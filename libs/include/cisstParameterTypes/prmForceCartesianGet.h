@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 /*! Cartesian force get command argument */
 class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
     typedef mtsGenericObject BaseType;

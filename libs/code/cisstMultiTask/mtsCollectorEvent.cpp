@@ -151,7 +151,7 @@ mtsInterfaceRequired * mtsCollectorEvent::GetInterfaceRequiredFor(const mtsCompo
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
     // check if this component is already "registered"
-    InterfacesRequiredMap * interfacesRequired = this->ObservedComponents.GetItem(componentPointer->GetName(), CMN_LOG_LOD_INIT_DEBUG);
+    InterfacesRequiredMap * interfacesRequired = this->ObservedComponents.GetItem(componentPointer->GetName(), CMN_LOG_LEVEL_INIT_DEBUG);
     if (!interfacesRequired) {
         CMN_LOG_CLASS_INIT_DEBUG << "GetInterfaceRequiredFor: create required interfaces for component \""
                                  << componentPointer->GetName() << "\"" << std::endl;
@@ -163,7 +163,7 @@ mtsInterfaceRequired * mtsCollectorEvent::GetInterfaceRequiredFor(const mtsCompo
                                  << componentPointer->GetName() << "\"" << std::endl;
     }
     // check if the component already has the required interface needed
-    mtsInterfaceRequired * interfaceRequired = interfacesRequired->GetItem(interfacePointer->GetName(), CMN_LOG_LOD_INIT_DEBUG);
+    mtsInterfaceRequired * interfaceRequired = interfacesRequired->GetItem(interfacePointer->GetName(), CMN_LOG_LEVEL_INIT_DEBUG);
     if (!interfaceRequired) {
         CMN_LOG_CLASS_INIT_DEBUG << "GetInterfaceRequiredFor: create required interface to collect events from interface \""
                                  << interfacePointer->GetName() << "\"" << std::endl;

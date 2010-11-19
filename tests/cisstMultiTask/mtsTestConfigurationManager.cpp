@@ -31,7 +31,7 @@ const double TransitionDelay = 5.0 * cmn_s;
 
 class mtsTestConfigurationManager: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
 
     mtsInterfaceRequired * InterfaceToComponentManager;

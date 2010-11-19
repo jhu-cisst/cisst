@@ -36,7 +36,7 @@ template <class _elementType>
 class prmMaskedVector: public mtsGenericObject
 {
     // declare services, requires dynamic creation
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

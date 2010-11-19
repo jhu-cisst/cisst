@@ -20,36 +20,35 @@ int main(int argc, char * argv[])
     std::string serverTaskIP(argv[2]);
 
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example9Server");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("serverTask", CMN_LOG_ALLOW_ALL);
 
     // create our server task
     const double PeriodServer = 10 * cmn_ms; // in milliseconds
     serverTask * server = new serverTask("Server", PeriodServer);
 
-    // Get the TaskManager instance and set operation mode
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(server);
+    // Get the ComponentManager instance and set operation mode
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
+    componentManager->AddComponent(server);
     
     // create the tasks, i.e. find the commands
-    taskManager->CreateAll();
+    componentManager->CreateAll();
     // start the periodic Run
-    taskManager->StartAll();
+    componentManager->StartAll();
     
     while (1) {
         osaSleep(10 * cmn_ms);
     }
     
     // cleanup
-    taskManager->KillAll();
-    taskManager->Cleanup();    
+    componentManager->KillAll();
+    componentManager->Cleanup();    
     return 0;
 }
 

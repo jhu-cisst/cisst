@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT ui3BehaviorBase: public mtsTaskContinuous
 {
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class ui3Manager;
     friend class ui3MasterArm;

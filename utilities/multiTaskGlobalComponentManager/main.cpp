@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
@@ -30,13 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    // add a log per thread
-    //osaThreadedLogFile threadedLog("GlobalComponentManager");
-    //cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsManagerGlobal", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
 
     // Create and start global component manager
     mtsManagerGlobal globalComponentManager;

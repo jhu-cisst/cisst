@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsTask: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
 
@@ -221,13 +221,13 @@ public:
 
     /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName) {
-        return this->StateTables.GetItem(stateTableName, CMN_LOG_LOD_INIT_ERROR);
+        return this->StateTables.GetItem(stateTableName, CMN_LOG_LEVEL_INIT_ERROR);
     }
 
     /*! Return a pointer to the default state table.  See
       GetStateTable and GetDefaultStateTableName. */
     inline mtsStateTable * GetDefaultStateTable(void) {
-        return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LOD_INIT_ERROR);
+        return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
 
     /*! Add an existing state table to the list of known state tables

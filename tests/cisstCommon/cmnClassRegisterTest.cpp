@@ -35,15 +35,15 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(TestD34);
 
 void cmnClassRegisterTest::setUp(void)
 {
-    cmnLogger::AddChannel(OutputStream, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(OutputStream, CMN_LOG_ALLOW_ALL);
 }
 
 
 void cmnClassRegisterTest::tearDown(void)
 {
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_ERROR);
-    cmnLogger::GetMultiplexer()->RemoveChannel(OutputStream);
+    cmnLogger::SetMaskClass("TestA", CMN_LOG_ALLOW_DEFAULT);
+    cmnLogger::RemoveChannel(OutputStream);
 }
 
 
@@ -143,15 +143,15 @@ void cmnClassRegisterTest::TestRegistrationDynamicNoInline(void) {
 
 
 void cmnClassRegisterTest::TestLoD(void) {
-    cmnLogLoD lod;
+    cmnLogLevel lod;
     const cmnClassServicesBase* classAServices = 0;
     TestA objectA;
 
     /* access the class lod via the class itself, therefore should
        find the default LoD, i.e. 5.  this will force the
        registration */
-    lod = objectA.ClassServices()->GetLoD();
-    CPPUNIT_ASSERT(lod == 5);
+    lod = objectA.ClassServices()->GetLogMask();
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_DEFAULT);
 
     /* try again via the class register, but first check that the
        class is known */
@@ -165,28 +165,28 @@ void cmnClassRegisterTest::TestLoD(void) {
 
     /* set the LoD via the class and check via the class and class
        register */
-    objectA.ClassServices()->SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    lod = objectA.ClassServices()->GetLoD();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
-    lod = cmnClassRegister::FindClassServices("TestA")->GetLoD();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
+    objectA.ClassServices()->SetLogMask(CMN_LOG_ALLOW_ALL);
+    lod = objectA.ClassServices()->GetLogMask();
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_ALL);
+    lod = cmnClassRegister::FindClassServices("TestA")->GetLogMask();
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_ALL);
 
     /* set the LoD via the class register and check via the class and
        the class register (with macro) */
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_INIT_VERBOSE);
-    lod = objectA.ClassServices()->GetLoD();
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_INIT_VERBOSE);
+    lod = objectA.ClassServices()->GetLogMask();
     CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
-    lod = cmnClassRegister::FindClassServices("TestA")->GetLoD();
+    lod = cmnClassRegister::FindClassServices("TestA")->GetLogMask();
     CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
 
     /* set the global LoD */
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
-    CPPUNIT_ASSERT(cmnLogger::GetLoD() == CMN_LOG_LOD_RUN_ERROR);
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
-    CPPUNIT_ASSERT(cmnLogger::GetLoD() == CMN_LOG_LOD_RUN_DEBUG);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_ERROR);
+    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_DEBUG);
+    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_LOD_RUN_DEBUG);
 
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_RUN_ERROR);
 }
 
 
@@ -195,47 +195,47 @@ void cmnClassRegisterTest::TestLog(void) {
 
     /* set the level of detail for class TestA */
     TestA objectA;
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_WARNING);
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_RUN_WARNING);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_ERROR);
 
     OutputStream.str("");
-    objectA.Message(CMN_LOG_LOD_INIT_DEBUG);
+    objectA.Message(CMN_LOG_LEVEL_INIT_DEBUG);
     std::string expectedLog =
-        std::string(cmnLogLoDString[CMN_LOG_LOD_INIT_DEBUG])
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
         + " - Function " + objectA.Services()->GetName() + ": 4\n"
-        + std::string(cmnLogLoDString[CMN_LOG_LOD_INIT_DEBUG])
+        + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
         + " - Class " + objectA.Services()->GetName() + ": 4\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
-    objectA.Message(CMN_LOG_LOD_RUN_ERROR);
+    objectA.Message(CMN_LOG_LEVEL_RUN_ERROR);
     expectedLog =
-        std::string(cmnLogLoDString[CMN_LOG_LOD_RUN_ERROR])
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_ERROR))
         + " - Function " + objectA.Services()->GetName() + ": 5\n"
-        + std::string(cmnLogLoDString[CMN_LOG_LOD_RUN_ERROR])
+        + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_ERROR))
         + " - Class " + objectA.Services()->GetName() + ": 5\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     /* global LoD prevails, nothing goes thru */
     OutputStream.str("");
-    objectA.Message(CMN_LOG_LOD_RUN_WARNING);
+    objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     CPPUNIT_ASSERT(OutputStream.str() == "");
 
     /* set a higher global LoD */
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_DEBUG);
     OutputStream.str("");
-    objectA.Message(CMN_LOG_LOD_RUN_WARNING);
+    objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     expectedLog =
-        std::string(cmnLogLoDString[CMN_LOG_LOD_RUN_WARNING])
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_WARNING))
         + " - Function " + objectA.Services()->GetName() + ": 6\n"
-        + std::string(cmnLogLoDString[CMN_LOG_LOD_RUN_WARNING])
+        + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_WARNING))
         + " - Class " + objectA.Services()->GetName() + ": 6\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
-    objectA.Message(CMN_LOG_LOD_RUN_DEBUG);
+    objectA.Message(CMN_LOG_LEVEL_RUN_DEBUG);
     expectedLog =
-        std::string(cmnLogLoDString[CMN_LOG_LOD_RUN_DEBUG])
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_DEBUG))
         + " - Function " + objectA.Services()->GetName() + ": 8\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 }

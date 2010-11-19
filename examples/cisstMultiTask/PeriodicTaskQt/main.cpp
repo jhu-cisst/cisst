@@ -40,18 +40,20 @@ const unsigned int NumSineTasks = 2;
 int main(int argc, char *argv[])
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::HaltDefaultLog();
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_VERBOSE);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("displayQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsManagerLocal", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsManagerGlobal", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsCollectorQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsCollectorState", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsCollectorEvent", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsStateTable", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("displayQtComponent", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsManagerLocal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsCollectorQtComponent", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsCollectorState", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsCollectorEvent", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsStateTable", CMN_LOG_ALLOW_ALL);
 
     // create Qt user interface
     QApplication application(argc, argv);
@@ -172,7 +174,7 @@ int main(int argc, char *argv[])
     taskManager->Cleanup();
 
     // stop all logs
-    cmnLogger::SetLoD(CMN_LOG_LOD_NONE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
 
     return 0;
 }

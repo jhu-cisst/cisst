@@ -132,7 +132,7 @@ devMicronTracker::Tool * devMicronTracker::AddTool(const std::string & name, con
         tool->Name = name;
         tool->SerialNumber = serialNumber;
 
-        if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
+        if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
             delete tool;
             return 0;

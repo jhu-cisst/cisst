@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 template <class _ValueType, unsigned int _DataChannels, unsigned int _VideoChannels>
 class CISST_EXPORT svlSampleImageCustom : public svlSampleImage
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

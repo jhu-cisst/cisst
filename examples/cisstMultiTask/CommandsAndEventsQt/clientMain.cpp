@@ -42,16 +42,16 @@ int main(int argc, char * argv[])
     }
 
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("QtCommandsAndEventsClient-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoDForMatchingClasses("mts", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("clientQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("clientQtComponent", CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);

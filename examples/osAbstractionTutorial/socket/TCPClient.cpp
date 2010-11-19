@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2009
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,9 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("osaSocket", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("osaSocket", CMN_LOG_ALLOW_ALL);
 
     osaSocket socket(osaSocket::TCP);
     std::string host = "127.0.0.1";
@@ -78,7 +78,7 @@ int main(void)
         }
 #ifdef OSA_SOCKET_WITH_STREAM
         socket << message;
-#else 
+#else
         socket.Send(message);
 #endif // OSA_SOCKET_WITH_STREAM
     }

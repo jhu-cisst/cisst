@@ -16,41 +16,41 @@ using namespace std;
 int main(void)
 {
     // Log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ERRORS);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example5-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ERRORS);
 
     // create our tasks
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
     robotLowLevel * robot1Task = new robotLowLevel("Robot1", 100 * cmn_ms);
     robotLowLevel * robot2Task = new robotLowLevel("Robot2", 100 * cmn_ms);
     appTask * appTaskControl1 = new appTask("ControlRobot1", "Robot1", "Robot2", 100 * cmn_ms);
     appTask * appTaskControl2 = new appTask("ControlRobot2", "Robot2", "Robot1", 150 * cmn_ms);
 
     // add all tasks
-    taskManager->AddComponent(robot1Task);
-    taskManager->AddComponent(robot2Task);
-    taskManager->AddComponent(appTaskControl1);
-    taskManager->AddComponent(appTaskControl2);
+    componentManager->AddComponent(robot1Task);
+    componentManager->AddComponent(robot2Task);
+    componentManager->AddComponent(appTaskControl1);
+    componentManager->AddComponent(appTaskControl2);
 
-    taskManager->CreateAll();
-    taskManager->StartAll();
+    componentManager->CreateAll();
+    componentManager->StartAll();
 
     // Loop until both tasks are closed
     while (!(appTaskControl1->GetExitFlag() && appTaskControl2->GetExitFlag())) {
         osaSleep(0.5 * cmn_s); // 0.5 seconds
     }
 
-    taskManager->KillAll();
+    componentManager->KillAll();
 
     /*
     while (!robot1Task->IsTerminated()) osaTime::Sleep(PeriodRobot);
     while (!robot2Task->IsTerminated()) osaTime::Sleep(PeriodRobot);
     while (!appTaskControl->IsTerminated()) osaTime::Sleep(PeriodRobot);
     */
-    taskManager->Cleanup();
+    componentManager->Cleanup();
     return 0;
 }
 

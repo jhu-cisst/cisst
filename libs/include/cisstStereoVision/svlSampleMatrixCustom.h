@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 template <class _ValueType>
 class CISST_EXPORT svlSampleMatrixCustom : public svlSampleMatrix
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

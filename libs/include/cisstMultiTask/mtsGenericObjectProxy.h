@@ -211,7 +211,7 @@ public:
     //enum {HAS_DYNAMIC_CREATION = DeRefType::HAS_DYNAMIC_CREATION};
     //enum {InitialLoD = DeRefType::InitialLoD};
     enum {HAS_DYNAMIC_CREATION = true};
-    enum {InitialLoD = CMN_LOG_LOD_RUN_ERROR};
+    enum {InitialLoD = CMN_LOG_ALLOW_DEFAULT};
     static cmnClassServicesBase * ClassServices(void) { return DeRefType::ClassServices(); }
     virtual const cmnClassServicesBase * Services(void) const
     {
@@ -252,7 +252,7 @@ public:
 template <class _elementType>
 class mtsGenericObjectProxy: public mtsGenericObjectProxyBase<_elementType>
 {
-    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     typedef mtsGenericObjectProxy<_elementType> ThisType;

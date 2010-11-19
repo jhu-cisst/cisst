@@ -105,7 +105,7 @@ QVariant cmnLoggerQtWidgetClassServicesModel::data(const QModelIndex & index, in
         } else {
             // get the string associated to the level of detail for display
             if (role == Qt::DisplayRole) {
-                return QString(cmnLogLoDString[iterator->second->GetLoD()]);
+                return QString(cmnLogLevelToString(iterator->second->GetLoD()).c_str());
             } else {
                 // for edit, return the LoD itself
                 return QVariant(iterator->second->GetLoD());
@@ -153,8 +153,8 @@ bool cmnLoggerQtWidgetClassServicesModel::setData(const QModelIndex & index,
         // addressBook[index.row()+1][index.column()] = value.toString();
         cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
         std::advance(iterator, index.row());
-        cmnClassRegister::SetLoD(iterator->first.c_str(),
-                                 static_cast<cmnLogLoD>(value.toInt()));
+        cmnClassRegister::SetLogMaskClass(iterator->first.c_str(),
+                                          cmnIndexToLogLevel(value.toInt()));
     }
     return true;
 }
@@ -172,10 +172,10 @@ QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
 {
     QComboBox * comboBox = new QComboBox(parent);
     unsigned int lod;
-    for (lod = CMN_LOG_LOD_NONE;
-         lod < CMN_LOG_LOD_NOT_USED;
+    for (lod = 0;
+         lod <= 8;
          lod++) {
-        comboBox->insertItem(lod, QString(cmnLogLoDString[lod]), QVariant(lod));
+        comboBox->insertItem(lod, QString(cmnLogLevelToString(cmnIndexToLogLevel(lod)).c_str()), QVariant(lod));
     }
     return comboBox;
 }
@@ -221,7 +221,7 @@ cmnLoggerQtWidget::cmnLoggerQtWidget(QWidget * parent)
     this->MainFilterLayout->setContentsMargins(0, 0, 0, 0);
     this->MainFilterLabel = new QLabel("Overall filter", this->MainFilterWidget);
     this->MainFilterLayout->addWidget(this->MainFilterLabel);
-    this->MainFilterData = new QLabel(cmnLogLoDString[cmnLogger::GetLoD()], this->MainFilterWidget);
+    this->MainFilterData = new QLabel(cmnLogMaskToString(cmnLogger::GetMask()).c_str(), this->MainFilterWidget);
     this->MainFilterLayout->addWidget(this->MainFilterData);
     this->MainFilterLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     this->MainFilterData->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);

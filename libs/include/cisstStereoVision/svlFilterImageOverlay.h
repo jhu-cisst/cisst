@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT svlFilterImageOverlay : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     typedef std::map<svlFilterInput*, svlSample*> _SampleCacheMap;
 

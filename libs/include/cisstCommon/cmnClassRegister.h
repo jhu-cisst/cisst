@@ -7,7 +7,7 @@
   Author(s):  Alvin Liem, Anton Deguet
   Created on: 2002-08-01
 
-  (C) Copyright 2002-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2002-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -97,9 +97,6 @@ http://www.cisst.org/cisst/license.txt.
  */
 class CISST_EXPORT cmnClassRegister {
  public:
-    /*! Type used to define the Log Level of Detail */
-    typedef cmnLogger::LogLoDType LogLoDType;
-
     /*! Simple typedefs to ease the declaration of iterators */
     //@{
     typedef std::map<std::string, cmnClassServicesBase*> ServicesContainerType;
@@ -139,13 +136,13 @@ class CISST_EXPORT cmnClassRegister {
     RegisterInstance(cmnClassServicesBase * classServicesPointer,
                      const std::string & className);
 
-    /*! Instance specific implementation of SetLoDForAllClasses.
-      \sa SetLoDForAllClasses */
-    bool SetLoDForAllClassesInstance(LogLoDType lod);
+    /*! Instance specific implementation of SetLogMaskClassAll
+      \sa SetLogMaskClassAll */
+    bool SetLogMaskClassAllInstance(cmnLogMask mask);
 
-    /*! Instance specific implementation of SetLoDForMatchingClasses.
-      \sa SetLoDForMatchingClasses */
-    bool SetLoDForMatchingClassesInstance(const std::string & stringToMatch, LogLoDType lod);
+    /*! Instance specific implementation of SetLogMaskClassMatching.
+      \sa SetLogMaskClassMatching */
+    bool SetLogMaskClassMatchingInstance(const std::string & stringToMatch, cmnLogMask mask);
 
     /*! Instance specific implementation of ToString.
       \sa ToString */
@@ -217,44 +214,56 @@ protected:
     }
 
 
-    /*! The SetLoD method allows the user to specify the lod for a
-      specific class. It checks to see if the class is registered. If
-      so, it updates the cmnClassServices object directly. Otherwise,
-      it log a warning message.
+    /*! The SetLogMaskClass method allows the user to specify the log
+      mask for a specific class. It checks to see if the class is
+      registered. If so, it updates the cmnClassServices object
+      directly. Otherwise, it log a warning message.
 
-      \param className The name of the class.
-      \param lod The level of detail.
+      \param className The name of the class
+      \param mask The log mask to be applied
 
       \return bool True if the class is registered.
     */
-    static bool SetLoD(const std::string & className, LogLoDType lod);
+    static bool SetLogMaskClass(const std::string & className, cmnLogMask mask);
 
-
-    /*! The SetLoDForAllClasses method allows the user to specify the
-      lod for all registered classes.
-
-      \param lod The level of detail.
-
-      \return bool True if there is at least one class LoD was
-      modified
-    */
-    static inline bool SetLoDForAllClasses(LogLoDType lod) {
-        return Instance()->SetLoDForAllClassesInstance(lod);
+    static inline bool CISST_DEPRECATED SetLoD(const std::string & className, cmnLogMask mask) {
+        return SetLogMaskClass(className, mask);
     }
 
 
-    /*! The SetLoDForMatchingClasses method allows the user to specify the lod
-      for all classes with a name matching a given string.  The string
-      matching is case sensitive.
+    /*! The SetLogMaskClassAll method allows the user to specify the
+      log mask for all registered classes.
 
-      \param stringToMatch A string found in class names (e.g. "cmn")
-      \param lod The level of detail.
+      \param mask The log mask to be applied
 
-      \return bool True if there is at least one class LoD was
+      \return bool True if there is at least one class log mask was
       modified
     */
-    static inline bool SetLoDForMatchingClasses(const std::string & stringToMatch, LogLoDType lod) {
-        return Instance()->SetLoDForMatchingClassesInstance(stringToMatch, lod);
+    static inline bool SetLogMaskClassAll(cmnLogMask mask) {
+        return Instance()->SetLogMaskClassAllInstance(mask);
+    }
+
+    static inline bool CISST_DEPRECATED SetLoDForAllClasses(cmnLogMask mask) {
+        return SetLogMaskClassAll(mask);
+    }
+
+
+    /*! The SetLogMaskClassMatching method allows the user to specify
+      the log mask for all classes with a name matching a given
+      string.  The string matching is case sensitive (exact match).
+
+      \param stringToMatch A string found in class names (e.g. "cmn")
+      \param mask The log mask to be applied
+
+      \return bool True if there is at least one class log mask was
+      modified
+    */
+    static inline bool SetLogMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask) {
+        return Instance()->SetLogMaskClassMatchingInstance(stringToMatch, mask);
+    }
+
+    static inline bool CISST_DEPRECATED SetLoDForMatchingClasses(const std::string & stringToMatch, cmnLogMask mask) {
+        return Instance()->SetLogMaskClassMatching(stringToMatch, mask);
     }
 
 

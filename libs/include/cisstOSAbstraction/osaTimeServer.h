@@ -62,7 +62,7 @@ struct osaAbsoluteTime {
 
 class CISST_EXPORT osaTimeServer: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 32};

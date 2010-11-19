@@ -23,6 +23,7 @@ set(SOURCE_FILES
     cmnDeSerializer.cpp
     cmnGenericObject.cpp
     cmnGetChar.cpp
+    cmnLogLoD.cpp
     cmnLogger.cpp
     cmnObjectRegister.cpp
     cmnOutputMultiplexer.cpp

@@ -28,11 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 int main(int argc, char * argv[])
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    // add a log per thread
-    //osaThreadedLogFile threadedLog("ProcessControl");
-    //cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // Get local component manager instance
     mtsManagerLocal * ComponentManager;

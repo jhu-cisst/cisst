@@ -19,12 +19,12 @@ using namespace std;
 int main(int argc, char **argv)
 {
     // log configuration, see previous examples
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds

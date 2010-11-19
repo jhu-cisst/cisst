@@ -101,7 +101,7 @@ bool mtsInterfaceRequired::UseQueueBasedOnInterfacePolicy(mtsEventQueueingPolicy
 bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventName, mtsCommandVoid * handler) const
 {
     bool result = false;
-    ReceiverVoidInfo * receiverInfo = EventReceiversVoid.GetItem(eventName, CMN_LOG_LOD_RUN_VERBOSE);
+    ReceiverVoidInfo * receiverInfo = EventReceiversVoid.GetItem(eventName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (receiverInfo) {
         receiverInfo->Pointer->SetHandlerCommand(handler);
         result = true;
@@ -113,7 +113,7 @@ bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventNa
 bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string &eventName, mtsCommandWriteBase *handler) const
 {
     bool result = false;
-    ReceiverWriteInfo *receiverInfo = EventReceiversWrite.GetItem(eventName, CMN_LOG_LOD_INIT_WARNING);
+    ReceiverWriteInfo *receiverInfo = EventReceiversWrite.GetItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
     if (receiverInfo) {
         receiverInfo->Pointer->SetHandlerCommand(handler);
         result = true;
@@ -739,7 +739,7 @@ bool mtsInterfaceRequired::RemoveEventHandlerVoid(const std::string &eventName)
 {
     mtsCommandVoid * handler = 0;
     AddEventHandlerToReceiver(eventName, handler);
-    return EventHandlersVoid.RemoveItem(eventName, CMN_LOG_LOD_RUN_WARNING);
+    return EventHandlersVoid.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
 }
 
 
@@ -747,5 +747,5 @@ bool mtsInterfaceRequired::RemoveEventHandlerWrite(const std::string &eventName)
 {
     mtsCommandWriteBase * handler = 0;
     AddEventHandlerToReceiver(eventName, handler);
-    return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LOD_RUN_WARNING);
+    return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
 }

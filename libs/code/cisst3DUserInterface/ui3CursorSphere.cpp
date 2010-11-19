@@ -37,7 +37,7 @@ CMN_IMPLEMENT_SERVICES(ui3CursorSphere);
 
 class ui3CursorSphereTip: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
     vtkSphereSource * Source;
@@ -131,7 +131,7 @@ CMN_IMPLEMENT_SERVICES(ui3CursorSphereTip);
 
 class ui3CursorSphereAnchor: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
     vtkLineSource * Source;
