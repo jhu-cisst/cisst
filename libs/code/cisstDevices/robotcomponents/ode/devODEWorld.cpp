@@ -202,13 +202,12 @@ void devODEWorld::RunComponent() {
 
   dSpaceCollide( GetSpaceID(), (void*)this, space_collision);
   dWorldStep( GetWorldID(), timestep );
+
   Unlock();
 
-  std::list< devODEWorld::Contact > c = QueryContacts( "background" );
-  std::list< devODEWorld::Contact >::const_iterator contact;
-  for( contact=c.begin(); contact!=c.end(); contact++ ){
-    std::cout << *contact << std::endl;
-  }
+  /*
+  */
+
   dJointGroupEmpty( GetGroupID() );
 
 }

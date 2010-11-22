@@ -9,15 +9,8 @@
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
-#include <cisstDevices/robotcomponents/ode/devODEWorld.h>
-#include <cisstDevices/robotcomponents/ode/devODEBody.h>
-#include <cisstCommon/cmnGetChar.h>
-
 #include <cisstStereoVision.h>
 
-#include <cisstMultiTask/mtsTaskManager.h>
-
-#include <cisstCommon/cmnGetChar.h>
 
 // This is a callback class to capture buffers of the viewer
 class CallBack : public osg::Camera::DrawCallback {
@@ -45,40 +38,23 @@ public:
 
 int main(){
 
-  // Create the task manager
-  mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
+  // Create the OSG World
+  devOSGWorld* world;
+  world = new devOSGWorld;
 
-  // Create the workd task and add it to the manager
-  devODEWorld* world;
-  world = new devODEWorld( 0.001,
-			   OSA_CPU1,
-  			   vctFixedSizeVector<double,3>(0.0,0.0,-9.81) );
-  taskManager->AddComponent( world );
-
-  // Create an object
-  devODEBody* hubble;
+  // Create a rotation/translation
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
-			  vctFixedSizeVector<double,3>(0, 0, 5.1 ));
-  hubble = new devODEBody( "hubble",                              // name
-			   Rt,                                    // pos+ori
-			   1.0,                                   // mass
-			   vctFixedSizeVector<double,3>( 0.0 ),   // com
-			   vctFixedSizeMatrix<double,3,3>::Eye(), // moit
-			   "libs/etc/cisstRobot/objects/hst.3ds", // model
-			   world->GetSpaceID(),                   // 
-			   world );
+			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.3) );
+  // Load an object and shift it to Rt
+  devOSGBody* hubble;
+  hubble = new devOSGBody( "libs/etc/cisstRobot/objects/hst.3ds", world, Rt );
 
-  // Create the background
-  devODEBody* background;
-  background = new devODEBody( "background", 
-			       vctFrame4x4<double>(),
-			       "libs/etc/cisstRobot/objects/background.3ds",
-			       world->GetSpaceID(),
-			       world );
+  // Load another object
+  devOSGBody* background;
+  background = new devOSGBody( "libs/etc/cisstRobot/objects/background.3ds",	
+			       world, 
+			       vctFrame4x4<double>() );
 
-  // Create+Start all the task
-  taskManager->CreateAll();
-  taskManager->StartAll();
 
   // Create the OpenGL projection matrix. This is made to match camera 
   // intrinsic parameters.
@@ -232,10 +208,8 @@ int main(){
     j++;
   }
 
-  // Kill everything
-  taskManager->KillAll();
-
+  getchar();
+  
   return 0;
 
 }
-

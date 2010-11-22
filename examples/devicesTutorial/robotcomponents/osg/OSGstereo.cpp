@@ -4,48 +4,35 @@
 //  #defines in cisstConfig.h
 #include <osgViewer/CompositeViewer>
 #include <osgGA/TrackballManipulator>
-
+#include <osgGA/StateSetManipulator>
+#include <osgViewer/ViewerEventHandlers>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
-#include <cisstDevices/robotcomponents/ode/devODEWorld.h>
-#include <cisstDevices/robotcomponents/ode/devODEBody.h>
-#include <cisstCommon/cmnGetChar.h>
-
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstVector/vctMatrixRotation3.h>
+#include <cisstVector/vctFixedSizeVector.h>
 
 #include <cisstCommon/cmnGetChar.h>
 
 int main(){
 
-  mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
+  // Create the OSG World
+  devOSGWorld* world;
+  world = new devOSGWorld;
 
-  devODEWorld* world;
-  world = new devODEWorld( 0.001,
-			   OSA_CPU1,
-  			   vctFixedSizeVector<double,3>(0.0,0.0,-9.81) );
-  taskManager->AddComponent( world );
+  // Create a rotation/translation
+  vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
+			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.3) );
+  // Load an object and shift it to Rt
+  devOSGBody* hubble;
+  hubble = new devOSGBody( "libs/etc/cisstRobot/objects/hst.3ds", world, Rt );
 
-  devODEBody* hubble;
-  hubble = new devODEBody( "hubble",                              // name
-			   vctFrame4x4<double>( vctMatrixRotation3<double>(),
-						vctFixedSizeVector<double,3>(0, 0, 5.1 )),
-			   1.0,                                   // mass
-			   vctFixedSizeVector<double,3>( 0.0 ),   // com
-			   vctFixedSizeMatrix<double,3,3>::Eye(), // moit
-			   "libs/etc/cisstRobot/objects/hst.3ds", // model
-			   world->GetSpaceID(),                   // 
-			   world );
-  devODEBody* background;
-  background = new devODEBody( "background", 
-			       vctFrame4x4<double>(),
-			       "libs/etc/cisstRobot/objects/background.3ds",
-			       world->GetSpaceID(),
-			       world );
-
-  taskManager->CreateAll();
-  taskManager->StartAll();
-
+  // Load another object
+  devOSGBody* background;
+  background = new devOSGBody( "libs/etc/cisstRobot/objects/background.3ds",	
+			       world, 
+			       vctFrame4x4<double>() );
+  
   // Create a viewer
   osgViewer::CompositeViewer viewer;
   
@@ -81,17 +68,8 @@ int main(){
   viewer.addView( rightview );    
 
   // run the viewer
-  while(!viewer.done()){ 
-    // Query the contacts for the hubble body
-    std::list< devODEWorld::Contact > c = world->QueryContacts( "hubble" );
-    std::list< devODEWorld::Contact >::const_iterator contact;
-    for( contact=c.begin(); contact!=c.end(); contact++ )
-      { std::cout << *contact << std::endl; }
-
-    viewer.frame(); 
-  }
-
-  taskManager->KillAll();
+  while(!viewer.done())
+    { viewer.frame(); }
 
   return 0;
 
