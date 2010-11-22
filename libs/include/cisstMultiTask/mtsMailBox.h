@@ -69,13 +69,14 @@ public:
     void ThreadSignalWait(void);
 
     /*! Get the thread signal. Used by event receivers. */
-    osaThreadSignal *GetThreadSignal(void) { return &ThreadSignal; }
+    osaThreadSignal * GetThreadSignal(void);
 
     /*! Execute the oldest command queued. */
     bool ExecuteNext(void);
 
     /*! Returns true if mailbox is empty. */
-    bool IsEmpty(void) const { return CommandQueue.IsEmpty(); }
+    bool IsEmpty(void) const;
+
 };
 
 

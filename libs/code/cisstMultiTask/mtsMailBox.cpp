@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2007-09-05
 
-  (C) Copyright 2007 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -62,6 +62,12 @@ bool mtsMailBox::Write(mtsCommandBase * command)
 void mtsMailBox::ThreadSignalWait(void)
 {
     this->ThreadSignal.Wait();
+}
+
+
+osaThreadSignal * mtsMailBox::GetThreadSignal(void)
+{
+    return &ThreadSignal;
 }
 
 
@@ -139,3 +145,8 @@ bool mtsMailBox::ExecuteNext(void)
    return true;
 }
 
+
+bool mtsMailBox::IsEmpty(void) const
+{
+    return CommandQueue.IsEmpty();
+}
