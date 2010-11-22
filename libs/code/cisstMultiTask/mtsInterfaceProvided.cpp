@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -35,10 +35,13 @@ http://www.cisst.org/cisst/license.txt.
 
 
 mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponent * component,
-                                           mtsInterfaceQueueingPolicy queueingPolicy, mtsCallableVoidBase * postCommandQueuedCallable):
+                                           mtsInterfaceQueueingPolicy queueingPolicy,
+                                           mtsCallableVoidBase * postCommandQueuedCallable):
     BaseType(name, component),
     MailBox(0),
     QueueingPolicy(queueingPolicy),
+    MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
+    ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
     OriginalInterface(0),
     UserCounter(0),
     CommandsVoid("CommandsVoid", true),
@@ -84,10 +87,14 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
 
 mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterface,
                                            const std::string & userName,
-                                           size_t mailBoxSize):
+                                           size_t mailBoxSize,
+                                           size_t argumentQueuesSize):
     BaseType(originalInterface->GetName() + "For" + userName,
              originalInterface->Component),
+    MailBox(0),
     QueueingPolicy(MTS_COMMANDS_SHOULD_BE_QUEUED),
+    MailBoxSize(mailBoxSize),
+    ArgumentQueuesSize(argumentQueuesSize),
     OriginalInterface(originalInterface),
     EndUserInterface(true),
     UserCounter(0),
@@ -127,7 +134,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
          iterVoid++) {
         commandQueuedVoid = dynamic_cast<mtsCommandQueuedVoid *>(iterVoid->second);
         if (commandQueuedVoid) {
-            commandVoid = commandQueuedVoid->Clone(this->MailBox, mailBoxSize);
+            commandVoid = commandQueuedVoid->Clone(this->MailBox, argumentQueuesSize);
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued void command \"" << iterVoid->first
                                        << "\" for \"" << this->GetName() << "\"" << std::endl;
         } else {
@@ -169,7 +176,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
          iterWrite++) {
         commandQueuedWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(iterWrite->second);
         if (commandQueuedWrite) {
-            commandWrite = commandQueuedWrite->Clone(this->MailBox, mailBoxSize);
+            commandWrite = commandQueuedWrite->Clone(this->MailBox, argumentQueuesSize);
             CMN_LOG_CLASS_INIT_VERBOSE << "constructor: cloned queued write command " << iterWrite->first
                                        << "\" for \"" << this->GetName() << "\"" << std::endl;
         } else {
@@ -204,14 +211,16 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
 }
 
 
-mtsInterfaceProvided::~mtsInterfaceProvided() {
+mtsInterfaceProvided::~mtsInterfaceProvided()
+{
 	CMN_LOG_CLASS_INIT_VERBOSE << "Class mtsInterfaceProvided: Class destructor" << std::endl;
     // ADV: Need to add all cleanup, i.e. make sure all mailboxes are
     // properly deleted.
 }
 
 
-void mtsInterfaceProvided::Cleanup() {
+void mtsInterfaceProvided::Cleanup(void)
+{
     CMN_LOG_CLASS_INIT_ERROR << "Cleanup: need to cleanup all created interfaces ... (not implemented yet)" << std::endl;
 #if 0 // adeguet1, adv
     InterfacesProvidedCreatedType::iterator op;
@@ -222,6 +231,41 @@ void mtsInterfaceProvided::Cleanup() {
     QueuedCommands.erase(QueuedCommands.begin(), QueuedCommands.end());
 #endif
 	CMN_LOG_CLASS_INIT_VERBOSE << "Done base class Cleanup " << Name << std::endl;
+}
+
+
+void mtsInterfaceProvided::SetMailBoxSize(size_t desiredSize)
+{
+    if (this->QueueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetMailBoxSize: interface \"" << this->GetName()
+                                   << "\" is not queuing commands, calling SetMailBoxSize has no effect"
+                                   << std::endl;
+    }
+    this->MailBoxSize = desiredSize;
+}
+
+
+void mtsInterfaceProvided::SetArgumentQueuesSize(size_t desiredSize)
+{
+    if (this->QueueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetName()
+                                   << "\" is not queuing commands, calling SetArgumentQueuesSize has no effect"
+                                   << std::endl;
+    }
+    if (desiredSize > this->MailBoxSize) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetName()
+                                   << "\" new size (" << desiredSize
+                                   << ") is smaller than command mail box size (" << this->MailBoxSize
+                                   << "), the extra space won't be used" << std::endl;
+    }
+    this->ArgumentQueuesSize = desiredSize;
+}
+
+
+void mtsInterfaceProvided::SetMailBoxAndArgumentQueuesSize(size_t desiredSize)
+{
+    this->SetMailBoxSize(desiredSize);
+    this->SetArgumentQueuesSize(desiredSize);
 }
 
 
@@ -605,12 +649,17 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     // new end user interface created with default size for mailbox
     mtsInterfaceProvided * interfaceProvided = new mtsInterfaceProvided(this,
                                                                         userName,
-                                                                        DEFAULT_ARG_BUFFER_LEN);
-    //InterfacesProvidedCreated.resize(InterfacesProvidedCreated.size() + 1,
-    //                                 InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
+                                                                        this->MailBoxSize,
+                                                                        this->ArgumentQueuesSize);
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
     return interfaceProvided;
+}
+
+
+mtsInterfaceProvided * mtsInterfaceProvided::GetOriginalInterface(void) const
+{
+    return this->OriginalInterface;
 }
 
 

@@ -102,8 +102,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Base class */
     typedef mtsInterfaceProvidedOrOutput BaseType;
 
-    /*! Default length for argument buffers */
-    enum {DEFAULT_ARG_BUFFER_LEN = 64};
+    /*! Default size for mail boxes and argument queues */
+    enum {DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE = 64};
 
     /*! Typedef for a map of name and void commands. */
     typedef cmnNamedMap<mtsCommandVoid> CommandVoidMapType;
@@ -147,6 +147,40 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! The member function that is executed once the task
       terminates. This does some cleanup work */
     void Cleanup(void);
+
+    /*! Set the desired size for the command mail box.  If queueing
+      has been enabled for this interface, a single mailbox is created
+      for each connected required interface.  All commands provided by
+      this interface share a single mailbox but each write command
+      (write and write with return) manages it's own queue for the
+      command argument.  To change the argument queue size, use
+      SetArgumentQueuesSize.  To change both parameters at once, use
+      SetMailBoxAndArgumentQueuesSize.
+
+      The size of the mail box can't be changed while being used
+      (i.e. while any required interface is connected to the provided
+      interface. */
+    void SetMailBoxSize(size_t desiredSize);
+
+    /*! Set the desired size for all argument queues.  If queueing has
+      been enabled for this interface, each write command (write or
+      write with return) manages it's own queue of arguments.  The
+      command itself is queued in the interface mailbox (see
+      SetMailBoxSize) and the argument is queued by the command
+      itself.  There is no reason to have an argument queue larger
+      than the command mail box as there can't be more arguments
+      queued than commands.  The reciprocal is not true as different
+      commands can be queued.  So, the argument queue size should be
+      lesser or equal to the mail box size.
+
+      The size of argument queues can't be changed while being used
+      (i.e. while any required interface is connected to the provided
+      interface. */
+    void SetArgumentQueuesSize(size_t desiredSize);
+
+    /*! Set the desired size for the command mail box and argument
+      queues.  See SetMailBoxSize and SetArgumentQueuesSize. */
+    void SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
 
     /*! Get the names of commands provided by this interface. */
     //@{
@@ -429,19 +463,25 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@}
 
 
-    /*!
-      \todo documentation outdated
-      This method need to called to create a unique Id and queues
-      for a potential user.  When using the methods "GetCommandXyz"
-      later on, the unique Id should be used to define which queues to
-      use.  To avoid any issue, each potential thread should require a
-      unique Id and then use it.  If two or more tasks are running
-      from the same thread, they can use different Ids but this is not
-      required. */
+    /*!  This method creates a copy of the existing interface.  The
+      copy is required for each new user, i.e. for each required
+      interface connected to this provided interface if queueing has
+      been enabled.  This method should not be called on a provided
+      interface if queueing is not enable.  The newly created provided
+      interface is created using the current MailBoxSize (see
+      SetMailBoxSize) and ArgumentQueuesSize (see
+      SetArgumentQueuesSize).  Commands and events should only be
+      added to the original interface.
+
+      \param userName name of the required interface being connected
+      to this provided interface.  This information is used for
+      logging only.
+     */
     mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
 
-    mtsInterfaceProvided * GetOriginalInterface(void) const
-    { return this->OriginalInterface; }
+    /*! Get the original.  This allows to retrieve the original
+      interface from a copy created using GetEndUserInterface. */
+    mtsInterfaceProvided * GetOriginalInterface(void) const;
 
     /*! Method used to process all commands queued in mailboxes.  This
       method should only be used by the component that owns the
@@ -454,10 +494,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
  protected:
 
     /*! Constructor used to create an end user interface (object
-      factory) for each user. */
+      factory) for each user (interface required).  This constructor
+      is called by the method GetEndUserInterface. */
     mtsInterfaceProvided(mtsInterfaceProvided * interfaceProvided,
                          const std::string & userName,
-                         size_t mailBoxSize);
+                         size_t mailBoxSize,
+                         size_t argumentQueuesSize);
 
     /*! Utility method to determine if a command should be queued or
       not based on the default policy for the interface and the user's
@@ -482,6 +524,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Flag to determine if by default void and write commands are
       queued. */
     mtsInterfaceQueueingPolicy QueueingPolicy;
+
+    /*! Size to be used for mailboxes */
+    size_t MailBoxSize;
+
+    /*! Size to be used for argument queues */
+    size_t ArgumentQueuesSize;
 
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
