@@ -57,6 +57,7 @@ public:
 
     ~mtsMailBox(void);
 
+    /*! Get the mailbox's name */
     const std::string & GetName(void) const;
 
     /*! Write a command to the mailbox.  If a post command queued
@@ -73,6 +74,12 @@ public:
 
     /*! Execute the oldest command queued. */
     bool ExecuteNext(void);
+
+    /*! Resize the mailbox, i.e. resizes the underlying queue of
+      commands.  This command is not thread safe and shouldn't be used
+      if commands are already queued or can be queued.  The SetSize
+      methods deletes whatever command has been queued. */
+    void SetSize(size_t size);
 
     /*! Returns true if mailbox is empty. */
     bool IsEmpty(void) const;

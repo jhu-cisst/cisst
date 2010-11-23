@@ -146,6 +146,13 @@ bool mtsMailBox::ExecuteNext(void)
 }
 
 
+void mtsMailBox::SetSize(size_t size)
+{
+    if (CommandQueue.GetSize() != size) {
+        CommandQueue.SetSize(size, 0); // array of null pointers
+    }
+}
+
 bool mtsMailBox::IsEmpty(void) const
 {
     return CommandQueue.IsEmpty();
