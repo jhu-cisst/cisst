@@ -293,13 +293,6 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     CPPUNIT_ASSERT(createdOjectC2CopyCtor != 0);
     CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements != realObjectC2.Elements); // pointer should change
 
-    /* try to delete the object using the class register */
-    cmnGenericObject * pointer = createdOjectCopyCtor;
-    const cmnClassServicesBase * services = createdOjectCopyCtor->Services();
-    services->Delete(createdOjectCopyCtor);
-    CPPUNIT_ASSERT(pointer == createdOjectCopyCtor);
-    CPPUNIT_ASSERT(typeid(*pointer) == typeid(*createdOjectCopyCtor));
-
     /* use the placement new to recreate the object */
     /* now test the copy constructor */
     free(realObjectC2.Elements);
@@ -309,6 +302,7 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     realObjectC2.Elements[1] = 3;
     realObjectC2.Elements[2] = 2;
     realObjectC2.Elements[3] = 1;
+    const cmnClassServicesBase * services = createdOjectCopyCtor->Services();
     services->Create(createdOjectCopyCtor, realObjectC2);
     createdOjectC2CopyCtor = dynamic_cast<TestC2 *>(createdOjectCopyCtor);
     CPPUNIT_ASSERT(createdOjectC2CopyCtor);
@@ -320,6 +314,12 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[2] == realObjectC2.Elements[2]);
     CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[3] == realObjectC2.Elements[3]);
 
+    /* try to delete the object using the class register */
+    cmnGenericObject * pointer = createdOjectCopyCtor;
+    services->Delete(createdOjectCopyCtor);
+    CPPUNIT_ASSERT(pointer == createdOjectCopyCtor);
+    CPPUNIT_ASSERT(typeid(*pointer) == typeid(*createdOjectCopyCtor));
+    
     /* test the copy constructor with another type */
     createdOjectCopyCtor = createdOjectC2DefaultCtor->ClassServices()->Create(*objectC);
     CPPUNIT_ASSERT(createdOjectCopyCtor == 0);
@@ -331,6 +331,7 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     CPPUNIT_ASSERT(typeid(*objectD34) == typeid(realObjectD34a));
     TestD<3, 4> realObjectD34b;
     CPPUNIT_ASSERT(typeid(*objectD34) == typeid(realObjectD34b));
+
 }
 
 
