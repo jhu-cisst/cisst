@@ -86,8 +86,8 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string
                                                                mtsRequiredType required)
 {
     // create a mailbox with post command queued command
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
-    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN,
+    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
+                                          mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE,
                                           this->PostCommandQueuedCallable);
     mtsInterfaceRequired * result;
     if (mailBox) {

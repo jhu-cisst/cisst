@@ -17,6 +17,8 @@ sineTask::sineTask(const std::string & taskName, double period):
     StateTable.AddData(SineData, "SineData");
     // add one interface, this will create an mtsTaskInterface
     mtsInterfaceProvided * provided = AddInterfaceProvided("MainInterface");
+    // set the size of mailboxes
+    provided->SetMailBoxAndArgumentQueuesSize(32);
     if (provided) {
         // add command to access state table values to the interface
         provided->AddCommandReadState(StateTable, SineData, "GetData");

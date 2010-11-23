@@ -262,8 +262,8 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfac
 mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName,
                                                      mtsRequiredType required)
 {
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else
-    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN);
+    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
+                                          mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE);
     mtsInterfaceRequired * result;
     // try to create and add interface
     result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);

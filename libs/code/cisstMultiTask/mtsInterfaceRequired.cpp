@@ -36,6 +36,8 @@ mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
                                            mtsRequiredType required):
     mtsInterfaceRequiredOrInput(interfaceName, required),
     MailBox(mailBox),
+    MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
+    ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
     FunctionsVoid("FunctionsVoid"),
     FunctionsVoidReturn("FunctionsVoidReturn"),
     FunctionsWrite("FunctionsWrite"),
@@ -68,6 +70,57 @@ mtsInterfaceRequired::~mtsInterfaceRequired()
     FunctionsWriteReturn.DeleteAll();
     FunctionsRead.DeleteAll();
     FunctionsQualifiedRead.DeleteAll();
+}
+
+
+bool mtsInterfaceRequired::SetMailBoxSize(size_t desiredSize)
+{
+    if (!this->MailBox) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetMailBoxSize: interface \"" << this->GetName()
+                                   << "\" is not queuing commands, calling SetMailBoxSize has no effect"
+                                   << std::endl;
+        return false;
+    }
+    if (this->InterfaceProvidedOrOutput) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetMailBoxSize: interface \"" << this->GetName()
+                                 << "\", can't modify mail box size while the interface is connected."
+                                 << std::endl;
+        return false;
+    }
+    this->MailBoxSize = desiredSize;
+    this->MailBox->SetSize(desiredSize);
+}
+
+
+bool mtsInterfaceRequired::SetArgumentQueuesSize(size_t desiredSize)
+{
+    if (!this->MailBox) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetName()
+                                   << "\" is not queuing commands, calling SetArgumentQueuesSize has no effect"
+                                   << std::endl;
+        return false;
+    }
+    if (this->InterfaceProvidedOrOutput) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetArgumentQueuesSize: interface \"" << this->GetName()
+                                 << "\", can't modify argument queues size while the interface is connected."
+                                 << std::endl;
+        return false;
+    }
+    if (desiredSize > this->MailBoxSize) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetName()
+                                   << "\" new size (" << desiredSize
+                                   << ") is smaller than command mail box size (" << this->MailBoxSize
+                                   << "), the extra space won't be used" << std::endl;
+    }
+    this->ArgumentQueuesSize = desiredSize;
+    return true;
+}
+
+
+bool mtsInterfaceRequired::SetMailBoxAndArgumentQueuesSize(size_t desiredSize)
+{
+    return (this->SetMailBoxSize(desiredSize)
+            && this->SetArgumentQueuesSize(desiredSize));
 }
 
 
@@ -110,7 +163,7 @@ bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventNa
 }
 
 
-bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string &eventName, mtsCommandWriteBase *handler) const
+bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventName, mtsCommandWriteBase * handler) const
 {
     bool result = false;
     ReceiverWriteInfo *receiverInfo = EventReceiversWrite.GetItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
@@ -122,7 +175,8 @@ bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string &eventNam
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctions(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctions(void) const
+{
     std::vector<std::string> commands = GetNamesOfFunctionsVoid();
     std::vector<std::string> tmp = GetNamesOfFunctionsVoidReturn();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
@@ -142,81 +196,98 @@ std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctions(void) const {
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsVoid(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsVoid(void) const
+{
     return FunctionsVoid.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsVoidReturn(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsVoidReturn(void) const
+{
     return FunctionsVoidReturn.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsWrite(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsWrite(void) const
+{
     return FunctionsWrite.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsWriteReturn(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsWriteReturn(void) const
+{
     return FunctionsWriteReturn.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsRead(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsRead(void) const
+{
     return FunctionsRead.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsQualifiedRead(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsQualifiedRead(void) const
+{
     return FunctionsQualifiedRead.GetNames();
 }
 
-mtsFunctionVoid * mtsInterfaceRequired::GetFunctionVoid(const std::string & functionName) const {
+mtsFunctionVoid * mtsInterfaceRequired::GetFunctionVoid(const std::string & functionName) const
+{
     return dynamic_cast<mtsFunctionVoid *>(FunctionsVoid.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
 }
 
-mtsFunctionVoidReturn * mtsInterfaceRequired::GetFunctionVoidReturn(const std::string & functionName) const {
+mtsFunctionVoidReturn * mtsInterfaceRequired::GetFunctionVoidReturn(const std::string & functionName) const
+{
     return dynamic_cast<mtsFunctionVoidReturn *>(FunctionsVoidReturn.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
 }
 
-mtsFunctionWrite * mtsInterfaceRequired::GetFunctionWrite(const std::string & functionName) const {
+mtsFunctionWrite * mtsInterfaceRequired::GetFunctionWrite(const std::string & functionName) const
+{
     return dynamic_cast<mtsFunctionWrite *>(FunctionsWrite.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
 }
 
-mtsFunctionWriteReturn * mtsInterfaceRequired::GetFunctionWriteReturn(const std::string & functionName) const {
+mtsFunctionWriteReturn * mtsInterfaceRequired::GetFunctionWriteReturn(const std::string & functionName) const
+{
     return dynamic_cast<mtsFunctionWriteReturn *>(FunctionsWriteReturn.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
 }
 
-mtsFunctionRead * mtsInterfaceRequired::GetFunctionRead(const std::string & functionName) const {
+mtsFunctionRead * mtsInterfaceRequired::GetFunctionRead(const std::string & functionName) const
+{
     return dynamic_cast<mtsFunctionRead *>(FunctionsRead.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
 }
 
-mtsFunctionQualifiedRead * mtsInterfaceRequired::GetFunctionQualifiedRead(const std::string & functionName) const {
+mtsFunctionQualifiedRead * mtsInterfaceRequired::GetFunctionQualifiedRead(const std::string & functionName) const
+{
     return dynamic_cast<mtsFunctionQualifiedRead *>(FunctionsQualifiedRead.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfEventHandlersVoid(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfEventHandlersVoid(void) const
+{
     return EventHandlersVoid.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceRequired::GetNamesOfEventHandlersWrite(void) const {
+std::vector<std::string> mtsInterfaceRequired::GetNamesOfEventHandlersWrite(void) const
+{
     return EventHandlersWrite.GetNames();
 }
 
 
-mtsCommandVoid * mtsInterfaceRequired::GetEventHandlerVoid(const std::string & eventName) const {
+mtsCommandVoid * mtsInterfaceRequired::GetEventHandlerVoid(const std::string & eventName) const
+{
     return EventHandlersVoid.GetItem(eventName);
 }
 
 
-mtsCommandWriteBase * mtsInterfaceRequired::GetEventHandlerWrite(const std::string & eventName) const {
+mtsCommandWriteBase * mtsInterfaceRequired::GetEventHandlerWrite(const std::string & eventName) const
+{
     return EventHandlersWrite.GetItem(eventName);
 }
 
 
-bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) {
+bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
+{
     // make sure we are connecting to a provided interface
     mtsInterfaceProvided * interfaceProvided = dynamic_cast<mtsInterfaceProvided *>(interfaceProvidedOrOutput);
     if (!interfaceProvided) {
@@ -618,13 +689,15 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
 }
 
 
-void mtsInterfaceRequired::DisableAllEvents(void) {
+void mtsInterfaceRequired::DisableAllEvents(void)
+{
     EventHandlersVoid.ForEachVoid(&mtsCommandBase::Disable);
     EventHandlersWrite.ForEachVoid(&mtsCommandBase::Disable);
 }
 
 
-void mtsInterfaceRequired::EnableAllEvents(void) {
+void mtsInterfaceRequired::EnableAllEvents(void)
+{
     EventHandlersVoid.ForEachVoid(&mtsCommandBase::Enable);
     EventHandlersWrite.ForEachVoid(&mtsCommandBase::Enable);
 }
@@ -632,13 +705,15 @@ void mtsInterfaceRequired::EnableAllEvents(void) {
 
 size_t mtsInterfaceRequired::ProcessMailBoxes(void)
 {
-    // MJUNG: Currently, one of constructor of mtsInterfaceRequired allows
-    // a null pointer to be passed as the second argument.
+    // one of constructor of mtsInterfaceRequired allows a null
+    // pointer to be passed as the second argument.
     if (!MailBox) {
+        CMN_LOG_CLASS_RUN_WARNING << "ProcessMailBoxes: called on interface \""
+                                  << this->GetName() << "\" which doesn't have a mail box." << std::endl;
         return 0;
     }
 
-    unsigned int numberOfCommands = 0;
+    size_t numberOfCommands = 0;
     while (MailBox->ExecuteNext()) {
         numberOfCommands++;
     }
@@ -722,7 +797,7 @@ mtsCommandVoid * mtsInterfaceRequired::AddEventHandlerVoid(mtsCallableVoidBase *
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerVoid", eventName);
     if (queued) {
         if (MailBox) {
-            EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(callable, eventName, MailBox, DEFAULT_EVENT_QUEUE_LEN));
+            EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(callable, eventName, MailBox, this->ArgumentQueuesSize));
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void \"" << eventName << "\"" << std::endl;
         }

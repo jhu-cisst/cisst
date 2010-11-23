@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_DEBUG);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // set the log level of detail on select tasks
@@ -113,7 +113,6 @@ int main(int argc, char *argv[])
         sine = new sineTask("SIN" + index.str(), 5.0 * cmn_ms);
         sine->UseSeparateLogFileDefault();
         taskManager->AddComponent(sine);
-        std::cout << *sine << std::endl;
         display = new displayQtComponent("DISP" + index.str());
         taskManager->AddComponent(display);
         tab1Layout->addWidget(display->GetWidget(), 1, i);
