@@ -74,11 +74,11 @@ int svlSampleTargets::SetSize(const svlSample& sample)
 {
     const svlSampleTargets* targets = dynamic_cast<const svlSampleTargets*>(&sample);
     if (targets == 0) return SVL_FAIL;
-    
+
     Channels = targets->GetChannels();
     Dimensions = targets->GetDimensions();
     Matrix.SetSize(1 + Channels * (1 + Dimensions), targets->GetMaxTargets());
-    
+
     return SVL_OK;
 }
 

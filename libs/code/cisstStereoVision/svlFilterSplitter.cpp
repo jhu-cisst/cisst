@@ -79,6 +79,10 @@ int svlFilterSplitter::AddOutput(const std::string &name, const unsigned int thr
     AsyncOutputs.resize(size + 1);
     AsyncOutputs[size] = output;
 
+    // If input is already connected, then set the type of the new output accordingly
+    svlFilterInput* input = GetInput();
+    if (input->IsConnected()) output->SetType(input->GetType());
+
     return SVL_OK;
 }
 

@@ -421,7 +421,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                         }
                         OnUserEvent(winid, false, winInput_LBUTTONDOWN);
                     }
-                    else if (event.xbutton.button == Button2) {
+                    else if (event.xbutton.button == Button3) {
                         if (!LButtonDown && !RButtonDown) {
                             RButtonDown = true;
                             XGrabPointer(xDisplay, xWindows[winid], false,
@@ -443,9 +443,9 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                             XUngrabPointer(xDisplay, CurrentTime);
                         }
                     }
-                    else if (event.xbutton.button == Button2) {
+                    else if (event.xbutton.button == Button3) {
                         OnUserEvent(winid, false, winInput_RBUTTONUP);
-                        if (LButtonDown && !RButtonDown) {
+                        if (!LButtonDown && RButtonDown) {
                             RButtonDown = false;
                             XUngrabPointer(xDisplay, CurrentTime);
                         }

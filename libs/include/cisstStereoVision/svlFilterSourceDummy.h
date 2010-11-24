@@ -45,6 +45,9 @@ public:
     int SetDimensions(unsigned int width, unsigned int height);
     void EnableNoiseImage(bool noise);
 
+    unsigned int GetWidth(unsigned int videoch = SVL_LEFT) const;
+    unsigned int GetHeight(unsigned int videoch = SVL_LEFT) const;
+
 protected:
     virtual int Initialize(svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);

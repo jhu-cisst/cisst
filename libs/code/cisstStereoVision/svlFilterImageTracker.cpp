@@ -136,7 +136,7 @@ void svlFilterImageTracker::SetRigidBodyConstraints(double angle_low, double ang
 int svlFilterImageTracker::SetROI(const svlRect & rect, unsigned int videoch)
 {
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
-    if (IsInitialized()) return SVL_FAIL;
+    if (IsRunning()) return SVL_FAIL;
 
     ROI[videoch] = rect;
 

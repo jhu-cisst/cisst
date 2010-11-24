@@ -138,6 +138,13 @@ void svlFilterImageOverlay::AddOverlay(svlOverlay & overlay)
     CS.Leave();
 }
 
+int svlFilterImageOverlay::AddQueuedItems()
+{
+    if (IsRunning()) return SVL_FAIL;
+    AddQueuedItemsInternal();
+    return SVL_OK;
+}
+
 int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
@@ -151,7 +158,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
     _OnSingleThread(procInfo) {
         // Add queued inputs and overlays in a thread safe manner
-        if (ImageInputsToAddUsed || TargetInputsToAddUsed || TextInputsToAddUsed || OverlaysToAddUsed) AddQueuedItems();
+        if (ImageInputsToAddUsed || TargetInputsToAddUsed || TextInputsToAddUsed || OverlaysToAddUsed) AddQueuedItemsInternal();
 
         _SampleCacheMap::iterator itersample;
         svlSampleImage* src_image = dynamic_cast<svlSampleImage*>(syncInput);
@@ -199,52 +206,52 @@ bool svlFilterImageOverlay::IsInputAlreadyQueued(const std::string &name)
     return false;
 }
 
-void svlFilterImageOverlay::AddQueuedItems()
+void svlFilterImageOverlay::AddQueuedItemsInternal()
 {
     CS.Enter();
 
-        unsigned int i;
+    unsigned int i;
 
-        for (i = 0; i < ImageInputsToAddUsed; i ++) {
-            svlFilterInput* input = AddInput(ImageInputsToAdd[i], false);
-            if (!input) continue;
-            input->AddType(svlTypeImageRGB);
-            input->AddType(svlTypeImageRGBStereo);
-            SampleCache[input] = 0;
+    for (i = 0; i < ImageInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(ImageInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeImageRGB);
+        input->AddType(svlTypeImageRGBStereo);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < TargetInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(TargetInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeTargets);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < TextInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(TextInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeText);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < OverlaysToAddUsed; i ++) {
+        if (LastOverlay) {
+            LastOverlay->Next = OverlaysToAdd[i];
+            OverlaysToAdd[i]->Prev = LastOverlay;
+            LastOverlay = OverlaysToAdd[i];
+            LastOverlay->Next = 0;
         }
-
-        for (i = 0; i < TargetInputsToAddUsed; i ++) {
-            svlFilterInput* input = AddInput(TargetInputsToAdd[i], false);
-            if (!input) continue;
-            input->AddType(svlTypeTargets);
-            SampleCache[input] = 0;
+        else {
+            FirstOverlay = LastOverlay = OverlaysToAdd[i];
+            FirstOverlay->Prev = 0;
+            FirstOverlay->Next = 0;
         }
+    }
 
-        for (i = 0; i < TextInputsToAddUsed; i ++) {
-            svlFilterInput* input = AddInput(TextInputsToAdd[i], false);
-            if (!input) continue;
-            input->AddType(svlTypeText);
-            SampleCache[input] = 0;
-        }
-
-        for (i = 0; i < OverlaysToAddUsed; i ++) {
-            if (LastOverlay) {
-                LastOverlay->Next = OverlaysToAdd[i];
-                OverlaysToAdd[i]->Prev = LastOverlay;
-                LastOverlay = OverlaysToAdd[i];
-                LastOverlay->Next = 0;
-            }
-            else {
-                FirstOverlay = LastOverlay = OverlaysToAdd[i];
-                FirstOverlay->Prev = 0;
-                FirstOverlay->Next = 0;
-            }
-        }
-
-        ImageInputsToAddUsed  = 0;
-        TargetInputsToAddUsed = 0;
-        TextInputsToAddUsed   = 0;
-        OverlaysToAddUsed     = 0;
+    ImageInputsToAddUsed  = 0;
+    TargetInputsToAddUsed = 0;
+    TextInputsToAddUsed   = 0;
+    OverlaysToAddUsed     = 0;
 
     CS.Leave();
 }

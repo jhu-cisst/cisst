@@ -46,6 +46,7 @@ public:
     int AddInputTargets(const std::string &name);
     int AddInputText(const std::string &name);
     void AddOverlay(svlOverlay & overlay);
+    int AddQueuedItems();
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -68,7 +69,7 @@ private:
     vctDynamicVector<svlOverlay*> OverlaysToAdd;
 
     bool IsInputAlreadyQueued(const std::string &name);
-    void AddQueuedItems();
+    void AddQueuedItemsInternal();
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay)
