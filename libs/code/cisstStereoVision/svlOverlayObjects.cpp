@@ -491,7 +491,7 @@ svlRGB svlOverlayStaticText::GetBackgroundColor() const
     return BGColor;
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 svlRect svlOverlayStaticText::GetTextSize(const std::string & text)
 {
@@ -522,7 +522,7 @@ svlRect svlOverlayStaticText::GetTextSize(const std::string & CMN_UNUSED(text))
 
 #endif // CISST_SVL_HAS_OPENCV
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 void svlOverlayStaticText::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
@@ -790,7 +790,7 @@ bool svlOverlayStaticEllipse::GetFill() const
 
 void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
     cvEllipse(bgimage->IplImageRef(VideoCh),
               cvPoint(Center.x, Center.y),

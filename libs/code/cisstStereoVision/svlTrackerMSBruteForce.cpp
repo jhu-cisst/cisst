@@ -241,7 +241,7 @@ int svlTrackerMSBruteForce::PreProcessImage(svlSampleImage & image, unsigned int
     if (Scale > 1) {
 
         // shirinking image for the lower scales recursively
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
         cvResize(image.IplImageRef(videoch), LowerScaleImage->IplImageRef(), CV_INTER_AREA);
 #else // CISST_SVL_HAS_OPENCV
         ShrinkImage(image.GetUCharPointer(videoch), LowerScaleImage->GetUCharPointer());

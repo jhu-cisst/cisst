@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifdef _WIN32
 #include "winWin32.h"
 #else
-#if (CISST_SVL_HAS_X11 == ON)
+#if CISST_SVL_HAS_X11
 #include "winX11.h"
 #endif // CISST_SVL_HAS_X11
 #endif // _WIN32
@@ -320,7 +320,7 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 #ifdef _WIN32
         WindowManager = new CWin32WindowManager(1);
 #else
-#if (CISST_SVL_HAS_X11 == ON)
+#if CISST_SVL_HAS_X11
         WindowManager = new CX11WindowManager(1);
 #endif // CISST_SVL_HAS_X11
 #endif // _WIN32
@@ -337,7 +337,7 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 #ifdef _WIN32
         WindowManager = new CWin32WindowManager(2);
 #else
-#if (CISST_SVL_HAS_X11 == ON)
+#if CISST_SVL_HAS_X11
         WindowManager = new CX11WindowManager(2);
 #endif // CISST_SVL_HAS_X11
 #endif // _WIN32

@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 
-// Using ICE 
-#define CISST_MTS_HAS_ICE @CISST_MTS_HAS_ICE@
+// Using ICE
+#cmakedefine01 CISST_MTS_HAS_ICE
 
-#endif // _mtsConfig_h 
+#endif // _mtsConfig_h

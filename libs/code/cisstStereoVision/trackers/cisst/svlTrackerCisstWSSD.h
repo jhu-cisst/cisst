@@ -45,7 +45,7 @@ public:
         TRANS_ROT_SCALE
     };
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Incomming Data format, should be different from MatrixType, otherwise
 	//eleminate copyImage functions.
 	typedef IplImage* ImageType;
@@ -108,7 +108,7 @@ public:
 	void setInitPosition(IndexType r, IndexType c);
 	// Set the image size field
 	void setImageSize(IndexType rows, IndexType cols);
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Add another template to the tracker (uses opencv)
 	void pushTemplate_opencv(ImageType &src, IndexType r, IndexType c);
 #endif // CISST_SVL_HAS_OPENCV
@@ -121,7 +121,7 @@ public:
 	//Get the number of templates loaded
 	//Explicit unsigned int required??
 	IndexType getNumberOfTemplates();
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Copy a choosen template to an image (uses opencv)
 	void getTemplate_opencv(IndexType index, ImageType &dst);
 #endif // CISST_SVL_HAS_OPENCV
@@ -140,7 +140,7 @@ public:
 	void initializeTrack();
 
 	//Online tracking routines and feedback
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Update the current window position (uses opencv)
     MatrixType imagecopy;
 	void updateTrack_opencv(ImageType &  src);
@@ -188,7 +188,7 @@ protected:
 	void copyCurrentRegion();
 	void updateParameters();
 	//Other helper routines
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Copy a input image into buffer matrix (uses opencv)
 	void copyImage_opencv(ImageType &src, MatrixType &dst, IndexType startR = 0, IndexType startC = 0);
 		//Copy a buffered image back to an input image (uses opencv)

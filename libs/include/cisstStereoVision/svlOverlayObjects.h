@@ -200,7 +200,7 @@ private:
     svlRGB TxtColor;
     svlRGB BGColor;
     bool Background;
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     CvFont Font;
 #endif // CISST_SVL_HAS_OPENCV
     bool FontChanged;
@@ -251,7 +251,7 @@ private:
     svlRGB TxtColor;
     svlRGB BGColor;
     bool Background;
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     CvFont Font;
 #endif // CISST_SVL_HAS_OPENCV
     bool FontChanged;

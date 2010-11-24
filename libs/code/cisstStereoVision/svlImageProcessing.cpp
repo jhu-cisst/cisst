@@ -241,7 +241,7 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
     return Resize(src_img, src_videoch, dst_img, dst_videoch, interpolation, internals);
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch,
                                svlSampleImage* dst_img, unsigned int dst_videoch,
                                bool interpolation,
@@ -274,7 +274,7 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
         return SVL_OK;
     }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
     if (interpolation) cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_LINEAR);
     else cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_NN);

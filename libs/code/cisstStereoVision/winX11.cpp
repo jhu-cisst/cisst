@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "winX11.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
 #include <cisstStereoVision/svlConverters.h>
 #endif // CISST_SVL_HAS_XV
 
@@ -66,7 +66,7 @@ CX11WindowManager::CX11WindowManager(unsigned int numofwins) : CWindowManagerBas
     Titles = 0;
     CustomTitles = 0;
     CustomTitleEnabled = 0;
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     xvImg = 0;
     xvShmInfo = 0;
     xvPort = 0;
@@ -92,7 +92,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     unsigned long black, white;
     XSizeHints wsh;
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     Atom atoms[3];
     unsigned int xvadaptorcount;
     XvAdaptorInfo *xvai;
@@ -125,7 +125,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     xDisplay = XOpenDisplay(reinterpret_cast<char*>(0));
     xScreen = DefaultScreen(xDisplay);
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     // check if 24bpp is suppoted by the display
     if (XMatchVisualInfo(xDisplay, xScreen, 24, TrueColor, &xvvinfo) == 0) goto labError;
 #endif // CISST_SVL_HAS_XV
@@ -143,7 +143,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     // create atoms for overriding default window behaviours
     atoms[0] = XInternAtom(xDisplay, "WM_DELETE_WINDOW", False);
     atoms[1] = XInternAtom(xDisplay, "_MOTIF_WM_HINTS", False);
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     atoms[2] = XInternAtom(xDisplay, "XV_SYNC_TO_VBLANK", False);
 #endif // CISST_SVL_HAS_XV
 
@@ -152,7 +152,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     CustomTitles = new std::string[NumOfWins];
     CustomTitleEnabled = new int[NumOfWins];
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     xvImg = new XvImage*[NumOfWins];
     xvShmInfo = new XShmSegmentInfo[NumOfWins];
     xvPort = new XvPortID[NumOfWins];
@@ -258,7 +258,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
         // set window colormap
         XSetWindowColormap(xDisplay, xWindows[i], DefaultColormapOfScreen(DefaultScreenOfDisplay(xDisplay)));
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
         // query shared memory extension
         if (!XShmQueryExtension(xDisplay)) goto labError;
 
@@ -278,7 +278,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
         XSetBackground(xDisplay, xGCs[i], white);
         XSetForeground(xDisplay, xGCs[i], black);
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
         // create image in shared memory
         xvImg[i] = XvShmCreateImage(xDisplay, xvPort[i], 0x32595559/*YUV2*/, 0, Width[i], Height[i], &(xvShmInfo[i]));
         xvShmInfo[i].shmid = shmget(IPC_PRIVATE, xvImg[i]->data_size, IPC_CREAT | 0777);
@@ -303,7 +303,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     unsigned int winid;
 
     while (1) {
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
         osaSleep(0.001);
         if (!xvupdateimage) {
             while (XPending(xDisplay)) {
@@ -457,7 +457,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                     OnUserEvent(winid, false, winInput_MOUSEMOVE);
                 }
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
                 // image update complete
                 if (event.type == XShmGetEventBase(xDisplay) + ShmCompletion) {
                     xvupdateimage = true;
@@ -474,7 +474,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                 csImage.Enter();
                     lastimage = ImageCounter;
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
                     for (i = 0; i < NumOfWins; i ++) {
                         XvShmPutImage(xDisplay,
                                       xvPort[i],
@@ -519,7 +519,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
 
 labError:
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     if (xvShmInfo) {
         for (i = 0; i < NumOfWins; i ++) {
             XShmDetach(xDisplay, &(xvShmInfo[i]));
@@ -535,7 +535,7 @@ labError:
         if (xWindows[i]) XDestroyWindow(xDisplay, xWindows[i]);
     }
     XCloseDisplay(xDisplay);
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     if (xvImg) {
         for (i = 0; i < NumOfWins; i ++) {
             if (xvImg[i]) XFree(xvImg[i]); 
@@ -638,7 +638,7 @@ void CX11WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffe
         else CustomTitleEnabled[winid] = -1;
     }
 */
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     // convert image to YUV2 directly into the output buffer
     svlConverter::BGR24toYUV422(buffer,
                                 reinterpret_cast<unsigned char*>(xvImg[winid]->data),

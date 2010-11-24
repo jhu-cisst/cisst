@@ -113,7 +113,7 @@ int svlFilterImageUnsharpMask::Process(svlProcInfo* procInfo, svlSample* syncInp
             continue;
         }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
         cvSmooth(input->IplImageRef(idx), OutputImage->IplImageRef(idx), CV_GAUSSIAN, Radius * 2 + 1);
 

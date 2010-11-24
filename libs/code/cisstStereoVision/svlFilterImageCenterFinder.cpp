@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageCenterFinder.h>
 #include <cisstStereoVision/svlFilterImageCropper.h>
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     #include <cisstStereoVision/svlFilterImageZoom.h>
 #endif // CISST_SVL_HAS_OPENCV
 
@@ -170,7 +170,7 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
                     cropper->SetCenter(x, y, vch);
                     break;
                 }
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
                 svlFilterImageZoom* zoom = dynamic_cast<svlFilterImageZoom*>(ReceivingFilter);
                 if (zoom) zoom->SetCenter(x, y, vch);
 #endif // CISST_SVL_HAS_OPENCV

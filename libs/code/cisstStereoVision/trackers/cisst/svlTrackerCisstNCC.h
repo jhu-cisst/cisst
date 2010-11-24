@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 class svlTrackerCisstNCC : public svlTrackerCisstBase
 {
 public:   // was private earlier
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Incomming Data format, should be different from MatrixType, otherwise
 	//eleminate copyImage functions.
 	typedef IplImage* ImageType;
@@ -96,7 +96,7 @@ public:
 	void setInitPosition(IndexType r, IndexType c);
 	// Set the image size field
 	void setImageSize(IndexType rows, IndexType cols);
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Add another template to the tracker (uses opencv)
 	void pushTemplate_opencv(ImageType &src, IndexType r, IndexType c);
 #endif // CISST_SVL_HAS_OPENCV
@@ -109,7 +109,7 @@ public:
 	//Get the number of templates loaded
 	//Explicit unsigned int required??
 	IndexType getNumberOfTemplates();
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Copy a choosen template to an image (uses opencv)
 	void getTemplate_opencv(IndexType index, ImageType &dst);
 #endif // CISST_SVL_HAS_OPENCV
@@ -127,7 +127,7 @@ public:
 	void initializeTrack();
 
 	//Online tracking routines and feedback
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//Update the current window position (uses opencv)
 	void updateTrack_opencv(ImageType &  src);
 #endif // CISST_SVL_HAS_OPENCV
@@ -173,7 +173,7 @@ protected:
 	void NCC_Standard(MatrixType &srcI, MatrixType &srcT, MatrixType &energy, MatrixType &dst);
 
 	//Other helper routines
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 	//move the search window to the source image if near the edge (uses opencv)
 	void checkRectangleBoundries_opencv(ImageType & src, PointType & size, PointType & position);
 	//Copy a input image into buffer matrix (uses opencv)

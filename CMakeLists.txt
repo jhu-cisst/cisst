@@ -78,16 +78,16 @@ IF(UNIX)
 ENDIF(UNIX)
 
 # Build static or dynamic libraries
-OPTION(CISST_BUILD_SHARED_LIBS "Build cisst with shared libraries." OFF)
-IF(CISST_BUILD_SHARED_LIBS)
-  SET(IS_SHARED SHARED)
-  SET(BUILD_SHARED_LIBS SHARED)
-  IF(WIN32)
-    ADD_DEFINITIONS(-DCISST_DLL)
-  ENDIF(WIN32)
-ELSE(CISST_BUILD_SHARED_LIBS)
-  SET(IS_SHARED STATIC)
-ENDIF(CISST_BUILD_SHARED_LIBS)
+option (CISST_BUILD_SHARED_LIBS "Build cisst with shared libraries." OFF)
+if (CISST_BUILD_SHARED_LIBS)
+  set (IS_SHARED SHARED)
+  set (BUILD_SHARED_LIBS SHARED)
+  if (WIN32)
+    add_definitions (-DCISST_DLL)
+  endif (WIN32)
+else (CISST_BUILD_SHARED_LIBS)
+  set (IS_SHARED STATIC)
+endif (CISST_BUILD_SHARED_LIBS)
 
 
 # Wrapping with swig for Python and/or Java
@@ -132,42 +132,42 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 
 # Use XML or not
-SET(CISST_HAS_XML OFF CACHE BOOL "Include cmnXMLPath in the version (requires libxml2)")
-IF(CISST_HAS_XML)
-  FIND_PACKAGE(LibXml2 REQUIRED)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES LIBXML2_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
-ENDIF(CISST_HAS_XML)
+option (CISST_HAS_XML "Include cmnXMLPath in the version (requires libxml2)" OFF)
+if (CISST_HAS_XML)
+  find_package (LibXml2 REQUIRED)
+  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES LIBXML2_INCLUDE_DIR)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
+endif (CISST_HAS_XML)
 
 
 # Check for Fortran NETLIB
-OPTION(CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." OFF)
-IF(CISST_HAS_CISSTNETLIB)
-  FIND_PACKAGE(CisstNetlib)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
-ENDIF(CISST_HAS_CISSTNETLIB)
+option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." OFF)
+if (CISST_HAS_CISSTNETLIB)
+  find_package (CisstNetlib)
+  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
+endif (CISST_HAS_CISSTNETLIB)
 
 # Support for OpenGL
 option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
 if (CISST_HAS_OPENGL)
   find_package (OpenGL REQUIRED)
-  CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES OPENGL_LIBRARIES)
-endif(CISST_HAS_OPENGL)
+  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES OPENGL_LIBRARIES)
+endif (CISST_HAS_OPENGL)
 
 # Support for QT
 option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" OFF)
 if (CISST_HAS_QT)
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   set (QT_USE_QTOPENGL ON)
-  find_package(Qt4 REQUIRED)
-  include(${QT_USE_FILE})
-  set(CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
-  mark_as_advanced(CISST_QT_PACKAGE)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES CISST_QT_PACKAGE)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_CMAKE_FILES QT_USE_FILE)
-endif(CISST_HAS_QT)
+  find_package (Qt4 REQUIRED)
+  include (${QT_USE_FILE})
+  set (CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
+  mark_as_advanced (CISST_QT_PACKAGE)
+  cisst_add_to_internal (CISST_ADDITIONAL_PACKAGES CISST_QT_PACKAGE)
+  cisst_add_to_internal (CISST_ADDITIONAL_CMAKE_FILES QT_USE_FILE)
+endif (CISST_HAS_QT)
 
 # Support for FLTK
 option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" OFF)
@@ -183,17 +183,17 @@ if (CISST_HAS_FLTK)
 endif (CISST_HAS_FLTK)
 
 # Extra link flag if for Apple
-IF(CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
-  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
-ENDIF(CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
+if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
+  set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
+endif (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
 
 # Check for RTAI
-OPTION(CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
-IF(CISST_HAS_LINUX_RTAI)
-  FIND_PACKAGE(RTAI)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES RTAI_LIBRARIES)
-ENDIF(CISST_HAS_LINUX_RTAI)
+option (CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
+if (CISST_HAS_LINUX_RTAI)
+  find_package (RTAI)
+  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES RTAI_LIBRARIES)
+endif (CISST_HAS_LINUX_RTAI)
 
 # Determine if cmnThrow uses "throw" or "abort"
 OPTION(CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
@@ -225,8 +225,8 @@ if( CISST_HAS_LINUX_XENOMAI )
   # add /usr/xenomai/include
   cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_DIR )
 
-  # add /usr/xenomai/include/posix. This is a *must* since we want to 
-  # to use xenomai/include/posix/pthread.h 
+  # add /usr/xenomai/include/posix. This is a *must* since we want to
+  # to use xenomai/include/posix/pthread.h
   cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_POSIX_DIR )
 
   # add libnative libxenomai librtdm libpthread_rt
@@ -282,28 +282,28 @@ IF(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 ENDIF(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Which libraries to build
-SET(CISST_LIBS_STABLE
-    cisstCommon
-    cisstVector
-    cisstOSAbstraction
-    cisstMultiTask
-    )
+set (CISST_LIBS_STABLE
+     cisstCommon
+     cisstVector
+     cisstOSAbstraction
+     cisstMultiTask
+     )
 
-SET(CISST_LIBS_UNSTABLE
-    cisstNumerical
-    cisstInteractive
-    cisstRobot
-    cisstParameterTypes
-    cisstDevices
-    cisstImage
-    cisstStereoVision
-    cisst3DUserInterface
-    )
+set (CISST_LIBS_UNSTABLE
+     cisstNumerical
+     cisstInteractive
+     cisstRobot
+     cisstParameterTypes
+     cisstDevices
+     cisstImage
+     cisstStereoVision
+     cisst3DUserInterface
+     )
 
 # All libraries
-SET(CISST_LIBS
-    ${CISST_LIBS_STABLE}
-    ${CISST_LIBS_UNSTABLE})
+set (CISST_LIBS
+     ${CISST_LIBS_STABLE}
+     ${CISST_LIBS_UNSTABLE})
 
 # Which librairies have Qt Widgets
 set(CISST_LIBS_WITH_QT
@@ -317,24 +317,24 @@ set(CISST_LIBS_WITH_FLTK
 
 
 # Build by default
-FOREACH(lib ${CISST_LIBS_STABLE})
-  OPTION(BUILD_LIBS_${lib} "Build ${lib}." ON)
-ENDFOREACH(lib)
+foreach (lib ${CISST_LIBS_STABLE})
+  option (BUILD_LIBS_${lib} "Build ${lib}." ON)
+endforeach (lib)
 
-FOREACH(lib ${CISST_LIBS_UNSTABLE})
-  OPTION(BUILD_LIBS_${lib} "Build ${lib}." OFF)
-ENDFOREACH(lib)
+foreach (lib ${CISST_LIBS_UNSTABLE})
+  option (BUILD_LIBS_${lib} "Build ${lib}." OFF)
+endforeach (lib)
 
 # If OS abstraction is compiled, require dynamic loading libraries
-IF(BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CMAKE_DL_LIBS)
-ENDIF(BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
+if (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CMAKE_DL_LIBS)
+endif (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
 
 # Once all variables have been defined, use cisstMacros
-INCLUDE(cisstMacros)
+include (cisstMacros)
 
 # Finally, create lib targets
-ADD_SUBDIRECTORY(libs)
+add_subdirectory (libs)
 
 # List of libraries to be built
 foreach (lib ${CISST_LIBS})
@@ -364,37 +364,39 @@ foreach (lib ${CISST_LIBS})
 endforeach (lib)
 cisst_cmake_debug("Libraries to be built: ${CISST_LIBRARIES}")
 
-# Contional builds
-IF(BUILD_UTILITIES)
-  ADD_SUBDIRECTORY(utilities)
-ENDIF(BUILD_UTILITIES)
+# Conditional builds
+if (BUILD_UTILITIES)
+  add_subdirectory (utilities)
+endif (BUILD_UTILITIES)
 
-IF(BUILD_TESTS)
+if (BUILD_TESTS)
   # Settings for CTest
-  ENABLE_TESTING()
-  MARK_AS_ADVANCED(BUILD_TESTING)
-  INCLUDE(Dart)
+  enable_testing ()
+  mark_as_advanced (BUILD_TESTING)
+  include (Dart)
   # cisst Tests
-  SUBDIRS(tests)
-ENDIF(BUILD_TESTS)
+  add_subdirectory (tests)
+endif (BUILD_TESTS)
 
-IF(BUILD_EXAMPLES)
-  ADD_SUBDIRECTORY(examples)
-ENDIF(BUILD_EXAMPLES)
+if (BUILD_EXAMPLES)
+  add_subdirectory (examples)
+endif (BUILD_EXAMPLES)
 
-IF(BUILD_DOC)
-  ADD_SUBDIRECTORY(doc)
-ENDIF(BUILD_DOC)
+if (BUILD_DOC)
+  add_subdirectory (doc)
+endif (BUILD_DOC)
 
+# create equivalent for cisstInteractive
+set (CISST_HAS_IRE ${BUILD_LIBS_cisstInteractive})
 
 # Create misc. config files
-SET(CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})
-SET(CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR}/libs/include)
-SET(CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
-SET(CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_F95_LIBRARIES})
-IF(NOT UNIX)
-    SET(CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISST_BUILD_CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_GCC_LIBRARIES})
-ENDIF(NOT UNIX)
+set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})
+set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR}/libs/include)
+set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
+set (CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_F95_LIBRARIES})
+if (NOT UNIX)
+    set (CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISST_BUILD_CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_GCC_LIBRARIES})
+endif (NOT UNIX)
 # Preserved for backward compatibility
 configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstBuild.cmake.in
                 ${cisst_BINARY_DIR}/cisstBuild.cmake
@@ -408,24 +410,23 @@ configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstBuild.cmake.in
 # Generate cisst-config.cmake to work with find_package NO_MODULE (if
 # the user builds against an "installed" version of cisst) -- not
 # supported yet
-SET(CISST_INSTALLED_INCLUDE_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/include)
-SET(CISST_INSTALLED_DOXYGEN_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include)
-SET(CISST_INSTALLED_LINK_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/lib)
-CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/cmake/cisstInstalled.cmake.in
-               ${cisst_BINARY_DIR}/cisstInstalled.cmake
-               @ONLY)
-INSTALL_FILES(/share/cisst/cmake
-              ".cmake"
-              ${cisst_BINARY_DIR}/cisstInstalled.cmake)
+set (CISST_INSTALLED_INCLUDE_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/include)
+set (CISST_INSTALLED_DOXYGEN_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include)
+set (CISST_INSTALLED_LINK_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/lib)
+configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstInstalled.cmake.in
+                ${cisst_BINARY_DIR}/cisstInstalled.cmake
+                @ONLY)
+install_files (/share/cisst/cmake
+               ".cmake"
+               ${cisst_BINARY_DIR}/cisstInstalled.cmake)
 
 
 # Configuration file
-SET(CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-SET(CISST_BINARY_DIR ${cisst_BINARY_DIR})
-CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstConfig.h.in
-               ${cisst_BINARY_DIR}/libs/include/cisstConfig.h
-               @ONLY)
-INSTALL_FILES(/include
+set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
+set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
+configure_file (${cisst_SOURCE_DIR}/libs/include/cisstConfig.h.in
+                ${cisst_BINARY_DIR}/libs/include/cisstConfig.h)
+install_files (/include
                ".h"
                ${cisst_BINARY_DIR}/libs/include/cisstConfig.h)
 

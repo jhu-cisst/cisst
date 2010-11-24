@@ -34,7 +34,7 @@ svlBufferImage::svlBufferImage(unsigned int width, unsigned int height)
     Buffer[1].SetSize(height, width * 3);
     Buffer[2].SetSize(height, width * 3);
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     OCVImage[0] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
     OCVImage[1] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
     OCVImage[2] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
@@ -51,7 +51,7 @@ svlBufferImage::svlBufferImage(unsigned int width, unsigned int height)
 
 svlBufferImage::~svlBufferImage()
 {
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     cvReleaseImageHeader(&(OCVImage[0]));
     cvReleaseImageHeader(&(OCVImage[1]));
     cvReleaseImageHeader(&(OCVImage[2]));
@@ -131,7 +131,7 @@ bool svlBufferImage::Push(unsigned char* buffer, unsigned int size, bool topdown
     return ret;
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 bool svlBufferImage::PushIplImage(IplImage* image)
 {
     return Push(reinterpret_cast<unsigned char*>(image->imageData), GetDataSize(), (image->origin != IPL_ORIGIN_TL));
@@ -175,7 +175,7 @@ svlImageRGB* svlBufferImage::Pull(bool waitfornew, double timeout)
     return &(Buffer[Locked]);
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 IplImage* svlBufferImage::PullIplImage(bool waitfornew, double timeout)
 {
     if (Pull(waitfornew, timeout) == 0) return 0;

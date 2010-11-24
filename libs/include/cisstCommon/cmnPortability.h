@@ -105,11 +105,11 @@ http://www.cisst.org/cisst/license.txt.
   #ifdef linux // see cpp -dM and ctrl+d
     #define CISST_OS CISST_LINUX
   #endif // linux
-  #if (CISST_HAS_LINUX_RTAI == ON) // overwrite if RTAI
+  #if CISST_HAS_LINUX_RTAI // overwrite if RTAI
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_RTAI
   #endif // linux RTAI
-  #if (CISST_HAS_LINUX_XENOMAI == ON) // overwrite if Xenomai
+  #if CISST_HAS_LINUX_XENOMAI // overwrite if Xenomai
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_XENOMAI
   #endif // linux Xenomai
@@ -186,11 +186,11 @@ http://www.cisst.org/cisst/license.txt.
   #if defined (__linux__) // linux
     #define CISST_OS CISST_LINUX
   #endif // linux
-  #if (CISST_HAS_LINUX_RTAI == ON) // overwrite if RTAI
+  #if CISST_HAS_LINUX_RTAI // overwrite if RTAI
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_RTAI
   #endif // linux RTAI
-  #if (CISST_HAS_LINUX_XENOMAI == ON) // overwrite if Xenomai
+  #if CISST_HAS_LINUX_XENOMAI // overwrite if Xenomai
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_XENOMAI
   #endif // linux Xenomai

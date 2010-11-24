@@ -26,11 +26,11 @@
 // Includes for handling device specific API
 // interactions that cannot otherwise be abstracted
 
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+#if CISST_SVL_HAS_DIRECTSHOW
 #include "svlVidCapSrcDirectShow.h"
 #endif // CISST_SVL_HAS_DIRECTSHOW
 
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
 #include "svlVidCapSrcMIL.h"
 #endif // CISST_SVL_HAS_MIL
 

@@ -52,7 +52,7 @@ public:
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             OwnImage[vch] = new vctDynamicMatrix<_ValueType>;
             Image[vch].SetRef(*(OwnImage[vch]));
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
             else OCVImageHeader[vch] = 0;
@@ -72,7 +72,7 @@ public:
             else {
                 OwnImage[vch] = 0;
             }
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
             else OCVImageHeader[vch] = 0;
@@ -87,7 +87,7 @@ public:
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             OwnImage[vch] = new vctDynamicMatrix<_ValueType>;
             Image[vch].SetRef(*(OwnImage[vch]));
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
             else OCVImageHeader[vch] = 0;
@@ -105,7 +105,7 @@ public:
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             if (OwnImage[vch]) delete OwnImage[vch];
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
             if (OCVImageHeader[vch]) cvReleaseImageHeader(&(OCVImageHeader[vch]));
 #endif // CISST_SVL_HAS_OPENCV
         }
@@ -359,13 +359,13 @@ public:
         return svlPixelUnknown;
     }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     IplImage* IplImageRef(const unsigned int videochannel = 0) const
 #else // CISST_SVL_HAS_OPENCV
     IplImage* IplImageRef(const unsigned int CMN_UNUSED(videochannel) = 0) const
 #endif // CISST_SVL_HAS_OPENCV
     {
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
         if (videochannel < _VideoChannels) return OCVImageHeader[videochannel];
         else return 0;
 #else // CISST_SVL_HAS_OPENCV
@@ -408,7 +408,7 @@ public:
                 GetHeight(videochannel) == height) return;
             OwnImage[videochannel]->SetSize(height,  width * _DataChannels);
             Image[videochannel].SetRef(*(OwnImage[videochannel]));
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
             if (OCVImageHeader[videochannel]) {
                 cvInitImageHeader(OCVImageHeader[videochannel],
                                   cvSize(width, height),
@@ -543,7 +543,7 @@ public:
     {
         if (!OwnData && videochannel < _VideoChannels) {
             Image[videochannel].SetRef(matrix);
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
             if (OCVImageHeader[videochannel]) {
                 cvInitImageHeader(OCVImageHeader[videochannel],
                                   cvSize(GetWidth(videochannel), GetHeight(videochannel)),
@@ -605,7 +605,7 @@ private:
     vctDynamicMatrix<_ValueType>*   OwnImage[_VideoChannels];
     vctDynamicMatrix<_ValueType>    InvalidMatrix;
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     IplImage* OCVImageHeader[_VideoChannels];
 
     int GetOCVDepth()

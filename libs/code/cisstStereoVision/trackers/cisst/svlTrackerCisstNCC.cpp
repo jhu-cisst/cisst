@@ -219,7 +219,7 @@ svlTrackerCisstNCC::IndexType svlTrackerCisstNCC::getCurrentimageNumCols() { ret
 double svlTrackerCisstNCC::getOutputPosX() {return outputPosX;}
 double svlTrackerCisstNCC::getOutputPosY() {return outputPosY;}
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 //Copy a input image into buffer matrix
 void svlTrackerCisstNCC::copyImage_opencv(ImageType &src, MatrixType &dst, IndexType startR, IndexType startC) {

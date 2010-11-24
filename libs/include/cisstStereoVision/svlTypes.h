@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlDefinitions.h>
 #include <cisstStereoVision/svlConfig.h>
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
   #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
     #include <cv.h>
     #include <highgui.h>

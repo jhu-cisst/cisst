@@ -283,7 +283,7 @@ void svlDraw::Poly(svlSampleImage* image,
     }
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 void svlDraw::Ellipse(svlSampleImage* image,
                       unsigned int videoch,
@@ -365,7 +365,7 @@ void svlDraw::Crosshair(svlSampleImage* image,
     Line(image, videoch, from, to, color);
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 void svlDraw::Text(svlSampleImage* image,
                    unsigned int videoch,
