@@ -136,7 +136,6 @@ void svlFilterImageTracker::SetRigidBodyConstraints(double angle_low, double ang
 int svlFilterImageTracker::SetROI(const svlRect & rect, unsigned int videoch)
 {
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
-    if (IsRunning()) return SVL_FAIL;
 
     ROI[videoch] = rect;
 
@@ -145,7 +144,14 @@ int svlFilterImageTracker::SetROI(const svlRect & rect, unsigned int videoch)
 
 int svlFilterImageTracker::SetROI(int left, int top, int right, int bottom, unsigned int videoch)
 {
-    return SetROI(svlRect(left, top, right, bottom), videoch);
+    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
+
+    ROI[videoch].left   = left;
+    ROI[videoch].top    = top;
+    ROI[videoch].right  = right;
+    ROI[videoch].bottom = bottom;
+
+    return SVL_OK;
 }
 
 int svlFilterImageTracker::GetROI(svlRect & rect, unsigned int videoch) const
@@ -211,7 +217,6 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
                 if (!Trackers[vch]->IsInitialized()) {
                     Trackers[vch]->SetImageSize(img->GetWidth(vch), img->GetHeight(vch));
-                    Trackers[vch]->SetROI(ROI[vch]);
                     Trackers[vch]->SetTargetCount(target_input->GetMaxTargets());
                     Trackers[vch]->Initialize();
                 }
@@ -260,6 +265,9 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     _ParallelLoop(procInfo, vch, VideoChannels)
     {
         if (!Trackers[vch]) continue;
+
+        // Region of interest might change at run-time
+        Trackers[vch]->SetROI(ROI[vch]);
 
         // Processing data
         Trackers[vch]->PreProcessImage(*img, vch);
@@ -453,15 +461,21 @@ int svlImageTracker::SetImageSize(unsigned int width, unsigned int height)
     return SVL_OK;
 }
 
-int svlImageTracker::SetROI(const svlRect & rect)
+void svlImageTracker::SetROI(const svlRect & rect)
 {
-    if (Initialized) return SVL_FAIL;
-
     ROI = rect;
     ROI.Normalize();
     ROI.Trim(0, Width, 0, Height);
+}
 
-    return SVL_OK;
+void svlImageTracker::SetROI(int left, int top, int right, int bottom)
+{
+    ROI.left   = left;
+    ROI.top    = top;
+    ROI.right  = right;
+    ROI.bottom = bottom;
+    ROI.Normalize();
+    ROI.Trim(0, Width, 0, Height);
 }
 
 int svlImageTracker::SetTargetCount(unsigned int targetcount)

@@ -181,13 +181,6 @@ int svlTrackerMSBruteForce::Initialize()
         LowerScale->SetTargetCount(targetcount);
         // half the image size
         LowerScale->SetImageSize(Width / 2, Height / 2);
-        // half the work area
-        svlRect roi;
-        roi.left   = ROI.left   / 2;
-        roi.right  = ROI.right  / 2;
-        roi.top    = ROI.top    / 2;
-        roi.bottom = ROI.bottom / 2;
-        LowerScale->SetROI(roi);
         // initialize
         LowerScale->Initialize();
 
@@ -270,7 +263,10 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
 
 
     // Call lower scales recursively
-    if (LowerScale) LowerScale->Track(*LowerScaleImage);
+    if (LowerScale) {
+        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
+        LowerScale->Track(*LowerScaleImage);
+    }
 
 
     // Acquire target templates if possible

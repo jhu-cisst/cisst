@@ -37,8 +37,7 @@ svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
     svlFilterBase(),
     Smoothing(0.0),
     MaskEnabled(false),
-    ThresholdLevel(10),
-    ReceivingFilter(0)
+    ThresholdLevel(10)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -163,18 +162,9 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
         x /= videochannels;
         y /= videochannels;
 
-        for (vch = 0; vch < videochannels; vch ++) {
-            while (ReceivingFilter) {
-                svlFilterImageCropper* cropper = dynamic_cast<svlFilterImageCropper*>(ReceivingFilter);
-                if (cropper) {
-                    cropper->SetCenter(x, y, vch);
-                    break;
-                }
-#if CISST_SVL_HAS_OPENCV
-                svlFilterImageZoom* zoom = dynamic_cast<svlFilterImageZoom*>(ReceivingFilter);
-                if (zoom) zoom->SetCenter(x, y, vch);
-#endif // CISST_SVL_HAS_OPENCV
-                break;
+        for (i = 0; i < Receivers.size(); i ++) {
+            if (Receivers[i]) {
+                for (vch = 0; vch < videochannels; vch ++) Receivers[i]->SetCenter(x, y, vch);
             }
         }
     }
@@ -182,9 +172,13 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
     return SVL_OK;
 }
 
-void svlFilterImageCenterFinder::SetReceivingFilter(svlFilterBase* cropper)
+void svlFilterImageCenterFinder::AddReceiver(svlFilterImageCenterFinderInterface* receiver)
 {
-    ReceivingFilter = cropper;
+    if (!receiver) return;
+
+    unsigned int size = Receivers.size();
+    Receivers.resize(size + 1);
+    Receivers[size] = receiver;
 }
 
 void svlFilterImageCenterFinder::SetTrajectorySmoothing(double smoothing)

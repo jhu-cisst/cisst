@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Forward declarations
 class svlFilterImageCropper;
+class svlFilterImageCenterFinderInterface;
 
 class CISST_EXPORT svlFilterImageCenterFinder : public svlFilterBase
 {
@@ -46,7 +47,7 @@ public:
     void SetThreshold(unsigned char thresholdlevel);
     unsigned char GetThreshold();
     int GetCenter(int &x, int &y, unsigned int videoch = SVL_LEFT);
-    void SetReceivingFilter(svlFilterBase* cropper);
+    void AddReceiver(svlFilterImageCenterFinderInterface* receiver);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -61,7 +62,13 @@ private:
     double Smoothing;
     bool MaskEnabled;
     unsigned int ThresholdLevel;
-    svlFilterBase* ReceivingFilter;
+    vctDynamicVector<svlFilterImageCenterFinderInterface*> Receivers;
+};
+
+class CISST_EXPORT svlFilterImageCenterFinderInterface
+{
+public:
+    virtual int SetCenter(int x, int y, unsigned int videoch = SVL_LEFT) = 0;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageCenterFinder)

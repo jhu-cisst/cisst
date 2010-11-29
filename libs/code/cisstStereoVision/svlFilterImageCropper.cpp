@@ -56,7 +56,7 @@ svlFilterImageCropper::~svlFilterImageCropper()
     Release();
 }
 
-int svlFilterImageCropper::SetRectangle(const int left, const int top, const int right, const int bottom, unsigned int videoch)
+int svlFilterImageCropper::SetRectangle(int left, int top, int right, int bottom, unsigned int videoch)
 {
     return SetRectangle(svlRect(left, top, right, bottom), videoch);
 }
@@ -76,7 +76,7 @@ int svlFilterImageCropper::SetRectangle(const svlRect & rect, unsigned int video
     return SVL_OK;
 }
 
-int svlFilterImageCropper::SetCorner(const int x, const int y, unsigned int videoch)
+int svlFilterImageCropper::SetCorner(int x, int y, unsigned int videoch)
 {
     if (videoch >= Rectangles.size() || !Enabled[videoch]) return SVL_FAIL;
     Rectangles[videoch].right = x + Rectangles[videoch].right - Rectangles[videoch].left;
@@ -86,7 +86,7 @@ int svlFilterImageCropper::SetCorner(const int x, const int y, unsigned int vide
     return SVL_OK;
 }
 
-int svlFilterImageCropper::SetCenter(const int x, const int y, unsigned int videoch)
+int svlFilterImageCropper::SetCenter(int x, int y, unsigned int videoch)
 {
     if (videoch >= Rectangles.size() || !Enabled[videoch]) return SVL_FAIL;
     return SetCorner(x - (Rectangles[videoch].right - Rectangles[videoch].left) / 2,

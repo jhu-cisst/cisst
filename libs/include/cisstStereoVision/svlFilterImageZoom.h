@@ -23,13 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageZoom_h
 #define _svlFilterImageZoom_h
 
-#include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterImageCenterFinder.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterImageZoom : public svlFilterBase
+class CISST_EXPORT svlFilterImageZoom : public svlFilterBase, public svlFilterImageCenterFinderInterface
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -37,9 +37,9 @@ public:
     svlFilterImageZoom();
     virtual ~svlFilterImageZoom();
 
-    int SetZoom(const double zoom, unsigned int videoch = SVL_LEFT);
+    int SetZoom(double zoom, unsigned int videoch = SVL_LEFT);
     double GetZoom(unsigned int videoch = SVL_LEFT);
-    int SetCenter(const int x, const int y, unsigned int videoch = SVL_LEFT);
+    int SetCenter(int x, int y, unsigned int videoch = SVL_LEFT);
     int GetCenter(int & x, int & y, unsigned int videoch = SVL_LEFT);
     void SetInterpolation(bool enable);
 

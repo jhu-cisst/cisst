@@ -98,7 +98,8 @@ public:
     bool IsInitialized();
 
     virtual int SetImageSize(unsigned int width, unsigned int height);
-    virtual int SetROI(const svlRect & rect);
+    virtual void SetROI(const svlRect & rect);
+    virtual void SetROI(int left, int top, int right, int bottom);
     virtual int SetTargetCount(unsigned int targetcount);
     virtual int SetTarget(unsigned int targetid, const svlTarget2D & target);
     virtual int GetTarget(unsigned int targetid, svlTarget2D & target);
