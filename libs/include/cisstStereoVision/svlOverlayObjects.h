@@ -176,6 +176,7 @@ public:
 
     void SetText(const std::string & text);
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetFontSize(double size);
     void SetTextColor(svlRGB txtcolor);
     void SetBackgroundColor(svlRGB bgcolor);
@@ -183,6 +184,7 @@ public:
 
     const std::string & GetText() const;
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     double GetFontSize() const;
     svlRGB GetTextColor() const;
     svlRGB GetBackgroundColor() const;
@@ -228,12 +230,14 @@ public:
     virtual ~svlOverlayText();
 
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetFontSize(double size);
     void SetTextColor(svlRGB txtcolor);
     void SetBackgroundColor(svlRGB bgcolor);
     void SetBackground(bool enable);
 
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     double GetFontSize() const;
     svlRGB GetTextColor() const;
     svlRGB GetBackgroundColor() const;
@@ -271,10 +275,12 @@ public:
     virtual ~svlOverlayStaticRect();
 
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetColor(svlRGB color);
     void SetFill(bool fill);
 
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     svlRGB GetColor() const;
     bool GetFill() const;
 
@@ -455,6 +461,7 @@ public:
     void SetValue(const double value);
     void SetDirection(const bool vertical);
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetColor(svlRGB color);
     void SetBackgroundColor(svlRGB bgcolor);
     void SetBorderWidth(const unsigned int pixels);
@@ -465,6 +472,7 @@ public:
     double GetValue() const;
     bool GetDirection() const;
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     svlRGB GetColor() const;
     svlRGB GetBackgroundColor() const;
     unsigned int GetBorderWidth() const;

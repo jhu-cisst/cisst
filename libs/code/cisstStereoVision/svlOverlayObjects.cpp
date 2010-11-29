@@ -440,6 +440,11 @@ void svlOverlayStaticText::SetRect(svlRect rect)
     Rect = rect;
 }
 
+void svlOverlayStaticText::SetRect(int left, int top, int right, int bottom)
+{
+    Rect.Assign(left, top, right, bottom);
+}
+
 void svlOverlayStaticText::SetTextColor(svlRGB txtcolor)
 {
     TxtColor = txtcolor;
@@ -469,6 +474,14 @@ const std::string & svlOverlayStaticText::GetText() const
 svlRect svlOverlayStaticText::GetRect() const
 {
     return Rect;
+}
+
+void svlOverlayStaticText::GetRect(int & left, int & top, int & right, int & bottom) const
+{
+    left   = Rect.left;
+    top    = Rect.top;
+    right  = Rect.right;
+    bottom = Rect.bottom;
 }
 
 svlRGB svlOverlayStaticText::GetTextColor() const
@@ -647,6 +660,11 @@ void svlOverlayStaticRect::SetRect(svlRect rect)
     Rect = rect;
 }
 
+void svlOverlayStaticRect::SetRect(int left, int top, int right, int bottom)
+{
+    Rect.Assign(left, top, right, bottom);
+}
+
 void svlOverlayStaticRect::SetColor(svlRGB color)
 {
     Color = color;
@@ -660,6 +678,14 @@ void svlOverlayStaticRect::SetFill(bool fill)
 svlRect svlOverlayStaticRect::GetRect() const
 {
     return Rect;
+}
+
+void svlOverlayStaticRect::GetRect(int & left, int & top, int & right, int & bottom) const
+{
+    left   = Rect.left;
+    top    = Rect.top;
+    right  = Rect.right;
+    bottom = Rect.bottom;
 }
 
 svlRGB svlOverlayStaticRect::GetColor() const
@@ -1145,6 +1171,11 @@ void svlOverlayStaticBar::SetRect(svlRect rect)
     Rect.Normalize();
 }
 
+void svlOverlayStaticBar::SetRect(int left, int top, int right, int bottom)
+{
+    Rect.Assign(left, top, right, bottom);
+}
+
 void svlOverlayStaticBar::SetColor(svlRGB color)
 {
     Color = color;
@@ -1189,6 +1220,14 @@ bool svlOverlayStaticBar::GetDirection() const
 svlRect svlOverlayStaticBar::GetRect() const
 {
     return Rect;
+}
+
+void svlOverlayStaticBar::GetRect(int & left, int & top, int & right, int & bottom) const
+{
+    left   = Rect.left;
+    top    = Rect.top;
+    right  = Rect.right;
+    bottom = Rect.bottom;
 }
 
 svlRGB svlOverlayStaticBar::GetColor() const
