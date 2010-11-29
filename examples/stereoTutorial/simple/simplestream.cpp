@@ -116,6 +116,17 @@ int main()
                                       true);                     // filled
     overlay.AddOverlay(rect_overlay);
 
+    // Add static ellipse overlay
+    svlOverlayStaticEllipse ellipse_overlay(SVL_LEFT,             // background video channel
+                                            true,                 // visible
+                                            svlPoint2D(440, 327), // rectangle size and position
+                                            48,                   // radius horizontally
+                                            32,                   // radius vertically
+                                            60.0,                 // angle
+                                            svlRGB(64, 128, 64),  // color
+                                            true);                // filled
+    overlay.AddOverlay(ellipse_overlay);
+    
     // Add static triangle overlay
     svlOverlayStaticTriangle tri_overlay(SVL_LEFT,            // background video channel
                                          true,                // visible
@@ -146,7 +157,7 @@ int main()
                                     svlRGB(32, 32, 32));   // background color
     overlay.AddOverlay(fps_overlay);
 
-    // Add framerate overlay
+    // Add bar overlay
     svlOverlayStaticBar bar_overlay(SVL_LEFT,                    // background video channel
                                     true,                        // visible
                                     vct2(-10.0, 25.0),           // range

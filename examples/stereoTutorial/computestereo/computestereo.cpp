@@ -59,7 +59,6 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
     unsigned int srcwidth, srcheight;
     svlCameraGeometry geometry;
     string filename;
-    svlRect roi;
 
 
 //////////////////////////////////////////////////////////////
@@ -102,8 +101,7 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
                            SVL_RIGHT);
     stereo.SetCameraGeometry(geometry);
 
-    roi.Assign(5, 5, srcwidth - maxdisparity, srcheight - 5);
-    stereo.SetROI(roi);
+    stereo.SetROI(5, 5, srcwidth - maxdisparity, srcheight - 5);
 
     stereo.SetCrossCheck(xcheck);
     stereo.SetSubpixelPrecision(subpixel_precision);

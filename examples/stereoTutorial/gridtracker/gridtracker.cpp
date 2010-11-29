@@ -123,7 +123,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     // setup source
     source.DialogFilePath();
 
-    centerfinder.SetReceivingFilter(&cropper);
+    centerfinder.AddReceiver(&cropper);
     centerfinder.SetMask(false);
     centerfinder.SetThreshold(15);
     cropper.SetRectangle(0, 0, 400, 400);
@@ -140,7 +140,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-0.4, 0.4, 0.9, 1.1);
     tracker.SetTracker(trackeralgo);
-    tracker.SetROI(svlRect(100, 100, 300, 300));
+    tracker.SetROI(100, 100, 300, 300);
 
     const int radius = 40;
     const int distance = 10;
