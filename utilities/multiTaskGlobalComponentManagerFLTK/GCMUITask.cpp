@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: GCMUITask.cpp 952 2009-11-10 00:06:14Z auneri1 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-02-26

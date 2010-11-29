@@ -1,7 +1,7 @@
 # -*- Mode: CMAKE; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set filetype=cmake softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 #
-# $Id: CMakeLists.txt 213 2009-04-01 15:12:08Z adeguet1 $
+# $Id$
 #
 # (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
