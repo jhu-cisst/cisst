@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-// #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
