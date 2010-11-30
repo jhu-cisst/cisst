@@ -74,7 +74,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsCommandRead.h"
 %include "cisstMultiTask/mtsCommandWriteBase.h"
 %include "cisstMultiTask/mtsCommandWriteReturn.h"
-%include "cisstMultiTask/mtsCommandQualifiedReadBase.h"
+%include "cisstMultiTask/mtsCommandQualifiedRead.h"
 
 // Extend mtsCommandVoid
 %extend mtsCommandVoid {
@@ -189,7 +189,7 @@ http://www.cisst.org/cisst/license.txt.
 }
 
 // Extend mtsCommandQualifiedRead
-%extend mtsCommandQualifiedReadBase {
+%extend mtsCommandQualifiedRead {
     %pythoncode {
         def UpdateFromC(self):
             try:

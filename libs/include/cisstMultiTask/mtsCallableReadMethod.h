@@ -38,22 +38,22 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 */
-template <class _classType, class _returnType>
+template <class _classType, class _resultType>
 class mtsCallableReadMethod: public mtsCallableReadBase {
 
 public:
     typedef mtsCallableReadBase BaseType;
-    typedef _returnType ReturnType;
+    typedef _resultType ResultType;
 
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
 
     /*! This type. */
-    typedef mtsCallableReadMethod<ClassType, ReturnType> ThisType;
+    typedef mtsCallableReadMethod<ClassType, ResultType> ThisType;
 
     /*! Typedef for pointer to member function (method) of a specific
       class (_classType). */
-    typedef bool(_classType::*ActionType)(ReturnType & argument) const;
+    typedef bool(_classType::*ActionType)(ResultType & argument) const;
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -69,10 +69,10 @@ protected:
 
     template <bool, typename _dummy = void>
     class ConditionalCast {
-        // Default case: ReturnType not derived from mtsGenericObjectProxy
+        // Default case: ResultType not derived from mtsGenericObjectProxy
     public:
         static mtsExecutionResult CallMethod(ClassType * classInstantiation, ActionType action, mtsGenericObject & argument) {
-            ReturnType * argumentCasted = mtsGenericTypes<ReturnType>::CastArg(argument);
+            ResultType * argumentCasted = mtsGenericTypes<ResultType>::CastArg(argument);
             if (argumentCasted == 0) {
                 return mtsExecutionResult::BAD_INPUT;
             }
@@ -85,12 +85,12 @@ protected:
 
     template <typename _dummy>
     class ConditionalCast<true, _dummy> {
-        // Specialization: ReturnType is derived from mtsGenericObjectProxy (and thus also from mtsGenericObject)
+        // Specialization: ResultType is derived from mtsGenericObjectProxy (and thus also from mtsGenericObject)
         // In this case, we may need to create a temporary Proxy object.
     public:
         static mtsExecutionResult CallMethod(ClassType * classInstantiation, ActionType action, mtsGenericObject & argument) {
             // First, check if a Proxy object was passed.
-            ReturnType * argumentCasted = dynamic_cast<ReturnType *>(&argument);
+            ResultType * argumentCasted = dynamic_cast<ResultType *>(&argument);
             if (argumentCasted) {
                 if ( (classInstantiation->*action)(*argumentCasted) ) {
                     return mtsExecutionResult::DEV_OK;
@@ -98,15 +98,15 @@ protected:
                 return mtsExecutionResult::COMMAND_FAILED;
             }
             // If it isn't a Proxy, maybe it is a ProxyRef
-            typedef typename ReturnType::RefType ReturnRefType;
-            ReturnRefType * dataRef = dynamic_cast<ReturnRefType *>(&argument);
+            typedef typename ResultType::RefType ResultRefType;
+            ResultRefType * dataRef = dynamic_cast<ResultRefType *>(&argument);
             if (!dataRef) {
                 CMN_LOG_INIT_ERROR << "mtsCallableRead: CallMethod could not cast from " << typeid(argument).name()
-                                   << " to " << typeid(ReturnRefType).name() << std::endl;
+                                   << " to " << typeid(ResultRefType).name() << std::endl;
                 return mtsExecutionResult::BAD_INPUT;
             }
             // Now, make the call using the temporary
-            ReturnType temp;
+            ResultType temp;
             if ( (classInstantiation->*action)(temp) ) {
                 // Finally, copy the data to the return
                 *dataRef = temp;
@@ -138,7 +138,7 @@ public:
 
     /* documented in base class */
     mtsExecutionResult Execute(mtsGenericObject & argument) {
-        return ConditionalCast<cmnIsDerivedFromTemplated<ReturnType, mtsGenericObjectProxy>::YES>
+        return ConditionalCast<cmnIsDerivedFromTemplated<ResultType, mtsGenericObjectProxy>::YES>
             ::CallMethod(ClassInstantiation, Action, argument);
     }
 

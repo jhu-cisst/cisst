@@ -60,7 +60,7 @@ protected:
 
 public:
     /*! The constructor. Does nothing */
-    mtsCommandRead(void); /*: BaseType(); */
+    mtsCommandRead(void);
 
     mtsCommandRead(const std::string & name);
 

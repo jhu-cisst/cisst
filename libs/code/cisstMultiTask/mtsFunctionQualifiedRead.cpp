@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 
 
 mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead()

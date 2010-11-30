@@ -576,7 +576,29 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 }
 
 
-mtsCommandQualifiedReadBase * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCommandQualifiedReadBase *command)
+mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
+                                                                        const std::string & name,
+                                                                        mtsGenericObject * argument1Prototype,
+                                                                        mtsGenericObject * argument2Prototype)
+{
+    // check that the input is valid
+    if (callable) {
+        mtsCommandQualifiedRead * command =
+            new mtsCommandQualifiedRead(callable, name, argument1Prototype, argument2Prototype);
+        if (!CommandsQualifiedRead.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
+            delete command;
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+        return command;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: attempt to add undefined command (null callable pointer) to interface \""
+                             << this->GetName() << "\"" << std::endl;
+    return 0;
+}
+
+
+mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCommandQualifiedRead * command)
 {
     if (command) {
         if (!CommandsQualifiedRead.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
@@ -592,7 +614,7 @@ mtsCommandQualifiedReadBase * mtsInterfaceProvided::AddCommandQualifiedRead(mtsC
 }
 
 
-mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQualifiedReadBase * filter,
+mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQualifiedRead * filter,
                                                                     mtsCommandWriteBase * command,
                                                                     mtsCommandQueueingPolicy queueingPolicy)
 {
@@ -663,7 +685,8 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetOriginalInterface(void) const
 }
 
 
-mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName) {
+mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName)
+{
     mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName);
     if (eventMulticastCommand) {
         if (AddEvent(eventName, eventMulticastCommand)) {
@@ -681,7 +704,8 @@ mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventNam
 
 
 bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
-                                      const std::string eventName) {
+                                      const std::string eventName)
+{
     mtsCommandVoid * command;
     command = this->AddEventVoid(eventName);
     if (command) {
@@ -714,7 +738,8 @@ bool mtsInterfaceProvided::AddEvent(const std::string & name, mtsMulticastComman
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const
+{
     std::vector<std::string> commands = GetNamesOfCommandsVoid();
     std::vector<std::string> tmp = GetNamesOfCommandsVoidReturn();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
@@ -734,27 +759,32 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const {
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsVoid(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsVoid(void) const
+{
     return CommandsVoid.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsVoidReturn(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsVoidReturn(void) const
+{
     return CommandsVoidReturn.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsWrite(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsWrite(void) const
+{
     return CommandsWrite.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsWriteReturn(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsWriteReturn(void) const
+{
     return CommandsWriteReturn.GetNames();
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsRead(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsRead(void) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->CommandsRead.GetNames();
     }
@@ -762,7 +792,8 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsRead(void) cons
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(void) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->CommandsQualifiedRead.GetNames();
     }
@@ -770,7 +801,8 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(v
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsVoid(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsVoid(void) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->EventVoidGenerators.GetNames();
     }
@@ -778,7 +810,8 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsVoid(void) const 
 }
 
 
-std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsWrite(void) const {
+std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsWrite(void) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->EventWriteGenerators.GetNames();
     }
@@ -786,7 +819,8 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsWrite(void) const
 }
 
 
-mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & commandName) const {
+mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & commandName) const
+{
     if (this->EndUserInterface) {
         return CommandsVoid.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
@@ -798,7 +832,8 @@ mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & comman
 }
 
 
-mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::string & commandName) const {
+mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::string & commandName) const
+{
     if (this->EndUserInterface) {
         return CommandsVoidReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
@@ -810,7 +845,8 @@ mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::str
 }
 
 
-mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & commandName) const {
+mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & commandName) const
+{
     if (this->EndUserInterface) {
         return CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
@@ -822,7 +858,8 @@ mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & 
 }
 
 
-mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::string & commandName) const {
+mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::string & commandName) const
+{
     if (this->EndUserInterface) {
         return CommandsWriteReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
@@ -834,7 +871,8 @@ mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::s
 }
 
 
-mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & commandName) const {
+mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & commandName) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->GetCommandRead(commandName);
     }
@@ -842,7 +880,8 @@ mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & comman
 }
 
 
-mtsCommandQualifiedReadBase * mtsInterfaceProvided::GetCommandQualifiedRead(const std::string & commandName) const {
+mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const std::string & commandName) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->GetCommandQualifiedRead(commandName);
     }
@@ -850,7 +889,8 @@ mtsCommandQualifiedReadBase * mtsInterfaceProvided::GetCommandQualifiedRead(cons
 }
 
 
-mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string & eventName) const {
+mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string & eventName) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->GetEventVoid(eventName);
     }
@@ -858,7 +898,8 @@ mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string &
 }
 
 
-mtsMulticastCommandWriteBase * mtsInterfaceProvided::GetEventWrite(const std::string & eventName) const {
+mtsMulticastCommandWriteBase * mtsInterfaceProvided::GetEventWrite(const std::string & eventName) const
+{
     if (this->OriginalInterface) {
         return this->OriginalInterface->GetEventWrite(eventName);
     }

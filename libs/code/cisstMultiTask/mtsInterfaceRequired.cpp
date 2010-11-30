@@ -89,6 +89,7 @@ bool mtsInterfaceRequired::SetMailBoxSize(size_t desiredSize)
     }
     this->MailBoxSize = desiredSize;
     this->MailBox->SetSize(desiredSize);
+    return true;
 }
 
 

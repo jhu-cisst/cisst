@@ -19,9 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandFilteredWrite.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 
-mtsCommandFilteredWrite::mtsCommandFilteredWrite(mtsCommandQualifiedReadBase * filter,
+mtsCommandFilteredWrite::mtsCommandFilteredWrite(mtsCommandQualifiedRead * filter,
                                                  mtsCommandWriteBase * command):
     BaseType(),
     Command(command),

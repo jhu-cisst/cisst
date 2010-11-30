@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionBase.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsFunctionQualifiedRead: public mtsFunctionBase {
 public:
-    typedef mtsCommandQualifiedReadBase CommandType;
+    typedef mtsCommandQualifiedRead CommandType;
 protected:
     CommandType * Command;
 
@@ -48,7 +48,7 @@ protected:
     class ConditionalWrap {
         // default case: both parameters need to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
@@ -59,7 +59,7 @@ protected:
     class ConditionalWrap<_userType1, _userType2, false, true> {
         // specialization: only first parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             return command->Execute(argument1Wrapped, argument2);
@@ -69,7 +69,7 @@ protected:
     class ConditionalWrap<_userType1, _userType2, true, false> {
         // specialization: only second parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
             return command->Execute(argument1, argument2Wrapped);
@@ -79,7 +79,7 @@ protected:
     class ConditionalWrap<_userType1, _userType2, true, true> {
         // specialization: neither parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             return command->Execute(argument1, argument2); }
     };

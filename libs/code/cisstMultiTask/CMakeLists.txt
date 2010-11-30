@@ -25,6 +25,7 @@ set (SOURCE_FILES
 
      mtsCommandFilteredQueuedWrite.cpp
      mtsCommandFilteredWrite.cpp
+     mtsCommandQualifiedRead.cpp
      mtsCommandQueuedVoid.cpp
      mtsCommandQueuedVoidReturn.cpp
      mtsCommandQueuedWriteBase.cpp
@@ -83,7 +84,9 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
-
+     mtsCallableQualifiedReadBase.h
+     mtsCallableQualifiedReadMethod.h
+     mtsCallableQualifiedReadReturnVoidMethod.h
      mtsCallableReadBase.h
      mtsCallableReadMethod.h
      mtsCallableReadReturnVoidMethod.h
@@ -103,7 +106,6 @@ set (HEADER_FILES
      mtsCommandFilteredQueuedWrite.h
      mtsCommandFilteredWrite.h
      mtsCommandQualifiedRead.h
-     mtsCommandQualifiedReadBase.h
      mtsCommandQueuedVoid.h
      mtsCommandQueuedVoidReturn.h
      mtsCommandQueuedWrite.h

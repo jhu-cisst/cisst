@@ -29,7 +29,9 @@ mtsCommandRead::mtsCommandRead(void):
 
 
 mtsCommandRead::mtsCommandRead(const std::string & name):
-    BaseType(name)
+    BaseType(name),
+    Callable(0),
+    ArgumentPrototype(0)
 {
 }
 

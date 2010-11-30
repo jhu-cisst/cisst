@@ -29,19 +29,21 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
  */
 
-class mtsCommandFilteredQueuedWrite: public mtsCommandQueuedWriteGeneric
+class CISST_EXPORT mtsCommandFilteredQueuedWrite: public mtsCommandQueuedWriteGeneric
 {
 public:
     typedef mtsCommandQueuedWriteGeneric BaseType;
     typedef mtsCommandFilteredQueuedWrite ThisType;
 
 protected:
-    mtsCommandQualifiedReadBase * ActualFilter;
+    mtsCommandQualifiedRead * ActualFilter;
     mtsGenericObject * FilterOutput;
 
 private:
@@ -50,11 +52,11 @@ private:
 
 public:
 
-    mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase * actualFilter,
+    mtsCommandFilteredQueuedWrite(mtsCommandQualifiedRead * actualFilter,
                                   mtsCommandWriteBase * actualCommand);
 
     mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox,
-                                  mtsCommandQualifiedReadBase * actualFilter,
+                                  mtsCommandQualifiedRead * actualFilter,
                                   mtsCommandWriteBase * actualCommand,
                                   size_t size);
 

@@ -1087,16 +1087,16 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             break;
         case 'Q':
             {
-                mtsCommandQualifiedReadBase * command = interfaceProvided->GetCommandQualifiedRead(actualCommandName);
+                mtsCommandQualifiedRead * command = interfaceProvided->GetCommandQualifiedRead(actualCommandName);
                 if (!command) {
                     description = "No qualified read command found for ";
                     description += actualCommandName;
                     return;
                 }
                 description = "Argument1 type: ";
-                description += command->GetArgument1ClassServices()->GetName();
+                description += command->GetArgument1Prototype()->Services()->GetName();
                 description += "\nArgument2 type: ";
-                description += command->GetArgument2ClassServices()->GetName();
+                description += command->GetArgument2Prototype()->Services()->GetName();
             }
             break;
         default:

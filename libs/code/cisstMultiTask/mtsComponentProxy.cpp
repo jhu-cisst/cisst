@@ -983,7 +983,7 @@ void mtsComponentProxy::ExtractInterfaceProvidedDescription(
     }
 
     // Extract qualified read commands
-    mtsCommandQualifiedReadBase * qualifiedReadCommand;
+    mtsCommandQualifiedRead * qualifiedReadCommand;
     CommandQualifiedReadElement elementCommandQualifiedRead;
     const std::vector<std::string> namesOfQualifiedReadCommand = endUserInterface->GetNamesOfCommandsQualifiedRead();
     for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {

@@ -19,9 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandFilteredQueuedWrite.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 
-mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase * actualFilter,
+mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualifiedRead * actualFilter,
                                                              mtsCommandWriteBase * actualCommand):
     BaseType(0, actualCommand, 0), ActualFilter(actualFilter)
 {
@@ -33,7 +33,7 @@ mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualified
 
 
 mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox,
-                                                             mtsCommandQualifiedReadBase * actualFilter,
+                                                             mtsCommandQualifiedRead * actualFilter,
                                                              mtsCommandWriteBase * actualCommand, size_t size):
     BaseType(mailBox, actualCommand, size),
     ActualFilter(actualFilter)
