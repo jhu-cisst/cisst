@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlFilterImageChannelSwapper.h 1236 2010-02-26 20:38:21Z adeguet1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: devMicronTrackerToolQDevice.cpp 1307 2010-03-18 20:34:00Z auneri1 $
+  $Id$
 
   Author(s):  Ali Uneri
   Created on: 2010-05-27
