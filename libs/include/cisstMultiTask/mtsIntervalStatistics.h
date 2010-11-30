@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsIntervalStatistics.h 1313 2010-03-19 02:49:12Z adeguet1 $
+  $Id$
 
   Author(s):  Marcin Balicki
   Created on: 2010-3-31

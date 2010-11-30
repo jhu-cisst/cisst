@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCallableVoidReturn.h 1822 2010-09-24 19:50:59Z adeguet1 $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2010-09-16
