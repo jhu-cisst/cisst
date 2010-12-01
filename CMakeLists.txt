@@ -295,7 +295,6 @@ set (CISST_LIBS_UNSTABLE
      cisstRobot
      cisstParameterTypes
      cisstDevices
-     cisstImage
      cisstStereoVision
      cisst3DUserInterface
      )
