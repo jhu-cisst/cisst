@@ -88,16 +88,16 @@ public:
     /*! The execute method. */
     mtsExecutionResult Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2) {
         if (IsDisabled()) {
-            return mtsExecutionResult::DISABLED;
+            return mtsExecutionResult::COMMAND_DISABLED;
         }
 
         if (NetworkProxyServer) {
             if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID, argument1, argument2)) {
-                return mtsExecutionResult::COMMAND_FAILED;
+                return mtsExecutionResult::NETWORK_ERROR;
             }
         }
 
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /*! Generate human readable description of this object */

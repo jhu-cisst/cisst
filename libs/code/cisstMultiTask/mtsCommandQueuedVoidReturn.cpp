@@ -50,20 +50,21 @@ mtsExecutionResult mtsCommandQueuedVoidReturn::Execute(mtsGenericObject & result
         if (!MailBox) {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: no mailbox for \""
                               << this->Name << "\"" << std::endl;
-            return mtsExecutionResult::NO_MAILBOX;
+            return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
         }
         // preserve address of result and wait to be dequeued
         ResultPointer = &result;
         if (!MailBox->Write(this)) {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: mailbox full for \""
                               << this->Name << "\"" <<  std::endl;
-            return mtsExecutionResult::MAILBOX_FULL;
+            return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
         }
-        if (!MailBox->IsEmpty())
+        if (!MailBox->IsEmpty()) {
             MailBox->ThreadSignalWait();
-        return mtsExecutionResult::DEV_OK;
+        }
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

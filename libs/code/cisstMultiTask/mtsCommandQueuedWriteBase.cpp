@@ -82,13 +82,13 @@ void mtsCommandQueuedWriteGeneric::Allocate(size_t size)
 
 
 mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject & argument,
-                                                                 mtsBlockingType blocking)
+                                                         mtsBlockingType blocking)
 {
     if (this->IsEnabled()) {
         if (!MailBox) {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: no mailbox for \""
                               << this->Name << "\"" << std::endl;
-            return mtsExecutionResult::NO_MAILBOX;
+            return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
         }
         // copy the argument and blocking flag to the local storage.
         if (ArgumentsQueue.Put(argument) &&
@@ -96,20 +96,23 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
             if (MailBox->Write(this)) {
                 if ((blocking == MTS_BLOCKING) && !MailBox->IsEmpty()) {
                     MailBox->ThreadSignalWait();
+                    return mtsExecutionResult::COMMAND_SUCCEEDED;
                 }
-                return mtsExecutionResult::DEV_OK;
+                return mtsExecutionResult::COMMAND_QUEUED;
             } else {
                 CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: mailbox full for \""
                                   << this->Name << "\"" << std::endl;
                 ArgumentsQueue.Get();  // pop argument and blocking flag from local storage
-                BlockingFlagQueue.Get();}
+                BlockingFlagQueue.Get();
+                return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+            }
         } else {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue or BlockingFlagQueue full for \""
                               << this->Name << "\"" << std::endl;
+            return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
         }
-        return mtsExecutionResult::MAILBOX_FULL;
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

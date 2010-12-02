@@ -76,14 +76,14 @@ protected:
         {
             const ArgumentType * data1 = mtsGenericTypes<ArgumentType>::CastArg(argument);
             if (data1 == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             ResultType * data2 = mtsGenericTypes<ResultType>::CastArg(result);
             if (data2 == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             (classInstantiation->*action)(*data1, *data2);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 
@@ -103,17 +103,17 @@ protected:
                 if (!data1ref) {
                     CMN_LOG_INIT_ERROR << "Class mtsCallableQualifiedReadReturnVoidMethod: CallMethod could not cast argument from " << typeid(argument).name()
                                        << " to const " << typeid(ArgumentRefType).name() << std::endl;
-                    return mtsExecutionResult::BAD_INPUT;
+                    return mtsExecutionResult::INVALID_INPUT_TYPE;
                 }
                 temp1 = *data1ref;
                 data1 = &temp1;
             }
             ResultType * data2 = mtsGenericTypes<ResultType>::CastArg(result);
             if (data2 == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             (classInstantiation->*action)(*data1, *data2);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 
@@ -125,7 +125,7 @@ protected:
         {
             const ArgumentType * data1 = mtsGenericTypes<ArgumentType>::CastArg(argument);
             if (data1 == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             // First, check if a Proxy object was passed.
             ResultType temp2;  // in case needed
@@ -138,7 +138,7 @@ protected:
                 if (!data2ref) {
                     CMN_LOG_INIT_ERROR << "Class mtsCallableQualifiedReadReturnVoidMethod: CallMethod could not cast result from " << typeid(result).name()
                                        << " to const " << typeid(ResultRefType).name() << std::endl;
-                    return mtsExecutionResult::BAD_INPUT;
+                    return mtsExecutionResult::INVALID_INPUT_TYPE;
                 }
                 data2 = &temp2;
             }
@@ -146,7 +146,7 @@ protected:
             if (data2ref) {
                 *data2ref = *data2;
             }
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 
@@ -166,7 +166,7 @@ protected:
                 if (!data1ref) {
                     CMN_LOG_INIT_ERROR << "Class mtsCallableQualifiedReadReturnVoidMethod: CallMethod could not cast argument from " << typeid(argument).name()
                                        << " to const " << typeid(ArgumentRefType).name() << std::endl;
-                    return mtsExecutionResult::BAD_INPUT;
+                    return mtsExecutionResult::INVALID_INPUT_TYPE;
                 }
                 temp1 = *data1ref;
                 data1 = &temp1;
@@ -182,7 +182,7 @@ protected:
                 if (!data2ref) {
                     CMN_LOG_INIT_ERROR << "Class mtsCallableQualifiedReadReturnVoidMethod: CallMethod could not cast result from " << typeid(result).name()
                                        << " to const " << typeid(ResultRefType).name() << std::endl;
-                    return mtsExecutionResult::BAD_INPUT;
+                    return mtsExecutionResult::INVALID_INPUT_TYPE;
                 }
                 data2 = &temp2;
             }
@@ -191,7 +191,7 @@ protected:
             if (data2ref) {
                 *data2ref = temp2;
             }
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 

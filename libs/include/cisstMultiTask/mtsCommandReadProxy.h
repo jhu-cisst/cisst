@@ -80,15 +80,15 @@ public:
     /*! The execute method. */
     virtual mtsExecutionResult Execute(mtsGenericObject & argument) {
         if (IsDisabled()) {
-            return mtsExecutionResult::DISABLED;
+            return mtsExecutionResult::COMMAND_DISABLED;
         }
 
         if (NetworkProxyServer) {
             if (!NetworkProxyServer->SendExecuteCommandReadSerialized(ClientID, CommandID, argument)) {
-                return mtsExecutionResult::COMMAND_FAILED;
+                return mtsExecutionResult::NETWORK_ERROR;
             }
         }
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /*! Generate human readable description of this object */

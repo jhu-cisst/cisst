@@ -127,7 +127,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
                             cmnIsDerivedFrom<__argumentType, mtsGenericObject>::YES,
                             cmnIsDerivedFrom<__resultType, mtsGenericObject>::YES>
                            ::Call(Command, argument, result)
-          : mtsExecutionResult::NO_INTERFACE;
+          : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return executionResult;
     }
 #endif

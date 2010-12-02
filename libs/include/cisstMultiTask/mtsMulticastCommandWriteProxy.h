@@ -65,7 +65,7 @@ public:
         for (index = 0; index < Commands.size(); ++index) {
             Commands[index]->Execute(argument, MTS_NOT_BLOCKING);
         }
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /*! Set an argument prototype */

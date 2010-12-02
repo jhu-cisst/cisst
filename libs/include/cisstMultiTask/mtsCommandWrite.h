@@ -76,10 +76,10 @@ protected:
         {
             const ArgumentType * data = mtsGenericTypes<ArgumentType>::CastArg(argument);
             if (data == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             (ClassInst->*Action)(*data);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
     template<typename dummy>
@@ -93,7 +93,7 @@ protected:
             const ArgumentType *data = dynamic_cast<const ArgumentType *>(&argument);
             if (data) {
                 (ClassInst->*Action)(*data);
-                return mtsExecutionResult::DEV_OK;
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
             }
             // If it isn't a Proxy, maybe it is a ProxyRef
             typedef typename ArgumentType::RefType ArgumentRefType;
@@ -101,13 +101,13 @@ protected:
             if (!dataref) {
                 CMN_LOG_INIT_ERROR << "Write CallMethod could not cast from " << typeid(argument).name()
                                    << " to const " << typeid(ArgumentRefType).name() << std::endl;
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             // Now, make the call using the temporary
             ArgumentType temp;
             temp.Assign(*dataref);
             (ClassInst->*Action)(temp);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 
@@ -155,7 +155,7 @@ public:
             return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::YES
                                   >::CallMethod(ClassInstantiation, Action, argument);
         }
-        return mtsExecutionResult::DISABLED;
+        return mtsExecutionResult::COMMAND_DISABLED;
     }
 
     /*! Direct execute can be used for mtsMulticastCommandWrite */
@@ -163,9 +163,9 @@ public:
                                       mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             (ClassInstantiation->*Action)(argument);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
-        return mtsExecutionResult::DISABLED;
+        return mtsExecutionResult::COMMAND_DISABLED;
     }
 
     /* commented in base class */
@@ -262,9 +262,9 @@ public:
                                mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             (ClassInstantiation->*Action)(argument);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
-        return mtsExecutionResult::DISABLED;
+        return mtsExecutionResult::COMMAND_DISABLED;
     }
 
     /* documented in base class */

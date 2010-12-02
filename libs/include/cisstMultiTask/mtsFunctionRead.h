@@ -93,7 +93,7 @@ public:
     mtsExecutionResult operator()(_userType & argument) const {
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument)
-          : mtsExecutionResult::NO_INTERFACE;
+          : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
 #endif

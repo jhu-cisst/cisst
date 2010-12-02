@@ -54,13 +54,13 @@ bool mtsFunctionVoid::Bind(CommandType * command)
 
 mtsExecutionResult mtsFunctionVoid::Execute(void) const
 {
-    return Command ? Command->Execute(MTS_NOT_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
+    return Command ? Command->Execute(MTS_NOT_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
 }
 
 
 mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
 {
-    return Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
+    return Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
 }
 
 

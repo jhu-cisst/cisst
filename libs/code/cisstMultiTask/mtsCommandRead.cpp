@@ -59,7 +59,7 @@ mtsExecutionResult mtsCommandRead::Execute(mtsGenericObject & argument)
     if (this->IsEnabled()) {
         return this->Callable->Execute(argument);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

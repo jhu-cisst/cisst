@@ -98,7 +98,7 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     mtsExecutionResult Execute(_userType & result) const {
         mtsExecutionResult executionResult = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, result)
-          : mtsExecutionResult::NO_INTERFACE;
+          : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return executionResult;
     }
 #endif

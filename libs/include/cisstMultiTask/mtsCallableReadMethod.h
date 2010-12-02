@@ -74,12 +74,12 @@ protected:
         static mtsExecutionResult CallMethod(ClassType * classInstantiation, ActionType action, mtsGenericObject & argument) {
             ResultType * argumentCasted = mtsGenericTypes<ResultType>::CastArg(argument);
             if (argumentCasted == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             if ( (classInstantiation->*action)(*argumentCasted) ) {
-                return mtsExecutionResult::DEV_OK;
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
             }
-            return mtsExecutionResult::COMMAND_FAILED;
+            return mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
         }
     };
 
@@ -93,9 +93,9 @@ protected:
             ResultType * argumentCasted = dynamic_cast<ResultType *>(&argument);
             if (argumentCasted) {
                 if ( (classInstantiation->*action)(*argumentCasted) ) {
-                    return mtsExecutionResult::DEV_OK;
+                    return mtsExecutionResult::COMMAND_SUCCEEDED;
                 }
-                return mtsExecutionResult::COMMAND_FAILED;
+                return mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
             }
             // If it isn't a Proxy, maybe it is a ProxyRef
             typedef typename ResultType::RefType ResultRefType;
@@ -103,18 +103,18 @@ protected:
             if (!dataRef) {
                 CMN_LOG_INIT_ERROR << "mtsCallableRead: CallMethod could not cast from " << typeid(argument).name()
                                    << " to " << typeid(ResultRefType).name() << std::endl;
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             // Now, make the call using the temporary
             ResultType temp;
             if ( (classInstantiation->*action)(temp) ) {
                 // Finally, copy the data to the return
                 *dataRef = temp;
-                return mtsExecutionResult::DEV_OK;
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
             }
             // Copy result anyway
             *dataRef = temp;
-            return mtsExecutionResult::COMMAND_FAILED;
+            return mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
         }
     };
 

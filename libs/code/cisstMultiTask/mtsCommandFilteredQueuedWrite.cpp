@@ -72,11 +72,11 @@ mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject
     if (this->IsEnabled()) {
         // First, call the filter (qualified read)
         mtsExecutionResult result = ActualFilter->Execute(argument, *FilterOutput);
-        if (result != mtsExecutionResult::DEV_OK) {
+        if (!result.IsOK()) {
             return result;
         }
         // Next, queue the write command
         return BaseType::Execute(*FilterOutput, blocking);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }

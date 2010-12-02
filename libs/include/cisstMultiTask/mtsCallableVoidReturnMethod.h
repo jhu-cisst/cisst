@@ -74,10 +74,10 @@ protected:
         static mtsExecutionResult CallMethod(ClassType * classInstantiation, ActionType action, mtsGenericObject & result) {
             ResultType * resultCasted = mtsGenericTypes<ResultType>::CastArg(result);
             if (resultCasted == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             (classInstantiation->*action)(*resultCasted);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 
@@ -91,7 +91,7 @@ protected:
             ResultType * resultCasted = dynamic_cast<ResultType *>(&result);
             if (resultCasted) {
                 (classInstantiation->*action)(*resultCasted);
-                return mtsExecutionResult::DEV_OK;
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
             }
             // If it isn't a Proxy, maybe it is a ProxyRef
             typedef typename ResultType::RefType ResultRefType;
@@ -99,14 +99,14 @@ protected:
             if (!dataRef) {
                 CMN_LOG_INIT_ERROR << "mtsCallableVoidReturn: CallMethod could not cast from " << typeid(result).name()
                                    << " to " << typeid(ResultRefType).name() << std::endl;
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             // Now, make the call using the temporary
             ResultType temp;
             (classInstantiation->*action)(temp);
             // Finally, copy the data to the return
             *dataRef = temp;
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 

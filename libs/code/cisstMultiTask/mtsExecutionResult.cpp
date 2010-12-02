@@ -25,7 +25,7 @@
 
 mtsExecutionResult::mtsExecutionResult(void)
 {
-    this->Value = DEV_OK;
+    this->Value = COMMAND_SUCCEEDED;
 }
 
 
@@ -54,47 +54,19 @@ void mtsExecutionResult::ToStream(std::ostream & outputStream) const
 
 const std::string & mtsExecutionResult::ToString(const Enum & value)
 {
-    static const std::string stringDEV_OK("OK");
-    static const std::string stringDEV_NOT_OK("Failed");
-    static const std::string stringBAD_COMMAND("Failed, bad command");
-    static const std::string stringNO_MAILBOX("Failed, no mailbox");
-    static const std::string stringBAD_INPUT("Failed, bad input");
-    static const std::string stringNO_INTERFACE("Failed, no interface");
-    static const std::string stringMAILBOX_FULL("Failed, mailbox full");
-    static const std::string stringDISABLED("Failed, disabled");
-    static const std::string stringCOMMAND_FAILED("Failed, underlying method or function returned 'false'");
-    static const std::string stringDEFAULT("Unknown execution result");
-    switch (value) {
-    case DEV_OK:
-        return stringDEV_OK;
-        break;
-    case DEV_NOT_OK:
-        return stringDEV_NOT_OK;
-        break;
-    case BAD_COMMAND:
-        return stringBAD_COMMAND;
-        break;
-    case NO_MAILBOX:
-        return stringNO_MAILBOX;
-        break;
-    case BAD_INPUT:
-        return stringBAD_INPUT;
-        break;
-    case NO_INTERFACE:
-        return stringNO_INTERFACE;
-        break;
-    case MAILBOX_FULL:
-        return stringMAILBOX_FULL;
-        break;
-    case DISABLED:
-        return stringDISABLED;
-        break;
-    case COMMAND_FAILED:  // Read or QualifiedRead returned 'false'
-        return stringCOMMAND_FAILED;
-        break;
-    default:
-        return stringDEFAULT;
-    }
+    static const std::string resultDescription[] = {
+        "command succeeded",
+        "command queued",
+        "function not bound to a command",
+        "queued command has no mailbox",
+        "command disabled",
+        "interface command mailbox full",
+        "command argument queue full",
+        "invalid input type",
+        "underlying method or function returned \"false\"",
+        "network error"
+    };
+    return resultDescription[value];
 }
 
 
@@ -107,4 +79,16 @@ bool mtsExecutionResult::operator == (const mtsExecutionResult & result) const
 bool mtsExecutionResult::operator != (const mtsExecutionResult & result) const
 {
     return !(*this == result);
+}
+
+
+bool mtsExecutionResult::IsOK(void) const
+{
+    return ((this->Value == COMMAND_SUCCEEDED) || (this->Value == COMMAND_QUEUED));
+}
+
+
+mtsExecutionResult::operator bool (void) const
+{
+    return this->IsOK();
 }

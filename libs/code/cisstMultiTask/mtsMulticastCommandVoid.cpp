@@ -38,14 +38,14 @@ void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
 }
 
 
-mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking)) {
-    int result = static_cast<int>(mtsExecutionResult::DEV_OK);
-    for (size_t i = 0; i < Commands.size(); i++) {
-        result =
-            (result << static_cast<int>(mtsExecutionResult::RETURN_TYPE_BIT_SIZE))
-            | static_cast<int>((Commands[i]->Execute(MTS_NOT_BLOCKING)).GetResult());
+mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking))
+{
+    size_t index;
+    const size_t commandsSize = Commands.size();
+    for (index = 0; index < commandsSize; index++) {
+        Commands[index]->Execute(MTS_NOT_BLOCKING);
     }
-    return static_cast<mtsExecutionResult::Enum>(result);
+    return mtsExecutionResult::COMMAND_SUCCEEDED;
 }
 
 

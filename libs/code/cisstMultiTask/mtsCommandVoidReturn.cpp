@@ -49,7 +49,7 @@ mtsExecutionResult mtsCommandVoidReturn::Execute(mtsGenericObject & result)
     if (this->IsEnabled()) {
         return this->Callable->Execute(result);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

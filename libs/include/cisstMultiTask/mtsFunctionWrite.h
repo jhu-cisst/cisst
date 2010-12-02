@@ -98,7 +98,7 @@ public:
     mtsExecutionResult Execute(const _userType & argument) const {
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_NOT_BLOCKING)
-          : mtsExecutionResult::NO_INTERFACE;
+          : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
 
@@ -106,7 +106,7 @@ public:
     mtsExecutionResult ExecuteBlocking(const _userType & argument) const {
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_BLOCKING)
-          : mtsExecutionResult::NO_INTERFACE;
+          : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
 #endif
