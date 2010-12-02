@@ -28,7 +28,7 @@ class CISST_EXPORT devOSGBody : public osg::MatrixTransform {
 
  protected:
 
-  osg::Geometry* geometry;
+  std::vector<osg::Geometry*> geometries;
 
  public: 
 

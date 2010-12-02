@@ -20,8 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 devOSGBody::devOSGBody( const std::string& model, 
 			devOSGWorld* world,
-			const vctFrame4x4<double>& Rt ) :
-  geometry( NULL ){
+			const vctFrame4x4<double>& Rt ){
   
   osg::ref_ptr< osgDB::ReaderWriter::Options > options;
   // "noRotation" is to cancel the default -X in .obj files
@@ -49,34 +48,36 @@ devOSGBody::devOSGBody( const std::string& model,
     osg::Group* group = node->asGroup();
     if( group != NULL ){
 
-      // Then get the first child (there could be more!)
-      node = group->getChild( 0 );
-      // This node should be a geode
-      osg::Geode* geode = node->asGeode();
-      if( geode != NULL ){
+      for( size_t g = 0; g<group->getNumChildren(); g++ ){
 
-	// Find if it has any drawables?
-	if( 0 < geode->getNumDrawables() ){
+	node = group->getChild( g );
+
+	// This node should be a geode
+	osg::Geode* geode = node->asGeode();
+	if( geode != NULL ){
+
+	  // Find if it has any drawables?
+	  for( size_t d=0; d<geode->getNumDrawables(); d++ ){
+	    // Get the first drawable
+	    osg::Drawable* drawable = geode->getDrawable( d );
 	  
-	  // Get the first drawable
-	  osg::Drawable* drawable = geode->getDrawable( 0 );
-	  
-	  // Cast the drawable as a geometry
-	  geometry = drawable->asGeometry();
-	  if( geometry == NULL ){
-	    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			      << "Failed to cast the drawable as a geometry."
-			      << std::endl;
+	    // Cast the drawable as a geometry
+	    osg::Geometry* geometry = drawable->asGeometry();
+	    if( geometry == NULL ){
+	      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+				<< "Failed to cast the drawable as a geometry."
+				<< std::endl;
+	    }
+	    else { geometries.push_back( geometry ); }
+
 	  }
-
+	}
+	else{
+	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			    << "Failed to cast node as a geode for : " << model 
+			    << std::endl;
 	}
       }
-      else{
-	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			  << "Failed to cast node as a geode for : " << model 
-			  << std::endl;
-      }
-      
     }
     else{
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS

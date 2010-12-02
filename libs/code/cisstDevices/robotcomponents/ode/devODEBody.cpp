@@ -33,7 +33,7 @@ devODEBody::devODEBody( const std::string& name,
   Vertices( NULL ),
   VertexCount( 0 ),
   Indices( NULL ),
-  IndexCount( NULL ){
+  IndexCount( 0 ){
 
   if( world != NULL ){
     world->Lock();
@@ -72,7 +72,7 @@ devODEBody::devODEBody( const std::string& name,
   Vertices( NULL ),
   VertexCount( 0 ),
   Indices( NULL ),
-  IndexCount( NULL ){
+  IndexCount( 0 ){
 
   setUpdateCallback( new OSGCallback );
 
@@ -153,63 +153,85 @@ devODEBody::~devODEBody(){
 void devODEBody::BuildODETriMesh( dSpaceID spaceid,
 				  const vctFixedSizeVector<double,3>& com ){
 
-  // Find if a geometry was loaded
-  if( geometry != NULL ){
+  // used to accumulate the vertices of all geometries
+  std::vector< vctFixedSizeVector<double,3> > Verticestmp;
+  // used to accumulate the vertices per geometry
+  std::vector< int > VertexCounttmp;
+  // used to accumulate the indices
+  std::vector<dTriIndex> Indicestmp;
+
+  // start a 0 vertex
+  VertexCounttmp.push_back( 0 );
+
+  for( size_t i=0; i<geometries.size(); i++ ){
     
     // Get the OSG vertex array
-    const osg::Array* vertexarray = geometry->getVertexArray();
+    const osg::Array* vertexarray = geometries[i]->getVertexArray();
 
     // This part copies the vertices in a temporary (double) buffer
     // Ensure we are dealing with an array of 3d points
     if( vertexarray->getType() == osg::Array::Vec3ArrayType ){
+
       // Ensure that the array is GL_FLOAT
       if( vertexarray->getDataType() == GL_FLOAT ){
 	
-	// Copy the array in the buffer
+	// Copy the vertices
 	GLfloat* fvertices = (GLfloat*)vertexarray->getDataPointer();
-        Vertices  = new dVector3[ vertexarray->getNumElements() ];
-	VertexCount = vertexarray->getNumElements();
-
-	for( size_t i=0, idx=0; i<vertexarray->getNumElements(); i++){
-	  Vertices[i][0] = fvertices[idx++] - com[0]; 
-	  Vertices[i][1] = fvertices[idx++] - com[1]; 
-	  Vertices[i][2] = fvertices[idx++] - com[2]; 
+	for( size_t j=0, idx=0; j<vertexarray->getNumElements(); j++){
+	  vctFixedSizeVector<double,3> vertex;
+	  vertex[0] = fvertices[idx++] - com[0]; 
+	  vertex[1] = fvertices[idx++] - com[1]; 
+	  vertex[2] = fvertices[idx++] - com[2]; 
+	  Verticestmp.push_back( vertex );
 	}
-
+	// Copy the vertex count for this geometry
+	VertexCounttmp.push_back( vertexarray->getNumElements()/3 );
       }
 
     }
     
 
     const osg::Geometry::PrimitiveSetList primitivesetlist = 
-      geometry->getPrimitiveSetList();
+      geometries[i]->getPrimitiveSetList();
 
     // Copy the indices in a temporary array
     // Ensure we only have triangle primitives
     if( primitivesetlist.size() == 1 ){
 
       const osg::PrimitiveSet* primitiveset;
-      primitiveset = geometry->getPrimitiveSet( 0 );
+      primitiveset = geometries[i]->getPrimitiveSet( 0 );
 
-      // thest that the primitive are triangles
+      // test that the primitive are triangles
       if( primitiveset->getMode() == GL_TRIANGLES ){
-	Indices = new dTriIndex[ primitiveset->getNumIndices() ];
-	IndexCount = primitiveset->getNumIndices();
-	for( unsigned int i=0; i<primitiveset->getNumIndices(); i++ )
-	  { Indices[i] = (dTriIndex) primitiveset->index( i ); }
+	// copy the indices. Add the vertex count of the previous geometry. This
+	// is because the indices are numbered wrt to vertices of the geometry
+	for( unsigned int j=0; j<primitiveset->getNumIndices(); j++ ){ 
+	  Indicestmp.push_back( (dTriIndex) primitiveset->index( j ) + 
+				VertexCounttmp[ i ] );
+	}
       }
 
-      else{
-	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			  << "Illegal primitive."
-			  << std::endl;
-      }
     }
-    else{
-	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			  << "Model must be triangulated."
-			  << std::endl;
-    }
+
+  }
+
+  // Create the array for ODE and copy the data
+  VertexCount = Verticestmp.size();
+  Vertices  = new dVector3[ VertexCount ];
+  IndexCount = Indicestmp.size();
+  Indices = new dTriIndex[ IndexCount ];
+
+  for( int i=0; i<VertexCount; i++ ){
+    Vertices[i][0] = Verticestmp[i][0];
+    Vertices[i][1] = Verticestmp[i][1];
+    Vertices[i][2] = Verticestmp[i][2];
+  }
+
+  for( int i=0; i<IndexCount; i++ ){
+    Indices[i] = Indicestmp[i];
+  }
+
+  if( 0 < IndexCount && 0 < VertexCount ){
 
     // Build the mesh data for ODE
     this->meshid = dGeomTriMeshDataCreate();
@@ -218,14 +240,14 @@ void devODEBody::BuildODETriMesh( dSpaceID spaceid,
     dGeomTriMeshDataBuildSimple( this->meshid, 
 				 (const dReal*)Vertices, VertexCount,
 				 Indices, IndexCount );
-    
+  
     // Create the geom
     this->geomid = dCreateTriMesh( spaceid, this->meshid, NULL, NULL, NULL);
     dGeomSetData( GetGeomID(), (void*)this );
-
+  
     // Attach the geom to the body
     dGeomSetBody( GetGeomID(), GetBodyID() );
-
+  
   }
 
 }
