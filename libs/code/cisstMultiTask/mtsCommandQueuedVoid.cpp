@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -48,32 +48,41 @@ mtsCommandQueuedVoid * mtsCommandQueuedVoid::Clone(mtsMailBox * mailBox, size_t 
 
 mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
 {
-    if (this->IsEnabled()) {
-        if (!MailBox) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: no mailbox for \""
-                              << this->Name << "\"" << std::endl;
-            return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
-        }
-        if (BlockingFlagQueue.Put(blocking)) {
-            if (MailBox->Write(this)) {
-                if ((blocking == MTS_BLOCKING) && !MailBox->IsEmpty()) {
-                    MailBox->ThreadSignalWait();
-                    return mtsExecutionResult::COMMAND_SUCCEEDED;
-                }
-                return mtsExecutionResult::COMMAND_QUEUED;
-            } else {
-                CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox full for \""
-                                  << this->Name << "\"" <<  std::endl;
-                BlockingFlagQueue.Get(); // pop blocking flag from local storage
-                return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
-            }
-        } else {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: BlockingFlagQueue full for \""
-                              << this->Name << "\"" << std::endl;
-        }
+    // check if this command is enabled
+    if (!this->IsEnabled()) {
+        return mtsExecutionResult::COMMAND_DISABLED;
+    }
+    // check if there is a mailbox (i.e. if the command is associated to an interface
+    if (!MailBox) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: no mailbox for \""
+                          << this->Name << "\"" << std::endl;
+        return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
+    }
+    // copy the blocking flag to the local storage.
+    if (!BlockingFlagQueue.Put(blocking)) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: BlockingFlagQueue full for \""
+                          << this->Name << "\"" << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
-    return mtsExecutionResult::COMMAND_DISABLED;
+    // finally try to queue to mailbox
+    if (!MailBox->Write(this)) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox full for \""
+                          << this->Name << "\"" <<  std::endl;
+        BlockingFlagQueue.Get(); // pop blocking flag from local storage
+        return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+    }
+    if (blocking == MTS_BLOCKING) {
+        // test if the mailbox has been emptied already (e.g. post queued command)
+        if (MailBox->IsEmpty()) {
+            // signal has been raised, reset it
+            MailBox->ThreadSignalWait(0.0);
+        } else {
+            // normal case, wait
+            MailBox->ThreadSignalWait();
+        }
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return mtsExecutionResult::COMMAND_QUEUED;
 }
 
 

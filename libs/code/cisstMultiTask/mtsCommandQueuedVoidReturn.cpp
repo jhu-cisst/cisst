@@ -46,25 +46,32 @@ mtsCommandQueuedVoidReturn * mtsCommandQueuedVoidReturn::Clone(mtsMailBox * mail
 
 mtsExecutionResult mtsCommandQueuedVoidReturn::Execute(mtsGenericObject & result)
 {
-    if (this->IsEnabled()) {
-        if (!MailBox) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: no mailbox for \""
-                              << this->Name << "\"" << std::endl;
-            return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
-        }
-        // preserve address of result and wait to be dequeued
-        ResultPointer = &result;
-        if (!MailBox->Write(this)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: mailbox full for \""
-                              << this->Name << "\"" <<  std::endl;
-            return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
-        }
-        if (!MailBox->IsEmpty()) {
-            MailBox->ThreadSignalWait();
-        }
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    // check if this command is enabled
+    if (!this->IsEnabled()) {
+        return mtsExecutionResult::COMMAND_DISABLED;
     }
-    return mtsExecutionResult::COMMAND_DISABLED;
+    // check if there is a mailbox (i.e. if the command is associated to an interface
+    if (!MailBox) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: no mailbox for \""
+                          << this->Name << "\"" << std::endl;
+        return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
+    }
+    // preserve address of result and wait to be dequeued
+    ResultPointer = &result;
+    if (!MailBox->Write(this)) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: mailbox full for \""
+                          << this->Name << "\"" <<  std::endl;
+        return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+    }
+    // test if the mailbox has been emptied already (e.g. post queued command)
+    if (MailBox->IsEmpty()) {
+        // signal has been raised, reset it
+        MailBox->ThreadSignalWait(0.0);
+    } else {
+        // normal case, wait
+        MailBox->ThreadSignalWait();
+    }
+    return mtsExecutionResult::COMMAND_SUCCEEDED;
 }
 
 

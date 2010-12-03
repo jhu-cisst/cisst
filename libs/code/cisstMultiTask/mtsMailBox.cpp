@@ -65,6 +65,12 @@ void mtsMailBox::ThreadSignalWait(void)
 }
 
 
+void mtsMailBox::ThreadSignalWait(double timeOutInSeconds)
+{
+    this->ThreadSignal.Wait(timeOutInSeconds);
+}
+
+
 osaThreadSignal * mtsMailBox::GetThreadSignal(void)
 {
     return &ThreadSignal;

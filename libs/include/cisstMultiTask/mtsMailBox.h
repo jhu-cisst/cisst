@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -68,6 +68,11 @@ public:
       Write.  ExecuteNext will Raise the thread signal if the queued
       command was blocking. */
     void ThreadSignalWait(void);
+
+    /*! Don't really wait but at least does a Wait call to match a
+      potential Raise.  Use with Caution, normally only when the
+      mailbox is empty. */
+    void ThreadSignalWait(double timeOutInSeconds);
 
     /*! Get the thread signal. Used by event receivers. */
     osaThreadSignal * GetThreadSignal(void);
