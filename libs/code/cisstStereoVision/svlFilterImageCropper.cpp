@@ -94,6 +94,16 @@ int svlFilterImageCropper::SetCenter(int x, int y, unsigned int videoch)
                      videoch);
 }
 
+int svlFilterImageCropper::SetCenter(int x, int y, int rx, int ry, unsigned int videoch)
+{
+    if (IsInitialized() ) {
+        return SetCenter(x, y, videoch);
+    }
+    else {
+        return SetRectangle(x - rx, y - ry, x + rx, y + ry, videoch);
+    }
+}
+
 int svlFilterImageCropper::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();

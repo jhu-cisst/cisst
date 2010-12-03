@@ -65,11 +65,17 @@ double svlFilterImageZoom::GetZoom(unsigned int videoch)
     return Zoom[videoch];
 }
 
-int svlFilterImageZoom::SetCenter(const int x, const int y, unsigned int videoch)
+int svlFilterImageZoom::SetCenter(int x, int y, unsigned int videoch)
 {
     if (videoch >= Center.size()) return SVL_FAIL;
     Center[videoch].Assign(x, y);
     return SVL_OK;
+}
+
+int svlFilterImageZoom::SetCenter(int x, int y, int CMN_UNUSED(rx), int CMN_UNUSED(ry), unsigned int videoch)
+{
+    // Ignore radii
+    return SetCenter(x, y, videoch);
 }
 
 int svlFilterImageZoom::GetCenter(int & x, int & y, unsigned int videoch)

@@ -40,6 +40,7 @@ public:
     int SetZoom(double zoom, unsigned int videoch = SVL_LEFT);
     double GetZoom(unsigned int videoch = SVL_LEFT);
     int SetCenter(int x, int y, unsigned int videoch = SVL_LEFT);
+    int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT);
     int GetCenter(int & x, int & y, unsigned int videoch = SVL_LEFT);
     void SetInterpolation(bool enable);
 
