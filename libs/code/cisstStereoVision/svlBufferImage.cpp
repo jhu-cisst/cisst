@@ -102,7 +102,7 @@ void svlBufferImage::Push()
     NewFrameEvent.Raise();
 }
 
-bool svlBufferImage::Push(unsigned char* buffer, unsigned int size, bool topdown)
+bool svlBufferImage::Push(const unsigned char* buffer, unsigned int size, bool topdown)
 {
     unsigned int datasize = Buffer[0].width() * Buffer[0].height();
     if (buffer == 0 || size < datasize) return false;
@@ -183,7 +183,7 @@ IplImage* svlBufferImage::PullIplImage(bool waitfornew, double timeout)
 }
 #endif // CISST_SVL_HAS_OPENCV
 
-bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, unsigned char *sourcebuffer)
+bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, const unsigned char *sourcebuffer)
 {
     if (targetbuffer == 0 ||
         sourcebuffer == 0) return false;
@@ -191,7 +191,7 @@ bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, unsigned char *sou
     const unsigned int linesize = Buffer[0].width();
     const unsigned int height = Buffer[0].height();
     unsigned char *tptr1 = targetbuffer;
-    unsigned char *tptr2 = sourcebuffer + linesize * (height - 1);
+    unsigned char *tptr2 = const_cast<unsigned char*>(sourcebuffer) + linesize * (height - 1);
 
     for (unsigned int i = 0; i < height; i ++) {
         memcpy(tptr1, tptr2, linesize);

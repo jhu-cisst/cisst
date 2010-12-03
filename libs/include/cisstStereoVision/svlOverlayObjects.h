@@ -32,6 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
+// Forward declarations
+class svlBufferImage;
+
+
 class CISST_EXPORT svlOverlay
 {
 friend class svlFilterImageOverlay;
@@ -152,6 +156,41 @@ private:
     bool ConfidenceColoring;
     bool Crosshair;
     unsigned int TargetSize;
+};
+
+
+class CISST_EXPORT svlOverlayStaticImage : public svlOverlay
+{
+public:
+    svlOverlayStaticImage();
+    svlOverlayStaticImage(unsigned int videoch,
+                          bool visible,
+                          const svlSampleImageRGB & image,
+                          vctInt2 pos,
+                          unsigned char alpha);
+    svlOverlayStaticImage(unsigned int videoch,
+                          bool visible,
+                          const svlSampleImageRGBStereo & image,
+                          unsigned int imagech,
+                          vctInt2 pos,
+                          unsigned char alpha);
+    virtual ~svlOverlayStaticImage();
+
+    void SetImage(const svlSampleImageRGB & image);
+    void SetImage(const svlSampleImageRGBStereo & image, unsigned int imagech);
+    void SetPosition(vctInt2 pos);
+    void SetAlpha(unsigned char alpha);
+
+    vctInt2 GetPosition() const;
+    unsigned char GetAlpha() const;
+
+protected:
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    svlBufferImage* Buffer;
+    vctInt2 Pos;
+    unsigned char Alpha;
 };
 
 

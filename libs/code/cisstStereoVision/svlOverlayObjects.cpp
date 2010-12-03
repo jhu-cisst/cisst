@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlOverlayObjects.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlBufferImage.h>
+
 
 /****************************/
 /*** svlOverlay class *******/
@@ -369,6 +371,167 @@ void svlOverlayTargets::DrawInternal(svlSampleImage* bgimage, svlSample* input)
                                    r, g, b);
             }
         }
+    }
+}
+
+
+/***************************************/
+/*** svlOverlayStaticImage class *******/
+/***************************************/
+
+svlOverlayStaticImage::svlOverlayStaticImage() :
+    svlOverlay(),
+    Buffer(0),
+    Pos(0, 0),
+    Alpha(255)
+{
+}
+
+svlOverlayStaticImage::svlOverlayStaticImage(unsigned int videoch,
+                                             bool visible,
+                                             const svlSampleImageRGB & image,
+                                             vctInt2 pos,
+                                             unsigned char alpha) :
+    svlOverlay(videoch, visible),
+    Buffer(0),
+    Pos(pos),
+    Alpha(alpha)
+{
+    SetImage(image);
+}
+
+svlOverlayStaticImage::svlOverlayStaticImage(unsigned int videoch,
+                                             bool visible,
+                                             const svlSampleImageRGBStereo & image,
+                                             unsigned int imagech,
+                                             vctInt2 pos,
+                                             unsigned char alpha) :
+    svlOverlay(videoch, visible),
+    Buffer(0),
+    Pos(pos),
+    Alpha(alpha)
+{
+    SetImage(image, imagech);
+}
+
+svlOverlayStaticImage::~svlOverlayStaticImage()
+{
+    if (Buffer) delete Buffer;
+}
+
+void svlOverlayStaticImage::SetImage(const svlSampleImageRGB & image)
+{
+    const unsigned int width  = image.GetWidth();
+    const unsigned int height = image.GetHeight();
+
+    if (Buffer) {
+        if (width != Buffer->GetWidth() || height != Buffer->GetHeight()) return;
+    }
+    else {
+        if (width < 1 || height < 1) return;
+        Buffer = new svlBufferImage(width, height);
+    }
+
+    Buffer->Push(image.GetUCharPointer(), image.GetDataSize(), false);
+}
+
+void svlOverlayStaticImage::SetImage(const svlSampleImageRGBStereo & image, unsigned int imagech)
+{
+    if (imagech >= image.GetVideoChannels()) return;
+
+    const unsigned int width  = image.GetWidth(imagech);
+    const unsigned int height = image.GetHeight(imagech);
+
+    if (Buffer) {
+        if (width != Buffer->GetWidth() || height != Buffer->GetHeight()) return;
+    }
+    else {
+        if (width < 1 || height < 1) return;
+        Buffer = new svlBufferImage(width, height);
+    }
+
+    Buffer->Push(image.GetUCharPointer(imagech), image.GetDataSize(imagech), false);
+}
+
+void svlOverlayStaticImage::SetPosition(vctInt2 pos)
+{
+    Pos = pos;
+}
+
+void svlOverlayStaticImage::SetAlpha(unsigned char alpha)
+{
+    Alpha = alpha;
+}
+
+vctInt2 svlOverlayStaticImage::GetPosition() const
+{
+    return Pos;
+}
+
+unsigned char svlOverlayStaticImage::GetAlpha() const
+{
+    return Alpha;
+}
+
+void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
+{
+    if (!Buffer) return;
+
+    svlImageRGB* ovrlimage = Buffer->Pull(false);
+    if (!ovrlimage) return;
+
+    int i, ws, hs, wo, ho, xs, ys, xo, yo, copylen, linecount;
+
+    // Prepare for data copy
+    ws = static_cast<int>(bgimage->GetWidth(VideoCh) * 3);
+    hs = static_cast<int>(bgimage->GetHeight(VideoCh));
+    wo = static_cast<int>(ovrlimage->cols());
+    ho = static_cast<int>(ovrlimage->rows());
+
+    copylen = wo;
+    linecount = ho;
+    xs = Pos.X() * 3;
+    ys = Pos.Y();
+    xo = yo = 0;
+
+    // If overlay position reaches out of the background on the left
+    if (xs < 0) {
+        copylen += xs;
+        xo -= xs;
+        xs = 0;
+    }
+    // If overlay position reaches out of the background on the right
+    if ((xs + copylen) > ws) {
+        copylen += ws - (xs + copylen);
+    }
+    // If overlay is outside the background boundaries
+    if (copylen <= 0) return;
+    
+    // If overlay position reaches out of the background on the top
+    if (ys < 0) {
+        linecount += ys;
+        yo -= ys;
+        ys = 0;
+    }
+    // If overlay position reaches out of the background on the bottom
+    if ((ys + linecount) > hs) {
+        linecount += hs - (ys + linecount);
+    }
+    // If overlay is outside the background boundaries
+    if (linecount <= 0) return;
+
+    unsigned char *bgdata = bgimage->GetUCharPointer(VideoCh) + (ys * ws) + xs;
+    unsigned char *ovrldata = ovrlimage->Pointer() + (yo * wo) + xo;
+
+    if (Alpha == 255) {
+        for (i = 0; i < linecount; i ++) {
+            memcpy(bgdata, ovrldata, copylen);
+            bgdata += ws;
+            ovrldata += wo;
+        }
+    }
+    else {
+        // TO DO
     }
 }
 

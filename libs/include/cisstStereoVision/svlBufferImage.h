@@ -44,7 +44,7 @@ public:
     unsigned char* GetPushBuffer();
     unsigned char* GetPushBuffer(unsigned int& size);
     void Push();
-    bool Push(unsigned char* buffer, unsigned int size, bool topdown);
+    bool Push(const unsigned char* buffer, unsigned int size, bool topdown);
 #if CISST_SVL_HAS_OPENCV
     bool PushIplImage(IplImage* image);
 #endif // CISST_SVL_HAS_OPENCV
@@ -73,7 +73,7 @@ private:
     osaCriticalSection CS;
 #endif
 
-    bool TopDownCopy(unsigned char *targetbuffer, unsigned char *sourcebuffer);
+    bool TopDownCopy(unsigned char *targetbuffer, const unsigned char *sourcebuffer);
 };
 
 
