@@ -1677,7 +1677,8 @@ void mtsManagerLocal::GetIPAddressList(std::vector<std::string> & ipAddresses)
 
 bool mtsManagerLocal::Connect(
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+    const unsigned int retryCount)
 {
     // Prevent this method from being used to connect two local interfaces
     if (clientProcessName == serverProcessName) {
@@ -1724,21 +1725,20 @@ bool mtsManagerLocal::Connect(
     // to 10 seconds.
     //
     // An example of the bi-directional connection:
-    // component A has a required interface that connects to component B's
-    // provided interface and the component B also has a required interface that
-    // needs to connect to component A's provided interface.
-    const unsigned int maxRetryCount = 10;
-    unsigned int retryCount = 1;
+    // The component A has a required interface that connects to a provided interface in
+    // the component B and the component B also has a required interface that
+    // needs to connect to a provided interface in the component A.
+    unsigned int count = 1;
     int connectionID;
 
-    while (retryCount <= maxRetryCount) {
+    while (count <= retryCount) {
         // Inform the global component manager of a new connection being established.
         connectionID = ManagerGlobal->Connect(this->ProcessName,
             clientProcessName, clientComponentName, clientInterfaceRequiredName,
             serverProcessName, serverComponentName, serverInterfaceProvidedName);
         if (connectionID == -1) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: Waiting for connection to be established.... Retrying "
-                << retryCount++ << "/" << maxRetryCount << std::endl;
+                << count++ << "/" << retryCount << std::endl;
             osaSleep(1 * cmn_s);
         } else {
             break;
@@ -2487,10 +2487,6 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     std::string serverEndpointInfo;
     mtsComponentProxy * clientComponentProxy;
 
-    int numTrial = 0;
-    const int maxTrial = 10;
-    const double sleepTime = 200 * cmn_ms;
-
     // Get component proxy object. Note that this process is a server process
     // and the client component is a proxy, not an original component.
     const std::string clientComponentProxyName = mtsManagerGlobal::GetComponentProxyName(clientProcessName, clientComponentName);
@@ -2511,9 +2507,12 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     // access information to the global component manager, and thus access
     // information is not readily available.  To handle such a case, a required
     // interface proxy client tries fetching the information from the global
-    // component manager for five times.  After these trials without success,
-    // this method returns false, resulting in disconnecting and cleaning up the
-    // current pending connection.
+    // component manager for maxTrial times defined below.  After these trials 
+    // without success, this method returns false, resulting in disconnection and
+    // cleaning up the current connection which is not yet established.
+    int numTrial = 0;
+    const int maxTrial = 10;
+    const double sleepTime = 200 * cmn_ms;
 
     // Fecth proxy server's access information from the GCM
     while (++numTrial <= maxTrial) {
