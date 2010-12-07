@@ -2461,6 +2461,10 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     // -- one inteface is an original interface and the other one is a proxy
     // interface -- at server side.
 
+    int numTrial = 0;
+    const int maxTrial = 10;
+    const double sleepTime = 200 * cmn_ms;
+
     // Make sure that this is a server process.
     if (this->ProcessName != serverProcessName) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectServerSideInterface: this is not the server process: " << serverProcessName << std::endl;
