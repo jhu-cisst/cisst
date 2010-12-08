@@ -33,13 +33,14 @@ using namespace std;
 
 int VideoPlayer(std::string pathname)
 {
+    pathname = "/Users/vagvoba/Code/visr/experiment1/final/u1_video.avi";
+
     svlInitialize();
 
     // instantiating SVL stream and filters
     svlStreamManager stream(1);
     svlFilterSourceVideoFile source(1);
     svlFilterImageOverlay overlay;
-    svlFilterImageConvolution convolution;
     svlFilterImageWindow window;
 
     // setup overlay
@@ -72,8 +73,7 @@ int VideoPlayer(std::string pathname)
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
     source.GetOutput()->Connect(overlay.GetInput());
-    overlay.GetOutput()->Connect(convolution.GetInput());
-    convolution.GetOutput()->Connect(window.GetInput());
+    overlay.GetOutput()->Connect(window.GetInput());
 
     cerr << endl << "Starting stream... ";
 

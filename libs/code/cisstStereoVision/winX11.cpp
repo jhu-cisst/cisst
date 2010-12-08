@@ -59,6 +59,7 @@ CX11WindowManager::CX11WindowManager(unsigned int numofwins) : CWindowManagerBas
     RButtonDown = false;
     DestroyFlag = false;
     DestroyedSignal = 0;
+    ImageCounter = 0;
     xScreen = 0;
     xDisplay = 0;
     xWindows = 0;
