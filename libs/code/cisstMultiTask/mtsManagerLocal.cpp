@@ -1729,7 +1729,7 @@ bool mtsManagerLocal::Connect(
     // the component B and the component B also has a required interface that
     // needs to connect to a provided interface in the component A.
     unsigned int count = 1;
-    int connectionID;
+    int connectionID = -1;
 
     while (count <= retryCount) {
         // Inform the global component manager of a new connection being established.
@@ -2514,9 +2514,7 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     // component manager for maxTrial times defined below.  After these trials 
     // without success, this method returns false, resulting in disconnection and
     // cleaning up the current connection which is not yet established.
-    int numTrial = 0;
-    const int maxTrial = 10;
-    const double sleepTime = 200 * cmn_ms;
+
 
     // Fecth proxy server's access information from the GCM
     while (++numTrial <= maxTrial) {
