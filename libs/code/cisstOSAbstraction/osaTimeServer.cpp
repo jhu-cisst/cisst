@@ -446,3 +446,8 @@ double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
     return answer;
 }
 
+double osaAbsoluteTime::ToSeconds(void) const
+{
+    return static_cast<double>(sec)+static_cast<double>(nsec)*cmn_ns;
+}
+

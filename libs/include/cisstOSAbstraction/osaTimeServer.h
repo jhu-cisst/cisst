@@ -37,6 +37,9 @@ http://www.cisst.org/cisst/license.txt.
 struct osaAbsoluteTime {
     long sec;   // seconds
     long nsec;  // nano-seconds
+
+    /*! Returns absolute time in seconds relative to Jan 1, 1970. */
+    double ToSeconds(void) const;
 };
 
 /*!
