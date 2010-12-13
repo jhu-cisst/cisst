@@ -182,7 +182,7 @@ function (cisst_target_link_libraries TARGET ...)
   foreach (required ${REQUIRED_CISST_LIBRARIES})
     if ("${CISST_LIBRARIES}"  MATCHES ${required})
     else ("${CISST_LIBRARIES}"  MATCHES ${required})
-      message ("${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+      message (SEND_ERROR "${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
     endif ("${CISST_LIBRARIES}"  MATCHES ${required})
   endforeach (required)
 
@@ -355,7 +355,7 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
 
   # create variable to store all generated files names
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_CG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
-  
+
 endfunction (cisst_component_generator)
 
 
@@ -411,7 +411,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
 
   # create variable to store all generated files names
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
-  
+
 endfunction (cisst_data_generator)
 
 
@@ -539,7 +539,7 @@ MACRO(CISST_REQUIRES WHO_REQUIRES REQUIRED_CISST_LIBRARIES)
    FOREACH(required ${REQUIRED_CISST_LIBRARIES})
      IF("${CISST_LIBRARIES}"  MATCHES ${required})
      ELSE("${CISST_LIBRARIES}"  MATCHES ${required})
-       MESSAGE("${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+       MESSAGE(SEND_ERROR "${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
      ENDIF("${CISST_LIBRARIES}"  MATCHES ${required})
    ENDFOREACH(required)
 
