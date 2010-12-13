@@ -13,14 +13,9 @@
 #
 # --- end cisst license ---
 
-
-project (cisstTests)
-
-
 # Set the ouptut path for the libraries and executables
-set (LIBRARY_OUTPUT_PATH ${cisstTests_BINARY_DIR}/lib)
-set (EXECUTABLE_OUTPUT_PATH ${cisstTests_BINARY_DIR}/bin)
-
+set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
+set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 # Load CppUnit stuff
 include (${cisst_SOURCE_DIR}/libs/cmake/FindCppUnit.cmake)
@@ -29,38 +24,37 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 link_libraries (optimized ${CPPUNIT_LIBRARIES}
                 debug ${CPPUNIT_DEBUG_LIBRARIES})
 
-
 # Which tests to build based on which libraries have been compiled
 foreach (lib ${CISST_LIBRARIES})
   # Test if the directory exists
-  if (EXISTS ${cisstTests_SOURCE_DIR}/${lib})
-    # Build by default
+  if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
+    # Build by default and mark as advanced
     option (BUILD_TESTS_${lib} "Build ${lib} tests." ON)
-  endif (EXISTS ${cisstTests_SOURCE_DIR}/${lib})
+    mark_as_advanced (BUILD_TESTS_${lib})
+  endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
 endforeach (lib)
 
 # Generate tests for wrapped libraries
 if (CISST_HAS_SWIG_PYTHON)
   option (BUILD_TESTS_wrapping "Build wrapping tests." ON)
+  mark_as_advanced (BUILD_TESTS_wrapping)
 endif (CISST_HAS_SWIG_PYTHON)
-
 
 # Create the main library
 set (CISST_TESTS_MAIN_SRC
-     ${cisstTests_SOURCE_DIR}/code/cisstTestMain.cpp
-     ${cisstTests_SOURCE_DIR}/code/cisstTestParameters.cpp
-     ${cisstTests_SOURCE_DIR}/code/cisstTestParameters.h)
+     ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestMain.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestParameters.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestParameters.h)
 add_library (cisstTestsMain STATIC ${CISST_TESTS_MAIN_SRC})
-
 
 # Configure the OS test program
 get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
 get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
-configure_file (${cisstTests_SOURCE_DIR}/cisstCommon/cmnPortabilityTestCMake.h.in
-                ${cisstTests_BINARY_DIR}/include/cmnPortabilityTestCMake.h
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstCommon/cmnPortabilityTestCMake.h.in
+                ${CMAKE_CURRENT_BINARY_DIR}/include/cmnPortabilityTestCMake.h
                 @ONLY@)
 # Add the path for the includes
-include_directories (${cisstTests_BINARY_DIR}/include)
+include_directories (${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Create targets for each test
 # Build in each subdir
@@ -88,7 +82,6 @@ if (BUILD_TESTS_wrapping)
 endif (BUILD_TESTS_wrapping)
 
 # For other libraries using the same testing framework
-configure_file (${cisstTests_SOURCE_DIR}/cmake/cisstTestsBuild.cmake.in
-                ${cisstTests_BINARY_DIR}/cisstTestsBuild.cmake
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmake/cisstTestsBuild.cmake.in
+                ${CMAKE_CURRENT_BINARY_DIR}/cisstTestsBuild.cmake
                 @ONLY)
-
