@@ -58,7 +58,8 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyAngleHigh(__PI),
     RigidBodyScaleLow(0.01),
     RigidBodyScaleHigh(100.0),
-    Iterations(1)
+    Iterations(1),
+    WarpedImage(0)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -72,6 +73,9 @@ svlFilterImageTracker::svlFilterImageTracker() :
 
     AddOutput("targets", false);
     SetOutputType("targets", svlTypeTargets);
+
+    AddOutput("warpedimage", false);
+    SetOutputType("warpedimage", svlTypeImageRGB);
 
     Trackers.SetSize(SVL_MAX_CHANNELS);
     Trackers.SetAll(0);
@@ -174,7 +178,21 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
 
     if (RigidBody) {
         RigidBodyAngle.SetSize(VideoChannels);
+        RigidBodyAngle.SetAll(0.0);
         RigidBodyScale.SetSize(VideoChannels);
+        RigidBodyScale.SetAll(1.0);
+
+        WarpedRigidBodyAngle.SetSize(VideoChannels);
+        WarpedRigidBodyAngle.SetAll(0.0);
+        WarpedRigidBodyScale.SetSize(VideoChannels);
+        WarpedRigidBodyScale.SetAll(1.0);
+        WarpInternals.SetSize(VideoChannels);
+
+        WarpedImage = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
+        if (!WarpedImage) return SVL_FAIL;
+        WarpedImage->SetSize(syncInput);
+        WarpedImage->SetTimestamp(syncInput->GetTimestamp());
+        GetOutput("warpedimage")->SetupSample(WarpedImage);
     }
 
     syncOutput = syncInput;
@@ -269,6 +287,12 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         // Region of interest might change at run-time
         Trackers[vch]->SetROI(ROI[vch]);
 
+        if (RigidBody) {
+            // Warp input image from last estimated pose
+            WarpImage(img, vch);
+            img = WarpedImage;
+        }
+
         // Processing data
         Trackers[vch]->PreProcessImage(*img, vch);
         for (i = 0; i < Iterations; i ++) {
@@ -319,7 +343,20 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             }
         }
 
-        GetOutput("targets")->PushSample(&OutputTargets);
+        // Pushing samples to async outputs
+        svlFilterOutput* output;
+        double ts = syncInput->GetTimestamp();
+
+        output = GetOutput("targets");
+        if (output) {
+            OutputTargets.SetTimestamp(ts);
+            output->PushSample(&OutputTargets);
+        }
+        output = GetOutput("warpedimage");
+        if (output) {
+            WarpedImage->SetTimestamp(ts);
+            output->PushSample(WarpedImage);
+        }
     }
 
     return SVL_OK;
@@ -329,6 +366,10 @@ int svlFilterImageTracker::Release()
 {
     for (unsigned int i = 0; i < Trackers.size(); i ++) {
         if (Trackers[i]) Trackers[i]->Release();
+    }
+    if (WarpedImage) {
+        delete WarpedImage;
+        WarpedImage = 0;
     }
     return SVL_OK;
 }
@@ -419,19 +460,69 @@ void svlFilterImageTracker::ReconstructRigidBody()
             target = Targets.Pointer(j, i);
 
             if (target->used) {
+                vx = proto_pos.Element(0, i) - proto_ax;
+                vy = proto_pos.Element(1, i) - proto_ay;
+
+                target->pos.x = ax + vx;
+                target->pos.y = ay + vy;
+
+                if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
 
                 angle2 = cos(angle);
                 angle3 = sin(angle);
-                vx = proto_pos.Element(0, i) - proto_ax;
-                vy = proto_pos.Element(1, i) - proto_ay;
 
                 target->pos.x = static_cast<int>(ax + scale * (vx * angle2 - vy * angle3));
                 target->pos.y = static_cast<int>(ay + scale * (vx * angle3 + vy * angle2));
 
-                if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
+//                if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
             }
         }
     }
+}
+
+void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch)
+{
+    WarpedRigidBodyAngle[videoch] -= RigidBodyAngle[videoch];
+    WarpedRigidBodyScale[videoch] /= RigidBodyScale[videoch];
+
+    double c = cos(WarpedRigidBodyAngle[videoch]);
+    double s = sin(WarpedRigidBodyAngle[videoch]);
+    double sc = WarpedRigidBodyScale[videoch];
+
+    const int border = 50;
+
+    const int x1 = ROI[videoch].left - border;
+    const int y1 = ROI[videoch].top - border;
+    const int x2 = ROI[videoch].right + border;
+    const int y2 = y1;
+    const int x3 = x2;
+    const int y3 = ROI[videoch].bottom + border;
+    const int x4 = x1;
+    const int y4 = y3;
+
+    const int cx = (x1 + x2 + x3 + x4) / 4;
+    const int cy = (y1 + y2 + y3 + y4) / 4;
+
+    const int wx1 = static_cast<int>(sc * (c * (x1 - cx) - s * (y1 - cy))) + cx;
+    const int wy1 = static_cast<int>(sc * (s * (x1 - cx) + c * (y1 - cy))) + cy;
+    const int wx2 = static_cast<int>(sc * (c * (x2 - cx) - s * (y2 - cy))) + cx;
+    const int wy2 = static_cast<int>(sc * (s * (x2 - cx) + c * (y2 - cy))) + cy;
+    const int wx3 = static_cast<int>(sc * (c * (x3 - cx) - s * (y3 - cy))) + cx;
+    const int wy3 = static_cast<int>(sc * (s * (x3 - cx) + c * (y3 - cy))) + cy;
+    const int wx4 = static_cast<int>(sc * (c * (x4 - cx) - s * (y4 - cy))) + cx;
+    const int wy4 = static_cast<int>(sc * (s * (x4 - cx) + c * (y4 - cy))) + cy;
+
+    memset(WarpedImage->GetUCharPointer(videoch), 0, WarpedImage->GetDataSize(videoch));
+
+    svlTriangle tri_in, tri_out;
+
+    tri_in.Assign(x1, y1, x3, y3, x4, y4);
+    tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
+    svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
+
+    tri_in.Assign(x1, y1, x2, y2, x3, y3);
+    tri_out.Assign(wx1, wy1, wx2, wy2, wx3, wy3);
+    svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
 }
 
 

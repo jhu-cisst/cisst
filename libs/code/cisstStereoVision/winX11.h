@@ -35,11 +35,11 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_SVL_HAS_XV
 
 
-class CX11WindowManager : public CWindowManagerBase
+class svlWindowManagerX11 : public svlWindowManagerBase
 {
 public:
-    CX11WindowManager(unsigned int numofwins);
-    ~CX11WindowManager();
+    svlWindowManagerX11(unsigned int numofwins);
+    ~svlWindowManagerX11();
 
     // method overrides
     int DoModal(bool show, bool fullscreen);

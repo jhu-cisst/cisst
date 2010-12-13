@@ -35,11 +35,11 @@ svlRect::svlRect() :
 {
 }
 
-svlRect::svlRect(int left, int top, int right, int bottom) :
-    left(left),
-    top(top),
-    right(right),
-    bottom(bottom)
+svlRect::svlRect(int _left, int _top, int _right, int _bottom) :
+    left(_left),
+    top(_top),
+    right(_right),
+    bottom(_bottom)
 {
 }
 
@@ -87,6 +87,51 @@ void svlRect::Trim(int minx, int maxx, int miny, int maxy)
 }
 
 
+/*************************/
+/*** svlTriangle class ***/
+/*************************/
+
+svlTriangle::svlTriangle() :
+    x1(0),
+    y1(0),
+    x2(0),
+    y2(0),
+    x3(0),
+    y3(0)
+{
+}
+
+svlTriangle::svlTriangle(int _x1, int _y1, int _x2, int _y2, int _x3, int _y3) :
+    x1(_x1),
+    y1(_y1),
+    x2(_x2),
+    y2(_y2),
+    x3(_x3),
+    y3(_y3)
+{
+}
+
+void svlTriangle::Assign(const svlTriangle & triangle)
+{
+    x1 = triangle.x1;
+    y1 = triangle.y1;
+    x2 = triangle.x2;
+    y2 = triangle.y2;
+    x3 = triangle.x3;
+    y3 = triangle.y3;
+}
+
+void svlTriangle::Assign(int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    this->x1 = x1;
+    this->y1 = y1;
+    this->x2 = x2;
+    this->y2 = y2;
+    this->x3 = x3;
+    this->y3 = y3;
+}
+
+
 /************************/
 /*** svlPoint2D class ***/
 /************************/
@@ -97,10 +142,10 @@ svlPoint2D::svlPoint2D() :
 {
 }
 
-svlPoint2D::svlPoint2D(int x, int y)
+svlPoint2D::svlPoint2D(int _x, int _y) :
+    x(_x),
+    y(_y)
 {
-    svlPoint2D::x = x;
-    svlPoint2D::y = y;
 }
 
 void svlPoint2D::Assign(const svlPoint2D & point)
@@ -111,8 +156,8 @@ void svlPoint2D::Assign(const svlPoint2D & point)
 
 void svlPoint2D::Assign(int x, int y)
 {
-    svlPoint2D::x = x;
-    svlPoint2D::y = y;
+    this->x = x;
+    this->y = y;
 }
 
 

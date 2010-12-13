@@ -108,7 +108,7 @@ private:
 
 int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 {
-    bool showgrid = true;
+    bool showgrid = false;
 
     svlInitialize();
 
@@ -119,9 +119,11 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlFilterImageTracker tracker;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
+    svlFilterImageWindow window2;
 
     // setup source
-    source.DialogFilePath();
+//    source.DialogFilePath();
+    source.SetFilePath("crop2.avi");
 
     centerfinder.AddReceiver(&cropper);
     centerfinder.SetMask(false);
@@ -131,19 +133,19 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     // setup tracker
     svlTrackerMSBruteForce trackeralgo;
     trackeralgo.SetParameters(svlNCC, // metric
-                              8,      // template radius
-                              50,     // search radius
-                              4,      // number of scales
+                              15,     // template radius
+                              20,     // search radius
+                              3,      // number of scales
                               0, 0.0);
     tracker.SetMovingAverageSmoothing(0.0);
     tracker.SetIterations(1);
     tracker.SetRigidBody(true);
-    tracker.SetRigidBodyConstraints(-0.4, 0.4, 0.9, 1.1);
+    tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
     tracker.SetTracker(trackeralgo);
     tracker.SetROI(100, 100, 300, 300);
 
     const int radius = 40;
-    const int distance = 10;
+    const int distance = 15;
 
     const int targetcount = (radius * 2 + 1) * (radius * 2 + 1);
     svlSampleTargets targets;
@@ -203,6 +205,8 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
                                             svlRGB(0, 128, 0));
     overlay.AddOverlay(tracker_fps_overlay);
 
+    overlay.AddQueuedItems();
+
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
     source.GetOutput()->Connect(centerfinder.GetInput());
@@ -210,6 +214,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     cropper.GetOutput()->Connect(tracker.GetInput());
     tracker.GetOutput()->Connect(overlay.GetInput());
     overlay.GetOutput()->Connect(window.GetInput());
+    tracker.GetOutput("warpedimage")->Connect(window2.GetInput());
 
     tracker.GetOutput("targets")->Connect(bgtracker.GetInput());
     bgtracker.GetOutput()->Connect(overlay.GetInput("targets"));

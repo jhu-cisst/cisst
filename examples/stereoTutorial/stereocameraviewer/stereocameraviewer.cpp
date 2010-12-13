@@ -27,15 +27,15 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
-///////////////////////////////////
-//     Window callback class     //
-///////////////////////////////////
+////////////////////////////////////////
+//     Window event handler class     //
+////////////////////////////////////////
 
-class CViewerWindowCallback : public svlImageWindowCallbackBase
+class CViewerEventHandler : public svlWindowEventHandlerBase
 {
 public:
-    CViewerWindowCallback() :
-        svlImageWindowCallbackBase()
+    CViewerEventHandler() :
+        svlWindowEventHandlerBase()
 		,AdjustmentsEnabled(false)
 		,MousePressed(false)
 		,OffsetX(0)
@@ -185,7 +185,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     svlFilterImageWindow window;
     svlFilterImageOverlay overlay;
     svlFilterStereoImageJoiner joiner;
-    CViewerWindowCallback window_cb;
+    CViewerEventHandler window_eh;
     svlFilterImageFileWriter imagewriter;
     svlFilterVideoFileWriter videowriter;
 
@@ -249,14 +249,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     }
 
     // setup image window
-    window_cb.ImageWriterFilter = &imagewriter;
-	window_cb.ImageShifter = &shifter;
-    window_cb.Gamma = &gamma;
+    window_eh.ImageWriterFilter = &imagewriter;
+	window_eh.ImageShifter = &shifter;
+    window_eh.Gamma = &gamma;
     if (save == true) {
-        window_cb.VideoWriterFilter = &videowriter;
-        window_cb.SplitterOutput = splitteroutput;
+        window_eh.VideoWriterFilter = &videowriter;
+        window_eh.SplitterOutput = splitteroutput;
     }
-    window.SetEventHandler(&window_cb);
+    window.SetEventHandler(&window_eh);
     window.SetTitle("Camera Viewer");
 	if (fullscreen >= 0) {
 		window.SetFullScreen(true);

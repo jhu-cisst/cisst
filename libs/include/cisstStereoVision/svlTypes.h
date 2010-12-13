@@ -93,6 +93,21 @@ struct CISST_EXPORT svlRect
     int bottom;
 };
 
+struct CISST_EXPORT svlTriangle
+{
+    svlTriangle();
+    svlTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
+    void Assign(const svlTriangle & triangle);
+    void Assign(int x1, int y1, int x2, int y2, int x3, int y3);
+
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int x3;
+    int y3;
+};
+
 struct CISST_EXPORT svlPoint2D
 {
     svlPoint2D();

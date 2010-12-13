@@ -27,15 +27,15 @@
 using namespace std;
 
 
-///////////////////////////////////
-//     Window callback class     //
-///////////////////////////////////
+////////////////////////////////////////
+//     Window event handler class     //
+////////////////////////////////////////
 
-class CViewerWindowCallback : public svlImageWindowCallbackBase
+class CViewerEventHandler : public svlWindowEventHandlerBase
 {
 public:
-    CViewerWindowCallback() :
-    svlImageWindowCallbackBase()
+    CViewerEventHandler() :
+    svlWindowEventHandlerBase()
     ,AdjustmentsEnabled(false)
     ,MousePressed(false)
     ,OffsetX(0)
@@ -152,7 +152,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     svlFilterImageWindow window;
     svlFilterImageOverlay overlay;
     svlFilterStereoImageJoiner joiner;
-    CViewerWindowCallback window_cb;
+    CViewerEventHandler window_eh;
 
     // Add timestamp overlay
     svlOverlayTimestamp ts_overlay(SVL_LEFT,               // background video channel
@@ -204,9 +204,9 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     }
 
     // setup image window
-    window_cb.Gamma = &gamma;
-    window_cb.ImageShifter = &shifter;
-    window.SetEventHandler(&window_cb);
+    window_eh.Gamma = &gamma;
+    window_eh.ImageShifter = &shifter;
+    window.SetEventHandler(&window_eh);
     window.SetTitle("Camera Viewer");
 	if (fullscreen >= 0) {
         window.SetFullScreen(true);

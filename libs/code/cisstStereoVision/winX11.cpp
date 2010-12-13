@@ -49,11 +49,11 @@ http://www.cisst.org/cisst/license.txt.
 #define MWM_DECOR_MAXIMIZE      (1L << 6)
 
 
-/*************************************/
-/*** CX11WindowManager class *********/
-/*************************************/
+/*********************************/
+/*** svlWindowManagerX11 class ***/
+/*********************************/
 
-CX11WindowManager::CX11WindowManager(unsigned int numofwins) : CWindowManagerBase(numofwins)
+svlWindowManagerX11::svlWindowManagerX11(unsigned int numofwins) : svlWindowManagerBase(numofwins)
 {
     LButtonDown = false;
     RButtonDown = false;
@@ -77,12 +77,12 @@ CX11WindowManager::CX11WindowManager(unsigned int numofwins) : CWindowManagerBas
 #endif // CISST_SVL_HAS_XV
 }
 
-CX11WindowManager::~CX11WindowManager()
+svlWindowManagerX11::~svlWindowManagerX11()
 {
     Destroy();
 }
 
-int CX11WindowManager::DoModal(bool show, bool fullscreen)
+int svlWindowManagerX11::DoModal(bool show, bool fullscreen)
 {
     Destroy();
     DestroyFlag = false;
@@ -590,7 +590,7 @@ labError:
     return 0;
 }
 
-void CX11WindowManager::Show(bool show, int winid)
+void svlWindowManagerX11::Show(bool show, int winid)
 {
     if (xDisplay && xWindows && winid < static_cast<int>(NumOfWins)) {
         if (winid < 0)
@@ -605,17 +605,17 @@ void CX11WindowManager::Show(bool show, int winid)
     }
 }
 
-void CX11WindowManager::LockBuffers()
+void svlWindowManagerX11::LockBuffers()
 {
     csImage.Enter();
 }
 
-void CX11WindowManager::UnlockBuffers()
+void svlWindowManagerX11::UnlockBuffers()
 {
     csImage.Leave();
 }
 
-void CX11WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid)
+void svlWindowManagerX11::SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid)
 {
     if (xDisplay == 0 || buffer == 0 || winid >= NumOfWins) return;
 
@@ -655,13 +655,13 @@ void CX11WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffe
 #endif // CISST_SVL_HAS_XV
 }
 
-void CX11WindowManager::DrawImages()
+void svlWindowManagerX11::DrawImages()
 {
     ImageCounter ++;
     signalImage.Raise();
 }
 
-void CX11WindowManager::Destroy()
+void svlWindowManagerX11::Destroy()
 {
     DestroyFlag = true;
 
@@ -672,7 +672,7 @@ void CX11WindowManager::Destroy()
     }
 }
 
-void CX11WindowManager::DestroyThreadSafe()
+void svlWindowManagerX11::DestroyThreadSafe()
 {
     Destroy();
 }

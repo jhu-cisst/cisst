@@ -30,18 +30,18 @@ http://www.cisst.org/cisst/license.txt.
 
 
 // Forward declarations
-class CWindowManagerBase;
+class svlWindowManagerBase;
 class osaThread;
 class osaThreadSignal;
 
 
-class CISST_EXPORT svlImageWindowCallbackBase
+class CISST_EXPORT svlWindowEventHandlerBase
 {
-friend class CWindowManagerBase;
+friend class svlWindowManagerBase;
 friend class svlFilterImageWindow;
 
 public:
-    virtual ~svlImageWindowCallbackBase();
+    virtual ~svlWindowEventHandlerBase();
 
 protected:
     virtual void OnNewFrame(unsigned int frameid);
@@ -56,12 +56,12 @@ private:
     void SetMousePos(int x, int y);
 };
 
-class CISST_EXPORT CWindowManagerBase
+class CISST_EXPORT svlWindowManagerBase
 {
 public:
-    CWindowManagerBase(unsigned int numofwins);
-    virtual ~CWindowManagerBase();
-    void SetCallback(svlImageWindowCallbackBase* callback);
+    svlWindowManagerBase(unsigned int numofwins);
+    virtual ~svlWindowManagerBase();
+    void SetEventHandler(svlWindowEventHandlerBase* handler);
     void SetTitleText(const std::string title);
     void SetTimestamp(double timestamp);
     int SetClientSize(unsigned int width, unsigned int height, unsigned int winid);
@@ -85,7 +85,7 @@ protected:
     unsigned int NumOfWins;
     unsigned int *Width, *Height;
     int *PosX, *PosY;
-    svlImageWindowCallbackBase* EventHandler;
+    svlWindowEventHandlerBase* EventHandler;
     osaThreadSignal *InitReadySignal;
 
     void OnNewFrame(unsigned int frameid);
@@ -95,14 +95,14 @@ protected:
 };
 
 
-class CWindowManagerThreadProc;
+class svlWindowManagerThreadProc;
 
 
 class CISST_EXPORT svlFilterImageWindow : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class CWindowManagerThreadProc;
+    friend class svlWindowManagerThreadProc;
 
 public:
     svlFilterImageWindow();
@@ -110,17 +110,12 @@ public:
 
     virtual int SetPosition(const int x, const int y, const unsigned int videoch = SVL_LEFT);
     virtual int GetPosition(int & x, int & y, unsigned int videoch = SVL_LEFT) const;
-    virtual void SetEventHandler(svlImageWindowCallbackBase* handler);
+    virtual void SetEventHandler(svlWindowEventHandlerBase* handler);
 
     virtual void SetFullScreen(const bool & fullscreen);
     virtual void SetTitle(const std::string & title);
     virtual void GetFullScreen(bool & fullscreen) const;
     virtual void GetTitle(std::string & title) const;
-
-    // Deprecated methods: replace them with their corresponding new versions above
-    virtual CISST_DEPRECATED int SetWindowPosition(const int x, const int y, const unsigned int videoch = SVL_LEFT);
-    virtual CISST_DEPRECATED void SetTitleText(const std::string & title);
-    virtual CISST_DEPRECATED void SetCallback(svlImageWindowCallbackBase* callback);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -133,11 +128,11 @@ private:
     int PosX[2], PosY[2];
     std::string Title;
     osaThread* Thread;
-    CWindowManagerThreadProc* ThreadProc;
+    svlWindowManagerThreadProc* ThreadProc;
     bool StopThread;
 
-    CWindowManagerBase* WindowManager;
-    svlImageWindowCallbackBase* EventHandler;
+    svlWindowManagerBase* WindowManager;
+    svlWindowEventHandlerBase* EventHandler;
 
 protected:
     virtual void CreateInterfaces();
@@ -148,11 +143,11 @@ protected:
 };
 
 
-class CISST_EXPORT CWindowManagerThreadProc
+class CISST_EXPORT svlWindowManagerThreadProc
 {
 public:
-    CWindowManagerThreadProc() {}
-    ~CWindowManagerThreadProc() {}
+    svlWindowManagerThreadProc() {}
+    ~svlWindowManagerThreadProc() {}
     void* Proc(svlFilterImageWindow* obj);
 };
 

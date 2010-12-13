@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterImageWindowTargetSelect : public svlImageWindowCallbackBase, public svlFilterImageWindow
+class CISST_EXPORT svlFilterImageWindowTargetSelect : public svlWindowEventHandlerBase, public svlFilterImageWindow
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -46,11 +46,8 @@ public:
 
 protected:
     virtual void SetFullScreen(const bool & fullscreen);
-    virtual void SetEventHandler(svlImageWindowCallbackBase* handler);
+    virtual void SetEventHandler(svlWindowEventHandlerBase* handler);
     virtual void GetFullScreen(bool & fullscreen) const;
-
-    // Deprecated methods
-    virtual CISST_DEPRECATED void SetCallback(svlImageWindowCallbackBase* callback);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);

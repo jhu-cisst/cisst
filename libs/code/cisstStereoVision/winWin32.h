@@ -28,11 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <windows.h>
 
-class CWin32Window
+class svlWindowWin32
 {
 public:
-    CWin32Window(unsigned int id);
-    virtual ~CWin32Window();
+    svlWindowWin32(unsigned int id);
+    virtual ~svlWindowWin32();
 
     virtual int Create(unsigned int width, unsigned int height, bool show,
                        const std::string title, int titleid = -1,
@@ -52,11 +52,11 @@ private:
     int ClientOffsetY;
 };
 
-class CWin32WindowManager : public CWindowManagerBase
+class svlWindowManagerWin32 : public svlWindowManagerBase
 {
 public:
-    CWin32WindowManager(unsigned int numofwins);
-    ~CWin32WindowManager();
+    svlWindowManagerWin32(unsigned int numofwins);
+    ~svlWindowManagerWin32();
 
     int DoModal(bool show, bool fullscreen);
     void Show(bool show, int winid);
@@ -71,7 +71,7 @@ public:
 private:
     bool LButtonDown;
     bool RButtonDown;
-    CWin32Window** Windows;
+    svlWindowWin32** Windows;
     HWND* WindowHandles;
     unsigned int* LineSize;
     unsigned int* Padding;

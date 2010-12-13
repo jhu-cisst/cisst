@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageTracker_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlDraw.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -61,6 +62,7 @@ protected:
     virtual int Release();
 
     virtual void ReconstructRigidBody();
+    virtual void WarpImage(svlSampleImage* image, unsigned int videoch);
 
 private:
     svlSampleTargets OutputTargets;
@@ -85,6 +87,11 @@ private:
     double RigidBodyScaleLow;
     double RigidBodyScaleHigh;
     unsigned int Iterations;
+
+    vctDynamicVector<double> WarpedRigidBodyAngle;
+    vctDynamicVector<double> WarpedRigidBodyScale;
+    svlSampleImage* WarpedImage;
+    vctDynamicVector<svlDraw::Internals> WarpInternals;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)

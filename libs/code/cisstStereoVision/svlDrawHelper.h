@@ -70,6 +70,58 @@ namespace svlDrawHelper
         vctDynamicVector<int> LeftSamples;
         vctDynamicVector<int> RightSamples;
     };
+
+
+    //////////////////////
+    // Triangle Warping //
+    //////////////////////
+
+    class TriangleWarpInternals : public svlDrawInternals
+    {
+    public:
+        TriangleWarpInternals();
+        ~TriangleWarpInternals();
+
+        bool SetInputImage(svlSampleImage* image, unsigned int channel = 0);
+        bool SetOutputImage(svlSampleImage* image, unsigned int channel = 0);
+        void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
+                  int ox1, int oy1, int ox2, int oy2, int ox3, int oy3);
+
+    private:
+        int GetLinePixels(int* xs, int* ys, int x1, int y1, int x2, int y2);
+        int GetLinePixels(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
+        void ResampleLine(int ix1, int iy1, int ix2, int iy2,
+                          int ox1, int oy1, int ox2, int oy2);
+
+        void AllocateBuffers(const unsigned int size);
+        void ReleaseBuffers();
+
+    private:
+        unsigned char* Input;
+        int InWidth;
+        int InHeight;
+
+        unsigned char* Output;
+        int OutWidth;
+        int OutHeight;
+
+        vctInt3 _ilen;
+        vctInt3 _olen;
+
+        int* _in_idxs;
+        int* _out_idxs;
+        int* _lm_x;
+        int* _rm_x;
+        int* _lm_id;
+        int* _rm_id;
+        int* _lm_pos;
+        int* _rm_pos;
+
+        vctFixedSizeVector<int*, 3> _ixs;
+        vctFixedSizeVector<int*, 3> _iys;
+        vctFixedSizeVector<int*, 3> _oxs;
+        vctFixedSizeVector<int*, 3> _oys;
+    };
 };
 
 #endif // _svlDrawHelper_h
