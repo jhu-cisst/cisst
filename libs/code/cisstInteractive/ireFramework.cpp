@@ -356,7 +356,7 @@ void ireFramework::FinalizeShellInstance(void)
 //
 void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython) {
     //start python
-    const char * python_args[] = { "IRE", startup };
+    const char * python_args[] = { "", startup };
 
     if (IRE_State != IRE_INITIALIZED) {
         CMN_LOG_INIT_ERROR << "LaunchIREShellInstance:  IRE state is " << IRE_State << "." << std::endl;

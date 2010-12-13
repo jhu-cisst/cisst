@@ -177,7 +177,7 @@ public:
       callback function to change the state to IRE_ACTIVE prior to entering
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
-	static inline void LaunchIREShell(char *startup = "", bool newPythonThread = false, bool useIPython = false) throw(std::runtime_error) {
+	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false) throw(std::runtime_error) {
 	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython);
 	}
 
@@ -187,7 +187,7 @@ public:
         IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "print 'using wxPython'");
         \endcode
     */
-    static inline void *RunIRE_wxPython(char *startup) {
+    static inline void *RunIRE_wxPython(const char *startup) {
         try {
             LaunchIREShell(startup, false, false);
         }
@@ -204,7 +204,7 @@ public:
         IreThread.Create<char *> (&ireFramework::RunIRE_IPython, "print 'using IPython'");
         \endcode
     */
-    static inline void *RunIRE_IPython(char *startup) {
+    static inline void *RunIRE_IPython(const char *startup) {
         try {
             LaunchIREShell(startup, false, true);
         }
