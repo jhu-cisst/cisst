@@ -14,8 +14,8 @@
 
 
 # Backward compatibility
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
-PROJECT(cisst)
+cmake_minimum_required (VERSION 2.6.2)
+project (cisst)
 
 option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake" OFF)
 mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
@@ -51,15 +51,15 @@ if(CISST_CLEAR_INTERNALS)
 endif(CISST_CLEAR_INTERNALS)
 
 # Output directories.
-SET(LIBRARY_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/lib)
-SET(EXECUTABLE_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/bin)
+set (LIBRARY_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/lib)
+set (EXECUTABLE_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/bin)
 
 # Where to find afterwards
-SET(cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
-SET(cisst_EXECUTABLE_PATH "${EXECUTABLE_OUTPUT_PATH}")
+set (cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
+set (cisst_EXECUTABLE_PATH "${EXECUTABLE_OUTPUT_PATH}")
 
 # Where to find cisst defined CMake Macros/Modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisst_SOURCE_DIR}/libs/cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisst_SOURCE_DIR}/libs/cmake)
 
 # On Windows, CMake uses a different compiler at configuration time
 if (CMAKE_CL_64)
@@ -69,16 +69,17 @@ else (CMAKE_CL_64)
 endif (CMAKE_CL_64)
 
 # Options
-OPTION(BUILD_UTILITIES "Build utility programs built using cisst." OFF)
-OPTION(BUILD_TESTS "Build tests." OFF)
-OPTION(BUILD_EXAMPLES "Build examples." OFF)
+option (BUILD_UTILITIES "Build utility programs built using cisst." ON)
+option (BUILD_TESTS "Build tests." OFF)
+option (BUILD_EXAMPLES "Build examples." OFF)
 
-IF(UNIX)
-  OPTION(BUILD_DOC "Build the documentation." OFF)
-ENDIF(UNIX)
+if (UNIX)
+  option (BUILD_DOC "Build the documentation." OFF)
+endif (UNIX)
 
 # Build static or dynamic libraries
 option (CISST_BUILD_SHARED_LIBS "Build cisst with shared libraries." OFF)
+mark_as_advanced (CISST_BUILD_SHARED_LIBS)
 if (CISST_BUILD_SHARED_LIBS)
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)
@@ -91,8 +92,8 @@ endif (CISST_BUILD_SHARED_LIBS)
 
 
 # Wrapping with swig for Python and/or Java
-OPTION(CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
-
+option (CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
+mark_as_advanced (CISST_HAS_SWIG_PYTHON)
 if (CISST_HAS_SWIG_PYTHON)
     # Find Swig
     set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
@@ -119,13 +120,14 @@ if (CISST_HAS_SWIG_PYTHON)
     endif (NOT PYTHON_DEBUG_LIBRARIES)
     find_package (PythonInterp REQUIRED)
     include_directories (${PYTHON_INCLUDE_PATH})
-    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
+    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
     # We also need numpy if we have cisstVector
     if (BUILD_LIBS_cisstVector)
 	find_package (Numpy REQUIRED)
 	if (PYTHON_NUMPY_FOUND)
 	    include_directories (${PYTHON_NUMPY_INCLUDE_DIR})
-	    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
+	    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
+	    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
 	endif (PYTHON_NUMPY_FOUND)
     endif (BUILD_LIBS_cisstVector)
 endif (CISST_HAS_SWIG_PYTHON)
@@ -187,99 +189,96 @@ if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
 endif (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
 
-# Check for RTAI
-option (CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
-if (CISST_HAS_LINUX_RTAI)
-  find_package (RTAI)
-  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES RTAI_LIBRARIES)
-endif (CISST_HAS_LINUX_RTAI)
+# Check on Linus only
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+  # Check for RTAI
+  option (CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
+  if (CISST_HAS_LINUX_RTAI)
+    find_package (RTAI)
+    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES RTAI_LIBRARIES)
+  endif (CISST_HAS_LINUX_RTAI)
+
+  # Check for Xenomai
+  option (CISST_HAS_LINUX_XENOMAI "Use the Xenomai real time extensions for Linux." OFF)
+  if (CISST_HAS_LINUX_XENOMAI)
+    find_package(XENOMAI)
+    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_DIR)
+    # add /usr/xenomai/include/posix. This is a *must* since we want to
+    # to use xenomai/include/posix/pthread.h
+    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_POSIX_DIR)
+    # add libnative libxenomai librtdm libpthread_rt
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_NATIVE)
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_PTHREAD_RT)
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_RTDM)
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_XENOMAI)
+    # add -D_GNU_SOURCE -D_REENTRANT -D__XENO__ -pipe
+    add_definitions ("${XENOMAI_DEFINITIONS}")
+    # add Xenomai wrappers for pthread
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
+  endif (CISST_HAS_LINUX_XENOMAI)
+
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Determine if cmnThrow uses "throw" or "abort"
-OPTION(CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
-MARK_AS_ADVANCED(CMN_THROW_DOES_ABORT)
-IF(CMN_THROW_DOES_ABORT)
-  ADD_DEFINITIONS(-DCMN_THROW_DOES_ABORT)
-ENDIF(CMN_THROW_DOES_ABORT)
+option (CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
+mark_as_advanced (CMN_THROW_DOES_ABORT)
+if (CMN_THROW_DOES_ABORT)
+  add_definitions (-DCMN_THROW_DOES_ABORT)
+endif (CMN_THROW_DOES_ABORT)
 
 # Determine if CMN_ASSERT should be disabled
-OPTION(CMN_ASSERT_DISABLED "CMN_ASSERT is disabled, i.e. does not assert (for release mode)" OFF)
-MARK_AS_ADVANCED(CMN_ASSERT_DISABLED)
-IF(CMN_ASSERT_DISABLED)
-  ADD_DEFINITIONS(-DCMN_ASSERT_DISABLED)
-ENDIF(CMN_ASSERT_DISABLED)
+option (CMN_ASSERT_DISABLED "CMN_ASSERT is disabled, i.e. does not assert (for release mode)" OFF)
+mark_as_advanced (CMN_ASSERT_DISABLED)
+if (CMN_ASSERT_DISABLED)
+  add_definitions (-DCMN_ASSERT_DISABLED)
+endif (CMN_ASSERT_DISABLED)
 
 # Determine if CMN_ASSERT should throw an exception instead of abort
-OPTION(CMN_ASSERT_THROWS_EXCEPTION "CMN_ASSERT throws an exception instead of abort" OFF)
-MARK_AS_ADVANCED(CMN_ASSERT_THROWS_EXCEPTION)
-IF(CMN_ASSERT_THROWS_EXCEPTION)
-  ADD_DEFINITIONS(-DCMN_ASSERT_THROWS_EXCEPTION)
-ENDIF(CMN_ASSERT_THROWS_EXCEPTION)
+option (CMN_ASSERT_THROWS_EXCEPTION "CMN_ASSERT throws an exception instead of abort" OFF)
+mark_as_advanced (CMN_ASSERT_THROWS_EXCEPTION)
+if (CMN_ASSERT_THROWS_EXCEPTION)
+  add_definitions (-DCMN_ASSERT_THROWS_EXCEPTION)
+endif (CMN_ASSERT_THROWS_EXCEPTION)
 
-# Check for Xenomai
-option( CISST_HAS_LINUX_XENOMAI "Use the Xenomai real time extensions for Linux." OFF )
-if( CISST_HAS_LINUX_XENOMAI )
-
-  find_package( XENOMAI )
-
-  # add /usr/xenomai/include
-  cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_DIR )
-
-  # add /usr/xenomai/include/posix. This is a *must* since we want to
-  # to use xenomai/include/posix/pthread.h
-  cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_POSIX_DIR )
-
-  # add libnative libxenomai librtdm libpthread_rt
-  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_NATIVE )
-  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_PTHREAD_RT )
-  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_RTDM )
-  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_XENOMAI )
-
-  # add -D_GNU_SOURCE -D_REENTRANT -D__XENO__ -pipe
-  add_definitions( "${XENOMAI_DEFINITIONS}" )
-
-  # add Xenomai wrappers for pthread
-  set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}" )
-
-
-endif( CISST_HAS_LINUX_XENOMAI )
 
 # Put "." in the rpath of all CISST shared libraries.
-LINK_DIRECTORIES(. ${LIBRARY_OUTPUT_PATH})
+link_directories (. ${LIBRARY_OUTPUT_PATH})
 
 # Determine if we want to use rpath, no by default
-IF(UNIX)
-  OPTION(CMAKE_SKIP_RPATH "Do NOT use rpath to hard code the path to dynamic libraries." ON)
-  MARK_AS_ADVANCED(FORCE CMAKE_SKIP_RPATH)
-ENDIF(UNIX)
+if (UNIX)
+  option (CMAKE_SKIP_RPATH "Do NOT use rpath to hard code the path to dynamic libraries." ON)
+  mark_as_advanced (FORCE CMAKE_SKIP_RPATH)
+endif (UNIX)
 
 
 # Add include directories
-SET(CISST_INCLUDE_DIR
-    ${cisst_BINARY_DIR}/libs/include
-    ${cisst_SOURCE_DIR}/libs/include)
-INCLUDE_DIRECTORIES(${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
+set (CISST_INCLUDE_DIR
+     ${cisst_BINARY_DIR}/libs/include
+     ${cisst_SOURCE_DIR}/libs/include)
+include_directories (${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
 # Additional link directories
-LINK_DIRECTORIES(${CISST_ADDITIONAL_LINK_DIRECTORIES})
+link_directories (${CISST_ADDITIONAL_LINK_DIRECTORIES})
 
 
 # To have more warnings with gcc
-IF(CMAKE_COMPILER_IS_GNUCXX)
-  INCLUDE(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-Wextra" CXX_SUPPORTS_WEXTRA)
-  IF(CXX_SUPPORTS_WEXTRA)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-  ENDIF(CXX_SUPPORTS_WEXTRA)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX)
+  include (CheckCXXCompilerFlag)
+  check_cxx_compiler_flag ("-Wextra" CXX_SUPPORTS_WEXTRA)
+  if (CXX_SUPPORTS_WEXTRA)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+  endif (CXX_SUPPORTS_WEXTRA)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif (CMAKE_COMPILER_IS_GNUCXX)
 
 
 # Find native threads
-IF(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-  FIND_PACKAGE(Threads REQUIRED)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CMAKE_THREAD_LIBS_INIT)
-ENDIF(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+  find_package (Threads REQUIRED)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CMAKE_THREAD_LIBS_INIT)
+endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Which libraries to build
 set (CISST_LIBS_STABLE
@@ -305,14 +304,14 @@ set (CISST_LIBS
      ${CISST_LIBS_UNSTABLE})
 
 # Which librairies have Qt Widgets
-set(CISST_LIBS_WITH_QT
-    cisstCommon
-    cisstVector
-    cisstMultiTask)
+set (CISST_LIBS_WITH_QT
+     cisstCommon
+     cisstVector
+     cisstMultiTask)
 
 # Which librairies have FLTK Widgets
-set(CISST_LIBS_WITH_FLTK
-    cisstVector)
+set (CISST_LIBS_WITH_FLTK
+     cisstVector)
 
 
 # Build by default
@@ -328,6 +327,12 @@ endforeach (lib)
 if (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
   cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CMAKE_DL_LIBS)
 endif (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
+
+# If cisstInteractive in turned on, also force SWIG for Python and shared libraries
+if (BUILD_LIBS_cisstInteractive)
+  set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
+  set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
+endif (BUILD_LIBS_cisstInteractive)
 
 # Once all variables have been defined, use cisstMacros
 include (cisstMacros)
