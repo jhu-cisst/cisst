@@ -1,46 +1,53 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
-project(3DUserInterfaceTutorial)
+if (BUILD_LIBS_cisst3DUserInterface)
 
-# library of sample behavior
-add_subdirectory(behaviors)
+  # library of sample behavior
+  add_subdirectory(behaviors)
+  include_directories(behaviors)
 
-include_directories(behaviors)
+  # programs, depends on hardware availability
 
-# programs, depends on hardware availability
-
-# Sensable specific examples, requires cisstDevices
-if (CISST_DEV_HAS_SENSABLEHD)
+  # Sensable specific examples, requires cisstDevices
+  if (CISST_DEV_HAS_SENSABLEHD)
     add_subdirectory(example1)
     add_subdirectory(example2)
-	add_subdirectory(example5)
-endif (CISST_DEV_HAS_SENSABLEHD)
+    add_subdirectory(example5)
+  else (CISST_DEV_HAS_SENSABLEHD)
+    message (WARNING " 3DUserInterface examples 1, 2, and 5 will not be compiled since they require CISST_DEV_HAS_SENSABLEHD")
+  endif (CISST_DEV_HAS_SENSABLEHD)
 
-# Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
-option (CISST_UI3_HAS_DAVINCI "Build 3DUserInterface example using the daVinci API" OFF)
-if (CISST_UI3_HAS_DAVINCI)
+  # Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
+  option (CISST_UI3_HAS_DAVINCI "Build 3DUserInterface example using the daVinci API" OFF)
+  if (CISST_UI3_HAS_DAVINCI)
     option (CISST_UI3_HAS_DAVINCI_BBAPI "Use the daVinci BBAPI" OFF)
     if (CISST_UI3_HAS_DAVINCI_BBAPI)
-        find_library (BBAPI_LIBRARIES isi_bbapi.lib)
+      find_library (BBAPI_LIBRARIES isi_bbapi.lib)
     endif (CISST_UI3_HAS_DAVINCI_BBAPI)
     find_path (daVinci_INCLUDE_DIRS cisstDaVinciAPI.h)
     if (daVinci_INCLUDE_DIRS)
-        include_directories(${daVinci_INCLUDE_DIRS})
+      include_directories(${daVinci_INCLUDE_DIRS})
     endif (daVinci_INCLUDE_DIRS)
     find_library (daVinci_LIBRARIES cisstDaVinciAPI)
     set(daVinci_ALL_LIBRARIES ${daVinci_LIBRARIES} ${BBAPI_LIBRARIES})
     add_subdirectory(example3)
     add_subdirectory(example4)
-endif (CISST_UI3_HAS_DAVINCI)
+  else (CISST_UI3_HAS_DAVINCI)
+    message (WARNING " 3DUserInterface examples 3 and 4 will not be compiled since they require CISST_UI3_HAS_DAVINCI")
+  endif (CISST_UI3_HAS_DAVINCI)
+
+else (BUILD_LIBS_cisst3DUserInterface)
+  message (WARNING " 3DUserInterface examples will not be compiled since they require BUILD_LIBS_3DUserInterface")
+endif (BUILD_LIBS_cisst3DUserInterface)
