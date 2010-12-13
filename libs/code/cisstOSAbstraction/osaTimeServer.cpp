@@ -381,6 +381,22 @@ double osaTimeServer::GetRelativeTime(void) const
     return answer;
 }
 
+
+double osaTimeServer::GetAbsoluteTimeInSeconds(void) const {
+
+    return GetAbsoluteTime().ToSeconds();
+
+}
+
+osaAbsoluteTime osaTimeServer::GetAbsoluteTime(void) const {
+
+    osaAbsoluteTime absTime;
+    RelativeToAbsolute(GetRelativeTime(), absTime);
+    return absTime;
+
+}
+
+
 double osaTimeServer::EstimateDrift(void) const
 {
 #if (CISST_OS == CISST_WINDOWS)

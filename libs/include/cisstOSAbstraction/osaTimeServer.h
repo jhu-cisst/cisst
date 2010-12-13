@@ -99,6 +99,14 @@ public:
         \returns The number of seconds */
     double GetRelativeTime(void) const;
 
+   /*! Get the number of seconds that have elapsed since 1970.
+     \returns The number of seconds */
+    double GetAbsoluteTimeInSeconds(void) const;
+
+      /*! Get the absolute time since 1970.
+     \returns The number of seconds */
+    osaAbsoluteTime GetAbsoluteTime(void) const;
+
     /*! Estimate drift between synchronized clocks (Windows only) */
     double EstimateDrift(void) const;
 
