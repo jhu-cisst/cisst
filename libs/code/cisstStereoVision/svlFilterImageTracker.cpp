@@ -453,8 +453,11 @@ void svlFilterImageTracker::ReconstructRigidBody()
         else if (RigidBodyAngle[j] >RigidBodyAngleHigh) RigidBodyAngle[j] = RigidBodyAngleHigh;
 
         // Reconstruct rigid body based on prototype
-        scale = RigidBodyScale[j];
-        angle = RigidBodyAngle[j];
+        WarpedRigidBodyAngle[j] -= RigidBodyAngle[j];
+        WarpedRigidBodyScale[j] /= RigidBodyScale[j];
+
+        scale = 1.0 / WarpedRigidBodyScale[j];
+        angle = -WarpedRigidBodyAngle[j];
 
         for (i = 0; i < targetcount; i ++) {
             target = Targets.Pointer(j, i);
@@ -473,8 +476,6 @@ void svlFilterImageTracker::ReconstructRigidBody()
 
                 target->pos.x = static_cast<int>(ax + scale * (vx * angle2 - vy * angle3));
                 target->pos.y = static_cast<int>(ay + scale * (vx * angle3 + vy * angle2));
-
-//                if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
             }
         }
     }
@@ -482,9 +483,6 @@ void svlFilterImageTracker::ReconstructRigidBody()
 
 void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch)
 {
-    WarpedRigidBodyAngle[videoch] -= RigidBodyAngle[videoch];
-    WarpedRigidBodyScale[videoch] /= RigidBodyScale[videoch];
-
     double c = cos(WarpedRigidBodyAngle[videoch]);
     double s = sin(WarpedRigidBodyAngle[videoch]);
     double sc = WarpedRigidBodyScale[videoch];
