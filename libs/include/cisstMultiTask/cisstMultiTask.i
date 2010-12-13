@@ -193,9 +193,9 @@ http://www.cisst.org/cisst/license.txt.
     %pythoncode {
         def UpdateFromC(self):
             try:
-                tmp1Object = self.GetArgument1ClassServices().Create()
+                tmp1Object = self.GetArgument1Prototype().Services().Create()
                 self.Argument1Type = tmp1Object.__class__
-                tmp2Object = self.GetArgument2ClassServices().Create()
+                tmp2Object = self.GetArgument2Prototype().Services().Create()
                 self.Argument2Type = tmp2Object.__class__
             except Exception, e:
                 print 'Qualified read command ', self.GetName(), ': ', e
