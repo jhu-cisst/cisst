@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2007-02-05
-  
+
   (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -113,7 +113,7 @@ void vctQuaternionRotation3BaseTest::TestApplyTo(void) {
     CPPUNIT_ASSERT((z - result).LinfNorm() < tolerance);
     composed.ApplyTo(z, result);
     CPPUNIT_ASSERT((y + result).LinfNorm() < tolerance);
-    
+
     testRotation.From(vctAxisAngleRotation3<_elementType>(y, _elementType(cmnPI_2)));
     testRotation.ApplyTo(z, result);
     CPPUNIT_ASSERT((x - result).LinfNorm() < tolerance);
@@ -150,11 +150,10 @@ void vctQuaternionRotation3BaseTest::TestApplyToFloat(void) {
 
 template <class _elementType>
 void vctQuaternionRotation3BaseTest::TestConversionMatrix(void) {
-    typedef vctQuaternionRotation3Base<vctFixedSizeVector<_elementType, 4> > QuatRotType;
-    QuatRotType quaternionRotation;
-    QuatRotType rotationQuaternion;
+    vctQuaternionRotation3Base<vctFixedSizeVector<_elementType, 4> > quaternionRotation;
+    vctMatrixRotation3<_elementType> matrixRotation;
     vctRandom(quaternionRotation);
-    vctGenericRotationTest::TestConversion(quaternionRotation, rotationQuaternion);
+    vctGenericRotationTest::TestConversion(quaternionRotation, matrixRotation);
 }
 
 void vctQuaternionRotation3BaseTest::TestConversionMatrixDouble(void) {
@@ -314,7 +313,7 @@ void vctQuaternionRotation3BaseTest::TestInverse(void) {
     vctQuaternionRotation3Base<vctFixedSizeVector<_elementType, 4> > quaternionRotation;
     vctRandom(quaternionRotation);
     vctGenericRotationTest::TestInverse(quaternionRotation);
-    
+
 }
 
 void vctQuaternionRotation3BaseTest::TestInverseDouble(void) {
