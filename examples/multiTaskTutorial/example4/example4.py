@@ -9,4 +9,5 @@ from cisstMultiTaskPython import *
 taskManager = cmnObjectRegister.FindObject("TaskManager")
 taskManager.UpdateFromC()
 
-sineData = taskManager.SIN.MainInterface.GetCommandRead('GetData')
+sineData = taskManager.SIN.MainInterface.GetData
+SetAmplitude = taskManager.SIN.MainInterface.SetAmplitude
