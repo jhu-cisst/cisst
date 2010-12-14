@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaExport.h>
 
 // PKAZ: move this to osaGetTime.h
-struct osaAbsoluteTime {
+struct CISST_EXPORT osaAbsoluteTime {
     long sec;   // seconds
     long nsec;  // nano-seconds
 
