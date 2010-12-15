@@ -105,9 +105,6 @@ if (CISST_HAS_SWIG_PYTHON)
         include (${SWIG_USE_FILE})
     endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
 
-    # Check that the main libraries are compiled shared
-    variable_requires (CISST_HAS_SWIG_PYTHON REQUIREMENT_MET CISST_BUILD_SHARED_LIBS)
-
     # Force to use exceptions
     set (CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
     set (CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
@@ -140,15 +137,6 @@ if (CISST_HAS_XML)
   cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES LIBXML2_INCLUDE_DIR)
   cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
 endif (CISST_HAS_XML)
-
-
-# Check for Fortran NETLIB
-option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." OFF)
-if (CISST_HAS_CISSTNETLIB)
-  find_package (CisstNetlib)
-  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
-endif (CISST_HAS_CISSTNETLIB)
 
 # Support for OpenGL
 option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
@@ -331,9 +319,23 @@ endif (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
 # If cisstInteractive in turned on, also force SWIG for Python and shared libraries
 if (BUILD_LIBS_cisstInteractive)
   set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
-  set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (BUILD_LIBS_cisstInteractive)
+if (CISST_HAS_SWIG_PYTHON)
+  set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
+endif (CISST_HAS_SWIG_PYTHON)
 
+# If cisstNumerical is ON, turn CISST_HAS_CISSTNETLIB ON as well
+if (BUILD_LIBS_cisstNumerical)
+  # Use Fortran NETLIB by default
+  option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." ON)
+  mark_as_advanced (CISST_HAS_CISSTNETLIB)
+  if (CISST_HAS_CISSTNETLIB)
+    find_package (CisstNetlib)
+    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
+  endif (CISST_HAS_CISSTNETLIB)
+endif (BUILD_LIBS_cisstNumerical)
+  
 # Once all variables have been defined, use cisstMacros
 include (cisstMacros)
 
@@ -378,6 +380,7 @@ if (BUILD_TESTS)
   enable_testing ()
   mark_as_advanced (BUILD_TESTING)
   include (Dart)
+  mark_as_advanced (DART_ROOT)
   # cisst Tests
   add_subdirectory (tests)
 endif (BUILD_TESTS)
