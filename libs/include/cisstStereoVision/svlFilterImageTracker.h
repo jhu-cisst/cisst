@@ -58,11 +58,12 @@ public:
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int OnStart(unsigned int procCount);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
     virtual void ReconstructRigidBody();
-    virtual void WarpImage(svlSampleImage* image, unsigned int videoch);
+    virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = 2);
 
 private:
     svlSampleTargets OutputTargets;
@@ -88,6 +89,7 @@ private:
     double RigidBodyScaleHigh;
     unsigned int Iterations;
 
+    bool WarpingParallel;
     vctDynamicVector<double> WarpedRigidBodyAngle;
     vctDynamicVector<double> WarpedRigidBodyScale;
     svlSampleImage* WarpedImage;

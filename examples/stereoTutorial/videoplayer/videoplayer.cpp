@@ -33,8 +33,6 @@ using namespace std;
 
 int VideoPlayer(std::string pathname)
 {
-    pathname = "/Users/vagvoba/Code/visr/experiment1/final/u1_video.avi";
-
     svlInitialize();
 
     // instantiating SVL stream and filters
@@ -63,8 +61,6 @@ int VideoPlayer(std::string pathname)
             goto labError;
         }
     }
-
-    //source.SetTargetFrequency(30.0);
 
     // setup image window
     window.SetTitle("Video Player");

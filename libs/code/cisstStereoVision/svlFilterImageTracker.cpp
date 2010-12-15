@@ -201,6 +201,13 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
     return SVL_OK;
 }
 
+int svlFilterImageTracker::OnStart(unsigned int procCount)
+{
+    (procCount >= WarpInternals.size() * 2) ? WarpingParallel = true : WarpingParallel = false;
+
+    return SVL_OK;
+}
+
 int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
@@ -275,6 +282,22 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         }
     }
 
+    _ParallelLoop(procInfo, vch, VideoChannels)
+    {
+        // Region of interest might change at run-time
+        if (Trackers[vch]) Trackers[vch]->SetROI(ROI[vch]);
+    }
+
+    if (WarpingParallel) {
+
+        _SynchronizeThreads(procInfo);
+
+        vch = procInfo->id >> 1;
+        if (vch < VideoChannels && Trackers[vch]) {
+            WarpImage(img, vch, procInfo->id & 1);
+        }
+    }
+
     _SynchronizeThreads(procInfo);
 
     targetcount = OutputTargets.GetMaxTargets();
@@ -284,12 +307,8 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     {
         if (!Trackers[vch]) continue;
 
-        // Region of interest might change at run-time
-        Trackers[vch]->SetROI(ROI[vch]);
-
         if (RigidBody) {
-            // Warp input image from last estimated pose
-            WarpImage(img, vch);
+            if (!WarpingParallel) WarpImage(img, vch);
             img = WarpedImage;
         }
 
@@ -371,6 +390,13 @@ int svlFilterImageTracker::Release()
         delete WarpedImage;
         WarpedImage = 0;
     }
+
+    RigidBodyAngle.SetSize(0);
+    RigidBodyScale.SetSize(0);
+    WarpedRigidBodyAngle.SetSize(0);
+    WarpedRigidBodyScale.SetSize(0);
+    WarpInternals.SetSize(0);
+
     return SVL_OK;
 }
 
@@ -481,8 +507,10 @@ void svlFilterImageTracker::ReconstructRigidBody()
     }
 }
 
-void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch)
+void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch, int threadid)
 {
+    if (threadid < 0 || threadid > 2) return;
+
     double c = cos(WarpedRigidBodyAngle[videoch]);
     double s = sin(WarpedRigidBodyAngle[videoch]);
     double sc = WarpedRigidBodyScale[videoch];
@@ -510,17 +538,18 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
     const int wx4 = static_cast<int>(sc * (c * (x4 - cx) - s * (y4 - cy))) + cx;
     const int wy4 = static_cast<int>(sc * (s * (x4 - cx) + c * (y4 - cy))) + cy;
 
-    memset(WarpedImage->GetUCharPointer(videoch), 0, WarpedImage->GetDataSize(videoch));
-
     svlTriangle tri_in, tri_out;
 
-    tri_in.Assign(x1, y1, x3, y3, x4, y4);
-    tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
-    svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
-
-    tri_in.Assign(x1, y1, x2, y2, x3, y3);
-    tri_out.Assign(wx1, wy1, wx2, wy2, wx3, wy3);
-    svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
+    if (threadid > 0) {
+        tri_in.Assign(x1, y1, x3, y3, x4, y4);
+        tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
+        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
+    }
+    if (threadid != 1) {
+        tri_in.Assign(x1, y1, x2, y2, x3, y3);
+        tri_out.Assign(wx1, wy1, wx2, wy2, wx3, wy3);
+        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
+    }
 }
 
 

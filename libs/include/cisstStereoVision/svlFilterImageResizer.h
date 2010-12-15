@@ -50,6 +50,7 @@ protected:
 private:
     svlSampleImage* OutputImage;
 
+    bool EqualSize;
     double WidthRatio[2];
     double HeightRatio[2];
     unsigned int Width[2];
