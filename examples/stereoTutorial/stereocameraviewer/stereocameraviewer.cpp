@@ -238,9 +238,9 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
 			resizer.SetOutputSize(width / 2, height, SVL_RIGHT);
 		}
 		else if (fullscreen == 2) {
-		    resizer.SetOutputSize(width, height / 2, SVL_LEFT);
-			resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
-			joiner.SetLayout(svlLayoutInterlaced);
+            resizer.SetOutputSize(width, height / 2, SVL_LEFT);
+            resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
+            joiner.SetLayout(svlLayoutInterlaced);
 		}
 		else {
 		    resizer.SetOutputSize(width, height, SVL_LEFT);

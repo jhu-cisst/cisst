@@ -273,6 +273,21 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
         memcpy(dst_img->GetUCharPointer(dst_videoch), src_img->GetUCharPointer(src_videoch), src_img->GetDataSize(src_videoch));
         return SVL_OK;
     }
+    else if (!interpolation && weq && src_height == (dst_height << 1)) {
+        // Special case: decimate by 2 vertically
+
+        const unsigned int stride  = src_width * 3;
+        const unsigned int stride2 = stride << 1;
+        unsigned char *src_buf = src_img->GetUCharPointer(src_videoch);
+        unsigned char *dst_buf = dst_img->GetUCharPointer(dst_videoch);
+
+        for (unsigned int j = 0; j < dst_height; j ++) {
+            memcpy(dst_buf, src_buf, stride);
+            dst_buf += stride;
+            src_buf += stride2;
+        }
+        return SVL_OK;
+    }
 
 #if CISST_SVL_HAS_OPENCV
 

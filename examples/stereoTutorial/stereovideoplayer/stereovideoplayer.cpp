@@ -193,8 +193,8 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
 			resizer.SetOutputSize(width / 2, height, SVL_RIGHT);
 		}
 		else if (fullscreen == 2) {
-		    resizer.SetOutputSize(width, height / 2, SVL_LEFT);
-			resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
+            resizer.SetOutputSize(width, height / 2, SVL_LEFT);
+            resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
             joiner.SetLayout(svlLayoutInterlaced);
 		}
 		else {
