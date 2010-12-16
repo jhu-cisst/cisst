@@ -35,7 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <stdexcept>
 #include <cstdlib>
-#define CMN_THROW_DOES_ABORT
 
 /*!
   \ingroup cisstCommon
