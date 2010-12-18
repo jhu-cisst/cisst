@@ -16,7 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstDevices/can/devCAN.h>
-#include <cisstDevices/manipulators/WAM/devProperties.h>
+#include <cisstDevices/robotcomponents/manipulators/Barrett/devProperties.h>
 
 #ifndef _devPuck_h
 #define _devPuck_h
@@ -47,7 +47,11 @@ public:
 	    PUCK_ID5=5, 
 	    PUCK_ID6=6, 
 	    PUCK_ID7=7,
-	    SAFETY_MODULE_ID=10 };
+	    SAFETY_MODULE_ID=10,
+	    PUCK_IDF1=11,
+	    PUCK_IDF2=12,
+	    PUCK_IDF3=13,
+	    PUCK_IDF4=14  };
 
   //! Define the modes of a puck
   /**
@@ -62,6 +66,7 @@ public:
   */
   static const devProperty::Value MODE_IDLE = 0;
   static const devProperty::Value MODE_TORQUE = 2;
+  static const devProperty::Value MODE_POSITION = 3;
   static const devProperty::Value MODE_PID = 3;
   static const devProperty::Value MODE_VELOCITY = 4;
   static const devProperty::Value MODE_TRAPEZOIDAL = 5;
@@ -104,7 +109,7 @@ private:
   /**
      Convert the ID of a puck to a CAN ID used in a CAN frame
   */
-  static devCANFrame::ID CANID( devPuck::ID id );
+  static devCAN::Frame::ID CANID( devPuck::ID id );
 
   //! Does the data contain a set property command
   /**
@@ -115,7 +120,7 @@ private:
      \param canframe A CAN frame with a read/write command
      \return true if the command is a write. false if the command is a read
   */
-  static bool IsSetFrame( const devCANFrame& canframe );
+  static bool IsSetFrame( const devCAN::Frame& canframe );
   
   //! pack a CAN frame
   /**
@@ -126,7 +131,7 @@ private:
      \param set True of the property must be set. False for a query
      \return false if no error occurred. true otherwise
   */
-  devPuck::Errno PackProperty( devCANFrame& canframe,
+  devPuck::Errno PackProperty( devCAN::Frame& canframe,
 			       devProperty::Command command,
 			       devProperty::ID propid,
 			       devProperty::Value propval = 0 );
@@ -156,9 +161,9 @@ public:
      Call this method to obtain the origin puck ID in a CAN ID.
      \param canid The CAN id
      \return The origin puck ID of the CAN ID
-     \sa Origin( devCANFrame )
+     \sa Origin( devCAN::Frame )
   */
-  static devPuck::ID OriginID( devCANFrame::ID id );
+  static devPuck::ID OriginID( devCAN::Frame::ID id );
 
   //! Return the origin ID of the CAN frame
   /**
@@ -170,7 +175,7 @@ public:
      \return The origin puck ID of the CAN frame
      \sa Origin( devCANID )
   */
-  static devPuck::ID OriginID( const devCANFrame& canframe );
+  static devPuck::ID OriginID( const devCAN::Frame& canframe );
 
   //! Return the destination ID of the CAN id
   /**
@@ -180,9 +185,9 @@ public:
      Call this method to obtain the destination puck ID in a CAN ID.
      \param canid The CAN id
      \return The origin puck ID of the CAN ID
-     \sa Origin( devCANFrame )
+     \sa Origin( devCAN::Frame )
   */
-  static devPuck::ID DestinationID( devCANFrame::ID id );
+  static devPuck::ID DestinationID( devCAN::Frame::ID id );
 
   //! Return the destination ID of the CAN frame
   /**
@@ -194,7 +199,7 @@ public:
      \return The origin puck ID of the CAN frame
      \sa Destination( devCANID )
   */
-  static devPuck::ID DestinationID( const devCANFrame& canframe );
+  static devPuck::ID DestinationID( const devCAN::Frame& canframe );
 
   //! Return the index of the puck within its group
   /**
@@ -251,7 +256,7 @@ public:
      \param propid[out] The ID of the property in the data
      \param propval[out] The value of the property in the data
    */
-  devPuck::Errno UnpackCANFrame( const devCANFrame& canframe, 
+  devPuck::Errno UnpackCANFrame( const devCAN::Frame& canframe, 
 				 devProperty::ID& id, 
 				 devProperty::Value& value );
   

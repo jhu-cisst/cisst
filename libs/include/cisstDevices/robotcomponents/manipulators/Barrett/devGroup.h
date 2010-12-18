@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devGroup_h
 #define _devGroup_h
 
-#include <cisstDevices/manipulators/WAM/devPuck.h>
+#include <cisstDevices/robotcomponents/manipulators/Barrett/devPuck.h>
 #include <vector>
 
 //! A logical group of pucks
@@ -39,20 +39,20 @@ public:
        The broadcast group contains all the pucks in a WAM (with the exception 
        of the safety module)
     */
-    BROADCAST    = 0x00,
+    BROADCAST = 0x00,
 
     //! The upper arm group
     /**
        The upper arm group represents the 4 pucks of the upper arm 
        (shoulder+elbow)
     */
-    UPPERARM     = 0x01,
+    UPPERARM = 0x01,
 
     //! The forearm group
     /**
        The forearm group represents the 3 pucks of the upper arm (wrist)
     */
-    FOREARM      = 0x02,
+    FOREARM = 0x02,
 
     //! The motor position group
     /**
@@ -60,16 +60,22 @@ public:
        query all the motor positions. Each puck will reply to a message to this
        group with its motor position
     */
-    POSITION     = 0x03,
+    POSITION = 0x03,
 
     //! Upper arm property group
-    UPPERARMPROP = 0x04,
+    UPPERARM_POSITION = 0x04,
 
     //! Forearm property group
-    FOREARMPROP  = 0x05,
+    FOREARM_POSITION = 0x05,
 
     //! Feedback property group
-    PROPFEEDBACK = 0x06 
+    PROPERTY = 0x06,
+
+    HAND = 0x07,
+
+    HAND_POSITION = 0x08,
+    
+    LASTGROUP = 0x09
 
   };
 
@@ -102,7 +108,7 @@ private:
      \param canframe A CAN frame with a read/write command
      \return true if the command is a write. false if the command is a read
   */
-  static bool IsSetFrame( const devCANFrame& canframe );
+  static bool IsSetFrame( const devCAN::Frame& canframe );
   
   //! pack a CAN frame
   /**
@@ -113,13 +119,13 @@ private:
      \param set True of the property must be set. False for a query
      \return false if no error occurred. true otherwise
   */
-  devGroup::Errno PackProperty( devCANFrame& canframe,
+  devGroup::Errno PackProperty( devCAN::Frame& canframe,
 				devProperty::Command command,
 				devProperty::ID propid,
 				devProperty::Value propval = 0 );
   
   //! The bit of a CAN ID that identicates a group
-  static const devCANFrame::ID GROUP_CODE = 0x0400;
+  static const devCAN::Frame::ID GROUP_CODE = 0x0400;
   
 public:
 
@@ -137,25 +143,25 @@ public:
      Convert the ID of a group to a CAN ID used in a CAN frame. This assumes 
      that the origin of the CAN ID will be the host (00000)
   */
-  static devCANFrame::ID CANID( devGroup::ID groupid );
+  static devCAN::Frame::ID CANID( devGroup::ID groupid );
   
   //! Return the group ID
   devGroup::ID GetID() const;
 
   //! Return the origin ID of the CAN id
-  static devGroup::ID OriginID( devCANFrame::ID canid );
+  static devGroup::ID OriginID( devCAN::Frame::ID canid );
   
   //! Return the origin ID of the CAN frame
-  static devGroup::ID OriginID( const devCANFrame& canframe );
+  static devGroup::ID OriginID( const devCAN::Frame& canframe );
   
   //! Return the destination ID of the CAN id
-  static devGroup::ID DestinationID( devCANFrame::ID canid );
+  static devGroup::ID DestinationID( devCAN::Frame::ID canid );
   
   //! Return the destination ID of the CAN id
-  static devGroup::ID DestinationID( const devCANFrame& canframe );
+  static devGroup::ID DestinationID( const devCAN::Frame& canframe );
   
   //! Return true if the CAN frame id's destination is a group (any group)
-  static bool IsDestinationAGroup( const devCANFrame canframe );
+  static bool IsDestinationAGroup( const devCAN::Frame canframe );
   
   //! Add the puck ID to the group
   void AddPuckIDToGroup( devPuck::ID puckid ) { pucksid.push_back(puckid); }
