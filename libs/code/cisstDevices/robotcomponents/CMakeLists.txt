@@ -80,7 +80,8 @@ if( CISST_DEV_HAS_RTSOCKETCAN )
 
 endif( CISST_DEV_HAS_RTSOCKETCAN )
 
-include( FindOpenSceneGraph )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
+
 if( OPENSCENEGRAPH_FOUND )
 
   SET( 
@@ -99,12 +100,55 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGManipulator.cpp
     )
 
-  find_library( OSGVIEWER_LIBRARY osgViewer )
-
-  SET(OPENSCENEGRAPH_LIBRARIES ${OSGVIEWER_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES})
-
   cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)
 
+  find_package( ODE )
+  if( ODE_FOUND )
+
+    message('ODE FOUND')
+      
+    set( CMAKE_CXX_FLAGS 
+      "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
+      PARENT_SCOPE )
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
+    
+    SET( HEADER_FILES 
+      
+      ${HEADER_FILES} 
+      
+      robotcomponents/ode/devODEBody.h
+      robotcomponents/ode/devODEJoint.h
+      robotcomponents/ode/devODEServoMotor.h
+      #      robotcomponents/ode/devODEManipulator.h
+      
+      #      robotcomponents/ode/devODEBH.h
+      #      robotcomponents/ode/devODEBHF1.h
+      #      robotcomponents/ode/devODEBHF2.h
+      #      robotcomponents/ode/devODEBHF3.h
+      
+      )
+    message( ${HEADER_FILES} )
+    SET( 
+      SOURCE_FILES
+      
+      ${SOURCE_FILES} 
+      
+      robotcomponents/ode/devODEBody.cpp
+      robotcomponents/ode/devODEJoint.cpp
+      robotcomponents/ode/devODEServoMotor.cpp
+      #      robotcomponents/ode/devODEManipulator.cpp
+      
+      #      robotcomponents/ode/devODEBH.cpp
+      #      robotcomponents/ode/devODEBHF1.cpp
+      #      robotcomponents/ode/devODEBHF2.cpp
+      #      robotcomponents/ode/devODEBHF3.cpp
+      
+      robotcomponents/ode/devODEWorld.cpp 
+      
+      )
+    
+  endif( ODE_FOUND )
+    
 endif( OPENSCENEGRAPH_FOUND )
 
 # Check for GLUT
@@ -143,55 +187,6 @@ if( CISST_DEV_HAS_GLUT )
     )
 
 endif( CISST_DEV_HAS_GLUT )
-
-# Check for ODE
-if( CISST_DEV_HAS_ODE )
-  find_package( ODE )
-  if( ODE_FOUND )
-    
-    set( CMAKE_CXX_FLAGS 
-      "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
-      PARENT_SCOPE )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
-    
-    SET( HEADER_FILES 
-
-      ${HEADER_FILES} 
-
-      robotcomponents/ode/devODEBody.h
-      robotcomponents/ode/devODEJoint.h
-      robotcomponents/ode/devODEServoMotor.h
-#      robotcomponents/ode/devODEManipulator.h
-
-#      robotcomponents/ode/devODEBH.h
-#      robotcomponents/ode/devODEBHF1.h
-#      robotcomponents/ode/devODEBHF2.h
-#      robotcomponents/ode/devODEBHF3.h
-
-      )
-    
-    SET( 
-      SOURCE_FILES
-
-      ${SOURCE_FILES} 
-
-      robotcomponents/ode/devODEBody.cpp
-      robotcomponents/ode/devODEJoint.cpp
-      robotcomponents/ode/devODEServoMotor.cpp
-#      robotcomponents/ode/devODEManipulator.cpp
-
-#      robotcomponents/ode/devODEBH.cpp
-#      robotcomponents/ode/devODEBHF1.cpp
-#      robotcomponents/ode/devODEBHF2.cpp
-#      robotcomponents/ode/devODEBHF3.cpp
-
-      robotcomponents/ode/devODEWorld.cpp 
-
-      )
-    
-    endif( ODE_FOUND )
-    
-endif( CISST_DEV_HAS_ODE )
 
 set( ROBOTCOMPONENTS_HEADER_FILES ${HEADER_FILES} PARENT_SCOPE )
 set( ROBOTCOMPONENTS_SOURCE_FILES ${SOURCE_FILES} PARENT_SCOPE )
