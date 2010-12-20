@@ -401,6 +401,48 @@ http://www.cisst.org/cisst/license.txt.
                 # Only call UpdateFromC if required interface is connected to a provided interface
                 if self.__dict__[interfaceNoSpace].GetConnectedInterface():
                     self.__dict__[interfaceNoSpace].UpdateFromC()
+
+        def AddInterfaceRequiredFromProvided(self, interfaceProvided):
+            if not isinstance(interfaceProvided, mtsInterfaceProvided):
+                print 'Parameter must be of type mtsInterfaceProvided'
+                return
+            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvided.GetName(), MTS_OPTIONAL)
+            for command in interfaceProvided.GetNamesOfCommandsVoid():
+                self.__dict__[command] = mtsFunctionVoid()
+                interfaceRequired.AddFunction(command, self.__dict__[command])
+            for command in interfaceProvided.GetNamesOfCommandsVoidReturn():
+                self.__dict__[command] = mtsFunctionVoidReturn()
+                interfaceRequired.AddFunction(command, self.__dict__[command])
+            for command in interfaceProvided.GetNamesOfCommandsWrite():
+                self.__dict__[command] = mtsFunctionWrite()
+                interfaceRequired.AddFunction(command, self.__dict__[command])
+            for command in interfaceProvided.GetNamesOfCommandsWriteReturn():
+                self.__dict__[command] = mtsFunctionWriteReturn()
+                interfaceRequired.AddFunction(command, self.__dict__[command])
+            for command in interfaceProvided.GetNamesOfCommandsQualifiedRead():
+                self.__dict__[command] = mtsFunctionQualifiedRead()
+                interfaceRequired.AddFunction(command, self.__dict__[command])
+            for command in interfaceProvided.GetNamesOfCommandsRead():
+                self.__dict__[command] = mtsFunctionRead()
+                interfaceRequired.AddFunction(command, self.__dict__[command])
+            
+        # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
+        # or ('component', 'interfaceProvided')
+        def AddInterfaceRequiredAndConnect(self, otherComponentInterface):
+            try:
+                num = len(otherComponentInterface)
+                if 2 <= num <= 3:
+                    interfaceName = otherComponentInterface[num-1]
+                    componentName = otherComponentInterface[num-2]
+                    if num == 3:
+                        processName = otherComponentInterface[num-3]
+                    else:
+                        processName = ''  # local
+                    # Now do the work here...(TBD)
+                else:
+                    print 'Parameter error: must specify (process, component, interface) or (component, interface)'
+            except TypeError, e:
+                print 'Parameter error: must specify (process, component, interface) or (component, interface)'
     }
 }
 
