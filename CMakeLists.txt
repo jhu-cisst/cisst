@@ -131,7 +131,14 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 
 # Use XML or not
-option (CISST_HAS_XML "Include cmnXMLPath in the version (requires libxml2)" OFF)
+find_package (LibXml2)
+if (LIBXML2_FOUND)
+  Option (CISST_HAS_XML "Include cmnXMLPath in the version (requires libxml2)" ON)
+  mark_as_advanced (CISST_HAS_XML)
+else (LIBXML2_FOUND)
+  option (CISST_HAS_XML "Include cmnXMLPath in the version (requires libxml2)" OFF)
+endif (LIBXML2_FOUND)
+
 if (CISST_HAS_XML)
   find_package (LibXml2 REQUIRED)
   cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES LIBXML2_INCLUDE_DIR)
@@ -139,7 +146,14 @@ if (CISST_HAS_XML)
 endif (CISST_HAS_XML)
 
 # Support for OpenGL
-option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
+find_package (OpenGL)
+if (OPENGL_FOUND)
+  option (CISST_HAS_OPENGL "Is OpenGL available." ON)
+  mark_as_advanced (CISST_HAS_OPENGL)
+else (OPENGL_FOUND)
+  option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
+endif (OPENGL_FOUND)
+
 if (CISST_HAS_OPENGL)
   find_package (OpenGL REQUIRED)
   cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
@@ -147,9 +161,19 @@ if (CISST_HAS_OPENGL)
 endif (CISST_HAS_OPENGL)
 
 # Support for QT
-option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" OFF)
+set (QT_USE_QTOPENGL ON)
+find_package (Qt4)
+if (QT_FOUND)
+  option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" ON)
+  mark_as_advanced (CISST_HAS_QT)
+else (QT_FOUND)
+  option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" OFF)
+endif (QT_FOUND)
+
+# if detected or if user requests it
 if (CISST_HAS_QT)
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
+  mark_as_advanced (CISST_HAS_OPENGL)
   set (QT_USE_QTOPENGL ON)
   find_package (Qt4 REQUIRED)
   include (${QT_USE_FILE})
@@ -160,10 +184,17 @@ if (CISST_HAS_QT)
 endif (CISST_HAS_QT)
 
 # Support for FLTK
-option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" OFF)
+find_package (FLTK)
+if (FLTK_FOUND)
+  option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" ON)
+  mark_as_advanced (CISST_HAS_FLTK)
+else (FLTK_FOUND)
+  option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" OFF)
+endif (FLTK_FOUND)
+
 if (CISST_HAS_FLTK)
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
-  set (CISST_HAS_OPENGL ON )
+  mark_as_advanced (CISST_HAS_OPENGL)
   find_package(FLTK REQUIRED)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES FLTK_LIBRARIES)
@@ -335,7 +366,7 @@ if (BUILD_LIBS_cisstNumerical)
     cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
   endif (CISST_HAS_CISSTNETLIB)
 endif (BUILD_LIBS_cisstNumerical)
-  
+
 # Once all variables have been defined, use cisstMacros
 include (cisstMacros)
 
