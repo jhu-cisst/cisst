@@ -18,7 +18,7 @@
 # Locate Ice home
 
 # This module defines the following variables:
-# ICE_FOUND : 1 if Ice is found, 0 otherwise
+# ICE_FOUND : YES if Ice is found, NO otherwise
 # ICE_HOME  : path where to find include, lib, bin, etc.
 # ICE_INCLUDE_DIR
 # ICE_LIBRARY_DIR
@@ -35,9 +35,9 @@
 # to be more robust we can look for all of those things individually.
 
 # start with 'not found'
-set (ICE_FOUND 0 CACHE BOOL "Do we have Ice?")
+set (ICE_FOUND "NO" CACHE BOOL "Do we have Ice?" FORCE)
 
-find_path (ICE_INCLUDE_DIR
+find_path (ICE_ICE_H_INCLUDE_DIR
            NAMES Ice/Ice.h
            PATHS
              # rational for this search order:
@@ -86,17 +86,17 @@ find_path (ICE_INCLUDE_DIR
 
 # NOTE: if ICE_HOME_INCLUDE_ICE is set to *-NOTFOUND it will evaluate to FALSE
 
-if (ICE_INCLUDE_DIR)
+if (ICE_ICE_H_INCLUDE_DIR)
 
-  set (ICE_FOUND 1 CACHE BOOL "Do we have Ice?" FORCE)
-  get_filename_component (ICE_HOME_STRING ${ICE_INCLUDE_DIR} PATH)
+  set (ICE_FOUND "YES" CACHE BOOL "Do we have Ice?" FORCE)
+  get_filename_component (ICE_HOME_STRING ${ICE_ICE_H_INCLUDE_DIR} PATH)
   set (ICE_HOME ${ICE_HOME_STRING} CACHE PATH "Ice home directory")
 
   message (STATUS "Setting ICE_HOME to ${ICE_HOME}")
 
   # include and lib dirs are easy
   set (ICE_INCLUDE_DIR
-       ${ICE_INCLUDE_DIR}
+       ${ICE_ICE_H_INCLUDE_DIR}
        ${ICE_HOME}/share/slice
        ${ICE_HOME}/share/ice/slice
        ${ICE_HOME}/share/Ice/slice
@@ -136,7 +136,7 @@ if (ICE_INCLUDE_DIR)
   # quiet things down a bit
   if (ICE_FOUND)
     mark_as_advanced (ICE_FOUND ICE_HOME
-                      ICE_INCLUDE_DIR ICE_SLICE_DIR
+                      ICE_INCLUDE_DIR ICE_ICE_H_INCLUDE_DIR ICE_SLICE_DIR
                       ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE)
   endif (ICE_FOUND)
-endif (ICE_INCLUDE_DIR)
+endif (ICE_ICE_H_INCLUDE_DIR)
