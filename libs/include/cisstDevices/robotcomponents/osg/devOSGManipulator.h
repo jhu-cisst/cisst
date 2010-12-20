@@ -21,7 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstRobot/robManipulator.h>
 #include <cisstDevices/robotcomponents/manipulators/devManipulator.h>
+#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+#include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstDevices/devExport.h>
 
 class CISST_EXPORT devOSGManipulator : 
@@ -30,16 +32,38 @@ class CISST_EXPORT devOSGManipulator :
   public robManipulator,
   public osg::Group {
 
- private:
-
-  RnIO* input;
-  RnIO* output;
-
  protected:
 
-  vctDynamicVector<double> q;
+  RnIO* input;                            // input of N joints
+  RnIO* output;                           // output of N joints
 
+  vctDynamicVector<double> q;             // N joints
+  std::vector< mtsDoubleFrm4x4 > mtsRtw;  // N+1 SE3 (N joints + base)
+
+  void UpdateKinematics();
+
+  devOSGBody* CreateLink( const std::string& name, 
+			  const vctFrame4x4<double>& Rt,
+			  const std::string& model,
+			  devOSGWorld* world );
+  
  public: 
+
+  devOSGManipulator( const std::string& devname,
+		     double period,
+		     devManipulator::State state,
+		     osaCPUMask mask,
+		     devManipulator::Mode mode,
+		     const std::string& robotfile,
+		     const vctFrame4x4<double>& Rtw0 );
+
+  devOSGManipulator( const std::string& devname,
+		     double period,
+		     devManipulator::State state,
+		     osaCPUMask mask,
+		     devManipulator::Mode mode );
+
+
 
   //! OSG Manipulator generic constructor
   /**
@@ -48,11 +72,15 @@ class CISST_EXPORT devOSGManipulator :
      manipulators (bodies and joints) for the engine.
      \param devname The name of the task
      \param period The period of the task
+     \param state  The initial state of the manipulator
+     \param mask   The CPU to host this task
+     \param world  The OSG world
      \param robotfile The file with the kinematics and dynamics parameters
-     \param qinit The initial joint angles
      \param Rtw0 The offset transformation of the robot base
+     \param qinit The initial joint angles
+     \param models A vector of 3D model file names
+     \param basemodel The file name of the base 3D model
   */
-
   devOSGManipulator( const std::string& devname,
 		     double period,
 		     devManipulator::State state,
@@ -70,7 +98,6 @@ class CISST_EXPORT devOSGManipulator :
 
   void Read();
   void Write();
-  void Write( const vctDynamicVector<double>& q );
 
 };
 

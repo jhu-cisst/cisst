@@ -17,10 +17,32 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <osgDB/ReadFile> 
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
-devOSGBody::devOSGBody( const std::string& model, 
+// This is called at each update traversal
+void devOSGBody::UpdateCallback::operator()( osg::Node* node, 
+					   osg::NodeVisitor* nv ){
+      
+  osg::Referenced* data = node->getUserData();
+  devOSGBody::UserData* userdata;
+  userdata = dynamic_cast<devOSGBody::UserData*>( data );
+
+  if( userdata != NULL )
+    { userdata->GetBody()->Update(); }
+
+  traverse( node, nv );
+
+}   
+
+
+devOSGBody::devOSGBody(	const std::string& name,
+			const vctFrame4x4<double>& Rt,
+			const std::string& model, 
 			devOSGWorld* world,
-			const vctFrame4x4<double>& Rt ){
+			const std::string& fnname ) : 
+  mtsComponent( name ){
+  
+  setDataVariance( osg::Object::DYNAMIC );
   
   osg::ref_ptr< osgDB::ReaderWriter::Options > options;
   // "noRotation" is to cancel the default -X in .obj files
@@ -95,16 +117,43 @@ devOSGBody::devOSGBody( const std::string& model,
   if( world != NULL )
     { world->addChild( this ); }
   
-  SetTransformation( Rt );
-  
+  // Setup the callback
+  // Set callback stuff
+  userdata = new devOSGBody::UserData( this );
+  setUserData( userdata );
+  setUpdateCallback( new devOSGBody::UpdateCallback );
+
+  // MTS stuff
+  if( !fnname.empty() ){
+    CMN_LOG_INIT_VERBOSE << name << " " << fnname << std::endl;
+    mtsInterfaceRequired* required;
+    required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
+    if( required != NULL )
+      { required->AddFunction( fnname, ReadTransformation ); }
+
+  }
+
+  SetMatrix( Rt );
+
 }
 
 devOSGBody::~devOSGBody(){}
 
-void devOSGBody::SetTransformation( const vctFrame4x4<double>& Rt ){
-  setMatrix( osg::Matrix ( Rt[0][0], Rt[1][0], Rt[2][0], 0.0,
-			   Rt[0][1], Rt[1][1], Rt[2][1], 0.0,
-			   Rt[0][2], Rt[1][2], Rt[2][2], 0.0,
-			   Rt[0][3], Rt[1][3], Rt[2][3], 1.0 ) );
+// Set the OSG transformation
+void devOSGBody::SetMatrix( const vctFrame4x4<double>& Rt ){
+  this->setMatrix( osg::Matrix ( Rt[0][0], Rt[1][0], Rt[2][0], 0.0,
+				 Rt[0][1], Rt[1][1], Rt[2][1], 0.0,
+				 Rt[0][2], Rt[1][2], Rt[2][2], 0.0,
+				 Rt[0][3], Rt[1][3], Rt[2][3], 1.0 ) );
 }
-  
+
+// This is called from the body's callback
+// This reads a transformation if the body is connected to an interface
+void devOSGBody::Update(){
+  // Get the transformation if possible
+  if( ReadTransformation.IsValid() ){
+    mtsDoubleFrm4x4 Rt;
+    ReadTransformation( Rt );
+    SetMatrix( vctFrame4x4<double>(Rt) );
+  }
+}

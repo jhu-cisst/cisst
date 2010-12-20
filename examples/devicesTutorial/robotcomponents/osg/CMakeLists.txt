@@ -20,16 +20,19 @@ if( OPENSCENEGRAPH_FOUND )
 
   add_executable( OSGtest OSGtest.cpp )
   add_executable( OSGstereo OSGstereo.cpp )
+  add_executable( OSGdepth OSGdepth.cpp )
+  add_executable( OSGsvl OSGsvl.cpp )
+  add_executable( OSGwam OSGwam.cpp )
 
-  cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision )
 
-  cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision )
 
-  if( BUILD_LIBS_cisstStereoVision )
+  cisst_target_link_libraries( OSGdepth cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision )
 
-    add_executable( OSGsvl OSGsvl.cpp )
-    cisst_target_link_libraries( OSGsvl cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision)
+  cisst_target_link_libraries( OSGsvl cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision)
 
-  endif( BUILD_LIBS_cisstStereoVision )
+  cisst_target_link_libraries( OSGwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision)
+
 
 endif( OPENSCENEGRAPH_FOUND )

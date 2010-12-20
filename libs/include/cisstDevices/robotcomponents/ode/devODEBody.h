@@ -20,8 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <ode/ode.h>
 
-// Need to include these first otherwise there's a mess with
-//  #defines in cisstConfig.h
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
@@ -43,17 +41,6 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 
  private:
 
-  // This is used to update the position of the OSG body from the 
-  // ODE position
-  class OSGCallback : public osg::NodeCallback {    
-  public:
-    OSGCallback();
-    void operator()( osg::Node* node, osg::NodeVisitor* nv );
-  };
-
-  //! The name of the body
-  std::string name;
-  
   //! The World ID
   devODEWorld* world;
 
@@ -87,12 +74,25 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   */
   dSpaceID space;
 
+  // Transformation from the center of mass to the intertial frame (base)
   vctFrame4x4<double> Rtcomb;
 
   void BuildODETriMesh( dSpaceID spaceid, 
 			const vctFixedSizeVector<double,3>& com );
 
+  // This is called from each OSG update traversal
+  void Update();
+
+  vctMatrixRotation3<double> GetOrientation() const;
+  vctFixedSizeVector<double,3> GetPosition() const;
+
  public:
+
+  devODEBody( const std::string& name,
+	      const vctFrame4x4<double>& Rtwb,
+	      const std::string& model,
+	      devODEWorld* odeWorld,
+	      dSpaceID spaceid );
 
   //! Main constructor
   /**
@@ -109,18 +109,13 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   */
   devODEBody( const std::string& name,
 	      const vctFrame4x4<double>& Rt,
+	      const std::string& model,
+	      devODEWorld* odeWorld,
 	      double m,
 	      const vctFixedSizeVector<double,3>& com,
 	      const vctFixedSizeMatrix<double,3,3>& moit,
-	      const std::string& model,
-	      dSpaceID spaceid,
-	      devODEWorld* odeWorld );
+	      dSpaceID spaceid );
 
-  devODEBody( const std::string& name,
-	      const vctFrame4x4<double>& Rtwb,
-	      const std::string& model,
-	      dSpaceID spaceid,
-	      devODEWorld* odeWorld );
 
   //! Default destructor
   ~devODEBody();
@@ -131,17 +126,8 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   //! Query the ID of the body
   dBodyID GetBodyID() const { return bodyid; }
 
-  //! Get the body name
-  std::string GetName() const { return name; }
-
   //! Query the ID of the body
   dGeomID GetGeomID() const { return geomid; }
-
-  void Update();
-
-  vctMatrixRotation3<double> GetOrientation() const;
-
-  vctFixedSizeVector<double,3> GetPosition() const;
 
 };
 

@@ -205,9 +205,6 @@ void devODEWorld::RunComponent() {
 
   Unlock();
 
-  /*
-  */
-
   dJointGroupEmpty( GetGroupID() );
 
 }

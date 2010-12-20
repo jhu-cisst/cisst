@@ -87,17 +87,21 @@ if( OPENSCENEGRAPH_FOUND )
   SET( 
     HEADER_FILES 
     ${HEADER_FILES} 
-    robotcomponents/osg/devOSGWorld.h
     robotcomponents/osg/devOSGBody.h
+    robotcomponents/osg/devOSGCamera.h
     robotcomponents/osg/devOSGManipulator.h
+    robotcomponents/osg/devOSGStereo.h
+    robotcomponents/osg/devOSGWorld.h
     )
 
   SET(
     SOURCE_FILES
     ${SOURCE_FILES} 
-    robotcomponents/osg/devOSGWorld.cpp
     robotcomponents/osg/devOSGBody.cpp
+    robotcomponents/osg/devOSGCamera.cpp
     robotcomponents/osg/devOSGManipulator.cpp
+    robotcomponents/osg/devOSGStereo.cpp
+    robotcomponents/osg/devOSGWorld.cpp
     )
 
   cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)
@@ -105,8 +109,6 @@ if( OPENSCENEGRAPH_FOUND )
   find_package( ODE )
   if( ODE_FOUND )
 
-    message('ODE FOUND')
-      
     set( CMAKE_CXX_FLAGS 
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
       PARENT_SCOPE )
@@ -127,7 +129,7 @@ if( OPENSCENEGRAPH_FOUND )
       #      robotcomponents/ode/devODEBHF3.h
       
       )
-    message( ${HEADER_FILES} )
+
     SET( 
       SOURCE_FILES
       

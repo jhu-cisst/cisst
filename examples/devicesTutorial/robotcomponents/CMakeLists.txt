@@ -1,6 +1,6 @@
 
 
-add_subdirectory( trajectories )
+#add_subdirectory( trajectories )
 
 if( CISST_DEV_HAS_ODE )
   add_subdirectory( ode )
