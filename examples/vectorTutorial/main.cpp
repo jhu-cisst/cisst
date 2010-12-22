@@ -47,7 +47,7 @@ using namespace std;
 #include "ExampleNumerical.h"
 #else
 void ExampleNumerical(void) {
-    cout << "This example is not available because cisst was compiled without CISST_HAS_CISSTNETLIB or CISST_HAS_CNETLIB" << endl;
+    cout << "This example is not available because cisst was compiled without CISST_HAS_CISSTNETLIB" << endl;
 }
 #endif
 

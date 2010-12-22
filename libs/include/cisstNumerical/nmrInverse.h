@@ -548,9 +548,9 @@ public:
 
   </ol>
 
-  \note The Inverse functions make use of LAPACK routines.  To activate
-  this code, set the CISST_HAS_CNETLIB or CISST_HAS_CISSTNETLIB flag
-  to ON during the configuration of cisst with CMake.
+  \note The Inverse functions make use of LAPACK routines.  To
+  activate this code, set the CISST_HAS_CISSTNETLIB flag to ON during
+  the configuration of cisst with CMake.
  */
 //@{
 

@@ -109,7 +109,7 @@ http://www.cisst.org/cisst/license.txt.
      nmrPInverseEconomy(A, PInverse, Work);
 
      \note The PInverse functions make use of LAPACK routines.  To activate this
-     code, set the CISST_HAS_CNETLIB flag to ON during the configuration
+     code, set the CISST_HAS_CISSTNETLIB flag to ON during the configuration
      with CMake.
      \note The general rule for numerical functions which depend on LAPACK is that 
      column-major matrices should be used everywhere, and that all
