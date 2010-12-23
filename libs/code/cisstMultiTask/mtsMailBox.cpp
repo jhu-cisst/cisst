@@ -78,8 +78,6 @@ osaThreadSignal * mtsMailBox::GetThreadSignal(void)
 
 
 // return false if nothing to execute; true otherwise.
-// NOTE: this will break if exceptions are thrown by the command objects
-// because the commands (and parameters) won't be removed from the queues.
 bool mtsMailBox::ExecuteNext(void)
 {
    mtsCommandBase** command = CommandQueue.Peek();
@@ -95,58 +93,78 @@ bool mtsMailBox::ExecuteNext(void)
    mtsCommandQueuedVoidReturn * commandVoidReturn;
    mtsCommandQueuedWriteReturn * commandWriteReturn;
 
-   if (!(*command)->Returns()) {
-       switch ((*command)->NumberOfArguments()) {
-       case 0:
-           commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
-           CMN_ASSERT(commandVoid);
-           commandVoid->GetCallable()->Execute();
-           if (commandVoid->BlockingFlagGet() == MTS_BLOCKING) {
-               this->ThreadSignal.Raise();
-           }
-           break;
-       case 1:
-           commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
-           if (commandWrite) {
-               commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
-               commandWrite->ArgumentGet();  // Remove from parameter queue
-               if (commandWrite->BlockingFlagGet() == MTS_BLOCKING) {
-                   this->ThreadSignal.Raise();
+   bool isBlocking = false;
+   try {
+
+       if (!(*command)->Returns()) {
+           switch ((*command)->NumberOfArguments()) {
+           case 0:
+               commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
+               CMN_ASSERT(commandVoid);
+               isBlocking = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
+               commandVoid->GetCallable()->Execute();
+               break;
+           case 1:
+               commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
+               if (commandWrite) {
+                   isBlocking = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
+                   try {
+                       commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
+                   }
+                   catch (...) {
+                       commandWrite->ArgumentGet();  // Remove from parameter queue
+                       throw;
+                   }
+                   commandWrite->ArgumentGet();  // Remove from parameter queue
+               } else {
+                   commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGeneric *>(*command);
+                   CMN_ASSERT(commandWriteGeneric);
+                   isBlocking = (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING);
+                   try {
+                       commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()), MTS_NOT_BLOCKING);
+                   }
+                   catch (...) {
+                       commandWriteGeneric->ArgumentGet();  // Remove from parameter queue
+                       throw;
+                   }
+                   commandWriteGeneric->ArgumentGet();  // Remove from parameter queue
                }
-           } else {
-               commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGeneric *>(*command);
-               CMN_ASSERT(commandWriteGeneric);
-               commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()), MTS_NOT_BLOCKING);
-               commandWriteGeneric->ArgumentGet();  // Remove from parameter queue
-               if (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING) {
-                   this->ThreadSignal.Raise();
-               }
+               break;
+           default:
+               CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
+               return false;
            }
-           break;
-       default:
-           CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
-           return false;
-       }
-   } else {
-       switch ((*command)->NumberOfArguments()) {
-       case 0:
-           commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(*command);
-           CMN_ASSERT(commandVoidReturn);
-           commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
-           this->ThreadSignal.Raise();
-           break;
-       case 1:
-           commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
-           CMN_ASSERT(commandWriteReturn);
-           commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
-                                                       *(commandWriteReturn->GetResultPointer()) );
-           this->ThreadSignal.Raise();
-           break;
-       default:
-           CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
-           return false;
+       } else {
+           switch ((*command)->NumberOfArguments()) {
+           case 0:
+               commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(*command);
+               CMN_ASSERT(commandVoidReturn);
+               isBlocking = true;
+               commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
+               break;
+           case 1:
+               commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
+               CMN_ASSERT(commandWriteReturn);
+               isBlocking = true;
+               commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
+                                                           *(commandWriteReturn->GetResultPointer()) );
+               break;
+           default:
+               CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
+               return false;
+           }
        }
    }
+   catch (...) {
+       CMN_LOG_RUN_WARNING << "mtsMailbox::ExecuteNext caught exception, blocking = " << isBlocking << std::endl;
+       if (isBlocking)
+           this->ThreadSignal.Raise();
+       CommandQueue.Get();  // Remove command from mailbox queue
+       throw;
+   }
+
+   if (isBlocking)
+      this->ThreadSignal.Raise();
    CommandQueue.Get();  // Remove command from mailbox queue
    return true;
 }
