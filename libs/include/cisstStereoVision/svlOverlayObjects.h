@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -32,6 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
+// Forward declarations
+class svlBufferImage;
+
+
 class CISST_EXPORT svlOverlay
 {
 friend class svlFilterImageOverlay;
@@ -46,6 +50,7 @@ public:
     void SetVisible(bool visible);
     unsigned int GetVideoChannel() const;
     bool GetVisible() const;
+    bool IsUsed() const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input) = 0;
@@ -60,6 +65,7 @@ protected:
 private:
     svlOverlay* Next;
     svlOverlay* Prev;
+    bool Used;
 };
 
 
@@ -153,6 +159,41 @@ private:
 };
 
 
+class CISST_EXPORT svlOverlayStaticImage : public svlOverlay
+{
+public:
+    svlOverlayStaticImage();
+    svlOverlayStaticImage(unsigned int videoch,
+                          bool visible,
+                          const svlSampleImageRGB & image,
+                          vctInt2 pos,
+                          unsigned char alpha);
+    svlOverlayStaticImage(unsigned int videoch,
+                          bool visible,
+                          const svlSampleImageRGBStereo & image,
+                          unsigned int imagech,
+                          vctInt2 pos,
+                          unsigned char alpha);
+    virtual ~svlOverlayStaticImage();
+
+    void SetImage(const svlSampleImageRGB & image);
+    void SetImage(const svlSampleImageRGBStereo & image, unsigned int imagech);
+    void SetPosition(vctInt2 pos);
+    void SetAlpha(unsigned char alpha);
+
+    vctInt2 GetPosition() const;
+    unsigned char GetAlpha() const;
+
+protected:
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    svlBufferImage* Buffer;
+    vctInt2 Pos;
+    unsigned char Alpha;
+};
+
+
 class CISST_EXPORT svlOverlayStaticText : public svlOverlay
 {
 public:
@@ -174,6 +215,7 @@ public:
 
     void SetText(const std::string & text);
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetFontSize(double size);
     void SetTextColor(svlRGB txtcolor);
     void SetBackgroundColor(svlRGB bgcolor);
@@ -181,6 +223,7 @@ public:
 
     const std::string & GetText() const;
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     double GetFontSize() const;
     svlRGB GetTextColor() const;
     svlRGB GetBackgroundColor() const;
@@ -198,7 +241,7 @@ private:
     svlRGB TxtColor;
     svlRGB BGColor;
     bool Background;
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     CvFont Font;
 #endif // CISST_SVL_HAS_OPENCV
     bool FontChanged;
@@ -226,12 +269,14 @@ public:
     virtual ~svlOverlayText();
 
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetFontSize(double size);
     void SetTextColor(svlRGB txtcolor);
     void SetBackgroundColor(svlRGB bgcolor);
     void SetBackground(bool enable);
 
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     double GetFontSize() const;
     svlRGB GetTextColor() const;
     svlRGB GetBackgroundColor() const;
@@ -249,7 +294,7 @@ private:
     svlRGB TxtColor;
     svlRGB BGColor;
     bool Background;
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     CvFont Font;
 #endif // CISST_SVL_HAS_OPENCV
     bool FontChanged;
@@ -269,10 +314,12 @@ public:
     virtual ~svlOverlayStaticRect();
 
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetColor(svlRGB color);
     void SetFill(bool fill);
 
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     svlRGB GetColor() const;
     bool GetFill() const;
 
@@ -281,6 +328,52 @@ protected:
 
 private:
     svlRect Rect;
+    svlRGB Color;
+    bool Fill;
+};
+
+
+class CISST_EXPORT svlOverlayStaticEllipse : public svlOverlay
+{
+public:
+    svlOverlayStaticEllipse();
+    svlOverlayStaticEllipse(unsigned int videoch,
+                            bool visible,
+                            const svlPoint2D center,
+                            int radius_horiz,
+                            int radius_vert,
+                            double angle,
+                            svlRGB color,
+                            bool fill = true);
+    svlOverlayStaticEllipse(unsigned int videoch,
+                            bool visible,
+                            const svlPoint2D center,
+                            int radius,
+                            svlRGB color,
+                            bool fill = true);
+    virtual ~svlOverlayStaticEllipse();
+
+    void SetCenter(const svlPoint2D center);
+    void SetRadius(const int radius_horiz, const int radius_vert);
+    void SetRadius(const int radius);
+    void SetAngle(const double angle);
+    void SetColor(svlRGB color);
+    void SetFill(bool fill);
+
+    svlPoint2D GetCenter() const;
+    void GetRadius(int & radius_horiz, int & radius_vert) const;
+    double GetAngle() const;
+    svlRGB GetColor() const;
+    bool GetFill() const;
+
+protected:
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    svlPoint2D Center;
+    int RadiusHoriz;
+    int RadiusVert;
+    double Angle;
     svlRGB Color;
     bool Fill;
 };
@@ -407,6 +500,7 @@ public:
     void SetValue(const double value);
     void SetDirection(const bool vertical);
     void SetRect(svlRect rect);
+    void SetRect(int left, int top, int right, int bottom);
     void SetColor(svlRGB color);
     void SetBackgroundColor(svlRGB bgcolor);
     void SetBorderWidth(const unsigned int pixels);
@@ -417,6 +511,7 @@ public:
     double GetValue() const;
     bool GetDirection() const;
     svlRect GetRect() const;
+    void GetRect(int & left, int & top, int & right, int & bottom) const;
     svlRGB GetColor() const;
     svlRGB GetBackgroundColor() const;
     unsigned int GetBorderWidth() const;

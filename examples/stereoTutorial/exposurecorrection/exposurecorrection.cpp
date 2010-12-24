@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: videoconverter.cpp 1660 2010-07-22 20:22:54Z adeguet1 $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2009
@@ -27,15 +27,15 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
-///////////////////////////////////
-//     Window callback class     //
-///////////////////////////////////
+////////////////////////////////////////
+//     Window event handler class     //
+////////////////////////////////////////
 
-class CWindowCallback : public svlImageWindowCallbackBase
+class CViewerEventHandler : public svlWindowEventHandlerBase
 {
 public:
-    CWindowCallback() :
-        svlImageWindowCallbackBase(),
+    CViewerEventHandler() :
+        svlWindowEventHandlerBase(),
         ExposureCorrectionFilter(0),
         Gamma(true)
     {
@@ -91,7 +91,7 @@ int ExposureCorrection(std::string &src_path)
     svlFilterSourceVideoFile source(1);
     svlFilterImageExposureCorrection exposurecorrection;
     svlFilterImageWindow window;
-    CWindowCallback window_cb;
+    CViewerEventHandler window_eh;
 
     if (src_path.empty()) {
         if (source.DialogFilePath() != SVL_OK) {
@@ -104,8 +104,8 @@ int ExposureCorrection(std::string &src_path)
         source.SetFilePath(src_path);
     }
 
-    window.SetEventHandler(&window_cb);
-    window_cb.ExposureCorrectionFilter = &exposurecorrection;
+    window.SetEventHandler(&window_eh);
+    window_eh.ExposureCorrectionFilter = &exposurecorrection;
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
@@ -116,8 +116,8 @@ int ExposureCorrection(std::string &src_path)
 
     const unsigned int cx = source.GetWidth() / 2;
     const unsigned int cy = source.GetHeight() / 2;
-    window_cb.Center = svlPoint2D(cx, cy);
-    window_cb.Scale = vct2(100.0 / cx, 100.0 / cy);
+    window_eh.Center = svlPoint2D(cx, cy);
+    window_eh.Scale = vct2(100.0 / cx, 100.0 / cy);
 
     // initialize and start stream
     if (stream.Play() != SVL_OK) goto labError;

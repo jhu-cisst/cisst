@@ -1,273 +1,287 @@
-#include <cisstDevices/robotcomponents/glut/devMeshTriangular.h>
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
+#include <cisstDevices/robotcomponents/ode/devODEWorld.h>
 #include <cisstVector/vctMatrixRotation3.h>
 
-devODEBody::devODEBody( dWorldID worldid, 
-			dSpaceID spaceid,
-			const vctFrame4x4<double>& Rtwb,
+devODEBody::devODEBody( const std::string& name,
+		        const vctFrame4x4<double>& Rtwb,
+			const std::string& model,
+			devODEWorld* world,
+			dSpaceID spaceid ) : 
+  devOSGBody( name, Rtwb, model, world ),
+  world( world ),
+  bodyid( 0 ),
+  mass( NULL ),
+  geomid( 0 ),
+  Vertices( NULL ),
+  VertexCount( 0 ),
+  Indices( NULL ),
+  IndexCount( 0 ){
+
+  if( world != NULL ){
+    world->Lock();
+
+    BuildODETriMesh( spaceid, vctFixedSizeVector<double,3>( 0.0 ) );
+
+    // set the body position
+    dGeomSetPosition( GetGeomID(), Rtwb[0][3], Rtwb[1][3], Rtwb[2][3] );
+    
+    // get the orientation of the body
+    dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
+		   Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
+		   Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
+    
+    // set the orientation
+    dGeomSetRotation( GetGeomID(), R );
+    
+    world->Unlock();
+  }
+}
+
+devODEBody::devODEBody( const std::string& name,
+		        const vctFrame4x4<double>& Rtwb,
+			const std::string& model,
+			devODEWorld* world, 
 			double m,
 			const vctFixedSizeVector<double,3>& tbcom,
 			const vctFixedSizeMatrix<double,3,3>& moit,
-			const std::string& geomfile,
-			bool glutgeom ) :
-  mass(NULL),
-  triangles(NULL),
-  ntriangles(0),
-  vertices(NULL),
-  nvertices(0),
-  geometry(NULL) {
-  
-  // Create the ode body
-  bodyid = dBodyCreate( worldid );
+			dSpaceID spaceid ) :
 
-  // Create and configure the mass 
-  this->mass = new dMass;
-  dMassSetParameters( mass,                                // 
-		      m,                                   // mass
-		      0.0, 0.0, 0.0,                       // center of mass
-		      moit[0][0], moit[1][1], moit[2][2],  // tensor
-		      moit[0][1], moit[0][2], moit[1][2] );
+  devOSGBody( name, Rtwb, model, world ),
+  world( world ),
+  bodyid( 0 ),
+  mass( NULL ),
+  geomid( 0 ),
+  Vertices( NULL ),
+  VertexCount( 0 ),
+  Indices( NULL ),
+  IndexCount( 0 ){
 
-  // set the mass of the body
-  dBodySetMass( BodyID(), this->mass );
+  if( world != NULL ){
 
-  // Configure the geometry
-  // Ensure an .obj file is given
-  if( !geomfile.empty() ){
+    // Ensure that the world isn't turning
+    world->Lock();
 
-    // Load the mesh
-    LoadOBJ( geomfile, tbcom );
+    // Create the ode body
+    bodyid = dBodyCreate( world->GetWorldID() );
 
-    // Create the ODE data object
-    this->meshid = dGeomTriMeshDataCreate();
+    dBodySetData( GetBodyID(), (void*)this );
 
-    // Build the mesh data for ODE
-    dGeomTriMeshDataBuildSimple( this->meshid,
-				 (const dReal*)this->vertices,
-				 this->nvertices,
-				 this->triangles,
-				 this->ntriangles*3 );
+    // Create and configure the mass 
+    this->mass = new dMass;
+    //dMassSetBoxTotal (mass, 1, 0.1, 0.1, 0.1 );
+    dMassSetParameters( mass,                                // 
+			m,                                   // mass
+			0.0, 0.0, 0.0,                       // center of mass
+			moit[0][0], moit[1][1], moit[2][2],  // tensor
+			moit[0][1], moit[0][2], moit[1][2] );
 
-    // Create the geom
-    this->geomid = dCreateTriMesh( spaceid, this->meshid, NULL, NULL, NULL);
+    // set the mass of the body
+    dBodySetMass( GetBodyID(), this->mass );
 
-    // dBodySetPosition( BodyID(), tbcom[0], tbcom[1], tbcom[2] );
-    // Attach the geom to the body
-    dGeomSetBody( GeomID(), BodyID() );
+    // Build the mesh data
+    BuildODETriMesh( spaceid, tbcom );
 
-    // Add a mesh for GLUT if we need one
-    if( glutgeom ){
-      this->geometry = new devMeshTriangular;
-
-      this->geometry->LoadOBJ( geomfile );
-      devGLUT::Register( (devGeometry*)(this->geometry) );
-    }
+    // This is the center of mass. ODE requires that the coordinate frame of the
+    // body be a its center of mass. Thus, we must shift the position of the
+    // body to its center of mass.
+    
+    // Center of mass with respect to the body coordinate frame...
+    vctFrame4x4<double> Rtbcom( vctMatrixRotation3<double>(), tbcom );
+    this->Rtcomb = Rtbcom;
+    
+    // ...We actually want to remember its inverse...
+    this->Rtcomb.InverseSelf();
+    
+    // Center of mass wrt to the world frame
+    vctFrame4x4<double> Rtwcom = Rtwb * Rtbcom;
+    
+    // set the body position
+    dBodySetPosition( GetBodyID(), Rtwcom[0][3], Rtwcom[1][3], Rtwcom[2][3] );
+    
+    // get the orientation of the body
+    dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
+		   Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
+		   Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
+    
+    // set the orientation
+    dBodySetRotation( GetBodyID(), R );
+    
+    // Ensure that the world isn't turning
+    world->Unlock();
   }
-
-  // This is the center of mass. ODE requires that the coordinate frame of the
-  // body be a its center of mass. Thus, we must shift the position of the body
-  // to its center of mass.
-
-  // Center of mass with respect to the body coordinate frame...
-  vctFrame4x4<double> Rtbcom( vctMatrixRotation3<double>(), tbcom );
-  this->Rtcomb = Rtbcom;
-  
-  // ...We actually want to remember its inverse...
-  this->Rtcomb.InverseSelf();
-
-  // Center of mass wrt to the world frame
-  vctFrame4x4<double> Rtwcom = Rtwb * Rtbcom;
-
-  // set the body position
-  dBodySetPosition( BodyID(), Rtwcom[0][3], Rtwcom[1][3], Rtwcom[2][3] );
-
-  // get the orientation of the body
-  dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
-		 Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
-		 Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
-
-  // set the orientation
-  dBodySetRotation( BodyID(), R );
 
 }
 
 devODEBody::~devODEBody(){
-  if( triangles != NULL ) delete[] triangles;
-  if( vertices != NULL )  delete[] vertices;
+  world->Lock();
+
+  /* 
+  if( Vertices != NULL ){ delete[] Vertices; }
+  if( Indices != NULL ) { delete[] Indices;  }
+  if( mass != NULL )    { delete   mass;     }
+
+  
+  if( GetBodyID() != 0 ){ dBodyDestroy( GetBodyID() ); }
+  dGeomTriMeshDataDestroy( this->meshid );
+  dGeomDestroy( GetGeomID() );
+  */
+
+  world->Unlock();
+
+}
+
+void devODEBody::BuildODETriMesh( dSpaceID spaceid,
+				  const vctFixedSizeVector<double,3>& com ){
+
+  // used to accumulate the vertices of all geometries
+  std::vector< vctFixedSizeVector<double,3> > geometriesvertices;
+  // used to accumulate the vertices per geometry
+  std::vector< int > geometriesverticescount;
+  // used to accumulate the indices
+  std::vector<dTriIndex> geometriesindices;
+
+  // start a 0 vertex
+  geometriesverticescount.push_back( 0 );
+
+  for( size_t i=0; i<geometries.size(); i++ ){
+    
+    // Get the OSG vertex array of the geometry
+    const osg::Array* vertexarray = geometries[i]->getVertexArray();
+
+    // This part copies the vertices of a geometry in a temporary buffer
+    // Ensure we are dealing with an array of 3d points
+    if( vertexarray->getType() == osg::Array::Vec3ArrayType ){
+
+      // Ensure that the array is GL_FLOAT
+      if( vertexarray->getDataType() == GL_FLOAT ){
+	
+	// Copy the vertices
+	GLfloat* fvertices = (GLfloat*)vertexarray->getDataPointer();
+	for( size_t j=0, idx=0; j<vertexarray->getNumElements(); j++){
+	  vctFixedSizeVector<double,3> vertex;
+	  vertex[0] = fvertices[idx++] - com[0]; 
+	  vertex[1] = fvertices[idx++] - com[1]; 
+	  vertex[2] = fvertices[idx++] - com[2]; 
+	  geometriesvertices.push_back( vertex );
+	}
+	// Copy the vertex count for this geometry
+	geometriesverticescount.push_back( vertexarray->getNumElements()/3 );
+      }
+
+    }
+    
+    // Copy the indices in a temporary array
+    // Process all the primitives in the geometry
+    for( size_t j=0; j<geometries[i]->getNumPrimitiveSets(); j++ ){
+      
+      // get the ith primitive set
+      const osg::PrimitiveSet* primitiveset = geometries[i]->getPrimitiveSet( j );
+
+      // test that the primitive are triangles
+      if( primitiveset->getMode() == osg::PrimitiveSet::TRIANGLES || 
+	  primitiveset->getMode() == osg::PrimitiveSet::TRIANGLE_STRIP ){
+
+	// copy the indices. Add the vertex count of the previous geometry. This
+	// is because the indices are numbered wrt to vertices of the geometry
+	for( unsigned int k=0; k<primitiveset->getNumIndices(); k++ ){ 
+	  dTriIndex idx = (dTriIndex)primitiveset->index( k );// vertex index wrt geometry
+	  idx += geometriesverticescount[ i ];                // vertex absolute index
+	  geometriesindices.push_back( idx );
+	}
+      }
+    }
+  }
+
+  // Create the array for ODE and copy the data
+  VertexCount =  geometriesvertices.size();
+  Vertices  = new dVector3[ VertexCount ];
+  IndexCount = geometriesindices.size();
+  Indices = new dTriIndex[ IndexCount ];
+
+  for( int i=0; i<VertexCount; i++ ){
+    Vertices[i][0] = geometriesvertices[i][0];
+    Vertices[i][1] = geometriesvertices[i][1];
+    Vertices[i][2] = geometriesvertices[i][2];
+  }
+
+  for( int i=0; i<IndexCount; i++ ){
+    Indices[i] = geometriesindices[i];
+  }
+
+  if( 0 < IndexCount && 0 < VertexCount ){
+
+    // Build the mesh data for ODE
+    this->meshid = dGeomTriMeshDataCreate();
+
+    // Build the mesh
+    dGeomTriMeshDataBuildSimple( this->meshid, 
+				 (const dReal*)Vertices, VertexCount,
+				 Indices, IndexCount );
+  
+    // Create the geom
+    this->geomid = dCreateTriMesh( spaceid, this->meshid, NULL, NULL, NULL);
+    dGeomSetData( GetGeomID(), (void*)this );
+  
+    // Attach the geom to the body
+    dGeomSetBody( GetGeomID(), GetBodyID() );
+  
+  }
+
 }
 
 void devODEBody::Enable(){ 
-  dBodySetLinearVel( BodyID(), 0, 0, 0);
-  dBodySetAngularVel( BodyID(), 0, 0, 0);
-  dBodyEnable( BodyID() ); 
-  dBodySetLinearVel( BodyID(), 0, 0, 0);
-  dBodySetAngularVel( BodyID(), 0, 0, 0);
+  dBodySetLinearVel( GetBodyID(), 0, 0, 0);
+  dBodySetAngularVel( GetBodyID(), 0, 0, 0);
+  dBodyEnable( GetBodyID() ); 
+  dBodySetLinearVel( GetBodyID(), 0, 0, 0);
+  dBodySetAngularVel( GetBodyID(), 0, 0, 0);
 }
 void devODEBody::Disable(){ 
-  dBodySetLinearVel( BodyID(), 0, 0, 0);
-  dBodySetAngularVel( BodyID(), 0, 0, 0);
-  dBodyDisable( BodyID() ); 
-  dBodySetLinearVel( BodyID(), 0, 0, 0);
-  dBodySetAngularVel( BodyID(), 0, 0, 0);
+  dBodySetLinearVel( GetBodyID(), 0, 0, 0);
+  dBodySetAngularVel( GetBodyID(), 0, 0, 0);
+  dBodyDisable( GetBodyID() ); 
+  dBodySetLinearVel( GetBodyID(), 0, 0, 0);
+  dBodySetAngularVel( GetBodyID(), 0, 0, 0);
 }
 
+// This is different from the devOSGBody::Update since it gets the position/orientation
+// from ODE world and not from MTS
 void devODEBody::Update(){
-  if( geometry != NULL ){
-    vctMatrixRotation3<double> Rwb = GetOrientation();
-    vctFixedSizeVector<double,3> twb = GetPosition();
-    geometry->devGeometry::SetPositionOrientation(vctFrame4x4<double>(Rwb,twb));
-  }
+  vctMatrixRotation3<double> R = GetOrientation();
+  vctFixedSizeVector<double,3> t = GetPosition();
+  SetMatrix( vctFrame4x4<double>(R,t) );
 }
 
 vctMatrixRotation3<double> devODEBody::GetOrientation() const{
-  const dReal* Rwcom = dBodyGetRotation( BodyID() );
-  return vctMatrixRotation3<double> ( Rwcom[0], Rwcom[1], Rwcom[2], // R[3],
-				      Rwcom[4], Rwcom[5], Rwcom[6], // R[7],
-				      Rwcom[8], Rwcom[9], Rwcom[10],// R[11],
-				      VCT_NORMALIZE );
+  if( GetGeomID() != 0 ){
+    const dReal* Rwcom = dGeomGetRotation( GetGeomID() );
+    return vctMatrixRotation3<double> ( Rwcom[0], Rwcom[1], Rwcom[2], // R[3],
+					Rwcom[4], Rwcom[5], Rwcom[6], // R[7],
+					Rwcom[8], Rwcom[9], Rwcom[10],// R[11],
+					VCT_NORMALIZE );
+  }
+  return vctMatrixRotation3<double>();
 }
 
 vctFixedSizeVector<double,3> devODEBody::GetPosition() const{
-  const dReal* t = dBodyGetPosition( BodyID() );
-  //return vctFixedSizeVector<double,3>( t[0], t[1], t[2] );
-  // The position of the center of mass in the wrt world
-  vctFixedSizeVector<double,3> twcom( t[0], t[1], t[2] );
+  if( GetGeomID() != 0 ){
 
-  // The orientation of the center of mass
-  vctMatrixRotation3<double> Rwcom = GetOrientation();
+    const dReal* t = dGeomGetPosition( GetGeomID() );
+    //return vctFixedSizeVector<double,3>( t[0], t[1], t[2] );
+    // The position of the center of mass in the wrt world
+    vctFixedSizeVector<double,3> twcom( t[0], t[1], t[2] );
+    
+    // The orientation of the center of mass
+    vctMatrixRotation3<double> Rwcom = GetOrientation();
 
-  // The position and orientation of the com wrt to the world frame
-  vctFrame4x4<double> Rtwcom( Rwcom, twcom );
-
-  vctFrame4x4<double> Rtwb = Rtwcom * this->Rtcomb;
-
-  // return the position of the body: position of the com - (com in body frame) 
-  return vctFixedSizeVector<double,3>( Rtwb[0][3], Rtwb[1][3], Rtwb[2][3] );
-
-}
-
-int devODEBody::LoadOBJ( const std::string& objfilename,
-			 const vctFixedSizeVector<double,3>& com ){
-
-  std::string line;       // used to parse lines of the obj file
-  std::ifstream ifs;      // 
-
-  // we're going to accumulate the vertices and triangles in these vectors
-  std::vector< vctFixedSizeVector<double,3> > tmpvertices;
-  std::vector< vctFixedSizeVector<int,3> > tmptriangles;
-
-  // open the file name
-  ifs.open( objfilename.data() );
-  if(!ifs){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Couldn't open file " << objfilename
-		      << std::endl;
-    return 1;
+    // The position and orientation of the com wrt to the world frame
+    vctFrame4x4<double> Rtwcom( Rwcom, twcom );
+    
+    vctFrame4x4<double> Rtwb = Rtwcom * this->Rtcomb;
+    
+    // return the position of the body: position of the com - (com in body frame) 
+    return vctFixedSizeVector<double,3>( Rtwb[0][3], Rtwb[1][3], Rtwb[2][3] );
   }
-
-  // copy the first line in the string
-  getline( ifs, line );
-
-  // until we reach the end of the file
-  while(!ifs.eof()){
-
-    // get the 1st (non-space) character of the line
-    size_t first = line.find_first_not_of(" ");
-
-    // ensure the 1st character is found (not an empty line)
-    if( first != std::string::npos ){
-      
-      // ensure the line isn't a comment
-      if( line.at( first ) != '#' ){
-
-	// we'll tokenize the string
-	char* array = new char[ line.size()+1 ];  // create an array
-	strcpy( array, line.data() );             // copy the string
-	
-	char *token = strtok(array, " ");
-
-	if( token != NULL ){
-	  
-	  // Is the token a vertex?
-	  if( strcmp( token, "v" ) == 0 ){
-	    std::istringstream linestream(line);
-	    double x, y, z, w=1.0;   // the coordinates
-	    char v;                  // the "v" character
-	    linestream >> v >> x >> y >> z >> w;
-	    tmpvertices.push_back( vctFixedSizeVector<double,3>(x, y, z) );
-	  }
-	  
-	  // Is the token a facet?
-	  if( strcmp( token, "f" ) == 0 ){
-
-	    vctFixedSizeVector<int,3> triangle;   // holds the vertex indices
-	    size_t n=0;                           // the number of vertices
-
-	    char* triplet = strtok(NULL, " ");
-	    while( triplet ){
-	      int v, vt, vn;
-
-	      // vertex + texture + normal
-	      if( sscanf( triplet, "%d/%d/%d", &v, &vt, &vn  ) == 3 ){
-		if( n < 3 ){
-		  triangle[n] = v-1;
-		  n++;
-		}
-	      }
-
-	      // vertex + normal
-	      else if( sscanf( triplet, "%d//%d", &v, &vn ) == 2 ){
-		if( n < 3 ){
-		  triangle[n] = v-1;
-		  n++;
-		}
-	      }
-	      // vertex
-	      else if( sscanf( triplet, "%d", &v ) == 1 ){
-		if( n < 3 ){
-		  triangle[n] = v-1;
-		  n++;
-		}
-	      }
-
-	      triplet = strtok(NULL, " ");  // go to the next triplet
-	    }
-
-	    // did we got 3 vertices 
-	    if( n == 3 ){
-	      tmptriangles.push_back( triangle );
-	    }
-	    else{ }
-
-	  }
-
-	}
-	delete[] array;
-	
-      }
-    }
-    getline( ifs, line );
-  }
-  nvertices = tmpvertices.size();
-  ntriangles = tmptriangles.size();
-
-  vertices = new dVector3[ nvertices ];
-  triangles = new dTriIndex[ ntriangles*3 ];
-
-  // copy the vertex coordinates from the vectors
-  for(size_t i=0; i<nvertices; i++){
-    vertices[i][0] = tmpvertices[i][0] - com[0];
-    vertices[i][1] = tmpvertices[i][1] - com[1];
-    vertices[i][2] = tmpvertices[i][2] - com[2];
-  }
-
-  // copy the indices (3 indices/triangle)
-  for( size_t i=0; i<ntriangles; i++ ){
-    triangles[i*3+0] = (dTriIndex)tmptriangles[i][0];
-    triangles[i*3+1] = (dTriIndex)tmptriangles[i][1];
-    triangles[i*3+2] = (dTriIndex)tmptriangles[i][2];
-  }
-
-  return 0;
+  return vctFixedSizeVector<double,3>( 0.0 );
 }
 

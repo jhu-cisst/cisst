@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -119,37 +119,54 @@ public:
 
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
                                        mtsBlockingType blocking) {
-        if (this->IsEnabled()) {
-            if (!MailBox) {
-                CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: no mailbox for \""
-                                  << this->Name << "\"" << std::endl;
-                return mtsExecutionResult::NO_MAILBOX;
-            }
-            const ArgumentQueueBaseType * argumentTyped = dynamic_cast<const ArgumentQueueBaseType*>(&argument);
-            if (!argumentTyped) {
-                return mtsExecutionResult::BAD_INPUT;
-            }
-            // copy the argument and blocking flag to the local storage.
-            if (ArgumentsQueue.Put(*argumentTyped) &&
-                BlockingFlagQueue.Put(blocking)) {
-                if (MailBox->Write(this)) {
-                    if ((blocking == MTS_BLOCKING) && !MailBox->IsEmpty()) {
-                        MailBox->ThreadSignalWait();
-                    }
-                    return mtsExecutionResult::DEV_OK;
-                } else {
-                    CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute(): mailbox full for \""
-                                      << this->Name << "\"" << std::endl;
-                    ArgumentsQueue.Get();  // pop argument and blocking flag from local storage
-                    BlockingFlagQueue.Get();
-                }
-            } else {
-                CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute(): ArgumentsQueue or BlockingFlagQueue full for \""
-                                  << this->Name << "\"" << std::endl;
-            }
-            return mtsExecutionResult::MAILBOX_FULL;
+        // check if this command is enabled
+        if (!this->IsEnabled()) {
+            return mtsExecutionResult::COMMAND_DISABLED;
         }
-        return mtsExecutionResult::DISABLED;
+        // check if there is a mailbox (i.e. if the command is associated to an interface
+        if (!MailBox) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: no mailbox for \""
+                              << this->Name << "\"" << std::endl;
+            return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
+        }
+        // try to cast the input type
+        const ArgumentQueueBaseType * argumentTyped = dynamic_cast<const ArgumentQueueBaseType*>(&argument);
+        if (!argumentTyped) {
+            return mtsExecutionResult::INVALID_INPUT_TYPE;
+        }
+        // copy the argument to the local storage.
+        if (!ArgumentsQueue.Put(*argumentTyped)) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: ArgumentsQueue full for \""
+                              << this->Name << "\"" << std::endl;
+            return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+        }
+        // copy the blocking flag to the local storage.
+        if (!BlockingFlagQueue.Put(blocking)) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: BlockingFlagQueue full for \""
+                              << this->Name << "\"" << std::endl;
+            ArgumentsQueue.Get(); // pop argument
+            return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+        }
+        // finally try to queue to mailbox
+        if (!MailBox->Write(this)) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: mailbox full for \""
+                              << this->Name << "\"" << std::endl;
+            ArgumentsQueue.Get();  // pop argument and blocking flag from local storage
+            BlockingFlagQueue.Get();
+            return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+        }
+        if (blocking == MTS_BLOCKING) {
+            // test if the mailbox has been emptied already (e.g. post queued command)
+            if (MailBox->IsEmpty()) {
+                // signal has been raised, reset it
+                MailBox->ThreadSignalWait(0.0);
+            } else {
+            // normal case, wait
+                MailBox->ThreadSignalWait();
+            }
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
+        }
+        return mtsExecutionResult::COMMAND_QUEUED;
     }
 
     /* commented in base class */

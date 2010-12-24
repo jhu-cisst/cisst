@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlTrackerCisstWSSD.cpp 821 2009-09-08 01:31:37Z adeguet1 $
+  $Id$
 
   Author(s):  Maneesh Dewan (?)
   Created on: 2007 
@@ -182,7 +182,7 @@ svlTrackerCisstWSSD::IndexType svlTrackerCisstWSSD::getCurrentimageNumCols() { r
 double svlTrackerCisstWSSD::getOutputPosX() {return outputPosX;}
 double svlTrackerCisstWSSD::getOutputPosY() {return outputPosY;}
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 //Copy a input image into buffer matrix
 void svlTrackerCisstWSSD::copyImage_opencv(ImageType &src, MatrixType &dst, IndexType startR, IndexType startC) {

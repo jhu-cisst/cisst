@@ -18,12 +18,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _devWAM_h
 
 #include <cisstDevices/can/devCAN.h>
-#include <cisstDevices/manipulators/WAM/devPuck.h>
-#include <cisstDevices/manipulators/WAM/devGroup.h>
+#include <cisstDevices/robotcomponents/manipulators/Barrett/devPuck.h>
+#include <cisstDevices/robotcomponents/manipulators/Barrett/devGroup.h>
 
 #include <cisstVector/vctDynamicMatrix.h>
 
-#include <cisstDevices/manipulators/devManipulator.h>
+#include <cisstDevices/robotcomponents/manipulators/devManipulator.h>
 #include <cisstDevices/devExport.h>
 
 //! A clas for a WAM device
@@ -52,10 +52,14 @@ private:
   // WAM specific members
   //
 
+  RnIO* input;
+  RnIO* output;
+
   //! A pointer to a CAN device
   devCAN* candev;
 
   vctDynamicVector<double> qinit;
+  vctDynamicVector<double> q;
   
   //! A vector of all the pucks
   std::vector<devPuck>   pucks;
@@ -138,7 +142,7 @@ private:
 	      then only the first 3 currents will be used.
      \return false if no error occurred. true otherwise.
   */
-  devWAM::Errno PackCurrents( devCANFrame& canframe, 
+  devWAM::Errno PackCurrents( devCAN::Frame& canframe, 
 			      devGroup::ID gid, 
 			      const double I[4] );
 
@@ -150,8 +154,10 @@ private:
      \param q[out] The resulting motor positions in radians
      \return false if no error occurred. true otherwise.
   */
+ public:
+  devWAM::Errno QueryPositions();
   devWAM::Errno RecvPositions( vctDynamicVector<double>& q );
-  vctDynamicVector<double>  Read();
+  void  Read();
   
   //! Send joints positions
   /**
@@ -178,7 +184,7 @@ private:
      \return false if no error occurred. true otherwise
   */
   devWAM::Errno SendTorques( const vctDynamicVector<double>& t );
-  void Write( const vctDynamicVector<double>& t );
+  void Write();
 
   //! Set velocity warning
   /**
@@ -231,13 +237,22 @@ private:
   */
   devWAM::Errno SetTorqueFault( devProperty::Value torquefault );
   
+  devWAM::Errno SetPucksMode( devProperty::Value puckmode );
+
   devWAM::Errno SetPucksStatus( devProperty::Value puckstatus );
 
-  //! Enable the motors
+ protected:
+
+  //! Enable the modes
   /**
      This enables the motors of the WAM. This is the equivalent of "activating"
      the WAM with the display pendant. So be careful. Things can move after.
   */
+ public:
+
+  void SetIdleMode(void);
+  void SetPositionMode(void);
+  void SetForceTorqueMode(void);
 
 public:
 
@@ -256,10 +271,12 @@ public:
   */
   devWAM( const std::string& taskname, 
 	  double period, 
+	  osaCPUMask mask,
 	  devCAN* candev, 
 	  const vctDynamicVector<double>& qinit=
 	  vctDynamicVector<double>( 7, 0.0 ) );
-  ~devWAM(){}
+
+  ~devWAM();
 
   void Configure( const std::string& filename = "" );
   void Cleanup();

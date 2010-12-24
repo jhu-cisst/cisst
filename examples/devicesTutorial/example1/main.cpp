@@ -33,7 +33,7 @@ int main(void)
     taskManager->AddTask(displayTaskObject);
 
     // this is not great if one has both sensable and novint, we pick sensable by default
-#if (CISST_DEV_HAS_SENSABLEHD == ON)
+#if CISST_DEV_HAS_SENSABLEHD
     // name as defined in Sensable configuration
     std::string omniName("Omni1");
     devSensableHD * robotObject = new devSensableHD("Omni", "Omni1");
@@ -43,7 +43,7 @@ int main(void)
     taskManager->Connect("DISP", "Robot", "Omni", omniName);
     taskManager->Connect("DISP", "Button1", "Omni", omniName + "Button1");
     taskManager->Connect("DISP", "Button2", "Omni", omniName + "Button2");
-#elif (CISST_DEV_HAS_NOVINTHDL == ON)
+#elif CISST_DEV_HAS_NOVINTHDL
     // name as defined in Sensable configuration
     devNovintHDL * robotObject = new devNovintHDL("Novint", "Novint");
 	taskManager->AddTask(robotObject);

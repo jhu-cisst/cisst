@@ -12,14 +12,14 @@
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example9Local");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClass("clientTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("serverTask", CMN_LOG_ALLOW_ALL);
 
     // create our two components
     const double PeriodClient = 10 * cmn_ms; // in milliseconds

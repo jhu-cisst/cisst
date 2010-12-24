@@ -178,7 +178,7 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvided(const std::string & in
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
     }
     if (interfaceProvided) {
-        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LOD_INIT_ERROR)) {
+        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LEVEL_INIT_ERROR)) {
             InterfacesProvided.push_back(interfaceProvided);
             return interfaceProvided;
         }
@@ -703,15 +703,15 @@ void mtsComponent::UseSeparateLogFile(const std::string & filename, bool forward
     this->LogFile = new std::ofstream();
     this->LogFile->open(filename.c_str());
     if (this->LogFile->is_open()) {
-        // set the multiplexer and change flag et the end!
+        // set the multiplexer and change flag at the end!
         CMN_LOG_CLASS_INIT_DEBUG << "UseSeparateLogFile: opened log file \"" << filename
                                  << "\" for component \"" << this->GetName() << "\"" << std::endl;
-        this->LoDMultiplexerStreambuf->AddChannel(*(this->LogFile), CMN_LOG_LOD_VERY_VERBOSE);
+        this->LoDMultiplexerStreambuf->AddChannel(*(this->LogFile), CMN_LOG_ALLOW_ALL);
         if (forwardToLogger) {
             // note that if the component multiplexer already existed
             // and the cmnLogger multiplexer was already added, this
             // line has no effect
-            this->LoDMultiplexerStreambuf->AddChannel(cmnLogger::GetMultiplexer(), CMN_LOG_LOD_VERY_VERBOSE);
+            this->LoDMultiplexerStreambuf->AddMultiplexer(cmnLogger::GetMultiplexer());
         }
         this->UseSeparateLogFileFlag = true;
     } else {

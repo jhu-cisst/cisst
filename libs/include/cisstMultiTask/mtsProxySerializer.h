@@ -82,6 +82,7 @@ public:
         }
     }
 
+    // MJ: This method internally allocates memory. Caller should deallocate it.
     mtsGenericObject * DeSerialize(const std::string & serializedObject) {
         cmnGenericObject * deserializedObject = 0;
         try {

@@ -117,7 +117,7 @@ set (CTEST_DROP_LOCATION "/cisst/CDash/submit.php?project=cisst")
 # set (CTEST_TRIGGER_SITE "")
 
 # Set maximum execution time
-set (DART_TESTING_TIMEOUT 2000)
+set (DART_TESTING_TIMEOUT 120) # in seconds
 
 # the specified NIGHLY_START_TIME. Time is specified in 24 hour format.
 set (CTEST_NIGHTLY_START_TIME "00:00:00 EST")

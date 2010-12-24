@@ -23,24 +23,25 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageCropper_h
 #define _svlFilterImageCropper_h
 
-#include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterImageCenterFinder.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterImageCropper : public svlFilterBase
+class CISST_EXPORT svlFilterImageCropper : public svlFilterBase, public svlFilterImageCenterFinderInterface
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterImageCropper();
     virtual ~svlFilterImageCropper();
 
-    int SetRectangle(const int left, const int top, const int right, const int bottom, unsigned int videoch = SVL_LEFT);
+    int SetRectangle(int left, int top, int right, int bottom, unsigned int videoch = SVL_LEFT);
     int SetRectangle(const svlRect & rect, unsigned int videoch = SVL_LEFT);
-    int SetCorner(const int x, const int y, unsigned int videoch = SVL_LEFT);
-    int SetCenter(const int x, const int y, unsigned int videoch = SVL_LEFT);
+    int SetCorner(int x, int y, unsigned int videoch = SVL_LEFT);
+    int SetCenter(int x, int y, unsigned int videoch = SVL_LEFT);
+    int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);

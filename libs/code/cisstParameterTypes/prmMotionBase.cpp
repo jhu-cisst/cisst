@@ -24,3 +24,30 @@ prmMotionBase::~prmMotionBase()
 {
 }
 
+
+void prmMotionBase::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+    //! \todo Fix this once serializeRaw is available for BlockingFlagMember
+    //this->BlockingFlagMember.SerializeRaw(outputStream);
+    //cmnSerializeRaw(outputStream, prmBlocking);
+    cmnSerializeRaw(outputStream, BlendingFactorMember);
+    cmnSerializeRaw(outputStream, TimeLimitMember);
+    cmnSerializeRaw(outputStream, IsPreemptableMember);
+    cmnSerializeRaw(outputStream, IsCoordinatedMember);
+    cmnSerializeRaw(outputStream, IsGoalOnlyMember);
+
+}
+
+void prmMotionBase::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+    //! \todo Fix this once serializeRaw is available for BlockingFlagMember
+    //this->BlockingFlagMember.DeSerializeRaw(inputStream);
+    //cmnDeSerializeRaw(inputStream, prmBlocking);
+    cmnDeSerializeRaw(inputStream, BlendingFactorMember);
+    cmnDeSerializeRaw(inputStream, TimeLimitMember);
+    cmnDeSerializeRaw(inputStream, IsPreemptableMember);
+    cmnDeSerializeRaw(inputStream, IsCoordinatedMember);
+    cmnDeSerializeRaw(inputStream, IsGoalOnlyMember);
+}

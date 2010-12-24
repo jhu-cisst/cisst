@@ -1086,8 +1086,8 @@ class vctFixedSizeConstMatrixBase
         const size_type myRows = rows();
         const size_type myCols = cols();
         // preserve the formatting flags as they were
-        const size_t width = outputStream.width(12);
-        const size_t precision = outputStream.precision(6);
+        const std::streamsize width = outputStream.width(12);
+        const std::streamsize precision = outputStream.precision(6);
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
         size_type indexRow, indexCol;

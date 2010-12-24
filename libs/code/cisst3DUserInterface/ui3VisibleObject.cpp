@@ -140,7 +140,7 @@ void ui3VisibleObject::PropagateVisibility(bool visible)
 
 void ui3VisibleObject::SetPosition(const vctDouble3 & position, bool useLock)
 {
-    CMN_LOG_CLASS_VERY_VERBOSE << "SetPosition: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "SetPosition: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
         if (useLock) {
             this->Lock();
@@ -159,7 +159,7 @@ void ui3VisibleObject::SetPosition(const vctDouble3 & position, bool useLock)
 
 void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix, bool useLock)
 {
-    CMN_LOG_CLASS_VERY_VERBOSE << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
         unsigned int i, j;
         if (useLock) {
@@ -181,7 +181,7 @@ void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix, bool us
 
 void ui3VisibleObject::SetScale(const double & scale, bool useLock)
 {
-    CMN_LOG_CLASS_VERY_VERBOSE << "SetScale: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "SetScale: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
         if (useLock) {
             this->Lock();

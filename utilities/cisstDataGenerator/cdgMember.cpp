@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-06
@@ -31,7 +31,13 @@ cdgMember::cdgMember():
 }
 
 
-bool cdgMember::IsKeyword(const std::string & keyword) const
+cdgScope::Type cdgMember::GetScope(void) const
+{
+    return cdgScope::CDG_MEMBER;
+}
+
+
+bool cdgMember::HasKeyword(const std::string & keyword) const
 {
     if ((keyword == "name")
         || (keyword == "type")
@@ -41,6 +47,13 @@ bool cdgMember::IsKeyword(const std::string & keyword) const
         || (keyword == "scope")) {
         return true;
     }
+    return false;
+}
+
+
+bool cdgMember::HasScope(const std::string & CMN_UNUSED(keyword),
+                         cdgScope::Stack & CMN_UNUSED(scopes))
+{
     return false;
 }
 

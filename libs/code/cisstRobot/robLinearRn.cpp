@@ -33,7 +33,9 @@ robLinearRn::robLinearRn( const vctFixedSizeVector<double,3>& p1,
 		 vctDynamicVector<double>( 3, 0.0 ) ){
 
   vctFixedSizeVector<double,3> dp = p2 - p1;
-  StopTime() = StartTime() + dp.Norm() / fabs(v);  // Compute the final time t2
+  if( 0 < fabs(v) ){
+    StopTime() = StartTime() + dp.Norm() / fabs(v);// Compute the final time t2
+  }
   ComputeParameters();                             // evaluate the parameters
 
 }
@@ -55,9 +57,11 @@ robLinearRn::robLinearRn( const vctDynamicVector<double>& q1,
     
     // Compute the final time t2
     for( size_t i=0; i<q1.size(); i++ ){
-      double t2i = StartTime() + fabs( q2[i]-q1[i] ) / fabs( qd[i] );
-      if( StopTime() < t2i )
-	{ StopTime() = t2i; }
+      if( 0 < fabs( qd[i] ) ){
+	double t2i = StartTime() + fabs( q2[i]-q1[i] ) / fabs( qd[i] );
+	if( StopTime() < t2i )
+	  { StopTime() = t2i; }
+      }
     }
     ComputeParameters();
   }
@@ -119,11 +123,6 @@ void robLinearRn::ComputeParameters(){
     b = y1;                 // zero offset to y1
     m = y1d;                // no velocity
     y2 = y1;                // final config to y1
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": t1 = " << StartTime() 
-		      << " equals t2 = " << StopTime()
-		      << " The trajectory will remain at y1 = " << y1
-		      << std::endl;
   }
 
 }

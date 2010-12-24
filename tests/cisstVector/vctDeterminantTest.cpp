@@ -78,7 +78,9 @@ void vctDeterminantTest::TestDeterminant2x2ByInverse(const vctFixedSizeMatrix<El
         -inputMatrix[1][0] / determinant, inputMatrix[0][0] / determinant
         );
 
-    const vctFixedSizeMatrix<ElementType, 2, 2> product( inputMatrix * inverse );
+    /* gcc (Ubuntu 4.4.3-4ubuntu5) 4.4.3 crashes with internal error
+       on ubuntu 64 - Ubuntu 10.04.1 LTS with const */
+    /* const */ vctFixedSizeMatrix<ElementType, 2, 2> product( inputMatrix * inverse );
     const vctFixedSizeMatrix<ElementType, 2, 2> identity( ElementType(1), ElementType(0), ElementType(0), ElementType(1) );
     const vctFixedSizeMatrix<ElementType, 2, 2> difference = product - identity;
     ElementType diffNorm = difference.Norm();

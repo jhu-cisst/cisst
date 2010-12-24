@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id:$
+  $Id$
 
   Author(s): Peter Kazanzides, Anton Deguet
 
@@ -29,12 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandWrite.h>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
  */
 
-class mtsCommandFilteredWrite: public mtsCommandWriteBase
+class CISST_EXPORT mtsCommandFilteredWrite: public mtsCommandWriteBase
 {
 public:
     typedef mtsCommandWriteBase BaseType;
@@ -42,7 +44,7 @@ public:
 
 protected:
     mtsCommandWriteBase * Command;
-    mtsCommandQualifiedReadBase * Filter;
+    mtsCommandQualifiedRead * Filter;
     mtsGenericObject * FilterOutput;
 
 private:
@@ -51,7 +53,7 @@ private:
 
 public:
 
-    mtsCommandFilteredWrite(mtsCommandQualifiedReadBase * filter,
+    mtsCommandFilteredWrite(mtsCommandQualifiedRead * filter,
                             mtsCommandWriteBase * command);
 
     virtual ~mtsCommandFilteredWrite();

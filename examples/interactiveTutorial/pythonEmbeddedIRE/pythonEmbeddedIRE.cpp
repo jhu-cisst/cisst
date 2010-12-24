@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 #ifdef CISST_OSATHREAD
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
     osaThread IreThread;
-    IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "from pythonEmbeddedIRE import *");
+    IreThread.Create<const char *> (&ireFramework::RunIRE_wxPython, "from pythonEmbeddedIRE import *");
 #else
     cout << "*** Launching IRE shell (Python Thread) ***" << endl;
     try {

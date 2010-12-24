@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(svlFilterImageWindowTargetSelect)
 
 svlFilterImageWindowTargetSelect::svlFilterImageWindowTargetSelect() :
-    svlImageWindowCallbackBase(),
+    svlWindowEventHandlerBase(),
     svlFilterImageWindow(),
     DisplayImage(0),
     SendTargets(false),
@@ -85,7 +85,7 @@ void svlFilterImageWindowTargetSelect::SetFullScreen(const bool & fullscreen)
     svlFilterImageWindow::SetFullScreen(fullscreen);
 }
 
-void svlFilterImageWindowTargetSelect::SetEventHandler(svlImageWindowCallbackBase* handler)
+void svlFilterImageWindowTargetSelect::SetEventHandler(svlWindowEventHandlerBase* handler)
 {
     svlFilterImageWindow::SetEventHandler(handler);
 }
@@ -93,11 +93,6 @@ void svlFilterImageWindowTargetSelect::SetEventHandler(svlImageWindowCallbackBas
 void svlFilterImageWindowTargetSelect::GetFullScreen(bool & fullscreen) const
 {
     svlFilterImageWindow::GetFullScreen(fullscreen);
-}
-
-void svlFilterImageWindowTargetSelect::SetCallback(svlImageWindowCallbackBase* callback)
-{
-    svlFilterImageWindow::SetEventHandler(callback);
 }
 
 int svlFilterImageWindowTargetSelect::Initialize(svlSample* syncInput, svlSample* &syncOutput)

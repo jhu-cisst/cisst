@@ -26,13 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <tchar.h>
 
 
-/***************************************/
-/*** CWin32Window class ****************/
-/***************************************/
+/****************************/
+/*** svlWindowWin32 class ***/
+/****************************/
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-CWin32Window::CWin32Window(unsigned int id)
+svlWindowWin32::svlWindowWin32(unsigned int id)
 {
     ID = id;    
     hWnd = NULL;
@@ -40,12 +40,12 @@ CWin32Window::CWin32Window(unsigned int id)
     ClientOffsetY = 0;
 }
 
-CWin32Window::~CWin32Window()
+svlWindowWin32::~svlWindowWin32()
 {
     Destroy();
 }
 
-int CWin32Window::Create(unsigned int width, unsigned int height, bool show,
+int svlWindowWin32::Create(unsigned int width, unsigned int height, bool show,
                          const std::string title, int titleid,
                          bool borderless, int blposx, int blposy)
 {
@@ -136,7 +136,7 @@ int CWin32Window::Create(unsigned int width, unsigned int height, bool show,
     return 0;
 }
 
-int CWin32Window::ProcessMessage(MSG* msg)
+int svlWindowWin32::ProcessMessage(MSG* msg)
 {
     if (msg == NULL) return -1;
     if (msg->hwnd == hWnd) {
@@ -147,7 +147,7 @@ int CWin32Window::ProcessMessage(MSG* msg)
     return 1;
 }
 
-void CWin32Window::Destroy()
+void svlWindowWin32::Destroy()
 {
     if (hWnd) {
         DestroyWindow(hWnd);
@@ -155,7 +155,7 @@ void CWin32Window::Destroy()
     }
 }
 
-int CWin32Window::Show(bool show)
+int svlWindowWin32::Show(bool show)
 {
     if (hWnd) {
         if (show) {
@@ -170,12 +170,12 @@ int CWin32Window::Show(bool show)
     return -1;
 }
 
-void CWin32Window::GetTitle(std::string & title)
+void svlWindowWin32::GetTitle(std::string & title)
 {
     title = Title;
 }
 
-void CWin32Window::SetTitle(const std::string title)
+void svlWindowWin32::SetTitle(const std::string title)
 {
     SetWindowText(hWnd, title.c_str());
 }
@@ -199,11 +199,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 }
 
 
-/***************************************/
-/*** CWin32WindowManager class *********/
-/***************************************/
+/***********************************/
+/*** svlWindowManagerWin32 class ***/
+/***********************************/
 
-CWin32WindowManager::CWin32WindowManager(unsigned int numofwins) : CWindowManagerBase(numofwins)
+svlWindowManagerWin32::svlWindowManagerWin32(unsigned int numofwins) : svlWindowManagerBase(numofwins)
 {
     Windows = 0;
     WindowHandles = 0;
@@ -216,7 +216,7 @@ CWin32WindowManager::CWin32WindowManager(unsigned int numofwins) : CWindowManage
     RButtonDown = false;
 }
 
-CWin32WindowManager::~CWin32WindowManager()
+svlWindowManagerWin32::~svlWindowManagerWin32()
 {
     // Critical section: starts
     csImage.Enter();
@@ -227,16 +227,16 @@ CWin32WindowManager::~CWin32WindowManager()
     // Critical section: ends
 }
 
-int CWin32WindowManager::DoModal(bool show, bool fullscreen)
+int svlWindowManagerWin32::DoModal(bool show, bool fullscreen)
 {
     Destroy();
 
     unsigned int i, posx = 0;
 
     WindowHandles = new HWND[NumOfWins];
-    Windows = new CWin32Window*[NumOfWins];
+    Windows = new svlWindowWin32*[NumOfWins];
     for (i = 0; i < NumOfWins; i ++) {
-        Windows[i] = new CWin32Window(i);
+        Windows[i] = new svlWindowWin32(i);
     }
 
     if (PosX == 0 || PosY == 0) {
@@ -317,7 +317,7 @@ int CWin32WindowManager::DoModal(bool show, bool fullscreen)
     return 0;
 }
 
-void CWin32WindowManager::Show(bool show, int winid)
+void svlWindowManagerWin32::Show(bool show, int winid)
 {
     if (Windows && winid < static_cast<int>(NumOfWins)) {
         // Critical section: starts
@@ -333,17 +333,17 @@ void CWin32WindowManager::Show(bool show, int winid)
     }
 }
 
-void CWin32WindowManager::LockBuffers()
+void svlWindowManagerWin32::LockBuffers()
 {
     csImage.Enter();
 }
 
-void CWin32WindowManager::UnlockBuffers()
+void svlWindowManagerWin32::UnlockBuffers()
 {
     csImage.Leave();
 }
 
-void CWin32WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid)
+void svlWindowManagerWin32::SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid)
 {
     if (Windows && winid < static_cast<int>(NumOfWins) &&
         Padding != 0 && LineSize != 0 && ImageBufferSizes != 0 && ImageBuffers != 0 &&
@@ -400,7 +400,7 @@ void CWin32WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buf
     }
 }
 
-void CWin32WindowManager::DrawImages()
+void svlWindowManagerWin32::DrawImages()
 {
     if (Windows && Padding != 0 && LineSize != 0 && ImageBufferSizes != 0 && ImageBuffers != 0) {
         RECT rect;
@@ -423,7 +423,7 @@ void CWin32WindowManager::DrawImages()
     }
 }
 
-void CWin32WindowManager::Destroy()
+void svlWindowManagerWin32::Destroy()
 {
     unsigned int i;
     if (Windows){
@@ -460,7 +460,7 @@ void CWin32WindowManager::Destroy()
     }
 }
 
-void CWin32WindowManager::DestroyThreadSafe()
+void svlWindowManagerWin32::DestroyThreadSafe()
 {
     if (WindowHandles) {
         for (unsigned int i = 0; i < NumOfWins; i ++)
@@ -471,7 +471,7 @@ void CWin32WindowManager::DestroyThreadSafe()
     }
 }
 
-int CWin32WindowManager::FilterMessage(unsigned int winid, MSG* msg)
+int svlWindowManagerWin32::FilterMessage(unsigned int winid, MSG* msg)
 {
 	PAINTSTRUCT ps;
     unsigned int code;

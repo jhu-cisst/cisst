@@ -28,7 +28,6 @@ dJointID devODEServoMotor::MotorID() const { return amotorid; }
 void devODEServoMotor::SetPosition( double qs, double q, double dt ){
 
   double sign = 1.0;
-
   if( qs < q )
     { sign = -1.0; }
 

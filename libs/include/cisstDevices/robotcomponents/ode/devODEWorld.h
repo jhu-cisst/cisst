@@ -20,16 +20,63 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <ode/ode.h>
 
+#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
+
+#include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 #include <cisstDevices/robotcomponents/devRobotComponent.h>
+
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
 #include <cisstDevices/robotcomponents/ode/devODEJoint.h>
 
 #include <cisstVector/vctFixedSizeVector.h>
+#include <cisstOSAbstraction/osaMutex.h>
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEWorld : public devRobotComponent {
 
-private:
+class CISST_EXPORT devODEWorld : 
+  public devRobotComponent,
+  public devOSGWorld {
+
+ public:
+
+  struct Contact{
+    
+    devODEBody* body1;
+    devODEBody* body2;
+    vctFixedSizeVector<double,3> position;
+    vctFixedSizeVector<double,3> normal;
+    double depth;
+
+    Contact( devODEBody* b1, 
+	     devODEBody* b2,
+	     const vctFixedSizeVector<double,3>& pos,
+	     const vctFixedSizeVector<double,3>& n,
+	     double d ) :
+      body1( b1 ),
+      body2( b2 ),
+      position( pos ),
+      normal( n ),
+      depth( d ) {}
+
+    friend std::ostream& operator <<( std::ostream& os, 
+				      const devODEWorld::Contact& c ){
+
+      os << "Body1:    " << c.body1->GetName() << std::endl
+      	 << "Body2:    " << c.body2->GetName() << std::endl
+	 << "Position: " << c.position << std::endl
+	 << "Normal:   " << c.normal << std::endl
+	 << "Depth:    " << c.depth;
+      
+      return os;
+    }
+
+  };
+
+ private:
+  
+  osaMutex ContactsListMutex;
+  std::list<devODEWorld::Contact> ContactsList;
+
 
   //! The time step of the engine
   double timestep;
@@ -40,6 +87,7 @@ private:
      geometries
   */
   dWorldID worldid;
+  osaMutex WorldMutex;
 
   //! The ODE space ID
   /**
@@ -63,7 +111,7 @@ private:
      This is used internally for processing collisions. 
      \return The contacts group ID.
   */
-  dJointGroupID GroupID() const { return contactsgid; }
+  dJointGroupID GetGroupID() const { return contactsgid; }
 
   //! The maximum number of contacts
   /**
@@ -74,10 +122,12 @@ private:
   */
   static const size_t NUM_CONTACTS = 5;
 
-  std::vector<devODEBody*> bodies;
+  void CleanContacts();
+
+
   std::vector<devODEJoint*> joints;
 
-public:
+ public:
 
   //! Create a new world
   /**
@@ -96,10 +146,10 @@ public:
   ~devODEWorld();
 
   //! Return the world ID
-  dWorldID WorldID() const { return worldid; }
+  dWorldID GetWorldID() const { return worldid; }
 
   //! Return the space ID
-  dSpaceID SpaceID() const { return spaceid; }
+  dSpaceID GetSpaceID() const { return spaceid; }
 
   //! Detect a manipulator "self collision"
   /**
@@ -127,8 +177,12 @@ public:
 
   void RunComponent();
 
-  void Insert( devODEBody* body );
   void Insert( devODEJoint* joint );
+
+  std::list< devODEWorld::Contact > QueryContacts( const std::string& name );
+
+  void Lock();
+  void Unlock();
 
 };
 

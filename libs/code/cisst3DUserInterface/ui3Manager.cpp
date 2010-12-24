@@ -236,7 +236,7 @@ bool ui3Manager::AddMasterArm(ui3MasterArm * arm)
 {
     // setup UI manager pointer in newly added arm
     arm->SetManager(this);
-    this->MasterArms.AddItem(arm->Name, arm, CMN_LOG_LOD_INIT_ERROR);
+    this->MasterArms.AddItem(arm->Name, arm, CMN_LOG_LEVEL_INIT_ERROR);
     return true;
 }
 
@@ -245,20 +245,20 @@ bool ui3Manager::AddSlaveArm(ui3SlaveArm * arm)
 {
     // setup UI manager pointer in newly added arm
     arm->SetManager(this);
-    this->SlaveArms.AddItem(arm->Name, arm, CMN_LOG_LOD_INIT_ERROR);
+    this->SlaveArms.AddItem(arm->Name, arm, CMN_LOG_LEVEL_INIT_ERROR);
     return true;
 }
 
 
 ui3SlaveArm * ui3Manager::GetSlaveArm(const std::string & armName)
 {
-    return this->SlaveArms.GetItem(armName, CMN_LOG_LOD_INIT_ERROR);
+    return this->SlaveArms.GetItem(armName, CMN_LOG_LEVEL_INIT_ERROR);
 }
 
 
 ui3MasterArm * ui3Manager::GetMasterArm(const std::string & armName)
 {
-    return  this->MasterArms.GetItem(armName, CMN_LOG_LOD_INIT_ERROR);
+    return  this->MasterArms.GetItem(armName, CMN_LOG_LEVEL_INIT_ERROR);
 }
 
 

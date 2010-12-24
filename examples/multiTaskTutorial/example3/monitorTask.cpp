@@ -42,8 +42,8 @@ void monitorTask::Run(void)
         Robot[i].GetStateIndex(StateIndex);  // time index of robot state table
         Robot[i].GetPositionJoint(StateIndex, CurrentPosition[i]); // current data
         result = Robot[i].GetPositionJoint(StateIndex - 1, PreviousPosition[i]);
-        if ((result == mtsExecutionResult::DEV_OK) &&
-           (CurrentPosition[i] != PreviousPosition[i])) {
+        if (result &&
+            (CurrentPosition[i] != PreviousPosition[i])) {
             if ((!CurrentPosition[i].Greater(lowerBound))
                 || (!CurrentPosition[i].Lesser(upperBound))) {
                 CMN_LOG_CLASS_RUN_WARNING << "Run: robot " << i+1 << " out of bounds"

@@ -19,14 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 #define _devODEBody_h
 
 #include <ode/ode.h>
-#include <cisstVector/vctFrame4x4.h>
 
-#include <cisstDevices/robotcomponents/glut/devMeshTriangular.h>
-#include <cisstDevices/robotcomponents/glut/devGLUT.h>
+#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
+#include <cisstVector/vctMatrixRotation3.h>
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEBody {
+class devODEWorld;
+
+class CISST_EXPORT devODEBody : public devOSGBody {
 
  public:
 
@@ -37,34 +38,17 @@ class CISST_EXPORT devODEBody {
     vctFixedSizeVector<double,3> w;
   };
 
+
  private:
-  
+
+  //! The World ID
+  devODEWorld* world;
+
   //! The ODE body ID
   dBodyID bodyid;
 
   //! The ODE mass
   dMass* mass;
-
-  //! The indices of the triangles
-  /**
-     This array contains the indices of each triangle. The first 3
-     entries are the indices to the vertices of the first triangle. The next 3
-     entries are the indices to the vertices of the second triangle and so on.
-     The size of this array is 3*ntriangles.
-  */
-  dTriIndex* triangles;
-  size_t ntriangles;
-
-  //! The vertices of the facets
-  /**
-     This array contains the coordinates of each vertex. The first 3 dVector3
-     contains the coordinates of the 1st vertex, the second dVector3 contains
-     the coordinates of the second vertex and so on. The vertices are no in any
-     specific order and should be used in combination with the indices array.
-     The size of this array is nvertices.
-  */
-  dVector3* vertices;
-  size_t nvertices;
 
   //! The ODE mesh ID
   /**
@@ -78,29 +62,37 @@ class CISST_EXPORT devODEBody {
   */
   dGeomID geomid;
 
+  //! Data used by ODE Tri Mesh
+  dVector3* Vertices;
+  int       VertexCount;
+  dTriIndex* Indices;
+  int        IndexCount;
+
   //! The ODE space ID
   /**
     This is a structure used by ODE to represent collision spaces
   */
   dSpaceID space;
 
-  //! Load an OBJ file
-  /**
-     This load an .obj (wavefront) file into memory. It calls 
-     robMeshTriangular::Load(const std::string&) to load the mesh then allocates
-     and populate the vertices and indices arrays
-     \param filename The full path to an .obj filename
-     \return SUCCESS if the mesh was properly loaded. ERROR otherwise
-  */
-  int LoadOBJ( const std::string& filename,
-	       const vctFixedSizeVector<double,3>& com );
-
-  //!
-  devMeshTriangular* geometry;
-
+  // Transformation from the center of mass to the intertial frame (base)
   vctFrame4x4<double> Rtcomb;
 
-public:
+  void BuildODETriMesh( dSpaceID spaceid, 
+			const vctFixedSizeVector<double,3>& com );
+
+  // This is called from each OSG update traversal
+  void Update();
+
+  vctMatrixRotation3<double> GetOrientation() const;
+  vctFixedSizeVector<double,3> GetPosition() const;
+
+ public:
+
+  devODEBody( const std::string& name,
+	      const vctFrame4x4<double>& Rtwb,
+	      const std::string& model,
+	      devODEWorld* odeWorld,
+	      dSpaceID spaceid );
 
   //! Main constructor
   /**
@@ -115,14 +107,15 @@ public:
                  center of mass
      \param geomfile The name of the Wavefront file used by the body
   */
-  devODEBody( dWorldID worldid, 
-	      dSpaceID spaceid,
+  devODEBody( const std::string& name,
 	      const vctFrame4x4<double>& Rt,
+	      const std::string& model,
+	      devODEWorld* odeWorld,
 	      double m,
 	      const vctFixedSizeVector<double,3>& com,
 	      const vctFixedSizeMatrix<double,3,3>& moit,
-	      const std::string& geomfile,
-	      bool glutgeom = true );
+	      dSpaceID spaceid );
+
 
   //! Default destructor
   ~devODEBody();
@@ -131,16 +124,10 @@ public:
   void Disable();
 
   //! Query the ID of the body
-  dBodyID BodyID() const { return bodyid; }
+  dBodyID GetBodyID() const { return bodyid; }
 
   //! Query the ID of the body
-  dGeomID GeomID() const { return geomid; }
-
-  void Update();
-
-  vctMatrixRotation3<double> GetOrientation() const;
-
-  vctFixedSizeVector<double,3> GetPosition() const;
+  dGeomID GetGeomID() const { return geomid; }
 
 };
 

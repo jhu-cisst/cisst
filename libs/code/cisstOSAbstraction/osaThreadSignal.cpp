@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
+#include <cisstOSAbstraction/osaThread.h>
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 //PK: Probably some of these include files are not needed
@@ -225,6 +226,11 @@ struct osaThreadSignalInternals
 
 #define INTERNALS(A) (reinterpret_cast<osaThreadSignalInternals*>(Internals)->A)
 
+static osaThreadId CallbackThreadId;
+
+void (*osaThreadSignal::PreCallback)(void) = 0;
+void (*osaThreadSignal::PostCallback)(void) = 0;
+
 /*************************************/
 /*** osaThreadSignal class ***********/
 /*************************************/
@@ -357,9 +363,14 @@ void osaThreadSignal::Wait()
 
 bool osaThreadSignal::Wait(double timeoutInSec)
 {
+    bool do_callback = false;
+    if (PreCallback && PostCallback && (osaGetCurrentThreadId() == CallbackThreadId))
+        do_callback = true;
+    if (do_callback) PreCallback();
     unsigned int millisec = (unsigned int)(timeoutInSec * 1000);
 #if (CISST_OS == CISST_WINDOWS)
     if (WaitForSingleObject(INTERNALS(hEvent), millisec) == WAIT_TIMEOUT) {
+        if (do_callback) PostCallback();
         return false;
     }
 #endif
@@ -414,6 +425,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
                                    << strerror(retval) << ": " << retval
                                    << std::endl;
             }
+            if (do_callback) PostCallback();
             return false;
         }
     }
@@ -447,6 +459,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
 
 #endif
 
+    if (do_callback) PostCallback();
     return true;
 }
 
@@ -462,4 +475,11 @@ void osaThreadSignal::ToStream(std::ostream & outputStream) const
     //pthread_cond_t gnuCondition;
     outputStream << "condition_state = " << Condition_State;
 #endif
+}
+
+void osaThreadSignal::SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void))
+{
+    CallbackThreadId = threadId;
+    PreCallback = pre;
+    PostCallback = post;
 }

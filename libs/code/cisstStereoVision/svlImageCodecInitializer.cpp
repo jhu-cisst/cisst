@@ -26,11 +26,11 @@
 #include "svlImageCodecBMP.h"
 #include "svlImageCodecPPM.h"
 
-#if (CISST_SVL_HAS_JPEG == ON)
+#if CISST_SVL_HAS_JPEG
 #include "svlImageCodecJPEG.h"
 #endif // CISST_SVL_HAS_JPEG
 
-#if (CISST_SVL_HAS_PNG == ON)
+#if CISST_SVL_HAS_PNG
 #include "svlImageCodecPNG.h"
 #endif // CISST_SVL_HAS_PNG
 

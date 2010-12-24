@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -241,7 +241,7 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
     return Resize(src_img, src_videoch, dst_img, dst_videoch, interpolation, internals);
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch,
                                svlSampleImage* dst_img, unsigned int dst_videoch,
                                bool interpolation,
@@ -273,8 +273,23 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
         memcpy(dst_img->GetUCharPointer(dst_videoch), src_img->GetUCharPointer(src_videoch), src_img->GetDataSize(src_videoch));
         return SVL_OK;
     }
+    else if (!interpolation && weq && src_height == (dst_height << 1)) {
+        // Special case: decimate by 2 vertically
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+        const unsigned int stride  = src_width * 3;
+        const unsigned int stride2 = stride << 1;
+        unsigned char *src_buf = src_img->GetUCharPointer(src_videoch);
+        unsigned char *dst_buf = dst_img->GetUCharPointer(dst_videoch);
+
+        for (unsigned int j = 0; j < dst_height; j ++) {
+            memcpy(dst_buf, src_buf, stride);
+            dst_buf += stride;
+            src_buf += stride2;
+        }
+        return SVL_OK;
+    }
+
+#if CISST_SVL_HAS_OPENCV
 
     if (interpolation) cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_LINEAR);
     else cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_NN);

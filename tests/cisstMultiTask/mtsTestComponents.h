@@ -211,12 +211,14 @@ public:
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
+        provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
         }
 
         mtsInterfaceRequired * required;
         required = AddInterfaceRequired("r1", MTS_OPTIONAL);
+        required->SetMailBoxAndArgumentQueuesSize(8);
         if (required) {
             InterfaceRequired1.PopulateExistingInterface(required);
         }
@@ -290,6 +292,7 @@ public:
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
+        provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
         }
@@ -300,6 +303,7 @@ public:
 
         mtsInterfaceRequired * required;
         required = AddInterfaceRequired("r1", MTS_OPTIONAL);
+        required->SetMailBoxAndArgumentQueuesSize(8);
         if (required) {
             InterfaceRequired1.PopulateExistingInterface(required);
         }
@@ -375,12 +379,14 @@ public:
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
+        provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
         }
 
         mtsInterfaceRequired * required;
         required = AddInterfaceRequired("r1", MTS_OPTIONAL);
+        required->SetMailBoxAndArgumentQueuesSize(8);
         if (required) {
             InterfaceRequired1.PopulateExistingInterface(required);
         }
@@ -476,12 +482,14 @@ public:
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
+        provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
         }
 
         mtsInterfaceRequired * required;
         required = AddInterfaceRequired("r1", MTS_OPTIONAL);
+        required->SetMailBoxAndArgumentQueuesSize(8);
         if (required) {
             InterfaceRequired1.PopulateExistingInterface(required);
         }

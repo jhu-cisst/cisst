@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-06
@@ -20,22 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cdgData_h
-#define _cdgData_h
+#ifndef _cdgClass_h
+#define _cdgClass_h
 
 #include <iostream>
 #include <vector>
 
+#include "cdgScope.h"
 #include "cdgMember.h"
 #include "cdgTypedef.h"
+#include "cdgCode.h"
 
 /*
 
  */
 
-class cdgClass {
-
-    friend class cdgFile;
+class cdgClass: public cdgScope
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     /*! Name of the data type to be created. */
     std::string Name;
@@ -60,14 +62,21 @@ class cdgClass {
     typedef std::vector<cdgTypedef *> TypedefsType;
     TypedefsType Typedefs;
     //@}
-    
+
+    typedef std::vector<cdgCode *> CodesType;
+    CodesType Codes;
+
     /*! List of data members.  Corresponds to keyword "member" in
       cisst data description file. */
     typedef std::vector<cdgMember *> MembersType;
     MembersType Members;
 
 public:
-    bool IsKeyword(const std::string & keyword) const;
+
+    cdgScope::Type GetScope(void) const;
+    bool HasKeyword(const std::string & keyword) const;
+    bool HasScope(const std::string & keyword,
+                  cdgScope::Stack & scopes);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
@@ -88,4 +97,6 @@ protected:
     void GenerateToStreamRawCode(std::ostream & output) const;
 };
 
-#endif // _cdgData_h
+CMN_DECLARE_SERVICES_INSTANTIATION(cdgClass);
+
+#endif // _cdgClass_h

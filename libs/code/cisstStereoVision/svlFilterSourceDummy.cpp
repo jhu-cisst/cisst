@@ -141,6 +141,16 @@ void svlFilterSourceDummy::EnableNoiseImage(bool noise)
     Noise = noise;
 }
 
+unsigned int svlFilterSourceDummy::GetWidth(unsigned int CMN_UNUSED(videoch)) const
+{
+    return Width;
+}
+
+unsigned int svlFilterSourceDummy::GetHeight(unsigned int CMN_UNUSED(videoch)) const
+{
+    return Height;
+}
+
 int svlFilterSourceDummy::Initialize(svlSample* &syncOutput)
 {
     if (OutputSample == 0) return SVL_FAIL;

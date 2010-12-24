@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsParameterTypes.h 1726 2010-08-30 05:07:54Z mjung5 $
+  $Id$
 
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
@@ -45,7 +45,7 @@ public:
 //
 class CISST_EXPORT mtsDescriptionComponent: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     std::string ProcessName;
@@ -65,7 +65,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponent);
 //
 class CISST_EXPORT mtsDescriptionInterface: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     std::string ProcessName;
@@ -86,7 +86,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionInterface);
 //
 class CISST_EXPORT mtsDescriptionConnection: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 #ifndef SWIG
@@ -116,16 +116,18 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnection);
 
-typedef mtsGenericObjectProxy<std::vector<mtsDescriptionConnection> > mtsDescriptionConnectionVec;
+typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionStdVec;
+typedef mtsGenericObjectProxy<mtsDescriptionConnectionStdVec> mtsDescriptionConnectionVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVec);
 
 // Define stream out operator for std::vector<mtsDescriptionConnection>
 inline std::ostream & operator << (std::ostream & output,
-                            const std::vector<mtsDescriptionConnection> & object) {
+                            const mtsDescriptionConnectionStdVec & object) {
     output << "[";
     for (size_t i = 0; i < object.size(); i++) {
         object[i].ToStream(output);
-        output << ", ";
+        if (i < object.size()-1)
+            output << ", ";
     }
     output << "]";
     return output;
@@ -137,7 +139,7 @@ inline std::ostream & operator << (std::ostream & output,
 //
 class CISST_EXPORT mtsComponentStatusControl : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     typedef enum { 
@@ -164,7 +166,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStatusControl);
 //
 class CISST_EXPORT mtsComponentStateChange : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     mtsComponentStateChange() {}

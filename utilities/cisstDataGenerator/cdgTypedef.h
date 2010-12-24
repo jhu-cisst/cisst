@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-06
@@ -23,10 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cdgTypedef_h
 #define _cdgTypedef_h
 
-#include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnClassRegisterMacros.h>
+#include "cdgScope.h"
 
-class cdgTypedef: public cmnGenericObject {
+class cdgTypedef: public cdgScope {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class cdgData;
@@ -36,10 +35,14 @@ class cdgTypedef: public cmnGenericObject {
     std::string Name;
 
 public:
-    bool IsKeyword(const std::string & keyword) const;
+    cdgScope::Type GetScope(void) const;
+    bool HasKeyword(const std::string & keyword) const;
+    bool HasScope(const std::string & keyword,
+                  cdgScope::Stack & scopes);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
+
     void GenerateHeader(std::ostream & outputStream) const;
 };
 

@@ -62,8 +62,6 @@ int VideoPlayer(std::string pathname)
         }
     }
 
-    //source.SetTargetFrequency(30.0);
-
     // setup image window
     window.SetTitle("Video Player");
     window.SetFullScreen(true);

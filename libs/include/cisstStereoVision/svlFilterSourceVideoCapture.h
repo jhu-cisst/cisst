@@ -37,7 +37,7 @@ class svlVidCapSrcDialogThread;
 
 class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 friend class svlVidCapSrcDialogThread;
 

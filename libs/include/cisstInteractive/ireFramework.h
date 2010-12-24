@@ -92,6 +92,8 @@ private:
     // The current state of the IRE (see above enum)
     static IRE_STATES IRE_State;
 
+    static void *IreThreadState;
+
     void InitShellInstance(void);
 
     void FinalizeShellInstance(void);
@@ -175,7 +177,7 @@ public:
       callback function to change the state to IRE_ACTIVE prior to entering
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
-	static inline void LaunchIREShell(char *startup = "", bool newPythonThread = false, bool useIPython = false) throw(std::runtime_error) {
+	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false) throw(std::runtime_error) {
 	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython);
 	}
 
@@ -185,7 +187,7 @@ public:
         IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "print 'using wxPython'");
         \endcode
     */
-    static inline void *RunIRE_wxPython(char *startup) {
+    static inline void *RunIRE_wxPython(const char *startup) {
         try {
             LaunchIREShell(startup, false, false);
         }
@@ -202,7 +204,7 @@ public:
         IreThread.Create<char *> (&ireFramework::RunIRE_IPython, "print 'using IPython'");
         \endcode
     */
-    static inline void *RunIRE_IPython(char *startup) {
+    static inline void *RunIRE_IPython(const char *startup) {
         try {
             LaunchIREShell(startup, false, true);
         }
@@ -243,6 +245,12 @@ public:
     /*! If the current IRE state is IRE_FINISHED, change it to IRE_INITIALIZED (calling InitShell if
         necessary). This is provided to facililate relaunching of the IRE. */
     static void Reset();
+
+    /*! Release the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
+    static void UnblockThreads();
+
+    /*! Re-acquire the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
+    static void BlockThreads();
 };
 
 #endif // _ireFramework_h

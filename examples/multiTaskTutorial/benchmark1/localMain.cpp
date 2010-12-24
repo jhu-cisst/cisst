@@ -12,11 +12,11 @@
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example9Local");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // create our two tasks
     serverTask * server = new serverTask("Server", confServerPeriod);

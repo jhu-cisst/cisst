@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -30,11 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 
 
 // Forward declarations
-class svlFilterImageCropper;
+class svlFilterImageCenterFinderInterface;
 
 class CISST_EXPORT svlFilterImageCenterFinder : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterImageCenterFinder();
@@ -45,8 +45,10 @@ public:
     bool GetMask();
     void SetThreshold(unsigned char thresholdlevel);
     unsigned char GetThreshold();
+    void SetMassRatio(unsigned int ratio);
     int GetCenter(int &x, int &y, unsigned int videoch = SVL_LEFT);
-    void SetReceivingFilter(svlFilterBase* cropper);
+    int GetRadius(int &x, int &y, unsigned int videoch = SVL_LEFT);
+    void AddReceiver(svlFilterImageCenterFinderInterface* receiver);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -58,10 +60,19 @@ private:
 
     vctDynamicVector<int> CenterX;
     vctDynamicVector<int> CenterY;
+    vctDynamicVector<int> RadiusX;
+    vctDynamicVector<int> RadiusY;
+    unsigned int MassRatio;
     double Smoothing;
     bool MaskEnabled;
     unsigned int ThresholdLevel;
-    svlFilterBase* ReceivingFilter;
+    vctDynamicVector<svlFilterImageCenterFinderInterface*> Receivers;
+};
+
+class CISST_EXPORT svlFilterImageCenterFinderInterface
+{
+public:
+    virtual int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT) = 0;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageCenterFinder)

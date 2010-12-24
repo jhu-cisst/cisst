@@ -43,12 +43,10 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa cmnClassServices
 */
-class CISST_EXPORT cmnClassServicesBase {
-public:
-    /*! Type used to define the logging level of detail. */
-    typedef cmnLogLoD LogLoDType;
-
-    /*! Type used to refer to cmnGenericObject by pointer, convenient to
+class CISST_EXPORT cmnClassServicesBase
+{
+ public:
+     /*! Type used to refer to cmnGenericObject by pointer, convenient to
       pass a pointer by reference */
     typedef cmnGenericObject * generic_pointer;
 
@@ -57,11 +55,11 @@ public:
 
       \param className The name to be associated with the class.
       \param typeInfo Runtime type as defined by C++ RTTI
-      \param lod The Log Level of Detail setting to be used with this class.
+      \param mask The log mask to be used with this class.
     */
     cmnClassServicesBase(const std::string & className,
                          const std::type_info * typeInfo,
-                         LogLoDType lod = CMN_LOG_LOD_RUN_ERROR);
+                         cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT);
 
 
     /*! Virtual destructor.  Does nothing. */
@@ -121,42 +119,46 @@ public:
 
     virtual bool DeleteArray(generic_pointer & data, size_t & size) const = 0;
 
-    /*! Call destructor explicitely */
+    /*! Call destructor explicitly */
     virtual bool Delete(cmnGenericObject * existing) const = 0;
+
+    /*! Get the size of the class */
+    virtual size_t GetSize(void) const = 0;
 
     /*! Get the name associated with the class.
 
       \return The name of the class as a string.
     */
-    inline const std::string & GetName(void) const {
-        return (*NameMember);
-    }
+    const std::string & GetName(void) const;
 
     /*!
       Get the type_info corresponding to the registered class.
 
       \return Pointer to the class type_info as defined by C++ RTTI.
     */
-    inline const std::type_info * TypeInfoPointer(void) const {
-        return TypeInfoMember;
-    }
-
+    const std::type_info * TypeInfoPointer(void) const;
 
     /*! Get the log Level of Detail associated with the class.  This
       is the level used to filter the log messages.
 
       \return The log Level of Detail.
     */
-    inline const LogLoDType & GetLoD(void) const {
-        return LoDMember;
+    const cmnLogMask & GetLogMask(void) const;
+
+    inline const cmnLogMask & GetLoD(void) const {
+        return GetLogMask();
     }
 
 
-    /*! Change the Level of Detail setting for the class.
+    /*! Change the log mask for the class.
 
-    \param newLoD The log Level of Detail setting.
+    \param mask The log mask.
     */
-    void SetLoD(LogLoDType newLoD);
+    void SetLogMask(cmnLogMask mask);
+
+    inline void CISST_DEPRECATED SetLoD(cmnLogMask mask) {
+        SetLogMask(mask);
+    }
 
 
 private:
@@ -166,7 +168,7 @@ private:
     const std::type_info * TypeInfoMember;
 
     /*! The log Level of Detail. */
-    LogLoDType LoDMember;
+    cmnLogMask LogMask;
 };
 
 

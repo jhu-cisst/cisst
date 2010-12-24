@@ -27,7 +27,9 @@ class CISST_EXPORT devManipulator : public devRobotComponent {
 
   //! Return the mode of the trajectory
   devManipulator::Mode GetMode();
-
+  void SetPositionMode() { mtsMode = POSITION; }
+  void SetForceTorqueMode() { mtsMode = FORCETORQUE; }
+  
   void RunComponent();
 
   virtual void Read() = 0;

@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: cmnLogLoDTest.h 1236 2010-02-26 20:38:21Z adeguet1 $
   
-  Author(s): Anton Deguet
-  Created on: 2006-03-28
+  Author(s):  Anton Deguet
+  Created on: 2010-11-09
   
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,12 +23,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "cisstImage/imgUCharRGB.h"
 
-class imgPixelTypesTest : public CppUnit::TestFixture
+
+class cmnLogLoDTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(imgPixelTypesTest);
-    CPPUNIT_TEST(TestCompilerSizeOf);
+    CPPUNIT_TEST_SUITE(cmnLogLoDTest);
+    {
+        CPPUNIT_TEST(TestLogLevelToIndex);
+        CPPUNIT_TEST(TestIndexToLogLevel);
+        CPPUNIT_TEST(TestMasks);
+    }
     CPPUNIT_TEST_SUITE_END();
     
  public:
@@ -38,10 +42,11 @@ class imgPixelTypesTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
     
-    /*! Test compiler sizeof */
-    void TestCompilerSizeOf(void);
+    void TestLogLevelToIndex(void);
+    void TestIndexToLogLevel(void);
+    void TestMasks(void);
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(imgPixelTypesTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(cmnLogLoDTest);
 

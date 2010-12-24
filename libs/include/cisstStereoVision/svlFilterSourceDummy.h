@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT svlFilterSourceDummy : public svlFilterSourceBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterSourceDummy();
@@ -44,6 +44,9 @@ public:
 
     int SetDimensions(unsigned int width, unsigned int height);
     void EnableNoiseImage(bool noise);
+
+    unsigned int GetWidth(unsigned int videoch = SVL_LEFT) const;
+    unsigned int GetHeight(unsigned int videoch = SVL_LEFT) const;
 
 protected:
     virtual int Initialize(svlSample* &syncOutput);

@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2003-09-12
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -130,10 +130,10 @@ typedef vctFrameBase<vctFloatQuatRot3> vctFloatQuatFrm3;
 /*! Define a transformation in dimension 3 using a 3 by 3 matrix of
   doubles for its rotation. */
 //@{
-typedef vctFrameBase<vctDoubleMatRot3 > vctDoubleMatFrm3;
-typedef vctFrameBase<vctMatRot3 > vctMatFrm3;
-typedef vctFrameBase<vctDoubleRot3 > vctDoubleFrm3;
-typedef vctFrameBase<vctRot3 > vctFrm3;
+typedef vctFrameBase<vctDoubleMatRot3> vctDoubleMatFrm3;
+typedef vctFrameBase<vctMatRot3> vctMatFrm3;
+typedef vctFrameBase<vctDoubleRot3> vctDoubleFrm3;
+typedef vctFrameBase<vctRot3> vctFrm3;
 //@}
 
 
@@ -141,7 +141,7 @@ typedef vctFrameBase<vctRot3 > vctFrm3;
   floats for its rotation. */
 //@{
 typedef vctFrameBase<vctFloatMatRot3> vctFloatMatFrm3;
-typedef vctFrameBase<vctFloatRot3 > vctFloatFrm3;
+typedef vctFrameBase<vctFloatRot3> vctFloatFrm3;
 //@}
 
 
@@ -186,6 +186,24 @@ typedef vctMatrixRotation2<double> vctRot2;
 //@{
 typedef vctMatrixRotation2<float> vctFloatMatRot2;
 typedef vctMatrixRotation2<float> vctFloatRot2;
+//@}
+
+
+/*! Define a transformation in dimension 2 using a 2 by 2 matrix of
+  doubles for its rotation. */
+//@{
+typedef vctFrameBase<vctDoubleMatRot2> vctDoubleMatFrm2;
+typedef vctFrameBase<vctMatRot2> vctMatFrm2;
+typedef vctFrameBase<vctDoubleRot2> vctDoubleFrm2;
+typedef vctFrameBase<vctRot2> vctFrm2;
+//@}
+
+
+/*! Define a transformation in dimension 2 using a 2 by 2 matrix of
+  floats for its rotation. */
+//@{
+typedef vctFrameBase<vctFloatMatRot2> vctFloatMatFrm2;
+typedef vctFrameBase<vctFloatRot2> vctFloatFrm2;
 //@}
 
 

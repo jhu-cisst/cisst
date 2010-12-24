@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT svlFilterImageOverlay : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     typedef std::map<svlFilterInput*, svlSample*> _SampleCacheMap;
 
@@ -46,6 +46,7 @@ public:
     int AddInputTargets(const std::string &name);
     int AddInputText(const std::string &name);
     void AddOverlay(svlOverlay & overlay);
+    int AddQueuedItems();
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -55,6 +56,20 @@ private:
     svlOverlay* FirstOverlay;
     svlOverlay* LastOverlay;
     _SampleCacheMap SampleCache;
+
+    osaCriticalSection CS;
+
+    unsigned int ImageInputsToAddUsed;
+    unsigned int TargetInputsToAddUsed;
+    unsigned int TextInputsToAddUsed;
+    unsigned int OverlaysToAddUsed;
+    vctDynamicVector<std::string> ImageInputsToAdd;
+    vctDynamicVector<std::string> TargetInputsToAdd;
+    vctDynamicVector<std::string> TextInputsToAdd;
+    vctDynamicVector<svlOverlay*> OverlaysToAdd;
+
+    bool IsInputAlreadyQueued(const std::string &name);
+    void AddQueuedItemsInternal();
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay)

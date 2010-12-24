@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: main.cpp 682 2009-08-14 03:18:33Z adeguet1 $
+  $Id$
   
   Author(s):  Min Yang Jung
   Created on: 2010-02-25
@@ -28,14 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    // add a log per thread
-    //osaThreadedLogFile threadedLog("GlobalComponentManagerFLTK");
-    //cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsManagerGlobal", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("GCMUITask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("GCMUITask", CMN_LOG_ALLOW_ALL);
 
     // Create and start global component manager that serves local component
     // managers running across networks.

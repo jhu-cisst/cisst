@@ -36,10 +36,12 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT prmPositionJointSet: public prmMotionBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 
 protected:
+
+
     /*! masks correpsonding elements in goal, if an element is set
     true --> corresponding goal should be used */
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
@@ -101,6 +103,12 @@ public:
 
     /*! destructor */
     virtual ~prmPositionJointSet();
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
 
 
 }; // _prmPositionJointSet_h

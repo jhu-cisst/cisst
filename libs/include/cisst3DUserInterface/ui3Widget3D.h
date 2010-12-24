@@ -46,7 +46,7 @@ class ui3Widget3DHandle;
 */
 class CISST_EXPORT ui3Widget3D: public ui3VisibleList
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class ui3SceneManager;
     friend class ui3BehaviorBase;
@@ -107,7 +107,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
 
 class ui3Widget3DHandle: public ui3Selectable
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
     unsigned int HandleNumber;

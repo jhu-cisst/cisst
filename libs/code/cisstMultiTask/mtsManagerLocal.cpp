@@ -235,6 +235,11 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(void)
 {
     if (!Instance) {
         Instance = new mtsManagerLocal;
+
+        // Create manager components
+        if (!Instance->CreateManagerComponents()) {
+            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+        }
     }
 
     return Instance;
@@ -440,11 +445,11 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & globalComponen
 {
     if (!Instance) {
         Instance = new mtsManagerLocal(globalComponentManager);
-    }
 
-    // Create manager components
-    if (!Instance->CreateManagerComponents()) {
-        CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+        // Create manager components
+        if (!Instance->CreateManagerComponents()) {
+            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+        }
     }
 
     return Instance;
@@ -1082,16 +1087,16 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             break;
         case 'Q':
             {
-                mtsCommandQualifiedReadBase * command = interfaceProvided->GetCommandQualifiedRead(actualCommandName);
+                mtsCommandQualifiedRead * command = interfaceProvided->GetCommandQualifiedRead(actualCommandName);
                 if (!command) {
                     description = "No qualified read command found for ";
                     description += actualCommandName;
                     return;
                 }
                 description = "Argument1 type: ";
-                description += command->GetArgument1ClassServices()->GetName();
+                description += command->GetArgument1Prototype()->Services()->GetName();
                 description += "\nArgument2 type: ";
-                description += command->GetArgument2ClassServices()->GetName();
+                description += command->GetArgument2Prototype()->Services()->GetName();
             }
             break;
         default:
@@ -1672,7 +1677,8 @@ void mtsManagerLocal::GetIPAddressList(std::vector<std::string> & ipAddresses)
 
 bool mtsManagerLocal::Connect(
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+    const unsigned int retryCount)
 {
     // Prevent this method from being used to connect two local interfaces
     if (clientProcessName == serverProcessName) {
@@ -1719,21 +1725,20 @@ bool mtsManagerLocal::Connect(
     // to 10 seconds.
     //
     // An example of the bi-directional connection:
-    // component A has a required interface that connects to component B's
-    // provided interface and the component B also has a required interface that
-    // needs to connect to component A's provided interface.
-    const unsigned int maxRetryCount = 10;
-    unsigned int retryCount = 1;
-    int connectionID;
+    // The component A has a required interface that connects to a provided interface in
+    // the component B and the component B also has a required interface that
+    // needs to connect to a provided interface in the component A.
+    unsigned int count = 1;
+    int connectionID = -1;
 
-    while (retryCount <= maxRetryCount) {
+    while (count <= retryCount) {
         // Inform the global component manager of a new connection being established.
         connectionID = ManagerGlobal->Connect(this->ProcessName,
             clientProcessName, clientComponentName, clientInterfaceRequiredName,
             serverProcessName, serverComponentName, serverInterfaceProvidedName);
         if (connectionID == -1) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: Waiting for connection to be established.... Retrying "
-                << retryCount++ << "/" << maxRetryCount << std::endl;
+                << count++ << "/" << retryCount << std::endl;
             osaSleep(1 * cmn_s);
         } else {
             break;
@@ -2379,6 +2384,10 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     // -- one inteface is an original interface and the other one is a proxy
     // interface -- at server side.
 
+    int numTrial = 0;
+    const int maxTrial = 10;
+    const double sleepTime = 200 * cmn_ms;
+
     // Make sure that this is a server process.
     if (this->ProcessName != serverProcessName) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectServerSideInterface: this is not the server process: " << serverProcessName << std::endl;
@@ -2405,10 +2414,6 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     std::string serverEndpointInfo;
     mtsComponentProxy * clientComponentProxy;
 
-    int numTrial = 0;
-    const int maxTrial = 10;
-    const double sleepTime = 200 * cmn_ms;
-
     // Get component proxy object. Note that this process is a server process
     // and the client component is a proxy, not an original component.
     const std::string clientComponentProxyName = mtsManagerGlobal::GetComponentProxyName(clientProcessName, clientComponentName);
@@ -2429,9 +2434,10 @@ bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int connectionID
     // access information to the global component manager, and thus access
     // information is not readily available.  To handle such a case, a required
     // interface proxy client tries fetching the information from the global
-    // component manager for five times.  After these trials without success,
-    // this method returns false, resulting in disconnecting and cleaning up the
-    // current pending connection.
+    // component manager for maxTrial times defined below.  After these trials 
+    // without success, this method returns false, resulting in disconnection and
+    // cleaning up the current connection which is not yet established.
+
 
     // Fecth proxy server's access information from the GCM
     while (++numTrial <= maxTrial) {

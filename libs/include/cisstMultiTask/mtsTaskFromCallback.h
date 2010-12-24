@@ -78,7 +78,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsTaskFromCallback : public mtsTask
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
     typedef mtsTask BaseType;
@@ -151,7 +151,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskFromCallback)
 
 class CISST_EXPORT mtsTaskFromCallbackAdapter : public mtsTaskFromCallback
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
     typedef mtsTaskFromCallback BaseType;

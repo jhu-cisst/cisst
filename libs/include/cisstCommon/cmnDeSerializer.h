@@ -123,7 +123,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
   \sa cmnSerializer cmnGenericObject
 */
 class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Type used to identify objects over the network.  It uses the
@@ -154,7 +154,7 @@ public:
       \param serializeObject If true, object content is serialized.
              If false, only class services is serialized and object
              content is not serialized. True by default.
-             
+
       \note As this method relies on cmnDeSerializeRaw, it might throw
       an exception.
     */

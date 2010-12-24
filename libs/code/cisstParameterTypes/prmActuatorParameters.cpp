@@ -37,3 +37,48 @@ void prmActuatorParameters::SetSize(size_type size){
     TorqueLimitPeakMember.SetSize(size);
     TorqueOffsetMember.SetSize(size);
 }
+
+
+void prmActuatorParameters::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+    ForwardLimitMember.SerializeRaw(outputStream);
+    ReverseLimitMember.SerializeRaw(outputStream);
+    MaxVelocityMember.SerializeRaw(outputStream);
+    MaxAccelerationMember.SerializeRaw(outputStream);
+    MaxDecelerationMember.SerializeRaw(outputStream);
+    LimitSwitchDeccelarationMember.SerializeRaw(outputStream);
+    Counts_per_mmMember.SerializeRaw(outputStream);
+    KpMember.SerializeRaw(outputStream);
+    KdMember.SerializeRaw(outputStream);
+    KiMember.SerializeRaw(outputStream);
+    ILMember.SerializeRaw(outputStream);
+    FVMember.SerializeRaw(outputStream);
+    FAMember.SerializeRaw(outputStream);
+    TorqueLimitMember.SerializeRaw(outputStream);
+    TorqueLimitPeakMember.SerializeRaw(outputStream);
+    TorqueOffsetMember.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream,AxisSignMember);
+}
+
+void prmActuatorParameters::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+    ForwardLimitMember.DeSerializeRaw(inputStream);
+    ReverseLimitMember.DeSerializeRaw(inputStream);
+    MaxVelocityMember.DeSerializeRaw(inputStream);
+    MaxAccelerationMember.DeSerializeRaw(inputStream);
+    MaxDecelerationMember.DeSerializeRaw(inputStream);
+    LimitSwitchDeccelarationMember.DeSerializeRaw(inputStream);
+    Counts_per_mmMember.DeSerializeRaw(inputStream);
+    KpMember.DeSerializeRaw(inputStream);
+    KdMember.DeSerializeRaw(inputStream);
+    KiMember.DeSerializeRaw(inputStream);
+    ILMember.DeSerializeRaw(inputStream);
+    FVMember.DeSerializeRaw(inputStream);
+    FAMember.DeSerializeRaw(inputStream);
+    TorqueLimitMember.DeSerializeRaw(inputStream);
+    TorqueLimitPeakMember.DeSerializeRaw(inputStream);
+    TorqueOffsetMember.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream,AxisSignMember);
+}

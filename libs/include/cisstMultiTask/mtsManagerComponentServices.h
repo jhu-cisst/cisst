@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsManagerComponentServices.h 1726 2010-08-30 05:07:54Z mjung5 $
+  $Id$
 
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsManagerComponentServices : public cmnGenericObject {
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR)
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
 
 protected:
     mtsInterfaceRequired * InternalInterfaceRequired;

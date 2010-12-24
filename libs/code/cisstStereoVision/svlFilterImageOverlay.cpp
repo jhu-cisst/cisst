@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -33,13 +33,19 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageOverlay)
 svlFilterImageOverlay::svlFilterImageOverlay() :
     svlFilterBase(),
     FirstOverlay(0),
-    LastOverlay(0)
+    LastOverlay(0),
+    ImageInputsToAddUsed(0),
+    TargetInputsToAddUsed(0),
+    TextInputsToAddUsed(0),
+    OverlaysToAddUsed(0),
+    ImageInputsToAdd(10),
+    TargetInputsToAdd(10),
+    TextInputsToAdd(10),
+    OverlaysToAdd(10)
 {
     svlFilterBase::AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
-//    AddInputType("input", svlTypeImageRGBA);
     AddInputType("input", svlTypeImageRGBStereo);
-//    AddInputType("input", svlTypeImageRGBAStereo);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
@@ -47,21 +53,30 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
 
 svlFilterImageOverlay::~svlFilterImageOverlay()
 {
+    while (FirstOverlay) {
+        FirstOverlay->Used = false;
+        FirstOverlay = FirstOverlay->Next;
+    }
 }
 
 int svlFilterImageOverlay::AddInputImage(const std::string &name)
 {
     if (GetInput(name)) return SVL_FAIL;
 
-    svlFilterInput* input = AddInput(name, false);
-    if (!input) return SVL_FAIL;
+    CS.Enter();
 
-    input->AddType(svlTypeImageRGB);
-//    input->AddType(svlTypeImageRGBA);
-    input->AddType(svlTypeImageRGBStereo);
-//    input->AddType(svlTypeImageRGBAStereo);
+    while (1) {
+        if (IsInputAlreadyQueued(name)) break;
 
-    SampleCache[input] = 0;
+        unsigned int size = ImageInputsToAdd.size();
+        ImageInputsToAddUsed ++;
+        if (ImageInputsToAddUsed > size) ImageInputsToAdd.resize(size + 10);
+        ImageInputsToAdd[ImageInputsToAddUsed - 1] = name;
+
+        break;
+    }
+
+    CS.Leave();
 
     return SVL_OK;
 }
@@ -70,12 +85,20 @@ int svlFilterImageOverlay::AddInputTargets(const std::string &name)
 {
     if (GetInput(name)) return SVL_FAIL;
 
-    svlFilterInput* input = svlFilterBase::AddInput(name, false);
-    if (!input) return SVL_FAIL;
+    CS.Enter();
 
-    input->AddType(svlTypeTargets);
+    while (1) {
+        if (IsInputAlreadyQueued(name)) break;
 
-    SampleCache[input] = 0;
+        unsigned int size = TargetInputsToAdd.size();
+        TargetInputsToAddUsed ++;
+        if (TargetInputsToAddUsed > size) TargetInputsToAdd.resize(size + 10);
+        TargetInputsToAdd[TargetInputsToAddUsed - 1] = name;
+
+        break;
+    }
+
+    CS.Leave();
 
     return SVL_OK;
 }
@@ -84,26 +107,42 @@ int svlFilterImageOverlay::AddInputText(const std::string &name)
 {
     if (GetInput(name)) return SVL_FAIL;
 
-    svlFilterInput* input = svlFilterBase::AddInput(name, false);
-    if (!input) return SVL_FAIL;
+    CS.Enter();
 
-    input->AddType(svlTypeText);
+    while (1) {
+        if (IsInputAlreadyQueued(name)) break;
 
-    SampleCache[input] = 0;
+        unsigned int size = TextInputsToAdd.size();
+        TextInputsToAddUsed ++;
+        if (TextInputsToAddUsed > size) TextInputsToAdd.resize(size + 10);
+        TextInputsToAdd[TextInputsToAddUsed - 1] = name;
+
+        break;
+    }
+
+    CS.Leave();
 
     return SVL_OK;
 }
 
 void svlFilterImageOverlay::AddOverlay(svlOverlay & overlay)
 {
-    if (LastOverlay) {
-        LastOverlay->Next = &overlay;
-        overlay.Prev = LastOverlay;
-        LastOverlay = &overlay;
-    }
-    else {
-        FirstOverlay = LastOverlay = &overlay;
-    }
+    CS.Enter();
+
+        unsigned int size = OverlaysToAdd.size();
+        OverlaysToAddUsed ++;
+        if (OverlaysToAddUsed > size) OverlaysToAdd.resize(size + 10);
+        OverlaysToAdd[OverlaysToAddUsed - 1] = &overlay;
+        overlay.Used = true;
+
+    CS.Leave();
+}
+
+int svlFilterImageOverlay::AddQueuedItems()
+{
+    if (IsRunning()) return SVL_FAIL;
+    AddQueuedItemsInternal();
+    return SVL_OK;
 }
 
 int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -118,6 +157,9 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     _SkipIfDisabled();
 
     _OnSingleThread(procInfo) {
+        // Add queued inputs and overlays in a thread safe manner
+        if (ImageInputsToAddUsed || TargetInputsToAddUsed || TextInputsToAddUsed || OverlaysToAddUsed) AddQueuedItemsInternal();
+
         _SampleCacheMap::iterator itersample;
         svlSampleImage* src_image = dynamic_cast<svlSampleImage*>(syncInput);
         svlOverlayInput* overlayinput = 0;
@@ -153,5 +195,64 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     }
 
     return SVL_OK;
+}
+
+bool svlFilterImageOverlay::IsInputAlreadyQueued(const std::string &name)
+{
+    unsigned int i;
+    for (i = 0; i < ImageInputsToAddUsed;  i ++) if (ImageInputsToAdd[i]  == name) return true;
+    for (i = 0; i < TargetInputsToAddUsed; i ++) if (TargetInputsToAdd[i] == name) return true;
+    for (i = 0; i < TextInputsToAddUsed;   i ++) if (TextInputsToAdd[i]   == name) return true;
+    return false;
+}
+
+void svlFilterImageOverlay::AddQueuedItemsInternal()
+{
+    CS.Enter();
+
+    unsigned int i;
+
+    for (i = 0; i < ImageInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(ImageInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeImageRGB);
+        input->AddType(svlTypeImageRGBStereo);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < TargetInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(TargetInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeTargets);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < TextInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(TextInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeText);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < OverlaysToAddUsed; i ++) {
+        if (LastOverlay) {
+            LastOverlay->Next = OverlaysToAdd[i];
+            OverlaysToAdd[i]->Prev = LastOverlay;
+            LastOverlay = OverlaysToAdd[i];
+            LastOverlay->Next = 0;
+        }
+        else {
+            FirstOverlay = LastOverlay = OverlaysToAdd[i];
+            FirstOverlay->Prev = 0;
+            FirstOverlay->Next = 0;
+        }
+    }
+
+    ImageInputsToAddUsed  = 0;
+    TargetInputsToAddUsed = 0;
+    TextInputsToAddUsed   = 0;
+    OverlaysToAddUsed     = 0;
+
+    CS.Leave();
 }
 

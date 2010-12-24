@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-30
@@ -39,24 +39,21 @@ class CISST_EXPORT mtsExecutionResult
     /*! Defined this type */
     typedef mtsExecutionResult ThisType;
 
-    /* use to bitshift and or for return value of a composite
-       would limit the number of composite interfaces to 31 for
-       an int return value
-    */
-    enum {RETURN_TYPE_BIT_SIZE = 1};
-
     /*! Possible states */
-    /* \todo use consecutive values - will simplify ToStream method */
     /* \todo add timed_out, no_callable_object, ... */
-    enum Enum {DEV_OK = 0,
-               DEV_NOT_OK = 1,
-               BAD_COMMAND = 12,
-               NO_MAILBOX = 13,
-               BAD_INPUT = 14,
-               NO_INTERFACE = 15,
-               MAILBOX_FULL = 16,
-               DISABLED = 17,
-               COMMAND_FAILED = 18  // Read or QualifiedRead returned 'false'
+    /* IMPORTANT: make sure you update the ToStream method in cpp file
+       to handle all cases */
+    enum Enum {
+        COMMAND_SUCCEEDED,
+        COMMAND_QUEUED,
+        FUNCTION_NOT_BOUND,
+        COMMAND_HAS_NO_MAILBOX,
+        COMMAND_DISABLED,
+        INTERFACE_COMMAND_MAILBOX_FULL,
+        COMMAND_ARGUMENT_QUEUE_FULL,
+        INVALID_INPUT_TYPE,
+        METHOD_OR_FUNCTION_FAILED,
+        NETWORK_ERROR
     };
 
     /*! Default constructor, set value to DEV_OK. */
@@ -85,6 +82,14 @@ class CISST_EXPORT mtsExecutionResult
     /*! Equality operators */
     bool operator == (const ThisType & result) const;
     bool operator != (const ThisType & result) const;
+
+    /*! Test if the result is considered OK */
+    bool IsOK(void) const;
+
+    /*! Downcast to bool to allow code such as if (!myFunction) {
+      ... } */
+    operator bool (void) const;
+
 
  protected:
     /*! Value of this state */

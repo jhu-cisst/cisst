@@ -16,12 +16,12 @@ using namespace std;
 int main(void)
 {
     // log configuration, see previous examples
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
 
     // determine which mode to use to save the data
     int choice = 0;

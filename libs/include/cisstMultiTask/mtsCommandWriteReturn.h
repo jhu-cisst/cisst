@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCommandWriteReturn.h 1850 2010-10-06 19:40:27Z adeguet1 $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2010-09-16
@@ -31,6 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandBase.h>
 #include <string>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -42,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
   instantiation of the class to get and actual pointer on the
   method. */
 
-class mtsCommandWriteReturn: public mtsCommandBase {
+class CISST_EXPORT mtsCommandWriteReturn: public mtsCommandBase {
 
 public:
     /*! Base type */

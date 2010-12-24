@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlFilterImageUnsharpMask.cpp 1236 2010-02-26 20:38:21Z adeguet1 $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2006
@@ -113,7 +113,7 @@ int svlFilterImageUnsharpMask::Process(svlProcInfo* procInfo, svlSample* syncInp
             continue;
         }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
         cvSmooth(input->IplImageRef(idx), OutputImage->IplImageRef(idx), CV_GAUSSIAN, Radius * 2 + 1);
 

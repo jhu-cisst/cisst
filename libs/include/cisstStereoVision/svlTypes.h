@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlTypes.h 1212 2010-02-19 01:47:33Z bvagvol1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 
@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlDefinitions.h>
 #include <cisstStereoVision/svlConfig.h>
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
   #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
     #include <cv.h>
     #include <highgui.h>
@@ -91,6 +91,21 @@ struct CISST_EXPORT svlRect
     int top;
     int right;
     int bottom;
+};
+
+struct CISST_EXPORT svlTriangle
+{
+    svlTriangle();
+    svlTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
+    void Assign(const svlTriangle & triangle);
+    void Assign(int x1, int y1, int x2, int y2, int x3, int y3);
+
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int x3;
+    int y3;
 };
 
 struct CISST_EXPORT svlPoint2D

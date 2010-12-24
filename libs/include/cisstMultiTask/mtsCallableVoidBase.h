@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCallableVoidBase_h
 #define _mtsCallableVoidBase_h
 
+#include <cisstMultiTask/mtsExecutionResult.h>
+
 /*!
   \ingroup cisstMultiTask
 
@@ -47,7 +49,7 @@ public:
 
     /*! The execute method. Abstract method to be implemented by derived
       classes to run the actual operation on the receiver. */
-    virtual void Execute(void) = 0;
+    virtual mtsExecutionResult Execute(void) = 0;
 
     /*! Human readable description */
     virtual void ToStream(std::ostream & outputStream) const = 0;

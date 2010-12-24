@@ -1302,6 +1302,7 @@ void devRobotComponent::Startup(){
 void devRobotComponent::Run(){
 
   ProcessQueuedCommands();
+  ProcessQueuedEvents();
 
   if( GetState() == devRobotComponent::ENABLED ){
 

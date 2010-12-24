@@ -55,7 +55,7 @@ template <class _elementType>
 class mtsHistory : public mtsHistoryBase,
                    public vctDynamicVector<_elementType>
 {
-    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Type of elements. */

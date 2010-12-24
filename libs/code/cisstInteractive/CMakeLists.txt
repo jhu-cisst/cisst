@@ -14,10 +14,20 @@
 # 
 # --- end cisst license ---
 
+set(SOURCE_FILES ireFramework.cpp)
+set(HEADER_FILES ireExport.h ireFramework.h)
+set(DEPENDENCIES cisstCommon)
+
+if(BUILD_LIBS_cisstMultiTask)
+   set(SOURCE_FILES ${SOURCE_FILES} ireTask.cpp)
+   set(HEADER_FILES ${HEADER_FILES} ireTask.h)
+   set(DEPENDENCIES ${DEPENDENCIES} cisstOSAbstraction cisstMultiTask)
+endif(BUILD_LIBS_cisstMultiTask)
+
 cisst_add_library (LIBRARY cisstInteractive
-                   DEPENDENCIES cisstCommon
-                   SOURCE_FILES ireFramework.cpp
-                   HEADER_FILES ireExport.h ireFramework.h
+                   DEPENDENCIES ${DEPENDENCIES}
+                   SOURCE_FILES ${SOURCE_FILES}
+                   HEADER_FILES ${HEADER_FILES}
                    )
 
 # Link against these libraries

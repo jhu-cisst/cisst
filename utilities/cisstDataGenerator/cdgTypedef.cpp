@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-06
@@ -25,8 +25,13 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdgTypedef);
 
 
+cdgScope::Type cdgTypedef::GetScope(void) const
+{
+    return cdgScope::CDG_TYPEDEF;
+}
 
-bool cdgTypedef::IsKeyword(const std::string & keyword) const
+
+bool cdgTypedef::HasKeyword(const std::string & keyword) const
 {
     if ((keyword == "name")
         || (keyword == "type")) {
@@ -36,11 +41,17 @@ bool cdgTypedef::IsKeyword(const std::string & keyword) const
 }
 
 
+bool cdgTypedef::HasScope(const std::string & CMN_UNUSED(keyword),
+                          cdgScope::Stack & CMN_UNUSED(scopes))
+{
+    return false;
+}
+
+
 bool cdgTypedef::SetValue(const std::string & keyword,
                           const std::string & value,
                           std::string & errorMessage)
 {
-    errorMessage.clear();
     if (keyword == "name") {
         if (!this->Name.empty()) {
             errorMessage = "name already set";
@@ -64,7 +75,6 @@ bool cdgTypedef::SetValue(const std::string & keyword,
 
 bool cdgTypedef::IsValid(std::string & errorMessage) const
 {
-    errorMessage.clear();
     bool isValid = true;
     if (this->Name.empty()) {
         isValid = false;

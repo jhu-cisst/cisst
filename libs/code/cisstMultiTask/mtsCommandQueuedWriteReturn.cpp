@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCommandQueuedWriteReturn.cpp 1850 2010-10-06 19:40:27Z adeguet1 $
+  $Id$
 
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2010-09-16
@@ -50,25 +50,33 @@ mtsCommandQueuedWriteReturn * mtsCommandQueuedWriteReturn::Clone(mtsMailBox * ma
 mtsExecutionResult mtsCommandQueuedWriteReturn::Execute(const mtsGenericObject & argument,
                                                         mtsGenericObject & result)
 {
-    if (this->IsEnabled()) {
-        if (!MailBox) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteReturn: Execute: no mailbox for \""
-                              << this->Name << "\"" << std::endl;
-            return mtsExecutionResult::NO_MAILBOX;
-        }
-        // preserve address of result and wait to be dequeued
-        ArgumentPointer = &argument;
-        ResultPointer = &result;
-        if (!MailBox->Write(this)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteReturn: Execute: mailbox full for \""
-                              << this->Name << "\"" <<  std::endl;
-            return mtsExecutionResult::MAILBOX_FULL;
-        }
-        if (!MailBox->IsEmpty())
-            MailBox->ThreadSignalWait();
-        return mtsExecutionResult::DEV_OK;
+    // check if this command is enabled
+    if (!this->IsEnabled()) {
+        return mtsExecutionResult::COMMAND_DISABLED;
     }
-    return mtsExecutionResult::DISABLED;
+    // check if there is a mailbox (i.e. if the command is associated to an interface
+    if (!MailBox) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteReturn: Execute: no mailbox for \""
+                          << this->Name << "\"" << std::endl;
+        return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
+    }
+    // preserve address of result and wait to be dequeued
+    ArgumentPointer = &argument;
+    ResultPointer = &result;
+    if (!MailBox->Write(this)) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteReturn: Execute: mailbox full for \""
+                          << this->Name << "\"" <<  std::endl;
+        return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+    }
+    // test if the mailbox has been emptied already (e.g. post queued command)
+    if (MailBox->IsEmpty()) {
+        // signal has been raised, reset it
+        MailBox->ThreadSignalWait(0.0);
+    } else {
+        // normal case, wait
+        MailBox->ThreadSignalWait();
+    }
+    return mtsExecutionResult::COMMAND_SUCCEEDED;
 }
 
 

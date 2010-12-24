@@ -81,7 +81,7 @@ class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
     // for reconfiguration
     friend class mtsComponentProxy;
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Typedef for local component manager's configuration */
@@ -394,6 +394,7 @@ public:
         \param serverProcessName Name of server process
         \param serverComponentName Name of server component
         \param serverInterfaceProvidedName Name of provided interface
+        \param retryCount Number of times this connection is retried (default: 10)
         \return True if success, false otherwise
         \note If connection is established successfully, this information is
               reported to the global component manager. Since connection between
@@ -412,7 +413,8 @@ public:
     bool Connect(const std::string & clientProcessName, const std::string & clientComponentName,
                  const std::string & clientInterfaceRequiredName,
                  const std::string & serverProcessName, const std::string & serverComponentName,
-                 const std::string & serverInterfaceProvidedName);
+                 const std::string & serverInterfaceProvidedName,
+                 const unsigned int retryCount = 10);
 #endif
 
     /*! Disconnect two interfaces */

@@ -472,7 +472,7 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
         tool->Name = name;
         strncpy(tool->SerialNumber, serialNumber, 8);
 
-        if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
+        if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
             delete tool;
             return 0;
@@ -621,7 +621,7 @@ void devNDISerial::PortHandlesQuery(void)
         // associate the tool to its port handle
         toolKey = portHandles[i].Pointer();
         CMN_LOG_CLASS_INIT_VERBOSE << "PortHandlesQuery: associating " << tool->Name << " to port handle " << tool->PortHandle << std::endl;
-        PortToTool.AddItem(toolKey, tool, CMN_LOG_LOD_INIT_ERROR);
+        PortToTool.AddItem(toolKey, tool, CMN_LOG_LEVEL_INIT_ERROR);
 
         CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery:\n"
                                  << " * Port Handle: " << tool->PortHandle << "\n"

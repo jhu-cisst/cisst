@@ -1027,8 +1027,6 @@ bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const s
                                   const std::string & serverProcessName, const std::string & serverComponentName,
                                   const std::string & serverInterfaceProvidedName)
 {
-    // smmy
-    /*
     // Get connection information
     ConnectionMapType * connectionMapOfInterfaceRequired =
         GetConnectionsOfInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceRequiredName);
@@ -1189,8 +1187,6 @@ bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const s
     CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: successfully disconnected: "
                               << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << " - "
                               << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl;
-
-    */
 
     return true;
 }

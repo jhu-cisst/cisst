@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsManagerComponentServer.h 1726 2010-08-30 05:07:54Z mjung5 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
@@ -46,7 +46,7 @@ class mtsManagerGlobal;
 
 class mtsManagerComponentServer : public mtsManagerComponentBase
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
 

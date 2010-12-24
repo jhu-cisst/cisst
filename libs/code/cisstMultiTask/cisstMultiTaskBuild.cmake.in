@@ -1,5 +1,5 @@
 #
-# $Id: cisstDevicesBuild.cmake.in 1236 2010-02-26 20:38:21Z adeguet1 $
+# $Id$
 #
 # Cmake configuration file for the installed version of cisstDevices
 #

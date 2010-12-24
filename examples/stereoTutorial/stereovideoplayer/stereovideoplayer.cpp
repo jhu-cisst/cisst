@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- $Id: $
+ $Id$
 
  Author(s):  Balazs Vagvolgyi
  Created on: 2010
@@ -27,15 +27,15 @@
 using namespace std;
 
 
-///////////////////////////////////
-//     Window callback class     //
-///////////////////////////////////
+////////////////////////////////////////
+//     Window event handler class     //
+////////////////////////////////////////
 
-class CViewerWindowCallback : public svlImageWindowCallbackBase
+class CViewerEventHandler : public svlWindowEventHandlerBase
 {
 public:
-    CViewerWindowCallback() :
-    svlImageWindowCallbackBase()
+    CViewerEventHandler() :
+    svlWindowEventHandlerBase()
     ,AdjustmentsEnabled(false)
     ,MousePressed(false)
     ,OffsetX(0)
@@ -143,7 +143,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     svlStreamManager stream(8);
     svlFilterSourceVideoFile source(2);
     svlFilterImageExposureCorrection gamma;
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     svlFilterImageCenterFinder centerfinder;
     svlFilterImageZoom zoom;
 #endif // CISST_SVL_HAS_OPENCV
@@ -152,7 +152,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     svlFilterImageWindow window;
     svlFilterImageOverlay overlay;
     svlFilterStereoImageJoiner joiner;
-    CViewerWindowCallback window_cb;
+    CViewerEventHandler window_eh;
 
     // Add timestamp overlay
     svlOverlayTimestamp ts_overlay(SVL_LEFT,               // background video channel
@@ -164,9 +164,9 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
                                    svlRGB(0, 0, 128));     // background color
     overlay.AddOverlay(ts_overlay);
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     // setup center finder and zoom
-    centerfinder.SetReceivingFilter(&zoom);
+    centerfinder.AddReceiver(&zoom);
     centerfinder.SetMask(false);
     centerfinder.SetThreshold(40);
     zoom.SetZoom(2.0, SVL_LEFT);
@@ -193,8 +193,8 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
 			resizer.SetOutputSize(width / 2, height, SVL_RIGHT);
 		}
 		else if (fullscreen == 2) {
-		    resizer.SetOutputSize(width, height / 2, SVL_LEFT);
-			resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
+            resizer.SetOutputSize(width, height / 2, SVL_LEFT);
+            resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
             joiner.SetLayout(svlLayoutInterlaced);
 		}
 		else {
@@ -204,9 +204,9 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     }
 
     // setup image window
-    window_cb.Gamma = &gamma;
-    window_cb.ImageShifter = &shifter;
-    window.SetEventHandler(&window_cb);
+    window_eh.Gamma = &gamma;
+    window_eh.ImageShifter = &shifter;
+    window.SetEventHandler(&window_eh);
     window.SetTitle("Camera Viewer");
 	if (fullscreen >= 0) {
         window.SetFullScreen(true);
@@ -242,7 +242,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
         output = resizer.GetOutput();
     }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     // Add center finder
     output->Connect(centerfinder.GetInput());
     output = centerfinder.GetOutput();

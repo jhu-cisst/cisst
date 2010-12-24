@@ -25,48 +25,41 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cisstConfig_h
 #define _cisstConfig_h
 
-#define ON 1
-#define OFF 0
-
 // Path to source root (to find some configuration files)
-#define CISST_SOURCE_ROOT "@CISST_SOURCE_DIR@"
+#define CISST_SOURCE_ROOT "${CISST_SOURCE_DIR}"
 
 // Path to build root (to find some configuration files)
-#define CISST_BUILD_ROOT "@CISST_BINARY_DIR@"
+#define CISST_BUILD_ROOT "${CISST_BINARY_DIR}"
 
 // Path to build files
-#define CISST_BUILD_LINK_DIRECTORIES "@CISST_BUILD_LINK_DIRECTORIES@"
+#define CISST_BUILD_LINK_DIRECTORIES "${CISST_BUILD_LINK_DIRECTORIES}"
 
 // Was cisst compiled as shared libraries or static
-#define CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@
+#cmakedefine01 CISST_BUILD_SHARED_LIBS
 
 // For MSVC, CMake generator assumes either 32 or 64 bits compiler
-#define CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@
+#cmakedefine01 CISST_CMAKE_COMPILER_IS_MSVC_64
 
 // LAPACK3E, erc-cisst distribution of code from netlib.org
-#define CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@
+#cmakedefine01 CISST_HAS_CISSTNETLIB
 
 // RTAI Realtime extension for Linux
-#define CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@
+#cmakedefine01 CISST_HAS_LINUX_RTAI
 
 // Xenomai Realtime extension for Linux
-#define CISST_HAS_LINUX_XENOMAI @CISST_HAS_LINUX_XENOMAI@
-
-// Using OpenCV for optimized image processing
-#define CISST_HAS_OPENCV @SVL_HAS_OPENCV@
+#cmakedefine01 CISST_HAS_LINUX_XENOMAI
 
 // Using XML or not
-#define CISST_HAS_XML @CISST_HAS_XML@
+#cmakedefine01 CISST_HAS_XML
 
 // Using IRE (and Swig/Python) or not
-#define CISST_HAS_IRE @BUILD_LIBS_cisstInteractive@
+#cmakedefine01 CISST_HAS_IRE
 
 // Using FLTK or not
-#define CISST_HAS_FLTK @CISST_HAS_FLTK@
+#cmakedefine01 CISST_HAS_FLTK
 
 // Using Qt or not
-#define CISST_HAS_QT @CISST_HAS_QT@
+#cmakedefine01 CISST_HAS_QT
 
 
 #endif // _cisstConfig_h
-

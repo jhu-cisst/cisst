@@ -38,7 +38,7 @@ class ui3CursorSphereAnchor;
 */
 class CISST_EXPORT ui3CursorSphere: public ui3CursorBase
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:  
     /*! VTK objects used for the cursor itself, i.e. a simple

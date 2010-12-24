@@ -771,8 +771,8 @@ public:
   </ol>
 
   \note The NNLS functions make use of LAPACK routines.  To activate
-  this code, set the CISST_HAS_CNETLIB or CISST_HAS_CISSTNETLIB flag
-  to ON during the configuration of cisst with CMake.
+  this code, set the CISST_HAS_CISSTNETLIB flag to ON during the
+  configuration of cisst with CMake.
 
   \note The general rule for numerical functions which depend on
   LAPACK is that column major matrices should be used everywhere, and

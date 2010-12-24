@@ -51,6 +51,12 @@ protected:
     mtsMulticastCommandWriteProxy(const std::string & name) : BaseType(name)
     {}
 
+    ~mtsMulticastCommandWriteProxy() {
+        if (ArgumentPrototype) {
+            delete ArgumentPrototype;
+        }
+    }
+
 public:
     /*! Execute all the commands in the composite. */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
@@ -59,12 +65,12 @@ public:
         for (index = 0; index < Commands.size(); ++index) {
             Commands[index]->Execute(argument, MTS_NOT_BLOCKING);
         }
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        this->ArgumentPrototype = argumentPrototype;
+        ArgumentPrototype = argumentPrototype;
     }
 
     /*! Getter */

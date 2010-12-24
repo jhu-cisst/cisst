@@ -211,7 +211,7 @@ public:
     //enum {HAS_DYNAMIC_CREATION = DeRefType::HAS_DYNAMIC_CREATION};
     //enum {InitialLoD = DeRefType::InitialLoD};
     enum {HAS_DYNAMIC_CREATION = true};
-    enum {InitialLoD = CMN_LOG_LOD_RUN_ERROR};
+    enum {InitialLoD = CMN_LOG_ALLOW_DEFAULT};
     static cmnClassServicesBase * ClassServices(void) { return DeRefType::ClassServices(); }
     virtual const cmnClassServicesBase * Services(void) const
     {
@@ -252,7 +252,7 @@ public:
 template <class _elementType>
 class mtsGenericObjectProxy: public mtsGenericObjectProxyBase<_elementType>
 {
-    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     typedef mtsGenericObjectProxy<_elementType> ThisType;
@@ -612,5 +612,24 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
+
+typedef std::vector<std::string> stdStringVec;
+// Add Proxy to name to distinguish this from mtsVector<std::string>
+typedef mtsGenericObjectProxy<stdStringVec> mtsStdStringVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVecProxy);
+
+// Define stream out operator for stdStringVec
+inline std::ostream & operator << (std::ostream & output,
+                            const stdStringVec & object) {
+    output << "[";
+    for (size_t i = 0; i < object.size(); i++) {
+        output << object[i];
+        if (i < object.size()-1)
+            output << ", ";
+    }
+    output << "]";
+    return output;
+}
+
 
 #endif

@@ -35,7 +35,7 @@ struct devNovintHDLDriverData;
 struct devNovintHDLHandle;
 
 class CISST_EXPORT devNovintHDL: public mtsTaskFromCallbackAdapter {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     enum {NB_JOINTS = 3};

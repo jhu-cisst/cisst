@@ -3,13 +3,13 @@
 
 /*
   $Id$
-  
+
   Author(s): Anton Deguet
   Created on: 2009-01-27
 
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
-  
+
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
@@ -26,40 +26,40 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstConfig.h>
 
 // Using OpenCV for optimized image processing
-#define CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV@
+#cmakedefine01 CISST_SVL_HAS_OPENCV
 
 // Using ZLIB for optimized image processing
-#define CISST_SVL_HAS_ZLIB @CISST_SVL_HAS_ZLIB@
+#cmakedefine01 CISST_SVL_HAS_ZLIB
 
 // Support for Videre Design SVS
-#define CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@
+#cmakedefine01 CISST_SVL_HAS_SVS
 
 // Support for DirectShow
-#define CISST_SVL_HAS_DIRECTSHOW @CISST_SVL_HAS_DIRECTSHOW@
+#cmakedefine01 CISST_SVL_HAS_DIRECTSHOW
 
 // Support for libDC1394
-#define CISST_SVL_HAS_DC1394 @CISST_SVL_HAS_DC1394@
+#cmakedefine01 CISST_SVL_HAS_DC1394
 
 // Support for IEEE1394B switch on Darwin
-#define CISST_SVL_DC1394_ENABLE_800Mbps @CISST_SVL_DC1394_ENABLE_800Mbps@
+#cmakedefine01 CISST_SVL_DC1394_ENABLE_800Mbps
 
 // Support for video4linux2
-#define CISST_SVL_HAS_VIDEO4LINUX2 @CISST_SVL_HAS_VIDEO4LINUX2@
+#cmakedefine01 CISST_SVL_HAS_VIDEO4LINUX2
 
 // Support for video4linux2
-#define CISST_SVL_HAS_MIL @CISST_SVL_HAS_MIL@
+#cmakedefine01 CISST_SVL_HAS_MIL
 
 // Support for X11
-#define CISST_SVL_HAS_X11 @CISST_SVL_HAS_X11@
+#cmakedefine01 CISST_SVL_HAS_X11
 
 // Support for Xvideo
-#define CISST_SVL_HAS_XV @CISST_SVL_HAS_XV@
+#cmakedefine01 CISST_SVL_HAS_XV
 
 // Support for JPEG
-#define CISST_SVL_HAS_JPEG @CISST_SVL_HAS_JPEG@
+#cmakedefine01 CISST_SVL_HAS_JPEG
 
 // Support for PNG
-#define CISST_SVL_HAS_PNG @CISST_SVL_HAS_PNG@
+#cmakedefine01 CISST_SVL_HAS_PNG
 
 #endif // _svlConfig_h
 

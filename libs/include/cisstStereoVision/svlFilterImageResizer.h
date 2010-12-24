@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT svlFilterImageResizer : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterImageResizer();
@@ -50,6 +50,7 @@ protected:
 private:
     svlSampleImage* OutputImage;
 
+    bool EqualSize;
     double WidthRatio[2];
     double HeightRatio[2];
     unsigned int Width[2];

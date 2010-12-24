@@ -215,7 +215,7 @@ int svlFilterSourceVideoCapture::EnumerateDevices()
         go = SupportedAPIs[j]->Create();
 
         if (go == 0) {
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
             // MIL device object is a singleton, cannot be created dynamically
             if (APIPlatforms[j] == MatroxImaging) {
                 go = svlVidCapSrcMIL::GetInstance();
@@ -360,7 +360,7 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
         platform = DeviceObj[API[i]]->GetPlatformType();
 
         if (platform == WinDirectShow) {
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+#if CISST_SVL_HAS_DIRECTSHOW
             // DirectShow does not use the Format structure.
             // Instead, it has its own custom configuration format.
             if (DevSpecConfigBuffer[i] && DevSpecConfigBufferSize[i] > 0) {
@@ -368,7 +368,7 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
             }
 #endif // CISST_SVL_HAS_DIRECTSHOW
         }
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL 
         else if (platform == MatroxImaging) {
             // Check if Matrox device supports capture
             if (dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[API[i]])->EnableCapture(APIDeviceID[i]) == false) {
@@ -400,7 +400,7 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
         platform = DeviceObj[API[i]]->GetPlatformType();
 
         if (platform == WinDirectShow) {
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+#if CISST_SVL_HAS_DIRECTSHOW
             // DirectShow does not use the Properties structure.
             // Instead, it encodes image preperties into the custom
             // configuration format which was already set above.
@@ -463,7 +463,7 @@ int svlFilterSourceVideoCapture::Release()
 {
     for (unsigned int i = 0; i < NumberOfSupportedAPIs; i ++) {
 
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
         // MIL device object is a singleton, should not be deleted
         if (DeviceObj[i] &&
             DeviceObj[i]->GetPlatformType() == MatroxImaging) {
@@ -504,7 +504,7 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
             go = (*iter).second->Create();
 
             if (go == 0) {
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
                 // MIL device object is a singleton, cannot be created dynamically
                 if ((*iter).first == "svlVidCapSrcMIL") {
                     go = svlVidCapSrcMIL::GetInstance();
@@ -574,7 +574,7 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
             DeviceGenObj[j] = SupportedAPIs[j]->Create();
 
             if (DeviceGenObj[j] == 0) {
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
                 // MIL device object is a singleton, cannot be created dynamically
                 if (APIPlatforms[j] == MatroxImaging) {
                     DeviceGenObj[j] = svlVidCapSrcMIL::GetInstance();
@@ -638,7 +638,7 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
     DialogFormat(videoch);
 
     if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
-#if (CISST_SVL_HAS_DC1394 == ON)
+#if CISST_SVL_HAS_DC1394
         std::cout << std::endl << "  ===== Setup external trigger =====" << std::endl;
         DialogTrigger(videoch);
         std::cout << std::endl;
@@ -720,7 +720,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
     PlatformType platform = EnumeratedDevices[DeviceID[videoch]].platform;
 
     if (platform == WinDirectShow) {
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+#if CISST_SVL_HAS_DIRECTSHOW
         // Create temporary DirectShow capture module and initialize it
         svlVidCapSrcDirectShow device;
         device.SetStreamCount(1);
@@ -950,7 +950,7 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
     PlatformType platform = DeviceObj[API[videoch]]->GetPlatformType();
 
     if (platform == WinDirectShow) {
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+#if CISST_SVL_HAS_DIRECTSHOW
         svlVidCapSrcDirectShow* device = dynamic_cast<svlVidCapSrcDirectShow*>(DeviceObj[API[videoch]]);
         if (device->ShowImageDialog(0, APIChannelID[videoch]) == SVL_OK) {
             // Store, whatever changes have been made

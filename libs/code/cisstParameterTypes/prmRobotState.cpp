@@ -71,4 +71,47 @@ void prmRobotState::SetSize(size_type size){
 
 }
 
+
+void prmRobotState::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+
+    this->JointPositionMember.SerializeRaw(outputStream);
+    this->JointVelocityMember.SerializeRaw(outputStream);
+    this->JointPositionGoalMember.SerializeRaw(outputStream);
+    this->JointVelocityGoalMember.SerializeRaw(outputStream);
+    this->JointPositionErrorMember.SerializeRaw(outputStream);
+    this->JointVelocityErrorMember.SerializeRaw(outputStream);
+    this->CartesianPositionMember.SerializeRaw(outputStream);
+    this->CartesianVelocityMember.SerializeRaw(outputStream);
+    this->CartesianPositionGoalMember.SerializeRaw(outputStream);
+    this->CartesianVelocityGoalMember.SerializeRaw(outputStream);
+    this->CartesianVelocityErrorMember.SerializeRaw(outputStream);
+    this->CartesianPositionErrorMember.SerializeRaw(outputStream);
+    this->EndEffectorFrameMember.SerializeRaw(outputStream);
+
+}
+
+void prmRobotState::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+
+    this->JointPositionMember.DeSerializeRaw(inputStream);
+    this->JointVelocityMember.DeSerializeRaw(inputStream);
+    this->JointPositionGoalMember.DeSerializeRaw(inputStream);
+    this->JointVelocityGoalMember.DeSerializeRaw(inputStream);
+    this->JointPositionErrorMember.DeSerializeRaw(inputStream);
+    this->JointVelocityErrorMember.DeSerializeRaw(inputStream);
+    this->CartesianPositionMember.DeSerializeRaw(inputStream);
+    this->CartesianVelocityMember.DeSerializeRaw(inputStream);
+    this->CartesianPositionGoalMember.DeSerializeRaw(inputStream);
+    this->CartesianVelocityGoalMember.DeSerializeRaw(inputStream);
+    this->CartesianVelocityErrorMember.DeSerializeRaw(inputStream);
+    this->CartesianPositionErrorMember.DeSerializeRaw(inputStream);
+    this->EndEffectorFrameMember.DeSerializeRaw(inputStream);
+
+}
+
+
+
 //  $Log 

@@ -42,7 +42,7 @@ class osaCriticalSection;
 
 class CISST_EXPORT svlStreamManager: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 friend class svlStreamProc;
 

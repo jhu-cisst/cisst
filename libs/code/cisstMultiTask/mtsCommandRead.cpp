@@ -29,7 +29,9 @@ mtsCommandRead::mtsCommandRead(void):
 
 
 mtsCommandRead::mtsCommandRead(const std::string & name):
-    BaseType(name)
+    BaseType(name),
+    Callable(0),
+    ArgumentPrototype(0)
 {
 }
 
@@ -57,7 +59,7 @@ mtsExecutionResult mtsCommandRead::Execute(mtsGenericObject & argument)
     if (this->IsEnabled()) {
         return this->Callable->Execute(argument);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

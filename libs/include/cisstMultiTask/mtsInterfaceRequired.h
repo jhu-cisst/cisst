@@ -81,7 +81,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsComponentProxy;
     friend class mtsComponentInterfaceProxyClient;
@@ -97,13 +97,20 @@ protected:
     /*! Pointer to provided interface that we are connected to. */
     mtsInterfaceProvided * InterfaceProvided;
 
+    /*! Size to be used for mailboxes */
+    size_t MailBoxSize;
+
+    /*! Size to be used for argument queues */
+    size_t ArgumentQueuesSize;
+
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequired(void) {}
 
  public:
 
-    /*! Default size for queues of events */
-    enum {DEFAULT_EVENT_QUEUE_LEN = 64};
+    /*! Default size for mail boxes and argument queues used by event
+      handlers. */
+    enum {DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE = 64};
 
     /*! Constructor. Sets the name, device pointer, and mailbox for queued events.
 
@@ -125,6 +132,39 @@ protected:
 
     const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
 
+    /*! Set the desired size for the event handlers mail box.  If
+      queueing has been enabled for this interface, a single mailbox
+      is created to handle all events.  Each write event handler
+      manages it's own queue for the event argument.  To change the
+      argument queue size, use SetArgumentQueuesSize.  To change both
+      parameters at once, use SetMailBoxAndArgumentQueuesSize.
+
+      The size of the mail box can't be changed while being used
+      (i.e. while this required interface is connected to a provided
+      interface. */
+    bool SetMailBoxSize(size_t desiredSize);
+
+    /*! Set the desired size for all argument queues.  If queueing has
+      been enabled for this interface, each write event handler
+      manages it's own queue of arguments.  The command itself is
+      queued in the interface mailbox (see SetMailBoxSize) and the
+      argument is queued by the command itself.  There is no reason to
+      have an argument queue larger than the event handlers mail box
+      as there can't be more arguments queued than events.  The
+      reciprocal is not true as different events can be queued.  So,
+      the argument queue size should be lesser or equal to the mail
+      box size.
+
+      The size of the mail box can't be changed while being used
+      (i.e. while this required interface is connected to a provided
+      interface. */
+    bool SetArgumentQueuesSize(size_t desiredSize);
+
+    /*! Set the desired size for the event handlers mail box and
+      argument queues.  See SetMailBoxSize and
+      SetArgumentQueuesSize. */
+    bool SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
+
     /*! Get the names of commands required by this interface. */
     //@{
     virtual std::vector<std::string> GetNamesOfFunctions(void) const;
@@ -134,6 +174,16 @@ protected:
     virtual std::vector<std::string> GetNamesOfFunctionsWriteReturn(void) const;
     virtual std::vector<std::string> GetNamesOfFunctionsRead(void) const;
     virtual std::vector<std::string> GetNamesOfFunctionsQualifiedRead(void) const;
+    //@}
+
+    /*! Find a function based on its name. */
+    //@{
+    mtsFunctionVoid * GetFunctionVoid(const std::string & functionName) const;
+    mtsFunctionVoidReturn * GetFunctionVoidReturn(const std::string & functionName) const;
+    mtsFunctionWrite * GetFunctionWrite(const std::string & functionName) const;
+    mtsFunctionWriteReturn * GetFunctionWriteReturn(const std::string & functionName) const;
+    mtsFunctionRead * GetFunctionRead(const std::string & functionName) const;
+    mtsFunctionQualifiedRead * GetFunctionQualifiedRead(const std::string & functionName) const;
     //@}
 
     /*! Get the names of event handlers that exist in this interface */
@@ -313,8 +363,8 @@ public:
                                                              const std::string & eventName,
                                                              mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
-    bool RemoveEventHandlerVoid(const std::string &eventName);
-    bool RemoveEventHandlerWrite(const std::string &eventName);
+    bool RemoveEventHandlerVoid(const std::string & eventName);
+    bool RemoveEventHandlerWrite(const std::string & eventName);
 };
 
 
@@ -330,7 +380,7 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWrite(void (__
         new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType());
     if (queued) {
         if (MailBox)
-            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, DEFAULT_EVENT_QUEUE_LEN));
+            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, this->ArgumentQueuesSize));
         else
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write \"" << eventName << "\"" << std::endl;
     } else {
@@ -354,7 +404,7 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
     if (queued) {
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
-            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, DEFAULT_EVENT_QUEUE_LEN));
+            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize));
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write generic \"" << eventName << "\"" << std::endl;
         }

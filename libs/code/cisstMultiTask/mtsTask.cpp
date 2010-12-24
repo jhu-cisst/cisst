@@ -227,7 +227,7 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfac
     const std::string interfaceName = "StateTable" + tableName;
     if (!this->StateTables.AddItem(tableName,
                                    existingStateTable,
-                                   CMN_LOG_LOD_INIT_ERROR)) {
+                                   CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add state table \"" << tableName
                                  << "\" to task \"" << this->GetName() << "\"" << std::endl;
         return false;
@@ -266,8 +266,8 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfac
 mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName,
                                                      mtsRequiredType required)
 {
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else
-    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN);
+    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
+                                          mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE);
     mtsInterfaceRequired * result;
     // try to create and add interface
     result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);

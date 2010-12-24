@@ -53,9 +53,9 @@ bool mtsFunctionVoidReturn::Bind(CommandType * command)
 }
 
 
-mtsExecutionResult mtsFunctionVoidReturn::operator()(mtsGenericObject & result) const
+mtsExecutionResult mtsFunctionVoidReturn::Execute(mtsGenericObject & result) const
 {
-    return Command ? Command->Execute(result) : mtsExecutionResult::NO_INTERFACE;
+    return Command ? Command->Execute(result) : mtsExecutionResult::FUNCTION_NOT_BOUND;
 }
 
 
