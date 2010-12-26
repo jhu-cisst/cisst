@@ -105,6 +105,28 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
 }
 
 
+/*! De-serialization helper function for an STL vector.  This function
+  first de-serializes the vector size, resizes the vector and then
+  alls cmnDeSerializeRaw for each element of the vector.  This assumes that
+  cmnDeSerializeRaw is defined for the element type.
+  If the read operation fails, an exception is thrown
+  (<code>std::runtime_error</code>). */
+template <class _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementType> & data)
+    throw (std::runtime_error)
+{
+    std::vector<_elementType>::size_type size = 0;
+    cmnDeSerializeSizeRaw(inputStream, size);
+    data.resize(size);
+    for (size_t i = 0; i < size; i++) {
+        cmnDeSerializeRaw(inputStream, data[i]);
+        if (inputStream.fail()) {
+            cmnThrow("cmnDeSerializeRaw(std::vector<_elementType>): Error occured with std::istream::read");
+        }
+    }
+}
+
+
 /*!
   \brief De-serialization utility class.
   \ingroup cisstCommon

@@ -86,7 +86,7 @@ bool mtsInterfaceRequired::SetMailBoxSize(size_t desiredSize)
                                    << std::endl;
         return false;
     }
-    if (this->InterfaceProvidedOrOutput) {
+    if (this->GetConnectedInterface()) {
         CMN_LOG_CLASS_INIT_ERROR << "SetMailBoxSize: interface \"" << this->GetName()
                                  << "\", can't modify mail box size while the interface is connected."
                                  << std::endl;
@@ -106,7 +106,7 @@ bool mtsInterfaceRequired::SetArgumentQueuesSize(size_t desiredSize)
                                    << std::endl;
         return false;
     }
-    if (this->InterfaceProvidedOrOutput) {
+    if (this->GetConnectedInterface()) {
         CMN_LOG_CLASS_INIT_ERROR << "SetArgumentQueuesSize: interface \"" << this->GetName()
                                  << "\", can't modify argument queues size while the interface is connected."
                                  << std::endl;

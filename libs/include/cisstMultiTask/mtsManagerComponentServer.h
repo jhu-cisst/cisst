@@ -56,7 +56,7 @@ protected:
     mtsManagerGlobal * GCM;
 
     /*! Getters for GCM service provider */
-    void GetNamesOfProcesses(mtsStdStringVec & stdStringVec) const;
+    void GetNamesOfProcesses(std::vector<std::string> & processList) const;
 
     /*! Functions.  Since one manager component server needs to be able to
         handle multiple manager component clients, we keep a list of 
@@ -96,8 +96,9 @@ public:
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
-    void InterfaceGCMCommands_GetNamesOfProcesses(mtsStdStringVec & names) const;
-    void InterfaceGCMCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const;
+    void InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
+    void InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName, 
+                                                   std::vector<std::string> & names) const;
     void InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
 

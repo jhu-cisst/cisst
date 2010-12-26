@@ -24,21 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
-#include <cisstMultiTask/mtsVector.h> // for mtsDescriptionInterface::mtsStdStringVec
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last!
 #include <cisstMultiTask/mtsExport.h>
-
-#ifndef SWIG
-// Nominal class to provide utility functions
-class mtsParameterTypes {
-public:
-    static void ConvertVectorStringType(const mtsStdStringVec & mtsVec, std::vector<std::string> & stdVec);
-    static void ConvertVectorStringType(const std::vector<std::string> & stdVec, mtsStdStringVec & mtsVec);
-};
-#endif
 
 //-----------------------------------------------------------------------------
 //  Component Description
@@ -51,6 +41,15 @@ public:
     std::string ProcessName;
     std::string ComponentName;
     std::string ClassName;
+
+    /*! Default constructor */
+    mtsDescriptionComponent() {}
+    /*! Copy constructor */
+    mtsDescriptionComponent(const mtsDescriptionComponent &other);
+    /*! Constructor process name and component name */
+    mtsDescriptionComponent(const std::string &processName, const std::string &componentName);
+    /*! Destructor */
+    ~mtsDescriptionComponent() {}
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
@@ -70,8 +69,15 @@ class CISST_EXPORT mtsDescriptionInterface: public mtsGenericObject
 public:
     std::string ProcessName;
     std::string ComponentName;
-    mtsStdStringVec InterfaceRequiredNames;
-    mtsStdStringVec InterfaceProvidedNames;
+    std::vector<std::string> InterfaceRequiredNames;
+    std::vector<std::string> InterfaceProvidedNames;
+
+    /*! Default constructor */
+    mtsDescriptionInterface() {}
+    /*! Copy constructor */
+    mtsDescriptionInterface(const mtsDescriptionInterface &other);
+    /*! Destructor */
+    ~mtsDescriptionInterface() {}
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;

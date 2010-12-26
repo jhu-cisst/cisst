@@ -61,16 +61,9 @@ void mtsManagerComponentServer::Cleanup(void)
 {
 }
 
-void mtsManagerComponentServer::GetNamesOfProcesses(mtsStdStringVec & stdStringVec) const
+void mtsManagerComponentServer::GetNamesOfProcesses(std::vector<std::string> & processList) const
 {
-    std::vector<std::string> namesOfProcesses;
-    GCM->GetNamesOfProcesses(namesOfProcesses);
-
-    const size_t n = namesOfProcesses.size();
-    stdStringVec.SetSize(n);
-    for (unsigned int i = 0; i < n; ++i) {
-        stdStringVec(i) = namesOfProcesses[i];
-    }
+    GCM->GetNamesOfProcesses(processList);
 }
 
 bool mtsManagerComponentServer::AddInterfaceGCM(void)
@@ -305,39 +298,24 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsCo
     functionSet->ComponentResume(arg);
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses(mtsStdStringVec & names) const
+void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const
 {
-    std::vector<std::string> _names;
-    GCM->GetNamesOfProcesses(_names);
-
-    names.SetSize(_names.size());
-    for (size_t i = 0; i < names.size(); ++i) {
-        names(i) = _names[i];
-    }
+    GCM->GetNamesOfProcesses(names);
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const
+void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName,
+                                                                          std::vector<std::string> & names) const
 {
-    std::vector<std::string> _names;
-    GCM->GetNamesOfComponents(processName, _names);
-
-    names.SetSize(_names.size());
-    for (size_t i = 0; i < names.size(); ++i) {
-        names(i) = _names[i];
-    }
+    GCM->GetNamesOfComponents(processName, names);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const
 {
-    std::vector<std::string> interfaceNames;
-
     // Get a list of required interfaces
-    GCM->GetNamesOfInterfacesRequiredOrInput(component.ProcessName, component.ComponentName, interfaceNames);
-    mtsParameterTypes::ConvertVectorStringType(interfaceNames, interfaces.InterfaceRequiredNames);
+    GCM->GetNamesOfInterfacesRequiredOrInput(component.ProcessName, component.ComponentName, interfaces.InterfaceRequiredNames);
 
     // Get a list of provided interfaces
-    GCM->GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaceNames);
-    mtsParameterTypes::ConvertVectorStringType(interfaceNames, interfaces.InterfaceProvidedNames);
+    GCM->GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaces.InterfaceProvidedNames);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const

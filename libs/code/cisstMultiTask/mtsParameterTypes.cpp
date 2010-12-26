@@ -23,28 +23,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
-// Utility functions
-void mtsParameterTypes::ConvertVectorStringType(const mtsStdStringVec & mtsVec, std::vector<std::string> & stdVec)
-{
-    // MJ: is there better way to do this?
-    for (size_t i = 0; i < mtsVec.size(); ++i) {
-        stdVec.push_back(mtsVec(i));
-    }
-}
-
-void mtsParameterTypes::ConvertVectorStringType(const std::vector<std::string> & stdVec, mtsStdStringVec & mtsVec)
-{
-    // MJ: is there better way to do this?
-    mtsVec.SetSize(stdVec.size());
-    for (size_t i = 0; i < stdVec.size(); ++i) {
-        mtsVec(i) = stdVec[i];
-    }
-}
-
 //-----------------------------------------------------------------------------
 //  Component Description
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
+
+mtsDescriptionComponent::mtsDescriptionComponent(const mtsDescriptionComponent &other)
+{
+    this->ProcessName = other.ProcessName;
+    this->ComponentName = other.ComponentName;
+    this->ClassName = other.ClassName;
+}
+
+mtsDescriptionComponent::mtsDescriptionComponent(const std::string &processName, const std::string &componentName) :
+    ProcessName(processName), ComponentName(componentName)
+{
+}
 
 void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const 
 {
@@ -76,6 +70,14 @@ void mtsDescriptionComponent::DeSerializeRaw(std::istream & inputStream)
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
 
+mtsDescriptionInterface::mtsDescriptionInterface(const mtsDescriptionInterface &other)
+{
+    this->ProcessName = other.ProcessName;
+    this->ComponentName = other.ComponentName;
+    this->InterfaceRequiredNames = other.InterfaceRequiredNames;
+    this->InterfaceProvidedNames = other.InterfaceProvidedNames;
+}
+
 void mtsDescriptionInterface::ToStream(std::ostream & outputStream) const 
 {
     mtsGenericObject::ToStream(outputStream);
@@ -99,8 +101,8 @@ void mtsDescriptionInterface::SerializeRaw(std::ostream & outputStream) const
     mtsGenericObject::SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, this->ProcessName);
     cmnSerializeRaw(outputStream, this->ComponentName);
-    InterfaceRequiredNames.SerializeRaw(outputStream);
-    InterfaceProvidedNames.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->InterfaceRequiredNames);
+    cmnSerializeRaw(outputStream, this->InterfaceProvidedNames);
 }
 
 void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
@@ -108,8 +110,8 @@ void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, this->ProcessName);
     cmnDeSerializeRaw(inputStream, this->ComponentName);
-    InterfaceRequiredNames.DeSerializeRaw(inputStream);
-    InterfaceProvidedNames.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->InterfaceRequiredNames);
+    cmnDeSerializeRaw(inputStream, this->InterfaceProvidedNames);
 }
 
 

@@ -290,10 +290,7 @@ bool mtsManagerComponentServices::RequestGetNamesOfProcesses(std::vector<std::st
         return false;
     }
 
-    mtsStdStringVec names;
-    ServiceGetters.GetNamesOfProcesses(names);
-
-    mtsParameterTypes::ConvertVectorStringType(names, namesOfProcesses);
+    ServiceGetters.GetNamesOfProcesses(namesOfProcesses);
 
     return true;
 }
@@ -306,10 +303,7 @@ bool mtsManagerComponentServices::RequestGetNamesOfComponents(
         return false;
     }
 
-    mtsStdStringVec names;
-    ServiceGetters.GetNamesOfComponents(mtsStdString(processName), names);
-
-    mtsParameterTypes::ConvertVectorStringType(names, namesOfComponents);
+    ServiceGetters.GetNamesOfComponents(processName, namesOfComponents);
 
     return true;
 }
@@ -333,8 +327,8 @@ bool mtsManagerComponentServices::RequestGetNamesOfInterfaces(
 
     ServiceGetters.GetNamesOfInterfaces(argIn, argOut);
 
-    mtsParameterTypes::ConvertVectorStringType(argOut.InterfaceRequiredNames, namesOfInterfacesRequired);
-    mtsParameterTypes::ConvertVectorStringType(argOut.InterfaceProvidedNames, namesOfInterfacesProvided);
+    namesOfInterfacesRequired = argOut.InterfaceRequiredNames;
+    namesOfInterfacesProvided = argOut.InterfaceProvidedNames;
 
     return true;
 }

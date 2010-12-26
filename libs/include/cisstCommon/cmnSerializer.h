@@ -57,7 +57,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & da
 {
     outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
     if (outputStream.fail()) {
-        cmnThrow("cmnSerializerRaw(_elementType): Error occured with std::ostream::write");
+        cmnThrow("cmnSerializeRaw(_elementType): Error occured with std::ostream::write");
     }
 }
 
@@ -90,6 +90,27 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
     outputStream.write(data.c_str(), size * sizeof(std::string::value_type));
     if (outputStream.fail()) {
         cmnThrow("cmnSerializeRaw(std::string): Error occured with std::ostream::write");
+    }
+}
+
+
+/*! Serialization helper function for an STL vector.  This function
+  first serializes the vector size and then calls cmnSerializeRaw
+  for each element of the vector (thus, it will only work if cmnSerializeRaw
+  is defined for the element type.  If the write
+  operation fails, an exception is thrown
+  (<code>std::runtime_error</code>). */
+template <class _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elementType> & data)
+    throw (std::runtime_error)
+{
+    const std::vector<_elementType>::size_type size = data.size();
+    cmnSerializeSizeRaw(outputStream, size);
+    for (size_t i = 0; i < size; i++) {
+        cmnSerializeRaw(outputStream, data[i]);
+        if (outputStream.fail()) {
+            cmnThrow("cmnSerializeRaw(std::vector<_elementType>): Error occured with std::ostream::write");
+        }
     }
 }
 

@@ -350,7 +350,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
     }
 }
 
-void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfProcesses(mtsStdStringVec & names) const
+void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfProcesses(std::vector<std::string> & names) const
 {
     if (!InterfaceLCMFunction.GetNamesOfProcesses.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetNamesOfProcesses: failed to execute \"GetNamesOfProcesses\"" << std::endl;
@@ -360,7 +360,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfProcesses(m
     InterfaceLCMFunction.GetNamesOfProcesses(names);
 }
 
-void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const
+void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfComponents(const std::string & processName,
+                                                                                std::vector<std::string> & names) const
 {
     if (!InterfaceLCMFunction.GetNamesOfComponents.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetNamesOfComponents: failed to execute \"GetNamesOfComponents\"" << std::endl;

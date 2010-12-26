@@ -117,8 +117,9 @@ public:
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);
 
-    void InterfaceComponentCommands_GetNamesOfProcesses(mtsStdStringVec & names) const;
-    void InterfaceComponentCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const;
+    void InterfaceComponentCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
+    void InterfaceComponentCommands_GetNamesOfComponents(const std::string & processName,
+                                                         std::vector<std::string> & names) const;
     void InterfaceComponentCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
 
