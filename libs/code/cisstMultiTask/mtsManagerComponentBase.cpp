@@ -40,6 +40,7 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired 
 // Names of commands
 const std::string mtsManagerComponentBase::CommandNames::ComponentCreate  = "ComponentCreate";
 const std::string mtsManagerComponentBase::CommandNames::ComponentConnect = "ComponentConnect";
+const std::string mtsManagerComponentBase::CommandNames::ComponentDisconnect = "ComponentDisconnect";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStart   = "ComponentStart";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStop    = "ComponentStop";
 const std::string mtsManagerComponentBase::CommandNames::ComponentResume  = "ComponentResume";
@@ -53,6 +54,7 @@ const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddO
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";
 const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConnectionEvent";
+const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";
 
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentBase);

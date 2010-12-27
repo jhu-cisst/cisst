@@ -120,6 +120,17 @@ void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionConnection);
 
+mtsDescriptionConnection::mtsDescriptionConnection(const mtsDescriptionConnection &other)
+{
+    Client.ProcessName   = other.Client.ProcessName;
+    Client.ComponentName = other.Client.ComponentName;
+    Client.InterfaceName = other.Client.InterfaceName;
+    Server.ProcessName   = other.Server.ProcessName;
+    Server.ComponentName = other.Server.ComponentName;
+    Server.InterfaceName = other.Server.InterfaceName;
+    ConnectionID         = other.ConnectionID;
+}    
+
 mtsDescriptionConnection::mtsDescriptionConnection(
     const std::string & clientProcessName,
     const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
@@ -169,12 +180,20 @@ void mtsDescriptionConnection::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ConnectionID);
 }
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVec);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Status Control
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
+
+mtsComponentStatusControl::mtsComponentStatusControl(const mtsComponentStatusControl &other)
+{
+    ProcessName   = other.ProcessName;
+    ComponentName = other.ComponentName;
+    DelayInSecond = other.DelayInSecond;
+    Command       = other.Command;
+}
 
 void mtsComponentStatusControl::ToStream(std::ostream & outputStream) const
 {
@@ -216,6 +235,13 @@ void mtsComponentStatusControl::DeSerializeRaw(std::istream & inputStream)
 //  Component Status Change Event
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
+
+mtsComponentStateChange::mtsComponentStateChange(const mtsComponentStateChange &other)
+{
+    ProcessName = other.ProcessName;
+    ComponentName = other.ComponentName;
+    NewState = other.NewState;
+}
 
 void mtsComponentStateChange::ToStream(std::ostream & outputStream) const
 {

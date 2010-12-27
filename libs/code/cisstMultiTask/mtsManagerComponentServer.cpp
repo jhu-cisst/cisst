@@ -86,6 +86,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
+                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop,
@@ -105,6 +107,10 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceGCMEvents_AddConnection,
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
+    provided->AddEventWrite(this->InterfaceGCMEvents_RemoveConnection,
+                            mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
+    provided->AddEventWrite(this->InterfaceGCMEvents_ChangeState,
+                            mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceGCM: successfully added \"GCM\" interfaces" << std::endl;
 
@@ -133,6 +139,8 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
+                          newFunctionSet->ComponentDisconnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                           newFunctionSet->ComponentStart);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
@@ -224,6 +232,20 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 
     //functionSet->ComponentConnect.ExecuteBlocking(arg);
     functionSet->ComponentConnect(arg);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
+{
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
+        return;
+    }
+
+    //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
+    functionSet->ComponentDisconnect(arg);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg)
@@ -333,5 +355,16 @@ void mtsManagerComponentServer::AddConnectionEvent(const mtsDescriptionConnectio
 {
     //InterfaceGCMEvents_AddConnection.ExecuteBlocking(connection);
     InterfaceGCMEvents_AddConnection(connection);
+}
+
+void mtsManagerComponentServer::RemoveConnectionEvent(const mtsDescriptionConnection &connection)
+{
+    //InterfaceGCMEvents_RemoveConnection.ExecuteBlocking(connection);
+    InterfaceGCMEvents_RemoveConnection(connection);
+}
+
+void mtsManagerComponentServer::ChangeStateEvent(const mtsComponentStateChange &stateChange)
+{
+    InterfaceGCMEvents_ChangeState(stateChange);
 }
 

@@ -62,6 +62,7 @@ protected:
     // Event Handlers
     void AddComponent(const mtsDescriptionComponent &componentInfo);
     void AddConnection(const mtsDescriptionConnection &connectionInfo);
+    void RemoveConnection(const mtsDescriptionConnection &connectionInfo);
 
 public:
 

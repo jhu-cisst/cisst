@@ -53,8 +53,8 @@ protected:
         components, we keep a list of function objects using named map with 
         (key = component name, value = function object set instance) */
     typedef struct {
-        mtsFunctionWrite ComponentStop;
-        mtsFunctionWrite ComponentResume;
+        mtsFunctionVoid ComponentStop;
+        mtsFunctionVoid ComponentResume;
     } InterfaceComponentFunctionType;
 
     typedef cmnNamedMap<InterfaceComponentFunctionType> InterfaceComponentFunctionMapType;
@@ -65,6 +65,7 @@ protected:
         // Dynamic component management
         mtsFunctionWrite ComponentCreate;
         mtsFunctionWrite ComponentConnect;
+        mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
@@ -78,6 +79,7 @@ protected:
     // Event handlers for InterfaceLCM's required interface
     void HandleAddComponentEvent(const mtsDescriptionComponent &component);
     void HandleAddConnectionEvent(const mtsDescriptionConnection &component);
+    void HandleRemoveConnectionEvent(const mtsDescriptionConnection &component);
 
     // Event handlers for InterfaceComponent's required interface
     void HandleChangeState(const mtsComponentStateChange & componentStateChange);
@@ -106,6 +108,7 @@ public:
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
@@ -113,6 +116,7 @@ public:
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);
@@ -126,6 +130,7 @@ public:
     /*! Event generators for InterfaceLCM's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
+    mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
 
     /*! Returns name of manager component client */
     static std::string GetNameOfManagerComponentClient(const std::string & processName);

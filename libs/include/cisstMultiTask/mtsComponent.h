@@ -161,6 +161,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         the computations and message processing. */
     virtual void Start(void);
 
+    /*! Virtual method to suspend the component (same as Stop). */
+    virtual void Suspend(void);
+
     /*! Virtual method to stop the computations and message
         processing.  See Start. */
     virtual void Kill(void);
@@ -396,11 +399,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
                If true, the internal required interface is added to this 
                component (the internal provided interface is added by default) */
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
-
-    /*! Internal commands to process command execution request coming from manager
-        component client */
-    void InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg);
-    void InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg);
 
     /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
     void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);

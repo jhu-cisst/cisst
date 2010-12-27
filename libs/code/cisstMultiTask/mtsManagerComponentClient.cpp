@@ -113,6 +113,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect,
+                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop,
@@ -131,6 +133,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceComponentEvents_AddConnection,
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
+    provided->AddEventWrite(this->InterfaceComponentEvents_RemoveConnection,
+                            mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
     
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceComponent: successfully added \"Component\" interfaces" << std::endl;
 
@@ -150,6 +154,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           InterfaceLCMFunction.ComponentConnect);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
+                          InterfaceLCMFunction.ComponentDisconnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                           InterfaceLCMFunction.ComponentStart);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
@@ -170,6 +176,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                                    mtsManagerComponentBase::EventNames::AddComponent, MTS_EVENT_NOT_QUEUED);
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleAddConnectionEvent, this, 
                                    mtsManagerComponentBase::EventNames::AddConnection, MTS_EVENT_NOT_QUEUED);
+    required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleRemoveConnectionEvent, this, 
+                                   mtsManagerComponentBase::EventNames::RemoveConnection, MTS_EVENT_NOT_QUEUED);
 
     // Add provided interface
     interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided;
@@ -182,6 +190,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect,
+                             this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart,
                              this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentStop,
@@ -269,6 +279,26 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(cons
     } else {
         //InterfaceLCMFunction.ComponentConnect.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentConnect(arg);
+    }
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
+{
+    if (!InterfaceLCMFunction.ComponentDisconnect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentDsconnect: failed to execute \"Component Disconnect\"" << std::endl;
+        return;
+    }
+
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string nameOfThisLCM = LCM->GetProcessName();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
+        (nameOfThisLCM == arg.Client.ProcessName && nameOfThisLCM == arg.Server.ProcessName))
+    {
+        InterfaceLCMCommands_ComponentDisconnect(arg);
+        return;
+    } else {
+        //InterfaceLCMFunction.ComponentConnect.ExecuteBlocking(arg);
+        InterfaceLCMFunction.ComponentDisconnect(arg);
     }
 }
 
@@ -430,6 +460,26 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << arg << std::endl;
 }
 
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
+{
+    // Try to connect interfaces as requested
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
+#if CISST_MTS_HAS_ICE
+    if (!LCM->Disconnect(arg.Client.ProcessName, arg.Client.ComponentName, arg.Client.InterfaceName,
+                         arg.Server.ProcessName, arg.Server.ComponentName, arg.Server.InterfaceName))
+#else
+    if (!LCM->Disconnect(arg.Client.ComponentName, arg.Client.InterfaceName,
+                         arg.Server.ComponentName, arg.Server.InterfaceName))
+#endif
+    {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
+}
+
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg)
 {
     // Create internal thread (if needed)
@@ -440,12 +490,13 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart(const mtsCom
             << arg.ComponentName << std::endl;
         return;
     }
-    
-    // Wait for internal thread to be created
-    osaSleep(arg.DelayInSecond);
 
-    // Start an internal thread (if needed)
-    component->Create();
+    if (component->GetState() == mtsComponentState::CONSTRUCTED) {    
+        // Start an internal thread (if needed)
+        component->Create();
+        // Wait for internal thread to be created
+        osaSleep(arg.DelayInSecond);
+    }
 
     // Start the component
     component->Start();
@@ -468,7 +519,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStop(const mtsComp
     // manager but it is not thread safe.  For thread-safe stop/resume, we
     // use the cisstMultiTask's thread-safe command pattern instead.
     //functionSet->ComponentStop.ExecuteBlocking(arg);
-    functionSet->ComponentStop(arg);
+    functionSet->ComponentStop();
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg)
@@ -477,12 +528,12 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentResume(const mtsCo
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     mtsComponent * component = LCM->GetComponent(arg.ComponentName);
     if (!component) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentStart - no component found: "
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentResume - no component found: "
             << arg.ComponentName << std::endl;
         return;
     }
     
-    // Wait for internal thread to be created
+    // Wait if desired
     osaSleep(arg.DelayInSecond);
 
     // Resume (Start) the component
@@ -501,6 +552,13 @@ void mtsManagerComponentClient::HandleAddConnectionEvent(const mtsDescriptionCon
     CMN_LOG_INIT_VERBOSE << "MCC AddConnection event, connection = " << connection << std::endl;
     // Generate event to connected components
     InterfaceComponentEvents_AddConnection(connection);
+}
+
+void mtsManagerComponentClient::HandleRemoveConnectionEvent(const mtsDescriptionConnection &connection)
+{
+    CMN_LOG_INIT_VERBOSE << "MCC RemoveConnection event, connection = " << connection << std::endl;
+    // Generate event to connected components
+    InterfaceComponentEvents_RemoveConnection(connection);
 }
 
 void mtsManagerComponentClient::HandleChangeState(const mtsComponentStateChange & componentStateChange)

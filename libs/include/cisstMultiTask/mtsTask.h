@@ -205,12 +205,6 @@ public:
     virtual void Create(void * data) = 0;
     inline void Create(void) { Create(0); }
 
-    /*! Start or resume execution of the task. */
-    virtual void Start(void) = 0;
-
-    /*! Suspend the execution of the task. */
-    virtual void Suspend(void) = 0;
-
     /*! End the task */
     void Kill(void);
 

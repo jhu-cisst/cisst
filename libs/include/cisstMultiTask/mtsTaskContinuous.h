@@ -67,7 +67,7 @@ protected:
 	virtual void *RunInternal(void* argument);
 
     /*! Called from Start */
-    void StartInternal(void);
+    virtual void StartInternal(void);
 
 public:
     /********************* Task constructor and destructor *****************/

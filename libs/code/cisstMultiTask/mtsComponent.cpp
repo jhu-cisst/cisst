@@ -115,6 +115,14 @@ void mtsComponent::Start(void)
 }
 
 
+void mtsComponent::Suspend(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Suspend: default suspend method for component \""
+                               << this->GetName() << "\"" << std::endl;
+    this->State = mtsComponentState::READY;
+}
+
+
 void mtsComponent::Kill(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Kill: default kill method for component \""
@@ -831,10 +839,12 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;
         return false;
     }
-    provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentStop,
-                              this, mtsManagerComponentBase::CommandNames::ComponentStop);
-    provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentResume,
-                              this, mtsManagerComponentBase::CommandNames::ComponentResume);
+    provided->AddCommandVoid(&mtsComponent::Start,
+                              this, mtsManagerComponentBase::CommandNames::ComponentStart, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandVoid(&mtsComponent::Suspend,
+                              this, mtsManagerComponentBase::CommandNames::ComponentStop, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandVoid(&mtsComponent::Start,
+                              this, mtsManagerComponentBase::CommandNames::ComponentResume, MTS_COMMAND_NOT_QUEUED);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_GetEndUserInterface, this, 
                                     mtsManagerComponentBase::CommandNames::GetEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_AddObserverList, this, 
@@ -865,60 +875,6 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
     }
     
     return true;
-}
-
-void mtsComponent::InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg)
-{
-    // MJ: How to implement "Stopping device-type component which might be already running"?
-    //
-    // Possible solutions might be:
-    // - For device-type component: disable all commands and functions in all
-    //   interfaces of this component.
-    // - For task-type component: the above + call Suspend()
-    //
-    // The current implementation only can handle task-type component through mtsTask::Suspend()
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentStop: stopping component: " << GetName() << std::endl;
-
-    // Stop device-type component
-    mtsTask * task = dynamic_cast<mtsTask *>(this);
-    if (!task) {
-        // TODO: implement stopping a device-type component
-        cmnThrow("InterfaceInternalCommands_ComponentStop: TODO - implement this function");
-        return;
-    }
-    // Stop task-type component
-    else {
-        task->Suspend();
-    }
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentStart: stopped component:  " << GetName() << std::endl;
-}
-
-void mtsComponent::InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg)
-{
-    // MJ: How to implement "Resuming device-type component which might be already running"?
-    //
-    // Possible solutions might be:
-    // - For device-type component: enable all commands and functions in all
-    //   interfaces of this component.
-    // - For task-type component: the above + call Start()
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentResume: resuming component: " << GetName() << std::endl;
-
-    // Stop device-type component
-    mtsTask * task = dynamic_cast<mtsTask *>(this);
-    if (!task) {
-        // TODO: implement stopping a device-type component
-        cmnThrow("InterfaceInternalCommands_ComponentResume: TODO - implement this function");
-        return;
-    }
-    // Stop task-type component
-    else {
-        task->Start();
-    }
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentResume: resumed component:  " << GetName() << std::endl;
 }
 
 // Internal command

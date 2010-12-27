@@ -34,22 +34,11 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name, double periodic
     mtsTaskPeriodic(name, periodicityInSeconds),
     UDrawPipeConnected(false)
 {
-    // MJ TEMP
-#if 0
-    // Extend internal required interface (to Manager Component) to include event handlers
-    mtsInterfaceRequired *required = AddInterfaceRequired(
-        mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
-    if (required) {
-        InternalCommands.SetInterfaceRequired(required);
-        InternalCommands.AddComponentEventHandler(&mtsComponentViewer::AddComponent, this);
-        InternalCommands.AddConnectionEventHandler(&mtsComponentViewer::AddConnection, this);
-    }
-#endif
-
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
         ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponent, this);
         ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnection, this);
+        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnection, this);
     } else {
         cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to enable dynamic component composition"));
     }
@@ -138,6 +127,13 @@ void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connectio
         std::string response = UDrawPipe.ReadUntil(256, '\n');
         if (response != "")
             CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
+    }
+}
+
+void mtsComponentViewer::RemoveConnection(const mtsDescriptionConnection &connection)
+{
+    if (UDrawPipeConnected) {
+        CMN_LOG_CLASS_RUN_WARNING << "RemoveConnection event handler to be implemented" << std::endl;
     }
 }
 

@@ -65,6 +65,7 @@ protected:
     typedef struct {
         mtsFunctionWrite ComponentCreate;
         mtsFunctionWrite ComponentConnect;
+        mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
@@ -93,6 +94,7 @@ public:
     /*! Commands */
     void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
@@ -105,11 +107,15 @@ public:
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;
     mtsFunctionWrite InterfaceGCMEvents_AddConnection;
+    mtsFunctionWrite InterfaceGCMEvents_RemoveConnection;
+    mtsFunctionWrite InterfaceGCMEvents_ChangeState;
 
     // Methods for use by mtsManagerGlobal (Global Component Manager, GCM).
     // These just cause an event to be generated on the Manager Component provided interface.
     void AddComponentEvent(const mtsDescriptionComponent &component);
     void AddConnectionEvent(const mtsDescriptionConnection &connection);
+    void RemoveConnectionEvent(const mtsDescriptionConnection &connection);
+    void ChangeStateEvent(const mtsComponentStateChange &stateChange);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);

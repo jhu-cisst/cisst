@@ -127,6 +127,7 @@ public:
         // Dynamic component management
         const static std::string ComponentCreate;
         const static std::string ComponentConnect;
+        const static std::string ComponentDisconnect;
         const static std::string ComponentStart;
         const static std::string ComponentStop;
         const static std::string ComponentResume;
@@ -146,6 +147,7 @@ public:
         // Events
         const static std::string AddComponent;
         const static std::string AddConnection;
+        const static std::string RemoveConnection;
         const static std::string ChangeState;
     };
 

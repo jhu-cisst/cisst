@@ -570,7 +570,8 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 
 %include "cisstMultiTask/mtsParameterTypes.h"
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVec, mtsDescriptionConnectionStdVec);
+%template(mtsDescriptionConnectionVec) std::vector<mtsDescriptionConnection>;
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVecProxy, mtsDescriptionConnectionVec);
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"

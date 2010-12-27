@@ -108,12 +108,14 @@ public:
 #endif
 
     mtsDescriptionConnection() : ConnectionID(-1) {}
+    mtsDescriptionConnection(const mtsDescriptionConnection &other);
     mtsDescriptionConnection(
         const std::string & clientProcessName, 
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, 
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
         const int connectionId = -1);
+    ~mtsDescriptionConnection() {}
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
@@ -122,13 +124,13 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnection);
 
-typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionStdVec;
-typedef mtsGenericObjectProxy<mtsDescriptionConnectionStdVec> mtsDescriptionConnectionVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVec);
+typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionVec;
+typedef mtsGenericObjectProxy<mtsDescriptionConnectionVec> mtsDescriptionConnectionVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVecProxy);
 
 // Define stream out operator for std::vector<mtsDescriptionConnection>
 inline std::ostream & operator << (std::ostream & output,
-                            const mtsDescriptionConnectionStdVec & object) {
+                                   const std::vector<mtsDescriptionConnection> & object) {
     output << "[";
     for (size_t i = 0; i < object.size(); i++) {
         object[i].ToStream(output);
@@ -159,6 +161,10 @@ public:
     double      DelayInSecond;
     ComponentStatusCommand Command;
 
+    mtsComponentStatusControl() : DelayInSecond(0.0) {}
+    mtsComponentStatusControl(const mtsComponentStatusControl &other);
+    ~mtsComponentStatusControl() {}
+
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);
@@ -176,6 +182,7 @@ class CISST_EXPORT mtsComponentStateChange : public mtsGenericObject
 
 public:
     mtsComponentStateChange() {}
+    mtsComponentStateChange(const mtsComponentStateChange &other);
     mtsComponentStateChange(const std::string & processName, 
                             const std::string & componentName,
                             const mtsComponentState::Enum & newState)
@@ -223,11 +230,11 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArg);
 // Add Observers
 //
 
-#ifndef SWIG
 class CISST_EXPORT mtsEventHandlerList : public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
+#ifndef SWIG
     template <class _CommandType>
     struct EventHandlerInfo {
         std::string EventName;
@@ -238,24 +245,28 @@ class CISST_EXPORT mtsEventHandlerList : public mtsGenericObject
             : EventName(name), HandlerPtr(handler), Required(required), Result(false) {}
         ~EventHandlerInfo() {}
     };
+#endif
 
 public:
+#ifndef SWIG
     typedef EventHandlerInfo<mtsCommandVoid> InfoVoid;
     typedef EventHandlerInfo<mtsCommandWriteBase> InfoWrite;
+#endif
 
     mtsEventHandlerList() : Provided(0) {}
     mtsEventHandlerList(mtsInterfaceProvided *provided) : Provided(provided) {}
     ~mtsEventHandlerList() {}
 
+#ifndef SWIG
     mtsInterfaceProvided *Provided;
     std::vector<InfoVoid> VoidEvents;
     std::vector<InfoWrite> WriteEvents;
+#endif
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);
 };
-#endif
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsEventHandlerList);
 

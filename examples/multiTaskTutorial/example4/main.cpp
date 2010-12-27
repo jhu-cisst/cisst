@@ -50,6 +50,10 @@ int main(int argc, char **argv)
     ireTask *ire = new ireTask("IRE", "from example4 import *");
     taskManager->AddComponent(ire);
 
+    // create and add Component Viewer
+    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer", 1.0*cmn_s);
+    taskManager->AddComponent(componentViewer);
+
     taskManager->CreateAll();
     taskManager->StartAll();
 
