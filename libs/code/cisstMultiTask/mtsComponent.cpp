@@ -769,6 +769,10 @@ const mtsComponentState & mtsComponent::GetState(void) const
     return this->State;
 }
 
+void mtsComponent::GetState(mtsComponentState &state) const
+{
+    state = this->State;
+}
 
 bool mtsComponent::WaitForState(mtsComponentState desiredState, double timeout)
 {
@@ -845,6 +849,8 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
                               this, mtsManagerComponentBase::CommandNames::ComponentStop, MTS_COMMAND_NOT_QUEUED);
     provided->AddCommandVoid(&mtsComponent::Start,
                               this, mtsManagerComponentBase::CommandNames::ComponentResume, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandRead(&mtsComponent::GetState,
+                             this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_GetEndUserInterface, this, 
                                     mtsManagerComponentBase::CommandNames::GetEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_AddObserverList, this, 

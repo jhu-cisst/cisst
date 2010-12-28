@@ -69,6 +69,7 @@ protected:
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
+        mtsFunctionQualifiedRead ComponentGetState;
     } InterfaceGCMFunctionType;
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
@@ -98,6 +99,7 @@ public:
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    void InterfaceGCMCommands_ComponentGetState(const mtsDescriptionComponent &component, mtsComponentState &state) const;
     void InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
     void InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName, 
                                                    std::vector<std::string> & names) const;

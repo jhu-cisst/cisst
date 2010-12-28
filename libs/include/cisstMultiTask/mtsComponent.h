@@ -310,6 +310,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Return task state. */
     const mtsComponentState & GetState(void) const;
+    void GetState(mtsComponentState &state) const;
 
  protected:
 

@@ -27,7 +27,8 @@ CMN_IMPLEMENT_SERVICES(mtsManagerComponentServer);
 
 mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     : mtsManagerComponentBase(mtsManagerComponentBase::ComponentNames::ManagerComponentServer),
-      GCM(gcm)
+      GCM(gcm),
+      InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
@@ -36,6 +37,7 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
         cmnThrow(std::runtime_error("Error in creating manager component server: it's already created"));
     }
     gcm->SetMCS(this);
+    InterfaceGCMFunctionMap.SetOwner(*this);
 }
 
 mtsManagerComponentServer::~mtsManagerComponentServer()
@@ -94,6 +96,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::ComponentStop);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume,
                               this, mtsManagerComponentBase::CommandNames::ComponentResume);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState,
+                              this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents,
@@ -147,6 +151,8 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentStop);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
                           newFunctionSet->ComponentResume);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
+                          newFunctionSet->ComponentGetState);
 
     // Remember a required interface (InterfaceGCM's required interface) to 
     // connect it to the provided interface (InterfaceLCM's provided interface).
@@ -318,6 +324,30 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsCo
 
     //functionSet->ComponentResume.ExecuteBlocking(arg);
     functionSet->ComponentResume(arg);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                                       mtsComponentState &state) const
+{
+    if (!GCM->FindComponent(component.ProcessName, component.ComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get component state - no component found: "
+                                << component << std::endl;
+        return;
+    }
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(component.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get function set: " << component << std::endl;
+        return;
+    }
+    if (!functionSet->ComponentGetState.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+        return;
+    }
+
+    functionSet->ComponentGetState(component, state);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const

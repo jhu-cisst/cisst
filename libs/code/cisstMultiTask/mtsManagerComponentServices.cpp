@@ -46,6 +46,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.Stop);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume, 
                                                ServiceComponentManagement.Resume);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
+                                               ServiceComponentManagement.GetState);
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses, 
                                                ServiceGetters.GetNamesOfProcesses);
@@ -252,6 +254,17 @@ bool mtsManagerComponentServices::RequestComponentResume(
 
     CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentResume: requested component resume: " << arg << std::endl;
 
+    return true;
+}
+
+bool mtsManagerComponentServices::RequestComponentGetState(const mtsDescriptionComponent &component, mtsComponentState &state) const
+{
+    if (!ServiceComponentManagement.GetState.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentGetState: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    ServiceComponentManagement.GetState(component, state);
     return true;
 }
 

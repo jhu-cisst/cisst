@@ -46,6 +46,7 @@ protected:
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;
         mtsFunctionWrite Resume;
+        mtsFunctionQualifiedRead GetState;    // in: process, component, out: state
     } ServiceComponentManagement;
 
     // Getters
@@ -141,6 +142,8 @@ public:
     bool RequestComponentResume(const std::string& processName, const std::string & componentName,
                                 const double delayInSecond = 0.0) const;
 
+    bool RequestComponentGetState(const mtsDescriptionComponent &component, mtsComponentState &state) const;
+
     bool RequestGetNamesOfProcesses(std::vector<std::string> & namesOfProcesses) const;
     bool RequestGetNamesOfComponents(const std::string & processName, std::vector<std::string> & namesOfComponents) const;
     bool RequestGetNamesOfInterfaces(const std::string & processName,
@@ -154,4 +157,4 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServices)
 
-#endif // _mtsManagerComponentBase_h
+#endif // _mtsManagerComponentServices_h

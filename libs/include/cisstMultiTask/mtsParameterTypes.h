@@ -31,6 +31,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 //-----------------------------------------------------------------------------
+//  Component state (mtsComponentState)
+//
+typedef mtsGenericObjectProxy<mtsComponentState> mtsComponentStateProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateProxy);
+
+//-----------------------------------------------------------------------------
 //  Component Description
 //
 class CISST_EXPORT mtsDescriptionComponent: public mtsGenericObject

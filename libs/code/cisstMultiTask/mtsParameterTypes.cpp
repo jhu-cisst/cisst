@@ -24,6 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 //-----------------------------------------------------------------------------
+//  Component state (mtsComponentState)
+//
+CMN_IMPLEMENT_SERVICES(mtsComponentStateProxy);
+
+//-----------------------------------------------------------------------------
 //  Component Description
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);

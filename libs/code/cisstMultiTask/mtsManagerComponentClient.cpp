@@ -29,8 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentClient);
 
 mtsManagerComponentClient::mtsManagerComponentClient(const std::string & componentName)
-    : mtsManagerComponentBase(componentName)
+    : mtsManagerComponentBase(componentName),
+      InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
+    InterfaceComponentFunctionMap.SetOwner(*this);
 }
 
 mtsManagerComponentClient::~mtsManagerComponentClient()
@@ -121,6 +123,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::ComponentStop);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume,
                               this, mtsManagerComponentBase::CommandNames::ComponentResume);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState,
+                                      this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfProcesses,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfComponents,
@@ -131,6 +135,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
     provided->AddEventWrite(this->InterfaceComponentEvents_AddComponent, 
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
+    provided->AddEventWrite(this->InterfaceComponentEvents_ChangeState, 
+                            mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     provided->AddEventWrite(this->InterfaceComponentEvents_AddConnection,
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
     provided->AddEventWrite(this->InterfaceComponentEvents_RemoveConnection,
@@ -162,6 +168,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.ComponentStop);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
                           InterfaceLCMFunction.ComponentResume);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
+                          InterfaceLCMFunction.ComponentGetState);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                           InterfaceLCMFunction.GetNamesOfProcesses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
@@ -198,6 +206,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::ComponentStop);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentResume,
                              this, mtsManagerComponentBase::CommandNames::ComponentResume);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState,
+                             this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceLCM: successfully added \"LCM\" interfaces" << std::endl;
 
     return true;
@@ -224,6 +234,8 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
                           newFunctionSet->ComponentStop);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
                           newFunctionSet->ComponentResume);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
+                          newFunctionSet->ComponentGetState);
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleChangeState, this, 
                                    mtsManagerComponentBase::EventNames::ChangeState, MTS_EVENT_NOT_QUEUED);
 
@@ -377,6 +389,32 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
     } else {
         //InterfaceLCMFunction.ComponentResume.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentResume(arg);
+    }
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                                             mtsComponentState &state) const
+{
+    if (!InterfaceLCMFunction.ComponentGetState.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+        return;
+    }
+
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string nameOfThisLCM = LCM->GetProcessName();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
+        LCM->GetProcessName() == component.ProcessName)
+    {
+        // Check if the component specified exists
+        if (!LCM->GetComponent(component.ComponentName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component Resume\"" << std::endl;
+            return;
+        }
+
+        InterfaceLCMCommands_ComponentGetState(component, state);
+        return;
+    } else {
+        InterfaceLCMFunction.ComponentGetState(component, state);
     }
 }
 
@@ -540,11 +578,37 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentResume(const mtsCo
     component->Start();
 }
 
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                                       mtsComponentState &state) const
+{
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(component.ComponentName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+        return;
+    }
+    if (!functionSet->ComponentGetState.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentGetState: failed to execute \"Component GetState\""
+                                << component << std::endl;
+        return;
+    }
+
+    functionSet->ComponentGetState(state);
+}
+
 void mtsManagerComponentClient::HandleAddComponentEvent(const mtsDescriptionComponent &component)
 {
     CMN_LOG_INIT_VERBOSE << "MCC AddComponent event, component = " << component << std::endl;
     // Generate event to connected components
     InterfaceComponentEvents_AddComponent(component);
+}
+
+void mtsManagerComponentClient::HandleChangeStateEvent(const mtsComponentStateChange &componentStateChange)
+{
+    CMN_LOG_INIT_VERBOSE << "MCC ChangeState event, component = " << componentStateChange.ComponentName << std::endl;
+    // Generate event to connected components
+    InterfaceComponentEvents_ChangeState(componentStateChange);
 }
 
 void mtsManagerComponentClient::HandleAddConnectionEvent(const mtsDescriptionConnection &connection)

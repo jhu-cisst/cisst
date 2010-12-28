@@ -131,6 +131,7 @@ public:
         const static std::string ComponentStart;
         const static std::string ComponentStop;
         const static std::string ComponentResume;
+        const static std::string ComponentGetState;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;

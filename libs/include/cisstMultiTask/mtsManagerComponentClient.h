@@ -55,6 +55,7 @@ protected:
     typedef struct {
         mtsFunctionVoid ComponentStop;
         mtsFunctionVoid ComponentResume;
+        mtsFunctionRead ComponentGetState;
     } InterfaceComponentFunctionType;
 
     typedef cmnNamedMap<InterfaceComponentFunctionType> InterfaceComponentFunctionMapType;
@@ -69,6 +70,7 @@ protected:
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
+        mtsFunctionQualifiedRead ComponentGetState;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -78,8 +80,9 @@ protected:
 
     // Event handlers for InterfaceLCM's required interface
     void HandleAddComponentEvent(const mtsDescriptionComponent &component);
-    void HandleAddConnectionEvent(const mtsDescriptionConnection &component);
-    void HandleRemoveConnectionEvent(const mtsDescriptionConnection &component);
+    void HandleChangeStateEvent(const mtsComponentStateChange &componentStateChange);
+    void HandleAddConnectionEvent(const mtsDescriptionConnection &connection);
+    void HandleRemoveConnectionEvent(const mtsDescriptionConnection &connection);
 
     // Event handlers for InterfaceComponent's required interface
     void HandleChangeState(const mtsComponentStateChange & componentStateChange);
@@ -112,6 +115,8 @@ public:
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    void InterfaceLCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                mtsComponentState &state) const;
 
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
@@ -120,6 +125,8 @@ public:
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    void InterfaceComponentCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                      mtsComponentState &state) const;
 
     void InterfaceComponentCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
     void InterfaceComponentCommands_GetNamesOfComponents(const std::string & processName,
@@ -129,6 +136,7 @@ public:
 
     /*! Event generators for InterfaceLCM's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;
+    mtsFunctionWrite InterfaceComponentEvents_ChangeState;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
 

@@ -44,6 +44,7 @@ const std::string mtsManagerComponentBase::CommandNames::ComponentDisconnect = "
 const std::string mtsManagerComponentBase::CommandNames::ComponentStart   = "ComponentStart";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStop    = "ComponentStop";
 const std::string mtsManagerComponentBase::CommandNames::ComponentResume  = "ComponentResume";
+const std::string mtsManagerComponentBase::CommandNames::ComponentGetState = "ComponentGetState";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfProcesses  = "GetNamesOfProcesses";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfComponents = "GetNamesOfComponents";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces = "GetNamesOfInterfaces";

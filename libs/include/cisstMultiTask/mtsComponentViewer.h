@@ -57,10 +57,13 @@ protected:
     void SendAllInfo(void);
 
     std::string GetComponentInGraphFormat(const std::string & processName, const std::string & componentName) const;
-    std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName) const;
+    std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName,
+                                               const mtsComponentState & componentState) const;
+    std::string GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const;
 
     // Event Handlers
     void AddComponent(const mtsDescriptionComponent &componentInfo);
+    void ChangeState(const mtsComponentStateChange &componentStateChange);
     void AddConnection(const mtsDescriptionConnection &connectionInfo);
     void RemoveConnection(const mtsDescriptionConnection &connectionInfo);
 

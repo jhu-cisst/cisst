@@ -573,6 +573,14 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 %template(mtsDescriptionConnectionVec) std::vector<mtsDescriptionConnection>;
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVecProxy, mtsDescriptionConnectionVec);
 
+%include "cisstMultiTask/mtsComponentState.h"
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsComponentStateProxy, mtsComponentState);
+
+%extend mtsComponentState {
+    // ToString gets renamed to __str__
+    std::string ToString(void) const { return mtsComponentState::ToString($self->GetState()); }
+}
+
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"
 
