@@ -126,7 +126,7 @@ protected:
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType1, _userType2,
                             cmnIsDerivedFrom<_userType1, mtsGenericObject>::YES,
-                            cmnIsDerivedFrom<_userType1, mtsGenericObject>::YES>::Call(Command, argument1, argument2)
+                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::YES>::Call(Command, argument1, argument2)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
