@@ -32,6 +32,54 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <iterator>
 
+//-------------------------------------------------------------------------
+//  Internal Class Definitions
+//-------------------------------------------------------------------------
+// ConnectedInterfaceInfo class
+mtsManagerGlobal::ConnectedInterfaceInfo::ConnectedInterfaceInfo() 
+    : ProcessName(""), ComponentName(""), InterfaceName(""), RemoteConnection(false)
+#if CISST_MTS_HAS_ICE
+      , EndpointInfo("")
+#endif
+{}
+
+mtsManagerGlobal::ConnectedInterfaceInfo::ConnectedInterfaceInfo(
+    const std::string & processName, const std::string & componentName,
+    const std::string & interfaceName, const bool isRemoteConnection)
+    : ProcessName(processName), ComponentName(componentName), InterfaceName(interfaceName), 
+      RemoteConnection(isRemoteConnection)
+{}
+
+// ConnectionElement class to keep connection information
+mtsManagerGlobal::ConnectionElement::ConnectionElement(
+    const std::string & requestProcessName, const unsigned int connectionID,
+    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+    : ConnectionID(connectionID), Connected(false), RequestProcessName(requestProcessName),
+      ClientProcessName(clientProcessName), ClientComponentName(clientComponentName), ClientInterfaceRequiredName(clientInterfaceRequiredName),
+      ServerProcessName(serverProcessName), ServerComponentName(serverComponentName), ServerInterfaceProvidedName(serverInterfaceProvidedName)
+{
+#if CISST_MTS_HAS_ICE
+    TimeoutTime = osaGetTime() + mtsProxyConfig::ConnectConfirmTimeOut;
+#endif
+}
+
+mtsDescriptionConnection mtsManagerGlobal::ConnectionElement::GetDescriptionConnection(void) const 
+{
+    mtsDescriptionConnection conn;
+    conn.Client.ProcessName = ClientProcessName;
+    conn.Client.ComponentName = ClientComponentName;
+    conn.Client.InterfaceName = ClientInterfaceRequiredName;
+    conn.Server.ProcessName = ServerProcessName;
+    conn.Server.ComponentName = ServerComponentName;
+    conn.Server.InterfaceName = ServerInterfaceProvidedName;
+    conn.ConnectionID = ConnectionID;
+    return conn;
+}
+
+//-------------------------------------------------------------------------
+//  Constructor and Destructor
+//-------------------------------------------------------------------------
 mtsManagerGlobal::mtsManagerGlobal() :
     ProcessMap("ProcessMap"),
     LocalManager(0), LocalManagerConnected(0), ConnectionID(0)
@@ -48,14 +96,9 @@ mtsManagerGlobal::~mtsManagerGlobal()
     Cleanup();
 }
 
-//-------------------------------------------------------------------------
-//  Processing Methods
-//-------------------------------------------------------------------------
 bool mtsManagerGlobal::Cleanup(void)
 {
     bool ret = true;
-
-
 
     // Remove all processes safely
     ProcessMapType::iterator itProcess = ProcessMap.begin();
@@ -105,12 +148,16 @@ bool mtsManagerGlobal::AddProcess(const std::string & processName)
         return false;
     }
 
+    ProcessMapChange.Lock();
+
     // Register to process map
     if (!ProcessMap.AddItem(processName, 0)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddProcess: failed to add process to process map: " << processName << std::endl;
+        ProcessMapChange.Unlock();
         return false;
     }
 
+    ProcessMapChange.Unlock();
     return true;
 }
 
@@ -163,10 +210,13 @@ bool mtsManagerGlobal::AddProcessObject(mtsManagerLocalInterface * localManagerO
     }
 
     // Register to process map
+    ProcessMapChange.Lock();
     if (!ProcessMap.AddItem(processName, 0)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddProcessObject: failed to add process to process map: " << processName << std::endl;
+        ProcessMapChange.Unlock();
         return false;
     }
+    ProcessMapChange.Unlock();
 
     // Register to local manager object map
 #if CISST_MTS_HAS_ICE
@@ -195,22 +245,28 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
     }
 
     bool ret = true;
-    ComponentMapType * componentMap = ProcessMap.GetItem(processName);
 
-    // When componentMap is not NULL, all components that the process manages
-    // should be removed first.
-    if (componentMap) {
-        ComponentMapType::iterator it = componentMap->begin();
-        while (it != componentMap->end()) {
-            ret &= RemoveComponent(processName, it->first);
-            it = componentMap->begin();
+    ProcessMapChange.Lock();
+    {
+        ComponentMapType * componentMap = ProcessMap.GetItem(processName);
+
+        // If the process being killed has components, they should be removed first.
+        if (componentMap) {
+            ComponentMapType::iterator it = componentMap->begin();
+            while (it != componentMap->end()) {
+                ret &= RemoveComponent(processName, it->first);
+                it = componentMap->begin();
+            }
+
+            delete componentMap;
         }
 
-        delete componentMap;
-    }
+        // Remove the process from process map
+        ret &= ProcessMap.RemoveItem(processName);
 
-    // Remove the process from process map
-    ret &= ProcessMap.RemoveItem(processName);
+        // ProcessMapChange
+    }
+    ProcessMapChange.Unlock();
 
     return ret;
 }
@@ -278,7 +334,10 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
     // If the process did not register before
     if (componentMap == 0) {
         componentMap = new ComponentMapType(processName);
+
+        ProcessMapChange.Lock();
         (ProcessMap.GetMap())[processName] = componentMap;
+        ProcessMapChange.Unlock();
     }
 
     // PK TEMP: special handling if componentName ends with "-END"
@@ -319,7 +378,7 @@ bool mtsManagerGlobal::FindComponent(const std::string & processName, const std:
 
 bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const std::string & componentName)
 {
-    // Check if the component has been registered
+    // Check if the component exists
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveComponent: Can't find component: "
                                 << processName << ":" << componentName << std::endl;
@@ -331,20 +390,20 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
     ComponentMapType * componentMap = ProcessMap.GetItem(processName);
     CMN_ASSERT(componentMap);
 
-    // When interfaceMapType is not NULL, all interfaces that the component manages
+    // When interfaceMapType is not NULL, all interfaces that the component has
     // should be removed first.
     InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
     if (interfaceMap) {
         ConnectedInterfaceMapType::iterator it;
 
-        // Remove all the required interfaces that the process manage.
+        // Remove all the required interfaces that the component has
         it = interfaceMap->InterfaceRequiredOrInputMap.GetMap().begin();
         while (it != interfaceMap->InterfaceRequiredOrInputMap.GetMap().end()) {
             ret &= RemoveInterfaceRequiredOrInput(processName, componentName, it->first);
             it = interfaceMap->InterfaceRequiredOrInputMap.GetMap().begin();
         }
 
-        // Remove all the provided interfaces that the process manage.
+        // Remove all the provided interfaces that the component has
         it = interfaceMap->InterfaceProvidedOrOutputMap.GetMap().begin();
         while (it != interfaceMap->InterfaceProvidedOrOutputMap.GetMap().end()) {
             ret &= RemoveInterfaceProvidedOrOutput(processName, componentName, it->first);

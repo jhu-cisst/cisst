@@ -75,7 +75,6 @@ protected:
              C2
     */
 
-    /*! Data structure to keep information about a connected interface */
     class ConnectedInterfaceInfo {
     protected:
         // Names (IDs)
@@ -89,25 +88,19 @@ protected:
         std::string EndpointInfo;
 #endif
 
-        ConnectedInterfaceInfo() : ProcessName(""), ComponentName(""), InterfaceName(""), RemoteConnection(false)
-#if CISST_MTS_HAS_ICE
-            , EndpointInfo("")
-#endif
-        {}
+        ConnectedInterfaceInfo();
 
     public:
         ConnectedInterfaceInfo(const std::string & processName, const std::string & componentName,
-                               const std::string & interfaceName, const bool isRemoteConnection)
-            : ProcessName(processName), ComponentName(componentName), InterfaceName(interfaceName), RemoteConnection(isRemoteConnection)
-        {}
+                               const std::string & interfaceName, const bool isRemoteConnection);
 
         // Getters
-        const std::string GetProcessName() const   { return ProcessName; }
-        const std::string GetComponentName() const { return ComponentName; }
-        const std::string GetInterfaceName() const { return InterfaceName; }
-        bool IsRemoteConnection() const            { return RemoteConnection; }
+        inline std::string GetProcessName(void) const   { return ProcessName; }
+        inline std::string GetComponentName(void) const { return ComponentName; }
+        inline std::string GetInterfaceName(void) const { return InterfaceName; }
+        bool IsRemoteConnection(void) const             { return RemoteConnection; }
 #if CISST_MTS_HAS_ICE
-        std::string GetEndpointInfo() const        { return EndpointInfo; }
+        inline std::string GetEndpointInfo(void) const  { return EndpointInfo; }
 
         // Setters
         void SetProxyAccessInfo(const std::string & endpointInfo) {
@@ -116,7 +109,7 @@ protected:
 #endif
     };
 
-    /*! Data structure to keep information about a connection */
+    /*! Data structure to keep connection information */
     class ConnectionElement {
         // For unit-test
         friend class mtsManagerGlobalTest;
@@ -139,46 +132,26 @@ protected:
         const std::string ServerComponentName;
         const std::string ServerInterfaceProvidedName;
 #if CISST_MTS_HAS_ICE
-        // Time when this object becomes timed out
+        // Time when pending connection becomes invalidated; any pending connection 
+        // should be confirmed before this time.
         double TimeoutTime;
 #endif
 
         ConnectionElement(const std::string & requestProcessName, const unsigned int connectionID,
             const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-            const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
-            : ConnectionID(connectionID), Connected(false), RequestProcessName(requestProcessName),
-              ClientProcessName(clientProcessName), ClientComponentName(clientComponentName), ClientInterfaceRequiredName(clientInterfaceRequiredName),
-              ServerProcessName(serverProcessName), ServerComponentName(serverComponentName), ServerInterfaceProvidedName(serverInterfaceProvidedName)
-        {
-#if CISST_MTS_HAS_ICE
-            // When current time plus Timeout expires, this connection elements
-            // gets invalidated by the GCM.
-            TimeoutTime = osaGetTime() + mtsProxyConfig::ConnectConfirmTimeOut;
-#endif
-        }
+            const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-        /*! Get connection id */
-        unsigned int GetConnectionID(void) const {
+        /*! Getters and Setters */
+        inline unsigned int GetConnectionID(void) const {
             return ConnectionID;
         }
 
-        mtsDescriptionConnection GetDescriptionConnection(void) const {
-            mtsDescriptionConnection conn;
-            conn.Client.ProcessName = ClientProcessName;
-            conn.Client.ComponentName = ClientComponentName;
-            conn.Client.InterfaceName = ClientInterfaceRequiredName;
-            conn.Server.ProcessName = ServerProcessName;
-            conn.Server.ComponentName = ServerComponentName;
-            conn.Server.InterfaceName = ServerInterfaceProvidedName;
-            conn.ConnectionID = ConnectionID;
-            return conn;
-        }
+        mtsDescriptionConnection GetDescriptionConnection(void) const;
 
         inline bool IsConnected(void) const {
             return Connected;
         }
 
-        /*! Set this connection as established */
         inline void SetConnected(void) {
             Connected = true;
         }
@@ -192,7 +165,7 @@ protected:
     };
 
     /*! Connection map: (connected interface name, connected interface information)
-        Map name: a name of component that has these interfaces. */
+        Map name: name of component that owns these interfaces. */
     typedef cmnNamedMap<mtsManagerGlobal::ConnectedInterfaceInfo> ConnectionMapType;
 
     /*! Interface map: a map of registered interfaces in a component
@@ -251,13 +224,13 @@ protected:
         type of connections -- local and remote connections.  When the GCM 
         executes commands, it checks if it has a local connection to the LCM on 
         the same process and, if yes, it sends the command to the local LCM.  
-        If not, it delivers the command to a remote LCM as before. */
+        If not, it delivers the command to a remote LCM same as before. */
     mtsManagerLocal * LocalManager;
     mtsManagerLocalInterface * LocalManagerConnected;
 
-    /*! Mutex for thread-safe connection processing (there could be possibly multiple
-        threads that try to establish a connection */
+    /*! Mutex for thread-safe processing */
     osaMutex ConnectionChange;
+    osaMutex ProcessMapChange;
 
     /*! Counter to issue a new connection ID */
     unsigned int ConnectionID;

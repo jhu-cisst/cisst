@@ -21,8 +21,8 @@
 # Cisst = Use cisst internal logger (CMN_LOG and CMN_LOG_CLASS)
 # Windows = Use OutputDebugString() API for logging. Works only on Windows
 #
-Logger = Cisst
-#Logger = Windows
+#Logger = Cisst
+Logger = Windows
 
 #
 # MJ: Please do not modify these property settings since these configurations 
@@ -42,7 +42,7 @@ Ice.ImplicitContext = Shared
 #
 # Warn about connection exceptions
 #
-Ice.Warn.Connections = 0
+Ice.Warn.Connections = 1
 
 #
 # Network Tracing
@@ -51,7 +51,7 @@ Ice.Warn.Connections = 0
 # 2 = like 1, but more detailed
 # 3 = like 2, but also trace data transfer
 #
-Ice.Trace.Network = 0
+Ice.Trace.Network = 1
 
 #
 # Timeout in msec

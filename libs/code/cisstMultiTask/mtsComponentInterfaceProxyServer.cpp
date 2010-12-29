@@ -600,7 +600,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         try {
             ComponentInterfaceProxyServer->MonitorConnections();
         } catch (const Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyServer::ManagerServerI, "Server component disconnection detected");
+            LogPrint(mtsManagerProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
         }
     }
 #endif

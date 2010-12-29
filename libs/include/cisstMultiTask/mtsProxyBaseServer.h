@@ -127,9 +127,10 @@ protected:
     /*! Remove ICE proxy object using client id */
     bool RemoveClientByClientID(const ClientIDType & clientID);
 
-    /*! \brief Close ICE connection with connected client 
+    /*! \brief Close ICE connection with connected client using client id
+        \param clientID client id (set as IceUtil::generateUUID())
         \param force false for graceful closure (default), true for forceful closure */
-    void CloseClient(const ConnectionIDType & connectionID, const bool force = false);
+    bool CloseClient(const ClientIDType & clientID, const bool force = false);
 
     /*! Monitor active connection by heart beat. If a client proxy disconnects or is
         disconnected, the close event is detected here. */
@@ -360,7 +361,7 @@ bool mtsProxyBaseServerType::AddProxyClient(
     ConnectionIDMap.insert(std::make_pair(connectionID, client));
     ConnectionIDMapChange.Unlock();
 
-    return (FindClientByClientID(clientID) && FindClientByConnectionID(connectionID));
+    return ((FindClientByClientID(clientID) && FindClientByConnectionID(connectionID)));
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
@@ -412,20 +413,22 @@ bool mtsProxyBaseServerType::RemoveClientByClientID(
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-void mtsProxyBaseServerType::CloseClient(const ConnectionIDType & connectionID, const bool force) 
+bool mtsProxyBaseServerType::CloseClient(const ClientIDType & clientID, const bool force)
 {
-    ClientProxyType * clientProxy = GetClientByConnectionID(connectionID);
+    ClientProxyType * clientProxy = GetClientByClientID(clientID);
     if (!clientProxy) {
         std::stringstream ss;
-        ss << "CloseClient: cannot find client with connection id: " << connectionID;
+        ss << "CloseClient: cannot find client with client id: " << clientID;
         std::string s = ss.str();
         IceLogger->warning(s);
-        return;
+        return false;
     }
 
     // Close Ice connection
     Ice::ConnectionPtr conn = ClientIDMap.begin()->second.ClientProxy->ice_getConnection();
     conn->close(force);
+
+    return true;
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
@@ -435,11 +438,6 @@ void mtsProxyBaseServerType::Monitor(void)
 
     typename ConnectionIDMapType::iterator it = ConnectionIDMap.begin();
     while (it != ConnectionIDMap.end()) {
-        // smmy: it would be good to be able to check isShutdown()
-        //if (it->second.ClientProxy->isShutdown()) {
-        //    continue;
-        //}
-
         try {
             it->second.ClientProxy->ice_ping();
             ++it;
@@ -452,8 +450,7 @@ void mtsProxyBaseServerType::Monitor(void)
 
             OnClientDisconnect(it->second.ClientID);
 
-            // Reset iterator to the head of the map since OnClientDisconnect()
-            // may erase an element and thus invalidate iterator.
+            // Reset iterator (OnClientDisconnect() may invalidated it)
             it = ConnectionIDMap.begin();
         }
     }

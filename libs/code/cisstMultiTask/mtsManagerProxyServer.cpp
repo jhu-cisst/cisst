@@ -1362,7 +1362,7 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         try {
             ManagerProxyServer->MonitorConnections();
         } catch (const Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected");
+            LogPrint(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected: " << ex.what());
         }
     }
 #endif
@@ -1405,9 +1405,9 @@ void mtsManagerProxyServer::ManagerServerI::TestMessageFromClientToServer(
 bool mtsManagerProxyServer::ManagerServerI::AddClient(
     const std::string & processName, const ::Ice::Identity & identity, const ::Ice::Current& current)
 {
-#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+//#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
    LogPrint(ManagerServerI, "<<<<< RECV: AddClient: " << processName << " (" << Communicator->identityToString(identity) << ")");
-#endif
+//#endif
 
     const ConnectionIDType connectionID = current.ctx.find(mtsManagerProxyServer::GetConnectionIDKey())->second;
 
