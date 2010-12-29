@@ -112,14 +112,16 @@ void mtsComponentViewer::AddComponent(const mtsDescriptionComponent &componentIn
 void mtsComponentViewer::ChangeState(const mtsComponentStateChange &componentStateChange)
 {
     if (UDrawPipeConnected) {
-        std::string buffer("graph(change_attr(node(\"");
+        std::string buffer("graph(change_attr([node(\"");
         buffer.append(componentStateChange.ProcessName + ":" + componentStateChange.ComponentName);
-        buffer.append("\", ");
+        buffer.append("\", [");
         buffer.append(GetStateInUDrawGraphFormat(componentStateChange.NewState));
-        buffer.append(")))\n");
-        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
+        buffer.append("])]))\n");
+        CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
         UDrawPipe.Write(buffer, static_cast<int>(buffer.length()));
         buffer = UDrawPipe.ReadUntil(256, '\n');
+        if (buffer != "")
+            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << buffer << std::endl;
     }
 }
 

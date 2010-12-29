@@ -117,7 +117,9 @@ public:
     void AddComponentEvent(const mtsDescriptionComponent &component);
     void AddConnectionEvent(const mtsDescriptionConnection &connection);
     void RemoveConnectionEvent(const mtsDescriptionConnection &connection);
-    void ChangeStateEvent(const mtsComponentStateChange &stateChange);
+
+    // Event handler for use by this class (Manager Component Server, MCS)
+    void HandleChangeStateEvent(const mtsComponentStateChange &stateChange);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);

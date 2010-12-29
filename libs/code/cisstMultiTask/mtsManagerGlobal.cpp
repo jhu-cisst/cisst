@@ -282,6 +282,8 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
     }
 
     // PK TEMP: special handling if componentName ends with "-END"
+    // This was needed for JGraph component viewer, but is no longer needed for uDrawGraph component viewer.
+    // If removed, need to generate AddComponentEvent elsewhere
     if (componentName.find("-END", componentName.length()-4) != std::string::npos) {
         if (ManagerComponentServer) {
             mtsDescriptionComponent componentInfo;

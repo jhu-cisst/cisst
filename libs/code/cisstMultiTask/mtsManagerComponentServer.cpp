@@ -153,6 +153,8 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentResume);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                           newFunctionSet->ComponentGetState);
+    required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this, 
+                                   mtsManagerComponentBase::EventNames::ChangeState);
 
     // Remember a required interface (InterfaceGCM's required interface) to 
     // connect it to the provided interface (InterfaceLCM's provided interface).
@@ -256,6 +258,11 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const m
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg)
 {
+    // Check if command is for this component (MCS)
+    if (arg.ComponentName == this->GetName()) {
+        CMN_LOG_CLASS_RUN_WARNING << "ComponentStart for " << arg.ComponentName << " ignored." << std::endl;
+        return;
+    }
     // Check if a new component with the name specified can be created
     if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentStart: failed to start component - no component found: " << arg << std::endl;
@@ -280,6 +287,11 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsCom
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg)
 {
+    // Check if command is for this component (MCS)
+    if (arg.ComponentName == this->GetName()) {
+        CMN_LOG_CLASS_RUN_WARNING << "ComponentStop for " << arg.ComponentName << " ignored." << std::endl;
+        return;
+    }
     // Check if a new component with the name specified can be created
     if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentStop: failed to Stop component - no component found: " << arg << std::endl;
@@ -304,6 +316,11 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop(const mtsComp
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg)
 {
+    // Check if command is for this component (MCS)
+    if (arg.ComponentName == this->GetName()) {
+        CMN_LOG_CLASS_RUN_WARNING << "ComponentResume for " << arg.ComponentName << " ignored." << std::endl;
+        return;
+    }
     // Check if a new component with the name specified can be created
     if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentResume: failed to Resume component - no component found: " << arg << std::endl;
@@ -329,6 +346,13 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsCo
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
                                                                        mtsComponentState &state) const
 {
+    // Check if command is for this component (MCS)
+    if (component.ComponentName == this->GetName()) {
+        //GetState(state);
+        //For now, always return active for MCC
+        state = mtsComponentState::ACTIVE;
+        return;
+    }
     if (!GCM->FindComponent(component.ProcessName, component.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get component state - no component found: "
                                 << component << std::endl;
@@ -393,8 +417,9 @@ void mtsManagerComponentServer::RemoveConnectionEvent(const mtsDescriptionConnec
     InterfaceGCMEvents_RemoveConnection(connection);
 }
 
-void mtsManagerComponentServer::ChangeStateEvent(const mtsComponentStateChange &stateChange)
+void mtsManagerComponentServer::HandleChangeStateEvent(const mtsComponentStateChange &stateChange)
 {
+    CMN_LOG_CLASS_RUN_VERBOSE << "MCS got ChangeState event for " << stateChange.ComponentName << std::endl;
     InterfaceGCMEvents_ChangeState(stateChange);
 }
 

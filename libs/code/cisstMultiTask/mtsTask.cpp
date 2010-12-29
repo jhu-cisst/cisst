@@ -135,7 +135,7 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State.GetState()));
+        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State));
     }
 }
 

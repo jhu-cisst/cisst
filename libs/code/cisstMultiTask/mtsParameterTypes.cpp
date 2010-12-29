@@ -253,7 +253,7 @@ void mtsComponentStateChange::ToStream(std::ostream & outputStream) const
     mtsGenericObject::ToStream(outputStream);
     outputStream << ", Process: " << this->ProcessName
                  << ", component: " << this->ComponentName
-                 << ", state: " << mtsComponentState::ToString(this->NewState);
+                 << ", state: " << mtsComponentState::ToString(this->NewState.GetState());
 }
 
 void mtsComponentStateChange::SerializeRaw(std::ostream & outputStream) const
@@ -261,7 +261,7 @@ void mtsComponentStateChange::SerializeRaw(std::ostream & outputStream) const
     mtsGenericObject::SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, ProcessName);
     cmnSerializeRaw(outputStream, ComponentName);
-    cmnSerializeRaw(outputStream, static_cast<int>(NewState));
+    cmnSerializeRaw(outputStream, NewState);
 }
 
 void mtsComponentStateChange::DeSerializeRaw(std::istream & inputStream)
@@ -269,9 +269,7 @@ void mtsComponentStateChange::DeSerializeRaw(std::istream & inputStream)
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, ProcessName);
     cmnDeSerializeRaw(inputStream, ComponentName);
-    int newState;
-    cmnDeSerializeRaw(inputStream, newState);
-    NewState = static_cast<mtsComponentState::Enum>(newState);
+    cmnDeSerializeRaw(inputStream, NewState);
 }
 
 //-----------------------------------------------------------------------------

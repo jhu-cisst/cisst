@@ -78,14 +78,14 @@ protected:
         mtsFunctionRead          GetListOfConnections;
     } InterfaceLCMFunctionType;
 
-    // Event handlers for InterfaceLCM's required interface
+    // Event handlers for InterfaceLCM's required interface (handle events from MCS)
     void HandleAddComponentEvent(const mtsDescriptionComponent &component);
     void HandleChangeStateEvent(const mtsComponentStateChange &componentStateChange);
     void HandleAddConnectionEvent(const mtsDescriptionConnection &connection);
     void HandleRemoveConnectionEvent(const mtsDescriptionConnection &connection);
 
-    // Event handlers for InterfaceComponent's required interface
-    void HandleChangeState(const mtsComponentStateChange & componentStateChange);
+    // Event handlers for InterfaceComponent's required interface (handle events from Component)
+    void HandleChangeStateFromComponent(const mtsComponentStateChange & componentStateChange);
 
     InterfaceLCMFunctionType InterfaceLCMFunction;
 
@@ -118,6 +118,9 @@ public:
     void InterfaceLCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
                                                 mtsComponentState &state) const;
 
+    /*! Event generators for InterfaceLCM's provided interface */
+    mtsFunctionWrite InterfaceLCMEvents_ChangeState;
+
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
@@ -134,7 +137,7 @@ public:
     void InterfaceComponentCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
 
-    /*! Event generators for InterfaceLCM's provided interface */
+    /*! Event generators for InterfaceComponent's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;
     mtsFunctionWrite InterfaceComponentEvents_ChangeState;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;

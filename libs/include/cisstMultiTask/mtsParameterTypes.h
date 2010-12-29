@@ -191,14 +191,14 @@ public:
     mtsComponentStateChange(const mtsComponentStateChange &other);
     mtsComponentStateChange(const std::string & processName, 
                             const std::string & componentName,
-                            const mtsComponentState::Enum & newState)
+                            const mtsComponentState & newState)
                             : ProcessName(processName),
                               ComponentName(componentName),
                               NewState(newState) {}
 
     std::string ProcessName;
     std::string ComponentName;
-    mtsComponentState::Enum NewState;
+    mtsComponentState NewState;
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
