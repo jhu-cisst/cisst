@@ -1168,6 +1168,9 @@ bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const s
         element = it->second;
         if (clientInterfaceUID == GetInterfaceUID(element->ClientProcessName, element->ClientComponentName, element->ClientInterfaceRequiredName)) {
             if (serverInterfaceUID == GetInterfaceUID(element->ServerProcessName, element->ServerComponentName, element->ServerInterfaceProvidedName)) {
+                // Send disconnection event to ManagerComponentServer
+                if (ManagerComponentServer)
+                    ManagerComponentServer->RemoveConnectionEvent(element->GetDescriptionConnection());
                 ConnectionChange.Lock();
                 delete element;
                 ConnectionElementMap.erase(it);

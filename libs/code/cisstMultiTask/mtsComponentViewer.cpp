@@ -20,19 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s)
+void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double timeoutInSec)
 {
+    WaitingForResponse = true;
     pipe.Write(s, s.length());
+    WaitForResponse(timeoutInSec);
 }
 
 CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
 
-mtsComponentViewer::mtsComponentViewer(const std::string & name, double periodicityInSeconds) :
-    mtsTaskPeriodic(name, periodicityInSeconds),
-    UDrawPipeConnected(false)
+mtsComponentViewer::mtsComponentViewer(const std::string & name) :
+    mtsTaskFromSignal(name),
+    UDrawPipeConnected(false),
+    WaitingForResponse(false),
+    RedrawGraph(false)
 {
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
@@ -69,25 +74,25 @@ void mtsComponentViewer::Run(void)
            SendAllInfo();
        }
     }
-#if 0
-    // Could also periodically check for connection to JGraph-based program.
-    if (!JGrahSocketConnected) {
-       ConnectToJGraph();
-       if (JGraphSocketConnected) {
-           CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
-           SendAllInfo();
-       }
-    }
-#endif
     ProcessQueuedCommands();
     ProcessQueuedEvents();
+    // PK TEMP: following should be replaced by a queued command
+    if (RedrawGraph) {
+        RedrawGraph = false;
+        SendAllInfo();
+    }
 }
 
 void mtsComponentViewer::Cleanup(void)
 {
     if (UDrawPipeConnected) {
+        ReaderThreadFinished = true;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for reader thread to finish" << std::endl;
+        ReaderThread.Wait();
+        ReaderThread.Delete();
         UDrawPipe.Close();
         UDrawPipeConnected = false;
+        CMN_LOG_CLASS_RUN_WARNING << "Exited" << std::endl;
     }
 }
 
@@ -100,11 +105,8 @@ void mtsComponentViewer::AddComponent(const mtsDescriptionComponent &componentIn
         ManagerComponentServices->RequestComponentGetState(componentInfo, componentState);
         std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
         if (buffer != "") {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-            UDrawPipe.Write(buffer, static_cast<int>(buffer.length()));
-            buffer = UDrawPipe.ReadUntil(256, '\n');
-            if (buffer != "")
-                CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << buffer << std::endl;
+            CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+            WriteString(UDrawPipe, buffer);
         }
     }
 }
@@ -118,17 +120,14 @@ void mtsComponentViewer::ChangeState(const mtsComponentStateChange &componentSta
         buffer.append(GetStateInUDrawGraphFormat(componentStateChange.NewState));
         buffer.append("])]))\n");
         CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
-        UDrawPipe.Write(buffer, static_cast<int>(buffer.length()));
-        buffer = UDrawPipe.ReadUntil(256, '\n');
-        if (buffer != "")
-            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << buffer << std::endl;
+        WriteString(UDrawPipe, buffer);
     }
 }
 
 void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connection)
 {
     if (UDrawPipeConnected) {
-        char IDString[256];
+        char IDString[20];
         std::string message("graph(update([],[new_edge(\"");
         sprintf(IDString, "%d", connection.ConnectionID);
         message.append(IDString);
@@ -142,17 +141,20 @@ void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connectio
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
         message.append("\")]))\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        UDrawPipe.Write(message, static_cast<int>(message.length()));
-        std::string response = UDrawPipe.ReadUntil(256, '\n');
-        if (response != "")
-            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
+        WriteString(UDrawPipe, message);
     }
 }
 
 void mtsComponentViewer::RemoveConnection(const mtsDescriptionConnection &connection)
 {
     if (UDrawPipeConnected) {
-        CMN_LOG_CLASS_RUN_WARNING << "RemoveConnection event handler to be implemented" << std::endl;
+        char IDString[20];
+        std::string message("graph(update([],[delete_edge(\"");
+        sprintf(IDString, "%d", connection.ConnectionID);
+        message.append(IDString);
+        message.append("\")]))\n");
+        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+        WriteString(UDrawPipe, message);
     }
 }
 
@@ -166,21 +168,52 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
     UDrawPipeConnected = UDrawPipe.Open("uDrawGraph", arguments, "rw");
     // wait for initial OK
     if (UDrawPipeConnected) {
-        std::string response = UDrawPipe.ReadUntil(256, '\n');
-        if (response != "") {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
-            WriteString(UDrawPipe, "drag_and_drop(dragging_on)\n");
-            response = UDrawPipe.ReadUntil(256, '\n');
-            if (response != "")
-               CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), drag_and_drop: " << response << std::endl;
-            WriteString(UDrawPipe, "graph(new([]))\n");
-            response = UDrawPipe.ReadUntil(256, '\n');
-            if (response != "")
-               CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), new: " << response << std::endl;
-        }
+        WaitingForResponse = true;
+        // Create reader thread.
+        ReaderThread.Create<mtsComponentViewer, int>(this, &mtsComponentViewer::ReadFromUDrawGraph, 0);
+        WaitForResponse(1.0);
+        WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\")]))\n");
+        WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\"]))\n");
+        WriteString(UDrawPipe, "drag_and_drop(dragging_on)\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Connected to UDraw(Graph)" << std::endl;
     }
     return UDrawPipeConnected;
+}
+
+void *mtsComponentViewer::ReadFromUDrawGraph(int)
+{
+    std::string response;
+    ReaderThreadFinished = false;
+    while (!ReaderThreadFinished) {
+        response = UDrawPipe.ReadUntil(256, '\n');
+        if (response.compare(0,2,"ok") == 0)
+            WaitingForResponse = false;
+        else if (response.compare(0, 19, "communication_error") == 0) {
+            WaitingForResponse = false;
+            CMN_LOG_CLASS_RUN_WARNING << "UDrawGraph error: " << response;
+        }
+        else if (response.compare(0,4,"quit") == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << "Received quit command from UDrawGraph" << std::endl;
+            Kill();
+        }
+        else if (response.compare(0,24,"menu_selection(\"redraw\")") == 0) {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph" << std::endl;
+            // PK TEMP: Following to be replaced by use of command pattern
+            RedrawGraph = true;
+            PostCommandQueuedMethod();
+        }
+    }
+    return 0;
+}
+
+bool mtsComponentViewer::WaitForResponse(double timeoutInSec) const
+{
+    // Could instead use osaThreadSignal with timeout
+    for (int i = 0; (i < timeoutInSec*1000) && WaitingForResponse; i++)
+        osaSleep(0.001);
+    if (WaitingForResponse)
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to receive response" << std::endl;
+    return !WaitingForResponse;
 }
 
 bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) const
@@ -191,6 +224,8 @@ bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) con
 
 void mtsComponentViewer::SendAllInfo(void)
 {
+    // Clear any existing graph
+    WriteString(UDrawPipe, "graph(new([]))\n");
     // Now, send all existing components and connections
     std::vector<std::string> processList;
     std::vector<std::string> componentList;
@@ -213,12 +248,7 @@ void mtsComponentViewer::SendAllInfo(void)
         for (i = 0; i < connectionList.size(); i++)
             this->AddConnection(connectionList[i]);
     }
-    if (UDrawPipeConnected) {
-        WriteString(UDrawPipe, "menu(layout(improve_all))\n");
-        std::string response = UDrawPipe.ReadUntil(256, '\n');
-        if (response != "")
-           CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), improve_all: " << response << std::endl;
-    }
+    WriteString(UDrawPipe, "menu(layout(improve_all))\n");
 }
 
 std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &processName,

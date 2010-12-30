@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     taskManager->AddComponent(ire);
 
     // create and add Component Viewer
-    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer", 1.0*cmn_s);
+    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer");
     taskManager->AddComponent(componentViewer);
 
     taskManager->CreateAll();
