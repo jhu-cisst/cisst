@@ -690,6 +690,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
                                                                     const std::string &userName)
 {
     // First, do some error checking
+#if 0  // PK TEMP
     // 1) The interfaceProvided parameter should be an end-user interface
     if (!interfaceProvided->EndUserInterface) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
@@ -697,6 +698,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
                                 << "\": parameter not an end-user interface" << std::endl;
         return interfaceProvided;
     }
+#endif
     // 2) This object should be an original interface (i.e., the OriginalInterface pointer should be 0)
     if (this->OriginalInterface) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
@@ -708,7 +710,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
     // Now, handle the case where the interfaceProvided is the same as this object, which would occur when
     // there are no queued commands.
     if (this == interfaceProvided) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
+        CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
                                   << "\" interface \"" << this->Name
                                   << "\": original interface is also the end-user interface" << std::endl;
         return 0;

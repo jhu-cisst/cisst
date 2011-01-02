@@ -180,7 +180,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get end-user interface for " << serverComponentName << std::endl;
                 return false;
             }
-            bool success = clientInterfaceRequired->BindCommands(endUserInterface);
+            success = clientInterfaceRequired->BindCommands(endUserInterface);
             mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
             serverFunctionSet->AddObserverList(eventList, eventList);
@@ -246,6 +246,156 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                                      << this->GetName()
                                      << "\" input interface \"" << clientInterfaceRequiredName
                                      << "\" failed to connect to output interface \""
+                                     << serverInterfaceProvidedName << "\"" << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// PK: Needs to be fixed!!!  Should get interface pointers from connection list -- otherwise, don't have end-user interface!!
+bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                                               const std::string & clientProcessName)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsComponent * clientComponent = LCM->GetComponent(clientComponentName);
+    if (!clientComponent) {
+        CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to get client component: \"" << clientComponentName << "\"" << std::endl;
+        return false;
+    }
+
+    mtsComponent * serverComponent = LCM->GetComponent(serverComponentName);
+    if (!serverComponent) {
+        CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to get server component: \"" << serverComponentName << "\"" << std::endl;
+        return false;
+    }
+
+    mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
+    if (!serverInterfaceProvidedOrOutput) {
+        // test for swapped interfaces
+        // TODO: This duplicates a test already done in the GCM
+        CMN_LOG_CLASS_INIT_DEBUG << "DisconnectLocally: looking for provided/output interface in first component as well" << std::endl;
+        serverInterfaceProvidedOrOutput = clientComponent->GetInterfaceProvidedOrOutput(clientInterfaceRequiredName);
+        if (!serverInterfaceProvidedOrOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to get provided/output interface \"" << serverInterfaceProvidedName << "\""
+                                     << " in component \"" << serverComponentName << "\"" << std::endl;
+            return false;
+        } else {
+            CMN_LOG_CLASS_INIT_DEBUG << "DisconnectLocally: Swapping client/server" << std::endl;
+            return DisconnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName, clientProcessName);
+        }
+    }
+
+    // Now, handle the disconnection.  First, we look for connection between required/provided interfaces.  Then, we look
+    // for connection between input/output interfaces.
+    mtsInterfaceProvided *serverInterfaceProvided = dynamic_cast<mtsInterfaceProvided *>(serverInterfaceProvidedOrOutput);
+    if (serverInterfaceProvided) {
+        mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceRequiredName);
+        if (!clientInterfaceRequired) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", client does not have required interface." << std::endl;
+            return false;
+        }
+        bool success = false;
+        // If the server is this component (ManagerComponentClient), or if this component is not active,
+        // we can directly call the methods. Note that we could use the StateChange mutex to make sure that the state
+        // does not change during execution of this method, but that is unlikely.
+        if ((serverComponentName == GetName()) || !IsRunning()) {
+            mtsEventHandlerList eventList(serverInterfaceProvided);
+            clientInterfaceRequired->GetEventList(eventList);
+            serverInterfaceProvided->RemoveObserverList(eventList, eventList);
+            success = clientInterfaceRequired->CheckEventList(eventList);
+            // Now, pause/stop the client component.  In the future, the component could be left
+            // running if the required interface is MTS_OPTIONAL.
+            clientComponent->Suspend();
+            clientInterfaceRequired->DetachCommands();
+            mtsInterfaceProvided *originalInterfaceProvided = serverInterfaceProvided->GetOriginalInterface();
+            if (!originalInterfaceProvided)
+                originalInterfaceProvided = serverInterfaceProvided;
+            if (originalInterfaceProvided->RemoveEndUserInterface(serverInterfaceProvided, clientInterfaceRequiredName) != 0)
+                success = false;
+        }
+        else {
+            InterfaceComponentFunctionType * serverFunctionSet = InterfaceComponentFunctionMap.GetItem(serverComponentName);
+            if (!serverFunctionSet) {
+                CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to get function set for " << serverComponentName << std::endl;
+                return false;
+            }
+            if (!serverFunctionSet->RemoveEndUserInterface.IsValid()) {
+                CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: RemoveEndUserInterface invalid for " << serverComponentName << std::endl;
+                return false;
+            }
+            if (!serverFunctionSet->RemoveObserverList.IsValid()) {
+                CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: RemoveObserverList invalid for " << serverComponentName << std::endl;
+                return false;
+            }
+#if 0
+            if (!serverFunctionSet->ComponentStop.IsValid()) {
+                CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: ComponentStop invalid for " << serverComponentName << std::endl;
+                return false;
+            }
+#endif
+            mtsEventHandlerList eventList(serverInterfaceProvided);
+            clientInterfaceRequired->GetEventList(eventList);
+            serverFunctionSet->RemoveObserverList(eventList, eventList);
+            success = clientInterfaceRequired->CheckEventList(eventList);
+            // Now, pause/stop the client component.  In the future, the component could be left
+            // running if the required interface is MTS_OPTIONAL.
+            clientComponent->Suspend(); // Could instead use serverFunctionSet->ComponentStop
+            clientInterfaceRequired->DetachCommands();
+            mtsInterfaceProvided *originalInterfaceProvided = serverInterfaceProvided->GetOriginalInterface();
+            if (!originalInterfaceProvided)
+                originalInterfaceProvided = serverInterfaceProvided;
+            mtsEndUserInterfaceArg endUserInterfaceArg(originalInterfaceProvided, clientInterfaceRequiredName, serverInterfaceProvided);
+            serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
+            if (endUserInterfaceArg.EndUserInterface != 0) {
+                CMN_LOG_CLASS_RUN_WARNING << "DisconnectLocally: failed to remove end-user interface for " << serverComponentName << std::endl;
+                success = false;
+            }
+        }
+        if (success) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "DisconnectLocally: successfully disconnected required/provided: "
+                                       << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                       << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect required/provided: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+            return false;
+        }
+    }
+    else {  // Input/Output connection
+        mtsInterfaceOutput *serverInterfaceOutput = dynamic_cast<mtsInterfaceOutput *>(serverInterfaceProvidedOrOutput);
+        if (!serverInterfaceOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", server does not have provided or output interface." << std::endl;
+            return false;
+        }
+        mtsInterfaceInput *clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceRequiredName);
+        if (!clientInterfaceInput) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", client does not have input interface." << std::endl;
+            return false;
+        }
+        if (clientInterfaceInput->Disconnect()) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "DisconnectLocally: component \""
+                                       << this->GetName()
+                                       << "\" input interface \"" << clientInterfaceRequiredName
+                                       << "\" successfully disconnected from output interface \""
+                                       << serverInterfaceProvidedName << "\"" << std::endl;
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: component \""
+                                     << this->GetName()
+                                     << "\" input interface \"" << clientInterfaceRequiredName
+                                     << "\" failed to disconnect from output interface \""
                                      << serverInterfaceProvidedName << "\"" << std::endl;
             return false;
         }
@@ -506,11 +656,6 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(cons
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
-    if (!InterfaceLCMFunction.ComponentDisconnect.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentDsconnect: failed to execute \"Component Disconnect\"" << std::endl;
-        return;
-    }
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
@@ -519,7 +664,11 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(c
         InterfaceLCMCommands_ComponentDisconnect(arg);
         return;
     } else {
-        //InterfaceLCMFunction.ComponentConnect.ExecuteBlocking(arg);
+        if (!InterfaceLCMFunction.ComponentDisconnect.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentDsconnect: failed to execute \"Component Disconnect\"" << std::endl;
+            return;
+        }
+        //InterfaceLCMFunction.ComponentDisconnect.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentDisconnect(arg);
     }
 }
@@ -724,22 +873,35 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
-    // Try to connect interfaces as requested
+    // Try to disconnect interfaces as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
+    // PK TODO: Would be nice to be able to disconnect using just connectionId (e.g., from ComponentViewer)
+    if (arg.Client.ProcessName != arg.Server.ProcessName) {
 #if CISST_MTS_HAS_ICE
-    if (!LCM->Disconnect(arg.Client.ProcessName, arg.Client.ComponentName, arg.Client.InterfaceName,
-                         arg.Server.ProcessName, arg.Server.ComponentName, arg.Server.InterfaceName))
+        // PK TODO: Need to fix this to be thread-safe
+        if (!LCM->Disconnect(arg.Client.ProcessName, arg.Client.ComponentName, arg.Client.InterfaceName,
+                             arg.Server.ProcessName, arg.Server.ComponentName, arg.Server.InterfaceName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentDisconnect: failed to execute \"Component Disonnect\": " << arg << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
 #else
+        CMN_LOG_CLASS_RUN_ERROR << "Cannot disconnect from external process without CISST_MTS_HAS_ICE, arg = " << arg << std::endl;
+#endif
+        return;
+    }
+
     if (!LCM->Disconnect(arg.Client.ComponentName, arg.Client.InterfaceName,
                          arg.Server.ComponentName, arg.Server.InterfaceName))
-#endif
     {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
         return;
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
+    if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,
+                          arg.Server.ComponentName, arg.Server.InterfaceName, arg.Client.ProcessName))
+        CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg)

@@ -1894,6 +1894,7 @@ bool mtsManagerLocal::ConnectLocally(const std::string & clientComponentName, co
 #endif
 
 
+// This should probably be split to functions such as DisconnectSetup and DisconnectNotify.
 bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
@@ -1905,13 +1906,6 @@ bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const 
         CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection failed." << std::endl;
         return false;
     }
-
-    //
-    // TODO: LOCAL DISCONNECT!!! (e.g. disable all commands and events, and all the other
-    // resource clean-up and disconnection chores)
-    //
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: successfully disconnected." << std::endl;
 
     return true;
 }

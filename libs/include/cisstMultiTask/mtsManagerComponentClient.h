@@ -110,6 +110,10 @@ protected:
                         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
                         const std::string & clientProcessName = "");
 
+    bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                           const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                           const std::string & clientProcessName = "");
+
 public:
     mtsManagerComponentClient(const std::string & componentName);
     ~mtsManagerComponentClient();

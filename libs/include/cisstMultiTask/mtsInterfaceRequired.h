@@ -204,8 +204,8 @@ protected:
     inline bool CouldConnectTo(mtsInterfaceProvidedOrOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
     }
-    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // OBSOLETE
-    bool Disconnect(void);
+    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // OBSOLETE (check mtsInterfaceRequiredOrInput)
+    bool Disconnect(void) { return DetachCommands(); }  // OBSOLETE (check mtsInterfaceRequiredOrInput)
 
     /*!
       \todo update documentation
@@ -216,6 +216,7 @@ protected:
  private:
 
     bool BindCommands(const mtsInterfaceProvided *interfaceProvided);
+    bool DetachCommands(void);
     void GetEventList(mtsEventHandlerList &eventList);
     bool CheckEventList(mtsEventHandlerList &eventList) const;
  public:
@@ -252,7 +253,6 @@ protected:
 
         inline void Detach(void) {
             Pointer->Detach();
-            Pointer = 0;
         }
 
         void ToStream(std::ostream & outputStream) const

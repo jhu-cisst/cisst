@@ -300,7 +300,7 @@ bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfacePro
 }
 
 
-bool mtsInterfaceRequired::Disconnect(void)
+bool mtsInterfaceRequired::DetachCommands(void)
 {
     // first, do the command pointers.  In the future, it may be
     // better to set the pointers to NOPVoid, NOPRead, etc., which can
@@ -324,15 +324,6 @@ bool mtsInterfaceRequired::Disconnect(void)
     for (iter = FunctionsQualifiedRead.begin(); iter != FunctionsQualifiedRead.end(); iter++) {
         iter->second->Detach();
     }
-#if 0
-    // Now, do the event handlers.  Still need to implement RemoveObserver
-    EventHandlerVoidMapType::iterator iterEventVoid;
-    for (iterEventVoid = EventHandlersVoid.begin(); iterEventVoid != EventHandlersVoid.end(); iterEventVoid++)
-        InterfaceProvided->RemoveObserver(iterEventVoid->first, iterEventVoid->second);
-    EventHandlerWriteMapType::iterator iterEventWrite;
-    for (iterEventWrite = EventHandlersWrite.begin(); iterEventWrite != EventHandlersWrite.end(); iterEventWrite++)
-        InterfaceProvided->RemoveObserver(iterEventWrite->first, iterEventWrite->second);
-#endif
     // set pointer to interface provided or input to 0
     InterfaceProvided = 0;
     return true;
