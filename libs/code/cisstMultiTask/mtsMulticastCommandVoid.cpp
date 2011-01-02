@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <algorithm>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 
 
@@ -37,6 +38,16 @@ void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
     }
 }
 
+bool mtsMulticastCommandVoid::RemoveCommand(BaseType * command) {
+    if (command) {
+        VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
+        if (it != Commands.end()) {
+            Commands.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
 
 mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking))
 {

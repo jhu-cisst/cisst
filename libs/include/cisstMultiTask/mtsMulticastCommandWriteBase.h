@@ -46,9 +46,10 @@ class CISST_EXPORT mtsMulticastCommandWriteBase: public mtsCommandWriteBase
 {
 public:
     typedef mtsCommandWriteBase BaseType;
+    typedef std::vector<BaseType *> VectorType;
 
 protected:
-    std::vector<BaseType *> Commands;
+    VectorType Commands;
 
 public:
     /*! Default constructor. Does nothing. */
@@ -61,6 +62,9 @@ public:
 
     /*! Add a command to the composite. */
     void AddCommand(BaseType * command);
+
+    /*! Remove a command from the composite. */
+    bool RemoveCommand(BaseType * command);
 
     /*! Execute all the commands in the composite. */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,

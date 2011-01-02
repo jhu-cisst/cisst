@@ -85,12 +85,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Provided interface for component management. */
     mtsInterfaceProvided *InterfaceProvidedToManager;
 
-    struct InternalCommandsStruct {
-        osaMutex Mutex;        
-        mtsFunctionWriteReturn GetEndUserInterface;
-        mtsFunctionWriteReturn AddObserverList;
-    } InternalCommands;
-
     /*! Default constructor. Protected to prevent creation of a component
       without a name. */
     mtsComponent(void);
@@ -261,17 +255,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Remove an input interface identified by its name */
     bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
+#if 0
     /*! Connect a required interface, used by mtsTaskManager */
     bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                          mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
-
-    /*! Call interfaceProvided->GetEndUserInterface(userName) in a thread-safe manner (i.e., from
-        component's thread if it has one). */
-    virtual mtsInterfaceProvided *GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName);
-
-    /*! Add list of event handlers as observers in the specified provided interface.
-        For active tasks, this is queued and executed from the component's thread. */
-    virtual void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+#endif
 
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
@@ -404,6 +392,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
     void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
     void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
+    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
+    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
 
  public:
 

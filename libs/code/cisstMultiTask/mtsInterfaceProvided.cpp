@@ -657,21 +657,15 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQu
 }
 
 
+// Protected function, should only be called from mtsComponent
 mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::string & userName)
 {
-    // check if this is already a end user interface
+    // check if this is already an end user interface
     if (this->EndUserInterface) {
         return this;
     }
-
     // else we need to duplicate this interface.
-    // We use the component services to queue this request, so that it is thread-safe.
-    return Component->GetEndUserInterface(this, userName);
-}
 
-
-mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterfaceInternal(const std::string & userName)
-{
     // Note that we don't check for duplicate user names (don't need to care whether there are duplicates)
     this->UserCounter++;
     CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: component \"" << Component->GetName()
@@ -685,6 +679,59 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterfaceInternal(const s
                                                                         this->ArgumentQueuesSize);
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
+    return interfaceProvided;
+}
+
+
+// Remove the end-user interface specified by the parameter interfaceProvided. Note that there are two
+// mtsInterfaceProvided objects:  (1) the interfaceProvided parameter, which should be a pointer to the
+// end-user interface to be removed and (2) the "this" pointer, which should point to the original interface.
+mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterfaceProvided *interfaceProvided,
+                                                                    const std::string &userName)
+{
+    // First, do some error checking
+    // 1) The interfaceProvided parameter should be an end-user interface
+    if (!interfaceProvided->EndUserInterface) {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
+                                << "\" interface \"" << this->Name
+                                << "\": parameter not an end-user interface" << std::endl;
+        return interfaceProvided;
+    }
+    // 2) This object should be an original interface (i.e., the OriginalInterface pointer should be 0)
+    if (this->OriginalInterface) {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
+                                << "\" interface \"" << this->Name
+                                << "\": called on object that is not an original interface" << std::endl;
+        return interfaceProvided;
+    }
+
+    // Now, handle the case where the interfaceProvided is the same as this object, which would occur when
+    // there are no queued commands.
+    if (this == interfaceProvided) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
+                                  << "\" interface \"" << this->Name
+                                  << "\": original interface is also the end-user interface" << std::endl;
+        return 0;
+    }
+
+    // Finally, remove the end-user interface from the list of end-user interfaces (InterfacesProvidedCreated).
+    InterfaceProvidedCreatedListType::iterator it;
+    for (it = InterfacesProvidedCreated.begin(); it != InterfacesProvidedCreated.end(); it++) {
+        if (it->second == interfaceProvided) {
+            CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
+                                      << "\" interface \"" << this->Name
+                                      << "\" removing copy (#" << it->first
+                                      << ") for user \"" << userName << "\"" << std::endl;
+            InterfacesProvidedCreated.erase(it);
+            delete interfaceProvided;
+            interfaceProvided = 0;
+            break;
+        }
+    }
+    CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
+                            << "\" interface \"" << this->Name
+                            << "\" could not find end-user interface for user \""
+                            << userName << "\"" << std::endl;
     return interfaceProvided;
 }
 
@@ -950,8 +997,60 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
     }
 }
 
-void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
+
+void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
 {
-    Component->AddObserverList(argin, argout);
+    argout = argin;
+    unsigned int i;
+    for (i = 0; i < argin.VoidEvents.size(); i++)
+        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPtr);
+    for (i = 0; i < argin.WriteEvents.size(); i++)
+        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPtr);
+}
+
+bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandVoid * handler)
+{
+    if (this->OriginalInterface) {
+        return this->OriginalInterface->RemoveObserver(eventName, handler);
+    }
+    mtsMulticastCommandVoid * multicastCommand = EventVoidGenerators.GetItem(eventName);
+    if (multicastCommand) {
+        if (!multicastCommand->RemoveCommand(handler)) {
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName << std::endl;
+            return false;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler)
+{
+    if (this->OriginalInterface) {
+        return this->OriginalInterface->RemoveObserver(eventName, handler);
+    }
+    mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
+    if (multicastCommand) {
+        if (!multicastCommand->RemoveCommand(handler)) {
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): did not find handler for event " << eventName << std::endl;
+            return false;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
+{
+    argout = argin;
+    unsigned int i;
+    for (i = 0; i < argin.VoidEvents.size(); i++)
+        argout.VoidEvents[i].Result = argin.Provided->RemoveObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPtr);
+    for (i = 0; i < argin.WriteEvents.size(); i++)
+        argout.WriteEvents[i].Result = argin.Provided->RemoveObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPtr);
 }
 

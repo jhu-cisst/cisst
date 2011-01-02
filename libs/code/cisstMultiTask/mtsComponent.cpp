@@ -213,14 +213,14 @@ mtsInterfaceOutput * mtsComponent::AddInterfaceOutput(const std::string & interf
 mtsInterfaceProvidedOrOutput *
 mtsComponent::GetInterfaceProvidedOrOutput(const std::string & interfaceProvidedOrOutputName)
 {
-    return InterfacesProvidedOrOutput.GetItem(interfaceProvidedOrOutputName);
+    return InterfacesProvidedOrOutput.GetItem(interfaceProvidedOrOutputName, CMN_LOG_LEVEL_RUN_VERBOSE);
 }
 
 
 mtsInterfaceProvided *
 mtsComponent::GetInterfaceProvided(const std::string & interfaceProvidedName) const
 {
-    return dynamic_cast<mtsInterfaceProvided *>(InterfacesProvidedOrOutput.GetItem(interfaceProvidedName));
+    return dynamic_cast<mtsInterfaceProvided *>(InterfacesProvidedOrOutput.GetItem(interfaceProvidedName, CMN_LOG_LEVEL_RUN_VERBOSE));
 }
 
 
@@ -576,7 +576,10 @@ const mtsInterfaceProvidedOrOutput * mtsComponent::GetInterfaceProvidedOrOutputF
     return interfaceRequiredOrInput ? interfaceRequiredOrInput->GetConnectedInterface() : 0;
 }
 
-
+#if 0  // Obsolete
+// PK: Following code is obsolete -- connections should be made in mtsManagerComponentClient
+// Right now, this is only used for input/output interfaces.
+// In retrospect, maybe it was not a good idea to combine Required/Input and Provided/Output interfaces.
 bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                                    mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
 {
@@ -605,38 +608,7 @@ bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interface
     }
     return false;
 }
-
-
-mtsInterfaceProvided *mtsComponent::GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName)
-{
-    if (!InternalCommands.GetEndUserInterface.IsValid()) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: InternalCommands not yet valid for component "
-                                   << this->GetName() << ", initializing." << std::endl;
-        AddInterfaceInternal(false);
-    }
-    if (InternalCommands.GetEndUserInterface.IsValid()) {
-        mtsEndUserInterfaceArg endUserInterfaceArg(interfaceProvided, userName);
-        CMN_LOG_CLASS_RUN_VERBOSE << "GetEndUserInterface: calling via InternalCommands for component "
-                                  << this->GetName() << ", user " << userName << std::endl;
-        InternalCommands.Mutex.Lock();
-        // Call the internal command (via internal mtsFunction)
-        InternalCommands.GetEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
-        InternalCommands.Mutex.Unlock();
-        return endUserInterfaceArg.EndUserInterface;
-    }
-    return 0;
-}
-
-
-void mtsComponent::AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
-{
-    if (InternalCommands.AddObserverList.IsValid()) {
-        InternalCommands.Mutex.Lock();
-        // Call the internal command (via internal mtsFunction)
-        InternalCommands.AddObserverList(argin, argout);
-        InternalCommands.Mutex.Unlock();
-    }
-}
+#endif  // OBSOLETE
 
 // Execute all commands in the mailbox.  This is just a temporary implementation, where
 // all commands in a mailbox are executed before moving on the next mailbox.  The final
@@ -855,31 +827,16 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
                                     mtsManagerComponentBase::CommandNames::GetEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_AddObserverList, this, 
                                     mtsManagerComponentBase::CommandNames::AddObserverList);
-#if 0
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface, this,
                                     mtsManagerComponentBase::CommandNames::RemoveEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveObserverList, this, 
                                     mtsManagerComponentBase::CommandNames::RemoveObserverList);
-#endif
     provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState,
                             mtsComponentStateChange());
 
     // Save this interface so that we can call it later (to process the mailboxes)
     InterfaceProvidedToManager = provided;
 
-    // Create an end user interface for internal invocations (via InternalCommands). These internal invocations
-    // are made by methods of this class, so we cannot assume that there is only one thread. Thus, to achieve thread-safety
-    // we need to use osaMutex.
-    mtsInterfaceProvided *interfaceProvidedToSelf = provided->GetEndUserInterfaceInternal("Self");
-    if (interfaceProvidedToSelf) {
-        InternalCommands.GetEndUserInterface.Bind(interfaceProvidedToSelf->GetCommandWriteReturn("GetEndUserInterface"));
-        InternalCommands.AddObserverList.Bind(interfaceProvidedToSelf->GetCommandWriteReturn("AddObserverList"));
-    }
-    else {
-        CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to create Self interface for component " 
-                                 << this->GetName() << std::endl;
-    }
-    
     return true;
 }
 
@@ -891,19 +848,27 @@ void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUse
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting internal GetEndUserInterface for " << argin.OriginalInterface->GetName() << std::endl;
     argout = argin;  // not really needed
     argout.EndUserInterface = 0;
-    if (argin.OriginalInterface) {
-        argout.EndUserInterface = argin.OriginalInterface->GetEndUserInterfaceInternal(argin.UserName);
-    }
+    argout.EndUserInterface = argin.OriginalInterface->GetEndUserInterface(argin.UserName);
 }
 
 void mtsComponent::InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin,
                                                                    mtsEventHandlerList &argout)
 {
     CMN_ASSERT(argin.Provided);
-    argout = argin;
-    unsigned int i;
-    for (i = 0; i < argin.VoidEvents.size(); i++)
-        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPtr);
-    for (i = 0; i < argin.WriteEvents.size(); i++)
-        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPtr);
+    argin.Provided->AddObserverList(argin, argout);
+}
+
+void mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin,
+                                                                    mtsEndUserInterfaceArg &argout)
+{
+    CMN_ASSERT(argin.OriginalInterface);
+    argout = argin;  // not really needed
+    argout.EndUserInterface = argin.OriginalInterface->RemoveEndUserInterface(argin.EndUserInterface, argin.UserName);
+}
+
+void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin,
+                                                                mtsEventHandlerList &argout)
+{
+    CMN_ASSERT(argin.Provided);
+    argin.Provided->RemoveObserverList(argin, argout);
 }

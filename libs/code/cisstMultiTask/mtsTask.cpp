@@ -361,29 +361,7 @@ void mtsTask::ProcessManagerCommandsIfNotActive()
 
 bool mtsTask::CheckForOwnThread(void) const
 {
-// PK TEMP: Set to 0 to temporarily disable queued internal commands
-#if 1
     return (osaGetCurrentThreadId() == Thread.GetId());
-#else
-    return true;
-#endif
-}
-
-mtsInterfaceProvided *mtsTask::GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName)
-{
-    if (CheckForOwnThread()) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "GetEndUserInterface: called from own thread for component "
-                                  << this->GetName() << std::endl;
-        return interfaceProvided->GetEndUserInterfaceInternal(userName);
-    }
-    return mtsComponent::GetEndUserInterface(interfaceProvided, userName);
-}
-
-void mtsTask::AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
-{
-    if (CheckForOwnThread())
-        InterfaceInternalCommands_AddObserverList(argin, argout);
-    mtsComponent::AddObserverList(argin, argout);
 }
 
 void mtsTask::ToStream(std::ostream & outputStream) const

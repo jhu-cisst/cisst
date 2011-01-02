@@ -221,8 +221,8 @@ public:
     mtsInterfaceProvided * EndUserInterface;
 
     mtsEndUserInterfaceArg() : OriginalInterface(0), EndUserInterface(0) {}
-    mtsEndUserInterfaceArg(mtsInterfaceProvided * orig, const std::string &name) :
-        UserName(name), OriginalInterface(orig), EndUserInterface(0) {}
+    mtsEndUserInterfaceArg(mtsInterfaceProvided * orig, const std::string &name, mtsInterfaceProvided * endUser = 0) :
+        UserName(name), OriginalInterface(orig), EndUserInterface(endUser) {}
     ~mtsEndUserInterfaceArg() {}
 
     void ToStream(std::ostream & outputStream) const;

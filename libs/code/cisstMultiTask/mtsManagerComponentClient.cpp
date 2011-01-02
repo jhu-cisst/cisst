@@ -20,8 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsManagerComponentClient.h>
+#include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceOutput.h>
+#include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstCommon/cmnUnits.h>
@@ -95,6 +98,162 @@ bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & cla
     return true;
 }
 
+bool mtsManagerComponentClient::ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                                               const std::string & clientProcessName)
+{
+    // At this point, it is guaranteed that all components and interfaces exist
+    // in the same process because the global component manager has already
+    // created all proxy objects needed.
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsComponent * clientComponent = LCM->GetComponent(clientComponentName);
+    if (!clientComponent) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get client component: \"" << clientComponentName << "\"" << std::endl;
+        return false;
+    }
+
+    mtsComponent * serverComponent = LCM->GetComponent(serverComponentName);
+    if (!serverComponent) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get server component: \"" << serverComponentName << "\"" << std::endl;
+        return false;
+    }
+
+    mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
+    if (!serverInterfaceProvidedOrOutput) {
+        // test for swapped interfaces
+        // TODO: This duplicates a test already done in the GCM
+        CMN_LOG_CLASS_INIT_DEBUG << "ConnectLocally: looking for provided/output interface in first component as well" << std::endl;
+        serverInterfaceProvidedOrOutput = clientComponent->GetInterfaceProvidedOrOutput(clientInterfaceRequiredName);
+        if (!serverInterfaceProvidedOrOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get provided/output interface \"" << serverInterfaceProvidedName << "\""
+                                     << " in component \"" << serverComponentName << "\"" << std::endl;
+            return false;
+        } else {
+            CMN_LOG_CLASS_INIT_DEBUG << "ConnectLocally: Swapping client/server" << std::endl;
+            return ConnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName, clientProcessName);
+        }
+    }
+
+    // Now, handle the connections.  First, we look for connection between required/provided interfaces.  Then, we look
+    // for connection between input/output interfaces.
+    mtsInterfaceProvided *serverInterfaceProvided = dynamic_cast<mtsInterfaceProvided *>(serverInterfaceProvidedOrOutput);
+    if (serverInterfaceProvided) {
+        mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceRequiredName);
+        if (!clientInterfaceRequired) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", client does not have required interface." << std::endl;
+            return false;
+        }
+        bool success = false;
+        // If the server is this component (ManagerComponentClient), or if this component is not active,
+        // we can directly call the methods. Note that we could use the StateChange mutex to make sure that the state
+        // does not change during execution of this method, but that is unlikely.
+        if ((serverComponentName == GetName()) || !IsRunning()) {
+            mtsInterfaceProvided *endUserInterface = serverInterfaceProvided->GetEndUserInterface(clientInterfaceRequiredName);
+            success = clientInterfaceRequired->BindCommands(endUserInterface);
+            mtsEventHandlerList eventList(endUserInterface);
+            clientInterfaceRequired->GetEventList(eventList);
+            endUserInterface->AddObserverList(eventList, eventList);
+            if (!clientInterfaceRequired->CheckEventList(eventList))
+                success = false;
+        }
+        else {
+            InterfaceComponentFunctionType * serverFunctionSet = InterfaceComponentFunctionMap.GetItem(serverComponentName);
+            if (!serverFunctionSet) {
+                CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get function set for " << serverComponentName << std::endl;
+                return false;
+            }
+            if (!serverFunctionSet->GetEndUserInterface.IsValid()) {
+                CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: GetEndUserInterface invalid for " << serverComponentName << std::endl;
+                return false;
+            }
+            if (!serverFunctionSet->AddObserverList.IsValid()) {
+                CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: AddObserverList invalid for " << serverComponentName << std::endl;
+                return false;
+            }
+            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceRequiredName);
+            serverFunctionSet->GetEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
+            mtsInterfaceProvided *endUserInterface = endUserInterfaceArg.EndUserInterface;
+            if (!endUserInterface) {
+                CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get end-user interface for " << serverComponentName << std::endl;
+                return false;
+            }
+            bool success = clientInterfaceRequired->BindCommands(endUserInterface);
+            mtsEventHandlerList eventList(endUserInterface);
+            clientInterfaceRequired->GetEventList(eventList);
+            serverFunctionSet->AddObserverList(eventList, eventList);
+            if (!clientInterfaceRequired->CheckEventList(eventList))
+                success = false;
+        }
+        if (success) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected required/provided: "
+                                       << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                       << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect required/provided: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+            return false;
+        }
+
+        // Post-connect processing to handle the special case 1:
+        // When the manager component server's provided interface (InterfaceGCM's
+        // provided interface) gets connected with a manager component client's
+        // required interface (InterfaceLCM's required interface) and a process
+        // name of LCM that owns the manager component client is unknown to the
+        // manager component server, a new set of function objects needs to be
+        // created so that manager component server can handle multiple manager
+        // component clients, i.e., multiple processes.
+        mtsManagerComponentServer * MCS = dynamic_cast<mtsManagerComponentServer*>(serverComponent);
+        if (MCS) {
+            if (serverInterfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided) {
+                if (!MCS->AddNewClientProcess(clientProcessName)) {
+                    CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to create new set of InterfaceGCM function objects: "
+                        << clientProcessName << std::endl;
+                    return false;
+                }
+            }
+        }
+
+    }
+    else {  // Input/Output connection
+        mtsInterfaceOutput *serverInterfaceOutput = dynamic_cast<mtsInterfaceOutput *>(serverInterfaceProvidedOrOutput);
+        if (!serverInterfaceOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", server does not have provided or output interface." << std::endl;
+            return false;
+        }
+        mtsInterfaceInput *clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceRequiredName);
+        if (!clientInterfaceInput) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", client does not have input interface." << std::endl;
+            return false;
+        }
+        if (clientInterfaceInput->ConnectTo(serverInterfaceOutput)) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: component \""
+                                       << this->GetName()
+                                       << "\" input interface \"" << clientInterfaceRequiredName
+                                       << "\" successfully connected to output interface \""
+                                       << serverInterfaceProvidedName << "\"" << std::endl;
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: component \""
+                                     << this->GetName()
+                                     << "\" input interface \"" << clientInterfaceRequiredName
+                                     << "\" failed to connect to output interface \""
+                                     << serverInterfaceProvidedName << "\"" << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool mtsManagerComponentClient::AddInterfaceComponent(void)
 {
     // InterfaceComponent's required interface is not created here but is created
@@ -105,6 +264,9 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
 
     // Add provided interface to which InterfaceInternal's required interface connects.
     std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceComponentProvided;
+    // Return if provided interface already exists
+    if (GetInterfaceProvided(interfaceName))
+        return true;
     mtsInterfaceProvided * provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceComponent: failed to add \"Component\" provided interface: " << interfaceName << std::endl;
@@ -143,6 +305,15 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                             mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
     
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceComponent: successfully added \"Component\" interfaces" << std::endl;
+
+    // Create an end user interface for internal invocations (via GeneralInterface). These internal invocations
+    // are made by methods of this class, so we cannot assume that there is only one thread. Thus, to achieve thread-safety
+    // we need to use osaMutex.
+    mtsInterfaceProvided *interfaceProvidedToSelf = provided->GetEndUserInterface("Self");
+    if (interfaceProvidedToSelf) {
+        GeneralInterface.ComponentConnect.Bind(interfaceProvidedToSelf->GetCommandWrite(
+                                               mtsManagerComponentBase::CommandNames::ComponentConnect));
+    }
 
     return true;
 }
@@ -240,6 +411,14 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
                           newFunctionSet->ComponentResume);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                           newFunctionSet->ComponentGetState);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetEndUserInterface,
+                          newFunctionSet->GetEndUserInterface);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::AddObserverList,
+                          newFunctionSet->AddObserverList);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::RemoveEndUserInterface,
+                          newFunctionSet->RemoveEndUserInterface);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::RemoveObserverList,
+                          newFunctionSet->RemoveObserverList);
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleChangeStateFromComponent, this, 
                                    mtsManagerComponentBase::EventNames::ChangeState);
 
@@ -255,6 +434,34 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
     CMN_LOG_CLASS_INIT_VERBOSE << "AddNewClientComponent: successfully added new client component: " 
         << clientComponentName << std::endl;
 
+    return true;
+}
+
+bool mtsManagerComponentClient::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string processName = LCM->GetProcessName();
+    mtsDescriptionConnection arg(processName, clientComponentName, clientInterfaceRequiredName,
+                                 processName, serverComponentName, serverInterfaceProvidedName);
+    if (!IsRunning()) {
+        InterfaceComponentCommands_ComponentConnect(arg);
+    }
+    else {
+        if (!GeneralInterface.ComponentConnect.IsValid()) {
+            CMN_LOG_CLASS_INIT_WARNING << "Connect: GeneralInterface not yet valid, initializing." << std::endl;
+            AddInterfaceComponent();
+            if (!GeneralInterface.ComponentConnect.IsValid()) {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: Failed to initialize ComponentConnect." << std::endl;
+                return false;
+            }
+        }
+        GeneralInterface.Mutex.Lock();
+        CMN_LOG_CLASS_INIT_WARNING << "mtsManagerComponentClient calling ComponentConnect" << std::endl;
+        GeneralInterface.ComponentConnect(arg);
+        GeneralInterface.Mutex.Unlock();
+        // PK: What about return value? Maybe Connect should be WriteReturn method?
+    }
     return true;
 }
 
@@ -280,11 +487,6 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg)
 {
-    if (!InterfaceLCMFunction.ComponentConnect.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConnect: failed to execute \"Component Connect\"" << std::endl;
-        return;
-    }
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
@@ -293,6 +495,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(cons
         InterfaceLCMCommands_ComponentConnect(arg);
         return;
     } else {
+        if (!InterfaceLCMFunction.ComponentConnect.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConnect: failed to execute \"Component Connect\"" << std::endl;
+            return;
+        }
         //InterfaceLCMFunction.ComponentConnect.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentConnect(arg);
     }
@@ -486,17 +692,32 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
     // Try to connect interfaces as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
+    if (arg.Client.ProcessName != arg.Server.ProcessName) {
 #if CISST_MTS_HAS_ICE
-    if (!LCM->Connect(arg.Client.ProcessName, arg.Client.ComponentName, arg.Client.InterfaceName,
-                      arg.Server.ProcessName, arg.Server.ComponentName, arg.Server.InterfaceName))
+        // PK TODO: Need to fix this to be thread-safe
+        if (!LCM->Connect(arg.Client.ProcessName, arg.Client.ComponentName, arg.Client.InterfaceName,
+                          arg.Server.ProcessName, arg.Server.ComponentName, arg.Server.InterfaceName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << arg << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << arg << std::endl;
 #else
-    if (!LCM->Connect(arg.Client.ComponentName, arg.Client.InterfaceName,
-                      arg.Server.ComponentName, arg.Server.InterfaceName))
+        CMN_LOG_CLASS_RUN_ERROR << "Cannot connect to external process without CISST_MTS_HAS_ICE, arg = " << arg << std::endl;
 #endif
-    {
+        return;
+    }
+
+    int connectionId = LCM->ConnectSetup(arg.Client.ComponentName, arg.Client.InterfaceName,
+                                         arg.Server.ComponentName, arg.Server.InterfaceName);
+    if (connectionId < 0) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << arg << std::endl;
         return;
     }
+    ConnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,
+                   arg.Server.ComponentName, arg.Server.InterfaceName, arg.Client.ProcessName);
+
+    LCM->ConnectNotify(connectionId, arg.Client.ComponentName, arg.Client.InterfaceName,
+                                     arg.Server.ComponentName, arg.Server.InterfaceName);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << arg << std::endl;
 }

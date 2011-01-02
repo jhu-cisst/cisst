@@ -140,6 +140,8 @@ public:
         // Establishing connections
         const static std::string GetEndUserInterface;
         const static std::string AddObserverList;
+        const static std::string RemoveEndUserInterface;
+        const static std::string RemoveObserverList;
     };
 
     /*! Event name definitions */

@@ -46,7 +46,7 @@ bool mtsFunctionWriteReturn::IsValid(void) const
 bool mtsFunctionWriteReturn::Bind(CommandType * command)
 {
     if (this->Command) {
-        CMN_LOG_INIT_WARNING << "Class mtsFunctionWriteReturn: Bind called on already bound function:" << this << std::endl;
+        CMN_LOG_INIT_WARNING << "Class mtsFunctionWriteReturn: Bind called on already bound function: " << this << std::endl;
     }
     this->Command = command;
     return (command != 0);

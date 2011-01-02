@@ -248,14 +248,6 @@ public:
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
                                                 mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
-
-    /*! Call interfaceProvided->GetEndUserInterface(userName) from component's thread */
-    mtsInterfaceProvided *GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName);
-
-    /*! Add list of event handlers as observers in the specified provided interface.
-        For active tasks, this is queued and executed from the component's thread. */
-    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
-
     /********************* Methods for task synchronization ***************/
 
     /*! Wait for task to start.
