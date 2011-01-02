@@ -268,9 +268,15 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
       setting forwardToLogger to false.  The default file name is
+      based on the component's name, followed by '-log.txt' */
+    void UseSeparateLogFileDefault(bool forwardToLogger = true);
+
+    /*! Tells this component to use its own file for log.  By default
+      the messages are also sent to cmnLogger but this can be changed
+      setting forwardToLogger to false.  The default file name is
       based on the component's name, followed by the date and
       '-log.txt' */
-    void UseSeparateLogFileDefault(bool forwardToLogger = true);
+    void UseSeparateLogFileDefaultWithDate(bool forwardToLogger = true);
 
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed

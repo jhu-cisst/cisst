@@ -688,6 +688,13 @@ void mtsComponent::ToStream(std::ostream & outputStream) const
 
 void mtsComponent::UseSeparateLogFileDefault(bool forwardToLogger)
 {
+    std::string filename = this->GetName() + "-log.txt";
+    this->UseSeparateLogFile(filename, forwardToLogger);
+}
+
+
+void mtsComponent::UseSeparateLogFileDefaultWithDate(bool forwardToLogger)
+{
     std::string currentDateTime;
     osaGetDateTimeString(currentDateTime);
     std::string filename = this->GetName() + "-" + currentDateTime + "-log.txt";
