@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -34,7 +34,9 @@ http://www.cisst.org/cisst/license.txt.
 mtsComponent::mtsComponent(const std::string & componentName):
     Name(componentName),
     InterfacesProvidedOrOutput("InterfacesProvided"),
-    InterfacesRequiredOrInput("InterfacesRequiredOrInput")
+    InterfacesRequiredOrInput("InterfacesRequiredOrInput"),
+    StateTables("StateTables")
+
 {
     Initialize();
 }
@@ -42,7 +44,8 @@ mtsComponent::mtsComponent(const std::string & componentName):
 
 mtsComponent::mtsComponent(void):
     InterfacesProvidedOrOutput("InterfacesProvided"),
-    InterfacesRequiredOrInput("InterfacesRequiredOrInput")
+    InterfacesRequiredOrInput("InterfacesRequiredOrInput"),
+    StateTables("StateTables")
 {
     Initialize();
 }
@@ -57,6 +60,7 @@ void mtsComponent::Initialize(void)
 
     InterfacesProvidedOrOutput.SetOwner(*this);
     InterfacesRequiredOrInput.SetOwner(*this);
+    this->StateTables.SetOwner(*this);
 }
 
 
@@ -597,6 +601,52 @@ bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interface
 }
 
 
+mtsStateTable * mtsComponent::GetStateTable(const std::string & stateTableName)
+{
+    return this->StateTables.GetItem(stateTableName, CMN_LOG_LEVEL_INIT_ERROR);
+}
+
+
+bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided)
+{
+    const std::string tableName = existingStateTable->GetName();
+    const std::string interfaceName = "StateTable" + tableName;
+    if (!this->StateTables.AddItem(tableName,
+                                   existingStateTable,
+                                   CMN_LOG_LEVEL_INIT_ERROR)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add state table \"" << tableName
+                                 << "\" to task \"" << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+    if (addInterfaceProvided) {
+        mtsInterfaceProvided * providedInterface = this->AddInterfaceProvided(interfaceName);
+        if (!providedInterface) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add provided interface \"" << interfaceName
+                                     << "\" to task \"" << this->GetName() << "\"" << std::endl;
+            return false;
+        }
+        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStart,
+                                           existingStateTable,
+                                           "StartCollection");
+        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStop,
+                                           existingStateTable,
+                                           "StopCollection");
+        providedInterface->AddEventWrite(existingStateTable->DataCollection.BatchReady,
+                                         "BatchReady", mtsStateTable::IndexRange());
+        providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
+                                        "CollectionStarted");
+        providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
+                                         "CollectionStopped", mtsUInt());
+        providedInterface->AddEventWrite(existingStateTable->DataCollection.Progress,
+                                         "Progress", mtsUInt());
+    }
+    CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
+                             << "\" and corresponding interface \"" << interfaceName
+                             << "\" to task \"" << this->GetName() << "\"" << std::endl;
+    return true;
+}
+
+
 // Execute all commands in the mailbox.  This is just a temporary implementation, where
 // all commands in a mailbox are executed before moving on the next mailbox.  The final
 // implementation will probably look at timestamps.  We may also want to pass in a
@@ -744,7 +794,7 @@ mtsInterfaceRequired * mtsComponent::EnableDynamicComponentManagement(void)
     mtsInterfaceRequired * required = AddInterfaceRequired(
         mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
     if (!required) {
-        CMN_LOG_CLASS_INIT_ERROR << "EnableDynamicComponentManagement: failed to add internal required interface to component " 
+        CMN_LOG_CLASS_INIT_ERROR << "EnableDynamicComponentManagement: failed to add internal required interface to component "
             << "\"" << GetName() << "\"" << std::endl;
         return 0;
     } else {
@@ -771,7 +821,7 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
     std::string interfaceName;
     if (useMangerComponentServices) {
         // If a user component needs to use the dynamic component management services,
-        // mtsComponent::EnableDynamicComponentManagement() should be called beforehand 
+        // mtsComponent::EnableDynamicComponentManagement() should be called beforehand
         // in the user component's constructor so that the internal required interface and DCC
         // service object is properly initialized.
         // Only validity of such internal structures is checked here.

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -72,7 +72,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsCollectorState;
-    friend class mtsTask;
+    friend class mtsComponent;
     friend class mtsTaskTest;
     friend class mtsStateTableTest;
     friend class mtsCollectorBaseTest;
