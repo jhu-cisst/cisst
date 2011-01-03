@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <algorithm>
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 

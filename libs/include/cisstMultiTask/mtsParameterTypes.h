@@ -147,7 +147,6 @@ inline std::ostream & operator << (std::ostream & output,
     return output;
 }
 
-
 //-----------------------------------------------------------------------------
 //  Component Status Control
 //
@@ -180,7 +179,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStatusControl);
 
 
 //-----------------------------------------------------------------------------
-//  Component Status Change Event
+//  Component State Change Event
 //
 class CISST_EXPORT mtsComponentStateChange : public mtsGenericObject
 {

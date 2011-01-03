@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstInteractive/ireFramework.h>
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>   // PK TEMP
 
 ireTask::ireTask(const std::string &name, const std::string &startup) :
     mtsTaskContinuous(name), StartupCommands(startup)
@@ -37,6 +38,9 @@ ireTask::~ireTask()
 
 void ireTask::Startup(void)
 {
+    // PK TEMP: Set callbacks for osaThreadSignal::Wait
+    osaThreadSignal::SetWaitCallbacks(Thread.GetId(), &ireFramework::UnblockThreads, &ireFramework::BlockThreads);
+
     cmnObjectRegister::Register(GetName(), this);
     std::stringstream startup;
     startup << "from cisstCommonPython import *; "

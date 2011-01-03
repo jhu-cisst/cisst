@@ -302,8 +302,13 @@ bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfacePro
 
 bool mtsInterfaceRequired::DetachCommands(void)
 {
-    // first, do the command pointers.  In the future, it may be
-    // better to set the pointers to NOPVoid, NOPRead, etc., which can
+    // Set pointer to interface provided or input to 0.
+    // We do this first so that if the component is still running (e.g., this required interface
+    // is MTS_OPTIONAL), it will detect that the required interface is disconnected before trying
+    // to invoke any function objects that may be in the process of being detached.
+    InterfaceProvided = 0;
+
+    // In the future, it may be better to set the pointers to NOPVoid, NOPRead, etc., which can
     // be static members of the corresponding command classes.
     FunctionInfoMapType::iterator iter;
     for (iter = FunctionsVoid.begin(); iter != FunctionsVoid.end(); iter++) {
@@ -324,8 +329,6 @@ bool mtsInterfaceRequired::DetachCommands(void)
     for (iter = FunctionsQualifiedRead.begin(); iter != FunctionsQualifiedRead.end(); iter++) {
         iter->second->Detach();
     }
-    // set pointer to interface provided or input to 0
-    InterfaceProvided = 0;
     return true;
 }
 

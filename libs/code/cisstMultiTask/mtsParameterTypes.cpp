@@ -237,7 +237,7 @@ void mtsComponentStatusControl::DeSerializeRaw(std::istream & inputStream)
 }
 
 //-----------------------------------------------------------------------------
-//  Component Status Change Event
+//  Component State Change Event
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
 

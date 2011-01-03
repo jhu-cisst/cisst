@@ -254,10 +254,11 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
     return true;
 }
 
-// PK: Needs to be fixed!!!  Should get interface pointers from connection list -- otherwise, don't have end-user interface!!
+// This implementation of DisconnectLocally does not rely on any data saved about the connection, such as the end-user
+// interface pointer or the connection id.  I think it would be better to first look up this information.
 bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-                                               const std::string & clientProcessName)
+                                                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                                                 const std::string & clientProcessName)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     mtsComponent * clientComponent = LCM->GetComponent(clientComponentName);
@@ -294,10 +295,28 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
     if (serverInterfaceProvided) {
         mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceRequiredName);
         if (!clientInterfaceRequired) {
-            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+            CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
                                      << clientComponentName << ":" << clientInterfaceRequiredName << " - "
                                      << serverComponentName << ":" << serverInterfaceProvidedName
                                      << ", client does not have required interface." << std::endl;
+            return false;
+        }
+        // Following check should not be necessary -- serverInterfaceProvided should always be the original interface
+        // because we obtained it via a string query.
+        if (serverInterfaceProvided->GetOriginalInterface()) {
+            CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", did not get original interface." << std::endl;
+            return false;
+        }
+        // Now, get the end-user interface for this client
+        mtsInterfaceProvided *endUserInterface = serverInterfaceProvided->FindEndUserInterfaceByName(clientInterfaceRequiredName);
+        if (!endUserInterface) {
+            CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", could not find end-user interface." << std::endl;
             return false;
         }
         bool success = false;
@@ -313,10 +332,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             // running if the required interface is MTS_OPTIONAL.
             clientComponent->Suspend();
             clientInterfaceRequired->DetachCommands();
-            mtsInterfaceProvided *originalInterfaceProvided = serverInterfaceProvided->GetOriginalInterface();
-            if (!originalInterfaceProvided)
-                originalInterfaceProvided = serverInterfaceProvided;
-            if (originalInterfaceProvided->RemoveEndUserInterface(serverInterfaceProvided, clientInterfaceRequiredName) != 0)
+            if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceRequiredName) != 0)
                 success = false;
         }
         else {
@@ -347,10 +363,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             // running if the required interface is MTS_OPTIONAL.
             clientComponent->Suspend(); // Could instead use serverFunctionSet->ComponentStop
             clientInterfaceRequired->DetachCommands();
-            mtsInterfaceProvided *originalInterfaceProvided = serverInterfaceProvided->GetOriginalInterface();
-            if (!originalInterfaceProvided)
-                originalInterfaceProvided = serverInterfaceProvided;
-            mtsEndUserInterfaceArg endUserInterfaceArg(originalInterfaceProvided, clientInterfaceRequiredName, serverInterfaceProvided);
+            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceRequiredName, endUserInterface);
             serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
             if (endUserInterfaceArg.EndUserInterface != 0) {
                 CMN_LOG_CLASS_RUN_WARNING << "DisconnectLocally: failed to remove end-user interface for " << serverComponentName << std::endl;

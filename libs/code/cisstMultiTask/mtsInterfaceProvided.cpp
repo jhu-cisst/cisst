@@ -85,12 +85,11 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
 }
 
 
-
 mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterface,
                                            const std::string & userName,
                                            size_t mailBoxSize,
                                            size_t argumentQueuesSize):
-    BaseType(originalInterface->GetName() + "For" + userName,
+    BaseType(mtsInterfaceProvided::GetEndUserInterfaceName(originalInterface, userName),
              originalInterface->Component),
     MailBox(0),
     QueueingPolicy(MTS_COMMANDS_SHOULD_BE_QUEUED),
@@ -657,6 +656,12 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQu
 }
 
 
+std::string mtsInterfaceProvided::GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                          const std::string &userName)
+{
+    return originalInterface->GetName() + "For" + userName;
+}
+
 // Protected function, should only be called from mtsComponent
 mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::string & userName)
 {
@@ -683,34 +688,43 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
 }
 
 
-// Remove the end-user interface specified by the parameter interfaceProvided. Note that there are two
-// mtsInterfaceProvided objects:  (1) the interfaceProvided parameter, which should be a pointer to the
-// end-user interface to be removed and (2) the "this" pointer, which should point to the original interface.
+// Remove the end-user interface specified by the parameter interfaceProvided.
+// Note that there are two mtsInterfaceProvided objects:  (1) the interfaceProvided parameter, which should be a
+// pointer to the end-user interface to be removed and (2) the "this" pointer, which should point to the original interface.
 mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterfaceProvided *interfaceProvided,
                                                                     const std::string &userName)
 {
     // First, do some error checking
-#if 0  // PK TEMP
-    // 1) The interfaceProvided parameter should be an end-user interface
+    // 1) Make sure interfaceProvided is non-zero
+    if (!interfaceProvided) {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
+                                << "\" interface \"" << this->Name
+                                << "\": null provided interface" << std::endl;
+        return interfaceProvided;
+    }
+    // 2) The interfaceProvided parameter should be an end-user interface
     if (!interfaceProvided->EndUserInterface) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
                                 << "\" interface \"" << this->Name
                                 << "\": parameter not an end-user interface" << std::endl;
         return interfaceProvided;
     }
-#endif
-    // 2) This object should be an original interface (i.e., the OriginalInterface pointer should be 0)
+    // 3) This object should be an original interface (i.e., the OriginalInterface pointer should be 0)
     if (this->OriginalInterface) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
                                 << "\" interface \"" << this->Name
                                 << "\": called on object that is not an original interface" << std::endl;
-        return interfaceProvided;
+        return (interfaceProvided ? interfaceProvided : this->OriginalInterface);
     }
 
-    // Now, handle the case where the interfaceProvided is the same as this object, which would occur when
+    // Now, handle the case where this object is also an end-user interface, which would occur when
     // there are no queued commands.
-    if (this == interfaceProvided) {
-        CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
+    if (this->EndUserInterface) {
+        if (interfaceProvided && (interfaceProvided != this))
+            CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
+                                      << "\" interface \"" << this->Name
+                                      << "\": original interface inconsistent with provided end-user interface" << std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
                                   << "\" interface \"" << this->Name
                                   << "\": original interface is also the end-user interface" << std::endl;
         return 0;
@@ -720,16 +734,16 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
     InterfaceProvidedCreatedListType::iterator it;
     for (it = InterfacesProvidedCreated.begin(); it != InterfacesProvidedCreated.end(); it++) {
         if (it->second == interfaceProvided) {
-            CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
+            CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
                                       << "\" interface \"" << this->Name
                                       << "\" removing copy (#" << it->first
                                       << ") for user \"" << userName << "\"" << std::endl;
             InterfacesProvidedCreated.erase(it);
             delete interfaceProvided;
-            interfaceProvided = 0;
-            break;
+            return 0;
         }
     }
+
     CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
                             << "\" interface \"" << this->Name
                             << "\" could not find end-user interface for user \""
@@ -743,6 +757,20 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetOriginalInterface(void) const
     return this->OriginalInterface;
 }
 
+mtsInterfaceProvided * mtsInterfaceProvided::FindEndUserInterfaceByName(const std::string &userName)
+{
+    // First, check if there is just a single provided interface (i.e., no queued commands)
+    if ((this->OriginalInterface == 0) && this->EndUserInterface)
+        return this;
+    std::string interfaceName = mtsInterfaceProvided::GetEndUserInterfaceName(this, userName);
+    InterfaceProvidedCreatedListType::iterator it;
+    for (it = InterfacesProvidedCreated.begin(); it != InterfacesProvidedCreated.end(); it++) {
+        if (it->second->GetName() == interfaceName) {
+            return it->second;
+        }
+    }
+    return 0;
+}
 
 mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName)
 {

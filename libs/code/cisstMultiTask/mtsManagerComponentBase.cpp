@@ -39,8 +39,8 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided 
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired       = "InterfaceGCMRequired";
 // Names of commands
 const std::string mtsManagerComponentBase::CommandNames::ComponentCreate  = "ComponentCreate";
-const std::string mtsManagerComponentBase::CommandNames::ComponentConnect = "ComponentConnect";
-const std::string mtsManagerComponentBase::CommandNames::ComponentDisconnect = "ComponentDisconnect";
+const std::string mtsManagerComponentBase::CommandNames::ComponentConnect = "Connect";
+const std::string mtsManagerComponentBase::CommandNames::ComponentDisconnect = "Disconnect";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStart   = "ComponentStart";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStop    = "ComponentStop";
 const std::string mtsManagerComponentBase::CommandNames::ComponentResume  = "ComponentResume";

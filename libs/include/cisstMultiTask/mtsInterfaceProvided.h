@@ -489,9 +489,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     void RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
     //@}
 
-    /*! Get the original.  This allows to retrieve the original
+    /*! Get the original interface.  This allows to retrieve the original
       interface from a copy created using GetEndUserInterface. */
     mtsInterfaceProvided * GetOriginalInterface(void) const;
+
+    /*! Find an end-user interface given a client name. */
+    mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
 
     /*! Method used to process all commands queued in mailboxes.  This
       method should only be used by the component that owns the
@@ -526,6 +529,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       logging only.
       \returns pointer to end-user interface (0 if error)
      */
+
+     static std::string mtsInterfaceProvided::GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                                      const std::string &userName);
 
 public: // PK TEMP for IRE
     mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
