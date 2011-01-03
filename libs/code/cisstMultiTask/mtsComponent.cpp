@@ -902,7 +902,6 @@ void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUse
                                                                  mtsEndUserInterfaceArg &argout)
 {
     CMN_ASSERT(argin.OriginalInterface);
-    CMN_LOG_CLASS_INIT_VERBOSE << "Starting internal GetEndUserInterface for " << argin.OriginalInterface->GetName() << std::endl;
     argout = argin;  // not really needed
     argout.EndUserInterface = 0;
     argout.EndUserInterface = argin.OriginalInterface->GetEndUserInterface(argin.UserName);

@@ -295,14 +295,48 @@ mtsCommandWriteBase * mtsInterfaceRequired::GetEventHandlerWrite(const std::stri
 
 bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
 {
-    CMN_LOG_CLASS_INIT_ERROR << "ConnectTo is OBSOLETE" << std::endl;
-    return false;
+    // make sure we are connecting to a provided interface
+    mtsInterfaceProvided * interfaceProvided = dynamic_cast<mtsInterfaceProvided *>(interfaceProvidedOrOutput);
+    if (!interfaceProvided) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: can not connect input interface \""
+                                 << interfaceProvidedOrOutput->GetName() << "\" to required interface \""
+                                 << this->GetName() << "\", can only connect required with provided or input with output"
+                                 << std::endl;
+        return false;
+    }
+    // get the end user interface
+    mtsInterfaceProvided * endUserInterface = interfaceProvided->GetEndUserInterface(this->GetName());
+    if (!endUserInterface) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: failed to get an end user provided interface for \""
+                                 << interfaceProvided->GetName() << "\" while connecting the required interface \""
+                                 << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+    // provide a different log message based on result
+    if (endUserInterface == interfaceProvided) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: connecting required interface \""
+                                   << this->GetName() << "\" to existing provided interface \""
+                                   << endUserInterface->GetName() << "\"" << std::endl;
+    } else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: connecting required interface \""
+                                   << this->GetName() << "\" to newly created provided interface \""
+                                   << endUserInterface->GetName() << "\"" << std::endl;
+    }
+
+    bool success = BindCommands(endUserInterface);
+    mtsEventHandlerList eventList(endUserInterface);
+    GetEventList(eventList);
+    endUserInterface->AddObserverList(eventList, eventList);
+    if (!CheckEventList(eventList))
+        success = false;
+
+    return success;
 }
 
 
 bool mtsInterfaceRequired::DetachCommands(void)
 {
-    // Set pointer to interface provided or input to 0.
+    // Set pointer to interface provided to 0.
     // We do this first so that if the component is still running (e.g., this required interface
     // is MTS_OPTIONAL), it will detect that the required interface is disconnected before trying
     // to invoke any function objects that may be in the process of being detached.

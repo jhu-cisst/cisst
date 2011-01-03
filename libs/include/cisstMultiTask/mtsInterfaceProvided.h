@@ -530,8 +530,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       \returns pointer to end-user interface (0 if error)
      */
 
-     static std::string mtsInterfaceProvided::GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
-                                                                      const std::string &userName);
+     static std::string GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                const std::string &userName);
 
 public: // PK TEMP for IRE
     mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);

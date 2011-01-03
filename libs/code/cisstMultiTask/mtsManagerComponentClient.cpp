@@ -148,16 +148,11 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         }
         bool success = false;
         // If the server is this component (ManagerComponentClient), or if this component is not active,
-        // we can directly call the methods. Note that we could use the StateChange mutex to make sure that the state
+        // we can use the previous implementation (mtsInterfaceRequired::ConnectTo), which directly calls the methods.
+        //  Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
         if ((serverComponentName == GetName()) || !IsRunning()) {
-            mtsInterfaceProvided *endUserInterface = serverInterfaceProvided->GetEndUserInterface(clientInterfaceRequiredName);
-            success = clientInterfaceRequired->BindCommands(endUserInterface);
-            mtsEventHandlerList eventList(endUserInterface);
-            clientInterfaceRequired->GetEventList(eventList);
-            endUserInterface->AddObserverList(eventList, eventList);
-            if (!clientInterfaceRequired->CheckEventList(eventList))
-                success = false;
+            success = clientInterfaceRequired->ConnectTo(serverInterfaceProvided);
         }
         else {
             InterfaceComponentFunctionType * serverFunctionSet = InterfaceComponentFunctionMap.GetItem(serverComponentName);

@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 //-----------------------------------------------------------------------------
 //  Component state (mtsComponentState)
 //
-CMN_IMPLEMENT_SERVICES(mtsComponentStateProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Description

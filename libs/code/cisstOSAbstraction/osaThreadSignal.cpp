@@ -326,9 +326,10 @@ void osaThreadSignal::Raise()
 
 void osaThreadSignal::Wait()
 {
-#if (CISST_OS == CISST_WINDOWS)
+// Following implementation should be better on Windows (enable after further testing)
+//#if (CISST_OS == CISST_WINDOWS)
+#if 0
     ResetEvent(INTERNALS(hEvent));
-    CMN_LOG_INIT_VERBOSE << "osaThreadSignal::Wait called for " << INTERNALS(hEvent) << std::endl;
     //DWORD ret = WaitForSingleObject(INTERNALS(hEvent), INFINITE);
     HANDLE handles[1] = { INTERNALS(hEvent) };
     bool done = false;
@@ -471,9 +472,7 @@ void osaThreadSignal::ToStream(std::ostream & outputStream) const
     outputStream << "handle = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->hEvent;
 #endif
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    //pthread_mutex_t gnuMutex;
-    //pthread_cond_t gnuCondition;
-    outputStream << "condition_state = " << Condition_State;
+    outputStream << "condition_state = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->Condition_State;
 #endif
 }
 

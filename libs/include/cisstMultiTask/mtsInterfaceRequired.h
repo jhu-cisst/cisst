@@ -204,8 +204,8 @@ protected:
     inline bool CouldConnectTo(mtsInterfaceProvidedOrOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
     }
-    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // OBSOLETE (check mtsInterfaceRequiredOrInput)
-    bool Disconnect(void) { return DetachCommands(); }  // OBSOLETE (check mtsInterfaceRequiredOrInput)
+    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // Should be deprecated
+    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated
 
     /*!
       \todo update documentation

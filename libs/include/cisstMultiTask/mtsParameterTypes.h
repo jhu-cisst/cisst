@@ -136,7 +136,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVecProxy);
 
 // Define stream out operator for std::vector<mtsDescriptionConnection>
 inline std::ostream & operator << (std::ostream & output,
-                                   const std::vector<mtsDescriptionConnection> & object) {
+                            const mtsDescriptionConnectionVec & object) {
     output << "[";
     for (size_t i = 0; i < object.size(); i++) {
         object[i].ToStream(output);

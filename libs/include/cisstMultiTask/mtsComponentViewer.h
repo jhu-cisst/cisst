@@ -62,6 +62,16 @@ protected:
 
     bool RedrawGraph; // PK TEMP: use provided interface instead
 
+    // Use a separate reader thread because osaPipeExec::Read is blocking.
+    // This could be eliminated if a non-blocking Read is implemented.
+    osaThread ReaderThread;
+    void *ReadFromUDrawGraph(int);
+    bool ReaderThreadFinished;
+    bool WaitingForResponse;
+    bool WaitForResponse(double timeoutInSec = 0.1) const;
+
+    bool RedrawGraph; // PK TEMP: use provided interface instead
+
     bool IsProxyComponent(const std::string & componentName) const;
     bool ConnectToUDrawGraph(void);
 

@@ -104,7 +104,7 @@ template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elementType> & data)
     throw (std::runtime_error)
 {
-    const std::vector<_elementType>::size_type size = data.size();
+    const typename std::vector<_elementType>::size_type size = data.size();
     cmnSerializeSizeRaw(outputStream, size);
     for (size_t i = 0; i < size; i++) {
         cmnSerializeRaw(outputStream, data[i]);
