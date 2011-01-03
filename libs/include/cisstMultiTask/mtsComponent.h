@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -261,12 +261,32 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
                                          mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
 #endif
 
+    /*! Return a pointer to state table with the given name. */
+    mtsStateTable * GetStateTable(const std::string & stateTableName);
+
+    /*! Add an existing state table to the list of known state tables
+      in this task.  This method will add a provided interface for the
+      state table using the name "StateTable" +
+      existingStateTable->GetName() unless the caller specifies that
+      no interface should be created.
+
+      By default, all state tables added will advance at each call of
+      the Run method.  To avoid the automatic advance, use the method
+      mtsStateTable::SetAutomaticAdvance(false). */
+    bool AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided = true);
+
+    /*! Tells this component to use its own file for log.  By default
+      the messages are also sent to cmnLogger but this can be changed
+      setting forwardToLogger to false.  The default file name is
+      based on the component's name, followed by '-log.txt' */
+    void UseSeparateLogFileDefault(bool forwardToLogger = true);
+
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
       setting forwardToLogger to false.  The default file name is
       based on the component's name, followed by the date and
       '-log.txt' */
-    void UseSeparateLogFileDefault(bool forwardToLogger = true);
+    void UseSeparateLogFileDefaultWithDate(bool forwardToLogger = true);
 
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
@@ -353,6 +373,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     InterfacesInputListType InterfacesInput;
     //@}
 
+    /*! Map of state tables, includes the default StateTable under the
+      name "StateTable" */
+    typedef cmnNamedMap<mtsStateTable> StateTableMapType;
+    StateTableMapType StateTables;
+
     /*! Process all messages in mailboxes. Returns number of commands processed. */
     size_t ProcessMailBoxes(InterfacesProvidedListType & interfaces);
 
@@ -371,9 +396,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsManagerComponentServices * ManagerComponentServices;
 
     /*! \brief Enable support for dynamic component management services
-        \return Pointer to internal required interface, if success.  
+        \return Pointer to internal required interface, if success.
                 NULL otherwise.
-        \note If user component needs dynamic component management services, 
+        \note If user component needs dynamic component management services,
               this method should be called by user component's constructor */
     mtsInterfaceRequired * EnableDynamicComponentManagement(void);
 
@@ -381,11 +406,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         change of this component */
     mtsFunctionWrite EventGeneratorChangeState;
 
-    /*! \brief Add internal interfaces 
+    /*! \brief Add internal interfaces
         \param useMangerComponentServices True to allow this component to use
                dynamic component control services through mts command pattern
-               to control other components.  
-               If true, the internal required interface is added to this 
+               to control other components.
+               If true, the internal required interface is added to this
                component (the internal provided interface is added by default) */
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
 

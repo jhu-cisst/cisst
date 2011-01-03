@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -184,12 +184,10 @@ mtsTask::mtsTask(const std::string & name,
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "StateTable"),
-    StateTables("StateTables"),
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0)
 {
-    this->StateTables.SetOwner(*this);
     this->AddStateTable(&this->StateTable);
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
 }
@@ -221,44 +219,6 @@ void mtsTask::Kill(void)
     }
 }
 
-
-bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided) {
-    const std::string tableName = existingStateTable->GetName();
-    const std::string interfaceName = "StateTable" + tableName;
-    if (!this->StateTables.AddItem(tableName,
-                                   existingStateTable,
-                                   CMN_LOG_LEVEL_INIT_ERROR)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add state table \"" << tableName
-                                 << "\" to task \"" << this->GetName() << "\"" << std::endl;
-        return false;
-    }
-    if (addInterfaceProvided) {
-        mtsInterfaceProvided * providedInterface = this->AddInterfaceProvided(interfaceName);
-        if (!providedInterface) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add provided interface \"" << interfaceName
-                                     << "\" to task \"" << this->GetName() << "\"" << std::endl;
-            return false;
-        }
-        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStart,
-                                           existingStateTable,
-                                           "StartCollection");
-        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStop,
-                                           existingStateTable,
-                                           "StopCollection");
-        providedInterface->AddEventWrite(existingStateTable->DataCollection.BatchReady,
-                                         "BatchReady", mtsStateTable::IndexRange());
-        providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
-                                        "CollectionStarted");
-        providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
-                                         "CollectionStopped", mtsUInt());
-        providedInterface->AddEventWrite(existingStateTable->DataCollection.Progress,
-                                         "Progress", mtsUInt());
-    }
-    CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
-                             << "\" and corresponding interface \"" << interfaceName
-                             << "\" to task \"" << this->GetName() << "\"" << std::endl;
-    return true;
-}
 
 
 /********************* Methods to manage interfaces *******************/

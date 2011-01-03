@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -87,11 +87,6 @@ protected:
 
     /*! The state data table object to store the states of the task. */
     mtsStateTable StateTable;
-
-    /*! Map of state tables, includes the default StateTable under the
-      name "StateTable" */
-    typedef cmnNamedMap<mtsStateTable> StateTableMapType;
-    StateTableMapType StateTables;
 
     /*! True if the task took more time to do computation than allocated time.
       */
@@ -216,27 +211,11 @@ public:
         return StateTable.GetName();
     }
 
-    /*! Return a pointer to state table with the given name. */
-    mtsStateTable * GetStateTable(const std::string & stateTableName) {
-        return this->StateTables.GetItem(stateTableName, CMN_LOG_LEVEL_INIT_ERROR);
-    }
-
     /*! Return a pointer to the default state table.  See
       GetStateTable and GetDefaultStateTableName. */
     inline mtsStateTable * GetDefaultStateTable(void) {
         return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
-
-    /*! Add an existing state table to the list of known state tables
-      in this task.  This method will add a provided interface for the
-      state table using the name "StateTable" +
-      existingStateTable->GetName() unless the caller specifies that
-      no interface should be created.
-
-      By default, all state tables added will advance at each call of
-      the Run method.  To avoid the automatic advance, use the method
-      mtsStateTable::SetAutomaticAdvance(false). */
-    bool AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided = true);
 
     /********************* Methods to manage interfaces *******************/
 
