@@ -127,14 +127,21 @@ public:
         // Dynamic component management
         const static std::string ComponentCreate;
         const static std::string ComponentConnect;
+        const static std::string ComponentDisconnect;
         const static std::string ComponentStart;
         const static std::string ComponentStop;
         const static std::string ComponentResume;
+        const static std::string ComponentGetState;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
         const static std::string GetNamesOfInterfaces;
         const static std::string GetListOfConnections;
+        // Establishing connections
+        const static std::string GetEndUserInterface;
+        const static std::string AddObserverList;
+        const static std::string RemoveEndUserInterface;
+        const static std::string RemoveObserverList;
     };
 
     /*! Event name definitions */
@@ -143,6 +150,7 @@ public:
         // Events
         const static std::string AddComponent;
         const static std::string AddConnection;
+        const static std::string RemoveConnection;
         const static std::string ChangeState;
     };
 

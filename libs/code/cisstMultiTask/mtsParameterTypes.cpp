@@ -21,29 +21,29 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
-// Utility functions
-void mtsParameterTypes::ConvertVectorStringType(const mtsStdStringVec & mtsVec, std::vector<std::string> & stdVec)
-{
-    // MJ: is there better way to do this?
-    for (size_t i = 0; i < mtsVec.size(); ++i) {
-        stdVec.push_back(mtsVec(i));
-    }
-}
-
-void mtsParameterTypes::ConvertVectorStringType(const std::vector<std::string> & stdVec, mtsStdStringVec & mtsVec)
-{
-    // MJ: is there better way to do this?
-    mtsVec.SetSize(stdVec.size());
-    for (size_t i = 0; i < stdVec.size(); ++i) {
-        mtsVec(i) = stdVec[i];
-    }
-}
+//-----------------------------------------------------------------------------
+//  Component state (mtsComponentState)
+//
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Description
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
+
+mtsDescriptionComponent::mtsDescriptionComponent(const mtsDescriptionComponent &other)
+{
+    this->ProcessName = other.ProcessName;
+    this->ComponentName = other.ComponentName;
+    this->ClassName = other.ClassName;
+}
+
+mtsDescriptionComponent::mtsDescriptionComponent(const std::string &processName, const std::string &componentName) :
+    ProcessName(processName), ComponentName(componentName)
+{
+}
 
 void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const 
 {
@@ -75,6 +75,14 @@ void mtsDescriptionComponent::DeSerializeRaw(std::istream & inputStream)
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
 
+mtsDescriptionInterface::mtsDescriptionInterface(const mtsDescriptionInterface &other)
+{
+    this->ProcessName = other.ProcessName;
+    this->ComponentName = other.ComponentName;
+    this->InterfaceRequiredNames = other.InterfaceRequiredNames;
+    this->InterfaceProvidedNames = other.InterfaceProvidedNames;
+}
+
 void mtsDescriptionInterface::ToStream(std::ostream & outputStream) const 
 {
     mtsGenericObject::ToStream(outputStream);
@@ -98,8 +106,8 @@ void mtsDescriptionInterface::SerializeRaw(std::ostream & outputStream) const
     mtsGenericObject::SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, this->ProcessName);
     cmnSerializeRaw(outputStream, this->ComponentName);
-    InterfaceRequiredNames.SerializeRaw(outputStream);
-    InterfaceProvidedNames.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->InterfaceRequiredNames);
+    cmnSerializeRaw(outputStream, this->InterfaceProvidedNames);
 }
 
 void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
@@ -107,8 +115,8 @@ void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, this->ProcessName);
     cmnDeSerializeRaw(inputStream, this->ComponentName);
-    InterfaceRequiredNames.DeSerializeRaw(inputStream);
-    InterfaceProvidedNames.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->InterfaceRequiredNames);
+    cmnDeSerializeRaw(inputStream, this->InterfaceProvidedNames);
 }
 
 
@@ -116,6 +124,17 @@ void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
 //  Connection Description
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionConnection);
+
+mtsDescriptionConnection::mtsDescriptionConnection(const mtsDescriptionConnection &other)
+{
+    Client.ProcessName   = other.Client.ProcessName;
+    Client.ComponentName = other.Client.ComponentName;
+    Client.InterfaceName = other.Client.InterfaceName;
+    Server.ProcessName   = other.Server.ProcessName;
+    Server.ComponentName = other.Server.ComponentName;
+    Server.InterfaceName = other.Server.InterfaceName;
+    ConnectionID         = other.ConnectionID;
+}    
 
 mtsDescriptionConnection::mtsDescriptionConnection(
     const std::string & clientProcessName,
@@ -166,12 +185,20 @@ void mtsDescriptionConnection::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ConnectionID);
 }
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVec);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Status Control
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
+
+mtsComponentStatusControl::mtsComponentStatusControl(const mtsComponentStatusControl &other)
+{
+    ProcessName   = other.ProcessName;
+    ComponentName = other.ComponentName;
+    DelayInSecond = other.DelayInSecond;
+    Command       = other.Command;
+}
 
 void mtsComponentStatusControl::ToStream(std::ostream & outputStream) const
 {
@@ -210,16 +237,23 @@ void mtsComponentStatusControl::DeSerializeRaw(std::istream & inputStream)
 }
 
 //-----------------------------------------------------------------------------
-//  Component Status Change Event
+//  Component State Change Event
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
+
+mtsComponentStateChange::mtsComponentStateChange(const mtsComponentStateChange &other)
+{
+    ProcessName = other.ProcessName;
+    ComponentName = other.ComponentName;
+    NewState = other.NewState;
+}
 
 void mtsComponentStateChange::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
     outputStream << ", Process: " << this->ProcessName
                  << ", component: " << this->ComponentName
-                 << ", state: " << mtsComponentState::ToString(this->NewState);
+                 << ", state: " << mtsComponentState::ToString(this->NewState.GetState());
 }
 
 void mtsComponentStateChange::SerializeRaw(std::ostream & outputStream) const
@@ -227,7 +261,7 @@ void mtsComponentStateChange::SerializeRaw(std::ostream & outputStream) const
     mtsGenericObject::SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, ProcessName);
     cmnSerializeRaw(outputStream, ComponentName);
-    cmnSerializeRaw(outputStream, static_cast<int>(NewState));
+    cmnSerializeRaw(outputStream, NewState);
 }
 
 void mtsComponentStateChange::DeSerializeRaw(std::istream & inputStream)
@@ -235,7 +269,62 @@ void mtsComponentStateChange::DeSerializeRaw(std::istream & inputStream)
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, ProcessName);
     cmnDeSerializeRaw(inputStream, ComponentName);
-    int newState;
-    cmnDeSerializeRaw(inputStream, newState);
-    NewState = static_cast<mtsComponentState::Enum>(newState);
+    cmnDeSerializeRaw(inputStream, NewState);
+}
+
+//-----------------------------------------------------------------------------
+// GetEndUserInterface (provided interface)
+//
+
+CMN_IMPLEMENT_SERVICES(mtsEndUserInterfaceArg);
+
+void mtsEndUserInterfaceArg::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "EndUserInterface to "
+                 << (OriginalInterface ? OriginalInterface->GetName() : "???")
+                 << (EndUserInterface ? " valid" : " invalid") << " for client"
+                 << UserName << std::endl;
+}
+
+void mtsEndUserInterfaceArg::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, UserName);
+    cmnSerializeRaw(outputStream, OriginalInterface);
+    cmnSerializeRaw(outputStream, EndUserInterface);
+}
+
+void mtsEndUserInterfaceArg::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, UserName);
+    cmnDeSerializeRaw(inputStream, OriginalInterface);
+    cmnDeSerializeRaw(inputStream, EndUserInterface);
+}
+
+//-----------------------------------------------------------------------------
+// AddObserverList
+//
+
+CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
+
+// Shouldn't need to serialize or deserialize this class, or even print it out
+
+void mtsEventHandlerList::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "EventHandlerList (ToStream not implemented)" << std::endl;
+}
+
+void mtsEventHandlerList::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, Provided);
+    CMN_LOG_CLASS_RUN_WARNING << "SerializeRaw not implemented" << std::endl;
+}
+
+void mtsEventHandlerList::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, Provided);
+    CMN_LOG_CLASS_RUN_WARNING << "DeSerializeRaw not implemented" << std::endl;
 }

@@ -29,12 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
+#include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -79,6 +81,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Component state. */
     mtsComponentState State;
+
+    /*! Provided interface for component management. */
+    mtsInterfaceProvided *InterfaceProvidedToManager;
 
     /*! Default constructor. Protected to prevent creation of a component
       without a name. */
@@ -149,6 +154,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Virtual method called after components are connected to start
         the computations and message processing. */
     virtual void Start(void);
+
+    /*! Virtual method to suspend the component (same as Stop). */
+    virtual void Suspend(void);
 
     /*! Virtual method to stop the computations and message
         processing.  See Start. */
@@ -247,9 +255,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Remove an input interface identified by its name */
     bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
+#if 0
     /*! Connect a required interface, used by mtsTaskManager */
     bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                          mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
+#endif
 
     /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName);
@@ -308,6 +318,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Return task state. */
     const mtsComponentState & GetState(void) const;
+    void GetState(mtsComponentState &state) const;
 
  protected:
 
@@ -403,10 +414,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
                component (the internal provided interface is added by default) */
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
 
-    /*! Internal commands to process command execution request coming from manager
-        component client */
-    void InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg);
-    void InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
+    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
+    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
+    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
+    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
 
  public:
 

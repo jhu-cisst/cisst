@@ -39,17 +39,25 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided 
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired       = "InterfaceGCMRequired";
 // Names of commands
 const std::string mtsManagerComponentBase::CommandNames::ComponentCreate  = "ComponentCreate";
-const std::string mtsManagerComponentBase::CommandNames::ComponentConnect = "ComponentConnect";
+const std::string mtsManagerComponentBase::CommandNames::ComponentConnect = "Connect";
+const std::string mtsManagerComponentBase::CommandNames::ComponentDisconnect = "Disconnect";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStart   = "ComponentStart";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStop    = "ComponentStop";
 const std::string mtsManagerComponentBase::CommandNames::ComponentResume  = "ComponentResume";
+const std::string mtsManagerComponentBase::CommandNames::ComponentGetState = "ComponentGetState";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfProcesses  = "GetNamesOfProcesses";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfComponents = "GetNamesOfComponents";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces = "GetNamesOfInterfaces";
 const std::string mtsManagerComponentBase::CommandNames::GetListOfConnections = "GetListOfConnections";
+const std::string mtsManagerComponentBase::CommandNames::GetEndUserInterface = "GetEndUserInterface";
+const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddObserverList";
+const std::string mtsManagerComponentBase::CommandNames::RemoveEndUserInterface = "RemoveEndUserInterface";
+const std::string mtsManagerComponentBase::CommandNames::RemoveObserverList = "RemoveObserverList";
+
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";
 const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConnectionEvent";
+const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";
 
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentBase);

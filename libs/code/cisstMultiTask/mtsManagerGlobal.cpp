@@ -282,6 +282,8 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
     }
 
     // PK TEMP: special handling if componentName ends with "-END"
+    // This was needed for JGraph component viewer, but is no longer needed for uDrawGraph component viewer.
+    // If removed, need to generate AddComponentEvent elsewhere
     if (componentName.find("-END", componentName.length()-4) != std::string::npos) {
         if (ManagerComponentServer) {
             mtsDescriptionComponent componentInfo;
@@ -1166,6 +1168,9 @@ bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const s
         element = it->second;
         if (clientInterfaceUID == GetInterfaceUID(element->ClientProcessName, element->ClientComponentName, element->ClientInterfaceRequiredName)) {
             if (serverInterfaceUID == GetInterfaceUID(element->ServerProcessName, element->ServerComponentName, element->ServerInterfaceProvidedName)) {
+                // Send disconnection event to ManagerComponentServer
+                if (ManagerComponentServer)
+                    ManagerComponentServer->RemoveConnectionEvent(element->GetDescriptionConnection());
                 ConnectionChange.Lock();
                 delete element;
                 ConnectionElementMap.erase(it);

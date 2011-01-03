@@ -98,6 +98,9 @@ protected:
     /*! The return value for RunInternal. */
     void * ReturnValue;
 
+    /*! Callable object used when queueing. */
+    mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
+
     /********************* Methods that call user methods *****************/
 
     /*! The member function that is passed as 'start routine' argument for
@@ -197,12 +200,6 @@ public:
     virtual void Create(void * data) = 0;
     inline void Create(void) { Create(0); }
 
-    /*! Start or resume execution of the task. */
-    virtual void Start(void) = 0;
-
-    /*! Suspend the execution of the task. */
-    virtual void Suspend(void) = 0;
-
     /*! End the task */
     void Kill(void);
 
@@ -230,7 +227,6 @@ public:
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
                                                 mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
-
     /********************* Methods for task synchronization ***************/
 
     /*! Wait for task to start.
@@ -255,6 +251,12 @@ public:
     inline virtual void Wakeup(void) {
         Thread.Wakeup();
     }
+
+    /*! Conditionally process internal mailbox */
+    void ProcessManagerCommandsIfNotActive();
+
+    /*! Returns true if currently executing in thread-space of component. */
+    bool CheckForOwnThread(void) const;
 
     /********************* Methods for task period and overrun ************/
 

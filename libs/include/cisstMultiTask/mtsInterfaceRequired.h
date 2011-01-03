@@ -40,6 +40,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+class mtsEventHandlerList;
+
 /*!
   \file
   \brief Declaration of mtsInterfaceRequired
@@ -88,11 +90,15 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     friend class mtsManagerLocal;
     friend class mtsManagerLocalTest;
     friend class mtsEventReceiverBase;
+    friend class mtsManagerComponentClient;
 
 protected:
 
     /*! Mailbox (if supported). */
     mtsMailBox * MailBox;
+
+    /*! Pointer to provided interface that we are connected to. */
+    const mtsInterfaceProvided * InterfaceProvided;
 
     /*! Size to be used for mailboxes */
     size_t MailBoxSize;
@@ -126,6 +132,8 @@ protected:
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
+
+    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
 
     /*! Set the desired size for the event handlers mail box.  If
       queueing has been enabled for this interface, a single mailbox
@@ -196,8 +204,8 @@ protected:
     inline bool CouldConnectTo(mtsInterfaceProvidedOrOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
     }
-    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
-    bool Disconnect(void);
+    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // Should be deprecated
+    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated
 
     /*!
       \todo update documentation
@@ -206,7 +214,11 @@ protected:
       commands) know which mailbox to use.  The user Id is provided
       by the provided interface when calling AllocateResources. */
  private:
-    bool BindCommandsAndEvents(void);
+
+    bool BindCommands(const mtsInterfaceProvided *interfaceProvided);
+    bool DetachCommands(void);
+    void GetEventList(mtsEventHandlerList &eventList);
+    bool CheckEventList(mtsEventHandlerList &eventList) const;
  public:
 
     void DisableAllEvents(void);
@@ -241,7 +253,6 @@ protected:
 
         inline void Detach(void) {
             Pointer->Detach();
-            Pointer = 0;
         }
 
         void ToStream(std::ostream & outputStream) const

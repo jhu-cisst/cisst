@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
+#include <cisstMultiTask/mtsManagerComponentBase.h>
 
 
 mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
@@ -111,13 +112,17 @@ mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvided(const std::string
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this,
-                                                     MTS_COMMANDS_SHOULD_BE_QUEUED,
-                                                     this->PostCommandQueuedCallable);
+        mtsCallableVoidBase * postCommandQueuedCallable = this->PostCommandQueuedCallable;
+        // If the internal provided interface (i.e., for the Manager Component Client), then the "post command queued"
+        // callable object should be the one defined in mtsTask, which processes the mailbox if the task is not active.
+        // Note that if the task is active, we always wait for the task's DoRunInternal method to process this mailbox.
+        if (interfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided)
+            postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
-                                   << this->GetName() << "\". This bypasses built-ins thread safety mechanisms, make sure your commands are thread safe.  "
+                                   << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe.  "
                                    << "Furthermore, the thread will not wake up since the post queued command will not be executed. "
                                    << std::endl;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);

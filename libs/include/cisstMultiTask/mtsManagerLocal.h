@@ -215,19 +215,13 @@ protected:
     bool RegisterInterfaces(mtsComponent * component);
     bool RegisterInterfaces(const std::string & componentName);
 
-    /*! \brief Connect two local interfaces.
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
-        \param clientProcessName Name of client process (ignored in standalone
-               configuration, used in networked configuration)
-        \return true if successful, false otherwise
-        \note  It is assumed that two components are in the same process. */
-    bool ConnectLocally(
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const std::string & clientProcessName = "");
+    // PK: following two methods were part of Connect method
+    int ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+
+    bool ConnectNotify(int connectionId,
+                       const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                       const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     //-------------------------------------------------------------------------
     //  Methods required by mtsManagerLocalInterface

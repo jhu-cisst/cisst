@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <algorithm>
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 
@@ -29,8 +30,8 @@ void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
         if (command->GetArgumentPrototype()) {
             CMN_ASSERT(this->GetArgumentPrototype());
             if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
-                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument type don't match" << std::endl;
-                exit(0);
+                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument types don't match" << std::endl;
+                return;  // need better error handling?
             } else {
                 // copy the multicast command prototype to each added command using in place new
                 this->GetArgumentPrototype()->Services()->Create(const_cast<mtsGenericObject *>(command->GetArgumentPrototype()), *(this->GetArgumentPrototype()));
@@ -46,6 +47,23 @@ void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
     }
 }
 
+
+bool mtsMulticastCommandWriteBase::RemoveCommand(BaseType * command) {
+    if (command) {
+        VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
+        if (it != Commands.end()) {
+            Commands.erase(it);
+            return true;
+        }
+        // TODO: 
+        //   1) If AddCommand created a new object, we should delete it here to avoid a memory leak
+        //      this->GetArgumentPrototype()->Services()->Delete(command->GetArgumentPrototype());
+        //   2) If AddCommand set the argument prototype, we should clear it here.
+        //      command->SetArgumentPrototype(0);
+        //   (alternatively, could add method to delete and set to 0)
+    }
+    return false;
+}
 
 void mtsMulticastCommandWriteBase::ToStream(std::ostream & outputStream) const {
     outputStream << "mtsMulticastCommandWrite: \"" << this->Name << "\"";

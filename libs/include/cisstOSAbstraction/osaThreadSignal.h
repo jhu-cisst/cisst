@@ -79,6 +79,9 @@ public:
 
     static void SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void));
 
+    /*! Print to stream */
+    void ToStream(std::ostream & outputStream) const;
+
 private:
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
@@ -91,6 +94,14 @@ private:
         used for testing only. */
     static unsigned int SizeOfInternals(void);
 };
+
+/*! Stream operator for a thread Id, see osaThreadId. */
+inline
+std::ostream & operator << (std::ostream & output,
+                            const osaThreadSignal & threadSignal) {
+    threadSignal.ToStream(output);
+    return output;
+}
 
 #endif // _osaThreadSignal_h
 

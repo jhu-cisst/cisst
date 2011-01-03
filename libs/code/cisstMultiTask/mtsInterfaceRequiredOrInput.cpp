@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 mtsInterfaceRequiredOrInput::mtsInterfaceRequiredOrInput(const std::string & interfaceName,
                                                          mtsRequiredType required):
     Name(interfaceName),
-    InterfaceProvidedOrOutput(0),
     Required(required)
 {
 }
@@ -38,11 +37,6 @@ mtsInterfaceRequiredOrInput::~mtsInterfaceRequiredOrInput()
 const std::string & mtsInterfaceRequiredOrInput::GetName(void) const
 {
     return this->Name;
-}
-
-
-const mtsInterfaceProvidedOrOutput * mtsInterfaceRequiredOrInput::GetConnectedInterface(void) const {
-    return this->InterfaceProvidedOrOutput;
 }
 
 

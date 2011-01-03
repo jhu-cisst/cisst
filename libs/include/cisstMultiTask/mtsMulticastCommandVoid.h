@@ -49,10 +49,11 @@ class mtsMulticastCommandVoid: public mtsCommandVoid
 {
 public:
     typedef mtsCommandVoid BaseType;
+    typedef std::vector<BaseType *> VectorType;
 
 protected:
     /*! Vector to commands that constitute the composite command. */
-    std::vector<BaseType *> Commands;
+    VectorType Commands;
 
 public:
     /*! Default constructor. Does nothing. */
@@ -63,6 +64,9 @@ public:
 
     /*! Add a command to the composite. */
     void AddCommand(BaseType * command);
+
+    /*! Remove a command from the composite. */
+    bool RemoveCommand(BaseType * command);
 
     /*! Execute all the commands in the composite. */
     virtual mtsExecutionResult Execute(mtsBlockingType CMN_UNUSED(blocking));

@@ -44,6 +44,8 @@ class mtsManagerComponentClient : public mtsManagerComponentBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+    friend class mtsManagerLocal;
+
 protected:
     /*! Get a list of all processes running in the system */
     mtsFunctionRead GetNamesOfProcesses;
@@ -53,8 +55,13 @@ protected:
         components, we keep a list of function objects using named map with 
         (key = component name, value = function object set instance) */
     typedef struct {
-        mtsFunctionWrite ComponentStop;
-        mtsFunctionWrite ComponentResume;
+        mtsFunctionVoid ComponentStop;
+        mtsFunctionVoid ComponentResume;
+        mtsFunctionRead ComponentGetState;
+        mtsFunctionWriteReturn GetEndUserInterface;
+        mtsFunctionWriteReturn AddObserverList;
+        mtsFunctionWriteReturn RemoveEndUserInterface;
+        mtsFunctionWriteReturn RemoveObserverList;
     } InterfaceComponentFunctionType;
 
     typedef cmnNamedMap<InterfaceComponentFunctionType> InterfaceComponentFunctionMapType;
@@ -65,9 +72,11 @@ protected:
         // Dynamic component management
         mtsFunctionWrite ComponentCreate;
         mtsFunctionWrite ComponentConnect;
+        mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
+        mtsFunctionQualifiedRead ComponentGetState;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -75,17 +84,44 @@ protected:
         mtsFunctionRead          GetListOfConnections;
     } InterfaceLCMFunctionType;
 
-    // Event handlers for InterfaceLCM's required interface
-    void HandleAddComponentEvent(const mtsDescriptionComponent &component);
-    void HandleAddConnectionEvent(const mtsDescriptionConnection &component);
-
-    // Event handlers for InterfaceComponent's required interface
-    void HandleChangeState(const mtsComponentStateChange & componentStateChange);
-
     InterfaceLCMFunctionType InterfaceLCMFunction;
+
+    // Event handlers for InterfaceLCM's required interface (handle events from MCS)
+    void HandleAddComponentEvent(const mtsDescriptionComponent &component);
+    void HandleChangeStateEvent(const mtsComponentStateChange &componentStateChange);
+    void HandleAddConnectionEvent(const mtsDescriptionConnection &connection);
+    void HandleRemoveConnectionEvent(const mtsDescriptionConnection &connection);
+
+    // Event handlers for InterfaceComponent's required interface (handle events from Component)
+    void HandleChangeStateFromComponent(const mtsComponentStateChange & componentStateChange);
+
+    // General-purpose interface. These are used to allow a class method to be invoked from
+    // any thread, but still allow that method to queue commands for execution by the MCC.
+    // Because any thread can call these methods, thread-safety is obtained by using a mutex.
+    struct GeneralInterfaceStruct {
+        osaMutex Mutex;        
+        mtsFunctionWrite ComponentConnect;
+    } GeneralInterface;
 
     /*! Create new component and add it to LCM */
     bool CreateAndAddNewComponent(const std::string & className, const std::string & componentName);
+
+    /*! \brief Connect two local interfaces.
+        \param clientComponentName Name of client component
+        \param clientInterfaceRequiredName Name of required interface
+        \param serverComponentName Name of server component
+        \param serverInterfaceProvidedName Name of provided interface
+        \param clientProcessName Name of client process (ignored in standalone
+               configuration, used in networked configuration)
+        \return true if successful, false otherwise
+        \note  It is assumed that the two components are in the same process. */
+    bool ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                        const std::string & clientProcessName = "");
+
+    bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                           const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                           const std::string & clientProcessName = "");
 
 public:
     mtsManagerComponentClient(const std::string & componentName);
@@ -103,28 +139,44 @@ public:
         it to InterfaceInternal's provided interface */
     bool AddNewClientComponent(const std::string & clientComponentName);
 
+    // Called from LCM
+    bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    void InterfaceLCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                mtsComponentState &state) const;
+
+    /*! Event generators for InterfaceLCM's provided interface */
+    mtsFunctionWrite InterfaceLCMEvents_ChangeState;
 
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    void InterfaceComponentCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                      mtsComponentState &state) const;
 
-    void InterfaceComponentCommands_GetNamesOfProcesses(mtsStdStringVec & names) const;
-    void InterfaceComponentCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const;
+    void InterfaceComponentCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
+    void InterfaceComponentCommands_GetNamesOfComponents(const std::string & processName,
+                                                         std::vector<std::string> & names) const;
     void InterfaceComponentCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
 
-    /*! Event generators for InterfaceLCM's provided interface */
+    /*! Event generators for InterfaceComponent's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;
+    mtsFunctionWrite InterfaceComponentEvents_ChangeState;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
+    mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
 
     /*! Returns name of manager component client */
     static std::string GetNameOfManagerComponentClient(const std::string & processName);

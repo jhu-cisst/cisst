@@ -75,6 +75,8 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsCommandWriteBase.h"
 %include "cisstMultiTask/mtsCommandWriteReturn.h"
 %include "cisstMultiTask/mtsCommandQualifiedRead.h"
+// Wrap event receivers
+%include "cisstMultiTask/mtsEventReceiver.h"
 
 // Extend mtsCommandVoid
 %extend mtsCommandVoid {
@@ -168,6 +170,8 @@ http://www.cisst.org/cisst/license.txt.
                 tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
             except Exception, e:
+                print 'Read command ', self.GetName(), ': ', e
+            except AttributeError, e:
                 print 'Read command ', self.GetName(), ': ', e
 
 
@@ -566,7 +570,16 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 
 %include "cisstMultiTask/mtsParameterTypes.h"
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVec, mtsDescriptionConnectionStdVec);
+%template(mtsDescriptionConnectionVec) std::vector<mtsDescriptionConnection>;
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVecProxy, mtsDescriptionConnectionVec);
+
+%include "cisstMultiTask/mtsComponentState.h"
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsComponentStateProxy, mtsComponentState);
+
+%extend mtsComponentState {
+    // ToString gets renamed to __str__
+    std::string ToString(void) const { return mtsComponentState::ToString($self->GetState()); }
+}
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"

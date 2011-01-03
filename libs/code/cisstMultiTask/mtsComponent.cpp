@@ -61,6 +61,8 @@ void mtsComponent::Initialize(void)
     InterfacesProvidedOrOutput.SetOwner(*this);
     InterfacesRequiredOrInput.SetOwner(*this);
     this->StateTables.SetOwner(*this);
+
+    InterfaceProvidedToManager = 0;
 }
 
 
@@ -114,6 +116,14 @@ void mtsComponent::Start(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "Start: default start method for component \""
                                << this->GetName() << "\"" << std::endl;
     this->State = mtsComponentState::ACTIVE;
+}
+
+
+void mtsComponent::Suspend(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Suspend: default suspend method for component \""
+                               << this->GetName() << "\"" << std::endl;
+    this->State = mtsComponentState::READY;
 }
 
 
@@ -207,14 +217,14 @@ mtsInterfaceOutput * mtsComponent::AddInterfaceOutput(const std::string & interf
 mtsInterfaceProvidedOrOutput *
 mtsComponent::GetInterfaceProvidedOrOutput(const std::string & interfaceProvidedOrOutputName)
 {
-    return InterfacesProvidedOrOutput.GetItem(interfaceProvidedOrOutputName);
+    return InterfacesProvidedOrOutput.GetItem(interfaceProvidedOrOutputName, CMN_LOG_LEVEL_RUN_VERBOSE);
 }
 
 
 mtsInterfaceProvided *
 mtsComponent::GetInterfaceProvided(const std::string & interfaceProvidedName) const
 {
-    return dynamic_cast<mtsInterfaceProvided *>(InterfacesProvidedOrOutput.GetItem(interfaceProvidedName));
+    return dynamic_cast<mtsInterfaceProvided *>(InterfacesProvidedOrOutput.GetItem(interfaceProvidedName, CMN_LOG_LEVEL_RUN_VERBOSE));
 }
 
 
@@ -570,7 +580,10 @@ const mtsInterfaceProvidedOrOutput * mtsComponent::GetInterfaceProvidedOrOutputF
     return interfaceRequiredOrInput ? interfaceRequiredOrInput->GetConnectedInterface() : 0;
 }
 
-
+#if 0  // Obsolete
+// PK: Following code is obsolete -- connections should be made in mtsManagerComponentClient
+// Right now, this is only used for input/output interfaces.
+// In retrospect, maybe it was not a good idea to combine Required/Input and Provided/Output interfaces.
 bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                                    mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
 {
@@ -599,7 +612,7 @@ bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interface
     }
     return false;
 }
-
+#endif  // OBSOLETE
 
 mtsStateTable * mtsComponent::GetStateTable(const std::string & stateTableName)
 {
@@ -785,6 +798,10 @@ const mtsComponentState & mtsComponent::GetState(void) const
     return this->State;
 }
 
+void mtsComponent::GetState(mtsComponentState &state) const
+{
+    state = this->State;
+}
 
 bool mtsComponent::WaitForState(mtsComponentState desiredState, double timeout)
 {
@@ -844,78 +861,70 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
         }
     }
 
-    // Add provided interface
-    mtsInterfaceProvided *provided = 0;
-    interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided;
-    if (GetInterfaceProvided(interfaceName))
-        CMN_LOG_INIT_WARNING << "AddInterfaceInternal: provided interface already present" << std::endl;
-    else {
-        provided = AddInterfaceProvided(interfaceName);
-        if (provided) {
-            provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentStop,
-                                      this, mtsManagerComponentBase::CommandNames::ComponentStop);
-            provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentResume,
-                                      this, mtsManagerComponentBase::CommandNames::ComponentResume);
-            provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
-            //CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceInternal: successfully added internal provided interface" << std::endl;
-        }
-        else
-            CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;
+    if (InterfaceProvidedToManager) {
+        CMN_LOG_CLASS_INIT_WARNING << "InterfaceProvidedToManager already initialized!" << std::endl;
+        return true;
     }
+    // Add provided interface (can't be done in constructor)
+    interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided;
+    mtsInterfaceProvided *provided = AddInterfaceProvided(interfaceName);
+    if (!provided) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;
+        return false;
+    }
+    provided->AddCommandVoid(&mtsComponent::Start,
+                              this, mtsManagerComponentBase::CommandNames::ComponentStart, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandVoid(&mtsComponent::Suspend,
+                              this, mtsManagerComponentBase::CommandNames::ComponentStop, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandVoid(&mtsComponent::Start,
+                              this, mtsManagerComponentBase::CommandNames::ComponentResume, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandRead(&mtsComponent::GetState,
+                             this, mtsManagerComponentBase::CommandNames::ComponentGetState);
+    provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_GetEndUserInterface, this, 
+                                    mtsManagerComponentBase::CommandNames::GetEndUserInterface);
+    provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_AddObserverList, this, 
+                                    mtsManagerComponentBase::CommandNames::AddObserverList);
+    provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface, this,
+                                    mtsManagerComponentBase::CommandNames::RemoveEndUserInterface);
+    provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveObserverList, this, 
+                                    mtsManagerComponentBase::CommandNames::RemoveObserverList);
+    provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState,
+                            mtsComponentStateChange());
+
+    // Save this interface so that we can call it later (to process the mailboxes)
+    InterfaceProvidedToManager = provided;
 
     return true;
 }
 
-void mtsComponent::InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg)
+// Internal command
+void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin,
+                                                                 mtsEndUserInterfaceArg &argout)
 {
-    // MJ: How to implement "Stopping device-type component which might be already running"?
-    //
-    // Possible solutions might be:
-    // - For device-type component: disable all commands and functions in all
-    //   interfaces of this component.
-    // - For task-type component: the above + call Suspend()
-    //
-    // The current implementation only can handle task-type component through mtsTask::Suspend()
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentStop: stopping component: " << GetName() << std::endl;
-
-    // Stop device-type component
-    mtsTask * task = dynamic_cast<mtsTask *>(this);
-    if (!task) {
-        // TODO: implement stopping a device-type component
-        cmnThrow("InterfaceInternalCommands_ComponentStop: TODO - implement this function");
-        return;
-    }
-    // Stop task-type component
-    else {
-        task->Suspend();
-    }
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentStart: stopped component:  " << GetName() << std::endl;
+    CMN_ASSERT(argin.OriginalInterface);
+    argout = argin;  // not really needed
+    argout.EndUserInterface = 0;
+    argout.EndUserInterface = argin.OriginalInterface->GetEndUserInterface(argin.UserName);
 }
 
-void mtsComponent::InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg)
+void mtsComponent::InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin,
+                                                                   mtsEventHandlerList &argout)
 {
-    // MJ: How to implement "Resuming device-type component which might be already running"?
-    //
-    // Possible solutions might be:
-    // - For device-type component: enable all commands and functions in all
-    //   interfaces of this component.
-    // - For task-type component: the above + call Start()
+    CMN_ASSERT(argin.Provided);
+    argin.Provided->AddObserverList(argin, argout);
+}
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentResume: resuming component: " << GetName() << std::endl;
+void mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin,
+                                                                    mtsEndUserInterfaceArg &argout)
+{
+    CMN_ASSERT(argin.OriginalInterface);
+    argout = argin;  // not really needed
+    argout.EndUserInterface = argin.OriginalInterface->RemoveEndUserInterface(argin.EndUserInterface, argin.UserName);
+}
 
-    // Stop device-type component
-    mtsTask * task = dynamic_cast<mtsTask *>(this);
-    if (!task) {
-        // TODO: implement stopping a device-type component
-        cmnThrow("InterfaceInternalCommands_ComponentResume: TODO - implement this function");
-        return;
-    }
-    // Stop task-type component
-    else {
-        task->Start();
-    }
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentResume: resumed component:  " << GetName() << std::endl;
+void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin,
+                                                                mtsEventHandlerList &argout)
+{
+    CMN_ASSERT(argin.Provided);
+    argin.Provided->RemoveObserverList(argin, argout);
 }

@@ -86,7 +86,8 @@ http://www.cisst.org/cisst/license.txt.
   by the GetEndUserInterface method, which returns a new mtsInterfaceProvided
   object to the client component. In other words, the original provided interface
   acts as a provided interface factory that generates a "copy" of the provided
-  interface for every client.
+  interface for every client. Note that GetEndUserInterface is protected,
+  and should only be called by mtsComponent.
 
 */
 class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
@@ -96,6 +97,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     friend class mtsComponentProxy;
     // To get information about event generators in this interface
     friend class mtsManagerLocal;
+    // To call GetEndUserInterface
+    friend class mtsComponent;
+    friend class mtsManagerComponentClient;
 
  public:
     /*! This type */
@@ -470,28 +474,27 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
     //@}
 
+    /*! Remove an observer for the specified event.  These methods are
+      used when disconnecting from the provided interface.
+      \param name Name of event
+      \param handler command object that implements event handler
+      \returns true if successful; false otherwise
+    */
+    //@{
+    bool RemoveObserver(const std::string & eventName, mtsCommandVoid * handler);
+    bool RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    void RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+    //@}
 
-    /*!  This method creates a copy of the existing interface.  The
-      copy is required for each new user, i.e. for each required
-      interface connected to this provided interface if queueing has
-      been enabled.  This method should not be called on a provided
-      interface if queueing is not enable.  The newly created provided
-      interface is created using the current MailBoxSize (see
-      SetMailBoxSize) and ArgumentQueuesSize (see
-      SetArgumentQueuesSize).  Commands and events should only be
-      added to the original interface.
-
-      \param userName name of the required interface being connected
-      to this provided interface.  This information is used for
-      logging only.
-     */
-    mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
-
-    /*! Get the original.  This allows to retrieve the original
+    /*! Get the original interface.  This allows to retrieve the original
       interface from a copy created using GetEndUserInterface. */
     mtsInterfaceProvided * GetOriginalInterface(void) const;
+
+    /*! Find an end-user interface given a client name. */
+    mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
 
     /*! Method used to process all commands queued in mailboxes.  This
       method should only be used by the component that owns the
@@ -510,6 +513,42 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
                          const std::string & userName,
                          size_t mailBoxSize,
                          size_t argumentQueuesSize);
+
+    /*!  This method creates a copy of the existing interface.  The
+      copy is required for each new user, i.e. for each required
+      interface connected to this provided interface if queueing has
+      been enabled.  This method should not be called on a provided
+      interface if queueing is not enable.  The newly created provided
+      interface is created using the current MailBoxSize (see
+      SetMailBoxSize) and ArgumentQueuesSize (see
+      SetArgumentQueuesSize).  Commands and events should only be
+      added to the original interface.
+
+      \param userName name of the required interface being connected
+      to this provided interface.  This information is used for
+      logging only.
+      \returns pointer to end-user interface (0 if error)
+     */
+
+     static std::string GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                const std::string &userName);
+
+public: // PK TEMP for IRE
+    mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
+protected: // PK TEMP
+
+    /*!  This method deletes the end-user interface created by GetEndUserInterface.
+         Note that there are two mtsInterfaceProvided objects:
+         (1) the interfaceProvided parameter, which should be a pointer to the
+             end-user interface to be removed
+         (2) the "this" pointer, which should point to the original interface.
+
+      \param interfaceProvided the end-user interface to be removed
+      \param userName name of the required interface (used for logging only)
+      \returns 0 if successful, interfaceProvided otherwise
+     */
+
+    mtsInterfaceProvided * RemoveEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string & userName);
 
     /*! Utility method to determine if a command should be queued or
       not based on the default policy for the interface and the user's

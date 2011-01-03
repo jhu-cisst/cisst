@@ -45,16 +45,22 @@ class CISST_EXPORT mtsInterfaceInput: public mtsInterfaceRequiredOrInput
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceInput(void) {}
 
+    /*! Pointer to output interface that we are connected to.
+        We could instead use the Connection member in svlFilterInput. */
+    mtsInterfaceOutput * InterfaceOutput;
+
  public:
 
     /*! Constructor. Sets the name.
 
-      \param interfaceName Name of required interface
+      \param interfaceName Name of input interface
     */
     mtsInterfaceInput(const std::string & interfaceName);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceInput();
+
+    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
 };
 
 
