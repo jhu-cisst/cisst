@@ -294,7 +294,6 @@ unsigned int osaThreadSignal::SizeOfInternals(void) {
 void osaThreadSignal::Raise()
 {
 #if (CISST_OS == CISST_WINDOWS)
-    CMN_LOG_INIT_VERBOSE << "Thread signal raise called for handle " << INTERNALS(hEvent) << std::endl;
     ::SetEvent(INTERNALS(hEvent));
 #endif
 

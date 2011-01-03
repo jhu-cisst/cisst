@@ -35,6 +35,10 @@ int main(void)
 
     // add the tasks to the task manager
     taskManager->AddComponent(sineTaskObject);
+    taskManager->AddComponent(displayTaskObject);
+
+    // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
+    taskManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
@@ -46,21 +50,9 @@ int main(void)
     // start the periodic Run
     taskManager->StartAll();
 
-    osaSleep(2.0);
-
-    taskManager->AddComponent(displayTaskObject);
-    CMN_LOG_INIT_VERBOSE << "Connecting DISP to SIN" << std::endl;
-
-    // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
-    taskManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
-
-    displayTaskObject->Create();
-    displayTaskObject->Start();
-
     // wait until the close button of the UI is pressed
     int cnt = 0;
     while (!displayTaskObject->IsTerminated()) {
-#if 0
         if (cnt++ == 3) {
             std::cout << "################### SUSPEND" << std::endl;
             sineTaskObject->Suspend();
@@ -68,7 +60,6 @@ int main(void)
             std::cout << "################### RESUME" << std::endl;
             sineTaskObject->Start();
         }
-#endif
         osaSleep(1 * cmn_s); // sleep to save CPU
     }
     // cleanup
