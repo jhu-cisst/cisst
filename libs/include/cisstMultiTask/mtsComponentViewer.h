@@ -73,10 +73,10 @@ protected:
     std::string GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const;
 
     // Event Handlers
-    void AddComponent(const mtsDescriptionComponent &componentInfo);
-    void ChangeState(const mtsComponentStateChange &componentStateChange);
-    void AddConnection(const mtsDescriptionConnection &connectionInfo);
-    void RemoveConnection(const mtsDescriptionConnection &connectionInfo);
+    void AddComponentHandler(const mtsDescriptionComponent &componentInfo);
+    void ChangeStateHandler(const mtsComponentStateChange &componentStateChange);
+    void AddConnectionHandler(const mtsDescriptionConnection &connectionInfo);
+    void RemoveConnectionHandler(const mtsDescriptionConnection &connectionInfo);
 
 public:
 

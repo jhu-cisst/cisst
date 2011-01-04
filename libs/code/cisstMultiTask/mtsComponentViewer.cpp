@@ -41,10 +41,10 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name) :
 {
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
-        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponent, this);
-        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeState, this);
-        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnection, this);
-        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnection, this);
+        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
+        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeStateHandler, this);
+        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnectionHandler, this);
+        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnectionHandler, this);
     } else {
         cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to enable dynamic component composition"));
     }
@@ -57,7 +57,6 @@ mtsComponentViewer::~mtsComponentViewer()
 
 void mtsComponentViewer::Startup(void)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Startup called" << std::endl;
     // Try to connect to UDrawGraph viewer
     if (!UDrawPipeConnected)
         ConnectToUDrawGraph();
@@ -85,10 +84,15 @@ void mtsComponentViewer::Run(void)
 
 void mtsComponentViewer::Cleanup(void)
 {
+    // TEMP: do this here because otherwise it doesn't work (maybe CleanupInternal
+    // takes too long to change the state)
+    ChangeState(mtsComponentState::FINISHED);
     if (UDrawPipeConnected) {
-        ReaderThreadFinished = true;
-        CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for reader thread to finish" << std::endl;
-        ReaderThread.Wait();
+        if (!ReaderThreadFinished) {
+            ReaderThreadFinished = true;
+            CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for reader thread to finish" << std::endl;
+            ReaderThread.Wait();
+        }
         ReaderThread.Delete();
         UDrawPipe.Close();
         UDrawPipeConnected = false;
@@ -98,7 +102,7 @@ void mtsComponentViewer::Cleanup(void)
 
 //*************************************** Event Handlers ******************************************************
 
-void mtsComponentViewer::AddComponent(const mtsDescriptionComponent &componentInfo)
+void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &componentInfo)
 {
     if (UDrawPipeConnected) {
         mtsComponentState componentState;
@@ -111,7 +115,7 @@ void mtsComponentViewer::AddComponent(const mtsDescriptionComponent &componentIn
     }
 }
 
-void mtsComponentViewer::ChangeState(const mtsComponentStateChange &componentStateChange)
+void mtsComponentViewer::ChangeStateHandler(const mtsComponentStateChange &componentStateChange)
 {
     if (UDrawPipeConnected) {
         std::string buffer("graph(change_attr([node(\"");
@@ -124,7 +128,7 @@ void mtsComponentViewer::ChangeState(const mtsComponentStateChange &componentSta
     }
 }
 
-void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connection)
+void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &connection)
 {
     if (UDrawPipeConnected) {
         char IDString[20];
@@ -145,7 +149,7 @@ void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connectio
     }
 }
 
-void mtsComponentViewer::RemoveConnection(const mtsDescriptionConnection &connection)
+void mtsComponentViewer::RemoveConnectionHandler(const mtsDescriptionConnection &connection)
 {
     if (UDrawPipeConnected) {
         char IDString[20];
@@ -194,7 +198,9 @@ void *mtsComponentViewer::ReadFromUDrawGraph(int)
         }
         else if (response.compare(0,4,"quit") == 0) {
             CMN_LOG_CLASS_RUN_WARNING << "Received quit command from UDrawGraph" << std::endl;
+            ReaderThreadFinished = true;
             Kill();
+            // mtsTaskFromSignal::Kill should wake up thread (no need to call PostCommandQueuedMethod)
         }
         else if (response.compare(0,24,"menu_selection(\"redraw\")") == 0) {
             CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph" << std::endl;
@@ -240,14 +246,14 @@ void mtsComponentViewer::SendAllInfo(void)
                 mtsDescriptionComponent arg;
                 arg.ProcessName = processList[i];
                 arg.ComponentName = componentList[j];
-                this->AddComponent(arg);
+                this->AddComponentHandler(arg);
             }
         }
-        std::vector<mtsDescriptionConnection> connectionList;
-        ManagerComponentServices->RequestGetListOfConnections(connectionList);
-        for (i = 0; i < connectionList.size(); i++)
-            this->AddConnection(connectionList[i]);
     }
+    std::vector<mtsDescriptionConnection> connectionList;
+    ManagerComponentServices->RequestGetListOfConnections(connectionList);
+    for (i = 0; i < connectionList.size(); i++)
+        this->AddConnectionHandler(connectionList[i]);
     WriteString(UDrawPipe, "menu(layout(improve_all))\n");
 }
 
