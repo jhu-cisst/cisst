@@ -255,6 +255,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Remove an input interface identified by its name */
     bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
+    /*! Get pointer to manager component services, which extends the internal required interface
+        to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
+    mtsManagerComponentServices *GetManagerComponentServices(void)
+    { return this->ManagerComponentServices; }
+
 #if 0
     /*! Connect a required interface, used by mtsTaskManager */
     bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,

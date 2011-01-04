@@ -27,6 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+
 /*!
   \file mtsManagerComponentBase.h
   \brief Declaration of Base Class for Manager Components
@@ -95,7 +98,7 @@ http://www.cisst.org/cisst/license.txt.
   mtsManagerGlobal, mtsManagerProxyServer
 */
 
-class mtsManagerComponentBase : public mtsTaskFromSignal
+class CISST_EXPORT mtsManagerComponentBase : public mtsTaskFromSignal
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -109,7 +112,7 @@ public:
     };
 
     /*! Interface name definitions */
-    class InterfaceNames {
+    class CISST_EXPORT InterfaceNames {
     public:
         const static std::string InterfaceInternalProvided;
         const static std::string InterfaceInternalRequired;
@@ -122,7 +125,7 @@ public:
     };
 
     /*! Command name definitions */
-    class CommandNames {
+    class CISST_EXPORT CommandNames {
     public:
         // Dynamic component management
         const static std::string ComponentCreate;
@@ -145,7 +148,7 @@ public:
     };
 
     /*! Event name definitions */
-    class EventNames {
+    class CISST_EXPORT EventNames {
     public:
         // Events
         const static std::string AddComponent;

@@ -514,6 +514,9 @@ http://www.cisst.org/cisst/license.txt.
     }
 }
 
+// Wrap manager component services (includes internal required interface)
+%include "cisstMultiTask/mtsManagerComponentServices.h"
+
 %include "cisstMultiTask/mtsTask.h"
 %include "cisstMultiTask/mtsTaskContinuous.h"
 %include "cisstMultiTask/mtsTaskPeriodic.h"

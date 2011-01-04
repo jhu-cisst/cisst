@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstInteractive/ireFramework.h>
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsManagerComponentBase.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>   // PK TEMP
 
 ireTask::ireTask(const std::string &name, const std::string &startup) :
@@ -46,8 +47,10 @@ void ireTask::Startup(void)
     startup << "from cisstCommonPython import *; "
             << "from cisstMultiTaskPython import *; "
             << GetName() << " = cmnObjectRegister.FindObject('" << GetName() << "'); "
-            << "Manager = " << GetName() << ".GetInterfaceRequired('InterfaceInternalRequired'); "
+            << "Manager = " << GetName() << ".GetInterfaceRequired('"
+            << mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired << "'); "
             << "Manager.UpdateFromC(); "
+            << "ManagerServices = " << GetName() << ".GetManagerComponentServices(); "
             << StartupCommands;
     try {
         ireFramework::LaunchIREShell(startup.str().c_str(), true);
