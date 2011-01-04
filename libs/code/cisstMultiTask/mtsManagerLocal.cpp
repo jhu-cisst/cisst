@@ -525,6 +525,22 @@ bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
             }
             break;
 #if CISST_MTS_HAS_ICE
+        case LCM_CONFIG_NETWORKED_WITH_GCM:
+            // Check if manager component server has been created
+            if (!ManagerComponent.Server) {
+                CMN_LOG_CLASS_INIT_ERROR << "Manager component server (networked) is not initialized" << std::endl;
+                return false;
+            }
+
+            // Connection between InterfaceGCM's required interface and
+            // InterfaceLCM's provided interface is not established here
+            // because InterfaceGCM's required interface needs to be dynamically 
+            // created when a manager component client connects to the manager 
+            // component server.
+
+            // NOTE: no break statement here so that we fall through to the next block of code
+            // to connect the MCC to the MCS in the GCM process.
+
         case LCM_CONFIG_NETWORKED:
             // Check if manager component client has been created
             if (!ManagerComponent.Client) {
@@ -551,20 +567,6 @@ bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
             }
             break;
 
-        case LCM_CONFIG_NETWORKED_WITH_GCM:
-            // Check if manager component server has been created
-            if (!ManagerComponent.Server) {
-                CMN_LOG_CLASS_INIT_ERROR << "Manager component server (networked) is not initialized" << std::endl;
-                return false;
-            }
-
-            // Connection between InterfaceGCM's required interface and
-            // InterfaceLCM's provided interface is not established here
-            // because InterfaceGCM's required interface needs to be dynamically 
-            // created when a manager component client connects to the manager 
-            // component server.
-
-            break;
 #endif
     }
 
@@ -666,7 +668,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 
     // If dynamic component management is enabled
     if (component->GetInterfaceRequired(
-        mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired))
+                   mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired))
     {
         // Add internal provided and required interface for dynamic component management service
         if (!component->AddInterfaceInternal(true)) {
@@ -742,14 +744,14 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         // That is, connect InterfaceInternal.Required to InterfaceComponent.Provided.
         // This enables user components to use dynamic component composition services
         // through cisstMultiTask's thread-safe command pattern.
-        if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
+        // PK: Always do this
+        //if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
+        if (1) {
             mtsManagerComponentClient * managerComponent = ManagerComponent.Client;
             if (!managerComponent) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to get MCC" << std::endl;
                 return false;
             }
-
-            const std::string nameOfInterfaceInternalRequired = mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired;
 
             if (componentName != managerComponent->GetName() &&
                 componentName != mtsManagerComponentBase::ComponentNames::ManagerComponentServer)
@@ -1429,22 +1431,11 @@ bool mtsManagerLocal::CreateManagerComponents(void)
             CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal manager component server" << std::endl;
             return false;
         }
-#if 0
-        // Enable this code to automatically use ComponentViewer
-        if (Configuration == LCM_CONFIG_STANDALONE) {
-            // Add ComponentViewer in standalone configuration. In networked configuration, we assume
-            // that the ComponentViewer will be in a separate process.
-            mtsComponentViewer *componentViewer = new mtsComponentViewer("ComponentViewer", 1.0*cmn_s);
-            CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Creating ComponentViewer" << std::endl;
-            if (!AddComponent(componentViewer)) {
-                CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add ComponentViewer" << std::endl;
-                return false;
-            }
-        }
-#endif
     }
 
-    if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
+    // Always add the MCC and connect it to the MCS
+    //if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
+    if (1) {
         if (!AddManagerComponent(GetProcessName())) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal MCC" << std::endl;
             return false;

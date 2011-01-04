@@ -154,6 +154,9 @@ protected:
     // Time server object
     const osaTimeServer * TimeServer;
 
+    // Component Viewer
+    mtsComponentViewer * ComponentViewer;
+
     // Remember time origin (the time when the first sample is fetched) per process
     //TimeOriginMapType TimeOriginMap;
     double TimeOrigin;

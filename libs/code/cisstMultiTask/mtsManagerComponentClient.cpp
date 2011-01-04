@@ -147,11 +147,11 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
             return false;
         }
         bool success = false;
-        // If the server is this component (ManagerComponentClient), or if this component is not active,
+        // If the server is this component (ManagerComponentClient), or if the server component is not active,
         // we can use the previous implementation (mtsInterfaceRequired::ConnectTo), which directly calls the methods.
-        //  Note that we could use the StateChange mutex to make sure that the state
+        // Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
-        if ((serverComponentName == GetName()) || !IsRunning()) {
+        if ((serverComponentName == GetName()) || !serverComponent->IsRunning()) {
             success = clientInterfaceRequired->ConnectTo(serverInterfaceProvided);
         }
         else {
@@ -615,7 +615,7 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
             }
         }
         GeneralInterface.Mutex.Lock();
-        CMN_LOG_CLASS_INIT_WARNING << "mtsManagerComponentClient calling ComponentConnect" << std::endl;
+        CMN_LOG_CLASS_INIT_WARNING << "Calling ComponentConnect for " << arg << std::endl;
         GeneralInterface.ComponentConnect(arg);
         GeneralInterface.Mutex.Unlock();
         // PK: What about return value? Maybe Connect should be WriteReturn method?
