@@ -251,6 +251,10 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // negated back
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
 
+        // test the state table read, first advance (blocking to make sure it happened)
+        client->InterfaceRequired1.FunctionStateTableAdvance.ExecuteBlocking();
+        client->InterfaceRequired1.FunctionStateTableRead(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(index + 1));
     }
 
     // test read command
@@ -289,6 +293,10 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
     manager->RemoveComponent(client);
     manager->RemoveComponent(server);
+    // the manager singleton needs to be cleaned up, adeguet1
+    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
+    manager->RemoveComponent("LCM_MCC");
+    manager->RemoveComponent("MCS");
 }
 
 
@@ -398,7 +406,7 @@ void mtsCommandAndEventLocalTest::TestFromSignalFromSignal_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
     mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later
@@ -419,7 +427,7 @@ void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestContinuous1<_elementType> * client = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Client");
     mtsTestContinuous1<_elementType> * server = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later
@@ -440,7 +448,7 @@ void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestFromCallback1<_elementType> * client = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Client");
     mtsTestCallbackTrigger * clientTrigger = new mtsTestCallbackTrigger(client);
     mtsTestFromCallback1<_elementType> * server = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Server", blockingDelay);
@@ -467,7 +475,7 @@ void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking_int(void)
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestFromSignal1<_elementType> * client = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Client");
     mtsTestFromSignal1<_elementType> * server = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later

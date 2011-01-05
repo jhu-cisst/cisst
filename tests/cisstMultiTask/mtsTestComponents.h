@@ -59,11 +59,12 @@ public:
     typedef _elementType value_type; // STL convention
 
 private:
-    value_type Value;
+    value_type Value, StateValue;
     value_type Argument1Prototype, Argument2Prototype;
     double ExecutionDelay; // to test blocking commands
 
 public:
+    mtsStateTable * StateTable;
     mtsFunctionVoid EventVoid;
     mtsFunctionWrite EventWrite;
 
@@ -71,9 +72,11 @@ public:
     enum {Argument2PrototypeDefault = 200};
 
     mtsTestInterfaceProvided(double executionDelay = 0.0):
-        ExecutionDelay(executionDelay)
+        ExecutionDelay(executionDelay),
+        StateTable(0)
     {
         Value = -1;   // initial value = -1;
+        StateValue = 0;
         Argument1Prototype = Argument1PrototypeDefault;
         Argument2Prototype = Argument2PrototypeDefault;
     }
@@ -120,6 +123,11 @@ public:
         return Value;
     }
 
+    void StateTableAdvance(void) {
+        StateValue++;
+        StateTable->Advance();
+    }
+
     void PopulateExistingInterface(mtsInterfaceProvided * provided) {
         provided->AddCommandVoid(&mtsTestInterfaceProvided::MethodVoid,
                                  this, "Void");
@@ -138,6 +146,14 @@ public:
                                           this, "QualifiedRead", Argument1Prototype, Argument2Prototype);
         provided->AddEventVoid(this->EventVoid, "EventVoid");
         provided->AddEventWrite(this->EventWrite, "EventWrite", Argument2Prototype);
+
+        // add and configure state table
+        StateTable = new mtsStateTable(100, "StateTable" + provided->GetName());
+        StateTable->AddData(StateValue);
+        StateTable->SetAutomaticAdvance(false);
+        provided->AddCommandReadState(*StateTable, StateValue, "StateTableRead");
+        provided->AddCommandVoid(&mtsTestInterfaceProvided::StateTableAdvance,
+                                 this, "StateTableAdvance");
     }
 };
 
@@ -159,6 +175,8 @@ public:
     mtsFunctionWrite FunctionFilteredWrite;
     mtsFunctionRead FunctionRead;
     mtsFunctionQualifiedRead FunctionQualifiedRead;
+    mtsFunctionRead FunctionStateTableRead;
+    mtsFunctionVoid FunctionStateTableAdvance;
 
     mtsTestInterfaceRequired() {
         Value = -1;   // initial value = -1;
@@ -184,6 +202,8 @@ public:
         required->AddFunction("FilteredWrite", this->FunctionFilteredWrite);
         required->AddFunction("Read", this->FunctionRead);
         required->AddFunction("QualifiedRead", this->FunctionQualifiedRead);
+        required->AddFunction("StateTableRead", this->FunctionStateTableRead);
+        required->AddFunction("StateTableAdvance", this->FunctionStateTableAdvance);
         required->AddEventHandlerVoid(&mtsTestInterfaceRequired::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&mtsTestInterfaceRequired::EventWriteHandler, this, "EventWrite");
     }
@@ -214,6 +234,7 @@ public:
         provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
@@ -253,6 +274,7 @@ public:
         provided = AddInterfaceProvided("p1");
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
@@ -295,10 +317,12 @@ public:
         provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
         provided = AddInterfaceProvided("p2");
         if (provided) {
             InterfaceProvided2.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided2.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
@@ -337,10 +361,12 @@ public:
         provided = AddInterfaceProvided("p1");
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
         provided = AddInterfaceProvided("p2");
         if (provided) {
             InterfaceProvided2.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided2.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
@@ -382,6 +408,7 @@ public:
         provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
@@ -452,6 +479,7 @@ public:
         provided = AddInterfaceProvided("p1");
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
@@ -485,6 +513,7 @@ public:
         provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
         mtsInterfaceRequired * required;
