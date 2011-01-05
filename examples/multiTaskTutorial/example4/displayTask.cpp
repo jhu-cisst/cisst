@@ -51,10 +51,28 @@ void displayTask::Startup(void)
 
 void displayTask::Run(void)
 {
-    Generator.GetData(Data);
-    Clock.GetClockData(Time);
-    UI.Data->value(Data);
-    UI.Time->value(Time); // display in seconds
+    if (Generator.GetData.IsValid()) {
+        if (!UI.Data->visible())
+            UI.Data->show();
+        Generator.GetData(Data);
+        UI.Data->value(Data);
+    }
+    else {
+        if (UI.Data->visible())
+            UI.Data->hide();
+        UI.Data->clear_output();
+    }
+    if (Clock.GetClockData.IsValid()) {
+        if (!UI.Time->visible())
+            UI.Time->show();
+        Clock.GetClockData(Time);
+        UI.Time->value(Time); // display in seconds
+    }
+    else {
+        if (UI.Time->visible())
+            UI.Time->hide();
+        UI.Time->clear_output();
+    }
     if (UI.AmplitudeChanged) {
         Amplitude = UI.Amplitude->value();
         Generator.SetAmplitude(Amplitude);
