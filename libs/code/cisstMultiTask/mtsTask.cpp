@@ -92,7 +92,10 @@ void mtsTask::CleanupInternal() {
     // Perform Cleanup on all interfaces provided
     InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
 
-    delete InterfaceProvidedToManagerCallable;
+    if (InterfaceProvidedToManagerCallable) {
+        delete InterfaceProvidedToManagerCallable;
+        InterfaceProvidedToManagerCallable = 0;
+    }
 
     ChangeState(mtsComponentState::FINISHED);
     CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
