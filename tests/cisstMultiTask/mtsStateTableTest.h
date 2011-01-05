@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Min Yang Jung
   Created on: 2009-03-05
-  
+
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -22,63 +22,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <cisstMultiTask/mtsCollectorBase.h>
 #include <cisstMultiTask/mtsStateData.h>
 
 #include <string>
 
-/*
-// To be used for TestAddSignal() ---------------------------------------------
-class mtsStateTableTestTask : public mtsTaskPeriodic {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
-
-protected:    
-	mtsStateData<cmnDouble> TestData;
-
-public:
-	mtsStateTableTestTask(const std::string & collectorName, double period);
-	virtual ~mtsStateTableTestTask() {}
-
-	// implementation of four methods that are pure virtual in mtsTask
-    void Configure(const std::string) {}
-	void Startup(void)	{}
-	void Run(void)		{}
-    void Cleanup(void)	{}
-
-	void AddDataToStateTable(const std::string & dataName);
-};
-
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTableTestTask);
-*/
-
-// Tester class ---------------------------------------------------------------
 class mtsStateTableTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsStateTableTest);
-	{		
-		// public variables and methods		
-		
-		// private variables and methods
-		CPPUNIT_TEST(TestGetStateVectorID);
-
-	}
+    {
+        CPPUNIT_TEST(TestGetStateVectorID);
+    }
     CPPUNIT_TEST_SUITE_END();
-	
-private:
-	//mtsCollector * Collector;
-    
+
 public:
-    void setUp(void) {
-		//Collector = new mtsCollector("collector", 10 * cmn_ms);
-    }
-    
-    void tearDown(void) {
-		//delete Collector;
-    }
-    
-	// public variables and methods
-	//void TestFindSignal(void);
-	
-	// private variables and methods
-	void TestGetStateVectorID(void);
+    void setUp(void);
+
+    void tearDown(void);
+
+    void TestGetStateVectorID(void);
 };
