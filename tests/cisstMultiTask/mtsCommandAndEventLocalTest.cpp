@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -100,12 +100,20 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     executionResult = client->InterfaceRequired1.FunctionQualifiedRead(valueWrite, valueRead);
     CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
 
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableRead.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableRead(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableAdvance.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableAdvance();
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
     // add to manager and start all
-    manager->AddComponent(client);
-    manager->AddComponent(server);
-    manager->Connect(client->GetName(), "r1", server->GetName(), "p1");
+    CPPUNIT_ASSERT(manager->AddComponent(client));
+    CPPUNIT_ASSERT(manager->AddComponent(server));
+    CPPUNIT_ASSERT(manager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
     manager->CreateAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
     manager->StartAll();
@@ -290,9 +298,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
-    manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
-    manager->RemoveComponent(client);
-    manager->RemoveComponent(server);
+    CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
+    CPPUNIT_ASSERT(manager->RemoveComponent(client));
+    CPPUNIT_ASSERT(manager->RemoveComponent(server));
     // the manager singleton needs to be cleaned up, adeguet1
     std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
     manager->RemoveComponent("LCM_MCC");
@@ -504,9 +512,9 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
     // add to manager and start all
-    manager->AddComponent(client);
-    manager->AddComponent(server);
-    manager->Connect(client->GetName(), "r1", server->GetName(), "p1");
+    CPPUNIT_ASSERT(manager->AddComponent(client));
+    CPPUNIT_ASSERT(manager->AddComponent(server));
+    CPPUNIT_ASSERT(manager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
     manager->CreateAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
     manager->StartAll();
@@ -564,12 +572,16 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
-    manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
-    manager->RemoveComponent(client);
-    manager->RemoveComponent(server);
-
+    CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
+    CPPUNIT_ASSERT(manager->RemoveComponent(client));
+    CPPUNIT_ASSERT(manager->RemoveComponent(server));
     delete client;
     delete server;
+
+    // the manager singleton needs to be cleaned up, adeguet1
+    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
+    manager->RemoveComponent("LCM_MCC");
+    manager->RemoveComponent("MCS");
 }
 void mtsCommandAndEventLocalTest::TestArgumentPrototypes_mtsInt(void) {
     mtsCommandAndEventLocalTest::TestArgumentPrototypes<mtsInt>();

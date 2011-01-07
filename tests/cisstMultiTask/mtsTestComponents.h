@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -149,7 +149,7 @@ public:
 
         // add and configure state table
         StateTable = new mtsStateTable(100, "StateTable" + provided->GetName());
-        StateTable->AddData(StateValue);
+        StateTable->AddData(StateValue, "StateValue");
         StateTable->SetAutomaticAdvance(false);
         provided->AddCommandReadState(*StateTable, StateValue, "StateTableRead");
         provided->AddCommandVoid(&mtsTestInterfaceProvided::StateTableAdvance,
