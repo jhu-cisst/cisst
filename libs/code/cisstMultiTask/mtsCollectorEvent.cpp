@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -226,10 +226,10 @@ std::string mtsCollectorEvent::GetDefaultOutputName(void)
 mtsComponent * mtsCollectorEvent::CheckComponent(const std::string & componentName) const
 {
     // todo, replace with GetComponent when available
-    mtsComponent * componentPointer = TaskManager->GetComponent(componentName);
+    mtsComponent * componentPointer = ComponentManager->GetComponent(componentName);
     if (!componentPointer) {
         CMN_LOG_CLASS_INIT_ERROR << "component \"" << componentName
-                                 << "\" not found in task manager for collector \""
+                                 << "\" not found in component manager for collector \""
                                  << this->GetName() << "\"" << std::endl;
     }
     return componentPointer;
@@ -458,8 +458,8 @@ bool mtsCollectorEvent::Connect(void)
                                      << "\" to \""
                                      << iterComponents->first << "::" << iterInterfaces->first
                                      << "\"" << std::endl;
-            if (!TaskManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
-                                      iterComponents->first, iterInterfaces->first)) {
+            if (!ComponentManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
+                                           iterComponents->first, iterInterfaces->first)) {
                 CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \""
                                          << this->GetName() << "::" << iterInterfaces->second->GetName()
                                          << "\" to \""

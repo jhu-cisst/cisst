@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -45,20 +45,22 @@ static char EndOfHeader[END_OF_HEADER_SIZE] = END_OF_HEADER;
 mtsCollectorState::mtsCollectorState(const std::string & collectorName):
     mtsCollectorBase(collectorName,
                      COLLECTOR_FILE_FORMAT_UNDEFINED),
-    TargetTask(0),
-    TargetStateTable(0)
-{}
-
-
-mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
-                                     const std::string & targetStateTableName,
-                                     const mtsCollectorBase::CollectorFileFormat fileFormat):
-    mtsCollectorBase(std::string("StateCollectorFor") + targetTaskName + targetStateTableName,
-                     fileFormat),
-    TargetTask(0),
+    TargetComponent(0),
     TargetStateTable(0)
 {
-    this->SetStateTable(targetTaskName, targetStateTableName);
+    this->Initialize();
+}
+
+
+mtsCollectorState::mtsCollectorState(const std::string & targetComponentName,
+                                     const std::string & targetStateTableName,
+                                     const mtsCollectorBase::CollectorFileFormat fileFormat):
+    mtsCollectorBase(std::string("StateCollectorFor") + targetComponentName + targetStateTableName,
+                     fileFormat),
+    TargetComponent(0),
+    TargetStateTable(0)
+{
+    this->SetStateTable(targetComponentName, targetStateTableName);
     this->SetOutputToDefault(fileFormat);
     this->Initialize();
 }
@@ -79,36 +81,30 @@ mtsCollectorState::~mtsCollectorState()
 }
 
 
-bool mtsCollectorState::SetStateTable(const std::string & taskName,
+bool mtsCollectorState::SetStateTable(const std::string & componentName,
                                       const std::string & stateTableName)
 {
-    // check if this task has already been connected
+    // check if this component has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "SetStateTable: collector \"" << this->GetName()
                                  << "\" is already connected, you can not modify the state table to collect" << std::endl;
         return false;
     }
-    // check if there is the specified task and the specified state table.
-    mtsComponent * componentPointer = TaskManager->GetComponent(taskName);
-    if (!componentPointer) {
-        cmnThrow(std::runtime_error("mtsCollectorState constructor: component \"" + taskName
-                                    + "\" not found in task manager."));
+    // check if there is the specified component and the specified state table.
+    this->TargetComponent = ComponentManager->GetComponent(componentName);
+    if (!this->TargetComponent) {
+        cmnThrow(std::runtime_error("mtsCollectorState::SetStateTable: component \"" + componentName
+                                    + "\" not found in component manager."));
     }
-    TargetTask = dynamic_cast<mtsTask *>(componentPointer);
-    if (!this->TargetTask) {
-        cmnThrow(std::runtime_error("mtsCollectorState constructor: task \"" + taskName
-                                    + "\" found in task manager seems to be an mtsComponent, not mtsTask therefore it has no state table."));
-    }
-
     // this task needs a pointer on the state table to perform a fast copy
-    this->TargetStateTable = this->TargetTask->GetStateTable(stateTableName);
+    this->TargetStateTable = this->TargetComponent->GetStateTable(stateTableName);
     if (!this->TargetStateTable) {
         CMN_LOG_CLASS_INIT_ERROR << "Initialize: can not find state table \""
-                                 << stateTableName << "\" in task \""
-                                 << taskName << "\" for collector \""
+                                 << stateTableName << "\" in component \""
+                                 << componentName << "\" for collector \""
                                  << this->GetName() << "\"" << std::endl;
-        this->TargetTask = 0;
-        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): can not find state table."));
+        this->TargetComponent = 0;
+        cmnThrow(std::runtime_error("mtsCollectorState::SetStateTable: can not find state table."));
     }
     return true;
 }
@@ -117,23 +113,46 @@ bool mtsCollectorState::SetStateTable(const std::string & taskName,
 
 bool mtsCollectorState::Connect(void)
 {
-    // check that a task/state table has been set properly
-    if (!(this->TargetTask && this->TargetStateTable)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: state table has not been set for collector \""
+    // check that a component/state table has been set properly
+    if (!(this->TargetComponent && this->TargetStateTable)) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: component and/or state table has not been set for collector \""
                                  << this->GetName() << "\"" << std::endl;
         return false;
     }
 
     // then connect the interface
     CMN_LOG_CLASS_INIT_DEBUG << "Connect: connecting required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
-                             << this->TargetTask->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
-    if (!this->TaskManager->Connect(this->GetName(), "StateTable",
-                                    this->TargetTask->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
+                             << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
+    if (!this->ComponentManager->Connect(this->GetName(), "StateTable",
+                                         this->TargetComponent->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
-                                 << this->TargetTask->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
+                                 << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
         return false;
     }
     this->ConnectedFlag = true;
+    return true;
+}
+
+
+bool mtsCollectorState::Disconnect(void)
+{
+    // check that a component has been set properly
+    if (!(this->TargetComponent && this->TargetStateTable)) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: component and/or state table has not been set for collector \""
+                                 << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+
+    // then connect the interface
+    CMN_LOG_CLASS_INIT_DEBUG << "Disconnect: disconnecting required interface \"" << this->GetName() << "::StateTable\" from provided interface \""
+                             << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
+    if (!this->ComponentManager->Disconnect(this->GetName(), "StateTable",
+                                            this->TargetComponent->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: connect failed for required interface \"" << this->GetName() << "::StateTable\" from provided interface \""
+                                 << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
+        return false;
+    }
+    this->ConnectedFlag = false;
     return true;
 }
 
@@ -146,7 +165,7 @@ void mtsCollectorState::Initialize(void)
     SamplingInterval = 1;
     OffsetForNextRead = 0;
 
-    // add a required interface to the collector task to communicate with the task containing the state table
+    // add a required interface to the collector task to communicate with the component containing the state table
     mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("StateTable");
     if (interfaceRequired) {
         // functions to stop/start collection
@@ -176,9 +195,16 @@ std::string mtsCollectorState::GetDefaultOutputName(void)
 {
     std::string currentDateTime;
     osaGetDateTimeString(currentDateTime);
-    std::string fileName =
-        "StateDataCollection-" + TargetTask->GetName() + "-"
-        + TargetStateTable->GetName() + "-" + currentDateTime;
+    std::string fileName;
+    if (TargetComponent && TargetStateTable) {
+        fileName =
+            "StateDataCollection-" + TargetComponent->GetName() + "-"
+            + TargetStateTable->GetName() + "-" + currentDateTime;
+    } else {
+        fileName = "StateDataCollection-" + currentDateTime;
+        CMN_LOG_CLASS_INIT_WARNING << "GetDefaultOutputName: component and/or state table not yet provided, using fixed name \""
+                                   << fileName << "\" for output" << std::endl;
+    }
     return fileName;
 }
 
@@ -330,24 +356,23 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
         PrintHeader(this->FileFormat);
     }
 
-    const size_t StartIndex = range.First.Ticks()  % TableHistoryLength;
-    const size_t EndIndex = range.Last.Ticks() % TableHistoryLength;
+    const size_t startIndex = range.First.Ticks()  % TableHistoryLength;
+    const size_t endIndex = range.Last.Ticks() % TableHistoryLength;
 
-    if (StartIndex < EndIndex) {
+    if (startIndex < endIndex) {
         // normal case
-        if (FetchStateTableData(TargetStateTable, StartIndex, EndIndex)) {
-            LastReadIndex = (EndIndex + (OffsetForNextRead - 1)) % TableHistoryLength;
+        if (FetchStateTableData(TargetStateTable, startIndex, endIndex)) {
+            LastReadIndex = (endIndex + (OffsetForNextRead - 1)) % TableHistoryLength;
         }
-    } else if (StartIndex == EndIndex) {
+    } else if (startIndex == endIndex) {
         // No data to be read. Wait for the next run
     } else {
         // Wrap-around case
-        // first part: from the last read index to the bottom of the array
-        if (FetchStateTableData(TargetStateTable, StartIndex, TableHistoryLength - 1)) {
-            // second part: from the top of the array to the IndexReader
-            const size_t indexReader = TargetStateTable->IndexReader;
-            if (FetchStateTableData(TargetStateTable, 0, indexReader)) {
-                LastReadIndex = (indexReader + (OffsetForNextRead - 1)) % TableHistoryLength;
+        // first part: from the last read index to the end of the array
+        if (FetchStateTableData(TargetStateTable, startIndex, TableHistoryLength - 1)) {
+            // second part: from the beginning of the array to the end of range
+            if (FetchStateTableData(TargetStateTable, 0, endIndex)) {
+                LastReadIndex = (endIndex + (OffsetForNextRead - 1)) % TableHistoryLength;
             }
         }
     }
@@ -364,7 +389,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
 
         // All lines in the header should be preceded by '#' which represents
         // the line contains header information rather than collected data.
-        *(this->OutputStream) << "# Task name          : " << TargetTask->GetName() << std::endl;
+        *(this->OutputStream) << "# Component name     : " << TargetComponent->GetName() << std::endl;
         *(this->OutputStream) << "# Table name         : " << TargetStateTable->GetName() << std::endl;
         *(this->OutputStream) << "# Date & time        : " << currentDateTime << std::endl;
         *(this->OutputStream) << "# Total signal count : " << RegisteredSignalElements.size() << std::endl;

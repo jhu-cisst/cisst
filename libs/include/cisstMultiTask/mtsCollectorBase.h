@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-02-25
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -93,7 +93,7 @@ protected:
     TaskMapType TaskMap;
 
     /*! Static member variables */
-    static mtsTaskManager * TaskManager;
+    static mtsComponentManager * ComponentManager;
 
     /*! Flag to determine if the collector is connected.  Once the
       collector is connected, it becomes impossible to change the
@@ -114,7 +114,7 @@ protected:
 
     /*! Time of last progress event */
     double TimeOfLastProgressEvent;
-    
+
     /*! Output file name, including working directory. */
     std::string OutputFileName;
 
