@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -98,7 +97,18 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
     std::string::size_type size = 0;
     cmnDeSerializeSizeRaw(inputStream, size);
     data.resize(size);
-    inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));
+    // The following seems to work fine, but may not be valid for all implementations of std::string
+    // because it is not guaranteed that c_str(), or data(), returns a pointer to the internal buffer;
+    // it could create a copy and then return a pointer to the copy.
+    //
+    // inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));
+    //
+    // So, even though it is less efficient, the data is first deserialized to a buffer and then
+    // assigned to the string.
+    std::string::value_type *buffer = new std::string::value_type[size];
+    inputStream.read(static_cast<char *>(buffer), size * sizeof(std::string::value_type));
+    data.assign(buffer, size);
+    delete [] buffer;
     if (inputStream.fail()) {
         cmnThrow("cmnDeSerializeRaw(std::string): Error occured with std::istream::read");
     }
