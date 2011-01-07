@@ -44,27 +44,48 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnExport.h>
 
 
-/*! De-serialization helper function for a basic type.  This function
-  performs a cast to char pointer (<code>char *</code>) using
-  <code>reinterpret_cast</code> and then replace the data with the
-  result of <code>read</code> from the input stream.  If the read
-  operation fails, an exception is thrown
-  (<code>std::runtime_error</code>).
+// Implementation class to provide deserialization when _elementType is not derived from cmnGenericObject
+template <class _elementType, bool>
+class cmnDeSerializeRawImpl
+{
+public:
+    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) throw (std::runtime_error)
+    {
+        inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
+        if (inputStream.fail()) {
+            std::string message("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read, _elementType = ");
+            message += typeid(_elementType).name();
+            cmnThrow(message);
+        }
+    }
+};
 
-  This function should be use to implement the DeSerializeRaw method
-  of classes derived from cmnGenericObject. */
+// Implementation class to provide deserialization when _elementType is derived from cmnGenericObject
+template <class _elementType>
+class cmnDeSerializeRawImpl<_elementType, true>
+{
+public:
+    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) throw (std::runtime_error)
+    {
+        data.DeSerializeRaw(inputStream);
+    }
+};
+
+/*! De-serialization helper function for a basic type.  If the type is derived
+    from cmnGenericObject, it just calls the DeSerializeRaw member function.
+    Otherwise, it performs a cast to char pointer (<code>char *</code>) using
+    <code>reinterpret_cast</code> and then replaces the data with the
+    result of <code>read</code> from the input stream.  If the read
+    operation fails, an exception is thrown
+    (<code>std::runtime_error</code>). */
+
 template <class _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
     throw (std::runtime_error)
 {
-    inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
-    if (inputStream.fail()) {
-        std::string message("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read, _elementType = ");
-        message += typeid(_elementType).name();
-        cmnThrow(message);
-    }
+    typedef cmnDeSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::YES> impl;
+    impl::DeSerializeRaw(inputStream, data);
 }
-
 
 /*! De-serialization helper function for STL size object.  This
   function converts a serialized size (unsigned long long int) to the

@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnSerializer_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnTypeTraits.h>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnThrow.h>
@@ -43,22 +44,44 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnExport.h>
 
 
-/*! Serialization helper function for a basic type.  This function
-  performs a cast to char pointer (<code>char *</code>) using
-  <code>reinterpret_cast</code> and then writes the result to the
-  output stream.  If the write operation fails, an exception is thrown
-  (<code>std::runtime_error</code>).
+// Implementation class to provide serialization when _elementType is not derived from cmnGenericObject
+template <class _elementType, bool>
+class cmnSerializeRawImpl
+{
+public:
+    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) throw (std::runtime_error)
+    {
+        outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
+        if (outputStream.fail()) {
+            cmnThrow("cmnSerializeRaw(_elementType): Error occured with std::ostream::write");
+        }
+    }
+};
 
-  This function should be use to implement the SerializeRaw method of
-  classes derived from cmnGenericObject. */
+// Implementation class to provide serialization when _elementType is derived from cmnGenericObject
+template <class _elementType>
+class cmnSerializeRawImpl<_elementType, true>
+{
+public:
+    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) throw (std::runtime_error)
+    {
+        data.SerializeRaw(outputStream);
+    }
+};
+
+/*! Serialization helper function for a basic type.  If the type is derived
+    from cmnGenericObject, it just calls the SerializeRaw member function.
+    Otherwise, it performs a cast to char pointer (<code>char *</code>) using
+    <code>reinterpret_cast</code> and then writes the result to the
+    output stream.  If the write operation fails, an exception is thrown
+    (<code>std::runtime_error</code>). */
+
 template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & data)
     throw (std::runtime_error)
 {
-    outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
-    if (outputStream.fail()) {
-        cmnThrow("cmnSerializeRaw(_elementType): Error occured with std::ostream::write");
-    }
+    typedef cmnSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::YES> impl;
+    impl::SerializeRaw(outputStream, data);
 }
 
 

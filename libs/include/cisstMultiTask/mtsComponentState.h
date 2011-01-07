@@ -119,10 +119,4 @@ inline std::ostream & operator << (std::ostream & output,
     return output;
 }
 
-inline void cmnSerializeRaw(std::ostream & outputStream, const mtsComponentState & state)
-{ state.SerializeRaw(outputStream); }
-
-inline void cmnDeSerializeRaw(std::istream & inputStream, mtsComponentState & state)
-{ state.DeSerializeRaw(inputStream); }
-
 #endif // _mtsComponentState_h
