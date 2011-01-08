@@ -191,7 +191,7 @@ set (HEADER_FILES
 
 
 # make sure all options are set for all devices to OFF
-find_package (ICE)
+find_package (Ice)
 if (ICE_FOUND)
   option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" ON)
   mark_as_advanced (CISST_MTS_HAS_ICE)
