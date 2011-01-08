@@ -30,8 +30,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedReadProxy.h>
 
 mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
-: mtsComponent(componentProxyName)
+  : mtsComponent(componentProxyName),
+    InterfaceProvidedNetworkProxies("InterfaceProvidedNetworkProxies"),
+    InterfaceRequiredNetworkProxies("InterfaceRequiredNetworkProxies"),
+    FunctionProxyAndEventHandlerProxyMap("FunctionProxyAndEventHandlerProxyMap")
 {
+    InterfaceProvidedNetworkProxies.SetOwner(*this);
+    InterfaceRequiredNetworkProxies.SetOwner(*this);
+    FunctionProxyAndEventHandlerProxyMap.SetOwner(*this);
+
 }
 
 mtsComponentProxy::~mtsComponentProxy()

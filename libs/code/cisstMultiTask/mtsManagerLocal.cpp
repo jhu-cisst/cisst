@@ -86,7 +86,7 @@ mtsManagerLocal::mtsManagerLocal(void)
 }
 
 #if CISST_MTS_HAS_ICE
-mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager)
+mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager) : ComponentMap("ComponentMap")
 {
     Initialize();
 
@@ -106,7 +106,8 @@ mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager)
 mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
                                  const std::string & thisProcessName,
                                  const std::string & thisProcessIP)
-                                 : ProcessName(thisProcessName),
+                                 : ComponentMap("ComponentMap"),
+                                   ProcessName(thisProcessName),
                                    GlobalComponentManagerIP(globalComponentManagerIP),
                                    ProcessIP(thisProcessIP)
 {

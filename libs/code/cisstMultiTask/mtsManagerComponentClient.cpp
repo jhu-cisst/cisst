@@ -151,13 +151,18 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         // we can use the previous implementation (mtsInterfaceRequired::ConnectTo), which directly calls the methods.
         // Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
-        if ((serverComponentName == GetName()) || !serverComponent->IsRunning()) {
+        if ((serverComponentName == GetName()) || 
+            (serverComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) ||   // PK TEMP
+            !serverComponent->IsRunning()) {
             success = clientInterfaceRequired->ConnectTo(serverInterfaceProvided);
         }
         else {
             InterfaceComponentFunctionType * serverFunctionSet = InterfaceComponentFunctionMap.GetItem(serverComponentName);
             if (!serverFunctionSet) {
-                CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get function set for " << serverComponentName << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                         << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                         << serverComponentName << ":" << serverInterfaceProvidedName
+                                         << ", failed to get function set for " << serverComponentName << std::endl;
                 return false;
             }
             if (!serverFunctionSet->GetEndUserInterface.IsValid()) {

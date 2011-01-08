@@ -105,12 +105,15 @@ void mtsComponentViewer::Cleanup(void)
 void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &componentInfo)
 {
     if (UDrawPipeConnected) {
-        mtsComponentState componentState;
-        ManagerComponentServices->RequestComponentGetState(componentInfo, componentState);
-        std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
-        if (buffer != "") {
-            CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
-            WriteString(UDrawPipe, buffer);
+        // Ignore proxy components
+        if (!IsProxyComponent(componentInfo.ComponentName)) {
+            mtsComponentState componentState;
+            ManagerComponentServices->RequestComponentGetState(componentInfo, componentState);
+            std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
+            if (buffer != "") {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+                WriteString(UDrawPipe, buffer);
+            }
         }
     }
 }
