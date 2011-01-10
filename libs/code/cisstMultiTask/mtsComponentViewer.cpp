@@ -107,8 +107,7 @@ void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &comp
     if (UDrawPipeConnected) {
         // Ignore proxy components
         if (!IsProxyComponent(componentInfo.ComponentName)) {
-            mtsComponentState componentState;
-            ManagerComponentServices->RequestComponentGetState(componentInfo, componentState);
+            mtsComponentState componentState = ManagerComponentServices->ComponentGetState(componentInfo);
             std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
             if (buffer != "") {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
@@ -239,10 +238,9 @@ void mtsComponentViewer::SendAllInfo(void)
     std::vector<std::string> processList;
     std::vector<std::string> componentList;
     size_t i, j;  // could use iterators instead
-    ManagerComponentServices->RequestGetNamesOfProcesses(processList);
+    processList = ManagerComponentServices->GetNamesOfProcesses();
     for (i = 0; i < processList.size(); i++) {
-        componentList.clear();
-        ManagerComponentServices->RequestGetNamesOfComponents(processList[i], componentList);
+        componentList = ManagerComponentServices->GetNamesOfComponents(processList[i]);
         for (j = 0; j < componentList.size(); j++) {
             // Ignore proxy components
             if (!IsProxyComponent(componentList[j])) {
@@ -254,7 +252,7 @@ void mtsComponentViewer::SendAllInfo(void)
         }
     }
     std::vector<mtsDescriptionConnection> connectionList;
-    ManagerComponentServices->RequestGetListOfConnections(connectionList);
+    connectionList = ManagerComponentServices->GetListOfConnections();
     for (i = 0; i < connectionList.size(); i++)
         this->AddConnectionHandler(connectionList[i]);
     WriteString(UDrawPipe, "menu(layout(improve_all))\n");
@@ -266,7 +264,7 @@ std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &pro
     size_t i;
     std::vector<std::string> requiredList;
     std::vector<std::string> providedList;
-    ManagerComponentServices->RequestGetNamesOfInterfaces(processName, componentName, requiredList, providedList);
+    ManagerComponentServices->GetNamesOfInterfaces(processName, componentName, requiredList, providedList);
     // For now, ignore components that don't have any interfaces
     if ((requiredList.size() == 0) && (providedList.size() == 0))
         return "";
@@ -294,7 +292,7 @@ std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string
     // Enable this to ignore components that don't have any interfaces
     std::vector<std::string> requiredList;
     std::vector<std::string> providedList;
-    ManagerComponentServices->RequestGetNamesOfInterfaces(processName, componentName, requiredList, providedList);
+    ManagerComponentServices->GetNamesOfInterfaces(processName, componentName, requiredList, providedList);
     if ((requiredList.size() == 0) && (providedList.size() == 0))
         return "";
 #endif

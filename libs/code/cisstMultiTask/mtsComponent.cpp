@@ -231,7 +231,7 @@ mtsComponent::GetInterfaceProvided(const std::string & interfaceProvidedName) co
 mtsInterfaceOutput *
 mtsComponent::GetInterfaceOutput(const std::string & interfaceOutputName) const
 {
-    return dynamic_cast<mtsInterfaceOutput *>(InterfacesProvidedOrOutput.GetItem(interfaceOutputName));
+    return dynamic_cast<mtsInterfaceOutput *>(InterfacesProvidedOrOutput.GetItem(interfaceOutputName, CMN_LOG_LEVEL_RUN_VERBOSE));
 }
 
 
@@ -352,21 +352,21 @@ bool mtsComponent::RemoveInterfaceOutput(const std::string & interfaceOutputName
 mtsInterfaceRequiredOrInput *
 mtsComponent::GetInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName)
 {
-    return InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
+    return InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName, CMN_LOG_LEVEL_RUN_VERBOSE);
 }
 
 
 mtsInterfaceRequired *
 mtsComponent::GetInterfaceRequired(const std::string & interfaceRequiredName)
 {
-    return dynamic_cast<mtsInterfaceRequired *>(InterfacesRequiredOrInput.GetItem(interfaceRequiredName));
+    return dynamic_cast<mtsInterfaceRequired *>(InterfacesRequiredOrInput.GetItem(interfaceRequiredName, CMN_LOG_LEVEL_RUN_VERBOSE));
 }
 
 
 mtsInterfaceInput *
 mtsComponent::GetInterfaceInput(const std::string & interfaceInputName) const
 {
-    return dynamic_cast<mtsInterfaceInput *>(InterfacesRequiredOrInput.GetItem(interfaceInputName));
+    return dynamic_cast<mtsInterfaceInput *>(InterfacesRequiredOrInput.GetItem(interfaceInputName, CMN_LOG_LEVEL_RUN_VERBOSE));
 }
 
 
@@ -576,7 +576,7 @@ std::vector<std::string> mtsComponent::GetNamesOfInterfacesInput(void) const
 
 const mtsInterfaceProvidedOrOutput * mtsComponent::GetInterfaceProvidedOrOutputFor(const std::string & interfaceRequiredOrInputName) {
     mtsInterfaceRequiredOrInput * interfaceRequiredOrInput =
-        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
+        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName, CMN_LOG_LEVEL_RUN_VERBOSE);
     return interfaceRequiredOrInput ? interfaceRequiredOrInput->GetConnectedInterface() : 0;
 }
 

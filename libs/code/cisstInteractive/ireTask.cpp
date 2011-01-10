@@ -47,10 +47,12 @@ void ireTask::Startup(void)
     startup << "from cisstCommonPython import *; "
             << "from cisstMultiTaskPython import *; "
             << GetName() << " = cmnObjectRegister.FindObject('" << GetName() << "'); "
+#if 0
             << "Manager = " << GetName() << ".GetInterfaceRequired('"
             << mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired << "'); "
             << "Manager.UpdateFromC(); "
-            << "ManagerServices = " << GetName() << ".GetManagerComponentServices(); "
+#endif
+            << "Manager = " << GetName() << ".GetManagerComponentServices(); "
             << StartupCommands;
     try {
         ireFramework::LaunchIREShell(startup.str().c_str(), true);

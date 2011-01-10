@@ -831,7 +831,7 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
     ComponentMapChange.Unlock();
 
     if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to removed component: " << componentName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component: " << componentName << std::endl;
         return false;
     }
     else {
@@ -2516,7 +2516,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const unsigned int connectionID
                 serverProcessName, serverComponentName, serverInterfaceProvidedName,
                 endpointAccessInfo))
         {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to fecth server proxy access information: "
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to fetch server proxy access information: "
                                      << mtsManagerGlobal::GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName)
                                      << std::endl;
             goto ConnectClientSideInterfaceError;
@@ -2546,7 +2546,9 @@ bool mtsManagerLocal::ConnectClientSideInterface(const unsigned int connectionID
             clientProcessName, clientComponentName, clientInterfaceRequiredName,
             serverProcessName, serverComponentName, serverInterfaceProvidedName))
     {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to connect interfaces at server process" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to connect interfaces at server process for (" 
+                                 << clientProcessName << ", " << clientComponentName << ", " << clientInterfaceRequiredName << ") - ("
+                                 << serverProcessName << ", " << serverComponentName << ", " << serverInterfaceProvidedName << ")" << std::endl;
         goto ConnectClientSideInterfaceError;
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "ConnectClientSideInterface: successfully connected server-side interfaces" << std::endl;
