@@ -870,7 +870,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
     }
 
     int connectionId = LCM->ConnectSetup(arg.Client.ComponentName, arg.Client.InterfaceName,
-                                         arg.Server.ComponentName, arg.Server.InterfaceName);
+                                             arg.Server.ComponentName, arg.Server.InterfaceName);
     if (connectionId < 0) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << arg << std::endl;
         return;
@@ -890,6 +890,9 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
     // PK TODO: Would be nice to be able to disconnect using just connectionId (e.g., from ComponentViewer)
+    // PK: The following may not be necessary, since the MCS should just send us the local disconnect request
+    // (in the network case, one of the components should be a proxy). For now, it is needed just to update the GCM database.
+    // See mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect.
     if (arg.Client.ProcessName != arg.Server.ProcessName) {
 #if CISST_MTS_HAS_ICE
         // PK TODO: Need to fix this to be thread-safe
@@ -905,11 +908,15 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
         return;
     }
 
-    if (!LCM->Disconnect(arg.Client.ComponentName, arg.Client.InterfaceName,
-                         arg.Server.ComponentName, arg.Server.InterfaceName))
-    {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
-        return;
+    // PK TEMP: Don't call following if client or server is a proxy object
+    if ((arg.Client.ComponentName.find("Proxy") == std::string::npos) &&
+        (arg.Server.ComponentName.find("Proxy") == std::string::npos)) {
+        if (!LCM->Disconnect(arg.Client.ComponentName, arg.Client.InterfaceName,
+                             arg.Server.ComponentName, arg.Server.InterfaceName))
+        {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
+            return;
+        }
     }
 
     if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,

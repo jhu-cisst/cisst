@@ -244,9 +244,40 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
+    InterfaceGCMFunctionType *functionSet;
+    if (arg.Client.ProcessName != arg.Server.ProcessName) {
+        // PK TEMP fix for network disconnect
+        mtsDescriptionConnection arg2;
+        // Step 1: Disconnect Client from ServerProxy  
+        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 1 (client side disconnect)" << std::endl;
+        arg2 = arg;
+        arg2.Server.ProcessName = arg.Client.ProcessName;
+        arg2.Server.ComponentName = mtsManagerGlobal::GetComponentProxyName(arg.Server.ProcessName, arg.Server.ComponentName);
+        functionSet = InterfaceGCMFunctionMap.GetItem(arg2.Client.ProcessName);
+        if (!functionSet) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to get function set for " << arg2.Client.ProcessName << std::endl;
+            return;
+        }
+        functionSet->ComponentDisconnect(arg2);
+        // Step 2: Disconnect ClientProxy from Server
+        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 2 (server side disconnect)" << std::endl;
+        arg2 = arg;
+        arg2.Client.ProcessName = arg.Server.ProcessName;
+        arg2.Client.ComponentName = mtsManagerGlobal::GetComponentProxyName(arg.Client.ProcessName, arg.Client.ComponentName);
+        functionSet = InterfaceGCMFunctionMap.GetItem(arg2.Server.ProcessName);
+        if (!functionSet) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to get function set for " << arg2.Server.ProcessName << std::endl;
+            return;
+        }
+        functionSet->ComponentDisconnect(arg2);
+        // Step 3: Update the GCM database (send arg unchanged to any MCC)
+        // For now, we just fall through to the statement below
+        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 3 (update GCM)" << std::endl;
+    }
+
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
+    functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
     if (!functionSet) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
         return;
