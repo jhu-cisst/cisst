@@ -518,7 +518,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Typemaps below are for GetNamesOfInterfaces, so that the two vectors of strings
 // (required and provided interfaces) can be returned as a list of lists of strings,
-// i.e., [[req1, req2, ...],[prov1, prov2, ...]]
+// i.e., ((req1, req2, ...),(prov1, prov2, ...))
 
 
 %typemap(in, numinputs=0) std::vector<std::string> & namesOfInterfacesRequired (std::vector<std::string> temp) {
@@ -530,26 +530,27 @@ http://www.cisst.org/cisst/license.txt.
 }
 
 %typemap(argout) std::vector<std::string> & namesOfInterfacesRequired {
+  Py_DECREF($result);  // Garbage collect the returned "bool"
   if (!result) {
       PyErr_SetString(PyExc_RuntimeError, "Failed to get interfaces");
       return NULL;
   }
-  $result = PyList_New(1);
-  PyObject *required = PyList_New((*$1).size());
-  PyList_SetItem($result,0,required);
+  $result = PyTuple_New(2);
+  PyObject *required = PyTuple_New((*$1).size());
+  PyTuple_SetItem($result,0,required);
 
   size_t i;
   for (i = 0; i < (*$1).size(); i++)
-      PyList_SetItem(required,i,PyString_FromString((*$1)[i].c_str()));
+      PyTuple_SetItem(required,i,PyString_FromString((*$1)[i].c_str()));
 }
 
 %typemap(argout) std::vector<std::string> & namesOfInterfacesProvided {
-  PyObject *provided = PyList_New((*$1).size());
-  PyList_Append($result,provided);
+  PyObject *provided = PyTuple_New((*$1).size());
+  PyTuple_SetItem($result,1,provided);
 
   size_t i;
   for (i = 0; i < (*$1).size(); i++)
-      PyList_SetItem(provided,i,PyString_FromString((*$1)[i].c_str()));
+      PyTuple_SetItem(provided,i,PyString_FromString((*$1)[i].c_str()));
 }
 
 %include "cisstMultiTask/mtsManagerComponentServices.h"

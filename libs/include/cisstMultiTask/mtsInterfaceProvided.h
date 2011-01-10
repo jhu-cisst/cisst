@@ -496,6 +496,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Find an end-user interface given a client name. */
     mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
 
+    /*! Return number of active end-user interfaces. */
+    int GetNumberOfEndUsers() const;
+
     /*! Method used to process all commands queued in mailboxes.  This
       method should only be used by the component that owns the
       interface for thread safety. */

@@ -772,6 +772,11 @@ mtsInterfaceProvided * mtsInterfaceProvided::FindEndUserInterfaceByName(const st
     return 0;
 }
 
+int mtsInterfaceProvided::GetNumberOfEndUsers(void) const
+{
+    return static_cast<int>(InterfacesProvidedCreated.size());
+}
+
 mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName)
 {
     mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName);
