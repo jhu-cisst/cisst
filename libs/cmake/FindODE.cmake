@@ -10,6 +10,8 @@ if( ODE_DIR )
 
   find_library( ODE_LIBRARIES ode ${ODE_DIR}/lib)
 
+  mark_as_advanced( ODE_DIR ODE_LIBRARIES )
+
 endif( ODE_DIR )
 
 

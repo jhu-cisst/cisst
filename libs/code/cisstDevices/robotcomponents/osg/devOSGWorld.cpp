@@ -1,6 +1,8 @@
 #include <osg/Geometry>
 #include <osg/Geode>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+#include <iostream>
+
 devOSGWorld::devOSGWorld(){
 
   osg::Geometry* linesGeom = new osg::Geometry;

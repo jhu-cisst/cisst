@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT devOSGWorld : public osg::Group {
  public:
   devOSGWorld();
+  ~devOSGWorld(){}
 };
 
 #endif
