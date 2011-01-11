@@ -109,7 +109,7 @@ public:
 		EventHandlerWriteVector EventHandlersWrite;
 
         // "IsRequired" attribute
-        bool IsRequired; // MTS_OPTIONAL or MTS_REQUIRED (mtsRequiredType)
+        bool IsRequired; // MTS_OPTIONAL or MTS_REQUIRED (of type mtsRequiredType)
     };
 };
 

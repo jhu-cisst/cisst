@@ -36,11 +36,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaThread.h>
 
 #include <cisstMultiTask/mtsProxyConfig.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
+#include <cisstMultiTask/mtsConnection.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <cisstMultiTask/mtsExport.h>
@@ -64,7 +66,7 @@ protected:
         |    |    |    |    Component Map: (C, InterfaceMap)
         |    |    |    r2   Interface Map: { (PI, ConnectionMap) where PI is Provided Interface
         |    |    |                          (RI, ConnectionMap) where RI is Required Interface }
-        |    |    p2 - r3   Connection Map: (name of connected interface, ConnectedInterfaceInfo)
+        |    |    p2 - r3   Connection Map: (name of connected interface, list of connection id(s))
         |    |    |
         |    |    r1 - p1
         |    |
@@ -75,121 +77,23 @@ protected:
              C2
     */
 
-    class ConnectedInterfaceInfo {
-    protected:
-        // Names (IDs)
-        const std::string ProcessName;
-        const std::string ComponentName;
-        const std::string InterfaceName;
-        // True if this interface is remote
-        const bool RemoteConnection;
-#if CISST_MTS_HAS_ICE
-        // Server proxy access information (sent to client proxy as requested)
-        std::string EndpointInfo;
-#endif
+    /*! Typedef for connection map: 
+            key=(connected interface name), value=(list of connection ids)
+            map name=(name of component that owns these interfaces. */
+    //typedef cmnNamedMap<mtsManagerGlobal::ConnectedInterfaceInfo> ConnectionMapType;
+    typedef std::vector<ConnectionIDType> ConnectionIDListType;
 
-        ConnectedInterfaceInfo();
+    /*! Typedef for interface map element: 
+            key=(interface name), value=(connection id list type) */
+    //typedef cmnNamedMap<ConnectionIDListType> ConnectedInterfaceMapType;
+    typedef cmnNamedMap<ConnectionIDListType> InterfaceMapElementType;
 
-    public:
-        ConnectedInterfaceInfo(const std::string & processName, const std::string & componentName,
-                               const std::string & interfaceName, const bool isRemoteConnection);
-
-        // Getters
-        inline std::string GetProcessName(void) const   { return ProcessName; }
-        inline std::string GetComponentName(void) const { return ComponentName; }
-        inline std::string GetInterfaceName(void) const { return InterfaceName; }
-        bool IsRemoteConnection(void) const             { return RemoteConnection; }
-#if CISST_MTS_HAS_ICE
-        inline std::string GetEndpointInfo(void) const  { return EndpointInfo; }
-
-        // Setters
-        void SetProxyAccessInfo(const std::string & endpointInfo) {
-            EndpointInfo = endpointInfo;
-        }
-#endif
-    };
-
-    /*! Data structure to keep connection information */
-    class ConnectionElement {
-        // For unit-test
-        friend class mtsManagerGlobalTest;
-
-    protected:
-        // This connection ID
-        const unsigned int ConnectionID;
-        // Connection status. False when waiting for a successful establishment,
-        // True if successfully established.
-        bool Connected;
-
-    public:
-        // Name of connect request process
-        const std::string RequestProcessName;
-        // Set of strings
-        const std::string ClientProcessName;
-        const std::string ClientComponentName;
-        const std::string ClientInterfaceRequiredName;
-        const std::string ServerProcessName;
-        const std::string ServerComponentName;
-        const std::string ServerInterfaceProvidedName;
-#if CISST_MTS_HAS_ICE
-        // Time when pending connection becomes invalidated; any pending connection 
-        // should be confirmed before this time.
-        double TimeoutTime;
-#endif
-
-        ConnectionElement(const std::string & requestProcessName, const unsigned int connectionID,
-            const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-            const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
-
-        /*! Getters and Setters */
-        inline unsigned int GetConnectionID(void) const {
-            return ConnectionID;
-        }
-
-        mtsDescriptionConnection GetDescriptionConnection(void) const;
-
-        inline bool IsConnected(void) const {
-            return Connected;
-        }
-
-        inline void SetConnected(void) {
-            Connected = true;
-        }
-
-        /*! Return true if this connection is timed out */
-#if CISST_MTS_HAS_ICE
-        inline bool CheckTimeout(void) const {
-            return (TimeoutTime - osaGetTime() <= 0);
-        }
-#endif
-    };
-
-    /*! Connection map: (connected interface name, connected interface information)
-        Map name: name of component that owns these interfaces. */
-    typedef cmnNamedMap<mtsManagerGlobal::ConnectedInterfaceInfo> ConnectionMapType;
-
-    /*! Interface map: a map of registered interfaces in a component
-        key=(interface name), value=(connection map)
-        value can be null if an interface does not have any connection. */
-    typedef cmnNamedMap<ConnectionMapType> ConnectedInterfaceMapType;
-
-    /*! Interface type flag map: a map of registered interfaces in a component
-        key=(interface name), value=(bool)
-        value is false if an interface is an original interface
-                 true  if an interface is a proxy interface
-        This information is used to determine if an interface should be removed
-        (cleaned up) when a connection is disconnected. See
-        mtsManagerGlobal::Disconnect() for more details. */
-    typedef std::map<std::string, bool> InterfaceTypeMapType;
-
-    /*! Interface map has two kinds of containers:
-        - containers for connection map
-        - containers for interface type flag map */
+    /*! Typedef for interface map */
     typedef struct {
-        ConnectedInterfaceMapType InterfaceProvidedOrOutputMap;
-        ConnectedInterfaceMapType InterfaceRequiredOrInputMap;
-        InterfaceTypeMapType InterfaceProvidedOrOutputTypeMap;
-        InterfaceTypeMapType InterfaceRequiredOrInputTypeMap;
+        //ConnectedInterfaceMapType InterfaceProvidedOrOutputMap;
+        //ConnectedInterfaceMapType InterfaceRequiredOrInputMap;
+        InterfaceMapElementType InterfaceProvidedOrOutputMap;
+        InterfaceMapElementType InterfaceRequiredOrInputMap;
     } InterfaceMapType;
 
     /*! Component map: a map of registered components in a process
@@ -204,14 +108,14 @@ protected:
     ProcessMapType ProcessMap;
 
     /*! Connection element map: a map of strings that defines a connection
-        key=(connection id), value=(an instance of ConnectionElement)
+        key=(connection id), value=(an instance of Connection)
         When a local component manager requests estbalishing a connection, an
         element is created and added. If a connection is not established before
         timeout, the element is removed. When a local component manager notifies
         that a connection is successfully established, the element is marked
         as connected. */
-    typedef std::map<unsigned int, mtsManagerGlobal::ConnectionElement*> ConnectionElementMapType;
-    ConnectionElementMapType ConnectionElementMap;
+    typedef std::map<ConnectionIDType, mtsConnection> ConnectionMapType;
+    ConnectionMapType ConnectionMap;
 
     /*! Instance of connected local component manager. Note that the global
         component manager communicates with the only one instance of
@@ -229,54 +133,93 @@ protected:
     mtsManagerLocalInterface * LocalManagerConnected;
 
     /*! Mutex for thread-safe processing */
-    osaMutex ConnectionChange;
-    osaMutex ProcessMapChange;
+    osaMutex ProcessMapChange;    // for thread-safe ProcessMap update
+    osaMutex ConnectionMapChange; // for thread-safe ConnectionMap update
+    osaMutex ConnectionChange;    // to process Connect() request one-by-one
 
     /*! Counter to issue a new connection ID */
-    unsigned int ConnectionID;
-
-    /*! Typedef to get user id using connection id.  User id is set by provided
-        interface's AllocatedResources()
-        (see mtsManagerLocal::GetInterfaceProvidedDescription() for details). */
-    //typedef std::map<unsigned int, int> UserIDMapType;
-    //UserIDMapType UserIDMap;
+    ConnectionIDType ConnectionID;
 
 #if CISST_MTS_HAS_ICE
     /*! Network proxy server */
     mtsManagerProxyServer * ProxyServer;
 #endif
 
-    mtsManagerComponentServer *ManagerComponentServer;
+    /*! For dynamic component composition feature */
+    mtsManagerComponentServer * ManagerComponentServer;
+
+    /*! Queues, mutexes, and internal thread for thread-safe disconnection */
+    typedef std::map<ConnectionIDType, ConnectionIDType> DisconnectQueueType;
+    DisconnectQueueType QueueDisconnectWaiting;
+    DisconnectQueueType QueueDisconnected;
+
+    osaMutex QueueDisconnectWaitingChange;
+    osaMutex QueueDisconnectedChange;
+
+    osaThread ThreadDisconnect;
+    osaThreadSignal ThreadDisconnectFinished;
+    bool ThreadDisconnectRunning;
+    void * ThreadDisconnectProcess(void * arg);
 
     //-------------------------------------------------------------------------
     //  Processing Methods
     //-------------------------------------------------------------------------
-    /*! Clean up the internal variables */
-    bool Cleanup(void);
+    /*! Reset internal data structures */
+    void Cleanup(void);
 
-    /*! Get a map containing connection information for a provided interface */
-    ConnectionMapType * GetConnectionsOfInterfaceProvidedOrOutput(const std::string & serverProcessName, const std::string & serverComponentName,
-                                                                  const std::string & providedInterfaceName, InterfaceMapType ** interfaceMap);
-    ConnectionMapType * GetConnectionsOfInterfaceProvidedOrOutput(const std::string & serverProcessName, const std::string & serverComponentName,
-                                                                  const std::string & providedInterfaceName) const;
+    /*! Get connection information about provided interface specified */
+    ConnectionIDListType * GetConnectionsOfInterfaceProvidedOrOutput(
+        const std::string & serverProcessName, const std::string & serverComponentName,
+        const std::string & interfaceProvidedName) const;
 
-    /*! Get a map containing connection information for a required interface */
-    ConnectionMapType * GetConnectionsOfInterfaceRequiredOrInput(const std::string & clientProcessName, const std::string & clientComponentName,
-                                                                 const std::string & requiredInterfaceName, InterfaceMapType ** interfaceMap);
+    ConnectionIDListType * GetConnectionsOfInterfaceProvidedOrOutput(
+        const std::string & serverProcessName, const std::string & serverComponentName,
+        const std::string & interfaceProvidedName, InterfaceMapType ** interfaceMap) const;
 
-    ConnectionMapType * GetConnectionsOfInterfaceRequiredOrInput(const std::string & clientProcessName, const std::string & clientComponentName,
-                                                                 const std::string & requiredInterfaceName) const;
+    /*! Get connection information about required interface specified */
+    ConnectionIDListType * GetConnectionsOfInterfaceRequiredOrInput(
+        const std::string & clientProcessName, const std::string & clientComponentName,
+        const std::string & interfaceRequiredName) const;
 
-    /*! Add this interface to connectionMap as connected interface */
-    bool AddConnectedInterface(ConnectionMapType * connectionMap,
-                               const std::string & processName, const std::string & componentName,
-                               const std::string & interfaceName, const bool isRemoteConnection = false);
+    ConnectionIDListType * GetConnectionsOfInterfaceRequiredOrInput(
+        const std::string & clientProcessName, const std::string & clientComponentName,
+        const std::string & interfaceRequiredName, InterfaceMapType ** interfaceMap) const;
+
+    /*! Add new connection id to specified interface */
+    bool AddConnectionToInterfaceProvidedOrOutput(
+        const std::string & serverProcessName, const std::string & serverComponentName,
+        const std::string & interfaceProvidedName, const ConnectionIDType connectionID);
+
+    bool AddConnectionToInterfaceRequiredOrInput(
+        const std::string & clientProcessName, const std::string & clientComponentName,
+        const std::string & interfaceRequiredName, const ConnectionIDType connectionID);
+
+    /*! Remove connection id from specified interface */
+    bool RemoveConnectionOfInterfaceProvidedOrOutput(
+        const std::string & serverProcessName, const std::string & serverComponentName,
+        const std::string & interfaceProvidedName, const ConnectionIDType connectionID);
+
+    bool RemoveConnectionOfInterfaceRequiredOrInput(
+        const std::string & clientProcessName, const std::string & clientComponentName,
+        const std::string & interfaceRequiredName, const ConnectionIDType connectionID);
 
     /*! Check if two interfaces are connected */
-    bool IsAlreadyConnected(const std::string & clientProcessName, const std::string & clientComponentName,
-                            const std::string & clientInterfaceRequiredName,
-                            const std::string & serverProcessName, const std::string & serverComponentName,
-                            const std::string & serverInterfaceProvidedName);
+    bool IsAlreadyConnected(const mtsDescriptionConnection & description) const;
+
+    /*! Get total number of interfaces a component manages */
+    int GetNumberOfInterfaces(const std::string & processName, const std::string & componentName) const;
+
+    /*! Get connection id that the required interface specified involves in */
+    ConnectionIDType GetConnectionID(const std::string & clientProcessName, 
+        const std::string & clientComponentName, const std::string & interfaceRequiredName) const;
+
+    /*! Get connection information using connection id */
+    mtsConnection * GetConnectionInformation(const ConnectionIDType connectionID);
+
+    /*! Process disconnect waiting queue.  This is periodically called by the 
+        internal processing thread.  The connection id that is disconnected 
+        is dequeued from disconnect waiting queue and enqueued to disconnected queue. */
+    void DisconnectInternal(void);
 
 public:
     /*! Constructor and destructor */
@@ -303,7 +246,7 @@ public:
 
     bool FindComponent(const std::string & processName, const std::string & componentName) const;
 
-    bool RemoveComponent(const std::string & processName, const std::string & componentName);
+    bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true);
 
     //-------------------------------------------------------------------------
     //  Interface Management
@@ -321,10 +264,10 @@ public:
                                       const std::string & interfaceName) const;
 
     bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                         const std::string & interfaceName);
+                                         const std::string & interfaceName, const bool lock = true);
 
     bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                        const std::string & interfaceName);
+                                        const std::string & interfaceName, const bool lock = true);
 
     //-------------------------------------------------------------------------
     //  Connection Management
@@ -333,20 +276,18 @@ public:
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-    bool ConnectConfirm(unsigned int connectionSessionID);
+    bool ConnectConfirm(const ConnectionIDType connectionID);
+
+    bool Disconnect(const ConnectionIDType connectionID);
 
     bool Disconnect(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
 #if CISST_MTS_HAS_ICE
-    bool InitiateConnect(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    bool InitiateConnect(const ConnectionIDType connectionID);
 
-    bool ConnectServerSideInterfaceRequest(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    bool ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
 #endif
 
     void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const;
@@ -451,9 +392,9 @@ public:
 #endif
 
     /*! Get a process object (local component manager object) */
-    mtsManagerLocalInterface * GetProcessObject(const std::string & processName);
+    mtsManagerLocalInterface * GetProcessObject(const std::string & processName) const;
 
-    /*! Generate unique id of an interface as string */
+    /*! Generate unique representation of interface as string */
     inline static const std::string GetInterfaceUID(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName)
     {
@@ -476,24 +417,15 @@ public:
     /*! Stop network proxy server */
     bool StopServer(void);
 
-    bool SetInterfaceProvidedProxyAccessInfo(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const std::string & endpointInfo);
+    /*! Set access information of interface proxy server */
+    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
 
-    /*! \brief Fetch information to access (connect to) network proxy server
-        \param clientProcessName Name of client process
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverProcessName Name of server process
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
-        \param [out] endpointInfo Access information
-        \return True if success, false otherwise */
+    /*! Get access information of interface proxy server */
+    bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
+
     bool GetInterfaceProvidedProxyAccessInfo(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        std::string & endpointInfo);
+        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
 
     /*! Check if there is any pending connection.  All new connections should be
         confirmed by the LCM within timeout after the GCM issues a new connection

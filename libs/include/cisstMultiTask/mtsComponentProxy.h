@@ -132,7 +132,8 @@ public:
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const unsigned int connectionID,
+    // TODO: smmy: REMOVE THIS???
+    bool AddConnectionInformation(const ConnectionIDType connectionID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
@@ -189,7 +190,7 @@ public:
        \return True if success, false otherwise */
     bool CreateInterfaceProxyClient(const std::string & requiredInterfaceProxyName,
                                     const std::string & serverEndpointInfo,
-                                    const unsigned int connectionID);
+                                    const ConnectionIDType connectionID);
 
     /* \brief Check if a network proxy server to serve the provided interface 
               proxy specified has been created. 
@@ -217,7 +218,7 @@ public:
         \param clientInterfaceRequiredName Name of required interface
         \note This method is called only by a client process
         \return True if success, false otherwise */
-    bool UpdateCommandProxyID(const unsigned int connectionID,
+    bool UpdateCommandProxyID(const ConnectionIDType connectionID,
         const std::string & serverInterfaceProvidedName, const std::string & clientInterfaceRequiredName);
 
     /*! \brief Assign ids of event handler proxies' in a required interface 

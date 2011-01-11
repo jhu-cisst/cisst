@@ -102,7 +102,7 @@ protected:
 public:
     /*! Constructor and destructor */
     mtsComponentInterfaceProxyClient(const std::string & serverEndpointInfo,
-                                     const unsigned int connectionID);
+                                     const ConnectionIDType connectionID);
     ~mtsComponentInterfaceProxyClient();
 
     /*! Entry point to run a proxy. */

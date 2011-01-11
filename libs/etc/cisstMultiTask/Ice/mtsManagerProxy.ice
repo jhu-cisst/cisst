@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
   
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -188,9 +188,6 @@ module mtsManagerProxy
         ["cpp:const"] idempotent
         string GetProcessName();
 
-        ["cpp:const"] idempotent
-        int GetTotalNumberOfInterfaces(string componentName);
-
         // Getters for component inspector
         ["cpp:const"] idempotent
         void GetNamesOfCommands(string componentName, string interfaceProvidedName, out NamesOfCommandsSequence names);
@@ -271,15 +268,15 @@ module mtsManagerProxy
 
         // Connection Management
         int Connect(ConnectionStringSet connectionStrings); 
-        bool ConnectConfirm(int connectionSessionID);
+        bool ConnectConfirm(int connectionID);
         bool Disconnect(ConnectionStringSet connectionStrings);
 
         // Networking
-        bool SetInterfaceProvidedProxyAccessInfo(ConnectionStringSet connectionStrings, string endpointInfo);
-        bool GetInterfaceProvidedProxyAccessInfo(ConnectionStringSet connectionStrings, out string endpointInfo);
-        bool InitiateConnect(int connectionID, ConnectionStringSet connectionStrings);
-        bool ConnectServerSideInterfaceRequest(int connectionID, ConnectionStringSet connectionStrings);
-
+        bool SetInterfaceProvidedProxyAccessInfo(int connectionID, string endpointInfo);
+        bool GetInterfaceProvidedProxyAccessInfo(string serverProcessName, string serverComponentName, string serverInterfaceProvidedName, out string endpointInfo);
+        bool GetInterfaceProvidedProxyAccessInfoWithID(int connectionID, out string endpointInfo);
+        bool InitiateConnect(int connectionID);
+        bool ConnectServerSideInterfaceRequest(int connectionID);
 	};
 };
 

@@ -219,6 +219,8 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     std::string ipString;
     if (ipAddresses.size() == 0) {
         ipString += "Failed to retrieve IP address";
+        CMN_LOG_CLASS_INIT_ERROR << "GCMUITask: No IP address detected on this machine" << std::endl;
+        cmnThrow(std::runtime_error("No IP address detected on this machine"));
     } else {
         ipString += ipAddresses[0];
         for (StringVector::size_type i = 1; i < ipAddresses.size(); ++i) {

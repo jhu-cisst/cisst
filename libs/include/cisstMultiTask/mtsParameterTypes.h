@@ -97,16 +97,16 @@ public:
 
     FullInterface Client;
     FullInterface Server;
-    int ConnectionID;
+    ConnectionIDType ConnectionID;
 #endif
 
-    mtsDescriptionConnection() : ConnectionID(-1) {}
+    mtsDescriptionConnection() : ConnectionID(0) {}
     mtsDescriptionConnection(
         const std::string & clientProcessName, 
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, 
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const int connectionId = -1);
+        const ConnectionIDType connectionId = 0);
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;

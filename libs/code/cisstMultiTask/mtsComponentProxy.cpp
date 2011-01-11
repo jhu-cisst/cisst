@@ -209,6 +209,7 @@ bool mtsComponentProxy::RemoveInterfaceRequiredProxy(const std::string & require
         return false;
     } else {
         // Network server deactivation and resource clean up
+        clientProxy->StopProxy();
         delete clientProxy;
         InterfaceRequiredNetworkProxies.RemoveItem(requiredInterfaceProxyName);
     }
@@ -469,6 +470,7 @@ bool mtsComponentProxy::RemoveInterfaceProvidedProxy(const std::string & provide
         return false;
     } else {
         // Network server deactivation and resource clean up
+        serverProxy->StopProxy();
         delete serverProxy;
         InterfaceProvidedNetworkProxies.RemoveItem(providedInterfaceProxyName);
     }
@@ -522,7 +524,7 @@ bool mtsComponentProxy::CreateInterfaceProxyServer(const std::string & providedI
 
 bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredInterfaceProxyName,
                                                    const std::string & serverEndpointInfo,
-                                                   const unsigned int connectionID)
+                                                   const ConnectionIDType connectionID)
 {
     // Create an instance of mtsComponentInterfaceProxyClient
     mtsComponentInterfaceProxyClient * requiredInterfaceProxy =
@@ -659,7 +661,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
     return true;
 }
 
-bool mtsComponentProxy::UpdateCommandProxyID(const unsigned int connectionID,
+bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID,
     const std::string & serverInterfaceProvidedName, const std::string & clientInterfaceRequiredName)
 {
     // User connection id as client id
@@ -1083,7 +1085,7 @@ void mtsComponentProxy::ExtractInterfaceRequiredDescription(
     }
 }
 
-bool mtsComponentProxy::AddConnectionInformation(const unsigned int connectionID,
+bool mtsComponentProxy::AddConnectionInformation(const ConnectionIDType connectionID,
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {

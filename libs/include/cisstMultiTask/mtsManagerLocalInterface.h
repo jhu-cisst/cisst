@@ -47,8 +47,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceCommon.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstOSAbstraction/osaTimeServer.h> // for osaAbsoluteTime
-
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -58,7 +58,7 @@ class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject
 
 public:
     //-------------------------------------------------------------------------
-    //  Data Structure of Visualization
+    //  Data Structure for Visualization
     //-------------------------------------------------------------------------
     /*! List of sampled values of signals */
     struct ValuePair {
@@ -95,40 +95,32 @@ public:
         method removes a provided interface proxy only when a provided interface
         user counter (mtsInterfaceProvidedOrOutput::UserCounter) becomes zero. */
     virtual bool RemoveInterfaceProvidedProxy(
-        const std::string & clientComponentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "") = 0;
+        const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "") = 0;
 
     /*! Remove a required interface proxy */
     virtual bool RemoveInterfaceRequiredProxy(
-        const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "") = 0;
+        const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "") = 0;
+#endif
 
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
+    /*! Thread-safe  */
+    virtual bool DisconnectLocally(const std::string & serverComponentName, const std::string & serverInterfaceName,
+                                   const std::string & clientComponentName, const std::string & clientInterfaceName) = 0;
+
+#if CISST_MTS_HAS_ICE
     /*! \brief Connect interfaces at server side 
-        \param clientProcessName Name of client process
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverProcessName Name of server process
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
+        \param description Description of connection
         \param listenerID Id of local component manager (set as process name) 
                that this method should call. Valid only in networked configuration
         \return True if success, false otherwise
         \note This method is called by the global component manager and is 
               always executed inside ConnectClientSideInterface(). */
-    virtual bool ConnectServerSideInterface(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName, const std::string & listenerID = "") = 0;
+    virtual bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
 
     /*! \brief Connect interfaces at client side 
-        \param connectionID Connection session id issued by the global component
-               manager.
-        \param clientProcessName Name of client process
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverProcessName Name of server process
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
+        \param description Description of connection
         \param listenerID Id of local component manager (set as process name) 
                that this method should call. Valid only in networked configuration
         \return True if success, false otherwise
@@ -138,9 +130,7 @@ public:
               so that it registers this connection. Otherwise, the GCM cleans up 
               the connection after timeout.  This method is always executed 
               ahead of ConnectServerSideInterface(). */
-    virtual bool ConnectClientSideInterface(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName, const std::string & listenerID = "") = 0;
+    virtual bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
 #endif
 
     //-------------------------------------------------------------------------
@@ -252,15 +242,6 @@ public:
     virtual bool GetInterfaceRequiredDescription(
         const std::string & componentName, const std::string & requiredInterfaceName,
         InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
-
-    /*! \brief Return a total number of interfaces that component has
-        \param componentName Name of component
-        \param listenerID Client ID that owns the component (specified by 
-               componentName argument). Valid only in the networked configuration.
-               Set as zero (by default) and ignored in standalone mode.
-        \return Total number of interfaces that the component specified has. 
-                -1 if error occurs */
-    virtual int GetTotalNumberOfInterfaces(const std::string & componentName, const std::string & listenerID = "") = 0;
 #endif
 };
 

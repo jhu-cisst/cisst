@@ -49,7 +49,7 @@ public:
     /*! Typedef for proxy connection id (defined by ICE). Set as Ice::Identity
         which can be transformed to std::string by identityToString().
         See http://www.zeroc.com/doc/Ice-3.3.1/reference/Ice/Identity.html */
-    typedef std::string ConnectionIDType;
+    typedef std::string IceConnectionIDType;
 
     /*! Typedef for client id */
     typedef _clientIDType ClientIDType;
@@ -101,7 +101,7 @@ protected:
     typedef struct {
         std::string      ClientName;
         ClientIDType     ClientID;
-        ConnectionIDType ConnectionID;
+        IceConnectionIDType ConnectionID;
         ClientProxyType  ClientProxy;
     } ClientInformation;
 
@@ -110,8 +110,8 @@ protected:
     ClientIDMapType ClientIDMap;
 
     /*! Lookup table to get client information with ConnectionID */
-    typedef std::map<ConnectionIDType, ClientInformation> ConnectionIDMapType;
-    ConnectionIDMapType ConnectionIDMap;
+    typedef std::map<IceConnectionIDType, ClientInformation> IceConnectionIDMapType;
+    IceConnectionIDMapType IceConnectionIDMap;
 
     /*! Mutex */
     osaMutex ClientIDMapChange;
@@ -119,10 +119,10 @@ protected:
 
     /*! Add proxy client connecting to this proxy server (key: connection id) */
     bool AddProxyClient(const std::string & clientName, const ClientIDType & clientID,
-        const ConnectionIDType & connectionID, ClientProxyType & clientProxy);
+        const IceConnectionIDType & iceConnectionID, ClientProxyType & clientProxy);
 
     /*! Remove ICE proxy object using connection id */
-    bool RemoveClientByConnectionID(const ConnectionIDType & connectionID);
+    bool RemoveClientByConnectionID(const IceConnectionIDType & iceConnectionID);
 
     /*! Remove ICE proxy object using client id */
     bool RemoveClientByClientID(const ClientIDType & clientID);
@@ -144,18 +144,18 @@ protected:
     //  Getters
     //-------------------------------------------------------------------------
     /*! Return ClientIDType */
-    ClientIDType GetClientID(const ConnectionIDType & connectionID) const {
-        typename ConnectionIDMapType::const_iterator it = ConnectionIDMap.find(connectionID);
-        if (it == ConnectionIDMap.end()) {
+    ClientIDType GetClientID(const IceConnectionIDType & iceConnectionID) const {
+        typename IceConnectionIDMapType::const_iterator it = IceConnectionIDMap.find(iceConnectionID);
+        if (it == IceConnectionIDMap.end()) {
             return 0;
         }
         return it->second.ClientID;
     }
 
     /*! Get ICE proxy object using connection id */
-    ClientProxyType * GetClientByConnectionID(const ConnectionIDType & connectionID) const {
-        typename ConnectionIDMapType::const_iterator it = ConnectionIDMap.find(connectionID);
-        if (it == ConnectionIDMap.end()) {
+    ClientProxyType * GetClientByConnectionID(const IceConnectionIDType & iceConnectionID) const {
+        typename IceConnectionIDMapType::const_iterator it = IceConnectionIDMap.find(iceConnectionID);
+        if (it == IceConnectionIDMap.end()) {
             return NULL;
         }
         return &(it->second.ClientProxy);
@@ -171,8 +171,8 @@ protected:
     }
 
     /*! Look for ICE proxy client using connection id */
-    inline bool FindClientByConnectionID(const ConnectionIDType & connectionID) const {
-        return (ConnectionIDMap.find(connectionID) != ConnectionIDMap.end());
+    inline bool FindClientByConnectionID(const IceConnectionIDType & iceConnectionID) const {
+        return (IceConnectionIDMap.find(iceConnectionID) != IceConnectionIDMap.end());
     }
 
     /*! Look for ICE proxy object using client id */
@@ -323,11 +323,8 @@ void mtsProxyBaseServerType::StopProxy(void)
 //}
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-bool mtsProxyBaseServerType::AddProxyClient(
-    const std::string & clientName,
-    const ClientIDType & clientID,
-    const ConnectionIDType & connectionID,
-    ClientProxyType & clientProxy)
+bool mtsProxyBaseServerType::AddProxyClient(const std::string & clientName, const ClientIDType & clientID, 
+                                            const IceConnectionIDType & iceConnectionID, ClientProxyType & clientProxy)
 {
     // Check the uniqueness of clientID
     if (FindClientByClientID(clientID)) {
@@ -338,10 +335,10 @@ bool mtsProxyBaseServerType::AddProxyClient(
         return false;
     }
 
-    // Check the uniqueness of connectionID
-    if (FindClientByConnectionID(connectionID)) {
+    // Check the uniqueness of iceConnectionID
+    if (FindClientByConnectionID(iceConnectionID)) {
         std::stringstream ss;
-        ss << "AddProxyClient: duplicate connection id: " << connectionID;
+        ss << "AddProxyClient: duplicate connection id: " << iceConnectionID;
         std::string s = ss.str();
         this->IceLogger->error(s);
         return false;
@@ -350,7 +347,7 @@ bool mtsProxyBaseServerType::AddProxyClient(
     ClientInformation client;
     client.ClientName = clientName;
     client.ClientID = clientID;
-    client.ConnectionID = connectionID;
+    client.ConnectionID = iceConnectionID;
     client.ClientProxy = clientProxy;
 
     ClientIDMapChange.Lock();
@@ -358,18 +355,17 @@ bool mtsProxyBaseServerType::AddProxyClient(
     ClientIDMapChange.Unlock();
 
     ConnectionIDMapChange.Lock();
-    ConnectionIDMap.insert(std::make_pair(connectionID, client));
+    IceConnectionIDMap.insert(std::make_pair(iceConnectionID, client));
     ConnectionIDMapChange.Unlock();
 
-    return ((FindClientByClientID(clientID) && FindClientByConnectionID(connectionID)));
+    return ((FindClientByClientID(clientID) && FindClientByConnectionID(iceConnectionID)));
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-bool mtsProxyBaseServerType::RemoveClientByConnectionID(
-    const ConnectionIDType & connectionID)
+bool mtsProxyBaseServerType::RemoveClientByConnectionID(const IceConnectionIDType & iceConnectionID)
 {
-    typename ConnectionIDMapType::iterator it1 = ConnectionIDMap.find(connectionID);
-    if (it1 == ConnectionIDMap.end()) {
+    typename IceConnectionIDMapType::iterator it1 = IceConnectionIDMap.find(iceConnectionID);
+    if (it1 == IceConnectionIDMap.end()) {
         return false;
     }
     typename ClientIDMapType::iterator it2 = ClientIDMap.find(it1->second.ClientID);
@@ -378,7 +374,7 @@ bool mtsProxyBaseServerType::RemoveClientByConnectionID(
     }
 
     ConnectionIDMapChange.Lock();
-    ConnectionIDMap.erase(it1);
+    IceConnectionIDMap.erase(it1);
     ConnectionIDMapChange.Unlock();
 
     ClientIDMapChange.Lock();
@@ -389,15 +385,14 @@ bool mtsProxyBaseServerType::RemoveClientByConnectionID(
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-bool mtsProxyBaseServerType::RemoveClientByClientID(
-    const ClientIDType & clientID) 
+bool mtsProxyBaseServerType::RemoveClientByClientID(const ClientIDType & clientID) 
 {
     typename ClientIDMapType::iterator it1 = ClientIDMap.find(clientID);
     if (it1 == ClientIDMap.end()) {
         return false;
     }
-    typename ConnectionIDMapType::iterator it2 = ConnectionIDMap.find(it1->second.ConnectionID);
-    if (it2 == ConnectionIDMap.end()) {
+    typename IceConnectionIDMapType::iterator it2 = IceConnectionIDMap.find(it1->second.ConnectionID);
+    if (it2 == IceConnectionIDMap.end()) {
         return false;
     }
 
@@ -406,7 +401,7 @@ bool mtsProxyBaseServerType::RemoveClientByClientID(
     ClientIDMapChange.Unlock();
 
     ConnectionIDMapChange.Lock();
-    ConnectionIDMap.erase(it2);
+    IceConnectionIDMap.erase(it2);
     ConnectionIDMapChange.Unlock();
 
     return true;
@@ -436,8 +431,8 @@ void mtsProxyBaseServerType::Monitor(void)
 {
     if (!IsActiveProxy()) return;
 
-    typename ConnectionIDMapType::iterator it = ConnectionIDMap.begin();
-    while (it != ConnectionIDMap.end()) {
+    typename IceConnectionIDMapType::iterator it = IceConnectionIDMap.begin();
+    while (it != IceConnectionIDMap.end()) {
         try {
             it->second.ClientProxy->ice_ping();
             ++it;
@@ -451,7 +446,7 @@ void mtsProxyBaseServerType::Monitor(void)
             OnClientDisconnect(it->second.ClientID);
 
             // Reset iterator (OnClientDisconnect() may invalidated it)
-            it = ConnectionIDMap.begin();
+            it = IceConnectionIDMap.begin();
         }
     }
 }

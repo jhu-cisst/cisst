@@ -73,6 +73,8 @@ set (SOURCE_FILES
      mtsCollectorState.cpp
      mtsCollectorEvent.cpp
 
+     mtsConnection.cpp
+     mtsConnection.cpp
      mtsManagerLocal.cpp
      mtsManagerGlobal.cpp
      mtsManagerComponentBase.cpp
@@ -177,6 +179,8 @@ set (HEADER_FILES
      mtsCollectorState.h
      mtsCollectorEvent.h
 
+     mtsConnection.h
+     mtsConnection.h
      mtsManagerLocalInterface.h
      mtsManagerLocal.h
      mtsManagerGlobalInterface.h

@@ -228,14 +228,14 @@ mtsComponentInterfaceProxyServer::ComponentInterfaceClientProxyType * mtsCompone
 //-------------------------------------------------------------------------
 //  Event Handlers (Client -> Server)
 //-------------------------------------------------------------------------
-void mtsComponentInterfaceProxyServer::ReceiveTestMessageFromClientToServer(const ConnectionIDType & connectionID, const std::string & str)
+void mtsComponentInterfaceProxyServer::ReceiveTestMessageFromClientToServer(const IceConnectionIDType & iceConnectionID, const std::string & str)
 {
-    const ClientIDType clientID = GetClientID(connectionID);
+    const ClientIDType clientID = GetClientID(iceConnectionID);
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
              "ReceiveTestMessageFromClientToServer: "
-             << "\n..... ConnectionID: " << connectionID
+             << "\n..... ConnectionID: " << iceConnectionID
              << "\n..... Message: " << str);
 #endif
 
@@ -243,10 +243,10 @@ void mtsComponentInterfaceProxyServer::ReceiveTestMessageFromClientToServer(cons
 }
 
 bool mtsComponentInterfaceProxyServer::ReceiveAddClient(
-    const ConnectionIDType & connectionID, const std::string & connectingProxyName,
+    const IceConnectionIDType & iceConnectionID, const std::string & connectingProxyName,
     const unsigned int providedInterfaceProxyInstanceID, ComponentInterfaceClientProxyType & clientProxy)
 {
-    if (!AddProxyClient(connectingProxyName, providedInterfaceProxyInstanceID, connectionID, clientProxy)) {
+    if (!AddProxyClient(connectingProxyName, providedInterfaceProxyInstanceID, iceConnectionID, clientProxy)) {
         LogError(mtsComponentInterfaceProxyServer, "ReceiveAddClient: failed to add proxy client: " << connectingProxyName);
         return false;
     }
@@ -254,7 +254,7 @@ bool mtsComponentInterfaceProxyServer::ReceiveAddClient(
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
              "ReceiveAddClient: added proxy client: "
-             << "\n..... ConnectionID: " << connectionID
+             << "\n..... ConnectionID: " << iceConnectionID
              << "\n..... Proxy Name: " << connectingProxyName
              << "\n..... ClientID: " << providedInterfaceProxyInstanceID);
 #endif
@@ -263,14 +263,14 @@ bool mtsComponentInterfaceProxyServer::ReceiveAddClient(
 }
 
 bool mtsComponentInterfaceProxyServer::ReceiveFetchEventGeneratorProxyPointers(
-    const ConnectionIDType & connectionID, const std::string & clientComponentName,
+    const IceConnectionIDType & iceConnectionID, const std::string & clientComponentName,
     const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
              "ReceiveFetchEventGeneratorProxyPointers: "
-             << "\n..... ConnectionID: " << connectionID
+             << "\n..... ConnectionID: " << iceConnectionID
              << "\n..... Client component name: " << clientComponentName
              << "\n..... Required interface name: " << requiredInterfaceName);
 #endif
@@ -291,7 +291,7 @@ bool mtsComponentInterfaceProxyServer::AddPerCommandSerializer(const CommandIDTy
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::AddConnectionInformation(const unsigned int connectionID,
+bool mtsComponentInterfaceProxyServer::AddConnectionInformation(const ConnectionIDType connectionID,
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
@@ -634,9 +634,9 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::TestMessageFro
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: TestMessageFromClientToServer");
 #endif
 
-    const ConnectionIDType connectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
+    const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
-    ComponentInterfaceProxyServer->ReceiveTestMessageFromClientToServer(connectionID, str);
+    ComponentInterfaceProxyServer->ReceiveTestMessageFromClientToServer(iceConnectionID, str);
 }
 
 bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::AddClient(
@@ -647,20 +647,20 @@ bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::AddClient(
    LogPrint(ComponentInterfaceServerI, "<<<<< RECV: AddClient: " << connectingProxyName << " (" << Communicator->identityToString(identity) << ")");
 #endif
 
-    const ConnectionIDType connectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
+    const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
     IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
 
     ComponentInterfaceClientProxyType clientProxy =
         ComponentInterfaceClientProxyType::uncheckedCast(current.con->createProxy(identity));
 
-    return ComponentInterfaceProxyServer->ReceiveAddClient(connectionID,
+    return ComponentInterfaceProxyServer->ReceiveAddClient(iceConnectionID,
         connectingProxyName, (unsigned int) providedInterfaceProxyInstanceID, clientProxy);
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Refresh(const ::Ice::Current& current)
 {
-    const ConnectionIDType connectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
+    const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: Refresh: " << connectionID);
@@ -675,7 +675,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Shutdown(const
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: Shutdown");
 #endif
 
-    const ConnectionIDType connectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
+    const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
     // TODO: smmy
     // Set as true to represent that this connection (session) is going to be closed.
@@ -692,10 +692,10 @@ bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::FetchEventGene
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: FetchEventGeneratorProxyPointers: " << clientComponentName << ", " << requiredInterfaceName);
 #endif
 
-    const ConnectionIDType connectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
+    const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
     return ComponentInterfaceProxyServer->ReceiveFetchEventGeneratorProxyPointers(
-        connectionID, clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers);
+        iceConnectionID, clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers);
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ExecuteEventVoid(

@@ -100,15 +100,15 @@ protected:
     //-------------------------------------------------------------------------
     //  Event Handlers (Client -> Server)
     //-------------------------------------------------------------------------
-    void ReceiveTestMessageFromClientToServer(const ConnectionIDType &connectionID, const std::string & str);
+    void ReceiveTestMessageFromClientToServer(const IceConnectionIDType & iceConnectionID, const std::string & str);
 
     /*! When a new client connects, add it to the client management list. */
-    bool ReceiveAddClient(const ConnectionIDType & connectionID,
+    bool ReceiveAddClient(const IceConnectionIDType & iceConnectionID,
                           const std::string & connectingProxyName,
                           const unsigned int providedInterfaceProxyInstanceID,
                           ComponentInterfaceClientProxyType & clientProxy);
 
-    bool ReceiveFetchEventGeneratorProxyPointers(const ConnectionIDType & connectionID,
+    bool ReceiveFetchEventGeneratorProxyPointers(const IceConnectionIDType & iceConnectionID,
                                                  const std::string & clientComponentName,
                                                  const std::string & requiredInterfaceName,
                                                  mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
@@ -133,7 +133,7 @@ public:
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const unsigned int connectionID,
+    bool AddConnectionInformation(const ConnectionIDType connectionID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 

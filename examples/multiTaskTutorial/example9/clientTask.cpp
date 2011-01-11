@@ -83,15 +83,13 @@ void clientTask<_dataType>::Run(void)
         {
             if (UI.VoidRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested" << std::endl;
-                //this->VoidServer();
-                this->VoidServer.ExecuteBlocking();
+                this->VoidServer();
                 UI.VoidRequested = false;
             }
             
             if (UI.WriteRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteRequested" << std::endl;
-                //this->WriteServer(_dataType(UI.WriteValue->value()));
-                this->WriteServer.ExecuteBlocking(_dataType(UI.WriteValue->value()));
+                this->WriteServer(_dataType(UI.WriteValue->value()));
                 UI.WriteRequested = false;
             }
             

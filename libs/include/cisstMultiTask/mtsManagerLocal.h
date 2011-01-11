@@ -234,6 +234,10 @@ protected:
     //
     //  See mtsManagerLocalInterface.h for detailed documentation.
     //-------------------------------------------------------------------------
+    bool DisconnectLocally(const std::string & serverComponentName, const std::string & serverInterfaceName,
+                           const std::string & clientComponentName, const std::string & clientInterfaceName);
+
+
 #if CISST_MTS_HAS_ICE
     /*! \brief Create component proxy
         \param componentProxyName Name of component proxy
@@ -261,13 +265,13 @@ protected:
         const std::string & clientComponentProxyName,
         const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
-    /*! Remove a provided interface proxy */
+    /*! Remove provided interface proxy */
     bool RemoveInterfaceProvidedProxy(
-        const std::string & clientComponentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
+        const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
 
-    /*! Remove a required interface proxy */
+    /*! Remove required interface proxy */
     bool RemoveInterfaceRequiredProxy(
-        const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
+        const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
 
     /*! Get information about provided interface */
     bool GetInterfaceProvidedDescription(
@@ -282,42 +286,11 @@ protected:
         const std::string & requiredInterfaceName,
         InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
-    /*! Returns a total number of interfaces that a component has */
-    int GetTotalNumberOfInterfaces(const std::string & componentName, const std::string & listenerID = "");
+    /*! Connect two local interfaces at the server side */
+    bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
 
-    /*! \brief Connect two local interfaces at server side
-        \param connectionID Id of this connection, which was issued by the global
-               component manager
-        \param clientProcessName Name of client process
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverProcessName Name of server process
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
-        \param listenerID Not used (see documentation for ConnectClientSideInterface()
-               in mtsManagerLocalInterface.h)
-        \return True if success, false otherwise */
-    bool ConnectServerSideInterface(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const std::string & listenerID = "");
-
-    /*! \brief Connect two local interfaces at client side
-        \param connectionID Id of this connection, which was issued by the global
-               component manager
-        \param clientProcessName Name of client process
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverProcessName Name of server process
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
-        \param listenerID Not used (see documentation for ConnectClientSideInterface()
-               in mtsManagerLocalInterface.h)
-        \return True if success, false otherwise */
-    bool ConnectClientSideInterface(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const std::string & listenerID = "");
+    /*! \brief Connect two local interfaces at the client side */
+    bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
 #endif
 
 public:
@@ -403,10 +376,10 @@ public:
               ConnectServerSideInterface().  ConnectClientSideInterface() is
               always executed first and calls ConnectServerSideInterface()
               internally in a blocking way (i.e., it waits for
-              ConnectServerSideInterface() to finish inside it).
-              Connection request can be made at any process--server or client
-              process.  That is, whichever process initiate connection request,
-              the result is the same.
+              ConnectServerSideInterface() to finish).
+              Connection request can be made by any process -- server process,
+              client process, or even third process -- and the result should
+              be the same regardless the request process.
               If this method is called against two local interfaces, the other
               Connect() method is internally called instead. */
     bool Connect(const std::string & clientProcessName, const std::string & clientComponentName,
@@ -416,6 +389,8 @@ public:
 #endif
 
     /*! Disconnect two interfaces */
+    bool Disconnect(const ConnectionIDType connectionID);
+
     bool Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
@@ -590,11 +565,7 @@ public:
     }
 
     /*! Set endpoint access information */
-    bool SetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName, const std::string & clientComponentName,
-                                             const std::string & clientInterfaceRequiredName,
-                                             const std::string & serverProcessName, const std::string & serverComponentName,
-                                             const std::string & serverInterfaceProvidedName,
-                                             const std::string & endpointInfo);
+    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
 
     /*! For testing purposes */
     void DisconnectGCM(void);
