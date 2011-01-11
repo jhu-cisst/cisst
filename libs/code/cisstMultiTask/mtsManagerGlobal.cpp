@@ -58,6 +58,15 @@ mtsManagerGlobal::~mtsManagerGlobal()
 //-------------------------------------------------------------------------
 void mtsManagerGlobal::Cleanup(void)
 {
+    // Disconnect all connections
+    ConnectionMapType::const_iterator it1 = ConnectionMap.begin();
+    const ConnectionMapType::const_iterator itEnd1 = ConnectionMap.end();
+    for (; it1 != itEnd1; ++it1) {
+        Disconnect(it1->second.GetConnectionID());
+    }
+
+    osaSleep(200 * cmn_ms);
+
     // Remove all processes
     ProcessMapType::iterator it = ProcessMap.begin();
     while (it != ProcessMap.end()) {
@@ -558,13 +567,19 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
         delete componentMap;
     }
 
+    const std::string removedProcessName = processName;
+
     // Remove the process from process map
     ret &= ProcessMap.RemoveItem(processName);
 
     ProcessMapChange.Unlock();
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "RemoveProcess: removed process: " << "\"" << processName << "\"" << std::endl;
-
+    if (ret) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveProcess: removed process: " << "\"" << removedProcessName << "\"" << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove process: " << "\"" << removedProcessName << "\"" << std::endl;
+    }
+    
     return ret;
 }
 
@@ -680,8 +695,6 @@ bool mtsManagerGlobal::FindComponent(const std::string & processName, const std:
 
 bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "zzzzzzzzzzzz 3333333333333333333" << componentName << std::endl;
-
     // Check if the component exists
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveComponent: no component found: "
@@ -719,6 +732,8 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
         delete interfaceMap;
     }
 
+    const std::string removedComponentName = componentName;
+
     // Remove the component from the component map
     ret &= componentMap->RemoveItem(componentName);
 
@@ -726,7 +741,11 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
         ProcessMapChange.Unlock();
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "RemoveComponent: removed component: " << "\"" << processName << ":" << componentName << "\"" << std::endl;
+    if (ret) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveComponent: removed component: " << "\"" << processName << ":" << removedComponentName << "\"" << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveComponent: failed to remove component: " << "\"" << processName << ":" << removedComponentName << "\"" << std::endl;
+    }
 
     return ret;
 }
@@ -907,6 +926,8 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
         }
     }
 
+    const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName);
+
     // Remove the provided interface from provided interface map
     ret &= interfaceMap->InterfaceProvidedOrOutputMap.RemoveItem(interfaceName);
 
@@ -914,8 +935,11 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
         ProcessMapChange.Unlock();
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceProvidedOrOutput: removed provided interface: \"" 
-        << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
+    if (ret) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceProvidedOrOutput: removed provided interface: \"" << interfaceUID << "\"" << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvidedOrOutput: failed to removed provided interface: \"" << interfaceUID << "\"" << std::endl;
+    }
 
     return ret;
 }
@@ -967,16 +991,18 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
     bool ret = true;
     ConnectionIDListType * list = interfaceMap->InterfaceRequiredOrInputMap.GetItem(interfaceName);
     if (list) {
-        CMN_ASSERT(list->size() == 1);
-
-        const ConnectionIDType id = *list->begin();
-        if (!Disconnect(id)) {
-            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequiredOrInput: failed to disconnect (id: \"" << id << "\"): \""
-                << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
-            return false;
+        if (list->size()) {
+            const ConnectionIDType id = *list->begin();
+            if (!Disconnect(id)) {
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequiredOrInput: failed to disconnect (id: \"" << id << "\"): \""
+                    << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
+                return false;
+            }
+            delete list;
         }
-        delete list;
     }
+
+    const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName);
 
     // Remove the required interface from required interface map
     ret &= interfaceMap->InterfaceRequiredOrInputMap.RemoveItem(interfaceName);
@@ -985,8 +1011,11 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
         ProcessMapChange.Unlock();
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequiredOrInput: removed required interface: \"" 
-        << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
+    if (ret) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequiredOrInput: removed required interface: \"" << interfaceUID << "\"" << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequiredOrInput: failed to removed required interface: \"" << interfaceUID << "\"" << std::endl;
+    }
 
     return ret;
 }
@@ -1643,42 +1672,30 @@ void mtsManagerGlobal::DisconnectInternal(void)
             //continue;
         }
 
-        /*
-        if (!localManager->DisconnectLocally(serverComponentName, serverInterfaceName, 
-                                             clientComponentName, clientInterfaceName))
-        {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: LCM failed to disconnect: [ " << connectionID << " ] "
-                << "\"" << serverComponentName << ":" << serverInterfaceName << " - " 
-                << "\"" << clientComponentName << ":" << clientInterfaceName << std::endl;
+        mtsDescriptionConnection connection;
+        connectionInfo->GetDescriptionConnection(connection);
+
+        ManagerComponentServer->InterfaceGCMCommands_ComponentDisconnect(connection);
+
+        // 2. Clean up GCM's internal data structure
+        if (!RemoveConnectionOfInterfaceRequiredOrInput(processName, clientComponentName, clientInterfaceName, connectionID)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove required interface's connection info: "
+                << "[ " << connectionID << " ] - "
+                << mtsManagerGlobal::GetInterfaceUID(processName, clientComponentName, clientInterfaceName)
+                << std::endl;
             CMN_ASSERT(false);
             // smmy: for testing
             //continue;
         }
-        */
 
-        // 2. Clean up GCM's internal data structure
-        //if (FindComponent(processName, clientComponentName)) {
-            if (!RemoveConnectionOfInterfaceRequiredOrInput(processName, clientComponentName, clientInterfaceName, connectionID)) {
-                CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove required interface's connection info: "
-                    << "[ " << connectionID << " ] - "
-                    << mtsManagerGlobal::GetInterfaceUID(processName, clientComponentName, clientInterfaceName)
-                    << std::endl;
-                CMN_ASSERT(false);
-                // smmy: for testing
-                //continue;
-            }
-        //}
-
-        if (FindComponent(processName, serverComponentName)) {
-            if (!RemoveConnectionOfInterfaceProvidedOrOutput(processName, serverComponentName, serverInterfaceName, connectionID)) {
-                CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface's connection info: "
-                    << "[ " << connectionID << " ] - "
-                    << mtsManagerGlobal::GetInterfaceUID(processName, serverComponentName, serverInterfaceName)
-                    << std::endl;
-                CMN_ASSERT(false);
-                // smmy: for testing
-                //continue;
-            }
+        if (!RemoveConnectionOfInterfaceProvidedOrOutput(processName, serverComponentName, serverInterfaceName, connectionID)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface's connection info: "
+                << "[ " << connectionID << " ] - "
+                << mtsManagerGlobal::GetInterfaceUID(processName, serverComponentName, serverInterfaceName)
+                << std::endl;
+            CMN_ASSERT(false);
+            // smmy: for testing
+            //continue;
         }
 #endif
 
@@ -1695,177 +1712,9 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
     QueueDisconnectWaitingChange.Unlock();
     
-    CMN_LOG_CLASS_INIT_VERBOSE << "zzzzzzzzzzzz 222222222222222222222222" << std::endl;
-
     CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: successfully disconnected [ " << connectionID << " ] : "
                                << "\"" << serverComponentName << ":" << serverInterfaceName << " - " 
                                << clientComponentName << ":" << clientInterfaceName << "\"" << std::endl;
-
-    /*
-    // Get connection information
-    ConnectionIDListType * connectionMapOfInterfaceRequired =
-        GetConnectionsOfInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceRequiredName);
-    if (!connectionMapOfInterfaceRequired) {
-        CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to disconnect. Required interface has no connection: "
-                                << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << std::endl;
-        return false;
-    }
-
-    ConnectionIDListType * connectionMapOfInterfaceProvided =
-        GetConnectionsOfInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceProvidedName);
-    if (!connectionMapOfInterfaceProvided) {
-        CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to disconnect. Provided interface has no connection: "
-                                << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl;
-        return false;
-    }
-
-    bool remoteConnection = false;  // true if the connection to be disconnected is a remote connection.
-    std::string interfaceUID;
-    ConnectedInterfaceInfo * connectionInfo;
-
-    // Remove required interfaces' connection information
-    if (connectionMapOfInterfaceRequired->size()) {
-        // Get an element that contains connection information
-        interfaceUID = GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName);
-        connectionInfo = connectionMapOfInterfaceRequired->GetItem(interfaceUID);
-
-        // Release allocated memory
-        if (connectionInfo) {
-            remoteConnection = connectionInfo->IsRemoteConnection();
-            delete connectionInfo;
-        }
-
-        // Remove connection information
-        if (connectionMapOfInterfaceRequired->FindItem(interfaceUID)) {
-            if (!connectionMapOfInterfaceRequired->RemoveItem(interfaceUID)) {
-                CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to update connection map in server process" << std::endl;
-                return false;
-            }
-
-            // If the required interface is a proxy object (not an original interface),
-            // it should be removed when the connection is disconnected.
-#if CISST_MTS_HAS_ICE
-            if (remoteConnection) {
-                mtsManagerLocalInterface * localManagerServer = GetProcessObject(serverProcessName);
-                const std::string clientComponentProxyName = GetComponentProxyName(clientProcessName, clientComponentName);
-                // Check if network proxy client is active. It is possible that
-                // a local manager server is disconnected due to crashes or any
-                // other reason. This check prevents redundant error messages.
-                mtsManagerProxyServe r* proxyClient = dynamic_cast<mtsManagerProxyServer *>(localManagerServer);
-                if (proxyClient) {
-                    if (proxyClient->GetNetworkProxyClient(serverProcessName)) {
-                        if (localManagerServer->RemoveInterfaceRequiredProxy(clientComponentProxyName, clientInterfaceRequiredName, serverProcessName)) {
-                            // If no interface exists on the component proxy, it should be removed.
-                            const int interfaceCount = localManagerServer->GetTotalNumberOfInterfaces(clientComponentProxyName, serverProcessName);
-                            if (interfaceCount != -1) { // no component found
-                                if (interfaceCount == 0) { // remove components with no active interface
-                                    CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove client component proxy with no active interface: " << clientComponentProxyName << std::endl;
-                                    if (!localManagerServer->RemoveComponentProxy(clientComponentProxyName, serverProcessName)) {
-                                        CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove client component proxy: "
-                                                                << clientComponentProxyName << " on " << serverProcessName << std::endl;
-                                        return false;
-                                    }
-                                }
-                            }
-                        } else {
-                            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to update local component manager at server side" << std::endl;
-                        }
-                    }
-                }
-            }
-#endif
-        }
-    }
-
-    // Remove provided interfaces' connection information
-    if (connectionMapOfInterfaceProvided->size()) {
-        // Get an element that contains connection information
-        interfaceUID = GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName);
-        connectionInfo = connectionMapOfInterfaceProvided->GetItem(interfaceUID);
-
-        // Release allocated memory
-        if (connectionInfo) {
-            remoteConnection = connectionInfo->IsRemoteConnection();
-            delete connectionInfo;
-        }
-
-        // Remove connection information
-        if (connectionMapOfInterfaceProvided->FindItem(interfaceUID)) {
-            if (!connectionMapOfInterfaceProvided->RemoveItem(interfaceUID)) {
-                CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to update connection map in client process" << std::endl;
-                return false;
-            }
-
-            // If the required interface is a proxy object (not an original interface),
-            // it should be removed when the connection is disconnected.
-#if CISST_MTS_HAS_ICE
-            if (remoteConnection) {
-                mtsManagerLocalInterface * localManagerClient = GetProcessObject(clientProcessName);
-                const std::string serverComponentProxyName = GetComponentProxyName(serverProcessName, serverComponentName);
-                // Check if network proxy client is active. It is possible that
-                // a local manager server is disconnected due to crashes or any
-                // other reason. This check prevents redundant error messages.
-                mtsManagerProxyServer * proxyClient = dynamic_cast<mtsManagerProxyServer *>(localManagerClient);
-                if (proxyClient) {
-                    if (proxyClient->GetNetworkProxyClient(clientProcessName)) {
-                        if (localManagerClient->RemoveInterfaceProvidedProxy(serverComponentProxyName, serverInterfaceProvidedName, clientProcessName)) {
-                            // If no interface exists on the component proxy, it should be removed.
-                            const int interfaceCount = localManagerClient->GetTotalNumberOfInterfaces(serverComponentProxyName, clientProcessName);
-                            if (interfaceCount != -1) {
-                                if (interfaceCount == 0) {
-                                    CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove server component proxy with no active interface: " << serverComponentProxyName << std::endl;
-                                    if (!localManagerClient->RemoveComponentProxy(serverComponentProxyName, clientProcessName)) {
-                                        CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove server component proxy: "
-                                                                << serverComponentProxyName << " on " << clientProcessName << std::endl;
-                                        return false;
-                                    }
-                                }
-                            }
-                        } else {
-                            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to update local component manager at client side" << std::endl;
-                        }
-                    }
-                }
-            }
-#endif
-        }
-    }
-
-    // Remove connection element corresponding to this connection
-    bool removed = false;
-    const std::string clientInterfaceUID = GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName);
-    const std::string serverInterfaceUID = GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName);
-    ConnectionElement * element;
-    ConnectionMapType::iterator it = ConnectionMap.begin();
-    for (; it != ConnectionMap.end(); ++it) {
-        element = it->second;
-        if (clientInterfaceUID == GetInterfaceUID(element->ClientProcessName, element->ClientComponentName, element->ClientInterfaceRequiredName)) {
-            if (serverInterfaceUID == GetInterfaceUID(element->ServerProcessName, element->ServerComponentName, element->ServerInterfaceProvidedName)) {
-                // Send disconnection event to ManagerComponentServer
-                if (ManagerComponentServer)
-                    ManagerComponentServer->RemoveConnectionEvent(element->GetDescriptionConnection());
-                ConnectionChange.Lock();
-                delete element;
-                ConnectionMap.erase(it);
-                ConnectionChange.Unlock();
-
-                removed = true;
-                break;
-            }
-        }
-    }
-
-    if (!removed) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: failed to remove connection element: "
-                                  << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << " - "
-                                  << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: successfully disconnected: "
-                              << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << " - "
-                              << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl;
-    */
 }
 
 bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
@@ -1891,7 +1740,6 @@ bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
         return false;
     }
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "zzzzzzzzzzzz 111111111111111111111111111" << std::endl;
     QueueDisconnectWaiting.insert(std::make_pair(connectionID, connectionID));
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: queueud connection id \"" << connectionID
