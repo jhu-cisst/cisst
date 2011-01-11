@@ -12,16 +12,12 @@
 int main(int argc, char **argv)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    // add a log per thread
-    //osaThreadedLogFile threadedLog("example9Local");
-    //cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsInterfaceProvided", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("clientTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("serverTask", CMN_LOG_ALLOW_ALL);
 
     // Command line parameter:
     //    1 -- server uses mtsDouble, client uses double

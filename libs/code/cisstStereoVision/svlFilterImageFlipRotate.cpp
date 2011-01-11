@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageFlipRotate.h>
 #include <cisstStereoVision/svlFilterInput.h>
-#include <cisstImage/imgUCharRGB.h>
 
 
 /***************************************/
@@ -184,15 +183,17 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
     unsigned int videochannels = input->GetVideoChannels();
     unsigned int idx;
 
+    typedef vctFixedSizeVector<unsigned char, 3> RGBPixelType;
+
     _ParallelLoop(procInfo, idx, videochannels)
     {
         switch (GetInput()->GetType()) {
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
-                FlipRotate<imgUCharRGB::Pixel>(reinterpret_cast<imgUCharRGB::Pixel*>(input->GetUCharPointer(idx)),
-                                               reinterpret_cast<imgUCharRGB::Pixel*>(OutputImage->GetUCharPointer(idx)),
-                                               input->GetWidth(idx), input->GetHeight(idx),
-                                               QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
+                FlipRotate<RGBPixelType>(reinterpret_cast<RGBPixelType *>(input->GetUCharPointer(idx)),
+                                         reinterpret_cast<RGBPixelType *>(OutputImage->GetUCharPointer(idx)),
+                                         input->GetWidth(idx), input->GetHeight(idx),
+                                         QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
 
             case svlTypeImageMono8:

@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <algorithm>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 
 
@@ -37,15 +38,25 @@ void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
     }
 }
 
-
-mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking)) {
-    int result = static_cast<int>(mtsExecutionResult::DEV_OK);
-    for (size_t i = 0; i < Commands.size(); i++) {
-        result =
-            (result << static_cast<int>(mtsExecutionResult::RETURN_TYPE_BIT_SIZE))
-            | static_cast<int>((Commands[i]->Execute(MTS_NOT_BLOCKING)).GetResult());
+bool mtsMulticastCommandVoid::RemoveCommand(BaseType * command) {
+    if (command) {
+        VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
+        if (it != Commands.end()) {
+            Commands.erase(it);
+            return true;
+        }
     }
-    return static_cast<mtsExecutionResult::Enum>(result);
+    return false;
+}
+
+mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking))
+{
+    size_t index;
+    const size_t commandsSize = Commands.size();
+    for (index = 0; index < commandsSize; index++) {
+        Commands[index]->Execute(MTS_NOT_BLOCKING);
+    }
+    return mtsExecutionResult::COMMAND_SUCCEEDED;
 }
 
 

@@ -27,15 +27,15 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
-///////////////////////////////////
-//     Window callback class     //
-///////////////////////////////////
+////////////////////////////////////////
+//     Window event handler class     //
+////////////////////////////////////////
 
-class CViewerWindowCallback : public svlImageWindowCallbackBase
+class CViewerEventHandler : public svlWindowEventHandlerBase
 {
 public:
-    CViewerWindowCallback() :
-        svlImageWindowCallbackBase()
+    CViewerEventHandler() :
+        svlWindowEventHandlerBase()
         ,ImageWriterFilter(0)
         ,RecorderFilter(0)
         ,Gamma(0)
@@ -125,7 +125,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
     svlFilterImageOverlay overlay;
-    CViewerWindowCallback window_cb;
+    CViewerEventHandler window_eh;
     svlFilterVideoFileWriter videowriter;
     svlFilterImageFileWriter imagewriter;
     svlFilterImageWindow window2;
@@ -170,13 +170,13 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     }
 
     // setup image window
-    window_cb.ImageWriterFilter = &imagewriter;
-    window_cb.Gamma = &gamma;
+    window_eh.ImageWriterFilter = &imagewriter;
+    window_eh.Gamma = &gamma;
     if (save == true) {
-        window_cb.RecorderFilter = &videowriter;
-        window_cb.SplitterOutput = splitteroutput;
+        window_eh.RecorderFilter = &videowriter;
+        window_eh.SplitterOutput = splitteroutput;
     }
-    window.SetEventHandler(&window_cb);
+    window.SetEventHandler(&window_eh);
     window.SetTitle("Camera Viewer");
 
     // Add buffer status overlay

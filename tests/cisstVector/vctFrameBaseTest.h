@@ -32,17 +32,23 @@ class vctFrameBaseTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(vctFrameBaseTest);
 
-    CPPUNIT_TEST(TestConstructorsDouble);
-    CPPUNIT_TEST(TestConstructorsFloat);
+    CPPUNIT_TEST(TestConstructorsDouble3);
+    CPPUNIT_TEST(TestConstructorsFloat3);
 
-    CPPUNIT_TEST(TestApplyToDouble);
-    CPPUNIT_TEST(TestApplyToFloat);
+    CPPUNIT_TEST(TestApplyToDouble3);
+    CPPUNIT_TEST(TestApplyToFloat3);
 
-    CPPUNIT_TEST(TestInverseDouble);
-    CPPUNIT_TEST(TestInverseFloat);
+    CPPUNIT_TEST(TestInverseDouble3);
+    CPPUNIT_TEST(TestInverseFloat3);
 
-    CPPUNIT_TEST(TestApplyMethodsOperatorsDouble);
-    CPPUNIT_TEST(TestApplyMethodsOperatorsFloat);
+    CPPUNIT_TEST(TestApplyMethodsOperatorsDouble3);
+    CPPUNIT_TEST(TestApplyMethodsOperatorsFloat3);
+
+    CPPUNIT_TEST(TestConstructorsDouble2);
+    CPPUNIT_TEST(TestConstructorsFloat2);
+
+    CPPUNIT_TEST(TestInverseDouble2);
+    CPPUNIT_TEST(TestInverseFloat2);
 
     CPPUNIT_TEST_SUITE_END();
     
@@ -53,29 +59,35 @@ class vctFrameBaseTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
     
-    /*! Test the constructors. */
-    template<class _elementType>
-        void TestConstructors(void);
-    void TestConstructorsDouble(void);
-    void TestConstructorsFloat(void);
+    /*! Test the constructors for 3D */
+    template<class _elementType> void TestConstructors3(void);
+    void TestConstructorsDouble3(void);
+    void TestConstructorsFloat3(void);
 
-    /*! Test the product methods */
-    template<class _elementType>
-        void TestApplyTo(void);
-    void TestApplyToDouble(void);
-    void TestApplyToFloat(void);
+    /*! Test the product methods for 3D */
+    template<class _rotationType> void TestApplyTo3(void);
+    void TestApplyToDouble3(void);
+    void TestApplyToFloat3(void);
 
-    /*! Test the inverse methods */
-    template<class _elementType>
-        void TestInverse(void);
-    void TestInverseDouble(void);
-    void TestInverseFloat(void);
+    /*! Test the inverse methods for 3D */
+    template<class _elementType> void TestInverse3(void);
+    void TestInverseDouble3(void);
+    void TestInverseFloat3(void);
 
-    /*! Test Apply methods (existence and consistency) */
-    template <class _elementType>
-        void TestApplyMethodsOperators(void);
-    void TestApplyMethodsOperatorsDouble(void);
-    void TestApplyMethodsOperatorsFloat(void);
+    /*! Test Apply methods (existence and consistency) for 3D */
+    template <class _elementType> void TestApplyMethodsOperators3(void);
+    void TestApplyMethodsOperatorsDouble3(void);
+    void TestApplyMethodsOperatorsFloat3(void);
+
+    /*! Test the constructors for 2D */
+    template<class _elementType> void TestConstructors2(void);
+    void TestConstructorsDouble2(void);
+    void TestConstructorsFloat2(void);
+
+    /*! Test the inverse methods for 2D */
+    template<class _elementType> void TestInverse2(void);
+    void TestInverseDouble2(void);
+    void TestInverseFloat2(void);
 
 };
 

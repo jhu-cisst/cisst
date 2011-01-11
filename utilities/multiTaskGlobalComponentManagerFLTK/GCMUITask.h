@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: GCMUITask.h 952 2009-11-10 00:06:14Z auneri1 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-02-26
@@ -153,6 +153,9 @@ public:
 protected:
     // Time server object
     const osaTimeServer * TimeServer;
+
+    // Component Viewer
+    mtsComponentViewer * ComponentViewer;
 
     // Remember time origin (the time when the first sample is fetched) per process
     //TimeOriginMapType TimeOriginMap;

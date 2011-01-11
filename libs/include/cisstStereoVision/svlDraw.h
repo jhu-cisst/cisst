@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -54,6 +54,7 @@ namespace svlDraw
     void CISST_EXPORT Rectangle(svlSampleImage* image, unsigned int videoch, int left, int top, int right, int bottom, unsigned char r, unsigned char g, unsigned char b, bool fill = true);
     void CISST_EXPORT Line(svlSampleImage* image, unsigned int videoch, svlPoint2D from, svlPoint2D to, svlRGB color);
     void CISST_EXPORT Line(svlSampleImage* image, unsigned int videoch, int from_x, int from_y, int to_x, int to_y, unsigned char r, unsigned char g, unsigned char b);
+    void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, svlTriangle & tri, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, svlPoint2D corner1, svlPoint2D corner2, svlPoint2D corner3, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, int x1, int y1, int x2, int y2, int x3, int y3, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Poly(svlSampleImage* image, unsigned int videoch, const vctDynamicVectorRef<svlPoint2D> points, svlRGB color, unsigned int start = 0);
@@ -62,6 +63,10 @@ namespace svlDraw
     void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned int radius = 5);
     void CISST_EXPORT Text(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, const std::string & text, double fontsize, svlRGB color);
     void CISST_EXPORT Text(svlSampleImage* image, unsigned int videoch, int x, int y, const std::string & text, double fontsize, unsigned char r, unsigned char g, unsigned char b);
+
+    void CISST_EXPORT WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
+                                   svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
+                                   svlDraw::Internals& internals);
 };
 
 #endif // _svlDraw_h

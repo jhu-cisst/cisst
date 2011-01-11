@@ -33,6 +33,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnClassServicesBase.h>
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnLogger.h>
 
 
 /*! This class is a helper for cmnClassServices.  Its goal is to
@@ -132,13 +134,20 @@ public:
 
     /*! Specialization of create(other) when dynamic creation is
       enabled.  Call new for the given class.  This method
-      requires a copy constructor for the aforementioned class. 
+      requires a copy constructor for the aforementioned class.
       Returns false on failure, in which case input parameter (existing) is
       not modified.
      */
     inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
+        if (existing->Services() != other.Services()) {
+            CMN_LOG_RUN_WARNING << "cmnClassServices::Create with in-place new called for different classes, existing = "
+                                << existing->Services()->GetName()
+                                << ", other = " << other.Services()->GetName() << std::endl;
+            return false;
+        }
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
+            existing->Services()->Delete(existing);
             new(existing) value_type(*otherPointer);
             return true;
         } else {
@@ -221,9 +230,6 @@ class cmnClassServices: public cmnClassServicesBase {
     typedef cmnClassServicesBase BaseType;
 
     /* documented in base class */
-    typedef BaseType::LogLoDType LogLoDType;
-
-    /* documented in base class */
     typedef cmnGenericObject * generic_pointer;
 
     /*!  Constructor. Sets the name of the class and the Level of Detail
@@ -232,10 +238,11 @@ class cmnClassServices: public cmnClassServicesBase {
       \param className The name to be associated with the class.
       \param typeInfo Type information as defined by typeid() (see
       C++ RTTI)
-      \param lod The Log Level of Detail setting to be used with this class.
+      \param mask The log mask to be used with this class.
     */
-    cmnClassServices(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR):
-        BaseType(className, typeInfo, lod)
+    cmnClassServices(const std::string & className, const std::type_info * typeInfo,
+                     cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT):
+        BaseType(className, typeInfo, mask)
     {}
 
     /* documented in base class */
@@ -280,6 +287,10 @@ class cmnClassServices: public cmnClassServicesBase {
         return FactoryType::Delete(existing);
     }
 
+    /* documented in base class */
+    virtual size_t GetSize(void) const {
+        return sizeof(_class);
+    }
 };
 
 

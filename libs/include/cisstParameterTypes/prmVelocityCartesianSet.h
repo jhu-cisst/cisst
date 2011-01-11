@@ -38,10 +38,16 @@ http://www.cisst.org/cisst/license.txt.
 /*! Cartesian velocity motion command arguments - default motion is a
   line between the current position and the goal
 */
+
+//! \todo Review SerializeRaw and DeserializeRaw, they don't seriliaze the frame pointers.
+
 class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 {
-	CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+	CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
  protected:
+
+    typedef prmMotionBase BaseType;
+
     /*! The controllable frame node in the transformation tree this
       command will act on */
     prmTransformationBasePtr MovingFrame;
@@ -251,6 +257,14 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     {
         return this->Mask;
     }
+
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
+
 
 }; // _prmVelocityCartesianSet_h
 

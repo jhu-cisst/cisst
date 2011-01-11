@@ -193,11 +193,11 @@ void ui3Widget3D::SetSize(double halfSize)
          handleCounter < 4;
          handleCounter++) {
         position.Assign(sides[handleCounter] * halfSize, sides[handleCounter + 1] * halfSize, 0.0);
-        CMN_LOG_CLASS_VERY_VERBOSE << "SetSize: set side handle at: " << position << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "SetSize: set side handle at: " << position << std::endl;
         CMN_ASSERT(this->SideHandles[handleCounter]);
         this->SideHandles[handleCounter]->SetPosition(position);
         position.Assign(corners[handleCounter] * halfSize, corners[handleCounter + 1] * halfSize, 0.0);
-        CMN_LOG_CLASS_VERY_VERBOSE << "SetSize: set corner handle at: " << position << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "SetSize: set corner handle at: " << position << std::endl;
         CMN_ASSERT(this->CornerHandles[handleCounter]);
         this->CornerHandles[handleCounter]->SetPosition(position);
     }

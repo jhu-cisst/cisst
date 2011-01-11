@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
+class osaThreadId;
 
 //class CISST_EXPORT osaThreadSignal {
 //
@@ -76,15 +77,31 @@ public:
     bool Wait(double timeoutInSec);
     void Raise();
 
+    static void SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void));
+
+    /*! Print to stream */
+    void ToStream(std::ostream & outputStream) const;
+
 private:
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
     char Internals[INTERNALS_SIZE];
 
+    static void (*PreCallback)(void);
+    static void (*PostCallback)(void);
+
     /*! Return the size of the actual object used by the OS.  This is
         used for testing only. */
     static unsigned int SizeOfInternals(void);
 };
+
+/*! Stream operator for a thread Id, see osaThreadId. */
+inline
+std::ostream & operator << (std::ostream & output,
+                            const osaThreadSignal & threadSignal) {
+    threadSignal.ToStream(output);
+    return output;
+}
 
 #endif // _osaThreadSignal_h
 

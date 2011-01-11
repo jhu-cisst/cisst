@@ -93,68 +93,89 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
 {
     Release();
 
-    svlStreamType type = GetInput()->GetType();
-
-    switch (type) {
-        case svlTypeImageRGB:
-        case svlTypeImageRGBStereo:
-        case svlTypeImageMono8:
-        case svlTypeImageMono8Stereo:
-            OutputImage = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
-        break;
-
-        case svlTypeImageMono16:        // To be added
-        case svlTypeImageMono16Stereo:  // To be added
-
-        // Other types may be added in the future
-        case svlTypeImageRGBA:
-        case svlTypeImageRGBAStereo:
-        case svlTypeMatrixInt8:
-        case svlTypeMatrixInt16:
-        case svlTypeMatrixInt32:
-        case svlTypeMatrixInt64:
-        case svlTypeMatrixUInt8:
-        case svlTypeMatrixUInt16:
-        case svlTypeMatrixUInt32:
-        case svlTypeMatrixUInt64:
-        case svlTypeMatrixFloat:
-        case svlTypeMatrixDouble:
-        case svlTypeImage3DMap:
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeTransform3D:
-        case svlTypeTargets:
-        case svlTypeText:
-        break;
-    }
-
     svlSampleImage* inputimage = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int numofchannels = inputimage->GetVideoChannels();
+    unsigned int i;
 
-    for (unsigned int i = 0; i < numofchannels; i ++) {
-
-        if (Width[i] == 0 || Height[i] == 0) {
-            Width[i] = static_cast<unsigned int>(WidthRatio[i] * inputimage->GetWidth(i));
-            Height[i] = static_cast<unsigned int>(HeightRatio[i] * inputimage->GetHeight(i));
-            if (Width[i] < 1) Width[i] = 1;
-            if (Height[i] < 1) Height[i] = 1;
+    EqualSize = true;
+    for (i = 0; i < numofchannels; i ++) {
+        if (Width[i] == 0 && Height[i] == 0) {
+            if (WidthRatio[i]  != 1.0 ||
+                HeightRatio[i] != 1.0) EqualSize = false;
         }
         else {
-            WidthRatio[i] = static_cast<double>(Width[i]) / OutputImage->GetWidth(i);
-            HeightRatio[i] = static_cast<double>(Height[i]) / OutputImage->GetHeight(i);
+            if (Width[i]  != inputimage->GetWidth(i) ||
+                Height[i] != inputimage->GetHeight(i)) EqualSize = false;
         }
-
-        OutputImage->SetSize(i, Width[i], Height[i]);
     }
 
-    syncOutput = OutputImage;
+    if (!EqualSize) {
+        svlStreamType type = GetInput()->GetType();
+
+        switch (type) {
+            case svlTypeImageRGB:
+            case svlTypeImageRGBStereo:
+            case svlTypeImageMono8:
+            case svlTypeImageMono8Stereo:
+                OutputImage = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
+            break;
+
+            case svlTypeImageMono16:        // To be added
+            case svlTypeImageMono16Stereo:  // To be added
+
+                // Other types may be added in the future
+            case svlTypeImageRGBA:
+            case svlTypeImageRGBAStereo:
+            case svlTypeMatrixInt8:
+            case svlTypeMatrixInt16:
+            case svlTypeMatrixInt32:
+            case svlTypeMatrixInt64:
+            case svlTypeMatrixUInt8:
+            case svlTypeMatrixUInt16:
+            case svlTypeMatrixUInt32:
+            case svlTypeMatrixUInt64:
+            case svlTypeMatrixFloat:
+            case svlTypeMatrixDouble:
+            case svlTypeImage3DMap:
+            case svlTypeInvalid:
+            case svlTypeStreamSource:
+            case svlTypeStreamSink:
+            case svlTypeTransform3D:
+            case svlTypeTargets:
+            case svlTypeText:
+            break;
+        }
+
+        for (i = 0; i < numofchannels; i ++) {
+
+            if (Width[i] == 0 || Height[i] == 0) {
+                Width[i] = static_cast<unsigned int>(WidthRatio[i] * inputimage->GetWidth(i));
+                Height[i] = static_cast<unsigned int>(HeightRatio[i] * inputimage->GetHeight(i));
+                if (Width[i] < 1) Width[i] = 1;
+                if (Height[i] < 1) Height[i] = 1;
+            }
+            else {
+                WidthRatio[i] = static_cast<double>(Width[i]) / inputimage->GetWidth(i);
+                HeightRatio[i] = static_cast<double>(Height[i]) / inputimage->GetHeight(i);
+            }
+
+            OutputImage->SetSize(i, Width[i], Height[i]);
+        }
+
+        syncOutput = OutputImage;
+    }
+
 
     return SVL_OK;
 }
 
 int svlFilterImageResizer::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
+    if (EqualSize) {
+        syncOutput = syncInput;
+        return SVL_OK;
+    }
+
     syncOutput = OutputImage;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
 

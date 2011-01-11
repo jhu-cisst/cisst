@@ -89,8 +89,9 @@ public:
     virtual ~mtsCallableVoidMethod() {}
 
     /* documented in base class */
-    inline void Execute(void) {
+    inline mtsExecutionResult Execute(void) {
         (ClassInstantiation->*Action)();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /* documented in base class */

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: GCMUITask.cpp 952 2009-11-10 00:06:14Z auneri1 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-02-26
@@ -192,6 +192,7 @@ void callbackVisualize(Fl_Widget * w, void *userdata)
 GCMUITask::GCMUITask(const std::string & taskName, const double period, 
                      mtsManagerGlobal& globalComponentManager) :
     mtsTaskPeriodic(taskName, period, false, 5000),
+    ComponentViewer(0),
     GlobalComponentManager(globalComponentManager)
 {
     GCMUI = this;
@@ -338,14 +339,30 @@ void GCMUITask::Run(void)
         return;
     }
 
-    // Connect to Task Viewer
+    // Connect to Component Viewer
     if (UI.ButtonTaskViewerClicked) {
-#if 0 // PK TEMP
-        // can specify IP address and port number (default is "localhost", 4444)
-        GlobalComponentManager.ConnectToTaskViewer();
-#endif
+        // Create and start Component Viewer
+        if (!ComponentViewer) {
+            ComponentViewer = new mtsComponentViewer("ComponentViewer");
+            mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
+            managerLocal->AddComponent(ComponentViewer);
+            osaSleep(0.1);
+            ComponentViewer->Create();
+            ComponentViewer->Start();
+        }
         UI.ButtonTaskViewerClicked = false;
     }
+
+#if 0
+    // TEMP: for now, don't allow Component Viewer to be recreated because
+    // it causes an unhandled exception.  Perhaps RemoveComponent does not work.
+    if (ComponentViewer && ComponentViewer->IsTerminated()) {
+        mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
+        managerLocal->RemoveComponent(ComponentViewer);
+        delete ComponentViewer;
+        ComponentViewer = 0;
+    }
+#endif
 
     if (Fl::check() == 0) {
         Kill();

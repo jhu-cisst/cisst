@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsManagerComponentServer.cpp 1726 2010-08-30 05:07:54Z mjung5 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
@@ -27,7 +27,8 @@ CMN_IMPLEMENT_SERVICES(mtsManagerComponentServer);
 
 mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     : mtsManagerComponentBase(mtsManagerComponentBase::ComponentNames::ManagerComponentServer),
-      GCM(gcm)
+      GCM(gcm),
+      InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
@@ -36,6 +37,7 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
         cmnThrow(std::runtime_error("Error in creating manager component server: it's already created"));
     }
     gcm->SetMCS(this);
+    InterfaceGCMFunctionMap.SetOwner(*this);
 }
 
 mtsManagerComponentServer::~mtsManagerComponentServer()
@@ -61,16 +63,9 @@ void mtsManagerComponentServer::Cleanup(void)
 {
 }
 
-void mtsManagerComponentServer::GetNamesOfProcesses(mtsStdStringVec & stdStringVec) const
+void mtsManagerComponentServer::GetNamesOfProcesses(std::vector<std::string> & processList) const
 {
-    std::vector<std::string> namesOfProcesses;
-    GCM->GetNamesOfProcesses(namesOfProcesses);
-
-    const size_t n = namesOfProcesses.size();
-    stdStringVec.SetSize(n);
-    for (unsigned int i = 0; i < n; ++i) {
-        stdStringVec(i) = namesOfProcesses[i];
-    }
+    GCM->GetNamesOfProcesses(processList);
 }
 
 bool mtsManagerComponentServer::AddInterfaceGCM(void)
@@ -93,12 +88,16 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
+                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop,
                               this, mtsManagerComponentBase::CommandNames::ComponentStop);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume,
                               this, mtsManagerComponentBase::CommandNames::ComponentResume);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState,
+                              this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents,
@@ -112,6 +111,10 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceGCMEvents_AddConnection,
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
+    provided->AddEventWrite(this->InterfaceGCMEvents_RemoveConnection,
+                            mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
+    provided->AddEventWrite(this->InterfaceGCMEvents_ChangeState,
+                            mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceGCM: successfully added \"GCM\" interfaces" << std::endl;
 
@@ -140,12 +143,18 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
+                          newFunctionSet->ComponentDisconnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                           newFunctionSet->ComponentStart);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
                           newFunctionSet->ComponentStop);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
                           newFunctionSet->ComponentResume);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
+                          newFunctionSet->ComponentGetState);
+    required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this, 
+                                   mtsManagerComponentBase::EventNames::ChangeState);
 
     // Remember a required interface (InterfaceGCM's required interface) to 
     // connect it to the provided interface (InterfaceLCM's provided interface).
@@ -233,8 +242,58 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
     functionSet->ComponentConnect(arg);
 }
 
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
+{
+    InterfaceGCMFunctionType *functionSet;
+    if (arg.Client.ProcessName != arg.Server.ProcessName) {
+        // PK TEMP fix for network disconnect
+        mtsDescriptionConnection arg2;
+        // Step 1: Disconnect Client from ServerProxy  
+        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 1 (client side disconnect)" << std::endl;
+        arg2 = arg;
+        arg2.Server.ProcessName = arg.Client.ProcessName;
+        arg2.Server.ComponentName = mtsManagerGlobal::GetComponentProxyName(arg.Server.ProcessName, arg.Server.ComponentName);
+        functionSet = InterfaceGCMFunctionMap.GetItem(arg2.Client.ProcessName);
+        if (!functionSet) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to get function set for " << arg2.Client.ProcessName << std::endl;
+            return;
+        }
+        functionSet->ComponentDisconnect(arg2);
+        // Step 2: Disconnect ClientProxy from Server
+        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 2 (server side disconnect)" << std::endl;
+        arg2 = arg;
+        arg2.Client.ProcessName = arg.Server.ProcessName;
+        arg2.Client.ComponentName = mtsManagerGlobal::GetComponentProxyName(arg.Client.ProcessName, arg.Client.ComponentName);
+        functionSet = InterfaceGCMFunctionMap.GetItem(arg2.Server.ProcessName);
+        if (!functionSet) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to get function set for " << arg2.Server.ProcessName << std::endl;
+            return;
+        }
+        functionSet->ComponentDisconnect(arg2);
+        // Step 3: Update the GCM database (send arg unchanged to any MCC)
+        // For now, we just fall through to the statement below
+        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 3 (update GCM)" << std::endl;
+    }
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
+        return;
+    }
+
+    //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
+    functionSet->ComponentDisconnect(arg);
+}
+
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg)
 {
+    // Check if command is for this component (MCS)
+    if (arg.ComponentName == this->GetName()) {
+        CMN_LOG_CLASS_RUN_WARNING << "ComponentStart for " << arg.ComponentName << " ignored." << std::endl;
+        return;
+    }
     // Check if a new component with the name specified can be created
     if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentStart: failed to start component - no component found: " << arg << std::endl;
@@ -259,6 +318,11 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsCom
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg)
 {
+    // Check if command is for this component (MCS)
+    if (arg.ComponentName == this->GetName()) {
+        CMN_LOG_CLASS_RUN_WARNING << "ComponentStop for " << arg.ComponentName << " ignored." << std::endl;
+        return;
+    }
     // Check if a new component with the name specified can be created
     if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentStop: failed to Stop component - no component found: " << arg << std::endl;
@@ -283,6 +347,11 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop(const mtsComp
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg)
 {
+    // Check if command is for this component (MCS)
+    if (arg.ComponentName == this->GetName()) {
+        CMN_LOG_CLASS_RUN_WARNING << "ComponentResume for " << arg.ComponentName << " ignored." << std::endl;
+        return;
+    }
     // Check if a new component with the name specified can be created
     if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentResume: failed to Resume component - no component found: " << arg << std::endl;
@@ -305,39 +374,55 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsCo
     functionSet->ComponentResume(arg);
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses(mtsStdStringVec & names) const
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
+                                                                       mtsComponentState &state) const
 {
-    std::vector<std::string> _names;
-    GCM->GetNamesOfProcesses(_names);
-
-    names.SetSize(_names.size());
-    for (size_t i = 0; i < names.size(); ++i) {
-        names(i) = _names[i];
+    // Check if command is for this component (MCS)
+    if (component.ComponentName == this->GetName()) {
+        //GetState(state);
+        //For now, always return active for MCC
+        state = mtsComponentState::ACTIVE;
+        return;
     }
+    if (!GCM->FindComponent(component.ProcessName, component.ComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get component state - no component found: "
+                                << component << std::endl;
+        return;
+    }
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(component.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get function set: " << component << std::endl;
+        return;
+    }
+    if (!functionSet->ComponentGetState.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+        return;
+    }
+
+    functionSet->ComponentGetState(component, state);
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const
+void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const
 {
-    std::vector<std::string> _names;
-    GCM->GetNamesOfComponents(processName, _names);
+    GCM->GetNamesOfProcesses(names);
+}
 
-    names.SetSize(_names.size());
-    for (size_t i = 0; i < names.size(); ++i) {
-        names(i) = _names[i];
-    }
+void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName,
+                                                                          std::vector<std::string> & names) const
+{
+    GCM->GetNamesOfComponents(processName, names);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const
 {
-    std::vector<std::string> interfaceNames;
-
     // Get a list of required interfaces
-    GCM->GetNamesOfInterfacesRequiredOrInput(component.ProcessName, component.ComponentName, interfaceNames);
-    mtsParameterTypes::ConvertVectorStringType(interfaceNames, interfaces.InterfaceRequiredNames);
+    GCM->GetNamesOfInterfacesRequiredOrInput(component.ProcessName, component.ComponentName, interfaces.InterfaceRequiredNames);
 
     // Get a list of provided interfaces
-    GCM->GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaceNames);
-    mtsParameterTypes::ConvertVectorStringType(interfaceNames, interfaces.InterfaceProvidedNames);
+    GCM->GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaces.InterfaceProvidedNames);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const
@@ -355,5 +440,17 @@ void mtsManagerComponentServer::AddConnectionEvent(const mtsDescriptionConnectio
 {
     //InterfaceGCMEvents_AddConnection.ExecuteBlocking(connection);
     InterfaceGCMEvents_AddConnection(connection);
+}
+
+void mtsManagerComponentServer::RemoveConnectionEvent(const mtsDescriptionConnection &connection)
+{
+    //InterfaceGCMEvents_RemoveConnection.ExecuteBlocking(connection);
+    InterfaceGCMEvents_RemoveConnection(connection);
+}
+
+void mtsManagerComponentServer::HandleChangeStateEvent(const mtsComponentStateChange &stateChange)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "MCS got ChangeState event for " << stateChange.ComponentName << std::endl;
+    InterfaceGCMEvents_ChangeState(stateChange);
 }
 

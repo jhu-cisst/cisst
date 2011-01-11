@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-02-11
-  
+
   (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -32,15 +32,15 @@ http://www.cisst.org/cisst/license.txt.
 
 
 template <class _elementType>
-void vctFrameBaseTest::TestConstructors(void) {
-
+void vctFrameBaseTest::TestConstructors3(void)
+{
     typedef vctFixedSizeVector<_elementType, 3> vectorType;
 
     vectorType vector(1.0, 3.0, -2.0);
     vector.Divide(_elementType(vector.Norm()));
     vectorType noTranslation(0.0, 0.0, 0.0);
     _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance();
-    
+
     typedef vctMatrixRotation3<_elementType> MatRotType;
     typedef vctQuaternionRotation3Base<vctFixedSizeVector<_elementType, 4> > QuatRotType;
     vctFrameBase<MatRotType> matrixFrame;
@@ -60,7 +60,7 @@ void vctFrameBaseTest::TestConstructors(void) {
 
     vctFrameBase<MatRotType> matrixFrameB(matrixRotation, vector);
     vctFrameBase<QuatRotType> quaternionFrameB(quaternionRotation, vector);
-    
+
     CPPUNIT_ASSERT((matrixFrameB.Rotation() - matrixRotation).LinfNorm() < tolerance);
     CPPUNIT_ASSERT((matrixFrameB.Translation() - vector).LinfNorm() < tolerance);
 
@@ -69,76 +69,83 @@ void vctFrameBaseTest::TestConstructors(void) {
 }
 
 
-void vctFrameBaseTest::TestConstructorsDouble(void) {
-    TestConstructors<double>();
+void vctFrameBaseTest::TestConstructorsDouble3(void)
+{
+    TestConstructors3<double>();
 }
 
-void vctFrameBaseTest::TestConstructorsFloat(void) {
-    TestConstructors<float>();
+void vctFrameBaseTest::TestConstructorsFloat3(void)
+{
+    TestConstructors3<float>();
 }
 
 
-template <class _elementType>
-void vctFrameBaseTest::TestApplyTo(void) {
-    /*
-    _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance();
+template <class _rotationType>
+void vctFrameBaseTest::TestApplyTo3(void)
+{
+    typedef typename _rotationType::value_type value_type;
+    value_type tolerance = cmnTypeTraits<value_type>::Tolerance();
 
-    vctFixedSizeVector<_elementType, 3> x(1.0, 0.0, 0.0);
-    vctFixedSizeVector<_elementType, 3> y(0.0, 1.0, 0.0);
-    vctFixedSizeVector<_elementType, 3> z(0.0, 0.0, 1.0);
-    vctFixedSizeVector<_elementType, 3> result;
-    vctFrameBase<_elementType> composed;
+    vctFixedSizeVector<value_type, 3> x(1.0, 0.0, 0.0);
+    vctFixedSizeVector<value_type, 3> y(0.0, 1.0, 0.0);
+    vctFixedSizeVector<value_type, 3> z(0.0, 0.0, 1.0);
+    vctFixedSizeVector<value_type, 3> result;
+    vctFrameBase<_rotationType> composed;
 
-    vctFrameBase<_elementType> testRotation(x, _elementType(cmnPI_2));
-    testRotation.ApplyTo(y, result);
+    vctFrameBase<_rotationType> testFrame;
+    testFrame.Rotation().From(vctAxisAngleRotation3<value_type>(x, value_type(cmnPI_2)));
+    testFrame.ApplyTo(y, result);
     CPPUNIT_ASSERT((z - result).Norm() < tolerance);
-    testRotation.ApplyTo(z, result);
+    testFrame.ApplyTo(z, result);
     CPPUNIT_ASSERT((y + result).Norm() < tolerance);
-    testRotation.ApplyTo(vctFrameBase<_elementType>::Identity(), composed);
+    testFrame.ApplyTo(vctFrameBase<_rotationType>::Identity(), composed);
     composed.ApplyTo(y, result);
     CPPUNIT_ASSERT((z - result).Norm() < tolerance);
     composed.ApplyTo(z, result);
     CPPUNIT_ASSERT((y + result).Norm() < tolerance);
-    
-    testRotation.From(y, _elementType(cmnPI_2));
-    testRotation.ApplyTo(z, result);
+
+    testFrame.Rotation().From(vctAxisAngleRotation3<value_type>(y, value_type(cmnPI_2)));
+    testFrame.ApplyTo(z, result);
     CPPUNIT_ASSERT((x - result).Norm() < tolerance);
-    testRotation.ApplyTo(x, result);
+    testFrame.ApplyTo(x, result);
     CPPUNIT_ASSERT((z + result).Norm() < tolerance);
-    testRotation.ApplyTo(vctFrameBase<_elementType>::Identity(), composed);
-    testRotation.ApplyTo(z, result);
+    testFrame.ApplyTo(vctFrameBase<_rotationType>::Identity(), composed);
+    testFrame.ApplyTo(z, result);
     CPPUNIT_ASSERT((x - result).Norm() < tolerance);
-    testRotation.ApplyTo(x, result);
+    testFrame.ApplyTo(x, result);
     CPPUNIT_ASSERT((z + result).Norm() < tolerance);
 
-    testRotation.From(z, _elementType(cmnPI_2));
-    testRotation.ApplyTo(x, result);
+    testFrame.Rotation().From(vctAxisAngleRotation3<value_type>(z, value_type(cmnPI_2)));
+    testFrame.ApplyTo(x, result);
     CPPUNIT_ASSERT((y - result).Norm() < tolerance);
-    testRotation.ApplyTo(y, result);
+    testFrame.ApplyTo(y, result);
     CPPUNIT_ASSERT((x + result).Norm() < tolerance);
-    testRotation.ApplyTo(vctFrameBase<_elementType>::Identity(), composed);
-    testRotation.From(z, _elementType(cmnPI_2));
-    testRotation.ApplyTo(x, result);
+    testFrame.ApplyTo(vctFrameBase<_rotationType>::Identity(), composed);
+    testFrame.Rotation().From(vctAxisAngleRotation3<value_type>(z, value_type(cmnPI_2)));
+    testFrame.ApplyTo(x, result);
     CPPUNIT_ASSERT((y - result).Norm() < tolerance);
-    testRotation.ApplyTo(y, result);
+    testFrame.ApplyTo(y, result);
     CPPUNIT_ASSERT((x + result).Norm() < tolerance);
-    */
 }
 
 
-void vctFrameBaseTest::TestApplyToDouble(void) {
-    TestApplyTo<double>();
+void vctFrameBaseTest::TestApplyToDouble3(void)
+{
+    TestApplyTo3<vctDoubleMatRot3>();
+    TestApplyTo3<vctDoubleQuatRot3>();
 }
 
-void vctFrameBaseTest::TestApplyToFloat(void) {
-    TestApplyTo<float>();
+void vctFrameBaseTest::TestApplyToFloat3(void)
+{
+    TestApplyTo3<vctDoubleMatRot3>();
+    TestApplyTo3<vctDoubleQuatRot3>();
 }
 
 
 
 template <class _elementType>
-void vctFrameBaseTest::TestInverse(void) {
-
+void vctFrameBaseTest::TestInverse3(void)
+{
     _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance();
     typedef vctFixedSizeVector<_elementType, 3> vectorType;
     typedef vctMatrixRotation3<_elementType> MatRotType;
@@ -155,11 +162,11 @@ void vctFrameBaseTest::TestInverse(void) {
     vectorType result, temp;
     matrixFrameType mfTest, mfProduct /*, mfResult*/;
     quaternionFrameType qfTest, qfProduct /*, qfResult*/;
-    
+
     _elementType angle = 0.0;
 
     int counter = 0;
-    // try different angles and axis  
+    // try different angles and axis
     while (angle <= _elementType(2.0 * cmnPI)) {
         angle = _elementType(counter * cmnPI / 10.0);
         axis[counter % 3] += _elementType(counter / 10.0);
@@ -214,18 +221,21 @@ void vctFrameBaseTest::TestInverse(void) {
     }
 }
 
-void vctFrameBaseTest::TestInverseDouble(void) {
-    TestInverse<double>();
+void vctFrameBaseTest::TestInverseDouble3(void)
+{
+    TestInverse3<double>();
 }
 
-void vctFrameBaseTest::TestInverseFloat(void) {
-    TestInverse<float>();
+void vctFrameBaseTest::TestInverseFloat3(void)
+{
+    TestInverse3<float>();
 }
 
 
 
 template <class _elementType>
-void vctFrameBaseTest::TestApplyMethodsOperators(void) {
+void vctFrameBaseTest::TestApplyMethodsOperators3(void)
+{
     typedef _elementType value_type;
     typedef vctMatrixRotation3Base<vctFixedSizeMatrix<value_type, 3, 3> > MatRotType;
     typedef vctQuaternionRotation3Base<vctFixedSizeVector<value_type, 4> > QuatRotType;
@@ -254,14 +264,18 @@ void vctFrameBaseTest::TestApplyMethodsOperators(void) {
     vctRandom(matrixFrame1.Translation(), value_type(-1.0), value_type(1.0));
     vctGenericRotationTest::TestApplyMethodsOperatorsObject(matrixFrame1, fixedVector);
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(matrixFrame1,
-        fixedMatrixRowMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          fixedMatrixRowMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(matrixFrame1,
-        fixedMatrixColMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          fixedMatrixColMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
     vctGenericRotationTest::TestApplyMethodsOperatorsObject(matrixFrame1, dynamicVector);
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(matrixFrame1,
-        dynamicMatrixRowMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          dynamicMatrixRowMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(matrixFrame1,
-        dynamicMatrixColMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          dynamicMatrixColMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
 
     matrixFrameType matrixFrame2;
     vctRandom(matrixFrame2.Rotation());
@@ -272,18 +286,19 @@ void vctFrameBaseTest::TestApplyMethodsOperators(void) {
     vctRandom(quaternionFrame1.Rotation());
     vctRandom(quaternionFrame1.Translation(), value_type(-1.0), value_type(1.0));
     vctGenericRotationTest::TestApplyMethodsOperatorsObject(quaternionFrame1, fixedVector);
-    // NOTE: As of Dec. 23, 2008, the ethods below failed to compile with gcc.
-    // This is left for future tests.
-    // Ofri.
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(quaternionFrame1,
-        fixedMatrixRowMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          fixedMatrixRowMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(quaternionFrame1,
-        fixedMatrixColMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          fixedMatrixColMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
     vctGenericRotationTest::TestApplyMethodsOperatorsObject(quaternionFrame1, dynamicVector);
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(quaternionFrame1,
-        dynamicMatrixRowMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          dynamicMatrixRowMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
     vctGenericRotationTest::TestApplyMethodsNoReturnValue(quaternionFrame1,
-        dynamicMatrixColMajor, cmnTypeTraits<value_type>::Tolerance());
+                                                          dynamicMatrixColMajor,
+                                                          cmnTypeTraits<value_type>::Tolerance());
 
     quaternionFrameType quaternionFrame2;
     vctRandom(quaternionFrame2.Rotation());
@@ -292,12 +307,110 @@ void vctFrameBaseTest::TestApplyMethodsOperators(void) {
 }
 
 
-void vctFrameBaseTest::TestApplyMethodsOperatorsDouble(void) {
-    TestApplyMethodsOperators<double>();
+void vctFrameBaseTest::TestApplyMethodsOperatorsDouble3(void)
+{
+    TestApplyMethodsOperators3<double>();
 }
 
-void vctFrameBaseTest::TestApplyMethodsOperatorsFloat(void) {
-    TestApplyMethodsOperators<float>();
+void vctFrameBaseTest::TestApplyMethodsOperatorsFloat3(void)
+{
+    TestApplyMethodsOperators3<float>();
+}
+
+
+
+template <class _elementType>
+void vctFrameBaseTest::TestConstructors2(void)
+{
+    typedef vctFixedSizeVector<_elementType, 2> vectorType;
+
+    vectorType vector(1.0, -2.0);
+    vector.Divide(_elementType(vector.Norm()));
+    vectorType noTranslation(0.0, 0.0);
+    _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance();
+
+    typedef vctMatrixRotation2<_elementType> MatRotType;
+    vctFrameBase<MatRotType> matrixFrame;
+
+    vctGenericRotationTest::TestDefaultConstructor(matrixFrame);
+
+    CPPUNIT_ASSERT((matrixFrame.Rotation() - MatRotType::Identity() ).LinfNorm() == 0);
+    CPPUNIT_ASSERT((matrixFrame.Translation() - noTranslation).LinfNorm() < tolerance);
+
+    MatRotType matrixRotation;
+    matrixRotation.From(vctAngleRotation2(cmnPI_2));
+
+    vctFrameBase<MatRotType> matrixFrameB(matrixRotation, vector);
+
+    CPPUNIT_ASSERT((matrixFrameB.Rotation() - matrixRotation).LinfNorm() < tolerance);
+    CPPUNIT_ASSERT((matrixFrameB.Translation() - vector).LinfNorm() < tolerance);
+}
+
+
+void vctFrameBaseTest::TestConstructorsDouble2(void)
+{
+    TestConstructors2<double>();
+}
+
+void vctFrameBaseTest::TestConstructorsFloat2(void)
+{
+    TestConstructors2<float>();
+}
+
+
+
+template <class _elementType>
+void vctFrameBaseTest::TestInverse2(void)
+{
+    _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance();
+    typedef vctFixedSizeVector<_elementType, 2> vectorType;
+    typedef vctMatrixRotation2<_elementType> MatRotType;
+    typedef vctFrameBase<MatRotType> matrixFrameType;
+
+    vectorType x(1.0, 0.0);
+    vectorType y(0.0, 1.0);
+    vectorType axis(_elementType(1.2), _elementType(0.2));
+    axis.Divide(_elementType(axis.Norm()));
+
+    vectorType result, temp;
+    matrixFrameType mfTest, mfProduct;
+
+    _elementType angle = 0.0;
+
+    int counter = 0;
+    // try different angles and axis
+    while (angle <= _elementType(2.0 * cmnPI)) {
+        angle = _elementType(counter * cmnPI / 10.0);
+        axis[counter % 2] += _elementType(counter / 10.0);
+        counter++;
+
+        mfTest.Rotation() = MatRotType(vctAngleRotation2(angle, VCT_NORMALIZE));
+        mfTest.Translation() = axis;
+        // test for x
+        CPPUNIT_ASSERT(((mfTest.Inverse() * (mfTest * x)) - x).LinfNorm() < tolerance);
+        mfTest.ApplyTo(x, temp);
+        mfTest.ApplyInverseTo(temp, result);
+        CPPUNIT_ASSERT((result - x).LinfNorm() < tolerance);
+        // test for y
+        CPPUNIT_ASSERT(((mfTest.Inverse() * (mfTest * y)) - y).LinfNorm() < tolerance);
+        mfTest.ApplyTo(y, temp);
+        mfTest.ApplyInverseTo(temp, result);
+        CPPUNIT_ASSERT((result - y).LinfNorm() < tolerance);
+        // test composition
+        mfProduct = mfTest * mfTest.Inverse();
+        CPPUNIT_ASSERT(mfProduct.Translation().LinfNorm() < tolerance);
+        CPPUNIT_ASSERT((mfProduct.Rotation() - matrixFrameType::RotationType::Identity()).LinfNorm() < tolerance);
+    }
+}
+
+void vctFrameBaseTest::TestInverseDouble2(void)
+{
+    TestInverse2<double>();
+}
+
+void vctFrameBaseTest::TestInverseFloat2(void)
+{
+    TestInverse2<float>();
 }
 
 

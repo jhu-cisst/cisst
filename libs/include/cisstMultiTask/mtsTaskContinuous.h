@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT mtsTaskContinuous: public mtsTask
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsTaskManager;
 
@@ -67,7 +67,7 @@ protected:
 	virtual void *RunInternal(void* argument);
 
     /*! Called from Start */
-    void StartInternal(void);
+    virtual void StartInternal(void);
 
 public:
     /********************* Task constructor and destructor *****************/

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-06
@@ -47,6 +47,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         semiColumn = false;
         curlyOpen = false;
         curlyClose = false;
+        lineFinished = false;
 
         // find curly brackets
         switch (currentChar) {

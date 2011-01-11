@@ -348,6 +348,10 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const 
     }
 
     eventWriteGeneratorProxy->Execute(*argument, MTS_NOT_BLOCKING);
+
+
+    // Release memory internally created by deserializer
+    delete argument;
 }
 
 //-------------------------------------------------------------------------

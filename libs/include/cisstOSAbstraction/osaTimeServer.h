@@ -34,9 +34,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaExport.h>
 
 // PKAZ: move this to osaGetTime.h
-struct osaAbsoluteTime {
+struct CISST_EXPORT osaAbsoluteTime {
     long sec;   // seconds
     long nsec;  // nano-seconds
+
+    /*! Returns absolute time in seconds relative to Jan 1, 1970. */
+    double ToSeconds(void) const;
 };
 
 /*!
@@ -62,7 +65,7 @@ struct osaAbsoluteTime {
 
 class CISST_EXPORT osaTimeServer: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 32};
@@ -95,6 +98,14 @@ public:
     /*! Get the number of seconds that have elapsed since the time origin.
         \returns The number of seconds */
     double GetRelativeTime(void) const;
+
+   /*! Get the number of seconds that have elapsed since 1970.
+     \returns The number of seconds */
+    double GetAbsoluteTimeInSeconds(void) const;
+
+      /*! Get the absolute time since 1970.
+     \returns The number of seconds */
+    osaAbsoluteTime GetAbsoluteTime(void) const;
 
     /*! Estimate drift between synchronized clocks (Windows only) */
     double EstimateDrift(void) const;

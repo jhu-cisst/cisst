@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsManagerComponentBase.h 1726 2010-08-30 05:07:54Z mjung5 $
+  $Id$
 
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
@@ -26,6 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
+
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \file mtsManagerComponentBase.h
@@ -95,9 +98,9 @@ http://www.cisst.org/cisst/license.txt.
   mtsManagerGlobal, mtsManagerProxyServer
 */
 
-class mtsManagerComponentBase : public mtsTaskFromSignal
+class CISST_EXPORT mtsManagerComponentBase : public mtsTaskFromSignal
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Component name definitions */
@@ -109,7 +112,7 @@ public:
     };
 
     /*! Interface name definitions */
-    class InterfaceNames {
+    class CISST_EXPORT InterfaceNames {
     public:
         const static std::string InterfaceInternalProvided;
         const static std::string InterfaceInternalRequired;
@@ -122,27 +125,35 @@ public:
     };
 
     /*! Command name definitions */
-    class CommandNames {
+    class CISST_EXPORT CommandNames {
     public:
         // Dynamic component management
         const static std::string ComponentCreate;
         const static std::string ComponentConnect;
+        const static std::string ComponentDisconnect;
         const static std::string ComponentStart;
         const static std::string ComponentStop;
         const static std::string ComponentResume;
+        const static std::string ComponentGetState;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
         const static std::string GetNamesOfInterfaces;
         const static std::string GetListOfConnections;
+        // Establishing connections
+        const static std::string GetEndUserInterface;
+        const static std::string AddObserverList;
+        const static std::string RemoveEndUserInterface;
+        const static std::string RemoveObserverList;
     };
 
     /*! Event name definitions */
-    class EventNames {
+    class CISST_EXPORT EventNames {
     public:
         // Events
         const static std::string AddComponent;
         const static std::string AddConnection;
+        const static std::string RemoveConnection;
         const static std::string ChangeState;
     };
 

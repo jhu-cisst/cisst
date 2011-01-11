@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -29,13 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-// #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
+#include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -68,7 +69,7 @@ http://www.cisst.org/cisst/license.txt.
  */
 class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
@@ -80,6 +81,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Component state. */
     mtsComponentState State;
+
+    /*! Provided interface for component management. */
+    mtsInterfaceProvided *InterfaceProvidedToManager;
 
     /*! Default constructor. Protected to prevent creation of a component
       without a name. */
@@ -150,6 +154,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Virtual method called after components are connected to start
         the computations and message processing. */
     virtual void Start(void);
+
+    /*! Virtual method to suspend the component (same as Stop). */
+    virtual void Suspend(void);
 
     /*! Virtual method to stop the computations and message
         processing.  See Start. */
@@ -248,16 +255,43 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Remove an input interface identified by its name */
     bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
+    /*! Get pointer to manager component services, which extends the internal required interface
+        to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
+    mtsManagerComponentServices *GetManagerComponentServices(void)
+    { return this->ManagerComponentServices; }
+
+#if 0
     /*! Connect a required interface, used by mtsTaskManager */
     bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                          mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
+#endif
+
+    /*! Return a pointer to state table with the given name. */
+    mtsStateTable * GetStateTable(const std::string & stateTableName);
+
+    /*! Add an existing state table to the list of known state tables
+      in this task.  This method will add a provided interface for the
+      state table using the name "StateTable" +
+      existingStateTable->GetName() unless the caller specifies that
+      no interface should be created.
+
+      By default, all state tables added will advance at each call of
+      the Run method.  To avoid the automatic advance, use the method
+      mtsStateTable::SetAutomaticAdvance(false). */
+    bool AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided = true);
+
+    /*! Tells this component to use its own file for log.  By default
+      the messages are also sent to cmnLogger but this can be changed
+      setting forwardToLogger to false.  The default file name is
+      based on the component's name, followed by '-log.txt' */
+    void UseSeparateLogFileDefault(bool forwardToLogger = true);
 
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
       setting forwardToLogger to false.  The default file name is
       based on the component's name, followed by the date and
       '-log.txt' */
-    void UseSeparateLogFileDefault(bool forwardToLogger = true);
+    void UseSeparateLogFileDefaultWithDate(bool forwardToLogger = true);
 
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
@@ -289,6 +323,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Return task state. */
     const mtsComponentState & GetState(void) const;
+    void GetState(mtsComponentState &state) const;
 
  protected:
 
@@ -343,6 +378,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     InterfacesInputListType InterfacesInput;
     //@}
 
+    /*! Map of state tables, includes the default StateTable under the
+      name "StateTable" */
+    typedef cmnNamedMap<mtsStateTable> StateTableMapType;
+    StateTableMapType StateTables;
+
     /*! Process all messages in mailboxes. Returns number of commands processed. */
     size_t ProcessMailBoxes(InterfacesProvidedListType & interfaces);
 
@@ -361,9 +401,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsManagerComponentServices * ManagerComponentServices;
 
     /*! \brief Enable support for dynamic component management services
-        \return Pointer to internal required interface, if success.  
+        \return Pointer to internal required interface, if success.
                 NULL otherwise.
-        \note If user component needs dynamic component management services, 
+        \note If user component needs dynamic component management services,
               this method should be called by user component's constructor */
     mtsInterfaceRequired * EnableDynamicComponentManagement(void);
 
@@ -371,18 +411,19 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         change of this component */
     mtsFunctionWrite EventGeneratorChangeState;
 
-    /*! \brief Add internal interfaces 
+    /*! \brief Add internal interfaces
         \param useMangerComponentServices True to allow this component to use
                dynamic component control services through mts command pattern
-               to control other components.  
-               If true, the internal required interface is added to this 
+               to control other components.
+               If true, the internal required interface is added to this
                component (the internal provided interface is added by default) */
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
 
-    /*! Internal commands to process command execution request coming from manager
-        component client */
-    void InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg);
-    void InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg);
+    /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
+    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
+    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
+    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
+    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
 
  public:
 

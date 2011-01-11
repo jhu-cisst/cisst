@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2005-05-04
-  
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -32,10 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 // main function
 int main(void) {
     // add cout for all log
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("osaSerialPort", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("osaSerialPort", CMN_LOG_ALLOW_ALL);
 
     osaSerialPort serialPort;
     // serialPort.SetPortNumber(1);
@@ -61,12 +61,12 @@ int main(void) {
     std::cout << "bytes read: " << bytesRead << std::endl;
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
-    
+
     // tare
     serialPort.Write("\eT", 2);
     // very stable K - L - M - very unstable N
     serialPort.Write("\eK", 2);
-    
+
     while (true) {
         serialPort.Write("\eP", 2);
         osaSleep(0.2 * cmn_s);

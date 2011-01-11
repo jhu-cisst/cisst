@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlTrackerOCVMeanShift.h 944 2009-11-06 23:15:19Z bvagvol1 $
+  $Id$
 
   Author(s):  Ankur Kapoor & Balazs Vagvolgyi
   Created on: 2007

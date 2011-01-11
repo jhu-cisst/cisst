@@ -30,8 +30,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedReadProxy.h>
 
 mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
-: mtsComponent(componentProxyName)
+  : mtsComponent(componentProxyName),
+    InterfaceProvidedNetworkProxies("InterfaceProvidedNetworkProxies"),
+    InterfaceRequiredNetworkProxies("InterfaceRequiredNetworkProxies"),
+    FunctionProxyAndEventHandlerProxyMap("FunctionProxyAndEventHandlerProxyMap")
 {
+    InterfaceProvidedNetworkProxies.SetOwner(*this);
+    InterfaceRequiredNetworkProxies.SetOwner(*this);
+    FunctionProxyAndEventHandlerProxyMap.SetOwner(*this);
+
 }
 
 mtsComponentProxy::~mtsComponentProxy()
@@ -203,9 +210,10 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
 bool mtsComponentProxy::RemoveInterfaceRequiredProxy(const std::string & requiredInterfaceProxyName)
 {
     // Get network objects to remove
-    mtsComponentInterfaceProxyClient * clientProxy = InterfaceRequiredNetworkProxies.GetItem(requiredInterfaceProxyName);
+    mtsComponentInterfaceProxyClient * clientProxy = InterfaceRequiredNetworkProxies.GetItem(requiredInterfaceProxyName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!clientProxy) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequiredProxy: cannot find proxy client: " << requiredInterfaceProxyName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequiredProxy: cannot find proxy client " << requiredInterfaceProxyName 
+                                 << " in proxy component " << GetName() << std::endl;
         return false;
     } else {
         // Network server deactivation and resource clean up
@@ -985,7 +993,7 @@ void mtsComponentProxy::ExtractInterfaceProvidedDescription(
     }
 
     // Extract qualified read commands
-    mtsCommandQualifiedReadBase * qualifiedReadCommand;
+    mtsCommandQualifiedRead * qualifiedReadCommand;
     CommandQualifiedReadElement elementCommandQualifiedRead;
     const std::vector<std::string> namesOfQualifiedReadCommand = endUserInterface->GetNamesOfCommandsQualifiedRead();
     for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {

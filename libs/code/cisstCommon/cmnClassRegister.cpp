@@ -7,16 +7,16 @@
   Author(s):  Alvin Liem, Anton Deguet
   Created on: 2002-08-01
 
-  (C) Copyright 2002-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2002-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
---- begin cisst license - do not edit ---
+  --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+  --- end cisst license ---
 
 */
 
@@ -49,7 +49,7 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
         insertionResult = ServicesContainer.insert(newEntry);
         if (insertionResult.second) {
             CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: Register: class \"" << className
-                                 << "\" has been registered with Log LoD \"" << cmnLogLoDString[classServicesPointer->GetLoD()] << "\"" << std::endl;
+                                 << "\" has been registered with Log LoD \"" << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\"" << std::endl;
             return &((*insertionResult.first).first);
         } else {
             CMN_LOG_INIT_ERROR << "Class cmnClassRegister: Register: class \"" << className
@@ -67,24 +67,26 @@ std::string cmnClassRegister::ToStringInstance(void) const {
 }
 
 
-bool cmnClassRegister::SetLoD(const std::string & name, LogLoDType lod) {
+bool cmnClassRegister::SetLogMaskClass(const std::string & name, cmnLogMask mask)
+{
     // see if class is registered.  If so, copy preferences (lod)
     cmnClassServicesBase* classServicesPointer = FindClassServices(name);
     if (classServicesPointer != NULL) {
-        classServicesPointer->SetLoD(lod);
-        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoD: class \"" << classServicesPointer->GetName()
-                             << "\" log LoD has been set to \""
-                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\"" << std::endl;
+        classServicesPointer->SetLogMask(mask);
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLogMask: class \"" << classServicesPointer->GetName()
+                             << "\" log mask has been set to \""
+                             << cmnLogMaskToString(mask) << "\"" << std::endl;
     } else {
         // we need to warn the programmer
-        CMN_LOG_INIT_WARNING << "Class cmnClassRegister: SetLoD: class \"" << name
+        CMN_LOG_INIT_WARNING << "Class cmnClassRegister: SetLogMask: class \"" << name
                              << "\" is not registered (yet?) " << std::endl;
     }
     return false;
 }
 
 
-bool cmnClassRegister::SetLoDForAllClassesInstance(LogLoDType lod) {
+bool cmnClassRegister::SetLogMaskClassAllInstance(cmnLogMask mask)
+{
     iterator iter;
     const iterator end = ServicesContainer.end();
     bool result = false;
@@ -96,20 +98,21 @@ bool cmnClassRegister::SetLoDForAllClassesInstance(LogLoDType lod) {
         classServicesPointer = (*iter).second;
         if (classServicesPointer != 0) {
             result = true; // at least one class found
-            classServicesPointer->SetLoD(lod);
+            classServicesPointer->SetLogMask(mask);
             allClasses = allClasses + classServicesPointer->GetName() + ", ";
         }
     }
     if (result) {
-        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForAllClasses: log LoD has been set to \""
-                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\" for the following classes: "
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLogMaskClassAll: log mask has been set to \""
+                             << cmnLogMaskToString(mask) << "\" for the following classes: "
                              << allClasses << std::endl;
     }
     return result;
 }
 
 
-bool cmnClassRegister::SetLoDForMatchingClassesInstance(const std::string & stringToMatch, LogLoDType lod) {
+bool cmnClassRegister::SetLogMaskClassMatchingInstance(const std::string & stringToMatch, cmnLogMask mask)
+{
     iterator iter;
     const iterator end = ServicesContainer.end();
     bool result = false;
@@ -124,38 +127,40 @@ bool cmnClassRegister::SetLoDForMatchingClassesInstance(const std::string & stri
             classServicesPointer = (*iter).second;
             if (classServicesPointer != 0) {
                 result = true; // at least one class found
-                classServicesPointer->SetLoD(lod);
+                classServicesPointer->SetLogMask(mask);
                 allClasses = allClasses + className + ", ";
             }
         }
     }
     if (result) {
-        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForMatchingClasses: log LoD has been set to \""
-                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\" for the following classes matching \""
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLogMaskClassMatching: log LoD has been set to \""
+                             << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\" for the following classes matching \""
                              << stringToMatch << "\": " << allClasses << std::endl;
     }
     return result;
 }
 
 
-cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::string & className) {
+cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::string & className)
+{
     const_iterator iterator;
     const const_iterator end = ServicesContainer.end();
     cmnClassServicesBase * result = NULL;
     iterator = ServicesContainer.find(className);
     if (iterator != end) {
-            result = iterator->second;
-            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: found class info for \""
-                                << className << "\"" << std::endl;
+        result = iterator->second;
+        CMN_LOG_RUN_DEBUG << "Class cmnClassRegister: FindClassServices: found class info for \""
+                          << className << "\"" << std::endl;
     } else {
-        CMN_LOG_RUN_WARNING << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
+        CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
                             << className << "\"" << std::endl;
     }
     return result;
 }
 
 
-cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::type_info & typeInfo) {
+cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::type_info & typeInfo)
+{
     const_iterator iterator;
     const const_iterator end = ServicesContainer.end();
     cmnClassServicesBase * result = NULL;
@@ -172,7 +177,8 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::ty
 }
 
 
-cmnGenericObject * cmnClassRegister::Create(const std::string & className) {
+cmnGenericObject * cmnClassRegister::Create(const std::string & className)
+{
     cmnClassServicesBase * classServicesPointer = FindClassServices(className);
     if (classServicesPointer) {
         return (classServicesPointer->Create());
@@ -191,18 +197,20 @@ cmnGenericObject * cmnClassRegister::Create(const std::string & className,
 }
 
 
-std::string cmnClassRegister::ToString(void) {
+std::string cmnClassRegister::ToString(void)
+{
     return Instance()->ToStringInstance();
 }
 
 
-void cmnClassRegister::ToStreamInstance(std::ostream & outputStream) const {
+void cmnClassRegister::ToStreamInstance(std::ostream & outputStream) const
+{
     const_iterator iterator;
     const const_iterator end = ServicesContainer.end();
     outputStream << "Registered classes:" << std::endl;
     for (iterator = ServicesContainer.begin(); iterator != end; iterator++) {
         outputStream << " - " << iterator->first
                      << " (typeid name \"" << iterator->second->TypeInfoPointer()->name()
-                     << "\", LoD \"" << cmnLogLoDString[iterator->second->GetLoD()] << "\")" << std::endl;
+                     << "\", LoD \"" << cmnLogLevelToString(iterator->second->GetLoD()) << "\")" << std::endl;
     }
 }

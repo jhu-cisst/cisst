@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 #include <X11/extensions/Xv.h>
@@ -35,11 +35,11 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_SVL_HAS_XV
 
 
-class CX11WindowManager : public CWindowManagerBase
+class svlWindowManagerX11 : public svlWindowManagerBase
 {
 public:
-    CX11WindowManager(unsigned int numofwins);
-    ~CX11WindowManager();
+    svlWindowManagerX11(unsigned int numofwins);
+    ~svlWindowManagerX11();
 
     // method overrides
     int DoModal(bool show, bool fullscreen);
@@ -67,7 +67,7 @@ private:
     osaThreadSignal signalImage;
     unsigned int ImageCounter;
 
-#if (CISST_SVL_HAS_XV == ON)
+#if CISST_SVL_HAS_XV
     XvImage **xvImg;
     XShmSegmentInfo *xvShmInfo;
     XvPortID *xvPort;

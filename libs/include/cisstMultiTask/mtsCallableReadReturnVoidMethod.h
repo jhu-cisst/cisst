@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCallableRead.h 1822 2010-09-24 19:50:59Z adeguet1 $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2010-09-16
@@ -74,10 +74,10 @@ protected:
         static mtsExecutionResult CallMethod(ClassType * classInstantiation, ActionType action, mtsGenericObject & argument) {
             ReturnType * argumentCasted = mtsGenericTypes<ReturnType>::CastArg(argument);
             if (argumentCasted == 0) {
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             (classInstantiation->*action)(*argumentCasted);
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 
@@ -91,7 +91,7 @@ protected:
             ReturnType * argumentCasted = dynamic_cast<ReturnType *>(&argument);
             if (argumentCasted) {
                 (classInstantiation->*action)(*argumentCasted);
-                return mtsExecutionResult::DEV_OK;
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
             }
             // If it isn't a Proxy, maybe it is a ProxyRef
             typedef typename ReturnType::RefType ReturnRefType;
@@ -99,14 +99,14 @@ protected:
             if (!dataRef) {
                 CMN_LOG_INIT_ERROR << "mtsCallableReadReturnVoid: CallMethod could not cast from " << typeid(argument).name()
                                    << " to " << typeid(ReturnRefType).name() << std::endl;
-                return mtsExecutionResult::BAD_INPUT;
+                return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             // Now, make the call using the temporary
             ReturnType temp;
             (classInstantiation->*action)(temp);
             // Finally, copy the data to the return
             *dataRef = temp;
-            return mtsExecutionResult::DEV_OK;
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
 

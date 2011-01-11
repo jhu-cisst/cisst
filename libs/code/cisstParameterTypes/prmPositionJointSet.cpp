@@ -32,4 +32,28 @@ void prmPositionJointSet::SetSize(size_type size)
     DecelerationMember.SetSize(size);
 }
 
+void prmPositionJointSet::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+    MaskMember.SerializeRaw(outputStream);
+    GoalMember.SerializeRaw(outputStream);
+    VelocityMember.SerializeRaw(outputStream);
+    AccelerationMember.SerializeRaw(outputStream);
+    DecelerationMember.SerializeRaw(outputStream);
+
+
+}
+
+void prmPositionJointSet::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+    MaskMember.DeSerializeRaw(inputStream);
+    GoalMember.DeSerializeRaw(inputStream);
+    VelocityMember.DeSerializeRaw(inputStream);
+    AccelerationMember.DeSerializeRaw(inputStream);
+    DecelerationMember.DeSerializeRaw(inputStream);
+}
+
+
+
 

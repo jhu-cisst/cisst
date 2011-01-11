@@ -61,7 +61,10 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     }
 
     // set the default number of elements for data collection batch
-    this->DataCollection.BatchSize = this->HistoryLength / 3;
+    this->DataCollection.BatchSize = this->HistoryLength / 5;
+    if (this->DataCollection.BatchSize == 0) {
+        this->DataCollection.BatchSize = 1;
+    }
     this->DataCollection.TimeIntervalForProgressEvent = 1.0 * cmn_s;
     this->DataCollection.BatchRange.SetValid(true);
     this->DataCollection.BatchRange.SetAutomaticTimestamp(false);

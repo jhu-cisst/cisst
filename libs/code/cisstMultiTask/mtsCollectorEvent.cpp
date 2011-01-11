@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -151,7 +151,7 @@ mtsInterfaceRequired * mtsCollectorEvent::GetInterfaceRequiredFor(const mtsCompo
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
     // check if this component is already "registered"
-    InterfacesRequiredMap * interfacesRequired = this->ObservedComponents.GetItem(componentPointer->GetName(), CMN_LOG_LOD_INIT_DEBUG);
+    InterfacesRequiredMap * interfacesRequired = this->ObservedComponents.GetItem(componentPointer->GetName(), CMN_LOG_LEVEL_INIT_DEBUG);
     if (!interfacesRequired) {
         CMN_LOG_CLASS_INIT_DEBUG << "GetInterfaceRequiredFor: create required interfaces for component \""
                                  << componentPointer->GetName() << "\"" << std::endl;
@@ -163,7 +163,7 @@ mtsInterfaceRequired * mtsCollectorEvent::GetInterfaceRequiredFor(const mtsCompo
                                  << componentPointer->GetName() << "\"" << std::endl;
     }
     // check if the component already has the required interface needed
-    mtsInterfaceRequired * interfaceRequired = interfacesRequired->GetItem(interfacePointer->GetName(), CMN_LOG_LOD_INIT_DEBUG);
+    mtsInterfaceRequired * interfaceRequired = interfacesRequired->GetItem(interfacePointer->GetName(), CMN_LOG_LEVEL_INIT_DEBUG);
     if (!interfaceRequired) {
         CMN_LOG_CLASS_INIT_DEBUG << "GetInterfaceRequiredFor: create required interface to collect events from interface \""
                                  << interfacePointer->GetName() << "\"" << std::endl;
@@ -226,10 +226,10 @@ std::string mtsCollectorEvent::GetDefaultOutputName(void)
 mtsComponent * mtsCollectorEvent::CheckComponent(const std::string & componentName) const
 {
     // todo, replace with GetComponent when available
-    mtsComponent * componentPointer = TaskManager->GetComponent(componentName);
+    mtsComponent * componentPointer = ComponentManager->GetComponent(componentName);
     if (!componentPointer) {
         CMN_LOG_CLASS_INIT_ERROR << "component \"" << componentName
-                                 << "\" not found in task manager for collector \""
+                                 << "\" not found in component manager for collector \""
                                  << this->GetName() << "\"" << std::endl;
     }
     return componentPointer;
@@ -458,8 +458,8 @@ bool mtsCollectorEvent::Connect(void)
                                      << "\" to \""
                                      << iterComponents->first << "::" << iterInterfaces->first
                                      << "\"" << std::endl;
-            if (!TaskManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
-                                      iterComponents->first, iterInterfaces->first)) {
+            if (!ComponentManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
+                                           iterComponents->first, iterInterfaces->first)) {
                 CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \""
                                          << this->GetName() << "::" << iterInterfaces->second->GetName()
                                          << "\" to \""

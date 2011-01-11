@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
     #define CMN_UNUSED(argument) argument
 #endif
 
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
     #include "svlVidCapSrcMIL.h"
 #endif // CISST_SVL_HAS_MIL
 
@@ -45,7 +45,7 @@ http://www.cisst.org/cisst/license.txt.
 
 svlRenderTargets::svlRenderTargets()
 {
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
     svlVidCapSrcMIL *device = svlVidCapSrcMIL::GetInstance();
     svlFilterSourceVideoCapture::DeviceInfo *devlist;
     int devicecount = device->GetDeviceList(&devlist);
@@ -76,7 +76,7 @@ svlRenderTargets* svlRenderTargets::Instance()
     return &instance;
 }
 
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 {
     svlRenderTargets* instance = Instance();
@@ -115,7 +115,7 @@ void svlRenderTargets::ReleaseAll()
             instance->Targets[i] = 0;
         }
     }
-#if (CISST_SVL_HAS_MIL == ON)
+#if CISST_SVL_HAS_MIL
     svlVidCapSrcMIL::GetInstance()->ReleaseAll();
 #endif // CISST_SVL_HAS_MIL
 }

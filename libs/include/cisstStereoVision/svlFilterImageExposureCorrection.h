@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT svlFilterImageExposureCorrection : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterImageExposureCorrection();
@@ -53,7 +53,7 @@ protected:
     double Contrast;
     double Gamma;
 
-    svlImageProcessing::Internals Exposure;
+    vctDynamicVector<svlImageProcessing::Internals> Exposure;
 
 protected:
     virtual void CreateInterfaces();

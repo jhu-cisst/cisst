@@ -20,9 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vector>
 
-#include <cisstRobot/robManipulator.h>
 
-#include <cisstDevices/robotcomponents/manipulators/devManipulator.h>
+#include <cisstDevices/robotcomponents/osg/devOSGManipulator.h>
 
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
 #include <cisstDevices/robotcomponents/ode/devODEJoint.h>
@@ -31,25 +30,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEManipulator : 
-  public devManipulator,
-  public robManipulator {
+class CISST_EXPORT devODEManipulator : public devOSGManipulator {
 
  private:
 
-  RnIO* input;
-  RnIO* output;
-
- public:
-
-  typedef std::vector< devODEBody::State > State;
-
- protected:
-
+  // The world ID
   dWorldID worldid;
 
   dWorldID WorldID() const { return worldid; }
 
+  // vector of joints, bodies
   std::vector<devODEJoint*> joints;
   std::vector<devODEBody*>  bodies;
   std::vector<devODEServoMotor*> servos;
@@ -64,12 +54,16 @@ class CISST_EXPORT devODEManipulator :
   void SetPosition( const vctDynamicVector<double>& qs );
   void SetVelocity( const vctDynamicVector<double>& qsd );
 
- public: 
+ public:
+
+  typedef std::vector< devODEBody::State > State;
 
   devODEManipulator( const std::string& devname, 
 		     double period,
 		     devManipulator::State state,
-		     osaCPUMask mask );
+		     osaCPUMask mask,
+		     devODEWorld* world,
+		     devManipulator::Mode mode );
 
   //! ODE Manipulator generic constructor
   /**
@@ -87,12 +81,13 @@ class CISST_EXPORT devODEManipulator :
 		     double period,
 		     devManipulator::State state,
 		     osaCPUMask mask,
+		     devODEWorld* world,
 		     devManipulator::Mode mode,
-		     devODEWorld& world,
-		     const std::string& manfile,
+		     const std::string& robotfile,
 		     const vctFrame4x4<double>& Rtw0,
-		     const vctDynamicVector<double> qinit,
-		     const std::vector<std::string>& geomfiles );
+		     const vctDynamicVector<double>& qinit,
+		     const std::vector<std::string>& models,
+		     const std::string& basemodel );
 
   ~devODEManipulator(){}
 

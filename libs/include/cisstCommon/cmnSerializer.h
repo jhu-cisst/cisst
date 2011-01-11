@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnSerializer_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnTypeTraits.h>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnThrow.h>
@@ -43,22 +44,44 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnExport.h>
 
 
-/*! Serialization helper function for a basic type.  This function
-  performs a cast to char pointer (<code>char *</code>) using
-  <code>reinterpret_cast</code> and then writes the result to the
-  output stream.  If the write operation fails, an exception is thrown
-  (<code>std::runtime_error</code>).
+// Implementation class to provide serialization when _elementType is not derived from cmnGenericObject
+template <class _elementType, bool>
+class cmnSerializeRawImpl
+{
+public:
+    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) throw (std::runtime_error)
+    {
+        outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
+        if (outputStream.fail()) {
+            cmnThrow("cmnSerializeRaw(_elementType): Error occured with std::ostream::write");
+        }
+    }
+};
 
-  This function should be use to implement the SerializeRaw method of
-  classes derived from cmnGenericObject. */
+// Implementation class to provide serialization when _elementType is derived from cmnGenericObject
+template <class _elementType>
+class cmnSerializeRawImpl<_elementType, true>
+{
+public:
+    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) throw (std::runtime_error)
+    {
+        data.SerializeRaw(outputStream);
+    }
+};
+
+/*! Serialization helper function for a basic type.  If the type is derived
+    from cmnGenericObject, it just calls the SerializeRaw member function.
+    Otherwise, it performs a cast to char pointer (<code>char *</code>) using
+    <code>reinterpret_cast</code> and then writes the result to the
+    output stream.  If the write operation fails, an exception is thrown
+    (<code>std::runtime_error</code>). */
+
 template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & data)
     throw (std::runtime_error)
 {
-    outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
-    if (outputStream.fail()) {
-        cmnThrow("cmnSerializerRaw(_elementType): Error occured with std::ostream::write");
-    }
+    typedef cmnSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::YES> impl;
+    impl::SerializeRaw(outputStream, data);
 }
 
 
@@ -94,6 +117,27 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
 }
 
 
+/*! Serialization helper function for an STL vector.  This function
+  first serializes the vector size and then calls cmnSerializeRaw
+  for each element of the vector (thus, it will only work if cmnSerializeRaw
+  is defined for the element type.  If the write
+  operation fails, an exception is thrown
+  (<code>std::runtime_error</code>). */
+template <class _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elementType> & data)
+    throw (std::runtime_error)
+{
+    const typename std::vector<_elementType>::size_type size = data.size();
+    cmnSerializeSizeRaw(outputStream, size);
+    for (size_t i = 0; i < size; i++) {
+        cmnSerializeRaw(outputStream, data[i]);
+        if (outputStream.fail()) {
+            cmnThrow("cmnSerializeRaw(std::vector<_elementType>): Error occured with std::ostream::write");
+        }
+    }
+}
+
+
 /*!
   \brief Serialization utility class.
   \ingroup cisstCommon
@@ -120,7 +164,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
   \sa cmnDeSerializer cmnGenericObject
 */
 class CISST_EXPORT cmnSerializer: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

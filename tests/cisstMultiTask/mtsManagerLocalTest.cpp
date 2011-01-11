@@ -424,19 +424,19 @@ void mtsManagerLocalTest::TestConnectLocally(void)
 #define FAIL    false
 #define SUCCESS true
     // test with invalid arguments
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.ConnectLocally("", "", "", ""));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect("", "", "", ""));
 
     CPPUNIT_ASSERT(localManager.AddComponent(client));
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.ConnectLocally(client->GetName(), "", "", ""));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect(client->GetName(), "", "", ""));
 
     CPPUNIT_ASSERT(localManager.AddComponent(server));
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.ConnectLocally(client->GetName(), "", server->GetName(), ""));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect(client->GetName(), "", server->GetName(), ""));
 
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.ConnectLocally(client->GetName(), "", server->GetName(), "p1"));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect(client->GetName(), "", server->GetName(), "p1"));
 
-    CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->InterfaceProvidedOrOutput == 0);
-    CPPUNIT_ASSERT_EQUAL(SUCCESS, localManager.ConnectLocally(client->GetName(), "r1", server->GetName(), "p1"));
-    CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->InterfaceProvidedOrOutput == server->GetInterfaceProvided("p1"));
+    CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->GetConnectedInterface() == 0);
+    CPPUNIT_ASSERT_EQUAL(SUCCESS, localManager.Connect(client->GetName(), "r1", server->GetName(), "p1"));
+    CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->GetConnectedInterface() == server->GetInterfaceProvided("p1"));
 }
 
 #if CISST_MTS_HAS_ICE

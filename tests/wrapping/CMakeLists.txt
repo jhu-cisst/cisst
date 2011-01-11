@@ -14,17 +14,16 @@
 # 
 # --- end cisst license ---
 
-
-PROJECT(cisstWrappingTests)
-
+# save parent directory to allow sub directories to access cisstTestMain.py.in
+set (cisstWrappingTests_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Check what seems available
-FOREACH(lib ${CISST_LIBRARIES})
+foreach (lib ${CISST_LIBRARIES})
 
   # Make sure there is actually a directory of test case
-  IF(EXISTS ${cisstWrappingTests_SOURCE_DIR}/${lib})
-    ADD_SUBDIRECTORY(${lib})
-  ENDIF(EXISTS ${cisstWrappingTests_SOURCE_DIR}/${lib})
+  if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
+    add_subdirectory (${lib})
+  endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
 
-ENDFOREACH(lib)
+endforeach (lib)
 

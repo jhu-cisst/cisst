@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
-mtsTaskManager * mtsCollectorBase::TaskManager;
+mtsComponentManager * mtsCollectorBase::ComponentManager;
 
 //-------------------------------------------------------
 //	Constructor, Destructor, and Initializer
@@ -46,8 +46,8 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     // set working directory
     this->WorkingDirectoryMember.Data = cmnPath::GetWorkingDirectory();
 
-    if (TaskManager == 0) {
-        TaskManager = mtsTaskManager::GetInstance();
+    if (ComponentManager == 0) {
+        ComponentManager = mtsComponentManager::GetInstance();
     }
 
     // add the control interface

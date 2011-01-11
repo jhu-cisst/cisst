@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsManagerComponentServer.h 1726 2010-08-30 05:07:54Z mjung5 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
@@ -46,7 +46,7 @@ class mtsManagerGlobal;
 
 class mtsManagerComponentServer : public mtsManagerComponentBase
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
 
@@ -56,7 +56,7 @@ protected:
     mtsManagerGlobal * GCM;
 
     /*! Getters for GCM service provider */
-    void GetNamesOfProcesses(mtsStdStringVec & stdStringVec) const;
+    void GetNamesOfProcesses(std::vector<std::string> & processList) const;
 
     /*! Functions.  Since one manager component server needs to be able to
         handle multiple manager component clients, we keep a list of 
@@ -65,9 +65,11 @@ protected:
     typedef struct {
         mtsFunctionWrite ComponentCreate;
         mtsFunctionWrite ComponentConnect;
+        mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
+        mtsFunctionQualifiedRead ComponentGetState;
     } InterfaceGCMFunctionType;
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
@@ -93,22 +95,31 @@ public:
     /*! Commands */
     void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
     void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
-    void InterfaceGCMCommands_GetNamesOfProcesses(mtsStdStringVec & names) const;
-    void InterfaceGCMCommands_GetNamesOfComponents(const mtsStdString & processName, mtsStdStringVec & names) const;
+    void InterfaceGCMCommands_ComponentGetState(const mtsDescriptionComponent &component, mtsComponentState &state) const;
+    void InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
+    void InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName, 
+                                                   std::vector<std::string> & names) const;
     void InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
 
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;
     mtsFunctionWrite InterfaceGCMEvents_AddConnection;
+    mtsFunctionWrite InterfaceGCMEvents_RemoveConnection;
+    mtsFunctionWrite InterfaceGCMEvents_ChangeState;
 
     // Methods for use by mtsManagerGlobal (Global Component Manager, GCM).
     // These just cause an event to be generated on the Manager Component provided interface.
     void AddComponentEvent(const mtsDescriptionComponent &component);
     void AddConnectionEvent(const mtsDescriptionConnection &connection);
+    void RemoveConnectionEvent(const mtsDescriptionConnection &connection);
+
+    // Event handler for use by this class (Manager Component Server, MCS)
+    void HandleChangeStateEvent(const mtsComponentStateChange &stateChange);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);

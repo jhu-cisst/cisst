@@ -4,7 +4,7 @@
 #   Author(s):  Peter Kazanzides
 #   Created on: 2009
 #
-#   (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+#   (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,14 +14,14 @@
 #
 # --- end cisst license ---
 
-ADD_EXECUTABLE(socketUDPServer UDPServer.cpp)
-CISST_REQUIRES(socketUDPServer "cisstCommon;cisstOSAbstraction")
+add_executable (socketUDPServer UDPServer.cpp)
+cisst_target_link_libraries (socketUDPServer  cisstCommon cisstOSAbstraction)
 
-ADD_EXECUTABLE(socketUDPClient UDPClient.cpp)
-CISST_REQUIRES(socketUDPClient "cisstCommon;cisstOSAbstraction")
+add_executable (socketUDPClient UDPClient.cpp)
+cisst_target_link_libraries (socketUDPClient cisstCommon cisstOSAbstraction)
 
-ADD_EXECUTABLE(socketTCPServer TCPServer.cpp)
-CISST_REQUIRES(socketTCPServer "cisstCommon;cisstOSAbstraction")
+add_executable (socketTCPServer TCPServer.cpp)
+cisst_target_link_libraries (socketTCPServer cisstCommon cisstOSAbstraction)
 
-ADD_EXECUTABLE(socketTCPClient TCPClient.cpp)
-CISST_REQUIRES(socketTCPClient "cisstCommon;cisstOSAbstraction")
+add_executable (socketTCPClient TCPClient.cpp)
+cisst_target_link_libraries (socketTCPClient cisstCommon cisstOSAbstraction)

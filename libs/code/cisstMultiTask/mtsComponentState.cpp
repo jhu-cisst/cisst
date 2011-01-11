@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-14
@@ -58,6 +58,18 @@ const std::string & mtsComponentState::ToString(const Enum & value)
     }
 }
 
+
+void mtsComponentState::SerializeRaw(std::ostream & outputStream) const
+{
+    cmnSerializeRaw(outputStream, static_cast<int>(this->Value));
+}
+
+void mtsComponentState::DeSerializeRaw(std::istream & inputStream)
+{
+    int state;
+    cmnDeSerializeRaw(inputStream, state);
+    this->Value = static_cast<Enum>(state);
+}
 
 bool mtsComponentState::operator == (const mtsComponentState & state) const
 {

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -54,15 +54,66 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
                                                 double clientExecutionDelay, double serverExecutionDelay,
                                                 double blockingDelay)
 {
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    // execution result used by all functions
+    mtsExecutionResult executionResult;
 
     // we assume both client and servers use the same type
     typedef typename _serverType::value_type value_type;
 
+    // value we used to make sure commands are processed, default is
+    // -1, void command set to 0
+    value_type valueWrite, valueWritePlusOne, valueRead;
+    valueWrite = 4;
+
+    // test functions not connected
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionVoid.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionVoid();
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+    executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionWrite.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionWrite(valueWrite);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+    executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionFilteredWrite.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionFilteredWrite(valueWrite);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+    executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionVoidReturn.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionWriteReturn.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionRead.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionRead(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionQualifiedRead.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionQualifiedRead(valueWrite, valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableRead.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableRead(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableAdvance.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableAdvance();
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+
     // add to manager and start all
-    manager->AddComponent(client);
-    manager->AddComponent(server);
-    manager->Connect(client->GetName(), "r1", server->GetName(), "p1");
+    CPPUNIT_ASSERT(manager->AddComponent(client));
+    CPPUNIT_ASSERT(manager->AddComponent(server));
+    CPPUNIT_ASSERT(manager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
     manager->CreateAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
     manager->StartAll();
@@ -77,10 +128,14 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     CPPUNIT_ASSERT_EQUAL(-1, server->InterfaceProvided1.GetValue()); // initial value
     CPPUNIT_ASSERT_EQUAL(-1, client->InterfaceRequired1.GetValue()); // initial value
 
-    // value we used to make sure commands are processed, default is
-    // -1, void command set to 0
-    value_type valueWrite, valueWritePlusOne, valueRead;
-    valueWrite = 4;
+    // check that all functions are bound
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionVoid.IsValid());
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionWrite.IsValid());
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionFilteredWrite.IsValid());
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionVoidReturn.IsValid());
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionWriteReturn.IsValid());
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionRead.IsValid());
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionQualifiedRead.IsValid());
 
     // loop over void and write commands to alternate blocking and non
     // blocking commands
@@ -88,7 +143,8 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     for (index = 0; index < 3; index++) {
         // test void command non blocking
         startTime = timeServer.GetRelativeTime();
-        client->InterfaceRequired1.FunctionVoid();
+        executionResult = client->InterfaceRequired1.FunctionVoid();
+        CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
         stopTime = timeServer.GetRelativeTime();
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
         osaSleep(serverExecutionDelay + blockingDelay); // time to dequeue and let command execute
@@ -97,7 +153,8 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
         // test write command
         startTime = timeServer.GetRelativeTime();
-        client->InterfaceRequired1.FunctionWrite(valueWrite);
+        executionResult = client->InterfaceRequired1.FunctionWrite(valueWrite);
+        CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
         stopTime = timeServer.GetRelativeTime();
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
         osaSleep(serverExecutionDelay + blockingDelay);  // time to dequeue and let command execute
@@ -106,7 +163,8 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
         // test filtered write command
         startTime = timeServer.GetRelativeTime();
-        client->InterfaceRequired1.FunctionFilteredWrite(valueWrite);
+        executionResult = client->InterfaceRequired1.FunctionFilteredWrite(valueWrite);
+        CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
         stopTime = timeServer.GetRelativeTime();
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
         osaSleep(serverExecutionDelay + blockingDelay);  // time to dequeue and let command execute
@@ -116,14 +174,16 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         // test void command blocking
         if (blockingDelay > 0.0) {
             startTime = timeServer.GetRelativeTime();
-            client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
+            executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
             stopTime = timeServer.GetRelativeTime();
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
             std::stringstream message;
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
             // no significant delay but result should be garanteed without sleep
-            client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
+            executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
         CPPUNIT_ASSERT(0 == server->InterfaceProvided1.GetValue()); // reset
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -131,14 +191,16 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         // test write command blocking
         if (blockingDelay > 0.0) {
             startTime = timeServer.GetRelativeTime();
-            client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
+            executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
             stopTime = timeServer.GetRelativeTime();
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
             std::stringstream message;
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
             // no significant delay but result should be garanteed without sleep
-            client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
+            executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
         CPPUNIT_ASSERT(valueWrite == server->InterfaceProvided1.GetValue()); // set to new value
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -146,67 +208,77 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         // test filtered write command blocking
         if (blockingDelay > 0.0) {
             startTime = timeServer.GetRelativeTime();
-            client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
+            executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
             stopTime = timeServer.GetRelativeTime();
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
             std::stringstream message;
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
             // no significant delay but result should be garanteed without sleep
-            client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
+            executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
         CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // set to new value + 1 (filter)
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
 
         // test void return command (always blocking)
-        value_type result;
         if (blockingDelay > 0.0) {
             startTime = timeServer.GetRelativeTime();
-            client->InterfaceRequired1.FunctionVoidReturn(result);
+            executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
             stopTime = timeServer.GetRelativeTime();
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
             std::stringstream message;
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
             // no significant delay but result should be garanteed without sleep
-            client->InterfaceRequired1.FunctionVoidReturn(result);
+            executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
-        CPPUNIT_ASSERT(result == 1); // number was positive
+        CPPUNIT_ASSERT(valueRead == 1); // number was positive
         CPPUNIT_ASSERT((-(valueWrite + 1)) == server->InterfaceProvided1.GetValue()); // negated
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
 
         // call write return to change sign of value back
+        valueWritePlusOne = valueWrite + 1;
         if (blockingDelay > 0.0) {
             startTime = timeServer.GetRelativeTime();
-            valueWritePlusOne = valueWrite + 1;
-            client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
-            result = valueRead;
+            executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
             stopTime = timeServer.GetRelativeTime();
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
             std::stringstream message;
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
             // no significant delay but result should be garanteed without sleep
-            valueWritePlusOne = valueWrite + 1;
-            client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
-            result = valueRead;
+            executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
+            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
-        CPPUNIT_ASSERT(result == -1); // number was negative
+        CPPUNIT_ASSERT(valueRead == -1); // number was negative
         CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // negated back
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
 
+        // test the state table read, first advance (blocking to make sure it happened)
+        client->InterfaceRequired1.FunctionStateTableAdvance.ExecuteBlocking();
+        client->InterfaceRequired1.FunctionStateTableRead(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(index + 1));
     }
 
     // test read command
     valueRead = 0;
-    client->InterfaceRequired1.FunctionRead(valueRead);
+    executionResult = client->InterfaceRequired1.FunctionRead(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
     CPPUNIT_ASSERT((valueWrite + 1) == valueRead);
     CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // unchanged
     CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
+    // test read command with downcast to bool for execution result
+    CPPUNIT_ASSERT(client->InterfaceRequired1.FunctionRead(valueRead));
 
     // test qualified read command
     valueRead = 0;
-    client->InterfaceRequired1.FunctionQualifiedRead(valueWrite, valueRead);
+    executionResult = client->InterfaceRequired1.FunctionQualifiedRead(valueWrite, valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
     CPPUNIT_ASSERT((valueWrite + 1) == valueRead);
     CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // unchanged
     CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -226,9 +298,13 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
-    manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
-    manager->RemoveComponent(client);
-    manager->RemoveComponent(server);
+    CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
+    CPPUNIT_ASSERT(manager->RemoveComponent(client));
+    CPPUNIT_ASSERT(manager->RemoveComponent(server));
+    // the manager singleton needs to be cleaned up, adeguet1
+    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
+    manager->RemoveComponent("LCM_MCC");
+    manager->RemoveComponent("MCS");
 }
 
 
@@ -338,7 +414,7 @@ void mtsCommandAndEventLocalTest::TestFromSignalFromSignal_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
     mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later
@@ -359,7 +435,7 @@ void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestContinuous1<_elementType> * client = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Client");
     mtsTestContinuous1<_elementType> * server = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later
@@ -380,7 +456,7 @@ void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestFromCallback1<_elementType> * client = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Client");
     mtsTestCallbackTrigger * clientTrigger = new mtsTestCallbackTrigger(client);
     mtsTestFromCallback1<_elementType> * server = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Server", blockingDelay);
@@ -407,7 +483,7 @@ void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking_int(void)
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking(void)
 {
-    const double blockingDelay = 0.5 * cmn_s;
+    const double blockingDelay = 0.25 * cmn_s;
     mtsTestFromSignal1<_elementType> * client = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Client");
     mtsTestFromSignal1<_elementType> * server = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later
@@ -436,9 +512,9 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
     // add to manager and start all
-    manager->AddComponent(client);
-    manager->AddComponent(server);
-    manager->Connect(client->GetName(), "r1", server->GetName(), "p1");
+    CPPUNIT_ASSERT(manager->AddComponent(client));
+    CPPUNIT_ASSERT(manager->AddComponent(server));
+    CPPUNIT_ASSERT(manager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
     manager->CreateAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
     manager->StartAll();
@@ -496,12 +572,16 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
-    manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
-    manager->RemoveComponent(client);
-    manager->RemoveComponent(server);
-
+    CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
+    CPPUNIT_ASSERT(manager->RemoveComponent(client));
+    CPPUNIT_ASSERT(manager->RemoveComponent(server));
     delete client;
     delete server;
+
+    // the manager singleton needs to be cleaned up, adeguet1
+    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
+    manager->RemoveComponent("LCM_MCC");
+    manager->RemoveComponent("MCS");
 }
 void mtsCommandAndEventLocalTest::TestArgumentPrototypes_mtsInt(void) {
     mtsCommandAndEventLocalTest::TestArgumentPrototypes<mtsInt>();

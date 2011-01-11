@@ -48,7 +48,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  protected:
     class Tool

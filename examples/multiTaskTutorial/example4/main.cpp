@@ -19,18 +19,20 @@ using namespace std;
 int main(int argc, char **argv)
 {
     // log configuration, see previous examples
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds
     const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
     // create the task manager and the tasks/devices
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    cmnObjectRegister::Register("TaskManager", taskManager);
+
     sineTask * sineTaskObject =
         new sineTask("SIN", PeriodSine);
     clockDevice * clockDeviceObject =
@@ -45,53 +47,19 @@ int main(int argc, char **argv)
     taskManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
     taskManager->Connect("DISP", "Clock", "CLOC", "MainInterface");
 
+    ireTask *ire = new ireTask("IRE", "from example4 import *");
+    taskManager->AddComponent(ire);
+
+    // create and add Component Viewer
+    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer");
+    taskManager->AddComponent(componentViewer);
+
     taskManager->CreateAll();
     taskManager->StartAll();
 
-    // we should not need this ...
-    osaSleep(2.0); // seconds
-
-    cmnObjectRegister::Register("TaskManager", taskManager);
-
-    // start a python shell, will resume after shell is closed
-#if 1  // PKAZ
-    cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
-    osaThread IreThread;
-    if (argc != 1)   // if any parameters, use IPython
-        IreThread.Create<char *> (&ireFramework::RunIRE_IPython, "from example4 import *");
-    else             // else use wxPython
-        IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "from example4 import *");
-    // Wait for IRE to initialize itself
-    while (ireFramework::IsStarting())
-        osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
     // Loop until IRE and display task are both exited
-    while (ireFramework::IsActive() || !displayTaskObject->IsTerminated())
+    while (!ire->IsTerminated() || !displayTaskObject->IsTerminated())
         osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
-    // Cleanup and exit
-    IreThread.Wait();
-#else
-    cmnPath path;
-    path.AddFromEnvironment("PYTHONPATH");
-    std::string exampleFile = path.Find("example4.py", cmnPath::READ);
-    std::cout << "Using file " << exampleFile << std::endl;
-    FILE * fileDescriptor;
-    fileDescriptor = fopen(exampleFile.c_str(), "r");
-    if (fileDescriptor == 0) {
-        std::cout << "Can't open " << exampleFile << std::endl;
-	} else {
-        Py_Initialize();
-        std::cout << "Starting Python shell with " << exampleFile << std::endl;
-        // #if (CISST_OS != CISST_WINDOWS)
-        PyRun_SimpleFile(fileDescriptor, exampleFile.c_str());
-        // #endif
-        PyRun_InteractiveLoop(fileDescriptor, exampleFile.c_str());
-        fclose(fileDescriptor);
-        Py_Finalize();
-    }
-    while (!displayTaskObject->IsTerminated()) {
-        osaSleep(100.0 * cmn_ms); // sleep to save CPU
-    }
-#endif
 
     osaSleep(PeriodDisplay * 2);
     sineTaskObject->Kill();

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id:$
+  $Id$
 
   Author(s):  Peter Kazanzides
 
@@ -19,9 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandFilteredQueuedWrite.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 
-mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase * actualFilter,
+mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualifiedRead * actualFilter,
                                                              mtsCommandWriteBase * actualCommand):
     BaseType(0, actualCommand, 0), ActualFilter(actualFilter)
 {
@@ -33,7 +33,7 @@ mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualified
 
 
 mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox,
-                                                             mtsCommandQualifiedReadBase * actualFilter,
+                                                             mtsCommandQualifiedRead * actualFilter,
                                                              mtsCommandWriteBase * actualCommand, size_t size):
     BaseType(mailBox, actualCommand, size),
     ActualFilter(actualFilter)
@@ -72,11 +72,11 @@ mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject
     if (this->IsEnabled()) {
         // First, call the filter (qualified read)
         mtsExecutionResult result = ActualFilter->Execute(argument, *FilterOutput);
-        if (result != mtsExecutionResult::DEV_OK) {
+        if (!result.IsOK()) {
             return result;
         }
         // Next, queue the write command
         return BaseType::Execute(*FilterOutput, blocking);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }

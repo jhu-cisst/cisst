@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlOverlayObjects.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlBufferImage.h>
+
 
 /****************************/
 /*** svlOverlay class *******/
@@ -32,7 +34,8 @@ svlOverlay::svlOverlay() :
     VideoCh(0),
     Visible(true),
     Next(0),
-    Prev(0)
+    Prev(0),
+    Used(false)
 {
 }
 
@@ -41,7 +44,8 @@ svlOverlay::svlOverlay(unsigned int videoch,
     VideoCh(videoch),
     Visible(visible),
     Next(0),
-    Prev(0)
+    Prev(0),
+    Used(false)
 {
 }
 
@@ -67,6 +71,11 @@ unsigned int svlOverlay::GetVideoChannel() const
 bool svlOverlay::GetVisible() const
 {
     return Visible;
+}
+
+bool svlOverlay::IsUsed() const
+{
+    return Used;
 }
 
 void svlOverlay::Draw(svlSampleImage* bgimage, svlSample* input)
@@ -366,6 +375,167 @@ void svlOverlayTargets::DrawInternal(svlSampleImage* bgimage, svlSample* input)
 }
 
 
+/***************************************/
+/*** svlOverlayStaticImage class *******/
+/***************************************/
+
+svlOverlayStaticImage::svlOverlayStaticImage() :
+    svlOverlay(),
+    Buffer(0),
+    Pos(0, 0),
+    Alpha(255)
+{
+}
+
+svlOverlayStaticImage::svlOverlayStaticImage(unsigned int videoch,
+                                             bool visible,
+                                             const svlSampleImageRGB & image,
+                                             vctInt2 pos,
+                                             unsigned char alpha) :
+    svlOverlay(videoch, visible),
+    Buffer(0),
+    Pos(pos),
+    Alpha(alpha)
+{
+    SetImage(image);
+}
+
+svlOverlayStaticImage::svlOverlayStaticImage(unsigned int videoch,
+                                             bool visible,
+                                             const svlSampleImageRGBStereo & image,
+                                             unsigned int imagech,
+                                             vctInt2 pos,
+                                             unsigned char alpha) :
+    svlOverlay(videoch, visible),
+    Buffer(0),
+    Pos(pos),
+    Alpha(alpha)
+{
+    SetImage(image, imagech);
+}
+
+svlOverlayStaticImage::~svlOverlayStaticImage()
+{
+    if (Buffer) delete Buffer;
+}
+
+void svlOverlayStaticImage::SetImage(const svlSampleImageRGB & image)
+{
+    const unsigned int width  = image.GetWidth();
+    const unsigned int height = image.GetHeight();
+
+    if (Buffer) {
+        if (width != Buffer->GetWidth() || height != Buffer->GetHeight()) return;
+    }
+    else {
+        if (width < 1 || height < 1) return;
+        Buffer = new svlBufferImage(width, height);
+    }
+
+    Buffer->Push(image.GetUCharPointer(), image.GetDataSize(), false);
+}
+
+void svlOverlayStaticImage::SetImage(const svlSampleImageRGBStereo & image, unsigned int imagech)
+{
+    if (imagech >= image.GetVideoChannels()) return;
+
+    const unsigned int width  = image.GetWidth(imagech);
+    const unsigned int height = image.GetHeight(imagech);
+
+    if (Buffer) {
+        if (width != Buffer->GetWidth() || height != Buffer->GetHeight()) return;
+    }
+    else {
+        if (width < 1 || height < 1) return;
+        Buffer = new svlBufferImage(width, height);
+    }
+
+    Buffer->Push(image.GetUCharPointer(imagech), image.GetDataSize(imagech), false);
+}
+
+void svlOverlayStaticImage::SetPosition(vctInt2 pos)
+{
+    Pos = pos;
+}
+
+void svlOverlayStaticImage::SetAlpha(unsigned char alpha)
+{
+    Alpha = alpha;
+}
+
+vctInt2 svlOverlayStaticImage::GetPosition() const
+{
+    return Pos;
+}
+
+unsigned char svlOverlayStaticImage::GetAlpha() const
+{
+    return Alpha;
+}
+
+void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
+{
+    if (!Buffer) return;
+
+    svlImageRGB* ovrlimage = Buffer->Pull(false);
+    if (!ovrlimage) return;
+
+    int i, ws, hs, wo, ho, xs, ys, xo, yo, copylen, linecount;
+
+    // Prepare for data copy
+    ws = static_cast<int>(bgimage->GetWidth(VideoCh) * 3);
+    hs = static_cast<int>(bgimage->GetHeight(VideoCh));
+    wo = static_cast<int>(ovrlimage->cols());
+    ho = static_cast<int>(ovrlimage->rows());
+
+    copylen = wo;
+    linecount = ho;
+    xs = Pos.X() * 3;
+    ys = Pos.Y();
+    xo = yo = 0;
+
+    // If overlay position reaches out of the background on the left
+    if (xs < 0) {
+        copylen += xs;
+        xo -= xs;
+        xs = 0;
+    }
+    // If overlay position reaches out of the background on the right
+    if ((xs + copylen) > ws) {
+        copylen += ws - (xs + copylen);
+    }
+    // If overlay is outside the background boundaries
+    if (copylen <= 0) return;
+    
+    // If overlay position reaches out of the background on the top
+    if (ys < 0) {
+        linecount += ys;
+        yo -= ys;
+        ys = 0;
+    }
+    // If overlay position reaches out of the background on the bottom
+    if ((ys + linecount) > hs) {
+        linecount += hs - (ys + linecount);
+    }
+    // If overlay is outside the background boundaries
+    if (linecount <= 0) return;
+
+    unsigned char *bgdata = bgimage->GetUCharPointer(VideoCh) + (ys * ws) + xs;
+    unsigned char *ovrldata = ovrlimage->Pointer() + (yo * wo) + xo;
+
+    if (Alpha == 255) {
+        for (i = 0; i < linecount; i ++) {
+            memcpy(bgdata, ovrldata, copylen);
+            bgdata += ws;
+            ovrldata += wo;
+        }
+    }
+    else {
+        // TO DO
+    }
+}
+
+
 /**********************************/
 /*** svlOverlayStaticText class ***/
 /**********************************/
@@ -433,6 +603,11 @@ void svlOverlayStaticText::SetRect(svlRect rect)
     Rect = rect;
 }
 
+void svlOverlayStaticText::SetRect(int left, int top, int right, int bottom)
+{
+    Rect.Assign(left, top, right, bottom);
+}
+
 void svlOverlayStaticText::SetTextColor(svlRGB txtcolor)
 {
     TxtColor = txtcolor;
@@ -464,6 +639,14 @@ svlRect svlOverlayStaticText::GetRect() const
     return Rect;
 }
 
+void svlOverlayStaticText::GetRect(int & left, int & top, int & right, int & bottom) const
+{
+    left   = Rect.left;
+    top    = Rect.top;
+    right  = Rect.right;
+    bottom = Rect.bottom;
+}
+
 svlRGB svlOverlayStaticText::GetTextColor() const
 {
     return TxtColor;
@@ -484,7 +667,7 @@ svlRGB svlOverlayStaticText::GetBackgroundColor() const
     return BGColor;
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 svlRect svlOverlayStaticText::GetTextSize(const std::string & text)
 {
@@ -515,7 +698,7 @@ svlRect svlOverlayStaticText::GetTextSize(const std::string & CMN_UNUSED(text))
 
 #endif // CISST_SVL_HAS_OPENCV
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 
 void svlOverlayStaticText::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
@@ -640,6 +823,11 @@ void svlOverlayStaticRect::SetRect(svlRect rect)
     Rect = rect;
 }
 
+void svlOverlayStaticRect::SetRect(int left, int top, int right, int bottom)
+{
+    Rect.Assign(left, top, right, bottom);
+}
+
 void svlOverlayStaticRect::SetColor(svlRGB color)
 {
     Color = color;
@@ -655,6 +843,14 @@ svlRect svlOverlayStaticRect::GetRect() const
     return Rect;
 }
 
+void svlOverlayStaticRect::GetRect(int & left, int & top, int & right, int & bottom) const
+{
+    left   = Rect.left;
+    top    = Rect.top;
+    right  = Rect.right;
+    bottom = Rect.bottom;
+}
+
 svlRGB svlOverlayStaticRect::GetColor() const
 {
     return Color;
@@ -668,6 +864,135 @@ bool svlOverlayStaticRect::GetFill() const
 void svlOverlayStaticRect::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
     svlDraw::Rectangle(bgimage, VideoCh, Rect, Color, Fill);
+}
+
+
+/*************************************/
+/*** svlOverlayStaticEllipse class ***/
+/*************************************/
+
+svlOverlayStaticEllipse::svlOverlayStaticEllipse() :
+    svlOverlay(),
+    Center(0, 0),
+    RadiusHoriz(0),
+    RadiusVert(0),
+    Angle(0.0),
+    Color(255, 255, 255),
+    Fill(true)
+{
+}
+
+svlOverlayStaticEllipse::svlOverlayStaticEllipse(unsigned int videoch,
+                                                 bool visible,
+                                                 const svlPoint2D center,
+                                                 int radius_horiz,
+                                                 int radius_vert,
+                                                 double angle,
+                                                 svlRGB color,
+                                                 bool fill) :
+    svlOverlay(videoch, visible),
+    Center(center),
+    RadiusHoriz(radius_horiz),
+    RadiusVert(radius_vert),
+    Angle(angle),
+    Color(color),
+    Fill(fill)
+{
+}
+
+svlOverlayStaticEllipse::svlOverlayStaticEllipse(unsigned int videoch,
+                                                 bool visible,
+                                                 const svlPoint2D center,
+                                                 int radius,
+                                                 svlRGB color,
+                                                 bool fill) :
+    svlOverlay(videoch, visible),
+    Center(center),
+    RadiusHoriz(radius),
+    RadiusVert(radius),
+    Angle(0.0),
+    Color(color),
+    Fill(fill)
+{
+}
+
+svlOverlayStaticEllipse::~svlOverlayStaticEllipse()
+{
+}
+
+void svlOverlayStaticEllipse::SetCenter(const svlPoint2D center)
+{
+    Center = center;
+}
+
+void svlOverlayStaticEllipse::SetRadius(const int radius_horiz, const int radius_vert)
+{
+    RadiusHoriz = radius_horiz;
+    RadiusVert  = radius_vert;
+}
+
+void svlOverlayStaticEllipse::SetRadius(const int radius)
+{
+    RadiusHoriz = RadiusVert = radius;
+}
+
+void svlOverlayStaticEllipse::SetAngle(const double angle)
+{
+    Angle = angle;
+}
+
+void svlOverlayStaticEllipse::SetColor(svlRGB color)
+{
+    Color = color;
+}
+
+void svlOverlayStaticEllipse::SetFill(bool fill)
+{
+    Fill = fill;
+}
+
+svlPoint2D svlOverlayStaticEllipse::GetCenter() const
+{
+    return Center;
+}
+
+void svlOverlayStaticEllipse::GetRadius(int & radius_horiz, int & radius_vert) const
+{
+    radius_horiz = RadiusHoriz;
+    radius_vert  = RadiusVert;
+}
+
+double svlOverlayStaticEllipse::GetAngle() const
+{
+    return Angle;
+}
+
+svlRGB svlOverlayStaticEllipse::GetColor() const
+{
+    return Color;
+}
+
+bool svlOverlayStaticEllipse::GetFill() const
+{
+    return Fill;
+}
+
+void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
+{
+#if CISST_SVL_HAS_OPENCV
+
+    cvEllipse(bgimage->IplImageRef(VideoCh),
+              cvPoint(Center.x, Center.y),
+              cvSize(RadiusHoriz, RadiusVert),
+              Angle, 0.0, 360.0,
+              cvScalar(Color.r, Color.g, Color.b),
+              (Fill ? -1 : 1));
+
+#else // CISST_SVL_HAS_OPENCV
+
+    // TO DO: to be implemented
+
+#endif // CISST_SVL_HAS_OPENCV
 }
 
 
@@ -1009,6 +1334,11 @@ void svlOverlayStaticBar::SetRect(svlRect rect)
     Rect.Normalize();
 }
 
+void svlOverlayStaticBar::SetRect(int left, int top, int right, int bottom)
+{
+    Rect.Assign(left, top, right, bottom);
+}
+
 void svlOverlayStaticBar::SetColor(svlRGB color)
 {
     Color = color;
@@ -1053,6 +1383,14 @@ bool svlOverlayStaticBar::GetDirection() const
 svlRect svlOverlayStaticBar::GetRect() const
 {
     return Rect;
+}
+
+void svlOverlayStaticBar::GetRect(int & left, int & top, int & right, int & bottom) const
+{
+    left   = Rect.left;
+    top    = Rect.top;
+    right  = Rect.right;
+    bottom = Rect.bottom;
 }
 
 svlRGB svlOverlayStaticBar::GetColor() const

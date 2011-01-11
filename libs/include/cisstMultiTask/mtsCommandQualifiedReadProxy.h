@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandQualifiedReadProxy_h
 #define _mtsCommandQualifiedReadProxy_h
 
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 #include <cisstMultiTask/mtsCommandProxyBase.h>
 #include <cisstMultiTask/mtsProxySerializer.h>
 
@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
   When Execute() method is called, the command id with two payloads is sent to
   the connected peer interface across a network.
 */
-class mtsCommandQualifiedReadProxy: public mtsCommandQualifiedReadBase, public mtsCommandProxyBase
+class mtsCommandQualifiedReadProxy: public mtsCommandQualifiedRead, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
 
@@ -53,12 +53,20 @@ protected:
 
 public:
     /*! Typedef for base type */
-    typedef mtsCommandQualifiedReadBase BaseType;
+    typedef mtsCommandQualifiedRead BaseType;
 
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when
+    /*! Constructor. Command proxy is disabled by default and is enabled when
         command id and network proxy are set. */
     mtsCommandQualifiedReadProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();
+    }
+    ~mtsCommandQualifiedReadProxy() {
+        if (Argument1Prototype) {
+            delete Argument1Prototype;
+        }
+        if (Argument2Prototype) {
+            delete Argument2Prototype;
+        }
     }
 
     /*! Set command id and register serializer to network proxy. This method
@@ -80,16 +88,16 @@ public:
     /*! The execute method. */
     mtsExecutionResult Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2) {
         if (IsDisabled()) {
-            return mtsExecutionResult::DISABLED;
+            return mtsExecutionResult::COMMAND_DISABLED;
         }
 
         if (NetworkProxyServer) {
             if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID, argument1, argument2)) {
-                return mtsExecutionResult::COMMAND_FAILED;
+                return mtsExecutionResult::NETWORK_ERROR;
             }
         }
 
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /*! Generate human readable description of this object */

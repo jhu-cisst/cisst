@@ -58,6 +58,8 @@ Ice.Trace.Network = 0
 #
 Ice.Override.Timeout = 10000
 Ice.Override.ConnectTimeout = 3000
+# Message size in KB (eg 50MB 51200)
+Ice.MessageSizeMax = 51200
 
 #------------------------------------------------------------------------------
 # Client-specific Properties

@@ -37,8 +37,7 @@ class ireTaskTree( wx.Frame ):
         self.taskManager = taskManager
         self.tree = wx.TreeCtrl(self)
         root = self.tree.AddRoot("TaskManager")
-        self.AddTaskNodes(root, self.taskManager.GetNamesOfDevices(), self.taskManager.GetDevice)		
-        self.AddTaskNodes(root, self.taskManager.GetNamesOfTasks(), self.taskManager.GetTask)
+        self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)		
         self.tree.Expand(root)
 
     def AddTaskNodes(self, parentId, items, getter):
@@ -51,9 +50,9 @@ class ireTaskTree( wx.Frame ):
             self.AddReqInterfaceNodes(reqId, task)
 
     def AddProvInterfaceNodes(self, parentId, task):
-        for item in task.GetNamesOfProvidedInterfaces():
+        for item in task.GetNamesOfInterfacesProvided():
             provId = self.tree.AppendItem(parentId, item)
-            provInterface = task.GetProvidedInterface(item)
+            provInterface = task.GetInterfaceProvided(item)
             cmdId = self.tree.AppendItem(provId, "CommandVoid")
             self.AddCommandNodes(cmdId, provInterface.GetNamesOfCommandsVoid())
             cmdId = self.tree.AppendItem(provId, "CommandWrite")
@@ -62,19 +61,27 @@ class ireTaskTree( wx.Frame ):
             self.AddCommandNodes(cmdId, provInterface.GetNamesOfCommandsRead())
             cmdId = self.tree.AppendItem(provId, "CommandQualifiedRead")
             self.AddCommandNodes(cmdId, provInterface.GetNamesOfCommandsQualifiedRead())
+            cmdId = self.tree.AppendItem(provId, "CommandVoidReturn")
+            self.AddCommandNodes(cmdId, provInterface.GetNamesOfCommandsVoidReturn())
+            cmdId = self.tree.AppendItem(provId, "CommandWriteReturn")
+            self.AddCommandNodes(cmdId, provInterface.GetNamesOfCommandsWriteReturn())
 
     def AddReqInterfaceNodes(self, parentId, task):
-        for item in task.GetNamesOfRequiredInterfaces():
+        for item in task.GetNamesOfInterfacesRequired():
             reqId = self.tree.AppendItem(parentId, item)
-            reqInterface = task.GetRequiredInterface(item)
+            reqInterface = task.GetInterfaceRequired(item)
             cmdId = self.tree.AppendItem(reqId, "CommandVoid")
-            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfCommandPointersVoid())
+            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfFunctionsVoid())
             cmdId = self.tree.AppendItem(reqId, "CommandWrite")
-            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfCommandPointersWrite())
+            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfFunctionsWrite())
             cmdId = self.tree.AppendItem(reqId, "CommandRead")
-            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfCommandPointersRead())
+            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfFunctionsRead())
             cmdId = self.tree.AppendItem(reqId, "CommandQualifiedRead")
-            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfCommandPointersQualifiedRead())
+            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfFunctionsQualifiedRead())
+            cmdId = self.tree.AppendItem(reqId, "CommandVoidReturn")
+            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfFunctionsVoidReturn())
+            cmdId = self.tree.AppendItem(reqId, "CommandWriteReturn")
+            self.AddCommandNodes(cmdId, reqInterface.GetNamesOfFunctionsWriteReturn())
 
     def AddCommandNodes(self, parentId, cmdList):
         for cmd in cmdList:
@@ -155,8 +162,7 @@ class ireSignalSelect( wx.Dialog ):
         else:
             self.tree = wx.TreeCtrl(self, style = wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
         root = self.tree.AddRoot("TaskManager")
-        self.AddTaskNodes(root, self.taskManager.GetNamesOfDevices(), self.taskManager.GetDevice)		
-        self.AddTaskNodes(root, self.taskManager.GetNamesOfTasks(), self.taskManager.GetTask)
+        self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)		
         self.tree.ExpandAll()
 
         self.OKButton = wx.Button(self, wx.ID_OK)
@@ -190,14 +196,14 @@ class ireSignalSelect( wx.Dialog ):
     def AddTaskNodes(self, parentId, items, getter):
         for item in items:
             task = getter(item)
-            if len(task.GetNamesOfProvidedInterfaces()) > 0:
+            if len(task.GetNamesOfInterfacesProvided()) > 0:
                 taskId = self.tree.AppendItem(parentId, item)
                 self.AddProvInterfaceNodes(taskId, task)
 
     def AddProvInterfaceNodes(self, parentId, task):
-        for item in task.GetNamesOfProvidedInterfaces():
+        for item in task.GetNamesOfInterfacesProvided():
             provId = self.tree.AppendItem(parentId, item)
-            provInterface = task.GetProvidedInterface(item)
+            provInterface = task.GetInterfaceProvided(item)
             if len(provInterface.GetNamesOfCommandsRead()) > 0:
                 self.AddCommandNodes(provId, provInterface, provInterface.GetNamesOfCommandsRead())
 

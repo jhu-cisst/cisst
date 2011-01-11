@@ -1,38 +1,48 @@
 #
 # $Id$
 #
-# (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
-# This project is designed to be built outside the Insight source tree.
-# Find ITK.
-FIND_PACKAGE(ITK)
-IF(ITK_FOUND)
-  INCLUDE(${ITK_USE_FILE})
+if (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)
 
-  ADD_EXECUTABLE(Subarray_ITK_Benchmark Subarray_ITK_Benchmark.cpp )
-  CISST_REQUIRES("Subarray_ITK_Benchmark" "cisstCommon;cisstOSAbstraction")
-  TARGET_LINK_LIBRARIES(Subarray_ITK_Benchmark ITKCommon)
+  # This project is designed to be built outside the Insight source tree.
+  # Find ITK.
+  find_package (ITK)
 
-  ADD_EXECUTABLE(Subarray_nArray_Benchmark Subarray_nArray_Benchmark.cpp)
-  CISST_REQUIRES("Subarray_nArray_Benchmark" "cisstCommon;cisstVector;cisstOSAbstraction")
+  if (ITK_FOUND)
+    include (${ITK_USE_FILE})
 
-  ADD_EXECUTABLE(ImageAdd_ITK_Benchmark ImageAdd_ITK_Benchmark.cpp )
-  CISST_REQUIRES("ImageAdd_ITK_Benchmark" "cisstCommon;cisstOSAbstraction")
-  TARGET_LINK_LIBRARIES(ImageAdd_ITK_Benchmark ITKCommon)
+    add_executable (Subarray_ITK_Benchmark Subarray_ITK_Benchmark.cpp )
+    cisst_target_link_libraries (Subarray_ITK_Benchmark cisstCommon cisstOSAbstraction)
+    target_link_libraries (Subarray_ITK_Benchmark ITKCommon)
 
-  ADD_EXECUTABLE(ImageAdd_nArray_Benchmark ImageAdd_nArray_Benchmark.cpp)
-  CISST_REQUIRES("ImageAdd_nArray_Benchmark" "cisstCommon;cisstVector;cisstOSAbstraction")
+    add_executable (Subarray_nArray_Benchmark Subarray_nArray_Benchmark.cpp)
+    cisst_target_link_libraries (Subarray_nArray_Benchmark cisstCommon cisstVector cisstOSAbstraction)
 
-ENDIF(ITK_FOUND)
+    add_executable (ImageAdd_ITK_Benchmark ImageAdd_ITK_Benchmark.cpp)
+    cisst_target_link_libraries (ImageAdd_ITK_Benchmark cisstCommoncisstOSAbstraction)
+    target_link_libraries (ImageAdd_ITK_Benchmark ITKCommon)
 
-ADD_EXECUTABLE(optimizedEngines optimizedEngines.cpp)
-CISST_REQUIRES("optimizedEngines" "cisstCommon;cisstVector;cisstOSAbstraction")
+    add_executable (ImageAdd_nArray_Benchmark ImageAdd_nArray_Benchmark.cpp)
+    cisst_target_link_libraries (ImageAdd_nArray_Benchmark cisstCommon cisstVector cisstOSAbstraction)
+
+  else (ITK_FOUND)
+    message (WARNING " nArrayBenchmark examples Subarray_ITK_Benchmark, Subarray_nArray_Benchmark, ImageAdd_ITK_Benchmark and ImageAdd_nArray_Benchmark will not be compiled since they require ITK")
+    mark_as_advanced (ITK_FOUND ITK_DIR)
+  endif (ITK_FOUND)
+
+  add_executable (optimizedEngines optimizedEngines.cpp)
+  cisst_target_link_libraries (optimizedEngines cisstCommon cisstVector cisstOSAbstraction)
+
+else (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)
+  message (WARNING " nArrayBenchmark examples will not be compiled since they require BUILD_LIBS_cisstVector and BUILD_LIBS_cisstOSAbstraction")
+endif (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)

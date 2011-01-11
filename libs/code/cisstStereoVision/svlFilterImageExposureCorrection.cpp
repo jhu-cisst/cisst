@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -94,6 +94,9 @@ void svlFilterImageExposureCorrection::GetGamma(double & gamma) const
 int svlFilterImageExposureCorrection::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
+    if (!img) return SVL_FAIL;
+    Exposure.SetSize(img->GetVideoChannels());
     return SVL_OK;
 }
 
@@ -109,7 +112,7 @@ int svlFilterImageExposureCorrection::Process(svlProcInfo* procInfo, svlSample* 
 
     _ParallelLoop(procInfo, vch, videochannels)
     {
-        svlImageProcessing::SetExposure(img, vch, Brightness, Contrast, Gamma, Exposure);
+        svlImageProcessing::SetExposure(img, vch, Brightness, Contrast, Gamma, Exposure[vch]);
     }
 
     return SVL_OK;

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2010-09-16
@@ -55,7 +55,7 @@ mtsExecutionResult mtsCommandWriteReturn::Execute(const mtsGenericObject & argum
     if (this->IsEnabled()) {
         return this->Callable->Execute(argument, result);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

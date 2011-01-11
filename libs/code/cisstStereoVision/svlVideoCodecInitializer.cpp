@@ -30,12 +30,12 @@
 #include "svlVideoCodecVfW32.h"
 #endif // CISST_WINDOWS
 
-#if (CISST_SVL_HAS_ZLIB == ON)
+#if CISST_SVL_HAS_ZLIB
 #include "svlVideoCodecCVI.h"
 #include "svlVideoCodecUDPStream.h"
 #endif // CISST_SVL_HAS_ZLIB
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 #include "svlVideoCodecOpenCV.h"
 #endif // CISST_SVL_HAS_OPENCV
 

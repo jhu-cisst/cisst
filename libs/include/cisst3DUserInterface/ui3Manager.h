@@ -54,7 +54,7 @@ public:
 */
 class CISST_EXPORT ui3Manager: public ui3BehaviorBase
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     
     friend class ui3ManagerCVTKRendererProc;
     friend class ui3BehaviorBase;

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- $Id: $
+ $Id$
  
  Author(s):  Balazs Vagvolgyi
  Created on: 2010
@@ -337,6 +337,576 @@ void svlDrawHelper::TriangleInternals::Draw(int x1, int y1, int x2, int y2, int 
         len = right - left;
         while (len >= 0) {
             *tdata2 = color; tdata2 ++; len --;
+        }
+    }
+}
+
+
+/**************************************************/
+/*** svlDrawHelper::TriangleWarpInternals class ***/
+/**************************************************/
+
+svlDrawHelper::TriangleWarpInternals::TriangleWarpInternals() :
+    svlDrawInternals(),
+    Input(0),
+    Output(0),
+    _in_idxs(0),
+    _out_idxs(0),
+    _lm_x(0),
+    _rm_x(0),
+    _lm_id(0),
+    _rm_id(0),
+    _lm_pos(0),
+    _rm_pos(0),
+    _ixs(0),
+    _iys(0),
+    _oxs(0),
+    _oys(0)
+{
+    AllocateBuffers(8192);
+}
+
+svlDrawHelper::TriangleWarpInternals::~TriangleWarpInternals()
+{
+    ReleaseBuffers();
+}
+
+bool svlDrawHelper::TriangleWarpInternals::SetInputImage(svlSampleImage* image, unsigned int channel)
+{
+    if (!image || channel >= image->GetVideoChannels()) return false;
+
+    InWidth = image->GetWidth(channel);
+    InHeight = image->GetHeight(channel);
+
+    if (InWidth < 1 || InHeight < 1) {
+        Input = 0;
+        return false;
+    }
+
+    Input = image->GetUCharPointer(channel);
+
+    return true;
+}
+
+bool svlDrawHelper::TriangleWarpInternals::SetOutputImage(svlSampleImage* image, unsigned int channel)
+{
+    if (!image || channel >= image->GetVideoChannels()) return false;
+
+    OutWidth = image->GetWidth(channel);
+    OutHeight = image->GetHeight(channel);
+
+    if (OutWidth < 1 || OutHeight < 1) {
+        Output = 0;
+        return false;
+    }
+
+    Output = image->GetUCharPointer(channel);
+
+    return true;
+}
+
+void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
+                                                int ox1, int oy1, int ox2, int oy2, int ox3, int oy3)
+{
+    if (!Input || !Output) return;
+
+    int miny = MIN3(oy1, oy2, oy3);
+    int maxy = MAX3(oy1, oy2, oy3);
+
+    int i, j, x, y, len;
+    int *xs, *ys;
+
+    // Trace source and destination triangle contours
+    _ilen[0] = GetLinePixels(_ixs[0], _iys[0], ix1, iy1, ix2, iy2);
+    _ilen[1] = GetLinePixels(_ixs[1], _iys[1], ix1, iy1, ix3, iy3);
+    _ilen[2] = GetLinePixels(_ixs[2], _iys[2], ix2, iy2, ix3, iy3);
+    _olen[0] = GetLinePixels(_oxs[0], _oys[0], ox1, oy1, ox2, oy2);
+    _olen[1] = GetLinePixels(_oxs[1], _oys[1], ox1, oy1, ox3, oy3);
+    _olen[2] = GetLinePixels(_oxs[2], _oys[2], ox2, oy2, ox3, oy3);
+
+    for (i = miny; i <= maxy; i ++) {
+        _lm_x[i] =  1000000;
+        _rm_x[i] = -1000000;
+    }
+
+    for (j = 0; j < 3; j ++) {
+        len = _olen[j];
+        xs = _oxs[j];
+        ys = _oys[j];
+
+        for (i = 0; i < len; i ++) {
+            x = *xs; xs ++;
+            y = *ys; ys ++;
+            if (x < _lm_x[y]) {
+                _lm_x[y] = x;
+                _lm_id[y] = j;
+                _lm_pos[y] = i;
+            }
+            if (x > _rm_x[y]) {
+                _rm_x[y] = x;
+                _rm_id[y] = j;
+                _rm_pos[y] = i;
+            }
+        }
+    }
+
+    vctInt3 ratio;
+    ratio[0] = (_ilen[0] << 10) / _olen[0];
+    ratio[1] = (_ilen[1] << 10) / _olen[1];
+    ratio[2] = (_ilen[2] << 10) / _olen[2];
+
+    int id1, id2, pos1, pos2;
+
+    if (miny < 0) miny = 0;
+    if (maxy >= OutHeight) maxy = OutHeight - 1;
+
+    for (i = miny; i <= maxy; i ++) {
+        id1 = _lm_id[i];
+        id2 = _rm_id[i];
+
+        pos1 = (_lm_pos[i] * ratio[id1]) >> 10;
+        pos2 = (_rm_pos[i] * ratio[id2]) >> 10;
+
+        ResampleLine(_ixs[id1][pos1], _iys[id1][pos1], _ixs[id2][pos2], _iys[id2][pos2],
+                     _lm_x[i], i, _rm_x[i], i);
+    }
+}
+
+int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1, int y1, int x2, int y2)
+{
+    if (x1 == x2 && y1 == y2) {
+        *xs = x1; *ys = y1;
+        return 1;
+    }
+
+    int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
+
+    if (x1 < x2) {
+
+        dx = x2 - x1;
+
+        if (dy > 0) {
+            if (dx >= dy) {
+                for (x = x1; x <= x2; x ++) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) >= dx) {
+                        y ++;
+                        eps -= dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y <= y2; y ++) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= dy) {
+                        x ++;
+                        eps -= dy;
+                    }
+                }
+            }
+        }
+        else {
+            if (dx >= abs(dy)) {
+                for (x = x1; x <= x2; x ++) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) <= -dx) {
+                        y --;
+                        eps += dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y >= y2; y --) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= -dy) {
+                        x ++;
+                        eps -= -dy;
+                    }
+                }
+            }
+        }
+    }
+    else {
+
+        dx = x1 - x2;
+
+        if (dy > 0) {
+            if (dx >= dy) {
+                for (x = x1; x >= x2; x --) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) >= dx) {
+                        y ++;
+                        eps -= dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y <= y2; y ++) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= dy) {
+                        x --;
+                        eps -= dy;
+                    }
+                }
+            }
+        }
+        else {
+            if (dx >= abs(dy)) {
+                for (x = x1; x >= x2; x --) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) <= -dx) {
+                        y --;
+                        eps += dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y >= y2; y --) {
+                    *xs = x; *ys = y; xs ++; ys ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= -dy) {
+                        x --;
+                        eps -= -dy;
+                    }
+                }
+            }
+        }
+    }
+
+    return len;
+}
+
+int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h)
+{
+    const int stride = w * 3;
+
+    if (x1 == x2 && y1 == y2) {
+
+        if (x1 >= 0 && x1 < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x1 * 3;
+        else *idxs = -1;
+
+        return 1;
+    }
+
+    int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
+
+    if (x1 < x2) {
+
+        dx = x2 - x1;
+
+        if (dy > 0) {
+            if (dx >= dy) {
+                for (x = x1; x <= x2; x ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) >= dx) {
+                        y ++;
+                        eps -= dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y <= y2; y ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= dy) {
+                        x ++;
+                        eps -= dy;
+                    }
+                }
+            }
+        }
+        else {
+            if (dx >= abs(dy)) {
+                for (x = x1; x <= x2; x ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) <= -dx) {
+                        y --;
+                        eps += dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y >= y2; y --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= -dy) {
+                        x ++;
+                        eps -= -dy;
+                    }
+                }
+            }
+        }
+    }
+    else {
+
+        dx = x1 - x2;
+
+        if (dy > 0) {
+            if (dx >= dy) {
+                for (x = x1; x >= x2; x --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) >= dx) {
+                        y ++;
+                        eps -= dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y <= y2; y ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= dy) {
+                        x --;
+                        eps -= dy;
+                    }
+                }
+            }
+        }
+        else {
+            if (dx >= abs(dy)) {
+                for (x = x1; x >= x2; x --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) <= -dx) {
+                        y --;
+                        eps += dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y >= y2; y --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 3;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= -dy) {
+                        x --;
+                        eps -= -dy;
+                    }
+                }
+            }
+        }
+    }
+
+    return len;
+}
+
+void svlDrawHelper::TriangleWarpInternals::ResampleLine(int ix1, int iy1, int ix2, int iy2,
+                                                        int ox1, int oy1, int ox2, int oy2)
+{
+    int ilen = GetLinePixels(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
+    int olen = GetLinePixels(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);
+
+    int* in_idxs = _in_idxs;
+    int* out_idxs = _out_idxs;
+    unsigned char *in_buf, *out_buf;
+    int ipix, opix;
+
+    if (olen == 1) {
+
+        opix = *out_idxs;
+        if (opix >= 0) {
+            out_buf = Output + opix;
+
+            ipix = *in_idxs;
+            if (ipix >= 0) {
+                in_buf  = Input + ipix;
+                *out_buf = *in_buf; out_buf ++; in_buf ++;
+                *out_buf = *in_buf; out_buf ++; in_buf ++;
+                *out_buf = *in_buf;
+            }
+            else {
+                *out_buf = 0; out_buf ++;
+                *out_buf = 0; out_buf ++;
+                *out_buf = 0;
+            }
+        }
+
+        return;
+    }
+
+    int i, eps = 0;
+
+    if (ilen >= olen) {
+        for (i = 0; i < ilen; i ++) {
+            eps += olen;
+            if ((eps << 1) >= ilen) {
+
+                opix = *out_idxs;
+                if (opix >= 0) {
+                    out_buf = Output + opix;
+
+                    ipix = *in_idxs;
+                    if (ipix >= 0) {
+                        in_buf  = Input + ipix;
+                        *out_buf = *in_buf; out_buf ++; in_buf ++;
+                        *out_buf = *in_buf; out_buf ++; in_buf ++;
+                        *out_buf = *in_buf;
+                    }
+                    else {
+                        *out_buf = 0; out_buf ++;
+                        *out_buf = 0; out_buf ++;
+                        *out_buf = 0;
+                    }
+                }
+                out_idxs ++;
+
+                eps -= ilen;
+            }
+            in_idxs ++;
+        }
+    }
+    else {
+        for (i = 0; i < olen; i ++) {
+
+            opix = *out_idxs;
+            if (opix >= 0) {
+                out_buf = Output + opix;
+
+                ipix = *in_idxs;
+                if (ipix >= 0) {
+                    in_buf  = Input + ipix;
+                    *out_buf = *in_buf; out_buf ++; in_buf ++;
+                    *out_buf = *in_buf; out_buf ++; in_buf ++;
+                    *out_buf = *in_buf;
+                }
+                else {
+                    *out_buf = 0; out_buf ++;
+                    *out_buf = 0; out_buf ++;
+                    *out_buf = 0;
+                }
+            }
+            out_idxs ++;
+
+            if ((eps << 1) >= olen) {
+                eps -= olen;
+                in_idxs ++;
+            }
+            eps += ilen;
+        }
+    }
+}
+
+void svlDrawHelper::TriangleWarpInternals::AllocateBuffers(const unsigned int size)
+{
+    ReleaseBuffers();
+
+    _in_idxs  = new int[size];
+    _out_idxs = new int[size];
+    _lm_x     = new int[size];
+    _rm_x     = new int[size];
+    _lm_id    = new int[size];
+    _rm_id    = new int[size];
+    _lm_pos   = new int[size];
+    _rm_pos   = new int[size];
+
+    for (unsigned int i = 0; i < 3; i ++) {
+        _ixs[i] = new int[size];
+        _iys[i] = new int[size];
+        _oxs[i] = new int[size];
+        _oys[i] = new int[size];
+    }
+}
+
+void svlDrawHelper::TriangleWarpInternals::ReleaseBuffers()
+{
+    if (_in_idxs) {
+        delete [] _in_idxs;
+        _in_idxs = 0;
+    }
+    if (_out_idxs) {
+        delete [] _out_idxs;
+        _out_idxs = 0;
+    }
+    if (_lm_x) {
+        delete [] _lm_x;
+        _lm_x = 0;
+    }
+    if (_rm_x) {
+        delete [] _rm_x;
+        _rm_x = 0;
+    }
+    if (_lm_id) {
+        delete [] _lm_id;
+        _lm_id = 0;
+    }
+    if (_rm_id) {
+        delete [] _rm_id;
+        _rm_id = 0;
+    }
+    if (_lm_pos) {
+        delete [] _lm_pos;
+        _lm_pos = 0;
+    }
+    if (_rm_pos) {
+        delete [] _rm_pos;
+        _rm_pos = 0;
+    }
+
+    for (unsigned int i = 0; i < 3; i ++) {
+        if (_ixs[i]) {
+            delete [] _ixs[i];
+            _ixs[i] = 0;
+        }
+        if (_iys[i]) {
+            delete [] _iys[i];
+            _iys[i] = 0;
+        }
+        if (_oxs[i]) {
+            delete [] _oxs[i];
+            _oxs[i] = 0;
+        }
+        if (_oys[i]) {
+            delete [] _oys[i];
+            _oys[i] = 0;
         }
     }
 }

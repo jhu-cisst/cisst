@@ -23,3 +23,27 @@ prmPositionCartesianSet::~prmPositionCartesianSet()
 {
 }
 
+void prmPositionCartesianSet::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+    GoalMember.SerializeRaw(outputStream);
+    Velocity.SerializeRaw(outputStream);
+    VelocityAngular.SerializeRaw(outputStream);
+    Acceleration.SerializeRaw(outputStream);
+    AccelerationAngular.SerializeRaw(outputStream);
+    Mask.SerializeRaw(outputStream);
+
+}
+
+void prmPositionCartesianSet::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+    GoalMember.DeSerializeRaw(inputStream);
+    Velocity.DeSerializeRaw(inputStream);
+    VelocityAngular.DeSerializeRaw(inputStream);
+    Acceleration.DeSerializeRaw(inputStream);
+    AccelerationAngular.DeSerializeRaw(inputStream);
+    Mask.DeSerializeRaw(inputStream);
+}
+
+

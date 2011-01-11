@@ -55,9 +55,6 @@ protected:
     /*! A string identifying the 'Name' of the required interface. */
     std::string Name;
 
-    /*! Pointer to provided interface that we are connected to. */
-    mtsInterfaceProvidedOrOutput * InterfaceProvidedOrOutput;
-
     /*! Indicates if the interface must be connected. */
     mtsRequiredType Required;
 
@@ -77,7 +74,7 @@ protected:
     /*! Returns the name of the interface. */
     const std::string & GetName(void) const;
 
-    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
+    virtual const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const = 0;
 
     virtual bool CouldConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) = 0;
     virtual bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) = 0;

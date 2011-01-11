@@ -636,6 +636,8 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
     }
 
     // PK TEMP: special handling if componentName ends with "-END"
+    // This was needed for JGraph component viewer, but is no longer needed for uDrawGraph component viewer.
+    // If removed, need to generate AddComponentEvent elsewhere
     if (componentName.find("-END", componentName.length()-4) != std::string::npos) {
         if (ManagerComponentServer) {
             mtsDescriptionComponent componentInfo;
@@ -1528,6 +1530,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                 //continue;
             }
 
+            /*
             // 1-1-3. Clean up GCM's internal data structure
             if (!RemoveConnectionOfInterfaceRequiredOrInput(
                     serverProcessName, clientComponentProxyName, clientInterfaceName))
@@ -1567,6 +1570,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     }
                 }
             }
+            */
 
         }
 
@@ -1598,6 +1602,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
             // 1-2-3. Check if client component proxy should be removed
             //        (proxy component should be removed if it has no proxy interface)
+            /*
             const int numOfInterfaces = GetNumberOfInterfaces(serverProcessName, clientComponentProxyName);
             if (numOfInterfaces == -1) {
                 CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to get total number of interfaces: "
@@ -1622,6 +1627,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     }
                 }
             }
+            */
         }
 #else
         // 1. Let LCM disconnect local connection
@@ -1637,6 +1643,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
             //continue;
         }
 
+        /*
         if (!localManager->DisconnectLocally(serverComponentName, serverInterfaceName, 
                                              clientComponentName, clientInterfaceName))
         {
@@ -1647,6 +1654,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
             // smmy: for testing
             //continue;
         }
+        */
 
         // 2. Clean up GCM's internal data structure
         //if (FindComponent(processName, clientComponentName)) {
@@ -1833,6 +1841,9 @@ void mtsManagerGlobal::DisconnectInternal(void)
         element = it->second;
         if (clientInterfaceUID == GetInterfaceUID(element->ClientProcessName, element->ClientComponentName, element->ClientInterfaceRequiredName)) {
             if (serverInterfaceUID == GetInterfaceUID(element->ServerProcessName, element->ServerComponentName, element->ServerInterfaceProvidedName)) {
+                // Send disconnection event to ManagerComponentServer
+                if (ManagerComponentServer)
+                    ManagerComponentServer->RemoveConnectionEvent(element->GetDescriptionConnection());
                 ConnectionChange.Lock();
                 delete element;
                 ConnectionMap.erase(it);

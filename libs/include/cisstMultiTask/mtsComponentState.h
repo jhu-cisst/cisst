@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-09-14
@@ -79,8 +79,16 @@ class CISST_EXPORT mtsComponentState
     /*! Send a human readable description of the state. */
     void ToStream(std::ostream & outputStream) const;
 
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! De-serialize the content of the object without any extra
+      information, i.e. no class type nor format version. */
+    void DeSerializeRaw(std::istream & inputStream);
+
+#ifndef SWIG
     /*! Get a human readable description for any state */
     static const std::string & ToString(const Enum & value);
+#endif
 
     /*! Equality operators */
     bool operator == (const ThisType & state) const;
@@ -95,7 +103,7 @@ class CISST_EXPORT mtsComponentState
     bool operator >= (const ThisType & state) const;
 
     /*! Getter of current state */
-    Enum GetState(void) {
+    Enum GetState(void) const {
         return Value;
     }
 
@@ -111,6 +119,4 @@ inline std::ostream & operator << (std::ostream & output,
     return output;
 }
 
-
 #endif // _mtsComponentState_h
-

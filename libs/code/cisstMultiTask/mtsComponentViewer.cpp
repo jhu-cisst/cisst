@@ -19,35 +19,32 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
+void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double timeoutInSec)
+{
+    WaitingForResponse = true;
+    pipe.Write(s, s.length());
+    WaitForResponse(timeoutInSec);
+}
+
 CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
 
-mtsComponentViewer::mtsComponentViewer(const std::string & name, double periodicityInSeconds) :
-    mtsTaskPeriodic(name, periodicityInSeconds),
-    JGraphSocket(osaSocket::TCP),
-    JGraphSocketConnected(false),
-    UDrawSocket(osaSocket::TCP),
-    UDrawSocketConnected(false)
+mtsComponentViewer::mtsComponentViewer(const std::string & name) :
+    mtsTaskFromSignal(name),
+    UDrawPipeConnected(false),
+    WaitingForResponse(false),
+    RedrawGraph(false)
 {
-    // MJ TEMP
-#if 0
-    // Extend internal required interface (to Manager Component) to include event handlers
-    mtsInterfaceRequired *required = AddInterfaceRequired(
-        mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
-    if (required) {
-        InternalCommands.SetInterfaceRequired(required);
-        InternalCommands.AddComponentEventHandler(&mtsComponentViewer::AddComponent, this);
-        InternalCommands.AddConnectionEventHandler(&mtsComponentViewer::AddConnection, this);
-    }
-#endif
-
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
-        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponent, this);
-        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnection, this);
+        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
+        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeStateHandler, this);
+        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnectionHandler, this);
+        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnectionHandler, this);
     } else {
         cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to enable dynamic component composition"));
     }
@@ -60,93 +57,88 @@ mtsComponentViewer::~mtsComponentViewer()
 
 void mtsComponentViewer::Startup(void)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Startup called" << std::endl;
-    // Try to connect to JGraph or UDrawGraph viewer
-    if (!JGraphSocketConnected)
-        ConnectToJGraph();
-    if (!UDrawSocketConnected)
+    // Try to connect to UDrawGraph viewer
+    if (!UDrawPipeConnected)
         ConnectToUDrawGraph();
-    if (JGraphSocketConnected || UDrawSocketConnected)
+    if (UDrawPipeConnected)
         SendAllInfo();
 }
 
 void mtsComponentViewer::Run(void)
 {
-    if (!UDrawSocketConnected) {
+    if (!UDrawPipeConnected) {
        ConnectToUDrawGraph();
-       if (UDrawSocketConnected) {
+       if (UDrawPipeConnected) {
            CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
            SendAllInfo();
        }
     }
-#if 0
-    // Could also periodically check for connection to JGraph-based program.
-    if (!JGrahSocketConnected) {
-       ConnectToJGraph();
-       if (JGraphSocketConnected) {
-           CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
-           SendAllInfo();
-       }
-    }
-#endif
     ProcessQueuedCommands();
     ProcessQueuedEvents();
+    // PK TEMP: following should be replaced by a queued command
+    if (RedrawGraph) {
+        RedrawGraph = false;
+        SendAllInfo();
+    }
 }
 
 void mtsComponentViewer::Cleanup(void)
 {
-    if (JGraphSocketConnected) {
-        JGraphSocket.Close();
-        JGraphSocketConnected = false;
-    }
-
-    if (UDrawSocketConnected) {
-        UDrawSocket.Close();
-        UDrawSocketConnected = false;
+    // TEMP: do this here because otherwise it doesn't work (maybe CleanupInternal
+    // takes too long to change the state)
+    ChangeState(mtsComponentState::FINISHED);
+    if (UDrawPipeConnected) {
+        if (!ReaderThreadFinished) {
+            ReaderThreadFinished = true;
+            CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for reader thread to finish" << std::endl;
+            ReaderThread.Wait();
+        }
+        ReaderThread.Delete();
+        UDrawPipe.Close();
+        UDrawPipeConnected = false;
+        CMN_LOG_CLASS_RUN_WARNING << "Exited" << std::endl;
     }
 }
 
 //*************************************** Event Handlers ******************************************************
 
-void mtsComponentViewer::AddComponent(const mtsDescriptionComponent &componentInfo)
+void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &componentInfo)
 {
-    if (JGraphSocketConnected) {
-        std::string buffer = GetComponentInGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName);
-        if (buffer != "") {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-            JGraphSocket.Send(buffer);
-        }
-    }
-    if (UDrawSocketConnected) {
-        std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName);
-        if (buffer != "") {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-            UDrawSocket.Send(buffer);
-            char response[256];
-            if (UDrawSocket.Receive(response, sizeof(response), 1.0))
-                CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
+    if (UDrawPipeConnected) {
+        // Ignore proxy components
+        if (!IsProxyComponent(componentInfo.ComponentName)) {
+            mtsComponentState componentState = ManagerComponentServices->ComponentGetState(componentInfo);
+            std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
+            if (buffer != "") {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+                WriteString(UDrawPipe, buffer);
+            }
         }
     }
 }
 
-void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connection)
+void mtsComponentViewer::ChangeStateHandler(const mtsComponentStateChange &componentStateChange)
 {
-    // Send to TaskViewer if present
-    if (JGraphSocketConnected) {
-        std::string message = "add edge [" + connection.Client.ProcessName + ":" + connection.Client.ComponentName + ", "
-                                           + connection.Server.ProcessName + ":" + connection.Server.ComponentName + ", "
-                                           + connection.Client.InterfaceName + ", "
-                                           + connection.Server.InterfaceName + "]\n";
-        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        JGraphSocket.Send(message);
+    if (UDrawPipeConnected) {
+        std::string buffer("graph(change_attr([node(\"");
+        buffer.append(componentStateChange.ProcessName + ":" + componentStateChange.ComponentName);
+        buffer.append("\", [");
+        buffer.append(GetStateInUDrawGraphFormat(componentStateChange.NewState));
+        buffer.append("])]))\n");
+        CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+        WriteString(UDrawPipe, buffer);
     }
-    if (UDrawSocketConnected) {
-        char response[256];
+}
+
+void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &connection)
+{
+    if (UDrawPipeConnected) {
+        char IDString[20];
         std::string message("graph(update([],[new_edge(\"");
-        sprintf(response, "%d", connection.ConnectionID);
-        message.append(response);
+        sprintf(IDString, "%d", connection.ConnectionID);
+        message.append(IDString);
         message.append("\", \"C\", [a(\"OBJECT\", \"");
-        message.append(response);
+        message.append(IDString);
         message.append("\"), a(\"INFO\", \"");
         message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
         message.append("\")], \"");
@@ -155,48 +147,81 @@ void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connectio
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
         message.append("\")]))\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        UDrawSocket.Send(message);
-        if (UDrawSocket.Receive(response, sizeof(response), 1.0))
-            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
+        WriteString(UDrawPipe, message);
+    }
+}
+
+void mtsComponentViewer::RemoveConnectionHandler(const mtsDescriptionConnection &connection)
+{
+    if (UDrawPipeConnected) {
+        char IDString[20];
+        std::string message("graph(update([],[delete_edge(\"");
+        sprintf(IDString, "%d", connection.ConnectionID);
+        message.append(IDString);
+        message.append("\")]))\n");
+        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+        WriteString(UDrawPipe, message);
     }
 }
 
 //********************************* Local (protected) methods ***********************************************
 
-bool mtsComponentViewer::ConnectToJGraph(const std::string &ipAddress, unsigned short port)
+bool mtsComponentViewer::ConnectToUDrawGraph(void)
 {
-    // Try to connect to the JGraph application software (Java program).
-    // Note that the JGraph application also sends event messages back via the socket,
-    // though we don't currently read them.
-    CMN_LOG_CLASS_INIT_WARNING << "Attempting to connect to JGraph TaskViewer" << std::endl;
-    JGraphSocketConnected = JGraphSocket.Connect(ipAddress, port);
-    if (JGraphSocketConnected) {
-        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
-        CMN_LOG_CLASS_INIT_VERBOSE << "Connected to JGraph TaskViewer" << std::endl;
-    }
-    return JGraphSocketConnected;
-}
-
-bool mtsComponentViewer::ConnectToUDrawGraph(const std::string &ipAddress, unsigned short port)
-{
-    // Try to connect to UDrawGraph on port 2554
-    // (Note: default UDrawGraph port is 2542, but this may be a target for hackers).
-    UDrawSocketConnected = UDrawSocket.Connect(ipAddress, port);
+    // Try to connect to UDrawGraph
+    std::vector<std::string> arguments;
+    arguments.push_back("-pipe");
+    UDrawPipeConnected = UDrawPipe.Open("uDrawGraph", arguments, "rw");
     // wait for initial OK
-    if (UDrawSocketConnected) {
-        char response[256];
-        if (UDrawSocket.Receive(response, sizeof(response), 3.0)) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
-            UDrawSocket.Send("drag_and_drop(dragging_on)\n");
-            if (UDrawSocket.Receive(response, sizeof(response), 1.0))
-               CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), drag_and_drop: " << response << std::endl;
-            UDrawSocket.Send("graph(new([]))\n");
-            if (UDrawSocket.Receive(response, sizeof(response), 1.0))
-               CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), new: " << response << std::endl;
-        }
+    if (UDrawPipeConnected) {
+        WaitingForResponse = true;
+        // Create reader thread.
+        ReaderThread.Create<mtsComponentViewer, int>(this, &mtsComponentViewer::ReadFromUDrawGraph, 0);
+        WaitForResponse(1.0);
+        WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\")]))\n");
+        WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\"]))\n");
+        WriteString(UDrawPipe, "drag_and_drop(dragging_on)\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Connected to UDraw(Graph)" << std::endl;
     }
-    return UDrawSocketConnected;
+    return UDrawPipeConnected;
+}
+
+void *mtsComponentViewer::ReadFromUDrawGraph(int)
+{
+    std::string response;
+    ReaderThreadFinished = false;
+    while (!ReaderThreadFinished) {
+        response = UDrawPipe.ReadUntil(256, '\n');
+        if (response.compare(0,2,"ok") == 0)
+            WaitingForResponse = false;
+        else if (response.compare(0, 19, "communication_error") == 0) {
+            WaitingForResponse = false;
+            CMN_LOG_CLASS_RUN_WARNING << "UDrawGraph error: " << response;
+        }
+        else if (response.compare(0,4,"quit") == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << "Received quit command from UDrawGraph" << std::endl;
+            ReaderThreadFinished = true;
+            Kill();
+            // mtsTaskFromSignal::Kill should wake up thread (no need to call PostCommandQueuedMethod)
+        }
+        else if (response.compare(0,24,"menu_selection(\"redraw\")") == 0) {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph" << std::endl;
+            // PK TEMP: Following to be replaced by use of command pattern
+            RedrawGraph = true;
+            PostCommandQueuedMethod();
+        }
+    }
+    return 0;
+}
+
+bool mtsComponentViewer::WaitForResponse(double timeoutInSec) const
+{
+    // Could instead use osaThreadSignal with timeout
+    for (int i = 0; (i < timeoutInSec*1000) && WaitingForResponse; i++)
+        osaSleep(0.001);
+    if (WaitingForResponse)
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to receive response" << std::endl;
+    return !WaitingForResponse;
 }
 
 bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) const
@@ -207,34 +232,30 @@ bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) con
 
 void mtsComponentViewer::SendAllInfo(void)
 {
+    // Clear any existing graph
+    WriteString(UDrawPipe, "graph(new([]))\n");
     // Now, send all existing components and connections
     std::vector<std::string> processList;
     std::vector<std::string> componentList;
     size_t i, j;  // could use iterators instead
-    ManagerComponentServices->RequestGetNamesOfProcesses(processList);
+    processList = ManagerComponentServices->GetNamesOfProcesses();
     for (i = 0; i < processList.size(); i++) {
-        componentList.clear();
-        ManagerComponentServices->RequestGetNamesOfComponents(processList[i], componentList);
+        componentList = ManagerComponentServices->GetNamesOfComponents(processList[i]);
         for (j = 0; j < componentList.size(); j++) {
             // Ignore proxy components
             if (!IsProxyComponent(componentList[j])) {
                 mtsDescriptionComponent arg;
                 arg.ProcessName = processList[i];
                 arg.ComponentName = componentList[j];
-                this->AddComponent(arg);
+                this->AddComponentHandler(arg);
             }
         }
-        std::vector<mtsDescriptionConnection> connectionList;
-        ManagerComponentServices->RequestGetListOfConnections(connectionList);
-        for (i = 0; i < connectionList.size(); i++)
-            this->AddConnection(connectionList[i]);
     }
-    if (UDrawSocketConnected) {
-        char response[256];
-        UDrawSocket.Send("menu(layout(improve_all))\n");
-        if (UDrawSocket.Receive(response, sizeof(response), 3.0))
-           CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), improve_all: " << response << std::endl;
-    }
+    std::vector<mtsDescriptionConnection> connectionList;
+    connectionList = ManagerComponentServices->GetListOfConnections();
+    for (i = 0; i < connectionList.size(); i++)
+        this->AddConnectionHandler(connectionList[i]);
+    WriteString(UDrawPipe, "menu(layout(improve_all))\n");
 }
 
 std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &processName,
@@ -243,7 +264,7 @@ std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &pro
     size_t i;
     std::vector<std::string> requiredList;
     std::vector<std::string> providedList;
-    ManagerComponentServices->RequestGetNamesOfInterfaces(processName, componentName, requiredList, providedList);
+    ManagerComponentServices->GetNamesOfInterfaces(processName, componentName, requiredList, providedList);
     // For now, ignore components that don't have any interfaces
     if ((requiredList.size() == 0) && (providedList.size() == 0))
         return "";
@@ -265,13 +286,13 @@ std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &pro
 }
 
 std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string &processName,
-                                                          const std::string &componentName) const
+                                const std::string &componentName, const mtsComponentState &componentState) const
 {
 #if 0
     // Enable this to ignore components that don't have any interfaces
     std::vector<std::string> requiredList;
     std::vector<std::string> providedList;
-    ManagerComponentServices->RequestGetNamesOfInterfaces(processName, componentName, requiredList, providedList);
+    ManagerComponentServices->GetNamesOfInterfaces(processName, componentName, requiredList, providedList);
     if ((requiredList.size() == 0) && (providedList.size() == 0))
         return "";
 #endif
@@ -281,6 +302,21 @@ std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string
     buffer.append(componentName);
     buffer.append("\"), a(\"INFO\", \"");
     buffer.append(processName + ":" + componentName);
-    buffer.append("\")])],[]))\n");
+    buffer.append("\"), ");
+    buffer.append(GetStateInUDrawGraphFormat(componentState));
+    buffer.append("])],[]))\n");
+    return buffer;
+}
+
+std::string mtsComponentViewer::GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const
+{
+    std::string buffer("a(\"COLOR\", \"");
+    if (componentState == mtsComponentState::READY)
+        buffer.append("yellow");
+    else if (componentState == mtsComponentState::ACTIVE)
+        buffer.append("green");
+    else
+        buffer.append("red");
+    buffer.append("\")");
     return buffer;
 }

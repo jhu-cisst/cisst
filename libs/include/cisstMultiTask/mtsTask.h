@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsTask: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
 
@@ -88,11 +88,6 @@ protected:
     /*! The state data table object to store the states of the task. */
     mtsStateTable StateTable;
 
-    /*! Map of state tables, includes the default StateTable under the
-      name "StateTable" */
-    typedef cmnNamedMap<mtsStateTable> StateTableMapType;
-    StateTableMapType StateTables;
-
     /*! True if the task took more time to do computation than allocated time.
       */
     bool OverranPeriod;
@@ -102,6 +97,9 @@ protected:
 
     /*! The return value for RunInternal. */
     void * ReturnValue;
+
+    /*! Callable object used when queueing. */
+    mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
 
     /********************* Methods that call user methods *****************/
 
@@ -202,12 +200,6 @@ public:
     virtual void Create(void * data) = 0;
     inline void Create(void) { Create(0); }
 
-    /*! Start or resume execution of the task. */
-    virtual void Start(void) = 0;
-
-    /*! Suspend the execution of the task. */
-    virtual void Suspend(void) = 0;
-
     /*! End the task */
     void Kill(void);
 
@@ -219,27 +211,11 @@ public:
         return StateTable.GetName();
     }
 
-    /*! Return a pointer to state table with the given name. */
-    mtsStateTable * GetStateTable(const std::string & stateTableName) {
-        return this->StateTables.GetItem(stateTableName, CMN_LOG_LOD_INIT_ERROR);
-    }
-
     /*! Return a pointer to the default state table.  See
       GetStateTable and GetDefaultStateTableName. */
     inline mtsStateTable * GetDefaultStateTable(void) {
-        return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LOD_INIT_ERROR);
+        return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
-
-    /*! Add an existing state table to the list of known state tables
-      in this task.  This method will add a provided interface for the
-      state table using the name "StateTable" +
-      existingStateTable->GetName() unless the caller specifies that
-      no interface should be created.
-
-      By default, all state tables added will advance at each call of
-      the Run method.  To avoid the automatic advance, use the method
-      mtsStateTable::SetAutomaticAdvance(false). */
-    bool AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided = true);
 
     /********************* Methods to manage interfaces *******************/
 
@@ -250,7 +226,6 @@ public:
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
                                                 mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
-
 
     /********************* Methods for task synchronization ***************/
 
@@ -276,6 +251,12 @@ public:
     inline virtual void Wakeup(void) {
         Thread.Wakeup();
     }
+
+    /*! Conditionally process internal mailbox */
+    void ProcessManagerCommandsIfNotActive();
+
+    /*! Returns true if currently executing in thread-space of component. */
+    bool CheckForOwnThread(void) const;
 
     /********************* Methods for task period and overrun ************/
 

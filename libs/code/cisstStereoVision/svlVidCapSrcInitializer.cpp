@@ -23,29 +23,29 @@
 #include <cisstStereoVision/svlTypes.h>
 #include "svlVidCapSrcInitializer.h"
 
-#if (CISST_SVL_HAS_SVS == ON)
+#if CISST_SVL_HAS_SVS
 #include "svlVidCapSrcSVS.h"
 #endif // CISST_SVL_HAS_SVS
 
 // See header for details:
-//#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+//#if CISST_SVL_HAS_DIRECTSHOW
 //#include "svlVidCapSrcDirectShow.h"
 //#endif // CISST_SVL_HAS_DIRECTSHOW
 
-#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
+#if CISST_SVL_HAS_VIDEO4LINUX2
 #include "svlVidCapSrcV4L2.h"
 #endif // CISST_SVL_HAS_VIDEO4LINUX2
 
-#if (CISST_SVL_HAS_DC1394 == ON)
+#if CISST_SVL_HAS_DC1394
 #include "svlVidCapSrcDC1394.h"
 #endif // CISST_SVL_HAS_DC1394
 
-#if (CISST_SVL_HAS_OPENCV == ON) && (CISST_OS != CISST_WINDOWS)
+#if CISST_SVL_HAS_OPENCV && (CISST_OS != CISST_WINDOWS)
 #include "svlVidCapSrcOpenCV.h"
 #endif // CISST_SVL_HAS_OPENCV AND NOT CISST_WINDOWS
 
 // See header for details:
-//#if (CISST_SVL_HAS_MIL == ON)
+//#if CISST_SVL_HAS_MIL
 //#include "svlVidCapSrcMIL.h"
 //#endif // CISST_SVL_HAS_MIL
 

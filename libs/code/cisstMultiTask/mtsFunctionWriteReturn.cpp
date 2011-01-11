@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsFunctionWriteReturn.cpp 1859 2010-10-08 16:17:25Z adeguet1 $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,17 +46,17 @@ bool mtsFunctionWriteReturn::IsValid(void) const
 bool mtsFunctionWriteReturn::Bind(CommandType * command)
 {
     if (this->Command) {
-        CMN_LOG_INIT_WARNING << "Class mtsFunctionWriteReturn: Bind called on already bound function:" << this << std::endl;
+        CMN_LOG_INIT_WARNING << "Class mtsFunctionWriteReturn: Bind called on already bound function: " << this << std::endl;
     }
     this->Command = command;
     return (command != 0);
 }
 
 
-mtsExecutionResult mtsFunctionWriteReturn::operator()(const mtsGenericObject & argument,
-                                                      mtsGenericObject & result) const
+mtsExecutionResult mtsFunctionWriteReturn::Execute(const mtsGenericObject & argument,
+                                                   mtsGenericObject & result) const
 {
-    return Command ? Command->Execute(argument, result) : mtsExecutionResult::NO_INTERFACE;
+    return Command ? Command->Execute(argument, result) : mtsExecutionResult::FUNCTION_NOT_BOUND;
 }
 
 

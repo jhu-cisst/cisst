@@ -90,7 +90,8 @@ class GlobalComponentManagerUI {open
             code0 {ButtonRefreshClicked = false;}
           }
           Fl_Button ButtonTaskViewer {
-            label {Task Viewer}
+            label {Component
+Viewer}
             callback {ButtonTaskViewerClicked = true;}
             xywh {560 190 105 40} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
             code0 {ButtonTaskViewerClicked = false;}

@@ -44,13 +44,13 @@ public:
     unsigned char* GetPushBuffer();
     unsigned char* GetPushBuffer(unsigned int& size);
     void Push();
-    bool Push(unsigned char* buffer, unsigned int size, bool topdown);
-#if (CISST_SVL_HAS_OPENCV == ON)
+    bool Push(const unsigned char* buffer, unsigned int size, bool topdown);
+#if CISST_SVL_HAS_OPENCV
     bool PushIplImage(IplImage* image);
 #endif // CISST_SVL_HAS_OPENCV
 
     svlImageRGB* Pull(bool waitfornew, double timeout = 5.0);
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     IplImage* PullIplImage(bool waitfornew, double timeout = 5.0);
 #endif // CISST_SVL_HAS_OPENCV
 
@@ -65,7 +65,7 @@ private:
     int InitializationCounter;
     osaThreadSignal NewFrameEvent;
     svlImageRGB Buffer[3];
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     IplImage* OCVImage[3];
 #endif // CISST_SVL_HAS_OPENCV
 
@@ -73,7 +73,7 @@ private:
     osaCriticalSection CS;
 #endif
 
-    bool TopDownCopy(unsigned char *targetbuffer, unsigned char *sourcebuffer);
+    bool TopDownCopy(unsigned char *targetbuffer, const unsigned char *sourcebuffer);
 };
 
 

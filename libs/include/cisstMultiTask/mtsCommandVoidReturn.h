@@ -31,6 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandBase.h>
 #include <string>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -42,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
   instantiation of the class to get and actual pointer on the
   method. */
 
-class mtsCommandVoidReturn: public mtsCommandBase {
+class CISST_EXPORT mtsCommandVoidReturn: public mtsCommandBase {
 
 public:
     /*! Base type */

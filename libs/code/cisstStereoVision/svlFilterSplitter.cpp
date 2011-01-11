@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
@@ -78,6 +78,10 @@ int svlFilterSplitter::AddOutput(const std::string &name, const unsigned int thr
     const unsigned int size = AsyncOutputs.size();
     AsyncOutputs.resize(size + 1);
     AsyncOutputs[size] = output;
+
+    // If input is already connected, then set the type of the new output accordingly
+    svlFilterInput* input = GetInput();
+    if (input->IsConnected()) output->SetType(input->GetType());
 
     return SVL_OK;
 }

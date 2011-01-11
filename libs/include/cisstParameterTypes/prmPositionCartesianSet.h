@@ -41,9 +41,11 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  protected:
+    typedef prmMotionBase BaseType;
+
     /*! The controllable frame node in the transformation tree this
       command will act on */
     prmTransformationBasePtr MovingFrame;
@@ -53,7 +55,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     prmTransformationBasePtr ReferenceFrame;
 
     /*! Motion command goal, relative to ReferenceFrame */
-    vctDoubleFrm3 Goal;
+    vctDoubleFrm3 GoalMember;
 
     /*! linear velocity to goal (time derivative of magnitude of the
       vector to goal */
@@ -90,7 +92,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
                             const vctBool2 & mask):
         MovingFrame(movingFrame),
         ReferenceFrame(referenceFrame),
-        Goal(goal), 
+        GoalMember(goal),
         Velocity(velocity),
         VelocityAngular(velocityAngular),
         Acceleration(acceleration),
@@ -109,9 +111,19 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     */
     void SetGoal(const vctDoubleFrm3 & goal, const vctBool2 & mask)
     {
-        this->Goal = goal;
+        this->GoalMember = goal;
         this->Mask = mask;
     }  
+
+    /*! Reference to the goal frame
+      \param goal cartesian position
+      \return &vctFrm3
+    */
+    vctFrm3 & Goal(void)
+    {
+        return GoalMember;
+    }
+
     
     /*! Set Target frame
       \param goal cartesian position 
@@ -119,7 +131,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     */
     void SetGoal(const vctDoubleFrm3 & goal)
     {
-        this->Goal = goal;
+        this->GoalMember = goal;
     }  
 
     /*! Set Target position only
@@ -128,7 +140,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     */
     void SetGoal(const vctDouble3 & position)
     {
-        Goal.Translation().Assign(position);
+        GoalMember.Translation().Assign(position);
     }
 
     /*! Set Target orientation only
@@ -137,7 +149,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     */
     void SetGoal(const vctDoubleRot3 & orientation)
     {
-       this->Goal.Rotation().Assign(orientation);
+       this->GoalMember.Rotation().Assign(orientation);
     }
 	
     /*! Set target to a node in the transformation tree
@@ -146,7 +158,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     */
     void SetGoal(const prmTransformationBasePtr & target)
     {
-        this->Goal = prmWRTReference(target, this->ReferenceFrame);
+        this->GoalMember = prmWRTReference(target, this->ReferenceFrame);
     } 
 
     /*! Get current goal parameter
@@ -154,7 +166,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     */
     vctDoubleFrm3 GetGoal(void) const 
     {
-        return this->Goal;
+        return this->GoalMember;
     }
 
     /*! Set the reference frame for current move
@@ -275,6 +287,12 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     {
         return this->Mask;
     }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
 
     
 }; // _prmPositionCartesianSet_h

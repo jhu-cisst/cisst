@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsVector.h 1221 2010-02-23 12:23:00Z adeguet1 $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:   2010-02-27
@@ -34,7 +34,7 @@ template <class _elementType, vct::size_type _size>
 class mtsFixedSizeVector: public mtsGenericObject,
                           public vctFixedSizeVector<_elementType, _size> {
     // declare services, requires dynamic creation
-    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
     /* defines useful types */
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);

@@ -4,7 +4,7 @@
 #   Author(s):  Anton Deguet
 #   Created on: 2009-11-16
 #
-#   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+#   (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,14 +14,8 @@
 #
 # --- end cisst license ---
 
-add_executable(commonTutorialLoggerQt
-               main.cpp
-               )
+add_executable (commonTutorialLoggerQt main.cpp)
 
-target_link_libraries(commonTutorialLoggerQt
-                      ${QT_LIBRARIES}
-                      )
+target_link_libraries (commonTutorialLoggerQt ${QT_LIBRARIES})
 
-cisst_requires(commonTutorialLoggerQt
-               "cisstCommon;cisstCommonQt"
-               )
+cisst_target_link_libraries (commonTutorialLoggerQt cisstCommon cisstCommonQt)

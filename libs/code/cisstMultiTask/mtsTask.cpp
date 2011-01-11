@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -38,6 +38,9 @@
 void mtsTask::DoRunInternal(void)
 {
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
+    // Make sure following is called
+    if (InterfaceProvidedToManager)
+        InterfaceProvidedToManager->ProcessMailBoxes();
     this->Run();
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
@@ -89,6 +92,11 @@ void mtsTask::CleanupInternal() {
     // Perform Cleanup on all interfaces provided
     InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
 
+    if (InterfaceProvidedToManagerCallable) {
+        delete InterfaceProvidedToManagerCallable;
+        InterfaceProvidedToManagerCallable = 0;
+    }
+
     ChangeState(mtsComponentState::FINISHED);
     CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
 }
@@ -128,11 +136,9 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     StateChangeSignal.Raise();
 
     // Inform the manager component client of the state change
-    mtsInterfaceProvided * interfaceInternalProvided = 
-        GetInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided);
-    if (interfaceInternalProvided) {
+    if (InterfaceProvidedToManager) {
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State.GetState()));
+        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State));
     }
 }
 
@@ -181,13 +187,12 @@ mtsTask::mtsTask(const std::string & name,
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "StateTable"),
-    StateTables("StateTables"),
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0)
 {
-    this->StateTables.SetOwner(*this);
     this->AddStateTable(&this->StateTable);
+    this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
 }
 
 
@@ -218,52 +223,14 @@ void mtsTask::Kill(void)
 }
 
 
-bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided) {
-    const std::string tableName = existingStateTable->GetName();
-    const std::string interfaceName = "StateTable" + tableName;
-    if (!this->StateTables.AddItem(tableName,
-                                   existingStateTable,
-                                   CMN_LOG_LOD_INIT_ERROR)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add state table \"" << tableName
-                                 << "\" to task \"" << this->GetName() << "\"" << std::endl;
-        return false;
-    }
-    if (addInterfaceProvided) {
-        mtsInterfaceProvided * providedInterface = this->AddInterfaceProvided(interfaceName);
-        if (!providedInterface) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add provided interface \"" << interfaceName
-                                     << "\" to task \"" << this->GetName() << "\"" << std::endl;
-            return false;
-        }
-        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStart,
-                                           existingStateTable,
-                                           "StartCollection");
-        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStop,
-                                           existingStateTable,
-                                           "StopCollection");
-        providedInterface->AddEventWrite(existingStateTable->DataCollection.BatchReady,
-                                         "BatchReady", mtsStateTable::IndexRange());
-        providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
-                                        "CollectionStarted");
-        providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
-                                         "CollectionStopped", mtsUInt());
-        providedInterface->AddEventWrite(existingStateTable->DataCollection.Progress,
-                                         "Progress", mtsUInt());
-    }
-    CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
-                             << "\" and corresponding interface \"" << interfaceName
-                             << "\" to task \"" << this->GetName() << "\"" << std::endl;
-    return true;
-}
-
 
 /********************* Methods to manage interfaces *******************/
 
 mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName,
                                                      mtsRequiredType required)
 {
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else
-    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN);
+    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
+                                          mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE);
     mtsInterfaceRequired * result;
     // try to create and add interface
     result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
@@ -279,11 +246,14 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfa
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
+        mtsCallableVoidBase * postCommandQueuedCallable = 0;
+        if (interfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided)
+            postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
-                                   << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe"
+                                   << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe."
                                    << std::endl;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     }
@@ -334,6 +304,28 @@ bool mtsTask::WaitToTerminate(double timeout)
     return ret;
 }
 
+
+void mtsTask::ProcessManagerCommandsIfNotActive()
+{
+    if (InterfaceProvidedToManager) {
+        // Lock the StateChange mutex so that the task state does not change
+        StateChange.Lock();
+        if (!IsRunning()) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " not active, processing internal mailbox" << std::endl;
+            InterfaceProvidedToManager->ProcessMailBoxes();
+        }
+        else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
+            CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " active, not processing internal mailbox" << std::endl;
+            this->Thread.Wakeup();
+        }
+        StateChange.Unlock();
+    }
+}
+
+bool mtsTask::CheckForOwnThread(void) const
+{
+    return (osaGetCurrentThreadId() == Thread.GetId());
+}
 
 void mtsTask::ToStream(std::ostream & outputStream) const
 {

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- $Id: $
+ $Id$
 
  Author(s):  Balazs Vagvolgyi
  Created on: 2010
@@ -33,13 +33,13 @@ using namespace std;
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ALL);
     // add a log per thread
     osaThreadedLogFile threadedLog("svlExMultitask1-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoDForAllClasses(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
 
     svlInitialize();
 

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlFilterImageTracker.h 1236 2010-02-26 20:38:21Z adeguet1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2007
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageTracker_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlDraw.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -35,7 +36,7 @@ class svlImageTracker;
 
 class CISST_EXPORT svlFilterImageTracker : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterImageTracker();
@@ -57,10 +58,12 @@ public:
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int OnStart(unsigned int procCount);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
     virtual void ReconstructRigidBody();
+    virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = 2);
 
 private:
     svlSampleTargets OutputTargets;
@@ -85,6 +88,12 @@ private:
     double RigidBodyScaleLow;
     double RigidBodyScaleHigh;
     unsigned int Iterations;
+
+    bool WarpingParallel;
+    vctDynamicVector<double> WarpedRigidBodyAngle;
+    vctDynamicVector<double> WarpedRigidBodyScale;
+    svlSampleImage* WarpedImage;
+    vctDynamicVector<svlDraw::Internals> WarpInternals;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)
@@ -98,7 +107,8 @@ public:
     bool IsInitialized();
 
     virtual int SetImageSize(unsigned int width, unsigned int height);
-    virtual int SetROI(const svlRect & rect);
+    virtual void SetROI(const svlRect & rect);
+    virtual void SetROI(int left, int top, int right, int bottom);
     virtual int SetTargetCount(unsigned int targetcount);
     virtual int SetTarget(unsigned int targetid, const svlTarget2D & target);
     virtual int GetTarget(unsigned int targetid, svlTarget2D & target);

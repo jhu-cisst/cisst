@@ -88,6 +88,11 @@ int svlFilterStereoImageJoiner::Initialize(svlSample* syncInput, svlSample* &syn
             width += input->GetWidth(SVL_RIGHT);
         break;
 
+        case svlLayoutInterlacedKeepSize:
+        case svlLayoutInterlacedKeepSizeRL:
+            // NOP
+        break;
+
         default:
             return SVL_FAIL;
     }
@@ -110,9 +115,10 @@ int svlFilterStereoImageJoiner::Process(svlProcInfo* procInfo, svlSample* syncIn
 
     _OnSingleThread(procInfo)
     {
-        svlSampleImage* id = dynamic_cast<svlSampleImage*>(syncInput);
-        unsigned int stride = id->GetWidth(SVL_LEFT) * id->GetBPP();
-        unsigned int height = id->GetHeight(SVL_LEFT);
+        svlSampleImage* id    = dynamic_cast<svlSampleImage*>(syncInput);
+        unsigned int stride   = id->GetWidth(SVL_LEFT) * id->GetBPP();
+        unsigned int stride2  = stride << 1;
+        unsigned int height   = id->GetHeight(SVL_LEFT);
         unsigned char *input1 = id->GetUCharPointer(SVL_LEFT);
         unsigned char *input2 = id->GetUCharPointer(SVL_RIGHT);
         unsigned char *output = OutputImage->GetUCharPointer();
@@ -139,6 +145,30 @@ int svlFilterStereoImageJoiner::Process(svlProcInfo* procInfo, svlSample* syncIn
                     output += stride;
                     memcpy(output, input1, stride);
                     input1 += stride;
+                    output += stride;
+                }
+            break;
+
+            case svlLayoutInterlacedKeepSize:
+                height >>= 1;
+                for (unsigned int j = 0; j < height; j ++) {
+                    memcpy(output, input1, stride);
+                    input1 += stride2;
+                    output += stride;
+                    memcpy(output, input2, stride);
+                    input2 += stride2;
+                    output += stride;
+                }
+            break;
+
+            case svlLayoutInterlacedKeepSizeRL:
+                height >>= 1;
+                for (unsigned int j = 0; j < height; j ++) {
+                    memcpy(output, input2, stride);
+                    input2 += stride2;
+                    output += stride;
+                    memcpy(output, input1, stride);
+                    input1 += stride2;
                     output += stride;
                 }
             break;
@@ -188,7 +218,7 @@ void svlFilterStereoImageJoiner::SetLayoutCommand(const int & layout)
         CMN_LOG_CLASS_INIT_ERROR << "SetLayoutCommand: failed to select layout; filter is already initialized" << std::endl;
         return;
     }
-    if (layout < svlLayoutInterlaced || layout > svlLayoutSideBySideRL) {
+    if (layout < svlLayoutInterlaced || layout > svlLayoutInterlacedKeepSizeRL) {
         CMN_LOG_CLASS_INIT_ERROR << "SetLayoutCommand: failed to select layout; invalid layout type" << std::endl;
         return;
     }

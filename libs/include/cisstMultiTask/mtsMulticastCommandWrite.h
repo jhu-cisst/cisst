@@ -73,7 +73,7 @@ public:
         // cast argument first
         const ArgumentFinalType * data = dynamic_cast< const ArgumentFinalType * >(&argument);
         if (data == 0) {
-            return mtsExecutionResult::BAD_INPUT;
+            return mtsExecutionResult::INVALID_INPUT_TYPE;
         }
         // if cast succeeded call using actual type
         size_t index;
@@ -81,7 +81,7 @@ public:
         for (index = 0; index < commandsSize; index++) {
             Commands[index]->Execute(*data, MTS_NOT_BLOCKING);
         }
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 };
 

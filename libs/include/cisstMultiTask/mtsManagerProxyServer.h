@@ -35,7 +35,7 @@ class CISST_EXPORT mtsManagerProxyServer :
 {
     friend class mtsManagerGlobal;
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     /*! Typedef for client proxy type */
     typedef mtsManagerProxy::ManagerClientPrx ManagerClientProxyType;

@@ -13,18 +13,25 @@
 # --- end cisst license ---
 
 
-# examples
-if (CISST_HAS_FLTK)
-  add_subdirectory (PeriodicTaskFLTK)
-  add_subdirectory (CommandsAndEventsFLTK)
-  add_subdirectory (ComponentGenerator)
-else (CISST_HAS_FLTK)
-  message (WARNING " cisstMultiTask examples PeriodicTaskFLTK, CommandsAndEventsFLTK and ComponentGenerator will not be compiled since they require CISST_HAS_FLTK")
-endif (CISST_HAS_FLTK)
+if (BUILD_LIBS_cisstMultiTask)
 
-if (CISST_HAS_QT)
-  add_subdirectory (PeriodicTaskQt)
-  add_subdirectory (CommandsAndEventsQt)
-else (CISST_HAS_QT)
-  message (WARNING " cisstMultiTask examples PeriodicTaskQt and CommandsAndEventsQt will not be compiled since they require CISST_HAS_QT")
-endif (CISST_HAS_QT)
+  # FLTK examples
+  if (CISST_HAS_FLTK)
+    add_subdirectory (PeriodicTaskFLTK)
+    add_subdirectory (CommandsAndEventsFLTK)
+    add_subdirectory (ComponentGenerator)
+  else (CISST_HAS_FLTK AND BUILD_LIBS_cisstMultiTask)
+    message (WARNING " cisstMultiTask examples PeriodicTaskFLTK, CommandsAndEventsFLTK and ComponentGenerator will not be compiled since they require CISST_HAS_FLTK")
+  endif (CISST_HAS_FLTK)
+
+  # Qt examples
+  if (CISST_HAS_QT)
+    add_subdirectory (PeriodicTaskQt)
+    add_subdirectory (CommandsAndEventsQt)
+  else (CISST_HAS_QT)
+    message (WARNING " cisstMultiTask examples PeriodicTaskQt and CommandsAndEventsQt will not be compiled since they require CISST_HAS_QT")
+  endif (CISST_HAS_QT)
+
+else (BUILD_LIBS_cisstMultiTask)
+  message (WARNING " cisstMultiTask examples will not be compiled since they require BUILD_LIBS_cisstMultiTask")
+endif (BUILD_LIBS_cisstMultiTask)

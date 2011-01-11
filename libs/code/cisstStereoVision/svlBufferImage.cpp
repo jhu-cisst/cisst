@@ -34,7 +34,7 @@ svlBufferImage::svlBufferImage(unsigned int width, unsigned int height)
     Buffer[1].SetSize(height, width * 3);
     Buffer[2].SetSize(height, width * 3);
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     OCVImage[0] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
     OCVImage[1] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
     OCVImage[2] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
@@ -51,7 +51,7 @@ svlBufferImage::svlBufferImage(unsigned int width, unsigned int height)
 
 svlBufferImage::~svlBufferImage()
 {
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
     cvReleaseImageHeader(&(OCVImage[0]));
     cvReleaseImageHeader(&(OCVImage[1]));
     cvReleaseImageHeader(&(OCVImage[2]));
@@ -102,7 +102,7 @@ void svlBufferImage::Push()
     NewFrameEvent.Raise();
 }
 
-bool svlBufferImage::Push(unsigned char* buffer, unsigned int size, bool topdown)
+bool svlBufferImage::Push(const unsigned char* buffer, unsigned int size, bool topdown)
 {
     unsigned int datasize = Buffer[0].width() * Buffer[0].height();
     if (buffer == 0 || size < datasize) return false;
@@ -131,7 +131,7 @@ bool svlBufferImage::Push(unsigned char* buffer, unsigned int size, bool topdown
     return ret;
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 bool svlBufferImage::PushIplImage(IplImage* image)
 {
     return Push(reinterpret_cast<unsigned char*>(image->imageData), GetDataSize(), (image->origin != IPL_ORIGIN_TL));
@@ -175,7 +175,7 @@ svlImageRGB* svlBufferImage::Pull(bool waitfornew, double timeout)
     return &(Buffer[Locked]);
 }
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if CISST_SVL_HAS_OPENCV
 IplImage* svlBufferImage::PullIplImage(bool waitfornew, double timeout)
 {
     if (Pull(waitfornew, timeout) == 0) return 0;
@@ -183,7 +183,7 @@ IplImage* svlBufferImage::PullIplImage(bool waitfornew, double timeout)
 }
 #endif // CISST_SVL_HAS_OPENCV
 
-bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, unsigned char *sourcebuffer)
+bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, const unsigned char *sourcebuffer)
 {
     if (targetbuffer == 0 ||
         sourcebuffer == 0) return false;
@@ -191,7 +191,7 @@ bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, unsigned char *sou
     const unsigned int linesize = Buffer[0].width();
     const unsigned int height = Buffer[0].height();
     unsigned char *tptr1 = targetbuffer;
-    unsigned char *tptr2 = sourcebuffer + linesize * (height - 1);
+    unsigned char *tptr2 = const_cast<unsigned char*>(sourcebuffer) + linesize * (height - 1);
 
     for (unsigned int i = 0; i < height; i ++) {
         memcpy(tptr1, tptr2, linesize);

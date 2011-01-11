@@ -152,7 +152,7 @@ void svlVidCapSrcDC1394Context::Enumerate()
     for (i = 0; i < CameraList->num; i ++) {
         if (Cameras[i] == 0) continue;
 
-#if (CISST_SVL_DC1394_ENABLE_800Mbps == ON)
+#if CISST_SVL_DC1394_ENABLE_800Mbps
         // Check if IEEE1394B operation mode is supported
         if (TestIEEE1394Interface(Cameras[i], DC1394_OPERATION_MODE_1394B, DC1394_ISO_SPEED_800) == SVL_OK) {
             BestOpMode[i] = DC1394_OPERATION_MODE_1394B;

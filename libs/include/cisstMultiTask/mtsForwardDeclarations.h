@@ -73,6 +73,7 @@ class mtsFunctionVoidReturn;
 // read commands
 class mtsCallableReadBase;
 template <class _classType, class _argumentType> class mtsCallableReadMethod;
+template <class _classType, class _argumentType> class mtsCallableReadReturnVoidMethod;
 class mtsCommandRead;
 class mtsFunctionRead;
 
@@ -89,8 +90,10 @@ class mtsCommandQueuedWriteReturn;
 class mtsFunctionWriteReturn;
 
 // qualified read commands
-class mtsCommandQualifiedReadBase;
-template <class _classType, class _argument1Type, class _argument2Type> class mtsCommandQualifiedRead;
+class mtsCallableQualifiedReadBase;
+template <class _classType, class _argument1Type, class _argument2Type> class mtsCallableQualifiedReadMethod;
+template <class _classType, class _argument1Type, class _argument2Type> class mtsCallableQualifiedReadReturnVoidMethod;
+class mtsCommandQualifiedRead;
 class mtsFunctionQualifiedRead;
 
 // event receivers

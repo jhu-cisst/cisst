@@ -34,7 +34,7 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
                               mtsComponentInterfaceProxy::ComponentInterfaceClientPrx,
                               unsigned int>
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     /*! Typedef for client proxy type */
     typedef mtsComponentInterfaceProxy::ComponentInterfaceClientPrx ComponentInterfaceClientProxyType;

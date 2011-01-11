@@ -55,21 +55,21 @@ public:
 
     /*! Execute void command */
     mtsExecutionResult Execute(mtsBlockingType blocking) {
-        if (IsDisabled()) return mtsExecutionResult::DISABLED;
+        if (IsDisabled()) return mtsExecutionResult::COMMAND_DISABLED;
 
         if (NetworkProxyServer) {
             // Command void execution: client (request) -> server (execution)
             if (!NetworkProxyServer->SendExecuteCommandVoid(ClientID, CommandID, blocking)) {
-                return mtsExecutionResult::COMMAND_FAILED;
+                return mtsExecutionResult::NETWORK_ERROR;
             }
         } else {
             // Event void execution: server (event generator) -> client (event handler)
             if (!NetworkProxyClient->SendExecuteEventVoid(CommandID)) {
-                return mtsExecutionResult::COMMAND_FAILED;
+                return mtsExecutionResult::NETWORK_ERROR;
             }
         }
 
-        return mtsExecutionResult::DEV_OK;
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /*! Generate human readable description of this object */

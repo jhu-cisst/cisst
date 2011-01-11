@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsIntervalStatistics.h 1313 2010-03-19 02:49:12Z adeguet1 $
+  $Id$
 
   Author(s):  Marcin Balicki
   Created on: 2010-3-31
@@ -45,7 +45,7 @@ http://www.cisst.org/cisst/license.txt.
  */
 class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
 
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
     /*! TimeTicks are typedef'ed as unsigned long long (64 bits)*/

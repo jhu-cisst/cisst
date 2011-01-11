@@ -39,6 +39,7 @@ class CISST_EXPORT osaPipeExec {
     static unsigned int SizeOfInternals(void);
     friend class osaPipeExecTest;
 
+    char ** Command;
     int ToProgram[2];
     int FromProgram[2];
     bool Connected;
@@ -48,7 +49,7 @@ class CISST_EXPORT osaPipeExec {
 
     /*! Free resources before returning an error. Also free the command
       pointer */
-    void CloseAllPipes(char ** command);
+    void CloseAllPipes(void);
 
     /*! Parse out the command and arguments and return an array in the
       form that execvp/_spawnvp accept */
@@ -63,11 +64,8 @@ class CISST_EXPORT osaPipeExec {
 #endif
 
  public:
-    /*! Constructor just asserts that internals size is okay */
-    osaPipeExec(void);
-
     /*! Constructor with name */
-    osaPipeExec(const std::string & name);
+    osaPipeExec(const std::string & name = "unnamed");
 
     /*! Destructor calls Close() */
     ~osaPipeExec(void);
@@ -99,17 +97,32 @@ class CISST_EXPORT osaPipeExec {
       empty string for an error */
     std::string Read(int maxLength) const;
 
+    /*! Read at most maxLength characters from the pipe, but stop reading if
+    stopChar is read. Return the number of characters read */
+    int ReadUntil(char * buffer, int maxLength, char stopChar) const;
+
+    /*! std::string version of ReadUntil
+    stopChar is read. Return the number of characters read */
+    std::string ReadUntil(int maxLength, char stopChar) const;
+
+    /*! Equivalent to ReadUntil(maxLength, '\0') */
+    std::string ReadString(int maxLength) const;
+
     /*! Write the null-terminated buffer to the pipe. Return the
       number of characters written or -1 for an error */
     int Write(const char * buffer);
 
-    /*! Write the the first n characters of buffer to pipe. Return the
+    /*! Write the first n characters of buffer to pipe. Return the
       number of characters written or -1 for an error */
     int Write(const char * buffer, int n);
 
     /*! Write s to the pipe and return the number of characters read
       or -1 for an error */
     int Write(const std::string & s);
+
+    /*! Write the first n characters of s to pipe. Return the number of
+      characters written or -1 for an error */
+    int Write(const std::string & s, int n);
 
     /*! Indicate if the pipe is opened (or at least supposed to be
       opened) */

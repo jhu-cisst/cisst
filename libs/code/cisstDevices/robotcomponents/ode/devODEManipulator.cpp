@@ -20,100 +20,115 @@ http://www.cisst.org/cisst/license.txt.
 devODEManipulator::devODEManipulator( const std::string& devname,
 				      double period,
 				      devManipulator::State state,
-				      osaCPUMask mask ) : 
+				      osaCPUMask mask,
+				      devODEWorld* world,
+				      devManipulator::Mode mode ) : 
+  devOSGManipulator( devname, period, state, mask, mode ),
+  worldid( world->GetWorldID() ){
 
-  devManipulator( devname, period, state, mask, devManipulator::FORCETORQUE ),
-  robManipulator( "", vctFrame4x4<double>() ),
-  base( NULL ){
-  
-  input = ProvideInputRn( devManipulator::Input,
+  // Create a Rn position input
+  input = ProvideInputRn( devManipulator::Input, 
 			  devRobotComponent::POSITION |
 			  devRobotComponent::VELOCITY |
-			  devRobotComponent::FORCETORQUE,
+			  devRobotComponent::FORCETORQUE, 
 			  qinit.size() );
 
+  // Create a Rn position output (which is the same as the input)
   output = ProvideOutputRn( devManipulator::Output,
 			    devRobotComponent::POSITION,
 			    qinit.size() );
 
 }
 
-devODEManipulator::devODEManipulator(const std::string& devname,
-				     double period,
-				     devManipulator::State state,
-				     osaCPUMask mask,
-				     devManipulator::Mode mode,
-				     devODEWorld& world,
-				     const std::string& robotfilename,
-				     const vctFrame4x4<double>& Rtw0,
-				     const vctDynamicVector<double> qinit,
-				     const std::vector<std::string>& geomfiles):
-  devManipulator( devname, period, state, mask, mode ),
-  robManipulator( robotfilename, Rtw0 ),
-  worldid( world.WorldID() ),
-  qinit( qinit ),
-  base( NULL ) {
+devODEManipulator::devODEManipulator( const std::string& devname,
+				      double period,
+				      devManipulator::State state,
+				      osaCPUMask mask,
+				      devODEWorld* world,
+				      devManipulator::Mode mode,
+				      const std::string& robotfile,
+				      const vctFrame4x4<double>& Rtw0,
+				      const vctDynamicVector<double>& qinit,
+				      const std::vector<std::string>& models,
+				      const std::string& basemodel ) :
 
+  devOSGManipulator( devname, period, state, mask, mode, robotfile, Rtw0 ),
+  worldid( world->GetWorldID() ),
+  qinit( qinit ){
+
+  // Create a Rn input
   input = ProvideInputRn( devManipulator::Input,
 			  devRobotComponent::POSITION |
 			  devRobotComponent::VELOCITY |
-			  devRobotComponent::FORCETORQUE,
+			  devRobotComponent::FORCETORQUE, 
 			  qinit.size() );
 
+  // Create a Rn position output (which is the same as the input)
   output = ProvideOutputRn( devManipulator::Output,
 			    devRobotComponent::POSITION,
 			    qinit.size() );
 
-  //! Create a new inputspace for the manipulator
-  dSpaceID spaceid = dSimpleSpaceCreate( world.SpaceID() );
+  //! Create a new space for the manipulator
+  dSpaceID spaceid = dSimpleSpaceCreate( world->GetSpaceID() );
 
-  // Initialize the links
+  // Create the linls
+  for( size_t i=0; i<=links.size(); i++ ){
 
-  for( size_t i=0; i<links.size(); i++ ){
+    std::ostringstream linkname;     // Links name
+    linkname << "link" << i;
 
     // obtain the position and orientation of the ith link 
-    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i+1 );
-    
-    // create and initialize the ith link
-    devODEBody* body;
-    body = new devODEBody( world.WorldID(),                         // world
-			   spaceid,                                 // space
-			   Rtwi,                                    // pos+ori
-			   links[i].Mass(),                         // m   
-			   links[i].CenterOfMass(),                 // com
-			   links[i].MomentOfInertiaAtCOM(),         // I  
-			   geomfiles[i] );
+    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    devODEBody* link;
 
-    world.Insert( body );
-    bodies.push_back( body );
+    if( i==0 ){
+      // This creates a static link
+      link = new devODEBody( linkname.str(), Rtwi, basemodel, world, spaceid );
+    }
+
+    else{
+      link = new devODEBody( linkname.str(),                          // name
+			     Rtwi,
+			     models[i-1],
+			     world,                                   // world
+			     links[i-1].Mass(),                       // m   
+			     links[i-1].CenterOfMass(),               // com
+			     links[i-1].MomentOfInertiaAtCOM(),       // I  
+			     spaceid );                               // space
+    }
+
+    //world->Insert( link );
+    bodies.push_back( link );
+
   }
+  
 
   // Initialize the joints
-  dBodyID b1 = 0;                                // ID of initial proximal link
+  dBodyID b1 = bodies[0]->GetBodyID();           // This should be "0"
   vctFixedSizeVector<double,3> z(0.0, 0.0, 1.0); // the local Z axis
 
-  for( size_t i=0; i<links.size(); i++ ){
+  for( size_t i=1; i<=links.size(); i++ ){
 
     // obtain the ID of the distal link 
-    dBodyID b2 = bodies[i]->BodyID();
+    dBodyID b2 = bodies[i]->GetBodyID();
     
     // obtain the position and orientation of the ith link
-    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i-1 );
     
     vctFixedSizeVector<double,3> anchor = Rtwi.Translation();
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
 
     int type = dJointTypeHinge;
-    if( links[i].GetType() == robLink::SLIDER )
+    if( links[i-1].GetType() == robLink::SLIDER )
       { type = dJointTypeSlider; }
 
     // This is a bit tricky. The min must be greater than -pi and the max must
     // be less than pi. Otherwise it really screw things up
-    double qmin = links[i].PositionMin();
-    double qmax = links[i].PositionMax();
+    double qmin = links[i-1].PositionMin();
+    double qmax = links[i-1].PositionMax();
 
     devODEJoint* joint;
-    joint =  new devODEJoint( world.WorldID(),     // the world ID
+    joint =  new devODEJoint( world->GetWorldID(), // the world ID
 			      b1,                  // the proximal body
 			      b2,                  // the distal body
 			      type,                // the joint type
@@ -122,22 +137,22 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 			      qmin,                // the lower limit
 			      qmax );              // the upper limit
     joints.push_back( joint );
-    world.Insert( joint );
+    world->Insert( joint );
 
-    {
+    if( mode == devManipulator::POSITION || mode == devManipulator::VELOCITY ){
       double sign = 1.0;
-      if( 0 < i ) sign = -1.0;
+      if( 1 < i ) sign = -1.0;
       
-      servos.push_back( new devODEServoMotor( world.WorldID(), 
+      servos.push_back( new devODEServoMotor( world->GetWorldID(), 
 					      b1,             // the first body
 					      b2,             // the second body
 					      axis*sign,      // the Z axis 
 					      10,             // fudged values
-					      links[i].ForceTorqueMax() ) );
+					      links[i-1].ForceTorqueMax() ) );
     }
-    b1 = b2;                                       // proximal is now distal
-
+    b1 = b2;  // proximal is now distal
   }
+
 }
 
 void devODEManipulator::Attach( robManipulator* tool ){
@@ -147,7 +162,7 @@ void devODEManipulator::Attach( robManipulator* tool ){
   if( odetool != NULL ){
 
     dJointID jid = dJointCreateSlider( WorldID(), 0 );
-    dJointAttach( jid, bodies.back()->BodyID(), odetool->BaseID() );
+    dJointAttach( jid, bodies.back()->GetBodyID(), odetool->BaseID() );
     dJointSetSliderAxis( jid, 0.0, 0.0, 1.0 );
     
     dJointSetSliderParam( jid, dParamLoStop, 0.0 );
@@ -187,7 +202,7 @@ void devODEManipulator::Enable(){
 
 dBodyID devODEManipulator::BaseID() const {
   if( base == NULL ) return NULL;
-  else               return base->BodyID();
+  else               return base->GetBodyID();
 }
 
 void devODEManipulator::Insert( devODEBody* body )
@@ -200,7 +215,7 @@ void devODEManipulator::Read()
 { output->SetPosition( GetJointsPositions() ); }
 
 void devODEManipulator::Write(){
-
+  
   switch( GetMode() ){
 
   case devManipulator::POSITION: 
@@ -240,6 +255,7 @@ void devODEManipulator::Write(){
 }
 
 void devODEManipulator::SetPosition( const vctDynamicVector<double>& qs ){
+  
   vctDynamicVector<double> q = GetJointsPositions();
 
   if( qs.size() == servos.size() && q.size() == servos.size() ){
@@ -281,6 +297,7 @@ void devODEManipulator::SetForcesTorques( const vctDynamicVector<double>& ft) {
 		      << " velocities. Got " << ft.size() 
 		      << std::endl;
   }
+
 }
 
 vctDynamicVector<double> devODEManipulator::GetJointsPositions() const {
@@ -325,7 +342,6 @@ devODEManipulator::State devODEManipulator::GetState() const {
   }
 
   return state;
-
 }
 
 

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
@@ -19,9 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandFilteredWrite.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 
-mtsCommandFilteredWrite::mtsCommandFilteredWrite(mtsCommandQualifiedReadBase * filter,
+mtsCommandFilteredWrite::mtsCommandFilteredWrite(mtsCommandQualifiedRead * filter,
                                                  mtsCommandWriteBase * command):
     BaseType(),
     Command(command),
@@ -50,13 +50,13 @@ mtsExecutionResult mtsCommandFilteredWrite::Execute(const mtsGenericObject & arg
     if (this->IsEnabled()) {
         // First, call the filter (qualified read)
         mtsExecutionResult result = this->Filter->Execute(argument, *FilterOutput);
-        if (result != mtsExecutionResult::DEV_OK) {
+        if (!result.IsOK()) {
             return result;
         }
         // Next, queue the write command
         return this->Command->Execute(*FilterOutput, blocking);
     }
-    return mtsExecutionResult::DISABLED;
+    return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 

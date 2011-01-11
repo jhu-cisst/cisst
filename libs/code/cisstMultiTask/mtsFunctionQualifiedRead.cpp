@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 
 
 mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead()
@@ -47,10 +47,10 @@ bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
 }
 
 
-mtsExecutionResult mtsFunctionQualifiedRead::operator()(const mtsGenericObject & qualifier,
-                                                                mtsGenericObject & argument) const
+mtsExecutionResult mtsFunctionQualifiedRead::Execute(const mtsGenericObject & qualifier,
+                                                     mtsGenericObject & argument) const
 {
-    return Command ? Command->Execute(qualifier, argument) : mtsExecutionResult::NO_INTERFACE;
+    return Command ? Command->Execute(qualifier, argument) : mtsExecutionResult::FUNCTION_NOT_BOUND;
 }
 
 

@@ -15,14 +15,14 @@ using namespace std;
 int main(void)
 {
     // Log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
     // add a log per thread
     osaThreadedLogFile threadedLog("example3-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("appTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("appTask", CMN_LOG_ALLOW_ALL);
 
     // create our tasks
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
@@ -32,7 +32,7 @@ int main(void)
     appTask * appTaskControl2 = new appTask("ControlRobot2", "Robot2", "Robot1", 100 * cmn_ms);
 
     // create and add Component Viewer
-    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer", 1.0*cmn_s);
+    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer");
     if (!taskManager->AddComponent(componentViewer)) {
         CMN_LOG_INIT_ERROR << "Failed to add ComponentViewer" << std::endl;
         exit(1);

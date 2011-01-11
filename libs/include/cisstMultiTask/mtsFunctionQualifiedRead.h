@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionBase.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
@@ -36,17 +36,19 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 class CISST_EXPORT mtsFunctionQualifiedRead: public mtsFunctionBase {
+public:
+    typedef mtsCommandQualifiedRead CommandType;
 protected:
-    typedef mtsCommandQualifiedReadBase CommandType;
     CommandType * Command;
 
+#ifndef SWIG
     // Portability note:  Visual Studio.NET 2003 did not compile with following (Error C2365), needed to add "a" and "b".
     // template<typename _userType1, typename _userType2, bool, bool>
     template <typename _userType1, typename _userType2, bool a, bool b>
     class ConditionalWrap {
         // default case: both parameters need to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
@@ -57,7 +59,7 @@ protected:
     class ConditionalWrap<_userType1, _userType2, false, true> {
         // specialization: only first parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             return command->Execute(argument1Wrapped, argument2);
@@ -67,7 +69,7 @@ protected:
     class ConditionalWrap<_userType1, _userType2, true, false> {
         // specialization: only second parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
             return command->Execute(argument1, argument2Wrapped);
@@ -77,10 +79,11 @@ protected:
     class ConditionalWrap<_userType1, _userType2, true, true> {
         // specialization: neither parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedReadBase * command,
+        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             return command->Execute(argument1, argument2); }
     };
+#endif
 
  public:
     /*! Default constructor.  Does nothing, use Bind before
@@ -106,18 +109,28 @@ protected:
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
     mtsExecutionResult operator()(const mtsGenericObject & qualifier,
-                                  mtsGenericObject & argument) const;
+                                  mtsGenericObject & argument) const
+    { return Execute(qualifier, argument); }
 
+    mtsExecutionResult Execute(const mtsGenericObject & qualifier,
+                               mtsGenericObject & argument) const;
+
+#ifndef SWIG
 	/*! Overloaded operator that accepts different argument types (for qualified read). */
     template <class _userType1, class _userType2>
-    mtsExecutionResult operator()(const _userType1 & argument1, _userType2 & argument2) const {
+    mtsExecutionResult operator()(const _userType1 & argument1, _userType2 & argument2) const
+    { return Execute(argument1, argument2); }
+
+    template <class _userType1, class _userType2>
+    mtsExecutionResult Execute(const _userType1 & argument1, _userType2 & argument2) const {
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType1, _userType2,
                             cmnIsDerivedFrom<_userType1, mtsGenericObject>::YES,
-                            cmnIsDerivedFrom<_userType1, mtsGenericObject>::YES>::Call(Command, argument1, argument2)
-          : mtsExecutionResult::NO_INTERFACE;
+                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::YES>::Call(Command, argument1, argument2)
+          : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
+#endif
 
     /*! Access to underlying command object. */
     CommandType * GetCommand(void) const;

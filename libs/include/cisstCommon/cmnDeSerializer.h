@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,27 +44,48 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnExport.h>
 
 
-/*! De-serialization helper function for a basic type.  This function
-  performs a cast to char pointer (<code>char *</code>) using
-  <code>reinterpret_cast</code> and then replace the data with the
-  result of <code>read</code> from the input stream.  If the read
-  operation fails, an exception is thrown
-  (<code>std::runtime_error</code>).
+// Implementation class to provide deserialization when _elementType is not derived from cmnGenericObject
+template <class _elementType, bool>
+class cmnDeSerializeRawImpl
+{
+public:
+    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) throw (std::runtime_error)
+    {
+        inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
+        if (inputStream.fail()) {
+            std::string message("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read, _elementType = ");
+            message += typeid(_elementType).name();
+            cmnThrow(message);
+        }
+    }
+};
 
-  This function should be use to implement the DeSerializeRaw method
-  of classes derived from cmnGenericObject. */
+// Implementation class to provide deserialization when _elementType is derived from cmnGenericObject
+template <class _elementType>
+class cmnDeSerializeRawImpl<_elementType, true>
+{
+public:
+    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) throw (std::runtime_error)
+    {
+        data.DeSerializeRaw(inputStream);
+    }
+};
+
+/*! De-serialization helper function for a basic type.  If the type is derived
+    from cmnGenericObject, it just calls the DeSerializeRaw member function.
+    Otherwise, it performs a cast to char pointer (<code>char *</code>) using
+    <code>reinterpret_cast</code> and then replaces the data with the
+    result of <code>read</code> from the input stream.  If the read
+    operation fails, an exception is thrown
+    (<code>std::runtime_error</code>). */
+
 template <class _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
     throw (std::runtime_error)
 {
-    inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
-    if (inputStream.fail()) {
-        std::string message("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read, _elementType = ");
-        message += typeid(_elementType).name();
-        cmnThrow(message);
-    }
+    typedef cmnDeSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::YES> impl;
+    impl::DeSerializeRaw(inputStream, data);
 }
-
 
 /*! De-serialization helper function for STL size object.  This
   function converts a serialized size (unsigned long long int) to the
@@ -98,9 +118,42 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
     std::string::size_type size = 0;
     cmnDeSerializeSizeRaw(inputStream, size);
     data.resize(size);
-    inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));
+    // The following seems to work fine, but may not be valid for all implementations of std::string
+    // because it is not guaranteed that c_str(), or data(), returns a pointer to the internal buffer;
+    // it could create a copy and then return a pointer to the copy.
+    //
+    // inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));
+    //
+    // So, even though it is less efficient, the data is first deserialized to a buffer and then
+    // assigned to the string.
+    std::string::value_type *buffer = new std::string::value_type[size];
+    inputStream.read(static_cast<char *>(buffer), size * sizeof(std::string::value_type));
+    data.assign(buffer, size);
+    delete [] buffer;
     if (inputStream.fail()) {
         cmnThrow("cmnDeSerializeRaw(std::string): Error occured with std::istream::read");
+    }
+}
+
+
+/*! De-serialization helper function for an STL vector.  This function
+  first de-serializes the vector size, resizes the vector and then
+  alls cmnDeSerializeRaw for each element of the vector.  This assumes that
+  cmnDeSerializeRaw is defined for the element type.
+  If the read operation fails, an exception is thrown
+  (<code>std::runtime_error</code>). */
+template <class _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementType> & data)
+    throw (std::runtime_error)
+{   
+    typename std::vector<_elementType>::size_type size = 0;
+    cmnDeSerializeSizeRaw(inputStream, size);
+    data.resize(size);
+    for (size_t i = 0; i < size; i++) {
+        cmnDeSerializeRaw(inputStream, data[i]);
+        if (inputStream.fail()) {
+            cmnThrow("cmnDeSerializeRaw(std::vector<_elementType>): Error occured with std::istream::read");
+        }
     }
 }
 
@@ -123,7 +176,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
   \sa cmnSerializer cmnGenericObject
 */
 class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Type used to identify objects over the network.  It uses the
@@ -154,7 +207,7 @@ public:
       \param serializeObject If true, object content is serialized.
              If false, only class services is serialized and object
              content is not serialized. True by default.
-             
+
       \note As this method relies on cmnDeSerializeRaw, it might throw
       an exception.
     */

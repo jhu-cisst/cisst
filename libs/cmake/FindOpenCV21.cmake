@@ -25,7 +25,7 @@
 #   www.mip.informatik.uni-kiel.de/~jw
 # ---------------------
 #
-# $Id: $
+# $Id$
 # ERC-CISST version:
 #  
 # Balazs [2010-03-19]:

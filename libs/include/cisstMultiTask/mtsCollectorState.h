@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -48,7 +48,7 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     friend class mtsCollectorStateTest;
     friend class mtsStateTable;
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     /*! Structure and container definition to manage the list of signals to be
         collected by this collector. */
@@ -72,8 +72,8 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! A stride value for data collector to skip several records. */
     size_t SamplingInterval;
 
-    /*! Pointers to the target task and the target state table. */
-    mtsTask * TargetTask;
+    /*! Pointers to the target component and the target state table. */
+    mtsComponent * TargetComponent;
     mtsStateTable * TargetStateTable;
 
     /*! Thread-related methods */
@@ -134,28 +134,28 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     void BatchCollect(const mtsStateTable::IndexRange & range);
 
 public:
-    /*! Constructor using the task name and table name. */
+    /*! Constructor using the component name and table name. */
     mtsCollectorState(const std::string & collectorName);
 
-    /*! Constructor using a task pointer and table name. */
-    mtsCollectorState(const std::string & targetTaskName,
+    /*! Constructor using a component pointer and table name. */
+    mtsCollectorState(const std::string & targetComponentName,
                       const std::string & targetStateTableName,
                       const CollectorFileFormat fileFormat);
 
     ~mtsCollectorState(void);
 
     /*! Defines which table to collect data from.  This is defined by
-        the task name and the table name.  If the table name is not
-        provided, the collector will use the default task's state
+        the component name and the table name.  If the table name is not
+        provided, the collector will use the default component's state
         table. */
-    bool SetStateTable(const std::string & taskName,
+    bool SetStateTable(const std::string & componentName,
                        const std::string & stateTableName = "");
 
     /*! Add the signal specified to a list of registered signals. */
     bool AddSignal(const std::string & signalName = "");
 
     /*! Set a sampling interval so that data collector can skip
-      several values.  This is useful when a frequency of the task is
+      several values.  This is useful when a frequency of the component is
       somewhat high and you don't want to collect ALL data from it. */
     void SetSamplingInterval(const unsigned int samplingInterval) {
         SamplingInterval = (samplingInterval > 0 ? samplingInterval : 1);
@@ -166,6 +166,10 @@ public:
       the collector should be added to the manager and then the
       Connect method should be called. */
     bool Connect(void);
+
+    /*! Disconnect.  Attempt to disconnect from the observed
+      component. */
+    bool Disconnect(void);
 
     /*! Convert a binary log file into a plain text one. */
     static bool ConvertBinaryToText(const std::string sourceBinaryLogFileName,
@@ -180,7 +184,7 @@ public:
     /*! Methods defined as virtual in base class to control stop/start
       collection with delay.  For the state table collection, these
       methods are mainly pass through, i.e. they call the
-      corresponding commands from the state table task.  */
+      corresponding commands from the state table component. */
     //@{
     void StartCollection(const mtsDouble & delayInSeconds);
     void StopCollection(const mtsDouble & delayInSeconds);

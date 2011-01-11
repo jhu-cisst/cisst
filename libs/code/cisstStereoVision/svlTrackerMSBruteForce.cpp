@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlTrackerMSBruteForce.cpp 618 2009-07-31 16:39:42Z bvagvol1 $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2007
@@ -181,13 +181,6 @@ int svlTrackerMSBruteForce::Initialize()
         LowerScale->SetTargetCount(targetcount);
         // half the image size
         LowerScale->SetImageSize(Width / 2, Height / 2);
-        // half the work area
-        svlRect roi;
-        roi.left   = ROI.left   / 2;
-        roi.right  = ROI.right  / 2;
-        roi.top    = ROI.top    / 2;
-        roi.bottom = ROI.bottom / 2;
-        LowerScale->SetROI(roi);
         // initialize
         LowerScale->Initialize();
 
@@ -238,15 +231,10 @@ int svlTrackerMSBruteForce::PreProcessImage(svlSampleImage & image, unsigned int
     if (!Initialized) return SVL_FAIL;
 
     // pre-processing image
-    if (Scale > 1) {
-
+    if (LowerScale) {
         // shirinking image for the lower scales recursively
-#if (CISST_SVL_HAS_OPENCV == ON)
-        cvResize(image.IplImageRef(videoch), LowerScaleImage->IplImageRef(), CV_INTER_AREA);
-#else // CISST_SVL_HAS_OPENCV
         ShrinkImage(image.GetUCharPointer(videoch), LowerScaleImage->GetUCharPointer());
-#endif // CISST_SVL_HAS_OPENCV
-
+        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
         LowerScale->PreProcessImage(*LowerScaleImage);
     }
 
@@ -264,32 +252,35 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
     const unsigned int targetcount = Targets.size();
     const unsigned int scalem1 = Scale - 1;
     int xpre, ypre, x, y;
-    svlTarget2D target;
+    svlTarget2D target, *ptgt;
     unsigned char conf;
     unsigned int i;
 
 
     // Call lower scales recursively
-    if (LowerScale) LowerScale->Track(*LowerScaleImage);
+    if (LowerScale) {
+        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
+        LowerScale->Track(*LowerScaleImage);
+    }
 
 
     // Acquire target templates if possible
-    for (i = 0; i < targetcount; i ++) {
-        if (!Targets[i].used) {
-            Targets[i].visible = false;
+    for (i = 0, ptgt = Targets.Pointer(); i < targetcount; i ++, ptgt ++) {
+        if (!ptgt->used) {
+            ptgt->visible = false;
             continue;
         }
 
         // Determine target visibility
-        x = Targets[i].pos.x;
-        y = Targets[i].pos.y;
+        x = ptgt->pos.x;
+        y = ptgt->pos.y;
         if (x < leftborder || x >= rightborder || y < topborder  || y >= bottomborder) {
-            Targets[i].visible = false;
-            Targets[i].conf    = 0;
+            ptgt->visible = false;
+            ptgt->conf    = 0;
             // Skip target if not visible
             continue;
         }
-        Targets[i].visible = true;
+        ptgt->visible = true;
 
         // Check if this scale already has a template
         if (OrigTemplateConf[i] == __NO_TMP) {
@@ -299,12 +290,12 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
             // filter
             CopyTemplate(image.GetUCharPointer(videoch),
                          OrigTemplates[i],
-                         Targets[i].pos.x - TemplateRadius,
-                         Targets[i].pos.y - TemplateRadius);
+                         ptgt->pos.x - TemplateRadius,
+                         ptgt->pos.y - TemplateRadius);
             CopyTemplate(image.GetUCharPointer(videoch),
                          Templates[i],
-                         Targets[i].pos.x - TemplateRadius,
-                         Targets[i].pos.y - TemplateRadius);
+                         ptgt->pos.x - TemplateRadius,
+                         ptgt->pos.y - TemplateRadius);
 
             // Set template flag
             OrigTemplateConf[i] = __NEW_TMP;
@@ -314,20 +305,20 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
                 // Scale up the tracking results from the
                 // lower scale and use that as position
                 LowerScale->GetTarget(i, target);
-                Targets[i].used    = target.used;
-                Targets[i].conf    = target.conf;
-                Targets[i].pos.x   = target.pos.x * 2 + 1;
-                Targets[i].pos.y   = target.pos.y * 2 + 1;
+                ptgt->used    = target.used;
+                ptgt->conf    = target.conf;
+                ptgt->pos.x   = target.pos.x * 2 + 1;
+                ptgt->pos.y   = target.pos.y * 2 + 1;
             }
         }
     }
 
 
     // Track targets
-    for (i = 0; i < targetcount; i ++) {
+    for (i = 0, ptgt = Targets.Pointer(); i < targetcount; i ++, ptgt ++) {
 
         // Skip non-visible targets
-        if (!Targets[i].visible) continue;
+        if (!ptgt->visible) continue;
 
         // Skip targets with just-acquired templates
         if (OrigTemplateConf[i] == __NEW_TMP) {
@@ -336,32 +327,32 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         }
 
         // template matching + updating coordinates
-        xpre = Targets[i].pos.x;
-        ypre = Targets[i].pos.y;
+        xpre = ptgt->pos.x;
+        ypre = ptgt->pos.y;
 
         if (Scale == 1) {
             if (Metric == svlSAD) {
                 MatchTemplateSAD(image.GetUCharPointer(videoch), Templates[i], xpre, ypre);
-                GetBestMatch(x, y, Targets[i].conf, false);
+                GetBestMatch(x, y, ptgt->conf, false);
             }
             else if (Metric == svlSSD) {
                 MatchTemplateSSD(image.GetUCharPointer(videoch), Templates[i], xpre, ypre);
-                GetBestMatch(x, y, Targets[i].conf, false);
+                GetBestMatch(x, y, ptgt->conf, false);
             }
             else if (Metric == svlNCC) {
                 MatchTemplateNCC(image.GetUCharPointer(videoch), Templates[i], xpre, ypre);
-                GetBestMatch(x, y, Targets[i].conf, true);
+                GetBestMatch(x, y, ptgt->conf, true);
             }
             else return SVL_FAIL;
 
-            Targets[i].pos.x = x + xpre;
-            Targets[i].pos.y = y + ypre;
+            ptgt->pos.x = x + xpre;
+            ptgt->pos.y = y + ypre;
 
             // trajectory filtering
-            Targets[i].pos.x = static_cast<int>(TrajectoryFilter * xpre +
-                                                TrajectoryFilterInv * Targets[i].pos.x);
-            Targets[i].pos.y = static_cast<int>(TrajectoryFilter * ypre +
-                                                TrajectoryFilterInv * Targets[i].pos.y);
+            ptgt->pos.x = static_cast<int>(TrajectoryFilter * xpre +
+                                           TrajectoryFilterInv * ptgt->pos.x);
+            ptgt->pos.y = static_cast<int>(TrajectoryFilter * ypre +
+                                           TrajectoryFilterInv * ptgt->pos.y);
         }
         else {
             if (Metric == svlSAD) {
@@ -378,9 +369,9 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
             }
             else return SVL_FAIL;
 
-            Targets[i].conf = (static_cast<int>(Targets[i].conf) * scalem1 + conf) / Scale;
-            Targets[i].pos.x = x + xpre;
-            Targets[i].pos.y = y + ypre;
+            ptgt->conf = (static_cast<int>(ptgt->conf) * scalem1 + conf) / Scale;
+            ptgt->pos.x = x + xpre;
+            ptgt->pos.y = y + ypre;
         }
 
 #ifdef __DEBUG_TRACKER
@@ -393,8 +384,8 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         UpdateTemplate(image.GetUCharPointer(videoch),
                        OrigTemplates[i],
                        Templates[i],
-                       Targets[i].pos.x - TemplateRadius,
-                       Targets[i].pos.y - TemplateRadius);
+                       ptgt->pos.x - TemplateRadius,
+                       ptgt->pos.y - TemplateRadius);
     }
 
     return SVL_OK;
@@ -872,13 +863,34 @@ void svlTrackerMSBruteForce::GetBestMatch(int &x, int &y, unsigned char &conf, b
 
 void svlTrackerMSBruteForce::ShrinkImage(unsigned char* src, unsigned char* dst)
 {
-    const unsigned int smw = Width / 2;
-    const unsigned int smh = Height / 2;
+    const int smwidth  = Width >> 1;
+    const int smheight = Height >> 1;
+
+    // make sure ROI values are even and in range
+    int wr = WindowRadius;
+    int smleft   = (ROI.left - wr) / 2;
+    int smtop    = (ROI.top - wr)  / 2;
+    int smright  = ((ROI.right + wr)  + 1) / 2;
+    int smbottom = ((ROI.bottom + wr) + 1) / 2;
+    if (smleft < 0) smleft = 0;
+    if (smtop  < 0) smtop = 0;
+    if (smright >= smwidth) smright = smwidth - 1;
+    if (smbottom >= smheight) smbottom = smheight - 1;
+
+    const int lgleft   = smleft << 1;
+    const int lgtop    = smtop  << 1;
     const unsigned int lgstride = Width * 3;
-    const unsigned int lgstride2 = lgstride * 2;
+    const unsigned int lgstride2 = lgstride << 1;
+    const unsigned int smw = smright - smleft;
+    const unsigned int smh = smbottom - smtop;
+    const unsigned int smstride = lgstride >> 1;
+    const unsigned int smstride2 = smstride - smw * 3;
 
     unsigned char *srcln1, *srcln2, *src1, *src2;
     unsigned int i, j, r, g, b;
+
+    src += lgtop * lgstride + lgleft * 3;
+    dst += smtop * smstride + smleft * 3;
 
     srcln1 = src;
     srcln2 = src + lgstride;
@@ -911,6 +923,7 @@ void svlTrackerMSBruteForce::ShrinkImage(unsigned char* src, unsigned char* dst)
         }
         srcln1 += lgstride2;
         srcln2 += lgstride2;
+        dst    += smstride2;
     }
 }
 

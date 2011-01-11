@@ -36,6 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCallableWriteReturnMethod.h>
 #include <cisstMultiTask/mtsCallableReadMethod.h>
 #include <cisstMultiTask/mtsCallableReadReturnVoidMethod.h>
+#include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
+#include <cisstMultiTask/mtsCallableQualifiedReadReturnVoidMethod.h>
 #include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
@@ -84,16 +86,20 @@ http://www.cisst.org/cisst/license.txt.
   by the GetEndUserInterface method, which returns a new mtsInterfaceProvided
   object to the client component. In other words, the original provided interface
   acts as a provided interface factory that generates a "copy" of the provided
-  interface for every client.
+  interface for every client. Note that GetEndUserInterface is protected,
+  and should only be called by mtsComponent.
 
 */
 class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     // To dynamically create and add command proxies and event proxies
     friend class mtsComponentProxy;
     // To get information about event generators in this interface
     friend class mtsManagerLocal;
+    // To call GetEndUserInterface
+    friend class mtsComponent;
+    friend class mtsManagerComponentClient;
 
  public:
     /*! This type */
@@ -102,8 +108,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Base class */
     typedef mtsInterfaceProvidedOrOutput BaseType;
 
-    /*! Default length for argument buffers */
-    enum {DEFAULT_ARG_BUFFER_LEN = 64};
+    /*! Default size for mail boxes and argument queues */
+    enum {DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE = 64};
 
     /*! Typedef for a map of name and void commands. */
     typedef cmnNamedMap<mtsCommandVoid> CommandVoidMapType;
@@ -121,7 +127,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     typedef cmnNamedMap<mtsCommandRead> CommandReadMapType;
 
     /*! Typedef for a map of name and qualified read commands. */
-    typedef cmnNamedMap<mtsCommandQualifiedReadBase> CommandQualifiedReadMapType;
+    typedef cmnNamedMap<mtsCommandQualifiedRead> CommandQualifiedReadMapType;
 
     /*! Typedef for a map of event name and void event generators. */
     typedef cmnNamedMap<mtsMulticastCommandVoid> EventVoidMapType;
@@ -148,6 +154,40 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       terminates. This does some cleanup work */
     void Cleanup(void);
 
+    /*! Set the desired size for the command mail box.  If queueing
+      has been enabled for this interface, a single mailbox is created
+      for each connected required interface.  All commands provided by
+      this interface share a single mailbox but each write command
+      (write and write with return) manages it's own queue for the
+      command argument.  To change the argument queue size, use
+      SetArgumentQueuesSize.  To change both parameters at once, use
+      SetMailBoxAndArgumentQueuesSize.
+
+      The size of the mail box can't be changed while being used
+      (i.e. while any required interface is connected to the provided
+      interface. */
+    void SetMailBoxSize(size_t desiredSize);
+
+    /*! Set the desired size for all argument queues.  If queueing has
+      been enabled for this interface, each write command (write or
+      write with return) manages it's own queue of arguments.  The
+      command itself is queued in the interface mailbox (see
+      SetMailBoxSize) and the argument is queued by the command
+      itself.  There is no reason to have an argument queue larger
+      than the command mail box as there can't be more arguments
+      queued than commands.  The reciprocal is not true as different
+      commands can be queued.  So, the argument queue size should be
+      lesser or equal to the mail box size.
+
+      The size of argument queues can't be changed while being used
+      (i.e. while any required interface is connected to the provided
+      interface. */
+    void SetArgumentQueuesSize(size_t desiredSize);
+
+    /*! Set the desired size for the command mail box and argument
+      queues.  See SetMailBoxSize and SetArgumentQueuesSize. */
+    void SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
+
     /*! Get the names of commands provided by this interface. */
     //@{
     std::vector<std::string> GetNamesOfCommands(void) const;
@@ -172,7 +212,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     mtsCommandWriteBase * GetCommandWrite(const std::string & commandName) const;
     mtsCommandWriteReturn * GetCommandWriteReturn(const std::string & commandName) const;
     mtsCommandRead * GetCommandRead(const std::string & commandName) const;
-    mtsCommandQualifiedReadBase * GetCommandQualifiedRead(const std::string & commandName) const;
+    mtsCommandQualifiedRead * GetCommandQualifiedRead(const std::string & commandName) const;
     //@}
 
     /*! Find an event based on its name. */
@@ -344,8 +384,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Adds command object to read history (i.e., vector of data)
       from the state table. */
     template <class _elementType>
-    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
-                                                        const std::string & commandName);
+    mtsCommandQualifiedRead * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
+                                                    const std::string & commandName);
 
     /*! Adds command object to write to state table. */
     template <class _elementType>
@@ -356,20 +396,25 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
 
     //@{
     template <class __classType, class __argument1Type, class __argument2Type>
-    inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
-                                                                 __classType * classInstantiation,
-                                                                 const std::string & commandName,
-                                                                 const __argument1Type & argument1Prototype,
-                                                                 const __argument2Type & argument2Prototype) {
-        return this->AddCommandQualifiedRead(new mtsCommandQualifiedRead<__classType, __argument1Type, __argument2Type>
-                                             (method, classInstantiation, commandName, argument1Prototype, argument2Prototype));
-    }
+    inline mtsCommandQualifiedRead * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
+                                                             __classType * classInstantiation,
+                                                             const std::string & commandName,
+                                                             const __argument1Type & argument1Prototype,
+                                                             const __argument2Type & argument2Prototype) {
+        return this->AddCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argument1Type, __argument2Type>(method, classInstantiation),
+                                             commandName,
+                                             mtsGenericTypes<__argument1Type>::ConditionalCreate(argument1Prototype, commandName),
+                                             mtsGenericTypes<__argument2Type>::ConditionalCreate(argument2Prototype, commandName));
+     }
 
     template <class __classType, class __argument1Type, class __argument2Type>
-    inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
-                                                                 __classType * classInstantiation,
-                                                                 const std::string & commandName) {
-        return this->AddCommandQualifiedRead(method, classInstantiation, commandName, __argument1Type(), __argument2Type());
+    inline mtsCommandQualifiedRead * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
+                                                             __classType * classInstantiation,
+                                                             const std::string & commandName) {
+        return this->AddCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argument1Type, __argument2Type>(method, classInstantiation),
+                                             commandName,
+                                             mtsGenericTypes<__argument1Type>::ConditionalCreate(__argument1Type(), commandName),
+                                             mtsGenericTypes<__argument2Type>::ConditionalCreate(__argument2Type(), commandName));
     }
     //@}
 
@@ -382,8 +427,11 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
                                                          const __filteredType & filteredPrototype,
                                                          mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
         std::string commandNameFilter(commandName + "Filter");
-        return this->AddCommandFilteredWrite(new mtsCommandQualifiedRead<__classType, __argumentType, __filteredType>
-                                                 (premethod, classInstantiation, commandNameFilter, argumentPrototype, filteredPrototype),
+        return this->AddCommandFilteredWrite(new mtsCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argumentType, __filteredType>
+                                                                         (premethod, classInstantiation),
+                                                                         commandNameFilter,
+                                                                         mtsGenericTypes<__argumentType>::ConditionalCreate(argumentPrototype, commandName),
+                                                                         mtsGenericTypes<__filteredType>::ConditionalCreate(filteredPrototype, commandName)),
                                              new mtsCommandWrite<__classType, __filteredType>(method, classInstantiation, commandName, filteredPrototype),
                                              queueingPolicy);
     }
@@ -426,22 +474,30 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
     //@}
 
+    /*! Remove an observer for the specified event.  These methods are
+      used when disconnecting from the provided interface.
+      \param name Name of event
+      \param handler command object that implements event handler
+      \returns true if successful; false otherwise
+    */
+    //@{
+    bool RemoveObserver(const std::string & eventName, mtsCommandVoid * handler);
+    bool RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    void RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+    //@}
 
-    /*!
-      \todo documentation outdated
-      This method need to called to create a unique Id and queues
-      for a potential user.  When using the methods "GetCommandXyz"
-      later on, the unique Id should be used to define which queues to
-      use.  To avoid any issue, each potential thread should require a
-      unique Id and then use it.  If two or more tasks are running
-      from the same thread, they can use different Ids but this is not
-      required. */
-    mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
+    /*! Get the original interface.  This allows to retrieve the original
+      interface from a copy created using GetEndUserInterface. */
+    mtsInterfaceProvided * GetOriginalInterface(void) const;
 
-    mtsInterfaceProvided * GetOriginalInterface(void) const
-    { return this->OriginalInterface; }
+    /*! Find an end-user interface given a client name. */
+    mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
+
+    /*! Return number of active end-user interfaces. */
+    int GetNumberOfEndUsers() const;
 
     /*! Method used to process all commands queued in mailboxes.  This
       method should only be used by the component that owns the
@@ -454,10 +510,48 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
  protected:
 
     /*! Constructor used to create an end user interface (object
-      factory) for each user. */
+      factory) for each user (interface required).  This constructor
+      is called by the method GetEndUserInterface. */
     mtsInterfaceProvided(mtsInterfaceProvided * interfaceProvided,
                          const std::string & userName,
-                         size_t mailBoxSize);
+                         size_t mailBoxSize,
+                         size_t argumentQueuesSize);
+
+    /*!  This method creates a copy of the existing interface.  The
+      copy is required for each new user, i.e. for each required
+      interface connected to this provided interface if queueing has
+      been enabled.  This method should not be called on a provided
+      interface if queueing is not enable.  The newly created provided
+      interface is created using the current MailBoxSize (see
+      SetMailBoxSize) and ArgumentQueuesSize (see
+      SetArgumentQueuesSize).  Commands and events should only be
+      added to the original interface.
+
+      \param userName name of the required interface being connected
+      to this provided interface.  This information is used for
+      logging only.
+      \returns pointer to end-user interface (0 if error)
+     */
+
+     static std::string GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                const std::string &userName);
+
+public: // PK TEMP for IRE
+    mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
+protected: // PK TEMP
+
+    /*!  This method deletes the end-user interface created by GetEndUserInterface.
+         Note that there are two mtsInterfaceProvided objects:
+         (1) the interfaceProvided parameter, which should be a pointer to the
+             end-user interface to be removed
+         (2) the "this" pointer, which should point to the original interface.
+
+      \param interfaceProvided the end-user interface to be removed
+      \param userName name of the required interface (used for logging only)
+      \returns 0 if successful, interfaceProvided otherwise
+     */
+
+    mtsInterfaceProvided * RemoveEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string & userName);
 
     /*! Utility method to determine if a command should be queued or
       not based on the default policy for the interface and the user's
@@ -482,6 +576,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Flag to determine if by default void and write commands are
       queued. */
     mtsInterfaceQueueingPolicy QueueingPolicy;
+
+    /*! Size to be used for mailboxes */
+    size_t MailBoxSize;
+
+    /*! Size to be used for argument queues */
+    size_t ArgumentQueuesSize;
 
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
@@ -534,7 +634,7 @@ protected:
                                                   mtsGenericObject * resultPrototype,
                                                   mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
-    mtsCommandWriteBase * AddCommandFilteredWrite(mtsCommandQualifiedReadBase * filter,
+    mtsCommandWriteBase * AddCommandFilteredWrite(mtsCommandQualifiedRead * filter,
                                                   mtsCommandWriteBase * command,
                                                   mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
@@ -542,7 +642,10 @@ protected:
                                     const std::string & name,
                                     mtsGenericObject * argumentPrototype);
 
-    mtsCommandQualifiedReadBase * AddCommandQualifiedRead(mtsCommandQualifiedReadBase * command);
+    mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
+                                                      const std::string & name,
+                                                      mtsGenericObject * argument1Prototype,
+                                                      mtsGenericObject * argument2Prototype);
 
     /*! Methods to add an existing command to the interface.  These
       methods will not check the queueing policy of the interface nor
@@ -553,6 +656,7 @@ protected:
     mtsCommandVoid * AddCommandVoid(mtsCommandVoid * command);
     mtsCommandVoidReturn * AddCommandVoidReturn(mtsCommandVoidReturn * command);
     mtsCommandRead * AddCommandRead(mtsCommandRead * command);
+    mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCommandQualifiedRead * command);
     //@}
 
     bool AddEvent(const std::string & commandName, mtsMulticastCommandVoid * generator);
@@ -575,16 +679,18 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
-    this->AddCommandQualifiedRead(new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, FinalType>
-                                  (&AccessorType::Get, stateAccessor, commandName, mtsStateIndex(), FinalType(stateData)));
+    this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, FinalType>(&AccessorType::Get, stateAccessor),
+                                  commandName,
+                                  mtsGenericTypes<mtsStateIndex>::ConditionalCreate(mtsStateIndex(), commandName),
+                                  mtsGenericTypes<FinalType>::ConditionalCreate(FinalType(stateData), commandName));
     return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
                                 commandName,
                                 mtsGenericTypes<FinalType>::ConditionalCreate(FinalType(stateData), commandName));
 }
 
 template <class _elementType>
-mtsCommandQualifiedReadBase * mtsInterfaceProvided::AddCommandReadHistory(const mtsStateTable & stateTable,
-                                                                          const _elementType & stateData, const std::string & commandName)
+mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandReadHistory(const mtsStateTable & stateTable,
+                                                                      const _elementType & stateData, const std::string & commandName)
 {
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
@@ -594,8 +700,10 @@ mtsCommandQualifiedReadBase * mtsInterfaceProvided::AddCommandReadHistory(const 
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadHistory: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
-    return this->AddCommandQualifiedRead(new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, mtsHistory<FinalType> >
-                                         (&AccessorType::GetHistory, stateAccessor, commandName, mtsStateIndex(), mtsHistory<FinalType>()));
+    return this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, mtsHistory<FinalType> >(&AccessorType::GetHistory, stateAccessor),
+                                         commandName,
+                                         mtsStateIndex(),
+                                         mtsHistory<FinalType>());
 }
 
 template <class _elementType>

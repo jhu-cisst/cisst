@@ -46,8 +46,9 @@ bool mtsFunctionRead::Bind(CommandType * command) {
 }
 
 
-mtsExecutionResult mtsFunctionRead::operator()(mtsGenericObject & argument) const {
-    return Command ? Command->Execute(argument) : mtsExecutionResult::NO_INTERFACE;
+mtsExecutionResult mtsFunctionRead::Execute(mtsGenericObject & argument) const
+{
+    return Command ? Command->Execute(argument) : mtsExecutionResult::FUNCTION_NOT_BOUND;
 }
 
 

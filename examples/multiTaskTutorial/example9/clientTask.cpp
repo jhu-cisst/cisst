@@ -84,12 +84,18 @@ void clientTask<_dataType>::Run(void)
             if (UI.VoidRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested" << std::endl;
                 this->VoidServer();
+                // Blocking command causes deadlock in single process (local)
+                // configuration due to fltkMutex.
+                //this->VoidServer.ExecuteBlocking();
                 UI.VoidRequested = false;
             }
             
             if (UI.WriteRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteRequested" << std::endl;
                 this->WriteServer(_dataType(UI.WriteValue->value()));
+                // Blocking command causes deadlock in single process (local)
+                // configuration due to fltkMutex.
+                //this->WriteServer.ExecuteBlocking(_dataType(UI.WriteValue->value()));
                 UI.WriteRequested = false;
             }
             

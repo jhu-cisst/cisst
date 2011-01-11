@@ -745,9 +745,8 @@ public:
   See ::nmrSVD for further details.
 
   \note The PInverse functions make use of LAPACK routines.  To
-  activate this code, set the CISST_HAS_CNETLIB or
-  CISST_HAS_CISSTNETLIB flag to ON during the configuration of cisst
-  with CMake.
+  activate this code, set the CISST_HAS_CISSTNETLIB flag to ON during
+  the configuration of cisst with CMake.
 
   \note The general rule for numerical functions which depend on
   LAPACK is that column-major matrices should be used everywhere, and
