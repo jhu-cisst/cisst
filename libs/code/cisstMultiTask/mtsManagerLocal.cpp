@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -2212,11 +2212,8 @@ bool mtsManagerLocal::RemoveInterfaceProvidedProxy(
         return false;
     }
 
-    // Remove provided interface proxy only when user counter is zero.
-    if (interfaceProvidedProxy->UserCounter > 0) {
-        --interfaceProvidedProxy->UserCounter;
-    }
-    if (interfaceProvidedProxy->UserCounter == 0) {
+    // Remove provided interface proxy only when number of end users is zero.
+    if (interfaceProvidedProxy->GetNumberOfEndUsers() == 0) {
         // Remove provided interface from component proxy.
         if (!clientComponentProxy->RemoveInterfaceProvidedProxy(interfaceProvidedProxyName)) {
             CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvidedProxy: failed to remove provided interface proxy: " << interfaceProvidedProxyName << std::endl;

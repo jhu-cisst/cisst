@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -57,6 +56,10 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetNamesOfInterfaces);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections, 
                                                ServiceGetters.GetListOfConnections);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription, 
+                                               ServiceGetters.GetInterfaceProvidedDescription);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription, 
+                                               ServiceGetters.GetInterfaceRequiredDescription);
 
         // Event receivers
         InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::AddComponent,
@@ -331,3 +334,54 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
         CMN_LOG_CLASS_RUN_ERROR << "GetListOfConnections: invalid function - has not been bound to command" << std::endl;
     return listOfConnections;
 }
+
+InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName, 
+                             const std::string & componentName, const std::string &interfaceName) const
+{
+    // output arg
+    InterfaceProvidedDescription argOut;
+    argOut.InterfaceProvidedName = "ERROR";
+
+    if (!ServiceGetters.GetInterfaceProvidedDescription.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceProvidedDescription: invalid function - has not been bound to command" << std::endl;
+        return argOut;
+    }
+
+    // input arg
+    // For now, use mtsDescriptionInterface to pass the request. Probably should create a separate class that consists only
+    // of the three required fields.
+    mtsDescriptionInterface argIn;
+    argIn.ProcessName = processName;
+    argIn.ComponentName = componentName;
+    argIn.InterfaceProvidedNames.push_back(interfaceName);
+
+    ServiceGetters.GetInterfaceProvidedDescription(argIn, argOut);
+
+    return argOut;
+}
+
+InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName, 
+                             const std::string & componentName, const std::string &interfaceName) const
+{
+    // output arg
+    InterfaceRequiredDescription argOut;
+    argOut.InterfaceRequiredName = "ERROR";
+
+    if (!ServiceGetters.GetInterfaceRequiredDescription.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceRequiredDescription: invalid function - has not been bound to command" << std::endl;
+        return argOut;
+    }
+
+    // input arg
+    // For now, use mtsDescriptionInterface to pass the request. Probably should create a separate class that consists only
+    // of the three required fields.
+    mtsDescriptionInterface argIn;
+    argIn.ProcessName = processName;
+    argIn.ComponentName = componentName;
+    argIn.InterfaceRequiredNames.push_back(interfaceName);
+
+    ServiceGetters.GetInterfaceRequiredDescription(argIn, argOut);
+
+    return argOut;
+}
+    

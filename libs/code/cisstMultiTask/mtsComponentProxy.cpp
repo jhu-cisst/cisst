@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-18
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,6 +28,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionReadProxy.h>
 #include <cisstMultiTask/mtsFunctionWriteProxy.h>
 #include <cisstMultiTask/mtsFunctionQualifiedReadProxy.h>
+
+mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAndEventHandlerProxyMapElement() :
+    FunctionVoidProxyMap("FunctionVoidProxyMap"),
+    FunctionWriteProxyMap("FunctionWriteProxyMap"),
+    FunctionReadProxyMap("FunctionReadProxyMap"),
+    FunctionQualifiedReadProxyMap("FunctionQualifiedReadProxyMap"),
+    EventGeneratorVoidProxyMap("EventGeneratorVoidProxyMap"),
+    EventGeneratorWriteProxyMap("EventGeneratorWriteProxyMap")
+{
+    // Could pass mtsComponentProxy object to SetOwner().
+}
 
 mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
   : mtsComponent(componentProxyName),
@@ -387,7 +398,7 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
     std::string eventName;
 
     FunctionProxyAndEventHandlerProxyMapElement * mapElement
-        = FunctionProxyAndEventHandlerProxyMap.GetItem(providedInterfaceName);
+        = FunctionProxyAndEventHandlerProxyMap.GetItem(providedInterfaceName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!mapElement) {
         mapElement = new FunctionProxyAndEventHandlerProxyMapElement;
     }
@@ -471,7 +482,7 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 bool mtsComponentProxy::RemoveInterfaceProvidedProxy(const std::string & providedInterfaceProxyName)
 {
     // Get network objects to remove
-    mtsComponentInterfaceProxyServer * serverProxy = InterfaceProvidedNetworkProxies.GetItem(providedInterfaceProxyName);
+    mtsComponentInterfaceProxyServer * serverProxy = InterfaceProvidedNetworkProxies.GetItem(providedInterfaceProxyName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!serverProxy) {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvidedProxy: cannot find proxy server: " << providedInterfaceProxyName << std::endl;
         return false;
@@ -558,14 +569,14 @@ bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredI
 bool mtsComponentProxy::IsActiveProxy(const std::string & proxyName, const bool isProxyServer) const
 {
     if (isProxyServer) {
-        mtsComponentInterfaceProxyServer * providedInterfaceProxy = InterfaceProvidedNetworkProxies.GetItem(proxyName);
+        mtsComponentInterfaceProxyServer * providedInterfaceProxy = InterfaceProvidedNetworkProxies.GetItem(proxyName, CMN_LOG_LEVEL_RUN_VERBOSE);
         if (!providedInterfaceProxy) {
             CMN_LOG_CLASS_INIT_ERROR << "IsActiveProxy: Cannot find provided interface proxy: " << proxyName << std::endl;
             return false;
         }
         return providedInterfaceProxy->IsActiveProxy();
     } else {
-        mtsComponentInterfaceProxyClient * requiredInterfaceProxy = InterfaceRequiredNetworkProxies.GetItem(proxyName);
+        mtsComponentInterfaceProxyClient * requiredInterfaceProxy = InterfaceRequiredNetworkProxies.GetItem(proxyName, CMN_LOG_LEVEL_RUN_VERBOSE);
         if (!requiredInterfaceProxy) {
             CMN_LOG_CLASS_INIT_ERROR << "IsActiveProxy: Cannot find required interface proxy: " << proxyName << std::endl;
             return false;
@@ -585,7 +596,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
 
     // Get network proxy client connected to the required interface proxy
     // of which name is 'clientInterfaceRequiredName.'
-    mtsComponentInterfaceProxyClient * interfaceProxyClient = InterfaceRequiredNetworkProxies.GetItem(clientInterfaceRequiredName);
+    mtsComponentInterfaceProxyClient * interfaceProxyClient = InterfaceRequiredNetworkProxies.GetItem(clientInterfaceRequiredName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!interfaceProxyClient) {
         CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: no network interface proxy client found for required interface: " 
             << clientInterfaceRequiredName << std::endl;
@@ -675,7 +686,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(const unsigned int connectionID,
 
     // Get an instance of network proxy server that serves the provided interface.
     mtsComponentInterfaceProxyServer * interfaceProxyServer = 
-        InterfaceProvidedNetworkProxies.GetItem(serverInterfaceProvidedName);
+        InterfaceProvidedNetworkProxies.GetItem(serverInterfaceProvidedName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!interfaceProxyServer) {
         CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: no network interface proxy server found: " << serverInterfaceProvidedName << std::endl;
         return false;
@@ -806,7 +817,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     }
 
     // Get function proxy and event handler proxy map element
-    FunctionProxyAndEventHandlerProxyMapElement * mapElement = FunctionProxyAndEventHandlerProxyMap.GetItem(requiredInterfaceName);
+    FunctionProxyAndEventHandlerProxyMapElement * mapElement = FunctionProxyAndEventHandlerProxyMap.GetItem(requiredInterfaceName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!mapElement) {
         CMN_LOG_CLASS_INIT_ERROR << "GetFunctionProxyPointers: failed to get proxy map element: " << requiredInterfaceName << std::endl;
         return false;
@@ -1095,7 +1106,7 @@ bool mtsComponentProxy::AddConnectionInformation(const unsigned int connectionID
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
-    mtsComponentInterfaceProxyServer * interfaceProxyServer = InterfaceProvidedNetworkProxies.GetItem(serverInterfaceProvidedName);
+    mtsComponentInterfaceProxyServer * interfaceProxyServer = InterfaceProvidedNetworkProxies.GetItem(serverInterfaceProvidedName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!interfaceProxyServer) {
         CMN_LOG_CLASS_INIT_ERROR << "AddConnectionInformation: no interface proxy server found: " << serverInterfaceProvidedName << std::endl;
         return false;

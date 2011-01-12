@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -106,6 +105,10 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescription,
+                              this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceRequiredDescription,
+                              this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
 
     provided->AddEventWrite(this->InterfaceGCMEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
@@ -153,6 +156,10 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentResume);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                           newFunctionSet->ComponentGetState);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
+                          newFunctionSet->GetInterfaceProvidedDescription);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
+                          newFunctionSet->GetInterfaceRequiredDescription);
     required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this, 
                                    mtsManagerComponentBase::EventNames::ChangeState);
 
@@ -428,6 +435,54 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const
 {
     GCM->GetListOfConnections(listOfConnections);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
+                                                                                     InterfaceProvidedDescription & description) const
+{
+    if (!GCM->FindComponent(intfc.ProcessName, intfc.ComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceProvidedDescription: failed to get interface description - no component found: "
+                                << intfc.ProcessName << ":" << intfc.ComponentName << std::endl;
+        return;
+    }
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(intfc.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceProvidedDescription: failed to get function set for "
+                                << intfc.ProcessName << std::endl;
+        return;
+    }
+    if (!functionSet->GetInterfaceProvidedDescription.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceProvidedDescription: function not bound to command" << std::endl;
+        return;
+    }
+
+    functionSet->GetInterfaceProvidedDescription(intfc, description);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
+                                                                                     InterfaceRequiredDescription & description) const
+{
+    if (!GCM->FindComponent(intfc.ProcessName, intfc.ComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceRequiredDescription: failed to get interface description - no component found: "
+                                << intfc.ProcessName << ":" << intfc.ComponentName << std::endl;
+        return;
+    }
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(intfc.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceRequiredDescription: failed to get function set for "
+                                << intfc.ProcessName << std::endl;
+        return;
+    }
+    if (!functionSet->GetInterfaceRequiredDescription.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceRequiredDescription: function not bound to command" << std::endl;
+        return;
+    }
+
+    functionSet->GetInterfaceRequiredDescription(intfc, description);
 }
 
 void mtsManagerComponentServer::AddComponentEvent(const mtsDescriptionComponent &component)

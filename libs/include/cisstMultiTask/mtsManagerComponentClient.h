@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -82,6 +81,8 @@ protected:
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
         mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
         mtsFunctionRead          GetListOfConnections;
+        mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
+        mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } InterfaceLCMFunctionType;
 
     InterfaceLCMFunctionType InterfaceLCMFunction;
@@ -152,6 +153,10 @@ public:
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
                                                 mtsComponentState &state) const;
+    void InterfaceLCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface &intfc,
+                                                InterfaceProvidedDescription & description) const;
+    void InterfaceLCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface &intfc,
+                                                InterfaceRequiredDescription & description) const;
 
     /*! Event generators for InterfaceLCM's provided interface */
     mtsFunctionWrite InterfaceLCMEvents_ChangeState;
@@ -171,6 +176,10 @@ public:
                                                          std::vector<std::string> & names) const;
     void InterfaceComponentCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
+    void InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, 
+                                                                    InterfaceProvidedDescription & description) const;
+    void InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, 
+                                                                    InterfaceRequiredDescription & description) const;
 
     /*! Event generators for InterfaceComponent's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;

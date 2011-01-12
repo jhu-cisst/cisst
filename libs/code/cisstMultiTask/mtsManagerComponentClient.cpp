@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -458,6 +457,10 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription,
+                                      this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription,
+                                      this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddEventWrite(this->InterfaceComponentEvents_AddComponent, 
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceComponentEvents_ChangeState, 
@@ -512,6 +515,10 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetNamesOfInterfaces);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                           InterfaceLCMFunction.GetListOfConnections);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
+                          InterfaceLCMFunction.GetInterfaceProvidedDescription);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
+                          InterfaceLCMFunction.GetInterfaceRequiredDescription);
     // It is not necessary to queue the events because we are just passing them along (it would not
     // hurt to queue them, either).
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleAddComponentEvent, this, 
@@ -544,6 +551,10 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::ComponentResume);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState,
                              this, mtsManagerComponentBase::CommandNames::ComponentGetState);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceProvidedDescription,
+                             this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceRequiredDescription,
+                             this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddEventWrite(this->InterfaceLCMEvents_ChangeState, 
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceLCM: successfully added \"LCM\" interfaces" << std::endl;
@@ -630,11 +641,6 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg)
 {
-    if (!InterfaceLCMFunction.ComponentCreate.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentCreate: failed to execute \"Component Create\"" << std::endl;
-        return;
-    }
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE || 
@@ -643,6 +649,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const
         InterfaceLCMCommands_ComponentCreate(arg);
         return;
     } else {
+        if (!InterfaceLCMFunction.ComponentCreate.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentCreate: failed to execute \"Component Create\"" << std::endl;
+            return;
+        }
         //InterfaceLCMFunction.ComponentCreate.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentCreate(arg);
     }
@@ -688,11 +698,6 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(c
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg)
 {
-    if (!InterfaceLCMFunction.ComponentStart.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: failed to execute \"Component Start\"" << std::endl;
-        return;
-    }
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
@@ -707,6 +712,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const 
         InterfaceLCMCommands_ComponentStart(arg);
         return;
     } else {
+        if (!InterfaceLCMFunction.ComponentStart.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: failed to execute \"Component Start\"" << std::endl;
+            return;
+        }
         //InterfaceLCMFunction.ComponentStart.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentStart(arg);
     }
@@ -714,13 +723,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const 
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg)
 {
-    if (!InterfaceLCMFunction.ComponentStop.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: failed to execute \"Component Stop\"" << std::endl;
-        return;
-    }
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
         LCM->GetProcessName() == arg.ProcessName) 
     {
@@ -733,6 +736,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const m
         InterfaceLCMCommands_ComponentStop(arg);
         return;
     } else {
+        if (!InterfaceLCMFunction.ComponentStop.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: failed to execute \"Component Stop\"" << std::endl;
+            return;
+        }
         //InterfaceLCMFunction.ComponentStop.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentStop(arg);
     }
@@ -740,11 +747,6 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const m
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg)
 {
-    if (!InterfaceLCMFunction.ComponentResume.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: failed to execute \"Component Resume\"" << std::endl;
-        return;
-    }
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
@@ -759,6 +761,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
         InterfaceLCMCommands_ComponentResume(arg);
         return;
     } else {
+        if (!InterfaceLCMFunction.ComponentResume.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: failed to execute \"Component Resume\"" << std::endl;
+            return;
+        }
         //InterfaceLCMFunction.ComponentResume.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentResume(arg);
     }
@@ -767,12 +773,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(const mtsDescriptionComponent &component,
                                                                              mtsComponentState &state) const
 {
-    if (!InterfaceLCMFunction.ComponentGetState.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
-        return;
-    }
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
         LCM->GetProcessName() == component.ProcessName)
     {
@@ -785,6 +786,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(con
         InterfaceLCMCommands_ComponentGetState(component, state);
         return;
     } else {
+        if (!InterfaceLCMFunction.ComponentGetState.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+            return;
+        }
         InterfaceLCMFunction.ComponentGetState(component, state);
     }
 }
@@ -829,6 +834,40 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections(
     }
 
     InterfaceLCMFunction.GetListOfConnections(listOfConnections);
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
+                                 InterfaceProvidedDescription & description) const
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
+        LCM->GetProcessName() == intfc.ProcessName)
+    {
+        InterfaceLCMCommands_GetInterfaceProvidedDescription(intfc, description);
+    } else {
+        if (!InterfaceLCMFunction.GetInterfaceProvidedDescription.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetInterfaceProvidedDescription: function not bound to command" << std::endl;
+            return;
+        }
+        InterfaceLCMFunction.GetInterfaceProvidedDescription(intfc, description);
+    }
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
+                                 InterfaceRequiredDescription & description) const
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
+        LCM->GetProcessName() == intfc.ProcessName)
+    {
+        InterfaceLCMCommands_GetInterfaceRequiredDescription(intfc, description);
+    } else {
+        if (!InterfaceLCMFunction.GetInterfaceRequiredDescription.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetInterfaceRequiredDescription: function not bound to command" << std::endl;
+            return;
+        }
+        InterfaceLCMFunction.GetInterfaceRequiredDescription(intfc, description);
+    }
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg)
@@ -1030,6 +1069,36 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
     }
 
     functionSet->ComponentGetState(state);
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface &intfc,
+                                                     InterfaceProvidedDescription & description) const
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (intfc.InterfaceProvidedNames.size() < 1) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_GetInterfaceProvidedDescription: provided interface name not specified" << std::endl;
+        return;
+    }
+    if (!LCM->GetInterfaceProvidedDescription(intfc.ComponentName, intfc.InterfaceProvidedNames[0], description)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_GetInterfaceProvidedDescription: failed to get description for component " 
+                                << intfc.ComponentName << " provided interface " << intfc.InterfaceProvidedNames[0] << std::endl;
+        return;
+    }
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface &intfc,
+                                                     InterfaceRequiredDescription & description) const
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (intfc.InterfaceRequiredNames.size() < 1) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_GetInterfaceRequiredDescription: required interface name not specified" << std::endl;
+        return;
+    }
+    if (!LCM->GetInterfaceRequiredDescription(intfc.ComponentName, intfc.InterfaceRequiredNames[0], description)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_GetInterfaceRequiredDescription: failed to get description for component " 
+                                << intfc.ComponentName << " required interface " << intfc.InterfaceRequiredNames[0] << std::endl;
+        return;
+    }
 }
 
 void mtsManagerComponentClient::HandleAddComponentEvent(const mtsDescriptionComponent &component)

@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 //  Component state (mtsComponentState)
 //
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
+
+//-----------------------------------------------------------------------------
+//  InterfaceProvidedDescription (defined in mtsInterfaceCommon.h)
+//  InterfaceRequiredDescription (defined in mtsInterfaceCommon.h)
+//
+CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceProvidedDescriptionProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Description

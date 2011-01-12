@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -55,6 +54,8 @@ protected:
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
         mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
         mtsFunctionRead          GetListOfConnections;
+        mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
+        mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } ServiceGetters;
 
     // Event receivers
@@ -154,6 +155,12 @@ public:
                               std::vector<std::string> & namesOfInterfacesProvided) const;
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
+
+    InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName, 
+                                 const std::string & componentName, const std::string &interfaceName) const;
+    InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName, 
+                                 const std::string & componentName, const std::string &interfaceName) const;
+    
     //@}
 
 };
