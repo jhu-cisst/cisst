@@ -61,6 +61,7 @@ class CISST_EXPORT devOSGCamera :
   vctDynamicMatrix<float>          depthbuffer;
   vctDynamicMatrix<unsigned char>  rgbbuffer;
 
+  int x, y;
   int width;
   int height;
 
