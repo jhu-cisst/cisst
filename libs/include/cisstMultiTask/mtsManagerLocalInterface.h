@@ -105,10 +105,6 @@ public:
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-    /*! Thread-safe  */
-    //virtual bool DisconnectLocally(const std::string & serverComponentName, const std::string & serverInterfaceName,
-    //                               const std::string & clientComponentName, const std::string & clientInterfaceName) = 0;
-
 #if CISST_MTS_HAS_ICE
     /*! \brief Connect interfaces at server side 
         \param description Description of connection

@@ -730,7 +730,7 @@ bool mtsManagerProxyClient::SendDisconnect(const ::mtsManagerProxy::ConnectionSt
 bool mtsManagerProxyClient::SendSetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendSetInterfaceProvidedProxyAccessInfo: " << connectionID << " - " endpointInfo);
+    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendSetInterfaceProvidedProxyAccessInfo: " << connectionID << " - " << endpointInfo);
 #endif
 
     try {

@@ -667,7 +667,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Refresh(const 
     const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ComponentInterfaceServerI, "<<<<< RECV: Refresh: " << connectionID);
+    LogPrint(ComponentInterfaceServerI, "<<<<< RECV: Refresh: " << iceConnectionID);
 #endif
 
     // TODO: Session refresh

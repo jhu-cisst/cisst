@@ -1807,18 +1807,6 @@ bool mtsManagerLocal::Connect(
 }
 #endif
 
-
-// This should probably be split to functions such as DisconnectSetup and DisconnectNotify.
-/*
-bool mtsManagerLocal::DisconnectLocally(const std::string & serverComponentName, const std::string & serverInterfaceName,
-                                        const std::string & clientComponentName, const std::string & clientInterfaceName)
-{
-    // TODO: use MCC's service for disconnection
-
-    return true;
-}
-*/
-
 bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 {
     // smmy TODO
@@ -1826,6 +1814,7 @@ bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
     return false;
 }
 
+// This should probably be split to functions such as DisconnectSetup and DisconnectNotify.
 bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
@@ -2023,10 +2012,6 @@ bool mtsManagerLocal::Disconnect(
         CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection failed." << std::endl;
         return false;
     }
-
-    //
-    // TODO: LOCAL DISCONNECT!!!
-    //
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: successfully disconnected." << std::endl;
 

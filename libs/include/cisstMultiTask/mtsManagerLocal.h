@@ -228,10 +228,6 @@ protected:
     //
     //  See mtsManagerLocalInterface.h for detailed documentation.
     //-------------------------------------------------------------------------
-    //bool DisconnectLocally(const std::string & serverComponentName, const std::string & serverInterfaceName,
-    //                       const std::string & clientComponentName, const std::string & clientInterfaceName);
-
-
 #if CISST_MTS_HAS_ICE
     /*! \brief Create component proxy
         \param componentProxyName Name of component proxy

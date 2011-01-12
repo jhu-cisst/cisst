@@ -1391,7 +1391,7 @@ void mtsManagerProxyServer::ManagerServerI::Refresh(const ::Ice::Current& curren
     const IceConnectionIDType iceConnectionID = current.ctx.find(mtsManagerProxyServer::GetConnectionIDKey())->second;
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ManagerServerI, "<<<<< RECV: Refresh: " << connectionID);
+    LogPrint(ManagerServerI, "<<<<< RECV: Refresh: " << iceConnectionID);
 #endif
 
     //

@@ -70,7 +70,7 @@ void mtsManagerComponentServer::GetNamesOfProcesses(std::vector<std::string> & p
 
 bool mtsManagerComponentServer::AddInterfaceGCM(void)
 {
-    // InterfaceGCM's required interface is not create here but is created
+    // InterfaceGCM's required interface is not created here but is created
     // when a manager component client connects to the manager component
     // server.  
     // See mtsManagerComponentServer::AddNewClientProcess()
@@ -242,8 +242,17 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
     functionSet->ComponentConnect(arg);
 }
 
+// MJ: Another method that does the same thing but accepts a single parameter 
+// as connection id should be added.
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
+    if (!GCM->Disconnect(arg.ConnectionID)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\" for " 
+            << "connection id [ " << arg.ConnectionID << " ]" << std::endl;
+        return;
+    }
+
+#if 0
     InterfaceGCMFunctionType *functionSet;
     if (arg.Client.ProcessName != arg.Server.ProcessName) {
         // PK TEMP fix for network disconnect
@@ -280,6 +289,20 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const m
     functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
     if (!functionSet) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
+        return;
+    }
+
+    //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
+    functionSet->ComponentDisconnect(arg);
+#endif
+}
+
+void mtsManagerComponentServer::ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg)
+{
+    // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \"" << processName << "\"" << std::endl;
         return;
     }
 

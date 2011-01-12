@@ -75,7 +75,7 @@ protected:
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
     InterfaceGCMFunctionMapType InterfaceGCMFunctionMap;
 
-    /*! Protected constructor to disallow users to create this component */
+    /*! Protected constructor to prevent users from createing this component */
     mtsManagerComponentServer(mtsManagerGlobal * gcm);
     ~mtsManagerComponentServer();
 
@@ -120,6 +120,9 @@ public:
 
     // Event handler for use by this class (Manager Component Server, MCS)
     void HandleChangeStateEvent(const mtsComponentStateChange &stateChange);
+
+    // Calls LCM::DisconnectLocally()
+    void ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);
