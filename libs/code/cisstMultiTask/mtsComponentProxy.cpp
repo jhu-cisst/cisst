@@ -286,8 +286,7 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         if (!providedInterfaceProxy->AddCommandWrite(newCommandWrite)) {
             delete newCommandWrite;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to add " <<
-                (itWrite->Category == 0 ? "write" : "filtered write") << " command proxy: " << commandName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to add write command proxy: " << commandName << std::endl;
             return false;
         }
 
@@ -297,15 +296,13 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (std::exception e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to deserialize " <<
-                (itWrite->Category == 0 ? "write" : "filtered write") << " command argument: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to deserialize write command argument: " << e.what() << std::endl;
             argumentPrototype = NULL;
         }
 
         if (!argumentPrototype) {
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create " <<
-                (itWrite->Category == 0 ? "write" : "filtered write") << " command proxy: " << commandName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write command proxy: " << commandName << std::endl;
             return false;
         }
         newCommandWrite->SetArgumentPrototype(argumentPrototype);

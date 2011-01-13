@@ -39,7 +39,6 @@ public:
 	struct CommandWriteElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
-        bool Category; // 0 for generic write command, 1 for filtered write command
 	};
 
     struct CommandReadElement {
