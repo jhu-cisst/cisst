@@ -80,3 +80,38 @@ bool mtsConnection::CheckTimeout(void) const {
     return (TimeoutTime - osaGetTime() <= 0);
 }
 #endif
+
+void mtsConnection::ToStream(std::ostream & outputStream) const 
+{
+    // smmy
+    //mtsGenericObject::ToStream(outputStream);
+    outputStream << ", " << ConnectionDescription
+                 << ", Connected: " << (Connected ? "YES" : "NO")
+#if CISST_MTS_HAS_ICE
+                 << ", Endpoint: " << EndpointInfo
+                 //<< ", TimeoutTime: " << TimeoutTime
+#endif
+                 ;
+}
+
+void mtsConnection::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    ConnectionDescription.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, Connected);
+#if CISST_MTS_HAS_ICE
+    cmnSerializeRaw(outputStream, EndpointInfo);
+    cmnSerializeRaw(outputStream, TimeoutTime);
+#endif
+}
+
+void mtsConnection::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    ConnectionDescription.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, Connected);
+#if CISST_MTS_HAS_ICE
+    cmnDeSerializeRaw(inputStream, EndpointInfo);
+    cmnDeSerializeRaw(inputStream, TimeoutTime);
+#endif
+}

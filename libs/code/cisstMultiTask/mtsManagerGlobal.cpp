@@ -916,13 +916,16 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
     if (list) {
         if (list->size()) {
             ConnectionIDListType::iterator it = list->begin();
-            while (it != list->end()) {
+            const ConnectionIDListType::iterator itEnd = list->end();
+            for (; it != itEnd; ++it) {
                 if (!Disconnect(*it)) {
                     CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvidedOrOutput: failed to disconnect (id: \"" << *it 
                         << "\"): \""
                         << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
+                    return false;
                 }
-                it = list->begin();
+                CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceProvidedOrOutput: request cleaning up connection: id [ " << *it << " ], \""
+                    << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
             }
             delete list;
         }
@@ -1000,6 +1003,9 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
                     << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
                 return false;
             }
+            CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequiredOrInput: request cleaning up connection: id [ " << id << " ] \""
+                << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
+
             delete list;
         }
     }
@@ -1457,6 +1463,9 @@ bool mtsManagerGlobal::ConnectConfirm(const ConnectionIDType connectionID)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "ConnectConfirm: confirmed connection id [ " << connectionID << " ]" << std::endl;
 
+    // MJ TEST
+    ShowInternalStructure();
+
     return true;
 }
 
@@ -1499,6 +1508,9 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
     while (!QueueDisconnectWaiting.empty()) {
         it = QueueDisconnectWaiting.begin();
+
+        // MJ TEST
+        ShowInternalStructure();
         
         connectionID = it->first;
         connectionInfo = GetConnectionInformation(connectionID);
@@ -1527,7 +1539,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
         if (!RemoveConnectionOfInterfaceProvidedOrOutput(
                 clientProcessName, serverComponentProxyName, serverInterfaceName, connectionID))
         {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface connection info from client: "
+            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to remove provided interface connection info from client: "
                 << "[ " << connectionID << " ] "
                 << "\"" << mtsManagerGlobal::GetInterfaceUID(clientProcessName, serverComponentProxyName, serverInterfaceName)
                 << "\"" << std::endl;
@@ -1551,12 +1563,11 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // MJ TODO: Check this again after provided interface proxy "instance" is implemented
         //
         if (!LocalManagerConnected->RemoveInterfaceProvidedProxy(serverComponentProxyName, serverInterfaceName, clientProcessName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface proxy at client side: "
+            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to remove provided interface proxy at client side: "
                 << "[ " << connectionID << " ] "
                 << "\"" << mtsManagerGlobal::GetInterfaceUID(clientProcessName, serverComponentProxyName, serverInterfaceName) 
                 << "\"" << std::endl;
-            CMN_ASSERT(false); // MJ: for testing
-            //continue;
+            //CMN_ASSERT(false); // MJ: for testing
         }
 
         // Remove server component proxy if necessary
@@ -1574,11 +1585,10 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     << "\"" << clientProcessName << ":" << serverComponentProxyName << "\"" << std::endl;
 
                 if (!LocalManagerConnected->RemoveComponentProxy(serverComponentProxyName, clientProcessName)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove server component proxy: "
+                    CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to remove server component proxy: "
                         << "[ " << connectionID << " ] "
                         << "\"" << clientProcessName << ":" << serverComponentProxyName << "\"" << std::endl;
-                    CMN_ASSERT(false); // MJ: for testing
-                    //continue;
+                    //CMN_ASSERT(false); // MJ: for testing
                 }
             }
         }
@@ -1621,21 +1631,19 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // MJ TODO: Check this again after provided interface proxy "instance" is implemented
         //
         if (!LocalManagerConnected->RemoveInterfaceRequiredProxy(clientComponentProxyName, clientInterfaceName, serverProcessName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove required interface proxy at server side: "
+            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to remove required interface proxy at server side: "
                 << "[ " << connectionID << " ] "
                 << "\"" << mtsManagerGlobal::GetInterfaceUID(serverProcessName, clientComponentProxyName, clientInterfaceName) 
                 << "\"" << std::endl;
-            CMN_ASSERT(false); // MJ: for testing
-            //continue;
         }
 
         // Remove client component proxy if necessary
         numOfInterfaces = GetNumberOfInterfaces(serverProcessName, clientComponentProxyName);
         if (numOfInterfaces == -1) {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to get total number of interfaces: "
+            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to get total number of interfaces: "
                 << "[ " << connectionID << " ] "
                 << "\"" << serverProcessName << ":" << clientComponentProxyName << "\"" << std::endl;
-            CMN_ASSERT(false); // MJ: for testing
+            //CMN_ASSERT(false); // MJ: for testing
             //continue;
         } else {
             if (numOfInterfaces == 0) {
@@ -1644,11 +1652,9 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     << "\"" << serverProcessName << ":" << clientComponentProxyName << "\"" << std::endl;
 
                 if (!LocalManagerConnected->RemoveComponentProxy(clientComponentProxyName, serverProcessName)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove empty client component proxy: "
+                    CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to remove empty client component proxy: "
                         << "[ " << connectionID << " ] "
                         << "\"" << serverProcessName << ":" << clientComponentProxyName << "\"" << std::endl;
-                    CMN_ASSERT(false); // MJ: for testing
-                    //continue;
                 }
             }
         }
@@ -1705,33 +1711,31 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
 bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
 {
-    QueueDisconnectWaitingChange.Lock();
-
     DisconnectQueueType::const_iterator it1 = QueueDisconnectWaiting.find(connectionID);
     if (it1 != QueueDisconnectWaiting.end()) {
-        QueueDisconnectWaitingChange.Unlock();
         return true;
     }
 
     DisconnectQueueType::const_iterator it2 = QueueDisconnected.find(connectionID);
     if (it2 != QueueDisconnected.end()) {
-        QueueDisconnectWaitingChange.Unlock();
         return true;
     }
 
     ConnectionMapType::iterator it = ConnectionMap.find(connectionID);
     if (it == ConnectionMap.end()) {
         CMN_LOG_CLASS_INIT_ERROR << "Disconnect: invalid connection id: " << connectionID << std::endl;
-        QueueDisconnectWaitingChange.Unlock();
         return false;
     }
 
+    QueueDisconnectWaitingChange.Lock();
     QueueDisconnectWaiting.insert(std::make_pair(connectionID, connectionID));
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: queueud connection id \"" << connectionID
-        << "\" to disconnect waiting queue" << std::endl;
-
     QueueDisconnectWaitingChange.Unlock();
+
+    // MJ TEST
+    ShowInternalStructure();
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: queueud connection id [ " << connectionID
+        << " ] to disconnect waiting queue" << std::endl;
 
     return true;
 }
@@ -2146,4 +2150,83 @@ void mtsManagerGlobal::GetListOfConnections(std::vector<mtsDescriptionConnection
         if (it->second.IsConnected())
             list.push_back(it->second.GetDescriptionConnection());
     }
+}
+
+void mtsManagerGlobal::ShowInternalStructure(void)
+{
+    return;
+    std::stringstream ss;
+    
+    ss << "======= Process Map ==================" << std::endl;
+
+    ProcessMapType::const_iterator itProcess = ProcessMap.begin();
+    for (; itProcess != ProcessMap.end(); ++itProcess) {
+        ss << "|P| " << itProcess->first << std::endl;
+        ComponentMapType * componentMap = itProcess->second;
+        if (componentMap) {
+            ComponentMapType::const_iterator itComponent = componentMap->begin();
+            for (; itComponent != componentMap->end(); ++itComponent) {
+                ss << "\t|C| " << itComponent->first << std::endl;
+                InterfaceMapType * intfcMap = itComponent->second;
+                if (intfcMap) {
+                    InterfaceMapElementType::const_iterator itPrvInt = intfcMap->InterfaceProvidedOrOutputMap.begin();
+                    for (; itPrvInt != intfcMap->InterfaceProvidedOrOutputMap.end(); ++itPrvInt) {
+                        ss << "\t\t|IP| " << itPrvInt->first << ": ";
+                        ConnectionIDListType * list = itPrvInt->second;
+                        if (list) {
+                            ConnectionIDListType::const_iterator itList = itPrvInt->second->begin();
+                            for (; itList != itPrvInt->second->end(); ++itList) {
+                                ss << " " << *itList;
+                            }
+                        }
+                        ss << std::endl;
+                    }
+                    InterfaceMapElementType::const_iterator itReqInt = intfcMap->InterfaceRequiredOrInputMap.begin();
+                    for (; itReqInt != intfcMap->InterfaceRequiredOrInputMap.end(); ++itReqInt) {
+                        ss << "\t\t|IR| " << itReqInt->first << ": ";
+                        ConnectionIDListType * list = itReqInt->second;
+                        if (list) {
+                            ConnectionIDListType::const_iterator itList = itReqInt->second->begin();
+                            for (; itList != itReqInt->second->end(); ++itList) {
+                                ss << " " << *itList;
+                            }
+                        }
+                        ss << std::endl;
+                    }
+                }
+            }
+        }
+    }
+    CMN_LOG_CLASS_INIT_VERBOSE << ss.str() << std::endl;
+
+    ss.str("");
+    ss << "======= Connection Map ===============" << std::endl;
+    {
+        ConnectionMapType::const_iterator it = ConnectionMap.begin();
+        const ConnectionMapType::const_iterator itEnd = ConnectionMap.end();
+        for (; it != itEnd; ++it) {
+            ss << it->second << std::endl;
+        }
+    }
+    CMN_LOG_CLASS_INIT_VERBOSE << ss.str() << std::endl;
+
+    ss.str("");
+    ss << "======= Disconnection Map ============" << std::endl;
+    {
+        ss << "DISCONNECT WAITING QUEUE: ";
+        DisconnectQueueType::const_iterator it = QueueDisconnectWaiting.begin();
+        DisconnectQueueType::const_iterator itEnd = QueueDisconnectWaiting.end();
+        for (; it != itEnd; ++it) {
+            ss << it->first << " ";
+        }
+        ss << std::endl;
+
+        ss << "DISCONNECTED QUEUE: ";
+        it = QueueDisconnected.begin();
+        itEnd = QueueDisconnected.end();
+        for (; it != itEnd; ++it) {
+            ss << it->first << " ";
+        }
+    }
+    CMN_LOG_CLASS_INIT_VERBOSE << ss.str() << std::endl;
 }

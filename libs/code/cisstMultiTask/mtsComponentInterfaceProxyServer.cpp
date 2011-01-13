@@ -153,7 +153,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
 {
     if (!IsActiveProxy()) return true;
 
-    LogWarning(mtsComponentInterfaceProxyServer, "Component interface client detected SERVER COMPONENT DISCONNECTION: "
+    LogWarning(mtsComponentInterfaceProxyServer, "detected COMPONENT INTERFACE CLIENT DISCONNECTION: "
         << "client id: \"" << clientID << "\"");
 
     // Get network proxy client serving the client with the clientID
@@ -183,7 +183,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         LogWarning(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to request disconnection: connection id [ " << clientID << " ]" << std::endl);
         return false;
     } else {
-        LogPrint(mtsManagerProxyServer, "OnClientDisconnect: requested successfully request disconnection: connection id [ " << clientID << " ]" << std::endl);
+        LogPrint(mtsManagerProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << clientID << " ]" << std::endl);
         return true;
     }
 }

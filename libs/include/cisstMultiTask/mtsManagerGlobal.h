@@ -139,7 +139,7 @@ protected:
 
     /*! Counter to issue a new connection ID */
     ConnectionIDType ConnectionID;
-
+ 
 #if CISST_MTS_HAS_ICE
     /*! Network proxy server */
     mtsManagerProxyServer * ProxyServer;
@@ -160,6 +160,9 @@ protected:
     osaThreadSignal ThreadDisconnectFinished;
     bool ThreadDisconnectRunning;
     void * ThreadDisconnectProcess(void * arg);
+
+    // MJ TEST
+    void ShowInternalStructure(void);
 
     //-------------------------------------------------------------------------
     //  Processing Methods

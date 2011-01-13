@@ -39,7 +39,7 @@ class CISST_EXPORT mtsConnection : public mtsGenericObject {
 
 protected:
     /* String representation of connection */
-    const mtsDescriptionConnection ConnectionDescription;
+    mtsDescriptionConnection ConnectionDescription;
 
     /* Name of connect request process */
     const std::string RequestProcessName;
@@ -85,6 +85,10 @@ public:
         invalidated due to connection timeout */
     bool CheckTimeout(void) const;
 #endif
+
+    void ToStream(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsConnection)

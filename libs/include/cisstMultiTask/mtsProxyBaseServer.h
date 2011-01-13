@@ -438,8 +438,8 @@ void mtsProxyBaseServerType::Monitor(void)
             ++it;
         } catch (const Ice::Exception & ex) {
             std::stringstream ss;
-            ss << "Proxy \"" << ProxyName << "\" detected CLIENT DISCONNECTION: client id=\"" << it->second.ClientID << "\", "
-                << "connection id=\"" << it->second.ConnectionID << "\"" << std::endl << ex;
+            ss << "Proxy \"" << ProxyName << "\" detected CLIENT DISCONNECTION: client id [ " << it->second.ClientID << " ], "
+                << "Ice connection id=\"" << it->second.ConnectionID << "\"" << std::endl << ex;
             std::string s = ss.str();
             IceLogger->warning(s);
 
