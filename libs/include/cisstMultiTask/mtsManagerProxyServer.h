@@ -121,8 +121,9 @@ protected:
 
     /*! Connection Management */
     ::Ice::Int ReceiveConnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
-    bool ReceiveConnectConfirm(::Ice::Int connectionSessionID);
+    bool ReceiveConnectConfirm(::Ice::Int connectionID);
     bool ReceiveDisconnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
+    bool ReceiveDisconnectWithID(::Ice::Int connectionID);
 
     /*! Networking */
     bool ReceiveSetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
@@ -453,7 +454,8 @@ protected:
 
         /*! Connection Management */
         ::Ice::Int Connect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet, const ::Ice::Current & current);
-        bool ConnectConfirm(::Ice::Int connectionSessionID, const ::Ice::Current & current);
+        bool ConnectConfirm(::Ice::Int connectionID, const ::Ice::Current & current);
+        bool DisconnectWithID(::Ice::Int connectionID, const ::Ice::Current & current);
         bool Disconnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet, const ::Ice::Current & current);
 
         /*! Networking */

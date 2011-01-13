@@ -146,9 +146,14 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) = 0;
 
     /*! \brief Confirm that connection has been successfully established.
-        \param connectionSessionID Connection id
+        \param connectionID Connection id
         \return False if connection id is invalid, true otherwise */
     virtual bool ConnectConfirm(const ConnectionIDType connectionID) = 0;
+
+    /*! \brief Disconnect two interfaces
+        \param connectionID Connection id 
+        \return true if disconnection request for connection id is accepted, false otherwise */
+    virtual bool Disconnect(const ConnectionIDType connectionID) = 0;
 
     /*! \brief Disconnect two interfaces
         \param clientProcessName Name of client process

@@ -1479,6 +1479,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
     if (QueueDisconnectWaiting.empty()) return;
 
     QueueDisconnectWaitingChange.Lock();
+    ProcessMapChange.Lock();
 
     DisconnectQueueType::iterator it;
     ConnectionIDType connectionID;
@@ -1695,6 +1696,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
     }
 
     QueueDisconnectWaitingChange.Unlock();
+    ProcessMapChange.Unlock();
     
     CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: successfully disconnected [ " << connectionID << " ] : "
                                << "\"" << serverComponentName << ":" << serverInterfaceName << " - " 

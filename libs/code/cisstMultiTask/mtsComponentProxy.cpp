@@ -1093,17 +1093,13 @@ void mtsComponentProxy::ExtractInterfaceRequiredDescription(
     }
 }
 
-bool mtsComponentProxy::AddConnectionInformation(const ConnectionIDType connectionID,
-    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+bool mtsComponentProxy::AddConnectionInformation(const std::string & serverInterfaceProvidedName, const ConnectionIDType connectionID)
 {
     mtsComponentInterfaceProxyServer * interfaceProxyServer = InterfaceProvidedNetworkProxies.GetItem(serverInterfaceProvidedName);
     if (!interfaceProxyServer) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddConnectionInformation: no interface proxy server found: " << serverInterfaceProvidedName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddConnectionInformation: no server interface proxy found: " << serverInterfaceProvidedName << std::endl;
         return false;
     }
 
-    return interfaceProxyServer->AddConnectionInformation(connectionID,
-        clientProcessName, clientComponentName, clientInterfaceRequiredName,
-        serverProcessName, serverComponentName, serverInterfaceProvidedName);
+    return interfaceProxyServer->AddConnectionInformation(connectionID);
 }

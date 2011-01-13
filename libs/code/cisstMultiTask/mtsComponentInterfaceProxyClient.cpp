@@ -183,7 +183,7 @@ bool mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception &
 {
     // Ice - ConnectionLostException - forceful closure by peer
     // Ice - ForcedCloseConnectionException - after forceful closure by peer
-    CMN_LOG_CLASS_RUN_ERROR << "Component interface proxy \"" << ProxyName << "\" detected SERVER COMPONENT DISCONNECTION "
+    CMN_LOG_CLASS_RUN_WARNING << "Component interface proxy \"" << ProxyName << "\" detected SERVER COMPONENT DISCONNECTION "
         << "(connection id: \"" << ConnectionID << "\")" << std::endl;
 
     StopProxy();

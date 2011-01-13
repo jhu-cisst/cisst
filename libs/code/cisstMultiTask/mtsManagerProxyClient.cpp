@@ -277,9 +277,14 @@ int mtsManagerProxyClient::Connect(const std::string & requestProcessName,
     return SendConnect(connectionStringSet);
 }
 
-bool mtsManagerProxyClient::ConnectConfirm(unsigned int connectionSessionID)
+bool mtsManagerProxyClient::ConnectConfirm(const ConnectionIDType connectionID)
 {
-    return SendConnectConfirm(connectionSessionID);
+    return SendConnectConfirm(connectionID);
+}
+
+bool mtsManagerProxyClient::Disconnect(const ConnectionIDType connectionID)
+{
+    return SendDisconnect(connectionID);
 }
 
 bool mtsManagerProxyClient::Disconnect(const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
@@ -697,16 +702,31 @@ bool mtsManagerProxyClient::SendRemoveInterfaceRequired(const std::string & proc
     }
 }
 
-bool mtsManagerProxyClient::SendConnectConfirm(::Ice::Int connectionSessionID)
+bool mtsManagerProxyClient::SendConnectConfirm(::Ice::Int connectionID)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendConnectConfirm: " << connectionSessionID);
+    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendConnectConfirm: " << connectionID);
 #endif
 
     try {
-        return ManagerServerProxy->ConnectConfirm(connectionSessionID);
+        return ManagerServerProxy->ConnectConfirm(connectionID);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyClient, "SendConnectConfirm: network exception: " << ex);
+        OnServerDisconnect(ex);
+        return false;
+    }
+}
+
+bool mtsManagerProxyClient::SendDisconnect(::Ice::Int connectionID)
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendDisconnect: " << connectionID);
+#endif
+
+    try {
+        return ManagerServerProxy->DisconnectWithID(connectionID);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyClient, "SendDisconnect: network exception: " << ex);
         OnServerDisconnect(ex);
         return false;
     }

@@ -57,9 +57,13 @@ protected:
         value=(an instance of mtsDescriptionConnection)
 
         This map is used to disconnect interface proxies when any error occurs or
-        Ice proxy disconnection is detected. */
+        Ice proxy disconnection is detected.
+
     typedef std::map<ClientIDType, mtsDescriptionConnection> ConnectionStringMapType;
     ConnectionStringMapType ConnectionStringMap;
+    */
+    typedef std::map<ClientIDType, ConnectionIDType> ClientConnectionIDMapType;
+    ClientConnectionIDMapType ClientConnectionIDMap;
 
     /*! String key to set implicit per-proxy context for connection id */
     static std::string ConnectionIDKey;
@@ -132,10 +136,8 @@ public:
     bool AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
 
     /*! Register connection information which is used to clean up a logical
-        connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const ConnectionIDType connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+        connection when a network proxy disconnection is detected. */
+    bool AddConnectionInformation(const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Event Generators (Event Sender) : Server -> Client

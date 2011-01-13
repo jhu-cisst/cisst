@@ -269,6 +269,7 @@ module mtsManagerProxy
         // Connection Management
         int Connect(ConnectionStringSet connectionStrings); 
         bool ConnectConfirm(int connectionID);
+        bool DisconnectWithID(int connectionID);
         bool Disconnect(ConnectionStringSet connectionStrings);
 
         // Networking

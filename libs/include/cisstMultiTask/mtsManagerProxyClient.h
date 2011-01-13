@@ -170,6 +170,7 @@ public:
                 const std::string & serverProcessName, const std::string & serverComponentName,
                 const std::string & serverInterfaceProvidedName);
     bool ConnectConfirm(const ConnectionIDType connectionID);
+    bool Disconnect(const ConnectionIDType connectionID);
     bool Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
                     const std::string & clientInterfaceRequiredName,
                     const std::string & serverProcessName, const std::string & serverComponentName,
@@ -215,7 +216,8 @@ public:
 
     // Connection Management
     ::Ice::Int SendConnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
-    bool SendConnectConfirm(::Ice::Int connectionSessionID);
+    bool SendConnectConfirm(::Ice::Int connectionID);
+    bool SendDisconnect(::Ice::Int connectionID);
     bool SendDisconnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
 
     // Networking

@@ -132,10 +132,7 @@ public:
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
-    // TODO: smmy: REMOVE THIS???
-    bool AddConnectionInformation(const ConnectionIDType connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    bool AddConnectionInformation(const std::string & serverInterfaceProvidedName, const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Interface Proxy

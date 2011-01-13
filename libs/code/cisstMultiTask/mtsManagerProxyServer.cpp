@@ -815,9 +815,14 @@ bool mtsManagerProxyServer::ReceiveRemoveInterfaceRequired(const std::string & p
                                connectionStringSet.ServerProcessName, connectionStringSet.ServerComponentName, connectionStringSet.ServerInterfaceProvidedName);
 }
 
-bool mtsManagerProxyServer::ReceiveConnectConfirm(::Ice::Int connectionSessionID)
+bool mtsManagerProxyServer::ReceiveConnectConfirm(::Ice::Int connectionID)
 {
-    return ProxyOwner->ConnectConfirm(connectionSessionID);
+    return ProxyOwner->ConnectConfirm(connectionID);
+}
+
+bool mtsManagerProxyServer::ReceiveDisconnectWithID(::Ice::Int connectionID)
+{
+    return ProxyOwner->Disconnect(connectionID);
 }
 
 bool mtsManagerProxyServer::ReceiveDisconnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet)
@@ -1539,13 +1544,22 @@ bool mtsManagerProxyServer::ManagerServerI::RemoveInterfaceRequired(const std::s
     return ManagerProxyServer->ReceiveConnect(connectionStringSet);
 }
 
-bool mtsManagerProxyServer::ManagerServerI::ConnectConfirm(::Ice::Int connectionSessionID, const ::Ice::Current & CMN_UNUSED(current))
+bool mtsManagerProxyServer::ManagerServerI::ConnectConfirm(::Ice::Int connectionID, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ManagerServerI, "<<<<< RECV: ConnectConfirm: " << connectionSessionID);
+    LogPrint(ManagerServerI, "<<<<< RECV: ConnectConfirm: " << connectionID);
 #endif
 
-    return ManagerProxyServer->ReceiveConnectConfirm(connectionSessionID);
+    return ManagerProxyServer->ReceiveConnectConfirm(connectionID);
+}
+
+bool mtsManagerProxyServer::ManagerServerI::DisconnectWithID(::Ice::Int connectionID, const ::Ice::Current & current)
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerServerI, "<<<<< RECV: DisconnectWithID: " << connectionID);
+#endif
+
+    return ManagerProxyServer->ReceiveDisconnectWithID(connectionID);
 }
 
 bool mtsManagerProxyServer::ManagerServerI::Disconnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet, const ::Ice::Current & CMN_UNUSED(current))

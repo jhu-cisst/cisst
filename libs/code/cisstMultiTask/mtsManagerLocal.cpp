@@ -1809,9 +1809,14 @@ bool mtsManagerLocal::Connect(
 
 bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 {
-    // smmy TODO
+    bool success = ManagerGlobal->Disconnect(connectionID);
 
-    return false;
+    if (!success) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection request failed: connection id [ " << connectionID << " ]" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 // This should probably be split to functions such as DisconnectSetup and DisconnectNotify.
@@ -1823,7 +1828,11 @@ bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const 
         ProcessName, serverComponentName, serverInterfaceProvidedName);
 
     if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection failed." << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection request failed: \""
+            << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceRequiredName)
+            << " - "
+            << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceProvidedName)
+            << std::endl;
         return false;
     }
 
@@ -2562,11 +2571,9 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     // Register this connection information to a provided interface proxy
     // server so that the proxy server can clean up this connection when a
     // required interface proxy client is detected as disconnected.
-    if (!serverComponentProxy->AddConnectionInformation(connectionID,
-                                                        clientProcessName, clientComponentName, clientInterfaceRequiredName,
-                                                        serverProcessName, serverComponentName, serverInterfaceProvidedName))
-    {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to add connection information: connection id = " << connectionID << std::endl;
+    if (!serverComponentProxy->AddConnectionInformation(serverInterfaceProvidedName, connectionID)) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to add connection [ " << connectionID 
+            << " ] to \"" << serverComponentProxy->GetName() << ":" << serverInterfaceProvidedName << "\"" << std::endl;
         goto ConnectClientSideInterfaceError;
     }
 
