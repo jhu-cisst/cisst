@@ -47,19 +47,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsPython.h>
 %}
 
-%header %{
-// For IRE, because EnableDynamicComponentManagement is protected
-// This could be instead be added to mtsComponent.h
-// (also see mtsComponentWithManagement later in this file)
-class mtsComponentWithManagement : public mtsComponent
-{
-public:
-    mtsComponentWithManagement(const std::string &name)
-        : mtsComponent(name) { EnableDynamicComponentManagement(); }
-    ~mtsComponentWithManagement() {}
-};
-%}
-
 // use class type to create the correct Python type
 %apply cmnGenericObject * {mtsGenericObject *};
 
@@ -473,7 +460,7 @@ public:
     }
 }
 
-// For IRE, because EnableDynamicComponentManagement is protected (see also above)
+// For IRE, because EnableDynamicComponentManagement is protected (see also mtsPython.h)
 class mtsComponentWithManagement : public mtsComponent
 {
 public:
