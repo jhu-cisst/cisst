@@ -2023,6 +2023,7 @@ bool mtsManagerLocal::Disconnect(
 
     return true;
 }
+#endif
 
 bool mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & serverComponentName, const std::string & interfaceProvidedName,
@@ -2047,7 +2048,11 @@ bool mtsManagerLocal::GetInterfaceProvidedDescription(
     // Extract complete information about all commands and event generators in
     // the provided interface specified. Argument prototypes are serialized.
     interfaceProvidedDescription.InterfaceProvidedName = interfaceProvidedName;
+#if CISST_MTS_HAS_ICE
     mtsComponentProxy::ExtractInterfaceProvidedDescription(interfaceProvided, interfaceProvidedDescription);
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
+#endif
 
     return true;
 }
@@ -2076,10 +2081,16 @@ bool mtsManagerLocal::GetInterfaceRequiredDescription(
     // a required interface. Argument prototypes are fetched with serialization.
     requiredInterfaceDescription.InterfaceRequiredName = requiredInterfaceName;
 
+#if CISST_MTS_HAS_ICE
     mtsComponentProxy::ExtractInterfaceRequiredDescription(requiredInterface, requiredInterfaceDescription);
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceRequiredDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
+#endif
 
     return true;
 }
+
+#if CISST_MTS_HAS_ICE
 
 bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
 {
@@ -2256,6 +2267,7 @@ bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
 
     return true;
 }
+#endif
 
 int mtsManagerLocal::GetTotalNumberOfInterfaces(const std::string & componentName, const std::string & CMN_UNUSED(listenerID))
 {
@@ -2268,6 +2280,8 @@ int mtsManagerLocal::GetTotalNumberOfInterfaces(const std::string & componentNam
 
     return (int)(component->GetNumberOfInterfacesProvided() + component->GetNumberOfInterfacesRequired());
 }
+
+#if CISST_MTS_HAS_ICE
 
 void mtsManagerLocal::SetIPAddress(void)
 {

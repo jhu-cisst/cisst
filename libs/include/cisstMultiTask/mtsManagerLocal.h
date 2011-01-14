@@ -262,6 +262,7 @@ protected:
     /*! Remove a required interface proxy */
     bool RemoveInterfaceRequiredProxy(
         const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
+#endif
 
     /*! Get information about provided interface */
     bool GetInterfaceProvidedDescription(
@@ -279,6 +280,7 @@ protected:
     /*! Returns a total number of interfaces that a component has */
     int GetTotalNumberOfInterfaces(const std::string & componentName, const std::string & listenerID = "");
 
+#if CISST_MTS_HAS_ICE
     /*! \brief Connect two local interfaces at server side
         \param connectionID Id of this connection, which was issued by the global
                component manager
