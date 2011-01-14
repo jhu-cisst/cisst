@@ -123,6 +123,11 @@ protected:
                            const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
                            const std::string & clientProcessName = "");
 
+    // If connection between InterfaceComponent.required - InterfaceInternal.provided is
+    // disconnected, required interface instance of InterfaceComponent that corresponds
+    // to the connection should be removed.
+    bool DisconnectCleanup(const std::string & componentName);
+
 public:
     mtsManagerComponentClient(const std::string & componentName);
     ~mtsManagerComponentClient();

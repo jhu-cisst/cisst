@@ -24,8 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 // Names of components
-//const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MNGR-COMP-SERVER";
-//const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix = "_MNGR-COMP-CLIENT";
 const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MCS";
 const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix = "_MCC";
 // Names of interfaces

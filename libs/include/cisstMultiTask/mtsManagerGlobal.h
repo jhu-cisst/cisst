@@ -406,7 +406,7 @@ public:
 
     /*! Generate unique name of a proxy component */
     inline static const std::string GetComponentProxyName(const std::string & processName, const std::string & componentName) {
-        return processName + ":" + componentName + "Proxy";
+        return processName + "." + componentName + "Proxy";
     }
 
     //-------------------------------------------------------------------------

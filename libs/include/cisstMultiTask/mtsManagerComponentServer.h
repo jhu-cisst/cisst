@@ -112,17 +112,22 @@ public:
     mtsFunctionWrite InterfaceGCMEvents_RemoveConnection;
     mtsFunctionWrite InterfaceGCMEvents_ChangeState;
 
-    // Methods for use by mtsManagerGlobal (Global Component Manager, GCM).
-    // These just cause an event to be generated on the Manager Component provided interface.
+    /*! Methods for global component manager (GCM) */
     void AddComponentEvent(const mtsDescriptionComponent &component);
     void AddConnectionEvent(const mtsDescriptionConnection &connection);
     void RemoveConnectionEvent(const mtsDescriptionConnection &connection);
+    // If connection between InterfaceGCM.required - InterfaceLCM.provided is
+    // disconnected, required interface instance of InterfaceGCM that corresponds
+    // to the connection should be removed.
+    bool DisconnectCleanup(const std::string & processName);
 
-    // Event handler for use by this class (Manager Component Server, MCS)
+    // Event handler of InterfaceGCM's required interface
     void HandleChangeStateEvent(const mtsComponentStateChange &stateChange);
 
     // Calls LCM::DisconnectLocally()
     void ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg);
+
+    static std::string GetNameOfInterfaceGCMRequiredFor(const std::string & processName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);

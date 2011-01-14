@@ -63,6 +63,15 @@ void mtsManagerComponentServer::Cleanup(void)
 {
 }
 
+std::string mtsManagerComponentServer::GetNameOfInterfaceGCMRequiredFor(const std::string & processName)
+{
+    std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired;
+    interfaceName += "For";
+    interfaceName += processName;
+
+    return interfaceName;
+}
+
 void mtsManagerComponentServer::GetNamesOfProcesses(std::vector<std::string> & processList) const
 {
     GCM->GetNamesOfProcesses(processList);
@@ -131,9 +140,7 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     // Create a new set of function objects
     InterfaceGCMFunctionType * newFunctionSet = new InterfaceGCMFunctionType;
 
-    std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired;
-    interfaceName += "For";
-    interfaceName += clientProcessName;
+    const std::string interfaceName = mtsManagerComponentServer::GetNameOfInterfaceGCMRequiredFor(clientProcessName);
     mtsInterfaceRequired * required = AddInterfaceRequired(interfaceName);
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to create \"GCM\" required interface: " << interfaceName << std::endl;
@@ -477,3 +484,17 @@ void mtsManagerComponentServer::HandleChangeStateEvent(const mtsComponentStateCh
     InterfaceGCMEvents_ChangeState(stateChange);
 }
 
+bool mtsManagerComponentServer::DisconnectCleanup(const std::string & processName)
+{
+    // Get instance of InterfaceGCM's required interface that corresponds to
+    // "processName"
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "DisconnectCleanup: failed to get function set for process \"" << processName << "\"" << std::endl;
+        return false;
+    }
+
+    // MJ: This might need to be protected as mutex
+    InterfaceGCMFunctionMap.RemoveItem(processName);
+    delete functionSet;
+}

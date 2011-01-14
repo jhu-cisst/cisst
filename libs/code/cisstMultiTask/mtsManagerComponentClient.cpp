@@ -414,7 +414,55 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
         }
     }
 
+    // Special handling for connections which MCC is involved with
+    //
+    // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
+    if (serverInterfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
+        if (!DisconnectCleanup(serverComponentName)) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", failed to clean up InterfaceComponent's required interface" << std::endl;
+            CMN_ASSERT(false); // MJ TEST
+            //return false;
+        } else {
+            const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequired(serverComponentName);
+            // MJ: In the current implementation, removing any type of component interfaces 
+            // does not inform the GCM of its removal.  This exception breaks the data 
+            // synchronization mechanism of the current system where the GCM knows up-to-date 
+            // information about all processes, components, and interfaces which all LCMs in 
+            // a system share.
+            // Thus, this needs special handling (i.e. manual removal of required interface)
+            // to logically remove the interface from GCM's ProcessMap.  See "isMCCforGCM"
+            // in mtsManagerGlobal::DisconnectInternal().
+            if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
+                CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                         << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                         << serverComponentName << ":" << serverInterfaceProvidedName
+                                         << ", failed to remove InterfaceComponent's required interface: " 
+                                         << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
+                CMN_ASSERT(false); // MJ TEST
+                // return false;
+            }
+        }
+    }
+
     return true;
+}
+
+bool mtsManagerComponentClient::DisconnectCleanup(const std::string & componentName)
+{
+    // Get instance of InterfaceComponent's required interface that corresponds to
+    // "componentName"
+    InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(componentName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "DisconnectCleanup: failed to get function set for component \"" << componentName << "\"" << std::endl;
+        return false;
+    }
+
+    // MJ: This might need to be protected as mutex
+    InterfaceComponentFunctionMap.RemoveItem(componentName);
+    delete functionSet;
 }
 
 bool mtsManagerComponentClient::AddInterfaceComponent(void)

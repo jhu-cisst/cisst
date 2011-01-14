@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerProxyServer.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerComponentClient.h>
 
 std::string mtsManagerProxyServer::ManagerCommunicatorID = "ManagerServerCommunicator";
 std::string mtsManagerProxyServer::ConnectionIDKey = "ManagerConnectionID";
@@ -195,29 +196,39 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
 {
     if (!IsActiveProxy()) return true;
 
-    LogError(mtsManagerProxyServer, "Global Component Manager detected LCM DISCONNECTION: \"" << clientID << "\"");
+    const std::string processName(clientID);
 
-    // Get network proxy client serving the client with the clientID
-    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    LogError(mtsManagerProxyServer, "Global Component Manager detected LCM DISCONNECTION: \"" << processName << "\"");
+
+    // Get network proxy client serving the client with the processName
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(processName);
     if (!clientProxy) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: no client proxy found with client id: \"" << clientID << "\"");
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: no client proxy found with client id: \"" << processName << "\"");
         return false;
     }
 
     // Remove client from client list. This prevents further network processing
     // requests from being executed.
-    if (!BaseServerType::RemoveClientByClientID(clientID)) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove client from client map: \"" << clientID << "\"");
+    if (!BaseServerType::RemoveClientByClientID(processName)) {
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove client from client map: \"" << processName << "\"");
         return false;
     }
 
-    // Remove the process logically
-    if (!ProxyOwner->RemoveProcess(clientID)) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove process: \"" << clientID << "\"");
+    // Logical removal of the disconnected process
+    if (!ProxyOwner->RemoveProcess(processName)) {
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove process: \"" << processName << "\"");
         return false;
     }
 
-    LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed process: \"" << clientID << "\"");
+    // Logical removal of MCC proxy for the disconnected process
+    const std::string nameOfMCCProxy = mtsManagerGlobal::GetComponentProxyName(
+        processName, mtsManagerComponentClient::GetNameOfManagerComponentClient(processName));
+    if (!ProxyOwner->RemoveComponent(mtsManagerLocal::ProcessNameOfLCMWithGCM, nameOfMCCProxy)) {
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove MCC proxy for process: \"" << processName << "\"");
+        return false;
+    }
+
+    LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed process: \"" << processName << "\"");
 
     return true;
 }
