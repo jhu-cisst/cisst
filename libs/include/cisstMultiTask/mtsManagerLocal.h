@@ -255,6 +255,14 @@ protected:
         const std::string & clientComponentProxyName,
         const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
+    /*! Remove provided interface */
+    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
+    bool RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceProvidedName);
+
+    /*! Remove required interface */
+    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
+    bool RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName);
+
     /*! Remove provided interface proxy */
     bool RemoveInterfaceProvidedProxy(
         const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
@@ -297,9 +305,9 @@ public:
     bool CISST_DEPRECATED AddDevice(mtsComponent * component); // For backward compatibility
 
     /*! \brief Remove a component from this local component manager. */
-    bool RemoveComponent(mtsComponent * component);
-    bool RemoveComponent(const std::string & componentName);
-
+    bool RemoveComponent(mtsComponent * component, const bool notifyGCM = true);
+    bool RemoveComponent(const std::string & componentName, const bool notifyGCM = true);
+    
     /*! \brief Retrieve a component by name. */
     mtsComponent * GetComponent(const std::string & componentName) const;
     mtsTask * GetComponentAsTask(const std::string & componentName) const;

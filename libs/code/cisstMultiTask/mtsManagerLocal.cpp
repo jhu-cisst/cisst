@@ -799,23 +799,24 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
     return AddComponent(component);
 }
 
-bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
+bool mtsManagerLocal::RemoveComponent(mtsComponent * component, const bool notifyGCM)
 {
     if (!component) {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: invalid argument" << std::endl;
         return false;
     }
 
-    return RemoveComponent(component->GetName());
+    return RemoveComponent(component->GetName(), notifyGCM);
 }
 
-bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
+bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const bool notifyGCM)
 {
     // Notify the global component manager of the removal of this component
-
-    if (!ManagerGlobal->RemoveComponent(ProcessName, componentName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component at global component manager: " << componentName << std::endl;
-        return false;
+    if (notifyGCM) {
+        if (!ManagerGlobal->RemoveComponent(ProcessName, componentName)) {
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component at global component manager: " << componentName << std::endl;
+            return false;
+        }
     }
 
     // Get a component to be removed
@@ -830,6 +831,8 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
     success = ComponentMap.RemoveItem(componentName);
     ComponentMapChange.Unlock();
 
+    delete component;
+
     if (!success) {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component: " << componentName << std::endl;
         return false;
@@ -837,6 +840,7 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
     else {
         CMN_LOG_CLASS_INIT_VERBOSE << "RemoveComponent: removed component: " << componentName << std::endl;
     }
+
     return true;
 }
 
@@ -2190,6 +2194,69 @@ bool mtsManagerLocal::CreateInterfaceRequiredProxy(
     CMN_LOG_CLASS_INIT_VERBOSE << "CreateInterfaceRequiredProxy: "
                                << "successfully created required interface proxy: " << clientComponentProxyName << ":"
                                << requiredInterfaceName << std::endl;
+    return true;
+}
+
+bool mtsManagerLocal::RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: can't find client component: " << componentName << std::endl;
+        return false;
+    }
+
+    // Check total number of required interfaces using (connecting to) this provided interface.
+    mtsInterfaceRequired * interfaceRequired = component->GetInterfaceRequired(interfaceRequiredName);
+    if (!interfaceRequired) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: no required interface found: " << interfaceRequiredName << std::endl;
+        return false;
+    }
+
+    // Remove provided interface
+    if (!component->RemoveInterfaceRequired(interfaceRequiredName)) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: failed to remove provided interface proxy: " << interfaceRequiredName << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "RemoveInterfaceRequired: removed provided interface: "
+                               << componentName << ":" << interfaceRequiredName << std::endl;
+
+    return true;
+}
+
+bool mtsManagerLocal::RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceProvidedName)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvided: can't find client component: " << componentName << std::endl;
+        return false;
+    }
+
+    // Check total number of required interfaces using (connecting to) this provided interface.
+    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceProvidedName);
+    if (!interfaceProvided) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvided: no provided interface found: " << interfaceProvidedName << std::endl;
+        return false;
+    }
+
+    // Remove provided interface only when user counter is zero.
+    if (interfaceProvided->UserCounter > 0) {
+        --interfaceProvided->UserCounter;
+    }
+    if (interfaceProvided->UserCounter == 0) {
+        // Remove provided interface
+        if (!component->RemoveInterfaceProvided(interfaceProvidedName)) {
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvided: failed to remove provided interface proxy: " << interfaceProvidedName << std::endl;
+            return false;
+        }
+
+        CMN_LOG_CLASS_INIT_VERBOSE << "RemoveInterfaceProvided: removed provided interface: "
+                                   << componentName << ":" << interfaceProvidedName << std::endl;
+    } else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "RemoveInterfaceProvided: decreased active user counter. current counter: "
+                                   << interfaceProvided->UserCounter << std::endl;
+    }
+
     return true;
 }
 

@@ -309,7 +309,8 @@ void mtsManagerComponentServer::ComponentDisconnect(const std::string & processN
     // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
     InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \"" << processName << "\"" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \"" 
+            << processName << "\": " << arg << std::endl;
         return;
     }
 

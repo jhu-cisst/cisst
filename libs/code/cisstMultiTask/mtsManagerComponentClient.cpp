@@ -427,14 +427,6 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             //return false;
         } else {
             const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequired(serverComponentName);
-            // MJ: In the current implementation, removing any type of component interfaces 
-            // does not inform the GCM of its removal.  This exception breaks the data 
-            // synchronization mechanism of the current system where the GCM knows up-to-date 
-            // information about all processes, components, and interfaces which all LCMs in 
-            // a system share.
-            // Thus, this needs special handling (i.e. manual removal of required interface)
-            // to logically remove the interface from GCM's ProcessMap.  See "isMCCforGCM"
-            // in mtsManagerGlobal::DisconnectInternal().
             if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
                 CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
                                          << clientComponentName << ":" << clientInterfaceRequiredName << " - "
