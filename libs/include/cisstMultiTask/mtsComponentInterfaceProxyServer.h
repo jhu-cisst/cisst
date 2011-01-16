@@ -43,7 +43,7 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
     typedef mtsProxyBaseServer<mtsComponentProxy, ComponentInterfaceClientProxyType, unsigned int> BaseServerType;
 
 protected:
-    /*! Definitions of send thread */
+    /*! Callback thread for bi-directional communication with server */
     class ComponentInterfaceServerI;
     typedef IceUtil::Handle<ComponentInterfaceServerI> ComponentInterfaceServerIPtr;
     ComponentInterfaceServerIPtr Sender;
@@ -202,9 +202,7 @@ protected:
         void Stop();
 
         /*! Getter */
-        bool IsActiveProxy() const {
-            return ComponentInterfaceProxyServer->IsActiveProxy();
-        }
+        bool IsActiveProxy() const;
 
         //---------------------------------------
         //  Event Handlers (Client -> Server)

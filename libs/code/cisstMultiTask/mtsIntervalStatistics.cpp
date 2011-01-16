@@ -42,7 +42,7 @@ StatisticsUpdatePeriod(1.0)
 
 void mtsIntervalStatistics::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "TimeStamp: " << TimestampMember <<" Avg: "<< Avg<<" StdDev: "<<StdDev<<" Max: " <<Max<<" Min: "<<Min<<" Period: "<<StatisticsUpdatePeriod<<std::endl;
+    outputStream << "TimeStamp: " << TimestampMember <<" Avg: "<< Avg<<" StdDev: "<<StdDev<<" Max: " <<Max<<" Min: "<<Min<<" Period: "<<StatisticsUpdatePeriod;
 }
 
 void mtsIntervalStatistics::ToStreamRaw(std::ostream & outputStream, const char delimiter,

@@ -50,7 +50,7 @@ typedef cmnDeSerializer::TypeId CommandIDType;
 typedef ::Ice::Long IceCommandIDType;
 
 /*! Enable/disable detailed log. This affects all proxy objects. */
-#define ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+//#define ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
 
 /*! Path to Ice property files */
 #define ICE_PROPERTY_FILE_ROOT CISST_SOURCE_ROOT"/libs/etc/cisstMultiTask/Ice/"

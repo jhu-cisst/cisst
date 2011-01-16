@@ -63,13 +63,12 @@ bool mtsComponentInterfaceProxyClient::StartProxy(mtsComponentProxy * proxyOwner
     id.name = GetIceGUID();
     id.category = "";
 
-    mtsComponentInterfaceProxy::ComponentInterfaceClientPtr client =
-        new ComponentInterfaceClientI(IceCommunicator, IceLogger, ComponentInterfaceServerProxy, this);
-    adapter->add(client, id);
+    Client = new ComponentInterfaceClientI(IceCommunicator, IceLogger, ComponentInterfaceServerProxy, this);
+    adapter->add(Client, id);
     adapter->activate();
     ComponentInterfaceServerProxy->ice_getConnection()->setAdapter(adapter);
 
-    // Set an implicit context (per proxy context)
+    // Set implicit context (per proxy context)
     IceCommunicator->getImplicitContext()->put(
         mtsComponentInterfaceProxyServer::GetConnectionIDKey(), IceCommunicator->identityToString(id));
 
@@ -168,6 +167,7 @@ void mtsComponentInterfaceProxyClient::StopProxy()
     try {
         BaseClientType::StopProxy();
         Server->Stop();
+        Client->Stop();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyClient: ");
         error += e.what();
@@ -429,11 +429,11 @@ mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ComponentInterfaceC
     const Ice::CommunicatorPtr& communicator,
     const Ice::LoggerPtr& logger,
     const mtsComponentInterfaceProxy::ComponentInterfaceServerPrx& server,
-    mtsComponentInterfaceProxyClient * componentInterfaceClient)
+    mtsComponentInterfaceProxyClient * componentInterfaceProxyClient)
     : Communicator(communicator),
       SenderThreadPtr(new SenderThread<ComponentInterfaceClientIPtr>(this)),
       IceLogger(logger),
-      ComponentInterfaceProxyClient(componentInterfaceClient),
+      ComponentInterfaceProxyClient(componentInterfaceProxyClient),
       Server(server)
 {
 }
@@ -491,6 +491,8 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
 {
     if (!IsActiveProxy()) return;
 
+    ComponentInterfaceProxyClient = 0;
+    
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -502,8 +504,16 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
-    ComponentInterfaceProxyClient = 0;
     LogPrint(ComponentInterfaceClientI, "Stopped and destroyed callback thread to communicate with server");
+}
+
+bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::IsActiveProxy() const 
+{
+    if (ComponentInterfaceProxyClient) {
+        return ComponentInterfaceProxyClient->IsActiveProxy();
+    } else {
+        return false;
+    }
 }
 
 //-----------------------------------------------------------------------------

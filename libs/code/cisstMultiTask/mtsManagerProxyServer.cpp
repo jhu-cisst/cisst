@@ -207,16 +207,15 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
         return false;
     }
 
-    // Remove client from client list. This prevents further network processing
-    // requests from being executed.
+    // Remove client from client list to prevent further requests from network layer
     if (!BaseServerType::RemoveClientByClientID(processName)) {
         LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove client from client map: \"" << processName << "\"");
         return false;
     }
 
     // Remove disconnected process from GCM
-    if (!ProxyOwner->RemoveProcess(processName)) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove process: \"" << processName << "\"");
+    if (!ProxyOwner->RemoveProcess(processName, true)) {
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove disconnected process: \"" << processName << "\"");
         return false;
     }
 
@@ -224,11 +223,11 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
     const std::string nameOfMCCProxy = mtsManagerGlobal::GetComponentProxyName(
         processName, mtsManagerComponentClient::GetNameOfManagerComponentClient(processName));
     if (!ProxyOwner->RemoveComponent(mtsManagerLocal::ProcessNameOfLCMWithGCM, nameOfMCCProxy)) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove MCC proxy for process: \"" << processName << "\"");
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove MCC proxy for disconnected process: \"" << processName << "\"");
         return false;
     }
 
-    LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed process: \"" << processName << "\"");
+    LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed disconnected process: \"" << processName << "\"");
 
     return true;
 }
@@ -1338,7 +1337,9 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         
         // If a pending connection fails to be confirmed by LCM, it should be
         // cleaned up
-        ManagerProxyServer->CheckConnectConfirmTimeout();
+        if (ManagerProxyServer) {
+            ManagerProxyServer->CheckConnectConfirmTimeout();
+        }
 
         // Check connections at every 1 second
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -1355,6 +1356,8 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
 {
     if (!IsActiveProxy()) return;
 
+    ManagerProxyServer = 0;
+
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -1368,6 +1371,15 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
 
     LogPrint(mtsManagerProxyServer::ManagerServerI, 
         "Stopped and destroyed callback thread to communicate with clients");
+}
+
+ bool mtsManagerProxyServer::ManagerServerI::IsActiveProxy() const 
+ {
+    if (ManagerProxyServer) {
+        return ManagerProxyServer->IsActiveProxy();
+    } else {
+        return false;
+    }
 }
 
 //-----------------------------------------------------------------------------

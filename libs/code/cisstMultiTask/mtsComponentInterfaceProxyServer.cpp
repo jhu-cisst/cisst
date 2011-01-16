@@ -153,8 +153,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
 {
     if (!IsActiveProxy()) return true;
 
-    LogWarning(mtsComponentInterfaceProxyServer, "detected COMPONENT INTERFACE CLIENT DISCONNECTION: "
-        << "client id: \"" << clientID << "\"");
+    LogWarning(mtsComponentInterfaceProxyServer, "COMP.INT.SERVER detected COMP.INT.CLIENT DISCONNECTION: \"" << clientID << "\"");
 
     // Get network proxy client serving the client with the clientID
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
@@ -163,7 +162,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         return false;
     }
 
-    // Remove client from client list to disable further command execution
+    // Remove client from client list to prevent further requests from network layer
     if (!BaseServerType::RemoveClientByClientID(clientID)) {
         LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to remove client from client map: \"" << clientID <<"\"");
         return false;
@@ -180,10 +179,10 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
 
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
     if (!localManager->Disconnect(connectionID)) {
-        LogWarning(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to request disconnection: connection id [ " << clientID << " ]" << std::endl);
+        LogWarning(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to request disconnection: connection id [ " << connectionID << " ]" << std::endl);
         return false;
     } else {
-        LogPrint(mtsManagerProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << clientID << " ]" << std::endl);
+        LogPrint(mtsManagerProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << connectionID << " ]" << std::endl);
         return true;
     }
 }
@@ -578,7 +577,9 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
 
         try {
-            ComponentInterfaceProxyServer->MonitorConnections();
+            if (ComponentInterfaceProxyServer) {
+                ComponentInterfaceProxyServer->MonitorConnections();
+            }
         } catch (const Ice::Exception & ex) {
             LogPrint(mtsManagerProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
         }
@@ -589,6 +590,8 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Stop()
 {
     if (!IsActiveProxy()) return;
+
+    ComponentInterfaceProxyServer = 0;
 
     IceUtil::ThreadPtr callbackSenderThread;
     {
@@ -602,6 +605,15 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Stop()
     callbackSenderThread->getThreadControl().join();
 
     LogPrint(ComponentInterfaceServerI, "Stopped and destroyed callback thread to communicate with clients");
+}
+
+bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::IsActiveProxy() const 
+{
+    if (ComponentInterfaceProxyServer) {
+        return ComponentInterfaceProxyServer->IsActiveProxy();
+    } else {
+        return false;
+    }
 }
 
 //-----------------------------------------------------------------------------

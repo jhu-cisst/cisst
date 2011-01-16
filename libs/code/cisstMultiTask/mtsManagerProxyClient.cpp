@@ -208,7 +208,7 @@ bool mtsManagerProxyClient::FindProcess(const std::string & processName) const
     return const_cast<mtsManagerProxyClient*>(this)->SendFindProcess(processName);
 }
 
-bool mtsManagerProxyClient::RemoveProcess(const std::string & processName)
+bool mtsManagerProxyClient::RemoveProcess(const std::string & processName, const bool CMN_UNUSED(networkDisconnect))
 {
     return SendRemoveProcess(processName);
 }
@@ -892,6 +892,8 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
 {
     if (!IsActiveProxy()) return;
 
+    ManagerProxyClient = 0;
+
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -903,9 +905,18 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
-    ManagerProxyClient = 0;
     LogPrint(ManagerClientI, "Stopped and destroyed callback thread to communicate with server");
 }
+
+bool mtsManagerProxyClient::ManagerClientI::IsActiveProxy() const 
+{
+    if (ManagerProxyClient) {
+        return ManagerProxyClient->IsActiveProxy();
+    } else {
+        return false;
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 //  Network Event handlers (Server -> Client)

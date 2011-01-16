@@ -36,6 +36,7 @@ mtsManagerComponentClient::mtsManagerComponentClient(const std::string & compone
       InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
     InterfaceComponentFunctionMap.SetOwner(*this);
+    UseSeparateLogFileDefault();
 }
 
 mtsManagerComponentClient::~mtsManagerComponentClient()
@@ -423,8 +424,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
                                      << clientComponentName << ":" << clientInterfaceRequiredName << " - "
                                      << serverComponentName << ":" << serverInterfaceProvidedName
                                      << ", failed to clean up InterfaceComponent's required interface" << std::endl;
-            CMN_ASSERT(false); // MJ TEST
-            //return false;
+            return false;
         } else {
             const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequired(serverComponentName);
             if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
@@ -433,8 +433,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
                                          << serverComponentName << ":" << serverInterfaceProvidedName
                                          << ", failed to remove InterfaceComponent's required interface: " 
                                          << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
-                CMN_ASSERT(false); // MJ TEST
-                // return false;
+                return false;
             }
         }
     }
@@ -455,6 +454,8 @@ bool mtsManagerComponentClient::DisconnectCleanup(const std::string & componentN
     // MJ: This might need to be protected as mutex
     InterfaceComponentFunctionMap.RemoveItem(componentName);
     delete functionSet;
+
+    return true;
 }
 
 bool mtsManagerComponentClient::AddInterfaceComponent(void)

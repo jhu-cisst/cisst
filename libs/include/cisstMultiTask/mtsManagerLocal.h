@@ -566,10 +566,6 @@ public:
 
     /*! Set endpoint access information */
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
-
-    /*! For testing purposes */
-    void DisconnectGCM(void);
-    void ReconnectGCM(void);
 #endif
 };
 

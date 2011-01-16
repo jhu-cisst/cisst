@@ -161,6 +161,15 @@ protected:
     bool ThreadDisconnectRunning;
     void * ThreadDisconnectProcess(void * arg);
 
+    /*! To clean up disconnected process */
+    typedef struct CleanupElementType {
+        std::string ProcessName;
+        std::string ComponentProxyName;
+    } CleanupElementType;
+    typedef std::list<CleanupElementType> CleanupElementListType;
+    typedef cmnNamedMap<CleanupElementListType> DisconnectedProcessCleanupMapType;
+    DisconnectedProcessCleanupMapType DisconnectedProcessCleanupMap;
+
     // MJ TEST
     void ShowInternalStructure(void);
 
@@ -206,6 +215,10 @@ protected:
         const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & interfaceRequiredName, const ConnectionIDType connectionID);
 
+    /*! Remove component proxies and internal interfaces (InterfaceComponentRequiredForXXX)
+        that were created because of the disconnected process */
+    bool CleanupDisconnectedProcess(const std::string & nameOfProcessDisconnected);
+
     /*! Check if two interfaces are connected */
     bool IsAlreadyConnected(const mtsDescriptionConnection & description) const;
 
@@ -224,6 +237,10 @@ protected:
         is dequeued from disconnect waiting queue and enqueued to disconnected queue. */
     void DisconnectInternal(void);
 
+    /*! Maintains information to clean up disconnected processes */
+    void AddToDisconnectedProcessCleanup(const std::string & sourceProcessName, 
+        const std::string & targetProcessName, const std::string & targetComponentProxyName);
+
 public:
     /*! Constructor and destructor */
     mtsManagerGlobal();
@@ -240,7 +257,7 @@ public:
 
     bool FindProcess(const std::string & processName) const;
 
-    bool RemoveProcess(const std::string & processName);
+    bool RemoveProcess(const std::string & processName, const bool networkDisconnect = false);
 
     //-------------------------------------------------------------------------
     //  Component Management

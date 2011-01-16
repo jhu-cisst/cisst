@@ -59,7 +59,7 @@ public:
 
     /*! \brief Remove process 
         \param processName Name of process */
-    virtual bool RemoveProcess(const std::string & processName) = 0;
+    virtual bool RemoveProcess(const std::string & processName, const bool networkDisconnect) = 0;
 
     //-------------------------------------------------------------------------
     //  Component Management

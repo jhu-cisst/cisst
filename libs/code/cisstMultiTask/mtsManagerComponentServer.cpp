@@ -173,31 +173,25 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
 
     // Connect InterfaceGCM's required interface to InterfaceLCM's provided interface
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string serverComponentName = mtsManagerComponentClient::GetNameOfManagerComponentClient(clientProcessName);
+    const std::string serverInterfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided;
 #if CISST_MTS_HAS_ICE
     if (!LCM->Connect(LCM->GetProcessName(), this->GetName(), interfaceName,
-                      clientProcessName, 
-                      mtsManagerComponentClient::GetNameOfManagerComponentClient(clientProcessName),
-                      mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided))
+                      clientProcessName, serverComponentName, serverInterfaceName))
     {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: " 
             << mtsManagerGlobal::GetInterfaceUID(LCM->GetProcessName(), this->GetName(), interfaceName)
             << " - "
-            << mtsManagerGlobal::GetInterfaceUID(clientProcessName,
-                                                 mtsManagerComponentClient::GetNameOfManagerComponentClient(clientProcessName),
-                                                 mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided)
+            << mtsManagerGlobal::GetInterfaceUID(clientProcessName, serverComponentName, serverInterfaceName)
             << std::endl;
         return false;
     }
 #else
-    if (!LCM->Connect(this->GetName(), interfaceName,
-                      mtsManagerComponentClient::GetNameOfManagerComponentClient(clientProcessName),
-                      mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided))
-    {
+    if (!LCM->Connect(this->GetName(), interfaceName, serverComponentName, serverInterfaceName)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: " 
             << this->GetName() << ":" << interfaceName
-            << " - "
-            << mtsManagerComponentClient::GetNameOfManagerComponentClient(clientProcessName) << ":"
-            << mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided
+            << " - " 
+            << serverComponentName << ":" << serverInterfaceName 
             << std::endl;
         return false;
     }
@@ -498,4 +492,6 @@ bool mtsManagerComponentServer::DisconnectCleanup(const std::string & processNam
     // MJ: This might need to be protected as mutex
     InterfaceGCMFunctionMap.RemoveItem(processName);
     delete functionSet;
+
+    return true;
 }

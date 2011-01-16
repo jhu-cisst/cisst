@@ -415,9 +415,7 @@ protected:
         void Stop();
 
         /*! Getter */
-        bool IsActiveProxy() const {
-            return ManagerProxyServer->IsActiveProxy();
-        }
+        bool IsActiveProxy() const;
 
         //---------------------------------------
         //  Event Handlers (Client -> Server)

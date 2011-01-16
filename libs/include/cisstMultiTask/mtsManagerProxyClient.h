@@ -142,7 +142,7 @@ public:
     //  Process Management
     bool AddProcess(const std::string & processName);
     bool FindProcess(const std::string & processName) const;
-    bool RemoveProcess(const std::string & processName);
+    bool RemoveProcess(const std::string & processName, const bool networkDisconnect);
 
     //  Component Management
     bool AddComponent(const std::string & processName, const std::string & componentName);
@@ -263,13 +263,7 @@ protected:
         void Stop();
 
         /*! Getter */
-        bool IsActiveProxy() const {
-            if (ManagerProxyClient) {
-                return ManagerProxyClient->IsActiveProxy();
-            } else {
-                return false;
-            }
-        }
+        bool IsActiveProxy() const;
 
         //-------------------------------------------------
         //  Event handlers (Server -> Client)

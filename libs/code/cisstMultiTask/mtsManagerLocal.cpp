@@ -2104,7 +2104,7 @@ bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyNam
 
 bool mtsManagerLocal::RemoveComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
 {
-    return RemoveComponent(componentProxyName);
+    return RemoveComponent(componentProxyName, false);
 }
 
 bool mtsManagerLocal::CreateInterfaceProvidedProxy(
@@ -2512,8 +2512,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     const std::string clientComponentName         = description.Client.ComponentName;
     const std::string clientInterfaceRequiredName = description.Client.InterfaceName;
 
-    // Get actual names of components (either a client component or a server
-    // component should be a proxy object).
+    // Get actual names of components (either client or server component should be proxy)
     const std::string actualClientComponentName = clientComponentName;
     const std::string actualServerComponentName = mtsManagerGlobal::GetComponentProxyName(serverProcessName, serverComponentName);
 
@@ -2567,8 +2566,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
                                        << serverComponentProxy->GetName() << std::endl;
         }
     }
-    // If there is a server proxy already running, fetch and use the access
-    // information of it without specifying client interface.
+    // If server proxy is already running, fetch the access information
     else {
         if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(
                 serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointAccessInfo))
@@ -2591,10 +2589,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     CMN_LOG_CLASS_INIT_VERBOSE << "ConnectClientSideInterface: successfully set server proxy access information: "
                                << serverInterfaceProvidedName << ", " << endpointAccessInfo << std::endl;
 
-    // Make the server process begin connection process via the GCM. Note that
-    // this call is blocking and returns only after the server process finishes
-    // establishing server-side connection (regardless of success or failure)
-    // and the global component manager gets informed of the connection.
+    // Make the server process begin connection process via the GCM
     if (!ManagerGlobal->ConnectServerSideInterfaceRequest(connectionID)) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to connect interfaces at server process for (" 
                                  << clientProcessName << ", " << clientComponentName << ", " << clientInterfaceRequiredName << ") - ("
@@ -2626,8 +2621,8 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     }
 
     // Inform the GCM that the connection is successfully established and
-    // becomes active (network proxies are running now and an ICE client
-    // proxy is connected to an ICE server proxy).
+    // is active (network proxies are running and Ice proxy client has 
+    // connected to Ice proxy server).
     if (!ManagerGlobal->ConnectConfirm(connectionID)) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to notify GCM of this connection" << std::endl;
         goto ConnectClientSideInterfaceError;
@@ -2654,29 +2649,5 @@ ConnectClientSideInterfaceError:
     }
 
     return false;
-}
-
-void mtsManagerLocal::DisconnectGCM()
-{
-    mtsManagerProxyClient * globalComponentManagerProxy = dynamic_cast<mtsManagerProxyClient*>(ManagerGlobal);
-    CMN_ASSERT(globalComponentManagerProxy);
-
-    globalComponentManagerProxy->StopProxy();
-}
-
-void mtsManagerLocal::ReconnectGCM()
-{
-    mtsManagerProxyClient * globalComponentManagerProxy = dynamic_cast<mtsManagerProxyClient*>(ManagerGlobal);
-    CMN_ASSERT(globalComponentManagerProxy);
-
-    if (!globalComponentManagerProxy->StartProxy(this)) {
-        CMN_LOG_CLASS_INIT_ERROR << "ReconnectGCM: Start failed" << std::endl;
-        return;
-    }
-
-    if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "ReconnectGCM: AddProcess failed" << std::endl;
-        return;
-    }
 }
 #endif

@@ -43,24 +43,8 @@ mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
 
 mtsComponentProxy::~mtsComponentProxy()
 {
-    // Clean up all internal resources
-
-    // Stop all provided interface proxies running.
-    InterfaceProvidedNetworkProxyMapType::MapType::const_iterator itProvidedProxy = InterfaceProvidedNetworkProxies.begin();
-    const InterfaceProvidedNetworkProxyMapType::MapType::const_iterator itProvidedProxyEnd = InterfaceProvidedNetworkProxies.end();
-    for (; itProvidedProxy != itProvidedProxyEnd; ++itProvidedProxy) {
-        itProvidedProxy->second->StopProxy();
-    }
     InterfaceProvidedNetworkProxies.DeleteAll();
-
-    // Stop all required interface proxies running.
-    InterfaceRequiredNetworkProxyMapType::MapType::const_iterator itRequiredProxy = InterfaceRequiredNetworkProxies.begin();
-    const InterfaceRequiredNetworkProxyMapType::MapType::const_iterator itRequiredProxyEnd = InterfaceRequiredNetworkProxies.end();
-    for (; itRequiredProxy != itRequiredProxyEnd; ++itRequiredProxy) {
-        itRequiredProxy->second->StopProxy();
-    }
     InterfaceRequiredNetworkProxies.DeleteAll();
-
     FunctionProxyAndEventHandlerProxyMap.DeleteAll();
 }
 
@@ -216,10 +200,8 @@ bool mtsComponentProxy::RemoveInterfaceRequiredProxy(const std::string & require
                                  << " in proxy component " << GetName() << std::endl;
         return false;
     } else {
-        // Network server deactivation and resource clean up
+        // Network server deactivation
         clientProxy->StopProxy();
-        delete clientProxy;
-        InterfaceRequiredNetworkProxies.RemoveItem(requiredInterfaceProxyName);
     }
 
     // Remove required interface proxy
@@ -474,10 +456,8 @@ bool mtsComponentProxy::RemoveInterfaceProvidedProxy(const std::string & provide
         CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvidedProxy: cannot find proxy server: " << providedInterfaceProxyName << std::endl;
         return false;
     } else {
-        // Network server deactivation and resource clean up
+        // Network server deactivation
         serverProxy->StopProxy();
-        delete serverProxy;
-        InterfaceProvidedNetworkProxies.RemoveItem(providedInterfaceProxyName);
     }
 
     // Remove required interface proxy

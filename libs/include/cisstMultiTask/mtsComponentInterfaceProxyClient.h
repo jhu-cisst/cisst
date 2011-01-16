@@ -41,10 +41,11 @@ class CISST_EXPORT mtsComponentInterfaceProxyClient :
     ComponentInterfaceServerProxyType ComponentInterfaceServerProxy;
 
 protected:
-    /*! Definitions for server communication callback thread */
+    /*! Callback thread for bi-directional communication with server */
     class ComponentInterfaceClientI;
     typedef IceUtil::Handle<ComponentInterfaceClientI> ComponentInterfaceClientIPtr;
     ComponentInterfaceClientIPtr Server;
+    ComponentInterfaceClientIPtr Client;
 
     /*! Typedef for per-event argument serializer */
     typedef std::map<CommandIDType, mtsProxySerializer *> PerEventSerializerMapType;
@@ -154,7 +155,7 @@ protected:
             const Ice::CommunicatorPtr& communicator,
             const Ice::LoggerPtr& logger,
             const mtsComponentInterfaceProxy::ComponentInterfaceServerPrx& server,
-            mtsComponentInterfaceProxyClient * ComponentInterfaceClient);
+            mtsComponentInterfaceProxyClient * componentInterfaceProxyClient);
         ~ComponentInterfaceClientI();
 
         /*! Proxy management */
@@ -163,13 +164,7 @@ protected:
         void Stop();
 
         /*! Getter */
-        bool IsActiveProxy() const {
-            if (ComponentInterfaceProxyClient) {
-                return ComponentInterfaceProxyClient->IsActiveProxy();
-            } else {
-                return false;
-            }
-        }
+        bool IsActiveProxy() const;
 
         //-------------------------------------------------
         //  Event handlers (Server -> Client)
