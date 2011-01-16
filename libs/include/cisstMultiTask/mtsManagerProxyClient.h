@@ -150,18 +150,12 @@ public:
     bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true);
 
     //  Interface Management
-    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                      const std::string & interfaceName, const bool isProxyInterface);
-    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                     const std::string & interfaceName, const bool isProxyInterface);
-    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                       const std::string & interfaceName) const;
-    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                      const std::string & interfaceName) const;
-    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                         const std::string & interfaceName, const bool lock = true);
-    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                        const std::string & interfaceName, const bool lock = true);
+    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
 
     //  Connection Management
     int Connect(const std::string & requestProcessName,
@@ -206,11 +200,11 @@ public:
     bool SendFindComponent(const std::string & processName, const std::string & componentName);
     bool SendRemoveComponent(const std::string & processName, const std::string & componentName);
 
-    bool SendAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface);
+    bool SendAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
     bool SendFindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
     bool SendRemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
-    bool SendAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface);
+    bool SendAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
     bool SendFindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
     bool SendRemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 

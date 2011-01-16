@@ -224,50 +224,50 @@ void mtsProxyBaseServerType::IceInitialize(void)
 
         // Create an adapter (server-side only)
         // (http://www.zeroc.com/doc/Ice-3.3.1/reference/Ice/ObjectAdapter.html)
-        IceAdapter = IceCommunicator->createObjectAdapterWithEndpoints(AdapterName, endpoint);
+        IceAdapter = this->IceCommunicator->createObjectAdapterWithEndpoints(AdapterName, endpoint);
 
         // Get endpoint information as string (ice_getEndpoints() can be used as well)
-        EndpointInfo = IceAdapter->createProxy(IceCommunicator->stringToIdentity(CommunicatorID))->ice_toString();
+        EndpointInfo = IceAdapter->createProxy(this->IceCommunicator->stringToIdentity(CommunicatorID))->ice_toString();
 
         // Create a servant
         Servant = CreateServant();
 
         // Inform the object adapter of the presence of a new servant
-        IceAdapter->add(Servant, IceCommunicator->stringToIdentity(CommunicatorID));
+        IceAdapter->add(Servant, this->IceCommunicator->stringToIdentity(CommunicatorID));
 
         // Activate the adapter. The adapter is initially created in a
         // holding state. The server starts to process incoming requests
         // from clients as soon as the adapter is activated.
         IceAdapter->activate();
 
-        InitSuccessFlag = true;
+        this->InitSuccessFlag = true;
 
         ChangeProxyState(BaseType::PROXY_STATE_READY);
 
-        IceLogger->trace("mtsProxyBaseServer", "ICE init - Server proxy initialization success.");
+        this->IceLogger->trace("mtsProxyBaseServer", "ICE init - Server proxy initialization success.");
     } catch (const Ice::Exception& e) {
-        if (IceLogger) {
-            IceLogger->error("mtsProxyBaseServer: ICE init - Server proxy initialization error");
-            IceLogger->trace("mtsProxyBaseServer", e.what());
+        if (this->IceLogger) {
+            this->IceLogger->error("mtsProxyBaseServer: ICE init - Server proxy initialization error");
+            this->IceLogger->trace("mtsProxyBaseServer", e.what());
         } else {
             CMN_LOG_RUN_ERROR << "mtsProxyBaseServer: ICE init - Server proxy initialization error." << std::endl;
             CMN_LOG_RUN_ERROR << "mtsProxyBaseServer: " << e.what() << std::endl;
         }
     } catch (...) {
-        if (IceLogger) {
-            IceLogger->error("mtsProxyBaseServer: ICE init - exception");
+        if (this->IceLogger) {
+            this->IceLogger->error("mtsProxyBaseServer: ICE init - exception");
         } else {
             CMN_LOG_RUN_ERROR << "mtsProxyBaseServer: ICE init - exception" << std::endl;
         }
     }
 
-    if (!InitSuccessFlag) {
+    if (!this->InitSuccessFlag) {
         try {
-            IceCommunicator->destroy();
+            this->IceCommunicator->destroy();
         } catch (const Ice::Exception & e) {
-            if (IceLogger) {
-                IceLogger->error("mtsProxyBaseServer: ICE init - Server proxy clean-up error");
-                IceLogger->trace("mtsProxyBaseServer", e.what());
+            if (this->IceLogger) {
+                this->IceLogger->error("mtsProxyBaseServer: ICE init - Server proxy clean-up error");
+                this->IceLogger->trace("mtsProxyBaseServer", e.what());
             } else {
                 CMN_LOG_RUN_ERROR << "mtsProxyBaseServer: ICE init - Server proxy clean-up error." << std::endl;
                 CMN_LOG_RUN_ERROR << e.what() << std::endl;
@@ -281,7 +281,7 @@ void mtsProxyBaseServerType::IceCleanup(void)
 {
     ChangeProxyState(BaseType::PROXY_STATE_FINISHING);
 
-    InitSuccessFlag = false;
+    this->InitSuccessFlag = false;
 
     // smmy: two different clean-up process
     // 1) when an individual client is disconnected - only Ice proxy associated
@@ -298,16 +298,16 @@ void mtsProxyBaseServerType::StopProxy(void)
 {
     IceCleanup();
 
-    if (IceCommunicator) {
+    if (this->IceCommunicator) {
         try {
-            IceCommunicator->destroy();
-            IceCommunicator = 0;
-            IceLogger->trace("mtsProxyBaseServer", "Proxy server clean-up success");
+            this->IceCommunicator->destroy();
+            this->IceCommunicator = 0;
+            this->IceLogger->trace("mtsProxyBaseServer", "Proxy server clean-up success");
         } catch (const Ice::Exception & e) {
-            IceLogger->error("mtsProxyBaseServer: Proxy server clean-up failure");
-            IceLogger->trace("mtsProxyBaseServer", e.what());
+            this->IceLogger->error("mtsProxyBaseServer: Proxy server clean-up failure");
+            this->IceLogger->trace("mtsProxyBaseServer", e.what());
         } catch (...) {
-            IceLogger->error("mtsProxyBaseServer: Proxy server clean-up failure");
+            this->IceLogger->error("mtsProxyBaseServer: Proxy server clean-up failure");
         }
     }
 
@@ -415,7 +415,7 @@ bool mtsProxyBaseServerType::CloseClient(const ClientIDType & clientID, const bo
         std::stringstream ss;
         ss << "CloseClient: cannot find client with client id: " << clientID;
         std::string s = ss.str();
-        IceLogger->warning(s);
+        this->IceLogger->warning(s);
         return false;
     }
 
@@ -429,7 +429,7 @@ bool mtsProxyBaseServerType::CloseClient(const ClientIDType & clientID, const bo
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
 void mtsProxyBaseServerType::Monitor(void) 
 {
-    if (!IsActiveProxy()) return;
+    if (!this->IsActiveProxy()) return;
 
     typename IceConnectionIDMapType::iterator it = IceConnectionIDMap.begin();
     while (it != IceConnectionIDMap.end()) {
@@ -438,10 +438,10 @@ void mtsProxyBaseServerType::Monitor(void)
             ++it;
         } catch (const Ice::Exception & ex) {
             std::stringstream ss;
-            ss << "Proxy \"" << ProxyName << "\" detected CLIENT DISCONNECTION: client id [ " << it->second.ClientID << " ], "
+            ss << "Proxy \"" << this->ProxyName << "\" detected CLIENT DISCONNECTION: client id [ " << it->second.ClientID << " ], "
                 << "Ice connection id=\"" << it->second.ConnectionID << "\"" << std::endl << ex;
             std::string s = ss.str();
-            IceLogger->warning(s);
+            this->IceLogger->warning(s);
 
             OnClientDisconnect(it->second.ClientID);
 

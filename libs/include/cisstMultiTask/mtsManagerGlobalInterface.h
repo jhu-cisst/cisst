@@ -85,18 +85,14 @@ public:
     /*! \brief Register provided interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
-        \param interfaceName Name of provided interface to be added
-        \param isProxyInterface True if interface added is a proxy interface */
-    virtual bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                              const std::string & interfaceName, const bool isProxyInterface) = 0;
+        \param interfaceName Name of provided interface to be added */
+    virtual bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
 
     /*! \brief Register required interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
-        \param interfaceName Name of required interface to be added
-        \param isProxyInterface True if interface added is a proxy interface */
-    virtual bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                             const std::string & interfaceName, const bool isProxyInterface) = 0;
+        \param interfaceName Name of required interface to be added */
+    virtual bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
 
     /*! \brief Find provided interface using process name, component name, and interface name
         \param processName Name of process 

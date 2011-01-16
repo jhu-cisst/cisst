@@ -33,8 +33,8 @@ unsigned int mtsComponentInterfaceProxyClient::InstanceCounter = 0;
 mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
     const std::string & serverEndpointInfo, const unsigned int connectionID)
     : BaseClientType("config.client", serverEndpointInfo),
-      ConnectionID(connectionID),
-      ComponentInterfaceServerProxy(0)
+      ComponentInterfaceServerProxy(0),
+      ConnectionID(connectionID)
 {
     ProxyName = "ComponentInterfaceProxyServer";
 }
@@ -183,6 +183,7 @@ bool mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception &
 {
     // Ice - ConnectionLostException - forceful closure by peer
     // Ice - ForcedCloseConnectionException - after forceful closure by peer
+    CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
     CMN_LOG_CLASS_RUN_WARNING << "Component interface proxy \"" << ProxyName << "\" detected SERVER COMPONENT DISCONNECTION "
         << "(connection id: \"" << ConnectionID << "\")" << std::endl;
 

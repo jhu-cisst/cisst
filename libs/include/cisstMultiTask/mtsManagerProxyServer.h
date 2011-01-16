@@ -111,11 +111,11 @@ protected:
     bool ReceiveFindComponent(const std::string & processName, const std::string & componentName) const;
     bool ReceiveRemoveComponent(const std::string & processName, const std::string & componentName);
 
-    bool ReceiveAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface);
+    bool ReceiveAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
     bool ReceiveFindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
     bool ReceiveRemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
-    bool ReceiveAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface);
+    bool ReceiveAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
     bool ReceiveFindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
     bool ReceiveRemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
@@ -442,11 +442,11 @@ protected:
         bool FindComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current)) const;
         bool RemoveComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current));
 
-        bool AddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface, const ::Ice::Current & CMN_UNUSED(current));
+        bool AddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
         bool FindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
         bool RemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
 
-        bool AddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface, const ::Ice::Current & current);
+        bool AddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
         bool FindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current &) const;
         bool RemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
 

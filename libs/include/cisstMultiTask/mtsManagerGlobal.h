@@ -271,23 +271,17 @@ public:
     //-------------------------------------------------------------------------
     //  Interface Management
     //-------------------------------------------------------------------------
-    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                      const std::string & interfaceName, const bool isProxyInterface = false);
+    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
-    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                     const std::string & interfaceName, const bool isProxyInterface = false);
+    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
-    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                       const std::string & interfaceName) const;
+    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
 
-    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                      const std::string & interfaceName) const;
+    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
 
-    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                         const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
 
-    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                        const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
 
     //-------------------------------------------------------------------------
     //  Connection Management

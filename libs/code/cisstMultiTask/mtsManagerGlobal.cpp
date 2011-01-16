@@ -38,10 +38,11 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsManagerGlobal::mtsManagerGlobal() :
     ProcessMap("ProcessMap"), LocalManager(0), LocalManagerConnected(0), ConnectionID(0), 
-    ManagerComponentServer(0), ThreadDisconnectRunning(true)
 #if CISST_MTS_HAS_ICE
-    , ProxyServer(0)
+    ProxyServer(0),
 #endif
+    ManagerComponentServer(0),
+    ThreadDisconnectRunning(true)
 {
     ProcessMap.SetOwner(*this);
 
@@ -268,7 +269,7 @@ bool mtsManagerGlobal::RemoveConnectionOfInterfaceProvidedOrOutput(
         ProcessMapChange.Unlock();
         return true;
     } else {
-        mtsManagerGlobal::ConnectionIDListType::const_iterator it = list->begin();
+        mtsManagerGlobal::ConnectionIDListType::iterator it = list->begin();
         const mtsManagerGlobal::ConnectionIDListType::const_iterator itEnd = list->end();
         for (; it != itEnd; ++it) {
             if (*it == connectionID) {
@@ -313,7 +314,7 @@ bool mtsManagerGlobal::RemoveConnectionOfInterfaceRequiredOrInput(
         ProcessMapChange.Unlock();
         return true;
     } else {
-        mtsManagerGlobal::ConnectionIDListType::const_iterator it = list->begin();
+        mtsManagerGlobal::ConnectionIDListType::iterator it = list->begin();
         const mtsManagerGlobal::ConnectionIDListType::const_iterator itEnd = list->end();
         for (; it != itEnd; ++it) {
             if (*it == connectionID) {
@@ -781,8 +782,8 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
 //-------------------------------------------------------------------------
 //  Interface Management
 //-------------------------------------------------------------------------
-bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                                    const std::string & interfaceName, const bool isProxyInterface)
+bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processName, 
+    const std::string & componentName, const std::string & interfaceName)
 {
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddInterfaceProvidedOrOutput: no component found: "
@@ -810,17 +811,14 @@ bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processN
         return false;
     }
 
-    // smmy
-    //interfaceMap->InterfaceProvidedOrOutputTypeMap[interfaceName] = isProxyInterface;
-
     ProcessMapChange.Unlock();
 
     return true;
 }
 
 
-bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                                   const std::string & interfaceName, const bool isProxyInterface)
+bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processName, 
+    const std::string & componentName, const std::string & interfaceName)
 {
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddInterfaceRequiredOrInput: can't find a registered component: "
@@ -847,8 +845,6 @@ bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processNa
         ProcessMapChange.Unlock();
         return false;
     }
-
-    //interfaceMap->InterfaceRequiredOrInputTypeMap[interfaceName] = isProxyInterface;
 
     ProcessMapChange.Unlock();
 

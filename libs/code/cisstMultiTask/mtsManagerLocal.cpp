@@ -1169,7 +1169,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
     if (!requiredInterface) return;
 
     // Get function type
-    char functionType = *functionName.c_str();
+    //char functionType = *functionName.c_str();
     std::string actualFunctionName = functionName.substr(3, functionName.size() - 2);
 
     description = "Resource argument type: ";
@@ -1970,7 +1970,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                 continue;
             }
         }
-        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i], false)) {
+        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
             CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add provided/output interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
@@ -1989,7 +1989,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                 continue;
             }
         }
-        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i], false)) {
+        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
             CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add required/input interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
@@ -2139,7 +2139,7 @@ bool mtsManagerLocal::CreateInterfaceProvidedProxy(
     }
 
     // Inform the global component manager of the creation of provided interface proxy
-    if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, serverComponentProxyName, interfaceProvidedName, true)) {
+    if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, serverComponentProxyName, interfaceProvidedName)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: "
                                  << "failed to add provided interface proxy to global component manager: "
                                  << ProcessName << ":" << serverComponentProxyName << ":" << interfaceProvidedName << std::endl;
@@ -2184,7 +2184,7 @@ bool mtsManagerLocal::CreateInterfaceRequiredProxy(
     }
 
     // Inform the global component manager of the creation of provided interface proxy
-    if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, clientComponentProxyName, requiredInterfaceName, true)) {
+    if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, clientComponentProxyName, requiredInterfaceName)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: "
                                  << "failed to add required interface proxy to global component manager: "
                                  << ProcessName << ":" << clientComponentProxyName << ":" << requiredInterfaceName << std::endl;

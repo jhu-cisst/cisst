@@ -335,7 +335,7 @@ public:
 
 template<class _proxyOwner>
 mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string& propertyFileName, 
-                                                    const ProxyTypes& proxyType)
+                                                    const ProxyTypes& CMN_UNUSED(proxyType))
 {
     ProxyBaseInitialize();
 

@@ -258,8 +258,8 @@ module mtsManagerProxy
         bool RemoveComponent(string processName, string componentName);
 
         // Interface Management
-        bool AddInterfaceProvided(string processName, string componentName, string interfaceName, bool isProxyInterface);
-        bool AddInterfaceRequired(string processName, string componentName, string interfaceName, bool isProxyInterface);
+        bool AddInterfaceProvided(string processName, string componentName, string interfaceName);
+        bool AddInterfaceRequired(string processName, string componentName, string interfaceName);
         bool FindInterfaceProvided(string processName, string componentName, string interfaceName);
         ["cpp:const"] idempotent
         bool FindInterfaceRequired(string processName, string componentName, string interfaceName);
