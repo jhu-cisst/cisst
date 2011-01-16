@@ -35,11 +35,16 @@ class CISST_EXPORT svlBufferSample
 {
 public:
     svlBufferSample(svlStreamType type);
+    //creates a new buffer based on an existing sample prototype (including size)
+    svlBufferSample(const svlSample &sample);
     ~svlBufferSample();
 
     svlStreamType GetType() const;
 
     int Push(const svlSample* sample);
+    svlSample* GetPushBuffer();
+    void Push();
+
     svlSample* Pull(bool waitfornew, double timeout = 5.0);
 
 private:
