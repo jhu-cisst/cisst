@@ -223,6 +223,14 @@ protected:
                        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
+    /*! Remove provided interface */
+    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
+    bool RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceProvidedName);
+
+    /*! Remove required interface */
+    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
+    bool RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName);
+
     //-------------------------------------------------------------------------
     //  Methods required by mtsManagerLocalInterface
     //
@@ -254,14 +262,6 @@ protected:
     bool CreateInterfaceRequiredProxy(
         const std::string & clientComponentProxyName,
         const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
-
-    /*! Remove provided interface */
-    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
-    bool RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceProvidedName);
-
-    /*! Remove required interface */
-    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
-    bool RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName);
 
     /*! Remove provided interface proxy */
     bool RemoveInterfaceProvidedProxy(
