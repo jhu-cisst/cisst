@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -140,6 +139,8 @@ public:
         const static std::string GetNamesOfComponents;
         const static std::string GetNamesOfInterfaces;
         const static std::string GetListOfConnections;
+        const static std::string GetInterfaceProvidedDescription;
+        const static std::string GetInterfaceRequiredDescription;
         // Establishing connections
         const static std::string GetEndUserInterface;
         const static std::string AddObserverList;

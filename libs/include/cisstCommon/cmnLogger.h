@@ -380,6 +380,15 @@ class CISST_EXPORT cmnLogger {
         Instance()->ResumeDefaultLogInstance(newLoD);
     }
 
+
+    /*! Set a new mask for the default log file.  This method uses
+      HaltDefaultLog followed by ResumeDefaultLog. */
+    static void SetMaskDefaultLog(cmnLogMask newLoD = CMN_LOG_ALLOW_DEFAULT) {
+        Instance()->HaltDefaultLogInstance();
+        Instance()->ResumeDefaultLogInstance(newLoD);
+    }
+
+
     /*! Add an output stream to the logger.  The level of detail
       provided is used to filter the messages, i.e. any message with a
       level of detail higher than the level associated to the output

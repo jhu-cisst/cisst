@@ -90,6 +90,11 @@ class CISST_EXPORT devOSGStereo :
   // Two draw callbacks. One for each camera
   osg::ref_ptr<FinalDrawCallback> finaldrawcallbacks[2];
 
+  int x, y;
+  int width;
+  int height;
+  double baseline;
+
 #ifdef CISST_STEREOVISION
   // svl
   svlBufferSample* colorbuffersample;

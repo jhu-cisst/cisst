@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -70,6 +69,8 @@ protected:
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
         mtsFunctionQualifiedRead ComponentGetState;
+        mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
+        mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } InterfaceGCMFunctionType;
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
@@ -105,6 +106,8 @@ public:
                                                    std::vector<std::string> & names) const;
     void InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
+    void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, InterfaceProvidedDescription & description) const;
+    void InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, InterfaceRequiredDescription & description) const;
 
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;

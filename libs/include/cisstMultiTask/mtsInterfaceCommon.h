@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-19
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,12 +21,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterfaceCommon_h
 #define _mtsInterfaceCommon_h
 
+#include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDeSerializer.h>
+
 #include <string>
 #include <vector>
 
-class mtsInterfaceCommon {
+namespace mtsInterfaceCommon {
 
-public:
     //-------------------------------------------------------------------------
     //  Structures for Provided Interface Description
     //-------------------------------------------------------------------------
@@ -62,6 +63,7 @@ public:
         std::string ArgumentPrototypeSerialized;
 	};
 
+    // PK TODO: update this to include CommandVoidReturn and CommandWriteReturn
     typedef std::vector<CommandVoidElement>          CommandVoidVector;
 	typedef std::vector<CommandWriteElement>         CommandWriteVector;
 	typedef std::vector<CommandReadElement>          CommandReadVector;
@@ -110,29 +112,203 @@ public:
         // "IsRequired" attribute
         bool IsRequired; // MTS_OPTIONAL or MTS_REQUIRED (of type mtsRequiredType)
     };
-};
+}
 
-// Typedefs to access internal structures
-#define TYPEDEF( _class ) typedef mtsInterfaceCommon::_class _class;
+using namespace mtsInterfaceCommon;
 
-TYPEDEF(InterfaceProvidedDescription);
-TYPEDEF(InterfaceRequiredDescription);
-TYPEDEF(CommandVoidElement);
-TYPEDEF(CommandWriteElement);
-TYPEDEF(CommandReadElement);
-TYPEDEF(CommandQualifiedReadElement);
-TYPEDEF(EventVoidElement);
-TYPEDEF(EventWriteElement);
+#ifndef SWIG
+// Following functions could be moved to cpp file, if one is created
 
-TYPEDEF(CommandVoidVector);
-TYPEDEF(CommandWriteVector);
-TYPEDEF(CommandReadVector);
-TYPEDEF(CommandQualifiedReadVector);
-TYPEDEF(EventVoidVector);
-TYPEDEF(EventWriteVector);
+inline void cmnSerializeRaw(std::ostream & outputStream, const CommandVoidElement & data)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, data.Name);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(CommandVoidElement: Error occured with std::ostream::write");
+}
 
-TYPEDEF(CommandPointerNames);
-TYPEDEF(EventHandlerVoidVector);
-TYPEDEF(EventHandlerWriteVector);
+inline void cmnDeSerializeRaw(std::istream & inputStream, CommandVoidElement & data)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, data.Name);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(CommandVoidElement: Error occured with std::istream::read");
+}
+
+inline void cmnSerializeRaw(std::ostream & outputStream, const CommandWriteElement & data)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, data.Name);
+    cmnSerializeRaw(outputStream, data.ArgumentPrototypeSerialized);
+    cmnSerializeRaw(outputStream, data.Category);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(CommandWriteElement: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, CommandWriteElement & data)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, data.Name);
+    cmnDeSerializeRaw(inputStream, data.ArgumentPrototypeSerialized);
+    cmnDeSerializeRaw(inputStream, data.Category);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(CommandWriteElement: Error occured with std::istream::read");
+}
+
+inline void cmnSerializeRaw(std::ostream & outputStream, const CommandReadElement & data)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, data.Name);
+    cmnSerializeRaw(outputStream, data.ArgumentPrototypeSerialized);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(CommandReadElement: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, CommandReadElement & data)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, data.Name);
+    cmnDeSerializeRaw(inputStream, data.ArgumentPrototypeSerialized);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(CommandReadElement: Error occured with std::istream::read");
+}
+
+inline void cmnSerializeRaw(std::ostream & outputStream, const CommandQualifiedReadElement & data)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, data.Name);
+    cmnSerializeRaw(outputStream, data.Argument1PrototypeSerialized);
+    cmnSerializeRaw(outputStream, data.Argument2PrototypeSerialized);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(CommandQualifiedReadElement: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, CommandQualifiedReadElement & data)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, data.Name);
+    cmnDeSerializeRaw(inputStream, data.Argument1PrototypeSerialized);
+    cmnDeSerializeRaw(inputStream, data.Argument2PrototypeSerialized);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(CommandQualifiedReadElement: Error occured with std::istream::read");
+}
+
+#if 0  // Event vectors typedefed to Command vectors
+inline void cmnSerializeRaw(std::ostream & outputStream, const EventVoidElement & data)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, data.Name);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(EventVoidElement: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, EventVoidElement & data)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, data.Name);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(EventVoidElement: Error occured with std::istream::read");
+}
+
+inline void cmnSerializeRaw(std::ostream & outputStream, const EventWriteElement & data)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, data.Name);
+    cmnSerializeRaw(outputStream, data.ArgumentPrototypeSerialized);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(EventWriteElement: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, EventWriteElement & data)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, data.Name);
+    cmnDeSerializeRaw(inputStream, data.ArgumentPrototypeSerialized);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(EventWriteElement: Error occured with std::istream::read");
+}
+#endif
+
+inline std::ostream & operator << (std::ostream & output,
+                                   const InterfaceProvidedDescription & description) {
+    output << "InterfaceProvided: " << description.InterfaceProvidedName
+           << ", Commands Void(" << description.CommandsVoid.size()
+           << ") Write(" << description.CommandsWrite.size()
+           << ") Read(" << description.CommandsRead.size()
+           << ") QualifiedRead(" << description.CommandsQualifiedRead.size()
+           << "), Events Void(" << description.EventsVoid.size()
+           << ") Write(" << description.EventsWrite.size() << ")" << std::endl;
+    return output;
+}
+
+inline void cmnSerializeRaw(std::ostream & outputStream, const InterfaceProvidedDescription & description)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, description.InterfaceProvidedName);
+    cmnSerializeRaw(outputStream, description.CommandsVoid);
+    cmnSerializeRaw(outputStream, description.CommandsWrite);
+    cmnSerializeRaw(outputStream, description.CommandsRead);
+    cmnSerializeRaw(outputStream, description.CommandsQualifiedRead);
+    cmnSerializeRaw(outputStream, description.EventsVoid);
+    cmnSerializeRaw(outputStream, description.EventsWrite);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(InterfaceProvidedDescription: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, InterfaceProvidedDescription & description)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, description.InterfaceProvidedName);
+    cmnDeSerializeRaw(inputStream, description.CommandsVoid);
+    cmnDeSerializeRaw(inputStream, description.CommandsWrite);
+    cmnDeSerializeRaw(inputStream, description.CommandsRead);
+    cmnDeSerializeRaw(inputStream, description.CommandsQualifiedRead);
+    cmnDeSerializeRaw(inputStream, description.EventsVoid);
+    cmnDeSerializeRaw(inputStream, description.EventsWrite);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(InterfaceProvidedDescription: Error occured with std::istream::read");
+}
+
+inline std::ostream & operator << (std::ostream & output,
+                                   const InterfaceRequiredDescription & description) {
+    output << "InterfaceRequired: " << description.InterfaceRequiredName
+           << ", Functions Void(" << description.FunctionVoidNames.size()
+           << ") Write(" << description.FunctionWriteNames.size()
+           << ") Read(" << description.FunctionReadNames.size()
+           << ") QualifiedRead(" << description.FunctionQualifiedReadNames.size()
+           << "), Event Handlers Void(" << description.EventHandlersVoid.size()
+           << ") Write(" << description.EventHandlersWrite.size() << ")" << std::endl;
+    return output;
+}
+
+inline void cmnSerializeRaw(std::ostream & outputStream, const InterfaceRequiredDescription & description)
+            throw (std::runtime_error)
+{
+    cmnSerializeRaw(outputStream, description.InterfaceRequiredName);
+    cmnSerializeRaw(outputStream, description.FunctionVoidNames);
+    cmnSerializeRaw(outputStream, description.FunctionWriteNames);
+    cmnSerializeRaw(outputStream, description.FunctionReadNames);
+    cmnSerializeRaw(outputStream, description.FunctionQualifiedReadNames);
+    cmnSerializeRaw(outputStream, description.EventHandlersVoid);
+    cmnSerializeRaw(outputStream, description.EventHandlersWrite);
+    cmnSerializeRaw(outputStream, description.IsRequired);
+    if (outputStream.fail())
+        cmnThrow("cmnSerializeRaw(InterfaceRequiredDescription: Error occured with std::ostream::write");
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, InterfaceRequiredDescription & description)
+            throw (std::runtime_error)
+{
+    cmnDeSerializeRaw(inputStream, description.InterfaceRequiredName);
+    cmnDeSerializeRaw(inputStream, description.FunctionVoidNames);
+    cmnDeSerializeRaw(inputStream, description.FunctionWriteNames);
+    cmnDeSerializeRaw(inputStream, description.FunctionReadNames);
+    cmnDeSerializeRaw(inputStream, description.FunctionQualifiedReadNames);
+    cmnDeSerializeRaw(inputStream, description.EventHandlersVoid);
+    cmnDeSerializeRaw(inputStream, description.EventHandlersWrite);
+    if (inputStream.fail())
+        cmnThrow("cmnDeSerializeRaw(InterfaceRequiredDescription: Error occured with std::istream::read");
+}
+#endif // SWIG
 
 #endif // _mtsInterfaceCommon_h

@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsComponentState.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last!
@@ -35,6 +35,15 @@ http://www.cisst.org/cisst/license.txt.
 //
 typedef mtsGenericObjectProxy<mtsComponentState> mtsComponentStateProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateProxy);
+
+//-----------------------------------------------------------------------------
+//  InterfaceProvidedDescription (defined in mtsInterfaceCommon.h)
+//  InterfaceRequiredDescription (defined in mtsInterfaceCommon.h)
+//
+typedef mtsGenericObjectProxy<InterfaceProvidedDescription> InterfaceProvidedDescriptionProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(InterfaceProvidedDescriptionProxy);
+typedef mtsGenericObjectProxy<InterfaceRequiredDescription> InterfaceRequiredDescriptionProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(InterfaceRequiredDescriptionProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Description

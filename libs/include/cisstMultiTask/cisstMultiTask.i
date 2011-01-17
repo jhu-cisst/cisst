@@ -7,8 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2008-01-17
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -407,33 +406,37 @@ http://www.cisst.org/cisst/license.txt.
                     self.__dict__[interfaceNoSpace].UpdateFromC()
 
         def AddInterfaceRequiredFromProvided(self, interfaceProvided):
-            if not isinstance(interfaceProvided, mtsInterfaceProvided):
-                print 'Parameter must be of type mtsInterfaceProvided'
+            if not isinstance(interfaceProvided, InterfaceProvidedDescription):
+                print 'Parameter must be of type InterfaceProvidedDescription'
                 return
-            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvided.GetName(), MTS_OPTIONAL)
-            for command in interfaceProvided.GetNamesOfCommandsVoid():
-                self.__dict__[command] = mtsFunctionVoid()
-                interfaceRequired.AddFunction(command, self.__dict__[command])
-            for command in interfaceProvided.GetNamesOfCommandsVoidReturn():
-                self.__dict__[command] = mtsFunctionVoidReturn()
-                interfaceRequired.AddFunction(command, self.__dict__[command])
-            for command in interfaceProvided.GetNamesOfCommandsWrite():
-                self.__dict__[command] = mtsFunctionWrite()
-                interfaceRequired.AddFunction(command, self.__dict__[command])
-            for command in interfaceProvided.GetNamesOfCommandsWriteReturn():
-                self.__dict__[command] = mtsFunctionWriteReturn()
-                interfaceRequired.AddFunction(command, self.__dict__[command])
-            for command in interfaceProvided.GetNamesOfCommandsQualifiedRead():
-                self.__dict__[command] = mtsFunctionQualifiedRead()
-                interfaceRequired.AddFunction(command, self.__dict__[command])
-            for command in interfaceProvided.GetNamesOfCommandsRead():
-                self.__dict__[command] = mtsFunctionRead()
-                interfaceRequired.AddFunction(command, self.__dict__[command])
+            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvided.InterfaceProvidedName, MTS_OPTIONAL)
+            if not interfaceRequired:
+                return
+            for command in interfaceProvided.CommandsVoid:
+                self.__dict__[command.Name] = mtsFunctionVoid()
+                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            #for command in interfaceProvided.CommandsVoidReturn:
+            #    self.__dict__[command.Name] = mtsFunctionVoidReturn()
+            #    interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            for command in interfaceProvided.CommandsWrite:
+                self.__dict__[command.Name] = mtsFunctionWrite()
+                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            #for command in interfaceProvided.CommandsWriteReturn:
+            #    self.__dict__[command.Name] = mtsFunctionWriteReturn()
+            #    interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            for command in interfaceProvided.CommandsQualifiedRead:
+                self.__dict__[command.Name] = mtsFunctionQualifiedRead()
+                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            for command in interfaceProvided.CommandsRead:
+                self.__dict__[command.Name] = mtsFunctionRead()
+                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            return interfaceRequired
             
         # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
         # or ('component', 'interfaceProvided')
         def AddInterfaceRequiredAndConnect(self, otherComponentInterface):
             try:
+                localProcessName = mtsManagerLocal_GetInstance().GetProcessName()
                 num = len(otherComponentInterface)
                 if 2 <= num <= 3:
                     interfaceName = otherComponentInterface[num-1]
@@ -441,14 +444,29 @@ http://www.cisst.org/cisst/license.txt.
                     if num == 3:
                         processName = otherComponentInterface[num-3]
                     else:
-                        processName = ''  # local
-                    # Now do the work here...(TBD)
+                        processName = localProcessName
+                    # Now do the work here
+                    manager = self.GetManagerComponentServices()
+                    if not manager:
+                        print 'Could not get manager component services'
+                        return
+                    interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
+                    manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
                 else:
                     print 'Parameter error: must specify (process, component, interface) or (component, interface)'
             except TypeError, e:
                 print 'Parameter error: must specify (process, component, interface) or (component, interface)'
     }
 }
+
+// For IRE, because EnableDynamicComponentManagement is protected (see also mtsPython.h)
+class mtsComponentWithManagement : public mtsComponent
+{
+public:
+    mtsComponentWithManagement(const std::string &name);
+    ~mtsComponentWithManagement();
+};
 
 %include "cisstMultiTask/mtsInterfaceProvidedOrOutput.h"
 %include "cisstMultiTask/mtsInterfaceProvided.h"
@@ -621,6 +639,17 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsComponentStateProxy, mtsComponentState);
     // ToString gets renamed to __str__
     std::string ToString(void) const { return mtsComponentState::ToString($self->GetState()); }
 }
+
+%include "cisstMultiTask/mtsInterfaceCommon.h"
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(InterfaceProvidedDescriptionProxy, InterfaceProvidedDescription);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(InterfaceRequiredDescriptionProxy, InterfaceRequiredDescription);
+
+%template(CommandVoidVector)          std::vector<CommandVoidElement>;
+%template(CommandWriteVector)         std::vector<CommandWriteElement>;
+%template(CommandReadVector)          std::vector<CommandReadElement>;
+%template(CommandQualifiedReadVector) std::vector<CommandQualifiedReadElement>;
+%template(EventVoidVector)            std::vector<EventVoidElement>;
+%template(EventWriteVector)           std::vector<EventWriteElement>;
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"

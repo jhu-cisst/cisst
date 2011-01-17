@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -2030,6 +2030,7 @@ bool mtsManagerLocal::Disconnect(
 
     return true;
 }
+#endif
 
 bool mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & serverComponentName, const std::string & interfaceProvidedName,
@@ -2054,7 +2055,11 @@ bool mtsManagerLocal::GetInterfaceProvidedDescription(
     // Extract complete information about all commands and event generators in
     // the provided interface specified. Argument prototypes are serialized.
     interfaceProvidedDescription.InterfaceProvidedName = interfaceProvidedName;
+#if CISST_MTS_HAS_ICE
     mtsComponentProxy::ExtractInterfaceProvidedDescription(interfaceProvided, interfaceProvidedDescription);
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
+#endif
 
     return true;
 }
@@ -2083,10 +2088,16 @@ bool mtsManagerLocal::GetInterfaceRequiredDescription(
     // a required interface. Argument prototypes are fetched with serialization.
     requiredInterfaceDescription.InterfaceRequiredName = requiredInterfaceName;
 
+#if CISST_MTS_HAS_ICE
     mtsComponentProxy::ExtractInterfaceRequiredDescription(requiredInterface, requiredInterfaceDescription);
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceRequiredDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
+#endif
 
     return true;
 }
+
+#if CISST_MTS_HAS_ICE
 
 bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
 {
@@ -2282,11 +2293,8 @@ bool mtsManagerLocal::RemoveInterfaceProvidedProxy(
         return false;
     }
 
-    // Remove provided interface proxy only when user counter is zero.
-    if (interfaceProvidedProxy->UserCounter > 0) {
-        --interfaceProvidedProxy->UserCounter;
-    }
-    if (interfaceProvidedProxy->UserCounter == 0) {
+    // Remove provided interface proxy only when number of end users is zero.
+    if (interfaceProvidedProxy->GetNumberOfEndUsers() == 0) {
         // Remove provided interface from component proxy.
         if (!clientComponentProxy->RemoveInterfaceProvidedProxy(interfaceProvidedProxyName)) {
             CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvidedProxy: failed to remove provided interface proxy: " << interfaceProvidedProxyName << std::endl;
@@ -2329,6 +2337,9 @@ bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
 
     return true;
 }
+#endif
+
+#if CISST_MTS_HAS_ICE
 
 void mtsManagerLocal::SetIPAddress(void)
 {

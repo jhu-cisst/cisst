@@ -31,7 +31,7 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     Mask(CMN_LOG_ALLOW_ALL),
     LoDMultiplexerStreambuf()
 {
-    LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_ALL);
+    LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);
 }
 
 

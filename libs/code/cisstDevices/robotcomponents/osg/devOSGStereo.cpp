@@ -173,7 +173,12 @@ devOSGStereo::devOSGStereo( const std::string& name,
 			    double zNear, double zFar,
 			    double baseline ) :
   mtsTaskContinuous( name ),
-  osgViewer::Viewer()
+  osgViewer::Viewer(),
+  x( xoffset ),
+  y( yoffset ),
+  width( width ),
+  height( height ),
+  baseline( baseline )
 #ifdef CISST_STEREOVISION
   ,colorbuffersample( NULL ),
   colorsample( NULL ),
@@ -184,12 +189,27 @@ devOSGStereo::devOSGStereo( const std::string& name,
 
   getCamera()->setProjectionMatrixAsPerspective(fovy, aspectRatio, zNear, zFar);
 
+  setSceneData( world );
+
+  // Set callback stuff
+  userdata = new devOSGStereo::UserData( this );
+  getCamera()->setUserData( userdata );
+  getCamera()->setUpdateCallback( new devOSGStereo::UpdateCallback );
+
+}
+
+devOSGStereo::~devOSGStereo(){}
+
+void devOSGStereo::Configure( const std::string& CMN_UNUSED( argv ) ) {}
+
+void devOSGStereo::Startup(){
+
   {
 
     osg::ref_ptr<osg::GraphicsContext::Traits> traits;
     traits = new osg::GraphicsContext::Traits;
-    traits->x = xoffset + 0;
-    traits->y = yoffset + 0;
+    traits->x = x + 0;
+    traits->y = y + 0;
     traits->width = width;
     traits->height = height;
     traits->windowDecoration = true;
@@ -200,7 +220,7 @@ devOSGStereo::devOSGStereo( const std::string& name,
     gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
 
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
-    camera->setName( name + "LEFT" );
+    camera->setName( GetName() + "LEFT" );
     camera->setGraphicsContext( gc.get() );
     camera->setViewport( new osg::Viewport( 0, 0, width, height ) );
 
@@ -225,8 +245,8 @@ devOSGStereo::devOSGStereo( const std::string& name,
 
     osg::ref_ptr<osg::GraphicsContext::Traits> traits;
     traits = new osg::GraphicsContext::Traits;
-    traits->x = xoffset + width;
-    traits->y = yoffset + 0;
+    traits->x = x + width;
+    traits->y = y + 0;
     traits->width = width;
     traits->height = height;
     traits->windowDecoration = true;
@@ -237,7 +257,7 @@ devOSGStereo::devOSGStereo( const std::string& name,
     gc = osg::GraphicsContext::createGraphicsContext(traits.get());
 
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
-    camera->setName( name + "RIGHT" );
+    camera->setName( GetName() + "RIGHT" );
     camera->setGraphicsContext(gc.get());
     camera->setViewport( new osg::Viewport( 0, 0, width, height) );
 
@@ -257,13 +277,6 @@ devOSGStereo::devOSGStereo( const std::string& name,
 	      osg::Matrixd::translate( -baseline/2.0, 0.0, 0.0 ) );
 
   }
-
-  setSceneData( world );
-
-  // Set callback stuff
-  userdata = new devOSGStereo::UserData( this );
-  getCamera()->setUserData( userdata );
-  getCamera()->setUpdateCallback( new devOSGStereo::UpdateCallback );
 
 #ifdef CISST_STEREOVISION
   // SVL stuff
@@ -304,13 +317,8 @@ devOSGStereo::devOSGStereo( const std::string& name,
 
   colorbuffersample->Push( colorsample );
 #endif
+
 }
-
-devOSGStereo::~devOSGStereo(){}
-
-void devOSGStereo::Configure( const std::string& CMN_UNUSED( argv ) ) {}
-
-void devOSGStereo::Startup(){}
 
 void devOSGStereo::Run(){
   ProcessQueuedCommands();

@@ -270,6 +270,7 @@ protected:
     /*! Remove required interface proxy */
     bool RemoveInterfaceRequiredProxy(
         const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
+#endif
 
     /*! Get information about provided interface */
     bool GetInterfaceProvidedDescription(

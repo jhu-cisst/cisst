@@ -41,6 +41,8 @@ devOSGCamera::devOSGCamera( const std::string& name,
 			    const std::string& fnname ) :
   mtsTaskContinuous( name ),
   osgViewer::Viewer(),                 // viewer
+  x( x ),                              // x position
+  y( y ),                              // y position
   width( width ),                      // width of images
   height( height ){                    // height of images
 
@@ -50,7 +52,7 @@ devOSGCamera::devOSGCamera( const std::string& name,
   camera->setProjectionMatrixAsPerspective( fovy,aspectRatio, zNear, zFar );
 
   setSceneData( world );
-  setUpViewInWindow( x, y, width, height );
+  //setUpViewInWindow( x, y, width, height );
 
   // Set callback stuff
   userdata = new devOSGCamera::UserData( this );
@@ -90,7 +92,10 @@ devOSGCamera::~devOSGCamera(){
 
 void devOSGCamera::Configure( const std::string& CMN_UNUSED( argv ) ) {}
 
-void devOSGCamera::Startup(){}
+void devOSGCamera::Startup(){
+  // The window must be created in the same thread as frame()
+  setUpViewInWindow( x, y, width, height );
+}
 
 void devOSGCamera::Run(){
   ProcessQueuedCommands();

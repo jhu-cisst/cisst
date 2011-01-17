@@ -38,6 +38,21 @@ svlBufferSample::svlBufferSample(svlStreamType type)
     Locked = 2;
 }
 
+svlBufferSample::svlBufferSample(const svlSample &sample)
+{
+    Buffer[0] = svlSample::GetNewFromType(sample.GetType());
+    Buffer[1] = svlSample::GetNewFromType(sample.GetType());
+    Buffer[2] = svlSample::GetNewFromType(sample.GetType());
+
+    Buffer[0]->SetSize(sample);
+    Buffer[1]->SetSize(sample);
+    Buffer[2]->SetSize(sample);
+
+    Latest = 0;
+    Next = 1;
+    Locked = 2;
+}
+
 svlBufferSample::~svlBufferSample()
 {
     delete Buffer[0];
@@ -92,5 +107,29 @@ svlSample* svlBufferSample::Pull(bool waitfornew, double timeout)
 #endif
 
     return Buffer[Locked];
+}
+
+svlSample* svlBufferSample::GetPushBuffer()
+{
+    return Buffer[Next];
+}
+
+void svlBufferSample::Push()
+{
+
+    // Atomic exchange of values
+#if (CISST_OS == CISST_WINDOWS)
+    Next = InterlockedExchange(&Latest, Next);
+#endif
+
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    CS.Enter();
+        int ti = Next;
+        Next = Latest;
+        Latest = ti;
+    CS.Leave();
+#endif
+
+    NewSampleEvent.Raise();
 }
 

@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,6 +46,8 @@ const std::string mtsManagerComponentBase::CommandNames::GetNamesOfProcesses  = 
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfComponents = "GetNamesOfComponents";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces = "GetNamesOfInterfaces";
 const std::string mtsManagerComponentBase::CommandNames::GetListOfConnections = "GetListOfConnections";
+const std::string mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription = "GetInterfaceProvidedDescription";
+const std::string mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription = "GetInterfaceRequiredDescription";
 const std::string mtsManagerComponentBase::CommandNames::GetEndUserInterface = "GetEndUserInterface";
 const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddObserverList";
 const std::string mtsManagerComponentBase::CommandNames::RemoveEndUserInterface = "RemoveEndUserInterface";
