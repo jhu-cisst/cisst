@@ -189,9 +189,9 @@ mtsManagerLocal::~mtsManagerLocal()
     // If ManagerGlobal is not NULL, it means Cleanup() has not been called
     // before. Thus, it needs to be called here for safe and clean termination.
     if (ManagerGlobal) {
-        if (Configuration == LCM_CONFIG_NETWORKED) {
+        //if (Configuration == LCM_CONFIG_NETWORKED) {
             Cleanup();
-        }
+        //}
     }
 }
 
@@ -1431,7 +1431,11 @@ bool mtsManagerLocal::FindComponent(const std::string & componentName) const
 bool mtsManagerLocal::CreateManagerComponents(void)
 {
     // Automatically add internal manager component when the LCM is initialized.
+#if CISST_MTS_HAS_ICE
     if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED_WITH_GCM)) {
+#else
+    if (Configuration == LCM_CONFIG_STANDALONE) {
+#endif
         if (!AddManagerComponent(GetProcessName(), true)) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal manager component server" << std::endl;
             return false;

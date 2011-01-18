@@ -257,8 +257,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
 // This implementation of DisconnectLocally does not rely on any data saved about the connection, such as the end-user
 // interface pointer or the connection id.  I think it would be better to first look up this information.
 bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-                                                 const std::string & clientProcessName)
+                                                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     mtsComponent * clientComponent = LCM->GetComponent(clientComponentName);
@@ -285,7 +284,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             return false;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "DisconnectLocally: Swapping client/server" << std::endl;
-            return DisconnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName, clientProcessName);
+            return DisconnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName);
         }
     }
 
@@ -414,8 +413,10 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
         }
     }
 
+    // smmygol: this should happen when component is removed (NOT DISCONNECTION!!!)
     // Special handling for connections which MCC is involved with
     //
+    /*
     // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
     if (serverInterfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
         if (!DisconnectCleanup(serverComponentName)) {
@@ -436,6 +437,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             }
         }
     }
+    */
 
     return true;
 }
@@ -970,6 +972,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
     // PK TODO: Would be nice to be able to disconnect using just connectionId (e.g., from ComponentViewer)
+
     // PK: The following may not be necessary, since the MCS should just send us the local disconnect request
     // (in the network case, one of the components should be a proxy). For now, it is needed just to update the GCM database.
     // See mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect.
@@ -989,6 +992,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
     }
 
     // PK TEMP: Don't call following if client or server is a proxy object
+    /*
     if ((arg.Client.ComponentName.find("Proxy") == std::string::npos) &&
         (arg.Server.ComponentName.find("Proxy") == std::string::npos)) {
         if (!LCM->Disconnect(arg.Client.ComponentName, arg.Client.InterfaceName,
@@ -998,9 +1002,10 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
             return;
         }
     }
+    */
 
     if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,
-                          arg.Server.ComponentName, arg.Server.InterfaceName, arg.Client.ProcessName))
+                          arg.Server.ComponentName, arg.Server.InterfaceName))
         CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
 }
 

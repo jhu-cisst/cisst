@@ -121,8 +121,7 @@ protected:
                         const std::string & clientProcessName = "");
 
     bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                           const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-                           const std::string & clientProcessName = "");
+                           const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     // If connection between InterfaceComponent.required - InterfaceInternal.provided is
     // disconnected, required interface instance of InterfaceComponent that corresponds

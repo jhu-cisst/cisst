@@ -87,13 +87,15 @@ public:
     /*! Typedef for local component manager's configuration */
     enum ConfigurationType {
         // Standalone mode: supports only local components/connections
-        LCM_CONFIG_STANDALONE,
+        LCM_CONFIG_STANDALONE
+#if CISST_MTS_HAS_ICE
         // Networked mode: supports both local and remote components/connections
-        LCM_CONFIG_NETWORKED,
+        , LCM_CONFIG_NETWORKED
         // Networked mode with global component manager: basically identical to
         // LCM_CONFIG_NETWORKED configuration except that LCM runs with the
         // global component manager on a same process.
-        LCM_CONFIG_NETWORKED_WITH_GCM
+        , LCM_CONFIG_NETWORKED_WITH_GCM
+#endif
     };
 
 
@@ -270,6 +272,12 @@ protected:
     /*! Remove required interface proxy */
     bool RemoveInterfaceRequiredProxy(
         const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
+
+    /*! Connect two local interfaces at the server side */
+    bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
+
+    /*! \brief Connect two local interfaces at the client side */
+    bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
 #endif
 
     /*! Get information about provided interface */
@@ -284,13 +292,6 @@ protected:
         const std::string & componentName,
         const std::string & requiredInterfaceName,
         InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
-
-    /*! Connect two local interfaces at the server side */
-    bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
-
-    /*! \brief Connect two local interfaces at the client side */
-    bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
-#endif
 
 public:
     //-------------------------------------------------------------------------

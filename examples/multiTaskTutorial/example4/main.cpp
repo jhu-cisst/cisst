@@ -25,6 +25,11 @@ int main(int argc, char **argv)
     cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsManagerLocal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsManagerComponentServer", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsManagerComponentClient", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("mtsComponentViewer", CMN_LOG_ALLOW_ALL);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds

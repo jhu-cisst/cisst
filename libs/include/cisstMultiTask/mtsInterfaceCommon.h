@@ -140,7 +140,6 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const CommandWriteEleme
 {
     cmnSerializeRaw(outputStream, data.Name);
     cmnSerializeRaw(outputStream, data.ArgumentPrototypeSerialized);
-    cmnSerializeRaw(outputStream, data.Category);
     if (outputStream.fail())
         cmnThrow("cmnSerializeRaw(CommandWriteElement: Error occured with std::ostream::write");
 }
@@ -150,7 +149,6 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, CommandWriteElement & 
 {
     cmnDeSerializeRaw(inputStream, data.Name);
     cmnDeSerializeRaw(inputStream, data.ArgumentPrototypeSerialized);
-    cmnDeSerializeRaw(inputStream, data.Category);
     if (inputStream.fail())
         cmnThrow("cmnDeSerializeRaw(CommandWriteElement: Error occured with std::istream::read");
 }
