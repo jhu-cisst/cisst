@@ -968,6 +968,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
+    /*
     // Try to disconnect interfaces as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
@@ -992,7 +993,6 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
     }
 
     // PK TEMP: Don't call following if client or server is a proxy object
-    /*
     if ((arg.Client.ComponentName.find("Proxy") == std::string::npos) &&
         (arg.Server.ComponentName.find("Proxy") == std::string::npos)) {
         if (!LCM->Disconnect(arg.Client.ComponentName, arg.Client.InterfaceName,

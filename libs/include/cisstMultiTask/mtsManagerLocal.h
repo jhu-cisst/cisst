@@ -225,6 +225,10 @@ protected:
                        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
+    /*! Remove component from this local component manager */
+    bool RemoveComponent(mtsComponent * component, const bool notifyGCM = true);
+    bool RemoveComponent(const std::string & componentName, const bool notifyGCM = true);
+
     /*! Remove provided interface */
     // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
     bool RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceProvidedName);
@@ -306,9 +310,9 @@ public:
     bool CISST_DEPRECATED AddTask(mtsTask * component); // For backward compatibility
     bool CISST_DEPRECATED AddDevice(mtsComponent * component); // For backward compatibility
 
-    /*! \brief Remove a component from this local component manager. */
-    bool RemoveComponent(mtsComponent * component, const bool notifyGCM = true);
-    bool RemoveComponent(const std::string & componentName, const bool notifyGCM = true);
+    /*! \brief Remove component from this local component manager. */
+    bool RemoveComponent(mtsComponent * component);
+    bool RemoveComponent(const std::string & componentName);
     
     /*! \brief Retrieve a component by name. */
     mtsComponent * GetComponent(const std::string & componentName) const;

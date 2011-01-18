@@ -799,6 +799,16 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
     return AddComponent(component);
 }
 
+bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
+{
+    return RemoveComponent(component->GetName(), true);
+}
+
+bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
+{
+    return RemoveComponent(componentName, true);
+}
+
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component, const bool notifyGCM)
 {
     if (!component) {
