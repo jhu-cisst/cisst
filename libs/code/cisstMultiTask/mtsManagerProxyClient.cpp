@@ -325,7 +325,7 @@ bool mtsManagerProxyClient::ConnectServerSideInterfaceRequest(const ConnectionID
     return SendConnectServerSideInterfaceRequest(connectionID);
 }
 
-void mtsManagerProxyClient::GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const
+void mtsManagerProxyClient::GetListOfConnections(std::vector<mtsDescriptionConnection> & CMN_UNUSED(list)) const
 {
     // TODO: implement this if needed (MJUNG)
 }

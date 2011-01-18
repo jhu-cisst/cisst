@@ -244,7 +244,12 @@ bool mtsComponentInterfaceProxyServer::ReceiveAddClient(
 }
 
 bool mtsComponentInterfaceProxyServer::ReceiveFetchEventGeneratorProxyPointers(
-    const IceConnectionIDType & iceConnectionID, const std::string & clientComponentName,
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    const IceConnectionIDType & iceConnectionID, 
+#else
+    const IceConnectionIDType & CMN_UNUSED(iceConnectionID),
+#endif
+    const std::string & clientComponentName,
     const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers)
 {

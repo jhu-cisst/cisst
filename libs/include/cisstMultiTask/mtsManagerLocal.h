@@ -226,8 +226,8 @@ protected:
                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     /*! Remove component from this local component manager */
-    bool RemoveComponent(mtsComponent * component, const bool notifyGCM = true);
-    bool RemoveComponent(const std::string & componentName, const bool notifyGCM = true);
+    bool RemoveComponent(mtsComponent * component, const bool notifyGCM);
+    bool RemoveComponent(const std::string & componentName, const bool notifyGCM);
 
     /*! Remove provided interface */
     // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
