@@ -15,27 +15,26 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _robDH_h
-#define _robDH_h
+#ifndef _robModifiedDH_h
+#define _robModifiedDH_h
 
 #include <iostream>
 
 #include <cisstRobot/robKinematics.h>
 #include <cisstRobot/robExport.h>
 
-//! Standard DH parameters of a coordinate frame
+//! Modified DH (Craig's) parameters of a link
 /**
-   The DH class is used for kinematics parameters.
+   The modified DH class is used for kinematics parameters.
 */
-class CISST_EXPORT robDH : public robKinematics {
+
+class CISST_EXPORT robModifiedDH : public robKinematics {
   
  private:
   
   //! DH parameters
-  double alpha;
-  double     a;            // x components
-  double theta;
-  double     d;            // z components
+  double alpha, a;            // x components
+  double theta, d;            // z components
 
  protected:
   
@@ -58,24 +57,24 @@ class CISST_EXPORT robDH : public robKinematics {
  public:
   
   //! Default constructor
-  robDH();
+  robModifiedDH();
 
   //! Overloaded constructor
   /**
-     \param alpha 
+     \param alpha
      \param a
      \param theta
      \param d
      \param joint
   */
-  robDH( double alpha, 
-	 double a, 
-	 double theta, 
-	 double d,
-	 const robJoint& joint );
+  robModifiedDH( double alpha, 
+		 double a, 
+		 double theta, 
+		 double d,
+		 const robJoint& joint );
 
   //! Default destructor
-  ~robDH();
+  ~robModifiedDH();
   
   //! Get the position and orientation of the coordinate frame
   /**
@@ -87,9 +86,10 @@ class CISST_EXPORT robDH : public robKinematics {
 
   //! Get the orientation of the link
   /**
-     Returns the orientation of the coordinate frame.
+     Returns the orientation of the link with respect to the proximal link for 
+     a given joint vale.
      \param joint The joint associated with the link
-     \return The orientation of the frame
+     \return The orientation associated with the DH parameters
   */
   vctMatrixRotation3<double> Orientation( double q ) const;
   

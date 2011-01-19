@@ -31,6 +31,7 @@ class CISST_EXPORT robJoint {
  public:
 
   enum Type{ 
+    UNDEFINED,   // no clue
     HINGE,       // revolute joint
     SLIDER,      // prismatic joint
     UNIVERSAL,   // universal joint
@@ -178,7 +179,7 @@ public:
      offset, min position, max position, max force/torque.
      \param is[in] The input stream
   */
-  robJoint::Errno ReadJoint( std::istream& is );
+  virtual robJoint::Errno Read( std::istream& is );
 
   //! Read from an input stream
   /**
@@ -186,7 +187,7 @@ public:
      stream. This method can be overloaded for more specific joints.
      \param os[in] The output stream
   */
-  robJoint::Errno WriteJoint( std::ostream& os ) const;
+  virtual robJoint::Errno Write( std::ostream& os ) const;
 
 };
 

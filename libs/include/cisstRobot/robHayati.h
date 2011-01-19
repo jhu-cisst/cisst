@@ -15,34 +15,37 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _robDH_h
-#define _robDH_h
+#ifndef _robHayati_h
+#define _robHayati_h
 
 #include <iostream>
 
 #include <cisstRobot/robKinematics.h>
 #include <cisstRobot/robExport.h>
 
-//! Standard DH parameters of a coordinate frame
+//! Hayati parameters of a coordinate frame
 /**
-   The DH class is used for kinematics parameters.
+   Hayati is a kinematics convention especially suitable for parallel 
+   consecutive axes [HayatiJRS85]
 */
-class CISST_EXPORT robDH : public robKinematics {
+
+class CISST_EXPORT robHayati : public robKinematics {
   
  private:
   
-  //! DH parameters
+  //! Hayati parameters
   double alpha;
-  double     a;            // x components
+  double  beta;         // x components
   double theta;
-  double     d;            // z components
+  double     d;         // z components
 
  protected:
   
   //! Read the parameters from an input stream
   /**
      Read the parameters from an input stream. The parameters are in the
-     following order: convention, \f$\alpha\f$, a, \f$\theta\f$, d, <joint>
+     following order: convention, \f$\alpha\f$, \f$\beta\f$, \f$\theta\f$, d, 
+     <joint>
      \param is The input stream
   */
   void ReadParameters( std::istream& is );
@@ -50,7 +53,7 @@ class CISST_EXPORT robDH : public robKinematics {
   //! Write the parameters to an output stream
   /**
      Write the parameters to an output stream. The parameters are in the
-     following order: \f$\alpha\f$, a, \f$\theta\f$, d
+     following order: \f$alpha\f$, \f$\beta\f$, \f$\theta\f$, d
      \param os The output stream
   */
   void WriteParameters( std::ostream& os ) const; 
@@ -58,24 +61,24 @@ class CISST_EXPORT robDH : public robKinematics {
  public:
   
   //! Default constructor
-  robDH();
+  robHayati();
 
   //! Overloaded constructor
   /**
-     \param alpha 
-     \param a
+     \param alpha
+     \param beta
      \param theta
      \param d
      \param joint
   */
-  robDH( double alpha, 
-	 double a, 
-	 double theta, 
-	 double d,
-	 const robJoint& joint );
+  robHayati( double alpha, 
+	     double beta, 
+	     double theta, 
+	     double d,
+	     const robJoint& joint );
 
   //! Default destructor
-  ~robDH();
+  ~robHayati();
   
   //! Get the position and orientation of the coordinate frame
   /**
@@ -87,9 +90,10 @@ class CISST_EXPORT robDH : public robKinematics {
 
   //! Get the orientation of the link
   /**
-     Returns the orientation of the coordinate frame.
+     Returns the orientation of the link with respect to the proximal link for 
+     a given joint vale.
      \param joint The joint associated with the link
-     \return The orientation of the frame
+     \return The orientation associated with the Hayati parameters
   */
   vctMatrixRotation3<double> Orientation( double q ) const;
   

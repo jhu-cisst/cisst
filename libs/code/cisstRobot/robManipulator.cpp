@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vector>
 #include <iostream>
+
 using namespace std;
 
 #ifdef SINGLE_PRECISION
@@ -159,13 +160,24 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 
   // read the links (kinematics+dynamics+geometry) from the input
   for( size_t i=0; i<N; i++ ){
+
+    // Read a line from the file
     std::string line;
     getline( ifs, line );
     std::istringstream stringstream(line);
 
-    robLink li;
-    li.ReadLink( stringstream );
+    // Find the type of kinematics convention
+    std::string convention;
+    stringstream >> convention;
+
+    robKinematics* kinematics = NULL;
+    kinematics = robKinematics::Instantiate( convention );
+    if( kinematics != NULL )
+      { kinematics->Read( stringstream ); }
+    
+    robLink li( kinematics, robMass() );
     links.push_back( li );
+
   }
 
   Js = rmatrix(0, links.size()-1, 0, 5);
@@ -207,7 +219,7 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
   // set the position/orientation of link 0 to the base * its tranformation
   // setting the link's transformation is necessary in order to render the link
   // in opengl
-  vctFrame4x4<double> Rtwi =Rtw0*links[0].ForwardKinematics(q[0]);
+  vctFrame4x4<double> Rtwi = Rtw0*links[0].ForwardKinematics( q[0] );
 
   // for link 1 to N
   for(int i=1; i<N; i++)
@@ -347,10 +359,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
   vctFrame4x4<double> U;  // set identity
+  //if( tool != NULL ) U = tool->ForwardKinematics();
 
   for(int j=(int)links.size()-1; 0<=j; j--){
 
-    if( links[j].GetConvention() == robDH::STANDARD ){      // DH convention
+    if( links[j].GetConvention() == robKinematics::STANDARD_DH ){ // DH
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
 
@@ -378,7 +391,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
     }
 
-    if( links[j].GetConvention() == robDH::MODIFIED )  // Modified DH
+    if( links[j].GetConvention() == robKinematics::MODIFIED_DH )  // Modified DH
       { U = links[j].ForwardKinematics( q[j] ) * U; }
 
   }

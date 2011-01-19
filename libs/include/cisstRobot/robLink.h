@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 
-#include <cisstRobot/robDH.h>
+#include <cisstRobot/robKinematics.h>
 #include <cisstRobot/robMass.h>
 
 #include <cisstRobot/robExport.h>
@@ -32,17 +32,28 @@ http://www.cisst.org/cisst/license.txt.
    link's position and orientation. The link is also derived from robDH to
    determine the link's position and orientation from joint values
 */
-class CISST_EXPORT robLink : public robDH, public robMass {
+class CISST_EXPORT robLink {
 
-public:
+ protected:
+
+  robKinematics* kinematics;
+  robMass       mass;
+
+ public:
 
   enum Errno { ESUCCESS, EFAILURE };
   
   //! Default constructor
   robLink();
 
-  //!
-  robLink( const robDH& dh, const robMass& mass );
+  //! Copy constructor
+  robLink( const robLink& link );
+  
+  //! Overloaded constructor
+  robLink( robKinematics* kinematics, const robMass& mass );
+
+  //! Default destructor
+  ~robLink();
   
   //! Read the DH and body parameters
   /**
@@ -61,14 +72,29 @@ public:
      joint maximum force/torque (1 double): absolute force/torque limit
      mass (1 double): The mass of the body
      center of mass (3 double): \f$ \begin{matrix}x&y&z\end{matrix} \f$
-     principal moment of inertia (3 double): \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{matrix} \f$
+     principal moment of inertia (3 double): 
+                          \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{matrix} \f$
      body principal axis (9 double): 
   */
-  robLink::Errno ReadLink( std::istream& is );
+  robLink::Errno Read( std::istream& is );
   
   //! Write the DH and body parameters
-  robLink::Errno WriteLink( std::ostream& os ) const;
-  
+  robLink::Errno Write( std::ostream& os ) const;
+ 
+  vctFrame4x4<double> ForwardKinematics( double q ) const;
+
+
+  vctFixedSizeVector<double,3> PStar() const;
+  vctMatrixRotation3<double> Orientation( double q ) const;
+
+  robKinematics::Convention GetConvention() const;
+
+  robJoint::Type GetType() const;
+ 
+  double Mass() const { return mass.Mass(); }
+  vctFixedSizeVector<double,3> CenterOfMass() const { return mass.CenterOfMass(); }
+  vctFixedSizeMatrix<double,3,3> MomentOfInertia() const { return mass.MomentOfInertia(); }
+
 };
 
 #endif

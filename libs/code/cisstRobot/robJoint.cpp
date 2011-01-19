@@ -3,10 +3,10 @@
 
 #include <algorithm>  // transform
 #include <iomanip>    // setw
-#include <ctype.h>    // toupper
+#include <cctype>    // toupper
 
 robJoint::robJoint() : 
-  type( robJoint::HINGE ),
+  type( robJoint::UNDEFINED ),
   mode( robJoint::ACTIVE ),
   qoffset( 0.0 ),
   qmin( 0.0 ),
@@ -79,7 +79,7 @@ double robJoint::PositionMax()    const { return qmax; }
 
 double robJoint::ForceTorqueMax() const { return ftmax; }
 
-robJoint::Errno robJoint::ReadJoint( std::istream& is ){ 
+robJoint::Errno robJoint::Read( std::istream& is ){ 
 
   std::string type, mode;
   
@@ -89,10 +89,10 @@ robJoint::Errno robJoint::ReadJoint( std::istream& is ){
      >> this->qmin 
      >> this->qmax 
      >> this->ftmax;
-  
+
   // convert the strings to upper cases
-  std::transform( type.begin(), type.end(), type.begin(), toupper );
-  std::transform( mode.begin(), mode.end(), mode.begin(), toupper );
+  std::transform( type.begin(), type.end(), type.begin(), ::toupper );
+  std::transform( mode.begin(), mode.end(), mode.begin(), ::toupper );
   
   // match to string to a joint type
   if( (type.compare("REVOLUTE") == 0) || (type.compare("HINGE") == 0) )
@@ -131,20 +131,23 @@ robJoint::Errno robJoint::ReadJoint( std::istream& is ){
   return robJoint::ESUCCESS;
 }
 
-robJoint::Errno robJoint::WriteJoint( std::ostream& os ) const {
+robJoint::Errno robJoint::Write( std::ostream& os ) const {
 
   switch( GetType() ){
   case robJoint::HINGE:
-    os <<  std::setw(10) << "hinge ";
+    os <<  std::setw(15) << "hinge ";
     break;
   case robJoint::SLIDER:
-    os <<  std::setw(10) << "slider ";
+    os <<  std::setw(15) << "slider ";
     break;
   case robJoint::UNIVERSAL:
-    os << std::setw(10) << "universal ";
+    os << std::setw(15) << "universal ";
     break;
   case robJoint::BALLSOCKET:
-    os << std::setw(10) << "ballsocket ";
+    os << std::setw(15) << "ballsocket ";
+    break;
+  default:
+    os << std::setw(15) << "undefined ";
     break;
   }
 

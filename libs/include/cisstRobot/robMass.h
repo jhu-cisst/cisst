@@ -70,6 +70,8 @@ class CISST_EXPORT robMass{
   */
   vctMatrixRotation3<double> V;
 
+public:
+
   //! Parallel Axis Theorem
   /**
      Finds the moment of inertia with respect to a parallel axis
@@ -79,7 +81,6 @@ class CISST_EXPORT robMass{
 		const vctFixedSizeVector<double,3>& t, 
 		const vctFixedSizeMatrix<double,3,3>& I ) const;
 
-public:
 
   //! Default constructor
   /**
