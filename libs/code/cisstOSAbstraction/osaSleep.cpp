@@ -38,12 +38,16 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 
+const long nSecInSec =  1000.0 * 1000.0 * 1000.0;
+
 void osaSleep(double timeInSeconds) 
 {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
-    // For multi-threaded applications, nanosleep is preferable to usleep (usleep may not be thread-safe).
-    // Also, should check that the parameter does not exceed the maximum allowed value of 10^6 microseconds.
-    usleep(static_cast<long>(timeInSeconds * 1000000.0));
+
+    struct timespec ts;
+    ts.tv_sec = static_cast<long> (timeInSeconds);
+    ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
+    nanosleep(&ts, NULL);
 
 #elif (CISST_OS == CISST_WINDOWS)
     // A waitable timer seems to be better than the Windows Sleep().
