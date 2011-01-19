@@ -815,8 +815,7 @@ bool mtsComponent::WaitForState(mtsComponentState desiredState, double timeout)
 mtsInterfaceRequired * mtsComponent::EnableDynamicComponentManagement(void)
 {
     // Extend internal required interface (to Manager Component) to include event handlers
-    mtsInterfaceRequired * required = AddInterfaceRequired(
-        mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
+    mtsInterfaceRequired * required = AddInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired());
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "EnableDynamicComponentManagement: failed to add internal required interface to component "
             << "\"" << GetName() << "\"" << std::endl;
@@ -849,8 +848,7 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
         // in the user component's constructor so that the internal required interface and DCC
         // service object is properly initialized.
         // Only validity of such internal structures is checked here.
-        mtsInterfaceRequired * required = GetInterfaceRequired(
-            mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
+        mtsInterfaceRequired * required = GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired());
         if (!required) {
             CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: dynamic component management service (1) is not properly initialized" << std::endl;
             return false;
@@ -866,7 +864,7 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
         return true;
     }
     // Add provided interface (can't be done in constructor)
-    interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided;
+    interfaceName = mtsManagerComponentBase::GetNameOfInterfaceInternalProvided();
     mtsInterfaceProvided *provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;

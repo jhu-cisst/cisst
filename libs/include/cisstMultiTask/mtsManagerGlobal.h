@@ -223,7 +223,7 @@ protected:
     bool IsAlreadyConnected(const mtsDescriptionConnection & description) const;
 
     /*! Get total number of interfaces a component manages */
-    int GetNumberOfInterfaces(const std::string & processName, const std::string & componentName) const;
+    int GetNumberOfInterfaces(const std::string & processName, const std::string & componentName, const bool includeInternalInterface = true) const;
 
     /*! Get connection id that the required interface specified involves in */
     ConnectionIDType GetConnectionID(const std::string & clientProcessName, 
@@ -403,22 +403,20 @@ public:
                             const std::string & commandName,
                             const int scalarIndex,
                             mtsManagerLocalInterface::SetOfValues & values) const;
+
+    /*! Check if component is proxy based on its name */
+    static bool IsProxyComponent(const std::string & componentName);
+
+    /*! Generate unique name of a proxy component */
+    static const std::string GetComponentProxyName(const std::string & processName, const std::string & componentName);
 #endif
 
     /*! Get a process object (local component manager object) */
     mtsManagerLocalInterface * GetProcessObject(const std::string & processName) const;
 
     /*! Generate unique representation of interface as string */
-    inline static const std::string GetInterfaceUID(
-        const std::string & processName, const std::string & componentName, const std::string & interfaceName)
-    {
-        return processName + ":" + componentName + ":" + interfaceName;
-    }
-
-    /*! Generate unique name of a proxy component */
-    inline static const std::string GetComponentProxyName(const std::string & processName, const std::string & componentName) {
-        return processName + "." + componentName + "Proxy";
-    }
+    static const std::string GetInterfaceUID(
+        const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
     //-------------------------------------------------------------------------
     //  Networking

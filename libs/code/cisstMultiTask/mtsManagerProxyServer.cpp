@@ -220,12 +220,14 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
     }
 
     // Remove MCC proxy from GCM
+    /* MJ TODO: remove this later
     const std::string nameOfMCCProxy = mtsManagerGlobal::GetComponentProxyName(
-        processName, mtsManagerComponentClient::GetNameOfManagerComponentClient(processName));
+        processName, mtsManagerComponentBase::GetNameOfManagerComponentClient(processName));
     if (!ProxyOwner->RemoveComponent(mtsManagerLocal::ProcessNameOfLCMWithGCM, nameOfMCCProxy)) {
         LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove MCC proxy for disconnected process: \"" << processName << "\"");
         return false;
     }
+    */
 
     LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed disconnected process: \"" << processName << "\"");
 

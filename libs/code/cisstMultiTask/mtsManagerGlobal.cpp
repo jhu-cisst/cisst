@@ -417,7 +417,8 @@ bool mtsManagerGlobal::IsAlreadyConnected(const mtsDescriptionConnection & descr
     return false;
 }
 
-int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, const std::string & componentName) const
+int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, const std::string & componentName,
+                                            const bool includeInternalInterface) const
 {
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_WARNING << "GetNumberOfInterfaces: no component found: "
@@ -425,10 +426,78 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
         return -1;
     }
 
-    const unsigned int numberOfInterfaceProvided = 
-        ProcessMap.GetItem(processName)->GetItem(componentName)->InterfaceProvidedOrOutputMap.size();
-    const unsigned int numberOfInterfaceRequired = 
-        ProcessMap.GetItem(processName)->GetItem(componentName)->InterfaceRequiredOrInputMap.size();
+    int numberOfInterfaceProvided = 0, numberOfInterfaceRequired = 0;
+    InterfaceMapType * interfaceMap = ProcessMap.GetItem(processName)->GetItem(componentName);
+    if (!interfaceMap) {
+        CMN_LOG_CLASS_RUN_WARNING << "GetNumberOfInterfaces: no interface map found for "
+            << "\"" << processName << ":" << componentName << "\"" << std::endl;
+        return -1;
+    }
+
+    numberOfInterfaceProvided += interfaceMap->InterfaceProvidedOrOutputMap.size();
+    numberOfInterfaceRequired += interfaceMap->InterfaceRequiredOrInputMap.size();
+
+    // Exclude internal interfaces
+    std::string interfaceName;
+    if (!includeInternalInterface) {
+        InterfaceMapElementType::const_iterator it, itEnd;
+        if (mtsManagerComponentBase::IsManagerComponentServer(componentName)) {
+            // InterfaceGCMRequired
+            it = interfaceMap->InterfaceRequiredOrInputMap.begin();
+            itEnd = interfaceMap->InterfaceRequiredOrInputMap.end();
+            for (; it != itEnd; ++it) {
+                if (mtsManagerComponentBase::IsNameOfInterfaceGCMRequired(it->first)) {
+                    --numberOfInterfaceRequired;
+                }
+            }
+            // InterfaceGCMProvided
+            it = interfaceMap->InterfaceProvidedOrOutputMap.begin();
+            itEnd = interfaceMap->InterfaceProvidedOrOutputMap.end();
+            for (; it != itEnd; ++it) {
+                if (mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(it->first)) {
+                    --numberOfInterfaceProvided;
+                }
+            }
+        } else if (mtsManagerComponentBase::IsManagerComponentClient(componentName)) {
+            // InterfaceLCMRequired or InterfaceComponentRequired
+            it = interfaceMap->InterfaceRequiredOrInputMap.begin();
+            itEnd = interfaceMap->InterfaceRequiredOrInputMap.end();
+            for (; it != itEnd; ++it) {
+                if (mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(it->first) ||
+                    mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(it->first)) 
+                {
+                    --numberOfInterfaceRequired;
+                }
+            }
+            // InterfaceLCMProvided or InterfaceComponentProvided
+            it = interfaceMap->InterfaceProvidedOrOutputMap.begin();
+            itEnd = interfaceMap->InterfaceProvidedOrOutputMap.end();
+            for (; it != itEnd; ++it) {
+                if (mtsManagerComponentBase::IsNameOfInterfaceLCMProvided(it->first) ||
+                    mtsManagerComponentBase::IsNameOfInterfaceComponentProvided(it->first))
+                {
+                    --numberOfInterfaceProvided;
+                }
+            }
+        } else {
+            // InterfaceInternalRequired
+            it = interfaceMap->InterfaceRequiredOrInputMap.begin();
+            itEnd = interfaceMap->InterfaceRequiredOrInputMap.end();
+            for (; it != itEnd; ++it) {
+                if (mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(it->first)) {
+                    --numberOfInterfaceRequired;
+                }
+            }
+            // InterfaceInternalProvided
+            it = interfaceMap->InterfaceProvidedOrOutputMap.begin();
+            itEnd = interfaceMap->InterfaceProvidedOrOutputMap.end();
+            for (; it != itEnd; ++it) {
+                if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(it->first)) {
+                    --numberOfInterfaceProvided;
+                }
+            }
+        }
+    }
 
     return (numberOfInterfaceProvided + numberOfInterfaceRequired);
 }
@@ -1547,8 +1616,6 @@ void mtsManagerGlobal::DisconnectInternal(void)
     ConnectionIDType connectionID;
     mtsConnection * connectionInfo;
     
-    mtsDescriptionConnection arg; // arg for dynamic component composition
-
 #if !CISST_MTS_HAS_ICE
     std::string processName;
 #endif
@@ -1606,12 +1673,12 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // clean up required interface "InterfaceComponentRequiredFor(UserComponent)" of 
         // manager component "LCM_MCC" together.
         const std::string nameOfLCM_MCC = // LCM_MCC
-            mtsManagerComponentClient::GetNameOfManagerComponentClient(mtsManagerLocal::ProcessNameOfLCMDefault);
+            mtsManagerComponentBase::GetNameOfManagerComponentClient(mtsManagerLocal::ProcessNameOfLCMDefault);
         if ((serverComponentName != nameOfLCM_MCC) && (clientComponentName == nameOfLCM_MCC) &&
-            (serverInterfaceName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided)) 
+            (serverInterfaceName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) 
         {
             const std::string interfaceName = // InterfaceComponentRequiredForXXXX
-                mtsManagerComponentClient::GetNameOfInterfaceComponentRequired(serverComponentName);
+                mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(serverComponentName);
             const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(processName, clientComponentName, interfaceName);
 
             // Remove from LCM: see mtsManagerComponentClient::DisconnectLocally
@@ -1627,14 +1694,19 @@ void mtsManagerGlobal::DisconnectInternal(void)
         //
         // LCM::DisconnectLocally()
         const bool isMCCforGCM = ((serverProcessName == clientProcessName) & 
-                                  (clientComponentName == mtsManagerComponentClient::GetNameOfManagerComponentClient(
+                                  (clientComponentName == mtsManagerComponentBase::GetNameOfManagerComponentClientFor(
                                     mtsManagerLocal::ProcessNameOfLCMWithGCM)));
         const std::string serverComponentProxyName = GetComponentProxyName(serverProcessName, serverComponentName);
         if (FindProcess(clientProcessName)) {
+            mtsDescriptionConnection arg = connection;
             if (!isMCCforGCM) {
-                connectionInfo->GetDescriptionConnection(arg);
                 arg.Server.ProcessName = clientProcessName;
                 arg.Server.ComponentName = serverComponentProxyName;
+            }
+            if (arg.Server.ComponentName == "" || arg.Server.InterfaceName == "" ||
+                arg.Client.ComponentName == "" || arg.Server.InterfaceName == "")
+            {
+                CMN_ASSERT(false); // MJ TEST
             }
             ManagerComponentServer->ComponentDisconnect(clientProcessName, arg); // MJ TODO: should check return value
         }
@@ -1661,26 +1733,30 @@ void mtsManagerGlobal::DisconnectInternal(void)
             }
         }
 
-        // Remove provided interface proxy from LCM
-        if (clientProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
-            LocalManagerConnected->RemoveInterfaceProvidedProxy(serverComponentProxyName, serverInterfaceName, clientProcessName);
-        } else {
-            LocalManager->RemoveInterfaceProvided(serverComponentProxyName, serverInterfaceName);
-        }
+        // Remove provided interface proxy from LCM and GCM
+        if (FindComponent(clientProcessName, serverComponentProxyName)) {
+            // From LCM
+            if (clientProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
+                if (FindProcess(clientProcessName))
+                    LocalManagerConnected->RemoveInterfaceProvidedProxy(serverComponentProxyName, serverInterfaceName, clientProcessName);
+            } else {
+                LocalManager->RemoveInterfaceProvided(serverComponentProxyName, serverInterfaceName);
+            }
 
-        // Remove provided interface proxy from GCM as well
-        if (FindProcess(clientProcessName)) {
-            RemoveInterfaceProvidedOrOutput(clientProcessName, serverComponentProxyName, serverInterfaceName);
+            // From GCM
+            if (FindProcess(clientProcessName))
+                RemoveInterfaceProvidedOrOutput(clientProcessName, serverComponentProxyName, serverInterfaceName);
 
             // Remove server component proxy if necessary
-            int numOfInterfaces = GetNumberOfInterfaces(clientProcessName, serverComponentProxyName);
+            int numOfInterfaces = GetNumberOfInterfaces(clientProcessName, serverComponentProxyName, false);
             if (numOfInterfaces == 0) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: remove empty server component proxy: "
                     << "[ " << connectionID << " ] "
                     << "\"" << clientProcessName << ":" << serverComponentProxyName << "\"" << std::endl;
 
                 if (clientProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
-                    LocalManagerConnected->RemoveComponentProxy(serverComponentProxyName, clientProcessName);
+                    if (FindProcess(clientProcessName))
+                        LocalManagerConnected->RemoveComponentProxy(serverComponentProxyName, clientProcessName);
                 }
             }
         }
@@ -1690,10 +1766,15 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // LCM::DisconnectLocally()
         const std::string clientComponentProxyName = GetComponentProxyName(clientProcessName, clientComponentName);
         if (FindProcess(serverProcessName)) {
+            mtsDescriptionConnection arg = connection;
             if (!isMCCforGCM) {
-                connectionInfo->GetDescriptionConnection(arg);
                 arg.Client.ProcessName = serverProcessName;
                 arg.Client.ComponentName = clientComponentProxyName;
+            }
+            if (arg.Server.ComponentName == "" || arg.Server.InterfaceName == "" ||
+                arg.Client.ComponentName == "" || arg.Server.InterfaceName == "")
+            {
+                CMN_ASSERT(false); // MJ TEST
             }
             ManagerComponentServer->ComponentDisconnect(serverProcessName, arg); // MJ TODO: should check return value
         }
@@ -1720,19 +1801,24 @@ void mtsManagerGlobal::DisconnectInternal(void)
             }
         }
 
-        // Remove required interface proxy from LCM
-        if (serverProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
-            LocalManagerConnected->RemoveInterfaceRequiredProxy(clientComponentProxyName, clientInterfaceName, serverProcessName);
-        } else {
-            LocalManager->RemoveInterfaceRequired(clientComponentProxyName, clientInterfaceName);
-        }
+        // Remove required interface proxy from LCM and GCM
+        if (FindComponent(serverProcessName, clientComponentProxyName)) {
+            // From LCM
+            if (serverProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
+                if (FindProcess(serverProcessName))
+                    LocalManagerConnected->RemoveInterfaceRequiredProxy(clientComponentProxyName, clientInterfaceName, serverProcessName);
+            } else {
+                LocalManager->RemoveInterfaceRequired(clientComponentProxyName, clientInterfaceName);
+            }
 
-        // Remove required interface proxy from GCM as well
-        if (FindProcess(serverProcessName)) {
-            RemoveInterfaceRequiredOrInput(serverProcessName, clientComponentProxyName, clientInterfaceName);
+            // From GCM
+            if (FindProcess(serverProcessName))
+                RemoveInterfaceRequiredOrInput(serverProcessName, clientComponentProxyName, clientInterfaceName);
+
             // Remove client component proxy
             if (serverProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
-                LocalManagerConnected->RemoveComponentProxy(clientComponentProxyName, serverProcessName);
+                if (FindProcess(serverProcessName))
+                    LocalManagerConnected->RemoveComponentProxy(clientComponentProxyName, serverProcessName);
             } else {
                 LocalManager->RemoveComponent(clientComponentProxyName);
             }
@@ -1741,19 +1827,20 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // Step 3. Special handling of MCC/MCS-involved connections
         //
         // Remove InterfaceGCMRequired instance (InterfaceGCMRequired - InterfaceLCMProvided)
-        if (serverInterfaceName == mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided) {
+        if (serverInterfaceName == mtsManagerComponentBase::GetNameOfInterfaceLCMProvided()) {
             if (!ManagerComponentServer->DisconnectCleanup(serverProcessName)) {
                 CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to clean up InterfaceGCM's required interface for connection "
                     << "[ " << connectionID << " ] - \"" << serverProcessName << "\"" << std::endl;
             } else {
-                const std::string componentName = mtsManagerComponentBase::ComponentNames::ManagerComponentServer;
-                const std::string interfaceName = mtsManagerComponentServer::GetNameOfInterfaceGCMRequiredFor(serverProcessName);
+                const std::string componentName = mtsManagerComponentBase::GetNameOfManagerComponentServer();
+                const std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceGCMRequiredFor(serverProcessName);
                 const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(clientProcessName, componentName, interfaceName);
 
                 // Remove required interface from LCM
                 if (FindComponent(clientProcessName, componentName)) {
                     if (clientProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
-                        LocalManagerConnected->RemoveInterfaceRequiredProxy(componentName, interfaceName, clientProcessName);
+                        if (FindProcess(clientProcessName))
+                            LocalManagerConnected->RemoveInterfaceRequiredProxy(componentName, interfaceName, clientProcessName);
                     } else {
                         if (!LocalManager->RemoveInterfaceRequired(componentName, interfaceName)) {
                             CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: failed to remove required interface proxy: "
@@ -1763,24 +1850,23 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     }
                 }
                 // Remove required interface from GCM
-                if (!RemoveInterfaceRequiredOrInput(clientProcessName, componentName, interfaceName)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove InterfaceGCM's required interface from GCM: "
-                        << "[ " << connectionID << " ] - \"" << interfaceUID << "\"" << std::endl;
-                }
+                if (FindProcess(clientProcessName))
+                    RemoveInterfaceRequiredOrInput(clientProcessName, componentName, interfaceName);
             }
         }
 
         // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
-        if (serverInterfaceName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
+        if (serverInterfaceName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()) {
             if (isMCCforGCM) {
-                const std::string componentName = mtsManagerComponentClient::GetNameOfManagerComponentClient(mtsManagerLocal::ProcessNameOfLCMWithGCM);
+                const std::string componentName = mtsManagerComponentBase::GetNameOfManagerComponentClientFor(mtsManagerLocal::ProcessNameOfLCMWithGCM);
                 const std::string interfaceName = clientInterfaceName;
                 const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(clientProcessName, componentName, clientInterfaceName);
 
                 // Remove required interface from LCM
                 if (FindComponent(clientProcessName, componentName)) {
                     if (clientProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
-                        LocalManagerConnected->RemoveInterfaceRequiredProxy(componentName, interfaceName, clientProcessName);
+                        if (FindProcess(clientProcessName))
+                            LocalManagerConnected->RemoveInterfaceRequiredProxy(componentName, interfaceName, clientProcessName);
                     } else {
                         if (!LocalManager->RemoveInterfaceRequired(componentName, interfaceName)) {
                             CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: failed to remove required interface proxy: "
@@ -1790,13 +1876,11 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     }
                 }
                 // Remove required interface from GCM
-                if (!RemoveInterfaceRequiredOrInput(clientProcessName, componentName, interfaceName)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove InterfaceComponent's required interface from GCM: "
-                        << "[ " << connectionID << " ] - \"" << interfaceUID << "\"" << std::endl;
-                }
+                if (FindProcess(clientProcessName))
+                    RemoveInterfaceRequiredOrInput(clientProcessName, componentName, interfaceName);
             } else {
                 const bool disconnectedProcessCleanup = ((serverProcessName == clientProcessName) & 
-                    (clientComponentName == mtsManagerComponentClient::GetNameOfManagerComponentClient(serverProcessName)));
+                    (clientComponentName == mtsManagerComponentBase::GetNameOfManagerComponentClientFor(serverProcessName)));
                 if (disconnectedProcessCleanup) {
                     const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceName);
 
@@ -1811,12 +1895,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     }
                     */
                     // Remove required interface from GCM
-                    if (FindComponent(clientProcessName, clientComponentName)) {
-                        if (!RemoveInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceName)) {
-                            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove InterfaceComponent's required interface from GCM (disconnected process): "
-                                << "[ " << connectionID << " ] - \"" << interfaceUID << "\"" << std::endl;
-                        }
-                    }
+                    if (FindComponent(clientProcessName, clientComponentName))
+                        RemoveInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceName);
                 }
             }
         }
@@ -1854,12 +1934,6 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
 bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
 {
-    ConnectionMapType::iterator it = ConnectionMap.find(connectionID);
-    if (it == ConnectionMap.end()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: invalid connection id: " << connectionID << std::endl;
-        return false;
-    }
-
     DisconnectQueueType::const_iterator it1 = QueueDisconnectWaiting.find(connectionID);
     if (it1 != QueueDisconnectWaiting.end()) {
         return true;
@@ -1868,6 +1942,12 @@ bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
     DisconnectQueueType::const_iterator it2 = QueueDisconnected.find(connectionID);
     if (it2 != QueueDisconnected.end()) {
         return true;
+    }
+
+    ConnectionMapType::iterator it = ConnectionMap.find(connectionID);
+    if (it == ConnectionMap.end()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: invalid connection id: " << connectionID << std::endl;
+        return false;
     }
 
     QueueDisconnectWaitingChange.Lock();
@@ -1899,6 +1979,29 @@ bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const s
 //-------------------------------------------------------------------------
 //  Getters
 //-------------------------------------------------------------------------
+#if CISST_MTS_HAS_ICE
+bool mtsManagerGlobal::IsProxyComponent(const std::string & componentName)
+{
+    // PK: Need to fix this to be more robust
+    return (componentName.find("Proxy", componentName.length()-5) != std::string::npos);
+}
+
+const std::string mtsManagerGlobal::GetComponentProxyName(const std::string & processName, const std::string & componentName) 
+{
+    if (IsProxyComponent(componentName)) {
+        return componentName;
+    }
+
+    return processName + "." + componentName + "Proxy";
+}
+#endif
+
+const std::string mtsManagerGlobal::GetInterfaceUID(
+    const std::string & processName, const std::string & componentName, const std::string & interfaceName)
+{
+    return processName + ":" + componentName + ":" + interfaceName;
+}
+
 void mtsManagerGlobal::GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses) const
 {
     std::vector<std::string> temp;

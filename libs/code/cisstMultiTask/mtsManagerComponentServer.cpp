@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentServer);
 
 mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
-    : mtsManagerComponentBase(mtsManagerComponentBase::ComponentNames::ManagerComponentServer),
+    : mtsManagerComponentBase(mtsManagerComponentBase::GetNameOfManagerComponentServer()),
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
@@ -62,15 +62,6 @@ void mtsManagerComponentServer::Cleanup(void)
 {
 }
 
-std::string mtsManagerComponentServer::GetNameOfInterfaceGCMRequiredFor(const std::string & processName)
-{
-    std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired;
-    interfaceName += "For";
-    interfaceName += processName;
-
-    return interfaceName;
-}
-
 void mtsManagerComponentServer::GetNamesOfProcesses(std::vector<std::string> & processList) const
 {
     GCM->GetNamesOfProcesses(processList);
@@ -85,7 +76,7 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
     // for the creation of required interfaces.
 
     // Add provided interface to which InterfaceLCM's required interface connects.
-    const std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided;
+    const std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceGCMProvided();
     mtsInterfaceProvided * provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceGCM: failed to add \"GCM\" provided interface: " << interfaceName << std::endl;
@@ -143,7 +134,7 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     // Create a new set of function objects
     InterfaceGCMFunctionType * newFunctionSet = new InterfaceGCMFunctionType;
 
-    const std::string interfaceName = mtsManagerComponentServer::GetNameOfInterfaceGCMRequiredFor(clientProcessName);
+    const std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceGCMRequiredFor(clientProcessName);
     mtsInterfaceRequired * required = AddInterfaceRequired(interfaceName);
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to create \"GCM\" required interface: " << interfaceName << std::endl;
@@ -180,8 +171,8 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
 
     // Connect InterfaceGCM's required interface to InterfaceLCM's provided interface
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    const std::string serverComponentName = mtsManagerComponentClient::GetNameOfManagerComponentClient(clientProcessName);
-    const std::string serverInterfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided;
+    const std::string serverComponentName = mtsManagerComponentBase::GetNameOfManagerComponentClientFor(clientProcessName);
+    const std::string serverInterfaceName = mtsManagerComponentBase::GetNameOfInterfaceLCMProvided();
 #if CISST_MTS_HAS_ICE
     if (!LCM->Connect(LCM->GetProcessName(), this->GetName(), interfaceName,
                       clientProcessName, serverComponentName, serverInterfaceName))

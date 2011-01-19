@@ -163,6 +163,25 @@ public:
 
     static bool IsManagerComponentServer(const std::string & componentName);
     static bool IsManagerComponentClient(const std::string & componentName);
+    static bool IsNameOfInterfaceGCMRequired(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceGCMProvided(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceLCMRequired(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceLCMProvided(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceComponentRequired(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceComponentProvided(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceInternalRequired(const std::string & nameOfInterface);
+    static bool IsNameOfInterfaceInternalProvided(const std::string & nameOfInterface);
+
+    static const std::string GetNameOfManagerComponentServer(void);
+    static const std::string GetNameOfManagerComponentClientFor(const std::string & processName);
+    static const std::string GetNameOfInterfaceGCMRequiredFor(const std::string & processName);
+    static const std::string GetNameOfInterfaceGCMProvided(void);
+    static const std::string GetNameOfInterfaceLCMRequired(void);
+    static const std::string GetNameOfInterfaceLCMProvided(void);
+    static const std::string GetNameOfInterfaceComponentRequiredFor(const std::string & componentName);
+    static const std::string GetNameOfInterfaceComponentProvided(void);
+    static const std::string GetNameOfInterfaceInternalRequired(void);
+    static const std::string GetNameOfInterfaceInternalProvided(void);
 
     // mtsTask implementation
     virtual void Startup(void) = 0;

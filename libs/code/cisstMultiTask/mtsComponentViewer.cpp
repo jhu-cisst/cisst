@@ -227,6 +227,7 @@ bool mtsComponentViewer::WaitForResponse(double timeoutInSec) const
 bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) const
 {
     // PK: Need to fix this to be more robust
+    // MJ: This method can be replaced with mtsManagerGlobal::IsProxyComponent()
     return (componentName.find("Proxy", componentName.length()-5) != std::string::npos);
 }
 

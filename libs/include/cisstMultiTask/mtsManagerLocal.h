@@ -563,13 +563,6 @@ public:
     //-------------------------------------------------------------------------
 #if CISST_MTS_HAS_ICE
 public:
-    /*! Check if a component is a proxy object based on its name */
-    static bool IsProxyComponent(const std::string & componentName) {
-        const std::string proxyStr = "Proxy";
-        size_t found = componentName.find(proxyStr);
-        return found != std::string::npos;
-    }
-
     /*! Set endpoint access information */
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
 #endif

@@ -247,7 +247,7 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfa
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
         mtsCallableVoidBase * postCommandQueuedCallable = 0;
-        if (interfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided)
+        if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {

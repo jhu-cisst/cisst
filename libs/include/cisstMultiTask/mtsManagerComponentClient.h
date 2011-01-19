@@ -190,12 +190,6 @@ public:
     mtsFunctionWrite InterfaceComponentEvents_ChangeState;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
-
-    /*! Returns name of manager component client */
-    static std::string GetNameOfManagerComponentClient(const std::string & processName);
-    
-    /*! Returns name of InterfaceComponent's required interface */
-    static std::string GetNameOfInterfaceComponentRequired(const std::string & userComponentName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentClient);

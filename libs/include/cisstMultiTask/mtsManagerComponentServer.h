@@ -129,8 +129,6 @@ public:
 
     // Calls LCM::DisconnectLocally()
     void ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg);
-
-    static std::string GetNameOfInterfaceGCMRequiredFor(const std::string & processName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);
