@@ -1106,7 +1106,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandVoidElement elementCommandVoid;
     const std::vector<std::string> namesOfVoidCommand = GetNamesOfCommandsVoid();
     for (size_t i = 0; i < namesOfVoidCommand.size(); ++i) {
-        voidCommand = GetCommandVoid(namesOfVoidCommand[i]);
+        voidCommand = CommandsVoid.GetItem(namesOfVoidCommand[i]);
         if (!voidCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void command: " << namesOfVoidCommand[i] << std::endl;
             success = false;
@@ -1122,7 +1122,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandWriteElement elementCommandWrite;
     const std::vector<std::string> namesOfWriteCommand = GetNamesOfCommandsWrite();
     for (size_t i = 0; i < namesOfWriteCommand.size(); ++i) {
-        writeCommand = GetCommandWrite(namesOfWriteCommand[i]);
+        writeCommand = CommandsWrite(namesOfWriteCommand[i]);
         if (!writeCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write command: " << namesOfWriteCommand[i] << std::endl;
             success = false;
@@ -1142,7 +1142,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandReadElement elementCommandRead;
     const std::vector<std::string> namesOfReadCommand = GetNamesOfCommandsRead();
     for (size_t i = 0; i < namesOfReadCommand.size(); ++i) {
-        readCommand = GetCommandRead(namesOfReadCommand[i]);
+        readCommand = CommandsRead(namesOfReadCommand[i]);
         if (!readCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null read command: " << namesOfReadCommand[i] << std::endl;
             success = false;
@@ -1162,7 +1162,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandQualifiedReadElement elementCommandQualifiedRead;
     const std::vector<std::string> namesOfQualifiedReadCommand = GetNamesOfCommandsQualifiedRead();
     for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {
-        qualifiedReadCommand = GetCommandQualifiedRead(namesOfQualifiedReadCommand[i]);
+        qualifiedReadCommand = CommandsQualifiedRead(namesOfQualifiedReadCommand[i]);
         if (!qualifiedReadCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null qualified read command: " << namesOfQualifiedReadCommand[i] << std::endl;
             success = false;
@@ -1181,12 +1181,14 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
     }
 
+    // MJ TODO: Add support for CommandsVoidReturn and CommandsWriteReturn
+
     // Extract void events
     mtsMulticastCommandVoid * voidEvent;
     EventVoidElement elementEventVoid;
     const std::vector<std::string> namesOfVoidEvent = GetNamesOfEventsVoid();
     for (size_t i = 0; i < namesOfVoidEvent.size(); ++i) {
-        voidEvent = GetEventVoid(namesOfVoidEvent[i]);
+        voidEvent = EventVoidGenerators(namesOfVoidEvent[i]);
         if (!voidEvent) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void event: " << namesOfVoidEvent[i] << std::endl;
             success = false;
@@ -1201,7 +1203,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     EventWriteElement elementEventWrite;
     const std::vector<std::string> namesOfWriteEvent = GetNamesOfEventsWrite();
     for (size_t i = 0; i < namesOfWriteEvent.size(); ++i) {
-        writeEvent = GetEventWrite(namesOfWriteEvent[i]);
+        writeEvent = EventWriteGenerators(namesOfWriteEvent[i]);
         if (!writeEvent) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write event: " << namesOfWriteEvent[i] << std::endl;
             success = false;
