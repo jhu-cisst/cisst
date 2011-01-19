@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 
 #include <cisstMultiTask/mtsFunctionBase.h>
 
@@ -318,6 +319,9 @@ protected:
     typedef cmnNamedMap<mtsCommandWriteBase> EventHandlerWriteMapType;
     EventHandlerVoidMapType EventHandlersVoid;
     EventHandlerWriteMapType EventHandlersWrite;
+
+    /*! Get description of this interface (with serialized argument information) */
+    void GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription);
 
 public:
 

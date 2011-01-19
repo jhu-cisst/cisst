@@ -661,6 +661,9 @@ protected:
 
     bool AddEvent(const std::string & commandName, mtsMulticastCommandVoid * generator);
     bool AddEvent(const std::string & commandName, mtsMulticastCommandWriteBase * generator);
+
+    /*! Get description of this interface (with serialized argument information) */
+    bool GetDescription(InterfaceProvidedDescription & providedInterfaceDescription);
 };
 
 

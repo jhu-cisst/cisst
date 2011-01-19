@@ -2067,7 +2067,11 @@ bool mtsManagerLocal::GetInterfaceProvidedDescription(
     // the provided interface specified. Argument prototypes are serialized.
     interfaceProvidedDescription.InterfaceProvidedName = interfaceProvidedName;
 #if CISST_MTS_HAS_ICE
-    mtsComponentProxy::ExtractInterfaceProvidedDescription(interfaceProvided, interfaceProvidedDescription);
+    if (!interfaceProvided->GetDescription(interfaceProvidedDescription)) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceProvidedDescription: failed to get complete information of \""
+                                 << interfaceProvidedName << "\" found in component \"" << serverComponentName << "\"" << std::endl;
+        return false;
+    }
 #else
     CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
 #endif
@@ -2100,7 +2104,7 @@ bool mtsManagerLocal::GetInterfaceRequiredDescription(
     requiredInterfaceDescription.InterfaceRequiredName = requiredInterfaceName;
 
 #if CISST_MTS_HAS_ICE
-    mtsComponentProxy::ExtractInterfaceRequiredDescription(requiredInterface, requiredInterfaceDescription);
+    requiredInterface->GetDescription(requiredInterfaceDescription);
 #else
     CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceRequiredDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
 #endif

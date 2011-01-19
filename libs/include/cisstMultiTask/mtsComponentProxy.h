@@ -252,23 +252,6 @@ public:
         \param componentName Name of user component */
     static std::string GetInterfaceProvidedUserName(
         const std::string & processName, const std::string & componentName);
-
-    //-------------------------------------------------------------------------
-    //  Utilities
-    //-------------------------------------------------------------------------
-    /*! \brief Extract complete information about all commands and event 
-               generators in the provided interface specified. Argument 
-               prototypes are serialized.
-        \param providedInterface Provided interface
-        \param providedInterfaceDescription Output parameter to contain
-               complete information about the provided interface specified. */
-    static void ExtractInterfaceProvidedDescription(mtsInterfaceProvided * providedInterface,
-        InterfaceProvidedDescription & providedInterfaceDescription);
-
-    /*! Extract complete information about all functions and event handlers in
-        a required interface. Argument prototypes are fetched with serialization. */
-    static void ExtractInterfaceRequiredDescription(mtsInterfaceRequired * requiredInterface,
-        InterfaceRequiredDescription & requiredInterfaceDescription);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentProxy)

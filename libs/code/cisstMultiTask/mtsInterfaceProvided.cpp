@@ -1089,3 +1089,131 @@ void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList &argin, 
         argout.WriteEvents[i].Result = argin.Provided->RemoveObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPtr);
 }
 
+bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & providedInterfaceDescription)
+{
+    bool success = true;
+
+    // Serializer initialization
+    std::stringstream streamBuffer;
+    cmnSerializer serializer(streamBuffer);
+
+    // Get information about commands and events.  Note that we fetch void 
+    // command objects from non-queued command container assuming the non-
+    // queued container is updated for both queued and non-queued commands.
+
+    // Extract void commands
+    mtsCommandVoid * voidCommand;
+    CommandVoidElement elementCommandVoid;
+    const std::vector<std::string> namesOfVoidCommand = GetNamesOfCommandsVoid();
+    for (size_t i = 0; i < namesOfVoidCommand.size(); ++i) {
+        voidCommand = GetCommandVoid(namesOfVoidCommand[i]);
+        if (!voidCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void command: " << namesOfVoidCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandVoid.Name = voidCommand->GetName();
+        providedInterfaceDescription.CommandsVoid.push_back(elementCommandVoid);
+    }
+
+    // Extract write commands
+    mtsCommandWriteBase * writeCommand;
+    CommandWriteElement elementCommandWrite;
+    const std::vector<std::string> namesOfWriteCommand = GetNamesOfCommandsWrite();
+    for (size_t i = 0; i < namesOfWriteCommand.size(); ++i) {
+        writeCommand = GetCommandWrite(namesOfWriteCommand[i]);
+        if (!writeCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write command: " << namesOfWriteCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandWrite.Name = writeCommand->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(writeCommand->GetArgumentPrototype()));
+        elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
+    }
+
+    // Extract read commands
+    mtsCommandRead * readCommand;
+    CommandReadElement elementCommandRead;
+    const std::vector<std::string> namesOfReadCommand = GetNamesOfCommandsRead();
+    for (size_t i = 0; i < namesOfReadCommand.size(); ++i) {
+        readCommand = GetCommandRead(namesOfReadCommand[i]);
+        if (!readCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null read command: " << namesOfReadCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandRead.Name = readCommand->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(readCommand->GetArgumentPrototype()));
+        elementCommandRead.ArgumentPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsRead.push_back(elementCommandRead);
+    }
+
+    // Extract qualified read commands
+    mtsCommandQualifiedRead * qualifiedReadCommand;
+    CommandQualifiedReadElement elementCommandQualifiedRead;
+    const std::vector<std::string> namesOfQualifiedReadCommand = GetNamesOfCommandsQualifiedRead();
+    for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {
+        qualifiedReadCommand = GetCommandQualifiedRead(namesOfQualifiedReadCommand[i]);
+        if (!qualifiedReadCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null qualified read command: " << namesOfQualifiedReadCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandQualifiedRead.Name = qualifiedReadCommand->GetName();
+        // serialize argument1
+        streamBuffer.str("");
+        serializer.Serialize(*(qualifiedReadCommand->GetArgument1Prototype()));
+        elementCommandQualifiedRead.Argument1PrototypeSerialized = streamBuffer.str();
+        // serialize argument2
+        streamBuffer.str("");
+        serializer.Serialize(*(qualifiedReadCommand->GetArgument2Prototype()));
+        elementCommandQualifiedRead.Argument2PrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
+    }
+
+    // Extract void events
+    mtsMulticastCommandVoid * voidEvent;
+    EventVoidElement elementEventVoid;
+    const std::vector<std::string> namesOfVoidEvent = GetNamesOfEventsVoid();
+    for (size_t i = 0; i < namesOfVoidEvent.size(); ++i) {
+        voidEvent = GetEventVoid(namesOfVoidEvent[i]);
+        if (!voidEvent) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void event: " << namesOfVoidEvent[i] << std::endl;
+            success = false;
+            continue;
+        }
+        elementEventVoid.Name = voidEvent->GetName();
+        providedInterfaceDescription.EventsVoid.push_back(elementEventVoid);
+    }
+
+    // Extract write events
+    mtsMulticastCommandWriteBase * writeEvent;
+    EventWriteElement elementEventWrite;
+    const std::vector<std::string> namesOfWriteEvent = GetNamesOfEventsWrite();
+    for (size_t i = 0; i < namesOfWriteEvent.size(); ++i) {
+        writeEvent = GetEventWrite(namesOfWriteEvent[i]);
+        if (!writeEvent) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write event: " << namesOfWriteEvent[i] << std::endl;
+            success = false;
+            continue;
+        }
+        elementEventWrite.Name = writeEvent->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(writeEvent->GetArgumentPrototype()));
+        elementEventWrite.ArgumentPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.EventsWrite.push_back(elementEventWrite);
+    }
+
+    return success;
+}

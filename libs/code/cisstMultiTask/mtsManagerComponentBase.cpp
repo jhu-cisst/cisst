@@ -167,7 +167,7 @@ const std::string mtsManagerComponentBase::GetNameOfInterfaceGCMProvided(void)
 
 const std::string mtsManagerComponentBase::GetNameOfInterfaceLCMRequired(void)
 {
-    return InterfaceNames::InterfaceLCMProvided;
+    return InterfaceNames::InterfaceLCMRequired;
 }
 
 const std::string mtsManagerComponentBase::GetNameOfInterfaceLCMProvided(void)

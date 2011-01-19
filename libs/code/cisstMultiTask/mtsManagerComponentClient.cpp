@@ -35,7 +35,6 @@ mtsManagerComponentClient::mtsManagerComponentClient(const std::string & compone
       InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
     InterfaceComponentFunctionMap.SetOwner(*this);
-    UseSeparateLogFileDefault();
 }
 
 mtsManagerComponentClient::~mtsManagerComponentClient()

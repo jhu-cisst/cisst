@@ -112,6 +112,9 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
 
     provided->AddEventWrite(this->InterfaceGCMEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
+    // MJ TODO: We may need RemoveComponent command as well
+    //provided->AddEventWrite(this->InterfaceGCMEvents_AddComponent,
+    //                        mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceGCMEvents_AddConnection,
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
     provided->AddEventWrite(this->InterfaceGCMEvents_RemoveConnection,
