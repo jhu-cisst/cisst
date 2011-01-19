@@ -1122,7 +1122,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandWriteElement elementCommandWrite;
     const std::vector<std::string> namesOfWriteCommand = GetNamesOfCommandsWrite();
     for (size_t i = 0; i < namesOfWriteCommand.size(); ++i) {
-        writeCommand = CommandsWrite(namesOfWriteCommand[i]);
+        writeCommand = CommandsWrite.GetItem(namesOfWriteCommand[i]);
         if (!writeCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write command: " << namesOfWriteCommand[i] << std::endl;
             success = false;
@@ -1142,7 +1142,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandReadElement elementCommandRead;
     const std::vector<std::string> namesOfReadCommand = GetNamesOfCommandsRead();
     for (size_t i = 0; i < namesOfReadCommand.size(); ++i) {
-        readCommand = CommandsRead(namesOfReadCommand[i]);
+        readCommand = CommandsRead.GetItem(namesOfReadCommand[i]);
         if (!readCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null read command: " << namesOfReadCommand[i] << std::endl;
             success = false;
@@ -1162,7 +1162,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     CommandQualifiedReadElement elementCommandQualifiedRead;
     const std::vector<std::string> namesOfQualifiedReadCommand = GetNamesOfCommandsQualifiedRead();
     for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {
-        qualifiedReadCommand = CommandsQualifiedRead(namesOfQualifiedReadCommand[i]);
+        qualifiedReadCommand = CommandsQualifiedRead.GetItem(namesOfQualifiedReadCommand[i]);
         if (!qualifiedReadCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null qualified read command: " << namesOfQualifiedReadCommand[i] << std::endl;
             success = false;
@@ -1188,7 +1188,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     EventVoidElement elementEventVoid;
     const std::vector<std::string> namesOfVoidEvent = GetNamesOfEventsVoid();
     for (size_t i = 0; i < namesOfVoidEvent.size(); ++i) {
-        voidEvent = EventVoidGenerators(namesOfVoidEvent[i]);
+        voidEvent = EventVoidGenerators.GetItem(namesOfVoidEvent[i]);
         if (!voidEvent) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void event: " << namesOfVoidEvent[i] << std::endl;
             success = false;
@@ -1203,7 +1203,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     EventWriteElement elementEventWrite;
     const std::vector<std::string> namesOfWriteEvent = GetNamesOfEventsWrite();
     for (size_t i = 0; i < namesOfWriteEvent.size(); ++i) {
-        writeEvent = EventWriteGenerators(namesOfWriteEvent[i]);
+        writeEvent = EventWriteGenerators.GetItem(namesOfWriteEvent[i]);
         if (!writeEvent) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write event: " << namesOfWriteEvent[i] << std::endl;
             success = false;
