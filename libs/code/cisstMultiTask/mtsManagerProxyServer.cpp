@@ -1001,7 +1001,13 @@ bool mtsManagerProxyServer::SendRemoveInterfaceProvidedProxy(const std::string &
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendRemoveInterfaceProvidedProxy: " << componentProxyName << ", " << providedInterfaceProxyName << ", " << clientID);
 #endif
 
-    return (*clientProxy)->RemoveInterfaceProvidedProxy(componentProxyName, providedInterfaceProxyName);
+    try {
+        return (*clientProxy)->RemoveInterfaceProvidedProxy(componentProxyName, providedInterfaceProxyName);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendRemoveInterfaceProvidedProxy: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 bool mtsManagerProxyServer::SendRemoveInterfaceRequiredProxy(const std::string & componentProxyName,
@@ -1039,7 +1045,13 @@ bool mtsManagerProxyServer::SendConnectServerSideInterface(const ConnectionIDTyp
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendConnectServerSideInterface: " << clientID);
 #endif
 
-    return (*clientProxy)->ConnectServerSideInterface(connectionID, connectionStrings);
+    try {
+        return (*clientProxy)->ConnectServerSideInterface(connectionID, connectionStrings);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendConnectServerSideInterface: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 bool mtsManagerProxyServer::SendConnectClientSideInterface(::Ice::Int connectionID,
@@ -1101,7 +1113,13 @@ bool mtsManagerProxyServer::SendGetInterfaceRequiredDescription(const std::strin
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetInterfaceRequiredDescription: " << componentName << ", " << requiredInterfaceName << ", " << clientID);
 #endif
 
-    return (*clientProxy)->GetInterfaceRequiredDescription(componentName, requiredInterfaceName, requiredInterfaceDescription);
+    try {
+        return (*clientProxy)->GetInterfaceRequiredDescription(componentName, requiredInterfaceName, requiredInterfaceDescription);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetInterfaceRequiredDescription: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetNamesOfCommands(std::vector<std::string>& namesOfCommands,
@@ -1117,7 +1135,13 @@ void mtsManagerProxyServer::SendGetNamesOfCommands(std::vector<std::string>& nam
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetNamesOfCommands: " << componentName << ", " << providedInterfaceName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetNamesOfCommands(componentName, providedInterfaceName, namesOfCommands);
+    try {
+        (*clientProxy)->GetNamesOfCommands(componentName, providedInterfaceName, namesOfCommands);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetNamesOfCommands: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
@@ -1133,7 +1157,13 @@ void mtsManagerProxyServer::SendGetNamesOfEventGenerators(std::vector<std::strin
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetNamesOfEventGenerators: " << componentName << ", " << providedInterfaceName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetNamesOfEventGenerators(componentName, providedInterfaceName, namesOfEventGenerators);
+    try {
+        (*clientProxy)->GetNamesOfEventGenerators(componentName, providedInterfaceName, namesOfEventGenerators);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetNamesOfEventGenerators: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
@@ -1149,7 +1179,13 @@ void mtsManagerProxyServer::SendGetNamesOfFunctions(std::vector<std::string>& na
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetNamesOfFunctions: " << componentName << ", " << requiredInterfaceName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetNamesOfFunctions(componentName, requiredInterfaceName, namesOfFunctions);
+    try {
+        (*clientProxy)->GetNamesOfFunctions(componentName, requiredInterfaceName, namesOfFunctions);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetNamesOfFunctions: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
@@ -1165,7 +1201,13 @@ void mtsManagerProxyServer::SendGetNamesOfEventHandlers(std::vector<std::string>
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetNamesOfEventHandlers: " << componentName << ", " << requiredInterfaceName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetNamesOfEventHandlers(componentName, requiredInterfaceName, namesOfEventHandlers);
+    try {
+        (*clientProxy)->GetNamesOfEventHandlers(componentName, requiredInterfaceName, namesOfEventHandlers);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetNamesOfEventHandlers: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    } 
 }
 
 void mtsManagerProxyServer::SendGetDescriptionOfCommand(std::string & description, const std::string & componentName,
@@ -1181,7 +1223,13 @@ void mtsManagerProxyServer::SendGetDescriptionOfCommand(std::string & descriptio
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetDescriptionOfCommand(componentName, providedInterfaceName, commandName, description);
+    try {
+        (*clientProxy)->GetDescriptionOfCommand(componentName, providedInterfaceName, commandName, description);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfCommand: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetDescriptionOfEventGenerator(std::string & description, const std::string & componentName,
@@ -1197,7 +1245,13 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventGenerator(std::string & des
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfEventGenerator: " << componentName << ", " << providedInterfaceName << ", " << eventGeneratorName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetDescriptionOfEventGenerator(componentName, providedInterfaceName, eventGeneratorName, description);
+    try {
+        (*clientProxy)->GetDescriptionOfEventGenerator(componentName, providedInterfaceName, eventGeneratorName, description);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventGenerator: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetDescriptionOfFunction(std::string & description, const std::string & componentName,
@@ -1213,7 +1267,13 @@ void mtsManagerProxyServer::SendGetDescriptionOfFunction(std::string & descripti
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfFunction: " << componentName << ", " << requiredInterfaceName << ", " << functionName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetDescriptionOfFunction(componentName, requiredInterfaceName, functionName, description);
+    try {
+        (*clientProxy)->GetDescriptionOfFunction(componentName, requiredInterfaceName, functionName, description);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfFunction: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetDescriptionOfEventHandler(std::string & description, const std::string & componentName,
@@ -1229,7 +1289,13 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventHandler(std::string & descr
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfEventHandler: " << componentName << ", " << requiredInterfaceName << ", " << eventHandlerName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
+    try {
+        (*clientProxy)->GetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventHandler: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetArgumentInformation(std::string & argumentName, std::vector<std::string> & signalNames,
@@ -1245,7 +1311,13 @@ void mtsManagerProxyServer::SendGetArgumentInformation(std::string & argumentNam
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetArgumentInformation: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << clientID);
 #endif
 
-    (*clientProxy)->GetArgumentInformation(componentName, providedInterfaceName, commandName, argumentName, signalNames);
+    try {
+        (*clientProxy)->GetArgumentInformation(componentName, providedInterfaceName, commandName, argumentName, signalNames);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetArgumentInformation: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 }
 
 void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values, const std::string & componentName,
@@ -1263,7 +1335,13 @@ void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values, const s
 
     ::mtsManagerProxy::SetOfValues valuesICEtype;
 
-    (*clientProxy)->GetValuesOfCommand(componentName, providedInterfaceName, commandName, scalarIndex, valuesICEtype);
+    try {
+        (*clientProxy)->GetValuesOfCommand(componentName, providedInterfaceName, commandName, scalarIndex, valuesICEtype);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsManagerProxyServer, "SendGetValuesOfCommand: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        return false;
+    }
 
     ConvertValuesOfCommand(valuesICEtype, values);
 }
