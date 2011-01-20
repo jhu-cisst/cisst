@@ -627,19 +627,44 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName, const bool
     // component proxies and internal interfaces that the process involved in.
     if (componentMap) {
         if (networkDisconnect) {
+            DisconnectedProcessCleanupMapChange.Lock();
             DisconnectedProcessCleanupMapType::iterator it = DisconnectedProcessCleanupMap.GetMap().find(processName);
             if (it != DisconnectedProcessCleanupMap.end()) {
                 CleanupElementListType * list = it->second;
 
                 CleanupElementListType::iterator it2 = list->begin();
                 const CleanupElementListType::iterator it2End = list->end();
+                std::string peerProcessName, proxyComponentName;
                 for (; it2 != it2End; ++it2) {
-                    ret &= RemoveComponent(it2->ProcessName, it2->ComponentProxyName, false);
+                    peerProcessName = it2->ProcessName;
+                    proxyComponentName = it2->ComponentProxyName;
+                    // Remove the proxy components from GCM
+                    ret &= RemoveComponent(peerProcessName, proxyComponentName, false);
+                    // Remove the proxy components from LCM
+                    if (peerProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM) {
+                        if (!LocalManager->RemoveComponent(proxyComponentName, false)) {
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from LCM_with_GCM: " 
+                                << "\"" << peerProcessName << ":" << proxyComponentName << "\"" 
+                                << std::endl;
+                            ret = false;
+                        }
+                    } 
+#if CISST_MTS_HAS_ICE
+                    else {
+                        if (!LocalManagerConnected->RemoveComponentProxy(proxyComponentName, peerProcessName)) {
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from: " 
+                                << "\"" << peerProcessName << ":" << proxyComponentName << "\"" 
+                                << std::endl;
+                            ret = false;
+                        }
+                    }
+#endif
                 }
 
                 delete list;
                 DisconnectedProcessCleanupMap.RemoveItem(processName);
             }
+            DisconnectedProcessCleanupMapChange.Unlock();
         }
 
         // If the process being killed has components, they should be removed first.
@@ -822,6 +847,7 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
     const std::string removedComponentName = componentName;
 
     // Remove MCC proxy from LCM_with_GCM
+    /*
 #if CISST_MTS_HAS_ICE
     if (processName == mtsManagerLocal::ProcessNameOfLCMWithGCM) {
         if (!LocalManager->RemoveComponent(componentName, false)) {
@@ -831,6 +857,7 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
         }
     }
 #endif
+    */
 
     // Remove the component from GCM's component map
     ret &= componentMap->RemoveItem(componentName);
@@ -1568,6 +1595,7 @@ bool mtsManagerGlobal::ConnectConfirm(const ConnectionIDType connectionID)
 void mtsManagerGlobal::AddToDisconnectedProcessCleanup(const std::string & sourceProcessName, 
     const std::string & targetProcessName, const std::string & targetComponentProxyName)
 {
+    DisconnectedProcessCleanupMapChange.Lock();
     CleanupElementListType * list = DisconnectedProcessCleanupMap.GetItem(sourceProcessName);
     // If new source process
     if (!list) {
@@ -1580,6 +1608,8 @@ void mtsManagerGlobal::AddToDisconnectedProcessCleanup(const std::string & sourc
     element.ComponentProxyName = targetComponentProxyName;
 
     list->push_back(element);
+
+    DisconnectedProcessCleanupMapChange.Unlock();
 }
 
 //  MJ: Design of Disconnect()

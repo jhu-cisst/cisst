@@ -135,6 +135,7 @@ protected:
     /*! Mutex for thread-safe processing */
     osaMutex ProcessMapChange;    // for thread-safe ProcessMap update
     osaMutex ConnectionMapChange; // for thread-safe ConnectionMap update
+    osaMutex DisconnectedProcessCleanupMapChange; // for thread-safe DisconnectedProcessCleanupMap update
     osaMutex ConnectionChange;    // to process Connect() request one-by-one
 
     /*! Counter to issue a new connection ID */
