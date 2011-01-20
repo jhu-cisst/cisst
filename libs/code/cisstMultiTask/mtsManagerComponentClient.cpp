@@ -451,6 +451,9 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
     // Return if provided interface already exists
     if (GetInterfaceProvided(interfaceName))
         return true;
+    // Return if provided interface already exists
+    if (GetInterfaceProvided(interfaceName))
+        return true;
     mtsInterfaceProvided * provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceComponent: failed to add \"Component\" provided interface: " << interfaceName << std::endl;
@@ -718,6 +721,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(c
         InterfaceLCMFunction.ComponentDisconnect(arg);
     }
     */
+    // MJ: Don't use short cut -- every configuration change in the LCM should be reported to the GCM
+    // and the change should be initiated and controlled by the GCM.
     if (!InterfaceLCMFunction.ComponentDisconnect.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentDsconnect: failed to execute \"Component Disconnect\"" << std::endl;
         return;

@@ -313,7 +313,13 @@ int svlImageCodecPNG::Read(svlSampleImage &image, const unsigned int videoch, st
         break;
 
         case PNG_COLOR_TYPE_GRAY:
-            if (bitdepth < 8) png_set_gray_1_2_4_to_8(png_ptr);
+            if (bitdepth < 8) {
+#if PNG_LIBPNG_VER >= 10300
+                png_set_expand_gray_1_2_4_to_8(png_ptr);
+#else
+                png_set_gray_1_2_4_to_8(png_ptr);
+#endif
+            }
         break;
     }
     if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
@@ -412,8 +418,14 @@ int svlImageCodecPNG::Read(svlSampleImage &image, const unsigned int videoch, co
         break;
 
         case PNG_COLOR_TYPE_GRAY:
-            if (bitdepth < 8) png_set_gray_1_2_4_to_8(png_ptr);
-        break;
+            if (bitdepth < 8) {
+#if PNG_LIBPNG_VER >= 10300
+                png_set_expand_gray_1_2_4_to_8(png_ptr);
+#else
+                png_set_gray_1_2_4_to_8(png_ptr);
+#endif
+            }
+            break;
     }
     if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
         png_set_tRNS_to_alpha(png_ptr);

@@ -43,21 +43,24 @@ if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
     robJoint.cpp
     robMass.cpp
     
+    robKinematics.cpp
     robDH.cpp
+    robHayati.cpp
+    robModifiedDH.cpp
     robLink.cpp
     robManipulator.cpp
     
-    BH/robBH.cpp
-    BH/robBHF1.cpp
-    BH/robBHF2.cpp
-    BH/robBHF3.cpp
+#    BH/robBH.cpp
+#    BH/robBHF1.cpp
+#    BH/robBHF2.cpp
+#    BH/robBHF3.cpp
     
-    SAH/robSAH.cpp
-    SAH/robSAHFinger.cpp
-    SAH/robSAHThumb.cpp
+#    SAH/robSAH.cpp
+#    SAH/robSAHFinger.cpp
+#    SAH/robSAHThumb.cpp
     
-    robComputedTorque.cpp
-    robPD.cpp
+#    robComputedTorque.cpp
+#    robPD.cpp
     
     )
   
@@ -81,22 +84,25 @@ if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
     robMass.h
     robJoint.h
     
+    robKinematics.h
     robDH.h
+    robHayati.h
+    robModifiedDH.h
     robLink.h
     robManipulator.h
     
-    BH/robBH.h
-    BH/robBHF1.h
-    BH/robBHF2.h
-    BH/robBHF3.h
+#    BH/robBH.h
+#    BH/robBHF1.h
+#    BH/robBHF2.h
+#    BH/robBHF3.h
     
-    SAH/robSAH.h
-    SAH/robSAHFinger.h
-    SAH/robSAHThumb.h
+#    SAH/robSAH.h
+#    SAH/robSAHFinger.h
+#    SAH/robSAHThumb.h
     
-    robControllerJoints.h
-    robComputedTorque.h
-    robPD.h
+#    robControllerJoints.h
+#    robComputedTorque.h
+#    robPD.h
     
     )
 

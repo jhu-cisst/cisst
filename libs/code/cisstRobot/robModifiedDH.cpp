@@ -15,36 +15,36 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstRobot/robDH.h>
+#include <cisstRobot/robModifiedDH.h>
 
 #include <iomanip>
 #include <iostream>
 
-robDH::robDH() : 
-  robKinematics( robKinematics::STANDARD_DH ){ 
+robModifiedDH::robModifiedDH() : 
+  robKinematics( robKinematics::MODIFIED_DH ){ 
   alpha = a = theta = d = 0.0;
 }
 
-robDH::robDH( double alpha, 
-	      double a, 
-	      double theta, 
-	      double d,
-	      const robJoint& joint ) :
-  robKinematics( joint, robKinematics::STANDARD_DH ),
+robModifiedDH::robModifiedDH( double alpha, 
+			      double a, 
+			      double theta, 
+			      double d,
+			      const robJoint& joint ) :
+  robKinematics( joint, robKinematics::MODIFIED_DH ),
   alpha( alpha ),
   a( a ),
   theta( theta ),
   d( d ){}
 
-robDH::~robDH(){}
+robModifiedDH::~robModifiedDH(){}
 
-robKinematics* robDH::Clone() const 
-{ return (robKinematics*) new robDH( *this ); }
+robKinematics* robModifiedDH::Clone() const 
+{ return (robKinematics*) new robModifiedDH( *this ); }
 
-vctFixedSizeVector<double,3> robDH::PStar() const
+vctFixedSizeVector<double,3> robModifiedDH::PStar() const
 { return vctFixedSizeVector<double,3>( a, d*sin(alpha), d*cos(alpha) ); }
   
-vctFrame4x4<double> robDH::ForwardKinematics( double q ) const { 
+vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const { 
 
   double d = this->d;           // copy the prismatic value
   double theta = this->theta;   // copy the revolute value
@@ -66,23 +66,24 @@ vctFrame4x4<double> robDH::ForwardKinematics( double q ) const {
   // should be computed once
   double ca = cos(this->alpha); double sa = sin(this->alpha);	
   double ct = cos(theta);       double st = sin(theta);
-
-  vctMatrixRotation3<double> R( ct, -st*ca,  st*sa,
-				st,  ct*ca, -ct*sa,
-				0,     sa,     ca );
-  vctFixedSizeVector<double,3> t(a*ct, a*st, d);
+    
+  // modified DH transformation
+  vctMatrixRotation3<double> R( ct,    -st,     0,
+				st*ca,  ct*ca, -sa,
+				st*sa,  ct*sa,  ca );
+  vctFixedSizeVector<double,3> t( a, -sa*d, ca*d );
   return vctFrame4x4<double>( R, t );
 
 }
 
-vctMatrixRotation3<double> robDH::Orientation( double q ) const {
+vctMatrixRotation3<double> robModifiedDH::Orientation( double q ) const {
   vctFrame4x4<double> Rt = ForwardKinematics( q );
   return vctMatrixRotation3<double>( Rt[0][0], Rt[0][1], Rt[0][2],
 				     Rt[1][0], Rt[1][1], Rt[1][2],
 				     Rt[2][0], Rt[2][1], Rt[2][2] );
 }
 
-void robDH::ReadParameters( std::istream& is ) {
+void robModifiedDH::ReadParameters( std::istream& is ) {
   is >> this->alpha  // read the stuff from the stream
      >> this->a 
      >> this->theta 
@@ -93,8 +94,8 @@ void robDH::ReadParameters( std::istream& is ) {
   if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
 }
 
-void robDH::WriteParameters( std::ostream& os ) const {
-  os << std::setw(10) << "STANDARD DH"
+void robModifiedDH::WriteParameters( std::ostream& os ) const {
+  os << std::setw(15) << "MODIFIED DH"
      << std::setw(10) << alpha 
      << std::setw(10) << a 
      << std::setw(10) << theta

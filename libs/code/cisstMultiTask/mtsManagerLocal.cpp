@@ -2065,7 +2065,7 @@ bool mtsManagerLocal::GetInterfaceProvidedDescription(
         return false;
     }
 #else
-    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for CISST_MTS_HAS_ICE" << std::endl;
 #endif
 
     return true;
@@ -2347,7 +2347,6 @@ bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
 #endif
 
 #if CISST_MTS_HAS_ICE
-
 void mtsManagerLocal::SetIPAddress(void)
 {
     // Fetch all ip addresses available on this machine.

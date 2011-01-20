@@ -246,8 +246,69 @@ IF(WIN32)
     SET(PROGRAMFILES_X86_DIR "$ENV{SystemDrive}/Program Files (x86)")
 ENDIF(WIN32)
 
+
+# OpenCV 2.2+
+IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+    SET(OpenCV2_OPTIONS
+        OpenCV2_INCLUDE_DIRS
+        OpenCV2_LIBRARIES
+        CACHE INTERNAL "List of OpenCV 2.2+ options"
+        )
+
+    FIND_PACKAGE(OpenCV2)
+    IF(OpenCV2_FOUND)
+        MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${OpenCV2_INCLUDE_DIRS}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${OpenCV2_LIBRARIES}"
+            )
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlFilterImageZoom.cpp
+            svlFilterToolTracker.cpp
+            svlVideoCodecOpenCV.h       # private header
+            svlVideoCodecOpenCV.cpp
+            svlTrackerOCVMeanShift.cpp
+            )
+        IF(NOT WIN32)
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                svlVidCapSrcOpenCV.h    # private header
+                svlVidCapSrcOpenCV.cpp
+                )
+        ENDIF(NOT WIN32)
+        SET(HEADER_FILES
+            ${HEADER_FILES}
+            svlFilterImageZoom.h
+            svlFilterToolTracker.h
+            svlTrackerOCVMeanShift.h
+            )
+        MESSAGE(STATUS "OpenCV 2.2+ found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)
+
+    ELSE(OpenCV2_FOUND)
+        IF(CISST_SVL_HAS_OPENCV2)
+            MARK_AS_ADVANCED(CLEAR ${OpenCV2_OPTIONS})
+            MESSAGE(FATAL_ERROR "OpenCV 2.2+ required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_OPENCV2)
+            MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+            OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV 2.2+ extensions" OFF)
+        ENDIF(CISST_SVL_HAS_OPENCV2)
+    ENDIF(OpenCV2_FOUND)
+
+ELSE(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+    OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" OFF)
+ENDIF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+
+
 # OpenCV
-IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
+IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
     SET(OpenCV_OPTIONS
         OpenCV_ROOT_DIR
         OpenCV_INCLUDE_DIRS
@@ -355,7 +416,6 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
             "${SVL_ADDITIONAL_LIBRARIES}"
             "${OpenCV_LIBRARIES}"
             )
-
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
@@ -371,14 +431,13 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
                 svlVidCapSrcOpenCV.cpp
             )
         ENDIF(NOT WIN32)
-
         SET(HEADER_FILES
             ${HEADER_FILES}
             svlFilterImageZoom.h
             svlFilterToolTracker.h
             svlTrackerOCVMeanShift.h
             )
-        MESSAGE(STATUS "OpenCV found")
+        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
 
     ELSE(OpenCV_FOUND)
@@ -391,10 +450,10 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
         ENDIF(CISST_SVL_HAS_OPENCV)
     ENDIF(OpenCV_FOUND)
 
-ELSE(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
+ELSE(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
     MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
     OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
-ENDIF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
+ENDIF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
 
 
 # JPEG
@@ -712,7 +771,7 @@ IF(WIN32)
                 MESSAGE(FATAL_ERROR "DirectShow required. Please specify its location.")
             ELSE(CISST_SVL_HAS_DIRECTSHOW)
                 MARK_AS_ADVANCED(FORCE ${DIRECTSHOW_OPTIONS})
-                OPTION(CISST_SVL_HAS_MIL "Compile DirectShow extensions" OFF)
+                OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
             ENDIF(CISST_SVL_HAS_DIRECTSHOW)
         ENDIF(DIRECTSHOW_FOUND)
 
@@ -905,9 +964,11 @@ IF(UNIX)
     ENDIF(CISST_SVL_HAS_DC1394 OR NOT DC1394_OPTIONS)
 
 
-    IF(CISST_SVL_HAS_X11 OR NOT DEFINED X11_FOUND)
+    IF(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
         FIND_PACKAGE(X11)
         IF(X11_FOUND)
+            SET(SVL_X11_FOUND ${X11_FOUND})
+
             SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
                 "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
                 "${X11_INCLUDE_DIR}"
@@ -961,10 +1022,10 @@ IF(UNIX)
             ENDIF(CISST_SVL_HAS_X11)
         ENDIF(X11_FOUND)
 
-    ELSE(CISST_SVL_HAS_X11 OR NOT DEFINED X11_FOUND)
+    ELSE(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
         OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
         SET(CISST_SVL_HAS_XV "OFF" CACHE INTERNAL "SVL Has Xvideo")
-    ENDIF(CISST_SVL_HAS_X11 OR NOT DEFINED X11_FOUND)
+    ENDIF(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
 
 ELSE(UNIX)
 
@@ -975,6 +1036,24 @@ ELSE(UNIX)
     SET(CISST_SVL_HAS_XV           "OFF" CACHE INTERNAL "SVL Has Xvideo")
 
 ENDIF(UNIX)
+
+# Set SVL options to 'advanced' to hide them from beginner user
+#MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_OPENCV)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_OPENCV2)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_JPEG)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_ZLIB)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_PNG)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_MIL)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DIRECTSHOW)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_SVS)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_VIDEO4LINUX2)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DC1394)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_X11)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_XV)
+IF(CMAKE_SYSTEM_NAME MATCHES Darwin)
+    MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
+ENDIF(CMAKE_SYSTEM_NAME MATCHES Darwin)
 
 # Exporting settings to applications that link against cisst
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES SVL_ADDITIONAL_INCLUDE_DIRECTORIES)

@@ -17,48 +17,59 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstRobot/robLink.h>
 
-robLink::robLink(){}
+robLink::robLink() : kinematics( NULL ){}
 
-robLink::robLink( const robDH& dh, 
-		  const robMass& mass ) :
-  robDH( dh ), robMass( mass ) {}
+robLink::robLink( const robLink& link ){
+  kinematics = link.kinematics->Clone();
+  mass       = link.mass;
+}
 
-robLink::Errno robLink::ReadLink( std::istream& is ){ 
+robLink::robLink( robKinematics* kinematics, const robMass& mass ) : 
+  kinematics( kinematics ), 
+  mass( mass ) {}
 
-  if( ReadDH( is ) != robDH::ESUCCESS ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to read the DH parameters."
-		      << std::endl;
-    return robLink::EFAILURE;
+robLink::~robLink(){
+  if( kinematics != NULL ){ 
+    delete kinematics;
+    kinematics = NULL;
   }
-  
-  if( ReadMass( is ) != robMass::ESUCCESS ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to read the body parameters."
-		      << std::endl;
-    return robLink::EFAILURE;
-  }
-  
+}
+
+robLink::Errno robLink::Read( std::istream& is ){ 
+  if( kinematics != NULL ) { kinematics->Read( is ); }
+  mass.ReadMass( is );
   return robLink::ESUCCESS;
 }
 
-robLink::Errno robLink::WriteLink( std::ostream& os ) const { 
-
-  if( WriteDH( os ) != robDH::ESUCCESS ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to write the DH parameters."
-		      << std::endl;
-    return robLink::EFAILURE;
-  }
-
-  if( WriteMass( os ) != robMass::ESUCCESS ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to write the body parameters."
-		      << std::endl;
-    return robLink::EFAILURE;
-  }
-  
+robLink::Errno robLink::Write( std::ostream& os ) const { 
+  if( kinematics != NULL ) { kinematics->Write( os ); }
+  mass.WriteMass( os );
   return robLink::ESUCCESS;
+}
 
+vctFrame4x4<double> robLink::ForwardKinematics( double q ) const {
+  if( kinematics != NULL ) { return kinematics->ForwardKinematics( q ); }
+  else                     { return vctFrame4x4<double>(); }
+}
+
+vctMatrixRotation3<double> robLink::Orientation( double q ) const {
+  if( kinematics != NULL ) { return kinematics->Orientation( q ); }
+  else                     { return vctMatrixRotation3<double>(); }
+}
+
+vctFixedSizeVector<double,3> robLink::PStar() const {
+  if( kinematics != NULL ) { return kinematics->PStar(); }
+  else                     { return vctFixedSizeVector<double,3>(0.0);  }
+}
+
+robKinematics::Convention robLink::GetConvention() const {
+  if( kinematics != NULL ) { return kinematics->GetConvention(); }
+  else                     { return robKinematics::UNDEFINED;  }
+}
+
+
+robJoint::Type robLink::GetType() const {
+  if( kinematics != NULL ) { return kinematics->GetType(); }
+  else                     { return robJoint::UNDEFINED;  }
 }
 

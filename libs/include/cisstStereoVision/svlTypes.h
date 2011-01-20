@@ -33,18 +33,43 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlDefinitions.h>
 #include <cisstStereoVision/svlConfig.h>
 
-#if CISST_SVL_HAS_OPENCV
-  #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
-    #include <cv.h>
-    #include <highgui.h>
-  #else
-    #include <opencv/cv.h>
-    #include <opencv/highgui.h>
-  #endif
-#else
-// to compile the same API
-typedef void IplImage;
-#endif // CISST_SVL_HAS_OPENCV
+#if CISST_SVL_HAS_OPENCV2
+    #include <core_c.h>
+    #include <core.hpp>
+    #include <wimage.hpp>
+//    #include <eigen.hpp>
+    #include <internal.hpp>
+    #include <imgproc_c.h>
+    #include <imgproc.hpp>
+    #include <features2d.hpp>
+    #include <flann.hpp>
+    #include <calib3d.hpp>
+    #include <objdetect.hpp>
+    #include <compat.hpp>
+    #include <legacy.hpp>
+    #include <blobtrack.hpp>
+    #include <contrib.hpp>
+    #include <highgui_c.h>
+    #include <highgui.hpp>
+    #include <ml.hpp>
+    #include <tracking.hpp>
+    #include <background_segm.hpp>
+    #include <gpu.hpp>
+#else // CISST_SVL_HAS_OPENCV2
+    #if CISST_SVL_HAS_OPENCV
+        #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
+            #include <cv.h>
+            #include <highgui.h>
+        #else
+            #include <opencv/cv.h>
+            #include <opencv/highgui.h>
+        #endif
+    #else // CISST_SVL_HAS_OPENCV
+        // to compile the same API
+        typedef void IplImage;
+    #endif // CISST_SVL_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV2
+
 
 #include <cisstStereoVision/svlSample.h>
 #include <cisstStereoVision/svlSampleImage.h>

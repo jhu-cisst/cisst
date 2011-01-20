@@ -235,7 +235,7 @@ protected:
             CMN_LOG_RUN_ERROR << "ICE: " << message << std::endl;
         }
         ::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
-            // TODO: Ice-3.4 support
+            // MJ: Ice-3.4 support
             return NULL;
         }
     };
