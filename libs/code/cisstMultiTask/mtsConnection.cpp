@@ -83,13 +83,12 @@ bool mtsConnection::CheckTimeout(void) const {
 
 void mtsConnection::ToStream(std::ostream & outputStream) const 
 {
-    // smmy
-    //mtsGenericObject::ToStream(outputStream);
+    mtsGenericObject::ToStream(outputStream);
     outputStream << ", " << ConnectionDescription
                  << ", Connected: " << (Connected ? "YES" : "NO")
 #if CISST_MTS_HAS_ICE
                  << ", Endpoint: " << EndpointInfo
-                 //<< ", TimeoutTime: " << TimeoutTime
+                 << ", TimeoutTime: " << TimeoutTime
 #endif
                  ;
 }

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-12
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -91,7 +91,7 @@ void mtsComponentInterfaceProxyServer::RemoveServant(void)
 {
     Sender->Stop();
 
-    // smmy: TDOO: iterate all clients and stop/clean-up all proxies
+    // MJ TDOO: iterate all clients and stop/clean-up all proxies
     // CloseAllClients() - defined in mtsProxyBaseServer.h
     //Sender = 0;
 }
@@ -663,7 +663,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Refresh(const 
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: Refresh: " << iceConnectionID);
 #endif
 
-    // TODO: Session refresh
+    // MJ: Could implement session refresh here
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Shutdown(const ::Ice::Current& current)
@@ -674,10 +674,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Shutdown(const
 
     const IceConnectionIDType iceConnectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
-    // TODO: smmy
-    // Set as true to represent that this connection (session) is going to be closed.
-    // After this flag is set, no message is allowed to be sent to a server.
-    //ComponentInterfaceProxyServer->ShutdownSession(current);
+    //MJ: Could have shutdown methods like ComponentInterfaceProxyServer->ShutdownSession(current);
 }
 
 bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::FetchEventGeneratorProxyPointers(

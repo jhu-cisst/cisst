@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -134,7 +134,7 @@ void mtsManagerProxyServer::RemoveServant(void)
 {
     Sender->Stop();
 
-    // smmy: TDOO: iterate all clients and stop/clean-up all proxies
+    // MJ TDOO: iterate all clients and stop/clean-up all proxies
     // CloseAllClients() - defined in mtsProxyBaseServer.h
     //Sender = 0;
 }
@@ -168,10 +168,6 @@ void mtsManagerProxyServer::Runner(ThreadArguments<mtsManagerGlobal> * arguments
         std::string error("mtsManagerProxyServer: exception at mtsManagerProxyServer::Runner()");
         ProxyServer->GetLogger()->error(error);
     }
-
-    // smmy: check if this causes crashes
-    //ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "proxy server terminates");
-    //ProxyServer->StopProxy();
 }
 
 void mtsManagerProxyServer::StopProxy(void)
@@ -220,14 +216,14 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
     }
 
     // Remove MCC proxy from GCM
-    //* MJ TODO: remove this later
+    /* MJ TODO: remove this later
     const std::string nameOfMCCProxy = mtsManagerGlobal::GetComponentProxyName(
         processName, mtsManagerComponentBase::GetNameOfManagerComponentClientFor(processName));
     if (!ProxyOwner->RemoveComponent(mtsManagerLocal::ProcessNameOfLCMWithGCM, nameOfMCCProxy)) {
         LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove MCC proxy for disconnected process: \"" << processName << "\"");
         return false;
     }
-    //*/
+    */
 
     LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed disconnected process: \"" << processName << "\"");
 
@@ -1480,9 +1476,9 @@ void mtsManagerProxyServer::ManagerServerI::TestMessageFromClientToServer(
 bool mtsManagerProxyServer::ManagerServerI::AddClient(
     const std::string & processName, const ::Ice::Identity & identity, const ::Ice::Current& current)
 {
-//#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
    LogPrint(ManagerServerI, "<<<<< RECV: AddClient: " << processName << " (" << Communicator->identityToString(identity) << ")");
-//#endif
+#endif
 
     const IceConnectionIDType iceConnectionID = current.ctx.find(mtsManagerProxyServer::GetConnectionIDKey())->second;
 
@@ -1502,9 +1498,7 @@ void mtsManagerProxyServer::ManagerServerI::Refresh(const ::Ice::Current& curren
     LogPrint(ManagerServerI, "<<<<< RECV: Refresh: " << iceConnectionID);
 #endif
 
-    //
-    // TODO: Refresh this session
-    //
+    // MJ: could refresh session here
 }
 
 void mtsManagerProxyServer::ManagerServerI::Shutdown(const ::Ice::Current& current)
@@ -1515,10 +1509,7 @@ void mtsManagerProxyServer::ManagerServerI::Shutdown(const ::Ice::Current& curre
 
     const IceConnectionIDType iceConnectionID = current.ctx.find(mtsManagerProxyServer::GetConnectionIDKey())->second;
 
-    // TODO:
-    // Set as true to represent that this connection (session) is going to be closed.
-    // After this flag is set, no message is allowed to be sent to a server.
-    //ComponentInterfaceProxyServer->ShutdownSession(current);
+    // MJ: could have shutdown like ComponentInterfaceProxyServer->ShutdownSession(current);
 }
 
 bool mtsManagerProxyServer::ManagerServerI::AddProcess(const std::string & processName, const ::Ice::Current & CMN_UNUSED(current))

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-13
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -54,8 +54,8 @@ protected:
     /*! Connection id that this proxy runs for. mtsComponentInterfaceProxyServer 
         handles multiple network proxy clients (because multiple required 
         interfaces can connect to a provided interface) with unique key as this
-        connection id (see also mtsComponentProxy::ConnectionId). */
-    unsigned int ConnectionID;
+        connection id. */
+    ConnectionIDType ConnectionID;
 
     /*! Instance counter used to set a short name of this thread */
     static unsigned int InstanceCounter;

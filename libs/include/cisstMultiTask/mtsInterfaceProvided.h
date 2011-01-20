@@ -496,7 +496,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Find an end-user interface given a client name. */
     mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
 
-    /*! Returns a list of user names */
+    /*! Returns a list of user names (name of connected required interface).  
+        Used to remove provided interface in a thread-safe way */
     std::vector<std::string> GetListOfUserNames(void) const;
 
     /*! Return number of active end-user interfaces. */

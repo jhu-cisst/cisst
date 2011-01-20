@@ -90,7 +90,6 @@ protected:
         connected */
     virtual void StopProxy(void);
 
-    // smmy: check if I really need this
     /*! Shutdown the current session for graceful termination */
     //void ShutdownSession(const Ice::Current & current);
 
@@ -135,10 +134,6 @@ protected:
     /*! Monitor active connection by heart beat. If a client proxy disconnects or is
         disconnected, the close event is detected here. */
     virtual void Monitor(void);
-
-    // smmy: todo: Implement this
-    /*! Close all the connected clients */
-    //void CloseAllClients(void);
 
     //-------------------------------------------------------------------------
     //  Getters
@@ -282,15 +277,6 @@ void mtsProxyBaseServerType::IceCleanup(void)
     ChangeProxyState(BaseType::PROXY_STATE_FINISHING);
 
     this->InitSuccessFlag = false;
-
-    // smmy: two different clean-up process
-    // 1) when an individual client is disconnected - only Ice proxy associated
-    //    with the client should be cleaned up
-    // 2) when server itself terminates - all clients via 1) + Ice server proxy
-    //    needs to be cleaned up
-
-    // TODO: smmy: remove client selectively!!!
-    //RemoveServant();
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>

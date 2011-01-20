@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-11-12
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -125,7 +125,7 @@ protected:
         MJ: (8/20/10) To support a local connection between the global component
         manager and a local component manager on the same process, this 
         assumption is slightly modified such that the GCM can have two different 
-        type of connections -- local and remote connections.  When the GCM 
+        types of connection with LCM -- local and remote.  When the GCM 
         executes commands, it checks if it has a local connection to the LCM on 
         the same process and, if yes, it sends the command to the local LCM.  
         If not, it delivers the command to a remote LCM same as before. */
@@ -171,7 +171,7 @@ protected:
     typedef cmnNamedMap<CleanupElementListType> DisconnectedProcessCleanupMapType;
     DisconnectedProcessCleanupMapType DisconnectedProcessCleanupMap;
 
-    // MJ TEST
+    /*! Prints out ProcessMap in human readable format */
     void ShowInternalStructure(void);
 
     //-------------------------------------------------------------------------

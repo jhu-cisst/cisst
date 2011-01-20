@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -162,10 +162,6 @@ void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
 void mtsManagerProxyClient::StopProxy()
 {
     if (!IsActiveProxy()) return;
-
-    // Let a server disconnect this client safely.
-    //ManagerServerProxy->Shutdown();
-    //ManagerServerProxy->ice_getConnection()->close(false); // close gracefully
 
     try {
         BaseClientType::StopProxy();

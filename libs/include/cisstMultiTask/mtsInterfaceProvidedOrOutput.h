@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -79,7 +79,7 @@ class CISST_EXPORT mtsInterfaceProvidedOrOutput: public cmnGenericObject
     const std::string & GetName(void) const;
 
     /*! Returns the name of the component */
-    const std::string & GetComponentName(void) const;
+    const std::string GetComponentName(void) const;
 
     /*! Cleanup method */
     virtual void Cleanup(void);

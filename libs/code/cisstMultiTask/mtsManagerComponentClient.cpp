@@ -992,8 +992,6 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
     }
     */
 
-    CMN_ASSERT(arg.Client.ProcessName == arg.Server.ProcessName); // MJ TEST
-
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     if (LCM->FindComponent(arg.Client.ComponentName) && LCM->FindComponent(arg.Server.ComponentName)) {
         if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,

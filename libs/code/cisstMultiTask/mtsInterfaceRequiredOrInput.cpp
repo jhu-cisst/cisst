@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,9 +43,13 @@ const std::string & mtsInterfaceRequiredOrInput::GetName(void) const
 }
 
 
-const std::string & mtsInterfaceRequiredOrInput::GetComponentName(void) const
+const std::string mtsInterfaceRequiredOrInput::GetComponentName(void) const
 {
-    return this->Component->GetName();
+    if (!Component) {
+        return "Unnamed";
+    } else {
+        return this->Component->GetName();
+    }
 }
 
 

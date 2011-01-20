@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-13
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -150,19 +150,11 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
         std::string error("mtsComponentInterfaceProxyClient: exception at mtsComponentInterfaceProxyClient::Runner()");
         ProxyClient->GetLogger()->error(error);
     } 
-
-    // smmy: check if this causes crashes
-    //ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "Proxy client terminates");
-    //ProxyClient->StopProxy();
 }
 
 void mtsComponentInterfaceProxyClient::StopProxy()
 {
     if (!IsActiveProxy()) return;
-
-    // Let a server disconnect this client safely.
-    //ManagerServerProxy->Shutdown();
-    //ComponentInterfaceServerProxy->ice_getConnection()->close(false); // close gracefully
 
     try {
         BaseClientType::StopProxy();
@@ -477,8 +469,6 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
         } catch (const ::Ice::Exception & ex) {
             LogPrint(mtsComponentInterfaceProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
             if (ComponentInterfaceProxyClient) {
-                // smmy: GCM, LCM_S, LCM_C: if LCM_C dies, LCM_S crashes at
-                // the following line
                 ComponentInterfaceProxyClient->OnServerDisconnect(ex);
             }
         }
