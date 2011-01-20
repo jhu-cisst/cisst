@@ -436,7 +436,7 @@ public:
     /*! Get access information of interface proxy server */
     bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
 
-    bool GetInterfaceProvidedProxyAccessInfo(
+    bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName, 
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
 

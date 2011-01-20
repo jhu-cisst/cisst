@@ -128,7 +128,7 @@ protected:
     /*! Networking */
     bool ReceiveSetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
     bool ReceiveGetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
-    bool ReceiveGetInterfaceProvidedProxyAccessInfo(
+    bool ReceiveGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName, 
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
     bool ReceiveInitiateConnect(const ConnectionIDType connectionID);
@@ -458,7 +458,7 @@ protected:
 
         /*! Networking */
         bool SetInterfaceProvidedProxyAccessInfo(::Ice::Int connectionID, const std::string & endpointInfo, const ::Ice::Current & current);
-        bool GetInterfaceProvidedProxyAccessInfo(
+        bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
             const std::string & serverProcessName, const std::string & serverComponentName, 
             const std::string & serverInterfaceProvidedName, std::string & endpointInfo, const ::Ice::Current & current);
         bool GetInterfaceProvidedProxyAccessInfoWithID(::Ice::Int connectionID, std::string & endpointInfo, const ::Ice::Current & current);

@@ -175,7 +175,7 @@ public:
     
     bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
 
-    bool GetInterfaceProvidedProxyAccessInfo(
+    bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName, 
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
     
@@ -217,7 +217,7 @@ public:
     // Networking
     bool SendSetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
     bool SendGetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
-    bool SendGetInterfaceProvidedProxyAccessInfo(
+    bool SendGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName, 
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
     bool SendInitiateConnect(::Ice::Int connectionID);

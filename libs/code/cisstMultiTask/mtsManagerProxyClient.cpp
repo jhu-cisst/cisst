@@ -308,11 +308,11 @@ bool mtsManagerProxyClient::GetInterfaceProvidedProxyAccessInfo(const Connection
     return SendGetInterfaceProvidedProxyAccessInfo(connectionID, endpointInfo);
 }
 
-bool mtsManagerProxyClient::GetInterfaceProvidedProxyAccessInfo(
+bool mtsManagerProxyClient::GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
     const std::string & serverProcessName, const std::string & serverComponentName, 
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
-    return SendGetInterfaceProvidedProxyAccessInfo(serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
+    return SendGetInterfaceProvidedProxyAccessInfo(clientProcessName, serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
 }
 
 bool mtsManagerProxyClient::InitiateConnect(const ConnectionIDType connectionID)
@@ -777,17 +777,17 @@ bool mtsManagerProxyClient::SendGetInterfaceProvidedProxyAccessInfo(const Connec
     }
 }
 
-bool mtsManagerProxyClient::SendGetInterfaceProvidedProxyAccessInfo(
+bool mtsManagerProxyClient::SendGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
     const std::string & serverProcessName, const std::string & serverComponentName, 
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendGetInterfaceProvidedProxyAccessInfo: "
+    LogPrint(mtsManagerProxyClient, ">>>>> SEND: SendGetInterfaceProvidedProxyAccessInfo: " << clientProcessName << ", "
         << mtsManagerGlobal::GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName));
 #endif
 
     try {
-        return ManagerServerProxy->GetInterfaceProvidedProxyAccessInfo(serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
+        return ManagerServerProxy->GetInterfaceProvidedProxyAccessInfo(clientProcessName, serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyClient, "SendGetInterfaceProvidedProxyAccessInfo: network exception: " << ex);
         OnServerDisconnect(ex);

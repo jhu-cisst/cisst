@@ -854,11 +854,11 @@ bool mtsManagerProxyServer::ReceiveGetInterfaceProvidedProxyAccessInfo(const Con
     return ProxyOwner->GetInterfaceProvidedProxyAccessInfo(connectionID, endpointInfo);
 }
 
-bool mtsManagerProxyServer::ReceiveGetInterfaceProvidedProxyAccessInfo(
+bool mtsManagerProxyServer::ReceiveGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
     const std::string & serverProcessName, const std::string & serverComponentName, 
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
-    return ProxyOwner->GetInterfaceProvidedProxyAccessInfo(serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
+    return ProxyOwner->GetInterfaceProvidedProxyAccessInfo(clientProcessName, serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
 }
 
 bool mtsManagerProxyServer::ReceiveInitiateConnect(const ConnectionIDType connectionID)
@@ -1695,17 +1695,17 @@ bool mtsManagerProxyServer::ManagerServerI::GetInterfaceProvidedProxyAccessInfoW
     return ManagerProxyServer->ReceiveGetInterfaceProvidedProxyAccessInfo(connectionID, endpointInfo);
 }
 
-bool mtsManagerProxyServer::ManagerServerI::GetInterfaceProvidedProxyAccessInfo(
+bool mtsManagerProxyServer::ManagerServerI::GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
     const std::string & serverProcessName, const std::string & serverComponentName, 
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo, 
     const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ManagerServerI, "<<<<< RECV: GetInterfaceProvidedProxyAccessInfo: " 
+    LogPrint(ManagerServerI, "<<<<< RECV: GetInterfaceProvidedProxyAccessInfo: " << clientProcessName << ", "
         << mtsManagerGlobal::GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName));
 #endif
 
-    return ManagerProxyServer->ReceiveGetInterfaceProvidedProxyAccessInfo(serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
+    return ManagerProxyServer->ReceiveGetInterfaceProvidedProxyAccessInfo(clientProcessName, serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
 }
 
 bool mtsManagerProxyServer::ManagerServerI::InitiateConnect(::Ice::Int connectionID, const ::Ice::Current & CMN_UNUSED(current))

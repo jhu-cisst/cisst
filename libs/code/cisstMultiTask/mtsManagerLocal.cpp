@@ -2586,7 +2586,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     }
     // If server proxy is already running, fetch the access information
     else {
-        if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(
+        if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(clientProcessName,
                 serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointAccessInfo))
         {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to fetch server proxy access information: "

@@ -201,11 +201,12 @@ public:
     virtual bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo) = 0;
 
     /*! \brief Get access information of the provided interface proxy
+        \param clientProcessName Name of client process
         \param serverProcessName Name of server process
         \param serverComponentName Name of server component
         \param serverInterfaceProvidedName Name of server provided interface
         \param endpointInfo access information of provided interface proxy */
-    virtual bool GetInterfaceProvidedProxyAccessInfo(
+    virtual bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName, 
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo) = 0;
 #endif

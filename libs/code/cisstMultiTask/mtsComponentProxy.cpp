@@ -535,7 +535,8 @@ bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredI
 
     // Run required interface proxy (i.e., component interface proxy client)
     if (!requiredInterfaceProxy->StartProxy(this)) {
-        CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProxyClient: proxy failed to start: " << requiredInterfaceProxyName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProxyClient: proxy failed to start for required interface " 
+            << "\"" << requiredInterfaceProxyName << "\", \"" << serverEndpointInfo << "\", [ " << connectionID << " ]" << std::endl;
         return false;
     }
 

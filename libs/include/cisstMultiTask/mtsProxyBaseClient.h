@@ -123,9 +123,13 @@ void mtsProxyBaseClient<_proxyOwner>::IceInitialize(void)
         }
     } catch (...) {
         if (this->IceLogger) {
-            this->IceLogger->error("mtsProxyBaseClient: ICE init - exception");
+            std::string msg("mtsProxyBaseClient: ICE init - exception: Endpoint = ");
+            msg += "\"";
+            msg += EndpointInfo;
+            msg += "\"";
+            this->IceLogger->error(msg);
         } else {
-            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - exception" << std::endl;
+            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - exception: Endpoint = " << EndpointInfo << std::endl;
         }
     }
 
@@ -134,10 +138,15 @@ void mtsProxyBaseClient<_proxyOwner>::IceInitialize(void)
             this->IceCommunicator->destroy();
         } catch (const Ice::Exception & e) {
             if (this->IceLogger) {
-                this->IceLogger->error("mtsProxyBaseClient: ICE init - Client proxy clean-up error");
-                this->IceLogger->trace("mtsProxyBaseClient", e.what());
+                std::string msg("mtsProxyBaseClient: ICE init - Client proxy clean-up error: Endpoint = ");
+                msg += "\"";
+                msg += EndpointInfo;
+                msg += "\", ";
+                msg += e.what();
+                this->IceLogger->error(msg);
+                this->IceLogger->trace("mtsProxyBaseClient", msg);
             } else {
-                CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - Client proxy clean-up error." << std::endl;
+                CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - Client proxy clean-up error: \"" << EndpointInfo << "\"" << std::endl;
                 CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: " << e.what() << std::endl;
             }
         }

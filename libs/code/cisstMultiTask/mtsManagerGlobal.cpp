@@ -2341,7 +2341,7 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const ConnectionIDTyp
     return true;
 }
 
-bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(
+bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
     const std::string & serverProcessName, const std::string & serverComponentName, 
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
@@ -2354,7 +2354,8 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(
     mtsDescriptionConnection description;
     for (; it != itEnd; ++it) {
         it->second.GetDescriptionConnection(description);
-        if ((description.Server.ProcessName == serverProcessName) &&
+        if ((description.Client.ProcessName == clientProcessName) &&
+            (description.Server.ProcessName == serverProcessName) &&
             (description.Server.ComponentName == serverComponentName) &&
             (description.Server.InterfaceName == serverInterfaceProvidedName))
         {

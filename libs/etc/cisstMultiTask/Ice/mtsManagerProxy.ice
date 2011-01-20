@@ -274,7 +274,7 @@ module mtsManagerProxy
 
         // Networking
         bool SetInterfaceProvidedProxyAccessInfo(int connectionID, string endpointInfo);
-        bool GetInterfaceProvidedProxyAccessInfo(string serverProcessName, string serverComponentName, string serverInterfaceProvidedName, out string endpointInfo);
+        bool GetInterfaceProvidedProxyAccessInfo(string clientProcessName, string serverProcessName, string serverComponentName, string serverInterfaceProvidedName, out string endpointInfo);
         bool GetInterfaceProvidedProxyAccessInfoWithID(int connectionID, out string endpointInfo);
         bool InitiateConnect(int connectionID);
         bool ConnectServerSideInterfaceRequest(int connectionID);
