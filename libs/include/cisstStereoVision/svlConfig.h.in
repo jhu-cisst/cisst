@@ -26,7 +26,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstConfig.h>
 
 // Using OpenCV for optimized image processing
-#cmakedefine01 CISST_SVL_HAS_OPENCV
+#cmakedefine01 CISST_SVL_HAS_OPENCV2
+#if CISST_SVL_HAS_OPENCV2
+    #define CISST_SVL_HAS_OPENCV 1
+#else // CISST_SVL_HAS_OPENCV2
+    #cmakedefine01 CISST_SVL_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV2
 
 // Using ZLIB for optimized image processing
 #cmakedefine01 CISST_SVL_HAS_ZLIB
