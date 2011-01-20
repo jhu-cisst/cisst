@@ -1140,7 +1140,7 @@ void mtsManagerProxyServer::SendGetNamesOfCommands(std::vector<std::string>& nam
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfCommands: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1162,7 +1162,7 @@ void mtsManagerProxyServer::SendGetNamesOfEventGenerators(std::vector<std::strin
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfEventGenerators: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1184,7 +1184,7 @@ void mtsManagerProxyServer::SendGetNamesOfFunctions(std::vector<std::string>& na
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfFunctions: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1206,7 +1206,7 @@ void mtsManagerProxyServer::SendGetNamesOfEventHandlers(std::vector<std::string>
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfEventHandlers: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     } 
 }
 
@@ -1228,7 +1228,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfCommand(std::string & descriptio
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfCommand: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1250,7 +1250,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventGenerator(std::string & des
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventGenerator: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1272,7 +1272,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfFunction(std::string & descripti
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfFunction: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1294,7 +1294,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventHandler(std::string & descr
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventHandler: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1316,7 +1316,7 @@ void mtsManagerProxyServer::SendGetArgumentInformation(std::string & argumentNam
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetArgumentInformation: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 }
 
@@ -1340,7 +1340,7 @@ void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values, const s
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetValuesOfCommand: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return;
     }
 
     ConvertValuesOfCommand(valuesICEtype, values);
