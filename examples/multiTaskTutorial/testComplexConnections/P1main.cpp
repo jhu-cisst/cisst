@@ -27,8 +27,8 @@ int main(int argc, char * argv[])
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
-    osaThreadedLogFile threadedLog("P1");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
+    //osaThreadedLogFile threadedLog("P1");
+    //cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
 
     // Get local component manager instance
     mtsManagerLocal * localManager;

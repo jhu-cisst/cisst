@@ -14,7 +14,6 @@ int main(int argc, char * argv[])
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
-    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("serverTask", CMN_LOG_ALLOW_ALL);
 
     std::string globalComponentManagerIP;

@@ -702,6 +702,8 @@ std::vector<std::string> mtsInterfaceProvided::GetListOfUserNames(void) const
         name = it->second->GetName();
         userNames.push_back(name.substr(offset1 + offset2, name.size() - offset1 - offset2));
     }
+
+    return userNames;
 }
 
 // Remove the end-user interface specified by the parameter interfaceProvided.

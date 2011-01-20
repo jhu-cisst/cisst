@@ -59,7 +59,11 @@ public:
 
     /*! \brief Remove process 
         \param processName Name of process */
+#if CISST_MTS_HAS_ICE
     virtual bool RemoveProcess(const std::string & processName, const bool networkDisconnect) = 0;
+#else
+    virtual bool RemoveProcess(const std::string & processName) = 0;
+#endif
 
     //-------------------------------------------------------------------------
     //  Component Management
