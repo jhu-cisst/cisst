@@ -461,9 +461,6 @@ public:
         return ProcessName;
     }
 
-    /*! Returns end user name to access provided interface's resources */
-    const std::string GetEndUserName(void) const;
-
     /*! Returns the current configuration of this local component manager */
     ConfigurationType GetConfiguration(void) const {
         return Configuration;

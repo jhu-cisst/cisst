@@ -496,6 +496,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Find an end-user interface given a client name. */
     mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
 
+    /*! Returns a list of user names */
+    std::vector<std::string> GetListOfUserNames(void) const;
+
     /*! Return number of active end-user interfaces. */
     int GetNumberOfEndUsers() const;
 

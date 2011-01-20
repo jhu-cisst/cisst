@@ -78,6 +78,9 @@ class CISST_EXPORT mtsInterfaceProvidedOrOutput: public cmnGenericObject
     /*! Returns the name of the interface. */
     const std::string & GetName(void) const;
 
+    /*! Returns the name of the component */
+    const std::string & GetComponentName(void) const;
+
     /*! Cleanup method */
     virtual void Cleanup(void);
 };

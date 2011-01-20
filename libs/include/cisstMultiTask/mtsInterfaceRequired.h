@@ -129,7 +129,8 @@ protected:
       function even if this interface is not connected to a provided
       interface.
     */
-    mtsInterfaceRequired(const std::string & interfaceName, mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
+    mtsInterfaceRequired(const std::string & interfaceName, mtsComponent * component, 
+                         mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();

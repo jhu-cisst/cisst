@@ -247,7 +247,7 @@ size_t mtsComponent::GetNumberOfInterfacesOutput(void) const
 }
 
 
-bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvidedName)
+bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvidedName, const bool skipDisconnect)
 {
     mtsInterfaceProvided * interfaceProvided = GetInterfaceProvided(interfaceProvidedName);
     if (!interfaceProvided) {
@@ -256,28 +256,75 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
         return false;
     }
 
-    // MJUNG: right now we don't consider the "safe disconnection" issue as
-    // follows (not complete) but have to deal with them in the future.
-    //
-    // \todo Need to remove (clean up as well) all provided interface
-    // instances which were created by this interface.
-    //
-    // \todo Need to add clean-up codes before deleting interface object
-    // itself through "safe disconnection" mechanism. Otherwise, a connected
-    // required interface might try to use provided interface's resource which
-    // are already deallocated and invalidated.
-    // The "safe disconection" mechanism should include (at least)
-    // - To disable required interface so that users cannot use it any more
-    // - To disable provided interface and instances that it generated
-    // - (something more...)
-    // - To disconnect the connection that the provided interface was related to
-    // - To deallocate provided interface and instances that it generated
-    // Things to consider:
-    // - Thread-safety issue between caller thread and main thread (main thread
-    //   uses component's inner structure(s) to process commands and events)
-    // - Safe clean-up to avoid run-time crash
+    // This check might be not necessary -- interfaceProvided should always be the original interface.
+    if (interfaceProvided->GetOriginalInterface()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                                << interfaceProvidedName << "\"" 
+                                << ", did not get original interface." << std::endl;
+        return false;
+    }
 
-    // MJUNG: this code is NOT thread safe.
+    // Get manager component service
+    mtsManagerComponentServices * service = GetManagerComponentServices();
+    if (!service) {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                                 << interfaceProvidedName << "\"" 
+                                 << ", cannot access manager component services."
+                                 << std::endl;
+        return false;
+    }
+
+    if (!skipDisconnect) {
+        // Disconnect all active connections
+        int userCount = interfaceProvided->GetNumberOfEndUsers();
+        int removedUserCount = 0;
+        const std::string serverComponentName = GetName();
+        const std::string serverInterfaceProvidedName = interfaceProvidedName;
+        std::string clientComponentName, clientInterfaceRequiredName;
+        mtsComponent * clientComponent = 0;
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
+        // Get a list of user names (names of required interfaces)
+        std::vector<std::string> userNames = interfaceProvided->GetListOfUserNames();
+        // Get a list of components in the same process 
+        std::vector<std::string> componentNames = LCM->GetNamesOfComponents();
+
+        std::vector<std::string>::const_iterator it = userNames.begin();
+        const std::vector<std::string>::const_iterator itEnd = userNames.end();
+        for (; it != itEnd; ++it) {
+            clientInterfaceRequiredName = *it;
+            // Look for component which owns the required interface
+            std::vector<std::string>::const_iterator _it = componentNames.begin();
+            const std::vector<std::string>::const_iterator _itEnd = componentNames.end();
+            for (; _it != _itEnd; ++_it) {
+                clientComponent = LCM->GetComponent(*_it);
+                if (!clientComponent) continue;
+                if (clientComponent->GetInterfaceRequired(clientInterfaceRequiredName)) {
+                    if (!service->Disconnect(clientComponentName, clientInterfaceRequiredName, 
+                        serverComponentName, serverInterfaceProvidedName))
+                    {
+                        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                            << interfaceProvidedName << "\"" 
+                            << ", failed to disconnect interfaces: "
+                            << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                            << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                        return false;
+                    } else {
+                        ++removedUserCount;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (userCount != removedUserCount) {
+            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                << interfaceProvidedName << "\"" 
+                << ", some of connections are not removed." 
+                << std::endl;
+        }
+    }
+        
     if (!InterfacesProvidedOrOutput.RemoveItem(interfaceProvidedName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
                                 << interfaceProvidedName << "\"" << std::endl;
@@ -285,12 +332,11 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
     }
 
     bool removed = false;
-    InterfacesProvidedListType::iterator it = InterfacesProvided.begin();
-    const InterfacesProvidedListType::const_iterator itEnd = InterfacesProvided.end();
-    for (; it != itEnd; ++it) {
-        // MJUNG: this code is NOT thread safe.
-        if (*it == interfaceProvided) {
-            InterfacesProvided.erase(it);
+    InterfacesProvidedListType::iterator it2 = InterfacesProvided.begin();
+    const InterfacesProvidedListType::const_iterator itEnd2 = InterfacesProvided.end();
+    for (; it2 != itEnd2; ++it2) {
+        if (*it2 == interfaceProvided) {
+            InterfacesProvided.erase(it2);
             removed = true;
             break;
         }
@@ -310,6 +356,7 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
 }
 
 
+/*
 bool mtsComponent::RemoveInterfaceOutput(const std::string & interfaceOutputName)
 {
     mtsInterfaceOutput * interfaceOutput = GetInterfaceOutput(interfaceOutputName);
@@ -347,6 +394,7 @@ bool mtsComponent::RemoveInterfaceOutput(const std::string & interfaceOutputName
                               << interfaceOutputName << "\"" << std::endl;
     return true;
 }
+*/
 
 
 mtsInterfaceRequiredOrInput *
@@ -382,8 +430,10 @@ size_t mtsComponent::GetNumberOfInterfacesInput(void) const
 }
 
 
-bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequiredName)
+bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequiredName, const bool skipDisconnect)
 {
+    // MJ: Note that this method should be called only by the GCM so that the LCM and the GCM can
+    // synchronize its internal information even though the LCM doesn't notify this change to the GCM.
     mtsInterfaceRequired * interfaceRequired = GetInterfaceRequired(interfaceRequiredName);
     if (!interfaceRequired) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: no required interface found: \""
@@ -391,22 +441,50 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
         return false;
     }
 
-    // MJUNG: see comments in mtsComponent::RemoveInterfaceProvided() for
-    // potential thread-safety issues
+    bool removed = false;
 
-    // MJUNG: this code is NOT thread safe.
+    if (!skipDisconnect) {
+        mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = const_cast<mtsInterfaceProvidedOrOutput*>(interfaceRequired->GetConnectedInterface());
+        // If this required interface has an established connection, disconnect it first using MCC.
+        if (serverInterfaceProvidedOrOutput) {
+            mtsManagerComponentServices * service = GetManagerComponentServices();
+            if (!service) {
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
+                    << interfaceRequiredName << "\"" 
+                    << ", cannot access manager component services."
+                    << std::endl;
+                return false;
+            }
+
+            const std::string clientComponentName = GetName();
+            const std::string clientInterfaceRequiredName = interfaceRequiredName;
+            const std::string serverComponentName = serverInterfaceProvidedOrOutput->GetComponentName();
+            const std::string serverInterfaceProvidedName = serverInterfaceProvidedOrOutput->GetName();
+
+            if (!service->Disconnect(clientComponentName, clientInterfaceRequiredName, 
+                                     serverComponentName, serverInterfaceProvidedName))
+            {
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
+                    << interfaceRequiredName << "\"" 
+                    << ", failed to disconnect interfaces: "
+                    << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                    << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // Now clean up internal data structures
     if (!InterfacesRequiredOrInput.RemoveItem(interfaceRequiredName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
-                                 << interfaceRequiredName << "\"" << std::endl;
+            << interfaceRequiredName << "\"" << std::endl;
         return false;
     }
 
-    bool removed = false;
     InterfacesRequiredListType::iterator it = InterfacesRequired.begin();
     const InterfacesRequiredListType::const_iterator itEnd = InterfacesRequired.end();
     for (; it != itEnd; ++it) {
         if (*it == interfaceRequired) {
-            // MJUNG: this code is NOT thread safe.
             InterfacesRequired.erase(it);
             removed = true;
             break;
@@ -426,7 +504,7 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
     return true;
 }
 
-
+/*
 bool mtsComponent::RemoveInterfaceInput(const std::string & interfaceInputName)
 {
     mtsInterfaceInput * interfaceInput = GetInterfaceInput(interfaceInputName);
@@ -464,7 +542,7 @@ bool mtsComponent::RemoveInterfaceInput(const std::string & interfaceInputName)
                               << interfaceInputName << "\"" << std::endl;
     return true;
 }
-
+*/
 
 mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredExisting(const std::string & interfaceRequiredName,
                                                                   mtsInterfaceRequired * interfaceRequired) {
@@ -480,7 +558,7 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
                                                                       mtsMailBox * mailBox,
                                                                       mtsRequiredType required)
 {
-    mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequired(interfaceRequiredName, mailBox, required);
+    mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequired(interfaceRequiredName, this, mailBox, required);
     if (interfaceRequired) {
         if (InterfacesRequiredOrInput.AddItem(interfaceRequiredName, interfaceRequired)) {
             InterfacesRequired.push_back(interfaceRequired);

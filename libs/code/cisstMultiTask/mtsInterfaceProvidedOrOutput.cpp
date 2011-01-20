@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsComponent.h>
 
 
 mtsInterfaceProvidedOrOutput::mtsInterfaceProvidedOrOutput(const std::string & interfaceName,
@@ -36,7 +37,17 @@ const std::string & mtsInterfaceProvidedOrOutput::GetName(void) const
 {
     return this->Name;
 }
-    
+
+
+const std::string & mtsInterfaceProvidedOrOutput::GetComponentName(void) const
+{
+    if (!Component) {
+        return "Unnamed";
+    } else {
+        return this->Component->GetName();
+    }
+}
+
 
 void mtsInterfaceProvidedOrOutput::Cleanup(void)
 {

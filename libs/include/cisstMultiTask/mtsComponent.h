@@ -201,10 +201,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesOutput(void) const;
 
     /*! Remove a provided interface identified by its name */
-    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName);
+    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName, const bool skipDisconnect = false);
 
     /*! Remove an output interface identified by its name */
-    bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
+    //bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
 
     /*! Add a required interface.  This interface will later on be
       connected to another task and use the provided interface of the
@@ -250,10 +250,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesInput(void) const;
 
     /*! Remove a required interface identified by its name */
-    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName);
+    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName, const bool skipDisconnect = false);
 
     /*! Remove an input interface identified by its name */
-    bool RemoveInterfaceInput(const std::string & interfaceInputName);
+    //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
     /*! Get pointer to manager component services, which extends the internal required interface
         to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */

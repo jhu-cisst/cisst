@@ -33,9 +33,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsParameterTypes.h>
 
 mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
+                                           mtsComponent * component,
                                            mtsMailBox * mailBox,
                                            mtsRequiredType required):
-    mtsInterfaceRequiredOrInput(interfaceName, required),
+    mtsInterfaceRequiredOrInput(interfaceName, component, required),
     MailBox(mailBox),
     InterfaceProvided(0),
     MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),

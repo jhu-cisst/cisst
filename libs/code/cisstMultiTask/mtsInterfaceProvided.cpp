@@ -655,7 +655,6 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQu
     return 0;
 }
 
-
 std::string mtsInterfaceProvided::GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
                                                           const std::string &userName)
 {
@@ -687,6 +686,23 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     return interfaceProvided;
 }
 
+std::vector<std::string> mtsInterfaceProvided::GetListOfUserNames(void) const
+{
+    std::vector<std::string> userNames;
+
+    if (!OriginalInterface) {
+        return userNames;
+    }
+
+    std::string name;
+    const size_t offset1 = OriginalInterface->GetName().size();
+    const size_t offset2 = 3; // = sizeof("For")
+    InterfaceProvidedCreatedListType::const_iterator it = InterfacesProvidedCreated.begin();
+    for (; it != InterfacesProvidedCreated.end(); ++it) {
+        name = it->second->GetName();
+        userNames.push_back(name.substr(offset1 + offset2, name.size() - offset1 - offset2));
+    }
+}
 
 // Remove the end-user interface specified by the parameter interfaceProvided.
 // Note that there are two mtsInterfaceProvided objects:  (1) the interfaceProvided parameter, which should be a

@@ -895,14 +895,6 @@ void mtsManagerLocal::GetNamesOfComponents(std::vector<std::string> & namesOfCom
     ComponentMap.GetNames(namesOfComponents);
 }
 
-const std::string mtsManagerLocal::GetEndUserName(void) const
-{
-    std::string endUserName(this->ProcessName);
-    endUserName += "-LocalManager";
-
-    return endUserName;
-}
-
 void CISST_DEPRECATED mtsManagerLocal::GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const
 {
     mtsComponent * component;
@@ -2238,7 +2230,7 @@ bool mtsManagerLocal::RemoveInterfaceRequired(const std::string & componentName,
         return false;
     }
 
-    // Remove provided interface
+    // Remove required interface
     if (!component->RemoveInterfaceRequired(interfaceRequiredName)) {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: failed to remove provided interface proxy: " << interfaceRequiredName << std::endl;
         return false;
