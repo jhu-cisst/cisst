@@ -545,8 +545,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
             ${SOURCE_FILES}
             svlVideoCodecCVI.h              # private header
             svlVideoCodecCVI.cpp
-            svlVideoCodecUDPStream.h        # private header
-            svlVideoCodecUDPStream.cpp
+            svlVideoCodecTCPStream.h        # private header
+            svlVideoCodecTCPStream.cpp
             )
         MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)

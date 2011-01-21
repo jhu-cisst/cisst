@@ -64,7 +64,7 @@ int VideoPlayer(std::string pathname)
 
     // setup image window
     window.SetTitle("Video Player");
-    window.SetFullScreen(true);
+//    window.SetFullScreen(true);
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);

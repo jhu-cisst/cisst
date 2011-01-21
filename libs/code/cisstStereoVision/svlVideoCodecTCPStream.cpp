@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: svlVideoCodecTCPStream.cpp 2095 2010-11-30 15:24:22Z adeguet1 $
   
   Author(s):  Balazs Vagvolgyi & Min Yang Jung
   Created on: 2010
@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include "svlVideoCodecUDPStream.h"
+#include "svlVideoCodecTCPStream.h"
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstStereoVision/svlConverters.h>
 #include <cisstStereoVision/svlSyncPoint.h>
@@ -41,27 +41,23 @@ http://www.cisst.org/cisst/license.txt.
     #include <errno.h>
 #endif
 
-#define _NET_VERBOSE_
+//#define _NET_VERBOSE_
 
-#define PACKET_ID_SIZE      4u
+#define MAX_CLIENTS         5
 #define PACKET_SIZE         1400u
-#define PACKET_DATA_SIZE    1396u
-
 #define BROKEN_FRAME        1
-#define MAX_UDP_BURST       8192
-#define UDP_BURST_WAIT      0.0001
 
 
 /*************************************/
-/*** svlVideoCodecUDPStream class ****/
+/*** svlVideoCodecTCPStream class ****/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecUDPStream)
+CMN_IMPLEMENT_SERVICES(svlVideoCodecTCPStream)
 
-svlVideoCodecUDPStream::svlVideoCodecUDPStream() :
+svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     svlVideoCodecBase(),
     cmnGenericObject(),
-    CodecName("CISST Video Stream over UDP"),
+    CodecName("CISST Video Stream over TCP/IP"),
     FrameStartMarker("\r\nFrame\r\n"),
     File(0),
     PartCount(0),
@@ -79,9 +75,17 @@ svlVideoCodecUDPStream::svlVideoCodecUDPStream() :
     comprBufferSize(0),
     PacketData(0),
     streamingBuffer(0),
-    streamingBufferSize(0)
+    streamingBufferSize(0),
+    ServerSocket(-1),
+    ServerThread(0),
+    ServerInitEvent(0),
+    ServerInitialized(false),
+    ReceiveSocket(-1),
+    ReceiveThread(0),
+    ReceiveInitEvent(0),
+    ReceiveInitialized(false)
 {
-    SetName("CISST Video Stream over UDP");
+    SetName("CISST Video Stream over TCP/IP");
     SetExtensionList(".ncvi;");
     SetMultithreaded(true);
 
@@ -89,7 +93,7 @@ svlVideoCodecUDPStream::svlVideoCodecUDPStream() :
     PacketData = new char[PACKET_SIZE];
 }
 
-svlVideoCodecUDPStream::~svlVideoCodecUDPStream()
+svlVideoCodecTCPStream::~svlVideoCodecTCPStream()
 {
     Close();
     if (yuvBuffer) delete [] yuvBuffer;
@@ -99,12 +103,9 @@ svlVideoCodecUDPStream::~svlVideoCodecUDPStream()
     if (PacketData) delete [] PacketData;
 }
 
-int svlVideoCodecUDPStream::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
+int svlVideoCodecTCPStream::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
 {
     if (Opened || ParseFilename(filename) != SVL_OK) return SVL_FAIL;
-
-    unsigned char* buffer;
-    unsigned int size;
 
     while (1) {
 
@@ -118,28 +119,19 @@ int svlVideoCodecUDPStream::Open(const std::string &filename, unsigned int &widt
         delete streamingBuffer;
         streamingBuffer = 0;
         streamingBufferSize = 0;
-        ReceivedWidth = ReceivedHeight = 0;
+        Width = Height = 0;
 
         // Start data receiving thread
-        StreamingInitialized = false;
-        KillStreamingThread = false;
-        StreamingThread.Create<svlVideoCodecUDPStream, int>(this, &svlVideoCodecUDPStream::ReceiveProc, 0);
-        StreamingInitEvent.Wait();
-        if (StreamingInitialized == false) break;
+        ReceiveInitialized = false;
+        KillReceiveThread = false;
+        ReceiveThread = new osaThread;
+        ReceiveInitEvent = new osaThreadSignal;
+        ReceiveThread->Create<svlVideoCodecTCPStream, int>(this, &svlVideoCodecTCPStream::ReceiveProc, 0);
+        ReceiveInitEvent->Wait();
+        if (ReceiveInitialized == false) break;
 
         // Wait until header is received
-        while (ReceivedWidth == 0 || ReceivedHeight == 0) osaSleep(0.1);
-        Width = ReceivedWidth;
-        Height = ReceivedHeight;
-
-        // Allocate buffers for the specific image size
-        size = Width * Height * 2;
-        buffer = new unsigned char[size];
-        yuvBufferSize = size;
-        yuvBuffer = buffer;
-        size = yuvBufferSize + yuvBufferSize / 100 + 4096 + PACKET_ID_SIZE;
-        streamingBuffer = new svlBufferMemory(size);
-        streamingBufferSize = size;
+        while (Width == 0 || Height == 0) osaSleep(0.1);
 
         Pos = BegPos = EndPos = 0;
         width = Width;
@@ -153,7 +145,7 @@ int svlVideoCodecUDPStream::Open(const std::string &filename, unsigned int &widt
     return SVL_FAIL;
 }
 
-int svlVideoCodecUDPStream::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double CMN_UNUSED(framerate))
+int svlVideoCodecTCPStream::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double CMN_UNUSED(framerate))
 {
 	if (Opened || ParseFilename(filename) != SVL_OK ||
         width < 1 || width > 4096 || height < 1 || height > 4096) return SVL_FAIL;
@@ -204,7 +196,6 @@ int svlVideoCodecUDPStream::Create(const std::string &filename, const unsigned i
         }
 
         // Allocate streaming buffers if not done yet
-        size += PACKET_ID_SIZE;
         if (!streamingBuffer) {
             streamingBuffer = new svlBufferMemory(size);
             streamingBufferSize = size;
@@ -219,11 +210,13 @@ int svlVideoCodecUDPStream::Create(const std::string &filename, const unsigned i
         StreamingBufferUsedID = 0;
 
         // Start data saving thread
-        StreamingInitialized = false;
-        KillStreamingThread = false;
-        StreamingThread.Create<svlVideoCodecUDPStream, int>(this, &svlVideoCodecUDPStream::SendProc, 0);
-        StreamingInitEvent.Wait();
-        if (StreamingInitialized == false) break;
+        ServerInitialized = false;
+        KillServerThread = false;
+        ServerThread = new osaThread;
+        ServerInitEvent = new osaThreadSignal;
+        ServerThread->Create<svlVideoCodecTCPStream, unsigned short>(this, &svlVideoCodecTCPStream::ServerProc, SocketPort);
+        ServerInitEvent->Wait();
+        if (ServerInitialized == false) break;
 
         BegPos = EndPos = Pos = 0;
         Width = width;
@@ -236,21 +229,31 @@ int svlVideoCodecUDPStream::Create(const std::string &filename, const unsigned i
 	return SVL_FAIL;
 }
 
-int svlVideoCodecUDPStream::Close()
+int svlVideoCodecTCPStream::Close()
 {
-    if (Opened && Writing) {
-
-        // Stop data saving thread
-        KillStreamingThread = true;
-        if (StreamingInitialized) {
-            StreamingThread.Wait();
+    if (Opened) {
+        if (Writing) {
+            // Shut down server
+            if (ServerThread && ServerInitialized) {
+                KillServerThread = true;
+                ServerThread->Wait();
+                delete ServerThread;
+                ServerThread = 0;
+                delete ServerInitEvent;
+                ServerInitEvent = 0;
+            }
         }
-    }
-
-    if (File) {
-        if (File->is_open()) File->close();
-        delete File;
-        File = 0;
+        else {
+            // Shut down receiver
+            if (ReceiveThread && ReceiveInitialized) {
+                KillReceiveThread = true;
+                ReceiveThread->Wait();
+                delete ReceiveThread;
+                ReceiveThread = 0;
+                delete ReceiveInitEvent;
+                ReceiveInitEvent = 0;
+            }
+        }
     }
 
     Width = 0;
@@ -264,31 +267,31 @@ int svlVideoCodecUDPStream::Close()
     return SVL_OK;
 }
 
-int svlVideoCodecUDPStream::GetBegPos() const
+int svlVideoCodecTCPStream::GetBegPos() const
 {
     return BegPos;
 }
 
-int svlVideoCodecUDPStream::GetEndPos() const
+int svlVideoCodecTCPStream::GetEndPos() const
 {
     return EndPos;
 }
 
-int svlVideoCodecUDPStream::GetPos() const
+int svlVideoCodecTCPStream::GetPos() const
 {
     return Pos;
 }
 
-svlVideoIO::Compression* svlVideoCodecUDPStream::GetCompression() const
+svlVideoIO::Compression* svlVideoCodecTCPStream::GetCompression() const
 {
     // The caller will need to release it by calling the
     // svlVideoIO::ReleaseCompression() method
     unsigned int size = sizeof(svlVideoIO::Compression);
     svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
-    
-    std::string name("CISST Video Stream (CVI)");
+
+    std::string name("CISST Video Stream over TCP/IP");
     memset(&(compression->extension[0]), 0, 16);
-    memcpy(&(compression->extension[0]), ".ncvi", 4);
+    memcpy(&(compression->extension[0]), ".ncvi", 5);
     memset(&(compression->name[0]), 0, 64);
     memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     compression->size = size;
@@ -299,7 +302,7 @@ svlVideoIO::Compression* svlVideoCodecUDPStream::GetCompression() const
     return compression;
 }
 
-int svlVideoCodecUDPStream::SetCompression(const svlVideoIO::Compression *compression)
+int svlVideoCodecTCPStream::SetCompression(const svlVideoIO::Compression *compression)
 {
     if (Opened || !compression || compression->size < sizeof(svlVideoIO::Compression)) return SVL_FAIL;
 
@@ -314,7 +317,7 @@ int svlVideoCodecUDPStream::SetCompression(const svlVideoIO::Compression *compre
     svlVideoIO::ReleaseCompression(Codec);
     Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
 
-    std::string name("CISST Video Stream (CVI)");
+    std::string name("CISST Video Stream over TCP/IP");
     memset(&(Codec->extension[0]), 0, 16);
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
@@ -326,7 +329,7 @@ int svlVideoCodecUDPStream::SetCompression(const svlVideoIO::Compression *compre
     return SVL_OK;
 }
 
-int svlVideoCodecUDPStream::DialogCompression()
+int svlVideoCodecTCPStream::DialogCompression()
 {
     if (Opened) return SVL_FAIL;
 
@@ -339,7 +342,7 @@ int svlVideoCodecUDPStream::DialogCompression()
     svlVideoIO::ReleaseCompression(Codec);
     Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
 
-    std::string name("CISST Video Stream (CVI)");
+    std::string name("CISST Video Stream over TCP/IP");
     memset(&(Codec->extension[0]), 0, 16);
     memcpy(&(Codec->extension[0]), ".ncvi", 5);
     memset(&(Codec->name[0]), 0, 64);
@@ -351,20 +354,20 @@ int svlVideoCodecUDPStream::DialogCompression()
 	return SVL_OK;
 }
 
-double svlVideoCodecUDPStream::GetTimestamp() const
+double svlVideoCodecTCPStream::GetTimestamp() const
 {
     if (!Opened || Writing) return -1.0;
     return Timestamp;
 }
 
-int svlVideoCodecUDPStream::SetTimestamp(const double timestamp)
+int svlVideoCodecTCPStream::SetTimestamp(const double timestamp)
 {
     if (!Opened || !Writing) return SVL_FAIL;
     Timestamp = timestamp;
     return SVL_OK;
 }
 
-int svlVideoCodecUDPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
+int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!Opened || Writing) return SVL_FAIL;
@@ -381,7 +384,6 @@ int svlVideoCodecUDPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
     while (!strmbuf) {
         strmbuf = streamingBuffer->Pull(true, 0.1);
     }
-    strmbuf += PACKET_ID_SIZE; // Skip the work room left before the data for the packet ID
 
     while (1) {
         // file start marker
@@ -441,14 +443,11 @@ int svlVideoCodecUDPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
     return ret;
 }
 
-int svlVideoCodecUDPStream::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
+int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!Opened || !Writing) return SVL_FAIL;
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) return SVL_FAIL;
-
-    // Check for video saving errors
-    if (StreamingThreadError) return SVL_FAIL;
 
     bool err = false;
 
@@ -473,8 +472,6 @@ int svlVideoCodecUDPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
     unsigned char* strmbuf = streamingBuffer->GetPushBuffer();
     unsigned long comprsize;
     int compr = Codec->data[0];
-
-    strmbuf += PACKET_ID_SIZE; // Skip the work room left before the data for the packet ID
 
     // Multithreaded compression phase
     while (1) {
@@ -558,171 +555,395 @@ int svlVideoCodecUDPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
 	return SVL_OK;
 }
 
-int svlVideoCodecUDPStream::CreateServer()
+void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
 {
+    unsigned int clientid;
+
 #if (CISST_OS == CISST_WINDOWS)
-    WSADATA wsaData;
-    if (WSAStartup(WINSOCKVERSION, &wsaData) != 0) {
+    bool wsa_running = false;
+#endif
+    bool socket_open = false;
+
+    while (1) {
+
+#if (CISST_OS == CISST_WINDOWS)
+        WSADATA wsaData;
+        if (WSAStartup(WINSOCKVERSION, &wsaData) != 0) {
 #ifdef _NET_VERBOSE_
-        std::cerr << "svlVideoCodecCVINet::CreateServer - WSAStartup failed" << std::endl;
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - WSAStartup failed" << std::endl;
 #endif
-        return SVL_FAIL;
-    }
-#endif
-
-    Socket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (Socket < 0) return SVL_FAIL;
-
-    hostent hostEnt;
-    long hostNum;
-    hostent* pHostEnt = gethostbyname(SocketAddress.c_str());
-    if (!pHostEnt) return SVL_FAIL;
-    memcpy(&hostEnt, pHostEnt, sizeof(hostent));
-    memcpy(&hostNum, hostEnt.h_addr_list[0], sizeof(long));
-
-    sockaddr_in* address = reinterpret_cast<sockaddr_in*>(SockAddr);
-    address->sin_family = AF_INET;
-    address->sin_addr.s_addr = hostNum;
-    address->sin_port = htons(SocketPort);
-
-    return SVL_OK;
-}
-
-int svlVideoCodecUDPStream::CreateClient()
-{
-#if (CISST_OS == CISST_WINDOWS)
-    WSADATA wsaData;
-    if (WSAStartup(WINSOCKVERSION, &wsaData) != 0) {
+            break;
+        }
+        wsa_running = true;
 #ifdef _NET_VERBOSE_
-        std::cerr << "svlVideoCodecCVINet::CreateServer - WSAStartup failed" << std::endl;
+        std::cerr << "svlVideoCodecTCPStream::ServerProc - WSAStartup success" << std::endl;
 #endif
-        return SVL_FAIL;
-    }
 #endif
 
-    Socket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (Socket < 0) return SVL_FAIL;
-    
-    sockaddr_in address;
-    address.sin_family = AF_INET; 
-    address.sin_addr.s_addr = INADDR_ANY; 
-    address.sin_port = htons(SocketPort);
-    
-    if (bind(Socket, (sockaddr*)&address, sizeof(sockaddr_in)) < 0) return SVL_FAIL;
-    
-    return SVL_OK;
-}
-
-void svlVideoCodecUDPStream::CloseSocket()
-{
-    if (Socket) {
-#if (CISST_OS == CISST_WINDOWS)
-        closesocket(Socket);
-#else
-        close(Socket);
-#endif
-        Socket = 0;
-    }
-    
-#if (CISST_OS == CISST_WINDOWS)
-    WSACleanup();
-#endif
-}
-
-int svlVideoCodecUDPStream::Send(unsigned char* buffer, unsigned int size, unsigned int& packet_id)
-{
-    // Incoming picture data starts at 'buffer + PACKET_ID_SIZE'.
-    // The first 'PACKET_ID_SIZE' bytes are there to leave room for the first packet ID.
-
-    unsigned int send_size;
-    int ret, udp_load = 0;
-
+        ServerSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (ServerSocket < 0) {
 #ifdef _NET_VERBOSE_
-    std::cerr << "svlVideoCodecUDPStream::Send - sending frame (" << size << " bytes; packets: " << packet_id << "-";
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - cannot create socket" << std::endl;
+#endif
+            break;
+        }
+        socket_open = true;
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ServerProc - socket created" << std::endl;
 #endif
 
-    while (size > 0) {
-        // Add packet ID to the beginning of the packet [first 'PACKET_ID_SIZE' bytes]
-        reinterpret_cast<unsigned int*>(buffer)[0] = packet_id ++;
-
-        // Calculate data size to send (including packet ID)
-        send_size = PACKET_ID_SIZE + std::min(size, PACKET_DATA_SIZE);
-
-        ret = sendto(Socket,
-                     reinterpret_cast<const char*>(buffer),
-                     send_size,
-                     0,
-                     reinterpret_cast<sockaddr*>(SockAddr),
-                     sizeof(sockaddr));
-
-        if (ret == static_cast<int>(send_size)) {
-            send_size -= PACKET_ID_SIZE;
-
-            // Advance buffer pointer
-            buffer += send_size;
-            size -= send_size;
-
-            // UDP load balancing
-            udp_load += ret;
-            if (udp_load > MAX_UDP_BURST) {
-                udp_load -= MAX_UDP_BURST;
-                osaSleep(UDP_BURST_WAIT);
-            }
+        int reuse = 1;
+        if (setsockopt(ServerSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - setsockopt success" << std::endl;
+#endif
         }
         else {
 #ifdef _NET_VERBOSE_
-            std::cerr << std::endl << "svlVideoCodecUDPStream::Send - sendto() error" << std::endl;
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - setsockopt failed" << std::endl;
 #endif
-            return SVL_FAIL;
+        }
+
+        sockaddr_in address;
+        memset(&address, 0, sizeof(sockaddr_in));
+
+        address.sin_family = AF_INET;
+        address.sin_port = htons(port);
+        address.sin_addr.s_addr = INADDR_ANY;
+
+        if (bind(ServerSocket, (sockaddr*)(&address), sizeof(sockaddr_in)) < 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - bind failed (port=" << port << ")" << std::endl;
+#endif
+            break;
+        }
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ServerProc - bind success (port=" << port << ")" << std::endl;
+#endif
+
+        if (listen(ServerSocket, MAX_CLIENTS) < 0)
+        {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - listen failed" << std::endl;
+#endif
+            break;
+        }
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ServerProc - listen success" << std::endl;
+#endif
+
+        ServerInitialized = true;
+        ServerInitEvent->Raise();
+
+        int connection;
+
+        // Create client pool
+        SendThread.SetSize(MAX_CLIENTS);
+        SendConnection.SetSize(MAX_CLIENTS);
+        KillSendThread.SetSize(MAX_CLIENTS);
+        for (clientid = 0; clientid < MAX_CLIENTS; clientid ++) {
+            SendThread[clientid]      = new osaThread;
+            SendConnection[clientid]  = -1;
+            KillSendThread[clientid]  = false;
+        }
+
+        fd_set fds;
+        timeval tv;
+
+        while (!KillServerThread) {
+
+            // Wait 0.5s for new connection, then continue
+            FD_ZERO(&fds); FD_SET(ServerSocket, &fds);
+            tv.tv_sec  = 0; tv.tv_usec = 500000;
+            if (select(ServerSocket + 1, &fds, 0, 0, &tv) <= 0 || !FD_ISSET(ServerSocket, &fds)) {
+                continue;
+            }
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - incoming connection..." << std::endl;
+#endif
+            
+            connection = accept(ServerSocket, 0, 0);
+            if (connection < 0) {
+#ifdef _NET_VERBOSE_
+                std::cerr << "svlVideoCodecTCPStream::ServerProc - accept failed" << std::endl;
+#endif
+                continue;
+            }
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - accept success" << std::endl;
+#endif
+
+            // Find free client in the pool
+            clientid = 0;
+            while (clientid < MAX_CLIENTS && SendConnection[clientid] >= 0) clientid ++;
+            if (clientid >= MAX_CLIENTS) {
+#ifdef _NET_VERBOSE_
+                std::cerr << "svlVideoCodecTCPStream::ServerProc - too many clients" << std::endl;
+#endif
+                shutdown(connection, SHUT_RDWR);
+#if (CISST_OS == CISST_WINDOWS)
+                closesocket(connection);
+#else
+                close(connection);
+#endif
+                continue;
+            }
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ServerProc - thread assigned to client" << std::endl;
+#endif
+
+            KillSendThread[clientid] = false;
+            SendConnection[clientid] = connection;
+            SendThread[clientid]->Create<svlVideoCodecTCPStream, unsigned int>(this, &svlVideoCodecTCPStream::SendProc, clientid);
+            // The thread will manage the shutdown and closing of the connection when done sending or terminated
+        }
+
+        break;
+    }
+
+    if (ServerInitialized) {
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ServerProc - shutting down all connections" << std::endl;
+#endif
+        // Destroy client pool
+        for (clientid = 0; clientid < SendThread.size(); clientid ++) {
+            if (SendConnection[clientid] >= 0) {
+                KillSendThread[clientid] = true;
+                SendThread[clientid]->Wait();
+            }
+            delete SendThread[clientid];
+        }
+        ServerInitialized = false;
+    }
+    else {
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ServerProc - server failed to initialize" << std::endl;
+#endif
+        ServerInitEvent->Raise();
+    }
+
+    if (socket_open) {
+#if (CISST_OS == CISST_WINDOWS)
+        closesocket(ServerSocket);
+#else
+        close(ServerSocket);
+#endif
+    }
+#if (CISST_OS == CISST_WINDOWS)
+    if (wsa_running) WSACleanup();
+#endif
+
+    ServerSocket = -1;
+
+    return this;
+}
+
+void* svlVideoCodecTCPStream::SendProc(unsigned int clientid)
+{
+    int ret, size;
+    unsigned char* strmbuf;
+
+    while (!KillSendThread[clientid]) {
+
+        // Wait until new frame is acquired
+        strmbuf = 0;
+        while (!strmbuf && !KillSendThread[clientid]) {
+            strmbuf = streamingBuffer->Pull(true, 0.1);
+        }
+        size = static_cast<int>(StreamingBufferUsedSize);
+
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::SendProc - sending frame (" << size << " bytes)" << std::endl;
+#endif
+
+        while (size > 0) {
+            ret = send(SendConnection[clientid], reinterpret_cast<const char*>(strmbuf), size, 0);
+
+            if (ret < 0) {
+#ifdef _NET_VERBOSE_
+                std::cerr << "svlVideoCodecTCPStream::SendProc - send failed" << std::endl;
+#endif
+                KillSendThread[clientid] = true;
+                break;
+            }
+
+            strmbuf += ret;
+            size -= ret;
         }
     }
 
-#ifdef _NET_VERBOSE_
-    std::cerr << packet_id - 1 << ")" << std::endl;
+    shutdown(SendConnection[clientid], SHUT_RDWR);
+#if (CISST_OS == CISST_WINDOWS)
+    closesocket(SendConnection[clientid]);
+#else
+    close(SendConnection[clientid]);
 #endif
-    return SVL_OK;
+    SendConnection[clientid] = -1;
+
+#ifdef _NET_VERBOSE_
+    std::cerr << std::endl << "svlVideoCodecTCPStream::SendProc - client (" << clientid << ") shut down" << std::endl;
+#endif
+
+    return this;
 }
 
-int svlVideoCodecUDPStream::Receive(unsigned char* buffer, unsigned int size)
+void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
+{
+    int ret;
+#if (CISST_OS == CISST_WINDOWS)
+    bool wsa_running      = false;
+#endif
+    bool socket_open      = false;
+    bool socket_connected = false;
+
+    while (1) {
+
+#if (CISST_OS == CISST_WINDOWS)
+        WSADATA wsaData;
+        if (WSAStartup(WINSOCKVERSION, &wsaData) != 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ReceiveProc - WSAStartup failed" << std::endl;
+#endif
+            break;
+        }
+        wsa_running = true;
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ReceiveProc - WSAStartup success" << std::endl;
+#endif
+#endif
+
+        ReceiveSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (ReceiveSocket < 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::ReceiveProc - cannot create socket" << std::endl;
+#endif
+            break;
+        }
+        socket_open = true;
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ReceiveProc - socket created" << std::endl;
+#endif
+
+        sockaddr_in address;
+        memset(&address, 0, sizeof(sockaddr_in));
+        address.sin_family = AF_INET;
+        address.sin_port = htons(SocketPort);
+
+        ret = inet_pton(AF_INET, SocketAddress.c_str(), &address.sin_addr);
+        if (ret <= 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecCVINet::ReceiveProc - inet_pton error (" << ret  << ")" << std::endl;
+#endif
+            break;
+        }
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecCVINet::ReceiveProc - inet_pton success (" << SocketAddress << ":"  << SocketPort << ")" << std::endl;
+#endif
+
+        ret = connect(ReceiveSocket, (sockaddr*)(&address), sizeof(sockaddr_in));
+        if (ret < 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecCVINet::ReceiveProc - connect failed (" << errno << ")" << std::endl;
+#endif
+            break;
+        }
+        socket_connected = true;
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecCVINet::ReceiveProc - connect success" << std::endl;
+#endif
+
+        ReceiveInitialized = true;
+        ReceiveInitEvent->Raise();
+
+        while (!KillReceiveThread) {
+
+            ret = Receive();
+            if (ret == SVL_FAIL) {
+                break;
+            }
+            else if (ret == BROKEN_FRAME) {
+
+                // Check if socket is still connected
+                int optval;
+                socklen_t optlen = sizeof(optval);
+                ret = getsockopt(ReceiveSocket, SOL_SOCKET, SO_ERROR, &optval, &optlen);
+
+                if (optval || ret) {
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::ReceiveProc - connection lost" << std::endl;
+#endif
+                    ReceiveThreadError = true;
+                    break;
+                }
+                else {
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::ReceiveProc - corrupt frame" << std::endl;
+#endif
+                    osaSleep(0.1);
+                }
+            }
+        }
+
+        break;
+    }
+
+    if (!socket_open) {
+#ifdef _NET_VERBOSE_
+        std::cerr << "svlVideoCodecTCPStream::ReceiveProc - client failed to initialize" << std::endl;
+#endif
+        ReceiveInitEvent->Raise();
+    }
+
+    if (socket_connected) shutdown(ReceiveSocket, SHUT_RDWR);
+    if (socket_open) {
+#if (CISST_OS == CISST_WINDOWS)
+        closesocket(ReceiveSocket);
+#else
+        close(ReceiveSocket);
+#endif
+    }
+#if (CISST_OS == CISST_WINDOWS)
+    if (wsa_running) WSACleanup();
+#endif
+
+    ReceiveSocket = -1;
+
+    return this;
+}
+
+int svlVideoCodecTCPStream::Receive()
 {
     const unsigned char* fsm = reinterpret_cast<const unsigned char*>(FrameStartMarker.c_str());
     const unsigned int fsm_len = FrameStartMarker.length();
-    bool framestart, started = false, onlyheader = buffer ? false : true;
+    unsigned char* buffer = reinterpret_cast<unsigned char*>(PacketData);
+    unsigned int size = PACKET_SIZE;
     unsigned int framesize = 0;
-    socklen_t from_len = sizeof(sockaddr_in);
-    sockaddr_in from_addr;
+    bool framestart = false;
+    bool started = false;
     fd_set mask;
     int ret;
 
-    if (onlyheader) {
-        // The caller requests only the image dimensions
-        // Use temporary packet buffer to receive header
-        size = PACKET_SIZE;
-        buffer = reinterpret_cast<unsigned char*>(PacketData);
-    }
 
     while (1) {
 
         // Wait for new packet
         FD_ZERO(&mask);
-        FD_SET(Socket, &mask);
-        ret = select(FD_SETSIZE, &mask, 0, 0, 0);
+        FD_SET(ReceiveSocket, &mask);
+        ret = select(ReceiveSocket + 1, &mask, 0, 0, 0);
         if (ret < 0) {
 #ifdef _NET_VERBOSE_
-            std::cerr << "svlVideoCodecUDPStream::Receive - select() error" << std::endl;
+            std::cerr << "svlVideoCodecTCPStream::Receive - select error" << std::endl;
 #endif
             break;
         }
-
+        
         ret = -1;
         // Receive packet
-        if (FD_ISSET(Socket, &mask)) {
-            ret = recvfrom(Socket,
-                           reinterpret_cast<char*>(buffer),
-                           std::min(size, PACKET_SIZE),
-                           0,
-                           (sockaddr*)&from_addr,
-                           &from_len);
+        if (FD_ISSET(ReceiveSocket, &mask)) {
+            ret = recv(ReceiveSocket,
+                       reinterpret_cast<char*>(buffer),
+                       std::min(size, PACKET_SIZE),
+                       0);
         }
 
         if (ret >= 0) {
@@ -738,27 +959,50 @@ int svlVideoCodecUDPStream::Receive(unsigned char* buffer, unsigned int size)
             else {
                 if (started) {
 #ifdef _NET_VERBOSE_
-                    std::cerr << "svlVideoCodecUDPStream::Receive - broken frame" << std::endl;
+                    std::cerr << "svlVideoCodecTCPStream::Receive - broken frame" << std::endl;
 #endif
                     return BROKEN_FRAME;
                 }
                 else {
-                    if (onlyheader) {
-                        // Extract dimensions from header
-                        int offset = fsm_len + sizeof(unsigned int);
-                        ReceivedWidth = reinterpret_cast<unsigned int*>(buffer + offset)[0];
-                        offset += sizeof(unsigned int);
-                        ReceivedHeight = reinterpret_cast<unsigned int*>(buffer + offset)[0];
-                        // Release temporary packet buffer and return without receiving more data
-                        return BROKEN_FRAME;
+                    // Extract dimensions from header
+                    int offset = fsm_len + sizeof(unsigned int);
+                    const unsigned int w = reinterpret_cast<unsigned int*>(buffer + offset)[0];
+                    offset += sizeof(unsigned int);
+                    const unsigned int h = reinterpret_cast<unsigned int*>(buffer + offset)[0];
+
+                    size = w * h * 2;
+                    if (yuvBuffer && yuvBufferSize < size) {
+                        delete [] yuvBuffer;
+                        yuvBuffer = 0;
+                        yuvBufferSize = 0;
                     }
+                    if (yuvBuffer == 0 || yuvBufferSize == 0) {
+                        yuvBuffer = new unsigned char[size];
+                        yuvBufferSize = size;
+                    }
+                    size += size / 100 + 4096;
+                    if (streamingBuffer && streamingBufferSize < size) {
+                        delete streamingBuffer;
+                        streamingBuffer = 0;
+                        streamingBufferSize = 0;
+                    }
+                    if (streamingBuffer == 0 || streamingBufferSize == 0) {
+                        streamingBuffer = new svlBufferMemory(size);
+                        streamingBufferSize = size;
+                    }
+
+                    buffer = streamingBuffer->GetPushBuffer();
+                    memcpy(buffer, PacketData, ret);
+
+                    Width = w;
+                    Height = h;
 
                     // Get "data size after frame start marker"
                     framesize = reinterpret_cast<unsigned int*>(buffer + fsm_len)[0] + fsm_len;
                     // Don't request the rest of the data if buffer size is too small
                     if (framesize > size) {
 #ifdef _NET_VERBOSE_
-                        std::cerr << "svlVideoCodecUDPStream::Receive - received data larger than buffer" << std::endl;
+                        std::cerr << "svlVideoCodecTCPStream::Receive - received data larger than buffer" << std::endl;
 #endif
                         break;
                     }
@@ -774,14 +1018,16 @@ int svlVideoCodecUDPStream::Receive(unsigned char* buffer, unsigned int size)
 
             if (framesize == size) {
 #ifdef _NET_VERBOSE_
-                std::cerr << "svlVideoCodecUDPStream::Receive - frame received (" << framesize << ")" << std::endl;
+                std::cerr << "svlVideoCodecTCPStream::Receive - frame received (" << framesize << ")" << std::endl;
 #endif
+                StreamingBufferUsedSize = framesize;
+                streamingBuffer->Push();
                 return SVL_OK;
             }
         }
 #ifdef _NET_VERBOSE_
         else {
-            std::cerr << "svlVideoCodecUDPStream::Receive - recvfrom() error" << std::endl;
+            std::cerr << "svlVideoCodecTCPStream::Receive - recvfrom failed" << std::endl;
         }
 #endif
     }
@@ -789,77 +1035,7 @@ int svlVideoCodecUDPStream::Receive(unsigned char* buffer, unsigned int size)
     return SVL_FAIL;
 }
 
-void* svlVideoCodecUDPStream::SendProc(int CMN_UNUSED(param))
-{
-    if (CreateServer() == SVL_OK) {
-        StreamingThreadError = false;
-        StreamingInitialized = true;
-    }
-    StreamingInitEvent.Raise();
-
-    unsigned char* strmbuf;
-    unsigned int packet_id = 0;
-
-    while (!StreamingThreadError && !KillStreamingThread) {
-
-        // Wait until new frame is acquired
-        strmbuf = 0;
-        while (!strmbuf && !KillStreamingThread) {
-            strmbuf = streamingBuffer->Pull(true, 0.1);
-        }
-
-        // Send frame
-        if (Send(strmbuf, StreamingBufferUsedSize, packet_id) != SVL_OK) {
-            StreamingThreadError = true;
-            break;
-        }
-    }
-    CloseSocket();
-
-    return this;
-}
-
-void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
-{
-    if (CreateClient() == SVL_OK) {
-        StreamingThreadError = false;
-        StreamingInitialized = true;
-    }
-    StreamingInitEvent.Raise();
-
-    unsigned char* strmbuf;
-    int framesize, ret;
-
-    while (!StreamingThreadError && !KillStreamingThread) {
-
-        // Receive frame
-        if (streamingBuffer) strmbuf = streamingBuffer->GetPushBuffer();
-        else strmbuf = 0;
-        framesize = streamingBufferSize;
-        ret = Receive(strmbuf, framesize);
-
-        switch(ret) {
-            case SVL_OK:
-                StreamingBufferUsedSize = framesize;
-                streamingBuffer->Push();
-            break;
-
-            case BROKEN_FRAME:
-                // NOP
-            break;
-
-            default:
-                StreamingThreadError = true;
-            break;
-        }
-    }
-
-    CloseSocket();
-
-    return this;
-}
-
-bool svlVideoCodecUDPStream::CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size)
+bool svlVideoCodecTCPStream::CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size)
 {
     while (size) {
         if (data1[size - 1] != data2[size - 1]) break;
@@ -868,7 +1044,7 @@ bool svlVideoCodecUDPStream::CompareData(const unsigned char* data1, const unsig
     return size ? false : true;
 }
 
-int svlVideoCodecUDPStream::ParseFilename(const std::string & filename)
+int svlVideoCodecTCPStream::ParseFilename(const std::string & filename)
 {
     // Port is "CISST" on numerical keypad by default
     SocketAddress.clear();
@@ -876,10 +1052,10 @@ int svlVideoCodecUDPStream::ParseFilename(const std::string & filename)
 
     size_t pos = filename.find('@');
     if (pos != std::string::npos) {
-        // Extract address string (substring before ':')
+        // Extract address string (substring before '@')
         SocketAddress = filename.substr(0, pos);
 
-        // Extract port (numerical string after ':')
+        // Extract port (numerical string after '@')
         pos += 1;
         unsigned int ui_port = 0;
         while (ui_port < 65536 && filename[pos] >= '0' && filename[pos] <= '9') {

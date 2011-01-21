@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: $
   
   Author(s):  Balazs Vagvolgyi & Min Yang Jung
   Created on: 2010
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlVideoCodecUDPStream_h
-#define _svlVideoCodecUDPStream_h
+#ifndef _svlVideoCodecTCPStream_h
+#define _svlVideoCodecTCPStream_h
 
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
@@ -30,13 +30,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 
 
-class svlVideoCodecUDPStream : public svlVideoCodecBase, public cmnGenericObject
+class svlVideoCodecTCPStream : public svlVideoCodecBase, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    svlVideoCodecUDPStream();
-    virtual ~svlVideoCodecUDPStream();
+    svlVideoCodecTCPStream();
+    virtual ~svlVideoCodecTCPStream();
 
     virtual int Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate);
     virtual int Create(const std::string &filename, const unsigned int width, const unsigned int height, const double framerate);
@@ -83,32 +83,38 @@ protected:
     unsigned int streamingBufferSize;
     unsigned int StreamingBufferUsedSize;
     unsigned int StreamingBufferUsedID;
-    osaThread StreamingThread;
-    osaThreadSignal StreamingInitEvent;
-    bool StreamingInitialized;
-    bool KillStreamingThread;
-    bool StreamingThreadError;
+
+    int ServerSocket;
+    osaThread* ServerThread;
+    osaThreadSignal* ServerInitEvent;
+    bool ServerInitialized;
+    bool KillServerThread;
+
+    vctDynamicVector<osaThread*> SendThread;
+    vctDynamicVector<int> SendConnection;
+    vctDynamicVector<bool> KillSendThread;
+
+    int ReceiveSocket;
+    osaThread* ReceiveThread;
+    osaThreadSignal* ReceiveInitEvent;
+    bool ReceiveInitialized;
+    bool KillReceiveThread;
+    bool ReceiveThreadError;
 
     unsigned short SocketPort;
     std::string SocketAddress;
-    int Socket;
     char* SockAddr;
-    unsigned int ReceivedWidth;
-    unsigned int ReceivedHeight;
 
-    int CreateServer();
-    int CreateClient();
-    void CloseSocket();
-    int Send(unsigned char* buffer, unsigned int size, unsigned int& packet_id);
-    int Receive(unsigned char* buffer, unsigned int size);
-
-    void* SendProc(int param);
+    void  CloseSocket();
+    void* ServerProc(unsigned short port);
+    void* SendProc(unsigned int clientid);
     void* ReceiveProc(int param);
-    bool CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size);
-    int ParseFilename(const std::string & filename);
+    int   Receive();
+    bool  CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size);
+    int   ParseFilename(const std::string & filename);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlVideoCodecUDPStream)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlVideoCodecTCPStream)
 
-#endif // _svlVideoCodecUDPStream_h
+#endif // _svlVideoCodecTCPStream_h
 

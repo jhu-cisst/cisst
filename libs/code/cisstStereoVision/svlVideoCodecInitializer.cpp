@@ -32,7 +32,7 @@
 
 #if CISST_SVL_HAS_ZLIB
 #include "svlVideoCodecCVI.h"
-#include "svlVideoCodecUDPStream.h"
+#include "svlVideoCodecTCPStream.h"
 #endif // CISST_SVL_HAS_ZLIB
 
 #if CISST_SVL_HAS_OPENCV
@@ -50,9 +50,9 @@ void svlInitializeVideoCodecs()
     delete new svlVideoCodecCVI;
 #endif // _svlVideoCodecCVI_h
 
-#ifdef _svlVideoCodecUDPStream_h
-    delete new svlVideoCodecUDPStream;
-#endif // _svlVideoCodecUDPStream_h
+#ifdef _svlVideoCodecTCPStream_h
+    delete new svlVideoCodecTCPStream;
+#endif // _svlVideoCodecTCPStream_h
     
 #ifdef _svlVideoCodecOpenCV_h
     delete new svlVideoCodecOpenCV;
