@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 mtsInterfaceProvidedOrOutput::mtsInterfaceProvidedOrOutput(const std::string & interfaceName,
                                                            mtsComponent * component):
     Name(interfaceName),
+    ComponentName(component->GetName()),
     Component(component)
 {
 }
@@ -41,11 +42,7 @@ const std::string & mtsInterfaceProvidedOrOutput::GetName(void) const
 
 const std::string mtsInterfaceProvidedOrOutput::GetComponentName(void) const
 {
-    if (!Component) {
-        return "Unnamed";
-    } else {
-        return this->Component->GetName();
-    }
+    return this->ComponentName;
 }
 
 

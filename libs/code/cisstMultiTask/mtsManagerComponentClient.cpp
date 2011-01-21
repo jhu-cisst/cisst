@@ -190,7 +190,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         // component clients, i.e., multiple processes.
         mtsManagerComponentServer * MCS = dynamic_cast<mtsManagerComponentServer*>(serverComponent);
         if (MCS) {
-            if (serverInterfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()) {
+            if (mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(serverInterfaceProvidedName)) {
                 if (!MCS->AddNewClientProcess(clientProcessName)) {
                     CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to create new set of InterfaceGCM function objects: "
                         << clientProcessName << std::endl;
@@ -252,29 +252,6 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
     if (!serverComponent) {
         CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to get server component: \"" << serverComponentName << "\"" << std::endl;
         return false;
-    }
-
-    // Special handling for connections which MCC is involved with
-    //
-    // If 
-    // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
-    if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceProvidedName)) {
-        const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequiredFor(serverComponentName);
-        if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
-            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
-                                     << ", failed to remove InterfaceComponent's required interface: " 
-                                     << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
-            return false;
-        }
-        if (!DisconnectCleanup(serverComponentName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
-                                     << ", failed to clean up InterfaceComponent's required interface" << std::endl;
-            return false;
-        }
     }
 
     mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
@@ -414,6 +391,28 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
                                      << "\" input interface \"" << clientInterfaceRequiredName
                                      << "\" failed to disconnect from output interface \""
                                      << serverInterfaceProvidedName << "\"" << std::endl;
+            return false;
+        }
+    }
+
+    // Special handling for connections which MCC is involved with
+    //
+    // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
+    if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceProvidedName)) {
+        const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequiredFor(serverComponentName);
+        if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", failed to remove InterfaceComponent's required interface: " 
+                                     << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
+            return false;
+        }
+        if (!DisconnectCleanup(serverComponentName)) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", failed to clean up InterfaceComponent's required interface" << std::endl;
             return false;
         }
     }

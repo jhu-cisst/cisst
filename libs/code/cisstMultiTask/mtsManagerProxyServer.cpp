@@ -223,7 +223,7 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
         LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove MCC proxy for disconnected process: \"" << processName << "\"");
         return false;
     }
-    */
+    //*/
 
     LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed disconnected process: \"" << processName << "\"");
 

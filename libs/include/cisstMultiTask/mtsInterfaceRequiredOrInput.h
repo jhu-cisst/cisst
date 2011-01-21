@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
   (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -53,7 +53,10 @@ class CISST_EXPORT mtsInterfaceRequiredOrInput: public cmnGenericObject
 protected:
 
     /*! A string identifying the 'Name' of the required interface. */
-    std::string Name;
+    const std::string Name;
+
+    /*! Name of component that owns this interface */
+    const std::string ComponentName;
 
     /*! Pointer on the device itself. */
     mtsComponent * Component;

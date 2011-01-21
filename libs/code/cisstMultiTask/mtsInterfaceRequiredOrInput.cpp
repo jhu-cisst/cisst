@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
   (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -26,6 +26,7 @@ mtsInterfaceRequiredOrInput::mtsInterfaceRequiredOrInput(const std::string & int
                                                          mtsComponent * component,
                                                          mtsRequiredType required):
     Name(interfaceName),
+    ComponentName(component->GetName()),
     Component(component),
     Required(required)
 {
@@ -45,11 +46,7 @@ const std::string & mtsInterfaceRequiredOrInput::GetName(void) const
 
 const std::string mtsInterfaceRequiredOrInput::GetComponentName(void) const
 {
-    if (!Component) {
-        return "Unnamed";
-    } else {
-        return this->Component->GetName();
-    }
+    return this->ComponentName;
 }
 
 

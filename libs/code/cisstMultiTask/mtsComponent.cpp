@@ -264,16 +264,6 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
         return false;
     }
 
-    // Get manager component service
-    mtsManagerComponentServices * service = GetManagerComponentServices();
-    if (!service) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
-                                 << interfaceProvidedName << "\"" 
-                                 << ", cannot access manager component services."
-                                 << std::endl;
-        return false;
-    }
-
     if (!skipDisconnect) {
         // Disconnect all active connections
         int userCount = interfaceProvided->GetNumberOfEndUsers();
@@ -300,8 +290,10 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
                 clientComponent = LCM->GetComponent(*_it);
                 if (!clientComponent) continue;
                 if (clientComponent->GetInterfaceRequired(clientInterfaceRequiredName)) {
-                    if (!service->Disconnect(clientComponentName, clientInterfaceRequiredName, 
-                        serverComponentName, serverInterfaceProvidedName))
+                    // MJ: Don't use MCC/MCS service here because some of internal connections
+                    // can be possibly disconnected.
+                    if (!LCM->Disconnect(clientComponentName, clientInterfaceRequiredName, 
+                                         serverComponentName, serverInterfaceProvidedName))
                     {
                         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
                             << interfaceProvidedName << "\"" 
@@ -403,25 +395,19 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
     bool removed = false;
 
     if (!skipDisconnect) {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = const_cast<mtsInterfaceProvidedOrOutput*>(interfaceRequired->GetConnectedInterface());
         // If this required interface has an established connection, disconnect it first using MCC.
         if (serverInterfaceProvidedOrOutput) {
-            mtsManagerComponentServices * service = GetManagerComponentServices();
-            if (!service) {
-                CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
-                    << interfaceRequiredName << "\"" 
-                    << ", cannot access manager component services."
-                    << std::endl;
-                return false;
-            }
-
             const std::string clientComponentName = GetName();
             const std::string clientInterfaceRequiredName = interfaceRequiredName;
             const std::string serverComponentName = serverInterfaceProvidedOrOutput->GetComponentName();
             const std::string serverInterfaceProvidedName = serverInterfaceProvidedOrOutput->GetName();
 
-            if (!service->Disconnect(clientComponentName, clientInterfaceRequiredName, 
-                                     serverComponentName, serverInterfaceProvidedName))
+            // MJ: Don't use MCC/MCS service here because some of internal connections
+            // can be possibly disconnected.
+            if (!LCM->Disconnect(clientComponentName, clientInterfaceRequiredName, 
+                                 serverComponentName, serverInterfaceProvidedName))
             {
                 CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
                     << interfaceRequiredName << "\"" 
