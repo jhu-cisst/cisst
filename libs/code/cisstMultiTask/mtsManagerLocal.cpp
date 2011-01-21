@@ -204,9 +204,7 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Client = 0;
     ManagerComponent.Server = 0;
 
-    if (!UnitTestEnabled) {
-        TimeServer.SetTimeOrigin();
-    }
+    TimeServer.SetTimeOrigin();
 }
 
 void mtsManagerLocal::Cleanup(void)
