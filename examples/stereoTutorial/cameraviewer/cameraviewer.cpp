@@ -219,15 +219,15 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     output->Connect(gamma.GetInput());
         output = gamma.GetOutput();
 
-    // Add splitter
-    output->Connect(splitter.GetInput());
-        output = splitter.GetOutput();
-
     // Add resizer if required
     if (width > 0 && height > 0) {
         output->Connect(resizer.GetInput());
             output = resizer.GetOutput();
     }
+
+    // Add splitter
+    output->Connect(splitter.GetInput());
+        output = splitter.GetOutput();
 
     // Add image file writer
     output->Connect(imagewriter.GetInput());

@@ -32,6 +32,40 @@ http://www.cisst.org/cisst/license.txt.
     #include <winsock2.h>
     #include <ws2tcpip.h>
     #define WINSOCKVERSION MAKEWORD(2,2)
+
+    static int inet_pton4(const char *src, unsigned char *dst)
+    {
+        static const char digits[] = "0123456789";
+        int saw_digit, octets, ch;
+        unsigned char tmp[4], *tp;
+
+        saw_digit = 0;
+        octets = 0;
+        tp = tmp;
+        *tp = 0;
+        while ((ch = *src++) != '\0') {
+            const char *pch;
+
+            if ((pch = strchr(digits, ch)) != NULL) {
+                unsigned int val = *tp * 10 + (unsigned int) (pch - digits);
+
+                if (val > 255) return (0);
+                *tp = (unsigned char) val;
+                if (!saw_digit) {
+                    if (++octets > 4) return (0);
+                    saw_digit = 1;
+                }
+            } else if (ch == '.' && saw_digit) {
+                if (octets == 4) return (0);
+                *++tp = 0;
+                saw_digit = 0;
+            } else return (0);
+        }
+        if (octets < 4) return (0);
+        memcpy(dst, tmp, 4);
+        return (1);
+    }
+
 #else
     #include <arpa/inet.h>
     #include <netdb.h>
@@ -593,7 +627,11 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
 #endif
 
         int reuse = 1;
+#if (CISST_OS == CISST_WINDOWS)
+        if (setsockopt(ServerSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)(&reuse), sizeof(int)) == 0) {
+#else
         if (setsockopt(ServerSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == 0) {
+#endif
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecTCPStream::ServerProc - setsockopt success" << std::endl;
 #endif
@@ -680,7 +718,11 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
 #ifdef _NET_VERBOSE_
                 std::cerr << "svlVideoCodecTCPStream::ServerProc - too many clients" << std::endl;
 #endif
+#if (CISST_OS == CISST_WINDOWS)
+                shutdown(connection, SD_BOTH);
+#else
                 shutdown(connection, SHUT_RDWR);
+#endif
 #if (CISST_OS == CISST_WINDOWS)
                 closesocket(connection);
 #else
@@ -772,7 +814,11 @@ void* svlVideoCodecTCPStream::SendProc(unsigned int clientid)
         }
     }
 
+#if (CISST_OS == CISST_WINDOWS)
+    shutdown(SendConnection[clientid], SD_BOTH);
+#else
     shutdown(SendConnection[clientid], SHUT_RDWR);
+#endif
 #if (CISST_OS == CISST_WINDOWS)
     closesocket(SendConnection[clientid]);
 #else
@@ -829,7 +875,11 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
         address.sin_family = AF_INET;
         address.sin_port = htons(SocketPort);
 
+#if (CISST_OS == CISST_WINDOWS)
+        ret = inet_pton4(SocketAddress.c_str(), (unsigned char*)(&address.sin_addr));
+#else
         ret = inet_pton(AF_INET, SocketAddress.c_str(), &address.sin_addr);
+#endif
         if (ret <= 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecCVINet::ReceiveProc - inet_pton error (" << ret  << ")" << std::endl;
@@ -866,7 +916,11 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
                 // Check if socket is still connected
                 int optval;
                 socklen_t optlen = sizeof(optval);
+#if (CISST_OS == CISST_WINDOWS)
+                ret = getsockopt(ReceiveSocket, SOL_SOCKET, SO_ERROR, (char*)(&optval), &optlen);
+#else
                 ret = getsockopt(ReceiveSocket, SOL_SOCKET, SO_ERROR, &optval, &optlen);
+#endif
 
                 if (optval || ret) {
 #ifdef _NET_VERBOSE_
@@ -894,7 +948,13 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
         ReceiveInitEvent->Raise();
     }
 
-    if (socket_connected) shutdown(ReceiveSocket, SHUT_RDWR);
+    if (socket_connected) {
+#if (CISST_OS == CISST_WINDOWS)
+        shutdown(ReceiveSocket, SD_BOTH);
+#else
+        shutdown(ReceiveSocket, SHUT_RDWR);
+#endif
+    }
     if (socket_open) {
 #if (CISST_OS == CISST_WINDOWS)
         closesocket(ReceiveSocket);
