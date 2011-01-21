@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 1897 2010-10-15 16:52:19Z adeguet1 $
+# $Id$
 #
 # CMakeLists for cisstVector tests
 #
