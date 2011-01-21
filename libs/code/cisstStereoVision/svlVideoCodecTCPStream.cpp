@@ -75,6 +75,16 @@ http://www.cisst.org/cisst/license.txt.
     #include <errno.h>
 #endif
 
+#if (CISST_OS == CISST_WINDOWS)
+    #define __errno         WSAGetLastError()
+    #define __ECONNABORTED  WSAECONNABORTED
+    #define __EAGAIN        WSATRY_AGAIN
+#else
+    #define __errno         errno
+    #define __ECONNABORTED  ECONNABORTED
+    #define __EAGAIN        EAGAIN
+#endif
+
 //#define _NET_VERBOSE_
 
 #define MAX_CLIENTS         5
@@ -893,7 +903,7 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
         ret = connect(ReceiveSocket, (sockaddr*)(&address), sizeof(sockaddr_in));
         if (ret < 0) {
 #ifdef _NET_VERBOSE_
-            std::cerr << "svlVideoCodecCVINet::ReceiveProc - connect failed (" << errno << ")" << std::endl;
+            std::cerr << "svlVideoCodecCVINet::ReceiveProc - connect failed (" << __errno << ")" << std::endl;
 #endif
             break;
         }
@@ -992,21 +1002,30 @@ int svlVideoCodecTCPStream::Receive()
         ret = select(ReceiveSocket + 1, &mask, 0, 0, 0);
         if (ret < 0) {
 #ifdef _NET_VERBOSE_
-            std::cerr << "svlVideoCodecTCPStream::Receive - select error" << std::endl;
+            std::cerr << "svlVideoCodecTCPStream::Receive - select failed (" << __errno << ")" << std::endl;
 #endif
             break;
         }
-        
-        ret = -1;
+
         // Receive packet
-        if (FD_ISSET(ReceiveSocket, &mask)) {
-            ret = recv(ReceiveSocket,
-                       reinterpret_cast<char*>(buffer),
-                       std::min(size, PACKET_SIZE),
-                       0);
+        if (FD_ISSET(ReceiveSocket, &mask) == 0) {
+#ifdef _NET_VERBOSE_
+            std::cerr << "svlVideoCodecTCPStream::Receive - FD_ISSET failed" << std::endl;
+#endif
+            continue;
         }
 
-        if (ret >= 0) {
+        ret = recv(ReceiveSocket,
+                   reinterpret_cast<char*>(buffer),
+                   std::min(size, PACKET_SIZE),
+                   0);
+        if (ret == 0) {
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::Receive - connection terminated" << std::endl;
+#endif
+            break;
+        }
+        else if (ret > 0) {
             // Check if it starts with a "frame start marker"
             framestart = CompareData(buffer, fsm, fsm_len);
 
@@ -1085,11 +1104,28 @@ int svlVideoCodecTCPStream::Receive()
                 return SVL_OK;
             }
         }
-#ifdef _NET_VERBOSE_
         else {
-            std::cerr << "svlVideoCodecTCPStream::Receive - recvfrom failed" << std::endl;
-        }
+            int err = __errno;
+            if (err == __EAGAIN) {
+#ifdef _NET_VERBOSE_
+                std::cerr << "svlVideoCodecTCPStream::Receive - recv failed, retrying..." << std::endl;
 #endif
+            }
+            else {
+                if (err == __ECONNABORTED) {
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::Receive - recv failed, connection aborted" << std::endl;
+#endif
+                }
+                else {
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::Receive - recv failed (" << err << ")" << std::endl;
+#endif
+                }
+                KillReceiveThread = true;
+                break;
+            }
+        }
     }
 
     return SVL_FAIL;
