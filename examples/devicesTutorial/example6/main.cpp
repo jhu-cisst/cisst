@@ -9,13 +9,13 @@
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
---- begin cisst license - do not edit ---
+  --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+  --- end cisst license ---
 */
 
 /*!
@@ -40,67 +40,67 @@ http://www.cisst.org/cisst/license.txt.
 int main(int argc, char *argv[])
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_RUN_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example6-");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
 
-    // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("devNDISerial", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("devNDISerialControllerQDevice", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("devNDISerialToolQDevice", CMN_LOG_LOD_RUN_VERBOSE);
+    // set the log level of detail on select components
+    cmnLogger::SetMaskClass("devNDISerial", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("devNDISerialControllerQDevice", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("devNDISerialToolQDevice", CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
-    // create the tasks
-    devNDISerial * taskNDISerial = new devNDISerial("taskNDISerial", 50.0 * cmn_ms);
-    devNDISerialControllerQDevice * taskControllerQDevice = new devNDISerialControllerQDevice("taskControllerQDevice");
+    // create the components
+    devNDISerial * componentNDISerial = new devNDISerial("componentNDISerial", 50.0 * cmn_ms);
+    devNDISerialControllerQDevice * componentControllerQDevice = new devNDISerialControllerQDevice("componentControllerQDevice");
 
-    // configure the tasks
+    // configure the components
     cmnPath searchPath = std::string(CISST_SOURCE_ROOT) + "/examples/devicesTutorial/example6";
-    taskNDISerial->Configure(searchPath.Find("config.xml"));
+    componentNDISerial->Configure(searchPath.Find("config.xml"));
 
-    // add the tasks to the task manager
-    mtsManagerLocal * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddComponent(taskNDISerial);
-    taskManager->AddComponent(taskControllerQDevice);
+    // add the components to the component manager
+    mtsManagerLocal * componentManager = mtsComponentManager::GetInstance();
+    componentManager->AddComponent(componentNDISerial);
+    componentManager->AddComponent(componentControllerQDevice);
 
-    // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-    taskManager->Connect(taskControllerQDevice->GetName(), "Controller",
-                         taskNDISerial->GetName(), "Controller");
+    // connect the components, e.g. RequiredInterface -> ProvidedInterface
+    componentManager->Connect(componentControllerQDevice->GetName(), "Controller",
+                              componentNDISerial->GetName(), "Controller");
 
     // add data collection for devNDISerial state table
-    mtsCollectorState * taskCollector =
-            new mtsCollectorState(taskNDISerial->GetName(),
-                                  taskNDISerial->GetDefaultStateTableName(),
-                                  mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
+    mtsCollectorState * componentCollector =
+        new mtsCollectorState(componentNDISerial->GetName(),
+                              componentNDISerial->GetDefaultStateTableName(),
+                              mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
 
     // add interfaces for tools and populate controller widget with tool widgets
-    for (unsigned int i = 0; i < taskNDISerial->GetNumberOfTools(); i++) {
-        std::string toolName = taskNDISerial->GetToolName(i);
-        devNDISerialToolQDevice * taskToolQDevice = new devNDISerialToolQDevice(toolName);
-        taskControllerQDevice->AddToolWidget(taskToolQDevice->GetWidget());
-        taskManager->AddComponent(taskToolQDevice);
-        taskManager->Connect(toolName, toolName,
-                             taskNDISerial->GetName(), toolName);
+    for (unsigned int i = 0; i < componentNDISerial->GetNumberOfTools(); i++) {
+        std::string toolName = componentNDISerial->GetToolName(i);
+        devNDISerialToolQDevice * componentToolQDevice = new devNDISerialToolQDevice(toolName);
+        componentControllerQDevice->AddToolWidget(componentToolQDevice->GetWidget());
+        componentManager->AddComponent(componentToolQDevice);
+        componentManager->Connect(toolName, toolName,
+                                  componentNDISerial->GetName(), toolName);
 
-        taskCollector->AddSignal(toolName + "Position");
+        componentCollector->AddSignal(toolName + "Position");
     }
-    taskManager->AddComponent(taskCollector);
-    taskCollector->Connect();
-    taskManager->Connect(taskControllerQDevice->GetName(), "DataCollector",
-                         taskCollector->GetName(), "Control");
+    componentManager->AddComponent(componentCollector);
+    componentCollector->Connect();
+    componentManager->Connect(componentControllerQDevice->GetName(), "DataCollector",
+                              componentCollector->GetName(), "Control");
 
-    // create and start all tasks
-    taskManager->CreateAll();
-    taskManager->StartAll();
+    // create and start all components
+    componentManager->CreateAll();
+    componentManager->StartAll();
 
     // create a main window to hold QWidgets
     QMainWindow * mainWindow = new QMainWindow();
-    mainWindow->setCentralWidget(taskControllerQDevice->GetWidget());
+    mainWindow->setCentralWidget(componentControllerQDevice->GetWidget());
     mainWindow->setWindowTitle("NDI Serial Controller");
     mainWindow->resize(0,0);
     mainWindow->show();
@@ -108,9 +108,9 @@ int main(int argc, char *argv[])
     // run Qt user interface
     application.exec();
 
-    // kill all tasks and perform cleanup
-    taskManager->KillAll();
-    taskManager->Cleanup();
+    // kill all components and perform cleanup
+    componentManager->KillAll();
+    componentManager->Cleanup();
 
     return 0;
 }
