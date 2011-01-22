@@ -7,7 +7,7 @@
   Author(s): Peter Kazanzides
   Created on: 2008-12-30
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,7 +40,11 @@ struct CISST_EXPORT osaAbsoluteTime {
 
     /*! Returns absolute time in seconds relative to Jan 1, 1970. */
     double ToSeconds(void) const;
+
+    /*! Set from time in seconds using floating point double */
+    void FromSeconds(double timeInSeconds);
 };
+
 
 /*!
   \brief Class for relative time

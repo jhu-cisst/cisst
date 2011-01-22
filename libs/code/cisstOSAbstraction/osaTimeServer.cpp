@@ -7,7 +7,7 @@
   Author(s): Peter Kazanzides
   Created on: 12-30-2008
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -464,6 +464,12 @@ double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
 
 double osaAbsoluteTime::ToSeconds(void) const
 {
-    return static_cast<double>(sec)+static_cast<double>(nsec)*cmn_ns;
+    return static_cast<double>(sec) + static_cast<double>(nsec) * cmn_ns;
+}
+
+void osaAbsoluteTime::FromSeconds(double timeInSeconds)
+{
+    sec = static_cast<long>(floor(timeInSeconds));
+    nsec = static_cast<long>((timeInSeconds - sec) * 1000000000); // nano seconds, 10^9
 }
 
