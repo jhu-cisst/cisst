@@ -21,8 +21,7 @@ int main(int argc, char **argv)
     // log configuration, see previous examples
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL); // for cisstLog.txt
     cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
 

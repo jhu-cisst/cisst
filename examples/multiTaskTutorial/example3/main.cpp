@@ -17,8 +17,7 @@ int main(void)
     // Log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL); // for cisstLog.txt
     // add a log per thread
     osaThreadedLogFile threadedLog("example3-");
     cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);

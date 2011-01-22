@@ -33,8 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 int main(void) {
     // add cout for all log
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
-    cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL); // for cisstLog.txt
     cmnLogger::SetMaskClass("osaSerialPort", CMN_LOG_ALLOW_ALL);
 
     osaSerialPort serialPort;
