@@ -29,6 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
+// overall constant, assumes this a maximum delay to transition from
+// one state to another
+const double StateTransitionMaximumDelay = 5.0 * cmn_s;
+
 /*
     Following component definitions are described in the project wiki page.
     (see https://trac.lcsr.jhu.edu/cisst/wiki/Private/cisstMultiTaskNetwork)
@@ -124,6 +128,7 @@ public:
     }
 
     void StateTableAdvance(void) {
+        StateTable->Start();
         StateValue++;
         StateTable->Advance();
     }
@@ -234,7 +239,7 @@ public:
         provided->SetMailBoxAndArgumentQueuesSize(8);
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
-            AddStateTable(InterfaceProvided1.StateTable, true);
+            AddStateTable(InterfaceProvided1.StateTable, true); // add with a provided interface
         }
 
         mtsInterfaceRequired * required;
@@ -529,5 +534,80 @@ public:
         ProcessQueuedEvents();
     }
 };
+
+
+
+/* Component used to test/control a state table collector.  This
+   component has 3 required interfaces:
+   -1- interface to test components to make state advance (test different components with their state tables)
+   -2- interface to observe the state table via its interface, mostly look for events indicating that batches are ready to be collected
+   -3- interface to collector to trigger start/stop collection, reset output, ... all actions that could potentially be taken by end user
+ */
+class mtsCollectorStateTestDevice: public mtsComponent
+{
+public:
+
+    unsigned int BatchReadyEventCounter; // counter for range events from state table
+    mtsStateTable::IndexRange LastRange;
+    bool CollectionRunning;
+    unsigned int SamplesCollected;
+
+    struct {
+        mtsFunctionVoid StateTableAdvance;
+    } TestComponent;
+
+    struct {
+        mtsFunctionVoid StartCollection;
+        mtsFunctionVoid StopCollection;
+    } CollectorState;
+
+    void BatchReadyHandler(const mtsStateTable::IndexRange & range) {
+        this->BatchReadyEventCounter++;
+        this->LastRange = range;
+    }
+
+    void CollectionStartedHandler(void) {
+        this->CollectionRunning = true;
+    }
+
+    void CollectionStoppedHandler(const mtsUInt & samplesCollected) {
+        this->CollectionRunning = false;
+        this->SamplesCollected = samplesCollected;
+    }
+
+    mtsCollectorStateTestDevice(void):
+        mtsComponent("CollectorStateTestDevice"),
+        BatchReadyEventCounter(0),
+        CollectionRunning(false),
+        SamplesCollected(0)
+    {
+        UseSeparateLogFileDefault();
+
+        mtsInterfaceRequired * required;
+        required = AddInterfaceRequired("TestComponent");
+        if (required) {
+            required->AddFunction("StateTableAdvance", TestComponent.StateTableAdvance);
+        }
+
+        required = AddInterfaceRequired("StateTable");
+        if (required) {
+            required->AddEventHandlerVoid(&mtsCollectorStateTestDevice::CollectionStartedHandler, this,
+                                          "CollectionStarted", MTS_EVENT_NOT_QUEUED);
+            required->AddEventHandlerWrite(&mtsCollectorStateTestDevice::CollectionStoppedHandler, this,
+                                           "CollectionStopped", MTS_EVENT_NOT_QUEUED);
+            required->AddEventHandlerWrite(&mtsCollectorStateTestDevice::BatchReadyHandler, this,
+                                           "BatchReady", MTS_EVENT_NOT_QUEUED);
+        }
+
+        required = AddInterfaceRequired("CollectorState");
+        if (required) {
+            required->AddFunction("StartCollection", CollectorState.StartCollection);
+            required->AddFunction("StopCollection", CollectorState.StopCollection);
+        }
+    }
+
+    void Configure(const std::string & CMN_UNUSED(filename) = "") {}
+};
+
 
 #endif // _mtsTestComponents_h

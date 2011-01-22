@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCommandAndEventNetworkedTest.cpp 1897 2010-10-15 16:52:19Z adeguet1 $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,14 +28,14 @@ CMN_IMPLEMENT_SERVICES(mtsCommandAndEventNetworkedTest);
 
 #include "mtsTestComponents.h"
 
-#define P1 "P1"
+
+/*#define P1 "P1"
 #define P2 "P2"
 #define P1_OBJ localManager1
 #define P2_OBJ localManager2
 
 #define DEFAULT_PROCESS_NAME "LCM"
-
-const double TransitionDelay = 10.0 * cmn_s;
+*/
 
 mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest():
     PipeComponentManager("component_manager"),
@@ -84,7 +84,7 @@ void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
                                                     const std::string & expected,
                                                     const double & timeOut)
 {
-    std::string pipeName = "pipe " + pipe.GetName(); 
+    std::string pipeName = "pipe " + pipe.GetName();
     CPPUNIT_ASSERT_MESSAGE(pipeName, pipe.IsConnected());
     std::string answer;
     if (!SendAndReceive(pipe, send, answer, timeOut)) {
@@ -201,9 +201,9 @@ void mtsCommandAndEventNetworkedTest::TestExecution(_clientType * client, _serve
     manager->AddComponent(server);
     manager->Connect(client->GetName(), "r1", server->GetName(), "p1");
     manager->CreateAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
     manager->StartAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
 
     // test commands and timing
     const double queueingDelay = 10.0 * cmn_ms;
@@ -362,7 +362,7 @@ void mtsCommandAndEventNetworkedTest::TestExecution(_clientType * client, _serve
 
     // stop all and cleanup
     manager->KillAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
     manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
     manager->RemoveComponent(client);
     manager->RemoveComponent(server);
@@ -587,9 +587,9 @@ void mtsCommandAndEventNetworkedTest::TestArgumentPrototypes(void)
     manager->AddComponent(server);
     manager->Connect(client->GetName(), "r1", server->GetName(), "p1");
     manager->CreateAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
     manager->StartAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
 
     // test that values are set properly for all argument prototypes
     const mtsGenericObject * argumentPrototypeGeneric;
@@ -642,7 +642,7 @@ void mtsCommandAndEventNetworkedTest::TestArgumentPrototypes(void)
 
     // stop all and cleanup
     manager->KillAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
     manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1");
     manager->RemoveComponent(client);
     manager->RemoveComponent(server);

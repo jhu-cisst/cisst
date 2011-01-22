@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2010-09-01
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,8 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-const double TransitionDelay = 5.0 * cmn_s;
-
+#include "mtsTestComponents.h"
 
 class mtsTestConfigurationManager: public mtsComponent
 {
@@ -42,7 +41,7 @@ public:
     }
 
     // ManagerComponentServices->RequestComponentCreate(processName, componentType, componentName)
-    // ManagerComponentServices->RequestComponentConnect(processName, componentName, interfaceRequiredName, 
+    // ManagerComponentServices->RequestComponentConnect(processName, componentName, interfaceRequiredName,
     //                                                   processName, componentName, interfaceProvidedName))
 
 };
@@ -82,7 +81,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         }
         // create the tasks, i.e. find the commands
         componentManager->CreateAll();
-        if (!componentManager->WaitForStateAll(mtsComponentState::READY, TransitionDelay)) {
+        if (!componentManager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay)) {
             std::cout << "failed to reach state READY for configuration_manager" << std::endl;
             return 1;
         }
@@ -93,7 +92,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         }
         // start the periodic Run
         componentManager->StartAll();
-        if (!componentManager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay)) {
+        if (!componentManager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay)) {
             std::cout << "failed to reach state ACTIVE for configuration_manager" << std::endl;
             return 1;
         }
@@ -124,10 +123,10 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         }
         osaSleep(10.0 * cmn_ms);
     }
-    
+
     // stop component manager
     componentManager->KillAll();
-    if (!componentManager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay)) {
+    if (!componentManager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay)) {
         std::cout << "failed to reach state FINISHED for configuration_manager" << std::endl;
         return 1;
     }
@@ -139,7 +138,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     while (true) {
         osaSleep(1.0 * cmn_hour);
     }
-    
+
     return 0;
 }
 

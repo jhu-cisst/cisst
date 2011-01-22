@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsQueueTest.cpp 1243 2010-02-28 05:33:17Z adeguet1 $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2009-04-29

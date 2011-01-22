@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---

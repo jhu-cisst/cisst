@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCollectorStateTest.h 1932 2010-10-22 03:32:17Z adeguet1 $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2011-01-06
@@ -23,15 +23,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/extensions/HelperMacros.h>
 #include <cisstMultiTask/mtsConfig.h>
 
+
 class mtsCollectorStateTest: public CppUnit::TestFixture
 {
 private:
     CPPUNIT_TEST_SUITE(mtsCollectorStateTest);
     {
-        CPPUNIT_TEST(TestProvidedInterfacesDevice_mtsInt);
-        CPPUNIT_TEST(TestProvidedInterfacesDevice_int);
-        CPPUNIT_TEST(TestProvidedInterfacesPeriodic_mtsInt);
-        CPPUNIT_TEST(TestProvidedInterfacesPeriodic_int);
+        CPPUNIT_TEST(TestDevice_mtsInt);
+        CPPUNIT_TEST(TestDevice_int);
+        CPPUNIT_TEST(TestPeriodic_mtsInt);
+        CPPUNIT_TEST(TestPeriodic_int);
+        CPPUNIT_TEST(TestContinuous_mtsInt);
+        CPPUNIT_TEST(TestContinuous_int);
+        CPPUNIT_TEST(TestFromCallback_mtsInt);
+        CPPUNIT_TEST(TestFromCallback_int);
+        CPPUNIT_TEST(TestFromSignal_mtsInt);
+        CPPUNIT_TEST(TestFromSignal_int);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -41,14 +48,26 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    template <class _clientType>
-    void TestProvidedInterfaces(_clientType * client);
+    template <class _serverType>
+    void TestExecution(_serverType * server, double serverExecutionDelay);
 
-    template <class _elementType> void TestProvidedInterfacesDevice(void);
-    void TestProvidedInterfacesDevice_mtsInt(void);
-    void TestProvidedInterfacesDevice_int(void);
+    template <class _elementType> void TestDevice(void);
+    void TestDevice_mtsInt(void);
+    void TestDevice_int(void);
 
-    template <class _elementType> void TestProvidedInterfacesPeriodic(void);
-    void TestProvidedInterfacesPeriodic_mtsInt(void);
-    void TestProvidedInterfacesPeriodic_int(void);
+    template <class _elementType> void TestPeriodic(void);
+    void TestPeriodic_mtsInt(void);
+    void TestPeriodic_int(void);
+
+    template <class _elementType> void TestContinuous(void);
+    void TestContinuous_mtsInt(void);
+    void TestContinuous_int(void);
+
+    template <class _elementType> void TestFromCallback(void);
+    void TestFromCallback_mtsInt(void);
+    void TestFromCallback_int(void);
+
+    template <class _elementType> void TestFromSignal(void);
+    void TestFromSignal_mtsInt(void);
+    void TestFromSignal_int(void);
 };

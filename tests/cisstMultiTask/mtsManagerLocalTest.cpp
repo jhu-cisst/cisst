@@ -38,7 +38,6 @@ using namespace std;
 
 mtsManagerLocalTest::mtsManagerLocalTest()
 {
-    mtsManagerLocal::UnitTestEnabled = true;
 #if !CISST_MTS_HAS_ICE
     mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 #else

@@ -26,14 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsTestComponents.h"
 
-#define P1 "P1"
-#define P2 "P2"
-#define P1_OBJ localManager1
-#define P2_OBJ localManager2
-
-#define DEFAULT_PROCESS_NAME "LCM"
-
-const double TransitionDelay = 3.0 * cmn_s;
 
 mtsCommandAndEventLocalTest::mtsCommandAndEventLocalTest()
 {
@@ -115,9 +107,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     CPPUNIT_ASSERT(manager->AddComponent(server));
     CPPUNIT_ASSERT(manager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
     manager->CreateAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
     manager->StartAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
 
     // test commands and timing
     const double queueingDelay = 10.0 * cmn_ms;
@@ -297,7 +289,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
     // stop all and cleanup
     manager->KillAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
     CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
     CPPUNIT_ASSERT(manager->RemoveComponent(client));
     CPPUNIT_ASSERT(manager->RemoveComponent(server));
@@ -516,9 +508,9 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     CPPUNIT_ASSERT(manager->AddComponent(server));
     CPPUNIT_ASSERT(manager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
     manager->CreateAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
     manager->StartAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
 
     // test that values are set properly for all argument prototypes
     const mtsGenericObject * argumentPrototypeGeneric;
@@ -571,7 +563,7 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
 
     // stop all and cleanup
     manager->KillAll();
-    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
     CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
     CPPUNIT_ASSERT(manager->RemoveComponent(client));
     CPPUNIT_ASSERT(manager->RemoveComponent(server));
