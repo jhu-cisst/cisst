@@ -41,8 +41,7 @@ int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_DEBUG);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_DEBUG);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // set the log level of detail on select tasks
@@ -83,7 +82,7 @@ int main(int argc, char *argv[])
     tabs->addTab(tab2Widget, "Collection");
 
     // get the component manager to add multiple sine generator tasks
-    mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
     sineTask * sine;
     displayQtComponent * display;
     mtsCollectorState * stateCollector;
@@ -93,15 +92,15 @@ int main(int argc, char *argv[])
     mtsCollectorEvent * eventCollector =
         new mtsCollectorEvent("EventCollector",
                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
-    taskManager->AddComponent(eventCollector);
+    componentManager->AddComponent(eventCollector);
     eventCollector->UseSeparateLogFile("event-collector-log.txt");
     // add QComponent to control the event collector
     collectorQtComponent = new mtsCollectorQtComponent("EventCollectorQComponent");
-    taskManager->AddComponent(collectorQtComponent);
+    componentManager->AddComponent(collectorQtComponent);
     // connect to the existing widget
     collectorQtComponent->ConnectToWidget(collectorQtWidget);
-    taskManager->Connect(collectorQtComponent->GetName(), "DataCollection",
-                         eventCollector->GetName(), "Control");
+    componentManager->Connect(collectorQtComponent->GetName(), "DataCollection",
+                              eventCollector->GetName(), "Control");
 
     // create multiple sine generators along with their widget and
     // state collectors
@@ -112,27 +111,27 @@ int main(int argc, char *argv[])
         // create the generator and its widget
         sine = new sineTask("SIN" + index.str(), 5.0 * cmn_ms);
         sine->UseSeparateLogFileDefault();
-        taskManager->AddComponent(sine);
+        componentManager->AddComponent(sine);
         display = new displayQtComponent("DISP" + index.str());
-        taskManager->AddComponent(display);
+        componentManager->AddComponent(display);
         tab1Layout->addWidget(display->GetWidget(), 1, i);
-        taskManager->Connect(display->GetName(), "DataGenerator",
-                             sine->GetName(), "MainInterface");
+        componentManager->Connect(display->GetName(), "DataGenerator",
+                                  sine->GetName(), "MainInterface");
 
         // create the state collector and connect it to the generator
         stateCollector = new mtsCollectorState(sine->GetName(),
                                                sine->GetDefaultStateTableName(),
                                                mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
         stateCollector->AddSignal("SineData");
-        taskManager->AddComponent(stateCollector);
+        componentManager->AddComponent(stateCollector);
         stateCollector->UseSeparateLogFileDefault();
         stateCollector->Connect();
         // create the QComponent to bridge between the collection widget and the collector
         collectorQtComponent = new mtsCollectorQtComponent(sine->GetName() + "StateCollectorQComponent");
-        taskManager->AddComponent(collectorQtComponent);
+        componentManager->AddComponent(collectorQtComponent);
         collectorQtComponent->ConnectToWidget(collectorQtWidget);
-        taskManager->Connect(collectorQtComponent->GetName(), "DataCollection",
-                             stateCollector->GetName(), "Control");
+        componentManager->Connect(collectorQtComponent->GetName(), "DataCollection",
+                                  stateCollector->GetName(), "Control");
 
         // add events to observe
         eventCollector->AddObservedComponent(sine);
@@ -156,12 +155,12 @@ int main(int argc, char *argv[])
 
     // generate a nice tasks diagram
     std::ofstream dotFile("PeriodicTaskQt.dot");
-    taskManager->ToStreamDot(dotFile);
+    componentManager->ToStreamDot(dotFile);
     dotFile.close();
 
     // create and start all tasks
-    taskManager->CreateAll();
-    taskManager->StartAll();
+    componentManager->CreateAll();
+    componentManager->StartAll();
 
     // run Qt user interface
     mainWidget->resize(NumSineTasks * 220, 360);
@@ -169,8 +168,8 @@ int main(int argc, char *argv[])
     application.exec();
 
     // kill all tasks and perform cleanup
-    taskManager->KillAll();
-    taskManager->Cleanup();
+    componentManager->KillAll();
+    componentManager->Cleanup();
 
     // stop all logs
     cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
