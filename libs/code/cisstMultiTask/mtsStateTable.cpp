@@ -4,10 +4,10 @@
 /*
 $Id$
 
-Author(s):  Ankur Kapoor, Min Yang Jung
+Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
 Created on: 2004-04-30
 
-(C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -61,7 +61,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     }
 
     // set the default number of elements for data collection batch
-    this->DataCollection.BatchSize = this->HistoryLength / 5;
+    this->DataCollection.BatchSize = this->HistoryLength / 3;
     if (this->DataCollection.BatchSize == 0) {
         this->DataCollection.BatchSize = 1;
     }
@@ -423,36 +423,19 @@ int mtsStateTable::GetStateVectorID(const std::string & dataName) const
 }
 
 
-#if 0 // adeguet1, this should be handled by an interface provided/required connect
-void mtsStateTable::SetDataCollectionEventHandler(mtsCollectorState * collector)
-{
-    DataCollectionEventHandler = new mtsCommandVoidMethod<mtsCollectorState>(
-        &mtsCollectorState::DataCollectionEventHandler, collector, collector->GetName());
-    CMN_ASSERT(DataCollectionEventHandler);
-}
-#endif
-
-#if 0
-void mtsStateTable::SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio)
-{
-    DataCollectionInfo.EventTriggeringLimit =
-        (unsigned int) (HistoryLength * eventTriggeringRatio);
-}
-#endif
-
-
 void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
                             << delay.Data << " seconds" << std::endl;
-    const double startTime = this->Tic + delay.Data;
+    // set start time based on current time and delay
+    const double startTime = this->TimeServer->GetRelativeTime() + delay.Data;
     // if we are not yet collection
     if (!this->DataCollection.Collecting) {
-        // is there is no collection scheduled
+        // if there is no collection scheduled
         if (this->DataCollection.StartTime == 0) {
             // set time to start
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                    << startTime << std::endl;
+                                    << startTime << " for state table \"" << this->GetName() << "\"" << std::endl;
             this->DataCollection.StartTime = startTime;
         } else {
             // we are set to collect but later, advance the collection
@@ -461,7 +444,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             // collect more data.
             if (this->DataCollection.StartTime > startTime) {
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (moved forward)" << std::endl;
+                                        << startTime << " (moved forward) for state table \"" << this->GetName() << "\"" << std::endl;
                 this->DataCollection.StartTime = startTime;
             } else {
                 CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received a new request to start data collection after previous request, ignored"
@@ -479,7 +462,8 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             } else {
                 // this will schedule a start after the scheduled stop
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (after a scheduled stop)" << std::endl;
+                                        << startTime << " (after a scheduled stop) for state table \""
+                                        << this->GetName() << "\"" << std::endl;
                 this->DataCollection.StartTime = startTime;
             }
         }
@@ -490,12 +474,15 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: received request to stop data collection in "
-                            << delay.Data << " seconds" << std::endl;
-    double stopTime = this->Tic + delay.Data;
+                            << delay.Data << " seconds for state table \""
+                            << this->GetName() << "\"" << std::endl;
+    // set stop time based on current time and delay
+    const double stopTime = this->TimeServer->GetRelativeTime() + delay.Data;
     // check is there is already a stop time scheduled
     if (this->DataCollection.StopTime == 0) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                << stopTime << std::endl;
+                                << stopTime << " for state table \""
+                                << this->GetName() << "\"" << std::endl;
         DataCollection.StopTime = stopTime;
     } else {
         // we are set to stop but earlier, delay the collection stop
@@ -504,7 +491,8 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
         // more data.
         if (this->DataCollection.StopTime < stopTime) {
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                    << stopTime << " (moved back)" << std::endl;
+                                    << stopTime << " (moved back) for state table \""
+                                    << this->GetName() << "\"" << std::endl;
             DataCollection.StopTime = stopTime;
         } else {
             CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStop: received a new request to stop data collection before previous request, ignored"
