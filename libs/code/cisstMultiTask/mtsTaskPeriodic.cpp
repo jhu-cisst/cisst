@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -40,7 +40,9 @@ void * mtsTaskPeriodic::RunInternal(void *data)
     while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
         if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();
-            if (StateTable.GetToc() - StateTable.GetTic() > Period) OverranPeriod = true;
+            if (StateTable.GetToc() - StateTable.GetTic() > Period) {
+                OverranPeriod = true;
+            }
         }
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
@@ -54,7 +56,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 void mtsTaskPeriodic::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
     // user defined initialization, find commands from associated resource interfaces
-    ThreadBuddy.Create(GetName().c_str(), atPeriod); // convert to nano seconds
+    ThreadBuddy.Create(GetName().c_str(), AbsoluteTimePeriod); // convert to nano seconds
 
     // Call base class StartupInternal, which also calls user-supplied Startup.
     BaseType::StartupInternal();
@@ -96,30 +98,29 @@ void mtsTaskPeriodic::StartInternal(void)
 /********************* Task constructor and destructor *****************/
 
 mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInSeconds,
- 				 bool isHardRealTime, unsigned int sizeStateTable,
-				 bool newThread):
+                                 bool isHardRealTime, unsigned int sizeStateTable,
+                                 bool newThread):
     mtsTaskContinuous(name, sizeStateTable, newThread),
     ThreadBuddy(),
     Period(periodicityInSeconds),
     IsHardRealTime(isHardRealTime)
 {
-   atPeriod.sec = (long)floor( periodicityInSeconds );
-   atPeriod.nsec = (long)(( periodicityInSeconds - atPeriod.sec )*1000000000 );
-   CMN_ASSERT(Period > 0);
+    AbsoluteTimePeriod.FromSeconds(periodicityInSeconds);
+    CMN_ASSERT(GetPeriodicity() > 0);
 }
 
 mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name, 
-				  const osaAbsoluteTime& period,
-				  bool isHardRealTime, 
-				  unsigned int sizeStateTable,
-				  bool newThread ):
+                                  const osaAbsoluteTime & period,
+                                  bool isHardRealTime, 
+                                  unsigned int sizeStateTable,
+                                  bool newThread ):
     mtsTaskContinuous(name, sizeStateTable, newThread),
     ThreadBuddy(),
-    Period( period.sec + period.nsec * cmn_ns ),
-    atPeriod( period ),
+    Period(period.ToSeconds()),
+    AbsoluteTimePeriod(period),
     IsHardRealTime(isHardRealTime)
 {
-   CMN_ASSERT( GetPeriodicity() > 0 );
+    CMN_ASSERT(GetPeriodicity() > 0);
 }
 
 mtsTaskPeriodic::~mtsTaskPeriodic() {
@@ -129,8 +130,9 @@ mtsTaskPeriodic::~mtsTaskPeriodic() {
     //pending on its message queue are unblocked with an error return.
 
     Kill();
+    // adeguet1, is this sleep still necessary?
     // Now, wait for 2 periods to see if it was killed
-    osaSleep(2.0 * this->Period); // all expressed in seconds
+    // osaSleep(2.0 * this->PeriodInSeconds); // all expressed in seconds
 }
 
 
@@ -145,3 +147,15 @@ void mtsTaskPeriodic::Suspend(void)
     }
 }
 
+
+double mtsTaskPeriodic::GetPeriodicity(void) const
+{
+    return AbsoluteTimePeriod.ToSeconds();
+}
+
+/*! Return true if thread is periodic.  Currently, returns true if
+  the thread was created with a period > 0. */
+bool mtsTaskPeriodic::IsPeriodic(void) const
+{
+    return Period > 0.0;
+}

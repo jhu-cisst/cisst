@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,19 +51,19 @@ class CISST_EXPORT mtsTaskPeriodic: public mtsTaskContinuous
 
     friend class mtsTaskManager;
 
-public:
+ public:
     typedef mtsTaskContinuous BaseType;
 
-protected:
+ protected:
     /************************ Protected task data  *********************/
 
 	/*! The OS independent thread buddy, that makes the thread
 	  real-time on __ALL__ platforms. */
 	osaThreadBuddy ThreadBuddy;
 
-	/*! The period of the task, in seconds. */
-        double Period;
-        osaAbsoluteTime atPeriod;
+    /*! The period of the task, in seconds. */
+    double Period;
+    osaAbsoluteTime AbsoluteTimePeriod;
    
 	/*! True if the task is hard real time. It is always false for non-real
 	  time systems. */
@@ -87,29 +87,29 @@ protected:
     /*! Called from Start */
     void StartInternal(void);
 
-public:
+ public:
     /********************* Task constructor and destructor *****************/
 
 	/*! Create a task with name 'name', periodicity, and a flag that
-        sets if the task needs to be hard real time.
+      sets if the task needs to be hard real time.
 
-        \param name The name of the task
-        \param periodicityInSeconds The task period, in seconds
-        \param isHardRealTime True if task should run in hard real time
-        \param sizeStateTable The history size of the state table
-        \param newThread True if a new thread should be created for this task
+      \param name The name of the task
+      \param periodicityInSeconds The task period, in seconds
+      \param isHardRealTime True if task should run in hard real time
+      \param sizeStateTable The history size of the state table
+      \param newThread True if a new thread should be created for this task
 
-        \note See note in mtsTask regarding length of string name.  See note
-              in mtsTaskContinuous regarding newThread parameter.
+      \note See note in mtsTask regarding length of string name.  See note
+      in mtsTaskContinuous regarding newThread parameter.
 
-	 */
+    */
     mtsTaskPeriodic(const std::string & name,
                     double periodicityInSeconds,
                     bool isHardRealTime = false,
                     unsigned int sizeStateTable = 256,
                     bool newThread = true);
 
-   mtsTaskPeriodic(const std::string & name,
+    mtsTaskPeriodic(const std::string & name,
                     const osaAbsoluteTime& periodicity,
                     bool isHardRealTime = false,
                     unsigned int sizeStateTable = 256,
@@ -126,12 +126,12 @@ public:
 
     /********************* Methods for task period and overrun ************/
 
-       /*! Return the periodicity of the task, in seconds */
-       double GetPeriodicity(void) const { return atPeriod.sec + atPeriod.nsec*cmn_ns; }
+    /*! Return the periodicity of the task, in seconds */
+    double GetPeriodicity(void) const;
 
     /*! Return true if thread is periodic.  Currently, returns true if
       the thread was created with a period > 0. */
-    bool IsPeriodic(void) const { return Period > 0; }
+    bool IsPeriodic(void) const;
 
 };
 
