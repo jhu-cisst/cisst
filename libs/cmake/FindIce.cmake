@@ -23,7 +23,7 @@
 # ICE_INCLUDE_DIR
 # ICE_LIBRARY_DIR
 # ICE_SLICE_DIR
-#
+# ICE_SLICE2CPP
 #
 
 #
@@ -40,12 +40,6 @@ set (ICE_FOUND "NO" CACHE BOOL "Do we have Ice?" FORCE)
 find_path (ICE_ICE_H_INCLUDE_DIR
            NAMES Ice/Ice.h
            PATHS
-             # rational for this search order:
-             #    source install w/env.var -> source install
-             #    package -> package
-             #    package + source install w/env.var -> source install
-             #    package + source install w/out env.var -> package
-             #
              # installation selected by user
              ${ICE_HOME}/include
              $ENV{ICE_HOME}/include
@@ -85,10 +79,8 @@ find_path (ICE_ICE_H_INCLUDE_DIR
             )
 
 # NOTE: if ICE_HOME_INCLUDE_ICE is set to *-NOTFOUND it will evaluate to FALSE
-
 if (ICE_ICE_H_INCLUDE_DIR)
 
-  set (ICE_FOUND "YES" CACHE BOOL "Do we have Ice?" FORCE)
   get_filename_component (ICE_HOME_STRING ${ICE_ICE_H_INCLUDE_DIR} PATH)
   set (ICE_HOME ${ICE_HOME_STRING} CACHE PATH "Ice home directory")
 
@@ -110,10 +102,8 @@ if (ICE_ICE_H_INCLUDE_DIR)
   # debian package splits off slice files into a different place
   if (ICE_HOME MATCHES /usr)
     set (ICE_SLICE_DIR /usr/share/slice)
-    # MESSAGE( STATUS "This is a Debian Ice installation. Slice files are in ${ice_slice_dir}" )
   else (ICE_HOME MATCHES /usr)
     set (ICE_SLICE_DIR ${ICE_HOME}/slice)
-    # MESSAGE( STATUS "This is NOT a Debian Ice installation. Slice files are in ${ice_slice_dir}" )
   endif (ICE_HOME MATCHES /usr)
 
   # some libs only care about IceUtil, we tell them to find IceUtil in the same place as Ice.
@@ -133,10 +123,22 @@ if (ICE_ICE_H_INCLUDE_DIR)
   endif (APPLE)
   message( STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
 
+  # find slice2cpp
+  find_program (ICE_SLICE2CPP
+                NAME slice2cpp
+                PATHS "${ICE_HOME}/bin"
+                NO_DEFAULT_PATH)
+
+  # set ICE_FOUND if enough is found
+  if (ICE_HOME AND ICE_LIBRARY_NAME AND ICE_SLICE2CPP)
+    set (ICE_FOUND "YES" CACHE BOOL "Do we have Ice?" FORCE)
+  endif (ICE_HOME AND ICE_LIBRARY_NAME AND ICE_SLICE2CPP)
+
   # quiet things down a bit
   if (ICE_FOUND)
     mark_as_advanced (ICE_FOUND ICE_HOME
                       ICE_INCLUDE_DIR ICE_ICE_H_INCLUDE_DIR ICE_SLICE_DIR
-                      ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE)
+                      ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE ICE_SLICE2CPP)
   endif (ICE_FOUND)
+
 endif (ICE_ICE_H_INCLUDE_DIR)

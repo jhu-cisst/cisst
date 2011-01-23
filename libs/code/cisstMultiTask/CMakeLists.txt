@@ -270,7 +270,7 @@ if (CISST_MTS_HAS_ICE)
       OUTPUT ${GENERATED_CPP_FILE} ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/libs/include/cisstMultiTask/${slice_file}.h
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       # first run slice2cpp
-      COMMAND ${ICE_HOME}/bin/slice2cpp
+      COMMAND ${ICE_SLICE2CPP}
       ARGS    -I ${ICE_SLICE_DIR} ${SLICE_OPTIONS} ${cisst_SOURCE_DIR}/libs/etc/cisstMultiTask/Ice/${slice_file}.ice
       # then create a directory to copy the header file
       COMMAND ${CMAKE_COMMAND}
