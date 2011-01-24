@@ -234,9 +234,12 @@ protected:
         inline void error(const ::std::string & message) {
             CMN_LOG_RUN_ERROR << "ICE: " << message << std::endl;
         }
+        // Support for Ice 3.4 or above (used by IceBox)
+        // MJ: This does not get called in the current implementation and thus
+        // can return null.  However, to be on the safe side, it returns a new
+        // instance of itself.
         ::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
-            // MJ: Ice-3.4 support
-            return NULL;
+            return new CisstLogger;
         }
     };
 
@@ -261,9 +264,12 @@ protected:
         inline void error(const ::std::string & message) {
             Log("##### ERROR: " + message);
         }
+        // Support for Ice 3.4 or above (used by IceBox)
+        // MJ: This does not get called in the current implementation and thus
+        // can return null.  However, to be on the safe side, it returns a new
+        // instance of itself.
         ::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
-            // TODO: Ice-3.4 support
-            return NULL;
+            return new WindowLogger;
         }
 
     protected:

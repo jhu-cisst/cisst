@@ -848,7 +848,7 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
         return true;
     }
     // Add provided interface (can't be done in constructor)
-    interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided;
+    interfaceName = mtsManagerComponentBase::GetNameOfInterfaceInternalProvided();
     mtsInterfaceProvided *provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;

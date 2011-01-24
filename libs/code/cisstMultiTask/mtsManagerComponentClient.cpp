@@ -450,9 +450,6 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
     // Return if provided interface already exists
     if (GetInterfaceProvided(interfaceName))
         return true;
-    // Return if provided interface already exists
-    if (GetInterfaceProvided(interfaceName))
-        return true;
     mtsInterfaceProvided * provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceComponent: failed to add \"Component\" provided interface: " << interfaceName << std::endl;

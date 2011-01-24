@@ -2064,11 +2064,12 @@ bool mtsManagerLocal::GetInterfaceProvidedDescription(
                                  << interfaceProvidedName << "\" found in component \"" << serverComponentName << "\"" << std::endl;
         return false;
     }
-#else
-    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for CISST_MTS_HAS_ICE" << std::endl;
-#endif
 
     return true;
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedDescription: not yet implement for !CISST_MTS_HAS_ICE" << std::endl;
+    return false;
+#endif
 }
 
 bool mtsManagerLocal::GetInterfaceRequiredDescription(

@@ -374,6 +374,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         newCommandQualifiedRead->SetArgumentPrototype(argument1Prototype, argument2Prototype);
     }
 
+    // MJ TODO: Add support for CommandsVoidReturn and CommandsWriteReturn
+
     // Create event generator proxies
     std::string eventName;
 

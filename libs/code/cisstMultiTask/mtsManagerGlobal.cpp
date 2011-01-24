@@ -1678,7 +1678,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
         processName = serverProcessName;
 
         ManagerComponentServer->ComponentDisconnect(processName, connection);
-        osaSleep(100 * cmn_ms); // MJ TODO: remove this when ComponentDisconnect() becomes blocking
+        osaSleep(100 * cmn_ms); // Give time to the GCM to actually process disconnection request
 
         // Step 2. Clean up GCM's internal data structure - Remove connection between user components
         if (!RemoveConnectionOfInterfaceRequiredOrInput(processName, clientComponentName, clientInterfaceName, connectionID)) {
@@ -1794,7 +1794,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                 arg.Server.ProcessName = clientProcessName;
                 arg.Server.ComponentName = serverComponentProxyName;
             }
-            ManagerComponentServer->ComponentDisconnect(clientProcessName, arg); // MJ TODO: should check return value
+            ManagerComponentServer->ComponentDisconnect(clientProcessName, arg);
         }
 
         // Remove connection information of provided interface proxy from GCM
@@ -1857,7 +1857,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                 arg.Client.ProcessName = serverProcessName;
                 arg.Client.ComponentName = clientComponentProxyName;
             }
-            ManagerComponentServer->ComponentDisconnect(serverProcessName, arg); // MJ TODO: should check return value
+            ManagerComponentServer->ComponentDisconnect(serverProcessName, arg);
         }
 
         // Remove connection information of required interface proxy from GCM
