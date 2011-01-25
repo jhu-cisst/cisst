@@ -19,7 +19,7 @@ set (SOURCE_FILES
      robDHTest.cpp
      robManipulatorTest.cpp
 #     robMassTest.cpp
-     robWAMKinematics.cpp
+     robRobotsKinematics.cpp
     )
 
 # all header files
@@ -27,7 +27,7 @@ set (HEADER_FILES
      robDHTest.h
      robManipulatorTest.h
 #     robMassTest.h
-     robWAMKinematics.h
+     robRobotsKinematics.h
      )
 
 # Add executable for C++ tests

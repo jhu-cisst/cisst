@@ -263,8 +263,10 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   int LDA = M;                // The leading dimension of the array A.
 
   // B is a pointer the the N vector containing the solution
-  double* B = new double[N];  // The N-by-NRHS matrix of right hand side matrix
-  int LDB = N;                // The leading dimension of the array B.
+  double* B;                  // The N-by-NRHS matrix of right hand side matrix
+  int LDB;                    // The leading dimension of the array B.
+  if( N < 6 )    { B = new double[6]; LDB = 6; }
+  else           { B = new double[N]; LDB = N; }    
 
   // These values are used for the SVD computation
   double* S = new double[M];  // The singular values of A in decreasing order
@@ -335,6 +337,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // update the solution
     for(size_t j=0; j<links.size(); j++) q[j] += B[j];
+
   }
   
   // copy the joint values and 
@@ -363,7 +366,8 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
   for(int j=(int)links.size()-1; 0<=j; j--){
 
-    if( links[j].GetConvention() == robKinematics::STANDARD_DH ){ // DH
+    if( links[j].GetConvention() == robKinematics::STANDARD_DH ||  // DH
+	links[j].GetConvention() == robKinematics::HAYATI ){       // Hayati
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
 

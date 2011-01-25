@@ -8,17 +8,23 @@ private:
 
   CPPUNIT_TEST_SUITE( robDHTest );
 
-  CPPUNIT_TEST(TestRead);
-  CPPUNIT_TEST(TestForwardKinematics);
+  CPPUNIT_TEST(TestReadWAM7);
+  CPPUNIT_TEST(TestForwardKinematicsWAM7);
+  CPPUNIT_TEST(TestReadPUMA560);
+  CPPUNIT_TEST(TestForwardKinematicsPUMA560);
 
   CPPUNIT_TEST_SUITE_END();
   
-  void TestRandomFK( size_t i, const robDH& dh );
+  void TestRandomFKPUMA560( size_t i, const robDH& dh );
+  void TestRandomFKWAM7( size_t i, const robDH& dh );
   
 public:
 
-  void TestForwardKinematics();
-  void TestRead();
+  void TestForwardKinematicsWAM7();
+  void TestReadWAM7();
+
+  void TestForwardKinematicsPUMA560();
+  void TestReadPUMA560();
 
 };
 
