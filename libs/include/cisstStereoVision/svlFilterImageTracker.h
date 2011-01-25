@@ -63,7 +63,7 @@ protected:
     virtual int Release();
 
     virtual void ReconstructRigidBody();
-    virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = 2);
+    virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
 
 private:
     svlSampleTargets OutputTargets;

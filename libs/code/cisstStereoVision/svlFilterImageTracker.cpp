@@ -186,7 +186,7 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
         WarpedRigidBodyAngle.SetAll(0.0);
         WarpedRigidBodyScale.SetSize(VideoChannels);
         WarpedRigidBodyScale.SetAll(1.0);
-        WarpInternals.SetSize(VideoChannels);
+        WarpInternals.SetSize(VideoChannels * 2);
 
         WarpedImage = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
         if (!WarpedImage) return SVL_FAIL;
@@ -203,7 +203,8 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
 
 int svlFilterImageTracker::OnStart(unsigned int procCount)
 {
-    (procCount >= WarpInternals.size() * 2) ? WarpingParallel = true : WarpingParallel = false;
+    if (RigidBody && procCount >= WarpInternals.size()) WarpingParallel = true;
+    else WarpingParallel = false;
 
     return SVL_OK;
 }
@@ -294,7 +295,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
         vch = procInfo->id >> 1;
         if (vch < VideoChannels && Trackers[vch]) {
-            WarpImage(img, vch, procInfo->id & 1);
+            WarpImage(img, vch, procInfo->id);
         }
     }
 
@@ -371,10 +372,12 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             OutputTargets.SetTimestamp(ts);
             output->PushSample(&OutputTargets);
         }
-        output = GetOutput("warpedimage");
-        if (output) {
-            WarpedImage->SetTimestamp(ts);
-            output->PushSample(WarpedImage);
+        if (RigidBody) {
+            output = GetOutput("warpedimage");
+            if (output) {
+                WarpedImage->SetTimestamp(ts);
+                output->PushSample(WarpedImage);
+            }
         }
     }
 
@@ -509,20 +512,18 @@ void svlFilterImageTracker::ReconstructRigidBody()
 
 void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch, int threadid)
 {
-    if (threadid < 0 || threadid > 2) return;
-
     double c = cos(WarpedRigidBodyAngle[videoch]);
     double s = sin(WarpedRigidBodyAngle[videoch]);
     double sc = WarpedRigidBodyScale[videoch];
 
     const int border = 50;
 
-    const int x1 = ROI[videoch].left - border;
-    const int y1 = ROI[videoch].top - border;
-    const int x2 = ROI[videoch].right + border;
+    const int x1 = std::max(0, ROI[videoch].left - border);
+    const int y1 = std::max(0, ROI[videoch].top - border);
+    const int x2 = std::min(static_cast<int>(image->GetWidth(videoch) - 1), ROI[videoch].right + border);
     const int y2 = y1;
     const int x3 = x2;
-    const int y3 = ROI[videoch].bottom + border;
+    const int y3 = std::min(static_cast<int>(image->GetHeight(videoch) - 1), ROI[videoch].bottom + border);
     const int x4 = x1;
     const int y4 = y3;
 
@@ -540,15 +541,24 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
 
     svlTriangle tri_in, tri_out;
 
-    if (threadid > 0) {
+    if (threadid >= 0) {
+        if (threadid & 1) {
+            tri_in.Assign(x1, y1, x3, y3, x4, y4);
+            tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
+        }
+        else {
+            tri_in.Assign(x1, y1, x2, y2, x3, y3);
+            tri_out.Assign(wx1, wy1, wx2, wy2, wx3, wy3);
+        }
+        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[threadid]);
+    }
+    else {
         tri_in.Assign(x1, y1, x3, y3, x4, y4);
         tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
-        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
-    }
-    if (threadid != 1) {
+        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[0]);
         tri_in.Assign(x1, y1, x2, y2, x3, y3);
         tri_out.Assign(wx1, wy1, wx2, wy2, wx3, wy3);
-        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
+        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[0]);
     }
 }
 

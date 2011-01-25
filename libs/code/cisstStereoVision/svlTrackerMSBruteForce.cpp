@@ -172,8 +172,8 @@ int svlTrackerMSBruteForce::Initialize()
         LowerScale = new svlTrackerMSBruteForce();
         // half the image size, scale decremented recursively
         LowerScale->SetParameters(Metric,
-                                  TemplateRadiusRequested / 2,
-                                  WindowRadiusRequested / 2,
+                                  (TemplateRadiusRequested + 1) / 2,
+                                  (WindowRadiusRequested + 1) / 2,
                                   Scale - 1,
                                   255 - OrigTmpltWeight,
                                   TrajectoryFilter);
@@ -189,8 +189,8 @@ int svlTrackerMSBruteForce::Initialize()
         LowerScaleImage->SetSize(Width / 2, Height / 2);
 
         // modify current parameters for multiscale processing + add some margin
-        TemplateRadius = std::max(TemplateRadiusRequested / 2, 2u);
-        WindowRadius = 1;
+        TemplateRadius = std::max((TemplateRadiusRequested) + 1 / 2, 2u);
+        WindowRadius = 2;
     }
     else {
         // coarsest scale so go by the original parameters
