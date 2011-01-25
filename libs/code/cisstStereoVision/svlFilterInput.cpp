@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 svlFilterInput::svlFilterInput(svlFilterBase* filter, bool trunk, const std::string &name) :
-    BaseType(name),
+    BaseType(name, filter),
     Filter(filter),
     Trunk(trunk),
     Connected(false),
