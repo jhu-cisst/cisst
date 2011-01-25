@@ -67,6 +67,7 @@ private:
     svlImageRGB Buffer[3];
 #if CISST_SVL_HAS_OPENCV
     IplImage* OCVImage[3];
+    vctDynamicVector<unsigned char> OCVConvBuffer;
 #endif // CISST_SVL_HAS_OPENCV
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
