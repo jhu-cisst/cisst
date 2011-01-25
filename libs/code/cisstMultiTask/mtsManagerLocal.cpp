@@ -796,6 +796,10 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
 
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
 {
+    if (component == 0) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: null component pointer passed to this method" << std::endl;
+        return false;
+    }
     return RemoveComponent(component->GetName(), true);
 }
 
@@ -835,8 +839,6 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const b
     ComponentMapChange.Lock();
     success = ComponentMap.RemoveItem(componentName);
     ComponentMapChange.Unlock();
-
-    delete component;
 
     if (!success) {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component: " << componentName << std::endl;
