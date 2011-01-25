@@ -61,12 +61,12 @@ void serverTask<_dataType>::Write(const _dataType & data)
     fltkMutex.Unlock();
 #if 0
     // MJ: test code
-    static int count = 0;
-    if (count++ >= 1) {
-        std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : START" << std::endl;
-        osaSleep((double)data);
-        std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : END" << std::endl;
-    }
+    //static int count = 0;
+    //if (count++ >= 1) {
+    //    std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : START" << std::endl;
+    //    osaSleep((double)data);
+    //    std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : END" << std::endl;
+    //}
 #endif
 }
 

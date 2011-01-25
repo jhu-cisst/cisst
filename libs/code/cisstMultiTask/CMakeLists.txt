@@ -38,6 +38,7 @@ set (SOURCE_FILES
      mtsComponent.cpp
      mtsComponentState.cpp
      mtsComponentViewer.cpp
+     mtsConnection.cpp
 
      mtsEventReceiver.cpp
      mtsExecutionResult.cpp
@@ -122,6 +123,7 @@ set (HEADER_FILES
      mtsComponentGeneratorMacros.h
      mtsComponentState.h
      mtsComponentViewer.h
+     mtsConnection.h
 
      mtsEventReceiver.h
      mtsExecutionResult.h

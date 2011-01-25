@@ -135,9 +135,7 @@ public:
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    bool AddConnectionInformation(const std::string & serverInterfaceProvidedName, const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Interface Proxy
@@ -192,7 +190,7 @@ public:
        \return True if success, false otherwise */
     bool CreateInterfaceProxyClient(const std::string & requiredInterfaceProxyName,
                                     const std::string & serverEndpointInfo,
-                                    const unsigned int connectionID);
+                                    const ConnectionIDType connectionID);
 
     /* \brief Check if a network proxy server to serve the provided interface 
               proxy specified has been created. 
@@ -220,7 +218,7 @@ public:
         \param clientInterfaceRequiredName Name of required interface
         \note This method is called only by a client process
         \return True if success, false otherwise */
-    bool UpdateCommandProxyID(const unsigned int connectionID,
+    bool UpdateCommandProxyID(const ConnectionIDType connectionID,
         const std::string & serverInterfaceProvidedName, const std::string & clientInterfaceRequiredName);
 
     /*! \brief Assign ids of event handler proxies' in a required interface 
@@ -254,23 +252,6 @@ public:
         \param componentName Name of user component */
     static std::string GetInterfaceProvidedUserName(
         const std::string & processName, const std::string & componentName);
-
-    //-------------------------------------------------------------------------
-    //  Utilities
-    //-------------------------------------------------------------------------
-    /*! \brief Extract complete information about all commands and event 
-               generators in the provided interface specified. Argument 
-               prototypes are serialized.
-        \param providedInterface Provided interface
-        \param providedInterfaceDescription Output parameter to contain
-               complete information about the provided interface specified. */
-    static void ExtractInterfaceProvidedDescription(mtsInterfaceProvided * providedInterface,
-        InterfaceProvidedDescription & providedInterfaceDescription);
-
-    /*! Extract complete information about all functions and event handlers in
-        a required interface. Argument prototypes are fetched with serialization. */
-    static void ExtractInterfaceRequiredDescription(mtsInterfaceRequired * requiredInterface,
-        InterfaceRequiredDescription & requiredInterfaceDescription);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentProxy)

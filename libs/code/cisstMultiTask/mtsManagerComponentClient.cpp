@@ -41,23 +41,6 @@ mtsManagerComponentClient::~mtsManagerComponentClient()
 {
 }
 
-std::string mtsManagerComponentClient::GetNameOfManagerComponentClient(const std::string & processName)
-{
-    std::string name(processName);
-    name += mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix;
-
-    return name;
-}
-
-std::string mtsManagerComponentClient::GetNameOfInterfaceComponentRequired(const std::string & userComponentName)
-{
-    std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceComponentRequired;
-    interfaceName += "For";
-    interfaceName += userComponentName;
-
-    return interfaceName;
-}
-
 void mtsManagerComponentClient::Startup(void)
 {
    CMN_LOG_CLASS_INIT_VERBOSE << "MCC starts" << std::endl;
@@ -151,7 +134,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         // Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
         if ((serverComponentName == GetName()) || 
-            (serverComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) ||   // PK TEMP
+            (serverComponentName == mtsManagerComponentBase::GetNameOfManagerComponentServer()) ||   // PK TEMP
             !serverComponent->IsRunning()) {
             success = clientInterfaceRequired->ConnectTo(serverInterfaceProvided);
         }
@@ -207,7 +190,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         // component clients, i.e., multiple processes.
         mtsManagerComponentServer * MCS = dynamic_cast<mtsManagerComponentServer*>(serverComponent);
         if (MCS) {
-            if (serverInterfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided) {
+            if (mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(serverInterfaceProvidedName)) {
                 if (!MCS->AddNewClientProcess(clientProcessName)) {
                     CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to create new set of InterfaceGCM function objects: "
                         << clientProcessName << std::endl;
@@ -256,8 +239,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
 // This implementation of DisconnectLocally does not rely on any data saved about the connection, such as the end-user
 // interface pointer or the connection id.  I think it would be better to first look up this information.
 bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-                                                 const std::string & clientProcessName)
+                                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     mtsComponent * clientComponent = LCM->GetComponent(clientComponentName);
@@ -284,7 +266,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             return false;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "DisconnectLocally: Swapping client/server" << std::endl;
-            return DisconnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName, clientProcessName);
+            return DisconnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName);
         }
     }
 
@@ -413,6 +395,45 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
         }
     }
 
+    // Special handling for connections which MCC is involved with
+    //
+    // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
+    if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceProvidedName)) {
+        const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequiredFor(serverComponentName);
+        if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", failed to remove InterfaceComponent's required interface: " 
+                                     << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
+            return false;
+        }
+        if (!DisconnectCleanup(serverComponentName)) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << ", failed to clean up InterfaceComponent's required interface" << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool mtsManagerComponentClient::DisconnectCleanup(const std::string & componentName)
+{
+    // Get instance of InterfaceComponent's required interface that corresponds to
+    // "componentName"
+    InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(componentName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "DisconnectCleanup: failed to get function set for component \"" << componentName << "\"" << std::endl;
+        return false;
+    }
+
+    // MJ: This might need to be protected as mutex
+    InterfaceComponentFunctionMap.RemoveItem(componentName);
+    delete functionSet;
+
     return true;
 }
 
@@ -425,7 +446,7 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
     // creation of required interfaces.
 
     // Add provided interface to which InterfaceInternal's required interface connects.
-    std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceComponentProvided;
+    std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceComponentProvided();
     // Return if provided interface already exists
     if (GetInterfaceProvided(interfaceName))
         return true;
@@ -487,7 +508,7 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
 bool mtsManagerComponentClient::AddInterfaceLCM(void)
 {
     // Add required interface
-    std::string interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceLCMRequired;
+    std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceLCMRequired();
     mtsInterfaceRequired * required = AddInterfaceRequired(interfaceName);
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceLCM: failed to add \"LCM\" required interface: " << interfaceName << std::endl;
@@ -531,7 +552,7 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                                    mtsManagerComponentBase::EventNames::RemoveConnection, MTS_EVENT_NOT_QUEUED);
 
     // Add provided interface
-    interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided;
+    interfaceName = mtsManagerComponentBase::GetNameOfInterfaceLCMProvided();
     mtsInterfaceProvided * provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceLCM: failed to add \"LCM\" required interface: " << interfaceName << std::endl;
@@ -573,7 +594,7 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
     // Create a new set of function objects
     InterfaceComponentFunctionType * newFunctionSet = new InterfaceComponentFunctionType;
 
-    const std::string interfaceName = GetNameOfInterfaceComponentRequired(clientComponentName);
+    const std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(clientComponentName);
     mtsInterfaceRequired * required = AddInterfaceRequired(interfaceName);
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientComponent: failed to create \"Component\" required interface: " << interfaceName << std::endl;
@@ -679,6 +700,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(cons
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
+    /*
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
@@ -694,6 +716,16 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(c
         //InterfaceLCMFunction.ComponentDisconnect.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentDisconnect(arg);
     }
+    */
+    // MJ: Don't use short cut -- every configuration change in the LCM should be reported to the GCM
+    // and the change should be initiated and controlled by the GCM.
+    if (!InterfaceLCMFunction.ComponentDisconnect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentDsconnect: failed to execute \"Component Disconnect\"" << std::endl;
+        return;
+    }
+
+    //InterfaceLCMFunction.ComponentDisconnect.ExecuteBlocking(arg);
+    InterfaceLCMFunction.ComponentDisconnect(arg);
 }
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg)
@@ -925,10 +957,12 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
+    /*
     // Try to disconnect interfaces as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
     // PK TODO: Would be nice to be able to disconnect using just connectionId (e.g., from ComponentViewer)
+
     // PK: The following may not be necessary, since the MCS should just send us the local disconnect request
     // (in the network case, one of the components should be a proxy). For now, it is needed just to update the GCM database.
     // See mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect.
@@ -957,10 +991,16 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
             return;
         }
     }
+    */
 
-    if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,
-                          arg.Server.ComponentName, arg.Server.InterfaceName, arg.Client.ProcessName))
-        CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (LCM->FindComponent(arg.Client.ComponentName) && LCM->FindComponent(arg.Server.ComponentName)) {
+        if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,
+                              arg.Server.ComponentName, arg.Server.InterfaceName))
+        {
+            CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnect: successfully disconnected: " << arg << std::endl;
+        }
+    }
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg)
@@ -1049,7 +1089,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
         return;
     }
     // Check if command is for MCS (TODO: should also check process name)
-    if (component.ComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) {
+    if (component.ComponentName == mtsManagerComponentBase::GetNameOfManagerComponentServer()) {
         //For now, always return active for MCS
         state = mtsComponentState::ACTIVE;
         return;

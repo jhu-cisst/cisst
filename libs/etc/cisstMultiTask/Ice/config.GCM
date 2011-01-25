@@ -42,7 +42,7 @@ Ice.ImplicitContext = Shared
 #
 # Warn about connection exceptions
 #
-Ice.Warn.Connections = 0
+Ice.Warn.Connections = 1
 
 #
 # Network Tracing

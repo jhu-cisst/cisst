@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-13
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,7 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsComponentInterfaceProxyClient : public mtsProxyBaseClient<mtsComponentProxy>
+class CISST_EXPORT mtsComponentInterfaceProxyClient : 
+    public mtsProxyBaseClient<mtsComponentProxy>, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -40,10 +41,11 @@ class CISST_EXPORT mtsComponentInterfaceProxyClient : public mtsProxyBaseClient<
     ComponentInterfaceServerProxyType ComponentInterfaceServerProxy;
 
 protected:
-    /*! Definitions for send thread */
+    /*! Callback thread for bi-directional communication with server */
     class ComponentInterfaceClientI;
     typedef IceUtil::Handle<ComponentInterfaceClientI> ComponentInterfaceClientIPtr;
-    ComponentInterfaceClientIPtr Sender;
+    ComponentInterfaceClientIPtr Server;
+    ComponentInterfaceClientIPtr Client;
 
     /*! Typedef for per-event argument serializer */
     typedef std::map<CommandIDType, mtsProxySerializer *> PerEventSerializerMapType;
@@ -51,9 +53,9 @@ protected:
 
     /*! Connection id that this proxy runs for. mtsComponentInterfaceProxyServer 
         handles multiple network proxy clients (because multiple required 
-        interfaces can connect to one provided interface) and it uses this 
-        id as unique id.  See also comments for mtsComponentProxy::ConnectionId */
-    unsigned int ConnectionID;
+        interfaces can connect to a provided interface) with unique key as this
+        connection id. */
+    ConnectionIDType ConnectionID;
 
     /*! Instance counter used to set a short name of this thread */
     static unsigned int InstanceCounter;
@@ -61,29 +63,24 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create a proxy object and a send thread. */
-    void CreateProxy() {
-        ComponentInterfaceServerProxy =
-            mtsComponentInterfaceProxy::ComponentInterfaceServerPrx::checkedCast(ProxyObject);
-        if (!ComponentInterfaceServerProxy) {
-            throw "mtsComponentInterfaceProxyClient: Invalid proxy";
-        }
+    /*! Create provided interface proxy (server) and callback thread to 
+        communicate with server.
+        This methods gets called by the base class (mtsProxyBaseClient). */
+    void CreateProxy(void);
 
-        Sender = new ComponentInterfaceClientI(IceCommunicator, IceLogger, ComponentInterfaceServerProxy, this);
-    }
+    /*! Destroy connected provided interface proxy including callback thread to 
+        communicate with server.
+        This methods gets called by the base class (mtsProxyBaseClient). */
+    void RemoveProxy(void);
 
-    /*! Remove a proxy object */
-    void RemoveProxy() {
-        Sender->Stop();
-    }
+    /*! Start callback thread to communicate with server (blocking call).
+        Internally, mtsManagerProxyClient::ManagerClientI::Start() is called. */
+    void StartClient(void);
 
-    /*! Start a send thread and wait for shutdown (blocking call). */
-    void StartClient();
+    /*! Called when server disconnection is detected or any exception occurs. */
+    bool OnServerDisconnect(const Ice::Exception & ex);
 
-    /*! Called when server disconnection is detected */
-    bool OnServerDisconnect();
-
-    /*! Thread runner */
+    /*! Runner for server communication callback thread */
     static void Runner(ThreadArguments<mtsComponentProxy> * arguments);
 
     //-------------------------------------------------------------------------
@@ -106,14 +103,14 @@ protected:
 public:
     /*! Constructor and destructor */
     mtsComponentInterfaceProxyClient(const std::string & serverEndpointInfo,
-                                     const unsigned int connectionID);
+                                     const ConnectionIDType connectionID);
     ~mtsComponentInterfaceProxyClient();
 
     /*! Entry point to run a proxy. */
-    bool Start(mtsComponentProxy * proxyOwner);
+    bool StartProxy(mtsComponentProxy * proxyOwner);
 
     /*! Stop the proxy (clean up thread-related resources) */
-    void Stop(void);
+    void StopProxy(void);
 
     //-------------------------------------------------------------------------
     //  Event Generators (Event Sender) : Client -> Server
@@ -158,7 +155,7 @@ protected:
             const Ice::CommunicatorPtr& communicator,
             const Ice::LoggerPtr& logger,
             const mtsComponentInterfaceProxy::ComponentInterfaceServerPrx& server,
-            mtsComponentInterfaceProxyClient * ComponentInterfaceClient);
+            mtsComponentInterfaceProxyClient * componentInterfaceProxyClient);
         ~ComponentInterfaceClientI();
 
         /*! Proxy management */
@@ -167,13 +164,7 @@ protected:
         void Stop();
 
         /*! Getter */
-        bool IsActiveProxy() const {
-            if (ComponentInterfaceProxyClient) {
-                return ComponentInterfaceProxyClient->IsActiveProxy();
-            } else {
-                return false;
-            }
-        }
+        bool IsActiveProxy() const;
 
         //-------------------------------------------------
         //  Event handlers (Server -> Client)

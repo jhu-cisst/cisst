@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,9 +33,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsParameterTypes.h>
 
 mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
+                                           mtsComponent * component,
                                            mtsMailBox * mailBox,
                                            mtsRequiredType required):
-    mtsInterfaceRequiredOrInput(interfaceName, required),
+    mtsInterfaceRequiredOrInput(interfaceName, component, required),
     MailBox(mailBox),
     InterfaceProvided(0),
     MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
@@ -834,4 +835,45 @@ bool mtsInterfaceRequired::RemoveEventHandlerWrite(const std::string &eventName)
     mtsCommandWriteBase * handler = 0;
     AddEventHandlerToReceiver(eventName, handler);
     return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
+}
+
+void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription)
+{
+    // Serializer initialization
+    std::stringstream streamBuffer;
+    cmnSerializer serializer(streamBuffer);
+
+    // Extract "IsRequired" attribute
+    requiredInterfaceDescription.IsRequired = IsRequired();
+
+    // Extract void functions
+    requiredInterfaceDescription.FunctionVoidNames = GetNamesOfFunctionsVoid();
+    // Extract write functions
+    requiredInterfaceDescription.FunctionWriteNames = GetNamesOfFunctionsWrite();
+    // Extract read functions
+    requiredInterfaceDescription.FunctionReadNames = GetNamesOfFunctionsRead();
+    // Extract qualified read functions
+    requiredInterfaceDescription.FunctionQualifiedReadNames = GetNamesOfFunctionsQualifiedRead();
+
+    // Extract void event handlers
+    CommandVoidElement elementEventVoidHandler;
+    mtsInterfaceRequired::EventHandlerVoidMapType::MapType::const_iterator itVoid = EventHandlersVoid.begin();
+    const mtsInterfaceRequired::EventHandlerVoidMapType::MapType::const_iterator itVoidEnd = EventHandlersVoid.end();
+    for (; itVoid != itVoidEnd; ++itVoid) {
+        elementEventVoidHandler.Name = itVoid->second->GetName();
+        requiredInterfaceDescription.EventHandlersVoid.push_back(elementEventVoidHandler);
+    }
+
+    // Extract write event handlers
+    CommandWriteElement elementEventWriteHandler;
+    mtsInterfaceRequired::EventHandlerWriteMapType::MapType::const_iterator itWrite = EventHandlersWrite.begin();
+    const mtsInterfaceRequired::EventHandlerWriteMapType::MapType::const_iterator itWriteEnd = EventHandlersWrite.end();
+    for (; itWrite != itWriteEnd; ++itWrite) {
+        elementEventWriteHandler.Name = itWrite->second->GetName();
+        // argument serialization
+        streamBuffer.str("");
+        serializer.Serialize(*(itWrite->second->GetArgumentPrototype()));
+        elementEventWriteHandler.ArgumentPrototypeSerialized = streamBuffer.str();
+        requiredInterfaceDescription.EventHandlersWrite.push_back(elementEventWriteHandler);
+    }
 }

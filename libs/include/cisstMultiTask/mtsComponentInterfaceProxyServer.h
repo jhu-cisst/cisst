@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-12
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -43,7 +43,7 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
     typedef mtsProxyBaseServer<mtsComponentProxy, ComponentInterfaceClientProxyType, unsigned int> BaseServerType;
 
 protected:
-    /*! Definitions for send thread */
+    /*! Callback thread for bi-directional communication with server */
     class ComponentInterfaceServerI;
     typedef IceUtil::Handle<ComponentInterfaceServerI> ComponentInterfaceServerIPtr;
     ComponentInterfaceServerIPtr Sender;
@@ -56,16 +56,20 @@ protected:
         key=(client id)
         value=(an instance of mtsDescriptionConnection)
 
-        This map is used to disconnect currently established connection when a
-        network proxy client is detected as disconnected. */
+        This map is used to disconnect interface proxies when any error occurs or
+        Ice proxy disconnection is detected.
+
     typedef std::map<ClientIDType, mtsDescriptionConnection> ConnectionStringMapType;
     ConnectionStringMapType ConnectionStringMap;
+    */
+    typedef std::map<ClientIDType, ConnectionIDType> ClientConnectionIDMapType;
+    ClientConnectionIDMapType ClientConnectionIDMap;
 
-    /*! String key to set an implicit per-proxy context for connection id */
+    /*! String key to set implicit per-proxy context for connection id */
     static std::string ConnectionIDKey;
 
-    /*! Communicator (proxy) ID to initialize mtsComponentInterfaceProxyServer.
-        A component interface proxy client uses this ID to connect to a proxy
+    /*! Communicator (proxy) id to initialize mtsComponentInterfaceProxyServer.
+        A component interface proxy client uses this id to connect to a proxy
         server. */
     static std::string InterfaceCommunicatorID;
 
@@ -75,27 +79,24 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create a servant */
-    Ice::ObjectPtr CreateServant() {
-        Sender = new ComponentInterfaceServerI(IceCommunicator, IceLogger, this);
-        return Sender;
-    }
+    /*! Create servant */
+    Ice::ObjectPtr CreateServant(void);
 
-    /*! Start a send thread and wait for shutdown (this is a blocking method). */
-    void StartServer();
+    /*! Start send thread and wait for shutdown (this is a blocking method). */
+    void StartServer(void);
 
     /*! Thread runner */
     static void Runner(ThreadArguments<mtsComponentProxy> * arguments);
 
-    /*! Get a network proxy client object using clientID. If no network proxy
-        client with the clientID is not connected or the proxy is inactive,
-        this method returns NULL. */
+    /*! Get a network proxy client using clientID. If no network proxy client
+        with the clientID is found or it's inactive proxy, returns NULL. */
     ComponentInterfaceClientProxyType * GetNetworkProxyClient(const ClientIDType clientID);
 
     /*! Monitor all the current connections */
-    void MonitorConnections() {
-        BaseServerType::Monitor();
-    }
+    void MonitorConnections(void);
+
+    /*! Remove servant */
+    void RemoveServant(void);
 
     /*! Event handler for client's disconnect event */
     bool OnClientDisconnect(const ClientIDType clientID);
@@ -103,15 +104,15 @@ protected:
     //-------------------------------------------------------------------------
     //  Event Handlers (Client -> Server)
     //-------------------------------------------------------------------------
-    void ReceiveTestMessageFromClientToServer(const ConnectionIDType &connectionID, const std::string & str);
+    void ReceiveTestMessageFromClientToServer(const IceConnectionIDType & iceConnectionID, const std::string & str);
 
     /*! When a new client connects, add it to the client management list. */
-    bool ReceiveAddClient(const ConnectionIDType & connectionID,
+    bool ReceiveAddClient(const IceConnectionIDType & iceConnectionID,
                           const std::string & connectingProxyName,
                           const unsigned int providedInterfaceProxyInstanceID,
                           ComponentInterfaceClientProxyType & clientProxy);
 
-    bool ReceiveFetchEventGeneratorProxyPointers(const ConnectionIDType & connectionID,
+    bool ReceiveFetchEventGeneratorProxyPointers(const IceConnectionIDType & iceConnectionID,
                                                  const std::string & clientComponentName,
                                                  const std::string & requiredInterfaceName,
                                                  mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
@@ -126,19 +127,17 @@ public:
     ~mtsComponentInterfaceProxyServer();
 
     /*! Entry point to run a proxy. */
-    bool Start(mtsComponentProxy * owner);
+    bool StartProxy(mtsComponentProxy * owner);
 
     /*! Stop the proxy (clean up thread-related resources) */
-    void Stop();
+    void StopProxy(void);
 
     /*! Register per-command (de)serializer */
     bool AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
 
     /*! Register connection information which is used to clean up a logical
-        connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+        connection when a network proxy disconnection is detected. */
+    bool AddConnectionInformation(const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Event Generators (Event Sender) : Server -> Client
@@ -165,12 +164,12 @@ public:
     //  Getters
     //-------------------------------------------------------------------------
     /*! Returns connection id key */
-    inline static std::string GetConnectionIDKey() {
+    inline static const std::string GetConnectionIDKey(void) {
         return mtsComponentInterfaceProxyServer::ConnectionIDKey;
     }
 
     /*! Returns communicator (proxy) ID */
-    inline static std::string GetInterfaceCommunicatorID() {
+    inline static const std::string GetInterfaceCommunicatorID(void) {
         return mtsComponentInterfaceProxyServer::InterfaceCommunicatorID;
     }
 
@@ -203,9 +202,7 @@ protected:
         void Stop();
 
         /*! Getter */
-        bool IsActiveProxy() const {
-            return ComponentInterfaceProxyServer->IsActiveProxy();
-        }
+        bool IsActiveProxy() const;
 
         //---------------------------------------
         //  Event Handlers (Client -> Server)

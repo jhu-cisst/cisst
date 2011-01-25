@@ -24,7 +24,8 @@ userInterface::userInterface(const std::string & robotName,
     // -1- Initialize the required interface. In this implementation, we are not
     // using a mailbox for events, so the events aren't queued. As a result, we
     // need to use a mutex in the event handlers (CallBackStarted and CallBackFinished).
-    mtsInterfaceRequired Robot("Robot", 0);
+    //mtsInterfaceRequired Robot("Robot", 0);
+    mtsInterfaceRequired Robot("Robot", 0, 0); // MJ: this will cause run-time segmentation fault: quick hack to skip compilation error
     Robot.AddFunction("GetPositionJoint", GetPositionJoint);
     Robot.AddFunction("MovePositionJoint", MovePositionJoint);
     // false --> Event handlers are not queued

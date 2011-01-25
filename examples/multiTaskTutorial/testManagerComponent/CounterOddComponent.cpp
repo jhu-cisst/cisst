@@ -36,8 +36,6 @@ CounterOddComponent::CounterOddComponent()
     : mtsTaskPeriodic("CounterOddObject", 1 * cmn_s, false, 1000), 
       CounterMine(-1)
 {
-    UseSeparateLogFileDefault();
-
     CMN_LOG_CLASS_INIT_VERBOSE << "Started" << std::endl;
 
     AddInterface();

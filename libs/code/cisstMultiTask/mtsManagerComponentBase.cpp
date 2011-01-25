@@ -22,9 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
+// MJ: If naming convention changes, all the check and getter methods should be updated accordingly.
 // Names of components
-//const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MNGR-COMP-SERVER";
-//const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix = "_MNGR-COMP-CLIENT";
 const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MCS";
 const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix = "_MCC";
 // Names of interfaces
@@ -84,13 +83,118 @@ void mtsManagerComponentBase::Cleanup(void)
 
 bool mtsManagerComponentBase::IsManagerComponentServer(const std::string & componentName)
 {
-   return (componentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer);
+   return (componentName == ComponentNames::ManagerComponentServer);
 }
 
 bool mtsManagerComponentBase::IsManagerComponentClient(const std::string & componentName)
 {
-    static const std::string suffix = mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix;
+    const std::string suffix = ComponentNames::ManagerComponentClientSuffix;
 
     // MJ TEMP: special handling if componentName ends with "-MCC"
     return (std::string::npos != componentName.find(suffix, componentName.length() - suffix.size()));
+}
+
+const std::string mtsManagerComponentBase::GetNameOfManagerComponentServer(void)
+{
+    return ComponentNames::ManagerComponentServer;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfManagerComponentClientFor(const std::string & processName)
+{
+    std::string componentName(processName);
+    componentName += ComponentNames::ManagerComponentClientSuffix;
+
+    return componentName;
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceGCMRequired(const std::string & nameOfInterface)
+{
+    const std::string prefix = GetNameOfInterfaceGCMRequiredFor("");
+
+    return (nameOfInterface.substr(0, prefix.size()) == prefix);
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(const std::string & nameOfInterface)
+{
+    return (nameOfInterface == GetNameOfInterfaceGCMProvided());
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(const std::string & nameOfInterface)
+{
+    return (nameOfInterface == GetNameOfInterfaceLCMRequired());
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceLCMProvided(const std::string & nameOfInterface)
+{
+    return (nameOfInterface == GetNameOfInterfaceLCMProvided());
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(const std::string & nameOfInterface)
+{
+    const std::string prefix = GetNameOfInterfaceComponentRequiredFor("");
+
+    return (nameOfInterface.substr(0, prefix.size()) == prefix);
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceComponentProvided(const std::string & nameOfInterface)
+{
+    return (nameOfInterface == GetNameOfInterfaceComponentProvided());
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(const std::string & nameOfInterface)
+{
+    return (nameOfInterface == GetNameOfInterfaceInternalRequired());
+}
+
+bool mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(const std::string & nameOfInterface)
+{
+    return (nameOfInterface == GetNameOfInterfaceInternalProvided());
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceGCMRequiredFor(const std::string & processName)
+{
+    std::string interfaceName = InterfaceNames::InterfaceGCMRequired;
+    interfaceName += "For";
+    interfaceName += processName;
+
+    return interfaceName;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceGCMProvided(void)
+{
+    return InterfaceNames::InterfaceGCMProvided;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceLCMRequired(void)
+{
+    return InterfaceNames::InterfaceLCMRequired;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceLCMProvided(void)
+{
+    return InterfaceNames::InterfaceLCMProvided;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(const std::string & componentName)
+{
+    std::string interfaceName = InterfaceNames::InterfaceComponentRequired;
+    interfaceName += "For";
+    interfaceName += componentName;
+
+    return interfaceName;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceComponentProvided(void)
+{
+    return InterfaceNames::InterfaceComponentProvided;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(void)
+{
+    return InterfaceNames::InterfaceInternalRequired;
+}
+
+const std::string mtsManagerComponentBase::GetNameOfInterfaceInternalProvided(void)
+{
+    return InterfaceNames::InterfaceInternalProvided;
 }

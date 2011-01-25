@@ -51,7 +51,7 @@ Ice.Warn.Connections = 0
 # 2 = like 1, but more detailed
 # 3 = like 2, but also trace data transfer
 #
-Ice.Trace.Network = 1
+Ice.Trace.Network = 0
 
 #
 # Timeout in msec
@@ -76,10 +76,24 @@ Ice.ThreadPool.Client.SizeMax = 8
 # Disable Active Connection Management (ACM)
 # (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Connections.38.4.html)
 #
-Ice.ACM.Client = 60
+Ice.ACM.Client = 0
+# Outgoing connection is closed if it has not been used for sixty seconds
+#Ice.ACM.Client = 60
 
 #
 # Retry interval
+# -1 = no retry
+# 0  = retry once immediately (default)
+# 0 100 500 = retry immediately after the first failure, again after waiting 
+#             100ms after the second failure, and again after waiting 500ms 
+#             after the third failure
 #
-Ice.RetryIntervals = 0 100 200 500
+#Ice.RetryIntervals = 0 100 200 500
+
+#
+# Retry trace level
+# 0 = No request retry trace (default)
+# 1 = Trace Ice operation call retries
+# 2 = Also trace Ice endpoint usage.
+#
 #Ice.Trace.Retry=2

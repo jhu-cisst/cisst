@@ -172,8 +172,6 @@ void C2ServerTask::DisconnectGCM()
     if (!localManager->Disconnect("C3", "r1", "C2", "p2")) {
         CMN_LOG_INIT_ERROR << "Disconnect failed: C3:r1-C2:p2" << std::endl;
     }
-
-    localManager->DisconnectGCM();
 }
 
 void C2ServerTask::ReconnectGCM() 
@@ -182,8 +180,6 @@ void C2ServerTask::ReconnectGCM()
     if (++count < 3) return;
 
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->ReconnectGCM();
-
     //localManager->AddComponent(C2Server);
     //localManager->AddComponent(C3);
     //if (!localManager->Connect("C3", "r1", "C2", "p2")) {

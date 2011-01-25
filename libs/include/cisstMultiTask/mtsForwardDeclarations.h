@@ -130,18 +130,6 @@ class mtsStateTable;
 class mtsCollectorBase;
 class mtsCollectorState;
 
-
-// global function to retrieve object name if available
-inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {
-    return "UnnamedObject";
-}
-
-// overload for mtsGenericObject to give at least the class name
-inline std::string mtsObjectName(const mtsGenericObject * object) {
-    return object->Services()->GetName();
-}
-
-
 // classes defined when ICE is used
 #if CISST_MTS_HAS_ICE
 class mtsComponentProxy;
@@ -154,15 +142,26 @@ class mtsManagerProxyServer;
 class mtsManagerProxyClient;
 #endif // CISST_MTS_HAS_ICE
 
-
+// managers
 class mtsManagerLocal;
 class mtsManagerLocalInterface;
 class mtsManagerGlobal;
 class mtsManagerGlobalInterface;
+typedef unsigned int ConnectionIDType;
 
+// dynamic component composition
 class mtsManagerComponentServices;
 class mtsManagerComponentClient;
 class mtsManagerComponentServer;
 
-#endif  // _mtsForwardDeclarations_h
+// global function to retrieve object name if available
+inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {
+    return "UnnamedObject";
+}
 
+// overload for mtsGenericObject to give at least the class name
+inline std::string mtsObjectName(const mtsGenericObject * object) {
+    return object->Services()->GetName();
+}
+
+#endif  // _mtsForwardDeclarations_h

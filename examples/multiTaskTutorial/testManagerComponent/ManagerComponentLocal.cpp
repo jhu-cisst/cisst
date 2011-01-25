@@ -40,8 +40,6 @@ CMN_IMPLEMENT_SERVICES(ManagerComponentLocal);
 ManagerComponentLocal::ManagerComponentLocal(const std::string & componentName, double period):
     mtsTaskPeriodic(componentName, period, false, 1000)
 {
-    UseSeparateLogFileDefault();
-
     // Enable manager component services
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (!required) {

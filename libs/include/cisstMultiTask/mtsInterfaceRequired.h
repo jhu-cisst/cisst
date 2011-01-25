@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 
 #include <cisstMultiTask/mtsFunctionBase.h>
 
@@ -128,7 +129,8 @@ protected:
       function even if this interface is not connected to a provided
       interface.
     */
-    mtsInterfaceRequired(const std::string & interfaceName, mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
+    mtsInterfaceRequired(const std::string & interfaceName, mtsComponent * component, 
+                         mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
@@ -318,6 +320,9 @@ protected:
     typedef cmnNamedMap<mtsCommandWriteBase> EventHandlerWriteMapType;
     EventHandlerVoidMapType EventHandlersVoid;
     EventHandlerWriteMapType EventHandlersWrite;
+
+    /*! Get description of this interface (with serialized argument information) */
+    void GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription);
 
 public:
 

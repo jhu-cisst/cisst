@@ -55,7 +55,7 @@ class CISST_EXPORT mtsInterfaceInput: public mtsInterfaceRequiredOrInput
 
       \param interfaceName Name of input interface
     */
-    mtsInterfaceInput(const std::string & interfaceName);
+    mtsInterfaceInput(const std::string & interfaceName, mtsComponent * component);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceInput();
