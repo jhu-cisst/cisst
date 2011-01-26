@@ -82,6 +82,7 @@ svlFilterImageTracker::svlFilterImageTracker() :
 
     ROI.SetSize(SVL_MAX_CHANNELS);
     ROI.SetAll(svlRect(0, 0, 4096, 4096));
+    ROICenter.SetSize(SVL_MAX_CHANNELS);
 }
 
 svlFilterImageTracker::~svlFilterImageTracker()
@@ -346,7 +347,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
             if (!Trackers[vch]) continue;
 
-            target_buffer  = Targets.Pointer(vch, 0);
+            target_buffer = Targets.Pointer(vch, 0);
             flag.SetRef(targetcount, OutputTargets.GetFlagPointer());
             confidence.SetRef(targetcount, OutputTargets.GetConfidencePointer(vch));
             position.SetRef(2, targetcount, OutputTargets.GetPositionPointer(vch));
@@ -406,7 +407,7 @@ int svlFilterImageTracker::Release()
 void svlFilterImageTracker::ReconstructRigidBody()
 {
     const unsigned int targetcount = Targets.cols();
-    double dconf, sum_conf, ax, ay, vx, vy, angle, angle2, angle3, scale;
+    double dconf, sum_conf, ax, ay, rx, ry, vx, vy, angle, cos_an, sin_an, scale;
     double proto_ax, proto_ay, proto_vx, proto_vy, proto_dist;
     vctDynamicMatrixRef<int> proto_pos;
     svlTarget2D *target;
@@ -420,7 +421,7 @@ void svlFilterImageTracker::ReconstructRigidBody()
 
         proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(j));
 
-        ax = ay = proto_ax = proto_ay = angle2 = angle3 = scale = sum_conf = 0.0;
+        ax = ay = proto_ax = proto_ay = cos_an = sin_an = scale = sum_conf = 0.0;
 
         // Compute center of weight
         for (i = 0; i < targetcount; i ++) {
@@ -465,15 +466,15 @@ void svlFilterImageTracker::ReconstructRigidBody()
                     // Sum-up angle
                     dconf  *= proto_dist;
                     angle   = atan2(vy, vx) - atan2(proto_vy, proto_vx);
-                    angle2 += dconf * cos(angle);
-                    angle3 += dconf * sin(angle);
+                    cos_an += dconf * cos(angle);
+                    sin_an += dconf * sin(angle);
                 }
             }
         }
         if (sum_conf < 0.0001) return;
 
         RigidBodyScale[j] = scale / sum_conf;
-        RigidBodyAngle[j] = atan2(angle3, angle2);
+        RigidBodyAngle[j] = atan2(sin_an, cos_an);
 
         // Checking rigid body transformation constraints
         if (RigidBodyScale[j] < RigidBodyScaleLow) RigidBodyScale[j] = RigidBodyScaleLow;
@@ -487,6 +488,10 @@ void svlFilterImageTracker::ReconstructRigidBody()
 
         scale = 1.0 / WarpedRigidBodyScale[j];
         angle = -WarpedRigidBodyAngle[j];
+        cos_an = cos(angle);
+        sin_an = sin(angle);
+        rx = ROICenter[j].X();
+        ry = ROICenter[j].Y();
 
         for (i = 0; i < targetcount; i ++) {
             target = Targets.Pointer(j, i);
@@ -495,16 +500,16 @@ void svlFilterImageTracker::ReconstructRigidBody()
                 vx = proto_pos.Element(0, i) - proto_ax;
                 vy = proto_pos.Element(1, i) - proto_ay;
 
-                target->pos.x = ax + vx;
-                target->pos.y = ay + vy;
+                target->pos.x = vx + ax;
+                target->pos.y = vy + ay;
 
                 if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
 
-                angle2 = cos(angle);
-                angle3 = sin(angle);
+                vx += ax - rx;
+                vy += ay - ry;
 
-                target->pos.x = static_cast<int>(ax + scale * (vx * angle2 - vy * angle3));
-                target->pos.y = static_cast<int>(ay + scale * (vx * angle3 + vy * angle2));
+                target->pos.x = static_cast<int>(rx + scale * (vx * cos_an - vy * sin_an));
+                target->pos.y = static_cast<int>(ry + scale * (vx * sin_an + vy * cos_an));
             }
         }
     }
@@ -529,6 +534,9 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
 
     const int cx = (x1 + x2 + x3 + x4) / 4;
     const int cy = (y1 + y2 + y3 + y4) / 4;
+
+    ROICenter[videoch].X() = cx;
+    ROICenter[videoch].Y() = cy;
 
     const int wx1 = static_cast<int>(sc * (c * (x1 - cx) - s * (y1 - cy))) + cx;
     const int wy1 = static_cast<int>(sc * (s * (x1 - cx) + c * (y1 - cy))) + cy;

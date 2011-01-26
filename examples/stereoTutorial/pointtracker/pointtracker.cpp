@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
+//#define __CAMERA_SOURCE
+
 
 //////////////////////////////////
 //             main             //
@@ -33,14 +35,25 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlInitialize();
 
     svlStreamManager stream(2);
+#ifdef __CAMERA_SOURCE
+    svlFilterSourceVideoCapture source(1);
+#else // __CAMERA_SOURCE
     svlFilterSourceVideoFile source(1);
+#endif // __CAMERA_SOURCE
     svlFilterImageWindowTargetSelect selector;
     svlFilterImageTracker tracker;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
 
     // setup source
+#ifdef __CAMERA_SOURCE
+    if (source.LoadSettings("pointtracker.dat") != SVL_OK) {
+        source.DialogSetup();
+        source.SaveSettings("pointtracker.dat");
+    }
+#else // __CAMERA_SOURCE
     source.DialogFilePath();
+#endif // __CAMERA_SOURCE
 
     // setup selector
     selector.SetMaxTargets(10);
@@ -51,7 +64,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     trackeralgo.SetParameters(svlNCC, // metric
                               32,     // template radius
                               25,     // search radius
-                              4,      // number of scales
+                              3,      // number of scales
                               0, 0.0);
     tracker.SetMovingAverageSmoothing(0.0);
     tracker.SetRigidBody(true);

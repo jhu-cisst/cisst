@@ -71,6 +71,7 @@ private:
     unsigned int VideoChannels;
     vctDynamicVector<svlImageTracker*> Trackers;
     vctDynamicVector<svlRect> ROI;
+    vctDynamicVector<vctInt2> ROICenter;
 
     bool RigidBody;
     vctDynamicVector<double> RigidBodyAngle;

@@ -140,7 +140,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     trackeralgo.SetParameters(svlNCC, // metric
                               16,     // template radius
                               20,     // search radius
-                              4,      // number of scales
+                              3,      // number of scales
                               0, 0.0);
     tracker.SetMovingAverageSmoothing(0.0);
     tracker.SetIterations(1);
@@ -150,7 +150,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     tracker.SetROI(100, 100, 300, 300);
 
     const int radius = 40;
-    const int distance = 15;
+    const int distance = 20;
 
     const int targetcount = (radius * 2 + 1) * (radius * 2 + 1);
     svlSampleTargets targets;
