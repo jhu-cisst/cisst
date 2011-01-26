@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandVoidProxy_h
 
 #include <cisstMultiTask/mtsCommandVoid.h>
-#include <cisstMultiTask/mtsCommandProxyBase.h>
+#include "mtsCommandProxyBase.h"
 
 /*!
   \ingroup cisstMultiTask

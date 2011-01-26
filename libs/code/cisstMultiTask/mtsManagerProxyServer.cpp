@@ -19,8 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include "mtsProxyConfig.h"
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsManagerProxyServer.h>
+#include "mtsManagerProxyServer.h"
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 
@@ -230,7 +231,7 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
     return true;
 }
 
-void mtsManagerProxyServer::MonitorConnections(void) 
+void mtsManagerProxyServer::MonitorConnections(void)
 {
     BaseServerType::Monitor();
 }
@@ -851,7 +852,7 @@ bool mtsManagerProxyServer::ReceiveGetInterfaceProvidedProxyAccessInfo(const Con
 }
 
 bool mtsManagerProxyServer::ReceiveGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-    const std::string & serverProcessName, const std::string & serverComponentName, 
+    const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
     return ProxyOwner->GetInterfaceProvidedProxyAccessInfo(clientProcessName, serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
@@ -1203,7 +1204,7 @@ void mtsManagerProxyServer::SendGetNamesOfEventHandlers(std::vector<std::string>
         LogError(mtsManagerProxyServer, "SendGetNamesOfEventHandlers: network exception: " << ex);
         OnClientDisconnect(clientID);
         return;
-    } 
+    }
 }
 
 void mtsManagerProxyServer::SendGetDescriptionOfCommand(std::string & description, const std::string & componentName,
@@ -1410,7 +1411,7 @@ void mtsManagerProxyServer::ManagerServerI::Run()
 #else
     while (IsActiveProxy()) {
         osaSleep(mtsProxyConfig::CheckPeriodForManagerConnections);
-        
+
         // If a pending connection fails to be confirmed by LCM, it should be
         // cleaned up
         if (ManagerProxyServer) {
@@ -1445,11 +1446,11 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
-    LogPrint(mtsManagerProxyServer::ManagerServerI, 
+    LogPrint(mtsManagerProxyServer::ManagerServerI,
         "Stopped and destroyed callback thread to communicate with clients");
 }
 
- bool mtsManagerProxyServer::ManagerServerI::IsActiveProxy() const 
+ bool mtsManagerProxyServer::ManagerServerI::IsActiveProxy() const
  {
     if (ManagerProxyServer) {
         return ManagerProxyServer->IsActiveProxy();
@@ -1687,8 +1688,8 @@ bool mtsManagerProxyServer::ManagerServerI::GetInterfaceProvidedProxyAccessInfoW
 }
 
 bool mtsManagerProxyServer::ManagerServerI::GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-    const std::string & serverProcessName, const std::string & serverComponentName, 
-    const std::string & serverInterfaceProvidedName, std::string & endpointInfo, 
+    const std::string & serverProcessName, const std::string & serverComponentName,
+    const std::string & serverInterfaceProvidedName, std::string & endpointInfo,
     const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG

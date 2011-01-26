@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsManagerProxyServer_h
 #define _mtsManagerProxyServer_h
 
-#include <cisstMultiTask/mtsProxyBaseServer.h>
-#include <cisstMultiTask/mtsManagerProxy.h>
+#include "mtsProxyBaseServer.h"
+#include "mtsManagerProxy.h"
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
@@ -129,7 +129,7 @@ protected:
     bool ReceiveSetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
     bool ReceiveGetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
     bool ReceiveGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
     bool ReceiveInitiateConnect(const ConnectionIDType connectionID);
     bool ReceiveConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
@@ -202,60 +202,60 @@ public:
     const std::string GetProcessName(const std::string & listenerID = "") const;
 
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
-                            const std::string & componentName, 
-                            const std::string & providedInterfaceName, 
+                            const std::string & componentName,
+                            const std::string & providedInterfaceName,
                             const std::string & listenerID = "");
 
     void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
-                                   const std::string & componentName, 
-                                   const std::string & providedInterfaceName, 
+                                   const std::string & componentName,
+                                   const std::string & providedInterfaceName,
                                    const std::string & listenerID = "");
 
     void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
-                             const std::string & componentName, 
-                             const std::string & requiredInterfaceName, 
+                             const std::string & componentName,
+                             const std::string & requiredInterfaceName,
                              const std::string & listenerID = "");
 
     void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
-                                 const std::string & componentName, 
-                                 const std::string & requiredInterfaceName, 
+                                 const std::string & componentName,
+                                 const std::string & requiredInterfaceName,
                                  const std::string & listenerID = "");
 
     void GetDescriptionOfCommand(std::string & description,
-                                 const std::string & componentName, 
-                                 const std::string & providedInterfaceName, 
+                                 const std::string & componentName,
+                                 const std::string & providedInterfaceName,
                                  const std::string & commandName,
                                  const std::string & listenerID = "");
 
     void GetDescriptionOfEventGenerator(std::string & description,
-                                        const std::string & componentName, 
-                                        const std::string & providedInterfaceName, 
+                                        const std::string & componentName,
+                                        const std::string & providedInterfaceName,
                                         const std::string & eventGeneratorName,
                                         const std::string & listenerID = "");
 
     void GetDescriptionOfFunction(std::string & description,
-                                  const std::string & componentName, 
-                                  const std::string & requiredInterfaceName, 
+                                  const std::string & componentName,
+                                  const std::string & requiredInterfaceName,
                                   const std::string & functionName,
                                   const std::string & listenerID = "");
 
     void GetDescriptionOfEventHandler(std::string & description,
-                                      const std::string & componentName, 
-                                      const std::string & requiredInterfaceName, 
+                                      const std::string & componentName,
+                                      const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName,
                                       const std::string & listenerID = "");
 
     void GetArgumentInformation(std::string & argumentName,
                                 std::vector<std::string> & signalNames,
-                                const std::string & componentName, 
-                                const std::string & providedInterfaceName, 
+                                const std::string & componentName,
+                                const std::string & providedInterfaceName,
                                 const std::string & commandName,
                                 const std::string & listenerID = "");
 
     void GetValuesOfCommand(SetOfValues & values,
-                            const std::string & componentName, 
-                            const std::string & providedInterfaceName, 
-                            const std::string & commandName, 
+                            const std::string & componentName,
+                            const std::string & providedInterfaceName,
+                            const std::string & commandName,
                             const int scalarIndex,
                             const std::string & listenerID = "");
 
@@ -293,7 +293,7 @@ public:
 
     /*! Getters */
     bool SendGetInterfaceProvidedDescription(
-        const std::string & serverComponentName, const std::string & providedInterfaceName, 
+        const std::string & serverComponentName, const std::string & providedInterfaceName,
         ::mtsManagerProxy::InterfaceProvidedDescription & providedInterfaceDescription,
         const std::string & clientID);
 
@@ -303,60 +303,60 @@ public:
         const std::string & clientID);
 
     void SendGetNamesOfCommands(std::vector<std::string>& namesOfCommands,
-                                const std::string & componentName, 
-                                const std::string & providedInterfaceName, 
+                                const std::string & componentName,
+                                const std::string & providedInterfaceName,
                                 const std::string & clientID);
 
     void SendGetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
-                                       const std::string & componentName, 
-                                       const std::string & providedInterfaceName, 
+                                       const std::string & componentName,
+                                       const std::string & providedInterfaceName,
                                        const std::string & clientID);
 
     void SendGetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
-                                 const std::string & componentName, 
-                                 const std::string & requiredInterfaceName, 
+                                 const std::string & componentName,
+                                 const std::string & requiredInterfaceName,
                                  const std::string & clientID);
 
     void SendGetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
-                                     const std::string & componentName, 
-                                     const std::string & requiredInterfaceName, 
+                                     const std::string & componentName,
+                                     const std::string & requiredInterfaceName,
                                      const std::string & clientID);
 
-    void SendGetDescriptionOfCommand(std::string & description, 
-                                     const std::string & componentName, 
-                                     const std::string & providedInterfaceName, 
-                                     const std::string & commandName, 
+    void SendGetDescriptionOfCommand(std::string & description,
+                                     const std::string & componentName,
+                                     const std::string & providedInterfaceName,
+                                     const std::string & commandName,
                                      const std::string & clientID);
 
-    void SendGetDescriptionOfEventGenerator(std::string & description, 
-                                            const std::string & componentName, 
-                                            const std::string & providedInterfaceName, 
-                                            const std::string & eventGeneratorName, 
+    void SendGetDescriptionOfEventGenerator(std::string & description,
+                                            const std::string & componentName,
+                                            const std::string & providedInterfaceName,
+                                            const std::string & eventGeneratorName,
                                             const std::string & clientID);
 
-    void SendGetDescriptionOfFunction(std::string & description, 
-                                      const std::string & componentName, 
-                                      const std::string & requiredInterfaceName, 
-                                      const std::string & functionName, 
+    void SendGetDescriptionOfFunction(std::string & description,
+                                      const std::string & componentName,
+                                      const std::string & requiredInterfaceName,
+                                      const std::string & functionName,
                                       const std::string & clientID);
 
-    void SendGetDescriptionOfEventHandler(std::string & description, 
-                                          const std::string & componentName, 
-                                          const std::string & requiredInterfaceName, 
-                                          const std::string & eventHandlerName, 
+    void SendGetDescriptionOfEventHandler(std::string & description,
+                                          const std::string & componentName,
+                                          const std::string & requiredInterfaceName,
+                                          const std::string & eventHandlerName,
                                           const std::string & clientID);
 
-    void SendGetArgumentInformation(std::string & argumentName, 
+    void SendGetArgumentInformation(std::string & argumentName,
                                     std::vector<std::string> & signalNames,
-                                    const std::string & componentName, 
-                                    const std::string & providedInterfaceName, 
-                                    const std::string & commandName, 
+                                    const std::string & componentName,
+                                    const std::string & providedInterfaceName,
+                                    const std::string & commandName,
                                     const std::string & clientID);
 
     void SendGetValuesOfCommand(SetOfValues & values,
                                 const std::string & componentName,
-                                const std::string & providedInterfaceName, 
-                                const std::string & commandName, 
+                                const std::string & providedInterfaceName,
+                                const std::string & commandName,
                                 const int scalarIndex,
                                 const std::string & clientID);
 
@@ -459,7 +459,7 @@ protected:
         /*! Networking */
         bool SetInterfaceProvidedProxyAccessInfo(::Ice::Int connectionID, const std::string & endpointInfo, const ::Ice::Current & current);
         bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-            const std::string & serverProcessName, const std::string & serverComponentName, 
+            const std::string & serverProcessName, const std::string & serverComponentName,
             const std::string & serverInterfaceProvidedName, std::string & endpointInfo, const ::Ice::Current & current);
         bool GetInterfaceProvidedProxyAccessInfoWithID(::Ice::Int connectionID, std::string & endpointInfo, const ::Ice::Current & current);
         bool InitiateConnect(::Ice::Int connectionID, const ::Ice::Current & current);

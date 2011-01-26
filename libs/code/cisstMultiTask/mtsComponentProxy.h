@@ -25,13 +25,13 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstMultiTask
 
   This class implements a component proxy which is internally created and
-  managed by the local component manager.  It also provides several utility 
+  managed by the local component manager.  It also provides several utility
   functions for proxy-related processings such as information extraction of
-  existing interfaces, creation of proxy objects, and updating pointers to 
+  existing interfaces, creation of proxy objects, and updating pointers to
   command and function objects.
 
   A component proxy is implemeneted as mtsComponent rather than mtsTask. This
-  helps avoiding potential thread synchronization issues between ICE threads 
+  helps avoiding potential thread synchronization issues between ICE threads
   and cisst internal threads.
 
   \note How proxy components exchange data across a network is as follows:
@@ -61,12 +61,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
-#include <cisstMultiTask/mtsCommandVoidProxy.h>
-#include <cisstMultiTask/mtsCommandWriteProxy.h>
-#include <cisstMultiTask/mtsCommandReadProxy.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadProxy.h>
+#include "mtsCommandVoidProxy.h"
+#include "mtsCommandWriteProxy.h"
+#include "mtsCommandReadProxy.h"
+#include "mtsCommandQualifiedReadProxy.h"
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
-#include <cisstMultiTask/mtsMulticastCommandWriteProxy.h>
+#include "mtsMulticastCommandWriteProxy.h"
 
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsComponentInterfaceProxy.h>
@@ -145,10 +145,10 @@ public:
                interface to be created with arguments serialized
         \return True if success, false otherwise
         \note Since every component proxy is created as a device, we don't need
-              to consider queued void and queued write commands which provide a 
-              mechanism for thread-safe data exchange between components. 
+              to consider queued void and queued write commands which provide a
+              mechanism for thread-safe data exchange between components.
               However, we still need to provide such a mechanism for data
-              communication between an original client component and a server 
+              communication between an original client component and a server
               component proxy in the client process.  For this purpose, we clone
               a provided interface proxy and create a provided interface proxy
               instance which is used for only one user (client component). This
@@ -156,7 +156,7 @@ public:
     bool CreateInterfaceProvidedProxy(const InterfaceProvidedDescription & providedInterfaceDescription);
 
     /*! \brief Remove provided interface proxy
-        \param providedInterfaceProxyName Name of provided interface proxy to 
+        \param providedInterfaceProxyName Name of provided interface proxy to
                be removed
         \return True if success, false otherwise */
     bool RemoveInterfaceProvidedProxy(const std::string & providedInterfaceProxyName);
@@ -168,11 +168,11 @@ public:
     //-------------------------------------------------------------------------
     //  Methods to Manage Network Proxy
     //-------------------------------------------------------------------------
-    /* \brief Create a network proxy server which serves a provided interface 
-              proxy. 
+    /* \brief Create a network proxy server which serves a provided interface
+              proxy.
        \param providedInterfaceName Name of provided interface
        \param endpointAccessInfo [out] Information to access this network proxy.
-              Registered to the global component manager and network proxy 
+              Registered to the global component manager and network proxy
               clients use this information to connect to this proxy server.
        \param communicatorID [out] ICE communicator id
        \return True if success, false otherwise */
@@ -180,11 +180,11 @@ public:
                                     std::string & endpointAccessInfo,
                                     std::string & communicatorID);
 
-    /* \brief Create a network proxy client which serves a required interface 
-              proxy. 
+    /* \brief Create a network proxy client which serves a required interface
+              proxy.
        \param requiredInterfaceProxyName Name of required interface
        \param endpointAccessInfo Information to access network proxy server
-              which the global component manager provides.  A network proxy 
+              which the global component manager provides.  A network proxy
               client uses this information to connect to a proxy server.
        \param connectionID connection id that this proxy client is related to.
        \return True if success, false otherwise */
@@ -192,16 +192,16 @@ public:
                                     const std::string & serverEndpointInfo,
                                     const ConnectionIDType connectionID);
 
-    /* \brief Check if a network proxy server to serve the provided interface 
-              proxy specified has been created. 
+    /* \brief Check if a network proxy server to serve the provided interface
+              proxy specified has been created.
        \param providedInterfaceName Name of provided interface
        \return True if success, false otherwise */
     inline bool FindInterfaceProxyServer(const std::string & providedInterfaceName) const {
         return InterfaceProvidedNetworkProxies.FindItem(providedInterfaceName);
     }
 
-    /* \brief Check if a network proxy server to serve the required interface 
-              proxy specified has been created. 
+    /* \brief Check if a network proxy server to serve the required interface
+              proxy specified has been created.
        \param requiredInterfaceName Name of required interface
        \return True if success, false otherwise */
     inline bool FindInterfaceProxyClient(const std::string & requiredInterfaceName) const {
@@ -209,9 +209,9 @@ public:
     }
 
     /*! \brief Assign ids of command proxies' in a provided interface proxy at
-               client side as those of function proxyies' fetched from a 
+               client side as those of function proxyies' fetched from a
                required interface proxy at server side.
-        \param connectionID Id of this connection (issued by the global 
+        \param connectionID Id of this connection (issued by the global
                component manager)
         \param serverInterfaceProvidedName Name of provided interface proxy at
                client side
@@ -221,9 +221,9 @@ public:
     bool UpdateCommandProxyID(const ConnectionIDType connectionID,
         const std::string & serverInterfaceProvidedName, const std::string & clientInterfaceRequiredName);
 
-    /*! \brief Assign ids of event handler proxies' in a required interface 
-               proxy at server side those of event generators' fetched from a 
-               provided interface proxy at client side. 
+    /*! \brief Assign ids of event handler proxies' in a required interface
+               proxy at server side those of event generators' fetched from a
+               provided interface proxy at client side.
         \param clientComponentName Name of client component
         \param clientInterfaceRequiredName Name of required interface at server
                side
@@ -248,7 +248,7 @@ public:
         mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
     /*! \brief Get name of provided interface user
-        \param processName Name of user process 
+        \param processName Name of user process
         \param componentName Name of user component */
     static std::string GetInterfaceProvidedUserName(
         const std::string & processName, const std::string & componentName);

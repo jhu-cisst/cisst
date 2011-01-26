@@ -19,12 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsComponentProxy.h>
-#include <cisstMultiTask/mtsComponentInterfaceProxyClient.h>
+#include "mtsProxyConfig.h"
+#include "mtsComponentProxy.h"
+#include "mtsComponentInterfaceProxyClient.h"
 #include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsFunctionReadProxy.h>
-#include <cisstMultiTask/mtsFunctionWriteProxy.h>
-#include <cisstMultiTask/mtsFunctionQualifiedReadProxy.h>
+#include "mtsFunctionReadProxy.h"
+#include "mtsFunctionWriteProxy.h"
+#include "mtsFunctionQualifiedReadProxy.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
 
@@ -89,8 +90,8 @@ bool mtsComponentInterfaceProxyClient::StartProxy(mtsComponentProxy * proxyOwner
     ThreadArgumentsInfo.Proxy = this;
     ThreadArgumentsInfo.Runner = mtsComponentInterfaceProxyClient::Runner;
 
-    // Set a short name of this thread as "CIPC" (Component Interface Proxy 
-    // Client) to meet the requirement that some of operating system have -- 
+    // Set a short name of this thread as "CIPC" (Component Interface Proxy
+    // Client) to meet the requirement that some of operating system have --
     // only a few characters can be used as a thread name (e.g. Linux RTAI)
     std::stringstream ss;
     ss << "CIPC" << mtsComponentInterfaceProxyClient::InstanceCounter++;
@@ -103,7 +104,7 @@ bool mtsComponentInterfaceProxyClient::StartProxy(mtsComponentProxy * proxyOwner
     return true;
 }
 
-void mtsComponentInterfaceProxyClient::CreateProxy(void) 
+void mtsComponentInterfaceProxyClient::CreateProxy(void)
 {
     ComponentInterfaceServerProxy = mtsComponentInterfaceProxy::ComponentInterfaceServerPrx::checkedCast(ProxyObject);
     if (!ComponentInterfaceServerProxy) {
@@ -149,7 +150,7 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
     } catch (...) {
         std::string error("mtsComponentInterfaceProxyClient: exception at mtsComponentInterfaceProxyClient::Runner()");
         ProxyClient->GetLogger()->error(error);
-    } 
+    }
 }
 
 void mtsComponentInterfaceProxyClient::StopProxy()
@@ -474,7 +475,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
         }
     }
 #endif
-    
+
     LogPrint(mtsManagerProxyClient, "mtsComponentInterfaceProxyClient::ComponentInterfaceClientI - terminated");
 }
 
@@ -483,7 +484,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
     if (!IsActiveProxy()) return;
 
     ComponentInterfaceProxyClient = 0;
-    
+
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -498,7 +499,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
     LogPrint(ComponentInterfaceClientI, "Stopped and destroyed callback thread to communicate with server");
 }
 
-bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::IsActiveProxy() const 
+bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::IsActiveProxy() const
 {
     if (ComponentInterfaceProxyClient) {
         return ComponentInterfaceProxyClient->IsActiveProxy();
@@ -550,7 +551,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommand
     ::Ice::Long commandID, const ::std::string & argument, bool blocking, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteSerialized: " << commandID << ", " 
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteSerialized: " << commandID << ", "
         << argument.size() << ", " << (blocking ? "BLOCKING" : "NON-BLOCKING"));
 #endif
 

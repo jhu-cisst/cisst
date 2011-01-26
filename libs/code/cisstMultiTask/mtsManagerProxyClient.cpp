@@ -19,8 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsManagerProxyClient.h>
-#include <cisstMultiTask/mtsManagerProxyServer.h>
+#include "mtsProxyConfig.h"
+#include "mtsManagerProxyClient.h"
+#include "mtsManagerProxyServer.h"
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
 #include <cisstOSAbstraction/osaSleep.h>
@@ -108,7 +109,7 @@ bool mtsManagerProxyClient::StartProxy(mtsManagerLocal * proxyOwner)
     return true;
 }
 
-void mtsManagerProxyClient::CreateProxy(void) 
+void mtsManagerProxyClient::CreateProxy(void)
 {
     ManagerServerProxy = mtsManagerProxy::ManagerServerPrx::checkedCast(ProxyObject);
     if (!ManagerServerProxy) {
@@ -118,7 +119,7 @@ void mtsManagerProxyClient::CreateProxy(void)
     Server = new ManagerClientI(IceCommunicator, IceLogger, ManagerServerProxy, this);
 }
 
-void mtsManagerProxyClient::RemoveProxy(void) 
+void mtsManagerProxyClient::RemoveProxy(void)
 {
     Server->Stop();
 
@@ -153,7 +154,7 @@ void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
     } catch (...) {
         std::string error("mtsManagerProxyClient: exception at mtsManagerProxyClient::Runner()");
         ProxyClient->GetLogger()->error(error);
-    } 
+    }
 
     ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client terminates");
     ProxyClient->StopProxy();
@@ -184,7 +185,7 @@ bool mtsManagerProxyClient::OnServerDisconnect(const Ice::Exception & ex)
     CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
     CMN_LOG_CLASS_RUN_ERROR << "LCM - Proxy \"" << ProxyName << "\" detected GLOBAL COMPONENT MANAGER DISCONNECTION "
                             << "(" << EndpointInfo << ")" << std::endl;
-    
+
     StopProxy();
 
     return true;
@@ -224,13 +225,13 @@ bool mtsManagerProxyClient::RemoveComponent(const std::string & processName, con
     return SendRemoveComponent(processName, componentName);
 }
 
-bool mtsManagerProxyClient::AddInterfaceProvidedOrOutput(const std::string & processName, 
+bool mtsManagerProxyClient::AddInterfaceProvidedOrOutput(const std::string & processName,
     const std::string & componentName, const std::string & interfaceName)
 {
     return SendAddInterfaceProvided(processName, componentName, interfaceName);
 }
 
-bool mtsManagerProxyClient::AddInterfaceRequiredOrInput(const std::string & processName, 
+bool mtsManagerProxyClient::AddInterfaceRequiredOrInput(const std::string & processName,
     const std::string & componentName, const std::string & interfaceName)
 {
     return SendAddInterfaceRequired(processName, componentName, interfaceName);
@@ -305,7 +306,7 @@ bool mtsManagerProxyClient::GetInterfaceProvidedProxyAccessInfo(const Connection
 }
 
 bool mtsManagerProxyClient::GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-    const std::string & serverProcessName, const std::string & serverComponentName, 
+    const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
     return SendGetInterfaceProvidedProxyAccessInfo(clientProcessName, serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointInfo);
@@ -774,7 +775,7 @@ bool mtsManagerProxyClient::SendGetInterfaceProvidedProxyAccessInfo(const Connec
 }
 
 bool mtsManagerProxyClient::SendGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-    const std::string & serverProcessName, const std::string & serverComponentName, 
+    const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -904,7 +905,7 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
     LogPrint(ManagerClientI, "Stopped and destroyed callback thread to communicate with server");
 }
 
-bool mtsManagerProxyClient::ManagerClientI::IsActiveProxy() const 
+bool mtsManagerProxyClient::ManagerClientI::IsActiveProxy() const
 {
     if (ManagerProxyClient) {
         return ManagerProxyClient->IsActiveProxy();
@@ -1108,7 +1109,7 @@ void mtsManagerProxyClient::ManagerClientI::GetArgumentInformation(const std::st
     ManagerProxyClient->ReceiveGetArgumentInformation(componentName, providedInterfaceName, commandName, argumentName, signalNames);
 }
 
-void mtsManagerProxyClient::ManagerClientI::GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, 
+void mtsManagerProxyClient::ManagerClientI::GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName,
     const std::string & commandName, ::Ice::Int scalarIndex, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & CMN_UNUSED(current)) const
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG

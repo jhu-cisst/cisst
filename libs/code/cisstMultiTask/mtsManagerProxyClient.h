@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerProxy.h>
-#include <cisstMultiTask/mtsProxyBaseClient.h>
+#include "mtsProxyBaseClient.h"
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 
 #include <cisstMultiTask/mtsExport.h>
@@ -172,17 +172,17 @@ public:
 
     //  Networking
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
-    
+
     bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
 
     bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
-    
+
     bool InitiateConnect(const ConnectionIDType connectionID);
-    
+
     bool ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
-    
+
     void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const;
 
     //-------------------------------------------------------------------------
@@ -218,7 +218,7 @@ public:
     bool SendSetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
     bool SendGetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
     bool SendGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
     bool SendInitiateConnect(::Ice::Int connectionID);
     bool SendConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);

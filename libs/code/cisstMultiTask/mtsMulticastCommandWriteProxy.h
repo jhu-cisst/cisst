@@ -30,8 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsMulticastCommandWriteProxy_h
 
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
-#include <cisstMultiTask/mtsProxySerializer.h>
-#include <cisstMultiTask/mtsCommandProxyBase.h>
+#include "mtsProxySerializer.h"
+#include "mtsCommandProxyBase.h"
 
 /*!
   \ingroup cisstMultiTask

@@ -22,24 +22,24 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsProxyBaseClient_h
 #define _mtsProxyBaseClient_h
 
-#include <cisstMultiTask/mtsProxyBaseCommon.h>
+#include "mtsProxyBaseCommon.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
 
-  This class is derived from mtsProxyBaseCommon and implements the basic 
+  This class is derived from mtsProxyBaseCommon and implements the basic
   structure and functions for ICE proxy client.  The actual processing routine
   should be implemented by derived classes.
 
-  Compared to mtsProxyBaseServer, this base class for Ice client proxy supports 
-  a single connection to a server proxy because the current cisstMultiTask 
+  Compared to mtsProxyBaseServer, this base class for Ice client proxy supports
+  a single connection to a server proxy because the current cisstMultiTask
   design allows a required interface to connect to only one provided interface.
 */
 
 template<class _proxyOwner>
-class CISST_EXPORT mtsProxyBaseClient: public mtsProxyBaseCommon<_proxyOwner> 
+class CISST_EXPORT mtsProxyBaseClient: public mtsProxyBaseCommon<_proxyOwner>
 {
 protected:
     typedef mtsProxyBaseCommon<_proxyOwner> BaseType;

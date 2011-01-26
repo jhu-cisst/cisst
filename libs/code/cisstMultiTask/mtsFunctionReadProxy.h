@@ -24,24 +24,24 @@ http://www.cisst.org/cisst/license.txt.
   \brief Defines the function proxy objects.
 */
 
-#ifndef _mtsFunctionWriteProxy_h
-#define _mtsFunctionWriteProxy_h
+#ifndef _mtsFunctionReadProxy_h
+#define _mtsFunctionReadProxy_h
 
-#include <cisstMultiTask/mtsFunctionWrite.h>
-#include <cisstMultiTask/mtsProxySerializer.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include "mtsProxySerializer.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsFunctionWriteProxy : public mtsFunctionWrite {
+class CISST_EXPORT mtsFunctionReadProxy : public mtsFunctionRead {
 protected:
-    typedef mtsFunctionWrite BaseType;
+    typedef mtsFunctionRead BaseType;
     mtsProxySerializer Serializer;
 
 public:
-    mtsFunctionWriteProxy()
+    mtsFunctionReadProxy()
     {}
 
-    ~mtsFunctionWriteProxy()
+    ~mtsFunctionReadProxy()
     {}
 
     /*! Getter */
@@ -50,4 +50,4 @@ public:
     }
 };
 
-#endif // _mtsFunctionWriteProxy_h
+#endif // _mtsFunctionReadProxy_h

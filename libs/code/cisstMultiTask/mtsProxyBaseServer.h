@@ -23,18 +23,18 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsProxyBaseServer_h
 
 #include <cisstOSAbstraction/osaMutex.h>
-#include <cisstMultiTask/mtsProxyBaseCommon.h>
+#include "mtsProxyBaseCommon.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
 
-  This class is derived from mtsProxyBaseCommon and implements the basic 
+  This class is derived from mtsProxyBaseCommon and implements the basic
   structure and functions for ICE proxy server.  The actual processing routine
   should be implemented by derived classes.
 
-  Besides proxy server setup, server proxy needs to handle multiple clients and 
+  Besides proxy server setup, server proxy needs to handle multiple clients and
   connections.  To support a general type of client proxy, this class is
   templated.
 */
@@ -280,7 +280,7 @@ void mtsProxyBaseServerType::IceCleanup(void)
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-void mtsProxyBaseServerType::StopProxy(void) 
+void mtsProxyBaseServerType::StopProxy(void)
 {
     IceCleanup();
 
@@ -309,7 +309,7 @@ void mtsProxyBaseServerType::StopProxy(void)
 //}
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-bool mtsProxyBaseServerType::AddProxyClient(const std::string & clientName, const ClientIDType & clientID, 
+bool mtsProxyBaseServerType::AddProxyClient(const std::string & clientName, const ClientIDType & clientID,
                                             const IceConnectionIDType & iceConnectionID, ClientProxyType & clientProxy)
 {
     // Check the uniqueness of clientID
@@ -371,7 +371,7 @@ bool mtsProxyBaseServerType::RemoveClientByConnectionID(const IceConnectionIDTyp
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-bool mtsProxyBaseServerType::RemoveClientByClientID(const ClientIDType & clientID) 
+bool mtsProxyBaseServerType::RemoveClientByClientID(const ClientIDType & clientID)
 {
     typename ClientIDMapType::iterator it1 = ClientIDMap.find(clientID);
     if (it1 == ClientIDMap.end()) {
@@ -413,7 +413,7 @@ bool mtsProxyBaseServerType::CloseClient(const ClientIDType & clientID, const bo
 }
 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
-void mtsProxyBaseServerType::Monitor(void) 
+void mtsProxyBaseServerType::Monitor(void)
 {
     if (!this->IsActiveProxy()) return;
 

@@ -22,9 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandProxyBase_h
 #define _mtsCommandProxyBase_h
 
-#include <cisstMultiTask/mtsProxyBaseCommon.h>
-#include <cisstMultiTask/mtsComponentInterfaceProxyServer.h>
-#include <cisstMultiTask/mtsComponentInterfaceProxyClient.h>
+#include "mtsProxyBaseCommon.h"
+#include "mtsComponentInterfaceProxyServer.h"
+#include "mtsComponentInterfaceProxyClient.h"
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 class mtsCommandProxyBase {

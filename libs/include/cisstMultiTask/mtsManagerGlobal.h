@@ -38,7 +38,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaThread.h>
 
-#include <cisstMultiTask/mtsProxyConfig.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -77,13 +76,13 @@ protected:
              C2
     */
 
-    /*! Typedef for connection map: 
+    /*! Typedef for connection map:
             key=(connected interface name), value=(list of connection ids)
             map name=(name of component that owns these interfaces. */
     //typedef cmnNamedMap<mtsManagerGlobal::ConnectedInterfaceInfo> ConnectionMapType;
     typedef std::vector<ConnectionIDType> ConnectionIDListType;
 
-    /*! Typedef for interface map element: 
+    /*! Typedef for interface map element:
             key=(interface name), value=(connection id list type) */
     //typedef cmnNamedMap<ConnectionIDListType> ConnectedInterfaceMapType;
     typedef cmnNamedMap<ConnectionIDListType> InterfaceMapElementType;
@@ -120,14 +119,14 @@ protected:
     /*! Instance of connected local component manager. Note that the global
         component manager communicates with the only one instance of
         mtsManagerLocalInterface regardless of connection type (standalone
-        or network mode) 
-        
+        or network mode)
+
         MJ: (8/20/10) To support a local connection between the global component
-        manager and a local component manager on the same process, this 
-        assumption is slightly modified such that the GCM can have two different 
-        types of connection with LCM -- local and remote.  When the GCM 
-        executes commands, it checks if it has a local connection to the LCM on 
-        the same process and, if yes, it sends the command to the local LCM.  
+        manager and a local component manager on the same process, this
+        assumption is slightly modified such that the GCM can have two different
+        types of connection with LCM -- local and remote.  When the GCM
+        executes commands, it checks if it has a local connection to the LCM on
+        the same process and, if yes, it sends the command to the local LCM.
         If not, it delivers the command to a remote LCM same as before. */
 #if CISST_MTS_HAS_ICE
     mtsManagerLocal * LocalManager;
@@ -144,7 +143,7 @@ protected:
 
     /*! Counter to issue a new connection ID */
     ConnectionIDType ConnectionID;
- 
+
 #if CISST_MTS_HAS_ICE
     /*! Network proxy server */
     mtsManagerProxyServer * ProxyServer;
@@ -233,20 +232,20 @@ protected:
     int GetNumberOfInterfaces(const std::string & processName, const std::string & componentName, const bool includeInternalInterface = true) const;
 
     /*! Get connection id that the required interface specified involves in */
-    ConnectionIDType GetConnectionID(const std::string & clientProcessName, 
+    ConnectionIDType GetConnectionID(const std::string & clientProcessName,
         const std::string & clientComponentName, const std::string & interfaceRequiredName) const;
 
     /*! Get connection information using connection id */
     mtsConnection * GetConnectionInformation(const ConnectionIDType connectionID);
 
-    /*! Process disconnect waiting queue.  This is periodically called by the 
-        internal processing thread.  The connection id that is disconnected 
+    /*! Process disconnect waiting queue.  This is periodically called by the
+        internal processing thread.  The connection id that is disconnected
         is dequeued from disconnect waiting queue and enqueued to disconnected queue. */
     void DisconnectInternal(void);
 
 #if CISST_MTS_HAS_ICE
     /*! Maintains information to clean up disconnected processes */
-    void AddToDisconnectedProcessCleanup(const std::string & sourceProcessName, 
+    void AddToDisconnectedProcessCleanup(const std::string & sourceProcessName,
         const std::string & targetProcessName, const std::string & targetComponentProxyName);
 #endif
 
@@ -449,7 +448,7 @@ public:
     bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
 
     bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
-        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
 
     /*! Check if there is any pending connection.  All new connections should be

@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsComponentProxy.h>
-#include <cisstMultiTask/mtsComponentInterfaceProxyServer.h>
-#include <cisstMultiTask/mtsComponentInterfaceProxyClient.h>
+#include "mtsProxyConfig.h"
+#include "mtsComponentProxy.h"
+#include "mtsComponentInterfaceProxyServer.h"
+#include "mtsComponentInterfaceProxyClient.h"
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -80,7 +81,7 @@ bool mtsComponentInterfaceProxyServer::StartProxy(mtsComponentProxy * proxyOwner
     return true;
 }
 
-Ice::ObjectPtr mtsComponentInterfaceProxyServer::CreateServant(void) 
+Ice::ObjectPtr mtsComponentInterfaceProxyServer::CreateServant(void)
 {
     Sender = new ComponentInterfaceServerI(IceCommunicator, IceLogger, this);
 
@@ -187,7 +188,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
     }
 }
 
-void mtsComponentInterfaceProxyServer::MonitorConnections(void) 
+void mtsComponentInterfaceProxyServer::MonitorConnections(void)
 {
     BaseServerType::Monitor();
 }
@@ -245,7 +246,7 @@ bool mtsComponentInterfaceProxyServer::ReceiveAddClient(
 
 bool mtsComponentInterfaceProxyServer::ReceiveFetchEventGeneratorProxyPointers(
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    const IceConnectionIDType & iceConnectionID, 
+    const IceConnectionIDType & iceConnectionID,
 #else
     const IceConnectionIDType & CMN_UNUSED(iceConnectionID),
 #endif
@@ -413,7 +414,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
-        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: no proxy client found or inactive proxy: " 
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: no proxy client found or inactive proxy: "
             << clientID << ", " << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
         return false;
     }
@@ -612,7 +613,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Stop()
     LogPrint(ComponentInterfaceServerI, "Stopped and destroyed callback thread to communicate with clients");
 }
 
-bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::IsActiveProxy() const 
+bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::IsActiveProxy() const
 {
     if (ComponentInterfaceProxyServer) {
         return ComponentInterfaceProxyServer->IsActiveProxy();

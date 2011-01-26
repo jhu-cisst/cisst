@@ -23,12 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsComponentInterfaceProxyClient_h
 
 #include <cisstMultiTask/mtsComponentInterfaceProxy.h>
-#include <cisstMultiTask/mtsProxyBaseClient.h>
+#include "mtsProxyBaseClient.h"
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsComponentInterfaceProxyClient : 
+class CISST_EXPORT mtsComponentInterfaceProxyClient :
     public mtsProxyBaseClient<mtsComponentProxy>, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -51,8 +51,8 @@ protected:
     typedef std::map<CommandIDType, mtsProxySerializer *> PerEventSerializerMapType;
     PerEventSerializerMapType PerEventSerializerMap;
 
-    /*! Connection id that this proxy runs for. mtsComponentInterfaceProxyServer 
-        handles multiple network proxy clients (because multiple required 
+    /*! Connection id that this proxy runs for. mtsComponentInterfaceProxyServer
+        handles multiple network proxy clients (because multiple required
         interfaces can connect to a provided interface) with unique key as this
         connection id. */
     ConnectionIDType ConnectionID;
@@ -63,12 +63,12 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create provided interface proxy (server) and callback thread to 
+    /*! Create provided interface proxy (server) and callback thread to
         communicate with server.
         This methods gets called by the base class (mtsProxyBaseClient). */
     void CreateProxy(void);
 
-    /*! Destroy connected provided interface proxy including callback thread to 
+    /*! Destroy connected provided interface proxy including callback thread to
         communicate with server.
         This methods gets called by the base class (mtsProxyBaseClient). */
     void RemoveProxy(void);

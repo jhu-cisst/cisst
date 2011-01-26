@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsComponentInterfaceProxyServer_h
 
 #include <cisstMultiTask/mtsComponentInterfaceProxy.h>
-#include <cisstMultiTask/mtsProxyBaseServer.h>
+#include "mtsProxyBaseServer.h"
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 

@@ -25,38 +25,40 @@ http://www.cisst.org/cisst/license.txt.
   \brief Defines a command proxy class with one argument
 */
 
-#ifndef _mtsCommandReadProxy_h
-#define _mtsCommandReadProxy_h
+#ifndef _mtsCommandWriteProxy_h
+#define _mtsCommandWriteProxy_h
 
-#include <cisstMultiTask/mtsCommandRead.h>
-#include <cisstMultiTask/mtsCommandProxyBase.h>
-#include <cisstMultiTask/mtsProxySerializer.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
+#include "mtsCommandProxyBase.h"
+#include "mtsProxySerializer.h"
 
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandReadProxy is a proxy for mtsCommandRead. When Execute()
+  mtsCommandWriteProxy is a proxy class for mtsCommandWrite. When Execute()
   method is called, the command id with payload is sent to the connected peer
   interface across a network.
 */
-class mtsCommandReadProxy: public mtsCommandRead, public mtsCommandProxyBase
+class mtsCommandWriteProxy: public mtsCommandWriteBase, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
+    friend class mtsMulticastCommandWriteBase;
 
 protected:
-    /*! Per-command serializer and deserializer */
+    /*! Per-command (de)serializer */
     mtsProxySerializer Serializer;
 
 public:
     /*! Typedef for base type */
-    typedef mtsCommandRead BaseType;
+    typedef mtsCommandWriteBase BaseType;
 
     /*! Constructor. Command proxy is disabled by defaultand is enabled when
         command id and network proxy are set. */
-    mtsCommandReadProxy(const std::string & commandName) : BaseType(commandName) {
+    mtsCommandWriteProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();
     }
-    ~mtsCommandReadProxy() {
+
+    ~mtsCommandWriteProxy() {
         if (ArgumentPrototype) {
             delete ArgumentPrototype;
         }
@@ -69,32 +71,45 @@ public:
 
         if (NetworkProxyServer) {
             NetworkProxyServer->AddPerCommandSerializer(CommandID, &Serializer);
+        } else {
+            NetworkProxyClient->AddPerEventSerializer(CommandID, &Serializer);
         }
     }
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
+        this->ArgumentPrototype = argumentPrototype;
     }
 
-    /*! The execute method. */
-    virtual mtsExecutionResult Execute(mtsGenericObject & argument) {
-        if (IsDisabled()) {
-            return mtsExecutionResult::COMMAND_DISABLED;
-        }
+    /*! Direct execute can be used for mtsMulticastCommandWrite. */
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                      mtsBlockingType blocking) {
+        if (IsDisabled()) return mtsExecutionResult::COMMAND_DISABLED;
 
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandReadSerialized(ClientID, CommandID, argument)) {
+            // Command write execution: client (request) -> server (execution)
+            if (!NetworkProxyServer->SendExecuteCommandWriteSerialized(ClientID, CommandID, argument, blocking)) {
+                return mtsExecutionResult::NETWORK_ERROR;
+            }
+        } else {
+            // Event write execution: server (event generator) -> client (event handler)
+            if (!NetworkProxyClient->SendExecuteEventWriteSerialized(CommandID, argument)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
+
         return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+
+    /*! Getter for per-command (de)serializer */
+    inline mtsProxySerializer * GetSerializer() {
+        return &Serializer;
     }
 
     /*! Generate human readable description of this object */
     void ToStream(std::ostream & outputStream) const {
-        ToStreamBase("mtsCommandReadProxy", Name, CommandID, IsEnabled(), outputStream);
+        ToStreamBase("mtsCommandWriteProxy", Name, CommandID, IsEnabled(), outputStream);
     }
 };
 
-#endif // _mtsCommandReadProxy_h
+#endif // _mtsCommandWriteProxy_h

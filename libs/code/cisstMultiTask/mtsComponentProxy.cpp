@@ -18,16 +18,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsComponentProxy.h>
+#include "mtsComponentProxy.h"
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsFunctionReadProxy.h>
-#include <cisstMultiTask/mtsFunctionWriteProxy.h>
-#include <cisstMultiTask/mtsFunctionQualifiedReadProxy.h>
+#include "mtsFunctionReadProxy.h"
+#include "mtsFunctionWriteProxy.h"
+#include "mtsFunctionQualifiedReadProxy.h"
 
 mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAndEventHandlerProxyMapElement() :
     FunctionVoidProxyMap("FunctionVoidProxyMap"),
@@ -207,7 +207,7 @@ bool mtsComponentProxy::RemoveInterfaceRequiredProxy(const std::string & require
     // Get network objects to remove
     mtsComponentInterfaceProxyClient * clientProxy = InterfaceRequiredNetworkProxies.GetItem(requiredInterfaceProxyName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!clientProxy) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequiredProxy: cannot find proxy client " << requiredInterfaceProxyName 
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequiredProxy: cannot find proxy client " << requiredInterfaceProxyName
                                  << " in proxy component " << GetName() << std::endl;
         return false;
     } else {
@@ -537,7 +537,7 @@ bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredI
 
     // Run required interface proxy (i.e., component interface proxy client)
     if (!requiredInterfaceProxy->StartProxy(this)) {
-        CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProxyClient: proxy failed to start for required interface " 
+        CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProxyClient: proxy failed to start for required interface "
             << "\"" << requiredInterfaceProxyName << "\", \"" << serverEndpointInfo << "\", [ " << connectionID << " ]" << std::endl;
         return false;
     }
@@ -580,7 +580,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
     // of which name is 'clientInterfaceRequiredName.'
     mtsComponentInterfaceProxyClient * interfaceProxyClient = InterfaceRequiredNetworkProxies.GetItem(clientInterfaceRequiredName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!interfaceProxyClient) {
-        CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: no network interface proxy client found for required interface: " 
+        CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: no network interface proxy client found for required interface: "
             << clientInterfaceRequiredName << std::endl;
         return false;
     }
@@ -589,9 +589,9 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
     // interface proxy at the client side.
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet eventGeneratorProxyPointers;
     if (!interfaceProxyClient->SendFetchEventGeneratorProxyPointers(
-            clientComponentName, clientInterfaceRequiredName, eventGeneratorProxyPointers)) 
+            clientComponentName, clientInterfaceRequiredName, eventGeneratorProxyPointers))
     {
-        CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: failed to fetch event generator proxy pointers: " 
+        CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: failed to fetch event generator proxy pointers: "
             << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
         return false;
     }
@@ -617,7 +617,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
         // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
         if (!eventHandlerVoid->SetNetworkProxy(interfaceProxyClient)) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: "
                 << eventHandlerVoid->GetName() << std::endl;
             return false;
         }
@@ -646,7 +646,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
         // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
         if (!eventHandlerWrite->SetNetworkProxy(interfaceProxyClient)) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: "
                 << eventHandlerWrite->GetName() << std::endl;
             return false;
         }
@@ -667,7 +667,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
     const unsigned int clientID = connectionID;
 
     // Get an instance of network proxy server that serves the provided interface.
-    mtsComponentInterfaceProxyServer * interfaceProxyServer = 
+    mtsComponentInterfaceProxyServer * interfaceProxyServer =
         InterfaceProvidedNetworkProxies.GetItem(serverInterfaceProvidedName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!interfaceProxyServer) {
         CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: no network interface proxy server found: " << serverInterfaceProvidedName << std::endl;
@@ -703,7 +703,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
     for (; itVoid != itVoidEnd; ++itVoid) {
         commandVoid = dynamic_cast<mtsCommandVoidProxy*>(endUserInterface->GetCommandVoid(itVoid->Name));
         if (!commandVoid) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command void proxy id: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command void proxy id: "
                 << itVoid->Name << std::endl;
             return false;
         }
@@ -726,13 +726,13 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
     for (; itWrite != itWriteEnd; ++itWrite) {
         commandWrite = dynamic_cast<mtsCommandWriteProxy*>(endUserInterface->GetCommandWrite(itWrite->Name));
         if (!commandWrite) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command write proxy id: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command write proxy id: "
                 << itWrite->Name << std::endl;
             return false;
         }
         // Set client ID and network proxy
         if (!commandWrite->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for command write: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for command write: "
                 << commandWrite->GetName() << std::endl;
             return false;
         }
@@ -748,13 +748,13 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
     for (; itRead != itReadEnd; ++itRead) {
         commandRead = dynamic_cast<mtsCommandReadProxy*>(endUserInterface->GetCommandRead(itRead->Name));
         if (!commandRead) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command read proxy id: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command read proxy id: "
                 << itRead->Name << std::endl;
             return false;
         }
         // Set client ID and network proxy
         if (!commandRead->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for command read: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for command read: "
                 << commandRead->GetName() << std::endl;
             return false;
         }
@@ -776,7 +776,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
         }
         // Set client ID and network proxy
         if (!commandQualifiedRead->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for qualified read command: " 
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for qualified read command: "
                 << commandQualifiedRead->GetName() << std::endl;
             return false;
         }

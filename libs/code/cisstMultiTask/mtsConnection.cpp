@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsConnection.h>
-#include <cisstMultiTask/mtsProxyConfig.h>
+#include "mtsProxyConfig.h"
 #include <cisstOSAbstraction/osaGetTime.h>
 
 CMN_IMPLEMENT_SERVICES(mtsConnection);
@@ -81,7 +81,7 @@ bool mtsConnection::CheckTimeout(void) const {
 }
 #endif
 
-void mtsConnection::ToStream(std::ostream & outputStream) const 
+void mtsConnection::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
     outputStream << ", " << ConnectionDescription

@@ -211,7 +211,9 @@ if (CISST_MTS_HAS_ICE)
        mtsComponentProxy.cpp
        )
 
-  set (PROXY_HEADER_FILES
+  set (ADDITIONAL_HEADER_FILES
+       ${ADDITIONAL_HEADER_FILES}
+
        mtsComponentProxy.h
 
        mtsProxyConfig.h
@@ -236,12 +238,6 @@ if (CISST_MTS_HAS_ICE)
        mtsMulticastCommandWriteProxy.h
        mtsEventWriteGeneratorProxy.h
        )
-
-  # For now, consider the PROXY_HEADER_FILES to be additional header files; that way, they are not added
-  # to the generated cisstMultiTask.h
-  foreach (file ${PROXY_HEADER_FILES})
-    set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisst_SOURCE_DIR}/libs/include/cisstMultiTask/${file})
-  endforeach (file)
 
   set (ICE_RESOURCE_DIR ${cisst_SOURCE_DIR}/libs/etc/cisstMultiTask/Ice)
   set (ICE_RESOURCE_FILES
