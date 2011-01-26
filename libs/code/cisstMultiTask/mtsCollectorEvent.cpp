@@ -52,7 +52,7 @@ void mtsCollectorEvent::CollectorEventVoid::EventHandler(void)
 }
 
 
-void mtsCollectorEvent::CollectorEventVoid::PrintHeader(std::ostream & outputStream, const CollectorFileFormat CMN_UNUSED(fileFormat))
+void mtsCollectorEvent::CollectorEventVoid::PrintHeader(std::ostream & outputStream, const CollectorFileFormat fileFormat)
 {
     outputStream << "# TimeEventReceived" << this->Collector->Delimiter
                  << " Id: " << this->EventId
@@ -83,7 +83,7 @@ void mtsCollectorEvent::CollectorEventWrite::EventHandler(const mtsGenericObject
 }
 
 
-void mtsCollectorEvent::CollectorEventWrite::PrintHeader(std::ostream & outputStream, const CollectorFileFormat CMN_UNUSED(fileFormat))
+void mtsCollectorEvent::CollectorEventWrite::PrintHeader(std::ostream & outputStream, const CollectorFileFormat fileFormat)
 {
     CMN_ASSERT(this->ArgumentPrototype);
     outputStream << "# TimeEventReceived" << this->Collector->Delimiter
