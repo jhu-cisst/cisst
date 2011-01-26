@@ -211,7 +211,7 @@ if (CISST_MTS_HAS_ICE)
        mtsComponentProxy.cpp
        )
 
-  set (HEADER_FILES ${HEADER_FILES}
+  set (PROXY_HEADER_FILES
        mtsComponentProxy.h
 
        mtsProxyConfig.h
@@ -236,6 +236,12 @@ if (CISST_MTS_HAS_ICE)
        mtsMulticastCommandWriteProxy.h
        mtsEventWriteGeneratorProxy.h
        )
+
+  # For now, consider the PROXY_HEADER_FILES to be additional header files; that way, they are not added
+  # to the generated cisstMultiTask.h
+  foreach (file ${PROXY_HEADER_FILES})
+    set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisst_SOURCE_DIR}/libs/include/cisstMultiTask/${file})
+  endforeach (file)
 
   set (ICE_RESOURCE_DIR ${cisst_SOURCE_DIR}/libs/etc/cisstMultiTask/Ice)
   set (ICE_RESOURCE_FILES
@@ -305,7 +311,7 @@ install_files (/include/cisstMultiTask
 # Add the config file to the project
 set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
-set (ADDITIONAL_HEADER_FILES ${CISST_MTS_CONFIG_FILE})
+set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE})
 
 # Create the CMake config file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
@@ -318,7 +324,8 @@ cisst_add_library(
   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}
-  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES})
+  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
+  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
 
 # Add linking to external libraries
