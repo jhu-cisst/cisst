@@ -1790,9 +1790,16 @@ void mtsManagerGlobal::DisconnectInternal(void)
                         << "[ " << connectionID << " ] "
                         << "\"" << clientProcessName << ":" << serverComponentProxyName << "\"" << std::endl;
 
+                    // From LCM
                     if (clientProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
                         if (FindProcess(clientProcessName))
                             LocalManagerConnected->RemoveComponentProxy(serverComponentProxyName, clientProcessName);
+                    }
+                    // From GCM
+                    if (!RemoveComponent(clientProcessName, serverComponentProxyName)) {
+                        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: failed to remove empty server component proxy from GCM: "
+                            << "[ " << connectionID << " ] "
+                            << "\"" << clientProcessName << ":" << serverComponentProxyName << "\"" << std::endl;
                     }
                 }
             }
@@ -1847,11 +1854,18 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     RemoveInterfaceRequiredOrInput(serverProcessName, clientComponentProxyName, clientInterfaceName);
 
                 // Remove client component proxy
+                // From LCM
                 if (serverProcessName !=  mtsManagerLocal::ProcessNameOfLCMWithGCM) {
                     if (FindProcess(serverProcessName))
                         LocalManagerConnected->RemoveComponentProxy(clientComponentProxyName, serverProcessName);
                 } else {
                     LocalManager->RemoveComponent(clientComponentProxyName);
+                }
+                // From GCM
+                if (!RemoveComponent(serverProcessName, clientComponentProxyName)) {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: failed to remove empty client component proxy from GCM: "
+                        << "[ " << connectionID << " ] "
+                        << "\"" << serverProcessName << ":" << clientComponentProxyName << "\"" << std::endl;
                 }
             }
 
@@ -2422,7 +2436,7 @@ void mtsManagerGlobal::GetListOfConnections(std::vector<mtsDescriptionConnection
 
 void mtsManagerGlobal::ShowInternalStructure(void)
 {
-    //return;
+    return;
 
     std::stringstream ss;
 
