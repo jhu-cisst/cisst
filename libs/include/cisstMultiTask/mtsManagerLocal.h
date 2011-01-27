@@ -218,10 +218,10 @@ protected:
     bool RegisterInterfaces(const std::string & componentName);
 
     // PK: following two methods were part of Connect method
-    int ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    ConnectionIDType ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-    bool ConnectNotify(int connectionId,
+    bool ConnectNotify(ConnectionIDType connectionId,
                        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 

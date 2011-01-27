@@ -261,9 +261,9 @@ bool mtsManagerProxyClient::RemoveInterfaceRequiredOrInput(const std::string & p
     return SendRemoveInterfaceRequired(processName, componentName, interfaceName);
 }
 
-int mtsManagerProxyClient::Connect(const std::string & requestProcessName,
-                                   const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                   const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+ConnectionIDType mtsManagerProxyClient::Connect(const std::string & requestProcessName,
+    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
     mtsManagerProxy::ConnectionStringSet connectionStringSet;
     GetConnectionStringSet(connectionStringSet,

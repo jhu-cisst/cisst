@@ -31,6 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
+// MJ: if this is an inappropriate place to define invalid connection id or
+// #include is not proper, we could move this to somewhere else (e.g. mtsManagerGlobal.h)
+#include <limits> // for invalid connection id
+
 #include <cisstMultiTask/mtsConfig.h>
 
 /*! Queueing policy for the interface */
@@ -148,6 +152,9 @@ class mtsManagerLocalInterface;
 class mtsManagerGlobal;
 class mtsManagerGlobalInterface;
 typedef unsigned int ConnectionIDType;
+// MJ: Slice only supports int type (-2^31 to 2^31-1)
+// See http://www.zeroc.com/doc/Ice-3.4.1/manual/Slice.5.8.html for details
+const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_limits<int>::max(); 
 
 // dynamic component composition
 class mtsManagerComponentServices;

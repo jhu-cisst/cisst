@@ -1156,11 +1156,11 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
 //-------------------------------------------------------------------------
 //  Connection Management
 //-------------------------------------------------------------------------
-int mtsManagerGlobal::Connect(const std::string & requestProcessName,
-                              const std::string & clientProcessName, const std::string & clientComponentName,
-                              const std::string & clientInterfaceRequiredName,
-                              const std::string & serverProcessName, const std::string & serverComponentName,
-                              const std::string & serverInterfaceProvidedName)
+ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessName,
+                                           const std::string & clientProcessName, const std::string & clientComponentName,
+                                           const std::string & clientInterfaceRequiredName,
+                                           const std::string & serverProcessName, const std::string & serverComponentName,
+                                           const std::string & serverInterfaceProvidedName)
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
@@ -1190,7 +1190,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
             CMN_LOG_CLASS_INIT_ERROR << "Connect: no required/input interface found: \""
                                      << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName)
                                      << "\", " << allOptions.str() << std::endl;
-            return -1;
+            return InvalidConnectionID;
         }
     }
 
@@ -1211,7 +1211,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
             CMN_LOG_CLASS_INIT_ERROR << "Connect: no provided/output interface found: \""
                                      << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName)
                                      << "\", " << allOptions.str() << std::endl;
-            return -1;
+            return InvalidConnectionID;
         }
     }
 
@@ -1239,7 +1239,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                                  << "\" - \""
                                  << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual)
                                  << "\"" << std::endl;
-        return -1;
+        return InvalidConnectionID;
     }
 
     // In case of remote connection
@@ -1261,14 +1261,14 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
                             << "\"" << clientComponentProxyName << "\" in server process "
                             << "\"" << serverProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 } else {
                     if (!LocalManagerConnected->CreateComponentProxy(clientComponentProxyName, serverProcessName)) {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
                             << "\"" << clientComponentProxyName << "\" in server process "
                             << "\"" << serverProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 }
             } else {
@@ -1276,7 +1276,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
                         << "\"" << clientComponentProxyName << "\" in server process "
                         << "\"" << serverProcessName << "\"" << std::endl;
-                    return -1;
+                    return InvalidConnectionID;
                 }
 
             }
@@ -1298,14 +1298,14 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
                             << "\"" << serverComponentProxyName << "\" in client process "
                             << "\"" << clientProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 } else {
                     if (!LocalManagerConnected->CreateComponentProxy(serverComponentProxyName, clientProcessName)) {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
                                                  << "\"" << serverComponentProxyName << "\" in client process "
                                                  << "\"" << clientProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 }
             } else {
@@ -1313,7 +1313,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
                                              << "\"" << serverComponentProxyName << "\" in client process "
                                              << "\"" << clientProcessName << "\"" << std::endl;
-                    return -1;
+                    return InvalidConnectionID;
                 }
 
             }
@@ -1364,7 +1364,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
                                                  << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 } else {
                     if (!LocalManagerConnected->GetInterfaceRequiredDescription(
@@ -1372,7 +1372,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
                                                  << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 }
 
@@ -1383,7 +1383,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
                                                  << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 } else {
                     if (!LocalManagerConnected->CreateInterfaceRequiredProxy(
@@ -1391,7 +1391,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
                                                  << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 }
             } else {
@@ -1400,7 +1400,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                 {
                     CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
                                              << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
-                    return -1;
+                    return InvalidConnectionID;
                 }
 
                 // Let the server process create required interface proxy
@@ -1409,7 +1409,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                 {
                     CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
                                              << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
-                    return -1;
+                    return InvalidConnectionID;
                 }
             }
         }
@@ -1425,7 +1425,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
                                                  << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 } else {
                     if (!LocalManagerConnected->GetInterfaceProvidedDescription(
@@ -1433,7 +1433,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
                             << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
 
                 }
@@ -1445,7 +1445,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
                                                  << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 } else {
                     if (!LocalManagerConnected->CreateInterfaceProvidedProxy(
@@ -1453,7 +1453,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                     {
                         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
                                                  << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
-                        return -1;
+                        return InvalidConnectionID;
                     }
                 }
             } else {
@@ -1462,7 +1462,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                 {
                     CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
                                              << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
-                    return -1;
+                    return InvalidConnectionID;
                 }
 
                 // Let the client process create provided interface proxy
@@ -1471,7 +1471,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                 {
                     CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
                                              << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
-                    return -1;
+                    return InvalidConnectionID;
                 }
             }
         }
@@ -1481,7 +1481,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
     ConnectionChange.Lock();
 
     // Assign new connection id
-    ConnectionIDType thisConnectionID = ConnectionID + 1;
+    ConnectionIDType thisConnectionID = ConnectionID;
 
     // STEP 3. Update ProcessMap
     //
@@ -1493,7 +1493,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
             << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual)
             << "\"" << std::endl;
         ConnectionChange.Unlock();
-        return -1;
+        return InvalidConnectionID;
     }
 
     // Add this connection to provided interface's connection list
@@ -1504,7 +1504,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
             << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual)
             << "\"" << std::endl;
         ConnectionChange.Unlock();
-        return -1;
+        return InvalidConnectionID;
     }
 
     // STEP 4. Update ConnectionMap
@@ -1520,6 +1520,11 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
     // STEP 5. Post-processings
     //
     // Increase connection id
+    if (ConnectionID + 1 == InvalidConnectionID) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: connection id approached its upper limit: " << InvalidConnectionID << std::endl;
+        return InvalidConnectionID;
+    }
+
     ++ConnectionID;
 
     // Send connection event to ManagerComponentServer

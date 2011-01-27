@@ -367,7 +367,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         mtsManagerGlobalInterface * newGCM = newInstance->ManagerGlobal;
 
         bool managerComponentInvolvedConnection;
-        int connectionId;
+        ConnectionIDType connectionId;
         std::vector<mtsDescriptionConnection>::const_iterator it = list.begin();
         const std::vector<mtsDescriptionConnection>::const_iterator itEnd = list.end();
         for (; it != itEnd; ++it) {
@@ -399,7 +399,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
             connectionId = newGCM->Connect(thisProcessName,
                 thisProcessName, it->Client.ComponentName, it->Client.InterfaceName,
                 thisProcessName, it->Server.ComponentName, it->Server.InterfaceName);
-            if (connectionId == -1) {
+            if (connectionId == InvalidConnectionID) {
                 CMN_LOG_INIT_ERROR << "Class mtsManagerLocal: Reconfiguration: failed to transfer previous connection: "
                     << mtsManagerGlobal::GetInterfaceUID(thisProcessName, it->Client.ComponentName, it->Client.InterfaceName)
                     << "-"
@@ -1591,8 +1591,8 @@ bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std
                                             serverComponentName, serverInterfaceProvidedName);
 }
 
-int mtsManagerLocal::ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
@@ -1628,7 +1628,7 @@ int mtsManagerLocal::ConnectSetup(const std::string & clientComponentName, const
         ManagerGlobal->Connect(ProcessName,
                                ProcessName, clientComponentName, clientInterfaceRequiredName,
                                ProcessName, serverComponentName, serverInterfaceProvidedName);
-    if (connectionID == 0) {
+    if (connectionID == InvalidConnectionID) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from the Global Component Manager: "
                                  << clientComponentName << ":" << clientInterfaceRequiredName << " - "
                                  << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
@@ -1643,7 +1643,7 @@ int mtsManagerLocal::ConnectSetup(const std::string & clientComponentName, const
     return connectionID;
 }
 
-bool mtsManagerLocal::ConnectNotify(int connectionId,
+bool mtsManagerLocal::ConnectNotify(ConnectionIDType connectionId,
                                     const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
@@ -1737,14 +1737,14 @@ bool mtsManagerLocal::Connect(
     // the component B and the component B also has a required interface that
     // needs to connect to a provided interface in the component A.
     unsigned int count = 1;
-    int connectionID = -1;
+    ConnectionIDType connectionID = InvalidConnectionID;
 
     while (count <= retryCount) {
         // Inform the global component manager of a new connection being established.
         connectionID = ManagerGlobal->Connect(this->ProcessName,
             clientProcessName, clientComponentName, clientInterfaceRequiredName,
             serverProcessName, serverComponentName, serverInterfaceProvidedName);
-        if (connectionID == -1) {
+        if (connectionID == InvalidConnectionID) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: Waiting for connection to be established.... Retrying "
                 << count++ << "/" << retryCount << std::endl;
             osaSleep(1 * cmn_s);
@@ -1753,7 +1753,7 @@ bool mtsManagerLocal::Connect(
         }
     }
 
-    if (connectionID == 0) {
+    if (connectionID == InvalidConnectionID) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get new connection id: "
                                  << mtsManagerGlobal::GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName)
                                  << " - "

@@ -141,7 +141,7 @@ public:
                 Session id is used to clean up pending connections (which was 
                 requested but not yet established) after timeout.
                 -1 if error occurs, zero or positive value if success */
-    virtual int Connect(const std::string & requestProcessName,
+    virtual ConnectionIDType Connect(const std::string & requestProcessName,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) = 0;
 

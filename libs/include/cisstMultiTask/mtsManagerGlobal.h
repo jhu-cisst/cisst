@@ -298,7 +298,7 @@ public:
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-    int Connect(const std::string & requestProcessName,
+    ConnectionIDType Connect(const std::string & requestProcessName,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 

@@ -158,11 +158,11 @@ public:
     bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
 
     //  Connection Management
-    int Connect(const std::string & requestProcessName,
-                const std::string & clientProcessName, const std::string & clientComponentName,
-                const std::string & clientInterfaceRequiredName,
-                const std::string & serverProcessName, const std::string & serverComponentName,
-                const std::string & serverInterfaceProvidedName);
+    ConnectionIDType Connect(const std::string & requestProcessName,
+                             const std::string & clientProcessName, const std::string & clientComponentName,
+                             const std::string & clientInterfaceRequiredName,
+                             const std::string & serverProcessName, const std::string & serverComponentName,
+                             const std::string & serverInterfaceProvidedName);
     bool ConnectConfirm(const ConnectionIDType connectionID);
     bool Disconnect(const ConnectionIDType connectionID);
     bool Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
