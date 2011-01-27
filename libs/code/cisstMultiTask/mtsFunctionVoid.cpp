@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 
@@ -60,7 +61,15 @@ mtsExecutionResult mtsFunctionVoid::Execute(void) const
 
 mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
 {
-    return Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult result;
+    result = Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    std::cout << "---- result: " << result << std::endl;
+    if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+        std::cout << "---- blocking" << std::endl;
+        ThreadSignal->Wait();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return result;
 }
 
 

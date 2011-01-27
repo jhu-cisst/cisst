@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsFunctionBase_h
 #define _mtsFunctionBase_h
 
+#include <cisstOSAbstraction/osaForwardDeclarations.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 class mtsFunctionBase {
@@ -38,6 +39,10 @@ protected:
     /*! Destructor. */
     virtual ~mtsFunctionBase() {}
 
+    /*! Reference to an existing thread signal used to block the
+      execution. */
+    osaThreadSignal * ThreadSignal;
+
 public:
     /*! Detach the function from the command used.  Internally, sets the command pointer to 0 */
     virtual bool Detach(void) = 0;
@@ -47,6 +52,11 @@ public:
 
     /*! Human readable output to stream. */
     virtual void ToStream(std::ostream & outputStream) const = 0;
+
+    /*! Set the thread signal used for blocking commands */
+    void SetThreadSignal(osaThreadSignal * threadSignal) {
+        this->ThreadSignal = threadSignal;
+    }
 };
 
 

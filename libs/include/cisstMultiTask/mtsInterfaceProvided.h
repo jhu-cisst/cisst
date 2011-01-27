@@ -474,7 +474,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
-    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+    void AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
     /*! Remove an observer for the specified event.  These methods are
@@ -486,7 +486,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool RemoveObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler);
-    void RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+    void RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
     /*! Get the original interface.  This allows to retrieve the original
@@ -538,7 +538,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
      */
 
      static std::string GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
-                                                const std::string &userName);
+                                                const std::string & userName);
 
 public: // PK TEMP for IRE
     mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
@@ -587,6 +587,10 @@ protected: // PK TEMP
     /*! Size to be used for argument queues */
     size_t ArgumentQueuesSize;
 
+    /*! Command to trigger void event for blocking commands not
+      expecting a returned value. */
+    mtsCommandVoid * BlockingCommandVoidExecuted;
+
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
     ThisType * OriginalInterface;
@@ -620,6 +624,7 @@ protected: // PK TEMP
 
 protected:
     mtsMailBox * GetMailBox(void);
+
     mtsCommandVoid * AddCommandVoid(mtsCallableVoidBase * callable,
                                     const std::string & name,
                                     mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
@@ -665,6 +670,8 @@ protected:
 
     bool AddEvent(const std::string & commandName, mtsMulticastCommandVoid * generator);
     bool AddEvent(const std::string & commandName, mtsMulticastCommandWriteBase * generator);
+
+    bool AddSystemEvents(void);
 
     /*! Get description of this interface (with serialized argument information) */
     bool GetDescription(InterfaceProvidedDescription & providedInterfaceDescription);

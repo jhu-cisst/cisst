@@ -43,6 +43,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     QueueingPolicy(queueingPolicy),
     MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
     ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
+    BlockingCommandVoidExecuted(0),
     OriginalInterface(0),
     UserCounter(0),
     CommandsVoid("CommandsVoid", true),
@@ -82,6 +83,9 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     EventVoidGenerators.SetOwner(*this);
     EventWriteGenerators.SetOwner(*this);
     CommandsInternal.SetOwner(*this);
+
+    // add system events
+    AddSystemEvents();
 }
 
 
@@ -95,6 +99,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     QueueingPolicy(MTS_COMMANDS_SHOULD_BE_QUEUED),
     MailBoxSize(mailBoxSize),
     ArgumentQueuesSize(argumentQueuesSize),
+    BlockingCommandVoidExecuted(0),
     OriginalInterface(originalInterface),
     EndUserInterface(true),
     UserCounter(0),
@@ -118,11 +123,17 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     EventWriteGenerators.SetOwner(*this);
     CommandsInternal.SetOwner(*this);
 
+    // add system events
+    AddSystemEvents();
+
     // duplicate what needs to be duplicated (i.e. void and write
     // commands)
     MailBox = new mtsMailBox(this->GetName(),
                              mailBoxSize,
                              this->PostCommandQueuedCallable);
+
+    // make sure the mailbox can trigger system events
+    MailBox->SetPostCommandVoidDequeuedCommand(this->BlockingCommandVoidExecuted);
 
     // clone void commands
     CommandVoidMapType::const_iterator iterVoid = originalInterface->CommandsVoid.begin();
@@ -205,9 +216,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                        << "\" for \"" << this->GetName() << "\"" << std::endl;
         }
         CommandsWriteReturn.AddItem(iterWriteReturn->first, commandWriteReturn, CMN_LOG_LEVEL_INIT_ERROR);
-
     }
-
 }
 
 
@@ -655,11 +664,13 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQu
     return 0;
 }
 
+
 std::string mtsInterfaceProvided::GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
                                                           const std::string &userName)
 {
     return originalInterface->GetName() + "For" + userName;
 }
+
 
 // Protected function, should only be called from mtsComponent
 mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::string & userName)
@@ -670,7 +681,8 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     }
     // else we need to duplicate this interface.
 
-    // Note that we don't check for duplicate user names (don't need to care whether there are duplicates)
+    // note that we don't check for duplicate user names (don't need
+    // to care whether there are duplicates)
     this->UserCounter++;
     CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: component \"" << Component->GetName()
                                << "\" interface \"" << this->Name
@@ -686,6 +698,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     return interfaceProvided;
 }
 
+
 std::vector<std::string> mtsInterfaceProvided::GetListOfUserNames(void) const
 {
     std::vector<std::string> userNames;
@@ -697,20 +710,23 @@ std::vector<std::string> mtsInterfaceProvided::GetListOfUserNames(void) const
     std::string name;
     const size_t offset1 = OriginalInterface->GetName().size();
     const size_t offset2 = 3; // = sizeof("For")
-    InterfaceProvidedCreatedListType::const_iterator it = InterfacesProvidedCreated.begin();
-    for (; it != InterfacesProvidedCreated.end(); ++it) {
-        name = it->second->GetName();
+    const InterfaceProvidedCreatedListType::const_iterator end = InterfacesProvidedCreated.end();
+    InterfaceProvidedCreatedListType::const_iterator iterator;
+    for (iterator = InterfacesProvidedCreated.begin();
+         iterator != end; ++iterator) {
+        name = iterator->second->GetName();
         userNames.push_back(name.substr(offset1 + offset2, name.size() - offset1 - offset2));
     }
 
     return userNames;
 }
 
+
 // Remove the end-user interface specified by the parameter interfaceProvided.
 // Note that there are two mtsInterfaceProvided objects:  (1) the interfaceProvided parameter, which should be a
 // pointer to the end-user interface to be removed and (2) the "this" pointer, which should point to the original interface.
 mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterfaceProvided *interfaceProvided,
-                                                                    const std::string &userName)
+                                                                    const std::string & userName)
 {
     // First, do some error checking
     // 1) Make sure interfaceProvided is non-zero
@@ -735,28 +751,33 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
         return (interfaceProvided ? interfaceProvided : this->OriginalInterface);
     }
 
-    // Now, handle the case where this object is also an end-user interface, which would occur when
-    // there are no queued commands.
+    // now, handle the case where this object is also an end-user
+    // interface, which would occur when there are no queued commands.
     if (this->EndUserInterface) {
-        if (interfaceProvided && (interfaceProvided != this))
+        if (interfaceProvided && (interfaceProvided != this)) {
             CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
                                       << "\" interface \"" << this->Name
                                       << "\": original interface inconsistent with provided end-user interface" << std::endl;
+        }
         CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
                                   << "\" interface \"" << this->Name
                                   << "\": original interface is also the end-user interface" << std::endl;
         return 0;
     }
 
-    // Finally, remove the end-user interface from the list of end-user interfaces (InterfacesProvidedCreated).
-    InterfaceProvidedCreatedListType::iterator it;
-    for (it = InterfacesProvidedCreated.begin(); it != InterfacesProvidedCreated.end(); it++) {
-        if (it->second == interfaceProvided) {
+    // finally, remove the end-user interface from the list of
+    // end-user interfaces (InterfacesProvidedCreated).
+    const InterfaceProvidedCreatedListType::iterator end = InterfacesProvidedCreated.end();
+    InterfaceProvidedCreatedListType::iterator iterator;
+    for (iterator = InterfacesProvidedCreated.begin();
+         iterator != end;
+         ++iterator) {
+        if (iterator->second == interfaceProvided) {
             CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
                                       << "\" interface \"" << this->Name
-                                      << "\" removing copy (#" << it->first
+                                      << "\" removing copy (#" << iterator->first
                                       << ") for user \"" << userName << "\"" << std::endl;
-            InterfacesProvidedCreated.erase(it);
+            InterfacesProvidedCreated.erase(iterator);
             delete interfaceProvided;
             return 0;
         }
@@ -775,25 +796,32 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetOriginalInterface(void) const
     return this->OriginalInterface;
 }
 
+
 mtsInterfaceProvided * mtsInterfaceProvided::FindEndUserInterfaceByName(const std::string &userName)
 {
     // First, check if there is just a single provided interface (i.e., no queued commands)
-    if ((this->OriginalInterface == 0) && this->EndUserInterface)
+    if ((this->OriginalInterface == 0) && this->EndUserInterface) {
         return this;
+    }
     std::string interfaceName = mtsInterfaceProvided::GetEndUserInterfaceName(this, userName);
-    InterfaceProvidedCreatedListType::iterator it;
-    for (it = InterfacesProvidedCreated.begin(); it != InterfacesProvidedCreated.end(); it++) {
-        if (it->second->GetName() == interfaceName) {
-            return it->second;
+    const InterfaceProvidedCreatedListType::const_iterator end = InterfacesProvidedCreated.end();
+    InterfaceProvidedCreatedListType::const_iterator iterator;
+    for (iterator = InterfacesProvidedCreated.begin();
+         iterator != end;
+         ++iterator) {
+        if (iterator->second->GetName() == interfaceName) {
+            return iterator->second;
         }
     }
     return 0;
 }
 
+
 int mtsInterfaceProvided::GetNumberOfEndUsers(void) const
 {
     return static_cast<int>(InterfacesProvidedCreated.size());
 }
+
 
 mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName)
 {
@@ -814,7 +842,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventNam
 
 
 bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
-                                      const std::string eventName)
+                                        const std::string eventName)
 {
     mtsCommandVoid * command;
     command = this->AddEventVoid(eventName);
@@ -845,6 +873,18 @@ bool mtsInterfaceProvided::AddEvent(const std::string & name, mtsMulticastComman
         return false;
     }
     return EventWriteGenerators.AddItem(name, generator, CMN_LOG_LEVEL_INIT_ERROR);
+}
+
+
+bool mtsInterfaceProvided::AddSystemEvents(void)
+{
+    this->BlockingCommandVoidExecuted = AddEventVoid("BlockingCommandVoidExecuted");
+    if (!(this->BlockingCommandVoidExecuted)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEvents: unable to add void event \"BlockingCommandVoidExecuted\" to interface \""
+                                 << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+    return true;
 }
 
 
@@ -913,6 +953,7 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(v
 
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsVoid(void) const
 {
+    // should also get names of events defined in the end-user interfaceg
     if (this->OriginalInterface) {
         return this->OriginalInterface->EventVoidGenerators.GetNames();
     }
@@ -1001,9 +1042,22 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const st
 
 mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string & eventName) const
 {
+    // this event might be owned by the end user provided interface, e.g. event for end of blocking command
     if (this->OriginalInterface) {
-        return this->OriginalInterface->GetEventVoid(eventName);
+        // try to find the event locally
+        mtsMulticastCommandVoid * eventGenerator = EventVoidGenerators.GetItem(eventName, CMN_LOG_LEVEL_INIT_DEBUG);
+        if (eventGenerator) {
+            CMN_LOG_CLASS_INIT_DEBUG << "GetEventVoid: found event \"" << eventName << "\" in provided interface \""
+                                     << this->GetName() << "\" of component \"" << this->Component->GetName() << "\"" << std::endl;
+            return eventGenerator;
+        } else {
+            CMN_LOG_CLASS_INIT_DEBUG << "GetEventVoid: looking for event \"" << eventName << "\" in provided interface \""
+                                     << this->OriginalInterface->GetName() << "\" of component \"" << this->Component->GetName() << "\"" << std::endl;
+            // the "master" provided interface might have the event generator
+            return this->OriginalInterface->GetEventVoid(eventName);
+        }
     }
+    // try from the "master" provided interface
     return EventVoidGenerators.GetItem(eventName, CMN_LOG_LEVEL_INIT_ERROR);
 }
 
@@ -1019,15 +1073,17 @@ mtsMulticastCommandWriteBase * mtsInterfaceProvided::GetEventWrite(const std::st
 
 bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommandVoid * handler)
 {
-    if (this->OriginalInterface) {
-        return this->OriginalInterface->AddObserver(eventName, handler);
-    }
-    mtsMulticastCommandVoid * multicastCommand = EventVoidGenerators.GetItem(eventName);
+    mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
         // should probably check for duplicates (have AddCommand return bool?)
         multicastCommand->AddCommand(handler);
         return true;
     } else {
+        // maybe the event is not defined at the end-user level but in
+        // the original interface?
+        if (this->OriginalInterface) {
+            return this->OriginalInterface->AddObserver(eventName, handler);
+        }
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
         return false;
     }
@@ -1051,14 +1107,16 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
 }
 
 
-void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
+void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
 {
     argout = argin;
-    unsigned int i;
-    for (i = 0; i < argin.VoidEvents.size(); i++)
-        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPtr);
-    for (i = 0; i < argin.WriteEvents.size(); i++)
-        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPtr);
+    size_t i;
+    for (i = 0; i < argin.VoidEvents.size(); i++) {
+        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPointer);
+    }
+    for (i = 0; i < argin.WriteEvents.size(); i++) {
+        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPointer);
+    }
 }
 
 bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandVoid * handler)
@@ -1066,7 +1124,7 @@ bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsComm
     if (this->OriginalInterface) {
         return this->OriginalInterface->RemoveObserver(eventName, handler);
     }
-    mtsMulticastCommandVoid * multicastCommand = EventVoidGenerators.GetItem(eventName);
+    mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
             CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName << std::endl;
@@ -1097,14 +1155,16 @@ bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsComm
     return true;
 }
 
-void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
+void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
 {
     argout = argin;
-    unsigned int i;
-    for (i = 0; i < argin.VoidEvents.size(); i++)
-        argout.VoidEvents[i].Result = argin.Provided->RemoveObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPtr);
-    for (i = 0; i < argin.WriteEvents.size(); i++)
-        argout.WriteEvents[i].Result = argin.Provided->RemoveObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPtr);
+    size_t i;
+    for (i = 0; i < argin.VoidEvents.size(); i++) {
+        argout.VoidEvents[i].Result = argin.Provided->RemoveObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPointer);
+    }
+    for (i = 0; i < argin.WriteEvents.size(); i++) {
+        argout.WriteEvents[i].Result = argin.Provided->RemoveObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPointer);
+    }
 }
 
 bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & providedInterfaceDescription)

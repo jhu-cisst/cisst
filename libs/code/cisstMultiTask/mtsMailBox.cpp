@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides
+  Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,7 +34,8 @@ mtsMailBox::mtsMailBox(const std::string & name,
                        mtsCallableVoidBase * postCommandQueuedCallable):
     CommandQueue(size, 0),
     Name(name),
-    PostCommandQueuedCallable(postCommandQueuedCallable)
+    PostCommandQueuedCallable(postCommandQueuedCallable),
+    PostCommandVoidDequeuedCommand(0)
 {}
 
 
@@ -94,14 +95,16 @@ bool mtsMailBox::ExecuteNext(void)
    mtsCommandQueuedWriteReturn * commandWriteReturn;
 
    bool isBlocking = false;
+   bool isBlockingVoid = false;
    try {
 
        if (!(*command)->Returns()) {
            switch ((*command)->NumberOfArguments()) {
            case 0:
+               std::cout << "---- dequeueing" << std::endl;
                commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
                CMN_ASSERT(commandVoid);
-               isBlocking = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
+               isBlockingVoid = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
                commandVoid->GetCallable()->Execute();
                break;
            case 1:
@@ -157,14 +160,24 @@ bool mtsMailBox::ExecuteNext(void)
    }
    catch (...) {
        CMN_LOG_RUN_WARNING << "mtsMailbox::ExecuteNext caught exception, blocking = " << isBlocking << std::endl;
-       if (isBlocking)
+       if (isBlocking) {
            this->ThreadSignal.Raise();
+       }
+       if (isBlockingVoid && this->PostCommandVoidDequeuedCommand) {
+           std::cout << "---- executing callback" << std::endl;
+           this->PostCommandVoidDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+       }
        CommandQueue.Get();  // Remove command from mailbox queue
        throw;
    }
-
-   if (isBlocking)
-      this->ThreadSignal.Raise();
+   
+   if (isBlocking) {
+       this->ThreadSignal.Raise();
+   }
+   if (isBlockingVoid && this->PostCommandVoidDequeuedCommand) {
+       std::cout << "---- executing callback" << std::endl;
+       this->PostCommandVoidDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+   }
    CommandQueue.Get();  // Remove command from mailbox queue
    return true;
 }

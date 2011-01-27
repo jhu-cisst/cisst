@@ -47,6 +47,12 @@ class CISST_EXPORT mtsMailBox
       thread. */
     mtsCallableVoidBase * PostCommandQueuedCallable;
 
+    /*! Command executed after a void command is de-queued.  This is
+      used for blocking commands in order to trigger an event sent
+      back to the caller.  The caller's required interface needs to
+      provide an event handler that is not queued. */
+    mtsCommandVoid * PostCommandVoidDequeuedCommand;
+
     /*! Thread signal used for blocking */
     osaThreadSignal ThreadSignal;
 
@@ -88,6 +94,10 @@ public:
 
     /*! Returns true if mailbox is empty. */
     bool IsEmpty(void) const;
+
+    void SetPostCommandVoidDequeuedCommand(mtsCommandVoid * command) {
+        this->PostCommandVoidDequeuedCommand = command;
+    }
 
 };
 

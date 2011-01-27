@@ -110,6 +110,10 @@ protected:
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequired(void) {}
 
+    /*! Thread signal used for blocking calls.  It is shared between
+      all functions */
+    osaThreadSignal ThreadSignalForBlockingCommands;
+
  public:
 
     /*! Default size for mail boxes and argument queues used by event
@@ -217,10 +221,14 @@ protected:
       by the provided interface when calling AllocateResources. */
  private:
 
-    bool BindCommands(const mtsInterfaceProvided *interfaceProvided);
+    bool AddSystemEventHandlers(void);
+    void BlockingCommandVoidExecutedHandler(void);
+
+    bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
     bool DetachCommands(void);
-    void GetEventList(mtsEventHandlerList &eventList);
-    bool CheckEventList(mtsEventHandlerList &eventList) const;
+
+    void GetEventList(mtsEventHandlerList & eventList);
+    bool CheckEventList(mtsEventHandlerList & eventList) const;
  public:
 
     void DisableAllEvents(void);

@@ -62,6 +62,7 @@ mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
     EventReceiversWrite.SetOwner(*this);
     EventHandlersVoid.SetOwner(*this);
     EventHandlersWrite.SetOwner(*this);
+    AddSystemEventHandlers();
 }
 
 
@@ -75,10 +76,12 @@ mtsInterfaceRequired::~mtsInterfaceRequired()
     FunctionsQualifiedRead.DeleteAll();
 }
 
+
 const mtsInterfaceProvidedOrOutput * mtsInterfaceRequired::GetConnectedInterface(void) const
 {
     return InterfaceProvided;
 }
+
 
 bool mtsInterfaceRequired::SetMailBoxSize(size_t desiredSize)
 {
@@ -368,7 +371,29 @@ bool mtsInterfaceRequired::DetachCommands(void)
 }
 
 
-bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided *interfaceProvided)
+bool mtsInterfaceRequired::AddSystemEventHandlers(void)
+{
+    mtsCommandVoid * voidCommand =
+        this->AddEventHandlerVoid(&mtsInterfaceRequired::BlockingCommandVoidExecutedHandler,
+                                  this, "BlockingCommandVoidExecuted",
+                                  MTS_EVENT_NOT_QUEUED);
+    if (!(voidCommand)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEventHandlers: unable to add void event handler \"BlockingCommandVoidExecuted\" to interface \""
+                                 << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+void mtsInterfaceRequired::BlockingCommandVoidExecutedHandler(void)
+{
+    std::cout << "---- blocking callback" << std::endl; 
+    this->ThreadSignalForBlockingCommands.Raise();
+}
+
+
+bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfaceProvided)
 {
     bool success = true;
     bool result;
@@ -378,13 +403,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided *interfacePro
         return false;
     }
 
-    // Bind the command pointers. This may not be thread-safe if the client component is active. We could execute
-    // this in the thread of the client component to achieve thread-safety (see, for example, the way that GetEndUserInterface
-    // and AddObserverList are executed in the thread of the server component). For now, we assume that the client component (with
-    // required interface) will not be active during the connection process, though the server component (with provided interface)
-    // might be active. Note also that we set the InterfaceProvided member data at the end of this function, so that the
-    // required interface is not considered connected until after the command binding is done (though event receivers/handlers
-    // have yet to be set up).
+    // Bind the command pointers. This may not be thread-safe if the
+    // client component is active. We could execute this in the thread
+    // of the client component to achieve thread-safety (see, for
+    // example, the way that GetEndUserInterface and AddObserverList
+    // are executed in the thread of the server component). For now,
+    // we assume that the client component (with required interface)
+    // will not be active during the connection process, though the
+    // server component (with provided interface) might be
+    // active. Note also that we set the InterfaceProvided member data
+    // at the end of this function, so that the required interface is
+    // not considered connected until after the command binding is
+    // done (though event receivers/handlers have yet to be set up).
 
     FunctionInfoMapType::iterator iter;
     mtsFunctionVoid * functionVoid;
@@ -613,7 +643,8 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided *interfacePro
     return success;
 }
 
-void mtsInterfaceRequired::GetEventList(mtsEventHandlerList &eventList)
+
+void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
 {
     // Make sure event list is empty
     eventList.VoidEvents.clear();
@@ -623,16 +654,18 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList &eventList)
     for (iterReceiverVoid = EventReceiversVoid.begin();
          iterReceiverVoid != EventReceiversVoid.end();
          iterReceiverVoid++) {
-        eventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(
-                             iterReceiverVoid->first, iterReceiverVoid->second->Pointer->GetCommand(), iterReceiverVoid->second->Required));
+        eventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(iterReceiverVoid->first,
+                                                                     iterReceiverVoid->second->Pointer->GetCommand(),
+                                                                     iterReceiverVoid->second->Required));
     }
 
     EventReceiverWriteMapType::iterator iterReceiverWrite;
     for (iterReceiverWrite = EventReceiversWrite.begin();
          iterReceiverWrite != EventReceiversWrite.end();
          iterReceiverWrite++) {
-        eventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(
-                              iterReceiverWrite->first, iterReceiverWrite->second->Pointer->GetCommand(), iterReceiverWrite->second->Required));
+        eventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(iterReceiverWrite->first,
+                                                                       iterReceiverWrite->second->Pointer->GetCommand(),
+                                                                       iterReceiverWrite->second->Required));
     }
 
     EventHandlerVoidMapType::iterator iterEventVoid;
@@ -643,8 +676,9 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList &eventList)
         // If there is no event receiver, add it directly to the provided interface.
         // Note that event handlers are considered optional.
         if (!AddEventHandlerToReceiver(iterEventVoid->first, iterEventVoid->second))
-            eventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(
-                                 iterEventVoid->first, iterEventVoid->second, MTS_OPTIONAL));
+            eventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(iterEventVoid->first,
+                                                                         iterEventVoid->second,
+                                                                         MTS_OPTIONAL));
     }
 
     EventHandlerWriteMapType::iterator iterEventWrite;
@@ -655,27 +689,30 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList &eventList)
         // If there is no event receiver, add it directly to the provided interface
         // Note that event handlers are considered optional.
         if (!AddEventHandlerToReceiver(iterEventWrite->first, iterEventWrite->second))
-            eventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(
-                                  iterEventWrite->first, iterEventWrite->second, MTS_OPTIONAL));
+            eventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(iterEventWrite->first,
+                                                                           iterEventWrite->second,
+                                                                           MTS_OPTIONAL));
     }
 }
 
+
 // PK: This could be moved out of mtsInterfaceRequired (perhaps to mtspEventHandlerList?)
-bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList &eventList) const
+bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList & eventList) const
 {
     bool success = true;
     // Now, check the results
-    unsigned int i;
+    size_t i;
     for (i = 0; i < eventList.VoidEvents.size(); i++) {
         if (!eventList.VoidEvents[i].Result) {
-            CMN_LOG_CLASS_INIT_WARNING << "CheckeventList: failed to add observer for void event \""
+            CMN_LOG_CLASS_INIT_WARNING << "CheckEventList: failed to add observer for void event \""
                                        << eventList.VoidEvents[i].EventName << "\" (connecting \""
                                        << this->GetName() << "\" to \""
                                        << eventList.Provided->GetName() << "\")"<< std::endl;
-            if (eventList.VoidEvents[i].Required == MTS_REQUIRED)
+            if (eventList.VoidEvents[i].Required == MTS_REQUIRED) {
                 success = false;
+            }
         } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "CheckeventList: succeeded to add observer for void event \""
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckEventList: succeeded to add observer for void event \""
                                      << eventList.VoidEvents[i].EventName << "\" (connecting \""
                                      << this->GetName() << "\" to \""
                                      << eventList.Provided->GetName() << "\")"<< std::endl;
@@ -684,14 +721,15 @@ bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList &eventList) const
 
     for (i = 0; i < eventList.WriteEvents.size(); i++) {
         if (!eventList.WriteEvents[i].Result) {
-            CMN_LOG_CLASS_INIT_WARNING << "CheckeventList: failed to add observer for write event \""
+            CMN_LOG_CLASS_INIT_WARNING << "CheckEventList: failed to add observer for write event \""
                                        << eventList.WriteEvents[i].EventName << "\" (connecting \""
                                        << this->GetName() << "\" to \""
                                        << eventList.Provided->GetName() << "\")"<< std::endl;
-            if (eventList.WriteEvents[i].Required == MTS_REQUIRED)
+            if (eventList.WriteEvents[i].Required == MTS_REQUIRED) {
                 success = false;
+            }
         } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "CheckeventList: succeeded to add observer for write event \""
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckEventList: succeeded to add observer for write event \""
                                      << eventList.WriteEvents[i].EventName << "\" (connecting \""
                                      << this->GetName() << "\" to \""
                                      << eventList.Provided->GetName() << "\")"<< std::endl;
@@ -748,6 +786,7 @@ void mtsInterfaceRequired::ToStream(std::ostream & outputStream) const
 bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionVoid & function,
                                        mtsRequiredType required)
 {
+    function.SetThreadSignal(&(this->ThreadSignalForBlockingCommands));
     return FunctionsVoid.AddItem(functionName, new FunctionInfo(function, required));
 }
 

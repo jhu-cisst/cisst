@@ -420,10 +420,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
 
     /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
-    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
-    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
-    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
-    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
+    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
+    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
+    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
+    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
 
  public:
 

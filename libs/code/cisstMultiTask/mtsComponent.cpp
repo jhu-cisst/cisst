@@ -881,7 +881,7 @@ bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
 
 // Internal command
 void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin,
-                                                                 mtsEndUserInterfaceArg &argout)
+                                                                 mtsEndUserInterfaceArg & argout)
 {
     CMN_ASSERT(argin.OriginalInterface);
     argout = argin;  // not really needed
@@ -890,14 +890,14 @@ void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUse
 }
 
 void mtsComponent::InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin,
-                                                                   mtsEventHandlerList &argout)
+                                                             mtsEventHandlerList & argout)
 {
     CMN_ASSERT(argin.Provided);
     argin.Provided->AddObserverList(argin, argout);
 }
 
 void mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin,
-                                                                    mtsEndUserInterfaceArg &argout)
+                                                                    mtsEndUserInterfaceArg & argout)
 {
     CMN_ASSERT(argin.OriginalInterface);
     argout = argin;  // not really needed
@@ -905,7 +905,7 @@ void mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface(const mtsEnd
 }
 
 void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin,
-                                                                mtsEventHandlerList &argout)
+                                                                mtsEventHandlerList & argout)
 {
     CMN_ASSERT(argin.Provided);
     argin.Provided->RemoveObserverList(argin, argout);
