@@ -132,6 +132,7 @@ public:
         const std::string & serverProcessName,
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
     bool Disconnect(const mtsDescriptionConnection & connection) const;
+    bool Disconnect(ConnectionIDType connectionID) const;
 
     bool ComponentStart(const std::string & componentName, const double delayInSecond = 0.0) const;
     bool ComponentStart(const std::string& processName, const std::string & componentName,

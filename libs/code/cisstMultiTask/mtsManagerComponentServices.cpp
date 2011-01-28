@@ -129,7 +129,7 @@ bool mtsManagerComponentServices::Connect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = -1;  // not yet assigned
+    arg.ConnectionID = InvalidConnectionID;  // not yet assigned
 
     return Connect(arg);
 }
@@ -171,7 +171,7 @@ bool mtsManagerComponentServices::Disconnect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = -1;  // not needed
+    arg.ConnectionID = InvalidConnectionID;  // not needed
 
     return Disconnect(arg);
 }
@@ -184,6 +184,12 @@ bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & co
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: requested component disconnection: " << connection << std::endl;
 
     return true;
+}
+
+bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) const
+{
+    // PK TEMP
+    return mtsManagerLocal::GetInstance()->Disconnect(connectionID);
 }
 
 bool mtsManagerComponentServices::ComponentStart(const std::string & componentName, const double delayInSecond) const
