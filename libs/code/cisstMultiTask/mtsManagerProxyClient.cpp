@@ -271,7 +271,7 @@ ConnectionIDType mtsManagerProxyClient::Connect(const std::string & requestProce
                            serverProcessName, serverComponentName, serverInterfaceProvidedName,
                            requestProcessName);
 
-    return SendConnect(connectionStringSet);
+    return (ConnectionIDType) SendConnect(connectionStringSet);
 }
 
 bool mtsManagerProxyClient::ConnectConfirm(const ConnectionIDType connectionID)
@@ -695,7 +695,7 @@ bool mtsManagerProxyClient::SendRemoveInterfaceRequired(const std::string & proc
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyClient, "SendConnect: network exception: " << ex);
         OnServerDisconnect(ex);
-        return -1; // See definition of this error code at mtsManagerGlobalInterface::Connect()
+        return (::Ice::Int) InvalidConnectionID;
     }
 }
 
