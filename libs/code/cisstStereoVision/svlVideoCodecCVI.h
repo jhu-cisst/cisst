@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstStereoVision/svlFile.h>
 
 
 class svlVideoCodecCVI : public svlVideoCodecBase, public cmnGenericObject
@@ -67,7 +68,7 @@ protected:
     const std::string FrameStartMarker;
 
     int Version;
-    std::fstream* File;
+    svlFile File;
     long long int FooterOffset;
     unsigned int PartCount;
     unsigned int Width;

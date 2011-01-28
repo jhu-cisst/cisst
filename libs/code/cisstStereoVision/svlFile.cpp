@@ -30,6 +30,14 @@ svlFile::svlFile() :
 {
 }
 
+svlFile::svlFile(const svlFile& CMN_UNUSED(file)) :
+    Stream(0),
+    Opened(false),
+    Length(0)
+{
+    // Will do only as much as the standard constructor
+}
+
 svlFile::svlFile(const std::string& filepath, const OpenMode mode) :
     Stream(0),
     Opened(false),
@@ -49,7 +57,9 @@ int svlFile::Open(const std::string& filepath, const OpenMode mode)
     if (Opened) return SVL_FAIL;
 
     Mode = mode;
-    std::ios_base::openmode iosmode = (Mode == R) ? std::ios_base::in : std::ios_base::out;
+    std::ios_base::openmode iosmode = (Mode == R) ?
+                                        std::ios_base::in  | std::ios_base::binary :
+                                        std::ios_base::out | std::ios_base::binary | std::ios_base::trunc;
     Stream = new std::fstream(filepath.c_str(), iosmode);
     if (Stream && Stream->fail() == false) Opened = true;
 
@@ -82,7 +92,10 @@ long long int svlFile::Read(char* buffer, const long long int length)
 
     Stream->read(buffer, length);
 
-    if (Stream->fail() && !Stream->eof()) return -1;
+    if (Stream->fail()) {
+        if (Stream->eof()) Stream->clear();
+        else return -1;
+    }
     return Stream->gcount();
 }
 
@@ -136,7 +149,10 @@ int svlFile::Seek(const long long int abspos)
         if (Mode == R) Stream->seekg(abspos, std::ios::beg);
         else Stream->seekp(abspos, std::ios::beg);
 
-        if (Stream->eof()) return SVL_EOF;
+        if (Stream->eof()) {
+            Stream->clear();
+            return SVL_EOF;
+        }
     }
     else {
         if (Mode == R) Stream->seekg(0, std::ios::end);
