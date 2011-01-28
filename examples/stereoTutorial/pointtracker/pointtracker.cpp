@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
-//#define __CAMERA_SOURCE
+#define __CAMERA_SOURCE
 
 
 //////////////////////////////////
