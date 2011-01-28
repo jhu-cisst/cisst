@@ -248,9 +248,8 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 // as connection id should be added.
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
-    if (!GCM->Disconnect(arg.ConnectionID)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\" for " 
-            << "connection id [ " << arg.ConnectionID << " ]" << std::endl;
+    if (!GCM->Disconnect(arg)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
         return;
     }
 

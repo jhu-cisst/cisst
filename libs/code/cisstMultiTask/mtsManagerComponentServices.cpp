@@ -117,11 +117,6 @@ bool mtsManagerComponentServices::Connect(
     const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
 {
-    if (!ServiceComponentManagement.Connect.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
-        return false;
-    }
-
     mtsDescriptionConnection arg;
     arg.Client.ProcessName   = clientProcessName;
     arg.Client.ComponentName = clientComponentName;
@@ -129,13 +124,18 @@ bool mtsManagerComponentServices::Connect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = InvalidConnectionID;  // not yet assigned
+    arg.ConnectionID = InvalidConnectionID; // not yet assigned
 
     return Connect(arg);
 }
 
 bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & connection) const
 {
+    if (!ServiceComponentManagement.Connect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
     // MJ: TODO: change this with blocking command
     ServiceComponentManagement.Connect(connection);
 
