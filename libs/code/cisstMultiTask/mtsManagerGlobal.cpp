@@ -1994,7 +1994,7 @@ bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const s
     return Disconnect(id);
 }
 
-bool mtsManagerGlobal::Disconnect(const mtsDescriptionConnection connection)
+bool mtsManagerGlobal::Disconnect(const mtsDescriptionConnection &connection)
 {
     if (connection.ConnectionID == InvalidConnectionID) {
         return Disconnect(connection.Client.ProcessName, connection.Client.ComponentName, connection.Client.InterfaceName,

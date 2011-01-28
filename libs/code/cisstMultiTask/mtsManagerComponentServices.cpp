@@ -124,7 +124,6 @@ bool mtsManagerComponentServices::Connect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = InvalidConnectionID; // not yet assigned
 
     return Connect(arg);
 }
@@ -136,10 +135,14 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
         return false;
     }
 
-    // MJ: TODO: change this with blocking command
-    ServiceComponentManagement.Connect(connection);
+    // Make a copy because the parameter is const
+    mtsDescriptionConnection conn(connection);
+    conn.ConnectionID = InvalidConnectionID;
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << connection << std::endl;
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Connect(conn);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << conn << std::endl;
 
     return true;
 }
