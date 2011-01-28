@@ -7,7 +7,11 @@
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstStereoVision/svlSampleMatrixTypes.h>
 
+#include <exception>
+
 // this is called during update traversal
+// it is used to call the "update" method that updates the position of the 
+// stereo rig
 void devOSGStereo::UpdateCallback::operator()( osg::Node* node, 
 					       osg::NodeVisitor* nv ){
   osg::Referenced* data = node->getUserData();
@@ -21,6 +25,7 @@ void devOSGStereo::UpdateCallback::operator()( osg::Node* node,
 }
 
 // This is called after everything else
+// It is used to capture color/depth images from the color/depth buffers
 devOSGStereo::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera,
 						    bool drawdepth,
 						    bool drawcolor ) :
@@ -111,17 +116,6 @@ devOSGStereo::FinalDrawCallback::ConvertDepthBuffer
       }
     }
 
-    /*
-    std::string s(camera->getName()+"depth");
-    std::ofstream ofs( s.data() );
-    for( int r=0; r<height; r++ ){
-      for( int c=0; c<width; c++ ){
-	ofs << depthimage[r][c] << " ";
-      }
-      ofs << std::endl;
-    }
-    ofs.close();
-    */
   }
 
 }
@@ -148,23 +142,9 @@ devOSGStereo::FinalDrawCallback::ConvertColorBuffer
 	      sizeof(unsigned char)*width*3 );
     }
     
-    std::string s(camera->getName()+"color");
-    /*
-    std::ofstream ofs( s.data() );
-    for( size_t r=0; r<height; r++ ){
-      for( size_t c=0; c<width*3; c++ ){
-	ofs << (int)colorimage[r][c] << " ";
-      }
-      ofs << std::endl;
-    }
-    ofs.close();
-    */
   }
 
 }
-
-
-
 
 devOSGStereo::devOSGStereo( const std::string& name, 
 			    devOSGWorld* world,
@@ -186,15 +166,124 @@ devOSGStereo::devOSGStereo( const std::string& name,
   depthsample( NULL )
 #endif
 {
+  // Add a timeout as it can take time to load the windows
+  SetInitializationDelay( 5.0 );
 
   getCamera()->setProjectionMatrixAsPerspective(fovy, aspectRatio, zNear, zFar);
 
   setSceneData( world );
 
-  // Set callback stuff
+  // Set the user data to point to this object
   userdata = new devOSGStereo::UserData( this );
+
+  // Set the update callback of the rig
   getCamera()->setUserData( userdata );
   getCamera()->setUpdateCallback( new devOSGStereo::UpdateCallback );
+
+  // Setup the left camera
+  {
+
+    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+
+    osg::ref_ptr<osg::Viewport> viewport;
+    viewport = new osg::Viewport( 0, 0, width, height);
+    camera->setViewport( viewport.get() );
+
+    // drawing callback
+    finaldrawcallbacks[0] = new FinalDrawCallback( camera, true, true );
+    camera->setFinalDrawCallback( finaldrawcallbacks[0] );
+
+    // add this slave camera to the viewer, with a shift left of the
+    // projection matrix
+    addSlave( camera.get(), 
+	      osg::Matrixd(),
+	      osg::Matrixd::translate( baseline/2.0, 0.0, 0.0 ) );
+
+  }
+
+  // setup the right camera
+  {
+
+    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+
+    osg::ref_ptr<osg::Viewport> viewport;
+    viewport = new osg::Viewport( 0, 0, width, height);
+    camera->setViewport( viewport.get() );
+
+    // drawing callback
+    finaldrawcallbacks[1] = new FinalDrawCallback( camera, true, true );
+    camera->setFinalDrawCallback( finaldrawcallbacks[1] );
+
+    // add this slave camera to the viewer, with a shift right of the 
+    // projection matrix                                  
+    addSlave( camera.get(), 
+	      osg::Matrixd(),
+	      osg::Matrixd::translate( -baseline/2.0, 0.0, 0.0 ) );
+
+  }
+
+#ifdef CISST_STEREOVISION
+  // SVL stuff
+  int retval;
+
+  // Create the buffer for the (left) depth image
+  try{ depthbuffersample = new svlBufferSample( svlTypeMatrixFloat ); }
+  catch( std::bad_alloc& ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to allocate depth buffer sample."
+		      << std::endl;
+  }
+
+  try{ depthsample = new svlSampleMatrixFloat( false ); }
+  catch( std::bad_alloc& ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to allocate depth sample."
+		      << std::endl;
+  }
+
+  // attach the callback matrices to the sample
+  retval = depthsample->SetMatrix( finaldrawcallbacks[0]->GetDepthImage() );
+  if( retval != SVL_OK ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to set matrix for left depth image."
+		      << std::endl;
+  }
+
+  // push the sample in the buffer
+  depthbuffersample->Push( depthsample );
+
+  // Create the buffer for the RGB images
+  try{ colorbuffersample = new svlBufferSample( svlTypeImageRGBStereo ); }
+  catch( std::bad_alloc& ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to allocate color buffer sample."
+		      << std::endl;
+  }
+
+  try{ colorsample = new svlSampleImageRGBStereo( false ); }
+  catch( std::bad_alloc& ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to allocate color sample."
+		      << std::endl;
+  }
+
+ // attach the callback matrices to the sample
+  retval = colorsample->SetMatrix( finaldrawcallbacks[0]->GetColorImage(), 0 );
+  if( retval != SVL_OK){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			   << "Failed to set matrix for left color image."
+			   << std::endl;
+  }
+  retval = colorsample->SetMatrix( finaldrawcallbacks[1]->GetColorImage(), 1 );
+  if( retval != SVL_OK){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			   << "Failed to set matrix for right color image."
+			   << std::endl;
+  }
+
+  colorbuffersample->Push( colorsample );
+
+#endif
 
 }
 
@@ -216,28 +305,18 @@ void devOSGStereo::Startup(){
     traits->doubleBuffer = true;
     traits->sharedContext = 0;
 
+    osg::View::Slave& slave = getSlave(0);
+    osg::Camera* camera = slave._camera.get();
+
     osg::ref_ptr<osg::GraphicsContext> gc;
     gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
-
-    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
     camera->setName( GetName() + "LEFT" );
     camera->setGraphicsContext( gc.get() );
-    camera->setViewport( new osg::Viewport( 0, 0, width, height ) );
 
     GLenum buffer = traits->doubleBuffer ? GL_BACK : GL_FRONT;
     camera->setDrawBuffer( buffer );
     camera->setReadBuffer( buffer );
     camera->setClearColor( osg::Vec4d( 0.0, 0.0, 0.0, 0.0 ) );
-
-    // drawing callback
-    finaldrawcallbacks[0] = new FinalDrawCallback( camera, true, true );
-    camera->setFinalDrawCallback( finaldrawcallbacks[0] );
-
-    // add this slave camera to the viewer, with a shift left of the
-    // projection matrix
-    addSlave( camera.get(), 
-	      osg::Matrixd(),
-	      osg::Matrixd::translate( baseline/2.0, 0.0, 0.0 ) );
 
   }
 
@@ -253,70 +332,20 @@ void devOSGStereo::Startup(){
     traits->doubleBuffer = true;
     traits->sharedContext = 0;
 
-    osg::ref_ptr<osg::GraphicsContext> gc;
-    gc = osg::GraphicsContext::createGraphicsContext(traits.get());
+    osg::View::Slave& slave = getSlave(1);
+    osg::Camera* camera = slave._camera.get();
 
-    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+    osg::ref_ptr<osg::GraphicsContext> gc;
+    gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
     camera->setName( GetName() + "RIGHT" );
-    camera->setGraphicsContext(gc.get());
-    camera->setViewport( new osg::Viewport( 0, 0, width, height) );
+    camera->setGraphicsContext( gc.get() );
 
     GLenum buffer = traits->doubleBuffer ? GL_BACK : GL_FRONT;
     camera->setDrawBuffer(buffer);
     camera->setReadBuffer(buffer);
     camera->setClearColor( osg::Vec4d( 0.0, 0.0, 0.0, 0.0 ) );
 
-    // drawing callback
-    finaldrawcallbacks[1] = new FinalDrawCallback( camera, true, true );
-    camera->setFinalDrawCallback( finaldrawcallbacks[1] );
-
-    // add this slave camera to the viewer, with a shift right of the 
-    // projection matrix                                  
-    addSlave( camera.get(), 
-	      osg::Matrixd(),
-	      osg::Matrixd::translate( -baseline/2.0, 0.0, 0.0 ) );
-
   }
-
-#ifdef CISST_STEREOVISION
-  // SVL stuff
-  int retval;
-
-  // Create the buffer for the (left) depth image
-  depthbuffersample = new svlBufferSample( svlTypeMatrixFloat );
-  depthsample       = new svlSampleMatrixFloat( false );
-
-  // attach the callback matrices to the sample
-  retval = depthsample->SetMatrix( finaldrawcallbacks[0]->GetDepthImage() );
-  if( retval != SVL_OK ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to set matrix for left depth image."
-		      << std::endl;
-  }
-
-  // push the sample in the buffer
-  depthbuffersample->Push( depthsample );
-
-  // Create the buffer for the RGB images
-  colorbuffersample = new svlBufferSample( svlTypeImageRGBStereo );
-  colorsample       = new svlSampleImageRGBStereo( false );
-
-  // attach the callback matrices to the sample
-  retval = colorsample->SetMatrix( finaldrawcallbacks[0]->GetColorImage(), 0 );
-  if( retval != SVL_OK){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			   << "Failed to set matrix for left color image."
-			   << std::endl;
-  }
-  retval = colorsample->SetMatrix( finaldrawcallbacks[1]->GetColorImage(), 1 );
-  if( retval != SVL_OK){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			   << "Failed to set matrix for right color image."
-			   << std::endl;
-  }
-
-  colorbuffersample->Push( colorsample );
-#endif
 
 }
 
@@ -332,11 +361,19 @@ void devOSGStereo::Run(){
 void devOSGStereo::Cleanup(){}
 
 #ifdef CISST_STEREOVISION
-svlBufferSample* devOSGStereo::GetColorBufferSample() const 
-{ return colorbuffersample; }
+svlBufferSample* devOSGStereo::GetColorBufferSample() const { 
+  if( colorbuffersample != NULL ) 
+    return colorbuffersample; 
+  std::cout << "NULL: " << std::endl;
+  return NULL;
+}
 
-svlBufferSample* devOSGStereo::GetDepthBufferSample() const 
-{ return depthbuffersample; }
+svlBufferSample* devOSGStereo::GetDepthBufferSample() const { 
+  if( depthbuffersample != NULL ) 
+    return depthbuffersample; 
+  std::cout << "NULL: " << std::endl;
+  return NULL;
+}
 #endif
 
 void devOSGStereo::Update()

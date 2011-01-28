@@ -20,7 +20,6 @@ class CISST_EXPORT devOSGCamera :
 
  private:
 
-
   // this is to store a pointer to a camera object
   class UserData : public osg::Referenced {
   private:
@@ -65,6 +64,15 @@ class CISST_EXPORT devOSGCamera :
   int width;
   int height;
 
+#ifdef CISST_STEREOVISION
+  // svl
+  svlBufferSample* colorbuffersample;
+  svlSampleImageRGBStereo* colorsample;
+
+  svlBufferSample* depthbuffersample;
+  svlSampleMatrixFloat* depthsample;
+#endif
+
  public : 
 
   //! Create an OSG viewer (actually it's a OSG viewer)
@@ -99,6 +107,11 @@ class CISST_EXPORT devOSGCamera :
   void Startup();
   void Run();
   void Cleanup();
+
+#ifdef CISST_STEREOVISION
+  svlBufferSample* GetDepthBufferSample() const ;
+  svlBufferSample* GetColorBufferSample() const ;
+#endif
 
 };
 

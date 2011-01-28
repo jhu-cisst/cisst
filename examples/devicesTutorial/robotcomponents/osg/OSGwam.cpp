@@ -61,7 +61,7 @@ int main(){
   // add the camera task
   taskManager->AddComponent( camera );
 
-  std::string path("libs/etc/cisstRobot/WAM/");
+  std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
   models.push_back( path+"l1.obj" );
   models.push_back( path+"l2.obj" );

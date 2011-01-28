@@ -24,20 +24,16 @@ int main(){
 
   devOSGWorld* world = new devOSGWorld;
 
+  std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
+
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
 			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
   devOSGBody* hubble;
-  hubble = new devOSGBody( "hubble",
-			   Rt, 
-			   "libs/etc/cisstRobot/objects/hst.3ds",
-			   world );
+  hubble = new devOSGBody( "hubble", Rt, data+"hst.3ds", world );
 
   vctFrame4x4<double> eye;
   devOSGBody* background;
-  background = new devOSGBody( "background",
-			       eye,
-			       "libs/etc/cisstRobot/objects/background.3ds",
-			       world );
+  background = new devOSGBody( "background", eye, data+"background.3ds", world);
 
   int width = 640, height = 480;
   devOSGCamera* camera = new devOSGCamera( "camera",

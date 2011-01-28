@@ -28,20 +28,16 @@ int main(){
   // Create the OSG World
   devOSGWorld* world = new devOSGWorld;
 
+  std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
+
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
 			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
   devOSGBody* hubble;
-  hubble = new devOSGBody( "hubble",
-			   Rt, 
-			   "libs/etc/cisstRobot/objects/hst.3ds",
-			   world );
+  hubble = new devOSGBody( "hubble", Rt, data+"hst.3ds", world );
 
   vctFrame4x4<double> eye;
   devOSGBody* background;
-  background = new devOSGBody( "background",
-			       eye,
-			       "libs/etc/cisstRobot/objects/background.3ds",
-			       world );
+  background = new devOSGBody( "background", eye, data+"background.3ds", world);
   
   int width = 320, height = 240;
   // Create a viewer
@@ -79,10 +75,11 @@ int main(){
   svlInitialize();
 
   // Create the source and hook it to the OSG output
-  svlFilterSourceBuffer colorsource, depthsource;
+  svlFilterSourceBuffer depthsource;
   depthsource.SetBuffer( *osgstereo->GetDepthBufferSample() );
   depthsource.SetTargetFrequency( 0.3 );
 
+  svlFilterSourceBuffer colorsource;
   colorsource.SetBuffer( *osgstereo->GetColorBufferSample() );
   colorsource.SetTargetFrequency( 0.3 );
 
@@ -110,7 +107,7 @@ int main(){
   stereo.SetSmoothnessFactor( 11 );
   stereo.SetTemporalFiltering( 0 );
   stereo.SetSpatialFiltering( 0 );
-    
+
   svlRect roi;
   roi.Assign(5, 5, width-5, height-5);
   stereo.SetROI(roi);
@@ -146,6 +143,7 @@ int main(){
     std::cout << "ERROR" << std::endl;
     exit(0);
   }
+
 #endif
 
   taskManager->CreateAll();
@@ -154,8 +152,10 @@ int main(){
   cmnGetChar();
 
 #ifdef CISST_STEREOVISION
+
   stereostream.Release();
   depthstream.Release();
+
 #endif
 
   taskManager->KillAll();
