@@ -844,7 +844,7 @@ void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & require
     cmnSerializer serializer(streamBuffer);
 
     // Extract "IsRequired" attribute
-    requiredInterfaceDescription.IsRequired = IsRequired();
+    requiredInterfaceDescription.IsRequired = (IsRequired() == MTS_REQUIRED);
 
     // Extract void functions
     requiredInterfaceDescription.FunctionVoidNames = GetNamesOfFunctionsVoid();

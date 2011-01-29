@@ -23,12 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsManagerGlobal.h>
 
 void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double timeoutInSec)
 {
     WaitingForResponse = true;
     pipe.Write(s, s.length());
-    WaitForResponse(timeoutInSec);
 }
 
 CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
@@ -36,8 +36,9 @@ CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
 mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     mtsTaskFromSignal(name),
     UDrawPipeConnected(false),
-    WaitingForResponse(false),
-    RedrawGraph(false)
+    UDrawResponse(""),
+    ShowProxies(false),
+    WaitingForResponse(false)
 {
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
@@ -75,11 +76,8 @@ void mtsComponentViewer::Run(void)
     }
     ProcessQueuedCommands();
     ProcessQueuedEvents();
-    // PK TEMP: following should be replaced by a queued command
-    if (RedrawGraph) {
-        RedrawGraph = false;
-        SendAllInfo();
-    }
+    if (UDrawPipeConnected)
+        ProcessResponse();
 }
 
 void mtsComponentViewer::Cleanup(void)
@@ -105,8 +103,11 @@ void mtsComponentViewer::Cleanup(void)
 void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &componentInfo)
 {
     if (UDrawPipeConnected) {
-        // Ignore proxy components
-        if (!IsProxyComponent(componentInfo.ComponentName)) {
+#if CISST_MTS_HAS_ICE
+        // Ignore proxy components, unless ShowProxies is true
+        if (ShowProxies || !mtsManagerGlobal::IsProxyComponent(componentInfo.ComponentName))
+#endif
+        {
             mtsComponentState componentState = ManagerComponentServices->ComponentGetState(componentInfo);
             std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
             if (buffer != "") {
@@ -133,21 +134,27 @@ void mtsComponentViewer::ChangeStateHandler(const mtsComponentStateChange &compo
 void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &connection)
 {
     if (UDrawPipeConnected) {
-        char IDString[20];
-        std::string message("graph(update([],[new_edge(\"");
-        sprintf(IDString, "%d", connection.ConnectionID);
-        message.append(IDString);
-        message.append("\", \"C\", [a(\"OBJECT\", \"");
-        message.append(IDString);
-        message.append("\"), a(\"INFO\", \"");
-        message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
-        message.append("\")], \"");
-        message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
-        message.append("\", \"");
-        message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
-        message.append("\")]))\n");
-        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        WriteString(UDrawPipe, message);
+#if CISST_MTS_HAS_ICE
+        if (ShowProxies || (!mtsManagerGlobal::IsProxyComponent(connection.Client.ComponentName) &&
+                            !mtsManagerGlobal::IsProxyComponent(connection.Server.ComponentName)))
+#endif
+        {
+            char IDString[20];
+            std::string message("graph(update([],[new_edge(\"");
+            sprintf(IDString, "%d", connection.ConnectionID);
+            message.append(IDString);
+            message.append("\", \"CONNECTION\", [a(\"OBJECT\", \"");
+            message.append(IDString);
+            message.append("\"), a(\"INFO\", \"");
+            message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
+            message.append("\")], \"");
+            message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
+            message.append("\", \"");
+            message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
+            message.append("\")]))\n");
+            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+            WriteString(UDrawPipe, message);
+        }
     }
 }
 
@@ -175,11 +182,26 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
     // wait for initial OK
     if (UDrawPipeConnected) {
         WaitingForResponse = true;
+        UDrawResponse = "";
         // Create reader thread.
         ReaderThread.Create<mtsComponentViewer, int>(this, &mtsComponentViewer::ReadFromUDrawGraph, 0);
-        WaitForResponse(1.0);
+        // Wait for initial OK
+        for (int i = 0; (i < 100) && (UDrawResponse == ""); i++)
+            osaSleep(0.01);
+        ProcessResponse();
+        if (WaitingForResponse)
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to receive response" << std::endl;
+        /// Now initialize the system
+#if CISST_MTS_HAS_ICE
+        WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\"), "
+                                                      "menu_entry(\"showproxies\", \"Show proxies\"), "
+                                                      "menu_entry(\"hideproxies\", \"Hide proxies\")]))\n");
+        WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\", \"showproxies\"]))\n");
+#else
         WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\")]))\n");
         WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\"]))\n");
+#endif
+        WriteString(UDrawPipe, "visual(new_rules([er(\"CONNECTION\", [m([menu_entry(\"Disconnect\", \"Disconnect\")])])]))\n");
         WriteString(UDrawPipe, "drag_and_drop(dragging_on)\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Connected to UDraw(Graph)" << std::endl;
     }
@@ -188,47 +210,72 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
 
 void *mtsComponentViewer::ReadFromUDrawGraph(int)
 {
-    std::string response;
     ReaderThreadFinished = false;
     while (!ReaderThreadFinished) {
-        response = UDrawPipe.ReadUntil(256, '\n');
-        if (response.compare(0,2,"ok") == 0)
-            WaitingForResponse = false;
-        else if (response.compare(0, 19, "communication_error") == 0) {
-            WaitingForResponse = false;
-            CMN_LOG_CLASS_RUN_WARNING << "UDrawGraph error: " << response;
+        if (UDrawResponse == "") {
+            // Blocking read from pipe
+            UDrawResponse = UDrawPipe.ReadUntil(256, '\n');
+            // Wake up Component Viewer (mtsTaskFromSignal) to process response
+            PostCommandQueuedMethod();
+            // Wait until component viewer signals that it is ready for new data
+            ReadyToRead.Wait(3.0);  // 3 second timeout
         }
-        else if (response.compare(0,4,"quit") == 0) {
-            CMN_LOG_CLASS_RUN_WARNING << "Received quit command from UDrawGraph" << std::endl;
-            ReaderThreadFinished = true;
-            Kill();
-            // mtsTaskFromSignal::Kill should wake up thread (no need to call PostCommandQueuedMethod)
-        }
-        else if (response.compare(0,24,"menu_selection(\"redraw\")") == 0) {
-            CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph" << std::endl;
-            // PK TEMP: Following to be replaced by use of command pattern
-            RedrawGraph = true;
+        else {
+            CMN_LOG_CLASS_INIT_WARNING << "ReadFromUDrawGraph: not ready to read new responses" << std::endl;
+            // Wake up Component Viewer just in case
             PostCommandQueuedMethod();
         }
     }
     return 0;
 }
 
-bool mtsComponentViewer::WaitForResponse(double timeoutInSec) const
+void mtsComponentViewer::ProcessResponse(void)
 {
-    // Could instead use osaThreadSignal with timeout
-    for (int i = 0; (i < timeoutInSec*1000) && WaitingForResponse; i++)
-        osaSleep(0.001);
-    if (WaitingForResponse)
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to receive response" << std::endl;
-    return !WaitingForResponse;
-}
-
-bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) const
-{
-    // PK: Need to fix this to be more robust
-    // MJ: This method can be replaced with mtsManagerGlobal::IsProxyComponent()
-    return (componentName.find("Proxy", componentName.length()-5) != std::string::npos);
+    if (UDrawResponse != "") {
+        if (UDrawResponse.compare(0,2,"ok") == 0)
+            WaitingForResponse = false;
+        else if (UDrawResponse.compare(0, 19, "communication_error") == 0) {
+            WaitingForResponse = false;
+            CMN_LOG_CLASS_RUN_WARNING << "UDrawGraph error: " << UDrawResponse;
+        }
+        else if (UDrawResponse.compare(0,4,"quit") == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << "Received quit command from UDrawGraph" << std::endl;
+            ReaderThreadFinished = true;
+            Kill();
+            // mtsTaskFromSignal::Kill should wake up thread (no need to call PostCommandQueuedMethod)
+        }
+        else if (UDrawResponse.compare(0,24,"menu_selection(\"redraw\")") == 0) {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph" << std::endl;
+            SendAllInfo();
+        }
+#if CISST_MTS_HAS_ICE
+        else if (UDrawResponse.compare(0,29,"menu_selection(\"showproxies\")") == 0) {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph, showing proxies" << std::endl;
+            ShowProxies = true;
+            SendAllInfo();
+            WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\", \"hideproxies\"]))\n");
+        }
+        else if (UDrawResponse.compare(0,29,"menu_selection(\"hideproxies\")") == 0) {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph, hiding proxies" << std::endl;
+            ShowProxies = false;
+            SendAllInfo();
+            WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\", \"showproxies\"]))\n");
+        }
+#endif
+        else if (UDrawResponse.compare(0, 20, "popup_selection_edge") == 0) {
+            // For now, we assume that the selection is to disconnect the edge, since that
+            // is the only menu option.
+            int connectionID;
+            if (sscanf(UDrawResponse.c_str(), "popup_selection_edge(\"%d\"", &connectionID) == 1) {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Disconnecting connection ID " << connectionID << std::endl;
+                ManagerComponentServices->Disconnect(static_cast<ConnectionIDType>(connectionID));
+            }
+            else
+                CMN_LOG_CLASS_RUN_ERROR << "Could not parse connection ID from: " << UDrawResponse << std::endl;
+        }
+        UDrawResponse = "";
+        ReadyToRead.Raise();
+    }
 }
 
 void mtsComponentViewer::SendAllInfo(void)
@@ -243,8 +290,11 @@ void mtsComponentViewer::SendAllInfo(void)
     for (i = 0; i < processList.size(); i++) {
         componentList = ManagerComponentServices->GetNamesOfComponents(processList[i]);
         for (j = 0; j < componentList.size(); j++) {
-            // Ignore proxy components
-            if (!IsProxyComponent(componentList[j])) {
+#if CISST_MTS_HAS_ICE
+            // Ignore proxy components, unless ShowProxies is true
+            if (ShowProxies || !mtsManagerGlobal::IsProxyComponent(componentList[j]))
+#endif
+            {
                 mtsDescriptionComponent arg;
                 arg.ProcessName = processList[i];
                 arg.ComponentName = componentList[j];

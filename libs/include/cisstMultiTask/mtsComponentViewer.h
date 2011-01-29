@@ -51,18 +51,18 @@ protected:
 
     osaPipeExec UDrawPipe;
     bool UDrawPipeConnected;
+    std::string UDrawResponse;
+    bool ShowProxies;
 
     // Use a separate reader thread because osaPipeExec::Read is blocking.
     // This could be eliminated if a non-blocking Read is implemented.
     osaThread ReaderThread;
+    osaThreadSignal ReadyToRead;
     void *ReadFromUDrawGraph(int);
     bool ReaderThreadFinished;
     bool WaitingForResponse;
-    bool WaitForResponse(double timeoutInSec = 0.1) const;
+    void ProcessResponse(void);
 
-    bool RedrawGraph; // PK TEMP: use provided interface instead
-
-    bool IsProxyComponent(const std::string & componentName) const;
     bool ConnectToUDrawGraph(void);
 
     void SendAllInfo(void);
