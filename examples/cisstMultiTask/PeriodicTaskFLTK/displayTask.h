@@ -34,6 +34,7 @@ class displayTask: public mtsTaskPeriodic {
     void Startup(void);
     void Run(void);
     void Cleanup(void) {};
+    void UpdateUI(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(displayTask);

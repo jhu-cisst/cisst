@@ -24,7 +24,7 @@ int main(void)
     cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
 
     // create our two tasks
-    const double PeriodSine = 1 * cmn_ms; // in milliseconds
+    const double PeriodSine = 5.0 * cmn_ms; // in milliseconds
     const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
     sineTask * sineTaskObject = new sineTask("SIN", PeriodSine);
@@ -50,7 +50,8 @@ int main(void)
 
     // wait until the close button of the UI is pressed
     while (!displayTaskObject->IsTerminated()) {
-        osaSleep(100.0 * cmn_ms); // sleep to save CPU
+        displayTaskObject->UpdateUI(); // this has to be done by main thread
+        osaSleep(5.0 * cmn_ms); // sleep to save CPU
     }
     // cleanup
     componentManager->KillAll();

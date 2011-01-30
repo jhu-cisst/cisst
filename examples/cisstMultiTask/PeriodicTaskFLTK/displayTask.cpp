@@ -29,48 +29,63 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
                                << minValue << ", " << maxValue << std::endl;
     CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting start value to: "
                                << startValue << std::endl;
-    UI.Amplitude->bounds(minValue, maxValue);
-    UI.Amplitude->value(startValue);
-    size_t traceId;
-    UI.Plot->AddTrace("Data", traceId);
-    AmplitudeData = startValue;
+    Fl::lock();
+    {
+        UI.Amplitude->bounds(minValue, maxValue);
+        UI.Amplitude->value(startValue);
+        size_t traceId;
+        UI.Plot->AddTrace("Data", traceId);
+        AmplitudeData = startValue;
+
+        UI.show(0, NULL);
+        UI.Plot->show();
+    }
+    Fl::unlock();
 }
 
 void displayTask::Startup(void)
 {
-    // make the UI visible
-    UI.show(0, NULL);
-    UI.Plot->show();
 }
 
 void displayTask::Run(void)
 {
     // get the data from the sine wave generator task
     Generator.GetData(Data);
-    UI.Data->value(Data);
-    UI.Plot->AddPoint(0, vctDouble2(Data.Timestamp(), Data.Data));
-    UI.Plot->redraw();
-    // check if the user has entered a new amplitude in UI
-    if (UI.AmplitudeChanged) {
-        // retrieve the new amplitude and send it to the sine task
-        AmplitudeData = UI.Amplitude->value();
-        AmplitudeData.SetTimestamp(mtsTaskManager::GetInstance()
-                                   ->GetTimeServer().GetRelativeTime());
-        AmplitudeData.SetValid(true);
-        // send it
-        Generator.SetAmplitude(AmplitudeData);
-        UI.AmplitudeChanged = false;
-        CMN_LOG_CLASS_RUN_VERBOSE << "Run: " << this->GetTick()
-                                  << " - Amplitude: " << AmplitudeData << std::endl;
+    Fl::lock();
+    {
+        UI.Data->value(Data);
+        UI.Plot->AddPoint(0, vctDouble2(Data.Timestamp(), Data.Data));
+        UI.Plot->redraw();
+        // check if the user has entered a new amplitude in UI
+        if (UI.AmplitudeChanged) {
+            // retrieve the new amplitude and send it to the sine task
+            AmplitudeData = UI.Amplitude->value();
+            AmplitudeData.SetTimestamp(mtsTaskManager::GetInstance()
+                                       ->GetTimeServer().GetRelativeTime());
+            AmplitudeData.SetValid(true);
+            // send it
+            Generator.SetAmplitude(AmplitudeData);
+            UI.AmplitudeChanged = false;
+            CMN_LOG_CLASS_RUN_VERBOSE << "Run: " << this->GetTick()
+                                      << " - Amplitude: " << AmplitudeData << std::endl;
+        }
     }
+    Fl::unlock();
+    Fl::awake();
+
     // log some extra information
     CMN_LOG_CLASS_RUN_VERBOSE << "Run : " << this->GetTick()
                               << " - Data: " << Data << std::endl;
+}
+
+void displayTask::UpdateUI(void)
+{
     // update the UI, process UI events
     if (Fl::check() == 0) {
         Kill();
     }
 }
+
 
 /*
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
