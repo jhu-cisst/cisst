@@ -61,6 +61,7 @@ protected:
     void *ReadFromUDrawGraph(int);
     bool ReaderThreadFinished;
     bool WaitingForResponse;
+    static void ParseArgs(const std::string &input, std::string &arg1, std::string &arg2);
     void ProcessResponse(void);
 
     bool ConnectToUDrawGraph(void);
