@@ -54,6 +54,9 @@ protected:
     std::string UDrawResponse;
     bool ShowProxies;
 
+    bool ConnectionStarted;
+    mtsDescriptionConnection ConnectionRequest;
+
     // Use a separate reader thread because osaPipeExec::Read is blocking.
     // This could be eliminated if a non-blocking Read is implemented.
     osaThread ReaderThread;
@@ -62,16 +65,22 @@ protected:
     bool ReaderThreadFinished;
     bool WaitingForResponse;
     static void ParseArgs(const std::string &input, std::string &arg1, std::string &arg2);
+    static bool ParseProcessAndComponent(const std::string &input, std::string &processName,
+                                         std::string &componentName);
     void ProcessResponse(void);
 
     bool ConnectToUDrawGraph(void);
 
     void SendAllInfo(void);
+    void ActivateMenuItems(void);
 
     std::string GetComponentInGraphFormat(const std::string & processName, const std::string & componentName) const;
     std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName,
                                                const mtsComponentState & componentState) const;
     std::string GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const;
+
+    enum BorderType { BORDER_NONE, BORDER_SINGLE, BORDER_DOUBLE };
+    void ChangeComponentBorder(const std::string &processName, const std::string &componentName, BorderType border);
 
     // Event Handlers
     void AddComponentHandler(const mtsDescriptionComponent &componentInfo);
