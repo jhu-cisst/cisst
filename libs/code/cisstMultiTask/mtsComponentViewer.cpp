@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-07
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -200,6 +200,7 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
         WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\")]))\n");
         WriteString(UDrawPipe, "app_menu(activate_menus([\"redraw\"]))\n");
 #endif
+        // Default node rules (nr) could be removed -- not currently used
         WriteString(UDrawPipe, "visual(new_rules([er(\"CONNECTION\", [m([menu_entry(\"disconnect\", \"Disconnect\")])]), "
                                                  "nr(\"USER\", [m([menu_entry(\"start\", \"Start\"), "
                                                                   "menu_entry(\"stop\", \"Stop\")])])]))\n");
@@ -327,6 +328,8 @@ void mtsComponentViewer::ProcessResponse(void)
                     CMN_LOG_CLASS_RUN_WARNING << "Stopping component " << arg1 << std::endl;
                     ManagerComponentServices->ComponentStop(processName, componentName);
                 }
+                else
+                    CMN_LOG_CLASS_RUN_WARNING << "Selected: " << args << std::endl;
             }
             else
                 CMN_LOG_CLASS_RUN_ERROR << "Could not parse component name from " << arg1 << std::endl;
@@ -394,6 +397,30 @@ std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &pro
     return buffer;
 }
 
+static void MakeInterfaceList(std::string &buffer, const std::string &type, const std::vector<std::string> &list)
+{
+    size_t i;
+    if (list.size() > 0) {
+        if (buffer[buffer.size()-1] != '[')
+            buffer.append(", ");
+        buffer.append("submenu_entry(\"");
+        buffer.append(type);
+        buffer.append("\", \"");
+        buffer.append(type);
+        buffer.append("\", [");
+        for (i = 0; i < list.size(); i++) {
+            buffer.append("menu_entry(\"");
+            buffer.append(type+":"+list[i]);
+            buffer.append("\", \"");
+            buffer.append(list[i]);
+            buffer.append("\")");
+            if (i < list.size()-1)
+                buffer.append(", ");
+        }
+        buffer.append("])");
+    }
+}
+
 std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string &processName,
                                 const std::string &componentName, const mtsComponentState &componentState) const
 {
@@ -415,6 +442,17 @@ std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string
     buffer.append(processName + ":" + componentName);
     buffer.append("\"), ");
     buffer.append(GetStateInUDrawGraphFormat(componentState));
+    std::vector<std::string> requiredList, providedList;
+    ManagerComponentServices->GetNamesOfInterfaces(processName, componentName, requiredList, providedList);
+    if ((componentType == "USER") || (requiredList.size() > 0) || (providedList.size() > 0)) {
+        buffer.append(", m([");
+        // Only allow Start/Stop of user components (but not this component)
+        if ((componentType == "USER") && (componentName != GetName()))
+            buffer.append("menu_entry(\"start\", \"Start\"), menu_entry(\"stop\", \"Stop\"), blank");
+        MakeInterfaceList(buffer, "Required", requiredList);
+        MakeInterfaceList(buffer, "Provided", providedList);
+        buffer.append("])");
+    }
     buffer.append("])],[]))\n");
     return buffer;
 }

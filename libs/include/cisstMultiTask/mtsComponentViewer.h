@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-07
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
