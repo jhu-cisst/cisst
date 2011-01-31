@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class displayTask: public mtsTaskPeriodic {
     // set log level to "Run Error"
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     
  protected:
     // local copy of data used in commands
