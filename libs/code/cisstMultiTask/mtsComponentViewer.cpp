@@ -193,6 +193,7 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
             CMN_LOG_CLASS_RUN_ERROR << "Failed to receive response" << std::endl;
 
         /// Now initialize the system
+        WriteString(UDrawPipe, "window(title(\"CISST Component Viewer\"))\n");
         WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\"), "
 #if CISST_MTS_HAS_ICE
                                                       "menu_entry(\"showproxies\", \"Show proxies\"), "
@@ -210,6 +211,9 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
                                                  "nr(\"USER\", [m([menu_entry(\"start\", \"Start\"), "
                                                                   "menu_entry(\"stop\", \"Stop\")])])]))\n");
         WriteString(UDrawPipe, "drag_and_drop(dragging_on)\n");
+        // Following is an example of how to create a TCL/TK window; in this case, a window with a single button "Connect"
+        // that returns the message "connectPressed".
+        // WriteString(UDrawPipe, "tcl(eval(\"button .b -text Connect -command {uDrawGraph tcl_answer connectPressed} ; pack .b\"))\n"); 
         CMN_LOG_CLASS_INIT_VERBOSE << "Connected to UDraw(Graph)" << std::endl;
     }
     return UDrawPipeConnected;
@@ -339,9 +343,11 @@ void mtsComponentViewer::ProcessResponse(void)
                 ConnectionRequest.Init();
                 ConnectionStarted = true;
                 ActivateMenuItems();
+                WriteString(UDrawPipe, "window(show_status(\"Starting connection: choose required and provided interfaces\"))\n");
                 CMN_LOG_CLASS_RUN_VERBOSE << "Starting connection -- choose required and provided interfaces" << std::endl;
             }
             else if (args == "connectFinish") {
+                WriteString(UDrawPipe, "window(show_status(\"\"))\n");
                 CMN_LOG_CLASS_RUN_VERBOSE << "Attempting connection: " << ConnectionRequest << std::endl;
                 ManagerComponentServices->Connect(ConnectionRequest);
                 ChangeComponentBorder(ConnectionRequest.Client.ProcessName,
@@ -353,6 +359,7 @@ void mtsComponentViewer::ProcessResponse(void)
                 ActivateMenuItems();
             }
             else if (args == "connectCancel") {
+                WriteString(UDrawPipe, "window(show_status(\"\"))\n");
                 ConnectionStarted = false;
                 ChangeComponentBorder(ConnectionRequest.Client.ProcessName,
                                       ConnectionRequest.Client.ComponentName, BORDER_SINGLE);
@@ -391,39 +398,62 @@ void mtsComponentViewer::ProcessResponse(void)
                     ManagerComponentServices->ComponentStop(processName, componentName);
                 }
                 else if (arg2.compare(0, 9, "Required:") == 0) {
-                    ChangeComponentBorder(ConnectionRequest.Client.ProcessName,
-                                          ConnectionRequest.Client.ComponentName, BORDER_SINGLE);
-                    ConnectionRequest.Client.ProcessName = processName;
-                    ConnectionRequest.Client.ComponentName = componentName;
-                    ConnectionRequest.Client.InterfaceName = arg2.substr(9);
-                    ChangeComponentBorder(ConnectionRequest.Client.ProcessName,
-                                          ConnectionRequest.Client.ComponentName, BORDER_DOUBLE);
-                    CMN_LOG_CLASS_RUN_VERBOSE << "Selected required interface "
-                                              << processName << ":"
-                                              << componentName << ":"
-                                              << ConnectionRequest.Client.InterfaceName << std::endl;
-                    if (ConnectionRequest.Server.ProcessName != "")
-                        ActivateMenuItems();
+                    if (ConnectionStarted) {
+                        ChangeComponentBorder(ConnectionRequest.Client.ProcessName,
+                                              ConnectionRequest.Client.ComponentName, BORDER_SINGLE);
+                        ConnectionRequest.Client.ProcessName = processName;
+                        ConnectionRequest.Client.ComponentName = componentName;
+                        ConnectionRequest.Client.InterfaceName = arg2.substr(9);
+                        ChangeComponentBorder(ConnectionRequest.Client.ProcessName,
+                                              ConnectionRequest.Client.ComponentName, BORDER_DOUBLE);
+                        CMN_LOG_CLASS_RUN_VERBOSE << "Selected required interface "
+                                                  << processName << ":"
+                                                  << componentName << ":"
+                                                  << ConnectionRequest.Client.InterfaceName << std::endl;
+                        if (ConnectionRequest.Server.ProcessName != "")
+                            ActivateMenuItems();
+                    }
                 }
                 else if (arg2.compare(0, 9, "Provided:") == 0) {
-                    ChangeComponentBorder(ConnectionRequest.Server.ProcessName,
-                                          ConnectionRequest.Server.ComponentName, BORDER_SINGLE);
-                    ConnectionRequest.Server.ProcessName = processName;
-                    ConnectionRequest.Server.ComponentName = componentName;
-                    ConnectionRequest.Server.InterfaceName = arg2.substr(9);
-                    ChangeComponentBorder(ConnectionRequest.Server.ProcessName,
-                                          ConnectionRequest.Server.ComponentName, BORDER_DOUBLE);
-                    CMN_LOG_CLASS_RUN_VERBOSE << "Selected provided interface "
-                                              << processName << ":"
-                                              << componentName << ":"
-                                              << ConnectionRequest.Server.InterfaceName << std::endl;
-                    if (ConnectionRequest.Client.ProcessName != "")
-                        ActivateMenuItems();
+                    if (ConnectionStarted) {
+                        ChangeComponentBorder(ConnectionRequest.Server.ProcessName,
+                                              ConnectionRequest.Server.ComponentName, BORDER_SINGLE);
+                        ConnectionRequest.Server.ProcessName = processName;
+                        ConnectionRequest.Server.ComponentName = componentName;
+                        ConnectionRequest.Server.InterfaceName = arg2.substr(9);
+                        ChangeComponentBorder(ConnectionRequest.Server.ProcessName,
+                                              ConnectionRequest.Server.ComponentName, BORDER_DOUBLE);
+                        CMN_LOG_CLASS_RUN_VERBOSE << "Selected provided interface "
+                                                  << processName << ":"
+                                                  << componentName << ":"
+                                                  << ConnectionRequest.Server.InterfaceName << std::endl;
+                        if (ConnectionRequest.Client.ProcessName != "")
+                            ActivateMenuItems();
+                    }
                 }
+                else
+                    CMN_LOG_CLASS_RUN_WARNING << "Unhandled popup_selection_node: " << args << std::endl;
             }
             else
                 CMN_LOG_CLASS_RUN_ERROR << "Could not parse component name from " << arg1 << std::endl;
         }
+        else if (command == "node_selections_labels") {
+            // Node (component) is selected -- no action implemented
+            CMN_LOG_CLASS_RUN_VERBOSE << "Selected component(s): " << args << std::endl;
+        }
+        else if (command == "edge_selection_label") {
+            // Edge (connection) is selected -- no action implemented
+            CMN_LOG_CLASS_RUN_VERBOSE << "Selected connection: " << args << std::endl;
+        }
+        else if (command == "create_edge") {
+            // Drag & drop -- not implemented (need a way to select interfaces)
+            CMN_LOG_CLASS_RUN_WARNING << "Create connection: " << args << std::endl;
+        }
+        else {
+            // Other actions not implemented
+            CMN_LOG_CLASS_RUN_VERBOSE << "Response: " << UDrawResponse << std::endl;
+        }
+
         UDrawResponse = "";
         ReadyToRead.Raise();
     }
