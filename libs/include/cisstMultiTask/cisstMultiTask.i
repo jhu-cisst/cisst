@@ -678,10 +678,16 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(InterfaceRequiredDescriptionProxy, Interfac
 
 // instantiate for types also instantiated in cisstVector wrappers
 MTS_INSTANTIATE_VECTOR(mtsDoubleVec, double);
-MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
-MTS_INSTANTIATE_VECTOR(mtsShortVec, short);
+MTS_INSTANTIATE_VECTOR(mtsFloatVec, float);
 MTS_INSTANTIATE_VECTOR(mtsLongVec, long);
+MTS_INSTANTIATE_VECTOR(mtsULongVec, unsigned long);
+MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
+MTS_INSTANTIATE_VECTOR(mtsUIntVec, unsigned int);
+MTS_INSTANTIATE_VECTOR(mtsShortVec, short);
+MTS_INSTANTIATE_VECTOR(mtsUShortVec, unsigned short);
+MTS_INSTANTIATE_VECTOR(mtsCharVec, char);
 MTS_INSTANTIATE_VECTOR(mtsUCharVec, unsigned char);
+MTS_INSTANTIATE_VECTOR(mtsBoolVec, bool);
 MTS_INSTANTIATE_VECTOR(mtsStdStringVec, std::string);
 
 // Wrap mtsMatrix
