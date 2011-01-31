@@ -1,6 +1,7 @@
 #include <osg/ref_ptr>
 #include <osg/View>
 #include <osgDB/WriteFile>
+#include <osgGA/TrackballManipulator>
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 
@@ -38,7 +39,8 @@ devOSGCamera::devOSGCamera( const std::string& name,
 			    int x, int y, int width, int height,
 			    double fovy, double aspectRatio,
 			    double zNear, double zFar,
-			    const std::string& fnname ) :
+			    const std::string& fnname,
+			    bool trackball ) :
   mtsTaskContinuous( name ),
   osgViewer::Viewer(),                 // viewer
   x( x ),                              // x position
@@ -90,6 +92,20 @@ devOSGCamera::devOSGCamera( const std::string& name,
     if( required != NULL )
       { required->AddFunction( fnname, ReadTransformation ); }
 
+  }
+
+  if( trackball ){
+    // Add+configure the trackball of the camera
+    setCameraManipulator( new osgGA::TrackballManipulator );
+    getCameraManipulator()->setHomePosition( osg::Vec3d( 1,0,1 ),
+					     osg::Vec3d( 0,0,0 ),
+					     osg::Vec3d( 0,0,1 ) );
+    home();
+    
+    // add a bit more light
+    osg::ref_ptr<osg::Light> light = new osg::Light;
+    light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
+    setLight( light );
   }
 
 }

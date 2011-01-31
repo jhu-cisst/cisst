@@ -92,13 +92,15 @@ class CISST_EXPORT devOSGCamera :
      \param zNear The near buffer distance
      \param zFar  The far buffer distance
      \param fnname The name of a MTS read command the body will connect
+     \param trackball Create the default trackball
   */
   devOSGCamera( const std::string& name,
 		devOSGWorld* world,
 		int x, int y, int width, int height,
 		double fovy, double aspectRatio,
 		double zNear, double zFar,
-		const std::string& fnname = "" );
+		const std::string& fnname = "",
+		bool trackball = true );
 
   ~devOSGCamera( );
 

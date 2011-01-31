@@ -79,10 +79,30 @@ class CISST_EXPORT devOSGBody :
      \param fnname The name of a MTS read command the body will connect
   */
   devOSGBody( const std::string& name, 
+	      const vctFrm3& Rt,
+	      const std::string& model,
+	      devOSGWorld* world,
+	      const std::string& fnname = "" );
+
+  //! OSG Body constructor
+  /**
+     Create a OSG body component. The body will add a required interface *if*
+     a function name is passed. In this case the interface is called 
+     "Transformation" and the body will read the function at each update 
+     traversal.
+     \param name The name of the body/component
+     \param Rt The initial transformation of the body
+     \param model The file name of a 3D model
+     \param world The OSG world the body belongs to
+     \param fnname The name of a MTS read command the body will connect
+  */
+  devOSGBody( const std::string& name, 
 	      const vctFrame4x4<double>& Rt,
 	      const std::string& model,
 	      devOSGWorld* world,
 	      const std::string& fnname = "" );
+
+
   ~devOSGBody();
   
 };

@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 class CISST_EXPORT devODEWorld : 
+
   public devRobotComponent,
   public devOSGWorld {
 
@@ -138,7 +139,7 @@ class CISST_EXPORT devODEWorld :
                     \$\begin{bmatrix} 0 & 0 & -9.81 \end{bmatrix}\$.
   */
   devODEWorld( double period,
-	       osaCPUMask mask,
+	       osaCPUMask mask = OSA_CPUANY,
 	       const vctFixedSizeVector<double,3>& gravity = 
 	       vctFixedSizeVector<double,3>(0.0, 0.0, -9.81) );
 
