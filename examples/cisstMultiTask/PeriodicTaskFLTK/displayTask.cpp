@@ -29,18 +29,14 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
                                << minValue << ", " << maxValue << std::endl;
     CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting start value to: "
                                << startValue << std::endl;
-    Fl::lock();
-    {
-        UI.Amplitude->bounds(minValue, maxValue);
-        UI.Amplitude->value(startValue);
-        size_t traceId;
-        UI.Plot->AddTrace("Data", traceId);
-        AmplitudeData = startValue;
-
-        UI.show(0, NULL);
-        UI.Plot->show();
-    }
-    Fl::unlock();
+    UI.Amplitude->bounds(minValue, maxValue);
+    UI.Amplitude->value(startValue);
+    size_t traceId;
+    UI.Plot->AddTrace("Data", traceId);
+    AmplitudeData = startValue;
+    
+    UI.show(0, NULL);
+    UI.Plot->show();
 }
 
 void displayTask::Startup(void)
@@ -81,9 +77,11 @@ void displayTask::Run(void)
 void displayTask::UpdateUI(void)
 {
     // update the UI, process UI events
+    Fl::lock();
     if (Fl::check() == 0) {
         Kill();
     }
+    Fl::unlock();
 }
 
 
