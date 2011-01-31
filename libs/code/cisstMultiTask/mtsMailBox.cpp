@@ -101,7 +101,6 @@ bool mtsMailBox::ExecuteNext(void)
        if (!(*command)->Returns()) {
            switch ((*command)->NumberOfArguments()) {
            case 0:
-               std::cout << "---- dequeueing" << std::endl;
                commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
                CMN_ASSERT(commandVoid);
                isBlockingVoid = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
@@ -164,7 +163,6 @@ bool mtsMailBox::ExecuteNext(void)
            this->ThreadSignal.Raise();
        }
        if (isBlockingVoid && this->PostCommandVoidDequeuedCommand) {
-           std::cout << "---- executing callback" << std::endl;
            this->PostCommandVoidDequeuedCommand->Execute(MTS_NOT_BLOCKING);
        }
        CommandQueue.Get();  // Remove command from mailbox queue
@@ -175,7 +173,6 @@ bool mtsMailBox::ExecuteNext(void)
        this->ThreadSignal.Raise();
    }
    if (isBlockingVoid && this->PostCommandVoidDequeuedCommand) {
-       std::cout << "---- executing callback" << std::endl;
        this->PostCommandVoidDequeuedCommand->Execute(MTS_NOT_BLOCKING);
    }
    CommandQueue.Get();  // Remove command from mailbox queue

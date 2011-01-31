@@ -155,10 +155,17 @@ public:
         interface proxy at the server process.
         clientID designates which network proxy client should execute a command
         and commandID represents which function proxy object should be called. */
-    bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID, const mtsBlockingType blocking);
-    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument, const mtsBlockingType blocking);
-    bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID, mtsGenericObject & argument);
-    bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut);
+    bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID,
+                                const mtsBlockingType blocking, mtsExecutionResult & executionResult);
+    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                           const mtsBlockingType blocking, mtsExecutionResult & executionResult,
+                                           const mtsGenericObject & argument);
+    bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                          mtsExecutionResult & executionResult,
+                                          mtsGenericObject & argument);
+    bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                   mtsExecutionResult & executionResult,
+                                                   const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut);
 
     //-------------------------------------------------------------------------
     //  Getters

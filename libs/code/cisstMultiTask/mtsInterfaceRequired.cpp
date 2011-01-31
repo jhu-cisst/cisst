@@ -388,7 +388,6 @@ bool mtsInterfaceRequired::AddSystemEventHandlers(void)
 
 void mtsInterfaceRequired::BlockingCommandVoidExecutedHandler(void)
 {
-    std::cout << "---- blocking callback" << std::endl; 
     this->ThreadSignalForBlockingCommands.Raise();
 }
 

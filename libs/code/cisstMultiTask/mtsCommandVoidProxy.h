@@ -55,11 +55,13 @@ public:
 
     /*! Execute void command */
     mtsExecutionResult Execute(mtsBlockingType blocking) {
-        if (IsDisabled()) return mtsExecutionResult::COMMAND_DISABLED;
-
+        if (IsDisabled()) {
+            return mtsExecutionResult::COMMAND_DISABLED;
+        }
+        mtsExecutionResult result;
         if (NetworkProxyServer) {
             // Command void execution: client (request) -> server (execution)
-            if (!NetworkProxyServer->SendExecuteCommandVoid(ClientID, CommandID, blocking)) {
+            if (!NetworkProxyServer->SendExecuteCommandVoid(ClientID, CommandID, blocking, result)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         } else {
@@ -68,8 +70,7 @@ public:
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
-
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+        return result;
     }
 
     /*! Generate human readable description of this object */

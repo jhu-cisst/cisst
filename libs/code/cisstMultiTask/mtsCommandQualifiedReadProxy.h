@@ -90,14 +90,14 @@ public:
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
-
+        mtsExecutionResult result;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID, argument1, argument2)) {
+            if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID,
+                                                                               result, argument1, argument2)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
-
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+        return result;
     }
 
     /*! Generate human readable description of this object */

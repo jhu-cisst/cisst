@@ -63,9 +63,7 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
 {
     mtsExecutionResult result;
     result = Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
-    std::cout << "---- result: " << result << std::endl;
     if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-        std::cout << "---- blocking" << std::endl;
         ThreadSignal->Wait();
         return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
