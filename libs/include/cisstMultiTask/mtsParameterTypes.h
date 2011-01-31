@@ -122,16 +122,17 @@ public:
     ConnectionIDType ConnectionID;
 #endif
 
-    mtsDescriptionConnection() : ConnectionID(0) {}
+    mtsDescriptionConnection() : ConnectionID(InvalidConnectionID) {}
     mtsDescriptionConnection(const mtsDescriptionConnection &other);
     mtsDescriptionConnection(
         const std::string & clientProcessName, 
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, 
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const ConnectionIDType connectionId = 0);
+        const ConnectionIDType connectionId = InvalidConnectionID);
     ~mtsDescriptionConnection() {}
 
+    void Init(void);
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);

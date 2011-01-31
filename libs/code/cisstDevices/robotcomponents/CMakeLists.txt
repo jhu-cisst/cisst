@@ -1,4 +1,5 @@
 
+# those will eventuall be removed
 option( CISST_DEV_HAS_ODE "Use support for ODE." OFF )
 option( CISST_DEV_HAS_GLUT "Use support for GLUT." OFF )
 
@@ -84,6 +85,7 @@ find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
 
 if( OPENSCENEGRAPH_FOUND )
 
+  set( CISST_HAS_OSG ON PARENT_SCOPE )
   SET( 
     HEADER_FILES 
     ${HEADER_FILES} 
@@ -110,6 +112,7 @@ if( OPENSCENEGRAPH_FOUND )
   find_package( ODE )
   if( ODE_FOUND )
 
+    set( CISST_HAS_ODE ON PARENT_SCOPE )
     set( CMAKE_CXX_FLAGS 
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
       PARENT_SCOPE )
@@ -122,7 +125,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEBody.h
       robotcomponents/ode/devODEJoint.h
       robotcomponents/ode/devODEServoMotor.h
-      #      robotcomponents/ode/devODEManipulator.h
+      robotcomponents/ode/devODEManipulator.h
       
       #      robotcomponents/ode/devODEBH.h
       #      robotcomponents/ode/devODEBHF1.h
@@ -139,7 +142,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEBody.cpp
       robotcomponents/ode/devODEJoint.cpp
       robotcomponents/ode/devODEServoMotor.cpp
-      #      robotcomponents/ode/devODEManipulator.cpp
+      robotcomponents/ode/devODEManipulator.cpp
       
       #      robotcomponents/ode/devODEBH.cpp
       #      robotcomponents/ode/devODEBHF1.cpp

@@ -85,7 +85,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     CommandsInternal.SetOwner(*this);
 
     // add system events
-    AddSystemEvents();
+    // AddSystemEvents();
 }
 
 
@@ -124,7 +124,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     CommandsInternal.SetOwner(*this);
 
     // add system events
-    AddSystemEvents();
+    // AddSystemEvents();
 
     // duplicate what needs to be duplicated (i.e. void and write
     // commands)

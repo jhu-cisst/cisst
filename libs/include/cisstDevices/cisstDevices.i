@@ -72,3 +72,42 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "cisstDevices/devKeyboard.h"
 
+#if CISST_DEV_HAS_ROBOTCOMPONENTS
+
+  #if CISST_HAS_OSG 
+    %header %{
+      #include <cisstVector/vctTransformationTypes.h>
+      #include <cisstDevices/devPython.h>
+
+      #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+      #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
+      #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
+    %}
+
+    %include "cisstDevices/robotcomponents/devRobotComponent.h"
+
+    %include "cisstDevices/robotcomponents/osg/devOSGWorld.h"
+    %include "cisstDevices/robotcomponents/osg/devOSGCamera.h"
+    %include "cisstDevices/robotcomponents/osg/devOSGBody.h"
+  
+    #if CISST_HAS_ODE
+      %header %{
+        #include <cisstVector/vctTransformationTypes.h>
+        #include <cisstDevices/devPython.h>
+
+        #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+        #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
+        #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
+
+        #include <cisstDevices/robotcomponents/ode/devODEWorld.h>
+        #include <cisstDevices/robotcomponents/ode/devODEBody.h>
+     %}
+
+      %include "cisstDevices/robotcomponents/ode/devODEWorld.h"
+      %include "cisstDevices/robotcomponents/ode/devODEBody.h"
+
+    #endif
+
+  #endif
+
+#endif

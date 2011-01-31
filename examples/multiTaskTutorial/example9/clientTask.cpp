@@ -96,8 +96,9 @@ void clientTask<_dataType>::Run(void)
         Fl::lock();
         {
             if (UI.VoidRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested" << std::endl;
-                this->VoidServer();
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested, returned \""
+                                          << this->VoidServer()
+                                          << "\"" << std::endl;
                 // Blocking command causes deadlock in single process (local)
                 // configuration due to fltkMutex.
                 //this->VoidServer.ExecuteBlocking();
@@ -105,8 +106,9 @@ void clientTask<_dataType>::Run(void)
             }
 
             if (UI.WriteRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteRequested" << std::endl;
-                this->WriteServer(_dataType(UI.WriteValue->value()));
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteRequested, returned \""
+                                          << this->WriteServer(_dataType(UI.WriteValue->value()))
+                                          << "\"" << std::endl;
                 // Blocking command causes deadlock in single process (local)
                 // configuration due to fltkMutex.
                 //this->WriteServer.ExecuteBlocking(_dataType(UI.WriteValue->value()));
@@ -114,17 +116,19 @@ void clientTask<_dataType>::Run(void)
             }
 
             if (UI.ReadRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: ReadRequested" << std::endl;
                 _dataType data;
-                this->ReadServer(data);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: ReadRequested, returned \""
+                                          << this->ReadServer(data)
+                                          << "\"" << std::endl;
                 UI.ReadValue->value((double)data);
                 UI.ReadRequested = false;
             }
 
             if (UI.QualifiedReadRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedReadRequested" << std::endl;
                 _dataType data;
-                this->QualifiedReadServer(_dataType(UI.WriteValue->value()), data);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedReadRequested, returned \""
+                                          << this->QualifiedReadServer(_dataType(UI.WriteValue->value()), data)
+                                          << "\"" << std::endl;
                 UI.QualifiedReadValue->value(data);
                 UI.QualifiedReadRequested = false;
             }

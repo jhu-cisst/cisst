@@ -1,6 +1,7 @@
 #include <osg/ref_ptr>
 #include <osg/View>
 #include <osgDB/WriteFile>
+#include <osgGA/TrackballManipulator>
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 
@@ -38,13 +39,21 @@ devOSGCamera::devOSGCamera( const std::string& name,
 			    int x, int y, int width, int height,
 			    double fovy, double aspectRatio,
 			    double zNear, double zFar,
-			    const std::string& fnname ) :
+			    const std::string& fnname,
+			    bool trackball ) :
   mtsTaskContinuous( name ),
   osgViewer::Viewer(),                 // viewer
   x( x ),                              // x position
   y( y ),                              // y position
   width( width ),                      // width of images
-  height( height ){                    // height of images
+  height( height )
+#ifdef CISST_STEREOVISION
+  ,colorbuffersample( NULL ),
+  colorsample( NULL ),
+  depthbuffersample( NULL ),
+  depthsample( NULL )
+#endif
+{                    // height of images
 
   osg::ref_ptr< osg::Camera > camera = getCamera();
 
@@ -85,6 +94,20 @@ devOSGCamera::devOSGCamera( const std::string& name,
 
   }
 
+  if( trackball ){
+    // Add+configure the trackball of the camera
+    setCameraManipulator( new osgGA::TrackballManipulator );
+    getCameraManipulator()->setHomePosition( osg::Vec3d( 1,0,1 ),
+					     osg::Vec3d( 0,0,0 ),
+					     osg::Vec3d( 0,0,1 ) );
+    home();
+    
+    // add a bit more light
+    osg::ref_ptr<osg::Light> light = new osg::Light;
+    light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
+    setLight( light );
+  }
+
 }
 
 devOSGCamera::~devOSGCamera(){
@@ -95,6 +118,47 @@ void devOSGCamera::Configure( const std::string& CMN_UNUSED( argv ) ) {}
 void devOSGCamera::Startup(){
   // The window must be created in the same thread as frame()
   setUpViewInWindow( x, y, width, height );
+  /*
+#ifdef CISST_STEREOVISION
+  // SVL stuff
+  int retval;
+
+  // Create the buffer for the (left) depth image
+  depthbuffersample = new svlBufferSample( svlTypeMatrixFloat );
+  depthsample       = new svlSampleMatrixFloat( false );
+
+  // attach the callback matrices to the sample
+  retval = depthsample->SetMatrix( finaldrawcallbacks[0]->GetDepthImage() );
+  if( retval != SVL_OK ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to set matrix for left depth image."
+		      << std::endl;
+  }
+
+  // push the sample in the buffer
+  depthbuffersample->Push( depthsample );
+
+  // Create the buffer for the RGB images
+  colorbuffersample = new svlBufferSample( svlTypeImageRGB );
+  colorsample       = new svlSampleImageRGB( false );
+
+  // attach the callback matrices to the sample
+  retval = colorsample->SetMatrix( finaldrawcallbacks->GetColorImage(), 0 );
+  if( retval != SVL_OK){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			   << "Failed to set matrix for left color image."
+			   << std::endl;
+  }
+  retval = colorsample->SetMatrix( finaldrawcallbacks[1]->GetColorImage(), 1 );
+  if( retval != SVL_OK){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			   << "Failed to set matrix for right color image."
+			   << std::endl;
+  }
+
+  colorbuffersample->Push( colorsample );
+#endif
+  */
 }
 
 void devOSGCamera::Run(){

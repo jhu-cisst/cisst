@@ -115,6 +115,8 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_YES                                 1
 #define SVL_NO                                  0
 
+#define SVL_EOF                                -2
+
 #define SVL_SYNC_ERROR                         -1
 #define SVL_SYNC_OK                             0
 #define SVL_SYNC_TIMEOUT                        1

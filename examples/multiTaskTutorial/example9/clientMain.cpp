@@ -84,8 +84,9 @@ int main(int argc, char * argv[])
         client = new clientTask<double>("Client", PeriodClient);
     }
 
+    client->Configure();
     componentManager->AddComponent(client);
-
+    
     // Connect the tasks across networks
     if (!componentManager->Connect("ProcessClient", "Client", "Required", "ProcessServer", "Server", "Provided")) {
         CMN_LOG_INIT_ERROR << "Connect failed" << std::endl;

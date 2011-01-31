@@ -23,50 +23,143 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFile.h>
 
 
-svlFile::svlFile()
+svlFile::svlFile() :
+    Stream(0),
+    Opened(false),
+    Length(0)
 {
 }
 
-svlFile::svlFile(const std::string& filepath, const OpenMode mode)
+svlFile::svlFile(const svlFile& CMN_UNUSED(file)) :
+    Stream(0),
+    Opened(false),
+    Length(0)
 {
+    // Will do only as much as the standard constructor
+}
+
+svlFile::svlFile(const std::string& filepath, const OpenMode mode) :
+    Stream(0),
+    Opened(false),
+    Length(0)
+{
+    Open(filepath, mode);
 }
 
 svlFile::~svlFile()
 {
+    Close();
+    delete Stream;
 }
 
-bool svlFile::Open(const std::string& filepath, const OpenMode mode)
+int svlFile::Open(const std::string& filepath, const OpenMode mode)
 {
-    return false;
+    if (Opened) return SVL_FAIL;
+
+    Mode = mode;
+    std::ios_base::openmode iosmode = (Mode == R) ?
+                                        std::ios_base::in  | std::ios_base::binary :
+                                        std::ios_base::out | std::ios_base::binary | std::ios_base::trunc;
+    Stream = new std::fstream(filepath.c_str(), iosmode);
+    if (Stream && Stream->fail() == false) Opened = true;
+
+    if (Opened && Mode == R) {
+        Seek(-1);
+        Length = GetPos();
+        Seek(0);
+    }
+
+    return (Opened ? SVL_OK : SVL_FAIL);
 }
 
-bool svlFile::Close()
+int svlFile::Close()
 {
-    return false;
+    if (!Opened) return SVL_FAIL;
+
+    Stream->close();
+
+    return SVL_OK;
 }
 
 bool svlFile::IsOpen()
 {
-    return false;
+    return Opened;
 }
 
 long long int svlFile::Read(char* buffer, const long long int length)
 {
-    return -1;
+    if (!Opened || Mode != R) return -1;
+
+    Stream->read(buffer, length);
+
+    if (Stream->fail()) {
+        if (Stream->eof()) Stream->clear();
+        else return -1;
+    }
+    return Stream->gcount();
 }
 
 long long int svlFile::Write(const char* buffer, const long long int length)
 {
-    return -1;
+    if (!Opened || Mode != W) return -1;
+
+    long long int pos = GetPos();
+
+    Stream->write(buffer, length);
+
+    if (Stream->bad()) return -1;
+    return (GetPos() - pos);
+}
+
+long long int svlFile::GetLength()
+{
+    if (!Opened) return -1;
+
+    if (Mode == R) return Length;
+
+    long long int oripos, endpos;
+
+    oripos = GetPos();
+    if (oripos < 0) return -1;
+
+    Seek(-1);
+    endpos = GetPos();
+    Seek(oripos);
+
+    return endpos;
 }
 
 long long int svlFile::GetPos()
 {
-    return -1;
+    if (!Opened) return -1;
+
+    long long int pos;
+
+    if (Mode == R) pos = Stream->tellg();
+    else pos = Stream->tellp();
+
+    return pos;
 }
 
-bool svlFile::Seek(const long long int abspos)
+int svlFile::Seek(const long long int abspos)
 {
-    return false;
+    if (!Opened) return SVL_FAIL;
+
+    if (abspos >= 0) {
+        if (Mode == R) Stream->seekg(abspos, std::ios::beg);
+        else Stream->seekp(abspos, std::ios::beg);
+
+        if (Stream->eof()) {
+            Stream->clear();
+            return SVL_EOF;
+        }
+    }
+    else {
+        if (Mode == R) Stream->seekg(0, std::ios::end);
+        else Stream->seekp(0, std::ios::end);
+    }
+
+    if (Stream->fail() || Stream->bad()) return SVL_FAIL;
+    return SVL_OK;
 }
 

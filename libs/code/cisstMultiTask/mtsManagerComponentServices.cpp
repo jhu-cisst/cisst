@@ -117,11 +117,6 @@ bool mtsManagerComponentServices::Connect(
     const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
 {
-    if (!ServiceComponentManagement.Connect.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
-        return false;
-    }
-
     mtsDescriptionConnection arg;
     arg.Client.ProcessName   = clientProcessName;
     arg.Client.ComponentName = clientComponentName;
@@ -129,17 +124,25 @@ bool mtsManagerComponentServices::Connect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = -1;  // not yet assigned
 
     return Connect(arg);
 }
 
 bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & connection) const
 {
-    // MJ: TODO: change this with blocking command
-    ServiceComponentManagement.Connect(connection);
+    if (!ServiceComponentManagement.Connect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << connection << std::endl;
+    // Make a copy because the parameter is const
+    mtsDescriptionConnection conn(connection);
+    conn.ConnectionID = InvalidConnectionID;
+
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Connect(conn);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << conn << std::endl;
 
     return true;
 }
@@ -171,7 +174,7 @@ bool mtsManagerComponentServices::Disconnect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = -1;  // not needed
+    arg.ConnectionID = InvalidConnectionID;  // not needed
 
     return Disconnect(arg);
 }
@@ -184,6 +187,12 @@ bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & co
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: requested component disconnection: " << connection << std::endl;
 
     return true;
+}
+
+bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) const
+{
+    // PK TEMP
+    return mtsManagerLocal::GetInstance()->Disconnect(connectionID);
 }
 
 bool mtsManagerComponentServices::ComponentStart(const std::string & componentName, const double delayInSecond) const

@@ -148,7 +148,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     gamma.SetGamma(0.0);
 
     // setup splitter
-    splitter.AddOutput("output2", 8, 200);
+    splitter.AddOutput("output2", 8);
     svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup writer

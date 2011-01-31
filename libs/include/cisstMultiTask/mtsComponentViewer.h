@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-07
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -51,26 +51,36 @@ protected:
 
     osaPipeExec UDrawPipe;
     bool UDrawPipeConnected;
+    std::string UDrawResponse;
+    bool ShowProxies;
+
+    bool ConnectionStarted;
+    mtsDescriptionConnection ConnectionRequest;
 
     // Use a separate reader thread because osaPipeExec::Read is blocking.
     // This could be eliminated if a non-blocking Read is implemented.
     osaThread ReaderThread;
+    osaThreadSignal ReadyToRead;
     void *ReadFromUDrawGraph(int);
     bool ReaderThreadFinished;
     bool WaitingForResponse;
-    bool WaitForResponse(double timeoutInSec = 0.1) const;
+    static void ParseArgs(const std::string &input, std::string &arg1, std::string &arg2);
+    static bool ParseProcessAndComponent(const std::string &input, std::string &processName,
+                                         std::string &componentName);
+    void ProcessResponse(void);
 
-    bool RedrawGraph; // PK TEMP: use provided interface instead
-
-    bool IsProxyComponent(const std::string & componentName) const;
     bool ConnectToUDrawGraph(void);
 
     void SendAllInfo(void);
+    void ActivateMenuItems(void);
 
     std::string GetComponentInGraphFormat(const std::string & processName, const std::string & componentName) const;
     std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName,
                                                const mtsComponentState & componentState) const;
     std::string GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const;
+
+    enum BorderType { BORDER_NONE, BORDER_SINGLE, BORDER_DOUBLE };
+    void ChangeComponentBorder(const std::string &processName, const std::string &componentName, BorderType border);
 
     // Event Handlers
     void AddComponentHandler(const mtsDescriptionComponent &componentInfo);

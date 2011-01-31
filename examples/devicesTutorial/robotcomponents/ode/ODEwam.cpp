@@ -62,15 +62,15 @@ int main(){
   // add the camera task
   taskManager->AddComponent( camera );
 
-  std::string path("libs/etc/cisstRobot/WAM/");
+  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
-  models.push_back( path+"l1.obj" );
-  models.push_back( path+"l2.obj" );
-  models.push_back( path+"l3.obj" );
-  models.push_back( path+"l4.obj" );
-  models.push_back( path+"l5.obj" );
-  models.push_back( path+"l6.obj" );
-  models.push_back( path+"l7.obj" );
+  models.push_back( path+"l1.3ds" );
+  models.push_back( path+"l2.3ds" );
+  models.push_back( path+"l3.3ds" );
+  models.push_back( path+"l4.3ds" );
+  models.push_back( path+"l5.3ds" );
+  models.push_back( path+"l6.3ds" );
+  models.push_back( path+"l7.3ds" );
 
   vctDynamicVector<double> qinit(7, 0.0);
   devODEManipulator* WAM = new devODEManipulator( "WAM",
@@ -83,7 +83,7 @@ int main(){
 						  vctFrame4x4<double>(),
 						  qinit,
 						  models,
-						  path+"l0.obj" );
+						  path+"l0.3ds" );
   taskManager->AddComponent( WAM );
 
   Trajectory trajectory;

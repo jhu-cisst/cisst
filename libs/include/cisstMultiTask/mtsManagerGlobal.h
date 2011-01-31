@@ -306,6 +306,8 @@ public:
 
     bool Disconnect(const ConnectionIDType connectionID);
 
+    bool Disconnect(const mtsDescriptionConnection & connection);
+
     bool Disconnect(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);

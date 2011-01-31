@@ -368,7 +368,7 @@ ConnectionIDType mtsManagerGlobal::GetConnectionID(const std::string & clientPro
         }
     }
 
-    return 0;
+    return InvalidConnectionID;
 }
 
 bool mtsManagerGlobal::IsAlreadyConnected(const mtsDescriptionConnection & description) const
@@ -408,6 +408,9 @@ bool mtsManagerGlobal::IsAlreadyConnected(const mtsDescriptionConnection & descr
         return false;
     } else {
         ConnectionIDType connectionID = GetConnectionID(clientProcessName, clientComponentName, clientInterfaceName);
+        if (connectionID == InvalidConnectionID) {
+            return false;
+        }
 
         ConnectionIDListType::const_iterator it = list->begin();
         const ConnectionIDListType::const_iterator itEnd = list->end();
@@ -1523,9 +1526,9 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     if (ConnectionID + 1 == InvalidConnectionID) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: connection id approached its upper limit: " << InvalidConnectionID << std::endl;
         return InvalidConnectionID;
+    } else {
+        ++ConnectionID;
     }
-
-    ++ConnectionID;
 
     // Send connection event to ManagerComponentServer
     if (ManagerComponentServer) {
@@ -1975,6 +1978,32 @@ void mtsManagerGlobal::DisconnectInternal(void)
     ShowInternalStructure();
 }
 
+bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
+                                  const std::string & clientInterfaceRequiredName,
+                                  const std::string & serverProcessName, const std::string & serverComponentName,
+                                  const std::string & serverInterfaceProvidedName)
+{
+    ConnectionIDType id = GetConnectionID(clientProcessName, clientComponentName, clientInterfaceRequiredName);
+    if (id == InvalidConnectionID) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: no connection id found for "
+            << "\"" << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << "\" - "
+            << "\"" << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl;
+        return false;
+    }
+
+    return Disconnect(id);
+}
+
+bool mtsManagerGlobal::Disconnect(const mtsDescriptionConnection &connection)
+{
+    if (connection.ConnectionID == InvalidConnectionID) {
+        return Disconnect(connection.Client.ProcessName, connection.Client.ComponentName, connection.Client.InterfaceName,
+                          connection.Server.ProcessName, connection.Server.ComponentName, connection.Server.InterfaceName);
+    } else {
+        return Disconnect(connection.ConnectionID);
+    }
+}
+
 bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
 {
     DisconnectQueueType::const_iterator it1 = QueueDisconnectWaiting.find(connectionID);
@@ -2001,22 +2030,6 @@ bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
         << " ] to disconnect waiting queue" << std::endl;
 
     return true;
-}
-
-bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
-                                  const std::string & clientInterfaceRequiredName,
-                                  const std::string & serverProcessName, const std::string & serverComponentName,
-                                  const std::string & serverInterfaceProvidedName)
-{
-    ConnectionIDType id = GetConnectionID(clientProcessName, clientComponentName, clientInterfaceRequiredName);
-    if (id == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: no connection id found for "
-            << "\"" << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << "\" - "
-            << "\"" << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl;
-        return false;
-    }
-
-    return Disconnect(id);
 }
 
 //-------------------------------------------------------------------------

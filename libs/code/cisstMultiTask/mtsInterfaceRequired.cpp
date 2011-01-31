@@ -62,7 +62,7 @@ mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
     EventReceiversWrite.SetOwner(*this);
     EventHandlersVoid.SetOwner(*this);
     EventHandlersWrite.SetOwner(*this);
-    AddSystemEventHandlers();
+    //AddSystemEventHandlers();
 }
 
 
@@ -882,7 +882,7 @@ void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & require
     cmnSerializer serializer(streamBuffer);
 
     // Extract "IsRequired" attribute
-    requiredInterfaceDescription.IsRequired = IsRequired();
+    requiredInterfaceDescription.IsRequired = (IsRequired() == MTS_REQUIRED);
 
     // Extract void functions
     requiredInterfaceDescription.FunctionVoidNames = GetNamesOfFunctionsVoid();

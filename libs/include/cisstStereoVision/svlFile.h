@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class svlFile
 {
+public:
     enum OpenMode {
         R = 1,
         W = 2
@@ -35,21 +36,26 @@ class svlFile
 
 public:
     svlFile();
+    svlFile(const svlFile& file);
     svlFile(const std::string& filepath, const OpenMode mode = R);
     virtual ~svlFile();
 
-    virtual bool Open(const std::string& filepath, const OpenMode mode = R);
-    virtual bool Close();
+    virtual int Open(const std::string& filepath, const OpenMode mode = R);
+    virtual int Close();
     virtual bool IsOpen();
 
     virtual long long int Read(char* buffer, const long long int length);
     virtual long long int Write(const char* buffer, const long long int length);
 
+    virtual long long int GetLength();
     virtual long long int GetPos();
-    virtual bool Seek(const long long int abspos);
+    virtual int Seek(const long long int abspos);
 
-protected:
-    svlFile(const svlFile& file);
+private:
+    std::fstream *Stream;
+    OpenMode      Mode;
+    bool          Opened;
+    long long int Length;
 };
 
 #endif // _svlFile_h

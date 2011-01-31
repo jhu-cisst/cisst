@@ -88,6 +88,17 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 
  public:
 
+  
+  //! Main constructor
+  /**
+     This create an ODE body that can be inserted in an ODE world. This body
+     does not have mass such that it cannot be moved (static object).
+     \param name The name of the body
+     \param Rtwb The position/orientation of the body
+     \param model The file name of the body's geometry
+     \param odeWorld The world the body belongs to
+     \param spaceid The space the body belongs to
+  */
   devODEBody( const std::string& name,
 	      const vctFrame4x4<double>& Rtwb,
 	      const std::string& model,
@@ -96,16 +107,16 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 
   //! Main constructor
   /**
-     This create an ODE body that can be inserted in an ODE world.
-     \param worldID The ID of the world used by the body
-     \param spaceID The ID of the space used by the body
-     \param Rt The position and orientation of the body wrt to the world frame
+     This create an ODE body that can be inserted in an ODE world. This body 
+     has a mass such that it can be moved.
+     \param name The name of the body
+     \param Rtwb The position/orientation of the body
+     \param model The file name of the body's geometry
+     \param odeWorld The world the body belongs to
      \param m The mass of the body
-     \param com The center of mass of the body wrt to the body's coordinate 
-                frame
-     \param moit The moment of inertia tensor of the body about the COM
-                 center of mass
-     \param geomfile The name of the Wavefront file used by the body
+     \param com The center of mass of the body
+     \param moit The moment of inertia tensor
+     \param spaceid The space the body belongs to
   */
   devODEBody( const std::string& name,
 	      const vctFrame4x4<double>& Rt,
@@ -116,6 +127,37 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 	      const vctFixedSizeMatrix<double,3,3>& moit,
 	      dSpaceID spaceid );
 
+  //! Constructor
+  /**
+     This create an ODE body that can be inserted in an ODE world. This body
+     does not have mass such that it cannot be moved (static object). The space
+     ID is defined to the world's space.
+     \param name The name of the body
+     \param Rtwb The position/orientation of the body
+     \param model The file name of the body's geometry
+     \param odeWorld The world the body belongs to
+  */
+  devODEBody( const std::string& name,
+	      const vctFrm3& Rt,
+	      const std::string& model,
+	      devODEWorld* odeWorld );
+
+  //! Main constructor
+  /**
+     This create an ODE body that can be inserted in an ODE world. This body 
+     has a mass such that it can be moved. The center of mass is set to zero
+     and the tensor to identity and space ID set to the world's space.
+     \param name The name of the body
+     \param Rtwb The position/orientation of the body
+     \param model The file name of the body's geometry
+     \param odeWorld The world the body belongs to
+     \param m The mass of the body
+  */
+  devODEBody( const std::string& name,
+	      const vctFrm3& Rt,
+	      const std::string& model,
+	      devODEWorld* world, 
+	      double m );
 
   //! Default destructor
   ~devODEBody();

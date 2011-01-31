@@ -163,6 +163,17 @@ mtsDescriptionConnection::mtsDescriptionConnection(
     ConnectionID         = connectionId;
 }
 
+void mtsDescriptionConnection::Init(void)
+{
+    Client.ProcessName.clear();
+    Client.ComponentName.clear();
+    Client.InterfaceName.clear();
+    Server.ProcessName.clear();
+    Server.ComponentName.clear();
+    Server.InterfaceName.clear();
+    ConnectionID = InvalidConnectionID;
+}
+
 void mtsDescriptionConnection::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
