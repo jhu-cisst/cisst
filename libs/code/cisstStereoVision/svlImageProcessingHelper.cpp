@@ -1457,6 +1457,550 @@ labError:
     return false;
 }
 
+/**************************************************************************************************
+* SetFromCameraCalibration					
+*	Generates the lookup table from the same parameters as the Maltab function rectindex.m	
+*
+* Input:
+*	height	unsigned int					- pixel height of the image
+*	width	unsigned int					- pixel width of the image
+*	R		vct3x3							- rotation matrix
+*	f		vct2							- is the focal length
+*	c		vct2							- is the camera center
+*	k		vctFixedSizeVector<double,5>	- distortion coefficents
+*	alpha:	double							- skew
+*	KK_new	vct3x3							- camera model of the target camera
+*	videoch	unsigned int					- the video channal for which this table is going to be used.
+*	
+* Output:
+*	bool									- true for success, false otherwise
+*
+***********************************************************************************************************/
+bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,5> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+{
+
+	//==============Setup, Variables==============//
+    Release();
+	bool debug = false;
+
+    const unsigned int maxwidth = 1920;
+    const unsigned int maxheight = 1200;
+    const unsigned int size = maxwidth * maxheight;
+    int valcnt, i;
+
+	vctDynamicMatrixRef<double> mx,my,KK_new_inv,R_ref;
+	vctDynamicVectorRef<double> rays1,rays2,rays3,rows,cols,x1,x2;
+	vctVec px,py,ones_rows,ones_cols,px2,py2,px_0,py_0,alpha_x,alpha_y,alpha_x_neg,alpha_y_neg,a1,a2,a3,a4,ind_1,ind_2,ind_3,ind_4,ind_new,px2_good,py2_good,px_0_good,py_0_good,px_good,py_good;
+	vctMat rays,x,xd;
+	vctDynamicVector<vctVec::index_type> good_points;
+	std::vector<vctVec::index_type> good_points_temp;
+
+	if(debug){
+		printf("=========svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration: parameters ==========\n");
+		printf("width: %d height: %d f:(%8.8lf,%8.8lf) c:(%8.8lf,%8.8lf) alpha:%8.8lf KK_new([%8.8lf,%8.8lf,%8.8lf,%8.8lf,%8.8lf,%8.8lf,%8.8lf,%8.8lf,%8.8lf], channel:%d\n",
+			width,height,f(0),f(1),c(0),c(1), alpha, KK_new.at(0,0),KK_new.at(0,1),KK_new.at(0,2),KK_new.at(1,0),KK_new.at(1,1),KK_new.at(1,2),KK_new.at(2,0),KK_new.at(2,1),KK_new.at(2,2),videoch);
+	}
+	px.SetSize(height*width);
+	py.SetSize(height*width);
+
+	//double check strides
+	mx.SetRef(height,width,width,1,px.Pointer());
+	my.SetRef(height,width,width,1,py.Pointer());
+
+	ones_rows.SetSize(height);
+	ones_rows.SetAll(1.0);
+
+	ones_cols.SetSize(width);
+	ones_cols.SetAll(1.0);
+
+	//double check strides
+	rows.SetRef(height,mx.Pointer());
+	cols.SetRef(width,my.Pointer());
+	
+	for(unsigned int i = 0; i < height || i < width;i++){
+		if(i < height)
+			rows(i) = i;
+		if(i < width)
+			cols(i) = i;
+	}
+
+
+	mx.OuterProductOf(ones_rows,cols);
+	my.OuterProductOf(rows,ones_cols);
+
+
+	rays.SetSize(3,height*width);
+
+	//double check strides
+    rays1.SetRef(rays.Row(0).size(),rays.Row(0).Pointer(),rays.Row(0).stride());
+    rays2.SetRef(rays.Row(1).size(),rays.Row(1).Pointer(),rays.Row(1).stride());
+    rays3.SetRef(rays.Row(2).size(),rays.Row(2).Pointer(),rays.Row(2).stride());
+
+	rays1.Assign(px);
+	rays2.Assign(py);
+	rays3.SetAll(1.0);
+
+	vct3x3 KK_new_inverse;
+	KK_new_inverse.SetAll(0.0);
+    //need cisst netlib
+    //KK_new_inverse.Assign(KK_new);
+    //nmrInverse(KK_new_inverse);
+
+	if(KK_new.at(0,0) == 0.0)
+	{
+		KK_new_inverse.at(0,0) = 0;
+	}else{
+		KK_new_inverse.at(0,0) = 1/KK_new.at(0,0);
+	}
+	if(KK_new.at(1,1) == 0.0)
+	{
+		KK_new_inverse.at(1,1) = 0;
+	}else{
+		KK_new_inverse.at(1,1) = 1/KK_new.at(1,1);
+	}
+    KK_new_inverse.at(2,2) = 1;
+	if(KK_new.at(0,2) == 0.0)
+	{
+		KK_new_inverse.at(0,2) = 0;
+	}else{
+		KK_new_inverse.at(0,2) = (-1/KK_new.at(0,0)) * KK_new.at(0,2);
+	} 
+	if(KK_new.at(1,2) == 0.0)
+	{
+		KK_new_inverse.at(1,2) = 0;
+	}else{
+		KK_new_inverse.at(1,2) = (-1/KK_new.at(1,1)) * KK_new.at(1,2);;
+	}
+
+	KK_new_inv.SetRef(KK_new_inverse);
+
+	rays.Assign(KK_new_inv*rays);
+
+	R_ref.SetRef(R);
+
+	rays.Assign(R_ref.TransposeRef()*rays);
+
+	x.SetSize(2,height*width);
+
+	//Double Check strides
+    x1.SetRef(x.Row(0).size(),x.Row(0).Pointer(),x.Row(0).stride());
+    x2.SetRef(x.Row(1).size(),x.Row(1).Pointer(),x.Row(1).stride());
+
+	x1.Assign(rays1.ElementwiseDivide(rays3));
+	x2.Assign(rays2.ElementwiseDivide(rays3));
+
+	//==============Distortion calculation==============//
+#pragma region DISTORTION
+
+	vctVec r2, r4, r6, kr2, kr4, kr6, x1squared, x2squared,cdist, ones2x1, a1tangential, a1tangential2, a2tangential, a3tangential, deltaX1, deltaX2;
+
+	vctMat xdtemp;
+
+	xdtemp.SetSize(2,height*width);
+
+	r2.SetSize(x1.size());
+	r4.SetSize(x1.size());
+	r6.SetSize(x1.size());
+	kr2.SetSize(x1.size());
+	kr4.SetSize(x1.size());
+	kr6.SetSize(x1.size());
+	x1squared.SetSize(x1.size());
+	x2squared.SetSize(x2.size());
+	cdist.SetSize(x1.size());
+	a1tangential.SetSize(x1.size());
+	a1tangential2.SetSize(x1.size());
+	a2tangential.SetSize(x1.size());
+	a3tangential.SetSize(x1.size());
+	deltaX1.SetSize(x1.size());
+	deltaX2.SetSize(x1.size());
+
+	//% Add distortion
+	//r2 = x(1,:).^2 + x(2,:).^2;
+	x1squared.Assign(x1);
+	x1squared.ElementwiseMultiply(x1);
+
+	x2squared.Assign(x2);
+	x2squared.ElementwiseMultiply(x2);
+
+	r2.Assign(x1squared);
+	r2.Add(x2squared);
+
+	//r4 = r2.^2;
+	r4.Assign(r2);
+	r4.ElementwiseMultiply(r2);
+
+	//r6 = r2.^3;
+	r6.Assign(r2);
+	r6.ElementwiseMultiply(r2);
+	r6.ElementwiseMultiply(r2);
+
+	//% Radial distortion:
+	//cdist = 1 + k(1) * r2 + k(2) * r4 + k(5) * r6;
+	cdist.SetAll(1.0);
+	kr2.Assign(r2);
+	kr2.Multiply(k[0]);
+	kr4.Assign(r4);
+	kr4.Multiply(k[1]);
+	kr6.Assign(r6);
+	kr6.Multiply(k[4]);
+
+	cdist.Add(kr2 + kr4 + kr6);
+
+	ones2x1.SetSize(2);
+	ones2x1.SetAll(1.0);
+
+	//xd1 = x .* (ones(2,1)*cdist);
+	xdtemp.OuterProductOf(ones2x1,cdist);
+
+	//MOVE TO AFTER TANGENTIAL DISTORTION DUE TO TANGENTIAL DISTORTION'S DEPENDENCE ON ORIGINAL x for x1, x2
+	//xd1 = x .* (ones(2,1)*cdist);
+	//x.ElementwiseMultiply(xdtemp);
+
+	if(debug)
+	{
+		for(unsigned int i = 0; i < rays1.size();i++)
+		{
+			if(debug && (i<10 || i > rays1.size()-10))
+			{
+				printf("SetFromCameraCalibration after distortion at %d x1,x2 (%8.8lf,%8.8lf)\n",i,x1.at(i),x2.at(i));
+			}
+		}
+	}
+
+	//tangential distortion:
+	//a1 = 2.*x(1,:).*x(2,:);
+	a1tangential.SetAll(0.0);
+	a1tangential.Assign(x2);
+	a1tangential.ElementwiseMultiply(x1);
+	a1tangential.Multiply(2.0);
+	a1tangential2.SetAll(0.0);
+	a1tangential2.Assign(x2);
+	a1tangential2.ElementwiseMultiply(x1);
+	a1tangential2.Multiply(2.0);
+
+	//a2 = r2 + 2*x(1,:).^2;
+	a2tangential.SetAll(0.0);
+	a2tangential.Assign(x1);
+	a2tangential.ElementwiseMultiply(x1);
+	a2tangential.Multiply(2.0);
+	a2tangential.Add(r2);
+
+	//a3 = r2 + 2*x(2,:).^2;
+	a3tangential.SetAll(0.0);
+	a3tangential.Assign(x2);
+	a3tangential.ElementwiseMultiply(x2);
+	a3tangential.Multiply(2.0);
+	a3tangential.Add(r2);
+
+	//delta_x = [k(3)*a1 + k(4)*a2 ;
+	//		   k(3) * a3 + k(4)*a1];
+	deltaX1.Assign(a2tangential.Multiply(k[3]));
+	deltaX1.Add(a1tangential.Multiply(k[2]));
+	deltaX2.Assign(a1tangential2.Multiply(k[3]));
+
+	deltaX2.Add(a3tangential.Multiply(k[2]));
+
+	//MOVED FROM RADIAL DISTORTION
+	//xd1 = x .* (ones(2,1)*cdist);
+	x.ElementwiseMultiply(xdtemp);
+
+	//xd = xd1 + delta_x;
+	x1.Add(deltaX1);
+	x2.Add(deltaX2);
+
+#pragma endregion DISTORTION
+	//==============Distortion calculation==============//
+
+	px2.SetSize(x1.size());
+	py2.SetSize(x2.size());
+
+	//reconvert in pixels
+	//px2.Assign(x1.Add(x2.Multiply(alpha)).Multiply(f(0)).Add(c(0)));
+	px2.Assign(x2);
+	px2.Multiply(alpha);
+	px2.Add(x1);
+	px2.Multiply(f(0));
+	px2.Add(c(0));
+
+	py2.Assign(x2);
+	py2.Multiply(f(1));
+	py2.Add(c(1));
+
+	//Interpolate between the closest pixels:
+	px_0.SetSize(px2.size());
+	py_0.SetSize(py2.size());
+
+	px_0.Assign(px2);
+	py_0.Assign(py2);
+
+	px_0.FloorSelf();
+	py_0.FloorSelf();
+
+
+	//Create good_points
+	if(debug)
+		printf("SetFromCameraCalibration: Checking for good points\n");
+	for(unsigned int i = 0; i < px_0.size();i++)
+	{
+		if(debug && (i<10 || i > rays1.size()-10))
+		{
+			printf("SetFromCameraCalibration at %d x1,x2 (%8.8lf,%8.8lf)\n",i,x1.at(i),x2.at(i));
+			printf("SetFromCameraCalibration at %d px2,py2 (%8.8lf,%8.8lf)\n",i,px2.at(i),py2.at(i));
+			printf("SetFromCameraCalibration at %d px_0,py_0 (%8.8lf,%8.8lf)\n",i,px_0.at(i),py_0.at(i));
+		}
+		if((px_0.at(i) >= 0) && (px_0.at(i) <= (width-2)) && (py_0.at(i) >= 0) && (py_0.at(i) <= (height-2))){
+				good_points_temp.push_back(i);
+		}
+	}
+
+	good_points.SetSize(good_points_temp.size());
+
+	for(unsigned int i = 0; i < good_points.size();i++)
+	{
+		good_points[i] = good_points_temp[i];
+	}
+
+	if(debug)
+	{
+		printf("SetFromCameraCalibration computed %d good points\n", good_points.size());
+	}
+
+	//Use good_points
+	px2_good.SetSize(good_points.size());
+	py2_good.SetSize(good_points.size());
+	px_0_good.SetSize(good_points.size());
+	py_0_good.SetSize(good_points.size());
+
+	px2_good.SelectFrom(px2,good_points);
+	py2_good.SelectFrom(py2,good_points);
+
+	px_0_good.SelectFrom(px_0,good_points);
+	py_0_good.SelectFrom(py_0,good_points);
+
+
+	alpha_x.SetSize(px2_good.size());
+	alpha_y.SetSize(py2_good.size());
+
+	alpha_x_neg.SetSize(px2_good.size());
+	alpha_y_neg.SetSize(px2_good.size());
+
+	alpha_x.Assign(px2_good.Subtract(px_0_good));
+    alpha_y.Assign(py2_good.Subtract(py_0_good));
+
+	alpha_x_neg.Assign(alpha_x.Negation());
+	alpha_x_neg.Add(1);
+
+	alpha_y_neg.Assign(alpha_y.Negation());
+	alpha_y_neg.Add(1);
+
+	a1.SetSize(px2_good.size());
+	a2.SetSize(px2_good.size());
+	a3.SetSize(px2_good.size());
+	a4.SetSize(px2_good.size());
+
+	a1.Assign(alpha_y_neg);
+	a1.ElementwiseMultiply(alpha_x_neg);
+
+	a2.Assign(alpha_y_neg);
+	a2.ElementwiseMultiply(alpha_x);
+
+	a3.Assign(alpha_y);
+	a3.ElementwiseMultiply(alpha_x_neg);
+
+	a4.Assign(alpha_y);
+	a4.ElementwiseMultiply(alpha_x);
+
+	ind_1.SetSize(px2_good.size());
+	ind_2.SetSize(px2_good.size());
+	ind_3.SetSize(px2_good.size());
+	ind_4.SetSize(px2_good.size());
+
+	ind_1.Assign(px_0_good);
+	ind_1.Multiply(height);
+	ind_1.Add(py_0_good);
+	
+	ind_2.Assign(px_0_good);
+	ind_2.Add(1);
+	ind_2.Multiply(height);
+	ind_2.Add(py_0_good);
+
+	ind_3.Assign(px_0_good);
+	ind_3.Multiply(height);
+	ind_3.Add(py_0_good);
+	ind_3.Add(1);
+
+	ind_4.Assign(px_0_good);
+	ind_4.Add(1);
+	ind_4.Multiply(height);
+	ind_4.Add(py_0_good);
+	ind_4.Add(1);
+
+	px_good.SetSize(good_points.size());
+	py_good.SetSize(good_points.size());
+
+	px_good.SelectFrom(px,good_points);
+	py_good.SelectFrom(py,good_points);
+
+	ind_new.SetSize(good_points.size());
+
+	ind_new.Assign(px_good);
+	ind_new.Multiply(height);
+	ind_new.Add(py_good);
+
+	//debugging
+	if(debug)
+	{
+
+		for(unsigned int i = 0; i < ind_new.size();i++)
+		{
+			if(debug && (i<10 || i > ind_new.size()-10))
+			{
+				printf("SetFromCameraCalibration %d ind_new: %8.8lf\n",i,ind_new.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < ind_1.size();i++)
+		{
+			if(debug && (i<10 || i > ind_1.size()-10))
+			{
+				printf("SetFromCameraCalibration %d ind_1: %8.8lf\n",i,ind_1.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < ind_2.size();i++)
+		{
+			if(debug && (i<10 || i > ind_2.size()-10))
+			{
+				printf("SetFromCameraCalibration %d ind_2: %8.8lf\n",i,ind_2.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < ind_3.size();i++)
+		{
+			if(debug && (i<10 || i > ind_3.size()-10))
+			{
+				printf("SetFromCameraCalibration %d ind_3: %8.8lf\n",i,ind_3.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < ind_4.size();i++)
+		{
+			if(debug && (i<10 || i > ind_4.size()-10))
+			{
+				printf("SetFromCameraCalibration %d ind_4: %8.8lf\n",i,ind_4.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < a1.size();i++)
+		{
+			if(debug && (i<10 || i > a1.size()-10))
+			{
+				printf("SetFromCameraCalibration %d a1: %8.8lf\n",i,a1.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < a2.size();i++)
+		{
+			if(debug && (i<10 || i > a2.size()-10))
+			{
+				printf("SetFromCameraCalibration %d a2: %8.8lf\n",i,a2.at(i));
+			}
+		}
+		for(unsigned int i = 0; i < a3.size();i++)
+		{
+			if(debug && (i<10 || i > a3.size()-10))
+			{
+				printf("SetFromCameraCalibration %d a3: %8.8lf\n",i,a3.at(i));
+			}
+		}
+
+		for(unsigned int i = 0; i < a4.size();i++)
+		{
+			if(debug && (i<10 || i > a4.size()-10))
+			{
+				printf("SetFromCameraCalibration %d a4: %8.8lf\n",i,a4.at(i));
+			}
+		}
+	}
+
+	//========SetTable(height,width,ind_new,ind_1,ind_2,ind_3,ind_4,a1,a2,a3,a4,videoch);========//
+	Height = height;
+	Width = width;
+	if (Width > maxwidth || Height > maxheight) goto labError;
+               
+	//this is not efficient 
+	valcnt = ind_new.size();
+
+	idxDestSize = ind_new.size();
+    idxDest = new unsigned int[ind_new.size()];
+
+	idxSrc1Size = ind_1.size();
+    idxSrc1 = new unsigned int[ind_1.size()];
+
+	idxSrc2Size = ind_2.size();
+    idxSrc2 = new unsigned int[ind_2.size()];
+
+	idxSrc3Size = ind_3.size();
+    idxSrc3 = new unsigned int[ind_3.size()];
+
+	idxSrc4Size = ind_4.size();
+    idxSrc4 = new unsigned int[ind_4.size()];
+
+	blendSrc1Size = a1.size();
+    blendSrc1 = new unsigned char[a1.size()];
+
+	blendSrc2Size = a2.size();
+    blendSrc2 = new unsigned char[a2.size()];
+
+	blendSrc3Size = a3.size();
+    blendSrc3 = new unsigned char[a3.size()];
+
+	blendSrc4Size = a4.size();
+    blendSrc4 = new unsigned char[a4.size()];
+
+    for (i = 0; i < valcnt; i ++) {
+        idxDest[i] = static_cast<unsigned int>(ind_new[i] + 0.5);
+
+        idxSrc1[i] = static_cast<unsigned int>(ind_1[i] + 0.5);
+		idxSrc2[i] = static_cast<unsigned int>(ind_2[i] + 0.5);
+		idxSrc3[i] = static_cast<unsigned int>(ind_3[i] + 0.5);
+		idxSrc4[i] = static_cast<unsigned int>(ind_4[i] + 0.5);
+
+		blendSrc1[i] = static_cast<unsigned char>(a1[i] * 256);
+		blendSrc2[i] = static_cast<unsigned char>(a2[i] * 256);
+		blendSrc3[i] = static_cast<unsigned char>(a3[i] * 256);
+		blendSrc4[i] = static_cast<unsigned char>(a4[i] * 256);
+    }
+
+	TransposeLUTArray2(idxDest, valcnt, Width, Height);
+    TransposeLUTArray2(idxSrc1, valcnt, Width, Height);
+    TransposeLUTArray2(idxSrc2, valcnt, Width, Height);
+    TransposeLUTArray2(idxSrc3, valcnt, Width, Height);
+    TransposeLUTArray2(idxSrc4, valcnt, Width, Height);
+
+    for (i = 0; i < valcnt; i ++) {
+        idxDest[i] *= 3;
+        idxSrc1[i] *= 3;
+        idxSrc2[i] *= 3;
+        idxSrc3[i] *= 3;
+        idxSrc4[i] *= 3;
+    }
+
+    return true;
+
+labError:
+    Release();
+
+    return false;
+
+}
+
+void svlImageProcessingHelper::RectificationInternals::TransposeLUTArray2(unsigned int* index, unsigned int size, unsigned int width, unsigned int height)
+{
+    unsigned int i, x, y, val;
+
+    for (i = 0; i < size; i ++) {
+		val = index[i];
+        x = val / height;
+        y = val % height;
+        index[i] = y * width + x;
+    }
+}
+
 int svlImageProcessingHelper::RectificationInternals::LoadLine(std::ifstream &file, double* dblbuf, char* chbuf, unsigned int size, int explen)
 {
     unsigned int bufsize = (16 * size) + 1; // max text line length
