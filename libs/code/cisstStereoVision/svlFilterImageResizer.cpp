@@ -164,7 +164,9 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
 
         syncOutput = OutputImage;
     }
-
+    else {
+        syncOutput = syncInput;
+    }
 
     return SVL_OK;
 }
