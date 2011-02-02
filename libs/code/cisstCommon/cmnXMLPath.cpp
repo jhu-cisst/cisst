@@ -55,6 +55,24 @@ void cmnXMLPath::SetInputSource(const char *filename)
 }
 
 
+bool cmnXMLPath::ValidateDTD(const char * filename)
+{
+    xmlDtdPtr dtd = xmlParseDTD(0, (const xmlChar *)filename);
+    if (dtd == 0) {
+		CMN_LOG_CLASS_INIT_ERROR << "ValidateDTD: \"" << filename << "\" does not contain a valid DTD" << std::endl;
+        return false;
+    }
+    xmlValidCtxt cvp;
+    cvp.userData = (void *)stderr;
+    cvp.error    = (xmlValidityErrorFunc)fprintf;
+    cvp.warning  = (xmlValidityWarningFunc)fprintf;
+    if (!xmlValidateDtd(&cvp, Document, dtd)) {
+        return false;
+    }
+    return true;
+}
+
+
 void cmnXMLPath::PrintValue(std::ostream &out, const char *context, const char *XPath)
 {
 	std::string str;

@@ -30,6 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnPython_h
 #define _cmnPython_h
 
+#include <cisstConfig.h>
+
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnObjectRegister.h>
@@ -38,5 +40,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnTypeTraits.h>
 #include <cisstCommon/cmnCallbackStreambuf.h>
 #include <cisstCommon/cmnPath.h>
+
+#if CISST_HAS_XML
+    #include <cisstCommon/cmnXMLPath.h>
+#endif  // CISST_HAS_XML
 
 #endif // _cmnPython_h

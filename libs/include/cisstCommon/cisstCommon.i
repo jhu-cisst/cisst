@@ -46,6 +46,8 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "swigrun.i"
 
+%import "cisstConfig.h"
+
 %header %{
 #include <cisstCommon/cmnPython.h>
 %}
@@ -179,6 +181,10 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 
 // Wrap cmnPath
 %include "cisstCommon/cmnPath.h"
+
+#if CISST_HAS_XML
+    %include "cisstCommon/cmnXMLPath.h"
+#endif  // CISST_HAS_XML
 
 // Wrap and instantiate useful type traits
 %include "cisstCommon/cmnTypeTraits.h"

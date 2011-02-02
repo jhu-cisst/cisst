@@ -148,6 +148,12 @@ public:
     }
     //@}
 
+    /*! Validate input document against its document type definition (DTD) */
+    bool ValidateDTD(const char * filename);
+    bool ValidateDTD(const std::string & filename) {
+        return ValidateDTD(filename.c_str());
+    }
+
     /*! For debugging. Print the attribute value as a string on stream */
     void PrintValue(std::ostream &out, const char *context, const char *XPath);
 
