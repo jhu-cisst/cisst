@@ -155,8 +155,17 @@ bool mtsMailBox::ExecuteNext(void)
            }
        }
    }
+   catch (std::exception &e) {
+       CMN_LOG_RUN_WARNING << "mtsMailbox " << GetName() << ": ExecuteNext for command " << (*command)->GetName()
+                           << " caught exception: " << e.what() << std::endl;
+       if (isBlocking)
+           this->ThreadSignal.Raise();
+       CommandQueue.Get();  // Remove command from mailbox queue
+       throw;
+   }
    catch (...) {
-       CMN_LOG_RUN_WARNING << "mtsMailbox::ExecuteNext caught exception, blocking = " << isBlocking << std::endl;
+       CMN_LOG_RUN_WARNING << "mtsMailbox " << GetName() << ": ExecuteNext for command " << (*command)->GetName()
+                           << " caught exception, blocking = " << isBlocking << std::endl;
        if (isBlocking)
            this->ThreadSignal.Raise();
        CommandQueue.Get();  // Remove command from mailbox queue
