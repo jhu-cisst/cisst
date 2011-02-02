@@ -52,10 +52,17 @@ public:
     virtual int Seek(const long long int abspos);
 
 private:
-    std::fstream *Stream;
     OpenMode      Mode;
     bool          Opened;
     long long int Length;
+
+    // Internals that are OS-dependent in some way
+    enum {INTERNALS_SIZE = 16};
+    char Internals[INTERNALS_SIZE];
+
+    // Return the size of the actual object used by the OS.
+    // This is used for testing only.
+    static unsigned int SizeOfInternals();
 };
 
 #endif // _svlFile_h
