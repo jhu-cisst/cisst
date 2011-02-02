@@ -2,29 +2,28 @@
 
 <config>
 
-  <device port="COM3"
-          definition="" />
+  <controller port="COM1"
+              tools="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\"
+              note="NDI Polaris Vicra" />
 
   <tools>
 
     <tool name="Pointer"
           enabled="true"
           serial="34802401"
-          definition="C:\\Program Files (x86)\\Northern Digital Inc\\Tool Definition Files\\8700340.rom"
-          description="">
-      <calibration x="-20.4072"
-                   y="-0.172478"
-                   z="-158.267" />
+          definition="8700340.rom"
+          note="Vicra default pointer">
+      <tooltip rotation="1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0"
+               translation="-20.4072, -0.172478, -158.267" />
     </tool>
 
-    <tool name="Patient"
-          enabled="false"
+    <tool name="Reference"
+          enabled="true"
           serial="34801403"
-          definition="C:\\Program Files (x86)\\Northern Digital Inc\\Tool Definition Files\\8700339.rom"
-          description="">
-      <calibration x="0.0"
-                   y="0.0"
-                   z="0.0" />
+          definition="8700339.rom"
+          note="Vicra big reference">
+      <tooltip rotation="1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0"
+               translation="0.0, 0.0, 0.0" />
     </tool>
   </tools>
 </config>

@@ -20,30 +20,29 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief A cisst wrapper for NDI trackers with serial interface.
+  \brief Device wrapper for NDI surgical trackers with serial interface.
   \ingroup cisstDevices
 
-  \bug Does not work with some RS232-to-USB converters.
-  \bug Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
+  \bug(auneri1) Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
-  \todo Make this device an mtsTaskContinuous.
-  \todo Verify the need for all sleep times.
-  \todo Ability to enable/disable individual tools.
-  \todo Add RMS error to CalibratePivot() (make this a provided command per Tool?).
-  \todo Handle other main types of tools.
-  \todo Parse port/system status, in order to get "partially out of volume", etc.
-  \todo Refactor ComputeCRC() and implement a CRC check in CommandSend().
-  \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?).
-  \todo Error handling for all strncpy().
-  \todo Check for buffer overflow in CommandAppend().
-  \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout() method?
-  \todo Handle supported features for newer Polaris versions.
-  \todo Pretty print for SerialNumber, to extract date, etc..
-  \todo Overload Tool class to have a stream.
-  \todo Use frame number to decide if timestamp should be refreshed.
-  \todo Implement an "adaptive sleep" for the run method?
-  \todo Main Type to human readable provided method.
-  \todo Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse().
+  \todo(auneri1) Consider deriving from mtsTaskContinuous using an "adaptive" sleep.
+  \todo(auneri1) Verify the need for existing sleep times.
+  \todo(auneri1) Enable/disable individual tools on-the-fly (or dynamically disable their interfaces).
+  \todo(auneri1) Add RMS error to CalibratePivot (store in a state table per tool?).
+  \todo(auneri1) Handle other main types of tools (besides pointer, reference, etc.).
+  \todo(auneri1) Parse port/system status, in order to get "partially out of volume", etc..
+  \todo(auneri1) Refactor ComputeCRC and implement a CRC check in CommandSend (move CRC check up to osaSerialPort?).
+  \todo(auneri1) Every sscanf should check if valid number of items have been read (wrapper for sscanf?).
+  \todo(auneri1) Error handling for all strncpy.
+  \todo(auneri1) Check for buffer overflow in CommandAppend.
+  \todo(auneri1) Implement a timeout for CheckResponse (CheckTimeout method?).
+  \todo(auneri1) Support for the extra features of newer Polaris versions.
+  \todo(auneri1) Pretty print for SerialNumber, to extract date, etc..
+  \todo(auneri1) Overload Tool class to have a stream.
+  \todo(auneri1) Use frame number to decide if timestamp should be refreshed.
+  \todo(auneri1) Implement an "adaptive sleep" for the run method?
+  \todo(auneri1) Method to convert Tool's MainType to human readable text.
+  \todo(auneri1) Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse.
 */
 
 #ifndef _devNDISerial_h

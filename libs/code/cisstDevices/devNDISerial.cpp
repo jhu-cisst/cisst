@@ -62,7 +62,11 @@ void devNDISerial::Configure(const std::string & filename)
 
     // initialize serial port
     std::string serialPort;
-    config.GetXMLValue("/config/device", "@port", serialPort);
+    config.GetXMLValue("/config/controller", "@port", serialPort, "");
+    if (serialPort.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Configure: failed to read serial port from: " << filename << std::endl;
+        return;
+    }
 
     SerialPort.SetPortName(serialPort);
     if (!SerialPort.Open()) {
@@ -79,33 +83,44 @@ void devNDISerial::Configure(const std::string & filename)
     CommandSend("INIT ");
     ResponseRead("OKAY");
 
+    std::string toolDefinitionsDir;
+    config.GetXMLValue("/config/controller", "@tools", toolDefinitionsDir, "");
+
     // add tools
     int maxNumTools = 100;
-    std::string toolName;
+    std::string toolName, toolSerial, toolSerialLast, toolDefinition;
     bool toolEnabled;
-    std::string toolSerial, toolSerialLast;
-    std::string toolDefinition;
     Tool * tool;
 
     for (int i = 0; i < maxNumTools; i++) {
         std::stringstream context;
         context << "/config/tools/tool[" << i << "]";
-        config.GetXMLValue(context.str().c_str(), "@name", toolName);
-        config.GetXMLValue(context.str().c_str(), "@enabled", toolEnabled);
+        config.GetXMLValue(context.str().c_str(), "@name", toolName, "");
+        if (toolName.empty()) {
+            continue;
+        }
         config.GetXMLValue(context.str().c_str(), "@serial", toolSerial);
         config.GetXMLValue(context.str().c_str(), "@definition", toolDefinition);
+        config.GetXMLValue(context.str().c_str(), "@enabled", toolEnabled);
         if (toolSerial != toolSerialLast) {
             toolSerialLast = toolSerial;
             if (toolEnabled) {
                 if (toolDefinition == "") {
                     tool = AddTool(toolName, toolSerial.c_str());
                 } else {
-                    tool = AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
+	                std::string toolDefinitionPath = toolDefinitionsDir + toolDefinition;
+                    tool = AddTool(toolName, toolSerial.c_str(), toolDefinitionPath.c_str());
                 }
-                context << "/calibration";
-                config.GetXMLValue(context.str().c_str(), "@x", tool->TooltipOffset.X());
-                config.GetXMLValue(context.str().c_str(), "@y", tool->TooltipOffset.Y());
-                config.GetXMLValue(context.str().c_str(), "@z", tool->TooltipOffset.Z());
+                context << "/tooltip";
+                std::string rotation, translation;
+                config.GetXMLValue(context.str().c_str(), "@rotation", rotation);
+                config.GetXMLValue(context.str().c_str(), "@translation", translation);
+                std::stringstream offset(translation);
+                double value;
+                for (unsigned int i = 0; offset >> value; i++) {
+                    tool->TooltipOffset[i] = value;
+                    offset.ignore(1);
+                }
             }
         }
     }
@@ -777,11 +792,12 @@ void devNDISerial::Track(void)
 
 void devNDISerial::CalibratePivot(const mtsStdString & toolName)
 {
+    Tool * tool = Tools.GetItem(toolName.Data);
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << tool->Name << std::endl;
+
 #if CISST_HAS_CISSTNETLIB
     const unsigned int numPoints = 500;
 
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.Data << std::endl;
-    Tool * tool = Tools.GetItem(toolName.Data);
     tool->TooltipOffset.SetAll(0.0);
 
     CommandSend("TSTART 80");
