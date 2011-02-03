@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 

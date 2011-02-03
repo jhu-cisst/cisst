@@ -47,7 +47,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
                                                 double blockingDelay)
 {
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
 
     // execution result used by all functions

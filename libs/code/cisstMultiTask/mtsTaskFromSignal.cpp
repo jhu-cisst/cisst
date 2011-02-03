@@ -83,8 +83,8 @@ void mtsTaskFromSignal::Kill(void)
 }
 
 
-mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                               mtsRequiredType required)
+mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                                         mtsRequiredType required)
 {
     // create a mailbox with post command queued command
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
@@ -106,8 +106,8 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string
 }
 
 
-mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                               mtsInterfaceQueueingPolicy queueingPolicy)
+mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
+                                                                                  mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)

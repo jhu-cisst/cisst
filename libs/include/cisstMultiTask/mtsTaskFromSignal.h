@@ -76,11 +76,11 @@ public:
     /* documented in base class */
 	void Kill(void);
 
-    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                mtsRequiredType required = MTS_REQUIRED);
+    mtsInterfaceRequired * AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                          mtsRequiredType required = MTS_REQUIRED);
 
-    mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
-                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+    mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
+                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
 };
 

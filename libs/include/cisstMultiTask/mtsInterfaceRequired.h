@@ -133,7 +133,7 @@ protected:
       function even if this interface is not connected to a provided
       interface.
     */
-    mtsInterfaceRequired(const std::string & interfaceName, mtsComponent * component, 
+    mtsInterfaceRequired(const std::string & interfaceName, mtsComponent * component,
                          mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
@@ -219,9 +219,10 @@ protected:
       Id so that GetCommandVoid and GetCommandWrite (queued
       commands) know which mailbox to use.  The user Id is provided
       by the provided interface when calling AllocateResources. */
- private:
 
     bool AddSystemEventHandlers(void);
+
+ private:
     void BlockingCommandVoidExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);

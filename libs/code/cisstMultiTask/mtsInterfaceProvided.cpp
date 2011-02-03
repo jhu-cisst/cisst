@@ -45,6 +45,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
     BlockingCommandVoidExecuted(0),
     OriginalInterface(0),
+    UserName(""),
     UserCounter(0),
     CommandsVoid("CommandsVoid", true),
     CommandsVoidReturn("CommandsVoidReturn", true),
@@ -83,9 +84,6 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     EventVoidGenerators.SetOwner(*this);
     EventWriteGenerators.SetOwner(*this);
     CommandsInternal.SetOwner(*this);
-
-    // add system events
-    // AddSystemEvents();
 }
 
 
@@ -93,7 +91,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                            const std::string & userName,
                                            size_t mailBoxSize,
                                            size_t argumentQueuesSize):
-    BaseType(mtsInterfaceProvided::GetEndUserInterfaceName(originalInterface, userName),
+    BaseType(mtsInterfaceProvided::GenerateEndUserInterfaceName(originalInterface, userName),
              originalInterface->Component),
     MailBox(0),
     QueueingPolicy(MTS_COMMANDS_SHOULD_BE_QUEUED),
@@ -102,6 +100,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     BlockingCommandVoidExecuted(0),
     OriginalInterface(originalInterface),
     EndUserInterface(true),
+    UserName(userName),
     UserCounter(0),
     CommandsVoid("CommandsVoid", true),
     CommandsVoidReturn("CommandsVoidReturn", true),
@@ -123,17 +122,11 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     EventWriteGenerators.SetOwner(*this);
     CommandsInternal.SetOwner(*this);
 
-    // add system events
-    // AddSystemEvents();
-
     // duplicate what needs to be duplicated (i.e. void and write
     // commands)
     MailBox = new mtsMailBox(this->GetName(),
                              mailBoxSize,
                              this->PostCommandQueuedCallable);
-
-    // make sure the mailbox can trigger system events
-    MailBox->SetPostCommandVoidDequeuedCommand(this->BlockingCommandVoidExecuted);
 
     // clone void commands
     CommandVoidMapType::const_iterator iterVoid = originalInterface->CommandsVoid.begin();
@@ -147,11 +140,11 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
         if (commandQueuedVoid) {
             commandVoid = commandQueuedVoid->Clone(this->MailBox, argumentQueuesSize);
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued void command \"" << iterVoid->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         } else {
             commandVoid = iterVoid->second;
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: using existing pointer on void command \"" << iterVoid->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         }
         CommandsVoid.AddItem(iterVoid->first, commandVoid, CMN_LOG_LEVEL_INIT_ERROR);
 
@@ -168,11 +161,11 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
         if (commandQueuedVoidReturn) {
             commandVoidReturn = commandQueuedVoidReturn->Clone(this->MailBox);
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued void return command \"" << iterVoidReturn->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         } else {
             commandVoidReturn = iterVoidReturn->second;
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: using existing pointer on void return command \"" << iterVoidReturn->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         }
         CommandsVoidReturn.AddItem(iterVoidReturn->first, commandVoidReturn, CMN_LOG_LEVEL_INIT_ERROR);
 
@@ -189,11 +182,11 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
         if (commandQueuedWrite) {
             commandWrite = commandQueuedWrite->Clone(this->MailBox, argumentQueuesSize);
             CMN_LOG_CLASS_INIT_VERBOSE << "constructor: cloned queued write command " << iterWrite->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         } else {
             commandWrite = iterWrite->second;
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: using existing pointer on write command \"" << iterWrite->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         }
         CommandsWrite.AddItem(iterWrite->first, commandWrite, CMN_LOG_LEVEL_INIT_ERROR);
     }
@@ -209,11 +202,11 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
         if (commandQueuedWriteReturn) {
             commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox);
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued write return command \"" << iterWriteReturn->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         } else {
             commandWriteReturn = iterWriteReturn->second;
             CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: using existing pointer on write return command \"" << iterWriteReturn->first
-                                       << "\" for \"" << this->GetName() << "\"" << std::endl;
+                                       << "\" for \"" << this->GetFullName() << "\"" << std::endl;
         }
         CommandsWriteReturn.AddItem(iterWriteReturn->first, commandWriteReturn, CMN_LOG_LEVEL_INIT_ERROR);
     }
@@ -246,7 +239,7 @@ void mtsInterfaceProvided::Cleanup(void)
 void mtsInterfaceProvided::SetMailBoxSize(size_t desiredSize)
 {
     if (this->QueueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED) {
-        CMN_LOG_CLASS_INIT_WARNING << "SetMailBoxSize: interface \"" << this->GetName()
+        CMN_LOG_CLASS_INIT_WARNING << "SetMailBoxSize: interface \"" << this->GetFullName()
                                    << "\" is not queuing commands, calling SetMailBoxSize has no effect"
                                    << std::endl;
     }
@@ -257,12 +250,12 @@ void mtsInterfaceProvided::SetMailBoxSize(size_t desiredSize)
 void mtsInterfaceProvided::SetArgumentQueuesSize(size_t desiredSize)
 {
     if (this->QueueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED) {
-        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetName()
+        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetFullName()
                                    << "\" is not queuing commands, calling SetArgumentQueuesSize has no effect"
                                    << std::endl;
     }
     if (desiredSize > this->MailBoxSize) {
-        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetName()
+        CMN_LOG_CLASS_INIT_WARNING << "SetArgumentQueuesSize: interface \"" << this->GetFullName()
                                    << "\" new size (" << desiredSize
                                    << ") is smaller than command mail box size (" << this->MailBoxSize
                                    << "), the extra space won't be used" << std::endl;
@@ -301,7 +294,7 @@ size_t mtsInterfaceProvided::ProcessMailBoxes(void)
         }
         return numberOfCommands;
     }
-    CMN_LOG_CLASS_RUN_ERROR << "ProcessMailBoxes: called on end user interface for " << this->GetName() << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "ProcessMailBoxes: called on end user interface for " << this->GetFullName() << std::endl;
     return 0;
 }
 
@@ -343,14 +336,14 @@ bool mtsInterfaceProvided::UseQueueBasedOnInterfacePolicy(mtsCommandQueueingPoli
         if (this->QueueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED) {
             CMN_LOG_CLASS_INIT_WARNING << methodName << ": adding non queued void command \""
                                        << commandName << "\" to provided interface \""
-                                       << this->GetName()
+                                       << this->GetFullName()
                                        << "\" which has beed created with policy MTS_COMMANDS_SHOULD_BE_QUEUED, thread safety has to be provided by the underlying method"
                                        << std::endl;
         } else {
             // send message to tell explicit queueing policy is useless
             CMN_LOG_CLASS_INIT_DEBUG << methodName << ": adding non queued void command \""
                                      << commandName << "\" to provided interface \""
-                                     << this->GetName()
+                                     << this->GetFullName()
                                      << "\" which has beed created with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, this is the default therefore there is no need to explicitely define the queueing policy"
                                      << std::endl;
         }
@@ -362,7 +355,7 @@ bool mtsInterfaceProvided::UseQueueBasedOnInterfacePolicy(mtsCommandQueueingPoli
             // send message to tell explicit queueing policy is useless
             CMN_LOG_CLASS_INIT_DEBUG << methodName << ": adding queued void command \""
                                      << commandName << "\" to provided interface \""
-                                     << this->GetName()
+                                     << this->GetFullName()
                                      << "\" which has beed created with policy MTS_COMMANDS_SHOULD_BE_QUEUED, this is the default therefore there is no need to explicitely define the queueing policy"
                                      << std::endl;
             return true;
@@ -370,7 +363,7 @@ bool mtsInterfaceProvided::UseQueueBasedOnInterfacePolicy(mtsCommandQueueingPoli
             // this is a case we can not handle
             CMN_LOG_CLASS_INIT_ERROR << methodName << ": adding queued void command \""
                                      << commandName << "\" to provided interface \""
-                                     << this->GetName()
+                                     << this->GetFullName()
                                      << "\" which has beed created with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED is not possible.  The command will NOT be queued"
                                      << std::endl;
             return false;
@@ -410,7 +403,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * call
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: attempt to add undefined command (null callable pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -426,7 +419,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCommandVoid * command)
         return command;
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: attempt to add undefined command (null command pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -461,7 +454,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: attempt to add undefined command (null callable pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -477,7 +470,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCommandVoid
         return command;
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: attempt to add undefined command (null command pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -508,7 +501,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: attempt to add undefined command (null pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -544,7 +537,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: attempt to add undefined command (null callable pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -564,7 +557,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * call
         return command;
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: attempt to add undefined command (null callable pointer) to interface \""
-                             << this->GetName() << "\"" << std::endl;
+                             << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
 
@@ -665,10 +658,10 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandFilteredWrite(mtsCommandQu
 }
 
 
-std::string mtsInterfaceProvided::GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
-                                                          const std::string &userName)
+std::string mtsInterfaceProvided::GenerateEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                               const std::string & userName)
 {
-    return originalInterface->GetName() + "For" + userName;
+    return originalInterface->GetName() + "[" + userName + "]";
 }
 
 
@@ -684,8 +677,8 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     // note that we don't check for duplicate user names (don't need
     // to care whether there are duplicates)
     this->UserCounter++;
-    CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: component \"" << Component->GetName()
-                               << "\" interface \"" << this->Name
+    this->UserName = userName;
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: interface \"" << this->GetFullName()
                                << "\" creating new copy (#" << this->UserCounter
                                << ") for user \"" << userName << "\"" << std::endl;
     // new end user interface created with default size for mailbox
@@ -694,6 +687,9 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
                                                                         this->MailBoxSize,
                                                                         this->ArgumentQueuesSize);
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
+
+    // finally, add system events
+    interfaceProvided->AddSystemEvents();
 
     return interfaceProvided;
 }
@@ -707,15 +703,11 @@ std::vector<std::string> mtsInterfaceProvided::GetListOfUserNames(void) const
         return userNames;
     }
 
-    std::string name;
-    const size_t offset1 = OriginalInterface->GetName().size();
-    const size_t offset2 = 3; // = sizeof("For")
     const InterfaceProvidedCreatedListType::const_iterator end = InterfacesProvidedCreated.end();
     InterfaceProvidedCreatedListType::const_iterator iterator;
     for (iterator = InterfacesProvidedCreated.begin();
          iterator != end; ++iterator) {
-        name = iterator->second->GetName();
-        userNames.push_back(name.substr(offset1 + offset2, name.size() - offset1 - offset2));
+        userNames.push_back(iterator->second->UserName);
     }
 
     return userNames;
@@ -731,22 +723,19 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
     // First, do some error checking
     // 1) Make sure interfaceProvided is non-zero
     if (!interfaceProvided) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
-                                << "\" interface \"" << this->Name
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                                 << "\": null provided interface" << std::endl;
         return interfaceProvided;
     }
     // 2) The interfaceProvided parameter should be an end-user interface
     if (!interfaceProvided->EndUserInterface) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
-                                << "\" interface \"" << this->Name
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                                 << "\": parameter not an end-user interface" << std::endl;
         return interfaceProvided;
     }
     // 3) This object should be an original interface (i.e., the OriginalInterface pointer should be 0)
     if (this->OriginalInterface) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
-                                << "\" interface \"" << this->Name
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                                 << "\": called on object that is not an original interface" << std::endl;
         return (interfaceProvided ? interfaceProvided : this->OriginalInterface);
     }
@@ -755,12 +744,10 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
     // interface, which would occur when there are no queued commands.
     if (this->EndUserInterface) {
         if (interfaceProvided && (interfaceProvided != this)) {
-            CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: component \"" << Component->GetName()
-                                      << "\" interface \"" << this->Name
+            CMN_LOG_CLASS_RUN_WARNING << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                                       << "\": original interface inconsistent with provided end-user interface" << std::endl;
         }
-        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
-                                  << "\" interface \"" << this->Name
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                                   << "\": original interface is also the end-user interface" << std::endl;
         return 0;
     }
@@ -773,8 +760,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
          iterator != end;
          ++iterator) {
         if (iterator->second == interfaceProvided) {
-            CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: component \"" << Component->GetName()
-                                      << "\" interface \"" << this->Name
+            CMN_LOG_CLASS_RUN_VERBOSE << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                                       << "\" removing copy (#" << iterator->first
                                       << ") for user \"" << userName << "\"" << std::endl;
             InterfacesProvidedCreated.erase(iterator);
@@ -783,8 +769,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::RemoveEndUserInterface(mtsInterface
         }
     }
 
-    CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: component \"" << Component->GetName()
-                            << "\" interface \"" << this->Name
+    CMN_LOG_CLASS_RUN_ERROR << "RemoveEndUserInterface: interface \"" << this->GetFullName()
                             << "\" could not find end-user interface for user \""
                             << userName << "\"" << std::endl;
     return interfaceProvided;
@@ -797,19 +782,18 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetOriginalInterface(void) const
 }
 
 
-mtsInterfaceProvided * mtsInterfaceProvided::FindEndUserInterfaceByName(const std::string &userName)
+mtsInterfaceProvided * mtsInterfaceProvided::FindEndUserInterfaceByName(const std::string & userName)
 {
     // First, check if there is just a single provided interface (i.e., no queued commands)
     if ((this->OriginalInterface == 0) && this->EndUserInterface) {
         return this;
     }
-    std::string interfaceName = mtsInterfaceProvided::GetEndUserInterfaceName(this, userName);
     const InterfaceProvidedCreatedListType::const_iterator end = InterfacesProvidedCreated.end();
     InterfaceProvidedCreatedListType::const_iterator iterator;
     for (iterator = InterfacesProvidedCreated.begin();
          iterator != end;
          ++iterator) {
-        if (iterator->second->GetName() == interfaceName) {
+        if (iterator->second->UserName == userName) {
             return iterator->second;
         }
     }
@@ -881,8 +865,14 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
     this->BlockingCommandVoidExecuted = AddEventVoid("BlockingCommandVoidExecuted");
     if (!(this->BlockingCommandVoidExecuted)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddSystemEvents: unable to add void event \"BlockingCommandVoidExecuted\" to interface \""
-                                 << this->GetName() << "\"" << std::endl;
+                                 << this->GetFullName() << "\"" << std::endl;
         return false;
+    }
+    if (this->MailBox) {
+        MailBox->SetPostCommandVoidDequeuedCommand(this->BlockingCommandVoidExecuted);
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEvents: can not set mailbox post dequeued command for blocking commands for for interface \""
+                                 << this->GetFullName() << "\"" << std::endl;
     }
     return true;
 }
@@ -976,7 +966,7 @@ mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & comman
         return CommandsVoid.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoid: cannot retrieve command " << commandName << " from \"factory\" interface \""
-                             << this->GetName()
+                             << this->GetFullName()
                              << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
@@ -989,7 +979,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::str
         return CommandsVoidReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoidReturn: cannot retrieve command " << commandName << " from \"factory\" interface \""
-                             << this->GetName()
+                             << this->GetFullName()
                              << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
@@ -1002,7 +992,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & 
         return CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandWrite: cannot retrieve command " << commandName << " from \"factory\" interface \""
-                             << this->GetName()
+                             << this->GetFullName()
                              << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
@@ -1015,7 +1005,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::s
         return CommandsWriteReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandWriteReturn: cannot retrieve command " << commandName << " from \"factory\" interface \""
-                             << this->GetName()
+                             << this->GetFullName()
                              << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
@@ -1048,11 +1038,11 @@ mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string &
         mtsMulticastCommandVoid * eventGenerator = EventVoidGenerators.GetItem(eventName, CMN_LOG_LEVEL_INIT_DEBUG);
         if (eventGenerator) {
             CMN_LOG_CLASS_INIT_DEBUG << "GetEventVoid: found event \"" << eventName << "\" in provided interface \""
-                                     << this->GetName() << "\" of component \"" << this->Component->GetName() << "\"" << std::endl;
+                                     << this->GetFullName() << "\"" << std::endl;
             return eventGenerator;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "GetEventVoid: looking for event \"" << eventName << "\" in provided interface \""
-                                     << this->OriginalInterface->GetName() << "\" of component \"" << this->Component->GetName() << "\"" << std::endl;
+                                     << this->OriginalInterface->GetFullName() << "\"" << std::endl;
             // the "master" provided interface might have the event generator
             return this->OriginalInterface->GetEventVoid(eventName);
         }
@@ -1175,7 +1165,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     std::stringstream streamBuffer;
     cmnSerializer serializer(streamBuffer);
 
-    // Get information about commands and events.  Note that we fetch void 
+    // Get information about commands and events.  Note that we fetch void
     // command objects from non-queued command container assuming the non-
     // queued container is updated for both queued and non-queued commands.
 

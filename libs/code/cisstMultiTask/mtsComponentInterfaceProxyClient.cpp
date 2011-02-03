@@ -568,13 +568,11 @@ mtsComponentInterfaceProxyClient
         << (blocking ? "BLOCKING" : "NON-BLOCKING"));
 #endif
     mtsExecutionResult executionResult;
-    std::cout << "----- before: " << executionResult << std::endl;
     if (blocking) {
         ComponentInterfaceProxyClient->ReceiveExecuteCommandVoid(commandID, MTS_BLOCKING, executionResult);
     } else {
         ComponentInterfaceProxyClient->ReceiveExecuteCommandVoid(commandID, MTS_NOT_BLOCKING, executionResult);
     }
-    std::cout << "----- after: " << executionResult << std::endl;
     result = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }
 

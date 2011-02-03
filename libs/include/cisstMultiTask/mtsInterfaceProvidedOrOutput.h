@@ -60,9 +60,6 @@ class CISST_EXPORT mtsInterfaceProvidedOrOutput: public cmnGenericObject
     /*! A string identifying the 'Name' of the interface. */
     const std::string Name;
 
-    /*! Name of component that owns this interface */
-    const std::string ComponentName;
-
     /*! Pointer on the component itself. */
     mtsComponent * Component;
 
@@ -81,8 +78,12 @@ class CISST_EXPORT mtsInterfaceProvidedOrOutput: public cmnGenericObject
     /*! Returns the name of the interface. */
     const std::string & GetName(void) const;
 
-    /*! Returns the name of the component */
-    const std::string GetComponentName(void) const;
+    /*! Returns the name of the this interface as well as the
+      component that owns the interface. */
+    const std::string GetFullName(void) const;
+
+    /*! Get a const pointer on the component */
+    const mtsComponent * GetComponent(void) const;
 
     /*! Cleanup method */
     virtual void Cleanup(void);

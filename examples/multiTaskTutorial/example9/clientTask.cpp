@@ -99,9 +99,6 @@ void clientTask<_dataType>::Run(void)
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested, returned \""
                                           << this->VoidServer()
                                           << "\"" << std::endl;
-                // Blocking command causes deadlock in single process (local)
-                // configuration due to fltkMutex.
-                //this->VoidServer.ExecuteBlocking();
                 UI.VoidRequested = false;
             }
 

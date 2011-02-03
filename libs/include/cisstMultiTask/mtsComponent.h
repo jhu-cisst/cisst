@@ -162,11 +162,20 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         processing.  See Start. */
     virtual void Kill(void);
 
-    /*! Method to add a provided interface to the component.  This
-      method is virtual so that mtsTask can redefine it and
-      create a provided interface that includes queues for thread safety. */
-    virtual mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                        mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+    /*! Method to add a provided interface to the component. */
+    mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+
+    /*! Method to add a bare provided interface, i.e. without all the
+      system events.  This method should not be used by regular
+      users as it might break things like blocking commands.
+
+      This method is virtual so that mtsTask can redefine it and
+      create a provided interface that includes queues for thread
+      safety. */
+    virtual mtsInterfaceProvided *
+        AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
@@ -210,8 +219,12 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       connected to another task and use the provided interface of the
       other task.  The required interface created also contains a list
       of event handlers to be used as observers. */
-    virtual mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                        mtsRequiredType isRequired = MTS_REQUIRED);
+    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                mtsRequiredType isRequired = MTS_REQUIRED);
+
+    virtual mtsInterfaceRequired *
+        AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                       mtsRequiredType isRequired = MTS_REQUIRED);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceRequired * AddRequiredInterface(const std::string & requiredInterfaceName) {
