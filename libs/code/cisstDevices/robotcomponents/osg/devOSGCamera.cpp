@@ -1,13 +1,10 @@
-#include <osg/ref_ptr>
-#include <osg/View>
-#include <osgDB/WriteFile>
 #include <osgGA/TrackballManipulator>
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-// this is called during update traversal
+// This operator is called during update traversal
 void devOSGCamera::UpdateCallback::operator()( osg::Node* node, 
 					       osg::NodeVisitor* nv ){
   osg::Referenced* data = node->getUserData();
@@ -21,79 +18,202 @@ void devOSGCamera::UpdateCallback::operator()( osg::Node* node,
 
 }
 
-// This is called after each draw
-void devOSGCamera::FinalDrawCallback::operator ()(osg::RenderInfo& info) const{ 
+#if CISST_SVL_HAS_OPENCV2
 
+// This is called after everything else
+// It is used to capture color/depth images from the color/depth buffers
+devOSGCamera::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera,
+						    bool capturedepth,
+						    bool capturecolor ) :
+  capturedepth( capturedepth ),
+  capturecolor( capturecolor ){
+
+  // get the viewport size
+  const osg::Viewport* viewport    = camera->getViewport();
+  osg::Viewport::value_type width  = viewport->width();
+  osg::Viewport::value_type height = viewport->height();
+
+  // Create and attach a depth image to the camera
+  depthbuffer = new osg::Image;
+  depthbuffer->allocateImage( width, height, 1, GL_DEPTH_COMPONENT, GL_FLOAT );
+  camera->attach( osg::Camera::DEPTH_BUFFER, depthbuffer.get(), 0, 0 );
+
+  // Create and attach a color image to the camera
+  colorbuffer = new osg::Image;
+  colorbuffer->allocateImage( width, height, 1, GL_RGB, GL_UNSIGNED_BYTE );
+  camera->attach( osg::Camera::COLOR_BUFFER, colorbuffer.get(), 0, 0 );
   
-  osg::Referenced* data = info.getView()->getCamera()->getUserData();
-  devOSGCamera::UserData* userdata;
-  userdata = dynamic_cast<devOSGCamera::UserData*>( data );
-
-  if( userdata != NULL )
-    { userdata->GetCamera()->Capture(); }
+  // Create a OpenCV image
+  cvDepthImage.create( height, width, CV_32FC1 );  // float image
+  cvColorImage.create( height, width, CV_8UC3 );   // RGB image
+  vctDepthImage.SetSize( height, width );
+  vctColorImage.SetSize( height, width*3 );
 
 }
 
+devOSGCamera::FinalDrawCallback::~FinalDrawCallback(){
+  cvDepthImage.release();
+  cvColorImage.release();
+}
+
+// This is called after each draw
+void devOSGCamera::FinalDrawCallback::operator ()( osg::RenderInfo& info )const{
+
+  // get the camera
+  osg::Camera* camera = info.getCurrentCamera();
+
+  // get the buffers attached to the cameras
+  osg::Camera::BufferAttachmentMap map = camera->getBufferAttachmentMap ();
+
+  // process the buffers
+  osg::Camera::BufferAttachmentMap::iterator attachment;
+  for( attachment=map.begin(); attachment!=map.end(); attachment++ ){
+
+    // find the kind of buffer
+    switch( attachment->first ){
+
+      // Convert the depth buffer
+    case osg::Camera::DEPTH_BUFFER:
+      ConvertDepthBuffer( camera );
+      break;
+      // Convert the color buffer
+    case osg::Camera::COLOR_BUFFER:
+      ConvertColorBuffer( camera );
+      break;
+      // nothing else
+    default:
+      break;
+    }
+
+  }
+
+}
+
+// Convert the depth buffer to something useful (depth values)
+void 
+devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
+( osg::Camera* camera ) const {
+
+  
+  // Should we care?
+  if( IsDepthBufferEnabled() ){
+    
+    // get the viewport size
+    const osg::Viewport* viewport = camera->getViewport();
+    int width  = (int)viewport->width();
+    int height = (int)viewport->height();
+
+    // get the intrinsic parameters of the camera
+    double fovy, aspectRatio, Zn, Zf;
+    camera->getProjectionMatrixAsPerspective( fovy, aspectRatio, Zn, Zf );
+  
+    // Convert zbuffer values [0,1] to range data and flip the image vertically
+    float* z = (float*)depthbuffer->data();
+
+    float* Z = NULL;
+    if( cvDepthImage.isContinuous() )
+      // const_cast = lame!
+      { Z = const_cast<float*>( cvDepthImage.ptr<float>() ); }
+
+    CMN_ASSERT( Z != NULL );
+    int i=0;
+    for( int r=height-1; 0<=r; r-- ){
+      for( int c=0; c<width; c++ ){
+	// forgot where I took this equation
+	Z[ i++ ] = Zn*Zf / (Zf - z[ r*width + c ]*(Zf-Zn));
+      }
+    }
+
+    // use this line to dump a test image
+    //cv::imwrite( "depth.bmp", cvDepthImage );
+
+    CMN_ASSERT( vctDepthImage.Pointer() != NULL );
+    memcpy( (void*)vctDepthImage.Pointer(), 
+	    (void*)cvDepthImage.ptr<float>(),
+	    sizeof(float)*width*height );
+
+  }
+
+}
+
+void 
+devOSGCamera::FinalDrawCallback::ConvertColorBuffer
+( osg::Camera* camera ) const{
+  
+  // Should we care?
+  if( IsColorBufferEnabled() ){
+    
+    // get the viewport size
+    const osg::Viewport* viewport = camera->getViewport();
+    size_t width  = (size_t)viewport->width();
+    size_t height = (size_t)viewport->height();
+    
+    // copy the color buffer and flip the image vertically
+    unsigned char* rgb = (unsigned char*)colorbuffer->data();
+    unsigned char* RGB = NULL;
+    if( cvColorImage.isContinuous() )
+      { RGB = const_cast<unsigned char*>( cvColorImage.ptr<unsigned char>() ); } 
+  
+    CMN_ASSERT( RGB != NULL );
+
+    // The format is BGR and flipped vertically
+    for( size_t R=0; R<height; R++ ){
+      for( size_t C=0; C<width; C++ ){
+	RGB[ R*width*3 + C*3 + 0 ] = rgb[ (height-R-1)*width*3 + C*3 + 2]; 
+	RGB[ R*width*3 + C*3 + 1 ] = rgb[ (height-R-1)*width*3 + C*3 + 1]; 
+	RGB[ R*width*3 + C*3 + 2 ] = rgb[ (height-R-1)*width*3 + C*3 + 0]; 
+      }
+    }
+
+    // use this line to dump a test image
+    //cv::imwrite( "rgb.bmp", cvColorImage );
+
+    CMN_ASSERT( vctColorImage.Pointer() != NULL );
+    memcpy( (void*)vctColorImage.Pointer(), 
+	    (void*)cvColorImage.ptr(),
+	    sizeof(unsigned char)*width*height*3 );
+
+  }
+
+}
+
+#endif
+
 devOSGCamera::devOSGCamera( const std::string& name, 
 			    devOSGWorld* world,
-			    int x, int y, int width, int height,
-			    double fovy, double aspectRatio,
-			    double zNear, double zFar,
 			    const std::string& fnname,
 			    bool trackball ) :
   mtsTaskContinuous( name ),
-  osgViewer::Viewer(),                 // viewer
-  x( x ),                              // x position
-  y( y ),                              // y position
-  width( width ),                      // width of images
-  height( height )
-#ifdef CISST_STEREOVISION
-  ,colorbuffersample( NULL ),
-  colorsample( NULL ),
-  depthbuffersample( NULL ),
-  depthsample( NULL )
+  osgViewer::Viewer()
+#if CISST_SVL_HAS_OPENCV2
+  ,depthbuffersample( NULL ),
+  colorbuffersample( NULL )
 #endif
-{                    // height of images
-
-  osg::ref_ptr< osg::Camera > camera = getCamera();
-
-  camera->setClearColor( osg::Vec4( 0, 0, 0, 0 ) );
-  camera->setProjectionMatrixAsPerspective( fovy,aspectRatio, zNear, zFar );
-
-  setSceneData( world );
-  //setUpViewInWindow( x, y, width, height );
-
-  // Set callback stuff
-  userdata = new devOSGCamera::UserData( this );
-  camera->setUserData( userdata );
-  camera->setUpdateCallback( new devOSGCamera::UpdateCallback );
-
-  // drawing callback
-  camera->setFinalDrawCallback( new FinalDrawCallback );
-
-  // create a depth image
-  zbuffer = new osg::Image;
-  zbuffer->allocateImage( width, height, 1, GL_DEPTH_COMPONENT, GL_FLOAT );
-  camera->attach( osg::Camera::DEPTH_BUFFER, zbuffer, 0, 0 );
-
-  depthbuffer.SetSize( height, width );  // this is a MxN matrix
-
-  // create a color image
-  colorbuffer = new osg::Image;
-  colorbuffer->allocateImage( width, height, 1, GL_RGB, GL_UNSIGNED_BYTE );
-  camera->attach( osg::Camera::COLOR_BUFFER, colorbuffer, 0, 0 );
+{
   
-  rgbbuffer.SetSize( height, width*3 );  // this is a MxN*3 matrix
+  // Add a timeout as it can take time to load the windows
+  SetInitializationDelay( 5.0 );
+
+  // Set the scene
+  setSceneData( world );
+
+  // Set the user data to point to this object
+  // WARNING: Duno if passing "this" in a construstor is kosher
+  getCamera()->setUserData( new devOSGCamera::UserData( this ) );
+
+  // update callback
+  getCamera()->setUpdateCallback( new devOSGCamera::UpdateCallback() );
 
   // MTS stuff
+  // This interface is used to change the position/orientation of the camera
   if( !fnname.empty() ){
     mtsInterfaceRequired* required;
     required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
     if( required != NULL )
       { required->AddFunction( fnname, ReadTransformation ); }
-
   }
 
+  // Create default trackball and light
   if( trackball ){
     // Add+configure the trackball of the camera
     setCameraManipulator( new osgGA::TrackballManipulator );
@@ -111,54 +231,21 @@ devOSGCamera::devOSGCamera( const std::string& name,
 }
 
 devOSGCamera::~devOSGCamera(){
-}
 
-void devOSGCamera::Configure( const std::string& CMN_UNUSED( argv ) ) {}
-
-void devOSGCamera::Startup(){
-  // The window must be created in the same thread as frame()
-  setUpViewInWindow( x, y, width, height );
-  /*
-#ifdef CISST_STEREOVISION
-  // SVL stuff
-  int retval;
-
-  // Create the buffer for the (left) depth image
-  depthbuffersample = new svlBufferSample( svlTypeMatrixFloat );
-  depthsample       = new svlSampleMatrixFloat( false );
-
-  // attach the callback matrices to the sample
-  retval = depthsample->SetMatrix( finaldrawcallbacks[0]->GetDepthImage() );
-  if( retval != SVL_OK ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to set matrix for left depth image."
-		      << std::endl;
+#if CISST_SVL_HAS_OPENCV2
+  
+  if( colorbuffersample != NULL ){
+    delete colorbuffersample; 
+    colorbuffersample = NULL;
   }
 
-  // push the sample in the buffer
-  depthbuffersample->Push( depthsample );
-
-  // Create the buffer for the RGB images
-  colorbuffersample = new svlBufferSample( svlTypeImageRGB );
-  colorsample       = new svlSampleImageRGB( false );
-
-  // attach the callback matrices to the sample
-  retval = colorsample->SetMatrix( finaldrawcallbacks->GetColorImage(), 0 );
-  if( retval != SVL_OK){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			   << "Failed to set matrix for left color image."
-			   << std::endl;
+  if( depthbuffersample != NULL ){
+    delete depthbuffersample;
+    depthbuffersample = NULL;
   }
-  retval = colorsample->SetMatrix( finaldrawcallbacks[1]->GetColorImage(), 1 );
-  if( retval != SVL_OK){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			   << "Failed to set matrix for right color image."
-			   << std::endl;
-  }
-
-  colorbuffersample->Push( colorsample );
+  
 #endif
-  */
+  
 }
 
 void devOSGCamera::Run(){
@@ -166,8 +253,7 @@ void devOSGCamera::Run(){
   frame();
 }
 
-void devOSGCamera::Cleanup(){}
-
+// Set the position/orientation of the camera
 void devOSGCamera::SetMatrix( const vctFrame4x4<double>& Rt ){
   // Set OSG transformation
   getCamera()->setViewMatrix( osg::Matrix( Rt[0][0], Rt[1][0], Rt[2][0], 0.0,
@@ -185,28 +271,3 @@ void devOSGCamera::Update(){
   }
 }
 
-void devOSGCamera::Capture(){
-
-  // Convert zbuffer values [0,1] to range data (and flip the image vertically)
-  float* z = (float*)zbuffer->data();
-  float* Z = depthbuffer.Pointer();
-  double fovy, aspectRatio, Zn, Zf;
-  getCamera()->getProjectionMatrixAsPerspective( fovy, aspectRatio, Zn, Zf );
-
-  int i=0;
-  for( int r=height-1; 0<=r; r-- ){
-    for( int c=0; c<width; c++ ){
-      Z[ i++ ] = Zn*Zf / (Zf - z[ r*width + c ]*(Zf-Zn));
-    }
-  }
-
-  // copy the color buffer (and flip the image vertically)
-  unsigned char* rgb = (unsigned char*)colorbuffer->data();
-  unsigned char* RGB = (unsigned char*)rgbbuffer.Pointer();
-  for( int r=0; r<height; r++ ){
-    memcpy( RGB + r*width*3,
-	    rgb + (height-r-1)*width*3,
-	    sizeof(unsigned char)*width*3 );
-  }
-
-}

@@ -1,8 +1,6 @@
-#include <osgGA/TrackballManipulator>
-
 #include <cisstDevices/robotcomponents/osg/devOSGManipulator.h>
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
-#include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
+#include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstCommon/cmnGetChar.h>
@@ -39,28 +37,19 @@ int main(){
   devOSGWorld* world = new devOSGWorld;
 
   // Create a camera
+  int x = 0, y = 0;
   int width = 640, height = 480;
-  devOSGCamera* camera = new devOSGCamera( "stereo",
-					   world,
-					   0, 0, width, height,
-					   55, 
-					   ((double)width)/((double)height),
-					   0.01, 10.0 );
-  // Add+configure the trackball of the camera
-  camera->setCameraManipulator( new osgGA::TrackballManipulator );
-  camera->getCameraManipulator()->setHomePosition( osg::Vec3d( 1,0,1 ),
-						   osg::Vec3d( 0,0,0 ),
-						   osg::Vec3d( 0,0,1 ) );
-  camera->home();
-
-  // add a bit more light
-  osg::ref_ptr<osg::Light> light = new osg::Light;
-  light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
-  camera->setLight( light );
-  
-  // add the camera task
+  double Znear = 0.01, Zfar = 10.0;
+  devOSGMono* camera;
+  camera = new devOSGMono( "camera",
+			   world,
+			   x, y, width, height,
+			   55, ((double)width)/((double)height),
+			   Znear, Zfar );
+  // Add the camera component
   taskManager->AddComponent( camera );
-
+  
+  // WAM stuff
   std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
   models.push_back( path+"l1.obj" );
@@ -84,18 +73,23 @@ int main(){
 						  path+"l0.obj" );
   taskManager->AddComponent( WAM );
 
+  // Trajectory
   Trajectory trajectory;
   taskManager->AddComponent( &trajectory );
 
+  // Connect trajectory to robot
   taskManager->Connect( trajectory.GetName(), "Output",
 			WAM->GetName(),       devOSGManipulator::Input );
 
+
+  // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
 
   cmnGetChar();
 
   taskManager->KillAll();
+  taskManager->Cleanup();
 
   return 0;
 }

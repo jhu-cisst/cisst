@@ -1,13 +1,13 @@
 
 
-#ifndef _devOSGStereo_h
-#define _devOSGStereo_h
+#ifndef _devOSGMono_h
+#define _devOSGMono_h
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devOSGStereo : public devOSGCamera {
-  
+class CISST_EXPORT devOSGMono : public devOSGCamera {
+
  private:
 
   //! X pixel coordinate of the window's top left corner
@@ -19,17 +19,14 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
   //! Image height
   int height;
 
-  //! The baseline between the cameras
-  double baseline;
-  
  public : 
-  
-  //! Create a stereo OSG viewer (actually it's a OSG viewer)
+
+  //! Create an OSG mono camera (master camera)
   /**
-     Create an stereo OSG viewer wrapped in a MTS continuous task. The stereo 
-     also creates an MTS required interface called "Transformation" if a 
-     function name is provided. This function is used to update the position of 
-     the camera at each update traversal.
+     Create an OSG mono wrapped in a MTS continuous task. The camera also
+     creates an MTS required interface called "Transformation" if a function
+     name is provided. This function is used to update the position of the
+     camera at each update traversal.
      \param name The name of the camera
      \param world The world the camera belongs to
      \param x The X offset of the camera window
@@ -40,30 +37,28 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
      \param aspectRatio The aspect ratio of the camera
      \param zNear The near buffer distance
      \param zFar  The far buffer distance
-     \param baseline The base line between the two cameras
      \param fnname The name of a MTS read command the body will connect
-     \param trackball Use the default trackball
+     \param trackball Create the default trackball
   */
-  devOSGStereo( const std::string& name,
-		devOSGWorld* world,
-		int x, int y, int width, int height,
-		double fovy, double aspectRatio,
-		double zNear, double zFar,
-		double baseline,
-		const std::string& fnname = "",
-		bool trackball = true );
-  ~devOSGStereo( );
+  devOSGMono( const std::string& name,
+	      devOSGWorld* world,
+	      int x, int y, int width, int height,
+	      double fovy, double aspectRatio,
+	      double zNear, double zFar,
+	      const std::string& fnname = "",
+	      bool trackball = true );
+
+  ~devOSGMono();
 
   void Startup();
-
   void Run();
 
 #if CISST_SVL_HAS_OPENCV2
 
  private:
 
-  svlSampleMatrixFloat*    depthsample;
-  svlSampleImageRGBStereo* colorsample;
+  svlSampleMatrixFloat* depthsample;
+  svlSampleImageRGB*    colorsample;
   
  public:
 

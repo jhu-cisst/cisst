@@ -92,6 +92,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGBody.h
     robotcomponents/osg/devOSGCamera.h
     robotcomponents/osg/devOSGManipulator.h
+    robotcomponents/osg/devOSGMono.h
     robotcomponents/osg/devOSGStereo.h
     robotcomponents/osg/devOSGWorld.h
     )
@@ -102,6 +103,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGBody.cpp
     robotcomponents/osg/devOSGCamera.cpp
     robotcomponents/osg/devOSGManipulator.cpp
+    robotcomponents/osg/devOSGMono.cpp
     robotcomponents/osg/devOSGStereo.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
