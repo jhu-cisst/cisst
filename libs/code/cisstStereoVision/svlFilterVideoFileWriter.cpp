@@ -241,10 +241,22 @@ int svlFilterVideoFileWriter::SetFramerate(double framerate)
 
 void svlFilterVideoFileWriter::Pause()
 {
-    // Get current absolute time
-    osaAbsoluteTime abstime;
-    TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
-    TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+    TargetActionTime = -1.0;
+    TargetCaptureLength = 0;
+    Action = true;
+}
+
+void svlFilterVideoFileWriter::PauseAtTime(double time)
+{
+    if (time <= 0.0) {
+        // Get current absolute time
+        osaAbsoluteTime abstime;
+        TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
+        TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+    }
+    else {
+        TargetActionTime = time;
+    }
 
     TargetCaptureLength = 0;
     Action = true;
@@ -252,10 +264,22 @@ void svlFilterVideoFileWriter::Pause()
 
 void svlFilterVideoFileWriter::Record(int frames)
 {
-    // Get current absolute time
-    osaAbsoluteTime abstime;
-    TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
-    TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+    TargetActionTime = -1.0;
+    TargetCaptureLength = frames;
+    Action = true;
+}
+
+void svlFilterVideoFileWriter::RecordAtTime(int frames, double time)
+{
+    if (time <= 0.0) {
+        // Get current absolute time
+        osaAbsoluteTime abstime;
+        TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
+        TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+    }
+    else {
+        TargetActionTime = time;
+    }
 
     TargetCaptureLength = frames;
     Action = true;

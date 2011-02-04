@@ -56,7 +56,9 @@ public:
     int LoadCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT);
 
     void Pause();
+    void PauseAtTime(double time = -1.0);
     void Record(int frames = -1);
+    void RecordAtTime(int frames = -1, double time = -1.0);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
