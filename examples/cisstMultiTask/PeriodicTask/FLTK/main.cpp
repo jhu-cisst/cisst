@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction.h>
 #include <cisstMultiTask.h>
 
-#include "sineTask.h"
+#include <components/sineTask.h>
 #include "displayTask.h"
 #include "displayUI.h"
 
@@ -32,9 +32,6 @@ int main(void)
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    // add a log per thread
-    osaThreadedLogFile threadedLog("example9-");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -24,11 +24,10 @@ add_executable (cisstMultiTaskPeriodicTaskQt
                 displayQtWidget.cpp
                 displayQtWidget.h
                 main.cpp
-                sineTask.cpp
-                sineTask.h
                 )
 
 target_link_libraries (cisstMultiTaskPeriodicTaskQt
+                       cisstMultiTaskPeriodicTaskComponents
                        ${QT_LIBRARIES}
                        )
 cisst_target_link_libraries (cisstMultiTaskPeriodicTaskQt

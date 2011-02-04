@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 
 #include "displayQtComponent.h"
-#include "sineTask.h"
+#include <components/sineTask.h>
 
 const unsigned int NumSineTasks = 2;
 
