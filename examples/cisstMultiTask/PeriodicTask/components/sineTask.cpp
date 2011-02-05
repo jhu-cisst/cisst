@@ -39,16 +39,36 @@ void sineTask::SetAmplitude(const mtsDouble & amplitude)
     SineAmplitude = amplitude.Data;
 }
 
+void sineTask::SetTriggerThreshold(const mtsDouble & trigger)
+{
+    TriggerThreshold = trigger.Data;
+}
+
+void sineTask::ResetTrigger(void)
+{
+    TriggerEnabled = true;
+}
+
 void sineTask::Startup(void)
 {
-    SineAmplitude = 1.0; // set the initial amplitude
+    SineData = 0.0;
+    SineAmplitude = 1.0;
+    TriggerThreshold = 0.0;
+    TriggerEnabled = false;
 }
 
 void sineTask::Run(void)
 {
-    // process the commands received, i.e. possible SetSineAmplitude
+    // process the commands received
     ProcessQueuedCommands();
-    // compute the new values based on the current time and amplitude
     SineData = SineAmplitude
         * sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 10.0);
+    // check if the trigger is enabled and if the conditions are right
+    // to send an event
+    if (TriggerEnabled) {
+        if  (SineData >= TriggerThreshold) {
+            MainInterface.TriggerEvent();
+            TriggerEnabled = false;
+        }
+    }
 }

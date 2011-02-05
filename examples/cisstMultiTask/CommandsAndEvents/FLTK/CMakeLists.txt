@@ -16,7 +16,7 @@
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 # CMake command, generate .cxx and .h from .fl files
-fltk_wrap_ui (cisstMultiTaskCommandsAndEventsFLTK clientUI.fl serverUI.fl)
+fltk_wrap_ui (cisstMultiTaskCommandsAndEventsFLTKLocal clientUI.fl serverUI.fl)
 
 # name the main executable and specifies with source files to use
 add_executable (cisstMultiTaskCommandsAndEventsFLTKLocal
@@ -25,7 +25,7 @@ add_executable (cisstMultiTaskCommandsAndEventsFLTKLocal
                 localMain.cpp
                 clientTask.h
                 serverTask.h
-                ${cisstMultiTaskCommandsAndEventsFLTK_FLTK_UI_SRCS}
+                ${cisstMultiTaskCommandsAndEventsFLTKLocal_FLTK_UI_SRCS}
                 )
 
 # link with the cisst libraries
@@ -36,23 +36,30 @@ cisst_target_link_libraries(cisstMultiTaskCommandsAndEventsFLTKLocal
 # compile network version if ICE is available
 if (CISST_MTS_HAS_ICE)
 
+  # CMake command, generate .cxx and .h from .fl files
+  fltk_wrap_ui (cisstMultiTaskCommandsAndEventsFLTKServer serverUI.fl)
+
   # name the main executable and specifies with source files to use
   add_executable (cisstMultiTaskCommandsAndEventsFLTKServer
                   serverTask.cpp
                   serverMain.cpp
                   serverTask.h
-                  ${cisstMultiTaskCommandsAndEventsFLTK_FLTK_UI_SRCS}
+                  ${cisstMultiTaskCommandsAndEventsFLTKServer_FLTK_UI_SRCS}
                   )
   # link with the cisst libraries
   cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsFLTKServer
                                cisstCommon cisstOSAbstraction cisstMultiTask)
+
+
+  # CMake command, generate .cxx and .h from .fl files
+  fltk_wrap_ui (cisstMultiTaskCommandsAndEventsFLTKClient clientUI.fl)
 
   # name the main executable and specifies with source files to use
   add_executable (cisstMultiTaskCommandsAndEventsFLTKClient
                   clientTask.cpp
                   clientMain.cpp
                   clientTask.h
-                  ${cisstMultiTaskCommandsAndEventsFLTK_FLTK_UI_SRCS}
+                  ${cisstMultiTaskCommandsAndEventsFLTKClient_FLTK_UI_SRCS}
                   )
   # link with the cisst libraries
   cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsFLTKClient

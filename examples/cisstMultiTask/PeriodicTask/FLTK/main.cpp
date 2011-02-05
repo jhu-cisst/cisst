@@ -24,6 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask.h>
 
 #include <components/sineTask.h>
+#include <components/clockComponent.h>
+
 #include "displayTask.h"
 #include "displayUI.h"
 
@@ -40,16 +42,20 @@ int main(void)
     const double PeriodSine = 5.0 * cmn_ms; // in milliseconds
     const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-    sineTask * sineTaskObject = new sineTask("SIN", PeriodSine);
-    displayTask * displayTaskObject = new displayTask("DISP", PeriodDisplay);
-    displayTaskObject->Configure();
+    sineTask * sineIntance = new sineTask("Sine", PeriodSine);
+    clockComponent * clockInstance = new clockComponent("Clock");
+    displayTask * displayInstance = new displayTask("Display", PeriodDisplay);
+
+    displayInstance->Configure();
 
     // add the tasks to the component manager
-    componentManager->AddComponent(sineTaskObject);
-    componentManager->AddComponent(displayTaskObject);
+    componentManager->AddComponent(sineIntance);
+    componentManager->AddComponent(clockInstance);
+    componentManager->AddComponent(displayInstance);
 
     // connect the components, task.RequiresInterface -> task.ProvidesInterface
-    componentManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
+    componentManager->Connect("Display", "DataGenerator", "Sine", "MainInterface");
+    componentManager->Connect("Display", "TimeGenerator", "Clock", "MainInterface");
 
     // create the components, i.e. find the commands
     componentManager->CreateAll();
@@ -60,8 +66,8 @@ int main(void)
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // wait until the close button of the UI is pressed
-    while (!displayTaskObject->IsTerminated()) {
-        displayTaskObject->UpdateUI(); // this has to be done by main thread
+    while (!displayInstance->IsTerminated()) {
+        displayInstance->UpdateUI(); // this has to be done by main thread
         osaSleep(5.0 * cmn_ms); // sleep to save CPU
     }
     // cleanup
@@ -69,5 +75,10 @@ int main(void)
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
 
     componentManager->Cleanup();
+
+    delete clockInstance;
+    delete sineIntance;
+    delete displayInstance;
+
     return 0;
 }

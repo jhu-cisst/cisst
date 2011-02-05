@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0109 
+version 1.0300 
 header_name {.h} 
 code_name {.cxx}
 class displayUI {open
@@ -8,7 +8,7 @@ class displayUI {open
   } {
     Fl_Window DisplayWindow {
       label DisplayWindow open
-      xywh {445 163 485 330} type Double visible
+      xywh {697 176 579 329} type Double visible
     } {
       Fl_Box Plot {
         label {Graph Region}
@@ -17,18 +17,38 @@ class displayUI {open
         class vctPlot2DOpenGLFLTK
       }
       Fl_Value_Output Data {
-        label {Data:} selected
-        xywh {400 25 75 25} box THIN_DOWN_BOX align 5
+        label {Data:}
+        xywh {400 25 170 25} box THIN_DOWN_BOX align 5
       }
       Fl_Return_Button Close {
         label Close
         callback {DisplayWindow->hide();}
-        xywh {400 295 75 25} box THIN_UP_BOX
+        xywh {495 295 75 25} box THIN_UP_BOX
       }
       Fl_Dial Amplitude {
         label {Amplitude:}
-        callback {AmplitudeChanged = true;}
-        xywh {400 135 75 75} box OSHADOW_BOX color 1 align 1
+        callback {AmplitudeChanged = true; AmplitudeValue->value(Amplitude->value());}
+        tooltip {Modify amplitude used by the data generator} xywh {400 79 80 81} box OSHADOW_BOX color 1 align 1
+      }
+      Fl_Dial Trigger {
+        label {Trigger:}
+        callback {TriggerChanged = true; TriggerValue->value(Trigger->value());}
+        tooltip {Modify amplitude used to trigger wakeup} xywh {490 79 80 81} box OSHADOW_BOX color 109 align 1 minimum -1
+      }
+      Fl_Check_Button WaitForTrigger {
+        label Wait
+        callback {TriggerWaitChanged = true;}
+        tooltip {Wait until the sine wave has reached the trigger value} xywh {490 197 80 18} down_box DOWN_BOX
+      }
+      Fl_Value_Output Time {
+        label {Time:}
+        xywh {400 258 170 25} align 5
+      }
+      Fl_Value_Output AmplitudeValue {
+        tooltip {Current amplitude} xywh {400 165 80 25} labeltype NO_LABEL align 5
+      }
+      Fl_Value_Output TriggerValue {selected
+        tooltip {Current trigger value} xywh {490 165 80 25} labeltype NO_LABEL align 5
       }
     }
     code {AmplitudeChanged = false;} {}
@@ -36,7 +56,16 @@ class displayUI {open
   Function {show(int argc, char**argv)} {open
   } {
     code {DisplayWindow->show();} {}
+    code {TriggerChanged = false;} {}
+    code {TriggerWaitChanged = false;} {}
+    code {Closed = false;} {}
   }
-  decl {bool AmplitudeChanged;} {public
+  decl {bool AmplitudeChanged;} {public local
+  }
+  decl {bool TriggerChanged;} {public local
+  }
+  decl {bool TriggerWaitChanged;} {public local
+  }
+  decl {bool Closed;} {public local
   }
 } 

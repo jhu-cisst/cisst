@@ -27,30 +27,28 @@ CMN_IMPLEMENT_SERVICES(displayTask);
 displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
-    // to communicate with the interface of the resource
-    mtsInterfaceRequired * required = AddInterfaceRequired("DataGenerator");
-    if (required) {
-       required->AddFunction("GetData", Generator.GetData);
-       required->AddFunction("SetAmplitude", Generator.SetAmplitude);
-    }
+    // call generated method to configure this component
+    InitComponent();
 }
 
 void displayTask::Configure(const std::string & CMN_UNUSED(filename))
 {
     // define some values, ideally these come from a configuration
     // file and then configure the user interface
-    double maxValue = 0.5; double minValue = 5.0;
+    double maxValue = 5.0; double minValue = 0.5;
     double startValue =  1.0;
-    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting bounds to: "
-                               << minValue << ", " << maxValue << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting start value to: "
-                               << startValue << std::endl;
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(startValue);
+    UI.AmplitudeValue->value(startValue);
+    UI.Trigger->bounds(-0.9, 0.9);
+    UI.Trigger->value(0.0);
+    UI.TriggerValue->value(0.0);
+    // plotting
     size_t traceId;
     UI.Plot->AddTrace("Data", traceId);
-    AmplitudeData = startValue;
-    
+    UI.Plot->AddTrace("Trigger", traceId);
+    UI.Plot->SetColor(1, vct3(0.0, 1.0, 0.0));
+    // display user interface
     UI.show(0, NULL);
     UI.Plot->show();
 }
@@ -59,14 +57,23 @@ void displayTask::Startup(void)
 {
 }
 
+void displayTask::HandleTrigger(void)
+{
+    ThreadSignal.Raise();
+}
+
 void displayTask::Run(void)
 {
     // get the data from the sine wave generator task
-    Generator.GetData(Data);
+    DataGenerator.GetData(Data);
+    TimeGenerator.GetTime(Time);
     Fl::lock();
     {
         UI.Data->value(Data);
+        UI.Time->value(Time); // display in seconds
         UI.Plot->AddPoint(0, vctDouble2(Data.Timestamp(), Data.Data));
+        UI.Plot->AddPoint(1, vctDouble2(Data.Timestamp(),
+                                        UI.Trigger->value() * UI.Amplitude->value()));
         UI.Plot->redraw();
         // check if the user has entered a new amplitude in UI
         if (UI.AmplitudeChanged) {
@@ -76,10 +83,25 @@ void displayTask::Run(void)
                                        ->GetTimeServer().GetRelativeTime());
             AmplitudeData.SetValid(true);
             // send it
-            Generator.SetAmplitude(AmplitudeData);
+            DataGenerator.SetAmplitude(AmplitudeData);
             UI.AmplitudeChanged = false;
             CMN_LOG_CLASS_RUN_VERBOSE << "Run: " << this->GetTick()
                                       << " - Amplitude: " << AmplitudeData << std::endl;
+        }
+        if (UI.TriggerChanged) {
+            DataGenerator.SetTriggerThreshold(UI.Trigger->value() * UI.Amplitude->value());
+            UI.TriggerChanged = false;
+            CMN_LOG_CLASS_RUN_VERBOSE << "Run : " << this->GetTick()
+                                      << " - Trigger: " << UI.Trigger->value() << std::endl;
+        }
+        if (UI.TriggerWaitChanged) {
+            UI.TriggerWaitChanged = false;
+            if (UI.WaitForTrigger->value()) {
+                CMN_LOG_RUN_VERBOSE << "Run: Waiting for trigger." << std::endl;
+                DataGenerator.ResetTrigger();
+                ThreadSignal.Wait();
+                UI.WaitForTrigger->value(0);
+            }
         }
     }
     Fl::unlock();
