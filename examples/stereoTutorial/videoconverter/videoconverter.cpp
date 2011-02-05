@@ -32,6 +32,8 @@ using namespace std;
 
 int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
 {
+    const bool resize = false;
+
     svlInitialize();
 
     svlStreamManager stream(8);
@@ -63,10 +65,9 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
         writer.SetFilePath(dst_path);
     }
 
-#if 0
     svlFilterImageResizer resizer;
     resizer.SetOutputRatio(0.5, 0.5);
-#endif
+    resizer.SetInterpolation(true);
 
     if (loadcodec) {
         if (writer.LoadCodec("codec.dat") != SVL_OK) {
@@ -90,9 +91,7 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
     // chain filters to pipeline
     svlFilterOutput* output = 0;
     stream.SetSourceFilter(&source);     output = source.GetOutput();
-#if 0
-    output->Connect(resizer.GetInput()); output = resizer.GetOutput();
-#endif
+    if (resize) output->Connect(resizer.GetInput()); output = resizer.GetOutput();
     output->Connect(writer.GetInput());  output = writer.GetOutput();
 
     cerr << "Converting: '" << src_path << "' to '" << dst_path <<"' using codec: '" << encoder << "'" << endl;

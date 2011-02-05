@@ -69,14 +69,14 @@ public:
                 {
                     if (VideoWriterFilter) {
                         if (Recording) {
-                            VideoWriterFilter->Pause();
+                            VideoWriterFilter->PauseAtTime();
                             SplitterOutput->SetBlock(true);
                             Recording = false;
                             cout << endl << " >>> Recording paused <<<" << endl;
                         }
                         else {
                             SplitterOutput->SetBlock(false);
-                            VideoWriterFilter->Record(-1);
+                            VideoWriterFilter->RecordAtTime();
                             Recording = true;
                             cout << endl << " >>> Recording started <<<" << endl;
                         }

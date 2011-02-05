@@ -61,14 +61,14 @@ public:
                 case ' ':
                     if (RecorderFilter) {
                         if (Recording) {
-                            RecorderFilter->Pause();
+                            RecorderFilter->PauseAtTime();
                             SplitterOutput->SetBlock(true);
                             Recording = false;
                             cout << endl << " >>> Recording paused <<<" << endl;
                         }
                         else {
                             SplitterOutput->SetBlock(false);
-                            RecorderFilter->Record(-1);
+                            RecorderFilter->RecordAtTime();
                             Recording = true;
                             cout << endl << " >>> Recording started <<<" << endl;
                         }
@@ -148,7 +148,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     gamma.SetGamma(0.0);
 
     // setup splitter
-    splitter.AddOutput("output2", 8);
+    splitter.AddOutput("output2", 8, 200);
     svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup writer
