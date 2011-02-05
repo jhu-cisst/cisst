@@ -31,13 +31,18 @@ std::string ccgComponent::WriteInterfaceProvided(void)
     ccgInterfaceProvided interf = InterfacesProvided.front();
     std::string n = interf.Name.substr(1, interf.Name.length()-2);
 
-    std::string s = "    interfaceProvided = AddInterfaceProvided(" + interf.Name + ");\n";
+    std::string s
+        = "    interfaceProvided = AddInterfaceProvided(\"" + interf.Name + "\");\n"
+        + "    if (!interfaceProvided) {\n"
+        + "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add \\\"" + interf.Name + "\\\" to component \\\"\" << this->GetName() << \"\\\"\" << std::endl;\n"
+        + "        return false;\n"
+        + "    }\n";
 
     size_t size = interf.Commands.size();
     for (size_t i = 0; i < size; i++) {
         ccgCommand command = interf.Commands.front();
 
-        s += "    interfaceProvided->AddCommand";
+        s += "    localResult = interfaceProvided->AddCommand";
         if (command.Type == "Void" || command.Type == "Write" || command.Type == "QualifiedRead") {
             s += command.Type + "(&" + Name + "::" + command.Func + ", this, " + command.Name;
 
@@ -47,12 +52,18 @@ std::string ccgComponent::WriteInterfaceProvided(void)
 
             s += ");\n";
         } else if (command.Type == "Read") {
-            if (command.Arg2 == "void")
+            if (command.Arg2 == "void") {
                 s += command.Type + "(&" + Name + "::" + command.Func + ", " + command.Arg1 + ", " + command.Name + ");\n";
-            else
+            } else {
                 s += command.Type + "(&" + command.Arg2 + "::" + command.Func + ", " + command.Arg1 + ", " + command.Name + ");\n";
-        } else if (command.Type == "ReadState")
+            }
+        } else if (command.Type == "ReadState") {
             s += command.Type + "(StateTable, " + command.Func + ", " + command.Name + ");\n";
+        }
+        s += "    if (!localResult) {\n";
+        s += "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add command to interface\\\"\" << interfaceProvided->GetFullName() << \"\\\"\" << std::endl;\n";
+        s += "        return false;\n";
+        s += "    }\n";
 
         interf.Commands.pop_front();
     }
@@ -61,13 +72,17 @@ std::string ccgComponent::WriteInterfaceProvided(void)
     for (size_t i = 0; i < size; i++) {
         ccgEvent e = interf.Events.front();
 
-        s += "    interfaceProvided->AddEvent";
-        s += e.Type + "(" + e.Function + ", " + e.Name;
-        if (e.Type == "Write")
+        s += "    localResult = interfaceProvided->AddEvent";
+        s += e.Type + "(" + interf.Name + "." + e.Function + ", " + e.Name;
+        if (e.Type == "Write") {
             s += ", " + e.Arg1 + ");\n";
-        else
+        } else {
             s += ");\n";
-
+        }
+        s += "    if (!localResult) {\n";
+        s += "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add event to interface\\\"\" << interfaceProvided->GetFullName() << \"\\\"\" << std::endl;\n";
+        s += "        return false;\n";
+        s += "    }\n";
         interf.Events.pop_front();
     }
 
@@ -86,19 +101,28 @@ std::string ccgComponent::WriteInterfaceRequired(void)
     size_t size = interf.Functions.size();
     for (size_t i = 0; i < size; i++) {
         ccgFunction function = interf.Functions.front();
-        s += "    interfaceRequired->AddFunction";
+        s += "    localResult = interfaceRequired->AddFunction";
         s += "(" + function.Name + ", " + interf.Type + "." + function.Type + ");\n";
+        s += "    if (!localResult) {\n";
+        s += "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add function to interface\\\"\" << interfaceRequired->GetFullName() << \"\\\"\" << std::endl;\n";
+        s += "        return false;\n";
+        s += "    }\n";
         interf.Functions.pop_front();
     }
 
     size = interf.Handlers.size();
     for (size_t i = 0; i < size; i++) {
         ccgEventHandler handler = interf.Handlers.front();
-        s += "    interfaceRequired->AddEventHandler" + handler.Type;
+        s += "    localResult = interfaceRequired->AddEventHandler" + handler.Type;
         s += "(&" + Name + "::" + handler.Function + ", this, " + handler.Name;
-        if (handler.Arg != "void")
+        if (handler.Arg != "void") {
             s += ", " + handler.Arg;
+        }
         s += ");\n";
+        s += "    if (!localResult) {\n";
+        s += "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add event handler to interface\\\"\" << interfaceRequired->GetFullName() << \"\\\"\" << std::endl;\n";
+        s += "        return false;\n";
+        s += "    }\n";
         interf.Handlers.pop_front();
     }
 
@@ -115,18 +139,24 @@ void ccgComponent::GenerateCode(std::string filename)
 
     file.open(filename.c_str());
 
-    file << "/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */" << std::endl;
-    file << "/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */" << std::endl;
-    file << "/* File " << GetName() << " generated by cisstComponentGenerator, do not change */\n" << std::endl;
-
-    file << "#include <" << GetName() << ".h>\n" << std::endl;
-
-    file << "void " << GetName() << "::InitComponent(void) {\n" << std::endl;
+    file << "/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */" << std::endl
+         << "/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */" << std::endl
+         << "/* File " << GetName() << " generated by cisstComponentGenerator, do not change */" << std::endl
+         << std::endl
+         << "#include <" << GetName() << ".h>" << std::endl
+         << std::endl
+         << "bool " << GetName() << "::InitComponent(void)" << std::endl
+         << "{" << std::endl
+         << "    bool localResult = true;" << std::endl;
+        
+        
     size_t size = GetStateTableSize();
-    if (size > 0)
+    if (size > 0) {
         file << "    // state table variables" << std::endl;
-    for (size_t i = 0; i < size; i++)
+    }
+    for (size_t i = 0; i < size; i++) {
         file << "    " << WriteStateTableData() << std::endl;
+    }
 
     size = GetNumberOfInterfacesProvided();
 
@@ -135,8 +165,9 @@ void ccgComponent::GenerateCode(std::string filename)
              << "    mtsInterfaceProvided * interfaceProvided;" << std::endl;
     }
 
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++) {
         file << WriteInterfaceProvided() << std::endl;
+    }
 
     size = GetNumberOfInterfacesRequired();
 
@@ -145,10 +176,11 @@ void ccgComponent::GenerateCode(std::string filename)
              << "    mtsInterfaceRequired * interfaceRequired;" << std::endl;
     }
 
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++) {
         file << WriteInterfaceRequired() << std::endl;
+    }
 
-    file << "\n};" << std::endl;
+    file << std::endl << "    return true;" << std::endl << "};" << std::endl;
 
     file.close();
 }
