@@ -24,7 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 devODEWorld::devODEWorld( double period,
 			  osaCPUMask mask,
 			  const vctFixedSizeVector<double,3>& gravity ) : 
-  devRobotComponent( "devODEWorld", period, devODEWorld::ENABLED, mask ),
+  //devRobotComponent( "devODEWorld", period, devODEWorld::ENABLED, mask ),
+  mtsTaskPeriodic( "ODEWorld", period, true ),
   timestep(period) {
 
   dInitODE2(0);                             // initialize the engine
@@ -189,7 +190,10 @@ void devODEWorld::Lock()
 void devODEWorld::Unlock()
 { WorldMutex.Unlock(); }
 
-void devODEWorld::RunComponent() {
+//void devODEWorld::RunComponent() {
+void devODEWorld::Run() {
+  ProcessQueuedCommands();
+  ProcessQueuedEvents();
 
   for( size_t i=0; i<joints.size(); i++ )
     { joints[i]->ApplyForceTorque(); }

@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
-#include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+//#include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 #include <cisstDevices/robotcomponents/devRobotComponent.h>
 
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devODEWorld : 
 
-  public devRobotComponent,
+  public mtsTaskPeriodic,
   public devOSGWorld {
 
  public:
@@ -176,7 +176,10 @@ class CISST_EXPORT devODEWorld :
   */
   void Collision( dGeomID o1, dGeomID o2 );
 
-  void RunComponent();
+  void Configure( const std::string& = "" ) {}
+  void Startup(){}
+  void Run();
+  void Cleanup(){}
 
   void Insert( devODEJoint* joint );
 

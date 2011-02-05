@@ -218,8 +218,8 @@ class CISST_EXPORT devOSGCamera :
   svlBufferSample* GetDepthBufferSample() const { return depthbuffersample; }
   svlBufferSample* GetColorBufferSample() const { return colorbuffersample; }
 
-  virtual const cv::Mat& GetDepthImage( size_t idx = 0 ) const = 0;
-  virtual const cv::Mat& GetColorImage( size_t idx = 0 ) const = 0;
+  //virtual const cv::Mat& GetDepthImage( size_t idx = 0 ) const = 0;
+  //virtual const cv::Mat& GetColorImage( size_t idx = 0 ) const = 0;
 
 #endif
 
