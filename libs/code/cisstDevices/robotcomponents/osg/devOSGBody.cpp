@@ -125,9 +125,8 @@ devOSGBody::devOSGBody(	const std::string& name,
 
   // MTS stuff
   if( !fnname.empty() ){
-    CMN_LOG_INIT_VERBOSE << name << " " << fnname << std::endl;
     mtsInterfaceRequired* required;
-    required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
+    required = AddInterfaceRequired( "Transformation" );
     if( required != NULL )
       { required->AddFunction( fnname, ReadTransformation ); }
 
@@ -227,7 +226,6 @@ devOSGBody::devOSGBody(	const std::string& name,
 
   // MTS stuff
   if( !fnname.empty() ){
-    CMN_LOG_INIT_VERBOSE << name << " " << fnname << std::endl;
     mtsInterfaceRequired* required;
     required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
     if( required != NULL )

@@ -161,7 +161,7 @@ void devOSGMono::Run(){
 
 #if CISST_SVL_HAS_OPENCV2
 
-const cv::Mat& devOSGMono::GetDepthImage( size_t ) const{
+cv::Mat devOSGMono::GetDepthImage( size_t ) const{
   // get the camera final draw callback
   const osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
@@ -174,7 +174,7 @@ const cv::Mat& devOSGMono::GetDepthImage( size_t ) const{
   return finaldrawcallback->GetCVDepthImage();
 }
 
-const cv::Mat& devOSGMono::GetColorImage( size_t ) const{
+cv::Mat devOSGMono::GetColorImage( size_t ) const{
   // get the camera final draw callback
   const osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();

@@ -152,7 +152,7 @@ class CISST_EXPORT devOSGCamera :
        not updated if the callback does not capture the depth buffer.
        \return A pointer to the depth image
     */
-    const cv::Mat&                  GetCVDepthImage()  const
+    cv::Mat                  GetCVDepthImage()  const
     { return cvDepthImage; }
        vctDynamicMatrix<float>*        GetvctDepthImage()
     { return &vctDepthImage; }
@@ -163,7 +163,7 @@ class CISST_EXPORT devOSGCamera :
        not updated if the callback does not capture the color buffer.
        \return A reference to the color image
     */
-    const cv::Mat&                   GetCVColorImage() const 
+    cv::Mat                   GetCVColorImage() const 
     {  return cvColorImage; }
     vctDynamicMatrix<unsigned char>& GetvctColorImage()
     { return vctColorImage; }
@@ -199,6 +199,9 @@ class CISST_EXPORT devOSGCamera :
 		bool trackball = true );
 
   ~devOSGCamera();
+
+  void setCullMask( osg::Node::NodeMask mask )
+  { getCamera()->setCullMask( mask ); }
 
   void Configure( const std::string& = "" ){}
   void Startup(){}

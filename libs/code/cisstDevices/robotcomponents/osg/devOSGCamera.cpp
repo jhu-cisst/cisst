@@ -206,8 +206,7 @@ devOSGCamera::devOSGCamera( const std::string& name,
 
   // MTS stuff
   // This interface is used to change the position/orientation of the camera
-  if( !fnname.empty() ){
-    mtsInterfaceRequired* required;
+  if( !fnname.empty() ){    mtsInterfaceRequired* required;
     required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
     if( required != NULL )
       { required->AddFunction( fnname, ReadTransformation ); }
