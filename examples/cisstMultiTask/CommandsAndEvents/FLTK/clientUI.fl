@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0109 
+version 1.0300 
 header_name {.h} 
 code_name {.cxx}
 class clientUI {open
@@ -7,18 +7,23 @@ class clientUI {open
   Function {clientUI()} {open
   } {
     Fl_Window ClientWindow {
-      label Client open selected
-      xywh {466 199 356 258} type Double visible
+      label Client open
+      xywh {466 199 681 253} type Double visible
     } {
       Fl_Return_Button Close {
         label Close
         callback {ClientWindow->hide();  Opened = false;}
-        xywh {230 215 105 30} box THIN_UP_BOX
+        xywh {370 210 105 30} box THIN_UP_BOX
       }
       Fl_Button VoidButton {
         label Void
         callback {this->VoidRequested = true;}
-        xywh {215 20 120 30}
+        tooltip {Triggers a "Void" command sent to the server.} xywh {215 20 120 30}
+      }
+      Fl_Button VoidSlowButton {
+        label VoidSlow
+        callback {this->VoidSlowRequested = true;}
+        tooltip {Triggers a blocking "Void" command sent to the server.} xywh {355 20 120 30}
       }
       Fl_Value_Slider WriteValue {
         xywh {15 60 190 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
@@ -26,12 +31,17 @@ class clientUI {open
       Fl_Button WriteButton {
         label Write
         callback {this->WriteRequested = true;}
-        xywh {215 60 120 30}
+        tooltip {Triggers a "Write" command sent to the server.  The value on the left will be sent along.} xywh {215 60 120 30}
+      }
+      Fl_Button WriteSlowButton {
+        label WriteSlow
+        callback {this->WriteSlowRequested = true;}
+        tooltip {Triggers a blocking "Write" command sent to the server.  The value on the left will be sent along.} xywh {355 60 120 30}
       }
       Fl_Button ReadButton {
         label Read
         callback {this->ReadRequested = true;}
-        xywh {215 100 120 30}
+        tooltip {Triggers a read command.  The user defined value on the server side should be read.} xywh {215 100 120 30}
       }
       Fl_Value_Output ReadValue {
         xywh {15 101 191 28}
@@ -39,14 +49,25 @@ class clientUI {open
       Fl_Button QualifiedReadButton {
         label {Qualified Read}
         callback {this->QualifiedReadRequested = true;}
-        xywh {215 138 120 30}
+        tooltip {Triggers a qualified read, i.e. sends the value above and the server returns a sum of (read+write)} xywh {215 138 120 30}
       }
       Fl_Value_Output QualifiedReadValue {
         xywh {15 138 191 28}
       }
       Fl_Value_Output EventValue {
         label {Events   }
-        xywh {215 176 120 28}
+        tooltip {Event counter, a write event sends a value added to the counter, a void event resets the counter.} xywh {215 176 120 28}
+      }
+      Fl_Slider HeartBeat {
+        tooltip {Heart beat, shows that the task is still running} xywh {15 215 190 30} type Horizontal maximum 100 step 1 deactivate
+      }
+      Fl_Check_Button VoidSlowBlocking {
+        label Blocking
+        tooltip {Make the "VoidSlow" command blocking, i.e. wait until the server is done.} xywh {475 20 105 30} down_box DOWN_BOX
+      }
+      Fl_Check_Button WriteSlowBlocking {
+        label Blocking
+        tooltip {Make the "WriteSlow" command blocking, i.e. wait until the server is done.} xywh {475 60 105 30} down_box DOWN_BOX
       }
     }
   }
@@ -54,14 +75,18 @@ class clientUI {open
   } {
     code {ClientWindow->show();} {}
   }
-  decl {bool VoidRequested;} {public
+  decl {bool VoidRequested;} {public local
   }
-  decl {bool WriteRequested;} {public
+  decl {bool VoidSlowRequested;} {public local
   }
-  decl {bool ReadRequested;} {public
+  decl {bool WriteRequested;} {public local
   }
-  decl {bool QualifiedReadRequested;} {public
+  decl {bool WriteSlowRequested;} {public local
   }
-  decl {bool Opened;} {public
+  decl {bool ReadRequested;} {public local
+  }
+  decl {bool QualifiedReadRequested;} {public local
+  }
+  decl {bool Opened;} {public local
   }
 } 

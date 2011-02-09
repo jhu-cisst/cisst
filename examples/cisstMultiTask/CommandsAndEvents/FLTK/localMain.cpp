@@ -81,21 +81,8 @@ int main(int argc, char **argv)
 
     // add the tasks to the task manager
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-    // reconfiguration test 1
-#if 0
-#if CISST_MTS_HAS_ICE
-    componentManager = mtsComponentManager::GetInstance("localhost", "localMainTest");
-#endif
-#endif
-
     componentManager->AddComponent(client);
     componentManager->AddComponent(server);
-    // reconfiguration test 2
-#if 0
-#if CISST_MTS_HAS_ICE
-    componentManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
-#endif
-#endif
 
     // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
     if (!componentManager->Connect("Client", "Required", "Server", "Provided")) {
@@ -103,24 +90,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // reconfiguration test 3
-#if 0
-#if CISST_MTS_HAS_ICE
-    componentManager = mtsComponentManager::GetInstance("localhost", "localMainTest");
-#endif
-#endif
-
     // create the tasks, i.e. find the commands
     componentManager->CreateAll();
     // start the periodic Run
     componentManager->StartAll();
-
-    // reconfiguration test 4
-#if 0
-#if CISST_MTS_HAS_ICE
-    componentManager = mtsComponentManager::GetInstance("localhost", "localMainTest");
-#endif
-#endif
 
     // wait until the close button of the UI is pressed
     while (server->UIOpened() || client->UIOpened()) {

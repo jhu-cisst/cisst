@@ -22,6 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include "displayTask.h"
 #include "displayUI.h"
 
+
+#define FLTK_CRITICAL_SECTION Fl::lock(); for (bool firstRun = true; firstRun; firstRun = false, Fl::unlock(), Fl::awake())
+
 CMN_IMPLEMENT_SERVICES(displayTask);
 
 displayTask::displayTask(const std::string & taskName, double period):
@@ -67,7 +70,7 @@ void displayTask::Run(void)
     // get the data from the sine wave generator task
     DataGenerator.GetData(Data);
     TimeGenerator.GetTime(Time);
-    Fl::lock();
+    FLTK_CRITICAL_SECTION
     {
         UI.Data->value(Data);
         UI.Time->value(Time); // display in seconds
@@ -104,8 +107,6 @@ void displayTask::Run(void)
             }
         }
     }
-    Fl::unlock();
-    Fl::awake();
 
     // log some extra information
     CMN_LOG_CLASS_RUN_VERBOSE << "Run : " << this->GetTick()
@@ -115,10 +116,9 @@ void displayTask::Run(void)
 void displayTask::UpdateUI(void)
 {
     // update the UI, process UI events
-    Fl::lock();
-    if (Fl::check() == 0) {
-        Kill();
+    FLTK_CRITICAL_SECTION {
+        if (Fl::check() == 0) {
+            Kill();
+        }
     }
-    Fl::unlock();
-    Fl::awake();
 }

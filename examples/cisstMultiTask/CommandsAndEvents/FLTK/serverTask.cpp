@@ -28,6 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskDouble);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskmtsDouble);
 
+// macro to create an FLTK critical section with lock, unlock and awake
+#define FLTK_CRITICAL_SECTION Fl::lock(); for (bool firstRun = true; firstRun; firstRun = false, Fl::unlock(), Fl::awake())
+
 template <class _dataType>
 serverTask<_dataType>::serverTask(const std::string & taskName, double period):
     serverTaskBase(taskName, period)
@@ -38,7 +41,9 @@ serverTask<_dataType>::serverTask(const std::string & taskName, double period):
     mtsInterfaceProvided * provided = AddInterfaceProvided("Provided");
     if (provided) {
         provided->AddCommandVoid(&serverTask<_dataType>::Void, this, "Void");
+        provided->AddCommandVoid(&serverTask<_dataType>::VoidSlow, this, "VoidSlow");
         provided->AddCommandWrite(&serverTask<_dataType>::Write, this, "Write");
+        provided->AddCommandWrite(&serverTask<_dataType>::WriteSlow, this, "WriteSlow");
         provided->AddCommandReadState(this->StateTable, this->ReadValue, "Read");
         provided->AddCommandQualifiedRead(&serverTask<_dataType>::QualifiedRead, this, "QualifiedRead");
         provided->AddEventVoid(this->EventVoid, "EventVoid");
@@ -51,17 +56,30 @@ template <class _dataType>
 void serverTask<_dataType>::Void(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Void" << std::endl;
-    Fl::lock();
-    {
+    FLTK_CRITICAL_SECTION {
         if (UI.VoidValue->value() == 0) {
             UI.VoidValue->value(1);
         } else {
             UI.VoidValue->value(0);
         }
     }
-    Fl::unlock();
-    Fl::awake();
-    osaSleep(10.0 * cmn_s);
+}
+
+
+template <class _dataType>
+void serverTask<_dataType>::VoidSlow(void)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "VoidSlow" << std::endl;
+    for (unsigned int index = 0; index < 6; ++index) {
+        FLTK_CRITICAL_SECTION {
+            if (UI.VoidValue->value() == 0) {
+                UI.VoidValue->value(1);
+            } else {
+                UI.VoidValue->value(0);
+            }
+        }
+        osaSleep(0.5 * cmn_s);
+    }
 }
 
 
@@ -69,24 +87,29 @@ template <class _dataType>
 void serverTask<_dataType>::Write(const _dataType & data)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Write" << std::endl;
-    Fl::lock();
-    {
+    FLTK_CRITICAL_SECTION {
         UI.WriteValue->value((double)data);
     }
-    Fl::unlock();
-    Fl::awake();
+}
+
+
+template <class _dataType>
+void serverTask<_dataType>::WriteSlow(const _dataType & data)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "WriteSlow" << std::endl;
+    for (unsigned int index = 0; index < 6; ++index) {
+        UI.WriteValue->value((double)data / (6 - index));
+        osaSleep(0.5 * cmn_s);
+    }
 }
 
 
 template <class _dataType>
 void serverTask<_dataType>::QualifiedRead(const _dataType & data, _dataType & placeHolder) const
 {
-    Fl::lock();
-    {
+    FLTK_CRITICAL_SECTION {
         placeHolder = data + _dataType(UI.ReadValue->value());
     }
-    Fl::unlock();
-    Fl::awake();
 }
 
 
@@ -112,8 +135,7 @@ void serverTask<_dataType>::Run(void) {
         // process the commands received, i.e. possible SetServerAmplitude
         ProcessQueuedCommands();
         // compute the new values based on the current time and amplitude
-        Fl::lock();
-        {
+        FLTK_CRITICAL_SECTION {
             if (UI.VoidEventRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidEventRequested" << std::endl;
                 this->EventVoid();
@@ -127,9 +149,10 @@ void serverTask<_dataType>::Run(void) {
             }
 
             this->ReadValue = _dataType(UI.ReadValue->value());
-        }
-        Fl::unlock();
-        Fl::awake();
+
+            UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 100.0));
+
+        } // fltk critical section
     }
 }
 

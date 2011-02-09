@@ -23,6 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskDouble);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskmtsDouble);
 
+// macro to create an FLTK critical section with lock, unlock and awake
+#define FLTK_CRITICAL_SECTION Fl::lock(); for (bool firstRun = true; firstRun; firstRun = false, Fl::unlock(), Fl::awake())
+
+// macro to release the critical section and then relock, this can be
+// used for blocking commands to make sure FLTK remains responsive
+#define FLTK_CRITICAL_SECTION_TEMPORARY_RELEASE Fl::unlock(); Fl::awake(); for (bool _firstRun = true; _firstRun; _firstRun = false, Fl::lock())
+
 template <class _dataType>
 clientTask<_dataType>::clientTask(const std::string & taskName, double period):
     clientTaskBase(taskName, period)
@@ -30,10 +37,12 @@ clientTask<_dataType>::clientTask(const std::string & taskName, double period):
     // to communicate with the interface of the resource
     mtsInterfaceRequired * required = AddInterfaceRequired("Required");
     if (required) {
-        required->AddFunction("Void", this->VoidServer);
-        required->AddFunction("Write", this->WriteServer);
-        required->AddFunction("Read", this->ReadServer);
-        required->AddFunction("QualifiedRead", this->QualifiedReadServer);
+        required->AddFunction("Void", this->Void);
+        required->AddFunction("VoidSlow", this->VoidSlow);
+        required->AddFunction("Write", this->Write);
+        required->AddFunction("WriteSlow", this->WriteSlow);
+        required->AddFunction("Read", this->Read);
+        required->AddFunction("QualifiedRead", this->QualifiedRead);
         required->AddEventHandlerVoid(&clientTask<_dataType>::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask<_dataType>::EventWriteHandler, this, "EventWrite");
     }
@@ -64,25 +73,19 @@ void clientTask<_dataType>::Startup(void)
 template <class _dataType>
 void clientTask<_dataType>::EventWriteHandler(const _dataType & value)
 {
-    Fl::lock();
-    {
+    FLTK_CRITICAL_SECTION {
         double result = (double)value + UI.EventValue->value();
         UI.EventValue->value(result);
     }
-    Fl::unlock();
-    Fl::awake();
 }
 
 
 template <class _dataType>
 void clientTask<_dataType>::EventVoidHandler(void)
 {
-    Fl::lock();
-    {
+    FLTK_CRITICAL_SECTION {
         UI.EventValue->value(0);
     }
-    Fl::unlock();
-    Fl::awake();
 }
 
 
@@ -93,29 +96,58 @@ void clientTask<_dataType>::Run(void)
         ProcessQueuedEvents();
 
         // check if toggle requested in UI
-        Fl::lock();
-        {
+        FLTK_CRITICAL_SECTION {
             if (UI.VoidRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested, returned \""
-                                          << this->VoidServer()
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Void, returned \""
+                                          << this->Void()
                                           << "\"" << std::endl;
                 UI.VoidRequested = false;
             }
 
+            if (UI.VoidSlowRequested) {
+                if (UI.VoidSlowBlocking->value()) {
+                    FLTK_CRITICAL_SECTION_TEMPORARY_RELEASE {
+                        CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidSlow (blocking), returned \""
+                                                  << this->VoidSlow.ExecuteBlocking()
+                                                  << "\"" << std::endl;
+                    }
+                } else {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidSlow, returned \""
+                                              << this->VoidSlow()
+                                              << "\"" << std::endl;
+                }
+                UI.VoidSlowRequested = false;
+            }
+
+            double valueToWrite;
             if (UI.WriteRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteRequested, returned \""
-                                          << this->WriteServer(_dataType(UI.WriteValue->value()))
+                valueToWrite = UI.WriteValue->value();
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Write, returned \""
+                                          << this->Write(_dataType(valueToWrite))
                                           << "\"" << std::endl;
-                // Blocking command causes deadlock in single process (local)
-                // configuration due to fltkMutex.
-                //this->WriteServer.ExecuteBlocking(_dataType(UI.WriteValue->value()));
                 UI.WriteRequested = false;
+            }
+
+            if (UI.WriteSlowRequested) {
+                valueToWrite = UI.WriteValue->value();
+                if (UI.WriteSlowBlocking->value()) {
+                    FLTK_CRITICAL_SECTION_TEMPORARY_RELEASE {
+                        CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteSlow (blocking), returned \""
+                                                  << this->WriteSlow.ExecuteBlocking(_dataType(valueToWrite))
+                                                  << "\"" << std::endl;
+                    }
+                } else {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteSlow, returned \""
+                                              << this->WriteSlow(_dataType(valueToWrite))
+                                              << "\"" << std::endl;
+                }
+                UI.WriteSlowRequested = false;
             }
 
             if (UI.ReadRequested) {
                 _dataType data;
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: ReadRequested, returned \""
-                                          << this->ReadServer(data)
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Read, returned \""
+                                          << this->Read(data)
                                           << "\"" << std::endl;
                 UI.ReadValue->value((double)data);
                 UI.ReadRequested = false;
@@ -123,15 +155,15 @@ void clientTask<_dataType>::Run(void)
 
             if (UI.QualifiedReadRequested) {
                 _dataType data;
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedReadRequested, returned \""
-                                          << this->QualifiedReadServer(_dataType(UI.WriteValue->value()), data)
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedRead, returned \""
+                                          << this->QualifiedRead(_dataType(UI.WriteValue->value()), data)
                                           << "\"" << std::endl;
                 UI.QualifiedReadValue->value(data);
                 UI.QualifiedReadRequested = false;
             }
-        }
-        Fl::unlock();
-        Fl::awake();
+
+            UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 100.0));
+        } // end of FLTK critical section
     }
 }
 

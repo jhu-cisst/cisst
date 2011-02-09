@@ -42,10 +42,12 @@ class clientTask: public clientTaskBase {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    mtsFunctionVoid VoidServer;
-    mtsFunctionWrite WriteServer;
-    mtsFunctionRead ReadServer;
-    mtsFunctionQualifiedRead QualifiedReadServer;
+    mtsFunctionVoid Void;
+    mtsFunctionVoid VoidSlow;
+    mtsFunctionWrite Write;
+    mtsFunctionWrite WriteSlow;
+    mtsFunctionRead Read;
+    mtsFunctionQualifiedRead QualifiedRead;
 
     void EventWriteHandler(const _dataType & value);
     void EventVoidHandler(void);
