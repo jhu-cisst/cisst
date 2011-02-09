@@ -10,7 +10,10 @@
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTransformationTypes.h>
 
+#if CISST_SVL_HAS_OPENCV2
 #include <cisstStereoVision.h>
+#endif
+
 #include <cisstDevices/devExport.h>
 
 class CISST_EXPORT devOSGCamera : 

@@ -116,9 +116,6 @@ int main(){
 
 #endif
 
-  // Start the cameras
-  taskManager->CreateAll();
-  taskManager->StartAll();
 
   // Create objects
   std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
@@ -130,7 +127,11 @@ int main(){
 
   vctFrame4x4<double> eye;
   devOSGBody* background;
-  background = new devOSGBody( "background", eye, data+"background.3ds", world );
+  background = new devOSGBody("background", eye, data+"background.3ds", world);
+
+  // Start the cameras
+  taskManager->CreateAll();
+  taskManager->StartAll();
 
   cmnGetChar();
 

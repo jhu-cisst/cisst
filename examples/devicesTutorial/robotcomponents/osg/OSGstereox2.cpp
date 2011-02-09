@@ -17,10 +17,9 @@ private:
   mtsDoubleFrm4x4 Rt;
   double theta;
 public:
-  Rotate() : mtsTaskPeriodic( "Rotate", 0.001, true ){
-    theta = 0;
-    mtsInterfaceProvided* interface = NULL;
-    interface = AddInterfaceProvided( "Transformation" );
+
+  Rotate() : mtsTaskPeriodic( "Rotate", 0.001, true ), theta(0.0){
+    mtsInterfaceProvided* interface = AddInterfaceProvided( "Transformation" );
     StateTable.AddData( Rt, "Transformation" );
     interface->AddCommandReadState( StateTable, Rt, "Transform" );
   }
@@ -49,6 +48,7 @@ int main(){
   int width = 320, height = 240;
   double Znear = 0.01, Zfar = 10.0;
   double baseline = 0.1;
+
   devOSGStereo* stereo1=new devOSGStereo( "stereo1",
 					  world,
 					  x, y, width, height,
@@ -63,12 +63,12 @@ int main(){
 
   devOSGStereo* stereo2=new devOSGStereo( "stereo2",
 					  world,
-					  x, y, width, height,
+					  x, y+300, width, height,
 					  55, ((double)width)/((double)height),
 					  Znear, Zfar,
 					  baseline );
   osg::Node::NodeMask mask2 = 0x0002;
-  stereo1->setCullMask( mask2 );
+  stereo2->setCullMask( mask2 );
   // Add the camera component
   taskManager->AddComponent( stereo2 );
 
@@ -78,7 +78,7 @@ int main(){
   std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
 
   vctFrame4x4<double> eye;
-
+  
   // Create the telescope
   devOSGBody* hubble;
   hubble = new devOSGBody( "hubble", eye, data+"hst.3ds", world, "Transform" );
@@ -94,11 +94,10 @@ int main(){
   taskManager->AddComponent( &rotate );
   
   taskManager->Connect( "hubble", "Transformation","Rotate", "Transformation" );
-
-  
   
   // Start the cameras
   taskManager->CreateAll();
+  cmnGetChar();
   taskManager->StartAll();
 
   cmnGetChar();

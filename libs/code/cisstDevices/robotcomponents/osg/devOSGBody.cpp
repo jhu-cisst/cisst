@@ -58,10 +58,11 @@ devOSGBody::devOSGBody(	const std::string& name,
   if( found != std::string::npos )
     { path.assign( model, 0, found ); }
   options->setDatabasePath( path );
-  
+
   osg::Node* node = osgDB::readNodeFile( model, options );
+
   if( node != NULL ){
-    
+
     // Add the node to the transformation node
     addChild( node );
 

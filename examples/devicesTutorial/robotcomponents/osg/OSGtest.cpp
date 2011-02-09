@@ -77,20 +77,20 @@ int main(){
 
 #endif
 
-  // Start the camera
-  taskManager->CreateAll();
-  taskManager->StartAll();
-
   // Create objects
   std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
 
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
 			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
   osg::ref_ptr<devOSGBody> hubble;
+
   hubble = new devOSGBody( "hubble", 
 			   Rt,
 			   data+"hst.3ds",
 			   world );
+
+  hubble->setNodeMask( 0x0020 );
+
 
   vctFrame4x4<double> eye;
   osg::ref_ptr<devOSGBody> background;
@@ -98,6 +98,12 @@ int main(){
 			       eye, 
 			       data+"background.3ds", 
 			       world );
+
+  background->setNodeMask( 0x0001 );
+
+  // Start the camera
+  taskManager->CreateAll();
+  taskManager->StartAll();
 
   cmnGetChar();
 
@@ -120,7 +126,6 @@ int main(){
   colorstream.Release();
   depthstream.Release();
 #endif
-
 
   return 0;
 
