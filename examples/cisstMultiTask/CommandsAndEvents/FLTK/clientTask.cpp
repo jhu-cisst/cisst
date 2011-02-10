@@ -38,11 +38,13 @@ clientTask<_dataType>::clientTask(const std::string & taskName, double period):
     mtsInterfaceRequired * required = AddInterfaceRequired("Required");
     if (required) {
         required->AddFunction("Void", this->Void);
-        required->AddFunction("VoidSlow", this->VoidSlow);
         required->AddFunction("Write", this->Write);
-        required->AddFunction("WriteSlow", this->WriteSlow);
         required->AddFunction("Read", this->Read);
         required->AddFunction("QualifiedRead", this->QualifiedRead);
+        required->AddFunction("VoidSlow", this->VoidSlow);
+        required->AddFunction("WriteSlow", this->WriteSlow);
+        required->AddFunction("VoidReturn", this->VoidReturn);
+        required->AddFunction("WriteReturn", this->WriteReturn);
         required->AddEventHandlerVoid(&clientTask<_dataType>::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask<_dataType>::EventWriteHandler, this, "EventWrite");
     }
@@ -92,6 +94,9 @@ void clientTask<_dataType>::EventVoidHandler(void)
 template <class _dataType>
 void clientTask<_dataType>::Run(void)
 {
+    double valueToWrite;
+    _dataType valueToRead;
+
     if (this->UIOpened()) {
         ProcessQueuedEvents();
 
@@ -102,6 +107,30 @@ void clientTask<_dataType>::Run(void)
                                           << this->Void()
                                           << "\"" << std::endl;
                 UI.VoidRequested = false;
+            }
+
+            if (UI.WriteRequested) {
+                valueToWrite = UI.WriteValue->value();
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Write, returned \""
+                                          << this->Write(_dataType(valueToWrite))
+                                          << "\"" << std::endl;
+                UI.WriteRequested = false;
+            }
+
+            if (UI.ReadRequested) {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Read, returned \""
+                                          << this->Read(valueToRead)
+                                          << "\"" << std::endl;
+                UI.ReadValue->value(valueToRead);
+                UI.ReadRequested = false;
+            }
+
+            if (UI.QualifiedReadRequested) {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedRead, returned \""
+                                          << this->QualifiedRead(_dataType(UI.WriteValue->value()), valueToRead)
+                                          << "\"" << std::endl;
+                UI.QualifiedReadValue->value(valueToRead);
+                UI.QualifiedReadRequested = false;
             }
 
             if (UI.VoidSlowRequested) {
@@ -117,15 +146,6 @@ void clientTask<_dataType>::Run(void)
                                               << "\"" << std::endl;
                 }
                 UI.VoidSlowRequested = false;
-            }
-
-            double valueToWrite;
-            if (UI.WriteRequested) {
-                valueToWrite = UI.WriteValue->value();
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Write, returned \""
-                                          << this->Write(_dataType(valueToWrite))
-                                          << "\"" << std::endl;
-                UI.WriteRequested = false;
             }
 
             if (UI.WriteSlowRequested) {
@@ -144,22 +164,25 @@ void clientTask<_dataType>::Run(void)
                 UI.WriteSlowRequested = false;
             }
 
-            if (UI.ReadRequested) {
-                _dataType data;
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: Read, returned \""
-                                          << this->Read(data)
-                                          << "\"" << std::endl;
-                UI.ReadValue->value((double)data);
-                UI.ReadRequested = false;
+            if (UI.VoidReturnRequested) {
+                FLTK_CRITICAL_SECTION_TEMPORARY_RELEASE {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidReturn, returned \""
+                                              << this->VoidReturn(valueToRead)
+                                              << "\"" << std::endl;
+                }
+                UI.ReadValue->value(valueToRead);
+                UI.VoidReturnRequested = false;
             }
 
-            if (UI.QualifiedReadRequested) {
-                _dataType data;
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedRead, returned \""
-                                          << this->QualifiedRead(_dataType(UI.WriteValue->value()), data)
-                                          << "\"" << std::endl;
-                UI.QualifiedReadValue->value(data);
-                UI.QualifiedReadRequested = false;
+            if (UI.WriteReturnRequested) {
+                valueToWrite = UI.WriteValue->value();
+                FLTK_CRITICAL_SECTION_TEMPORARY_RELEASE {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteReturn, returned \""
+                                              << this->WriteReturn(_dataType(valueToWrite), valueToRead)
+                                              << "\"" << std::endl;
+                }
+                UI.ReadValue->value(valueToRead);
+                UI.WriteReturnRequested = false;
             }
 
             UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 100.0));

@@ -41,11 +41,13 @@ serverTask<_dataType>::serverTask(const std::string & taskName, double period):
     mtsInterfaceProvided * provided = AddInterfaceProvided("Provided");
     if (provided) {
         provided->AddCommandVoid(&serverTask<_dataType>::Void, this, "Void");
-        provided->AddCommandVoid(&serverTask<_dataType>::VoidSlow, this, "VoidSlow");
         provided->AddCommandWrite(&serverTask<_dataType>::Write, this, "Write");
-        provided->AddCommandWrite(&serverTask<_dataType>::WriteSlow, this, "WriteSlow");
         provided->AddCommandReadState(this->StateTable, this->ReadValue, "Read");
         provided->AddCommandQualifiedRead(&serverTask<_dataType>::QualifiedRead, this, "QualifiedRead");
+        provided->AddCommandVoid(&serverTask<_dataType>::VoidSlow, this, "VoidSlow");
+        provided->AddCommandWrite(&serverTask<_dataType>::WriteSlow, this, "WriteSlow");
+        provided->AddCommandVoidReturn(&serverTask<_dataType>::VoidReturn, this, "VoidReturn");
+        provided->AddCommandWriteReturn(&serverTask<_dataType>::WriteReturn, this, "WriteReturn");
         provided->AddEventVoid(this->EventVoid, "EventVoid");
         provided->AddEventWrite(this->EventWrite, "EventWrite", _dataType(3.14));
     }
@@ -62,6 +64,25 @@ void serverTask<_dataType>::Void(void)
         } else {
             UI.VoidValue->value(0);
         }
+    }
+}
+
+
+template <class _dataType>
+void serverTask<_dataType>::Write(const _dataType & data)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "Write" << std::endl;
+    FLTK_CRITICAL_SECTION {
+        UI.WriteValue->value((double)data);
+    }
+}
+
+
+template <class _dataType>
+void serverTask<_dataType>::QualifiedRead(const _dataType & data, _dataType & placeHolder) const
+{
+    FLTK_CRITICAL_SECTION {
+        placeHolder = data + _dataType(UI.ReadValue->value());
     }
 }
 
@@ -84,16 +105,6 @@ void serverTask<_dataType>::VoidSlow(void)
 
 
 template <class _dataType>
-void serverTask<_dataType>::Write(const _dataType & data)
-{
-    CMN_LOG_CLASS_RUN_VERBOSE << "Write" << std::endl;
-    FLTK_CRITICAL_SECTION {
-        UI.WriteValue->value((double)data);
-    }
-}
-
-
-template <class _dataType>
 void serverTask<_dataType>::WriteSlow(const _dataType & data)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "WriteSlow" << std::endl;
@@ -105,11 +116,25 @@ void serverTask<_dataType>::WriteSlow(const _dataType & data)
 
 
 template <class _dataType>
-void serverTask<_dataType>::QualifiedRead(const _dataType & data, _dataType & placeHolder) const
+void serverTask<_dataType>::VoidReturn(_dataType & placeHolder)
 {
+    CMN_LOG_CLASS_RUN_VERBOSE << "VoidReturn" << std::endl;
+    serverTask<_dataType>::VoidSlow();
     FLTK_CRITICAL_SECTION {
-        placeHolder = data + _dataType(UI.ReadValue->value());
+        placeHolder = _dataType(UI.ReadValue->value());
     }
+}
+
+
+template <class _dataType>
+void serverTask<_dataType>::WriteReturn(const _dataType & data, _dataType & placeHolder)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "WriteReturn" << std::endl;
+    serverTask<_dataType>::WriteSlow(data);
+    FLTK_CRITICAL_SECTION {
+        placeHolder = _dataType(UI.ReadValue->value());
+    }
+    
 }
 
 

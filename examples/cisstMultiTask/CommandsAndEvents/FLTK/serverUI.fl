@@ -45,6 +45,9 @@ class serverUI {open
   Function {show(int argc, char**argv)} {open
   } {
     code {ServerWindow->show();} {}
+    code {Opened = true;} {} 
+    code {VoidEventRequested = false;} {}
+    code {WriteEventRequested = false;} {}
   }
   decl {bool VoidEventRequested;} {public local
   }

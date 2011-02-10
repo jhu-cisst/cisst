@@ -43,11 +43,13 @@ class clientTask: public clientTaskBase {
 
 protected:
     mtsFunctionVoid Void;
-    mtsFunctionVoid VoidSlow;
     mtsFunctionWrite Write;
-    mtsFunctionWrite WriteSlow;
     mtsFunctionRead Read;
     mtsFunctionQualifiedRead QualifiedRead;
+    mtsFunctionVoid VoidSlow;
+    mtsFunctionWrite WriteSlow;
+    mtsFunctionVoidReturn VoidReturn;
+    mtsFunctionWriteReturn WriteReturn;
 
     void EventWriteHandler(const _dataType & value);
     void EventVoidHandler(void);

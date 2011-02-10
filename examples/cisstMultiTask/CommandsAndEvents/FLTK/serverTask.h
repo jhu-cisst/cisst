@@ -45,10 +45,12 @@ protected:
     mtsFunctionWrite EventWrite;
 
     void Void(void);
-    void VoidSlow(void);
     void Write(const _dataType & data);
-    void WriteSlow(const _dataType & data);
     void QualifiedRead(const _dataType & data, _dataType & placeHolder) const;
+    void VoidSlow(void);
+    void WriteSlow(const _dataType & data);
+    void VoidReturn(_dataType & placeHolder);
+    void WriteReturn(const _dataType & data, _dataType & placeHolder);
     void SendButtonClickEvent(void);
 
     _dataType ReadValue;
