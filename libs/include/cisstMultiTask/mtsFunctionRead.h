@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,7 +46,7 @@ protected:
     class ConditionalWrap {
     public:
         static mtsExecutionResult Call(mtsCommandRead * command, _userType & argument) {
-            mtsGenericObjectProxyRef<_userType> argumentWrapped(argument); 
+            mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
             return command->Execute(argumentWrapped);
         }
     };
@@ -62,7 +62,7 @@ protected:
 public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
-    mtsFunctionRead(void): Command(0) {}
+    mtsFunctionRead(void);
 
     /*! Destructor. */
     virtual ~mtsFunctionRead();
@@ -110,4 +110,3 @@ public:
 };
 
 #endif // _mtsFunctionRead_h
-

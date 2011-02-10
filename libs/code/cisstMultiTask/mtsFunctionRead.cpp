@@ -22,6 +22,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandRead.h>
 
 
+mtsFunctionRead::mtsFunctionRead(void):
+    mtsFunctionBase(false),
+    Command(0)
+{}
+
+
 mtsFunctionRead::~mtsFunctionRead()
 {}
 

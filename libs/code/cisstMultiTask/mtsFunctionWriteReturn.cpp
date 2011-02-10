@@ -23,6 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
 
 
+mtsFunctionWriteReturn::mtsFunctionWriteReturn(void):
+    mtsFunctionBase(false),
+    Command(0)
+{}
+
+
 mtsFunctionWriteReturn::~mtsFunctionWriteReturn()
 {}
 

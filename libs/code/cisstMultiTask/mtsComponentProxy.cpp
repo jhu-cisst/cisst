@@ -89,7 +89,7 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     // Create void function proxies
     const std::vector<std::string> namesOfFunctionVoid = requiredInterfaceDescription.FunctionVoidNames;
     for (size_t i = 0; i < namesOfFunctionVoid.size(); ++i) {
-        functionVoidProxy = new mtsFunctionVoid();
+        functionVoidProxy = new mtsFunctionVoid(true /* create function for proxy */);
         success = requiredInterfaceProxy->AddFunction(namesOfFunctionVoid[i], *functionVoidProxy);
         success &= mapElement->FunctionVoidProxyMap.AddItem(namesOfFunctionVoid[i], functionVoidProxy);
         if (!success) {

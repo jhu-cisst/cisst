@@ -88,7 +88,7 @@ protected:
  public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
-    mtsFunctionQualifiedRead(void): Command(0) {}
+    mtsFunctionQualifiedRead(void);
 
     /*! Destructor. */
     ~mtsFunctionQualifiedRead();

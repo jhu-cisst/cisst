@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -38,12 +38,14 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
  public:
     typedef mtsCommandVoid CommandType;
  protected:
+    /*! Internal pointer to command.  Command pointer should be set
+      when interfaces get connected. */
     CommandType * Command;
 
  public:
     /*! Default constructor.  Does nothing, use Instantiate before
       using. */
-    mtsFunctionVoid(void): Command(0) {}
+    mtsFunctionVoid(const bool isProxy = false);
 
     /*! Destructor. */
     ~mtsFunctionVoid();

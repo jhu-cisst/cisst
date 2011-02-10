@@ -38,7 +38,8 @@ protected:
     mtsProxySerializer Serializer;
 
 public:
-    mtsFunctionWriteProxy()
+    mtsFunctionWriteProxy():
+        mtsFunctionWrite(true /* this is a proxy class */)
     {}
 
     ~mtsFunctionWriteProxy()

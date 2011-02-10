@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsCommandWriteBase.h>
+
+
+mtsFunctionWrite::mtsFunctionWrite(const bool isProxy):
+    mtsFunctionBase(isProxy),
+    Command(0)
+{}
 
 
 mtsFunctionWrite::~mtsFunctionWrite()
@@ -54,7 +60,14 @@ mtsExecutionResult mtsFunctionWrite::Execute(const mtsGenericObject & argument) 
 
 mtsExecutionResult mtsFunctionWrite::ExecuteBlocking(const mtsGenericObject & argument) const
 {
-    return Command ? Command->Execute(argument, MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult result;
+    result = Command ? Command->Execute(argument, MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+        && !this->IsProxy) {
+        this->ThreadSignalWait();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return result;
 }
 
 

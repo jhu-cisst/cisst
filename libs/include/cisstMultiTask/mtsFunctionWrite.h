@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -39,6 +39,8 @@ class CISST_EXPORT mtsFunctionWrite: public mtsFunctionBase {
 public:
     typedef mtsCommandWriteBase CommandType;
 protected:
+    /*! Internal pointer to command.  Command pointer should be set
+      when interfaces get connected. */
     CommandType * Command;
 
 #ifndef SWIG
@@ -62,7 +64,7 @@ protected:
 public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
-    mtsFunctionWrite(void): Command(0) {}
+    mtsFunctionWrite(const bool isProxy = false);
 
     /*! Destructor. */
     virtual ~mtsFunctionWrite();
@@ -107,6 +109,11 @@ public:
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_BLOCKING)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
+        if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+            && !this->IsProxy) {
+            this->ThreadSignalWait();
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
+        }
         return result;
     }
 #endif

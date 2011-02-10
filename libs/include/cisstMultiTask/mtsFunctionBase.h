@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,9 +32,12 @@ http://www.cisst.org/cisst/license.txt.
 
 class mtsFunctionBase {
 
+private:
+    mtsFunctionBase(void); // default constructor should not be used.
+
 protected:
     /*! Default constructor. */
-    mtsFunctionBase(void) {}
+    mtsFunctionBase(const bool isProxy);
 
     /*! Destructor. */
     virtual ~mtsFunctionBase() {}
@@ -42,6 +45,11 @@ protected:
     /*! Reference to an existing thread signal used to block the
       execution. */
     osaThreadSignal * ThreadSignal;
+
+    /*! Indicates if this function is used by a proxy required
+      interface.  If this is the case, blocking commands should not
+      block the proxy component. */
+    bool IsProxy;
 
 public:
     /*! Detach the function from the command used.  Internally, sets the command pointer to 0 */
@@ -54,9 +62,10 @@ public:
     virtual void ToStream(std::ostream & outputStream) const = 0;
 
     /*! Set the thread signal used for blocking commands */
-    void SetThreadSignal(osaThreadSignal * threadSignal) {
-        this->ThreadSignal = threadSignal;
-    }
+    void SetThreadSignal(osaThreadSignal * threadSignal);
+
+    /*! Wait for internal thread signal */
+    void ThreadSignalWait(void) const;
 };
 
 
@@ -69,4 +78,3 @@ inline std::ostream & operator << (std::ostream & output,
 
 
 #endif // _mtsFunctionBase_h
-

@@ -792,6 +792,7 @@ bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunc
 bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionVoidReturn & function,
                                        mtsRequiredType required)
 {
+    function.SetThreadSignal(&(this->ThreadSignalForBlockingCommands));
     return FunctionsVoidReturn.AddItem(functionName, new FunctionInfo(function, required));
 }
 
@@ -799,6 +800,7 @@ bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunc
 bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionWrite & function,
                                        mtsRequiredType required)
 {
+    function.SetThreadSignal(&(this->ThreadSignalForBlockingCommands));
     return FunctionsWrite.AddItem(functionName, new FunctionInfo(function, required));
 }
 
@@ -806,6 +808,7 @@ bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunc
 bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionWriteReturn & function,
                                        mtsRequiredType required)
 {
+    function.SetThreadSignal(&(this->ThreadSignalForBlockingCommands));
     return FunctionsWriteReturn.AddItem(functionName, new FunctionInfo(function, required));
 }
 

@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsCommandQualifiedRead.h>
+
+
+mtsFunctionQualifiedRead::mtsFunctionQualifiedRead(void):
+    mtsFunctionBase(false),
+    Command(0)
+{}
 
 
 mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead()

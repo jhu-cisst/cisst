@@ -115,17 +115,6 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
         BlockingFlagQueue.Get();
         return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
     }
-    if (blocking == MTS_BLOCKING) {
-        // test if the mailbox has been emptied already (e.g. post queued command)
-        if (MailBox->IsEmpty()) {
-            // signal has been raised, reset it
-            MailBox->ThreadSignalWait(0.0);
-        } else {
-            // normal case, wait
-            MailBox->ThreadSignalWait();
-        }
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
-    }
     return mtsExecutionResult::COMMAND_QUEUED;
 }
 

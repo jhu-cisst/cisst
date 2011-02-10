@@ -43,6 +43,7 @@ set (SOURCE_FILES
      mtsEventReceiver.cpp
      mtsExecutionResult.cpp
 
+     mtsFunctionBase.cpp
      mtsFunctionQualifiedRead.cpp
      mtsFunctionRead.cpp
      mtsFunctionVoid.cpp

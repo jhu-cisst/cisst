@@ -87,7 +87,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
  public:
     /*! Default constructor.  Does nothing, use Instantiate before
       using. */
-    mtsFunctionWriteReturn(void): Command(0) {}
+    mtsFunctionWriteReturn(void);
 
     /*! Destructor. */
     ~mtsFunctionWriteReturn();

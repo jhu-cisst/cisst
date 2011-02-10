@@ -18,9 +18,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
+
+
+mtsFunctionVoid::mtsFunctionVoid(const bool isProxy):
+    mtsFunctionBase(isProxy),
+    Command(0)
+{}
 
 
 mtsFunctionVoid::~mtsFunctionVoid()
@@ -63,8 +68,9 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
 {
     mtsExecutionResult result;
     result = Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
-    if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-        ThreadSignal->Wait();
+    if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+        && !this->IsProxy) {
+        this->ThreadSignalWait();
         return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
     return result;
@@ -83,4 +89,3 @@ void mtsFunctionVoid::ToStream(std::ostream & outputStream) const {
         outputStream << "mtsFunctionVoid not initialized";
     }
 }
-

@@ -109,7 +109,7 @@ bool mtsMailBox::ExecuteNext(void)
            case 1:
                commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
                if (commandWrite) {
-                   isBlocking = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
+                   isBlockingVoid = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
                    try {
                        commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }
@@ -121,7 +121,7 @@ bool mtsMailBox::ExecuteNext(void)
                } else {
                    commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGeneric *>(*command);
                    CMN_ASSERT(commandWriteGeneric);
-                   isBlocking = (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING);
+                   isBlockingVoid = (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING);
                    try {
                        commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }

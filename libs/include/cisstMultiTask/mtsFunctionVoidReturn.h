@@ -63,7 +63,7 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
  public:
     /*! Default constructor.  Does nothing, use Instantiate before
       using. */
-    mtsFunctionVoidReturn(void): Command(0) {}
+    mtsFunctionVoidReturn(void);
 
     /*! Destructor. */
     ~mtsFunctionVoidReturn();
