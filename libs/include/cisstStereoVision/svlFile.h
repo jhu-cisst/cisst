@@ -47,6 +47,22 @@ public:
     virtual long long int Read(char* buffer, const long long int length);
     virtual long long int Write(const char* buffer, const long long int length);
 
+    template<class _ValueType>
+    bool Read(_ValueType& value)
+    {
+        long long int len = sizeof(_ValueType);
+        if (Read(reinterpret_cast<char*>(&value), len) < len) return false;
+        return true;
+    }
+
+    template<class _ValueType>
+    bool Write(const _ValueType& value)
+    {
+        long long int len = sizeof(_ValueType);
+        if (Write(reinterpret_cast<const char*>(&value), len) < len) return false;
+        return true;
+    }
+
     virtual long long int GetLength();
     virtual long long int GetPos();
     virtual int Seek(const long long int abspos);

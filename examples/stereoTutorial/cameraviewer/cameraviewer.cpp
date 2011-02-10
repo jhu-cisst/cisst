@@ -153,8 +153,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // setup writer
     if (save == true) {
-        videowriter.DialogFilePath();
-        videowriter.DialogCodec();
+        videowriter.DialogOpenFile();
         videowriter.Pause();
     }
 
@@ -266,6 +265,9 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
     }
     cerr << "  In command window:" << endl;
+    if (save == true) {
+        cerr << "    'v'   - Start new video file" << endl;
+    }
     cerr << "    'i'   - Adjust image properties" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
 
@@ -273,6 +275,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         ch = cmnGetChar();
 
         switch (ch) {
+            case 'v':
+                if (save == true) {
+                    videowriter.CloseFile();
+                    videowriter.ResetCodec();
+                    videowriter.DialogOpenFile();
+                }
+            break;
+
             case 'i':
                 // Adjust image properties
                 cerr << endl << endl;

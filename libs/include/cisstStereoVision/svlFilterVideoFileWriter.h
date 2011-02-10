@@ -42,23 +42,24 @@ public:
     svlFilterVideoFileWriter();
     ~svlFilterVideoFileWriter();
 
-    int Disable(bool disable, unsigned int videoch = SVL_LEFT);
-    int DialogFilePath(unsigned int videoch = SVL_LEFT);
-    int SetFilePath(const std::string &filepath, unsigned int videoch = SVL_LEFT);
-    int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
-    int SetFramerate(double framerate);
+    int OpenFile(const std::string &filepath, unsigned int videoch = SVL_LEFT);
+    int DialogOpenFile(unsigned int videoch = SVL_LEFT);
+    int CloseFile(unsigned int videoch = SVL_LEFT);
 
-    int DialogCodec(unsigned int videoch = SVL_LEFT);
-    int GetCodecName(std::string &name, unsigned int videoch = SVL_LEFT) const;
-    int GetCodec(svlVideoIO::Compression **compression, unsigned int videoch = SVL_LEFT) const;
-    int SetCodec(const svlVideoIO::Compression *compression, unsigned int videoch = SVL_LEFT);
+    int SetCodec(const svlVideoIO::Compression *compression, double framerate, unsigned int videoch = SVL_LEFT);
+    int DialogCodec(const std::string &extension, unsigned int videoch = SVL_LEFT);
+    int ResetCodec(unsigned int videoch = SVL_LEFT);
     int SaveCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT) const;
     int LoadCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT);
 
-    void Pause();
-    void PauseAtTime(double time = -1.0);
+    int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
+    int GetCodecName(std::string &name, unsigned int videoch = SVL_LEFT) const;
+    int GetCodec(svlVideoIO::Compression **compression, unsigned int videoch = SVL_LEFT) const;
+
     void Record(int frames = -1);
     void RecordAtTime(int frames = -1, double time = -1.0);
+    void Pause();
+    void PauseAtTime(double time = -1.0);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -67,6 +68,9 @@ protected:
     virtual int Release();
 
 private:
+    osaCriticalSection CS;
+
+    bool ErrorInProcess;
     bool Action;
     double ActionTime;
     double TargetActionTime;
@@ -75,14 +79,15 @@ private:
 
     unsigned int VideoFrameCounter;
     unsigned int CaptureLength;
-    double Framerate;
     bool CodecsMultithreaded;
-    vctDynamicVector<svlVideoIO::Compression*> CodecParams;
+    vctDynamicVector<bool> ErrorOnChannel;
+    vctDynamicVector<vctUInt2> ImageDimensions;
     vctDynamicVector<svlVideoCodecBase*> Codec;
-    vctDynamicVector<bool> Disabled;
+    vctDynamicVector<svlVideoIO::Compression*> CodecParam;
     vctDynamicVector<std::string> FilePath;
+    vctDynamicVector<double> Framerate;
 
-    int UpdateStreamCount(unsigned int count);
+    void UpdateCodecCount(const unsigned int count);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoFileWriter)

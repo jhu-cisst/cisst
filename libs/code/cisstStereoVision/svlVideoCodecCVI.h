@@ -94,10 +94,10 @@ protected:
     unsigned int saveBufferSize;
     unsigned int SaveBufferUsedSize;
     unsigned int SaveBufferUsedID;
-    osaThread SaveThread;
-    osaThreadSignal SaveInitEvent;
-    osaThreadSignal NewFrameEvent;
-    osaThreadSignal WriteDoneEvent;
+    osaThread* SaveThread;
+    osaThreadSignal* SaveInitEvent;
+    osaThreadSignal* NewFrameEvent;
+    osaThreadSignal* WriteDoneEvent;
     bool SaveInitialized;
     bool KillSaveThread;
     bool SaveThreadError;

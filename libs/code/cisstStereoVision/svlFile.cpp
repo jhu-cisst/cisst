@@ -138,6 +138,8 @@ int svlFile::Close()
     INTERNALS(Stream)->close();
 #endif // CISST_OS
 
+    Opened = false;
+
     return SVL_OK;
 }
 

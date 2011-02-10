@@ -59,11 +59,16 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
     yuvBufferSize(0),
     comprBuffer(0),
     comprBufferSize(0),
-    saveBufferSize(0)
+    saveBufferSize(0),
+    SaveThread(0),
+    SaveInitEvent(0),
+    NewFrameEvent(0),
+    WriteDoneEvent(0)
 {
     SetName("CISST Video Files");
     SetExtensionList(".cvi;");
     SetMultithreaded(true);
+    SetVariableFramerate(true);
 
     saveBuffer.SetAll(0);
 }
@@ -212,7 +217,7 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
         memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
         Codec->size = sizeof(svlVideoIO::Compression);
         Codec->datasize = 1;
-        Codec->data[0] = 4;
+        Codec->data[0]  = 4;
     }
 
     unsigned int size;
@@ -288,15 +293,19 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
 
         // Start data saving thread
         SaveInitialized = false;
-        KillSaveThread = false;
-        SaveThread.Create<svlVideoCodecCVI, int>(this, &svlVideoCodecCVI::SaveProc, 0);
-        SaveInitEvent.Wait();
+        KillSaveThread  = false;
+        SaveThread      = new osaThread;
+        SaveInitEvent   = new osaThreadSignal;
+        NewFrameEvent   = new osaThreadSignal;
+        WriteDoneEvent  = new osaThreadSignal;
+        SaveThread->Create<svlVideoCodecCVI, int>(this, &svlVideoCodecCVI::SaveProc, 0);
+        SaveInitEvent->Wait();
         if (SaveInitialized == false) break;
 
-        BegPos = EndPos = Pos = 0;
-        Width = width;
-        Height = height;
-        Opened = true;
+        BegPos  = EndPos = Pos = 0;
+        Width   = width;
+        Height  = height;
+        Opened  = true;
 	    Writing = true;
 
         return SVL_OK;
@@ -316,8 +325,10 @@ int svlVideoCodecCVI::Close()
         // Stop data saving thread
         KillSaveThread = true;
         if (SaveInitialized) {
-            NewFrameEvent.Raise();
-            SaveThread.Wait();
+            NewFrameEvent->Raise();
+            SaveThread->Wait();
+            delete SaveThread;
+            SaveThread = 0;
         }
 
         if (File.IsOpen()) {
@@ -367,17 +378,27 @@ int svlVideoCodecCVI::Close()
 
     File.Close();
 
-    Version = -1;
+    delete SaveInitEvent;
+    delete NewFrameEvent;
+    delete WriteDoneEvent;
+    SaveInitEvent  = 0;
+    NewFrameEvent  = 0;
+    WriteDoneEvent = 0;
+
+    Version      = -1;
     FooterOffset = 0;
+    PartCount    = 0;
+    Width        = 0;
+    Height       = 0;
+    BegPos       = -1;
+    EndPos       = -1;
+    Pos          = -1;
+    Opened       = false;
+    Writing      = false;
+    Timestamp    = -1.0;
+
     FrameOffsets.SetSize(0);
     FrameTimestamps.SetSize(0);
-    Width = 0;
-    Height = 0;
-    BegPos = -1;
-    EndPos = -1;
-    Pos = -1;
-    Writing = false;
-    Opened = false;
 
     return ret;
 }
@@ -752,7 +773,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
         const double timestamp = image.GetTimestamp();
 
         // Wait until the previous write operation is done
-        WriteDoneEvent.Wait();
+        WriteDoneEvent->Wait();
 
         // Store current file position in frame offsets table (increase table size if needed)
         if (FrameOffsets.size() <= static_cast<unsigned int>(EndPos)) FrameOffsets.resize(FrameOffsets.size() + 100000);
@@ -782,7 +803,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 
         // Signal data saving thread to start writing
         SaveBufferUsedID = savebufferid;
-        NewFrameEvent.Raise();
+        NewFrameEvent->Raise();
 
 		EndPos ++; Pos ++;
     }
@@ -794,15 +815,15 @@ void* svlVideoCodecCVI::SaveProc(int CMN_UNUSED(param))
 {
     SaveThreadError = false;
     SaveInitialized = true;
-    SaveInitEvent.Raise();
-    WriteDoneEvent.Raise();
+    SaveInitEvent->Raise();
+    WriteDoneEvent->Raise();
 
     long long int len;
 
     while (1) {
 
         // Wait for new frame to arrive
-        NewFrameEvent.Wait();
+        NewFrameEvent->Wait();
         if (KillSaveThread || SaveThreadError) break;
 
         // Write frame
@@ -813,7 +834,7 @@ void* svlVideoCodecCVI::SaveProc(int CMN_UNUSED(param))
         }
 
         // Signal that write is done
-        WriteDoneEvent.Raise();
+        WriteDoneEvent->Raise();
     }
 
     return this;

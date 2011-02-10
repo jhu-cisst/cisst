@@ -51,6 +51,7 @@ svlVideoCodecOpenCV::svlVideoCodecOpenCV() :
     SetName("FFMPEG Codec");
     SetExtensionList(".avi;.mpg;.mpeg;.wmv;");
     SetMultithreaded(false);
+    SetVariableFramerate(false);
 }
 
 svlVideoCodecOpenCV::~svlVideoCodecOpenCV()

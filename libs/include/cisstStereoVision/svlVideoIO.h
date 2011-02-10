@@ -100,7 +100,9 @@ public:
 
     const std::string& GetName() const;
     const std::string& GetExtensions() const;
-    bool GetMultithreaded() const;
+    bool IsMultithreaded() const;
+    bool IsVariableFramerate() const;
+    
 
     virtual int Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate) = 0;
     virtual int Create(const std::string &filename, const unsigned int width, const unsigned int height, const double framerate) = 0;
@@ -130,6 +132,7 @@ protected:
     void SetName(const std::string &name);
     void SetExtensionList(const std::string &list);
     void SetMultithreaded(bool multithreaded);
+    void SetVariableFramerate(bool variableframerate);
 
     svlVideoIO::Compression* Codec;
 
@@ -137,6 +140,7 @@ private:
     std::string Name;
     std::string ExtensionList;
     bool Multithreaded;
+    bool VariableFramerate;
 };
 
 #endif // _svlVideoIO_h

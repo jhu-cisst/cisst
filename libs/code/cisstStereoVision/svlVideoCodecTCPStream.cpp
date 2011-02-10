@@ -132,6 +132,7 @@ svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     SetName("CISST Video Stream over TCP/IP");
     SetExtensionList(".ncvi;");
     SetMultithreaded(true);
+    SetVariableFramerate(true);
 
     SockAddr = new char[sizeof(sockaddr_in)];
     PacketData = new char[PACKET_SIZE];
