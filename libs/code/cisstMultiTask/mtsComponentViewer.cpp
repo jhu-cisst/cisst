@@ -139,21 +139,9 @@ void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &co
                             !mtsManagerGlobal::IsProxyComponent(connection.Server.ComponentName)))
 #endif
         {
-            char IDString[20];
-            std::string message("graph(update([],[new_edge(\"");
-            sprintf(IDString, "%d", connection.ConnectionID);
-            message.append(IDString);
-            message.append("\", \"CONNECTION\", [a(\"OBJECT\", \"");
-            message.append(IDString);
-            message.append("\"), a(\"INFO\", \"");
-            message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
-            message.append("\")], \"");
-            message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
-            message.append("\", \"");
-            message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
-            message.append("\")]))\n");
-            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-            WriteString(UDrawPipe, message);
+            std::string buffer = GetConnectionInUDrawGraphFormat(connection);
+            CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+            WriteString(UDrawPipe, buffer);
         }
     }
 }
@@ -496,33 +484,6 @@ void mtsComponentViewer::SendAllInfo(void)
     WriteString(UDrawPipe, "menu(layout(improve_all))\n");
 }
 
-std::string mtsComponentViewer::GetComponentInGraphFormat(const std::string &processName,
-                                                     const std::string &componentName) const
-{
-    size_t i;
-    std::vector<std::string> requiredList;
-    std::vector<std::string> providedList;
-    ManagerComponentServices->GetNamesOfInterfaces(processName, componentName, requiredList, providedList);
-    // For now, ignore components that don't have any interfaces
-    if ((requiredList.size() == 0) && (providedList.size() == 0))
-        return "";
-    std::string buffer;
-    buffer = "add taska [[" + processName + ":" + componentName + "],[";
-    for (i = 0; i < requiredList.size(); i++) {
-        buffer += requiredList[i];
-        if (i < requiredList.size()-1)
-            buffer += ",";
-    }
-    buffer += "],[";
-    for (i = 0; i < providedList.size(); i++) {
-        buffer += providedList[i];
-        if (i < providedList.size()-1)
-            buffer += ",";
-    }
-    buffer += "]]\n";
-    return buffer;
-}
-
 static void MakeInterfaceList(std::string &buffer, const std::string &type, const std::vector<std::string> &list)
 {
     size_t i;
@@ -594,6 +555,40 @@ std::string mtsComponentViewer::GetStateInUDrawGraphFormat(const mtsComponentSta
         buffer.append("red");
     buffer.append("\")");
     return buffer;
+}
+
+std::string mtsComponentViewer::GetConnectionInUDrawGraphFormat(const mtsDescriptionConnection &connection) const
+{
+    bool swapped = false;
+    // If the MCS is the server, swap so that it becomes the first node (parent).  This ensures that it is displayed
+    // as the top level node. Similarly, if the MCC is the server, swap unless the MCS is the client.
+    if (mtsManagerComponentBase::IsManagerComponentServer(connection.Server.ComponentName) ||
+         (mtsManagerComponentBase::IsManagerComponentClient(connection.Server.ComponentName) &&
+          !mtsManagerComponentBase::IsManagerComponentServer(connection.Client.ComponentName)))
+        swapped = true;
+    char IDString[20];
+    std::string message("graph(update([],[new_edge(\"");
+    sprintf(IDString, "%d", connection.ConnectionID);
+    message.append(IDString);
+    message.append("\", \"CONNECTION\", [a(\"OBJECT\", \"");
+    message.append(IDString);
+    message.append("\"), a(\"INFO\", \"");
+    message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
+    message.append("\")");
+    if (swapped)
+        message.append(", a(\"_DIR\", \"first\")");
+    message.append("], \"");
+    if (swapped)
+        message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
+    else
+        message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
+    message.append("\", \"");
+    if (swapped)
+        message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
+    else
+        message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
+    message.append("\")]))\n");
+    return message;
 }
 
 void mtsComponentViewer::ChangeComponentBorder(const std::string &processName, const std::string &componentName,
