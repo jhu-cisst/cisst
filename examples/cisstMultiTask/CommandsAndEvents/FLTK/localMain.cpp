@@ -92,8 +92,11 @@ int main(int argc, char **argv)
 
     // create the tasks, i.e. find the commands
     componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY);
+
     // start the periodic Run
     componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // wait until the close button of the UI is pressed
     while (server->UIOpened() || client->UIOpened()) {
@@ -107,6 +110,8 @@ int main(int argc, char **argv)
     }
     // cleanup
     componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
+
     componentManager->Cleanup();
     return 0;
 }

@@ -88,10 +88,13 @@ int main(int argc, char * argv[])
 
     // create the tasks, i.e. find the commands
     componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY);
+
     // start the periodic Run
     componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
-    while (1) {
+    while (server->UIOpened()) {
         Fl::lock();
         {
             Fl::check();
@@ -103,6 +106,8 @@ int main(int argc, char * argv[])
 
     // cleanup
     componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
+
     componentManager->Cleanup();
     return 0;
 }

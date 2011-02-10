@@ -21,9 +21,9 @@ class clientUI {open
         tooltip {Triggers a "Void" command sent to the server.} xywh {215 20 120 30}
       }
       Fl_Button VoidSlowButton {
-        label VoidSlow
+        label {Void (slow)}
         callback {this->VoidSlowRequested = true;}
-        tooltip {Triggers a blocking "Void" command sent to the server.} xywh {355 20 120 30}
+        tooltip {Triggers a slow "Void" command sent to the server.  This command takes 3 seconds to be completed.} xywh {355 20 120 30}
       }
       Fl_Value_Slider WriteValue {
         xywh {15 60 190 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
@@ -34,9 +34,9 @@ class clientUI {open
         tooltip {Triggers a "Write" command sent to the server.  The value on the left will be sent along.} xywh {215 60 120 30}
       }
       Fl_Button WriteSlowButton {
-        label WriteSlow
+        label {Write (slow)}
         callback {this->WriteSlowRequested = true;}
-        tooltip {Triggers a blocking "Write" command sent to the server.  The value on the left will be sent along.} xywh {355 60 120 30}
+        tooltip {Triggers a slow "Write" command sent to the server.  The value on the left will be sent along.  This command takes 3 seconds to be completed.} xywh {355 60 120 30}
       }
       Fl_Button ReadButton {
         label Read
@@ -74,6 +74,12 @@ class clientUI {open
   Function {show(int argc, char**argv)} {open
   } {
     code {ClientWindow->show();} {}
+    code {VoidRequested = false;} {}
+    code {VoidSlowRequested = false;} {}
+    code {WriteRequested = false;} {}
+    code {WriteSlowRequested = false;} {}
+    code {ReadRequested = false;} {}
+    code {QualifiedReadRequested = false;} {}
   }
   decl {bool VoidRequested;} {public local
   }

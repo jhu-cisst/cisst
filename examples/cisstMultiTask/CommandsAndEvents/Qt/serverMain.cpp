@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask.h>
 
@@ -43,48 +42,46 @@ int main(int argc, char * argv[])
 
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
-
-    // add a log per thread
-    osaThreadedLogFile threadedLog("QtCommandsAndEventsServer-");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
-
-    // set the log level of detail on select tasks
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("serverQtComponent", CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
-    // create our server task
+    // create our server component
     serverQtComponent * server = new serverQtComponent("Server");
 
-    // Get the TaskManager instance and set operation mode
-    // Get the local component manager
-    mtsManagerLocal * localManager;
+    // Get the ComponentManager instance and set operation mode
+    mtsComponentManager * componentManager;
     try {
-        localManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "cisstMultiTaskCommandsAndEventsQtServer");
+        componentManager = mtsComponentManager::GetInstance(globalComponentManagerIP, "cisstMultiTaskCommandsAndEventsQtServer");
     } catch (...) {
-        CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
+        CMN_LOG_INIT_ERROR << "Failed to initialize component manager" << std::endl;
         return 1;
     }
-    localManager->AddComponent(server);
+    componentManager->AddComponent(server);
 
     //
-    // TODO: Hide this waiting routine inside mtsTaskManager using events or other things.
+    // TODO: Hide this waiting routine inside mtsComponentManager using events or other things.
     //
     osaSleep(0.5 * cmn_s);
 
-    // create and start all tasks
-    localManager->CreateAll();
-    localManager->StartAll();
+    // create and start all components
+    componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY);
+
+    componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // run Qt user interface
     application.exec();
 
-    // kill all tasks and perform cleanup
-    localManager->KillAll();
-    localManager->Cleanup();
+    // kill all components and perform cleanup
+    componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
 
+    componentManager->Cleanup();
     return 0;
 }
