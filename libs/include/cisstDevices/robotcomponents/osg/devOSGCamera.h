@@ -5,13 +5,15 @@
 
 #include <osgViewer/Viewer>
 
+#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVector/vctFrame4x4.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
-#include <cisstMultiTask/mtsTransformationTypes.h>
 
-#if CISST_SVL_HAS_OPENCV2
-#include <cisstStereoVision.h>
+#include <cisstDevices/devConfig.h>
+#if CISST_DEV_HAS_OPENCV22
+#include <opencv2/opencv.hpp>
 #endif
 
 #include <cisstDevices/devExport.h>
@@ -19,7 +21,7 @@
 class CISST_EXPORT devOSGCamera : 
 
   public mtsTaskContinuous,
-  public osgViewer::Viewer {
+  public osgViewer::Viewer{
 
  protected:
 
@@ -80,9 +82,8 @@ class CISST_EXPORT devOSGCamera :
   */
   mtsFunctionRead ReadTransformation;
 
-    
-  // Only enable this if SVL+OpenCV is enabled
-#if CISST_SVL_HAS_OPENCV2
+  // Only enable this if OpenCV2 is enabled
+#if CISST_DEV_HAS_OPENCV22
     
   //! Final drawing callback
   /**
@@ -155,9 +156,9 @@ class CISST_EXPORT devOSGCamera :
        not updated if the callback does not capture the depth buffer.
        \return A pointer to the depth image
     */
-    cv::Mat                  GetCVDepthImage()  const
+    cv::Mat GetCVDepthImage()  const
     { return cvDepthImage; }
-       vctDynamicMatrix<float>*        GetvctDepthImage()
+    vctDynamicMatrix<float>* GetvctDepthImage()
     { return &vctDepthImage; }
     
     //! Get the color image of the camera
@@ -166,14 +167,15 @@ class CISST_EXPORT devOSGCamera :
        not updated if the callback does not capture the color buffer.
        \return A reference to the color image
     */
-    cv::Mat                   GetCVColorImage() const 
+    cv::Mat GetCVColorImage() const 
     {  return cvColorImage; }
+
     vctDynamicMatrix<unsigned char>& GetvctColorImage()
     { return vctColorImage; }
     
   };
 
-#endif
+#endif // CISST_DEV_HAS_OPENCV22
 
  public : 
 
@@ -211,22 +213,10 @@ class CISST_EXPORT devOSGCamera :
   void Run();
   void Cleanup(){}
 
-  //! SVL stuff
-#if CISST_SVL_HAS_OPENCV2
-
- protected:
-
-  svlBufferSample*   depthbuffersample;
-  svlBufferSample*   colorbuffersample;
-
- public:
-
-  svlBufferSample* GetDepthBufferSample() const { return depthbuffersample; }
-  svlBufferSample* GetColorBufferSample() const { return colorbuffersample; }
-
+  //! OpenCV stuff
+#if CISST_DEV_HAS_OPENCV22
   //virtual const cv::Mat& GetDepthImage( size_t idx = 0 ) const = 0;
   //virtual const cv::Mat& GetColorImage( size_t idx = 0 ) const = 0;
-
 #endif
 
 };

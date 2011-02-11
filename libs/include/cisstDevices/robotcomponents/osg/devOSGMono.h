@@ -53,18 +53,10 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
   void Startup();
   void Run();
 
-#if CISST_SVL_HAS_OPENCV2
-
- private:
-
-  svlSampleMatrixFloat* depthsample;
-  svlSampleImageRGB*    colorsample;
-  
+#if CISST_DEV_HAS_OPENCV22
  public:
-
   cv::Mat GetDepthImage( size_t idx = 0 ) const;
   cv::Mat GetColorImage( size_t idx = 0 ) const;
-
 #endif
 
 };

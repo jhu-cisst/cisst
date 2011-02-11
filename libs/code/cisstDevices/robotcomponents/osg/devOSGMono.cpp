@@ -11,12 +11,7 @@ devOSGMono::devOSGMono( const std::string& name,
   x( x ),                              // x position
   y( y ),                              // y position
   width( width ),                      // width of images
-  height( height )
-#if CISST_SVL_HAS_OPENCV2
-  ,depthsample( NULL ),
-  colorsample( NULL )
-#endif
-{
+  height( height ){
   
   // Set the intrinsic paramters
   getCamera()->setProjectionMatrixAsPerspective(fovy, aspectRatio, zNear, zFar);
@@ -26,8 +21,8 @@ devOSGMono::devOSGMono( const std::string& name,
   // right away
   getCamera()->setViewport( new osg::Viewport( x, y, width, height ) );
 
-  // Setup the SVL stuff
-#if CISST_SVL_HAS_OPENCV2
+  // Setup the OpenCV stuff
+#if CISST_DEV_HAS_OPENCV22
 
   // Create a drawing callback. This callback is set to capture depth+color 
   // buffer (true, true)
@@ -41,82 +36,11 @@ devOSGMono::devOSGMono( const std::string& name,
   CMN_ASSERT( finaldrawcallback );
   getCamera()->setFinalDrawCallback( finaldrawcallback );
 
-  // Create the SVL depth buffer sample for the image
-  try{ depthbuffersample = new svlBufferSample( svlTypeMatrixFloat ); }
-  catch( std::bad_alloc& ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to allocate float svlBufferSampple." 
-		      << std::endl;
-  }
-
-  // Create the SVL depth sample (float matrix)
-  try{ depthsample = new svlSampleMatrixFloat( false ); }
-  catch( std::bad_alloc& ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to allocate svlSampleMatrixFloat." 
-		      << std::endl;
-  }
-
-  int retval = !SVL_OK;
-
-  // Attach the sample matrix to the SVL buffer
-  retval = depthsample->SetMatrix( finaldrawcallback->GetvctDepthImage() );
-  if( retval != SVL_OK ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to set buffer of the depth buffer sample." 
-		      << std::endl;
-  }
-
-  // push the sample in the buffer
-  depthbuffersample->Push( depthsample );
-
-  // Create the SVL color buffer sample for the RGB images
-  try{ colorbuffersample = new svlBufferSample( svlTypeImageRGB ); }
-  catch( std::bad_alloc& ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to allocate RGB svlBufferSampple." 
-		      << std::endl;
-  }
-
-  // Create the RGB depth sample
-  try{ colorsample = new svlSampleImageRGB( false ); }
-  catch( std::bad_alloc& ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << "Failed to allocate svlSampleImageRGB." 
-		      << std::endl;
-  }
-
-  // Attach the RGB sample to the buffer
-  retval = colorsample->SetMatrix( finaldrawcallback->GetvctColorImage(), 0);
-  if( retval != SVL_OK){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			   << "Failed to set matrix for left color image."
-			   << std::endl;
-  }
-  
-  colorbuffersample->Push( colorsample );
-
 #endif
 
 }
 
-devOSGMono::~devOSGMono(){
-
-#if CISST_SVL_HAS_OPENCV2
-  
-  if( depthsample != NULL ){
-    delete depthsample;
-    depthsample = NULL;
-  }
-  
-  if( colorsample != NULL ){
-    delete colorsample; 
-    colorsample = NULL;
-  }
-
-#endif
-
-}
+devOSGMono::~devOSGMono(){}
 
 void devOSGMono::Startup(){
 
@@ -152,14 +76,9 @@ void devOSGMono::Startup(){
 
 void devOSGMono::Run(){
   devOSGCamera::Run();
-#if CISST_SVL_HAS_OPENCV2
-  colorbuffersample->Push( colorsample ); 
-  depthbuffersample->Push( depthsample );
-#endif
-
 }
 
-#if CISST_SVL_HAS_OPENCV2
+#if CISST_DEV_HAS_OPENCV22
 
 cv::Mat devOSGMono::GetDepthImage( size_t ) const{
   // get the camera final draw callback

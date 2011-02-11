@@ -44,10 +44,13 @@ http://www.cisst.org/cisst/license.txt.
 #cmakedefine01 CISST_DEV_HAS_ROBOTCOMPONENTS
 
 // Using OpenSceneGraph
-#cmakedefine01 CISST_HAS_OSG
+#cmakedefine01 CISST_DEV_HAS_OSG
 
 // Using ODE
-#cmakedefine01 CISST_HAS_ODE
+#cmakedefine01 CISST_DEV_HAS_ODE
+
+// Using ODE
+#cmakedefine01 CISST_DEV_HAS_OPENCV22
 
 
 #endif // _devConfig_h

@@ -9,6 +9,11 @@
 
 #include <cisstCommon/cmnGetChar.h>
 
+#include <cisstDevices/devConfig.h>
+#if CISST_DEV_HAS_OPENCV22
+#include <opencv2/opencv.hpp>
+#endif
+
 int main(){
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
@@ -28,54 +33,6 @@ int main(){
 			   Znear, Zfar );
   // Add the camera component
   taskManager->AddComponent( camera );
-
-  // The next section pipes OSG into SVL
-#if CISST_SVL_HAS_OPENCV2
-
-  // Now do SVL stuff
-
-  // initialize
-  svlInitialize();
-
-  // Create the source and hook it to the OSG output
-  svlFilterSourceBuffer depthsource;
-  depthsource.SetBuffer( *camera->GetDepthBufferSample() );
-  depthsource.SetTargetFrequency( 0.3 );
-  
-  svlFilterSourceBuffer colorsource;
-  colorsource.SetBuffer( *camera->GetColorBufferSample() );
-  colorsource.SetTargetFrequency( 0.3 );
-
-  // Conver the depth to [0,255] range
-  svlFilterStreamTypeConverter converter( svlTypeMatrixFloat, svlTypeImageRGB );
-  converter.SetScaling( 255.0f / 50.0 );
-
-  // chain filters to pipeline
-  svlStreamManager colorstream(1);
-  svlStreamManager depthstream(1);
-  svlFilterImageWindow colorwindow;
-  svlFilterImageWindow depthwindow;
-
-  // Hook up the filters
-  colorstream.SetSourceFilter( &colorsource );
-  colorsource.GetOutput()->Connect( colorwindow.GetInput() );
-
-  depthstream.SetSourceFilter( &depthsource );
-  depthsource.GetOutput()->Connect( converter.GetInput() );
-  converter.GetOutput()->Connect( depthwindow.GetInput() );
-
-  // start the show
-  if( colorstream.Play() != SVL_OK ){
-    std::cout << "ERROR" << std::endl;
-    exit(0);
-  }
-
-  if( depthstream.Play() != SVL_OK ){
-    std::cout << "ERROR" << std::endl;
-    exit(0);
-  }
-
-#endif
 
   // Create objects
   std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
@@ -108,7 +65,7 @@ int main(){
   cmnGetChar();
 
   // The next block reads and saves OpenCV images and save them to disk
-#if CISST_SVL_HAS_OPENCV2
+#if CISST_DEV_HAS_OPENCV22
   const cv::Mat& depth = camera->GetDepthImage();
   cv::imwrite( "depth.bmp", depth );
 
@@ -121,11 +78,6 @@ int main(){
   // Kill everything
   taskManager->KillAll();
   taskManager->Cleanup();
-
-#if CISST_SVL_HAS_OPENCV2
-  colorstream.Release();
-  depthstream.Release();
-#endif
 
   return 0;
 

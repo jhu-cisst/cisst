@@ -6,9 +6,14 @@
 #include <cisstVector/vctAxisAngleRotation3.h>
 #include <cisstCommon/cmnGetChar.h>
 
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
+
+#include <cisstDevices/devConfig.h>
+#if CISST_DEV_HAS_OPENCV22
+#include <opencv2/core/core.hpp>
+#endif
 
 #include <cisstCommon/cmnGetChar.h>
 
@@ -19,9 +24,9 @@ private:
 public:
 
   Rotate() : mtsTaskPeriodic( "Rotate", 0.001, true ), theta(0.0){
-    mtsInterfaceProvided* interface = AddInterfaceProvided( "Transformation" );
+    mtsInterfaceProvided* pinterface = AddInterfaceProvided( "Transformation");
     StateTable.AddData( Rt, "Transformation" );
-    interface->AddCommandReadState( StateTable, Rt, "Transform" );
+    pinterface->AddCommandReadState( StateTable, Rt, "Transform" );
   }
 
   void Configure( const std::string& = "" ){}
@@ -32,9 +37,11 @@ public:
     vctFixedSizeVector<double,3> u( 0.0, 0.0, 1.0 );
     vctAxisAngleRotation3<double> ut( u, theta );
     Rt = vctFrame4x4<double>( ut, vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
+
   }
   void Cleanup(){}
 };
+
 
 int main(){
 
@@ -63,15 +70,16 @@ int main(){
 
   devOSGStereo* stereo2=new devOSGStereo( "stereo2",
 					  world,
-					  x, y+300, width, height,
+					  x, y+height, width, height,
 					  55, ((double)width)/((double)height),
 					  Znear, Zfar,
 					  baseline );
+  // define the culling mask of the stereo rig
   osg::Node::NodeMask mask2 = 0x0002;
   stereo2->setCullMask( mask2 );
   // Add the camera component
   taskManager->AddComponent( stereo2 );
-
+ 
   // Create the objects
 
   // path to the models
@@ -92,12 +100,11 @@ int main(){
 
   Rotate rotate;
   taskManager->AddComponent( &rotate );
-  
+
   taskManager->Connect( "hubble", "Transformation","Rotate", "Transformation" );
   
   // Start the cameras
   taskManager->CreateAll();
-  cmnGetChar();
   taskManager->StartAll();
 
   cmnGetChar();

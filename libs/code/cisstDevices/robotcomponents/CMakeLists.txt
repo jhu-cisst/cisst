@@ -85,7 +85,7 @@ find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
 
 if( OPENSCENEGRAPH_FOUND )
 
-  set( CISST_HAS_OSG ON PARENT_SCOPE )
+  set( CISST_DEV_HAS_OSG ON PARENT_SCOPE )
   SET( 
     HEADER_FILES 
     ${HEADER_FILES} 
@@ -114,7 +114,7 @@ if( OPENSCENEGRAPH_FOUND )
   find_package( ODE )
   if( ODE_FOUND )
 
-    set( CISST_HAS_ODE ON PARENT_SCOPE )
+    set( CISST_DEV_HAS_ODE ON PARENT_SCOPE )
     set( CMAKE_CXX_FLAGS 
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
       PARENT_SCOPE )
@@ -156,7 +156,15 @@ if( OPENSCENEGRAPH_FOUND )
       )
     
   endif( ODE_FOUND )
-    
+
+  find_package( OpenCV2 )
+  if( OpenCV2_FOUND )
+    set( CISST_DEV_HAS_OPENCV22 ON PARENT_SCOPE )
+    MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+    cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OpenCV2_LIBRARIES)
+    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+  endif( OpenCV2_FOUND )
+  
 endif( OPENSCENEGRAPH_FOUND )
 
 # Check for GLUT

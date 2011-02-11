@@ -58,18 +58,10 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
 
   void Run();
 
-#if CISST_SVL_HAS_OPENCV2
-
- private:
-
-  svlSampleMatrixFloat*    depthsample;
-  svlSampleImageRGBStereo* colorsample;
-  
+#if CISST_DEV_HAS_OPENCV22
  public:
-
-  const cv::Mat& GetDepthImage( size_t idx = 0 ) const;
-  const cv::Mat& GetColorImage( size_t idx = 0 ) const;
-
+  cv::Mat GetDepthImage( size_t idx = 0 ) const;
+  cv::Mat GetColorImage( size_t idx = 0 ) const;
 #endif
 
 };

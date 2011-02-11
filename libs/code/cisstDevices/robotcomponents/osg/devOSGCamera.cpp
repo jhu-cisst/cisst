@@ -2,6 +2,7 @@
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 
+#include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 // This operator is called during update traversal
@@ -18,7 +19,7 @@ void devOSGCamera::UpdateCallback::operator()( osg::Node* node,
 
 }
 
-#if CISST_SVL_HAS_OPENCV2
+#if CISST_DEV_HAS_OPENCV22
 
 // This is called after everything else
 // It is used to capture color/depth images from the color/depth buffers
@@ -126,12 +127,6 @@ devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
 
     // use this line to dump a test image
     //cv::imwrite( "depth.bmp", cvDepthImage );
-
-    CMN_ASSERT( vctDepthImage.Pointer() != NULL );
-    memcpy( (void*)vctDepthImage.Pointer(), 
-	    (void*)cvDepthImage.ptr<float>(),
-	    sizeof(float)*width*height );
-
   }
 
 }
@@ -167,12 +162,6 @@ devOSGCamera::FinalDrawCallback::ConvertColorBuffer
 
     // use this line to dump a test image
     //cv::imwrite( "rgb.bmp", cvColorImage );
-
-    CMN_ASSERT( vctColorImage.Pointer() != NULL );
-    memcpy( (void*)vctColorImage.Pointer(), 
-	    (void*)cvColorImage.ptr(),
-	    sizeof(unsigned char)*width*height*3 );
-
   }
 
 }
@@ -184,15 +173,10 @@ devOSGCamera::devOSGCamera( const std::string& name,
 			    const std::string& fnname,
 			    bool trackball ) :
   mtsTaskContinuous( name ),
-  osgViewer::Viewer()
-#if CISST_SVL_HAS_OPENCV2
-  ,depthbuffersample( NULL ),
-  colorbuffersample( NULL )
-#endif
-{
-  
+  osgViewer::Viewer(){
+
   // Add a timeout as it can take time to load the windows
-  SetInitializationDelay( 5.0 );
+  SetInitializationDelay( 15.0 );
 
   // Set the scene
   setSceneData( world );
@@ -229,23 +213,7 @@ devOSGCamera::devOSGCamera( const std::string& name,
 
 }
 
-devOSGCamera::~devOSGCamera(){
-
-#if CISST_SVL_HAS_OPENCV2
-  
-  if( colorbuffersample != NULL ){
-    delete colorbuffersample; 
-    colorbuffersample = NULL;
-  }
-
-  if( depthbuffersample != NULL ){
-    delete depthbuffersample;
-    depthbuffersample = NULL;
-  }
-  
-#endif
-  
-}
+devOSGCamera::~devOSGCamera(){}
 
 void devOSGCamera::Run(){
   ProcessQueuedCommands();
@@ -269,4 +237,3 @@ void devOSGCamera::Update(){
     SetMatrix( vctFrame4x4<double>(Rt) );
   }
 }
-
