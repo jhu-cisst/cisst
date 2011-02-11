@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsMailBox_h
 #define _mtsMailBox_h
 
-#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -53,9 +52,6 @@ class CISST_EXPORT mtsMailBox
       provide an event handler that is not queued. */
     mtsCommandVoid * PostCommandDequeuedCommand;
 
-    /*! Thread signal used for blocking */
-    osaThreadSignal ThreadSignal;
-
 public:
     mtsMailBox(const std::string & name,
                size_t size,
@@ -69,19 +65,6 @@ public:
     /*! Write a command to the mailbox.  If a post command queued
       command has been provided, the command is executed. */
     bool Write(mtsCommandBase * command);
-
-    /*! Wait for thread signal, used by blocking commands just after
-      Write.  ExecuteNext will Raise the thread signal if the queued
-      command was blocking. */
-    void ThreadSignalWait(void);
-
-    /*! Don't really wait but at least does a Wait call to match a
-      potential Raise.  Use with Caution, normally only when the
-      mailbox is empty. */
-    void ThreadSignalWait(double timeOutInSeconds);
-
-    /*! Get the thread signal. Used by event receivers. */
-    osaThreadSignal * GetThreadSignal(void);
 
     /*! Execute the oldest command queued. */
     bool ExecuteNext(void);

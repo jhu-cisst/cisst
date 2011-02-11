@@ -62,7 +62,15 @@ bool mtsFunctionWriteReturn::Bind(CommandType * command)
 mtsExecutionResult mtsFunctionWriteReturn::Execute(const mtsGenericObject & argument,
                                                    mtsGenericObject & result) const
 {
-    return Command ? Command->Execute(argument, result) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult executionResult = Command ?
+        Command->Execute(argument, result)
+        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+        && !this->IsProxy) {
+        this->ThreadSignalWait();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return executionResult;
 }
 
 

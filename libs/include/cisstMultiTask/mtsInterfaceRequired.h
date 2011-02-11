@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
 
 #include <cisstCommon/cmnNamedMap.h>
+#include <cisstOSAbstraction/osaThread.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
 
@@ -113,6 +114,9 @@ protected:
     /*! Thread signal used for blocking calls.  It is shared between
       all functions */
     osaThreadSignal ThreadSignalForBlockingCommands;
+
+    /*! For event receiver. */
+    osaThreadSignal * GetThreadSignal(void);
 
  public:
 

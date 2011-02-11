@@ -128,6 +128,11 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
                             cmnIsDerivedFrom<__resultType, mtsGenericObject>::YES>
                            ::Call(Command, argument, result)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
+        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+            && !this->IsProxy) {
+            this->ThreadSignalWait();
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
+        }
         return executionResult;
     }
 #endif

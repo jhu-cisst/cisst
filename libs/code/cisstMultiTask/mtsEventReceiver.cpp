@@ -28,17 +28,19 @@ mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiverVoid"),
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
 {
-    if (OwnEventSignal)
+    if (OwnEventSignal) {
         delete EventSignal;
+    }
 }
 
-void mtsEventReceiverBase::SetRequired(const std::string &name, mtsInterfaceRequired *req)
+void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceRequired * interfaceRequired)
 {
     Name = name;
-    Required = req; 
+    Required = interfaceRequired; 
     EventSignal = 0;
-    if (Required && (Required->MailBox))
-      EventSignal = Required->MailBox->GetThreadSignal();
+    if (Required && (Required->MailBox)) {
+      EventSignal = Required->GetThreadSignal();
+    }
 }
 
 bool mtsEventReceiverBase::CheckRequired() const

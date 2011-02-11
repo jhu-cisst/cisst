@@ -76,6 +76,12 @@ mtsInterfaceRequired::~mtsInterfaceRequired()
 }
 
 
+osaThreadSignal * mtsInterfaceRequired::GetThreadSignal(void)
+{
+    return &ThreadSignalForBlockingCommands;
+}
+
+
 const mtsInterfaceProvidedOrOutput * mtsInterfaceRequired::GetConnectedInterface(void) const
 {
     return InterfaceProvided;

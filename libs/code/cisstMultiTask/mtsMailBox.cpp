@@ -60,24 +60,6 @@ bool mtsMailBox::Write(mtsCommandBase * command)
 }
 
 
-void mtsMailBox::ThreadSignalWait(void)
-{
-    this->ThreadSignal.Wait();
-}
-
-
-void mtsMailBox::ThreadSignalWait(double timeOutInSeconds)
-{
-    this->ThreadSignal.Wait(timeOutInSeconds);
-}
-
-
-osaThreadSignal * mtsMailBox::GetThreadSignal(void)
-{
-    return &ThreadSignal;
-}
-
-
 // return false if nothing to execute; true otherwise.
 bool mtsMailBox::ExecuteNext(void)
 {
@@ -95,7 +77,6 @@ bool mtsMailBox::ExecuteNext(void)
    mtsCommandQueuedWriteReturn * commandWriteReturn;
 
    bool isBlocking = false;
-   bool isBlockingVoid = false;
    try {
 
        if (!(*command)->Returns()) {
@@ -103,13 +84,13 @@ bool mtsMailBox::ExecuteNext(void)
            case 0:
                commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
                CMN_ASSERT(commandVoid);
-               isBlockingVoid = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
+               isBlocking = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
                commandVoid->GetCallable()->Execute();
                break;
            case 1:
                commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
                if (commandWrite) {
-                   isBlockingVoid = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
+                   isBlocking = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
                    try {
                        commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }
@@ -121,7 +102,7 @@ bool mtsMailBox::ExecuteNext(void)
                } else {
                    commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGeneric *>(*command);
                    CMN_ASSERT(commandWriteGeneric);
-                   isBlockingVoid = (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING);
+                   isBlocking = (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING);
                    try {
                        commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }
@@ -159,20 +140,14 @@ bool mtsMailBox::ExecuteNext(void)
    }
    catch (...) {
        CMN_LOG_RUN_WARNING << "mtsMailbox::ExecuteNext caught exception, blocking = " << isBlocking << std::endl;
-       if (isBlocking) {
-           this->ThreadSignal.Raise();
-       }
-       if (isBlockingVoid && this->PostCommandDequeuedCommand) {
+       if (isBlocking && this->PostCommandDequeuedCommand) {
            this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
        }
        CommandQueue.Get();  // Remove command from mailbox queue
        throw;
    }
    
-   if (isBlocking) {
-       this->ThreadSignal.Raise();
-   }
-   if (isBlockingVoid && this->PostCommandDequeuedCommand) {
+   if (isBlocking && this->PostCommandDequeuedCommand) {
        this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
    }
    CommandQueue.Get();  // Remove command from mailbox queue

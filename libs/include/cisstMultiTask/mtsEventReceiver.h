@@ -84,10 +84,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstOSAbstraction/osaForwardDeclarations.h>
+
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
-class osaThreadSignal;
 
 // EventReceivers must be added before Bind (should add check for InterfaceProvidedOrOutput==0)
 // EventHandlers can be added at any time.
@@ -98,8 +99,8 @@ class osaThreadSignal;
 class CISST_EXPORT mtsEventReceiverBase {
 protected:
     std::string Name;
-    mtsInterfaceRequired *Required;   // Pointer to the required interface
-    osaThreadSignal *EventSignal;
+    mtsInterfaceRequired * Required;   // Pointer to the required interface
+    osaThreadSignal * EventSignal;
     bool Waiting;
     bool OwnEventSignal;   // true if we created our own thread signal
 

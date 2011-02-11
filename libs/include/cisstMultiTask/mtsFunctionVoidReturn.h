@@ -98,7 +98,12 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     mtsExecutionResult Execute(_userType & result) const {
         mtsExecutionResult executionResult = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, result)
-          : mtsExecutionResult::FUNCTION_NOT_BOUND;
+            : mtsExecutionResult::FUNCTION_NOT_BOUND;
+        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+            && !this->IsProxy) {
+            this->ThreadSignalWait();
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
+        }
         return executionResult;
     }
 #endif
