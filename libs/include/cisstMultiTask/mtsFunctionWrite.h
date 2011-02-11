@@ -106,15 +106,15 @@ public:
 
     template <class _userType>
     mtsExecutionResult ExecuteBlocking(const _userType & argument) const {
-        mtsExecutionResult result = Command ?
+        mtsExecutionResult executionResult = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_BLOCKING)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
-        if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
             && !this->IsProxy) {
             this->ThreadSignalWait();
             return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
-        return result;
+        return executionResult;
     }
 #endif
 

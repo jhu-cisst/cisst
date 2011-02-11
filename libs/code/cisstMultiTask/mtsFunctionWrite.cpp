@@ -60,14 +60,16 @@ mtsExecutionResult mtsFunctionWrite::Execute(const mtsGenericObject & argument) 
 
 mtsExecutionResult mtsFunctionWrite::ExecuteBlocking(const mtsGenericObject & argument) const
 {
-    mtsExecutionResult result;
-    result = Command ? Command->Execute(argument, MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
-    if (result.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+    mtsExecutionResult executionResult;
+    executionResult = Command ?
+        Command->Execute(argument, MTS_BLOCKING)
+        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
         && !this->IsProxy) {
         this->ThreadSignalWait();
         return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
-    return result;
+    return executionResult;
 }
 
 

@@ -373,11 +373,11 @@ bool mtsInterfaceRequired::DetachCommands(void)
 bool mtsInterfaceRequired::AddSystemEventHandlers(void)
 {
     mtsCommandVoid * voidCommand =
-        this->AddEventHandlerVoid(&mtsInterfaceRequired::BlockingCommandVoidExecutedHandler,
-                                  this, "BlockingCommandVoidExecuted",
+        this->AddEventHandlerVoid(&mtsInterfaceRequired::BlockingCommandExecutedHandler,
+                                  this, "BlockingCommandExecuted",
                                   MTS_EVENT_NOT_QUEUED);
     if (!(voidCommand)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEventHandlers: unable to add void event handler \"BlockingCommandVoidExecuted\" to interface \""
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEventHandlers: unable to add void event handler \"BlockingCommandExecuted\" to interface \""
                                  << this->GetFullName() << "\"" << std::endl;
         return false;
     }
@@ -385,7 +385,7 @@ bool mtsInterfaceRequired::AddSystemEventHandlers(void)
 }
 
 
-void mtsInterfaceRequired::BlockingCommandVoidExecutedHandler(void)
+void mtsInterfaceRequired::BlockingCommandExecutedHandler(void)
 {
     this->ThreadSignalForBlockingCommands.Raise();
 }

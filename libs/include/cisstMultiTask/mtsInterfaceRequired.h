@@ -223,7 +223,7 @@ protected:
     bool AddSystemEventHandlers(void);
 
  private:
-    void BlockingCommandVoidExecutedHandler(void);
+    void BlockingCommandExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
     bool DetachCommands(void);

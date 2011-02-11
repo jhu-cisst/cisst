@@ -35,7 +35,7 @@ mtsMailBox::mtsMailBox(const std::string & name,
     CommandQueue(size, 0),
     Name(name),
     PostCommandQueuedCallable(postCommandQueuedCallable),
-    PostCommandVoidDequeuedCommand(0)
+    PostCommandDequeuedCommand(0)
 {}
 
 
@@ -162,8 +162,8 @@ bool mtsMailBox::ExecuteNext(void)
        if (isBlocking) {
            this->ThreadSignal.Raise();
        }
-       if (isBlockingVoid && this->PostCommandVoidDequeuedCommand) {
-           this->PostCommandVoidDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+       if (isBlockingVoid && this->PostCommandDequeuedCommand) {
+           this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
        }
        CommandQueue.Get();  // Remove command from mailbox queue
        throw;
@@ -172,8 +172,8 @@ bool mtsMailBox::ExecuteNext(void)
    if (isBlocking) {
        this->ThreadSignal.Raise();
    }
-   if (isBlockingVoid && this->PostCommandVoidDequeuedCommand) {
-       this->PostCommandVoidDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+   if (isBlockingVoid && this->PostCommandDequeuedCommand) {
+       this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
    }
    CommandQueue.Get();  // Remove command from mailbox queue
    return true;
@@ -187,7 +187,14 @@ void mtsMailBox::SetSize(size_t size)
     }
 }
 
+
 bool mtsMailBox::IsEmpty(void) const
 {
     return CommandQueue.IsEmpty();
+}
+
+
+void mtsMailBox::SetPostCommandDequeuedCommand(mtsCommandVoid * command)
+{
+    this->PostCommandDequeuedCommand = command;
 }

@@ -587,9 +587,8 @@ protected: // PK TEMP
     /*! Size to be used for argument queues */
     size_t ArgumentQueuesSize;
 
-    /*! Command to trigger void event for blocking commands not
-      expecting a returned value. */
-    mtsCommandVoid * BlockingCommandVoidExecuted;
+    /*! Command to trigger void event for blocking commands. */
+    mtsCommandVoid * BlockingCommandExecuted;
 
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
