@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    // get all message to log file
+    // get all messages to log file
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     // get only errors and warnings to std::cout
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
@@ -69,24 +69,33 @@ int main(int argc, char **argv)
         server = new serverTask<double>("Server", PeriodServer);
     }
 
-    clientTaskBase * client;
+    clientTaskBase * client1;
+    clientTaskBase * client2;
     if (clientGeneric) {
-        client = new clientTask<mtsDouble>("Client", PeriodClient);
+        client1 = new clientTask<mtsDouble>("Client1", PeriodClient);
+        client2 = new clientTask<mtsDouble>("Client2", PeriodClient);
     } else {
-        client = new clientTask<double>("Client", PeriodClient);
+        client1 = new clientTask<double>("Client1", PeriodClient);
+        client2 = new clientTask<double>("Client2", PeriodClient);
     }
 
     server->Configure();
-    client->Configure();
+    client1->Configure();
+    client2->Configure();
 
     // add the tasks to the task manager
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-    componentManager->AddComponent(client);
     componentManager->AddComponent(server);
+    componentManager->AddComponent(client1);
+    componentManager->AddComponent(client2);
 
     // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
-    if (!componentManager->Connect("Client", "Required", "Server", "Provided")) {
-        CMN_LOG_INIT_ERROR << "Failed to connect: Client:Required-Server:Provided" << std::endl;
+    if (!componentManager->Connect("Client1", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Failed to connect: Client1:Required-Server:Provided" << std::endl;
+        return 1;
+    }
+    if (!componentManager->Connect("Client2", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Failed to connect: Client2:Required-Server:Provided" << std::endl;
         return 1;
     }
 
@@ -99,7 +108,7 @@ int main(int argc, char **argv)
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // wait until the close button of the UI is pressed
-    while (server->UIOpened() || client->UIOpened()) {
+    while (server->UIOpened() || client1->UIOpened() || client2->UIOpened()) {
         Fl::lock();
         {
             Fl::check();
@@ -113,5 +122,11 @@ int main(int argc, char **argv)
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
 
     componentManager->Cleanup();
+
+    // delete components
+    delete server;
+    delete client1;
+    delete client2;
+
     return 0;
 }

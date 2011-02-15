@@ -51,6 +51,8 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     UI.Plot->AddTrace("Data", traceId);
     UI.Plot->AddTrace("Trigger", traceId);
     UI.Plot->SetColor(1, vct3(0.0, 1.0, 0.0));
+    UI.Plot->SetContinuousFitY(false);
+    UI.Plot->FitY(-5.0, 5.0); // set Y range
     // display user interface
     UI.show(0, NULL);
     UI.Plot->show();

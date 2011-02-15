@@ -33,6 +33,8 @@ int main(void)
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    // get all messages to log file
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);

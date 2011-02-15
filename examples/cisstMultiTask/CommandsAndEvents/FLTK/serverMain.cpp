@@ -109,5 +109,9 @@ int main(int argc, char * argv[])
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
 
     componentManager->Cleanup();
+
+    // delete components
+    delete server;
+
     return 0;
 }

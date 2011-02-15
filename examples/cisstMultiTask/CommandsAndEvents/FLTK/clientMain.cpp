@@ -77,19 +77,28 @@ int main(int argc, char * argv[])
 
     // create our client task
     const double PeriodClient = 10 * cmn_ms; // in milliseconds
-    clientTaskBase * client;
+    clientTaskBase * client1;
+    clientTaskBase * client2;
     if (useGeneric) {
-        client = new clientTask<mtsDouble>("Client", PeriodClient);
+        client1 = new clientTask<mtsDouble>("Client1", PeriodClient);
+        client2 = new clientTask<mtsDouble>("Client2", PeriodClient);
     } else {
-        client = new clientTask<double>("Client", PeriodClient);
+        client1 = new clientTask<double>("Client1", PeriodClient);
+        client2 = new clientTask<double>("Client2", PeriodClient);
     }
 
-    client->Configure();
-    componentManager->AddComponent(client);
+    client1->Configure();
+    client2->Configure();
+    componentManager->AddComponent(client1);
+    componentManager->AddComponent(client2);
 
     // Connect the tasks across networks
-    if (!componentManager->Connect("ProcessClient", "Client", "Required", "ProcessServer", "Server", "Provided")) {
-        CMN_LOG_INIT_ERROR << "Connect failed" << std::endl;
+    if (!componentManager->Connect("ProcessClient", "Client1", "Required", "ProcessServer", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for client 1" << std::endl;
+        return 1;
+    }
+    if (!componentManager->Connect("ProcessClient", "Client2", "Required", "ProcessServer", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for client 2" << std::endl;
         return 1;
     }
 
@@ -101,7 +110,7 @@ int main(int argc, char * argv[])
     componentManager->StartAll();
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
-    while (client->UIOpened()) {
+    while (client1->UIOpened() || client2->UIOpened()) {
         Fl::lock();
         {
             Fl::check();
@@ -116,5 +125,10 @@ int main(int argc, char * argv[])
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
 
     componentManager->Cleanup();
+
+    // delete components
+    delete client1;
+    delete client2;
+
     return 0;
 }
