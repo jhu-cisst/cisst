@@ -39,7 +39,7 @@ displayQtComponent::displayQtComponent(const std::string & componentName) :
     QObject::connect(CentralWidget.DialAmplitude, SIGNAL(valueChanged(int)),
                      this, SLOT(SetAmplitudeQSlot(int)));
 
-    startTimer(50); // in milliseconds 50 secs = 20 Hz 
+    startTimer(50); // in milliseconds 50 secs = 20 Hz
 }
 
 
@@ -47,7 +47,10 @@ void displayQtComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
 {
     Generator.GetData(Data);
     CentralWidget.ValueData->setNum(Data.Data);
-    CentralWidget.Plot->AddPoint(CentralWidget.TraceId, vctDouble2(Data.Timestamp(), Data.Data));
+    CentralWidget.TracePointer->AddPoint(vctDouble2(Data.Timestamp(), Data.Data));
+    if (Data.Data > 20.0) {
+        CentralWidget.VerticalLinePointer->SetX(Data.Timestamp() - 0.1);
+    }
     CentralWidget.Plot->updateGL();
 }
 

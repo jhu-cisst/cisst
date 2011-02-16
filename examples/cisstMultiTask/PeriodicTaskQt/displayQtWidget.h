@@ -39,7 +39,8 @@ class displayQtWidget : public QWidget
     QDial * DialAmplitude;
     QGridLayout * CentralLayout;
     vctPlot2DOpenGLQtWidget * Plot;
-    size_t TraceId;
+    vctPlot2DBase::Trace * TracePointer;
+    vctPlot2DBase::VerticalLine * VerticalLinePointer;
     QLabel * LabelAmplitude;
     QLabel * ValueAmplitude;
     QLabel * LabelData;

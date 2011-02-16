@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -39,12 +39,12 @@ vctPlot2DOpenGL::vctPlot2DOpenGL(void):
 
 void vctPlot2DOpenGL::RenderInitialize(void)
 {
-	glMatrixMode(GL_MODELVIEW); // set the model view matrix
-	glLoadIdentity();
-	glDisable(GL_DEPTH_TEST); // disable depth test
-	glDisable(GL_LIGHTING); // disable lighting
-	glShadeModel(GL_SMOOTH); // smooth render
-	glClearColor(static_cast<GLclampf>(this->BackgroundColor[0]),
+    glMatrixMode(GL_MODELVIEW); // set the model view matrix
+    glLoadIdentity();
+    glDisable(GL_DEPTH_TEST); // disable depth test
+    glDisable(GL_LIGHTING); // disable lighting
+    glShadeModel(GL_SMOOTH); // smooth render
+    glClearColor(static_cast<GLclampf>(this->BackgroundColor[0]),
                  static_cast<GLclampf>(this->BackgroundColor[1]),
                  static_cast<GLclampf>(this->BackgroundColor[2]),
                  static_cast<GLclampf>(1.0));
@@ -56,10 +56,10 @@ void vctPlot2DOpenGL::RenderResize(double width, double height)
     this->Viewport.Assign(width, height);
     GLsizei w = static_cast<GLsizei>(width);
     GLsizei h = static_cast<GLsizei>(height);
-	glViewport(0 , 0, w ,h); // set up viewport
-	glMatrixMode(GL_PROJECTION); // set the projection matrix
-	glLoadIdentity();
-	glOrtho(0.0, w, 0.0, h, -1.0, 1.0);
+    glViewport(0 , 0, w ,h); // set up viewport
+    glMatrixMode(GL_PROJECTION); // set the projection matrix
+    glLoadIdentity();
+    glOrtho(0.0, w, 0.0, h, -1.0, 1.0);
 }
 
 
@@ -73,17 +73,18 @@ void vctPlot2DOpenGL::Render(void)
     // see if translation and scale need to be updated
     this->ContinuousUpdate();
 
-    // make sure there is no left over transformation
-    glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
     // clear
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // make sure there is no left over transformation
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslated(this->Translation.X(), this->Translation.Y(), 0.0);
+    glScaled(this->Scale.X(), this->Scale.Y(), 1.0);
 
     // plot all traces.   this needs to be updated to use glScale and glTranslate to avoid all conputations on CPU
     double * data;
     size_t size;
-    glTranslated(this->Translation.X(), this->Translation.Y(), 0.0);
-    glScaled(this->Scale.X(), this->Scale.Y(), 1.0);
     for (traceIndex = 0;
          traceIndex < numberOfTraces;
          traceIndex++) {
@@ -127,5 +128,28 @@ void vctPlot2DOpenGL::Render(void)
             }
         }
     }
-    this->PointAddedSinceLastRender = false;
+
+    // render vertical lines
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslated(this->Translation.X(), 0.0, 0.0);
+    glScaled(this->Scale.X(), 1.0, 1.0);
+
+    const VerticalLinesType::const_iterator linesEnd = VerticalLines.end();
+    VerticalLinesType::const_iterator linesIter = VerticalLines.begin();
+    for (;
+         linesIter != linesEnd;
+         ++linesIter) {
+        this->Render(*(linesIter->second));
+    }
+}
+
+
+void vctPlot2DOpenGL::Render(const vctPlot2DBase::VerticalLine & line)
+{
+    // todo, should check for "visible" flag
+    glBegin(GL_LINE_STRIP);
+    glVertex2d(line.X, this->Viewport.Y());
+    glVertex2d(line.X, 0);
+    glEnd();
 }
