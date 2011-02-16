@@ -1,7 +1,12 @@
 #include <osgGA/TrackballManipulator>
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
+#if (CISST_OS == CISST_DARWIN)
+#include <OpenGL/glu.h>
+#else
 #include <GL/glu.h>
+#endif
+
 #include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
