@@ -24,8 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
-#include <cisstDaVinciAPI/cdvReadOnly.h>
-#include <cisstDaVinciAPI/cdvReadWrite.h>
+//#include <cisstDaVinciAPI/cdvReadOnly.h>
+#include <cisstDaVinci/cdvReadWrite.h>
 
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
@@ -54,7 +54,7 @@ int main()
     cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
 
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-#if 1
+#if 0
     cdvReadOnly * daVinci = new cdvReadOnly("daVinci", 0.0 /* period to be removed */,
                                                    "10.0.0.5", 5002, 0x1111, 50);
 #else
@@ -128,7 +128,7 @@ int main()
 
     svlCameraGeometry camera_geometry;
     // Load Camera calibration results
-    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_mock_or/calib_results.txt");
+    camera_geometry.LoadCalibration("E:/Users/davinci_mock_or/calib_results.txt");
     // Center world in between the two cameras (da Vinci specific)
     camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
