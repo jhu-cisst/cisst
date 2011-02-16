@@ -228,10 +228,10 @@ void SimpleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
     if (event.Type() == prmEventButton::PRESSED) {
         this->Following = true;
-        CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following started" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "Primary master button pressed, following started" << std::endl;
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->Following = false;
-        CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following ended" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "Primary master button pressed, following ended" << std::endl;
     }
 }
 
