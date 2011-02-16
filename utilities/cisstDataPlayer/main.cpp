@@ -33,31 +33,9 @@ int main(int argc, char *argv[])
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
-    std::string globalComponentManagerIP = "localhost";
-    // Set global component manager IP
-
-    if (argc == 1) {
-        //globalComponentManagerIP;
-    } else if (argc == 2) {
-        globalComponentManagerIP = argv[1];
-    } else {
-        std::cerr << "Usage: " << argv[0] << " (global component manager IP)" << std::endl;
-        return 1;
-    }
-    std::cout << "Global component manager IP: " << globalComponentManagerIP << std::endl;
-
     // create our components
-
     mtsComponentManager * componentManager;
-
-    //NOTE: this example can only run if the oct proc is not on.
-    try {
-        componentManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "DataPlayerProc");
-    } catch (...) {
-        CMN_LOG_INIT_WARNING << "Failed to initialize local component manager" << std::endl;
-        CMN_LOG_INIT_WARNING << "Running in local mode" << std::endl;
-        componentManager = mtsComponentManager::GetInstance();
-    }
+    componentManager = mtsManagerLocal::GetInstance();
 
     QApplication application(argc, argv);
 
