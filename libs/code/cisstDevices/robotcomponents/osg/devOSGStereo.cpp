@@ -159,10 +159,10 @@ void devOSGStereo::Run(){ devOSGCamera::Run(); }
 
 #if CISST_DEV_HAS_OPENCV22
 
-cv::Mat devOSGStereo::GetDepthImage( size_t ) const{
+vctDynamicMatrix<double> devOSGStereo::GetRangeData( size_t idx ) const {
 
   // Get the left slave
-  const osg::View::Slave& slave = getSlave(0);
+  const osg::View::Slave& slave = getSlave( idx );
   osg::Camera* camera = slave._camera.get();
 
   // get the camera final draw callback
@@ -174,10 +174,11 @@ cv::Mat devOSGStereo::GetDepthImage( size_t ) const{
   finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
 
   CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetCVDepthImage();
+  return finaldrawcallback->GetRangeData();
+
 }
 
-cv::Mat devOSGStereo::GetColorImage( size_t idx ) const{
+cv::Mat devOSGStereo::GetRGBImage( size_t idx ) const{
 
   // Get the left/right slave
   const osg::View::Slave& slave = getSlave( idx );
@@ -192,7 +193,7 @@ cv::Mat devOSGStereo::GetColorImage( size_t idx ) const{
   finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
 
   CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetCVColorImage();
+  return finaldrawcallback->GetRGBImage();
 
 }
 

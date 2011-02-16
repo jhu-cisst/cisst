@@ -80,7 +80,7 @@ void devOSGMono::Run(){
 
 #if CISST_DEV_HAS_OPENCV22
 
-cv::Mat devOSGMono::GetDepthImage( size_t ) const{
+vctDynamicMatrix<double> devOSGMono::GetRangeData() const{
   // get the camera final draw callback
   const osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
@@ -90,10 +90,10 @@ cv::Mat devOSGMono::GetDepthImage( size_t ) const{
   finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
 
   CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetCVDepthImage();
+  return finaldrawcallback->GetRangeData();
 }
 
-cv::Mat devOSGMono::GetColorImage( size_t ) const{
+cv::Mat devOSGMono::GetRGBImage() const{
   // get the camera final draw callback
   const osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
@@ -103,7 +103,45 @@ cv::Mat devOSGMono::GetColorImage( size_t ) const{
   finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
 
   CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetCVColorImage();
+  return finaldrawcallback->GetRGBImage();
 }
 
+vctDynamicNArray<unsigned char,3> devOSGMono::GetRGBPlanarImage() const{
+  // get the camera final draw callback
+  const osg::Camera::DrawCallback* dcb = NULL;
+  dcb = getCamera()->getFinalDrawCallback();
+
+  // cast
+  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
+
+  CMN_ASSERT( finaldrawcallback != NULL );
+  const cv::Mat& rgbimage = finaldrawcallback->GetRGBImage();
+
+  cv::Size size = rgbimage.size();
+  vctDynamicNArray<unsigned char, 3> x;
+  x.SetSize( vctDynamicNArray<unsigned char, 3>::nsize_type( size.height, size.width, 3 ) );
+  memcpy( x.Pointer(), rgbimage.ptr<unsigned char>(), size.height*size.width*3 );
+
+  return x;
+}
+
+vctDynamicMatrix<unsigned char> devOSGMono::GetRGBPixelImage() const{
+  // get the camera final draw callback
+  const osg::Camera::DrawCallback* dcb = NULL;
+  dcb = getCamera()->getFinalDrawCallback();
+
+  // cast
+  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
+
+  CMN_ASSERT( finaldrawcallback != NULL );
+  const cv::Mat& rgbimage = finaldrawcallback->GetRGBImage();
+
+  cv::Size size = rgbimage.size();
+  vctDynamicMatrix<unsigned char> x( size.height, size.width*3 );
+  memcpy( x.Pointer(), rgbimage.ptr<unsigned char>(), size.height*size.width*3 );
+
+  return x;
+}
 #endif

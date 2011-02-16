@@ -50,13 +50,12 @@ int main(){
 
   // The next block reads and saves OpenCV images and save them to disk
 #if CISST_DEV_HAS_OPENCV22
-  const cv::Mat& depth = stereocam->GetDepthImage();
-  cv::imwrite( "depth.bmp", depth );
+  vctDynamicMatrix<double> range = stereocam->GetRangeData( 0 );
 
-  const cv::Mat& leftrgb = stereocam->GetColorImage( 0 );
+  cv::Mat leftrgb = stereocam->GetRGBImage( 0 );
   cv::imwrite( "LEFTrgb.bmp", leftrgb );
 
-  const cv::Mat& rightrgb = stereocam->GetColorImage( 1 );
+  cv::Mat rightrgb = stereocam->GetRGBImage( 1 );
   cv::imwrite( "RIGHTrgb.bmp", rightrgb );
   
   cmnGetChar();

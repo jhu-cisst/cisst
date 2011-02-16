@@ -96,17 +96,15 @@ class CISST_EXPORT devOSGCamera :
     
     //! OSG image containing the depth buffer
     osg::ref_ptr<osg::Image> depthbuffer;
-    
+
+    //! Converted 3D range data
+    vctDynamicMatrix<double> rangedata;
+
     //! OSG image containing the color buffer
     osg::ref_ptr<osg::Image> colorbuffer;
-    
-    //! Image containing depth information of a scene
-    cv::Mat                   cvDepthImage;
-    vctDynamicMatrix<float>  vctDepthImage;
-    
+
     //! RGB image
-    cv::Mat                           cvColorImage;
-    vctDynamicMatrix<unsigned char>  vctColorImage;
+    cv::Mat rgbimage;
     
     //! Callback operator
     /**
@@ -150,16 +148,13 @@ class CISST_EXPORT devOSGCamera :
     
     ~FinalDrawCallback();
     
-    //! Get the depth image of the camera
+    //! Get the range data of the camera
     /**
        Return the depth image attached to the camera. Note that this image is
        not updated if the callback does not capture the depth buffer.
        \return A pointer to the depth image
     */
-    cv::Mat GetCVDepthImage()  const
-    { return cvDepthImage; }
-    vctDynamicMatrix<float>* GetvctDepthImage()
-    { return &vctDepthImage; }
+    const vctDynamicMatrix<double>& GetRangeData() const { return rangedata; }
     
     //! Get the color image of the camera
     /**
@@ -167,11 +162,8 @@ class CISST_EXPORT devOSGCamera :
        not updated if the callback does not capture the color buffer.
        \return A reference to the color image
     */
-    cv::Mat GetCVColorImage() const 
-    {  return cvColorImage; }
-
-    vctDynamicMatrix<unsigned char>& GetvctColorImage()
-    { return vctColorImage; }
+    const cv::Mat& GetRGBImage() const 
+    {  return rgbimage; }
     
   };
 
@@ -212,12 +204,6 @@ class CISST_EXPORT devOSGCamera :
   void Startup(){}
   void Run();
   void Cleanup(){}
-
-  //! OpenCV stuff
-#if CISST_DEV_HAS_OPENCV22
-  //virtual const cv::Mat& GetDepthImage( size_t idx = 0 ) const = 0;
-  //virtual const cv::Mat& GetColorImage( size_t idx = 0 ) const = 0;
-#endif
 
 };
 

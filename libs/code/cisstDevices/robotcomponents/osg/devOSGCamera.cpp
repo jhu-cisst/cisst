@@ -1,7 +1,7 @@
 #include <osgGA/TrackballManipulator>
 
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
-
+#include <GL/glu.h>
 #include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -39,22 +39,21 @@ devOSGCamera::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera,
   depthbuffer->allocateImage( width, height, 1, GL_DEPTH_COMPONENT, GL_FLOAT );
   camera->attach( osg::Camera::DEPTH_BUFFER, depthbuffer.get(), 0, 0 );
 
+  // must be col major
+  rangedata.SetSize( 3, width*height, VCT_COL_MAJOR );
+
   // Create and attach a color image to the camera
   colorbuffer = new osg::Image;
   colorbuffer->allocateImage( width, height, 1, GL_RGB, GL_UNSIGNED_BYTE );
   camera->attach( osg::Camera::COLOR_BUFFER, colorbuffer.get(), 0, 0 );
   
   // Create a OpenCV image
-  cvDepthImage.create( height, width, CV_32FC1 );  // float image
-  cvColorImage.create( height, width, CV_8UC3 );   // RGB image
-  vctDepthImage.SetSize( height, width );
-  vctColorImage.SetSize( height, width*3 );
+  rgbimage.create( height, width, CV_8UC3 );   // RGB image
 
 }
 
 devOSGCamera::FinalDrawCallback::~FinalDrawCallback(){
-  cvDepthImage.release();
-  cvColorImage.release();
+  rgbimage.release();
 }
 
 // This is called after each draw
@@ -101,34 +100,37 @@ devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
     
     // get the viewport size
     const osg::Viewport* viewport = camera->getViewport();
-    int width  = (int)viewport->width();
-    int height = (int)viewport->height();
 
-    // get the intrinsic parameters of the camera
-    double fovy, aspectRatio, Zn, Zf;
-    camera->getProjectionMatrixAsPerspective( fovy, aspectRatio, Zn, Zf );
-  
-    // Convert zbuffer values [0,1] to range data and flip the image vertically
-    float* z = (float*)depthbuffer->data();
+    size_t width = viewport->width();
+    size_t height = viewport->height();
 
-    float* Z = NULL;
-    if( cvDepthImage.isContinuous() )
-      // const_cast = lame!
-      { Z = const_cast<float*>( cvDepthImage.ptr<float>() ); }
+    double* XYZ = const_cast<double*>( rangedata.Pointer() );
 
-    CMN_ASSERT( Z != NULL );
-    int i=0;
-    for( int r=height-1; 0<=r; r-- ){
-      for( int c=0; c<width; c++ ){
-	// forgot where I took this equation
-	Z[ i++ ] = Zn*Zf / (Zf - z[ r*width + c ]*(Zf-Zn));
+    GLint view[4];
+    view[0] = (int)viewport->x();
+    view[1] = (int)viewport->y();
+    view[2] = width;
+    view[3] = height;
+
+    GLdouble model[4][4];
+    glGetDoublev(GL_MODELVIEW_MATRIX, &model[0][0]);
+
+    GLdouble proj[4][4];
+    glGetDoublev(GL_PROJECTION_MATRIX, &proj[0][0]);
+
+    for( size_t x=0; x<width; x++ ){
+      for( size_t y=0; y<height; y++ ){
+	GLdouble X, Y, Z;
+	float* d = (float*)depthbuffer->data( x, y );
+	gluUnProject( x, y, *d, &model[0][0], &proj[0][0], view, &X, &Y, &Z );
+	// rangedata is 4xN column major
+	*XYZ++ = X;
+	*XYZ++ = Y;
+	*XYZ++ = Z;
       }
     }
 
-    // use this line to dump a test image
-    //cv::imwrite( "depth.bmp", cvDepthImage );
   }
-
 }
 
 void 
@@ -146,8 +148,8 @@ devOSGCamera::FinalDrawCallback::ConvertColorBuffer
     // copy the color buffer and flip the image vertically
     unsigned char* rgb = (unsigned char*)colorbuffer->data();
     unsigned char* RGB = NULL;
-    if( cvColorImage.isContinuous() )
-      { RGB = const_cast<unsigned char*>( cvColorImage.ptr<unsigned char>() ); } 
+    if( rgbimage.isContinuous() )
+      { RGB = const_cast<unsigned char*>( rgbimage.ptr<unsigned char>() ); } 
   
     CMN_ASSERT( RGB != NULL );
 
@@ -171,8 +173,7 @@ devOSGCamera::FinalDrawCallback::ConvertColorBuffer
 devOSGCamera::devOSGCamera( const std::string& name, 
 			    devOSGWorld* world,
 			    const std::string& fnname,
-			    bool trackball ) :
-  mtsTaskContinuous( name ),
+			    bool trackball ) :  mtsTaskContinuous( name ),
   osgViewer::Viewer(){
 
   // Add a timeout as it can take time to load the windows
@@ -200,11 +201,12 @@ devOSGCamera::devOSGCamera( const std::string& name,
   if( trackball ){
     // Add+configure the trackball of the camera
     setCameraManipulator( new osgGA::TrackballManipulator );
-    getCameraManipulator()->setHomePosition( osg::Vec3d( 1,0,1 ),
+
+    getCameraManipulator()->setHomePosition( osg::Vec3d( 0,0,1 ),
 					     osg::Vec3d( 0,0,0 ),
-					     osg::Vec3d( 0,0,1 ) );
+					     osg::Vec3d( 0,1,0 ) );
     home();
-    
+
     // add a bit more light
     osg::ref_ptr<osg::Light> light = new osg::Light;
     light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
@@ -237,3 +239,48 @@ void devOSGCamera::Update(){
     SetMatrix( vctFrame4x4<double>(Rt) );
   }
 }
+
+
+/*
+// Convert the depth buffer to something useful (depth values)
+void 
+devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
+( osg::Camera* camera ) const {
+
+  
+  // Should we care?
+  if( IsDepthBufferEnabled() ){
+    
+    // get the viewport size
+    const osg::Viewport* viewport = camera->getViewport();
+    int width  = (int)viewport->width();
+    int height = (int)viewport->height();
+
+    // get the intrinsic parameters of the camera
+    double fovy, aspectRatio, Zn, Zf;
+    camera->getProjectionMatrixAsPerspective( fovy, aspectRatio, Zn, Zf );
+  
+    // Convert zbuffer values [0,1] to range data and flip the image vertically
+    float* z = (float*)depthbuffer->data();
+
+    float* Z = NULL;
+    if( cvDepthImage.isContinuous() )
+      // const_cast = lame!
+      { Z = const_cast<float*>( cvDepthImage.ptr<float>() ); }
+
+    CMN_ASSERT( Z != NULL );
+    int i=0;
+    for( int r=height-1; 0<=r; r-- ){
+      for( int c=0; c<width; c++ ){
+	// forgot where I took this equation
+	Z[ i++ ] = Zn*Zf / (Zf - z[ r*width + c ]*(Zf-Zn));
+      }
+    }
+
+    // use this line to dump a test image
+    //cv::imwrite( "depth.bmp", cvDepthImage );
+  }
+
+}
+
+*/

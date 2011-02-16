@@ -60,8 +60,8 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
-  cv::Mat GetDepthImage( size_t idx = 0 ) const;
-  cv::Mat GetColorImage( size_t idx = 0 ) const;
+  vctDynamicMatrix<double> GetRangeData( size_t idx ) const;
+  cv::Mat GetRGBImage( size_t idx ) const;
 #endif
 
 };

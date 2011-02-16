@@ -43,14 +43,14 @@ devODEWorld::devODEWorld( double period,
   // The following values are tuned "to make ODE work" decently
   // you can change these values if you wish and results may vary
   // set the error reduction parameter
-  //dWorldSetERP( GetWorldID(), 0.5 );
+  dWorldSetERP( GetWorldID(), 0.5 );
 
   // set the constraint force mixing
-  //dWorldSetCFM( GetWorldID(), 0.0000001 );
+  dWorldSetCFM( GetWorldID(), 0.0000001 );
   
   // set the surface layer depth
-  //dWorldSetContactSurfaceLayer( GetWorldID(), 0.001 );
-  //dWorldSetContactMaxCorrectingVel( GetWorldID(), 0.01 );
+  dWorldSetContactSurfaceLayer( GetWorldID(), 0.1 );
+  dWorldSetContactMaxCorrectingVel( GetWorldID(), 0.00001 );
 }
 
 // destroy the world
@@ -110,8 +110,8 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 				dContactSoftERP |
 				dContactSoftCFM 
 				);
-    contacts[i].surface.mu = 0.5;
-    contacts[i].surface.mu2 = 0.5;
+    contacts[i].surface.mu = 1;
+    contacts[i].surface.mu2 = 1;
     contacts[i].surface.bounce = 0.1;
     contacts[i].surface.soft_cfm = 0.00001;
     contacts[i].surface.soft_erp = 0.3;

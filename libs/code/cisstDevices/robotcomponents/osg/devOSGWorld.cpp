@@ -8,6 +8,7 @@
 
 devOSGWorld::devOSGWorld(){
 
+  /*
   osg::ref_ptr<osg::Geometry> linesGeom;
   try{ linesGeom = new osg::Geometry; }
   catch( std::bad_alloc& ){ 
@@ -106,6 +107,7 @@ devOSGWorld::devOSGWorld(){
   geode->addDrawable( Zgeom );
   
   addChild( geode );
+  */
 
 }
 

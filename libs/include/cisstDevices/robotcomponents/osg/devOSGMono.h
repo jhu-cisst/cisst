@@ -3,6 +3,7 @@
 #ifndef _devOSGMono_h
 #define _devOSGMono_h
 
+#include <cisstVector/vctDynamicNArray.h>
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
@@ -55,8 +56,10 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
-  cv::Mat GetDepthImage( size_t idx = 0 ) const;
-  cv::Mat GetColorImage( size_t idx = 0 ) const;
+  vctDynamicMatrix<double> GetRangeData() const;
+  cv::Mat GetRGBImage() const;
+  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage() const;
+  vctDynamicMatrix<unsigned char> GetRGBPixelImage() const;
 #endif
 
 };
