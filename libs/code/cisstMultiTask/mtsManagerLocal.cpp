@@ -1978,6 +1978,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
+        osaSleep(0.1);  // PK TEMP until blocking commands supported
     }
 
     mtsInterfaceRequiredOrInput * interfaceRequiredOrInput;
@@ -1997,6 +1998,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
+        osaSleep(0.1);  // PK TEMP until blocking commands supported
     }
     return true;
 }
