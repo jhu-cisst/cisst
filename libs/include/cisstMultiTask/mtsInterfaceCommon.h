@@ -188,7 +188,6 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, CommandQualifiedReadEl
         cmnThrow("cmnDeSerializeRaw(CommandQualifiedReadElement: Error occured with std::istream::read");
 }
 
-#if 0  // Event vectors typedefed to Command vectors
 inline void cmnSerializeRaw(std::ostream & outputStream, const EventVoidElement & data)
             throw (std::runtime_error)
 {
@@ -222,7 +221,6 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, EventWriteElement & da
     if (inputStream.fail())
         cmnThrow("cmnDeSerializeRaw(EventWriteElement: Error occured with std::istream::read");
 }
-#endif
 
 inline std::ostream & operator << (std::ostream & output,
                                    const InterfaceProvidedDescription & description) {
