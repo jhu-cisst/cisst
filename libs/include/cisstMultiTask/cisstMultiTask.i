@@ -467,7 +467,7 @@ http://www.cisst.org/cisst/license.txt.
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
                     manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
                     # PK TEMP: need time.sleep until blocking commands supported over network
-                    time.sleep(0.2)
+                    time.sleep(1.0)
                     interfaceRequired.UpdateFromC()
                     return interfaceRequired
                 else:
