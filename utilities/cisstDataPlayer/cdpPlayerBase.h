@@ -49,7 +49,7 @@ class cdpPlayerBase: public QObject, public mtsTaskPeriodic
 
 public:
 
-    QDockWidget * GetWidget(void) {
+    QWidget * GetWidget(void) {
         return &Widget;
     }
 
@@ -70,7 +70,7 @@ protected:
 
 
     //The instance of the widget representing this player.
-    QDockWidget Widget;
+    QWidget Widget;
 
     bool Sync;
     mtsInt State;

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: cdpPlayerVideo.h 2308 2011-02-15 22:01:00Z adeguet1 $
 
   Author(s): Marcin Balicki
   Created on: 2011-02-10
@@ -19,27 +19,29 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _cdpPlayerExample_h
-#define _cdpPlayerExample_h
+#ifndef _cdpPlayerVideo_h
+#define _cdpPlayerVideo_h
 
 #include <QObject>
 #include <QtGui/QCloseEvent>
 #include <cisstMultiTask.h>
+#include <cisstStereoVision.h>
 
 #include "ui_cdpPlayerWidget.h"
 #include "cdpPlayerBase.h"
+#include "svlFilterImageQWidget.h"
 
 //! todo Think about the thread safety issue. (At the moment, mtscommands and qslots can manipulte same data at the same time)
 //! If the data processing is not heavy we can use the main QT thread via QTimer and mtsTaskFromCallback, or add more mtsFunction calls.
 
-class cdpPlayerExample: public cdpPlayerBase
+class cdpPlayerVideo: public cdpPlayerBase
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_DEBUG);
 
 public:
-    cdpPlayerExample(const std::string & name, double period);
-    ~cdpPlayerExample();
+    cdpPlayerVideo(const std::string & name, double period);
+    ~cdpPlayerVideo();
 
     //call this after tasks connections are made
     void Configure(const std::string & filename = "");
@@ -50,7 +52,7 @@ public:
 
 private:
 
-    Ui::cdpPlayerWidget  ExWidget;
+    Ui::cdpPlayerWidget ExWidget;
     void MakeQTConnections(void);
     //by calling "emit QSignalQTUpdate" this function will be called.
     //used this to udpate qt widgets in a thread safe way.
@@ -63,6 +65,18 @@ private:
     void Quit(void);
     void LoadData(void);
     void UpdateLimits(void);
+
+    void SetupPipeline(void);
+
+    QWidget                 MainWindow;
+    svlFilterImageQWidget   *videoWidget;
+
+     // instantiating SVL stream and filters
+    svlStreamManager        stream;;
+    svlFilterImageOverlay   overlay;
+    svlFilterSourceVideoFile source;
+
+    svlOverlayTimestamp     *ts_overlay;
 
 
 private slots:
@@ -81,6 +95,6 @@ private slots:
 
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cdpPlayerExample);
+CMN_DECLARE_SERVICES_INSTANTIATION(cdpPlayerVideo);
 
-#endif // _cdpPlayerExample_h
+#endif // _cdpPlayerVideo_h

@@ -16,12 +16,14 @@ include_directories(${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               cdpPlayerBase.h
               cdpPlayerExample.h
-              cdpPlayerManager.h)
+              cdpPlayerManager.h
+              cdpPlayerVideo.h
+              svlFilterImageQWidget.h
+                )
 
 qt4_wrap_ui (QT_WRAPPED_UI
-             cdpPlayerExampleWidget.ui
-             cdpPlayerManagerWidget.ui)
-
+             cdpPlayerManagerWidget.ui
+             cdpPlayerWidget.ui)
 
 add_library (cisstDataPlayerComponents
              ${QT_WRAPPED_CPP}
@@ -35,7 +37,12 @@ add_library (cisstDataPlayerComponents
              cdpPlayerDataInfo.h
              cdpPlayerDataInfo.cpp
              cdpPlayerExample.h
-             cdpPlayerExample.cpp)
+             cdpPlayerExample.cpp
+             cdpPlayerVideo.h
+             cdpPlayerVideo.cpp
+             svlFilterImageQWidget.h
+             svlFilterImageQWidget.cpp
+)
 
 add_executable (cisstDataPlayer
                 main.cpp)
@@ -45,4 +52,4 @@ target_link_libraries (cisstDataPlayer
                        ${QT_LIBRARIES})
 
 cisst_target_link_libraries (cisstDataPlayer
-                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask)
+                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision)

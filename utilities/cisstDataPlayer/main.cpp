@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QApplication>
 #include "cdpPlayerExample.h"
 #include "cdpPlayerManager.h"
+#include "cdpPlayerVideo.h"
 
 
 int main(int argc, char *argv[])
@@ -38,22 +39,18 @@ int main(int argc, char *argv[])
     componentManager = mtsManagerLocal::GetInstance();
 
     QApplication application(argc, argv);
-
+    svlInitialize();
     cdpPlayerManager * playerManager = new cdpPlayerManager("PlayerManager", 1.0 * cmn_ms);
     cdpPlayerExample * player1 = new cdpPlayerExample("Player1", 1.0 * cmn_ms);
-    cdpPlayerExample * player2 = new cdpPlayerExample("Player2", 1.0 * cmn_ms);
+    cdpPlayerVideo   * vplayer = new cdpPlayerVideo("VideoPlayer", 1.0 * cmn_ms);
+    cdpPlayerVideo   * vplayer2 = new cdpPlayerVideo("VideoPlayer2", 1.0 * cmn_ms);
 
-    // add the components to the component manager
+
     componentManager->AddComponent(playerManager);
     componentManager->AddComponent(player1);
-    componentManager->AddComponent(player2);
+    componentManager->AddComponent(vplayer);
+    componentManager->AddComponent(vplayer2);
 
-    playerManager->AddPlayer(player1);
-    playerManager->AddPlayer(player2);
-
-    playerManager->Configure();
-    player1->Configure();
-    player2->Configure();
 
     // create the components, i.e. find the commands
     componentManager->CreateAll();
@@ -62,6 +59,17 @@ int main(int argc, char *argv[])
     // start the periodic Run
     componentManager->StartAll();
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
+
+    playerManager->AddPlayer(player1);
+    playerManager->AddPlayer(vplayer);
+    playerManager->AddPlayer(vplayer2);
+
+    playerManager->Configure();
+    player1->Configure();
+
+    //these should be configured after the pipeline is started.
+    vplayer->Configure();
+    vplayer2->Configure();
 
     application.setStyle("Plastique");
     application.exec();

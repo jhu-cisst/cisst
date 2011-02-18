@@ -1,6 +1,6 @@
 /*
-  $Id$
-  
+  $Id: cdpPlayerVideo.cpp 2308 2011-02-15 22:01:00Z adeguet1 $
+
   Author(s): Marcin Balicki
   Created on: 2011-02-10
 
@@ -16,31 +16,42 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "cdpPlayerExample.h"
+#include "cdpPlayerVideo.h"
 #include <math.h>
 #include <QMenu>
 #include <cisstOSAbstraction/osaGetTime.h>
-
+#include <QGridLayout>
 #include <iostream>
 #include <sstream>
 
-CMN_IMPLEMENT_SERVICES(cdpPlayerExample);
+CMN_IMPLEMENT_SERVICES(cdpPlayerVideo);
 
-cdpPlayerExample::cdpPlayerExample(const std::string & name, double period):
+cdpPlayerVideo::cdpPlayerVideo(const std::string & name, double period):
     cdpPlayerBase(name,period)
 {
-    // create the user interface
 
+    // create the user interface
+        // create the user interface
     ExWidget.setupUi(&Widget);
+    videoWidget = new svlFilterImageQWidget();
+
+    QGridLayout *CentralLayout = new QGridLayout(&MainWindow);
+    CentralLayout->setContentsMargins(0, 0, 0, 0);
+    CentralLayout->setRowStretch(0, 1);
+    CentralLayout->setColumnStretch(1, 1);
+
+    CentralLayout->addWidget(videoWidget, 0, 0, 1, 4);
+    CentralLayout->addWidget(&Widget,1,1,1,1);
+
 }
 
 
-cdpPlayerExample::~cdpPlayerExample()
+cdpPlayerVideo::~cdpPlayerVideo()
 {
 }
 
 
-void cdpPlayerExample::MakeQTConnections(void)
+void cdpPlayerVideo::MakeQTConnections(void)
 {
     QObject::connect(ExWidget.PlayButton, SIGNAL(clicked()),
                      this, SLOT( QSlotPlayClicked()) );
@@ -62,24 +73,31 @@ void cdpPlayerExample::MakeQTConnections(void)
 }
 
 
-void cdpPlayerExample::Configure(const std::string & CMN_UNUSED(filename))
+void cdpPlayerVideo::Configure(const std::string & CMN_UNUSED(filename))
 {
     MakeQTConnections();
+
+
+
+    //Widget.setWindowTitle(QString::fromStdString(GetName()));
+   // Widget.show();
+    MainWindow.setWindowTitle(QString::fromStdString(GetName()));
+    MainWindow.resize(300,500);
+    MainWindow.show();
     LoadData();
     UpdateLimits();
 
-    Widget.setWindowTitle(QString::fromStdString(GetName()));
-    Widget.show();
 }
 
 
-void cdpPlayerExample::Startup(void)
+void cdpPlayerVideo::Startup(void)
 {
 
+
 }
 
 
-void cdpPlayerExample::Run(void)
+void cdpPlayerVideo::Run(void)
 {
     ProcessQueuedEvents();
     ProcessQueuedCommands();
@@ -96,15 +114,28 @@ void cdpPlayerExample::Run(void)
         }
         else {
             //Load and Prep current data
+             //source.Play();
+             //CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
+             //CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
+             source.SetPosition(source.GetPositionAtTime(Time.Data));
+             source.Play();
         }
     }
     //make sure we are at the correct seek position.
     else if (State == SEEK) {
         //Load and Prep current data
+             // CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
+             //CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
+              source.SetPosition(source.GetPositionAtTime(Time.Data));
+              source.Play();
     }
 
     else if (State == STOP) {
         //do Nothing
+          source.Pause();
+              // CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
+            // CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
+
     }
 
     //now display updated data in the qt thread space.
@@ -115,7 +146,7 @@ void cdpPlayerExample::Run(void)
 
 
 //in QT thread space
-void cdpPlayerExample::UpdateQT(void)
+void cdpPlayerVideo::UpdateQT(void)
 {
     if (State == PLAY) {
         //Display the last datasample before Time.
@@ -136,7 +167,7 @@ void cdpPlayerExample::UpdateQT(void)
 }
 
 
-void cdpPlayerExample::Play(const mtsDouble & time)
+void cdpPlayerVideo::Play(const mtsDouble & time)
 {
     if (Sync) {
         CMN_LOG_CLASS_RUN_DEBUG << "Play " << PlayStartTime << std::endl;
@@ -147,7 +178,7 @@ void cdpPlayerExample::Play(const mtsDouble & time)
 }
 
 
-void cdpPlayerExample::Stop(const mtsDouble & time)
+void cdpPlayerVideo::Stop(const mtsDouble & time)
 {
     if (Sync) {
         CMN_LOG_CLASS_RUN_DEBUG << "Stop " << time << std::endl;
@@ -156,7 +187,7 @@ void cdpPlayerExample::Stop(const mtsDouble & time)
 }
 
 
-void cdpPlayerExample::Seek(const mtsDouble & time)
+void cdpPlayerVideo::Seek(const mtsDouble & time)
 {
     if (Sync) {
         CMN_LOG_CLASS_RUN_DEBUG << "Seek " << time << std::endl;
@@ -168,7 +199,7 @@ void cdpPlayerExample::Seek(const mtsDouble & time)
 }
 
 
-void cdpPlayerExample::Save(const cdpSaveParameters & saveParameters)
+void cdpPlayerVideo::Save(const cdpSaveParameters & saveParameters)
 {
     if (Sync) {
         CMN_LOG_CLASS_RUN_DEBUG << "Save " << saveParameters << std::endl;
@@ -176,14 +207,14 @@ void cdpPlayerExample::Save(const cdpSaveParameters & saveParameters)
 }
 
 
-void cdpPlayerExample::Quit(void)
+void cdpPlayerVideo::Quit(void)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Quit" << std::endl;
     this->Kill();
 }
 
 
-void cdpPlayerExample::QSlotPlayClicked(void)
+void cdpPlayerVideo::QSlotPlayClicked(void)
 {
     mtsDouble playTime = Time; //this should be read from the state table!!!
     playTime.Timestamp() = TimeServer.GetAbsoluteTimeInSeconds();
@@ -199,7 +230,7 @@ void cdpPlayerExample::QSlotPlayClicked(void)
 }
 
 
-void cdpPlayerExample::QSlotSeekSliderMoved(int c)
+void cdpPlayerVideo::QSlotSeekSliderMoved(int c)
 {
     mtsDouble t = c;
 
@@ -213,13 +244,13 @@ void cdpPlayerExample::QSlotSeekSliderMoved(int c)
 }
 
 
-void cdpPlayerExample::QSlotSyncCheck(bool checked)
+void cdpPlayerVideo::QSlotSyncCheck(bool checked)
 {
     Sync = checked;
 }
 
 
-void cdpPlayerExample::QSlotStopClicked(void)
+void cdpPlayerVideo::QSlotStopClicked(void)
 {
     mtsDouble now = Time;
 
@@ -231,10 +262,18 @@ void cdpPlayerExample::QSlotStopClicked(void)
 }
 
 
-void cdpPlayerExample::LoadData(void)
+void cdpPlayerVideo::LoadData(void)
 {
-    PlayerDataInfo.DataStart() = 1297723451.415;
-    PlayerDataInfo.DataEnd() = 1297723900.022;
+
+    SetupPipeline();
+
+    vctInt2 range;
+    source.GetRange(range);
+
+    PlayerDataInfo.DataStart() = source.GetTimeAtPosition(range[0]);
+    PlayerDataInfo.DataEnd() = source.GetTimeAtPosition(range[1]);
+//    PlayerDataInfo.DataStart() = 1297723451.415;
+//    PlayerDataInfo.DataEnd() = 1297723900.022;
 
     if (Time < PlayerDataInfo.DataStart()) {
         Time = PlayerDataInfo.DataStart();
@@ -252,19 +291,19 @@ void cdpPlayerExample::LoadData(void)
 }
 
 
-void cdpPlayerExample::QSlotSetSaveStartClicked(void)
+void cdpPlayerVideo::QSlotSetSaveStartClicked(void)
 {
     ExWidget.SaveStartSpin->setValue(Time.Data);
 }
 
 
-void cdpPlayerExample::QSlotSetSaveEndClicked(void)
+void cdpPlayerVideo::QSlotSetSaveEndClicked(void)
 {
     ExWidget.SaveEndSpin->setValue(Time.Data);
 }
 
 
-void cdpPlayerExample::UpdateLimits()
+void cdpPlayerVideo::UpdateLimits()
 {
     ExWidget.TimeSlider->setRange((int)PlayerDataInfo.DataStart(), (int)PlayerDataInfo.DataEnd());
 
@@ -273,4 +312,28 @@ void cdpPlayerExample::UpdateLimits()
 
     ExWidget.SaveStartSpin->setRange( PlayerDataInfo.DataStart(), PlayerDataInfo.DataEnd());
     ExWidget.SaveEndSpin->setRange( PlayerDataInfo.DataStart(), PlayerDataInfo.DataEnd());
+}
+
+
+void cdpPlayerVideo::SetupPipeline() {
+
+  // Add timestamp overlay
+    ts_overlay = new svlOverlayTimestamp (0, true, videoWidget, svlRect(4, 4, 134, 21),
+                                   15.0, svlRGB(255, 200, 200), svlRGB(32, 32, 32));
+    overlay.AddOverlay(*ts_overlay);
+
+    source.SetChannelCount(1);
+
+    std::string pathname = "/mnt/2TB/TestRecordings/laser.cvi";
+
+    if (source.SetFilePath(pathname) != SVL_OK) {
+            std::cerr << std::endl << "Wrong file name... " << std::endl;
+    }
+
+    // chain filters to pipeline
+    stream.SetSourceFilter(&source);    // chain filters to pipeline
+    source.GetOutput()->Connect(overlay.GetInput());
+    overlay.GetOutput()->Connect(videoWidget->GetInput());
+    stream.Play();
+    source.Pause();
 }

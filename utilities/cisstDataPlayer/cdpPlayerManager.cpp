@@ -147,6 +147,11 @@ void cdpPlayerManager::UpdateQT(void)
 void cdpPlayerManager::Configure(const std::string & CMN_UNUSED(filename))
 {
     MakeQTConnections();
+    //! /todo Temporary hack, remove
+    // DataEndTime     = 300;
+    UpdateLimits();
+    PlayUntilTime = DataStartTime;
+
     //Widget.resize(700,300);
     Widget.show();
 }
@@ -154,10 +159,7 @@ void cdpPlayerManager::Configure(const std::string & CMN_UNUSED(filename))
 
 void cdpPlayerManager::Startup(void)
 {
-    //! /todo Temporary hack, remove
-    // DataEndTime     = 300;
-    UpdateLimits();
-    PlayUntilTime = DataStartTime;
+
 }
 
 
@@ -274,7 +276,9 @@ void cdpPlayerManager::UpdatePlayerInfoHandler(const cdpPlayerDataInfo & info)
         MgrWidget.PlayerTable->setItem( i, 0, player );
         MgrWidget.PlayerTable->setItem( i, 1, start );
         MgrWidget.PlayerTable->setItem( i, 2, end );
-        MgrWidget.PlayerTable->setSortingEnabled (true);
+        //! /todo : this causes connect errors (qt:sortOrder)
+        //MgrWidget.PlayerTable->setSortingEnabled (true);
+
     }
     //    else if(list.size() > 1)
     //    {
@@ -292,6 +296,7 @@ void cdpPlayerManager::UpdatePlayerInfoHandler(const cdpPlayerDataInfo & info)
     //update
 
     UpdateLimits();
+
     CMN_LOG_CLASS_RUN_DEBUG << " UpdatePlayerInfo received: " << info << std::endl;
 }
 
