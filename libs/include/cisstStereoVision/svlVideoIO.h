@@ -102,7 +102,6 @@ public:
     const std::string& GetExtensions() const;
     bool IsMultithreaded() const;
     bool IsVariableFramerate() const;
-    
 
     virtual int Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate) = 0;
     virtual int Create(const std::string &filename, const unsigned int width, const unsigned int height, const double framerate) = 0;

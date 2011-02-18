@@ -70,7 +70,9 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
         }
         writer.OpenFile(dst_path);
     }
-    writer.SaveCodec("codec.dat");
+    if (!loadcodec) {
+        writer.SaveCodec("codec.dat");
+    }
     std::string encoder;
     writer.GetCodecName(encoder);
 
@@ -142,7 +144,7 @@ int main(int argc, char** argv)
         cerr << "     stereoTutorialVideoConverter src.avi dest.cvi" << endl << endl;
     }
 
-    VideoConverter(source, destination, true);
+    VideoConverter(source, destination, false);
 
     return 1;
 }

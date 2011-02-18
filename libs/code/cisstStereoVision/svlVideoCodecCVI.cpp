@@ -42,7 +42,8 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
     CodecName("CISST Video"),
     FileStartMarker("CisstSVLVideo\r\n",  // all version strings shall be of equal length
                     "CisstVid_1.10\r\n",
-                    "CisstVid_1.20\r\n"),
+                    "CisstVid_1.20\r\n",
+                    "CisstVid_1.30\r\n"),
     FrameStartMarker("\r\nFrame\r\n"),
     Version(-1),
     FooterOffset(0),
@@ -55,6 +56,8 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
     Opened(false),
     Writing(false),
     Timestamp(-1.0),
+    prevYuvBuffer(0),
+    prevYuvBufferSize(0),
     yuvBuffer(0),
     yuvBufferSize(0),
     comprBuffer(0),
@@ -71,20 +74,27 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
     SetVariableFramerate(true);
 
     saveBuffer.SetAll(0);
+
+    Config.Level        = 4;
+    Config.Differential = 0;
 }
 
 svlVideoCodecCVI::~svlVideoCodecCVI()
 {
     Close();
-    if (yuvBuffer) delete [] yuvBuffer;
-    if (comprBuffer) delete [] comprBuffer;
+    if (prevYuvBuffer) delete [] prevYuvBuffer;
+    if (yuvBuffer)     delete [] yuvBuffer;
+    if (comprBuffer)   delete [] comprBuffer;
     if (saveBuffer[0]) delete [] saveBuffer[0];
     if (saveBuffer[1]) delete [] saveBuffer[1];
 }
 
 int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
 {
-    if (Opened) return SVL_FAIL;
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "Open: already opened" << std::endl;
+        return SVL_FAIL;
+    }
 
     unsigned int size;
     long long int len, pos;
@@ -93,24 +103,49 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
     while (1) {
 
         // Open file
-        if (File.Open(filename, svlFile::R) != SVL_OK) break;
+        if (File.Open(filename, svlFile::R) != SVL_OK) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to open file for reading" << std::endl;
+            break;
+        }
 
         // Read "file start marker"
         len = FileStartMarker[0].length();
-        if (File.Read(strbuffer, len) != len) break;
+        if (File.Read(strbuffer, len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `file start marker`" << std::endl;
+            break;
+        }
         strbuffer[len] = 0;
         Version = static_cast<int>(FileStartMarker.size()) - 1;
         while (Version >= 0) {
             if (FileStartMarker[Version].compare(strbuffer) == 0) break;
             Version --;
         }
-        if (Version < 0) break;
+        if (Version < 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: invalid CVI version" << std::endl;
+            break;
+        }
 
         if (Version > 0) {
+
+            if (Version > 2) {
+                // Read "differential flag"
+                len = sizeof(unsigned char);
+                if (File.Read(reinterpret_cast<char*>(&(Config.Differential)), len) != len) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `differential flag`" << std::endl;
+                    break;
+                }
+            }
+
             // Read "footer offset"
             len = sizeof(long long int);
-            if (File.Read(reinterpret_cast<char*>(&FooterOffset), len) != len ||
-                FooterOffset <= 0) break;
+            if (File.Read(reinterpret_cast<char*>(&FooterOffset), len) != len) {
+                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `footer offset`" << std::endl;
+                break;
+            }
+            if (FooterOffset <= 0) {
+                CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `footer offset`" << std::endl;
+                break;
+            }
 
 #ifdef READ_CORRUPT_V110_FILE
             Version = 0;
@@ -119,12 +154,21 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
             pos = File.GetPos();
 
             // Seek to footer offset
-            if (File.Seek(FooterOffset) != SVL_OK) break;
+            if (File.Seek(FooterOffset) != SVL_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to seek to file footer" << std::endl;
+                break;
+            }
 
             // Read the frame ID of the last frame
             len = sizeof(int);
-            if (File.Read(reinterpret_cast<char*>(&EndPos), len) != len ||
-                EndPos < 0) break;
+            if (File.Read(reinterpret_cast<char*>(&EndPos), len) != len) {
+                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `end position`" << std::endl;
+                break;
+            }
+            if (EndPos < 0) {
+                CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `end position`" << std::endl;
+                break;
+            }
 
             // Create frame offsets
             FrameOffsets.SetSize(EndPos + 1);
@@ -132,7 +176,10 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
 
             // Read frame offsets
             len = FrameOffsets.size() * sizeof(long long int);
-            if (File.Read(reinterpret_cast<char*>(FrameOffsets.Pointer()), len) != len) break;
+            if (File.Read(reinterpret_cast<char*>(FrameOffsets.Pointer()), len) != len) {
+                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `frame offsets`" << std::endl;
+                break;
+            }
 
             if (Version > 1) {
                 // Create frame timestamps
@@ -141,7 +188,10 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
 
                 // Read frame timestamps
                 len = FrameTimestamps.size() * sizeof(double);
-                if (File.Read(reinterpret_cast<char*>(FrameTimestamps.Pointer()), len) != len) break;
+                if (File.Read(reinterpret_cast<char*>(FrameTimestamps.Pointer()), len) != len) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `frame timestamps`" << std::endl;
+                    break;
+                }
             }
 
             // Restore file position
@@ -154,16 +204,48 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
 
         // Read "width"
         len = sizeof(unsigned int);
-        if (File.Read(reinterpret_cast<char*>(&Width), len) != len ||
-            Width < 1 || Width > 4096) break;
+        if (File.Read(reinterpret_cast<char*>(&Width), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `width`" << std::endl;
+            break;
+        }
+        if (Width < 1 || Width > 8192) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `width`" << std::endl;
+            break;
+        }
         // Read "height"
         len = sizeof(unsigned int);
-        if (File.Read(reinterpret_cast<char*>(&Height), len) != len ||
-            Height < 1 || Height > 4096) break;
+        if (File.Read(reinterpret_cast<char*>(&Height), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `height`" << std::endl;
+            break;
+        }
+        if (Height < 1 || Height > 8192) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `height`" << std::endl;
+            break;
+        }
         // Read "part count"
         len = sizeof(unsigned int);
-        if (File.Read(reinterpret_cast<char*>(&PartCount), len)!= len ||
-            PartCount < 1 || PartCount > 256) break;
+        if (File.Read(reinterpret_cast<char*>(&PartCount), len)!= len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `part count`" << std::endl;
+            break;
+        }
+        if (PartCount < 1 || PartCount > 256) {
+            CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `part count`" << std::endl;
+            break;
+        }
+
+        if (Config.Differential) {
+            // Allocate previous YUV buffer if not done yet
+            size = Width * Height * 2;
+            if (!prevYuvBuffer) {
+                prevYuvBuffer = new unsigned char[size];
+                prevYuvBufferSize = size;
+            }
+            else if (prevYuvBuffer && prevYuvBufferSize < size) {
+                delete [] prevYuvBuffer;
+                prevYuvBuffer = new unsigned char[size];
+                prevYuvBufferSize = size;
+            }
+        }
 
         // Allocate YUV buffer if not done yet
         size = Width * Height * 2;
@@ -205,19 +287,13 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
 
 int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double CMN_UNUSED(framerate))
 {
-	if (Opened || width < 1 || width > 4096 || height < 1 || height > 4096) return SVL_FAIL;
-
-    if (!Codec) {
-        // Set default compression level to 4
-        Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
-        std::string name("Multiblock ZLib Compression (YUV422)");
-        memset(&(Codec->extension[0]), 0, 16);
-        memcpy(&(Codec->extension[0]), ".cvi", 4);
-        memset(&(Codec->name[0]), 0, 64);
-        memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
-        Codec->size = sizeof(svlVideoIO::Compression);
-        Codec->datasize = 1;
-        Codec->data[0]  = 4;
+	if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "Create: already opened" << std::endl;
+        return SVL_FAIL;
+    }
+    if (width < 1 || width > 8192 || height < 1 || height > 8192) {
+        CMN_LOG_CLASS_INIT_ERROR << "Create: invalid image dimensions" << std::endl;
+        return SVL_FAIL;
     }
 
     unsigned int size;
@@ -226,17 +302,33 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
     while (1) {
 
         // Open file
-        if (File.Open(filename, svlFile::W) != SVL_OK) break;
+        if (File.Open(filename, svlFile::W) != SVL_OK) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to open file for writing" << std::endl;
+            break;
+        }
 
         // Write "file start marker" (always writes the latest version)
         Version = FileStartMarker.size() - 1;
         len = FileStartMarker[Version].length();
-        if (File.Write(FileStartMarker[Version].c_str(), len) != len) break;
+        if (File.Write(FileStartMarker[Version].c_str(), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write `file start marker`" << std::endl;
+            break;
+        }
+
+        // Write "differential flag"
+        len = sizeof(unsigned char);
+        if (File.Write(reinterpret_cast<const char*>(&(Config.Differential)), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write `differential flag`" << std::endl;
+            break;
+        }
 
         // Write "footer offset" placeholder (will be filled later)
         FooterOffset = 0;
         len = sizeof(long long int);
-        if (File.Write(reinterpret_cast<const char*>(&FooterOffset), len) != len) break;
+        if (File.Write(reinterpret_cast<const char*>(&FooterOffset), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write `footer offset` placeholder" << std::endl;
+            break;
+        }
 
         // Pre-allocate large frame offsets & timestamps tables
         FrameOffsets.SetSize(100000);
@@ -244,10 +336,32 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
     
         // Write "width"
         len = sizeof(unsigned int);
-        if (File.Write(reinterpret_cast<const char*>(&width), len) != len) break;
+        if (File.Write(reinterpret_cast<const char*>(&width), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write `width`" << std::endl;
+            break;
+        }
         // Write "height"
         len = sizeof(unsigned int);
-        if (File.Write(reinterpret_cast<const char*>(&height), len) != len) break;
+        if (File.Write(reinterpret_cast<const char*>(&height), len) != len) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write `height`" << std::endl;
+            break;
+        }
+
+        if (Config.Differential) {
+            // Allocate previous YUV buffer if not done yet
+            size = width * height * 2;
+            if (!prevYuvBuffer) {
+                prevYuvBuffer = new unsigned char[size];
+                prevYuvBufferSize = size;
+            }
+            else if (prevYuvBuffer && prevYuvBufferSize < size) {
+                delete [] prevYuvBuffer;
+                prevYuvBuffer = new unsigned char[size];
+                prevYuvBufferSize = size;
+            }
+            // Initialize previous YUV buffer to all zeros
+            memset(prevYuvBuffer, 0, yuvBufferSize);
+        }
 
         // Allocate YUV buffer if not done yet
         size = width * height * 2;
@@ -300,7 +414,10 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
         WriteDoneEvent  = new osaThreadSignal;
         SaveThread->Create<svlVideoCodecCVI, int>(this, &svlVideoCodecCVI::SaveProc, 0);
         SaveInitEvent->Wait();
-        if (SaveInitialized == false) break;
+        if (SaveInitialized == false) {
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to create writer thread" << std::endl;
+            break;
+        }
 
         BegPos  = EndPos = Pos = 0;
         Width   = width;
@@ -341,6 +458,7 @@ int svlVideoCodecCVI::Close()
                 len = sizeof(int);
                 if (File.Write(reinterpret_cast<const char*>(&EndPos), len) != len) {
                     ret = SVL_FAIL;
+                    CMN_LOG_CLASS_INIT_ERROR << "Close: failed to write `end position`" << std::endl;
                     break;
                 }
 
@@ -348,6 +466,7 @@ int svlVideoCodecCVI::Close()
                 len = (EndPos + 1) * sizeof(long long int);
                 if (File.Write(reinterpret_cast<const char*>(FrameOffsets.Pointer()), len) != len) {
                     ret = SVL_FAIL;
+                    CMN_LOG_CLASS_INIT_ERROR << "Close: failed to write `frame offsets`" << std::endl;
                     break;
                 }
 
@@ -355,12 +474,16 @@ int svlVideoCodecCVI::Close()
                 len = (EndPos + 1) * sizeof(double);
                 if (File.Write(reinterpret_cast<const char*>(FrameTimestamps.Pointer()), len) != len) {
                     ret = SVL_FAIL;
+                    CMN_LOG_CLASS_INIT_ERROR << "Close: failed to write `frame timestamps`" << std::endl;
                     break;
                 }
 
                 // Seek back to "frame offsets pointer"
-                if (File.Seek(FileStartMarker[Version].length()) != SVL_OK) {
+                long long int frameoffsetspointer = FileStartMarker[Version].length() +  // File start marker
+                                                    sizeof(unsigned char);               // Differential flag
+                if (File.Seek(frameoffsetspointer) != SVL_OK) {
                     ret = SVL_FAIL;
+                    CMN_LOG_CLASS_INIT_ERROR << "Close: failed to seek to `frame offsets` placeholder" << std::endl;
                     break;
                 }
 
@@ -368,6 +491,7 @@ int svlVideoCodecCVI::Close()
                 len = sizeof(long long int);
                 if (File.Write(reinterpret_cast<const char*>(&FooterOffset), len) != len) {
                     ret = SVL_FAIL;
+                    CMN_LOG_CLASS_INIT_ERROR << "Close: failed to write `footer offset`" << std::endl;
                     break;
                 }
 
@@ -420,8 +544,14 @@ int svlVideoCodecCVI::GetPos() const
 
 int svlVideoCodecCVI::SetPos(const int pos)
 {
-    if (Version == 0) return SVL_FAIL;
-    if (pos < 0 || pos > EndPos) return SVL_FAIL;
+    if (Version == 0 || Config.Differential) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetPos: seeking is not supported in this CVI version" << std::endl;
+        return SVL_FAIL;
+    }
+    if (pos < 0 || pos > EndPos) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetPos: position=" << pos << " is out of valid range=[0, " << EndPos << "]" << std::endl;
+        return SVL_FAIL;
+    }
     Pos = pos;
     return SVL_OK;
 }
@@ -431,6 +561,7 @@ double svlVideoCodecCVI::GetBegTime() const
     if (Opened && !Writing && Version > 1) {
         return FrameTimestamps[0];
     }
+    CMN_LOG_CLASS_INIT_ERROR << "GetBegTime: failed to get first timestamp" << std::endl;
     return -1.0;
 }
 
@@ -439,6 +570,7 @@ double svlVideoCodecCVI::GetEndTime() const
     if (Opened && !Writing && Version > 1) {
         return FrameTimestamps[FrameTimestamps.size() - 1];
     }
+    CMN_LOG_CLASS_INIT_ERROR << "GetEndTime: failed to get last timestamp" << std::endl;
     return -1.0;
 }
 
@@ -456,6 +588,7 @@ double svlVideoCodecCVI::GetTimeAtPos(const int pos) const
             return FrameTimestamps[pos];
         }
     }
+    CMN_LOG_CLASS_INIT_ERROR << "GetTimeAtPos: failed to get timestamp at position=" << pos << std::endl;
     return -1.0;
 }
 
@@ -493,6 +626,7 @@ int svlVideoCodecCVI::GetPosAtTime(const double time) const
             }
         }
     }
+    CMN_LOG_CLASS_INIT_ERROR << "GetPosAtTime: failed to get position at time=" << std::fixed << time << std::endl;
     return -1;
 }
 
@@ -500,18 +634,24 @@ svlVideoIO::Compression* svlVideoCodecCVI::GetCompression() const
 {
     // The caller will need to release it by calling the
     // svlVideoIO::ReleaseCompression() method
-    unsigned int size = sizeof(svlVideoIO::Compression);
+    unsigned int size = sizeof(svlVideoIO::Compression) - sizeof(unsigned char) + sizeof(CompressionData);
     svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
 
+    // Output settings
+    CompressionData* output_data = reinterpret_cast<CompressionData*>(&(compression->data[0]));
+
+    // Generic settings
     std::string name("Multiblock ZLib Compression (YUV422)");
     memset(&(compression->extension[0]), 0, 16);
     memcpy(&(compression->extension[0]), ".cvi", 4);
     memset(&(compression->name[0]), 0, 64);
     memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     compression->size = size;
-    compression->datasize = 1;
-    if (Codec) compression->data[0] = Codec->data[0];
-    else compression->data[0] = 4; // Set default compression level to 4
+    compression->datasize = sizeof(CompressionData);
+
+    // CVI specific settings
+    output_data->Level        = Config.Level;
+    output_data->Differential = Config.Differential;
 
     return compression;
 }
@@ -524,28 +664,52 @@ int svlVideoCodecCVI::SetCompression(const svlVideoIO::Compression *compression)
     std::string extension(compression->extension);
     extension += ";";
     if (extensionlist.find(extension) == std::string::npos) {
-        // Codec parameters do not match this codec
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompression: codec parameters do not match this codec" << std::endl;
         return SVL_FAIL;
     }
 
     svlVideoIO::ReleaseCompression(Codec);
-    Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
+    unsigned int size = sizeof(svlVideoIO::Compression) - sizeof(unsigned char) + sizeof(CompressionData);
+    Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
 
+    // Local settings
+    CompressionData* local_data = reinterpret_cast<CompressionData*>(&(Codec->data[0]));
+    // Input settings
+    const CompressionData* input_data = reinterpret_cast<const CompressionData*>(&(compression->data[0]));
+
+    // Generic settings
     std::string name("Multiblock ZLib Compression (YUV422)");
     memset(&(Codec->extension[0]), 0, 16);
+    memcpy(&(Codec->extension[0]), ".cvi", 4);
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
-    Codec->size = sizeof(svlVideoIO::Compression);
-    Codec->datasize = 1;
-    if (compression->data[0] <= 9) Codec->data[0] = compression->data[0];
-    else Codec->data[0] = 4;
+    Codec->size = size;
+    Codec->datasize = sizeof(CompressionData);
+
+    // CVI specific settings
+    if (input_data->Level <= 9) {
+        Config.Level = local_data->Level = input_data->Level;
+    }
+    else {
+        local_data->Level = Config.Level;
+    }
+    if (compression->datasize >= sizeof(CompressionData)) {
+        Config.Differential = local_data->Differential = input_data->Differential;
+    }
+    else {
+        // Maintaining compatibility with older versions of the structure
+        local_data->Differential = Config.Differential;
+    }
 
     return SVL_OK;
 }
 
 int svlVideoCodecCVI::DialogCompression()
 {
-    if (Opened) return SVL_FAIL;
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: already open" << std::endl;
+        return SVL_FAIL;
+    }
 
     std::cout << std::endl << " # Enter compression level [0-9]: ";
     int level = 0;
@@ -553,45 +717,79 @@ int svlVideoCodecCVI::DialogCompression()
     level -= '0';
     std::cout << level << std::endl;
 
-    svlVideoIO::ReleaseCompression(Codec);
-    Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
+    std::cout << " # Enable differential encoding (seeking not supported) ['y' or other]: ";
+    int differential = cmnGetChar();
+    if (differential == 'y' || differential == 'Y') {
+        differential = 1;
+        std::cout << "YES" << std::endl;
+    }
+    else {
+        differential = 0;
+        std::cout << "NO" << std::endl;
+    }
 
+    svlVideoIO::ReleaseCompression(Codec);
+    unsigned int size = sizeof(svlVideoIO::Compression) - sizeof(unsigned char) + sizeof(CompressionData);
+    Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
+
+    // Local settings
+    CompressionData* local_data = reinterpret_cast<CompressionData*>(&(Codec->data[0]));
+
+    // Generic settings
     std::string name("Multiblock ZLib Compression (YUV422)");
     memset(&(Codec->extension[0]), 0, 16);
     memcpy(&(Codec->extension[0]), ".cvi", 4);
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
-    Codec->size = sizeof(svlVideoIO::Compression);
-    Codec->datasize = 1;
-    Codec->data[0] = static_cast<unsigned char>(level);
+    Codec->size = size;
+    Codec->datasize = sizeof(CompressionData);
+
+    // CVI specific settings
+    Config.Level        = local_data->Level        = static_cast<unsigned char>(level);
+    Config.Differential = local_data->Differential = static_cast<unsigned char>(differential);
 
 	return SVL_OK;
 }
 
 double svlVideoCodecCVI::GetTimestamp() const
 {
-    if (!Opened || Writing) return -1.0;
+    if (!Opened || Writing) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetTimestamp: failed to get timestamp" << std::endl;
+        return -1.0;
+    }
     return Timestamp;
 }
 
 int svlVideoCodecCVI::SetTimestamp(const double timestamp)
 {
-    if (!Opened || !Writing) return SVL_FAIL;
+    if (!Opened || !Writing) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetTimestamp: failed to set timestamp" << std::endl;
+        return SVL_FAIL;
+    }
     Timestamp = timestamp;
     return SVL_OK;
 }
 
 int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
-    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
-    if (!Opened || Writing) return SVL_FAIL;
+    if (videoch >= image.GetVideoChannels()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
+    if (!Opened || Writing) {
+        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") file needs to be opened for reading" << std::endl;
+        return SVL_FAIL;
+    }
 
     // Uses only a single thread
     if (procInfo && procInfo->id != 0) return SVL_OK;
 
     // Allocate image buffer if not done yet
     if (Width  != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
-        if (noresize) return SVL_FAIL;
+        if (noresize) {
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") unexpected change in image dimensions" << std::endl;
+            return SVL_FAIL;
+        }
         image.SetSize(videoch, Width, Height);
     }
 
@@ -609,15 +807,31 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
         }
 
         // Look up the position in the frame offsets table and move the file pointer
-        if (File.Seek(FrameOffsets[Pos]) != SVL_OK) return SVL_FAIL;
+        if (File.Seek(FrameOffsets[Pos]) != SVL_OK) {
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to seek to frame=" << Pos << std::endl;
+            return SVL_FAIL;
+        }
+
+        if (Pos == 0) {
+            if (Config.Differential) {
+                // Reset previous YUV buffer to all zeros
+                memset(prevYuvBuffer, 0, prevYuvBufferSize);
+            }
+        }
     }
     else {
         if (Pos == 0) {
             // Go to the beginning of the data, just after the header
 #ifdef READ_CORRUPT_V11_FILE
-            if (File.Seek(35) != SVL_OK) return SVL_FAIL;
+            if (File.Seek(35) != SVL_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to seek to position=35" << std::endl;
+                return SVL_FAIL;
+            }
 #else
-            if (File.Seek(27) != SVL_OK) return SVL_FAIL;
+            if (File.Seek(27) != SVL_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to seek to position=27" << std::endl;
+                return SVL_FAIL;
+            }
 #endif
         }
     }
@@ -628,12 +842,18 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
         len = FrameStartMarker.length();
         if (File.Read(strbuffer, len) != len) break;
         strbuffer[FrameStartMarker.length()] = 0;
-        if (FrameStartMarker.compare(strbuffer) != 0) return SVL_FAIL;
+        if (FrameStartMarker.compare(strbuffer) != 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read `frame start marker`" << std::endl;
+            return SVL_FAIL;
+        }
 
         // Read "timestamp"
         len = sizeof(double);
         if (File.Read(reinterpret_cast<char*>(&Timestamp), len) != len) break;
-        if (Timestamp < 0.0) return SVL_FAIL;
+        if (Timestamp < 0.0) {
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read `frame timestamp`" << std::endl;
+            return SVL_FAIL;
+        }
 
         offset = 0;
         for (i = 0; i < PartCount; i ++) {
@@ -641,7 +861,10 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             // Read "compressed part size"
             len = sizeof(unsigned int);
             if (File.Read(reinterpret_cast<char*>(&compressedpartsize), len) != len) break;
-            if (compressedpartsize == 0 || compressedpartsize > comprBufferSize) return SVL_FAIL;
+            if (compressedpartsize == 0 || compressedpartsize > comprBufferSize) {
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read `compressed part size`" << std::endl;
+                return SVL_FAIL;
+            }
 
             // Read compressed frame part
             len = compressedpartsize;
@@ -649,7 +872,15 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
 
             // Decompress frame part
             longsize = yuvBufferSize - offset;
-            if (uncompress(yuvBuffer + offset, &longsize, comprBuffer, compressedpartsize) != Z_OK) return SVL_FAIL;
+            if (uncompress(yuvBuffer + offset, &longsize, comprBuffer, compressedpartsize) != Z_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to uncompress data" << std::endl;
+                return SVL_FAIL;
+            }
+
+            if (Config.Differential) {
+                // Decode differential encoded data
+                DiffDecode(yuvBuffer + offset, prevYuvBuffer + offset, yuvBuffer + offset, longsize);
+            }
 
             // Convert YUV422 planar to RGB format
             svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
@@ -675,6 +906,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             }
             else {
                 // If it was the first frame, then file is invalid, let it fail
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read first frame" << std::endl;
             }
         }
     }
@@ -690,6 +922,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             }
             else {
                 // If it was the first frame, then file is invalid, let it fail
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read first frame" << std::endl;
             }
         }
     }
@@ -699,12 +932,24 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
 
 int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
-    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
-    if (!Opened || !Writing) return SVL_FAIL;
-	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) return SVL_FAIL;
+    if (videoch >= image.GetVideoChannels()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
+    if (!Opened || !Writing) {
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") file needs to be opened for writing" << std::endl;
+        return SVL_FAIL;
+    }
+	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") unexpected change in image dimensions" << std::endl;
+        return SVL_FAIL;
+    }
 
     // Check for video saving errors
-    if (SaveThreadError) return SVL_FAIL;
+    if (SaveThreadError) {
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") error detected on saving thread" << std::endl;
+        return SVL_FAIL;
+    }
 
     bool err = false;
     long long int len;
@@ -719,7 +964,10 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 
             // Write "part count"
             len = sizeof(unsigned int);
-            if (File.Write(reinterpret_cast<char*>(&procInfo->count), len) != len) err = true;
+            if (File.Write(reinterpret_cast<char*>(&procInfo->count), len) != len) {
+                err = true;
+                CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") failed to write `part count`" << std::endl;
+            }
         }
 
         // Synchronize threads
@@ -732,7 +980,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
     const unsigned int proccount = procInfo->count;
     unsigned int start, end, size, offset;
     unsigned long comprsize;
-    int compr = Codec->data[0];
+    int compr = Config.Level;
 
     // Multithreaded compression phase
     while (1) {
@@ -751,9 +999,17 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
         // Convert RGB to YUV422 planar format
         svlConverter::RGB24toYUV422P(const_cast<unsigned char*>(image.GetUCharPointer(videoch)) + offset * 3, yuvBuffer + offset * 2, size);
 
+        offset <<= 1; size <<= 1;
+
+        if (Config.Differential) {
+            // Encode data using differential coding
+            DiffEncode(yuvBuffer + offset, prevYuvBuffer + offset, yuvBuffer + offset, size);
+        }
+
         // Compress part
-        if (compress2(comprBuffer + ComprPartOffset[procid], &comprsize, yuvBuffer + offset * 2, size * 2, compr) != Z_OK) {
+        if (compress2(comprBuffer + ComprPartOffset[procid], &comprsize, yuvBuffer + offset, size, compr) != Z_OK) {
             err = true;
+            CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") failed to compress data" << std::endl;
             break;
         }
         ComprPartSize[procid] = comprsize;
@@ -811,6 +1067,99 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 	return SVL_OK;
 }
 
+void svlVideoCodecCVI::DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size)
+{
+    if (!input || !previous || !output || !size) return;
+
+    unsigned char* previous_temp = previous;
+    char* output_c = reinterpret_cast<char*>(output);
+    unsigned int pos = size;
+    int in_i, prev_i, diff_i;
+
+    while (pos) {
+        pos --;
+
+        prev_i = *previous;
+        in_i = *input;
+        diff_i = in_i - prev_i;
+
+        if (diff_i >= 0) {
+            if (diff_i < 64) {
+                *output_c = static_cast<char>(diff_i);
+            }
+            else {
+                *output_c = static_cast<char>(64 + (diff_i - 64) / 3);
+            }
+        }
+        else {
+            if (diff_i > -64) {
+                *output_c = static_cast<char>(diff_i);
+            }
+            else {
+                // Needs to be this convoluted because truncation
+                // may happen toward negative infinity in C
+                *output_c = static_cast<char>(-64 - ((-64 - diff_i) / 3));
+            }
+        }
+
+        input    ++;
+        previous ++;
+        output_c ++;
+    }
+
+    // Decode encoded data in order to propagate possible codeing errors
+    DiffDecode(output, previous_temp, previous_temp, size);
+}
+
+void svlVideoCodecCVI::DiffDecode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size)
+{
+    if (!input || !previous || !output || !size) return;
+
+    char* input_c = reinterpret_cast<char*>(input);
+    unsigned int pos = size;
+    int in_i, prev_i, res;
+
+    while (pos) {
+        pos --;
+
+        in_i = *input_c;
+        prev_i = *previous;
+
+        if (in_i >= 0) {
+            if (in_i < 64) {
+                res = prev_i + in_i;
+                if (res < 0) res = 0;
+                else if (res > 255) res = 255;
+                *output = *previous = static_cast<unsigned char>(res);
+            }
+            else {
+                res = prev_i + (in_i - 64) * 3 + 64;
+                if (res < 0) res = 0;
+                else if (res > 255) res = 255;
+                *output = *previous = static_cast<unsigned char>(res);
+            }
+        }
+        else {
+            if (in_i > -64) {
+                res = prev_i + in_i;
+                if (res < 0) res = 0;
+                else if (res > 255) res = 255;
+                *output = *previous = static_cast<unsigned char>(res);
+            }
+            else {
+                res = prev_i + (in_i + 64) * 3 - 64;
+                if (res < 0) res = 0;
+                else if (res > 255) res = 255;
+                *output = *previous = static_cast<unsigned char>(res);
+            }
+        }
+
+        input_c  ++;
+        previous ++;
+        output   ++;
+    }
+}
+
 void* svlVideoCodecCVI::SaveProc(int CMN_UNUSED(param))
 {
     SaveThreadError = false;
@@ -830,6 +1179,7 @@ void* svlVideoCodecCVI::SaveProc(int CMN_UNUSED(param))
         len = SaveBufferUsedSize;
         if (File.Write(reinterpret_cast<char*>(saveBuffer[SaveBufferUsedID]), len) != len) {
             SaveThreadError = true;
+            CMN_LOG_CLASS_INIT_ERROR << "SaveProc: failed to write compressed data" << std::endl;
             return this;
         }
 

@@ -128,7 +128,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     CViewerEventHandler window_eh;
     svlFilterVideoFileWriter videowriter;
     svlFilterImageFileWriter imagewriter;
-    svlFilterImageWindow window2;
 
     // setup source
     // Delete "device.dat" to reinitialize input device
@@ -352,7 +351,7 @@ int main(int argc, char** argv)
 
     //////////////////////////////
     // parsing arguments
-    int i, options, ivalue, width, height;
+    int j, options, ivalue, width, height;
     bool interpolation, save;
 
     options = argc - 1;
@@ -361,10 +360,10 @@ int main(int argc, char** argv)
     height = -1;
     save = false;
 
-    for (i = 1; i <= options; i ++) {
-        if (argv[i][0] != '-') continue;
+    for (j = 1; j <= options; j ++) {
+        if (argv[j][0] != '-') continue;
 
-        switch (argv[i][1]) {
+        switch (argv[j][1]) {
             case '?':
                 cerr << "Command line format:" << endl;
                 cerr << "     stereoTutorialCameraViewer [options]" << endl;
@@ -388,12 +387,12 @@ int main(int argc, char** argv)
             break;
 
             case 'w':
-                ivalue = ParseNumber(argv[i] + 2, 4);
+                ivalue = ParseNumber(argv[j] + 2, 4);
                 if (ivalue > 0) width = ivalue;
             break;
 
             case 'h':
-                ivalue = ParseNumber(argv[i] + 2, 4);
+                ivalue = ParseNumber(argv[j] + 2, 4);
                 if (ivalue > 0) height = ivalue;
             break;
 
