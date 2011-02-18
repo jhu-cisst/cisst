@@ -71,6 +71,7 @@ protected:
     bool Writing;
     double Timestamp;
 
+    char* PacketData;
     unsigned char* yuvBuffer;
     unsigned int yuvBufferSize;
     unsigned char* comprBuffer;
@@ -78,17 +79,14 @@ protected:
     vctDynamicVector<unsigned int> ComprPartOffset;
     vctDynamicVector<unsigned int> ComprPartSize;
 
-    char* PacketData;
-    svlBufferMemory* streamingBuffer;
-    unsigned int streamingBufferSize;
-    unsigned int StreamingBufferUsedSize;
-    unsigned int StreamingBufferUsedID;
-
     int ServerSocket;
     osaThread* ServerThread;
     osaThreadSignal* ServerInitEvent;
     bool ServerInitialized;
     bool KillServerThread;
+
+    svlBufferMemory* ReceiveBuffer;
+    vctDynamicVector<svlBufferMemory*> SendBuffer;
 
     vctDynamicVector<osaThread*> SendThread;
     vctDynamicVector<int> SendConnection;

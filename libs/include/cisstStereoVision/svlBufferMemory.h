@@ -34,16 +34,16 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT svlBufferMemory
 {
 public:
-    svlBufferMemory(unsigned int size);
+    svlBufferMemory(unsigned int max_size);
 
-    unsigned int GetSize();
+    unsigned int GetMaxSize();
 
     unsigned char* GetPushBuffer();
-    unsigned char* GetPushBuffer(unsigned int& size);
-    void Push();
-    bool Push(unsigned char* buffer, unsigned int size);
+    void Push(unsigned int used);
 
-    unsigned char* Pull(bool waitfornew, double timeout = 5.0);
+    bool Push(unsigned char* buffer, unsigned int used);
+
+    unsigned char* Pull(unsigned int& used, double timeout);
 
 private:
     svlBufferMemory();
@@ -55,6 +55,7 @@ private:
 #endif
     osaThreadSignal NewFrameEvent;
     vctDynamicMatrix<unsigned char> Buffer;
+    vctDynamicVector<unsigned int>  Used;
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     osaCriticalSection CS;

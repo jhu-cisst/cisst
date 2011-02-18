@@ -147,7 +147,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     gamma.SetGamma(0.0);
 
     // setup splitter
-    splitter.AddOutput("output2", 8, 200);
+    splitter.AddOutput("output2", 8, 3);
     svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup writer
@@ -227,6 +227,12 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     output->Connect(splitter.GetInput());
         output = splitter.GetOutput();
 
+    if (save == true) {
+        // If saving enabled, then add video writer on separate branch
+        splitteroutput->SetBlock(true);
+        splitteroutput->Connect(videowriter.GetInput());
+    }
+
     // Add image file writer
     output->Connect(imagewriter.GetInput());
         output = imagewriter.GetOutput();
@@ -238,12 +244,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     // Add window
     output->Connect(window.GetInput());
         output = window.GetOutput();
-
-    if (save == true) {
-        // If saving enabled, then add video writer on separate branch
-        splitteroutput->SetBlock(true);
-        splitteroutput->Connect(videowriter.GetInput());
-    }
 
     cerr << endl << "Starting stream... ";
 
