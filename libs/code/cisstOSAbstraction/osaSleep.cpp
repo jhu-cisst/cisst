@@ -28,9 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
     #include <sys/time.h>
     #include <unistd.h>
+#elif (CISST_OS == CISST_LINUX_RTAI)
+    #include <rtai_lxrt.h>
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #elif (CISST_OS == CISST_QNX)
@@ -42,12 +44,23 @@ const long nSecInSec =  1000.0 * 1000.0 * 1000.0;
 
 void osaSleep(double timeInSeconds) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
 
     struct timespec ts;
     ts.tv_sec = static_cast<long> (timeInSeconds);
     ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
     nanosleep(&ts, NULL);
+
+#elif (CISST_OS == CISST_LINUX_RTAI)
+    // check if this called by a real time task or not
+    if (rt_is_hard_real_time(rt_buddy())) {
+        rt_sleep(nano2count(static_cast<long> (timeInSeconds * nSecInSec)));
+    } else {
+        struct timespec ts;
+        ts.tv_sec = static_cast<long> (timeInSeconds);
+        ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
+        nanosleep(&ts, NULL);
+    }
 
 #elif (CISST_OS == CISST_WINDOWS)
     // A waitable timer seems to be better than the Windows Sleep().
