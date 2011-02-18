@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _devOSGBody_h
 
 #include <osg/Geometry>
+#include <osg/Switch>
 #include <osg/MatrixTransform>
 
 #include <cisstVector/vctFrame4x4.h>
@@ -47,23 +48,50 @@ class CISST_EXPORT devOSGBody :
   osg::ref_ptr<UserData> userdata;
 
   // This is used to update the position of the body
-  class UpdateCallback : public osg::NodeCallback {    
+  class TransformCallback : public osg::NodeCallback {    
   public:
-    UpdateCallback(){}
+    TransformCallback(){}
     void operator()( osg::Node* node, osg::NodeVisitor* nv );
   };
 
-  // This method is called from the callback
-  virtual void Update();
+  // This is used to update the position of the body
+  class SwitchCallback : public osg::NodeCallback {    
+  public:
+    SwitchCallback(){}
+    void operator()( osg::Node* node, osg::NodeVisitor* nv );
+  };
 
-  // Set the OSG matrix
+  //! This method is called from the transform callback
+  virtual void Transform();
+
+  //! This method is called from the switch callback
+  virtual void Switch();
+
+  //! Set the OSG matrix
+  /**
+     Convert the vctFrame4x4 matrix to the osg transform matrix
+  */
   void SetMatrix( const vctFrame4x4<double>& Rt );
 
   // Get the transformation from somewhere else
   mtsFunctionRead ReadTransformation;
+  vctFrame4x4<double> Rt_body;
 
+  // Get the switch status from somewhere else
+  mtsFunctionRead ReadSwitch;
+  bool switch_body;
+
+  // The switch
+  osg::ref_ptr< osg::Switch > osgswitch;
+  
   // A vector of geometries
-  std::vector<osg::Geometry*> geometries;
+  std::vector<osg::Geometry*> osggeometries;
+
+
+  void CreateInterface( const std::string& transformfn, 
+			const std::string& switchfn );
+  void ReadModel( const std::string& fname );
+  void Read3DData( const vctDynamicMatrix<double>& pc );
 
  public: 
 
@@ -77,13 +105,14 @@ class CISST_EXPORT devOSGBody :
      \param Rt The initial transformation of the body
      \param model The file name of a 3D model
      \param world The OSG world the body belongs to
-     \param fnname The name of a MTS read command the body will connect
+     \param transformfn The name of a MTS read command the body will connect
   */
   devOSGBody( const std::string& name, 
-	      const vctFrm3& Rt,
+	      const vctFrame4x4<double>& Rt,
 	      const std::string& model,
 	      devOSGWorld* world,
-	      const std::string& fnname = "" );
+	      const std::string& transformfn = "",
+	      const std::string& switchfn = "" );
 
   //! OSG Body constructor
   /**
@@ -95,16 +124,30 @@ class CISST_EXPORT devOSGBody :
      \param Rt The initial transformation of the body
      \param model The file name of a 3D model
      \param world The OSG world the body belongs to
-     \param fnname The name of a MTS read command the body will connect
+     \param transformfn The name of a MTS read command the body will connect
   */
   devOSGBody( const std::string& name, 
-	      const vctFrame4x4<double>& Rt,
+	      const vctFrm3& Rt,
 	      const std::string& model,
 	      devOSGWorld* world,
-	      const std::string& fnname = "" );
+	      const std::string& transformfn = "",
+	      const std::string& switchfn = "" );
 
+  //! Construcor for 3D point cloud
+  devOSGBody( const std::string& name, 
+              const vctFrm3& Rt,
+	      const vctDynamicMatrix<double>& pc,
+	      devOSGWorld* world,
+              const std::string& transformfn = "",
+	      const std::string& switchfn = "" );
 
   ~devOSGBody();
+
+  //! Set the transform of the body
+  void SetTransform( const vctFrame4x4<double>& Rt );
+
+  //! Set the switch of the body
+  void SetSwitch( bool onoff );
   
 };
 

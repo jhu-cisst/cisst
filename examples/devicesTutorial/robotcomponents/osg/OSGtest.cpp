@@ -1,3 +1,6 @@
+
+#include <cisstDevices/devKeyboard.h>
+
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
@@ -29,24 +32,20 @@ int main(){
   camera = new devOSGMono( "camera",
 			   world,
 			   x, y, width, height,
-			   55, ((double)width)/((double)height),
+			   55.0, ((double)width)/((double)height),
 			   Znear, Zfar );
   // Add the camera component
   taskManager->AddComponent( camera );
 
   // Create objects
   std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
-
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
 			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
   osg::ref_ptr<devOSGBody> hubble;
-  hubble = new devOSGBody( "hubble", 
-			   Rt,
-			   data+"hst.3ds",
-			   world );
 
   vctFrame4x4<double> eye;
   osg::ref_ptr<devOSGBody> background;
+  hubble = new devOSGBody( "hubble", Rt, data+"hst.3ds", world );
   background = new devOSGBody( "background", 
 			       eye, 
 			       data+"background.3ds", 
@@ -58,18 +57,41 @@ int main(){
 
   cmnGetChar();
 
+
   // The next block reads and saves OpenCV images and save them to disk
 #if CISST_DEV_HAS_OPENCV22
 
-  vctDynamicMatrix<double> range = camera->GetRangeData();
-  //std::cout << range.Transpose() << std::endl;
-
-  cv::Mat rgb = camera->GetRGBImage();
-  cv::imwrite( "rgb.bmp", rgb );
-
+  std::cout << "ENTER to render 3D data." << std::endl;
   cmnGetChar();
 
+  // Get the 3D data from the camera
+  vctDynamicMatrix<double> range = camera->GetRangeData();
+  
+  // Create a body from the range data
+  devOSGBody* databody = new devOSGBody( "data", vctFrm3(), range, world );
+
+  // Get the RGB data from the camera
+  cv::Mat rgb = camera->GetRGBImage();
+  // write the RGB to a file
+  cv::imwrite( "rgb.bmp", rgb );
+
+  std::cout << "ENTER to switch off 3D data." << std::endl;
+  cmnGetChar();
+  databody->SetSwitch( false );
+
+  std::cout << "ENTER to switch off geometry." << std::endl;
+  cmnGetChar();
+  hubble->SetSwitch( false );
+  background->SetSwitch( false );
+  databody->SetSwitch( true );
+
+
+
 #endif
+
+  std::cout << "ENTER to exit." << std::endl;
+  cmnGetChar();
+
 
   // Kill everything
   taskManager->KillAll();

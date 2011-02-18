@@ -117,17 +117,23 @@ devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
     view[2] = width;
     view[3] = height;
 
-    GLdouble model[4][4];
-    glGetDoublev(GL_MODELVIEW_MATRIX, &model[0][0]);
+    
 
-    GLdouble proj[4][4];
-    glGetDoublev(GL_PROJECTION_MATRIX, &proj[0][0]);
+    //GLdouble model[4][4];
+    //glGetDoublev(GL_MODELVIEW_MATRIX, &model[0][0]);
 
+    //GLdouble proj[4][4];
+    //glGetDoublev(GL_PROJECTION_MATRIX, &proj[0][0]);
+    
+    osg::Matrixd modelm = camera->getViewMatrix();
+    osg::Matrixd projm = camera->getProjectionMatrix();
+    
     for( size_t x=0; x<width; x++ ){
       for( size_t y=0; y<height; y++ ){
 	GLdouble X, Y, Z;
 	float* d = (float*)depthbuffer->data( x, y );
-	gluUnProject( x, y, *d, &model[0][0], &proj[0][0], view, &X, &Y, &Z );
+	gluUnProject( x, y, *d, modelm.ptr(), projm.ptr(), view, &X, &Y, &Z );
+	//gluUnProject( x, y, *d, &model[0][0], &proj[0][0], view, &X, &Y, &Z );
 	// rangedata is 4xN column major
 	*XYZ++ = X;
 	*XYZ++ = Y;
@@ -214,7 +220,7 @@ devOSGCamera::devOSGCamera( const std::string& name,
 
     // add a bit more light
     osg::ref_ptr<osg::Light> light = new osg::Light;
-    light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
+    light->setAmbient( osg::Vec4( .7, .7, .7, 1 ) );
     setLight( light );
   }
 

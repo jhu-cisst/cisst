@@ -20,18 +20,27 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 // This is called at each update traversal
-void devOSGBody::UpdateCallback::operator()( osg::Node* node, 
-					   osg::NodeVisitor* nv ){
-      
+void devOSGBody::TransformCallback::operator()( osg::Node* node, 
+						osg::NodeVisitor* nv ){
   osg::Referenced* data = node->getUserData();
   devOSGBody::UserData* userdata;
   userdata = dynamic_cast<devOSGBody::UserData*>( data );
 
   if( userdata != NULL )
-    { userdata->GetBody()->Update(); }
-
+    { userdata->GetBody()->Transform(); }
   traverse( node, nv );
+}   
 
+// This is called at each update traversal
+void devOSGBody::SwitchCallback::operator()( osg::Node* node, 
+					     osg::NodeVisitor* nv ){
+  osg::Referenced* data = node->getUserData();
+  devOSGBody::UserData* userdata;
+  userdata = dynamic_cast<devOSGBody::UserData*>( data );
+
+  if( userdata != NULL )
+    { userdata->GetBody()->Switch(); }
+  traverse( node, nv );
 }   
 
 
@@ -39,99 +48,36 @@ devOSGBody::devOSGBody(	const std::string& name,
 			const vctFrame4x4<double>& Rt,
 			const std::string& model, 
 			devOSGWorld* world,
-			const std::string& fnname ) : 
-  mtsComponent( name ){
+			const std::string& transformfn,
+			const std::string& switchfn ) : 
+  mtsComponent( name ),
+  Rt_body( Rt ),
+  switch_body( true ){
   
   setDataVariance( osg::Object::DYNAMIC );
   
-  osg::ref_ptr< osgDB::ReaderWriter::Options > options;
-  // "noRotation" is to cancel the default -X in .obj files
-  options = new osgDB::ReaderWriter::Options("noRotation");
+  // Setup the user data for this body. This can be used to recover the body
+  // from callbacks
+  userdata = new devOSGBody::UserData( this );
 
-  std::string path;
-  size_t found;
-#if (CISST_OS == CISST_WINDOWS)
-#else
-  found = model.rfind( '/' );
-#endif    
+  // Configure the (transform) node
+  this->setUserData( userdata );
+  this->setUpdateCallback( new devOSGBody::TransformCallback );
 
-  if( found != std::string::npos )
-    { path.assign( model, 0, found ); }
-  options->setDatabasePath( path );
+  // Create and configure the switch node
+  osgswitch = new osg::Switch();
+  osgswitch->setUserData( userdata );
+  osgswitch->setUpdateCallback( new devOSGBody::SwitchCallback );
 
-  osg::Node* node = osgDB::readNodeFile( model, options );
+  // add the switch as the child of the transform node
+  this->addChild( osgswitch );
 
-  if( node != NULL ){
-
-    // Add the node to the transformation node
-    addChild( node );
-
-    // This blocks gets the geometry out of the node
-    // This is how it "should" work: First cast the node as a group
-    osg::Group* group = node->asGroup();
-    if( group != NULL ){
-
-      for( size_t g = 0; g<group->getNumChildren(); g++ ){
-
-	node = group->getChild( g );
-
-	// This node should be a geode
-	osg::Geode* geode = node->asGeode();
-	if( geode != NULL ){
-
-	  // Find if it has any drawables?
-	  for( size_t d=0; d<geode->getNumDrawables(); d++ ){
-	    // Get the first drawable
-	    osg::Drawable* drawable = geode->getDrawable( d );
-	  
-	    // Cast the drawable as a geometry
-	    osg::Geometry* geometry = drawable->asGeometry();
-	    if( geometry == NULL ){
-	      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-				<< "Failed to cast the drawable as a geometry."
-				<< std::endl;
-	    }
-	    else { geometries.push_back( geometry ); }
-
-	  }
-	}
-	else{
-	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			    << "Failed to cast node as a geode for : " << model 
-			    << std::endl;
-	}
-      }
-    }
-    else{
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< "Failed to cast node as a group for : " << model 
-			<< std::endl;
-    }
-
-  }
-  else{
-    CMN_LOG_RUN_ERROR
-      << CMN_LOG_DETAILS
-      << "Failed to create node from file: " << model << std::endl;
-  }
+  ReadModel( model );
 
   if( world != NULL )
     { world->addChild( this ); }
   
-  // Setup the callback
-  // Set callback stuff
-  userdata = new devOSGBody::UserData( this );
-  setUserData( userdata );
-  setUpdateCallback( new devOSGBody::UpdateCallback );
-
-  // MTS stuff
-  if( !fnname.empty() ){
-    mtsInterfaceRequired* required;
-    required = AddInterfaceRequired( "Transformation" );
-    if( required != NULL )
-      { required->AddFunction( fnname, ReadTransformation ); }
-
-  }
+  CreateInterface( transformfn, switchfn );
 
   SetMatrix( Rt );
 
@@ -141,11 +87,97 @@ devOSGBody::devOSGBody(	const std::string& name,
 			const vctFrm3& Rt,
 			const std::string& model, 
 			devOSGWorld* world,
-			const std::string& fnname ) : 
-  mtsComponent( name ){
+			const std::string& transformfn,
+			const std::string& switchfn ) : 
+  mtsComponent( name ),
+  Rt_body( Rt.Rotation(), Rt.Translation() ),
+  switch_body( true ){
   
   setDataVariance( osg::Object::DYNAMIC );
   
+  // Setup the user data for this body. This can be used to recover the body
+  // from callbacks
+  userdata = new devOSGBody::UserData( this );
+
+  // Configure the (transform) node
+  this->setUserData( userdata );
+  this->setUpdateCallback( new devOSGBody::TransformCallback );
+
+  // Create and configure the switch node
+  osgswitch = new osg::Switch();
+  osgswitch->setUserData( userdata );
+  osgswitch->setUpdateCallback( new devOSGBody::SwitchCallback );
+
+  // add the switch as the child of the transform node
+  this->addChild( osgswitch );
+
+  ReadModel( model );
+
+  if( world != NULL )
+    { world->addChild( this ); }
+
+  CreateInterface( transformfn, switchfn );
+
+  SetMatrix( vctFrame4x4<double>( Rt.Rotation(), Rt.Translation() ) );
+
+}
+
+devOSGBody::devOSGBody(	const std::string& name,
+			const vctFrm3& Rt,
+			const vctDynamicMatrix<double>& pc,
+			devOSGWorld* world,
+			const std::string& transformfn,
+			const std::string& switchfn ) : 
+  mtsComponent( name ),
+  Rt_body( Rt.Rotation(), Rt.Translation() ),
+  switch_body( true ){
+
+  setDataVariance( osg::Object::DYNAMIC );
+  
+  // Setup the user data for this body. This can be used to recover the body
+  // from callbacks
+  userdata = new devOSGBody::UserData( this );
+
+  // Configure the (transform) node
+  this->setUserData( userdata );
+  this->setUpdateCallback( new devOSGBody::TransformCallback );
+
+  // Create and configure the switch node
+  osgswitch = new osg::Switch();
+  osgswitch->setUserData( userdata );
+  osgswitch->setUpdateCallback( new devOSGBody::SwitchCallback );
+
+  // add the switch as the child of the transform node
+  this->addChild( osgswitch );
+
+  Read3DData( pc );
+
+  if( world != NULL )
+    { world->addChild( this ); }
+ 
+  CreateInterface( transformfn, switchfn );
+
+  SetMatrix( vctFrame4x4<double>( Rt.Rotation(), Rt.Translation() ) );
+
+}
+
+
+devOSGBody::~devOSGBody(){}
+
+void devOSGBody::CreateInterface( const std::string& transformfn,
+				  const std::string& switchfn ){
+  mtsInterfaceRequired* required;
+  required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
+  if( required != NULL ){ 
+    if( !transformfn.empty() )
+      { required->AddFunction( transformfn, ReadTransformation ); }
+    if( !switchfn.empty() )
+      { required->AddFunction( transformfn, ReadSwitch ); }
+  }
+}
+
+void devOSGBody::ReadModel( const std::string& model ){
+
   osg::ref_ptr< osgDB::ReaderWriter::Options > options;
   // "noRotation" is to cancel the default -X in .obj files
   options = new osgDB::ReaderWriter::Options("noRotation");
@@ -160,12 +192,13 @@ devOSGBody::devOSGBody(	const std::string& name,
   if( found != std::string::npos )
     { path.assign( model, 0, found ); }
   options->setDatabasePath( path );
-  
-  osg::Node* node = osgDB::readNodeFile( model, options );
+
+  osg::ref_ptr<osg::Node> node = osgDB::readNodeFile( model, options );
+
   if( node != NULL ){
     
     // Add the node to the transformation node
-    addChild( node );
+    osgswitch->addChild( node );
 
     // This blocks gets the geometry out of the node
     // This is how it "should" work: First cast the node as a group
@@ -192,7 +225,7 @@ devOSGBody::devOSGBody(	const std::string& name,
 				<< "Failed to cast the drawable as a geometry."
 				<< std::endl;
 	    }
-	    else { geometries.push_back( geometry ); }
+	    else { osggeometries.push_back( geometry ); }
 
 	  }
 	}
@@ -216,30 +249,66 @@ devOSGBody::devOSGBody(	const std::string& name,
       << "Failed to create node from file: " << model << std::endl;
   }
 
-  if( world != NULL )
-    { world->addChild( this ); }
-  
-  // Setup the callback
-  // Set callback stuff
-  userdata = new devOSGBody::UserData( this );
-  setUserData( userdata );
-  setUpdateCallback( new devOSGBody::UpdateCallback );
-
-  // MTS stuff
-  if( !fnname.empty() ){
-    mtsInterfaceRequired* required;
-    required = AddInterfaceRequired( "Transformation", MTS_OPTIONAL );
-    if( required != NULL )
-      { required->AddFunction( fnname, ReadTransformation ); }
-
-  }
-
-  
-  SetMatrix( vctFrame4x4<double>( Rt.Rotation(), Rt.Translation() ) );
-
 }
 
-devOSGBody::~devOSGBody(){}
+void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
+
+  size_t npoints= 0;
+  if( pc.rows() == 3 )
+    { npoints = pc.cols(); }
+  else{
+    // invalid data
+  }
+  
+  // First, create a geode
+  osg::ref_ptr<osg::Geode> geode;
+  try{ geode = new osg::Geode; }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create a geode." 
+		      << std::endl;
+  }
+  osgswitch->addChild( geode );
+
+  // then create a geometry
+  osg::ref_ptr<osg::Geometry> pointsGeom;
+  try{ pointsGeom = new osg::Geometry; }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create a points geometry." 
+		      << std::endl;
+  }
+  // add the geometry to the geode
+  geode->addDrawable( pointsGeom );
+
+  // Create an array primitive set 
+  osg::ref_ptr<osg::DrawArrays> drawArrayPoints;
+  try{ drawArrayPoints = new osg::DrawArrays( osg::PrimitiveSet::POINTS ); }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create array of points."
+		      << std::endl;
+  }
+  // add the set to the geometry
+  pointsGeom->addPrimitiveSet( drawArrayPoints );
+  
+  // add a vector of vertices
+  osg::ref_ptr<osg::Vec3Array> vertexData;
+  try{ vertexData = new osg::Vec3Array; }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create vertices array." 
+		      << std::endl;
+  }
+  pointsGeom->setVertexArray( vertexData );
+  
+  for( size_t i=0; i<npoints; i++ )
+    { vertexData->push_back( osg::Vec3( pc[0][i], pc[1][i], pc[2][i] ) ); }
+
+  drawArrayPoints->setFirst( 0 );
+  drawArrayPoints->setCount( vertexData->size() );
+
+}
 
 // Set the OSG transformation
 void devOSGBody::SetMatrix( const vctFrame4x4<double>& Rt ){
@@ -251,11 +320,32 @@ void devOSGBody::SetMatrix( const vctFrame4x4<double>& Rt ){
 
 // This is called from the body's callback
 // This reads a transformation if the body is connected to an interface
-void devOSGBody::Update(){
+void devOSGBody::Transform(){
   // Get the transformation if possible
   if( ReadTransformation.IsValid() ){
     mtsDoubleFrm4x4 Rt;
     ReadTransformation( Rt );
     SetMatrix( vctFrame4x4<double>(Rt) );
   }
+  else
+    { SetMatrix( Rt_body ); }
 }
+
+void devOSGBody::Switch(){
+  // Get the transformation if possible
+  if( ReadTransformation.IsValid() ){
+    mtsBool mtsswitch;
+    ReadTransformation( mtsswitch );
+    osgswitch->setValue( 0, mtsswitch );
+  }
+  else
+    { osgswitch->setValue( 0, switch_body ); }
+}
+
+void devOSGBody::SetTransform( const vctFrame4x4<double>& Rt )
+{ this->Rt_body = Rt; }
+
+//! Set the switch of the body
+void devOSGBody::SetSwitch( bool onoff )
+{ this->switch_body = onoff; }
+  

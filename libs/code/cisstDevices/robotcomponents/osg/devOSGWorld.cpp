@@ -7,7 +7,6 @@
 #include <iostream>
 
 devOSGWorld::devOSGWorld(){
-
   /*
   osg::ref_ptr<osg::Geometry> linesGeom;
   try{ linesGeom = new osg::Geometry; }
@@ -107,7 +106,7 @@ devOSGWorld::devOSGWorld(){
   geode->addDrawable( Zgeom );
   
   addChild( geode );
-  */
 
+  */
 }
 

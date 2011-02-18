@@ -3,6 +3,7 @@
 #ifndef _devOSGStereo_h
 #define _devOSGStereo_h
 
+#include <cisstVector/vctDynamicNArray.h>
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
@@ -62,6 +63,8 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
  public:
   vctDynamicMatrix<double> GetRangeData( size_t idx ) const;
   cv::Mat GetRGBImage( size_t idx ) const;
+  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage( size_t idx ) const;
+  vctDynamicMatrix<unsigned char> GetRGBPixelImage( size_t idx ) const;
 #endif
 
 };
