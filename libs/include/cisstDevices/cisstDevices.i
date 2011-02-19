@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 %module cisstDevicesPython
 
 
+%include "std_list.i"
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_map.i"
@@ -122,6 +123,10 @@ http://www.cisst.org/cisst/license.txt.
 
       %include "cisstDevices/robotcomponents/ode/devODEWorld.h"
       %include "cisstDevices/robotcomponents/ode/devODEBody.h"
+
+      namespace std {
+          %template(ContactList) list<devODEContact>;
+      }
 
     #endif
   

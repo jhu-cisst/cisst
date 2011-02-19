@@ -20,6 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/robotcomponents/ode/devODEJoint.h>
 #include <cisstCommon/cmnLogger.h>
 
+devODEContact::devODEContact() :
+  body1( NULL ),
+  body2( NULL ),
+  position( vctFixedSizeVector<double,3>( 0.0 ) ),
+  normal( vctFixedSizeVector<double,3>( 0.0 ) ),
+  depth( 0.0 ) {}
+
+devODEContact::devODEContact( devODEBody* b1, 
+			      devODEBody* b2,
+			      const vctFixedSizeVector<double,3>& pos,
+			      const vctFixedSizeVector<double,3>& n,
+			      double d ) :
+  body1( b1 ),
+  body2( b2 ),
+  position( pos ),
+  normal( n ),
+  depth( d ) {}
+
 
 devODEWorld::devODEWorld( double period,
 			  osaCPUMask mask,
@@ -137,15 +155,15 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 
       dContactGeom geom = contacts[i].geom;
 
-      devODEWorld::Contact contact(body1, 
-				   body2,
-				   vctFixedSizeVector<double,3>(geom.pos[0],
-								geom.pos[1],
-								geom.pos[2] ),
-				   vctFixedSizeVector<double,3>(geom.normal[0],
-								geom.normal[1],
-								geom.normal[2]),
-				   geom.depth);
+      devODEContact contact(body1, 
+			    body2,
+			    vctFixedSizeVector<double,3>(geom.pos[0],
+							 geom.pos[1],
+							 geom.pos[2] ),
+			    vctFixedSizeVector<double,3>(geom.normal[0],
+							 geom.normal[1],
+							 geom.normal[2]),
+			    geom.depth);
       ContactsList.push_back( contact );
       
     }
@@ -216,14 +234,13 @@ void devODEWorld::Run() {
 void devODEWorld::Insert( devODEJoint* joint )
 { joints.push_back( joint ); }
 
-std::list< devODEWorld::Contact >
-devODEWorld::QueryContacts( const std::string& name ){
+std::list<devODEContact> devODEWorld::QueryContacts( const std::string& name ){
 
-  std::list< devODEWorld::Contact > matches;
+  std::list< devODEContact > matches;
 
   ContactsListMutex.Lock();
 
-  std::list< devODEWorld::Contact >::const_iterator contact;
+  std::list< devODEContact >::const_iterator contact;
   for( contact=ContactsList.begin(); contact!=ContactsList.end(); contact++ ){
     
     if( contact->body1->GetName() == name || contact->body2->GetName() == name )
@@ -236,3 +253,4 @@ devODEWorld::QueryContacts( const std::string& name ){
   return matches;
 
 }
+
