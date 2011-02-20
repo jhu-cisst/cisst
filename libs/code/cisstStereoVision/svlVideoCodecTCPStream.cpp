@@ -662,7 +662,11 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
 
 #if (CISST_OS != CISST_WINDOWS)
         int nosigpipe = 1;
+#if (CISST_OS == CISST_DARWIN)
         if (setsockopt(ServerSocket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == 0) {
+#else
+        if (setsockopt(ServerSocket, SOL_SOCKET, MSG_NOSIGNAL, &nosigpipe, sizeof(int)) == 0) {
+#endif
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecTCPStream::ServerProc - setsockopt (NOSIGPIPE) success" << std::endl;
 #endif
