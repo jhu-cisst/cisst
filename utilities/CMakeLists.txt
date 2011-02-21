@@ -21,11 +21,11 @@ if (BUILD_LIBS_cisstMultiTask)
   add_subdirectory (cisstComponentGenerator)
   add_subdirectory (cisstDataGenerator)
 
-  if (CISST_HAS_QT)
+  if (CISST_HAS_QT AND BUILD_LIBS_cisstStereoVision)
     add_subdirectory (cisstDataPlayer)
-  else (CISST_HAS_QT)
+  else (CISST_HAS_QT  AND BUILD_LIBS_cisstStereoVision)
     message (WARNING " utility cisstDataPlayer will not be compiled since it requires CISST_HAS_QT")
-  endif (CISST_HAS_QT)
+  endif (CISST_HAS_QT AND BUILD_LIBS_cisstStereoVision)
 
   if (CISST_MTS_HAS_ICE)
 

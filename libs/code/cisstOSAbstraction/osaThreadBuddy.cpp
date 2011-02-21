@@ -33,10 +33,8 @@ http://www.cisst.org/cisst/license.txt.
     #include <sys/stat.h>
     #include <unistd.h>
     #include <fstream> // to access /proc/modules
-#ifdef CMAKE_HAVE_QUERY_MODULE
+#ifdef CMAKE_HAVE_MODULE_H
     #include <linux/module.h> // to query kernel module information
-    // Just in case <linux/module.h> does not declare query_module (e.g., Fedora kernel 2.4.20)
-    extern "C" int query_module(const char *name, int which, void *buf, size_t bufsize, size_t *ret);
 #endif
     const char __lock_filepath[] = "/var/lock/subsys/rtai";
     const char __lock_filename[] = "/var/lock/subsys/rtai/rtai.lock";
@@ -111,7 +109,10 @@ void __os_init(void)
     } else {
         // Check version of Linux kernel. query_module is only present up until
         // kernel 2.4 and was removed in Linux 2.6.
-#ifdef CMAKE_HAVE_QUERY_MODULE
+#if defined(CMAKE_HAVE_MODULE_H) && defined(QM_INFO)
+        // Just in case <linux/module.h> does not declare query_module (e.g., Fedora kernel 2.4.20)
+        extern "C" int query_module(const char *name, int which, void *buf, size_t bufsize, size_t *ret);
+
         CMN_LOG_INIT_VERBOSE << "Linux kernel version: 2.4.x" << std::endl;
 
         bool found;
