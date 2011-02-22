@@ -157,11 +157,11 @@ public:
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
 
-    InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName, 
+    InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;
-    InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName, 
+    InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;
-    
+
     //@}
 
 };

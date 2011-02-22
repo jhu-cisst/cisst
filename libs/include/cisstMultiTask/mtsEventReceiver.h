@@ -44,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
   handler to a required interface. Thus, the following three blocks of code can all be used
   to set an event handler:
 
-  \code 
+  \code
   mtsInterfaceRequired required;
 
   // Method 1: Add event handler directly to required interface (no event receiver)
@@ -91,7 +91,7 @@ class osaThreadSignal;
 
 // EventReceivers must be added before Bind (should add check for InterfaceProvidedOrOutput==0)
 // EventHandlers can be added at any time.
-// When Bind called, 
+// When Bind called,
 //    if no EventReceiver, directly add EventHandler
 //    if EventReceiver, set handler in it
 

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsConnection.cpp 2146 2010-12-29 04:54:28Z mjung5 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2010-12-27
