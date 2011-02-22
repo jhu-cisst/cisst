@@ -80,7 +80,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
  public:
     /*! Collection is performed by batches, this requires to save
       the state indices for begin/end. */
-    class IndexRange: public mtsGenericObject
+    class CISST_EXPORT IndexRange: public mtsGenericObject
     {
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     public:
