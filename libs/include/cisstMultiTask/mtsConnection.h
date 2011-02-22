@@ -51,7 +51,7 @@ protected:
     /* Ice server proxy access information (to send messages to client proxy) */
     std::string EndpointInfo;
 
-    /* Time when pending connection becomes invalidated; any pending connection 
+    /* Time when pending connection becomes invalidated; any pending connection
        should be confirmed before this time limit */
     double TimeoutTime;
 #endif
@@ -74,14 +74,14 @@ public:
 
     bool IsConnected(void) const { return Connected; }
     void SetConnected(void) { Connected = true; }
-    
+
     bool IsRemoteConnection(void) const;
 
 #if CISST_MTS_HAS_ICE
     std::string GetEndpointInfo(void) const { return EndpointInfo; }
     void SetProxyAccessInfo(const std::string & endpointInfo) { EndpointInfo = endpointInfo; }
 
-    /*! In the state of pending connection, check if this connection should be 
+    /*! In the state of pending connection, check if this connection should be
         invalidated due to connection timeout */
     bool CheckTimeout(void) const;
 #endif
