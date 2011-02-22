@@ -96,6 +96,8 @@ SET(SOURCE_FILES
     svlFilterVideoExposureManager.cpp
     svlFilterVideoFileWriter.cpp
     svlRequiredInterfaces.cpp
+	svlFilterCallback.cpp
+    svlFilterBuffer.cpp
 
   # Private System API
     svlImageCodecBMP.h             # private header
@@ -187,6 +189,8 @@ SET(HEADER_FILES
     svlFilterVideoExposureManager.h
     svlFilterVideoFileWriter.h
     svlRequiredInterfaces.h
+	svlFilterCallback.h
+    svlFilterBuffer.h
 
   # Trackers
     svlTrackerMSBruteForce.h

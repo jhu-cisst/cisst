@@ -151,7 +151,7 @@ int svlVidCapSrcV4L2::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **de
     counter = 0;
     for (i = 0; i < 16; i ++) {
     
-        sprintf(tempname, "/dev/video%d", i + 32);
+        sprintf(tempname, "/dev/video%d", i);
 #ifdef __verbose__
         cout << "-Opening device: " << tempname << endl;
 #endif
@@ -243,7 +243,7 @@ int svlVidCapSrcV4L2::Open()
     for (i = 0; i < NumOfStreams; i ++) {
 
         // Opening device
-        sprintf(tempname, "/dev/video%d", DeviceID[i] + 32);
+        sprintf(tempname, "/dev/video%d", DeviceID[i]);
 #ifdef __verbose__
         cout << "Trying: " << tempname << endl;
 #endif
@@ -400,8 +400,10 @@ int svlVidCapSrcV4L2::Open()
         if (CapMethod[i] == MV4LP_METHOD_STREAMING) {
             // Streaming I/O
             // Not yet supported
-            goto labError;
-/*
+            //goto labError;
+///*
+            struct v4l2_requestbuffers reqbuff;
+
             // Requesting buffer
             memset(&reqbuff, 0, sizeof(v4l2_requestbuffers));
             reqbuff.count = MV4LP_BUFFER_SIZE_TARGET;
@@ -420,6 +422,8 @@ int svlVidCapSrcV4L2::Open()
             memset(FrameBuffer[i], 0, FrameBufferSize[i] * sizeof(FrameBufferType));
 
             for (j = 0; j < FrameBufferSize[i]; j++) {
+                struct v4l2_buffer buffer;
+
                 memset(&buffer, 0, sizeof(v4l2_buffer));
 
                 buffer.index       = j;
@@ -441,7 +445,7 @@ int svlVidCapSrcV4L2::Open()
                 cout << "--Open: buffer " << j << " parameters received" << endl;
 #endif
             }
-*/
+//*/
         }
         else {
             // Read/write I/O
@@ -488,7 +492,13 @@ void svlVidCapSrcV4L2::Close()
         }
 
         if (FrameBuffer[i]) {
-            for (j = 0; j < FrameBufferSize[i]; j++) delete [] reinterpret_cast<unsigned char*>(FrameBuffer[i][j].start);
+			for (j = 0; j < FrameBufferSize[i]; j++) {
+                if (CapMethod[i] == MV4LP_METHOD_STREAMING) {
+                    munmap(FrameBuffer[i][j].start, FrameBuffer[i][j].length);
+                } else {
+					delete [] reinterpret_cast<unsigned char*>(FrameBuffer[i][j].start);
+                }
+			}
             delete [] FrameBuffer[i];
             FrameBuffer[i] = 0;
         }

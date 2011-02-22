@@ -43,14 +43,15 @@ http://www.cisst.org/cisst/license.txt.
 /***************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterSourceImageFile)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceImageFile_FileInfo)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mts_svlFilterSourceImageFile_FileInfo)
 
 svlFilterSourceImageFile::svlFilterSourceImageFile() :
     svlFilterSourceBase(),
     OutputImage(0),
     NumberOfDigits(0),
     From(0),
-    To(0)
+    To(0),
+    FrameSet(false)
 {
     CreateInterfaces();
 
@@ -64,7 +65,8 @@ svlFilterSourceImageFile::svlFilterSourceImageFile(unsigned int channelcount) :
     OutputImage(0),
     NumberOfDigits(0),
     From(0),
-    To(0)
+    To(0),
+    FrameSet(false)
 {
     CreateInterfaces();
     
@@ -161,10 +163,12 @@ int svlFilterSourceImageFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
     if (FrameCounter > 0) {
         _OnSingleThread(procInfo)
         {
-            FileCounter ++;
-            if (FileCounter > To) {
-                if (GetLoop()) FileCounter = From;
-                else StopLoop = true;
+            if(!FrameSet){
+		        FileCounter ++;
+		        if (FileCounter > To) {
+		            if (GetLoop()) FileCounter = From;
+		            else StopLoop = true;
+                }
             }
         }
 
@@ -267,6 +271,21 @@ int svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecount
 
     path << "." << Extension[videoch];
     FilePath[videoch] = path.str();
+
+    return SVL_OK;
+}
+
+
+int svlFilterSourceImageFile::SetFrame(unsigned int numberofdigits, unsigned int frame)
+{
+    if (numberofdigits > 9)
+        return SVL_FAIL;
+    unsigned int maxval = static_cast<unsigned int>(pow(10.0f, static_cast<int>(numberofdigits)));
+    if (frame >= maxval) return SVL_FAIL;
+
+    NumberOfDigits = numberofdigits;
+    FileCounter = frame;
+    FrameSet = true;
 
     return SVL_OK;
 }

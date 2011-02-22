@@ -59,17 +59,19 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstStereoVision/svlStreamManager.h"
 
 %include "cisstStereoVision/svlFilterBase.h"
+%include "cisstStereoVision/svlFilterImageFileWriter.h"
 %include "cisstStereoVision/svlFilterImageRectifier.h"
 %include "cisstStereoVision/svlFilterImageResizer.h"
 %include "cisstStereoVision/svlFilterSourceBase.h"
 %include "cisstStereoVision/svlFilterSourceVideoFile.h"
 %include "cisstStereoVision/svlFilterVideoFileWriter.h"
- // %include "cisstStereoVision/svlFilterSourceBuffer.h"
+%include "cisstStereoVision/svlFilterSourceBuffer.h"
 
  // %include "cisstStereoVision/svlFilterRGBSwapper.h"
 
 %include "cisstStereoVision/svlFilterImageWindow.h"
 
+%include "cisstStereoVision/svlFilterSourceImageFile.h"
 
 %{
 
@@ -206,7 +208,7 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 %}
 
 
-#if 0 // adeguet1, this was introduced by Dan Mirota (I think, need to figure out why it is not in branch)
+ // adeguet1, this was introduced by Dan Mirota (I think, need to figure out why it is not in branch)
 %include "cisstStereoVision/svlFilterCallback.h"
 
 /* Copied from http://www.swig.org/Doc1.1/HTML/Python.html#n11 */
@@ -222,5 +224,5 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 }
 
 %include "cisstStereoVision/svlFilterBuffer.h"
-#endif
+
 
