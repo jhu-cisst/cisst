@@ -30,7 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 
-class cdpPlayerDataInfo: public mtsGenericObject
+// Always include last
+#include "cdpExport.h"
+
+class CISST_EXPORT cdpPlayerDataInfo: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

@@ -36,7 +36,10 @@ http://www.cisst.org/cisst/license.txt.
 //! todo Think about the thread safety issue. (At the moment, mtscommands and qslots can manipulte same data at the same time)
 //! If the data processing is not heavy we can use the main QT thread via QTimer and mtsTaskFromCallback, or add more mtsFunction calls.
 
-class cdpPlayerVideo: public cdpPlayerBase
+// Always include last
+#include "cdpExport.h"
+
+class CISST_EXPORT cdpPlayerVideo: public cdpPlayerBase
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_DEBUG);

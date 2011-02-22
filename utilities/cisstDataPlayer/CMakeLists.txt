@@ -27,6 +27,7 @@ qt4_wrap_ui (QT_WRAPPED_UI
 add_library (cisstDataPlayerComponents
              ${QT_WRAPPED_CPP}
              ${QT_WRAPPED_UI}
+             cdpExport.h
              cdpPlayerBase.h
              cdpPlayerBase.cpp
              cdpPlayerManager.h
@@ -40,6 +41,12 @@ add_library (cisstDataPlayerComponents
              cdpPlayerVideo.h
              cdpPlayerVideo.cpp
              )
+
+cisst_target_link_libraries (cisstDataPlayerComponents
+                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+
+target_link_libraries (cisstDataPlayerComponents
+                       ${QT_LIBRARIES})
 
 add_executable (cisstDataPlayer
                 main.cpp)

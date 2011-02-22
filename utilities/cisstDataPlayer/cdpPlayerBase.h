@@ -42,9 +42,11 @@ http://www.cisst.org/cisst/license.txt.
 //The
 
 
-//Upon connection to the manager the UpdateTimeStart and UpdateTimeEnd should be sent.
 
-class cdpPlayerBase: public QObject, public mtsTaskPeriodic
+// Always include last
+#include "cdpExport.h"
+
+class CISST_EXPORT cdpPlayerBase: public QObject, public mtsTaskPeriodic
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_DEBUG);

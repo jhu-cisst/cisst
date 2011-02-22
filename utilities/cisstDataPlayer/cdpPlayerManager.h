@@ -38,10 +38,12 @@ http://www.cisst.org/cisst/license.txt.
 //! PlayerManager should show the start and end of the data??
 
 //! /todo Decide how to deal with path/prefix
-
 //! /todo Centrilize quit button.
 
-class cdpPlayerManager : public QObject, public mtsTaskPeriodic
+// Always include last
+#include "cdpExport.h"
+
+class CISST_EXPORT cdpPlayerManager: public QObject, public mtsTaskPeriodic
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_DEBUG);
