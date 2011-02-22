@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlVideoCodecTCPStream.cpp 2095 2010-11-30 15:24:22Z adeguet1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi & Min Yang Jung
   Created on: 2010
