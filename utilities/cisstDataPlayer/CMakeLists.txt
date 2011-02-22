@@ -18,6 +18,7 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
               cdpPlayerExample.h
               cdpPlayerManager.h
               cdpPlayerVideo.h
+              cdpPlayerPlot2D.h
               )
 
 qt4_wrap_ui (QT_WRAPPED_UI
@@ -38,6 +39,8 @@ add_library (cisstDataPlayerComponents
              cdpPlayerDataInfo.cpp
              cdpPlayerExample.h
              cdpPlayerExample.cpp
+             cdpPlayerPlot2D.h
+             cdpPlayerPlot2D.cpp
              cdpPlayerVideo.h
              cdpPlayerVideo.cpp
              )

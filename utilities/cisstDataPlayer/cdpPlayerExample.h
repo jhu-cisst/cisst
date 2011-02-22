@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT cdpPlayerExample: public cdpPlayerBase
 {
     Q_OBJECT;
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_DEBUG);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     cdpPlayerExample(const std::string & name, double period);
@@ -45,14 +45,13 @@ public:
 
     //call this after tasks connections are made
     void Configure(const std::string & filename = "");
-
     void Startup(void);
     void Run(void);
     void Cleanup(void) {};
 
 private:
 
-    Ui::cdpPlayerWidget  ExWidget;
+    Ui::cdpPlayerWidget ExWidget;
     void MakeQTConnections(void);
     //by calling "emit QSignalQTUpdate" this function will be called.
     //used this to udpate qt widgets in a thread safe way.
@@ -68,19 +67,12 @@ private:
 
 
 private slots:
-
     void QSlotSeekSliderMoved(int c);
-
     void QSlotSyncCheck(bool checked);
-
     void QSlotPlayClicked(void);
-
     void QSlotStopClicked(void);
-
     void QSlotSetSaveStartClicked(void);
-
     void QSlotSetSaveEndClicked(void);
-
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdpPlayerExample);
