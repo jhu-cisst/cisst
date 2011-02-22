@@ -19,10 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #include "cdpPlayerVideo.h"
 #include <math.h>
 #include <QMenu>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <QGridLayout>
 #include <iostream>
 #include <sstream>
+
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstStereoVision/svlFilterOutput.h>
 
 CMN_IMPLEMENT_SERVICES(cdpPlayerVideo);
 
@@ -33,14 +35,14 @@ cdpPlayerVideo::cdpPlayerVideo(const std::string & name, double period):
     // create the user interface
         // create the user interface
     ExWidget.setupUi(&Widget);
-    videoWidget = new svlFilterImageQWidget();
+    VideoWidget = new svlFilterImageQtWidget();
 
     QGridLayout *CentralLayout = new QGridLayout(&MainWindow);
     CentralLayout->setContentsMargins(0, 0, 0, 0);
     CentralLayout->setRowStretch(0, 1);
     CentralLayout->setColumnStretch(1, 1);
 
-    CentralLayout->addWidget(videoWidget, 0, 0, 1, 4);
+    CentralLayout->addWidget(VideoWidget, 0, 0, 1, 4);
     CentralLayout->addWidget(&Widget,1,1,1,1);
 
 }
@@ -108,34 +110,33 @@ void cdpPlayerVideo::Run(void)
         double currentTime = TimeServer.GetAbsoluteTimeInSeconds();
         Time = currentTime - PlayStartTime.Timestamp() + PlayStartTime.Data;
 
-        if (Time > PlayUntilTime)  {
+        if (Time > PlayUntilTime) {
             Time = PlayUntilTime;
             State = STOP;
         }
         else {
             //Load and Prep current data
-             //source.Play();
-             //CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
+	    //source.Play();
+	    //CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
              //CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
-             source.SetPosition(source.GetPositionAtTime(Time.Data));
-             source.Play();
+	    Source.SetPosition(Source.GetPositionAtTime(Time.Data));
+	    Source.Play();
         }
     }
     //make sure we are at the correct seek position.
     else if (State == SEEK) {
         //Load and Prep current data
-             // CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
-             //CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
-              source.SetPosition(source.GetPositionAtTime(Time.Data));
-              source.Play();
+	// CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
+	//CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
+	Source.SetPosition(Source.GetPositionAtTime(Time.Data));
+	Source.Play();
     }
 
     else if (State == STOP) {
         //do Nothing
-          source.Pause();
-              // CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
-            // CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
-
+	Source.Pause();
+	// CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
+	// CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
     }
 
     //now display updated data in the qt thread space.
@@ -268,10 +269,10 @@ void cdpPlayerVideo::LoadData(void)
     SetupPipeline();
 
     vctInt2 range;
-    source.GetRange(range);
+    Source.GetRange(range);
 
-    PlayerDataInfo.DataStart() = source.GetTimeAtPosition(range[0]);
-    PlayerDataInfo.DataEnd() = source.GetTimeAtPosition(range[1]);
+    PlayerDataInfo.DataStart() = Source.GetTimeAtPosition(range[0]);
+    PlayerDataInfo.DataEnd() = Source.GetTimeAtPosition(range[1]);
 //    PlayerDataInfo.DataStart() = 1297723451.415;
 //    PlayerDataInfo.DataEnd() = 1297723900.022;
 
@@ -315,25 +316,23 @@ void cdpPlayerVideo::UpdateLimits()
 }
 
 
-void cdpPlayerVideo::SetupPipeline() {
-
-  // Add timestamp overlay
-    ts_overlay = new svlOverlayTimestamp (0, true, videoWidget, svlRect(4, 4, 134, 21),
-                                   15.0, svlRGB(255, 200, 200), svlRGB(32, 32, 32));
-    overlay.AddOverlay(*ts_overlay);
-
-    source.SetChannelCount(1);
+void cdpPlayerVideo::SetupPipeline()
+{
+    // Add timestamp overlay
+    TimestampOverlay = new svlOverlayTimestamp (0, true, VideoWidget, svlRect(4, 4, 134, 21),
+						15.0, svlRGB(255, 200, 200), svlRGB(32, 32, 32));
+    Overlay.AddOverlay(*TimestampOverlay);
+    Source.SetChannelCount(1);
 
     std::string pathname = "/mnt/2TB/TestRecordings/laser.cvi";
-
-    if (source.SetFilePath(pathname) != SVL_OK) {
-            std::cerr << std::endl << "Wrong file name... " << std::endl;
+    if (Source.SetFilePath(pathname) != SVL_OK) {
+	std::cerr << std::endl << "Wrong file name... " << std::endl;
     }
 
     // chain filters to pipeline
-    stream.SetSourceFilter(&source);    // chain filters to pipeline
-    source.GetOutput()->Connect(overlay.GetInput());
-    overlay.GetOutput()->Connect(videoWidget->GetInput());
-    stream.Play();
-    source.Pause();
+    StreamManager.SetSourceFilter(&Source); // chain filters to pipeline
+    Source.GetOutput()->Connect(Overlay.GetInput());
+    Overlay.GetOutput()->Connect(VideoWidget->GetInput());
+    StreamManager.Play();
+    Source.Pause();
 }

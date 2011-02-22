@@ -18,8 +18,7 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
               cdpPlayerExample.h
               cdpPlayerManager.h
               cdpPlayerVideo.h
-              svlFilterImageQWidget.h
-                )
+              )
 
 qt4_wrap_ui (QT_WRAPPED_UI
              cdpPlayerManagerWidget.ui
@@ -40,9 +39,7 @@ add_library (cisstDataPlayerComponents
              cdpPlayerExample.cpp
              cdpPlayerVideo.h
              cdpPlayerVideo.cpp
-             svlFilterImageQWidget.h
-             svlFilterImageQWidget.cpp
-)
+             )
 
 add_executable (cisstDataPlayer
                 main.cpp)
@@ -52,4 +49,4 @@ target_link_libraries (cisstDataPlayer
                        ${QT_LIBRARIES})
 
 cisst_target_link_libraries (cisstDataPlayer
-                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision)
+                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)

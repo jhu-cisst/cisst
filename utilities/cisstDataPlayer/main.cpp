@@ -18,10 +18,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask.h>
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
 #include <QApplication>
+
+#include <cisstCommon/cmnLogger.h>
+#include <cisstStereoVision/svlInitializer.h>
+
 #include "cdpPlayerExample.h"
 #include "cdpPlayerManager.h"
 #include "cdpPlayerVideo.h"

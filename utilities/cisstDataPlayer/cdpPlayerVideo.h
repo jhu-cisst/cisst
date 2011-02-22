@@ -24,12 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QObject>
 #include <QtGui/QCloseEvent>
-#include <cisstMultiTask.h>
-#include <cisstStereoVision.h>
-
 #include "ui_cdpPlayerWidget.h"
+
 #include "cdpPlayerBase.h"
-#include "svlFilterImageQWidget.h"
+
+#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterImageOverlay.h>
+#include <cisstStereoVision/svlFilterImageQtWidget.h>
+#include <cisstStereoVision/svlFilterSourceVideoFile.h>
 
 //! todo Think about the thread safety issue. (At the moment, mtscommands and qslots can manipulte same data at the same time)
 //! If the data processing is not heavy we can use the main QT thread via QTimer and mtsTaskFromCallback, or add more mtsFunction calls.
@@ -68,29 +70,22 @@ private:
 
     void SetupPipeline(void);
 
-    QWidget                 MainWindow;
-    svlFilterImageQWidget   *videoWidget;
+    QWidget MainWindow;
+    svlFilterImageQtWidget * VideoWidget;
 
      // instantiating SVL stream and filters
-    svlStreamManager        stream;;
-    svlFilterImageOverlay   overlay;
-    svlFilterSourceVideoFile source;
-
-    svlOverlayTimestamp     *ts_overlay;
-
+    svlStreamManager StreamManager;;
+    svlFilterImageOverlay Overlay;
+    svlFilterSourceVideoFile Source;
+    svlOverlayTimestamp * TimestampOverlay;
 
 private slots:
 
     void QSlotSeekSliderMoved(int c);
-
     void QSlotSyncCheck(bool checked);
-
     void QSlotPlayClicked(void);
-
     void QSlotStopClicked(void);
-
     void QSlotSetSaveStartClicked(void);
-
     void QSlotSetSaveEndClicked(void);
 
 };

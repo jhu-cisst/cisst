@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QObject>
 #include <QtGui/QCloseEvent>
-#include <cisstMultiTask.h>
 
 #include "ui_cdpPlayerWidget.h"
 #include "cdpPlayerBase.h"

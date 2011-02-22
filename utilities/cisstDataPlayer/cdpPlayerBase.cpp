@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include "cdpPlayerBase.h"
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <QMessageBox>
 
 CMN_IMPLEMENT_SERVICES(cdpPlayerBase);

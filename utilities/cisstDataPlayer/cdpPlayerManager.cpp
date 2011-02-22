@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "cdpPlayerManager.h"
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QStringList>

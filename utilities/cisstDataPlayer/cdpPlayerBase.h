@@ -27,9 +27,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <QDockWidget>
 #include <QTimerEvent>
 #include <QErrorMessage>
+
 #include "cdpSaveParameters.h"
 #include "cdpPlayerDataInfo.h"
 
+#include <cisstMultiTask/mtsTaskPeriodic.h>
 
 //The update rate is a QT timer that calls Update() implemented by the derived classes
 //can also use other ways...

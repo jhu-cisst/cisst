@@ -28,7 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cdpSaveParameters_h
 #define _cdpSaveParameters_h
 
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 
 class cdpSaveParameters: public mtsGenericObject
