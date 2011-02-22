@@ -53,7 +53,7 @@ public:
       display in a vector (vctDynamicVector) of points (vctDouble2).
       To prevent dynamic re-allocation, this class uses a "circular
       buffer".  */
-    class Trace
+    class CISST_EXPORT Trace
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
@@ -90,7 +90,7 @@ public:
     };
 
     /*! Storage for a given vertical line. */
-    class VerticalLine
+    class CISST_EXPORT VerticalLine
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
