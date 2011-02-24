@@ -33,32 +33,32 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
 {
     if (InternalInterfaceRequired) {
         // Dynamic component composition (DCC) services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                                                ServiceComponentManagement.Create);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                                                ServiceComponentManagement.Disconnect);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                                                ServiceComponentManagement.Start);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
                                                ServiceComponentManagement.Stop);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
                                                ServiceComponentManagement.Resume);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                                                ServiceComponentManagement.GetState);
         // Getter services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                                                ServiceGetters.GetNamesOfProcesses);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
                                                ServiceGetters.GetNamesOfComponents);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces,
                                                ServiceGetters.GetNamesOfInterfaces);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                                                ServiceGetters.GetListOfConnections);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
                                                ServiceGetters.GetInterfaceProvidedDescription);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                                                ServiceGetters.GetInterfaceRequiredDescription);
 
         // Event receivers
@@ -344,7 +344,7 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     return listOfConnections;
 }
 
-InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName, 
+InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
                              const std::string & componentName, const std::string &interfaceName) const
 {
     // output arg
@@ -369,7 +369,7 @@ InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDe
     return argOut;
 }
 
-InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName, 
+InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
                              const std::string & componentName, const std::string &interfaceName) const
 {
     // output arg
@@ -393,4 +393,4 @@ InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDe
 
     return argOut;
 }
-    
+
