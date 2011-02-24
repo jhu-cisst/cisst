@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 mtsFunctionBase::mtsFunctionBase(const bool isProxy):
+    ThreadSignal(0),
     IsProxy(isProxy)
 {}
 
