@@ -326,7 +326,8 @@ set (CISST_LIBS
 set (CISST_LIBS_WITH_QT
      cisstCommon
      cisstVector
-     cisstMultiTask)
+     cisstMultiTask
+     cisstStereoVision)
 
 # Which librairies have FLTK Widgets
 set (CISST_LIBS_WITH_FLTK

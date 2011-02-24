@@ -2,13 +2,16 @@
 
 #add_subdirectory( trajectories )
 
-if( CISST_DEV_HAS_ODE )
-  add_subdirectory( ode )
-endif( CISST_DEV_HAS_ODE )
-
-include( FindOpenSceneGraph )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
 if( OPENSCENEGRAPH_FOUND )
+
   add_subdirectory( osg )
+
+  find_package( ODE )
+  if( ODE_FOUND )
+    add_subdirectory( ode )
+  endif( ODE_FOUND )
+
 endif( OPENSCENEGRAPH_FOUND )
 
 if( CISST_DEV_HAS_GLUT )

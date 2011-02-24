@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-04-29
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -51,7 +50,7 @@ public:
     /*! Typedef for base type */
     typedef mtsCommandRead BaseType;
 
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when
+    /*! Constructor. Command proxy is disabled by default and is enabled when
         command id and network proxy are set. */
     mtsCommandReadProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();

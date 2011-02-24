@@ -1103,3 +1103,27 @@ if (CISST_HAS_SWIG_PYTHON)
 			CISST_LIBRARIES cisstStereoVision
                                         ${DEPENDENCIES})
 endif (CISST_HAS_SWIG_PYTHON)
+
+
+# Qt widgets
+if (CISST_HAS_OPENGL AND CISST_HAS_QT)
+
+  # to include Qt generated files
+  include_directories (${CMAKE_CURRENT_BINARY_DIR})
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                ../../include/cisstStereoVision/svlFilterImageQtWidget.h)
+
+  cisst_add_library (
+    LIBRARY cisstStereoVisionQt
+    LIBRARY_DIR cisstStereoVision
+    DEPENDENCIES cisstCommon
+                 cisstVector
+                 cisstStereoVision
+    SOURCE_FILES svlFilterImageQtWidget.cpp
+    HEADER_FILES svlFilterImageQtWidget.h
+                 svlExportQt.h
+    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+
+  target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+
+endif (CISST_HAS_OPENGL AND CISST_HAS_QT)

@@ -32,68 +32,70 @@ using namespace std;
 
 int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
 {
+    const bool resize = false;
+
     svlInitialize();
 
     svlStreamManager stream(8);
     svlFilterSourceVideoFile source(1);
     svlFilterVideoFileWriter writer;
 
-    if (src_path.empty()) {
+
+    // setup video file source
+    if (!src_path.empty()) {
+        source.SetFilePath(src_path);
+    }
+    else {
         if (source.DialogFilePath() != SVL_OK) {
             cerr << " -!- No source file has been selected." << endl;
             return -1;
         }
         source.GetFilePath(src_path);
     }
-    else {
-        source.SetFilePath(src_path);
-    }
-
     source.SetTargetFrequency(1000.0); // as fast as possible
     source.SetLoop(false);
 
+
+    // setup video file writer
     if (dst_path.empty()) {
-        if (writer.DialogFilePath() != SVL_OK) {
+        if (writer.DialogOpenFile() != SVL_OK) {
             cerr << " -!- No destination file has been selected." << endl;
             return -1;
         }
         writer.GetFilePath(dst_path);
     }
     else {
-        writer.SetFilePath(dst_path);
-    }
-
-#if 0
-    svlFilterImageResizer resizer;
-    resizer.SetOutputRatio(0.5, 0.5);
-#endif
-
-    if (loadcodec) {
-        if (writer.LoadCodec("codec.dat") != SVL_OK) {
-            if (writer.DialogCodec() != SVL_OK) {
-                cerr << " -!- Unable to set up compression." << endl;
-                return -1;
-            }
-            writer.SaveCodec("codec.dat");
+        if (!loadcodec || writer.LoadCodec("codec.dat") != SVL_OK) {
+            writer.DialogCodec(dst_path);
         }
+        writer.OpenFile(dst_path);
     }
-    else {
-        if (writer.DialogCodec() != SVL_OK) {
-            cerr << " -!- Unable to set up compression." << endl;
-            return -1;
-        }
+    if (!loadcodec) {
+        writer.SaveCodec("codec.dat");
     }
-
     std::string encoder;
     writer.GetCodecName(encoder);
 
+
+    // setup image resizer
+    svlFilterImageResizer resizer;
+    resizer.SetOutputRatio(0.5, 0.5);
+    resizer.SetInterpolation(true);
+
+
     // chain filters to pipeline
     svlFilterOutput* output = 0;
-    stream.SetSourceFilter(&source);     output = source.GetOutput();
-#if 0
-    output->Connect(resizer.GetInput()); output = resizer.GetOutput();
-#endif
-    output->Connect(writer.GetInput());  output = writer.GetOutput();
+
+    stream.SetSourceFilter(&source);
+        output = source.GetOutput();
+
+    if (resize) {
+        output->Connect(resizer.GetInput());
+            output = resizer.GetOutput();
+    }
+
+    output->Connect(writer.GetInput());
+        output = writer.GetOutput();
 
     cerr << "Converting: '" << src_path << "' to '" << dst_path <<"' using codec: '" << encoder << "'" << endl;
 
@@ -142,7 +144,7 @@ int main(int argc, char** argv)
         cerr << "     stereoTutorialVideoConverter src.avi dest.cvi" << endl << endl;
     }
 
-    VideoConverter(source, destination, true);
+    VideoConverter(source, destination, false);
 
     return 1;
 }

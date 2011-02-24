@@ -1,13 +1,3 @@
-
-
-#include <osgGA/TrackballManipulator>
-
-#include <cisstVector/vctMatrixRotation3.h>
-#include <cisstVector/vctFixedSizeVector.h>
-
-#include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
-#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
-
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGStereo.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
@@ -26,6 +16,21 @@ int main(){
   // Create the OSG World
   devOSGWorld* world = new devOSGWorld;
 
+  // Create a stereo rig
+  int x = 0, y = 0;
+  int width = 320, height = 240;
+  double Znear = 0.01, Zfar = 10.0;
+  double baseline = 0.1;
+  devOSGStereo* stereocam=new devOSGStereo( "stereo",
+					    world,
+					    x, y, width, height,
+					    55, ((double)width)/((double)height),
+					    Znear, Zfar,
+					    baseline );
+  // Add the camera component
+  taskManager->AddComponent( stereocam );
+
+  // Create objects
   std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
 
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
@@ -35,38 +40,30 @@ int main(){
 
   vctFrame4x4<double> eye;
   devOSGBody* background;
-  background = new devOSGBody( "background", eye, data+"background.3ds", world);
+  background = new devOSGBody("background", eye, data+"background.3ds", world);
 
-  // Create a viewer
-  int width = 640, height = 480;
-  devOSGStereo* stereo = new devOSGStereo( "stereo",
-					   world,
-					   0, 0, width, height,
-					   55, ((double)width)/((double)height),
-					   0.01, 10.0, 
-					   0.1 );
-
-  // Add+configure the trackball of the stereo rig
-  stereo->setCameraManipulator( new osgGA::TrackballManipulator );
-  stereo->getCameraManipulator()->setHomePosition( osg::Vec3d( 1,0,1 ),
-						   osg::Vec3d( 0,0,0 ),
-						   osg::Vec3d( 0,0,1 ) );
-  stereo->home();
-
-  // add a bit more light
-  osg::ref_ptr<osg::Light> light = new osg::Light;
-  light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
-  stereo->setLight( light );
-
-  // Add the camera component
-  taskManager->AddComponent( stereo );
-
+  // Start the cameras
   taskManager->CreateAll();
   taskManager->StartAll();
 
   cmnGetChar();
 
+  // The next block reads and saves OpenCV images and save them to disk
+#if CISST_DEV_HAS_OPENCV22
+  vctDynamicMatrix<double> range = stereocam->GetRangeData( 0 );
+
+  cv::Mat leftrgb = stereocam->GetRGBImage( 0 );
+  cv::imwrite( "LEFTrgb.bmp", leftrgb );
+
+  cv::Mat rightrgb = stereocam->GetRGBImage( 1 );
+  cv::imwrite( "RIGHTrgb.bmp", rightrgb );
+  
+  cmnGetChar();
+#endif
+
+  // Kill everything
   taskManager->KillAll();
+  taskManager->Cleanup();
 
   return 0;
 

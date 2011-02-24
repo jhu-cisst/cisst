@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,7 +40,8 @@ public:
     //@{
     virtual void RenderInitialize(void);
     virtual void RenderResize(double width, double height);
-    virtual void Render(void);
+    virtual void Render(void); // todo, move render to base class, not virtual
+    virtual void Render(const VerticalLine & line); // todo, move to base class as virtual and should be called by Render(void)
     //@}
 };
 

@@ -13,26 +13,17 @@
 # --- end cisst license ---
 
 
-include( FindOpenSceneGraph )
-if( OPENSCENEGRAPH_FOUND )
+project( osg )
 
-  project( osg )
+add_executable( OSGtest OSGtest.cpp )
+add_executable( OSGstereo OSGstereo.cpp )
+add_executable( OSGstereox2 OSGstereox2.cpp )
+add_executable( OSGwam OSGwam.cpp )
 
-  add_executable( OSGtest OSGtest.cpp )
-  add_executable( OSGstereo OSGstereo.cpp )
-  add_executable( OSGdepth OSGdepth.cpp )
-  add_executable( OSGsvl OSGsvl.cpp )
-  add_executable( OSGwam OSGwam.cpp )
+cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-  cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision )
+cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-  cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision )
+cisst_target_link_libraries( OSGstereox2 cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-  cisst_target_link_libraries( OSGdepth cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision )
-
-  cisst_target_link_libraries( OSGsvl cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision)
-
-  cisst_target_link_libraries( OSGwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision)
-
-
-endif( OPENSCENEGRAPH_FOUND )
+cisst_target_link_libraries( OSGwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )

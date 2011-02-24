@@ -20,11 +20,30 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/robotcomponents/ode/devODEJoint.h>
 #include <cisstCommon/cmnLogger.h>
 
+devODEContact::devODEContact() :
+  body1( NULL ),
+  body2( NULL ),
+  position( vctFixedSizeVector<double,3>( 0.0 ) ),
+  normal( vctFixedSizeVector<double,3>( 0.0 ) ),
+  depth( 0.0 ) {}
+
+devODEContact::devODEContact( devODEBody* b1, 
+			      devODEBody* b2,
+			      const vctFixedSizeVector<double,3>& pos,
+			      const vctFixedSizeVector<double,3>& n,
+			      double d ) :
+  body1( b1 ),
+  body2( b2 ),
+  position( pos ),
+  normal( n ),
+  depth( d ) {}
+
 
 devODEWorld::devODEWorld( double period,
 			  osaCPUMask mask,
 			  const vctFixedSizeVector<double,3>& gravity ) : 
-  devRobotComponent( "devODEWorld", period, devODEWorld::ENABLED, mask ),
+  //devRobotComponent( "devODEWorld", period, devODEWorld::ENABLED, mask ),
+  mtsTaskPeriodic( "ODEWorld", period, true ),
   timestep(period) {
 
   dInitODE2(0);                             // initialize the engine
@@ -42,14 +61,14 @@ devODEWorld::devODEWorld( double period,
   // The following values are tuned "to make ODE work" decently
   // you can change these values if you wish and results may vary
   // set the error reduction parameter
-  //dWorldSetERP( GetWorldID(), 0.5 );
+  dWorldSetERP( GetWorldID(), 0.5 );
 
   // set the constraint force mixing
-  //dWorldSetCFM( GetWorldID(), 0.0000001 );
+  dWorldSetCFM( GetWorldID(), 0.0000001 );
   
   // set the surface layer depth
-  //dWorldSetContactSurfaceLayer( GetWorldID(), 0.001 );
-  //dWorldSetContactMaxCorrectingVel( GetWorldID(), 0.01 );
+  dWorldSetContactSurfaceLayer( GetWorldID(), 0.1 );
+  dWorldSetContactMaxCorrectingVel( GetWorldID(), 0.00001 );
 }
 
 // destroy the world
@@ -109,8 +128,8 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 				dContactSoftERP |
 				dContactSoftCFM 
 				);
-    contacts[i].surface.mu = 0.5;
-    contacts[i].surface.mu2 = 0.5;
+    contacts[i].surface.mu = 1;
+    contacts[i].surface.mu2 = 1;
     contacts[i].surface.bounce = 0.1;
     contacts[i].surface.soft_cfm = 0.00001;
     contacts[i].surface.soft_erp = 0.3;
@@ -136,15 +155,15 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 
       dContactGeom geom = contacts[i].geom;
 
-      devODEWorld::Contact contact(body1, 
-				   body2,
-				   vctFixedSizeVector<double,3>(geom.pos[0],
-								geom.pos[1],
-								geom.pos[2] ),
-				   vctFixedSizeVector<double,3>(geom.normal[0],
-								geom.normal[1],
-								geom.normal[2]),
-				   geom.depth);
+      devODEContact contact(body1, 
+			    body2,
+			    vctFixedSizeVector<double,3>(geom.pos[0],
+							 geom.pos[1],
+							 geom.pos[2] ),
+			    vctFixedSizeVector<double,3>(geom.normal[0],
+							 geom.normal[1],
+							 geom.normal[2]),
+			    geom.depth);
       ContactsList.push_back( contact );
       
     }
@@ -189,7 +208,10 @@ void devODEWorld::Lock()
 void devODEWorld::Unlock()
 { WorldMutex.Unlock(); }
 
-void devODEWorld::RunComponent() {
+//void devODEWorld::RunComponent() {
+void devODEWorld::Run() {
+  ProcessQueuedCommands();
+  ProcessQueuedEvents();
 
   for( size_t i=0; i<joints.size(); i++ )
     { joints[i]->ApplyForceTorque(); }
@@ -212,14 +234,13 @@ void devODEWorld::RunComponent() {
 void devODEWorld::Insert( devODEJoint* joint )
 { joints.push_back( joint ); }
 
-std::list< devODEWorld::Contact >
-devODEWorld::QueryContacts( const std::string& name ){
+std::list<devODEContact> devODEWorld::QueryContacts( const std::string& name ){
 
-  std::list< devODEWorld::Contact > matches;
+  std::list< devODEContact > matches;
 
   ContactsListMutex.Lock();
 
-  std::list< devODEWorld::Contact >::const_iterator contact;
+  std::list< devODEContact >::const_iterator contact;
   for( contact=ContactsList.begin(); contact!=ContactsList.end(); contact++ ){
     
     if( contact->body1->GetName() == name || contact->body2->GetName() == name )
@@ -232,3 +253,4 @@ devODEWorld::QueryContacts( const std::string& name ){
   return matches;
 
 }
+

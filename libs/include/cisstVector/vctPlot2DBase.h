@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <map>
 #include <string>
 
+#include <cisstCommon/cmnNamedMap.h>
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
@@ -32,6 +33,16 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! Base class for 2D plotters.  Handles storage of 2D points, colors
   and thicknesses, computation of scales and offsets.
+
+  \todo Rename "trace" to "signal", "data set", "set", "point set", ...
+  \todo Add notion of scale, each line and signal should be managed within a "scale"
+  \todo Add "grid" and/or "axis" (maybe a special grid) to all scales
+  \todo Add a flag to all elements to determine if they should be used or not in auto fit methods (e.g. user might {not} want to see y=0 line)
+  \todo Cleanup pointSize vs lineWidth in traces, lines, etc.  use linewidth for everything
+  \todo Create a base class "element"/"data" for all elements visible (i.e. signal, vertical line, grid, ...), modifiedSinceLastRender, maybe even render method ...
+  \todo Remove all traceId code, Ids are not that efficient anyway and users should keep a pointer on the trace/line/grid they need or retrieve these by name
+  \todo Fit/Render should probably be defined at plot/scale/data level
+  \tobo Add flag/method Modified to all elements type to optimize fit/render
 */
 class CISST_EXPORT vctPlot2DBase
 {
@@ -42,7 +53,7 @@ public:
       display in a vector (vctDynamicVector) of points (vctDouble2).
       To prevent dynamic re-allocation, this class uses a "circular
       buffer".  */
-    class Trace
+    class CISST_EXPORT Trace
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
@@ -59,9 +70,10 @@ public:
         void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
 
         void SetNumberOfPoints(size_t numberOfPoints);
-        void SetColor(const vctDouble3 & color);
+        void SetColor(const vctDouble3 & colorInRange0To1);
 
     protected:
+        /*! Trace name, used for GUI */
         std::string Name;
         bool Empty;
         bool Visible;
@@ -77,20 +89,53 @@ public:
         double LineWidth;
     };
 
+    /*! Storage for a given vertical line. */
+    class CISST_EXPORT VerticalLine
+    {
+        friend class vctPlot2DBase;
+        friend class vctPlot2DOpenGL;
+        friend class vctPlot2DVTK;
+    public:
+        VerticalLine(const std::string & name, const double x = 0.0);
+        ~VerticalLine();
+
+        void SetX(const double x);
+        void SetColor(const vctDouble3 & colorInRange0To1);
+
+    protected:
+        std::string Name;
+        double X;
+        bool Visible;
+        vctDouble3 Color;
+        double LineWidth;
+    };
+
+
     vctPlot2DBase(size_t pointSize = 2);
     virtual ~vctPlot2DBase(void) {};
-
-    /*! Create a new trace, user needs to provide a placeholder to
-      retrieve the traceId assigned.  This method checks if the name
-      has already been used.  If so, the trace won't be added and the
-      method returns false. */
-    bool AddTrace(const std::string & name, size_t & traceId);
 
     /*! Set the number of points for all traces. */
     void SetNumberOfPoints(size_t numberOfPoints);
 
-    /*! Add a point to a given trace */
-    void AddPoint(size_t trace, const vctDouble2 & point);
+    /*! Create a new trace, user needs to provide a placeholder to
+      retrieve the traceId assigned.  This method checks if the name
+      has already been used.  If so, the trace won't be added and the
+      method returns a 0 pointer. */
+    Trace * AddTrace(const std::string & name, size_t & traceId);
+
+    /*! Create a new trace.  This method checks if the name has
+      already been used.  If so, the trace won't be added and the
+      method returns a 0 pointer. */
+    Trace * AddTrace(const std::string & name);
+
+    /*! Create a new vertical line.  This method checks if the name
+      has already been used.  If so, the line won't be added and the
+      method returns a 0 pointer. */
+    VerticalLine * AddVerticalLine(const std::string & name);
+
+    /*! Add a point to a given trace.  Deprecated, use
+      tracePointer->AddPoint instead. */
+    void CISST_DEPRECATED AddPoint(size_t trace, const vctDouble2 & point);
 
     /*! Data recentering, these methods re-align the data once only,
       based on all traces.  Padding is used to make sure the data is
@@ -161,15 +206,16 @@ public:
 
 #if 0
     // no yet implemented
-    void SetGridColor(const vctDouble3 & color);
+    void SetGridColor(const vctDouble3 & colorInRange0To1);
 
 #endif
 
-    /*! Set color for a specific trace */
-    void SetColor(size_t traceId, const vctDouble3 & color);
+    /*! Set color for a specific trace.  Deprecated, use
+      tracePointer->SetColor. */
+    void CISST_DEPRECATED SetColor(size_t traceId, const vctDouble3 & colorInRange0To1);
 
     /*! Set background color, defined as RGB between 0 and 1. */
-    void SetBackgroundColor(const vctDouble3 & color);
+    void SetBackgroundColor(const vctDouble3 & colorInRange0To1);
 
  protected:
 
@@ -186,6 +232,8 @@ public:
     //@}
 
 protected:
+    /*! Point size in memory, i.e. offset in sizeof(double) between
+      points.  Different for OpenGL in 2D, VTK, ... */
     size_t PointSize;
 
     // keep traces in a vector
@@ -194,6 +242,10 @@ protected:
     // maintain a map to find trace Id by name
     typedef std::map<std::string, size_t> TracesIdType;
     TracesIdType TracesId;
+
+    // keep vertical lines in a vector
+    typedef cmnNamedMap<VerticalLine> VerticalLinesType;
+    VerticalLinesType VerticalLines;
 
     // default number of points for all traces
     size_t NumberOfPoints;
@@ -207,7 +259,6 @@ protected:
     vctDouble2 Scale;
 
     // continuous computation of scales and offsets
-    bool PointAddedSinceLastRender;
     bool Continuous;
     bool ContinuousFitX;
     bool ContinuousFitY;

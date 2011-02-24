@@ -341,6 +341,7 @@ if (CISST_MTS_HAS_ICE)
     set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
     target_link_libraries (cisstMultiTask
                            ${ICE_LIBRARIES})
+    link_directories($ICE_LIBRARY_DIR)
     CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
   endif (WIN32)
 

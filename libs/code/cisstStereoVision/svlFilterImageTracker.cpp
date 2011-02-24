@@ -500,8 +500,8 @@ void svlFilterImageTracker::ReconstructRigidBody()
                 vx = proto_pos.Element(0, i) - proto_ax;
                 vy = proto_pos.Element(1, i) - proto_ay;
 
-                target->pos.x = vx + ax;
-                target->pos.y = vy + ay;
+                target->pos.x = static_cast<int>(vx + ax);
+                target->pos.y = static_cast<int>(vy + ay);
 
                 if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
 

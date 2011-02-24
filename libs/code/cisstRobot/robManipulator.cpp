@@ -171,11 +171,17 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
     stringstream >> convention;
 
     robKinematics* kinematics = NULL;
-    kinematics = robKinematics::Instantiate( convention );
-    if( kinematics != NULL )
-      { kinematics->Read( stringstream ); }
+    try{ kinematics = robKinematics::Instantiate( convention ); }
+    catch( std::bad_alloc& ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< "Failed to allocate a kinematics of type: " 
+			<< convention
+			<< std::endl;
+    }
     
+    CMN_ASSERT( kinematics != NULL );
     robLink li( kinematics, robMass() );
+    li.Read( stringstream );
     links.push_back( li );
 
   }

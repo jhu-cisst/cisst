@@ -81,7 +81,7 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 			const vctFixedSizeVector<double,3>& com );
 
   // This is called from each OSG update traversal
-  void Update();
+  void Transform();
 
   vctMatrixRotation3<double> GetOrientation() const;
   vctFixedSizeVector<double,3> GetPosition() const;
@@ -158,6 +158,14 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 	      const std::string& model,
 	      devODEWorld* world, 
 	      double m );
+
+  devODEBody( const std::string& name,
+	      const vctFrm3& Rt,
+	      const std::string& model,
+	      devODEWorld* world, 
+	      double m,
+	      const vctFixedSizeVector<double,3>& tbcom,
+	      const vctFixedSizeMatrix<double,3,3>& moit );
 
   //! Default destructor
   ~devODEBody();

@@ -12,10 +12,12 @@
 #
 # --- end cisst license ---
 
+find_package (VTK REQUIRED)
+include (${VTK_USE_FILE})
 
 add_executable (3DUserInterfaceTutorialExample3
                 main.cpp
-		MapBehavior.cpp
+                MapBehavior.cpp
                 BehaviorLUS.cpp
                 BehaviorLUS.h
                 CSOpenGLStippleActor.cxx

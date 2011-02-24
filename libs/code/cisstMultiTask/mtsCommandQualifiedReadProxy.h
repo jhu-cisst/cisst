@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-04-29
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,10 +45,6 @@ class mtsCommandQualifiedReadProxy: public mtsCommandQualifiedRead, public mtsCo
 protected:
     /*! Per-command serializer and deserializer */
     mtsProxySerializer Serializer;
-
-    /*! Argument prototypes. Deserialization recovers the original argument
-        prototype objects. */
-    mtsGenericObject *Argument1Prototype, *Argument2Prototype;
 
 public:
     /*! Typedef for base type */
@@ -103,15 +98,6 @@ public:
     /*! Generate human readable description of this object */
     void ToStream(std::ostream & outputStream) const {
         ToStreamBase("mtsCommandQualifiedReadProxy", Name, CommandID, IsEnabled(), outputStream);
-    }
-
-    /*! Return a pointer on the argument prototype */
-    const mtsGenericObject * GetArgument1Prototype(void) const {
-        return Argument1Prototype;
-    }
-
-    const mtsGenericObject * GetArgument2Prototype(void) const {
-        return Argument2Prototype;
     }
 };
 

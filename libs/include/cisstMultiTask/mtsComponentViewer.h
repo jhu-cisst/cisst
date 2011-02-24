@@ -74,10 +74,10 @@ protected:
     void SendAllInfo(void);
     void ActivateMenuItems(void);
 
-    std::string GetComponentInGraphFormat(const std::string & processName, const std::string & componentName) const;
     std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName,
                                                const mtsComponentState & componentState) const;
     std::string GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const;
+    std::string GetConnectionInUDrawGraphFormat(const mtsDescriptionConnection &connection) const;
 
     enum BorderType { BORDER_NONE, BORDER_SINGLE, BORDER_DOUBLE };
     void ChangeComponentBorder(const std::string &processName, const std::string &componentName, BorderType border);

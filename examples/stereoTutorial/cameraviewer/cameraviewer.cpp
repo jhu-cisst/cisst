@@ -61,14 +61,14 @@ public:
                 case ' ':
                     if (RecorderFilter) {
                         if (Recording) {
-                            RecorderFilter->Pause();
+                            RecorderFilter->PauseAtTime();
                             SplitterOutput->SetBlock(true);
                             Recording = false;
                             cout << endl << " >>> Recording paused <<<" << endl;
                         }
                         else {
                             SplitterOutput->SetBlock(false);
-                            RecorderFilter->Record(-1);
+                            RecorderFilter->RecordAtTime();
                             Recording = true;
                             cout << endl << " >>> Recording started <<<" << endl;
                         }
@@ -128,7 +128,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     CViewerEventHandler window_eh;
     svlFilterVideoFileWriter videowriter;
     svlFilterImageFileWriter imagewriter;
-    svlFilterImageWindow window2;
 
     // setup source
     // Delete "device.dat" to reinitialize input device
@@ -148,13 +147,12 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     gamma.SetGamma(0.0);
 
     // setup splitter
-    splitter.AddOutput("output2", 8);
+    splitter.AddOutput("output2", 8, 3);
     svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup writer
     if (save == true) {
-        videowriter.DialogFilePath();
-        videowriter.DialogCodec();
+        videowriter.DialogOpenFile();
         videowriter.Pause();
     }
 
@@ -229,6 +227,12 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     output->Connect(splitter.GetInput());
         output = splitter.GetOutput();
 
+    if (save == true) {
+        // If saving enabled, then add video writer on separate branch
+        splitteroutput->SetBlock(true);
+        splitteroutput->Connect(videowriter.GetInput());
+    }
+
     // Add image file writer
     output->Connect(imagewriter.GetInput());
         output = imagewriter.GetOutput();
@@ -240,12 +244,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     // Add window
     output->Connect(window.GetInput());
         output = window.GetOutput();
-
-    if (save == true) {
-        // If saving enabled, then add video writer on separate branch
-        splitteroutput->SetBlock(true);
-        splitteroutput->Connect(videowriter.GetInput());
-    }
 
     cerr << endl << "Starting stream... ";
 
@@ -266,6 +264,9 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
     }
     cerr << "  In command window:" << endl;
+    if (save == true) {
+        cerr << "    'v'   - Start new video file" << endl;
+    }
     cerr << "    'i'   - Adjust image properties" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
 
@@ -273,6 +274,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         ch = cmnGetChar();
 
         switch (ch) {
+            case 'v':
+                if (save == true) {
+                    videowriter.CloseFile();
+                    videowriter.ResetCodec();
+                    videowriter.DialogOpenFile();
+                }
+            break;
+
             case 'i':
                 // Adjust image properties
                 cerr << endl << endl;
@@ -342,7 +351,7 @@ int main(int argc, char** argv)
 
     //////////////////////////////
     // parsing arguments
-    int i, options, ivalue, width, height;
+    int j, options, ivalue, width, height;
     bool interpolation, save;
 
     options = argc - 1;
@@ -351,10 +360,10 @@ int main(int argc, char** argv)
     height = -1;
     save = false;
 
-    for (i = 1; i <= options; i ++) {
-        if (argv[i][0] != '-') continue;
+    for (j = 1; j <= options; j ++) {
+        if (argv[j][0] != '-') continue;
 
-        switch (argv[i][1]) {
+        switch (argv[j][1]) {
             case '?':
                 cerr << "Command line format:" << endl;
                 cerr << "     stereoTutorialCameraViewer [options]" << endl;
@@ -378,12 +387,12 @@ int main(int argc, char** argv)
             break;
 
             case 'w':
-                ivalue = ParseNumber(argv[i] + 2, 4);
+                ivalue = ParseNumber(argv[j] + 2, 4);
                 if (ivalue > 0) width = ivalue;
             break;
 
             case 'h':
-                ivalue = ParseNumber(argv[i] + 2, 4);
+                ivalue = ParseNumber(argv[j] + 2, 4);
                 if (ivalue > 0) height = ivalue;
             break;
 

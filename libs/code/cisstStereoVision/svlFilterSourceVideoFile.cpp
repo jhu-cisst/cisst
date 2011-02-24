@@ -78,7 +78,10 @@ svlFilterSourceVideoFile::~svlFilterSourceVideoFile()
 
 int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
 {
-    if (OutputImage) return SVL_FAIL;
+    if (OutputImage) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetChannelCount: channel count already set" << std::endl;
+        return SVL_FAIL;
+    }
 
     if (channelcount == 1) {
         GetOutput()->SetType(svlTypeImageRGB);
@@ -88,7 +91,10 @@ int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
         GetOutput()->SetType(svlTypeImageRGBStereo);
         OutputImage = new svlSampleImageRGBStereo;
     }
-    else return SVL_FAIL;
+    else {
+        CMN_LOG_CLASS_INIT_ERROR << "SetChannelCount: invalid channel count" << std::endl;
+        return SVL_FAIL;
+    }
 
     Codec.SetSize(channelcount);
     Codec.SetAll(0);
@@ -105,8 +111,7 @@ int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
 int svlFilterSourceVideoFile::Initialize(svlSample* &syncOutput)
 {
     if (OutputImage == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "Initialize: filter \"" << this->GetName()
-                                 << "\" failed to initialize because its output is not set" << std::endl; 
+        CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to initialize because channel count is not yet set" << std::endl; 
         return SVL_FAIL;
     }
     syncOutput = OutputImage;
@@ -123,8 +128,7 @@ int svlFilterSourceVideoFile::Initialize(svlSample* &syncOutput)
         Codec[i] = svlVideoIO::GetCodec(FilePath[i]);
         // Open video file
         if (!Codec[i] || Codec[i]->Open(FilePath[i], width, height, framerate) != SVL_OK) {
-            CMN_LOG_CLASS_INIT_ERROR << "Initialize: filter failed to open file \""
-                                     << FilePath[i] << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to open file \"" << FilePath[i] << "\"" << std::endl;
             ret = SVL_FAIL;
             break;
         }
@@ -195,7 +199,10 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
                     ret = Codec[idx]->Read(0, *OutputImage, idx, true);
                 }
             }
-            if (ret != SVL_OK) break;
+            if (ret != SVL_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
+                break;
+            }
 
             if (idx == 0) {
 
@@ -248,20 +255,16 @@ void svlFilterSourceVideoFile::OnResetTimer()
 int svlFilterSourceVideoFile::DialogFilePath(unsigned int videoch)
 {
     if (OutputImage == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogFilePath: filter \"" << this->GetName()
-                                 << "\" failed because its output is not set" << std::endl; 
+        CMN_LOG_CLASS_INIT_ERROR << "DialogFilePath: failed to initialize because channel count is not yet set" << std::endl; 
         return SVL_FAIL;
     }
     if (IsInitialized() == true) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogFilePath: filter \"" << this->GetName()
-                                 << "\" has already been initialized, can't use DialogFilePath" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogFilePath: filter has already been initialized" << std::endl;
         return SVL_ALREADY_INITIALIZED;
     }
 
     if (videoch >= OutputImage->GetVideoChannels()) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogFilePath: filter \"" << this->GetName()
-                                 << "\" only has " << OutputImage->GetVideoChannels() << " video channels but was called for channel "
-                                 << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogFilePath: video channel out of range: " << videoch << std::endl;
         return SVL_WRONG_CHANNEL;
     }
 
@@ -275,20 +278,16 @@ int svlFilterSourceVideoFile::DialogFilePath(unsigned int videoch)
 int svlFilterSourceVideoFile::SetFilePath(const std::string &filepath, unsigned int videoch)
 {
     if (OutputImage == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetFilePath: filter \"" << this->GetName()
-                                 << "\" failed because its output is not set" << std::endl; 
+        CMN_LOG_CLASS_INIT_ERROR << "SetFilePath: failed to initialize because channel count is not yet set" << std::endl; 
         return SVL_FAIL;
     }
     if (IsInitialized() == true) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetFilePath: filter \"" << this->GetName()
-                                 << "\" has already been initialized, can't use DialogFilePath" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetFilePath: filter has already been initialized" << std::endl;
         return SVL_ALREADY_INITIALIZED;
     }
 
     if (videoch >= OutputImage->GetVideoChannels()) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetFilePath: filter \"" << this->GetName()
-                                 << "\" only has " << OutputImage->GetVideoChannels() << " video channels but was called for channel "
-                                 << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetFilePath: video channel out of range: " << videoch << std::endl;
         return SVL_WRONG_CHANNEL;
     }
 
@@ -299,14 +298,20 @@ int svlFilterSourceVideoFile::SetFilePath(const std::string &filepath, unsigned 
 
 int svlFilterSourceVideoFile::GetFilePath(std::string &filepath, unsigned int videoch) const
 {
-    if (FilePath.size() <= videoch) return SVL_FAIL;
+    if (FilePath.size() <= videoch) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetFilePath: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
     filepath = FilePath[videoch];
     return SVL_OK;
 }
 
 int svlFilterSourceVideoFile::SetPosition(const int position, unsigned int videoch)
 {
-    if (Codec.size() <= videoch || !Codec[videoch]) return SVL_FAIL;
+    if (Codec.size() <= videoch || !Codec[videoch]) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetPosition: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
     Codec[videoch]->SetPos(position);
     Position[videoch] = position;
     ResetTimer = true;
@@ -315,51 +320,75 @@ int svlFilterSourceVideoFile::SetPosition(const int position, unsigned int video
 
 int svlFilterSourceVideoFile::GetPosition(unsigned int videoch) const
 {
-    if (Codec.size() <= videoch || !Codec[videoch]) return SVL_FAIL;
+    if (Codec.size() <= videoch || !Codec[videoch]) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetPosition: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
     return Codec[videoch]->GetPos();
 }
 
 int svlFilterSourceVideoFile::SetRange(const vctInt2 range, unsigned int videoch)
 {
-    if (Codec.size() <= videoch) return SVL_FAIL;
+    if (Codec.size() <= videoch) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetRange: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
     Range[videoch] = range;
     return SVL_OK;
 }
 
 int svlFilterSourceVideoFile::GetRange(vctInt2& range, unsigned int videoch) const
 {
-    if (Codec.size() <= videoch) return SVL_FAIL;
+    if (Codec.size() <= videoch) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetRange: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
     range = Range[videoch];
     return SVL_OK;
 }
 
 int svlFilterSourceVideoFile::GetLength(unsigned int videoch) const
 {
-    if (Codec.size() <= videoch || !Codec[videoch]) return SVL_FAIL;
+    if (Codec.size() <= videoch || !Codec[videoch]) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetLength: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
     return (Codec[videoch]->GetEndPos() + 1);
 }
 
 unsigned int svlFilterSourceVideoFile::GetWidth(unsigned int videoch) const
 {
-    if (!IsInitialized()) return 0;
+    if (!IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetWidth: filter not yet initialized" << std::endl;
+        return 0;
+    }
     return OutputImage->GetWidth(videoch);
 }
 
 unsigned int svlFilterSourceVideoFile::GetHeight(unsigned int videoch) const
 {
-    if (!IsInitialized()) return 0;
+    if (!IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetHeight: filter not yet initialized" << std::endl;
+        return 0;
+    }
     return OutputImage->GetHeight(videoch);
 }
 
 int svlFilterSourceVideoFile::GetPositionAtTime(const double time, unsigned int videoch) const
 {
-    if (Codec.size() <= videoch || !Codec[videoch]) return -1;
+    if (Codec.size() <= videoch || !Codec[videoch]) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetPositionAtTime: video channel out of range: " << videoch << std::endl;
+        return -1;
+    }
     return (Codec[videoch]->GetPosAtTime(time));
 }
 
 double svlFilterSourceVideoFile::GetTimeAtPosition(const int position, unsigned int videoch) const
 {
-    if (Codec.size() <= videoch || !Codec[videoch]) return -1.0;
+    if (Codec.size() <= videoch || !Codec[videoch]) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetTimeAtPosition: video channel out of range: " << videoch << std::endl;
+        return -1.0;
+    }
     return (Codec[videoch]->GetTimeAtPos(position));
 }
 
@@ -502,9 +531,9 @@ void svlFilterSourceVideoFile::GetLengthLCommand(int & length) const
 {
     length = GetLength(SVL_LEFT);
     if (length < 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetLengthLCommand: codec configuration for channel 0 is invalid" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetLengthLCommand: codec configuration on channel 0 is invalid" << std::endl;
     } else if (length == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetLengthLCommand: video file for channel 0 has not been opened" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetLengthLCommand: video file on channel 0 has not been opened" << std::endl;
     }
 }
 
@@ -512,9 +541,9 @@ void svlFilterSourceVideoFile::GetLengthRCommand(int & length) const
 {
     length = GetLength(SVL_RIGHT);
     if (length < 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetLengthRCommand: codec configuration for channel 1 is invalid" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetLengthRCommand: codec configuration on channel 1 is invalid" << std::endl;
     } else if (length == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetLengthRCommand: video file for channel 1 has not been opened" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetLengthRCommand: video file on channel 1 has not been opened" << std::endl;
     }
 }
 
@@ -574,7 +603,7 @@ void svlFilterSourceVideoFile::GetPositionAtTimeLCommand(const double & time, in
 {
     position = GetPositionAtTime(time, SVL_LEFT);
     if (position < 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetPositionAtTimeLCommand: codec configuration for channel 0 is invalid" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetPositionAtTimeLCommand: codec configuration on channel 0 is invalid" << std::endl;
     }
 }
 
@@ -582,7 +611,7 @@ void svlFilterSourceVideoFile::GetPositionAtTimeRCommand(const double & time, in
 {
     position = GetPositionAtTime(time, SVL_RIGHT);
     if (position < 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetPositionAtTimeRCommand: codec configuration for channel 1 is invalid" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetPositionAtTimeRCommand: codec configuration on channel 1 is invalid" << std::endl;
     }
 }
 
@@ -590,7 +619,7 @@ void svlFilterSourceVideoFile::GetTimeAtPositionLCommand(const int & position, d
 {
     time = GetTimeAtPosition(position, SVL_LEFT);
     if (time < 0.0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetTimeAtPositionLCommand: codec configuration for channel 0 is invalid" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetTimeAtPositionLCommand: codec configuration on channel 0 is invalid" << std::endl;
     }
 }
 
@@ -598,7 +627,7 @@ void svlFilterSourceVideoFile::GetTimeAtPositionRCommand(const int & position, d
 {
     time = GetTimeAtPosition(position, SVL_RIGHT);
     if (time < 0.0) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetTimeAtPositionRCommand: codec configuration for channel 1 is invalid" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetTimeAtPositionRCommand: codec configuration on channel 1 is invalid" << std::endl;
     }
 }
 

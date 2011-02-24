@@ -53,6 +53,7 @@ svlVideoCodecVfW32::svlVideoCodecVfW32() :
     SetName("AVI Files");
     SetExtensionList(".avi;");
     SetMultithreaded(false);
+    SetVariableFramerate(false);
 
     memset(&AviFileInfo, 0, sizeof(AVIFILEINFO));
     memset(&AviStreamInfo, 0, sizeof(AVISTREAMINFO));

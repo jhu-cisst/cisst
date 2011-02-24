@@ -52,6 +52,7 @@ svlVideoCodecDirectShow::svlVideoCodecDirectShow() :
     SetName("AVI Files");
     SetExtensionList(".avi;");
     SetMultithreaded(false);
+    SetVariableFramerate(false);
 
     memset(&MediaType, 0, sizeof(AM_MEDIA_TYPE));
 }

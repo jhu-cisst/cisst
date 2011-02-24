@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,7 +48,8 @@ vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints, siz
 }
 
 
-vctPlot2DBase::Trace::~Trace() {
+vctPlot2DBase::Trace::~Trace()
+{
     if (this->Buffer) {
         delete this->Buffer;
     }
@@ -57,7 +58,7 @@ vctPlot2DBase::Trace::~Trace() {
 
 void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
 {
-    if (!this->Frozen) { 
+    if (!this->Frozen) {
         // look where to store this point
         if (!this->Empty) {
             this->IndexLast++;
@@ -105,7 +106,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
         indexLast = this->IndexLast;
     }
     const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
-    
+
     // iterate
     double value;
     for (;
@@ -141,7 +142,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
         indexLast = this->IndexLast;
     }
     const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
-    
+
     // iterate
     double value;
     for (;
@@ -171,7 +172,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
         indexLast = this->IndexLast;
     }
     const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
-    
+
     // iterate
     double value;
     for (;
@@ -187,10 +188,40 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
 }
 
 
-void vctPlot2DBase::Trace::SetColor(const vctDouble3 & color)
+void vctPlot2DBase::Trace::SetColor(const vctDouble3 & colorInRange0To1)
 {
     vctDouble3 clippedColor;
-    clippedColor.ClippedAboveOf(color, 1.0);
+    clippedColor.ClippedAboveOf(colorInRange0To1, 1.0);
+    clippedColor.ClippedBelowOf(clippedColor, 0.0);
+    this->Color.Assign(clippedColor);
+}
+
+
+vctPlot2DBase::VerticalLine::VerticalLine(const std::string & name, const double x):
+    Name(name),
+    X(x),
+    Visible(true),
+    Color(1.0, 1.0, 1.0),
+    LineWidth(1.0)
+{
+}
+
+
+vctPlot2DBase::VerticalLine::~VerticalLine()
+{
+};
+
+
+void vctPlot2DBase::VerticalLine::SetX(const double x)
+{
+    this->X = x;
+}
+
+
+void vctPlot2DBase::VerticalLine::SetColor(const vctDouble3 & colorInRange0To1)
+{
+    vctDouble3 clippedColor;
+    clippedColor.ClippedAboveOf(colorInRange0To1, 1.0);
     clippedColor.ClippedBelowOf(clippedColor, 0.0);
     this->Color.Assign(clippedColor);
 }
@@ -210,7 +241,7 @@ vctPlot2DBase::vctPlot2DBase(size_t pointSize):
 }
 
 
-bool vctPlot2DBase::AddTrace(const std::string & name, size_t & traceId)
+vctPlot2DBase::Trace * vctPlot2DBase::AddTrace(const std::string & name, size_t & traceId)
 {
     // check if the name already exists
     TracesIdType::const_iterator found = this->TracesId.find(name);
@@ -221,9 +252,27 @@ bool vctPlot2DBase::AddTrace(const std::string & name, size_t & traceId)
         Trace * newTrace = new Trace(name, this->NumberOfPoints, this->PointSize);
         Traces.push_back(newTrace);
         TracesId[name] = traceId;
-        return true;
+        return newTrace;
     }
-    return false;
+    return 0;
+}
+
+
+vctPlot2DBase::Trace * vctPlot2DBase::AddTrace(const std::string & name)
+{
+    size_t traceId;
+    return this->AddTrace(name, traceId);
+}
+
+
+vctPlot2DBase::VerticalLine * vctPlot2DBase::AddVerticalLine(const std::string & name)
+{
+    VerticalLine * newLine = new VerticalLine(name);
+    if (this->VerticalLines.AddItem(name, newLine)) {
+        return newLine;
+    }
+    delete newLine;
+    return 0;
 }
 
 
@@ -238,9 +287,8 @@ void vctPlot2DBase::SetNumberOfPoints(size_t numberOfPoints)
 
 void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
 {
-    this->PointAddedSinceLastRender = true;
     this->Traces[traceId]->AddPoint(point);
-} 
+}
 
 
 void vctPlot2DBase::FitX(double padding)
@@ -411,7 +459,7 @@ void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 
 void vctPlot2DBase::ContinuousUpdate(void)
 {
-    if (this->Continuous && this->PointAddedSinceLastRender) {
+    if (this->Continuous) {
         if (this->ContinuousFitX && this->ContinuousFitY) {
             this->FitXY();
         } else if (this->ContinuousFitX) {
@@ -423,14 +471,16 @@ void vctPlot2DBase::ContinuousUpdate(void)
 }
 
 
-void vctPlot2DBase::SetColor(size_t traceId, const vctDouble3 & color)
+void vctPlot2DBase::SetColor(size_t traceId, const vctDouble3 & colorInRange0To1)
 {
-    this->Traces[traceId]->SetColor(color);
+    this->Traces[traceId]->SetColor(colorInRange0To1);
 }
 
 
-void vctPlot2DBase::SetBackgroundColor(const vctDouble3 & color)
+void vctPlot2DBase::SetBackgroundColor(const vctDouble3 & colorInRange0To1)
 {
-    // should add check for [0,1]
-    this->BackgroundColor = color;
+    vctDouble3 clippedColor;
+    clippedColor.ClippedAboveOf(colorInRange0To1, 1.0);
+    clippedColor.ClippedBelowOf(clippedColor, 0.0);
+    this->BackgroundColor.Assign(clippedColor);
 }
