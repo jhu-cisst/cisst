@@ -47,10 +47,10 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     UI.Trigger->value(0.0);
     UI.TriggerValue->value(0.0);
     // plotting
-    size_t traceId;
-    UI.Plot->AddTrace("Data", traceId);
-    UI.Plot->AddTrace("Trigger", traceId);
-    UI.Plot->SetColor(1, vct3(0.0, 1.0, 0.0));
+    UI.DataTrace = UI.Plot->AddTrace("Data");
+    UI.DataTrace->SetColor(vct3(1.0, 0.9, 0.9));
+    UI.TriggerTrace = UI.Plot->AddTrace("Trigger");
+    UI.TriggerTrace->SetColor(vct3(0.0, 1.0, 0.0));
     UI.Plot->SetContinuousFitY(false);
     UI.Plot->FitY(-5.0, 5.0); // set Y range
     // display user interface
@@ -76,9 +76,10 @@ void displayTask::Run(void)
     {
         UI.Data->value(Data);
         UI.Time->value(Time); // display in seconds
-        UI.Plot->AddPoint(0, vctDouble2(Data.Timestamp(), Data.Data));
-        UI.Plot->AddPoint(1, vctDouble2(Data.Timestamp(),
-                                        UI.Trigger->value() * UI.Amplitude->value()));
+        UI.DataTrace->AddPoint(vctDouble2(Data.Timestamp(),
+                                          Data.Data));
+        UI.TriggerTrace->AddPoint(vctDouble2(Data.Timestamp(),
+                                             UI.Trigger->value() * UI.Amplitude->value()));
         UI.Plot->redraw();
         // check if the user has entered a new amplitude in UI
         if (UI.AmplitudeChanged) {

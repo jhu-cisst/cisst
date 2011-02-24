@@ -69,4 +69,8 @@ class displayUI {open
   }
   decl {bool Closed;} {public local
   }
+  decl {vctPlot2DBase::Trace * DataTrace;} {public local
+  }
+  decl {vctPlot2DBase::Trace * TriggerTrace;} {public local
+  }
 } 
