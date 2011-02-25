@@ -30,7 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaForwardDeclarations.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
-class mtsFunctionBase {
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+
+class CISST_EXPORT mtsFunctionBase {
 
 private:
     mtsFunctionBase(void); // default constructor should not be used.
