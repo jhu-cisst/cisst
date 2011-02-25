@@ -686,10 +686,17 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
 
     // Get a provided interface proxy instance of which command proxies are going
     // to be updated.
-    mtsInterfaceProvided * endUserInterface = GetInterfaceProvided(serverInterfaceProvidedName);
-    if (!endUserInterface) {
+    mtsInterfaceProvided * originalInterface = GetInterfaceProvided(serverInterfaceProvidedName);
+    if (!originalInterface) {
         CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: failed to get provided interface: "
-            << serverInterfaceProvidedName << std::endl;
+                                 << serverInterfaceProvidedName << std::endl;
+        return false;
+    }
+    
+    mtsInterfaceProvided * endUserInterface = originalInterface->FindEndUserInterfaceByName(clientInterfaceRequiredName);
+    if (!endUserInterface) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: failed to get end user provided interface: "
+                                 << clientInterfaceRequiredName << std::endl;
         return false;
     }
 
