@@ -286,12 +286,13 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     UI.SpinnerSignalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
 
     ResetDataVisualizerUI();
+
+    // make the UI visible
+    UI.show(0, NULL);
 }
 
 void GCMUITask::Startup(void) 
 {
-    // make the UI visible
-    UI.show(0, NULL);
 }
 
 void GCMUITask::Run(void)
@@ -363,11 +364,19 @@ void GCMUITask::Run(void)
         ComponentViewer = 0;
     }
 #endif
+}
 
+#if 0 // looks like we use application.exec so this should not be needed
+void GCMUITask::UpdateUI(void)
+{
+    Fl::lock();
     if (Fl::check() == 0) {
         Kill();
     }
+    Fl::unlock();
+    Fl::awake();
 }
+#endif 
 
 #ifdef BASIC_PLOTTING_TEST
 void GCMUITask::PlotGraph(void)

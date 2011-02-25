@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
+
+
+mtsFunctionVoid::mtsFunctionVoid(const bool isProxy):
+    mtsFunctionBase(isProxy),
+    Command(0)
+{}
 
 
 mtsFunctionVoid::~mtsFunctionVoid()
@@ -60,7 +66,14 @@ mtsExecutionResult mtsFunctionVoid::Execute(void) const
 
 mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
 {
-    return Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult executionResult;
+    executionResult = Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+        && !this->IsProxy) {
+        this->ThreadSignalWait();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return executionResult;
 }
 
 
@@ -76,4 +89,3 @@ void mtsFunctionVoid::ToStream(std::ostream & outputStream) const {
         outputStream << "mtsFunctionVoid not initialized";
     }
 }
-

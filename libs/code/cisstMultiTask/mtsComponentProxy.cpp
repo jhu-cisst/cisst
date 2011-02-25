@@ -68,7 +68,7 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     const mtsRequiredType isRequired = (requiredInterfaceDescription.IsRequired ? MTS_REQUIRED : MTS_OPTIONAL);
 
     // Create a local required interface (a required interface proxy)
-    mtsInterfaceRequired * requiredInterfaceProxy = AddInterfaceRequired(requiredInterfaceName, isRequired);
+    mtsInterfaceRequired * requiredInterfaceProxy = AddInterfaceRequiredWithoutSystemEventHandlers(requiredInterfaceName, isRequired);
     if (!requiredInterfaceProxy) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add required interface proxy: " << requiredInterfaceName << std::endl;
         return false;
@@ -89,7 +89,7 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     // Create void function proxies
     const std::vector<std::string> namesOfFunctionVoid = requiredInterfaceDescription.FunctionVoidNames;
     for (size_t i = 0; i < namesOfFunctionVoid.size(); ++i) {
-        functionVoidProxy = new mtsFunctionVoid();
+        functionVoidProxy = new mtsFunctionVoid(true /* create function for proxy */);
         success = requiredInterfaceProxy->AddFunction(namesOfFunctionVoid[i], *functionVoidProxy);
         success &= mapElement->FunctionVoidProxyMap.AddItem(namesOfFunctionVoid[i], functionVoidProxy);
         if (!success) {
@@ -234,7 +234,7 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
     const std::string providedInterfaceName = providedInterfaceDescription.InterfaceProvidedName;
 
     // Create a local provided interface (a provided interface proxy)
-    mtsInterfaceProvided * providedInterfaceProxy = AddInterfaceProvided(providedInterfaceName);
+    mtsInterfaceProvided * providedInterfaceProxy = AddInterfaceProvidedWithoutSystemEvents(providedInterfaceName);
     if (!providedInterfaceProxy) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to add provided interface proxy: " << providedInterfaceName << std::endl;
         return false;

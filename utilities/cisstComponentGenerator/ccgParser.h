@@ -26,13 +26,14 @@ enum ccgMacro {NEG_MACRO = -1,
                EVENT_VOID,
                EVENT_WRITE,
                INTERFACE_REQUIRED_BEGIN,
+               INTERFACE_REQUIRED_END,
                FUNCTION_VOID,
                FUNCTION_WRITE,
                FUNCTION_READ,
                FUNCTION_QUALIFIEDREAD,
                EVENT_HANDLER_WRITE,
                EVENT_HANDLER_VOID,
-               INTERFACE_REQUIRED_END,
+               EVENT_HANDLER_NONQUEUED_VOID,
                MAX_MACRO
 };
 
@@ -101,6 +102,8 @@ private:
     int ParseEventHandlerWrite(void);
 
     int ParseEventHandlerVoid(void);
+
+    int ParseEventHandlerVoidNonQueued(void);
 
 
 public:

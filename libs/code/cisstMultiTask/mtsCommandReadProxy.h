@@ -77,17 +77,17 @@ public:
     }
 
     /*! The execute method. */
-    virtual mtsExecutionResult Execute(mtsGenericObject & argument) {
+    virtual mtsExecutionResult Execute(mtsGenericObject & placeHolder) {
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
-
+        mtsExecutionResult result;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandReadSerialized(ClientID, CommandID, argument)) {
+            if (!NetworkProxyServer->SendExecuteCommandReadSerialized(ClientID, CommandID, result, placeHolder)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+        return result;
     }
 
     /*! Generate human readable description of this object */

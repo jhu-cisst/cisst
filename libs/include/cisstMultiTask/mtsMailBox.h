@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsMailBox_h
 #define _mtsMailBox_h
 
-#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -47,8 +46,11 @@ class CISST_EXPORT mtsMailBox
       thread. */
     mtsCallableVoidBase * PostCommandQueuedCallable;
 
-    /*! Thread signal used for blocking */
-    osaThreadSignal ThreadSignal;
+    /*! Command executed after a command is de-queued.  This is
+      used for blocking commands in order to trigger an event sent
+      back to the caller.  The caller's required interface needs to
+      provide an event handler that is not queued. */
+    mtsCommandVoid * PostCommandDequeuedCommand;
 
 public:
     mtsMailBox(const std::string & name,
@@ -64,19 +66,6 @@ public:
       command has been provided, the command is executed. */
     bool Write(mtsCommandBase * command);
 
-    /*! Wait for thread signal, used by blocking commands just after
-      Write.  ExecuteNext will Raise the thread signal if the queued
-      command was blocking. */
-    void ThreadSignalWait(void);
-
-    /*! Don't really wait but at least does a Wait call to match a
-      potential Raise.  Use with Caution, normally only when the
-      mailbox is empty. */
-    void ThreadSignalWait(double timeOutInSeconds);
-
-    /*! Get the thread signal. Used by event receivers. */
-    osaThreadSignal * GetThreadSignal(void);
-
     /*! Execute the oldest command queued. */
     bool ExecuteNext(void);
 
@@ -88,6 +77,12 @@ public:
 
     /*! Returns true if mailbox is empty. */
     bool IsEmpty(void) const;
+
+    /*! Set the command to be called after a blocking command is
+      de-queued and executed.  This can be used to call a trigger for
+      event.  The event handler on the client site can then raise a
+      thread signal. */
+    void SetPostCommandDequeuedCommand(mtsCommandVoid * command);
 
 };
 

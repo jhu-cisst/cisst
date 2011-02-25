@@ -26,7 +26,6 @@ mtsInterfaceRequiredOrInput::mtsInterfaceRequiredOrInput(const std::string & int
                                                          mtsComponent * component,
                                                          mtsRequiredType required):
     Name(interfaceName),
-    ComponentName(component->GetName()),
     Component(component),
     Required(required)
 {
@@ -44,9 +43,18 @@ const std::string & mtsInterfaceRequiredOrInput::GetName(void) const
 }
 
 
-const std::string mtsInterfaceRequiredOrInput::GetComponentName(void) const
+const std::string mtsInterfaceRequiredOrInput::GetFullName(void) const
 {
-    return this->ComponentName;
+    if (this->Component) {
+        return this->Component->GetName() + ":" + this->GetName();
+    }
+    return "[no component]:" + this->GetName();
+}
+
+
+const mtsComponent *  mtsInterfaceRequiredOrInput::GetComponent(void) const
+{
+    return this->Component;
 }
 
 

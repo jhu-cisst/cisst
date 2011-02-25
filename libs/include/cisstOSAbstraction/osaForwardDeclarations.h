@@ -28,8 +28,8 @@ http://www.cisst.org/cisst/license.txt.
   \brief Forward declarations and \#define for cisstOSAbstraction
 */
 
-class osaTimeServer;
 class osaMutex;
+class osaThreadSignal;
+class osaTimeServer;
 
 #endif  // _osaForwardDeclarations_h
-

@@ -23,7 +23,7 @@ set (CISST_EXAMPLES
      commonTutorial
      devicesTutorial
      interactiveTutorial
-     multiTaskTutorial
+#     multiTaskTutorial
      nArrayBenchmark
      numericalTutorial
      osAbstractionTutorial

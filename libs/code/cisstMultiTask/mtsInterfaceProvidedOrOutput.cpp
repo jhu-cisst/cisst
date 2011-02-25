@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 mtsInterfaceProvidedOrOutput::mtsInterfaceProvidedOrOutput(const std::string & interfaceName,
                                                            mtsComponent * component):
     Name(interfaceName),
-    ComponentName(component->GetName()),
     Component(component)
 {
 }
@@ -40,13 +39,23 @@ const std::string & mtsInterfaceProvidedOrOutput::GetName(void) const
 }
 
 
-const std::string mtsInterfaceProvidedOrOutput::GetComponentName(void) const
+const std::string mtsInterfaceProvidedOrOutput::GetFullName(void) const
 {
-    return this->ComponentName;
+    if (this->Component) {
+        return this->Component->GetName() + ":" + this->GetName();
+    }
+    return "[no component]:" + this->GetName();
+}
+
+
+const mtsComponent *  mtsInterfaceProvidedOrOutput::GetComponent(void) const
+{
+    return this->Component;
 }
 
 
 void mtsInterfaceProvidedOrOutput::Cleanup(void)
 {
-    CMN_LOG_CLASS_INIT_DEBUG << "Cleanup: default implementation from mtsInterfaceProvidedOrOutput called" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "Cleanup: default implementation from mtsInterfaceProvidedOrOutput called for \""
+                             << this->GetFullName() << "\"" << std::endl;
 }

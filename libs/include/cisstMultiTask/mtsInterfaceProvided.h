@@ -141,8 +141,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Constructor with a post queued command.  This constructor is
       used by mtsTaskFromSignal to provide the command used everytime
       one uses a queued command of this interface (write and void
-      commands).  The post command queued command in this case performs
-      a wakeup (signal) on the task's thread. */
+      commands).  The post command queued command in this case
+      performs a wakeup (signal) on the task's thread. */
     mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                          mtsInterfaceQueueingPolicy queueingPolicy,
                          mtsCallableVoidBase * postCommandQueuedCallable = 0);
@@ -474,7 +474,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
-    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+    void AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
     /*! Remove an observer for the specified event.  These methods are
@@ -486,7 +486,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool RemoveObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler);
-    void RemoveObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+    void RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
     /*! Get the original interface.  This allows to retrieve the original
@@ -496,7 +496,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     /*! Find an end-user interface given a client name. */
     mtsInterfaceProvided * FindEndUserInterfaceByName(const std::string &userName);
 
-    /*! Returns a list of user names (name of connected required interface).  
+    /*! Returns a list of user names (name of connected required interface).
         Used to remove provided interface in a thread-safe way */
     std::vector<std::string> GetListOfUserNames(void) const;
 
@@ -521,6 +521,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
                          size_t mailBoxSize,
                          size_t argumentQueuesSize);
 
+    static std::string GenerateEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
+                                                    const std::string & userName);
+
     /*!  This method creates a copy of the existing interface.  The
       copy is required for each new user, i.e. for each required
       interface connected to this provided interface if queueing has
@@ -536,10 +539,6 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       logging only.
       \returns pointer to end-user interface (0 if error)
      */
-
-     static std::string GetEndUserInterfaceName(const mtsInterfaceProvided * originalInterface,
-                                                const std::string &userName);
-
 public: // PK TEMP for IRE
     mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
 protected: // PK TEMP
@@ -555,7 +554,8 @@ protected: // PK TEMP
       \returns 0 if successful, interfaceProvided otherwise
      */
 
-    mtsInterfaceProvided * RemoveEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string & userName);
+    mtsInterfaceProvided * RemoveEndUserInterface(mtsInterfaceProvided * interfaceProvided,
+                                                  const std::string & userName);
 
     /*! Utility method to determine if a command should be queued or
       not based on the default policy for the interface and the user's
@@ -587,6 +587,9 @@ protected: // PK TEMP
     /*! Size to be used for argument queues */
     size_t ArgumentQueuesSize;
 
+    /*! Command to trigger void event for blocking commands. */
+    mtsCommandVoid * BlockingCommandExecuted;
+
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
     ThisType * OriginalInterface;
@@ -597,6 +600,9 @@ protected: // PK TEMP
       interface should be created as a factory or template.  All users
       should use their own copy created using GetEndUserInterface(). */
     bool EndUserInterface;
+
+    /*! Name of user for end user interface */
+    std::string UserName;
 
     /*! Counter for number of users, i.e. number or required
       interfaces connected to this provided interface.  This number
@@ -620,6 +626,7 @@ protected: // PK TEMP
 
 protected:
     mtsMailBox * GetMailBox(void);
+
     mtsCommandVoid * AddCommandVoid(mtsCallableVoidBase * callable,
                                     const std::string & name,
                                     mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
@@ -665,6 +672,8 @@ protected:
 
     bool AddEvent(const std::string & commandName, mtsMulticastCommandVoid * generator);
     bool AddEvent(const std::string & commandName, mtsMulticastCommandWriteBase * generator);
+
+    bool AddSystemEvents(void);
 
     /*! Get description of this interface (with serialized argument information) */
     bool GetDescription(InterfaceProvidedDescription & providedInterfaceDescription);

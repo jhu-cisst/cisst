@@ -95,10 +95,17 @@ protected:
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers) const;
 
     /*! Execute commands */
-    void ReceiveExecuteCommandVoid(const CommandIDType commandID, const mtsBlockingType blocking);
-    void ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument, const mtsBlockingType blocking);
-    void ReceiveExecuteCommandReadSerialized(const CommandIDType commandID, std::string & serializedArgument);
-    void ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandID, const std::string & serializedArgumentIn, std::string & serializedArgumentOut);
+    void ReceiveExecuteCommandVoid(const CommandIDType commandID,
+                                   const mtsBlockingType blocking, mtsExecutionResult & executionResult);
+    void ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID,
+                                              const mtsBlockingType blocking, mtsExecutionResult & executionResult,
+                                              const std::string & serializedArgument);
+    void ReceiveExecuteCommandReadSerialized(const CommandIDType commandID,
+                                             mtsExecutionResult & executionResult,
+                                             std::string & serializedArgument);
+    void ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandID,
+                                                      mtsExecutionResult & executionResult,
+                                                      const std::string & serializedArgumentIn, std::string & serializedArgumentOut);
 
 public:
     /*! Constructor and destructor */
@@ -177,10 +184,10 @@ protected:
         bool FetchFunctionProxyPointers(const std::string &, mtsComponentInterfaceProxy::FunctionProxyPointerSet &, const ::Ice::Current & current) const;
 
         /*! Execute commands */
-        void ExecuteCommandVoid(::Ice::Long, bool, const ::Ice::Current&);
-        void ExecuteCommandWriteSerialized(::Ice::Long, const ::std::string&, bool, const ::Ice::Current&);
-        void ExecuteCommandReadSerialized(::Ice::Long, ::std::string&, const ::Ice::Current&);
-        void ExecuteCommandQualifiedReadSerialized(::Ice::Long, const ::std::string&, ::std::string&, const ::Ice::Current&);
+        void ExecuteCommandVoid(::Ice::Long, bool, ::Ice::Byte&, const ::Ice::Current&);
+        void ExecuteCommandWriteSerialized(::Ice::Long, const ::std::string&, bool, ::Ice::Byte&, const ::Ice::Current&);
+        void ExecuteCommandReadSerialized(::Ice::Long, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
+        void ExecuteCommandQualifiedReadSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
     };
 };
 

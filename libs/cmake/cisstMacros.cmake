@@ -342,7 +342,7 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
     # create output name and concatenate to list available in parent scope
     set (output_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}_initGenerated.cpp")
     cisst_cmake_debug ("cisst_component_generator: adding output file: ${output_absolute}")
-    set (GENERATED_FILES ${GENERATED_FILES} ${output_absolute})
+    set (GENERATED_FILES ${GENERATED_FILES} ${output_absolute} ${input})
     # tell cmake the output is generated and how to generate it
     set_source_files_properties (${output_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${output_absolute}
@@ -355,6 +355,9 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
 
   # create variable to store all generated files names
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_CG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
+
+  # add current source dir to include directories to compile generated code
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 endfunction (cisst_component_generator)
 

@@ -226,8 +226,8 @@ void mtsTask::Kill(void)
 
 /********************* Methods to manage interfaces *******************/
 
-mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                     mtsRequiredType required)
+mtsInterfaceRequired * mtsTask::AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                               mtsRequiredType required)
 {
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
                                           mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE);
@@ -240,8 +240,8 @@ mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfa
 }
 
 
-mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                     mtsInterfaceQueueingPolicy queueingPolicy)
+mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
+                                                                        mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)

@@ -448,8 +448,9 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
     // Add provided interface to which InterfaceInternal's required interface connects.
     std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceComponentProvided();
     // Return if provided interface already exists
-    if (GetInterfaceProvided(interfaceName))
+    if (GetInterfaceProvided(interfaceName)) {
         return true;
+    }
     mtsInterfaceProvided * provided = AddInterfaceProvided(interfaceName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceComponent: failed to add \"Component\" provided interface: " << interfaceName << std::endl;

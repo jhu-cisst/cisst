@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -30,5 +30,5 @@ if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
   cisst_target_link_libraries(numericalTutorial cisstCommon cisstVector cisstNumerical)
 
 else (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  message (WARNING " numericalTutorial examples will not be compiled since they require BUILD_LIBS_cisstMultiTask and CISST_HAS_CISSTNETLIB")
+  message (WARNING " numericalTutorial examples will not be compiled since they require BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
 endif (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)

@@ -26,13 +26,14 @@ static const std::string MacroNames[] =  {
     "EVENT_VOID",
     "EVENT_WRITE",
     "INTERFACE_REQUIRED_BEGIN",
+    "INTERFACE_REQUIRED_END",
     "FUNCTION_VOID",
     "FUNCTION_WRITE",
     "FUNCTION_READ",
     "FUNCTION_QUALIFIEDREAD",
     "EVENT_HANDLER_WRITE",
     "EVENT_HANDLER_VOID",
-    "INTERFACE_REQUIRED_END"
+    "EVENT_HANDLER_NONQUEUED_VOID"
 };
 
 ccgParser::ccgParser(const std::string & fullname)
@@ -82,19 +83,21 @@ int ccgParser::ParseFile(void)
         if ((macro = GetMacro(0)) != NEG_MACRO || State == CCG_PROCESSING_MTS_STATE_TABLE) {
             if (ChangeState(macro)) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "ParseFile: " << CCG_PARSER_LOG << std::endl;
-                RunState(macro);
-                //if(!runState(macro)) {
-                //    cout << "Error: Format Error in " << macroNames[macro] << std::endl;
-                //    return 0;
-                //}
+                try {
+                    RunState(macro);
+                } catch (...) {
+                    std::cerr << FullName << ":" << LineNumber << ":error: internal parser error" << std::endl;
+                }
             } else {
-                CMN_LOG_CLASS_RUN_ERROR << "ParseFile: illegal state change, " << CCG_PARSER_LOG << std::endl;
+                std::cerr << FullName << ":" << LineNumber << ":error: invalid state change" << std::endl;
+                CMN_LOG_CLASS_RUN_ERROR << "ParseFile: invalid state change, " << CCG_PARSER_LOG << std::endl;
                 return 0;//illegal state change
             }
         }
     }
 
     if (State != CCG_PROCESSING_MTS_COMPONENT) {
+        std::cerr << FullName << ":" << LineNumber << ":error: unexpected EOF" << std::endl;
         CMN_LOG_CLASS_RUN_ERROR << "ParseFile: unexpected EOF, " << CCG_PARSER_LOG << std::endl;
         fin.close();
         return 0; //reached end of file without ending declarations
@@ -179,6 +182,7 @@ int ccgParser::ChangeState(ccgMacro macro)
         case FUNCTION_QUALIFIEDREAD:
         case EVENT_HANDLER_WRITE:
         case EVENT_HANDLER_VOID:
+        case EVENT_HANDLER_NONQUEUED_VOID:
             break;
         default:
             //std::cout << m << std::endl;
@@ -244,6 +248,8 @@ int ccgParser::RunState(ccgMacro macro)
             return ParseEventHandlerWrite();
         case EVENT_HANDLER_VOID:
             return ParseEventHandlerVoid();
+        case EVENT_HANDLER_NONQUEUED_VOID:
+            return ParseEventHandlerVoidNonQueued();
         case INTERFACE_REQUIRED_END:
             State = CCG_PROCESSING_MTS_COMPONENT;
             return ParseInterfaceRequiredEnd();
@@ -432,8 +438,8 @@ int ccgParser::ParseCommandQualifiedRead(void)
 
 int ccgParser::ParseInterfaceProvided(void)
 {
-    size_t startin = Line.find('\"');
-    size_t endin = Line.find('\"', startin+1)+1;
+    size_t startin = Line.find('(')+1;
+    size_t endin = Line.find(')', startin);
     std::string name;
 
     name = Line.substr(startin, endin - startin);
@@ -474,15 +480,15 @@ int ccgParser::ParseInterfaceRequiredEnd(void)
 
 int ccgParser::ParseFunction(void)
 {
-    size_t namestart = Line.find('\"');
-    size_t nameend = Line.find('\"', namestart+1)+1;
-    size_t funcstart = Line.find(' ', nameend)+1;
-    std::string name, func;
+    size_t funcstart = Line.find('(')+1;
+    size_t funcend = Line.find(',', funcstart);
+    size_t namestart = Line.find('\"', funcend);
+    std::string func, name;
 
-    name = Line.substr(namestart, nameend - namestart);
-    func = Line.substr(funcstart, Line.find(')', funcstart) - funcstart);
+    func = Line.substr(funcstart, funcend - funcstart);
+    name = Line.substr(namestart, Line.find(')')-namestart);
 
-    //std::cout << name << " " << func << std::endl;
+    // std::cout << name << " " << func << std::endl;
     Component->AddFunctionToInterface(func, name);
     return 1;
 }
@@ -537,10 +543,11 @@ int ccgParser::ParseEventHandlerWrite(void)
     Etype = "Write";
     Efunc = Line.substr(funcstart, funcend - funcstart);
     Ename = Line.substr(namestart, nameend - namestart);
-    if (argstart != Line.npos)
+    if (argstart != Line.npos) {
         Earg = Line.substr(argstart, Line.find(')', argstart) - argstart);
-    else
+    } else {
         Earg = "void";
+    }
 
     Component->AddEventHandlerToInterface(Etype, Efunc, Ename, Earg);
     return 1;
@@ -559,6 +566,23 @@ int ccgParser::ParseEventHandlerVoid(void)
     Ename = Line.substr(namestart, Line.find(')') - namestart);
 
     Component->AddEventHandlerToInterface(Etype, Efunc, Ename);
+    return 1;
+}
+
+
+int ccgParser::ParseEventHandlerVoidNonQueued(void)
+{
+    size_t funcstart = Line.find('(')+1;
+    size_t funcend = Line.find(',', funcstart);
+    size_t namestart = Line.find('\"', funcend);
+    std::string Efunc, Ename, Etype, Epolicy;
+
+    Etype = "Void";
+    Efunc = Line.substr(funcstart, funcend - funcstart);
+    Ename = Line.substr(namestart, Line.find(')') - namestart);
+    Epolicy = "MTS_EVENT_NOT_QUEUED";
+
+    Component->AddEventHandlerToInterface(Etype, Efunc, Ename, Epolicy);
     return 1;
 }
 

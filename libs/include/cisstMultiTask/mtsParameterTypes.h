@@ -245,19 +245,19 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArg);
 // Add Observers
 //
 
-class CISST_EXPORT mtsEventHandlerList : public mtsGenericObject
+class CISST_EXPORT mtsEventHandlerList: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 #ifndef SWIG
-    template <class _CommandType>
+    template <class _commandType>
     struct EventHandlerInfo {
         std::string EventName;
-        _CommandType *HandlerPtr;
+        _commandType * HandlerPointer;
         mtsRequiredType Required;
         bool Result;
-        EventHandlerInfo(const std::string &name, _CommandType *handler, mtsRequiredType required)
-            : EventName(name), HandlerPtr(handler), Required(required), Result(false) {}
+        EventHandlerInfo(const std::string & name, _commandType * handler, mtsRequiredType required)
+            : EventName(name), HandlerPointer(handler), Required(required), Result(false) {}
         ~EventHandlerInfo() {}
     };
 #endif
@@ -269,11 +269,11 @@ public:
 #endif
 
     mtsEventHandlerList() : Provided(0) {}
-    mtsEventHandlerList(mtsInterfaceProvided *provided) : Provided(provided) {}
+    mtsEventHandlerList(mtsInterfaceProvided * provided) : Provided(provided) {}
     ~mtsEventHandlerList() {}
 
 #ifndef SWIG
-    mtsInterfaceProvided *Provided;
+    mtsInterfaceProvided * Provided;
     std::vector<InfoVoid> VoidEvents;
     std::vector<InfoWrite> WriteEvents;
 #endif

@@ -168,7 +168,7 @@ mtsInterfaceRequired * mtsCollectorEvent::GetInterfaceRequiredFor(const mtsCompo
         CMN_LOG_CLASS_INIT_DEBUG << "GetInterfaceRequiredFor: create required interface to collect events from interface \""
                                  << interfacePointer->GetName() << "\"" << std::endl;
         std::string interfaceRequiredName = componentPointer->GetName() + "::" + interfacePointer->GetName();
-        interfaceRequired = this->AddInterfaceRequired(interfaceRequiredName);
+        interfaceRequired = this->AddInterfaceRequiredWithoutSystemEventHandlers(interfaceRequiredName);
         if (interfaceRequired) {
             interfacesRequired->AddItem(interfacePointer->GetName(), interfaceRequired);
             CMN_LOG_CLASS_INIT_DEBUG << "GetInterfaceRequiredFor: created required interface \""

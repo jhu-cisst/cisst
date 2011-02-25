@@ -384,8 +384,9 @@ bool mtsComponentInterfaceProxyServer::SendFetchFunctionProxyPointers(
     }
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(
-    const ClientIDType clientID, const CommandIDType commandID, const mtsBlockingType blocking)
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID,
+                                                              const mtsBlockingType blocking,
+                                                              mtsExecutionResult & executionResult)
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
@@ -399,18 +400,22 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(
 #endif
 
     try {
-        (*clientProxy)->ExecuteCommandVoid(commandID, (blocking == MTS_BLOCKING));
+        Ice::Byte result;
+        (*clientProxy)->ExecuteCommandVoid(commandID, (blocking == MTS_BLOCKING), result);
+        executionResult = static_cast<mtsExecutionResult::Enum>(result);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoid: network exception: " << ex);
         OnClientDisconnect(clientID);
+        executionResult = mtsExecutionResult::NETWORK_ERROR;
         return false;
     }
 
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(
-    const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument, const mtsBlockingType blocking)
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                                         const mtsBlockingType blocking, mtsExecutionResult & executionResult,
+                                                                         const mtsGenericObject & argument)
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
@@ -436,21 +441,27 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandWriteSerialized: " << commandID << ", " << serializedArgument.size() << " bytes"
-        << ", " << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
+             << ", " << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
 #endif
 
     try {
-        (*clientProxy)->ExecuteCommandWriteSerialized(commandID, serializedArgument, (blocking == MTS_BLOCKING));
+        Ice::Byte result;
+        (*clientProxy)->ExecuteCommandWriteSerialized(commandID, serializedArgument, (blocking == MTS_BLOCKING), result);
+        executionResult = static_cast<mtsExecutionResult::Enum>(result);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: network exception: " << ex);
         OnClientDisconnect(clientID);
+        executionResult = mtsExecutionResult::NETWORK_ERROR;
         return false;
     }
 
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID, mtsGenericObject & argument)
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                                        mtsExecutionResult & executionResult,
+                                                                        mtsGenericObject & argument)
+
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) return false;
@@ -464,10 +475,13 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const Cl
 #endif
 
     try {
-        (*clientProxy)->ExecuteCommandReadSerialized(commandID, serializedArgument);
+        Ice::Byte result;
+        (*clientProxy)->ExecuteCommandReadSerialized(commandID, serializedArgument, result);
+        executionResult = static_cast<mtsExecutionResult::Enum>(result);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: network exception: " << ex);
         OnClientDisconnect(clientID);
+        executionResult = mtsExecutionResult::NETWORK_ERROR;
         return false;
     }
 
@@ -486,8 +500,9 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const Cl
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized(
-    const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut)
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                                                 mtsExecutionResult & executionResult,
+                                                                                 const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut)
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
@@ -518,10 +533,15 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized
 #endif
 
     try {
-        (*clientProxy)->ExecuteCommandQualifiedReadSerialized(commandID, serializedArgumentIn, serializedArgumentOut);
+        Ice::Byte result;
+        (*clientProxy)->ExecuteCommandQualifiedReadSerialized(commandID,
+                                                              serializedArgumentIn, serializedArgumentOut,
+                                                              result);
+        executionResult = static_cast<mtsExecutionResult::Enum>(result);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandQualifiedReadSerialized: network exception: " << ex);
         OnClientDisconnect(clientID);
+        executionResult = mtsExecutionResult::NETWORK_ERROR;
         return false;
     }
 
