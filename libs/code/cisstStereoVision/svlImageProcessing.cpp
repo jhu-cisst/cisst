@@ -60,7 +60,7 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
                                                      src_img->GetUCharPointer(src_videoch),
                                                      width, height,
                                                      fp_kernel_vert, false);
-            break;
+        break;
 
         case svlPixelRGBA:
             svlImageProcessingHelper::ConvolutionRGBA(src_img->GetUCharPointer(src_videoch),
@@ -71,7 +71,7 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
                                                       src_img->GetUCharPointer(src_videoch),
                                                       width, height,
                                                       fp_kernel_vert, false);
-            break;
+        break;
 
         case svlPixelMono8:
             svlImageProcessingHelper::ConvolutionMono8(src_img->GetUCharPointer(src_videoch),
@@ -82,7 +82,7 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
                                                        src_img->GetUCharPointer(src_videoch),
                                                        width, height,
                                                        fp_kernel_vert, false);
-            break;
+        break;
 
         case svlPixelMono16:
             svlImageProcessingHelper::ConvolutionMono16(reinterpret_cast<unsigned short*>(src_img->GetUCharPointer(src_videoch)),
@@ -93,7 +93,7 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
                                                         reinterpret_cast<unsigned short*>(src_img->GetUCharPointer(src_videoch)),
                                                         width, height,
                                                         fp_kernel_vert, false);
-            break;
+        break;
 
         default:
             return SVL_FAIL;
@@ -695,6 +695,120 @@ int svlImageProcessing::SetExposure(svlSampleImage* image, unsigned int videoch,
         ptr += toskip;
 
         pixelcount --;
+    }
+
+    return SVL_OK;
+}
+
+int svlImageProcessing::Dilate(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, unsigned int radius)
+{
+    if (!src_img || src_img->GetVideoChannels() <= src_videoch ||
+        !dst_img || dst_img->GetVideoChannels() <= dst_videoch) return SVL_FAIL;
+
+    const int width  = static_cast<int>(src_img->GetWidth(src_videoch));
+    const int height = static_cast<int>(src_img->GetHeight(src_videoch));
+
+    if (src_img->GetPixelType() != svlPixelMono8 ||
+        dst_img->GetPixelType() != svlPixelMono8 ||
+        width  < 1 || width  != static_cast<int>(dst_img->GetWidth(dst_videoch)) ||
+        height < 1 || height != static_cast<int>(dst_img->GetHeight(dst_videoch))) return SVL_FAIL;
+
+    unsigned char *input  = src_img->GetUCharPointer(src_videoch);
+    unsigned char *output = dst_img->GetUCharPointer(src_videoch);
+
+    if (radius < 1) {
+        memcpy(output, input, width * height);
+        return SVL_OK;
+    }
+
+    // TO DO: Add support for larger radius
+    radius = 1;
+
+    unsigned char *input_u = input - width;
+    unsigned char *input_d = input + width;
+    unsigned char *input_l = input - 1;
+    unsigned char *input_r = input + 1;
+
+    const int widthm1  = width  - 1;
+    const int heightm1 = height - 1;
+    int i, j;
+
+    for (j = 0; j < height; j ++) {
+        for (i = 0; i < width; i ++) {
+            if (*input ||
+                (j > 0        && *input_u) ||
+                (j < heightm1 && *input_d) ||
+                (i > 0        && *input_l) ||
+                (i < widthm1  && *input_r)) {
+                *output = 255;
+            }
+            else {
+                *output = 0;
+            }
+            input_u ++;
+            input_d ++;
+            input_l ++;
+            input_r ++;
+            input   ++;
+            output  ++;
+        }
+    }
+
+    return SVL_OK;
+}
+
+int svlImageProcessing::Erode(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, unsigned int radius)
+{
+    if (!src_img || src_img->GetVideoChannels() <= src_videoch ||
+        !dst_img || dst_img->GetVideoChannels() <= dst_videoch) return SVL_FAIL;
+
+    const int width  = static_cast<int>(src_img->GetWidth(src_videoch));
+    const int height = static_cast<int>(src_img->GetHeight(src_videoch));
+
+    if (src_img->GetPixelType() != svlPixelMono8 ||
+        dst_img->GetPixelType() != svlPixelMono8 ||
+        width  < 1 || width  != static_cast<int>(dst_img->GetWidth(dst_videoch)) ||
+        height < 1 || height != static_cast<int>(dst_img->GetHeight(dst_videoch))) return SVL_FAIL;
+
+    unsigned char *input  = src_img->GetUCharPointer(src_videoch);
+    unsigned char *output = dst_img->GetUCharPointer(src_videoch);
+
+    if (radius < 1) {
+        memcpy(output, input, width * height);
+        return SVL_OK;
+    }
+
+    // TO DO: Add support for larger radius
+    radius = 1;
+
+    unsigned char *input_u = input - width;
+    unsigned char *input_d = input + width;
+    unsigned char *input_l = input - 1;
+    unsigned char *input_r = input + 1;
+
+    const int widthm1  = width  - 1;
+    const int heightm1 = height - 1;
+    int i, j;
+
+    for (j = 0; j < height; j ++) {
+        for (i = 0; i < width; i ++) {
+            if (*input == 0 ||
+                (j > 0        && *input_u == 0) ||
+                (j < heightm1 && *input_d == 0) ||
+                (i > 0        && *input_l == 0) ||
+                (i < widthm1  && *input_r == 0)) {
+                *output = 0;
+            }
+            else {
+                *output = 255;
+            }
+            input_u ++;
+            input_d ++;
+            input_l ++;
+            input_r ++;
+            input   ++;
+            output  ++;
+        }
     }
 
     return SVL_OK;

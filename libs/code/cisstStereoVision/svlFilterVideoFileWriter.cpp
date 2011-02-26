@@ -126,7 +126,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
 
     if (CaptureLength == 0) {
         if (ActionTime < syncInput->GetTimestamp()) {
-            CS.Leave();
+            _OnSingleThread(procInfo) CS.Leave();
             return SVL_OK;
         }
         // Process remaining samples in the buffer when paused
@@ -134,7 +134,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
     else {
         // Drop frames when restarted
         if (ActionTime > syncInput->GetTimestamp()) {
-            CS.Leave();
+            _OnSingleThread(procInfo) CS.Leave();
             return SVL_OK;
         }
     }

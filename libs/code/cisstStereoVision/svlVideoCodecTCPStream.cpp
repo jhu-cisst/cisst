@@ -88,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
 //#define _NET_VERBOSE_
 
 #define MAX_CLIENTS         5
-#define PACKET_SIZE         1400u
+#define PACKET_SIZE         100u
 #define BROKEN_FRAME        1
 
 
@@ -1173,6 +1173,11 @@ int svlVideoCodecTCPStream::ParseFilename(const std::string & filename)
     if (pos != std::string::npos) {
         // Extract address string (substring before '@')
         SocketAddress = filename.substr(0, pos);
+
+        // From DanO (02-22-2011)
+        if (SocketAddress.find_last_of("/\\")) {
+            SocketAddress = SocketAddress.substr(SocketAddress.find_last_of("/\\") + 1);
+        }
 
         // Extract port (numerical string after '@')
         pos += 1;

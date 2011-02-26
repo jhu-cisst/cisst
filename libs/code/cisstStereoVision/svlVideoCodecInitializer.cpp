@@ -24,6 +24,7 @@
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstStereoVision/svlVideoIO.h>
 #include "svlVideoCodecInitializer.h"
 
 #if (CISST_OS == CISST_WINDOWS)

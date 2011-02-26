@@ -135,6 +135,18 @@ namespace svlImageProcessing
                                  double contrast,
                                  double gamma,
                                  Internals& internals);
+
+    int CISST_EXPORT Dilate(svlSampleImage* src_img,
+                            unsigned int src_videoch,
+                            svlSampleImage* dst_img,
+                            unsigned int dst_videoch,
+                            unsigned int radius);
+
+    int CISST_EXPORT Erode(svlSampleImage* src_img,
+                           unsigned int src_videoch,
+                           svlSampleImage* dst_img,
+                           unsigned int dst_videoch,
+                           unsigned int radius);
 };
 
 #endif // _svlImageProcessing_h

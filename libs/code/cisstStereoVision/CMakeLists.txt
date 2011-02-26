@@ -68,6 +68,7 @@ SET(SOURCE_FILES
     svlFilterImageCenterFinder.cpp
     svlFilterImageChannelSwapper.cpp
     svlFilterImageColorConverter.cpp
+    svlFilterImageColorSegmentation.cpp
     svlFilterImageConvolution.cpp
     svlFilterImageCropper.cpp
     svlFilterImageDeinterlacer.cpp
@@ -159,6 +160,7 @@ SET(HEADER_FILES
     svlFilterImageCenterFinder.h
     svlFilterImageChannelSwapper.h
     svlFilterImageColorConverter.h
+    svlFilterImageColorSegmentation.h
     svlFilterImageConvolution.h
     svlFilterImageCropper.h
     svlFilterImageDeinterlacer.h

@@ -123,6 +123,10 @@ void svlInitialize()
     delete new svlFilterImageCenterFinder;
 #endif // _svlFilterImageCenterFinder_h
 
+#ifdef _svlFilterImageColorSegmentation_h
+    delete new svlFilterImageColorSegmentation;
+#endif // _svlFilterImageColorSegmentation_h
+
 #ifdef _svlFilterImageUnsharpMask_h
     delete new svlFilterImageUnsharpMask;
 #endif // _svlFilterImageUnsharpMask_h
