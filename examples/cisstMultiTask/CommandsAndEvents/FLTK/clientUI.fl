@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0
 header_name {.h} 
 code_name {.cxx}
 class clientUI {open
@@ -109,22 +109,22 @@ class clientUI {open
     code {VoidReturnRequested = false;} {}
     code {WriteReturnRequested = false;} {}
   }
-  decl {bool VoidRequested;} {public local
+  decl {bool VoidRequested;} {public
   }
-  decl {bool WriteRequested;} {public local
+  decl {bool WriteRequested;} {public
   }
-  decl {bool ReadRequested;} {public local
+  decl {bool ReadRequested;} {public
   }
-  decl {bool QualifiedReadRequested;} {public local
+  decl {bool QualifiedReadRequested;} {public
   }
-  decl {bool VoidSlowRequested;} {public local
+  decl {bool VoidSlowRequested;} {public
   }
-  decl {bool WriteSlowRequested;} {public local
+  decl {bool WriteSlowRequested;} {public
   }
-  decl {bool VoidReturnRequested;} {public local
+  decl {bool VoidReturnRequested;} {public
   }
-  decl {bool WriteReturnRequested;} {public local
+  decl {bool WriteReturnRequested;} {public
   }
-  decl {bool Opened;} {public local
+  decl {bool Opened;} {public
   }
 } 

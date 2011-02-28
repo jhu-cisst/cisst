@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0
 header_name {.h} 
 code_name {.cxx}
 class serverUI {open
@@ -49,10 +49,10 @@ class serverUI {open
     code {VoidEventRequested = false;} {}
     code {WriteEventRequested = false;} {}
   }
-  decl {bool VoidEventRequested;} {public local
+  decl {bool VoidEventRequested;} {public
   }
-  decl {bool WriteEventRequested;} {public local
+  decl {bool WriteEventRequested;} {public
   }
-  decl {bool Opened;} {public local
+  decl {bool Opened;} {public
   }
 } 
