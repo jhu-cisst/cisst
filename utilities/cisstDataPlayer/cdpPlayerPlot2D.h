@@ -60,9 +60,19 @@ private:
 
     std::vector <double> TimeStamps;
     std::vector <double> Data;
-    size_t VectorIndex;
-    double ZoomScale;
+    mtsInt VectorIndex;
+    double ZoomScaleValue;
+    mtsDouble LastTime;
+    mtsDouble Plot2DTime;
 
+    struct{
+        mtsFunctionRead GetVectorIndex;
+        mtsFunctionRead GetZoomScale;
+        mtsFunctionWrite WriteVectorIndex;
+    }Plot2DAccess;
+
+    void SetVectorIndex(const mtsInt & index){ VectorIndex = index; };
+    
     void MakeQTConnections(void);
     //by calling "emit QSignalQTUpdate" this function will be called.
     //used this to udpate qt widgets in a thread safe way.

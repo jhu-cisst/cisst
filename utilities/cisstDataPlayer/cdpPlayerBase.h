@@ -102,6 +102,16 @@ protected:
     //the start and end of the data period in our system.
     mtsFunctionWrite UpdatePlayerInfo;
 
+    struct {
+        mtsFunctionRead IsSyncing;
+        mtsFunctionRead GetState;
+        mtsFunctionRead GetTime;
+        mtsFunctionWrite WriteTime;
+        mtsFunctionRead GetPlayStartTime;
+        mtsFunctionRead GetPlayerDataInfo;
+        mtsFunctionRead GetPlayUntilTime;
+    } BaseAccess;
+
     //The following functions are callbacks are called by the playerManager
     //need to be implemented by each player.
     virtual void Stop(const mtsDouble & time) = 0;
@@ -118,6 +128,8 @@ protected:
     //! Adjust timestamp so it is within the range of the data
     //! return true if time is in the range and no change is applied.
     bool SetInRange(double & time);
+    // Set Time
+    void SetTime(const mtsDouble &time);
 
     osaTimeServer TimeServer;
 
