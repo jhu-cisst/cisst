@@ -43,10 +43,10 @@ svlFilterImageColorSegmentation::svlFilterImageColorSegmentation() :
 
     // Calculate Square Root Look-up Table Normalized to 0-255
     const unsigned int len = 3 * 255 * 255;
-    const unsigned int maxval = sqrt(len);
+    const unsigned int maxval = static_cast<unsigned int>(sqrt(static_cast<float>(len)));
     NormSqrtLUT.SetSize(len);
     for (unsigned int i = 0; i < len; i ++) {
-        NormSqrtLUT[i] = 255 * sqrt(i) / maxval;
+        NormSqrtLUT[i] = 255 * static_cast<unsigned int>(sqrt(static_cast<float>(i))) / maxval;
     }
 }
 
