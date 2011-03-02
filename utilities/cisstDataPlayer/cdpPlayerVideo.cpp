@@ -35,7 +35,7 @@ cdpPlayerVideo::cdpPlayerVideo(const std::string & name, double period):
     // create the user interface
         // create the user interface
     ExWidget.setupUi(&Widget);
-    VideoWidget = new svlFilterImageQtWidget();
+    VideoWidget = new svlFilterImageOpenGLQtWidget();
 
     QGridLayout *CentralLayout = new QGridLayout(&MainWindow);
     CentralLayout->setContentsMargins(0, 0, 0, 0);
@@ -324,7 +324,7 @@ void cdpPlayerVideo::SetupPipeline()
     Overlay.AddOverlay(*TimestampOverlay);
     Source.SetChannelCount(1);
 
-    std::string pathname = "/mnt/2TB/TestRecordings/laser.cvi";
+    std::string pathname = "/Users/anton/devel/test480.cvi";
     if (Source.SetFilePath(pathname) != SVL_OK) {
 	std::cerr << std::endl << "Wrong file name... " << std::endl;
     }

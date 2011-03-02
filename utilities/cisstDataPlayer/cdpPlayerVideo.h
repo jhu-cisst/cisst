@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlStreamManager.h>
 #include <cisstStereoVision/svlFilterImageOverlay.h>
-#include <cisstStereoVision/svlFilterImageQtWidget.h>
+#include <cisstStereoVision/svlFilterImageOpenGLQtWidget.h>
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
 
 //! todo Think about the thread safety issue. (At the moment, mtscommands and qslots can manipulte same data at the same time)
@@ -74,7 +74,7 @@ private:
     void SetupPipeline(void);
 
     QWidget MainWindow;
-    svlFilterImageQtWidget * VideoWidget;
+    svlFilterImageOpenGLQtWidget * VideoWidget;
 
      // instantiating SVL stream and filters
     svlStreamManager StreamManager;;
