@@ -58,6 +58,8 @@ Ice.Trace.Network = 1
 #
 Ice.Override.Timeout = 10000
 Ice.Override.ConnectTimeout = 3000
+# Message size in KB (eg 50MB 51200)
+Ice.MessageSizeMax = 51200
 
 #------------------------------------------------------------------------------
 # Server-specific Properties
@@ -69,6 +71,7 @@ Ice.Override.ConnectTimeout = 3000
 #
 Ice.ThreadPool.Server.Size = 8
 Ice.ThreadPool.Server.SizeMax = 8
+
 
 #
 # Default port number that the global component manager uses
