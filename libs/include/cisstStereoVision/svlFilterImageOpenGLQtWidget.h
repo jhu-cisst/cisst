@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: svlFilterImageOpenGLOpenGLQtWidget.h -1   $
   
   Author(s):  Marcin Balicki
   Created on: 2011-02-18
@@ -20,25 +20,25 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlFilterImageQWidget_h
-#define _svlFilterImageQWidget_h
+#ifndef _svlFilterImageOpenGLQtWidget_h
+#define _svlFilterImageOpenGLQtWidget_h
 
 #include <QGLWidget>
-#include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterImageOpenGL.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>
 
 //! this class is useful for embedding an svl stream inside a qt widget
-class CISST_EXPORT svlFilterImageQtWidget: public QGLWidget, public svlFilterBase
+class CISST_EXPORT svlFilterImageOpenGLQtWidget: public QGLWidget, public svlFilterImageOpenGL
 {
     Q_OBJECT
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    svlFilterImageQtWidget(QWidget *parent = 0);
-    ~svlFilterImageQtWidget();
+    svlFilterImageOpenGLQtWidget(QWidget *parent = 0);
+    ~svlFilterImageOpenGLQtWidget();
 
  protected:
     // Qt derived methods
@@ -46,26 +46,22 @@ class CISST_EXPORT svlFilterImageQtWidget: public QGLWidget, public svlFilterBas
     void paintGL();
     void resizeGL(int width, int height);
 
+    // mouse events
     void mousePressEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
 
-    void CheckGLError();
+    // Method to trigger rendering once the svl filter has pushed the
+    // data to OpenGL ready structures.
+    void PostProcess(void);
 
  private:
     QPoint LastPosition;
-    svlSampleImage * Image;
-
- protected:
-    // svl derived methods
-    int Initialize(svlSample * syncInput, svlSample* &syncOutput);
-    int Process(svlProcInfo * procInfo, svlSample * syncInput, svlSample* &syncOutput);
-    int Release();
 
  signals:
     void QSignalUpdateGL();
 
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageQtWidget)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOpenGLQtWidget)
 
-#endif // _svlFilterImageQWidget_h
+#endif // _svlFilterImageOpenGLQtWidget_h

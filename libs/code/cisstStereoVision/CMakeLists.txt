@@ -1075,6 +1075,18 @@ SET(HEADER_FILES
     ${HEADER_FILES}
     svlInitializer.h)
 
+# Add svlFilterImageOpenGL is OpenGL is used
+if (CISST_HAS_OPENGL)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       svlFilterImageOpenGL.cpp
+       )
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       svlFilterImageOpenGL.h
+       )
+endif (CISST_HAS_OPENGL)
+
 # Create the config file
 SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
 CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstStereoVision/svlConfig.h.in
@@ -1111,7 +1123,7 @@ if (CISST_HAS_OPENGL AND CISST_HAS_QT)
   # to include Qt generated files
   include_directories (${CMAKE_CURRENT_BINARY_DIR})
   qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../../include/cisstStereoVision/svlFilterImageQtWidget.h)
+                ../../include/cisstStereoVision/svlFilterImageOpenGLQtWidget.h)
 
   cisst_add_library (
     LIBRARY cisstStereoVisionQt
@@ -1119,8 +1131,8 @@ if (CISST_HAS_OPENGL AND CISST_HAS_QT)
     DEPENDENCIES cisstCommon
                  cisstVector
                  cisstStereoVision
-    SOURCE_FILES svlFilterImageQtWidget.cpp
-    HEADER_FILES svlFilterImageQtWidget.h
+    SOURCE_FILES svlFilterImageOpenGLQtWidget.cpp
+    HEADER_FILES svlFilterImageOpenGLQtWidget.h
                  svlExportQt.h
     ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
