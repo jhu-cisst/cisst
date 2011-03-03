@@ -287,11 +287,13 @@ size_t mtsInterfaceProvided::ProcessMailBoxes(void)
         mtsMailBox * mailBox;
         for (;
              //iterator != end;
-             iterator != InterfacesProvidedCreated.end();
-             ++iterator) {
+            iterator != InterfacesProvidedCreated.end();
+            ++iterator) {
             mailBox = iterator->second->GetMailBox();
-            while (mailBox->ExecuteNext()) {
-                numberOfCommands++;
+            if (mailBox) {
+                while (mailBox->ExecuteNext()) {
+                    numberOfCommands++;
+                }
             }
         }
         return numberOfCommands;
