@@ -94,11 +94,17 @@ class CISST_EXPORT devOSGCamera :
     
   private:
     
+    bool colorbufferrequest;
+    bool depthbufferrequest;
+
     //! OSG image containing the depth buffer
     osg::ref_ptr<osg::Image> depthbuffer;
 
     //! Converted 3D range data
     vctDynamicMatrix<double> rangedata;
+
+    //! Depth image
+    cv::Mat depthimage;
 
     //! OSG image containing the color buffer
     osg::ref_ptr<osg::Image> colorbuffer;
@@ -155,6 +161,8 @@ class CISST_EXPORT devOSGCamera :
        \return A pointer to the depth image
     */
     const vctDynamicMatrix<double>& GetRangeData() const { return rangedata; }
+
+    const cv::Mat& GetDepthImage() const { return depthimage; }
     
     //! Get the color image of the camera
     /**
@@ -165,7 +173,17 @@ class CISST_EXPORT devOSGCamera :
     const cv::Mat& GetRGBImage() const 
     {  return rgbimage; }
     
+
+    void ColorBufferSetRequest()         { colorbufferrequest = true; }
+    void ColorBufferClearRequest()       { colorbufferrequest = false; }
+    bool IsColorBufferRequested() const  { return colorbufferrequest; }
+
+    void DepthBufferSetRequest()         { depthbufferrequest = true; }
+    void DepthBufferClearRequest()       { depthbufferrequest = false; }
+    bool IsDepthBufferRequested() const  { return depthbufferrequest; }
+
   };
+
 
 #endif // CISST_DEV_HAS_OPENCV22
 
@@ -205,6 +223,7 @@ class CISST_EXPORT devOSGCamera :
   void Run();
   void Cleanup(){}
 
+  
 };
 
 #endif

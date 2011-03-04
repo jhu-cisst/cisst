@@ -31,6 +31,8 @@ void devOSGCamera::UpdateCallback::operator()( osg::Node* node,
 devOSGCamera::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera,
 						    bool capturedepth,
 						    bool capturecolor ) :
+  colorbufferrequest( false ),
+  depthbufferrequest( false ),
   capturedepth( capturedepth ),
   capturecolor( capturecolor ){
 
@@ -76,14 +78,17 @@ void devOSGCamera::FinalDrawCallback::operator ()( osg::RenderInfo& info )const{
 
     // find the kind of buffer
     switch( attachment->first ){
-
       // Convert the depth buffer
     case osg::Camera::DEPTH_BUFFER:
-      ConvertDepthBuffer( camera );
+      if( IsDepthBufferRequested() ){
+	ConvertDepthBuffer( camera );
+      }
       break;
       // Convert the color buffer
     case osg::Camera::COLOR_BUFFER:
-      ConvertColorBuffer( camera );
+      if( IsColorBufferRequested() ){
+	ConvertColorBuffer( camera );
+      }
       break;
       // nothing else
     default:
@@ -117,7 +122,31 @@ devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
     view[2] = width;
     view[3] = height;
 
-    
+    // Compute the depth image
+    // get the intrinsic parameters of the camera
+    double fovy, aspectRatio, Zn, Zf;
+    camera->getProjectionMatrixAsPerspective( fovy, aspectRatio, Zn, Zf );
+  
+    // Convert zbuffer values [0,1] to range data and flip the image vertically
+    float* z = (float*)depthbuffer->data();
+
+    float* Z = NULL;
+    if( depthimage.isContinuous() )
+      // const_cast = lame!
+      { Z = const_cast<float*>( depthimage.ptr<float>() ); }
+
+    CMN_ASSERT( Z != NULL );
+    int i=0;
+    for( int r=height-1; 0<=r; r-- ){
+      for( int c=0; c<width; c++ ){
+	// forgot where I took this equation
+	Z[ i++ ] = Zn*Zf / (Zf - z[ r*width + c ]*(Zf-Zn));
+      }
+    }
+
+
+
+    // Compute range data
 
     //GLdouble model[4][4];
     //glGetDoublev(GL_MODELVIEW_MATRIX, &model[0][0]);
@@ -262,34 +291,6 @@ devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
   // Should we care?
   if( IsDepthBufferEnabled() ){
     
-    // get the viewport size
-    const osg::Viewport* viewport = camera->getViewport();
-    int width  = (int)viewport->width();
-    int height = (int)viewport->height();
-
-    // get the intrinsic parameters of the camera
-    double fovy, aspectRatio, Zn, Zf;
-    camera->getProjectionMatrixAsPerspective( fovy, aspectRatio, Zn, Zf );
-  
-    // Convert zbuffer values [0,1] to range data and flip the image vertically
-    float* z = (float*)depthbuffer->data();
-
-    float* Z = NULL;
-    if( cvDepthImage.isContinuous() )
-      // const_cast = lame!
-      { Z = const_cast<float*>( cvDepthImage.ptr<float>() ); }
-
-    CMN_ASSERT( Z != NULL );
-    int i=0;
-    for( int r=height-1; 0<=r; r-- ){
-      for( int c=0; c<width; c++ ){
-	// forgot where I took this equation
-	Z[ i++ ] = Zn*Zf / (Zf - z[ r*width + c ]*(Zf-Zn));
-      }
-    }
-
-    // use this line to dump a test image
-    //cv::imwrite( "depth.bmp", cvDepthImage );
   }
 
 }

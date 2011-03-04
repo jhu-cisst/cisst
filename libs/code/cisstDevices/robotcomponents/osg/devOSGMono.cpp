@@ -1,4 +1,5 @@
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 devOSGMono::devOSGMono( const std::string& name, 
 			devOSGWorld* world,
@@ -80,40 +81,66 @@ void devOSGMono::Run(){
 
 #if CISST_DEV_HAS_OPENCV22
 
-vctDynamicMatrix<double> devOSGMono::GetRangeData() const{
+vctDynamicMatrix<double> devOSGMono::GetRangeData(){
   // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
+  osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
   // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
+  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
+  finaldrawcallback->DepthBufferSetRequest();
+  { osaSleep( 1.0 ); }
+  finaldrawcallback->DepthBufferClearRequest();
 
   CMN_ASSERT( finaldrawcallback != NULL );
   return finaldrawcallback->GetRangeData();
 }
 
-cv::Mat devOSGMono::GetRGBImage() const{
+cv::Mat devOSGMono::GetDepthImage(){
   // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
+  osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
   // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
+  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
+  finaldrawcallback->DepthBufferSetRequest();
+  { osaSleep( 1.0 ); }
+  finaldrawcallback->DepthBufferClearRequest();
+
+  CMN_ASSERT( finaldrawcallback != NULL );
+  return finaldrawcallback->GetDepthImage();
+}
+
+cv::Mat devOSGMono::GetRGBImage(){
+
+  // get the camera final draw callback
+  osg::Camera::DrawCallback* dcb = NULL;
+  dcb = getCamera()->getFinalDrawCallback();
+
+  // cast
+  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
+  finaldrawcallback->ColorBufferSetRequest();
+  { osaSleep( 1.0 ); }
+  finaldrawcallback->ColorBufferClearRequest();
 
   CMN_ASSERT( finaldrawcallback != NULL );
   return finaldrawcallback->GetRGBImage();
 }
 
-vctDynamicNArray<unsigned char,3> devOSGMono::GetRGBPlanarImage() const{
+vctDynamicNArray<unsigned char,3> devOSGMono::GetRGBPlanarImage(){
   // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
+  osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
   // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
+  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
+  finaldrawcallback->ColorBufferSetRequest();
+  { osaSleep( 1.0 ); }
+  finaldrawcallback->ColorBufferClearRequest();
 
   CMN_ASSERT( finaldrawcallback != NULL );
   const cv::Mat& rgbimage = finaldrawcallback->GetRGBImage();
@@ -126,14 +153,17 @@ vctDynamicNArray<unsigned char,3> devOSGMono::GetRGBPlanarImage() const{
   return x;
 }
 
-vctDynamicMatrix<unsigned char> devOSGMono::GetRGBPixelImage() const{
+vctDynamicMatrix<unsigned char> devOSGMono::GetRGBPixelImage(){
   // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
+  osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
   // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
+  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
+  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
+  finaldrawcallback->ColorBufferSetRequest();
+  { osaSleep( 1.0 ); }
+  finaldrawcallback->ColorBufferClearRequest();
 
   CMN_ASSERT( finaldrawcallback != NULL );
   const cv::Mat& rgbimage = finaldrawcallback->GetRGBImage();
@@ -144,4 +174,6 @@ vctDynamicMatrix<unsigned char> devOSGMono::GetRGBPixelImage() const{
 
   return x;
 }
+
+
 #endif

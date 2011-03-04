@@ -56,10 +56,11 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
-  vctDynamicMatrix<double> GetRangeData() const;
-  cv::Mat GetRGBImage() const;
-  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage() const;
-  vctDynamicMatrix<unsigned char> GetRGBPixelImage() const;
+  vctDynamicMatrix<double> GetRangeData();
+  cv::Mat GetDepthImage();
+  cv::Mat GetRGBImage();
+  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage();
+  vctDynamicMatrix<unsigned char> GetRGBPixelImage();
 #endif
 
 };
