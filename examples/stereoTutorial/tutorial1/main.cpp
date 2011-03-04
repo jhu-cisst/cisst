@@ -65,8 +65,8 @@ int main()
 {
     svlInitialize();     // 1. Discover supported devices and codecs
 
-    SimpleStream();
-    //ProcessingStream();
+    //SimpleStream();
+    ProcessingStream();
 
     return 0;
 }
