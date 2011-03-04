@@ -119,6 +119,14 @@ void svlInitialize()
     delete new svlFilterImageRectifier;
 #endif // _svlFilterImageRectifier_h
 
+#ifdef _svlFilterImageBlobDetector_h
+    delete new svlFilterImageBlobDetector;
+#endif // _svlFilterImageBlobDetector_h
+
+#ifdef _svlFilterImageBlobTracker_h
+    delete new svlFilterImageBlobTracker;
+#endif // _svlFilterImageBlobTracker_h
+
 #ifdef _svlFilterImageCenterFinder_h
     delete new svlFilterImageCenterFinder;
 #endif // _svlFilterImageCenterFinder_h
@@ -126,6 +134,18 @@ void svlInitialize()
 #ifdef _svlFilterImageColorSegmentation_h
     delete new svlFilterImageColorSegmentation;
 #endif // _svlFilterImageColorSegmentation_h
+
+#ifdef _svlFilterImageDilation_h
+    delete new svlFilterImageDilation;
+#endif // _svlFilterImageDilation_h
+
+#ifdef _svlFilterImageErosion_h
+    delete new svlFilterImageErosion;
+#endif // _svlFilterImageErosion_h
+
+#ifdef _svlFilterImageThresholding_h
+    delete new svlFilterImageThresholding;
+#endif // _svlFilterImageThresholding_h
 
 #ifdef _svlFilterImageUnsharpMask_h
     delete new svlFilterImageUnsharpMask;

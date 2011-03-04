@@ -153,6 +153,12 @@ public:
                 if (_VideoChannels == 2) return svlTypeImageMono16Stereo;
             }
         }
+        if (IsTypeUInt32<_ValueType>(static_cast<_ValueType>(0))) {
+            if (_DataChannels == 1) {
+                if (_VideoChannels == 1) return svlTypeImageMono32;
+                if (_VideoChannels == 2) return svlTypeImageMono32Stereo;
+            }
+        }
         if (IsTypeFloat<_ValueType>(static_cast<_ValueType>(0))) {
             if (_DataChannels == 3 && _VideoChannels == 1) return svlTypeImage3DMap;
         }
@@ -334,6 +340,11 @@ public:
                 return svlPixelMono16;
             break;
 
+            case svlTypeImageMono32:
+            case svlTypeImageMono32Stereo:
+                return svlPixelMono32;
+            break;
+
             case svlTypeImage3DMap:
                 return svlPixel3DFloat;
             break;
@@ -354,6 +365,7 @@ public:
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
             break;
         }
         return svlPixelUnknown;
@@ -480,6 +492,8 @@ public:
             case svlTypeImageMono8Stereo:
             case svlTypeImageMono16:
             case svlTypeImageMono16Stereo:
+            case svlTypeImageMono32:
+            case svlTypeImageMono32Stereo:
             case svlTypeImage3DMap:
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
@@ -499,6 +513,7 @@ public:
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
             break;
         }
         return SVL_FAIL;

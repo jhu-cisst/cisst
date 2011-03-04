@@ -68,10 +68,13 @@ int svlSampleMatrix::ImportData(_TypeIn *input, const unsigned int size)
         case svlTypeImageMono8Stereo:
         case svlTypeImageMono16:
         case svlTypeImageMono16Stereo:
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
         break;
     }
     return SVL_FAIL;
@@ -111,10 +114,13 @@ int svlSampleMatrix::ImportMatrix(const svlSampleMatrix* matrix)
         case svlTypeImageMono8Stereo:
         case svlTypeImageMono16:
         case svlTypeImageMono16Stereo:
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
         break;
     }
 
@@ -155,6 +161,12 @@ int svlSampleMatrix::ImportImage(const svlSampleImage* image)
             return ImportData(reinterpret_cast<unsigned short*>(nc_image->GetUCharPointer(0)), size);
         break;
 
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
+            SetSize(width, height);
+            return ImportData(reinterpret_cast<unsigned int*>(nc_image->GetUCharPointer(0)), size);
+        break;
+
         case svlTypeImage3DMap:
 
         case svlTypeInvalid:
@@ -173,6 +185,7 @@ int svlSampleMatrix::ImportImage(const svlSampleImage* image)
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
         break;
     }
 

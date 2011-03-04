@@ -33,6 +33,8 @@ typedef svlSampleImageCustom<unsigned char,  1, 1>   svlSampleImageMono8;
 typedef svlSampleImageCustom<unsigned char,  1, 2>   svlSampleImageMono8Stereo;
 typedef svlSampleImageCustom<unsigned short, 1, 1>   svlSampleImageMono16;
 typedef svlSampleImageCustom<unsigned short, 1, 2>   svlSampleImageMono16Stereo;
+typedef svlSampleImageCustom<unsigned int,   1, 1>   svlSampleImageMono32;
+typedef svlSampleImageCustom<unsigned int,   1, 2>   svlSampleImageMono32Stereo;
 typedef svlSampleImageCustom<unsigned char,  3, 1>   svlSampleImageRGB;
 typedef svlSampleImageCustom<unsigned char,  4, 1>   svlSampleImageRGBA;
 typedef svlSampleImageCustom<unsigned char,  3, 2>   svlSampleImageRGBStereo;
@@ -43,6 +45,8 @@ CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono8)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono8Stereo)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono16)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono16Stereo)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono32)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono32Stereo)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGB)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBA)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBStereo)

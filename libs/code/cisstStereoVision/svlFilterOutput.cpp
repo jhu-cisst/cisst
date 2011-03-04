@@ -177,7 +177,7 @@ int svlFilterOutput::Connect(svlFilterInput *input)
     }
     else {
         // Manual setup
-        if (input->Filter->UpdateTypes(*input, Type) != SVL_OK) {
+        if (input->Filter->OnConnectInput(*input, Type) != SVL_OK) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: input doesn't support output type (manual)" << std::endl;
             return SVL_FAIL;
         }

@@ -38,9 +38,11 @@ svlFilterImageFlipRotate::svlFilterImageFlipRotate() :
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageMono8);
     AddInputType("input", svlTypeImageMono16);
+    AddInputType("input", svlTypeImageMono32);
     AddInputType("input", svlTypeImageRGBStereo);
     AddInputType("input", svlTypeImageMono8Stereo);
     AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageMono32Stereo);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
@@ -212,6 +214,14 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
                                            QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
 
+            case svlTypeImageMono32:
+            case svlTypeImageMono32Stereo:
+                FlipRotate<unsigned int>(reinterpret_cast<unsigned int*>(input->GetUCharPointer(idx)),
+                                         reinterpret_cast<unsigned int*>(OutputImage->GetUCharPointer(idx)),
+                                         input->GetWidth(idx), input->GetHeight(idx),
+                                         QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
+            break;
+
             case svlTypeImageRGBA:
             case svlTypeImageRGBAStereo:
             case svlTypeMatrixInt8:
@@ -231,6 +241,7 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
             return SVL_FAIL;
         }
     }

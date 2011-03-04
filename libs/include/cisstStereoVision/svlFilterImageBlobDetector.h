@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlFilterImageColorSegmentation_h
-#define _svlFilterImageColorSegmentation_h
+#ifndef _svlFilterImageBlobDetector_h
+#define _svlFilterImageBlobDetector_h
 
 #include <cisstStereoVision/svlFilterBase.h>
 
@@ -29,15 +29,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterImageColorSegmentation : public svlFilterBase
+class CISST_EXPORT svlFilterImageBlobDetector : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    svlFilterImageColorSegmentation();
-    ~svlFilterImageColorSegmentation();
+    svlFilterImageBlobDetector();
+    ~svlFilterImageBlobDetector();
 
-    void AddColor(int x, int y, int z, unsigned char threshold, unsigned char label);
+    int SetMaxBlobCount(unsigned int max_blobs);
+    void SetFilterArea(unsigned int min_area, unsigned int max_area);
+    void SetFilterCompactness(double min_compactness, double max_compactness);
 
 protected:
     virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
@@ -45,23 +47,22 @@ protected:
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
 private:
-    svlSampleImage* OutputImage;
+    bool BlobsOutputConnected;
+    svlSampleImage* OutputBlobIDs;
+    svlSampleBlobs* OutputBlobs;
+    vctDynamicMatrix<int> FillBuffer;
 
-    vctDynamicVector<vctInt3> Color;
-    vctDynamicVector<svlColorSpace> ColorSpace;
-    vctDynamicVector<unsigned char> ColorThreshold;
-    vctDynamicVector<unsigned char> ColorLabel;
+    unsigned int MaxBlobCount;
+    unsigned int FiltMinArea;
+    unsigned int FiltMaxArea;
+    double FiltMinCompactness;
+    double FiltMaxCompactness;
 
-    vctDynamicVector<unsigned char> NormSqrtLUT;
-    vctDynamicVector< vctDynamicMatrix<unsigned char> > DistanceMap;
-
-    void ComputeSegmentation(svlSampleImage* image, unsigned int videoch);
-
-    // TO DO: make it public once filter is fully implemented
-    void AddColor(svlColorSpace colorspace, int x, int y, int z, unsigned char threshold, unsigned char label);
+    unsigned int ComputeBlobIDs(svlSampleImage* input, unsigned int videoch);
+    void ComputeBlobStats(unsigned int maxblobid, svlSampleImage* input, unsigned int videoch);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageColorSegmentation)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageBlobDetector)
 
-#endif // _svlFilterImageColorSegmentation_h
+#endif // _svlFilterImageBlobDetector_h
 

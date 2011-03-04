@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: $
   
   Author(s):  Balazs Vagvolgyi
-  Created on: 2010
+  Created on: 2011
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlFilterStereoImageSplitter_h
-#define _svlFilterStereoImageSplitter_h
+#ifndef _svlFilterImageDilation_h
+#define _svlFilterImageDilation_h
 
 #include <cisstStereoVision/svlFilterBase.h>
 
@@ -29,30 +29,29 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterStereoImageSplitter : public svlFilterBase
+class CISST_EXPORT svlFilterImageDilation : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    svlFilterStereoImageSplitter();
-    virtual ~svlFilterStereoImageSplitter();
+    svlFilterImageDilation();
+    ~svlFilterImageDilation();
 
-    int SetLayout(svlStereoLayout layout);
-    svlStereoLayout GetLayout();
+    void SetIterations(unsigned int iterations);
+    unsigned int GetIterations() const;
 
 protected:
-    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
     svlSampleImage* OutputImage;
-
-    svlStereoLayout Layout;
+    svlSampleImage* TempImage;
+    unsigned int Iterations;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterStereoImageSplitter)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageDilation)
 
-#endif // _svlFilterStereoImageSplitter_h
+#endif // _svlFilterImageDilation_h
 

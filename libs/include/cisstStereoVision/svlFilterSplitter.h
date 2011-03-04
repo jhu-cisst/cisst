@@ -46,7 +46,7 @@ public:
     int AddOutput(const std::string &name, const unsigned int threadcount = 1, const unsigned int buffersize = 3);
 
 protected:
-    virtual int UpdateTypes(svlFilterInput &input, svlStreamType type);
+    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 

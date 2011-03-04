@@ -266,10 +266,13 @@ int svlSampleImage::ImportMatrix(const svlSampleMatrix* matrix, const int param,
         case svlTypeImageMono8Stereo:
         case svlTypeImageMono16:
         case svlTypeImageMono16Stereo:
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
         break;
     }
 

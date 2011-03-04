@@ -175,7 +175,7 @@ bool svlFilterSourceBase::IsTargetTimerRunning()
     return TargetTimer.IsRunning();
 }
 
-int svlFilterSourceBase::UpdateTypes(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))
+int svlFilterSourceBase::OnConnectInput(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))
 {
     return SVL_FAIL;
 }

@@ -115,7 +115,7 @@ int svlFilterInput::PushSample(const svlSample* sample)
     else {
         // Manual setup
         Type = type;
-        if (Filter->UpdateTypes(*this, Type) != SVL_OK) return SVL_FAIL;
+        if (Filter->OnConnectInput(*this, Type) != SVL_OK) return SVL_FAIL;
     }
 
     if (!Buffer) Buffer = new svlBufferSample(Type);

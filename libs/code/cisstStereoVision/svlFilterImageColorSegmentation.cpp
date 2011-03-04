@@ -84,7 +84,7 @@ void svlFilterImageColorSegmentation::AddColor(svlColorSpace colorspace, int x, 
     ColorLabel[size] = label;
 }
 
-int svlFilterImageColorSegmentation::UpdateTypes(svlFilterInput &input, svlStreamType type)
+int svlFilterImageColorSegmentation::OnConnectInput(svlFilterInput &input, svlStreamType type)
 {
     // Check if type is on the supported list
     if (!input.IsTypeSupported(type)) return SVL_FAIL;

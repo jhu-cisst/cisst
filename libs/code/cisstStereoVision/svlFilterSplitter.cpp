@@ -47,6 +47,8 @@ svlFilterSplitter::svlFilterSplitter() :
     AddInputType("input", svlTypeImageMono8Stereo);
     AddInputType("input", svlTypeImageMono16);
     AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageMono32);
+    AddInputType("input", svlTypeImageMono32Stereo);
     AddInputType("input", svlTypeImage3DMap);
     AddInputType("input", svlTypeMatrixInt8);
     AddInputType("input", svlTypeMatrixInt16);
@@ -61,6 +63,7 @@ svlFilterSplitter::svlFilterSplitter() :
     AddInputType("input", svlTypeTransform3D);
     AddInputType("input", svlTypeTargets);
     AddInputType("input", svlTypeText);
+    AddInputType("input", svlTypeBlobs);
 
     // Add the trunk output by default
     svlFilterBase::AddOutput("output", true);
@@ -86,7 +89,7 @@ int svlFilterSplitter::AddOutput(const std::string &name, const unsigned int thr
     return SVL_OK;
 }
 
-int svlFilterSplitter::UpdateTypes(svlFilterInput &input, svlStreamType type)
+int svlFilterSplitter::OnConnectInput(svlFilterInput &input, svlStreamType type)
 {
     // Check if type is on the supported list
     if (!input.IsTypeSupported(type)) return SVL_FAIL;

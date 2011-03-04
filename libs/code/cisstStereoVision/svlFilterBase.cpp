@@ -235,7 +235,7 @@ bool svlFilterBase::IsDisabled() const
     return !EnabledInternal;
 }
 
-int svlFilterBase::UpdateTypes(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))
+int svlFilterBase::OnConnectInput(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))
 {
     // Needs to be overloaded to handle manual type setup
     return SVL_OK;

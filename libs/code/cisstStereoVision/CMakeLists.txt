@@ -27,6 +27,7 @@ SET(SOURCE_FILES
   # Public System API
     svlTypes.cpp
     svlClassServices.cpp
+    svlSampleBlobs.cpp
     svlSampleText.cpp
     svlSampleTargets.cpp
     svlSampleTransform3D.cpp
@@ -65,6 +66,8 @@ SET(SOURCE_FILES
   # Filter API
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
+    svlFilterImageBlobDetector.cpp
+    svlFilterImageBlobTracker.cpp
     svlFilterImageCenterFinder.cpp
     svlFilterImageChannelSwapper.cpp
     svlFilterImageColorConverter.cpp
@@ -72,6 +75,8 @@ SET(SOURCE_FILES
     svlFilterImageConvolution.cpp
     svlFilterImageCropper.cpp
     svlFilterImageDeinterlacer.cpp
+    svlFilterImageDilation.cpp
+    svlFilterImageErosion.cpp
     svlFilterImageExposureCorrection.cpp
     svlFilterImageFileWriter.cpp
     svlFilterImageFlipRotate.cpp
@@ -79,6 +84,7 @@ SET(SOURCE_FILES
     svlFilterImageRectifier.cpp
     svlFilterImageResizer.cpp
     svlFilterImageSampler.cpp
+    svlFilterImageThresholding.cpp
     svlFilterImageTracker.cpp
     svlFilterImageTranslation.cpp
     svlFilterImageUnsharpMask.cpp
@@ -120,6 +126,7 @@ SET(HEADER_FILES
     svlProcInfo.h
     svlTypes.h
     svlTypeCheckers.h
+    svlSampleBlobs.h
     svlSampleText.h
     svlSampleTargets.h
     svlSampleTransform3D.h
@@ -157,6 +164,8 @@ SET(HEADER_FILES
   # Filter API
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
+    svlFilterImageBlobDetector.h
+    svlFilterImageBlobTracker.h
     svlFilterImageCenterFinder.h
     svlFilterImageChannelSwapper.h
     svlFilterImageColorConverter.h
@@ -164,6 +173,8 @@ SET(HEADER_FILES
     svlFilterImageConvolution.h
     svlFilterImageCropper.h
     svlFilterImageDeinterlacer.h
+    svlFilterImageDilation.h
+    svlFilterImageErosion.h
     svlFilterImageExposureCorrection.h
     svlFilterImageFileWriter.h
     svlFilterImageFlipRotate.h
@@ -171,6 +182,7 @@ SET(HEADER_FILES
     svlFilterImageRectifier.h
     svlFilterImageResizer.h
     svlFilterImageSampler.h
+    svlFilterImageThresholding.h
     svlFilterImageTracker.h
     svlFilterImageTranslation.h
     svlFilterImageUnsharpMask.h

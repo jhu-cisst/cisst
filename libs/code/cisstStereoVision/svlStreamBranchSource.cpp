@@ -98,6 +98,8 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeImageMono8Stereo:
         case svlTypeImageMono16:
         case svlTypeImageMono16Stereo:
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
         case svlTypeMatrixInt8:
@@ -114,6 +116,7 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
             return true;
 
         case svlTypeInvalid:

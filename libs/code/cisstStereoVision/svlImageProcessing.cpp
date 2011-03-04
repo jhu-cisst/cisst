@@ -95,6 +95,17 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
                                                         fp_kernel_vert, false);
         break;
 
+        case svlPixelMono32:
+            svlImageProcessingHelper::ConvolutionMono32(reinterpret_cast<unsigned int*>(src_img->GetUCharPointer(src_videoch)),
+                                                        reinterpret_cast<unsigned int*>(dst_img->GetUCharPointer(dst_videoch)),
+                                                        width, height,
+                                                        fp_kernel_horiz, true);
+            svlImageProcessingHelper::ConvolutionMono32(reinterpret_cast<unsigned int*>(dst_img->GetUCharPointer(dst_videoch)),
+                                                        reinterpret_cast<unsigned int*>(src_img->GetUCharPointer(src_videoch)),
+                                                        width, height,
+                                                        fp_kernel_vert, false);
+        break;
+
         default:
             return SVL_FAIL;
     }
@@ -793,10 +804,10 @@ int svlImageProcessing::Erode(svlSampleImage* src_img, unsigned int src_videoch,
     for (j = 0; j < height; j ++) {
         for (i = 0; i < width; i ++) {
             if (*input == 0 ||
-                (j > 0        && *input_u == 0) ||
-                (j < heightm1 && *input_d == 0) ||
-                (i > 0        && *input_l == 0) ||
-                (i < widthm1  && *input_r == 0)) {
+                j == 0 || j == heightm1 ||
+                i == 0 || i == widthm1  ||
+                (j > 0 && *input_u == 0) || (j < heightm1 && *input_d == 0) ||
+                (i > 0 && *input_l == 0) || (i < widthm1  && *input_r == 0)) {
                 *output = 0;
             }
             else {

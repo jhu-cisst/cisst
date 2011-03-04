@@ -39,6 +39,7 @@ svlFilterStereoImageSplitter::svlFilterStereoImageSplitter() :
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageMono8);
     AddInputType("input", svlTypeImageMono16);
+    AddInputType("input", svlTypeImageMono32);
 
     AddOutput("output", true);
     SetAutomaticOutputType(false);
@@ -49,7 +50,7 @@ svlFilterStereoImageSplitter::~svlFilterStereoImageSplitter()
     Release();
 }
 
-int svlFilterStereoImageSplitter::UpdateTypes(svlFilterInput &input, svlStreamType type)
+int svlFilterStereoImageSplitter::OnConnectInput(svlFilterInput &input, svlStreamType type)
 {
     // Check if type is on the supported list
     if (!input.IsTypeSupported(type)) return SVL_FAIL;
@@ -57,6 +58,7 @@ int svlFilterStereoImageSplitter::UpdateTypes(svlFilterInput &input, svlStreamTy
     if      (type == svlTypeImageRGB)    GetOutput()->SetType(svlTypeImageRGBStereo);
     else if (type == svlTypeImageMono8)  GetOutput()->SetType(svlTypeImageMono8Stereo);
     else if (type == svlTypeImageMono16) GetOutput()->SetType(svlTypeImageMono16Stereo);
+    else if (type == svlTypeImageMono32) GetOutput()->SetType(svlTypeImageMono32Stereo);
     else return SVL_FAIL;
 
     return SVL_OK;
@@ -90,6 +92,7 @@ int svlFilterStereoImageSplitter::Initialize(svlSample* syncInput, svlSample* &s
     if      (GetInput()->GetType() == svlTypeImageRGB)    OutputImage = new svlSampleImageRGBStereo;
     else if (GetInput()->GetType() == svlTypeImageMono8)  OutputImage = new svlSampleImageMono8Stereo;
     else if (GetInput()->GetType() == svlTypeImageMono16) OutputImage = new svlSampleImageMono16Stereo;
+    else if (GetInput()->GetType() == svlTypeImageMono32) OutputImage = new svlSampleImageMono32Stereo;
     else return SVL_FAIL;
     OutputImage->SetSize(width, height);
 
