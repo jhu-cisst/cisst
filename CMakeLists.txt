@@ -282,6 +282,12 @@ include_directories (${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES
 link_directories (${CISST_ADDITIONAL_LINK_DIRECTORIES})
 
 
+# To allow mixing static and dynamic libraries
+if (CMAKE_COMPILER_IS_GNUCXX)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif (CMAKE_COMPILER_IS_GNUCXX)
+
+
 # To have more warnings with gcc
 if (CMAKE_COMPILER_IS_GNUCXX)
   include (CheckCXXCompilerFlag)
