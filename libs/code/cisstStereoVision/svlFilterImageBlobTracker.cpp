@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageBlobTracker.h>
+#include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 
 #define BLOB_BUFFER_SIZE    1000
@@ -83,13 +84,24 @@ int svlFilterImageBlobTracker::Process(svlProcInfo* procInfo, svlSample* syncInp
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
     _SkipIfDisabled();
 
-    // TO DO: implement tracking
+    svlSampleBlobs *in_blobs = 0;
+
+    _OnSingleThread(procInfo)
+    {
+        // Attempting to pull a sample out of the 'blobs' input
+        svlFilterInput *input = GetInput("blobs");
+        if (input) in_blobs = dynamic_cast<svlSampleBlobs*>(input->PullSample(true, 0.0));
+
+        if (in_blobs) {
+            // TO DO: implement tracking
+        }
+    }
 
     _SynchronizeThreads(procInfo);
 
     _OnSingleThread(procInfo)
     {
-        GetOutput("blobs")->PushSample(OutputBlobs);
+        if (in_blobs) GetOutput("blobs")->PushSample(in_blobs);
     }
 
     return SVL_OK;
