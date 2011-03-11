@@ -36,7 +36,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
-#include <cisstMultiTask/mtsComponentViewer.h>
 
 #if CISST_MTS_HAS_ICE
 #include "mtsComponentProxy.h"

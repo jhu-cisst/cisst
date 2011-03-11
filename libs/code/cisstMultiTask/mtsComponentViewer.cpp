@@ -34,6 +34,26 @@ void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, 
 
 CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
 
+// Default constructor needed for dynamic creation
+mtsComponentViewer::mtsComponentViewer() :
+    mtsTaskFromSignal("DEFAULT"),
+    UDrawPipeConnected(false),
+    UDrawResponse(""),
+    ShowProxies(false),
+    ConnectionStarted(false),
+    WaitingForResponse(false)
+{
+    mtsInterfaceRequired * required = EnableDynamicComponentManagement();
+    if (required) {
+        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
+        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeStateHandler, this);
+        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnectionHandler, this);
+        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnectionHandler, this);
+    } else {
+        cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to enable dynamic component composition"));
+    }
+}
+
 mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     mtsTaskFromSignal(name),
     UDrawPipeConnected(false),
@@ -566,6 +586,11 @@ std::string mtsComponentViewer::GetConnectionInUDrawGraphFormat(const mtsDescrip
          (mtsManagerComponentBase::IsManagerComponentClient(connection.Server.ComponentName) &&
           !mtsManagerComponentBase::IsManagerComponentServer(connection.Client.ComponentName)))
         swapped = true;
+    bool SVLio = false;
+    // PK TEMP: Check for SVL input/output. In the future, this should be an attribute in the "connection"
+    // structure received from the GCM.
+    if ((connection.Client.InterfaceName == "input") && (connection.Server.InterfaceName == "output"))
+        SVLio = true;
     char IDString[20];
     std::string message("graph(update([],[new_edge(\"");
     sprintf(IDString, "%d", connection.ConnectionID);
@@ -573,17 +598,22 @@ std::string mtsComponentViewer::GetConnectionInUDrawGraphFormat(const mtsDescrip
     message.append("\", \"CONNECTION\", [a(\"OBJECT\", \"");
     message.append(IDString);
     message.append("\"), a(\"INFO\", \"");
-    message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
+    if (SVLio)
+        message.append(connection.Server.InterfaceName + "<->" + connection.Client.InterfaceName);
+    else
+        message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
     message.append("\")");
     if (swapped)
         message.append(", a(\"_DIR\", \"first\")");
+    if (SVLio)
+        message.append(", a(\"EDGEPATTERN\", \"double;solid;5;0\"), a(\"HEAD\", \"arrow\")");
     message.append("], \"");
-    if (swapped)
+    if (swapped || SVLio)
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
     else
         message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
     message.append("\", \"");
-    if (swapped)
+    if (swapped || SVLio)
         message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
     else
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
