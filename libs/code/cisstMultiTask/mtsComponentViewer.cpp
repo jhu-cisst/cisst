@@ -43,6 +43,7 @@ mtsComponentViewer::mtsComponentViewer() :
     ConnectionStarted(false),
     WaitingForResponse(false)
 {
+    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
         ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
@@ -62,6 +63,7 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     ConnectionStarted(false),
     WaitingForResponse(false)
 {
+    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
         ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
