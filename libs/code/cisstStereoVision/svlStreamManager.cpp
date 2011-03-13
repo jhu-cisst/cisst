@@ -323,6 +323,11 @@ int svlStreamManager::Play(void)
     }
 
     Running = true;
+    // PK TEMP: Send event indicating that stream source is now running
+    this->State = mtsComponentState::ACTIVE;
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), 
+                                                      mtsComponentState::ACTIVE));
 
     // Call OnStart for all filters in the trunk
     svlFilterBase * filter = StreamSource;
@@ -335,6 +340,10 @@ int svlStreamManager::Play(void)
                                     << this->GetName() << "\"" << std::endl;
             return SVL_FAIL;
         }
+        // PK TEMP: Send event indicating that filter is now running
+        filter->State = mtsComponentState::ACTIVE;
+        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), filter->GetName(), 
+                                                          mtsComponentState::ACTIVE));
 
         // Get next filter in the trunk
         output = filter->GetOutput();
@@ -434,6 +443,8 @@ void svlStreamManager::Stop(void)
     svlFilterOutput * output;
     svlFilterInput * input;
 
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
     // Stop all filter outputs recursively, if any
     svlFilterBase *filter = StreamSource;
     while (filter != 0) {
@@ -465,6 +476,11 @@ void svlStreamManager::Stop(void)
     filter = StreamSource;
     while (filter) {
         filter->Running = false;
+    
+        // PK TEMP: Send event indicating that filter is now stopped
+        filter->State = mtsComponentState::READY;
+        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), filter->GetName(), 
+                                                          mtsComponentState::READY));
 
         // Get next filter in the trunk
         output = filter->GetOutput();
@@ -479,6 +495,11 @@ void svlStreamManager::Stop(void)
 
     Running = false;
     StopThread = true;
+
+    // PK TEMP: Send event indicating that stream source is now stopped
+    this->State = mtsComponentState::READY;
+    EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), 
+                                                      mtsComponentState::READY));
 
     // Stopping multi thread processing and delete thread objects
     for (size_t i = 0; i < ThreadCount; i ++) {
@@ -557,9 +578,16 @@ void svlStreamManager::InternalStop(unsigned int callingthreadID)
         }
     }
 
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
     filter = StreamSource;
     while (filter) {
         filter->Running = false;
+
+        // PK TEMP: Send event indicating that filter is now stopped
+        filter->State = mtsComponentState::READY;
+        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), filter->GetName(), 
+                                                          mtsComponentState::READY));
 
         // Get next filter in the trunk
         output = filter->GetOutput();
@@ -574,6 +602,11 @@ void svlStreamManager::InternalStop(unsigned int callingthreadID)
 
     Running = false;
     StopThread = true;
+
+    // PK TEMP: Send event indicating that stream source is now stopped
+    this->State = mtsComponentState::READY;
+    EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), 
+                                                      mtsComponentState::READY));
 
     // Stopping multi thread processing and delete thread objects
     for (size_t i = 0; i < ThreadCount; i ++) {

@@ -34,12 +34,14 @@ int main(void)
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+#if 0
     // add a log per thread
     osaThreadedLogFile threadedLog("svlExMultitask1-");
     cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
+#endif
 
     svlInitialize();
 
@@ -52,7 +54,7 @@ int main(void)
     taskManager->AddComponent(&stream);
 
 #ifdef CAMERA_SOURCE
-    svlFilterSourceVideoCapture stream_source;
+    svlFilterSourceVideoCapture stream_source(1);
 #else
     svlFilterSourceVideoFile stream_source;
 #endif
@@ -75,6 +77,12 @@ int main(void)
     taskManager->Connect("ExampleComponent", "SourceConfig",  "StreamSource",  "Settings");
     taskManager->Connect("ExampleComponent", "WindowConfig",  "Window",        "Settings");
     taskManager->Connect("ExampleComponent", "FilterParams",  "ExampleFilter", "Parameters");
+
+#if 0
+    // create and add Component Viewer
+    mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer");
+    taskManager->AddComponent(componentViewer);
+#endif
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();
