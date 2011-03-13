@@ -259,7 +259,14 @@ void *mtsComponentViewer::ReadFromUDrawGraph(int)
             // Wake up Component Viewer (mtsTaskFromSignal) to process response
             PostCommandQueuedMethod();
             // Wait until component viewer signals that it is ready for new data
-            ReadyToRead.Wait(3.0);  // 3 second timeout
+            if (GetState() == mtsComponentState::ACTIVE)
+                ReadyToRead.Wait(3.0);  // 3 second timeout
+            else {
+                CMN_LOG_CLASS_INIT_WARNING << "ReadFromUDrawGraph: waiting for ComponentViewer to become active"
+                                           << ", current state = " 
+                                           << mtsComponentState::ToString(GetState().GetState()) << std::endl;
+                ReadyToRead.Wait();    // no timeout
+            }
         }
         else {
             CMN_LOG_CLASS_INIT_WARNING << "ReadFromUDrawGraph: not ready to read new responses" << std::endl;
