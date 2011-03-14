@@ -216,6 +216,7 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
 
 int svlFilterOutput::Connect(svlFilterInput *input)
 {
+
     if (!input) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: null input pointer passed to this method" << std::endl;
         return SVL_FAIL;
@@ -225,11 +226,13 @@ int svlFilterOutput::Connect(svlFilterInput *input)
         return SVL_FAIL;
     }
     mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+
     LCM->AddComponent(input->Filter);
+    osaSleep(0.25);
     if (LCM->Connect(input->Filter->GetName(), input->GetName(),
                      this->Filter->GetName(), this->GetName())) {
-        osaSleep(0.5);  // PK TEMP (remove when Connect is a blocking command)
-        return SVL_OK;
+    osaSleep(0.5);  // PK TEMP (remove when Connect is a blocking command)
+       return SVL_OK;
     }
     else
         return SVL_FAIL;
