@@ -1078,6 +1078,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER
 SET(SOURCE_FILES
     ${SOURCE_FILES}
     svlInitializer.cpp
+    svlInitializerMacros.h
     svlVidCapSrcInitializer.h
     svlVidCapSrcInitializer.cpp
     svlImageCodecInitializer.h
