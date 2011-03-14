@@ -38,19 +38,19 @@
 void svlInitializeImageCodecs()
 {
 #ifdef _svlImageCodecBMP_h
-    delete new svlImageCodecBMP;
+    SVL_INITIALIZE(svlImageCodecBMP);
 #endif // _svlImageCodecBMP_h
 
 #ifdef _svlImageCodecPPM_h
-    delete new svlImageCodecPPM;
+    SVL_INITIALIZE(svlImageCodecPPM);
 #endif // _svlImageCodecPPM_h
 
 #ifdef _svlImageCodecJPEG_h
-    delete new svlImageCodecJPEG;
+    SVL_INITIALIZE(svlImageCodecJPEG);
 #endif // _svlImageCodecJPEG_h
 
 #ifdef _svlImageCodecPNG_h
-    delete new svlImageCodecPNG;
+    SVL_INITIALIZE(svlImageCodecPNG);
 #endif // _svlImageCodecPNG_h
 
     // Create svlImageIO singleton object

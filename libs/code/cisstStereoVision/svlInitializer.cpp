@@ -76,171 +76,171 @@ void svlInitialize()
     svlInitializeVideoCapture();
 
 #ifdef _svlFilterSplitter_h
-    delete new svlFilterSplitter;
+    SVL_INITIALIZE(svlFilterSplitter);
 #endif // _svlFilterSplitter_h
 
 #ifdef _svlFilterImageOverlay_h
-    delete new svlFilterImageOverlay;
+    SVL_INITIALIZE(svlFilterImageOverlay);
 #endif // _svlFilterImageOverlay_h
 
 #ifdef _svlFilterSourceDummy_h
-    delete new svlFilterSourceDummy;
+    SVL_INITIALIZE(svlFilterSourceDummy);
 #endif // _svlFilterSourceDummy_h
 
 #ifdef _svlFilterImageDeinterlacer_h
-    delete new svlFilterImageDeinterlacer;
+    SVL_INITIALIZE(svlFilterImageDeinterlacer);
 #endif // _svlFilterImageDeinterlacer_h
 
 #ifdef _svlFilterSourceVideoCapture_h
-    delete new svlFilterSourceVideoCapture;
+    SVL_INITIALIZE(svlFilterSourceVideoCapture);
 #endif // _svlFilterSourceVideoCapture_h
 
 #ifdef _svlFilterSourceImageFile_h
-    delete new svlFilterSourceImageFile;
+    SVL_INITIALIZE(svlFilterSourceImageFile);
 #endif // _svlFilterSourceImageFile_h
 
 #ifdef _svlFilterImageFileWriter_h
-    delete new svlFilterImageFileWriter;
+    SVL_INITIALIZE(svlFilterImageFileWriter);
 #endif // _svlFilterImageFileWriter_h
 
 #ifdef _svlFilterComputationalStereo_h
-    delete new svlFilterComputationalStereo;
+    SVL_INITIALIZE(svlFilterComputationalStereo);
 #endif // _svlFilterComputationalStereo_h
 
 #ifdef _svlFilterDisparityMapToSurface_h
-    delete new svlFilterDisparityMapToSurface;
+    SVL_INITIALIZE(svlFilterDisparityMapToSurface);
 #endif // _svlFilterDisparityMapToSurface_h
 
 #ifdef _svlFilterStereoImageOptimizer_h
-    delete new svlFilterStereoImageOptimizer;
+    SVL_INITIALIZE(svlFilterStereoImageOptimizer);
 #endif // _svlFilterStereoImageOptimizer_h
 
 #ifdef _svlFilterImageRectifier_h
-    delete new svlFilterImageRectifier;
+    SVL_INITIALIZE(svlFilterImageRectifier);
 #endif // _svlFilterImageRectifier_h
 
 #ifdef _svlFilterImageBlobDetector_h
-    delete new svlFilterImageBlobDetector;
+    SVL_INITIALIZE(svlFilterImageBlobDetector);
 #endif // _svlFilterImageBlobDetector_h
 
 #ifdef _svlFilterImageBlobTracker_h
-    delete new svlFilterImageBlobTracker;
+    SVL_INITIALIZE(svlFilterImageBlobTracker);
 #endif // _svlFilterImageBlobTracker_h
 
 #ifdef _svlFilterImageCenterFinder_h
-    delete new svlFilterImageCenterFinder;
+    SVL_INITIALIZE(svlFilterImageCenterFinder);
 #endif // _svlFilterImageCenterFinder_h
 
 #ifdef _svlFilterImageColorSegmentation_h
-    delete new svlFilterImageColorSegmentation;
+    SVL_INITIALIZE(svlFilterImageColorSegmentation);
 #endif // _svlFilterImageColorSegmentation_h
 
 #ifdef _svlFilterImageDilation_h
-    delete new svlFilterImageDilation;
+    SVL_INITIALIZE(svlFilterImageDilation);
 #endif // _svlFilterImageDilation_h
 
 #ifdef _svlFilterImageErosion_h
-    delete new svlFilterImageErosion;
+    SVL_INITIALIZE(svlFilterImageErosion);
 #endif // _svlFilterImageErosion_h
 
 #ifdef _svlFilterImageThresholding_h
-    delete new svlFilterImageThresholding;
+    SVL_INITIALIZE(svlFilterImageThresholding);
 #endif // _svlFilterImageThresholding_h
 
 #ifdef _svlFilterImageUnsharpMask_h
-    delete new svlFilterImageUnsharpMask;
+    SVL_INITIALIZE(svlFilterImageUnsharpMask);
 #endif // _svlFilterImageUnsharpMask_h
 
 #ifdef _svlFilterImageSampler_h
-    delete new svlFilterImageSampler;
+    SVL_INITIALIZE(svlFilterImageSampler);
 #endif // _svlFilterImageSampler_h
 
 #ifdef _svlFilterImageChannelSwapper_h
-    delete new svlFilterImageChannelSwapper;
+    SVL_INITIALIZE(svlFilterImageChannelSwapper);
 #endif // _svlFilterImageChannelSwapper_h
 
 #ifdef _svlFilterStreamTypeConverter_h
-    delete new svlFilterStreamTypeConverter;
+    SVL_INITIALIZE(svlFilterStreamTypeConverter);
 #endif // _svlFilterStreamTypeConverter_h
 
 #ifdef _svlFilterImageColorConverter_h
-    delete new svlFilterImageColorConverter;
+    SVL_INITIALIZE(svlFilterImageColorConverter);
 #endif // _svlFilterImageColorConverter_h
 
 #ifdef _svlFilterImageCropper_h
-    delete new svlFilterImageCropper;
+    SVL_INITIALIZE(svlFilterImageCropper);
 #endif // _svlFilterImageCropper_h
 
 #ifdef _svlFilterImageTranslation_h
-    delete new svlFilterImageTranslation;
+    SVL_INITIALIZE(svlFilterImageTranslation);
 #endif // _svlFilterImageTranslation_h
 
 #ifdef _svlFilterImageResizer_h
-    delete new svlFilterImageResizer;
+    SVL_INITIALIZE(svlFilterImageResizer);
 #endif // _svlFilterImageResizer_h
 
 #ifdef _svlFilterImageZoom_h
-    delete new svlFilterImageZoom;
+    SVL_INITIALIZE(svlFilterImageZoom);
 #endif // _svlFilterImageZoom_h
     
 #ifdef _svlFilterImageTracker_h
-    delete new svlFilterImageTracker;
+    SVL_INITIALIZE(svlFilterImageTracker);
 #endif // _svlFilterImageTracker_h
 
 #ifdef _svlFilterStereoImageJoiner_h
-    delete new svlFilterStereoImageJoiner;
+    SVL_INITIALIZE(svlFilterStereoImageJoiner);
 #endif // _svlFilterStereoImageJoiner_h
 
 #ifdef _svlFilterStereoImageSplitter_h
-    delete new svlFilterStereoImageSplitter;
+    SVL_INITIALIZE(svlFilterStereoImageSplitter);
 #endif // _svlFilterStereoImageSplitter_h
 
 #ifdef _svlFilterImageFlipRotate_h
-    delete new svlFilterImageFlipRotate;
+    SVL_INITIALIZE(svlFilterImageFlipRotate);
 #endif // _svlFilterImageFlipRotate_h
 
 #ifdef _svlFilterLightSourceBuddy_h
-    delete new svlFilterLightSourceBuddy;
+    SVL_INITIALIZE(svlFilterLightSourceBuddy);
 #endif // _svlFilterLightSourceBuddy_h
     
 #ifdef _svlFilterToolTracker_h
-    delete new svlFilterToolTracker;
+    SVL_INITIALIZE(svlFilterToolTracker);
 #endif // _svlFilterToolTracker_h
 
 #ifdef _svlFilterSourceVideoFile_h
-    delete new svlFilterSourceVideoFile;
+    SVL_INITIALIZE(svlFilterSourceVideoFile);
 #endif // _svlFilterSourceVideoFile_h
 
 #ifdef _svlFilterVideoFileWriter_h
-    delete new svlFilterVideoFileWriter;
+    SVL_INITIALIZE(svlFilterVideoFileWriter);
 #endif // _svlFilterVideoFileWriter_h
 
 #ifdef _svlFilterImageWindow_h
-    delete new svlFilterImageWindow;
+    SVL_INITIALIZE(svlFilterImageWindow);
 #endif // _svlFilterImageWindow_h
 
 #ifdef _svlFilterImageWindowTargetSelect_h
-    delete new svlFilterImageWindowTargetSelect;
+    SVL_INITIALIZE(svlFilterImageWindowTargetSelect);
 #endif // _svlFilterImageWindowTargetSelect_h
 
 #ifdef _svlFilterSourceBuffer_h
-    delete new svlFilterSourceBuffer;
+    SVL_INITIALIZE(svlFilterSourceBuffer);
 #endif // _svlFilterSourceBuffer_h
 
 #ifdef _svlFilterSourceTextFile_h
-    delete new svlFilterSourceTextFile;
+    SVL_INITIALIZE(svlFilterSourceTextFile);
 #endif // _svlFilterSourceTextFile_h
     
 #ifdef _svlFilterImageExposureCorrection_h
-    delete new svlFilterImageExposureCorrection;
+    SVL_INITIALIZE(svlFilterImageExposureCorrection);
 #endif // _svlFilterImageExposureCorrection_h
     
 #ifdef _svlFilterVideoExposureManager_h
-    delete new svlFilterVideoExposureManager;
+    SVL_INITIALIZE(svlFilterVideoExposureManager);
 #endif // _svlFilterVideoExposureManager_h
 
 #ifdef _svlStreamManager_h
-    delete new svlStreamManager;
+    SVL_INITIALIZE(svlStreamManager);
 #endif // _svlStreamManager_h
 
 }

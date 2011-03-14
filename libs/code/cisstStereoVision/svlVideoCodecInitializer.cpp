@@ -44,22 +44,21 @@
 void svlInitializeVideoCodecs()
 {
 #ifdef _svlVideoCodecVfW32_h
-    delete new svlVideoCodecVfW32;
+    SVL_INITIALIZE(svlVideoCodecVfW32);
 #endif // _svlVideoCodecVfW32_h
 
 #ifdef _svlVideoCodecCVI_h
-    delete new svlVideoCodecCVI;
+    SVL_INITIALIZE(svlVideoCodecCVI);
 #endif // _svlVideoCodecCVI_h
 
 #ifdef _svlVideoCodecTCPStream_h
-    delete new svlVideoCodecTCPStream;
+    SVL_INITIALIZE(svlVideoCodecTCPStream);
 #endif // _svlVideoCodecTCPStream_h
     
 #ifdef _svlVideoCodecOpenCV_h
-    delete new svlVideoCodecOpenCV;
+    SVL_INITIALIZE(svlVideoCodecOpenCV);
 #endif // _svlVideoCodecOpenCV_h
 
     // Create svlVideoIO singleton object
     svlVideoIO::GetInstance();
 }
-
