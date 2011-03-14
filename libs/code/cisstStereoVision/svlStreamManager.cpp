@@ -89,7 +89,11 @@ int svlStreamManager::SetSourceFilter(svlFilterSourceBase * source)
         return SVL_ALREADY_INITIALIZED;
     }
     
+    // PK TEMP: This could be done elsewhere
+    mtsManagerLocal::GetInstance()->AddComponent(this);
+
     StreamSource = source;
+    mtsManagerLocal::GetInstance()->AddComponent(StreamSource);
     CMN_LOG_CLASS_INIT_DEBUG << "SetSourceFilter: filter \"" << source->GetName() << "\" associated to stream \""
                              << this->GetName() << "\"" << std::endl;
     return SVL_OK;

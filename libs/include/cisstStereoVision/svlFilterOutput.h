@@ -61,6 +61,7 @@ class CISST_EXPORT svlFilterOutput: public mtsInterfaceOutput
     int SetThreadCount(unsigned int threadcount);
     int SetBufferSize(unsigned int buffersize);
     int SetBlock(bool block);
+    int ConnectInternal(svlFilterInput *input);
     int Connect(svlFilterInput *input);
     int Disconnect(void);
 

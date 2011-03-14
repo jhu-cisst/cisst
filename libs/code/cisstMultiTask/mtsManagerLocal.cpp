@@ -655,7 +655,18 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         return false;
     }
 
-    const std::string componentName = component->GetName();
+    std::string componentName = component->GetName();
+
+    // If component does not yet have a valid name, assign one now, based on the class
+    // name and the pointer value (to ensure that name is unique).
+    if (componentName == "") {
+        componentName.assign(component->Services()->GetName());
+        char buf[20];
+        sprintf(buf, "_%lx", reinterpret_cast<unsigned long>(component));
+        componentName.append(buf);
+        CMN_LOG_CLASS_INIT_WARNING << "AddComponent: assigning name \"" << componentName << "\"" << std::endl;
+        component->SetName(componentName);
+    }
 
     // Try to register new component to the global component manager first.
     if (!ManagerGlobal->AddComponent(ProcessName, componentName)) {

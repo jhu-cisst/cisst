@@ -82,11 +82,6 @@ mtsComponentViewer::~mtsComponentViewer()
 
 void mtsComponentViewer::Startup(void)
 {
-    // Try to connect to UDrawGraph viewer
-    if (!UDrawPipeConnected)
-        ConnectToUDrawGraph();
-    if (UDrawPipeConnected)
-        SendAllInfo();
 }
 
 void mtsComponentViewer::Run(void)
@@ -95,6 +90,7 @@ void mtsComponentViewer::Run(void)
        ConnectToUDrawGraph();
        if (UDrawPipeConnected) {
            CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
+           // Should flush all events before calling SendAllInfo
            SendAllInfo();
        }
     }
