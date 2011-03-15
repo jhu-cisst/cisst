@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "ui_cdpPlayerWidget.h"
 #include "cdpPlayerBase.h"
+#include "cdpPlayerParseStatTableData.h"
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
 // Always include last
@@ -58,8 +59,21 @@ private:
     vctPlot2DBase::Trace * TracePointer;
     vctPlot2DBase::VerticalLine * VerticalLinePointer;
 
-    std::vector <double> TimeStamps;
-    std::vector <double> Data;
+    std::vector <double> *TimeStamps;
+    std::vector <double> *Data;
+
+    // Ping Pong buffer
+    std::vector <double> TimeStampsPool1;
+    std::vector <double> DataPool1;
+    std::vector <double> TimeStampsPool2;
+    std::vector <double> DataPool2;
+    bool PingPongAdded;
+
+
+
+    // PoolPoint is pointing to ping pong buffer
+    mtsInt PoolPoint;
+    // VectorIndex is point to the data we are playing
     mtsInt VectorIndex;
     double ZoomScaleValue;
     mtsDouble LastTime;
@@ -70,6 +84,9 @@ private:
         mtsFunctionRead GetZoomScale;
         mtsFunctionWrite WriteVectorIndex;
     }Plot2DAccess;
+
+    // Parser for data file
+    cdpPlayerParseStatTableData Parser;
 
     void SetVectorIndex(const mtsInt & index){ VectorIndex = index; };
     
