@@ -26,7 +26,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction.h>
 #include <cisstMultiTask.h>
 
-class clockComponent: public mtsComponent {
+// check if this module is built as a DLL
+#ifdef cisstMultiTaskPeriodicTaskComponents_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
+#include <cisstCommon/cmnExportMacros.h>
+
+// avoid impact on other modules
+#undef CISST_THIS_LIBRARY_AS_DLL
+
+class CISST_EXPORT clockComponent: public mtsComponent {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
  protected:

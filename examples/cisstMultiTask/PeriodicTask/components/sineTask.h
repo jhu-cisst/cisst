@@ -25,7 +25,16 @@ http://www.cisst.org/cisst/license.txt.
 // include for the whole cisstMultiTask library
 #include <cisstMultiTask.h>
 
-class sineTask: public mtsTaskPeriodic {
+// check if this module is built as a DLL
+#ifdef cisstMultiTaskPeriodicTaskComponents_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
+#include <cisstCommon/cmnExportMacros.h>
+
+// avoid impact on other modules
+#undef CISST_THIS_LIBRARY_AS_DLL
+
+class CISST_EXPORT sineTask: public mtsTaskPeriodic {
     // used to control the log level, "Run Error" by default
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
  protected:
