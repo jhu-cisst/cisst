@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 /* Header Definition. The value of END_OF_HEADER_SIZE should match the size of
    END_OF_HEADER array. */
@@ -382,9 +383,85 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
 {
     std::string currentDateTime;
+    std::ostringstream out;          
     osaGetDateTimeString(currentDateTime);
 
-    if (this->OutputStream) {
+    if(this->OutputStreamHeader){        
+
+        //this->OutputStreamHeader = (std::ostream*) &out;
+        out << "Ticks";
+        RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
+        for (; it != RegisteredSignalElements.end(); ++it) {
+           out << this->Delimiter;
+            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*((std::ostream*) &out), this->Delimiter, true,
+                                                                      TargetStateTable->StateVectorDataNames[it->ID]);
+        }
+        out << std::endl;
+
+        // process the content and make header file
+        std::cerr << out.str(); 
+        
+        std::vector <std::string> FieldName;
+        std::vector <double> FieldValue;        
+        std::istringstream iss(out.str());
+        std::string token;
+        // get token
+        while(getline(iss, token, this->Delimiter))
+            FieldName.push_back(token);
+        
+        // FileName:
+        // Date:
+        // Format:
+        // Delimiter
+        // Number Of Fields:
+        // Number Of Time Fields: 
+        // Number Of Data Fields:
+        // Field 1
+        // ...
+        // Field N
+
+        // File Name
+        *(this->OutputStreamHeader) << this->OutputFileName << std::endl;
+        // Date
+        *(this->OutputStreamHeader) << currentDateTime << std::endl;
+       // Format
+        if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
+            *(this->OutputStreamHeader) << "Text" << std::endl ;
+        } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
+            *(this->OutputStreamHeader) << "CSV" << std::endl ;
+        } else {
+            *(this->OutputStreamHeader) << "Binary" << std::endl;
+        }
+        // Delimiter
+        *(this->OutputStreamHeader) << this->Delimiter<< std::endl;
+
+        // Number Of Fields
+        *(this->OutputStreamHeader) << FieldName.size() << std::endl;
+        unsigned int TimeElementsNumber = 0, DtaElementsNumber = 0;
+        for(int i = 0; i< FieldName.size(); i++){
+            std::string element = FieldName.at(i); 
+            if(element.find("time") != std::string::npos){// this is a time element
+                TimeElementsNumber ++;
+            }else{
+                DtaElementsNumber ++;
+            }
+        }
+        // Number Of Time Fields: 
+        *(this->OutputStreamHeader) << TimeElementsNumber << std::endl;
+        // Number Of Data Fields:
+        *(this->OutputStreamHeader) << DtaElementsNumber << std::endl;
+        // All Fields
+        for(int i = 0; i< FieldName.size(); i++){
+            std::string element = FieldName.at(i); 
+            if(element.find("time") != std::string::npos){// this is a time element
+                *(this->OutputStreamHeader) << "Time: " << element << std::endl;
+            }else{
+                *(this->OutputStreamHeader) << "Data:  " << element << std::endl;
+            }
+        }        
+
+    }
+    else if (this->OutputStream) {
         // Print out some information on the state table.
 
         // All lines in the header should be preceded by '#' which represents

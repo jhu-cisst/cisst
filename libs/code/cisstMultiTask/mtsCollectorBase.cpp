@@ -106,7 +106,9 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     } else {
         // create the output file
         this->OutputFile = new std::ofstream;
+        this->OutputHeaderFile = new std::ofstream;
         // uses the oftream as our ostream
+        this->OutputStreamHeader = this->OutputHeaderFile;
         this->OutputStream = this->OutputFile;
     }
 
@@ -154,11 +156,13 @@ void mtsCollectorBase::OpenFileIfNeeded(void)
     case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/append mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::app);
+        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::app);      
         this->FileOpened = true;
         break;
     case COLLECTOR_FILE_FORMAT_BINARY:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/append mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::app);
+        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::app);      
         this->FileOpened = true;
         break;
     default:
@@ -181,7 +185,8 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
         suffix = "txt";
     } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
         suffix = "csv";
-    } else {
+    } 
+    else {
         suffix = "cdat"; // for cisst dat
     }
 
@@ -189,6 +194,10 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
         this->WorkingDirectoryMember.Data
         + cmnPath::DirectorySeparator()
         + this->GetDefaultOutputName() + "." + suffix;
+    // add header file name, Joshua 2011.03.03
+    this->OutputHeaderFileName =  this->WorkingDirectoryMember.Data
+        + cmnPath::DirectorySeparator()
+        + this->GetDefaultOutputName() + ".desc" ;
 
     this->SetOutput(fileName, fileFormat);
 }
