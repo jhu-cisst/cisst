@@ -35,23 +35,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <MeasurementBehavior.h>
 #include "MapBehavior.h"
 #include <ImageViewer.h>
+#include <ImageViewerKidney.h>
 
 #define HAS_ULTRASOUDS 0
 int main()
 {
+	std::cout << "Demo started" << std::endl;
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-	cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+	cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsComponentManager", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("BehaviorLUS", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
+	cmnLogger::SetMaskClassMatching("ui3", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("cdv", CMN_LOG_ALLOW_ALL);
 
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
 #if 0
@@ -84,8 +83,12 @@ int main()
     guiManager.AddBehavior(&imageViewer,
                            3,
                            "move.png");
+	
+    ImageViewerKidney imageViewerKidney("imageKidney");
+    guiManager.AddBehavior(&imageViewerKidney,
+                           4,
+                           "move.png");
 
-    
 #endif
 
 #if HAS_ULTRASOUDS
@@ -133,8 +136,6 @@ int main()
     camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
     camera_geometry.RotateWorldAboutY(180.0);
-    // Display camera configuration
-    std::cerr << camera_geometry;
 
     // *** Left view ***
     guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
@@ -215,8 +216,8 @@ int main()
     //set up ECM as slave arm
     ui3SlaveArm * ecm1 = new ui3SlaveArm("ECM1");
     guiManager.AddSlaveArm(ecm1);
-    ecm1 -> SetInput(daVinci, "ECM1");
-    ecm1 -> SetTransformation(transform, 1.0);
+    ecm1->SetInput(daVinci, "ECM1");
+    ecm1->SetTransformation(transform, 1.0);
 
     // setup event for MaM transitions
     guiManager.SetupMaM(daVinci, "MastersAsMice");
@@ -224,13 +225,15 @@ int main()
 
     guiManager.ConnectAll();
 
-    // following should be replaced by a utility function or method of ui3Manager 
+    // following should be replaced by a utility function or method of ui3Manager
+	std::cout << "Creating components" << std::endl;
     componentManager->CreateAll();
-    osaSleep(10.0 * cmn_s);
-    
-    componentManager->StartAll();
-    osaSleep(1.0 * cmn_s);
+	componentManager->WaitForStateAll(mtsComponentState::READY);
 
+	std::cout << "Starting components" << std::endl;
+    componentManager->StartAll();
+	componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
+    
     int ch;
     
     cerr << endl << "Keyboard commands:" << endl << endl;
@@ -241,7 +244,11 @@ int main()
         osaSleep(100.0 * cmn_ms);
     } while (ch != 'q');
 
+	
+	std::cout << "Stopping components" << std::endl;
     componentManager->KillAll();
+	componentManager->WaitForStateAll(mtsComponentState::READY, 10.0 * cmn_s);
+
     componentManager->Cleanup();
 
 #if HAS_ULTRASOUDS
