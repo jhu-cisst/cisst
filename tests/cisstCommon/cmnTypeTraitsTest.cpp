@@ -140,3 +140,27 @@ void cmnTypeTraitsTest::TestNonFloatingPointsChar(void) {
     TestNonFloatingPoints<char>();
 }
 
+class Base {
+    int x;
+public:
+    Base(int a) : x(a) {}
+    virtual ~Base() {}
+};
+
+class Derived : public Base {
+public:
+    Derived(int a) : Base(a) {}
+    ~Derived() {}
+};
+
+class SomeUnknownClass;
+
+void cmnTypeTraitsTest::TestIsDerivedFrom(void) {
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, Base>::YES));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Base, Derived>::NO));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, SomeUnknownClass>::NO));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<int, Base>::NO));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<int, SomeUnknownClass>::NO));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Base, int>::NO));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, int>::NO));
+}
