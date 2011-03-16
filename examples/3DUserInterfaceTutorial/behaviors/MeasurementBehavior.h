@@ -45,24 +45,26 @@ public:
 protected:
     unsigned long Ticker;
     void PrimaryMasterButtonCallback(const prmEventButton & event);
+    void StartStopMeasure(const prmEventButton & event);
     
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 PreviousCursorPosition;
     vctDouble3 Offset;
     vctFrm3 Position;
-    bool Following;
+    bool Measuring;
     
     ui3SlaveArm * Slave1;
     prmPositionCartesianGet Slave1Position;
     
+    void SetMeasurePoint1(void);
     void GetMeasurement(void);
     
 private:
     ui3VisibleList * VisibleList;
     MeasurementBehaviorVisibleObject * VisibleObject;
     bool RightMTMOpen;
-    
+    bool ClutchMeasureStarted; // for clutch based measure
     bool MeasurementActive;
     bool Transition;
     vctDouble3 MeasurePoint1;

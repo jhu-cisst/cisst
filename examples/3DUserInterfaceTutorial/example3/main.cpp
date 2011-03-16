@@ -221,9 +221,10 @@ int main()
 
     // setup event for MaM transitions
     guiManager.SetupMaM(daVinci, "MastersAsMice");
-
-
     guiManager.ConnectAll();
+
+    // connect measurement behavior
+    componentManager->Connect(measurementBehavior.GetName(), "StartStopMeasure", daVinci->GetName(), "Clutch");
 
     // following should be replaced by a utility function or method of ui3Manager
 	std::cout << "Creating components" << std::endl;

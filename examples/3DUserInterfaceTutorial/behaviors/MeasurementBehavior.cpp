@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include "MeasurementBehavior.h"
 
@@ -35,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class MeasurementBehaviorVisibleObject: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+	CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
     inline MeasurementBehaviorVisibleObject(vctFrm3 position, const std::string & name = "Text"):
         ui3VisibleObject(name),
@@ -44,33 +45,33 @@ public:
         TextActor(0),
         Position(position)
     {}
-    
+
     inline ~MeasurementBehaviorVisibleObject()
     {}
-        
+
     inline bool CreateVTKObjects(void) {
-        
+
         Text = vtkVectorText::New();
         CMN_ASSERT(Text);
         Text->SetText(" ");
-        
+
         TextMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(TextMapper);
         TextMapper->SetInputConnection(Text->GetOutputPort());
         TextMapper->ImmediateModeRenderingOn();
-        
+
         TextActor = vtkFollower::New();
         CMN_ASSERT(TextActor);
         TextActor->SetMapper(TextMapper);
-        TextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255 );
+        TextActor->GetProperty()->SetColor(0.0, 0.0, 200.0/255.0 );
         TextActor-> SetScale(2.5);
-        
+
         this->AddPart(this->TextActor);
-        
+
         return true;
     }
 
-    inline bool UpdateVTKObjects(void) {
+	inline bool UpdateVTKObjects(void) {
         return true;
     }
 
@@ -87,8 +88,8 @@ public:
             this->TextActor->GetProperty()->SetColor(r,g,b);
         }
     }
-    
-    
+
+
 protected:
     vtkVectorText * Text;
     vtkPolyDataMapper * TextMapper;
@@ -104,15 +105,23 @@ CMN_IMPLEMENT_SERVICES(MeasurementBehaviorVisibleObject);
 MeasurementBehavior::MeasurementBehavior(const std::string & name):
     ui3BehaviorBase(std::string("MeasurementBehavior::") + name, 0),
     Ticker(0),
-    Following(false),
+    Measuring(false),
+    ClutchMeasureStarted(false),
     VisibleList(0),
     VisibleObject(0)
 {
     this->Offset.Assign(0.0, 0.0, 0.0);
     this->VisibleList = new ui3VisibleList("TextList");
     this->VisibleObject = new MeasurementBehaviorVisibleObject(this->Position);
-    
+
     this->VisibleList->Add(this->VisibleObject);
+
+    // interface to trigger start/end of measurement
+    mtsInterfaceRequired * interfaceRequired;
+    interfaceRequired = this->AddInterfaceRequired("StartStopMeasure");
+    interfaceRequired->AddEventHandlerWrite(&MeasurementBehavior::StartStopMeasure,
+                                            this,
+                                            "Button");
 }
 
 
@@ -170,12 +179,11 @@ bool MeasurementBehavior::RunForeground()
     // compute offset
     if (this->DelayToGrab == 0) {
         this->GetPrimaryMasterPosition(position);
-        if (this->Following) {
-            if (this->Transition)
-                {
-                    this->PreviousCursorPosition.Assign(position.Position().Translation());
-                    this->Transition = false;
-                }
+        if (this->Measuring) {
+            if (this->Transition) {
+                this->PreviousCursorPosition.Assign(position.Position().Translation());
+                this->Transition = false;
+            }
             vctDouble3 deltaCursor;
             deltaCursor.DifferenceOf(position.Position().Translation(),
                                      this->PreviousCursorPosition);
@@ -222,15 +230,11 @@ bool MeasurementBehavior::RunNoInput()
     this->Slave1Position.Position().Translation().Add(this->Offset);
     this->VisibleList->SetPosition(this->Slave1Position.Position().Translation());
     this->VisibleList->Show();
-    
-    if (!RightMTMOpen) {
+
+    if (this->Measuring) {
         this->GetMeasurement();
-    } else {
-        MeasurementActive = false;
-        //can either leave the last measurement on the screen or let it dispear
-        //this->SetText(MeasureText, " ");
     }
-    
+
     return true;
 }
 
@@ -251,41 +255,52 @@ bool MeasurementBehavior::SaveConfiguration(const std::string & CMN_UNUSED(confi
 void MeasurementBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
     if (event.Type() == prmEventButton::PRESSED) {
-        this->RightMTMOpen = false;
-        this->Following = true;
+        this->SetMeasurePoint1();
+        this->Measuring = true;
     } else if (event.Type() == prmEventButton::RELEASED) {
-        this->RightMTMOpen = true;
-        this->Following = false;
+        this->Measuring = false;
     }
 }
 
-/*!
 
-Displays the absolute 3D distance the center of the probe has moved since being activated
+void MeasurementBehavior::StartStopMeasure(const prmEventButton & event)
+{
+    if (event.Type() == prmEventButton::RELEASED) {
+        this->ClutchMeasureStarted = !this->ClutchMeasureStarted;
+        if (this->ClutchMeasureStarted) {
+            this->SetMeasurePoint1();
+            this->Measuring = true;
+        } else {
+            this->Measuring = false;
+        }
+    }
+}
 
- */
+
+void MeasurementBehavior::SetMeasurePoint1(void)
+{
+    vctFrm3 frame;
+    frame = Slave1Position.Position(); //Moves the point from the control point of the probe to the center
+
+    //saves the first point
+    MeasurePoint1.Assign(frame.Translation());
+}
+
 
 void MeasurementBehavior::GetMeasurement(void)
 {
-    
     char    measure_string[100];
     vctFrm3 frame;
     frame = Slave1Position.Position(); //Moves the point from the control point of the probe to the center
 
-    if (!MeasurementActive) {
-        MeasurementActive = true;
-        //saves the first point
-        MeasurePoint1.Assign(frame.Translation());
-    } else {
-        //calculates the distance maoved
-        vctDouble3 diff;
-        diff.DifferenceOf(MeasurePoint1, frame.Translation());
-        
-        double AbsVal = diff.Norm();
-        
-        //displays the distance in mm 
-        sprintf(measure_string,"%4.1fmm", AbsVal);
-        this->VisibleObject->SetText(measure_string);
-    }
+    //calculates the distance moved
+    vctDouble3 diff;
+    diff.DifferenceOf(MeasurePoint1, frame.Translation());
+
+    double AbsVal = diff.Norm();
+
+    //displays the distance in mm
+    sprintf(measure_string,"%4.1fmm", AbsVal);
+    this->VisibleObject->SetText(measure_string);
 }
 
