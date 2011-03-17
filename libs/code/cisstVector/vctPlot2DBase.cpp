@@ -31,7 +31,8 @@ vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints, siz
     IndexFirst(0),
     IndexLast(0),
     Color(1.0, 1.0, 1.0),
-    LineWidth(1.0)
+    LineWidth(1.0),
+    pointSize(pointSize)
 {
     // create the underlaying buffer and fill it with zeros
     CMN_ASSERT(pointSize >= 2);
@@ -187,6 +188,25 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
     }
 }
 
+void vctPlot2DBase::Trace::SetNumberOfPoints(size_t numberOfPoints){
+    delete Buffer;
+    Buffer = new double[sizeof(vctDouble2) * numberOfPoints];
+    //memset(this->Buffer, 0, sizeof(vctDouble2) * numberOfPoints * sizeof(double));
+    memset(this->Buffer, 0, sizeof(Buffer));
+    IndexFirst = 0;
+    IndexLast = 0;
+    Empty = true;
+
+    this->Data.SetSize(numberOfPoints);
+    // now set all the references
+    size_t index;
+    for (index = 0;
+         index < numberOfPoints;
+         index++) {
+        this->Data.Element(index).SetRef(this->Buffer + this->pointSize * index);
+    }
+}
+
 
 void vctPlot2DBase::Trace::SetColor(const vctDouble3 & colorInRange0To1)
 {
@@ -274,7 +294,6 @@ vctPlot2DBase::VerticalLine * vctPlot2DBase::AddVerticalLine(const std::string &
     delete newLine;
     return 0;
 }
-
 
 void vctPlot2DBase::SetNumberOfPoints(size_t numberOfPoints)
 {
