@@ -62,14 +62,6 @@ set (HEADER_FILES
      )
 
 
-# for windows, needs WinSock
-if (WIN32)
-    set (CISST_WSOCK_LIBRARY WSOCK32)
-    target_link_libraries (cisstOSAbstraction ${CISST_WSOCK_LIBRARY})
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_WSOCK_LIBRARY)
-endif (WIN32)
-
-
 # RTAI
 if (CISST_HAS_LINUX_RTAI)
   # Check for existence of query_module, which was removed in kernel
@@ -89,17 +81,14 @@ endif (CISST_HAS_LINUX_RTAI)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   # QNX requires socket library
   set (CISST_SOCKET_LIBRARY socket)
-  target_link_libraries (cisstOSAbstraction ${CISST_SOCKET_LIBRARY})
   cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_SOCKET_LIBRARY)
 else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   if (UNIX AND NOT APPLE)
     # clock_gettime requires linking with librt
     set (CISST_RT_LIBRARY rt)
-    target_link_libraries (cisstOSAbstraction ${CISST_RT_LIBRARY})
     cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_RT_LIBRARY)
   endif (UNIX AND NOT APPLE)
 endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-
 
 # For atomic operations with gcc
 include (CheckCSourceCompiles)
@@ -135,6 +124,24 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
+# for windows, needs WinSock
+if (WIN32)
+    set (CISST_WSOCK_LIBRARY WSOCK32)
+    target_link_libraries (cisstOSAbstraction ${CISST_WSOCK_LIBRARY})
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_WSOCK_LIBRARY)
+endif (WIN32)
+
+
+# QNX does not require rt library for clock_gettime (contained in libc)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+  # QNX requires socket library
+  target_link_libraries (cisstOSAbstraction ${CISST_SOCKET_LIBRARY})
+else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+  if (UNIX AND NOT APPLE)
+    # clock_gettime requires linking with librt
+    target_link_libraries (cisstOSAbstraction ${CISST_RT_LIBRARY})
+  endif (UNIX AND NOT APPLE)
+endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
