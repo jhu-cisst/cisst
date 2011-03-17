@@ -31,7 +31,7 @@ typedef osaTripleBuffer<value_type> buffer_type;
 
 
 const size_t TestVectorSize = 100000;
-const size_t NumberOfIterations = 10000;
+const size_t NumberOfIterations = 100000;
 
 bool WriteThreadDone;
 bool ReadThreadDone;
@@ -88,6 +88,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
                                   << firstElement << " at element " << i << ", expected " << firstElement + i << ", got "
                                   << currentVector->Element(i) << std::endl;
                         ReadThreadDone = true;
+                        i = TestVectorSize;
                     }
                 }
             }
@@ -115,7 +116,7 @@ void osaTripleBufferTest::TestMultiThreading(void)
     osaThread writeThread;
     writeThread.Create(osaTripleBufferTestWriteThread, &tripleBuffer);
 
-    while (!ReadThreadDone && !WriteThreadDone) {
+    while (!(ReadThreadDone && WriteThreadDone)) {
         osaSleep(1.0 * cmn_ms);
     }
     CPPUNIT_ASSERT(!ErrorFoundInRead);

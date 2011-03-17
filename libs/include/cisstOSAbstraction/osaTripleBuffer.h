@@ -45,7 +45,9 @@ class osaTripleBuffer
     pointer ReadPointer, WritePointer, FreePointer;
 
 public:
-    osaTripleBuffer(void):
+    /*! Constructor that allocates memory for the triple buffer using
+      the default constructor for each element. */
+    inline osaTripleBuffer(void):
         OwnMemory(true),
         NewData(false),
         Reading(false)
@@ -56,7 +58,10 @@ public:
         this->FreePointer = this->Memory + 2;
     }
 
-    osaTripleBuffer(const_reference initialValue):
+    /*! Constructor that allocates memory for the triple buffer using
+      the copy constructor for each element.  User has to provide an
+      value which will be used to initialize the buffer elements. */
+    inline osaTripleBuffer(const_reference initialValue):
         OwnMemory(true),
         Memory(0),
         NewData(false),
@@ -67,7 +72,11 @@ public:
         this->FreePointer = new value_type(initialValue);
     }
 
-    osaTripleBuffer(pointer pointer1, pointer pointer2, pointer pointer3):
+    /*! Constructor that doesn't allocate any memory, user has to
+      provide 3 valid pointers on 3 different pre-allocated objects.
+      This can be used in combination with libraries such as VTK which
+      have private constructors. */
+    inline osaTripleBuffer(pointer pointer1, pointer pointer2, pointer pointer3):
         OwnMemory(false),
         Memory(0),
         NewData(false),
@@ -78,7 +87,8 @@ public:
         this->FreePointer = pointer3;
     }
 
-    ~osaTripleBuffer() {
+
+    inline ~osaTripleBuffer() {
         if (this->OwnMemory) {
             if (this->Memory) {
                 delete[] this->Memory;
@@ -90,32 +100,38 @@ public:
         }
     }
 
-    void Read(reference placeHolder) {
+
+    inline void Read(reference placeHolder) {
         this->BeginRead();
         placeHolder = *ReadPointer;
         this->EndRead();
     }
 
-    void Write(const_reference newValue) {
+
+    inline void Write(const_reference newValue) {
         this->BeginWrite();
         *WritePointer = newValue;
         this->EndWrite();
     }
 
-    pointer GetWritePointer(void) const {
+
+    inline pointer GetWritePointer(void) const {
         return this->WritePointer;
     }
 
-    void BeginRead(void) {
+
+    inline void BeginRead(void) {
         Reading = true;
         NewData = false;
     }
 
-    const_pointer GetReadPointer(void) const {
+
+    inline const_pointer GetReadPointer(void) const {
         return this->ReadPointer;
     }
 
-    void EndRead(void) {
+
+    inline void EndRead(void) {
         if (NewData) {
 #if CISST_OSA_HAS_sync_val_compare_and_swap
             ReadPointer = __sync_val_compare_and_swap(&FreePointer, FreePointer, ReadPointer);
@@ -124,19 +140,21 @@ public:
         Reading = false;
     }
 
-    void BeginWrite(void) {
+
+    inline void BeginWrite(void) {
     }
 
 
-    void EndWrite(void) {
+    inline void EndWrite(void) {
         if (!Reading) {
 #if CISST_OSA_HAS_sync_val_compare_and_swap
             WritePointer = __sync_val_compare_and_swap(&ReadPointer, ReadPointer, WritePointer);
 #endif
-        }
+        } else {
 #if CISST_OSA_HAS_sync_val_compare_and_swap
-        WritePointer = __sync_val_compare_and_swap(&FreePointer, FreePointer, WritePointer);
+            WritePointer = __sync_val_compare_and_swap(&FreePointer, FreePointer, WritePointer);
 #endif
-        NewData = true;
+            NewData = true;
+        }
     }
 };
