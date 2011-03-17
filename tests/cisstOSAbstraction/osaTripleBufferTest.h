@@ -28,12 +28,16 @@ class osaTripleBufferTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(osaTripleBufferTest);
     {
+        CPPUNIT_TEST(TestLogic);
         CPPUNIT_TEST(TestMultiThreading);
 	}
     CPPUNIT_TEST_SUITE_END();
 
 public:
     void setUp(void);
+
+    /*! Test logic */
+    void TestLogic(void);
 
     /*! Test multi threading */
     void TestMultiThreading(void);

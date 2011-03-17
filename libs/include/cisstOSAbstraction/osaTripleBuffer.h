@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <string>
+#include <cisstOSAbstraction/osaConfig.h>
 
 template <class _elementType>
 class osaTripleBuffer
@@ -47,7 +47,8 @@ class osaTripleBuffer
 public:
     osaTripleBuffer(void):
         OwnMemory(true),
-        NewData(false)
+        NewData(false),
+        Reading(false)
     {
         this->Memory = new value_type[3];
         this->ReadPointer = this->Memory;
@@ -58,7 +59,8 @@ public:
     osaTripleBuffer(const_reference initialValue):
         OwnMemory(true),
         Memory(0),
-        NewData(false)
+        NewData(false),
+        Reading(false)
     {
         this->ReadPointer = new value_type(initialValue);
         this->WritePointer = new value_type(initialValue);
@@ -68,7 +70,8 @@ public:
     osaTripleBuffer(pointer pointer1, pointer pointer2, pointer pointer3):
         OwnMemory(false),
         Memory(0),
-        NewData(false)
+        NewData(false),
+        Reading(false)
     {
         this->ReadPointer = pointer1;
         this->WritePointer = pointer2;

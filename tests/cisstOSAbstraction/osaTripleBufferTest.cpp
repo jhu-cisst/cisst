@@ -30,11 +30,12 @@ typedef vctDynamicVector<size_t> value_type;
 typedef osaTripleBuffer<value_type> buffer_type;
 
 
-const size_t TestVectorSize = 10000;
-const size_t NumberOfIterations = 10;
+const size_t TestVectorSize = 100000;
+const size_t NumberOfIterations = 10000;
 
 bool WriteThreadDone;
 bool ReadThreadDone;
+bool ErrorFoundInRead;
 
 
 void osaTripleBufferTest::setUp(void)
@@ -55,7 +56,6 @@ void * osaTripleBufferTestWriteThread(buffer_type * buffer)
             for (size_t i = 0; i < TestVectorSize; i++) {
                 currentVector->Element(i) = iteration + i;
             }
-            std::cerr << "write: " << currentVector->Element(0) << std::endl;
         }
         buffer->EndWrite();
     }
@@ -66,30 +66,33 @@ void * osaTripleBufferTestWriteThread(buffer_type * buffer)
 
 void * osaTripleBufferTestReadThread(buffer_type * buffer)
 {
+    ErrorFoundInRead = false;
     size_t firstElement = 0;
-    bool errorFound = false;
-    while (firstElement != NumberOfIterations) {
+    while ((firstElement != NumberOfIterations) && !ErrorFoundInRead) {
         buffer->BeginRead();
         {
             const value_type * currentVector = buffer->GetReadPointer();
             size_t newFirstElement = currentVector->Element(0);
-            // std::cerr << "read: " << newFirstElement << std::endl;
             if (newFirstElement < firstElement) {
-                errorFound = true;
+                ErrorFoundInRead = true;
+                std::cerr << "osaTripleBufferTestReadThread: unexpected first element "
+                          << newFirstElement << ", should be higher than " << firstElement << std::endl;
+                ReadThreadDone = true;
             }
             if (newFirstElement != firstElement) {
                 firstElement = newFirstElement;
                 for (size_t i = 0; i < TestVectorSize; i++) {
                     if (currentVector->Element(i) != (firstElement + i)) {
-                        errorFound = true;
+                        ErrorFoundInRead = true;
+                        std::cerr << "osaTripleBufferTestReadThread: error while reading iteration "
+                                  << firstElement << " at element " << i << ", expected " << firstElement + i << ", got "
+                                  << currentVector->Element(i) << std::endl;
+                        ReadThreadDone = true;
                     }
                 }
             }
         }
         buffer->EndRead();
-    }
-    if (errorFound) {
-        std::cerr << "------- error ------" << std::endl;
     }
     ReadThreadDone = true;
     return 0;
@@ -112,9 +115,80 @@ void osaTripleBufferTest::TestMultiThreading(void)
     osaThread writeThread;
     writeThread.Create(osaTripleBufferTestWriteThread, &tripleBuffer);
 
-    while (!ReadThreadDone) {
+    while (!ReadThreadDone && !WriteThreadDone) {
         osaSleep(1.0 * cmn_ms);
     }
+    CPPUNIT_ASSERT(!ErrorFoundInRead);
 }
+
+
+void osaTripleBufferTest::TestLogic(void)
+{
+    int value1 = 0;
+    int value2 = 0;
+    int value3 = 0;
+    int * slot1 = &value1;
+    int * slot2 = &value2;
+    int * slot3 = &value3;
+    osaTripleBuffer<int> tripleBuffer(slot1, slot2, slot3);
+
+    // test initial configuration
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.ReadPointer, slot1);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.WritePointer, slot2);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.FreePointer, slot3);
+
+
+    // write while nobody's reading
+    tripleBuffer.BeginWrite(); {
+        *(tripleBuffer.GetWritePointer()) = 1;
+    } tripleBuffer.EndWrite();
+    
+    // read to make sure, no ongoing write
+    tripleBuffer.BeginRead(); {
+        CPPUNIT_ASSERT_EQUAL(1, *(tripleBuffer.GetReadPointer()));
+    } tripleBuffer.EndRead();
+
+
+    // very long write, read a couple of times in between to make sure value doesn't change
+    tripleBuffer.BeginWrite(); {
+        // read before change
+        tripleBuffer.BeginRead(); {
+            CPPUNIT_ASSERT_EQUAL(1, *(tripleBuffer.GetReadPointer()));
+        } tripleBuffer.EndRead();
+        // change
+        *(tripleBuffer.GetWritePointer()) = 2;
+        // read after change but before release
+        tripleBuffer.BeginRead(); {
+            CPPUNIT_ASSERT_EQUAL(1, *(tripleBuffer.GetReadPointer()));
+        } tripleBuffer.EndRead();
+    } tripleBuffer.EndWrite();
+    // read after release
+    tripleBuffer.BeginRead(); {
+        CPPUNIT_ASSERT_EQUAL(2, *(tripleBuffer.GetReadPointer()));
+    } tripleBuffer.EndRead();
+
+    // very long read
+    tripleBuffer.BeginRead(); {
+        // read before change
+        CPPUNIT_ASSERT_EQUAL(2, *(tripleBuffer.GetReadPointer()));
+        // lock to write
+        tripleBuffer.BeginWrite(); {
+            *(tripleBuffer.GetWritePointer()) = 3;
+        } tripleBuffer.EndWrite();
+        // read again
+        CPPUNIT_ASSERT_EQUAL(2, *(tripleBuffer.GetReadPointer()));
+        // lock to write again
+        tripleBuffer.BeginWrite(); {
+            *(tripleBuffer.GetWritePointer()) = 4;
+        } tripleBuffer.EndWrite();
+        // read onceagain
+        CPPUNIT_ASSERT_EQUAL(2, *(tripleBuffer.GetReadPointer()));
+    } tripleBuffer.EndRead();
+    // final read
+    tripleBuffer.BeginRead(); {
+        CPPUNIT_ASSERT_EQUAL(4, *(tripleBuffer.GetReadPointer()));
+    } tripleBuffer.EndRead();
+}
+
 
 CPPUNIT_TEST_SUITE_REGISTRATION(osaTripleBufferTest);
