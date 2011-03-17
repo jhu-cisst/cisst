@@ -80,6 +80,7 @@ public:
         bool Frozen;
         /*! Actual buffer containing the data, contiguous for rendering */
         double * Buffer;
+        size_t pointSize;
         /*! Vector of references to the data to add, compute min/max, ... */
         typedef vctFixedSizeVectorRef<double, 2, 1> PointRef;
         vctDynamicVector<PointRef> Data;
