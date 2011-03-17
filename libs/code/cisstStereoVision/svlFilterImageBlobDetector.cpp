@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageBlobDetector.h>
 #include <cisstStereoVision/svlFilterInput.h>
+#include <cmath>
 
 #define FILL_BUFFER_SIZE    100000
 
