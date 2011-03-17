@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "cdpPlayerBase.h"
 #include "cdpPlayerParseStatTableData.h"
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 // Always include last
 #include "cdpExport.h"
@@ -87,6 +88,7 @@ private:
 
     // Parser for data file
     cdpPlayerParseStatTableData Parser;
+    osaCriticalSection CS;
 
     void SetVectorIndex(const mtsInt & index){ VectorIndex = index; };
     

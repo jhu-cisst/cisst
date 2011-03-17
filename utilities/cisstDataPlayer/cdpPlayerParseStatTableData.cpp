@@ -116,7 +116,7 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(double TimeStampForSearch, st
     for( i  = 0 ; i < Index.size(); i++){        
         std::vector <std::string> Token;   
         Tokenize(Index.at(i).LineAtIndex, Token, Header.Delimiter);// get rid of first string
-        if(TimeStampForSearch < strtod(Token.at(IndexOfTimeField).c_str(), NULL ))
+        if(TimeStampForSearch <= strtod(Token.at(IndexOfTimeField).c_str(), NULL ))
             break;
         Token.clear();        
     }    

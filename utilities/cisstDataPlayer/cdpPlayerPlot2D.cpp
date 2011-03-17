@@ -147,7 +147,8 @@ void cdpPlayerPlot2D::Run(void)
 {
     ProcessQueuedEvents();
     ProcessQueuedCommands();
-
+    
+    CS.Enter();
     //update the model (load data) etc.
     if (State == PLAY) {
 
@@ -209,6 +210,7 @@ void cdpPlayerPlot2D::Run(void)
         size_t i = 0;
         if(LastTime.Data == Time.Data ){
             State = STOP;
+            CS.Leave();
             return;
         }
 
@@ -221,6 +223,7 @@ void cdpPlayerPlot2D::Run(void)
         }
    
         if(i ==TimeStamps->size()-1 ){
+            int j;
             // out of range, reload buffer
             Parser.LoadDataFromFile(Time.Data, DataPool1, TimeStampsPool1);
             Parser.LoadDataFromFile(TimeStampsPool1.at(TimeStampsPool1.size()-1)+1, DataPool2, TimeStampsPool2);
@@ -229,6 +232,17 @@ void cdpPlayerPlot2D::Run(void)
             PingPongAdded = false;
             VectorIndex = 0;
             // go to Qt thread and re-allocate vctPlot2DOpenGLQtWidget object
+            TracePointer->SetNumberOfPoints((DataPool1.size()+DataPool2.size())*2);
+
+            for(j = 0 ; j< DataPool1.size(); j++)
+                TracePointer->AddPoint(vctDouble2(TimeStampsPool1.at(j), DataPool1.at(j)));
+             for ( j = 0; j < TimeStampsPool1.size()-1;j++) {
+                    if (TimeStampsPool1.at(j) <=Time.Data && TimeStampsPool1.at(j+1) >= Time.Data) 
+                        break;
+                }
+            (TimeStamps->at(0) >= Time.Data) ? VectorIndex=0 : VectorIndex = j;
+            PlayStartTime = Time;
+            UpdatePlot();
         }
         else{
             // in range, do plot thing
@@ -249,7 +263,8 @@ void cdpPlayerPlot2D::Run(void)
         //do Nothing
 //        UpdatePlot();
     }
-
+    
+    CS.Leave();
     //now display updated data in the qt thread space.
     if (Widget.isVisible()) {
         emit QSignalUpdateQT();
@@ -306,6 +321,7 @@ void cdpPlayerPlot2D::UpdatePlot(void)
 void cdpPlayerPlot2D::UpdateQT(void)
 {
     mtsDouble timevalue;
+    CS.Enter();
     //BaseAccess.GetTime(timevalue);
     timevalue = Time;
     if (State == PLAY) {
@@ -320,32 +336,13 @@ void cdpPlayerPlot2D::UpdateQT(void)
         ExWidget.TimeSlider->setValue((int)timevalue.Data);
     }
     else if (State == SEEK) {     
-        mtsInt vtIndex;
-        Plot2DAccess.GetVectorIndex(vtIndex);
-        // Re-allocate a new Plot object, this is fast   
-        if(vtIndex.Data == 0){
-            int i ;
-            //delete Plot;
-            Plot = new vctPlot2DOpenGLQtWidget(mainWidget);        
-            Plot->SetNumberOfPoints(Data->size()*3);
-            TracePointer = Plot->AddTrace("Data");
-            VerticalLinePointer = Plot->AddVerticalLine("X");
-            for(i = 0 ; i < Data->size(); i++)
-                TracePointer->AddPoint(vctDouble2(TimeStamps->at(i), Data->at(i)));
-            CentralLayout->addWidget(Plot, 0, 0, 1, 2);
-            for (i = 0; i < TimeStamps->size()-1;i++) {
-                if (TimeStamps->at(i) <=timevalue.Data && TimeStamps->at(i+1) >= timevalue.Data) 
-                    break;		
-            }
-            (TimeStamps->at(0) >= timevalue.Data) ? Plot2DAccess.WriteVectorIndex(0) : Plot2DAccess.WriteVectorIndex(i);            
-            UpdatePlot();
-        }
         //Optional: Test if the data needs to be updated:
         ExWidget.TimeSlider->setValue((int)timevalue.Data);
         //update Plot in Qt Thread
         if(Plot)
             Plot->updateGL();
     }   
+    CS.Leave();
     ExWidget.TimeLabel->setText(QString::number(timevalue.Data,'f', 3));
 }
 
