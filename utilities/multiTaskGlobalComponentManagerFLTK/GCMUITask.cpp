@@ -346,8 +346,9 @@ void GCMUITask::Run(void)
             ComponentViewer = new mtsComponentViewer("ComponentViewer");
             mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
             managerLocal->AddComponent(ComponentViewer);
-            osaSleep(0.1);
+            osaSleep(0.2);
             ComponentViewer->Create();
+            osaSleep(0.2);
             ComponentViewer->Start();
         }
         UI.ButtonTaskViewerClicked = false;
