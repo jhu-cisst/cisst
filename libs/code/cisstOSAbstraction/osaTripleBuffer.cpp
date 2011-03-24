@@ -21,6 +21,4 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstConfig.h> // to define CISST_OS and CISST_COMPILER
-#include <cisstOSAbstraction/osaConfig.h> // to know which atomic operations are available
 #include <cisstOSAbstraction/osaTripleBuffer.h>

@@ -30,8 +30,8 @@ typedef vctDynamicVector<size_t> value_type;
 typedef osaTripleBuffer<value_type> buffer_type;
 
 
-const size_t TestVectorSize = 100000;
-const size_t NumberOfIterations = 100000;
+const size_t TestVectorSize = 10000;
+const size_t NumberOfIterations = 1000000;
 
 bool WriteThreadDone;
 bool ReadThreadDone;
@@ -68,6 +68,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
 {
     ErrorFoundInRead = false;
     size_t firstElement = 0;
+    size_t element;
     while ((firstElement != NumberOfIterations) && !ErrorFoundInRead) {
         buffer->BeginRead();
         {
@@ -82,11 +83,12 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
             if (newFirstElement != firstElement) {
                 firstElement = newFirstElement;
                 for (size_t i = 0; i < TestVectorSize; i++) {
-                    if (currentVector->Element(i) != (firstElement + i)) {
+                    element = currentVector->Element(i);
+                    if (element != (firstElement + i)) {
                         ErrorFoundInRead = true;
                         std::cerr << "osaTripleBufferTestReadThread: error while reading iteration "
                                   << firstElement << " at element " << i << ", expected " << firstElement + i << ", got "
-                                  << currentVector->Element(i) << std::endl;
+                                  << element << std::endl;
                         ReadThreadDone = true;
                         i = TestVectorSize;
                     }
@@ -104,11 +106,12 @@ void osaTripleBufferTest::TestMultiThreading(void)
 {
     value_type referenceVector;
     referenceVector.SetSize(TestVectorSize);
+    referenceVector.SetAll(0);
 
     osaTripleBuffer<value_type > tripleBuffer(referenceVector);
-    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.ReadPointer->size());
-    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.WritePointer->size());
-    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.FreePointer->size());
+    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.Pointers[0]->size());
+    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.Pointers[1]->size());
+    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.Pointers[2]->size());
 
     osaThread readThread;
     readThread.Create(osaTripleBufferTestReadThread, &tripleBuffer);
@@ -134,9 +137,9 @@ void osaTripleBufferTest::TestLogic(void)
     osaTripleBuffer<int> tripleBuffer(slot1, slot2, slot3);
 
     // test initial configuration
-    CPPUNIT_ASSERT_EQUAL(tripleBuffer.ReadPointer, slot1);
-    CPPUNIT_ASSERT_EQUAL(tripleBuffer.WritePointer, slot2);
-    CPPUNIT_ASSERT_EQUAL(tripleBuffer.FreePointer, slot3);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.Pointers[0], slot1);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.Pointers[1], slot2);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.Pointers[2], slot3);
 
 
     // write while nobody's reading
