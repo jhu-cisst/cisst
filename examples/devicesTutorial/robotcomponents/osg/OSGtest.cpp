@@ -38,25 +38,22 @@ int main(){
   taskManager->AddComponent( camera );
 
   // Create objects
-  std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
+  std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
   vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
 			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
   osg::ref_ptr<devOSGBody> hubble;
 
   vctFrame4x4<double> eye;
   osg::ref_ptr<devOSGBody> background;
-  hubble = new devOSGBody( "hubble", Rt, data+"hst.3ds", world );
+  hubble = new devOSGBody( "hubble", Rt, path+"hst.3ds", world );
   background = new devOSGBody( "background", 
 			       eye, 
-			       data+"background.3ds", 
+			       path+"background.3ds", 
 			       world );
 
   // Start the camera
   taskManager->CreateAll();
   taskManager->StartAll();
-
-  cmnGetChar();
-
 
   // The next block reads and saves OpenCV images and save them to disk
 #if CISST_DEV_HAS_OPENCV22
@@ -66,25 +63,44 @@ int main(){
 
   // Get the 3D data from the camera
   vctDynamicMatrix<double> range = camera->GetRangeData();
-  
-  // Create a body from the range data
-  devOSGBody* databody = new devOSGBody( "data", vctFrm3(), range, world );
-
-  // Get the RGB data from the camera
-  cv::Mat rgb = camera->GetRGBImage();
-  // write the RGB to a file
-  cv::imwrite( "rgb.bmp", rgb );
-
-  std::cout << "ENTER to switch off 3D data." << std::endl;
-  cmnGetChar();
-  databody->SetSwitch( false );
-
-  std::cout << "ENTER to switch off geometry." << std::endl;
-  cmnGetChar();
+  devOSGBody* data = new devOSGBody( "data", vctFrm3(), range, world );
   hubble->SetSwitch( false );
   background->SetSwitch( false );
-  databody->SetSwitch( true );
 
+  std::cout << "ENTER to turn off 3D data." << std::endl;
+  cmnGetChar();
+  data->SetSwitch( false );
+  hubble->SetSwitch( true );
+  background->SetSwitch( true );
+
+  std::cout << "ENTER to save RGB data." << std::endl;
+  cmnGetChar();
+  cv::Mat rgb = camera->GetRGBImage();
+  cv::imwrite( "rgb.bmp", rgb );
+
+  std::cout << "ENTER to display depth image." << std::endl;
+  cmnGetChar();
+  cv::Mat depth = camera->GetDepthImage();
+  double minval, maxval;
+  cv::minMaxLoc( depth, &minval, &maxval );
+  cv::namedWindow( "depth" );
+  cv::imshow( "depth", depth / maxval );
+  cv::waitKey( 10 );
+
+  std::cout << "ENTER to compute visibility image. " 
+	    << "This might take a while." << std::endl;
+  cmnGetChar();
+  vctDynamicMatrix< std::list<devOSGBody*> > vis = camera->GetVisibilityImage();
+
+  size_t row, col;
+  std::cout << "Enter pixels coordinates: row col ";
+  std::cin >> row >> col;
+
+  std::list<devOSGBody*> l = vis[row][col];
+  while( !l.empty() ){
+    std::cout << l.front()->GetName() << std::endl;
+    l.pop_front();
+  }
 
 
 #endif

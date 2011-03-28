@@ -28,7 +28,7 @@ devOSGMono::devOSGMono( const std::string& name,
   // Create a drawing callback. This callback is set to capture depth+color 
   // buffer (true, true)
   osg::ref_ptr<devOSGCamera::FinalDrawCallback> finaldrawcallback;
-  try{ finaldrawcallback =  new FinalDrawCallback( getCamera(), true, true ); }
+  try{ finaldrawcallback =  new FinalDrawCallback( getCamera() ); }
   catch( std::bad_alloc& ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << "Failed to allocate FinalDrawCallback."
@@ -81,36 +81,41 @@ void devOSGMono::Run(){
 
 #if CISST_DEV_HAS_OPENCV22
 
-vctDynamicMatrix<double> devOSGMono::GetRangeData(){
+vctDynamicMatrix< std::list< devOSGBody* > > devOSGMono::GetVisibilityImage(){
+
   // get the camera final draw callback
   osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
-  // cast
-  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
-  finaldrawcallback->DepthBufferSetRequest();
-  { osaSleep( 1.0 ); }
-  finaldrawcallback->DepthBufferClearRequest();
-
-  CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetRangeData();
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestVisibilityImage();
+    while( data->VisibilityImageRequested() ) {osaSleep( 1.0 );}
+    return data->GetVisibilityImage();
+  }
+  return vctDynamicMatrix< std::list< devOSGBody* > > ();
 }
 
-cv::Mat devOSGMono::GetDepthImage(){
+
+vctDynamicMatrix<double> devOSGMono::GetRangeData(){
+
   // get the camera final draw callback
   osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
-
-  // cast
-  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
-  finaldrawcallback->DepthBufferSetRequest();
-  { osaSleep( 1.0 ); }
-  finaldrawcallback->DepthBufferClearRequest();
-
-  CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetDepthImage();
+ 
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestRangeData();
+    osaSleep( 1.0 );
+    return data->GetRangeData();
+  }
+  return vctDynamicMatrix<double>();
 }
 
 cv::Mat devOSGMono::GetRGBImage(){
@@ -119,17 +124,36 @@ cv::Mat devOSGMono::GetRGBImage(){
   osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
-  // cast
-  devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<devOSGCamera::FinalDrawCallback*>(dcb);
-  finaldrawcallback->ColorBufferSetRequest();
-  { osaSleep( 1.0 ); }
-  finaldrawcallback->ColorBufferClearRequest();
-
-  CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetRGBImage();
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestRGBImage();
+    osaSleep( 1.0 );
+    return data->GetRGBImage();
+  }
+  return cv::Mat();
 }
 
+cv::Mat devOSGMono::GetDepthImage(){
+  // get the camera final draw callback
+  osg::Camera::DrawCallback* dcb = NULL;
+  dcb = getCamera()->getFinalDrawCallback();
+
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestDepthImage();
+    osaSleep( 1.0 );
+    return data->GetDepthImage();
+  }
+  return cv::Mat();
+}
+
+/*
 vctDynamicNArray<unsigned char,3> devOSGMono::GetRGBPlanarImage(){
   // get the camera final draw callback
   osg::Camera::DrawCallback* dcb = NULL;
@@ -174,6 +198,5 @@ vctDynamicMatrix<unsigned char> devOSGMono::GetRGBPixelImage(){
 
   return x;
 }
-
-
+*/
 #endif

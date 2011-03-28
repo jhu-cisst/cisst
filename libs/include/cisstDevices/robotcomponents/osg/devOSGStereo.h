@@ -61,10 +61,10 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
-  vctDynamicMatrix<double> GetRangeData( size_t idx ) const;
-  cv::Mat GetRGBImage( size_t idx ) const;
-  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage( size_t idx ) const;
-  vctDynamicMatrix<unsigned char> GetRGBPixelImage( size_t idx ) const;
+  vctDynamicMatrix<double> GetRangeData( size_t idx );
+  cv::Mat GetRGBImage( size_t idx );
+  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage( size_t idx );
+  vctDynamicMatrix<unsigned char> GetRGBPixelImage( size_t idx );
 #endif
 
 };

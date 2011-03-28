@@ -56,6 +56,7 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
+  vctDynamicMatrix< std::list< devOSGBody* > > GetVisibilityImage();
   vctDynamicMatrix<double> GetRangeData();
   cv::Mat GetDepthImage();
   cv::Mat GetRGBImage();
