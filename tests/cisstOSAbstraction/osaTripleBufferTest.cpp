@@ -29,9 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 typedef vctDynamicVector<size_t> value_type;
 typedef osaTripleBuffer<value_type> buffer_type;
 
-
-const size_t TestVectorSize = 10000;
-const size_t NumberOfIterations = 1000000;
+// sizes must be large enough to have a chance to find a problem but
+// short enough so that unit tests don't timeout.
+const size_t TestVectorSize = 100 * 1000; // 100,0000 elements * 500,000 iterations takes about a minute on a decent core 2 duo laptop
+const size_t NumberOfIterations = 500 * 1000;
 
 bool WriteThreadDone;
 bool ReadThreadDone;
@@ -109,9 +110,9 @@ void osaTripleBufferTest::TestMultiThreading(void)
     referenceVector.SetAll(0);
 
     osaTripleBuffer<value_type > tripleBuffer(referenceVector);
-    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.Pointers[0]->size());
-    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.Pointers[1]->size());
-    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.Pointers[2]->size());
+    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.LastWriteNode->Pointer->size());
+    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.LastWriteNode->Next->Pointer->size());
+    CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.LastWriteNode->Next->Next->Pointer->size());
 
     osaThread readThread;
     readThread.Create(osaTripleBufferTestReadThread, &tripleBuffer);
@@ -137,9 +138,9 @@ void osaTripleBufferTest::TestLogic(void)
     osaTripleBuffer<int> tripleBuffer(slot1, slot2, slot3);
 
     // test initial configuration
-    CPPUNIT_ASSERT_EQUAL(tripleBuffer.Pointers[0], slot1);
-    CPPUNIT_ASSERT_EQUAL(tripleBuffer.Pointers[1], slot2);
-    CPPUNIT_ASSERT_EQUAL(tripleBuffer.Pointers[2], slot3);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.LastWriteNode->Pointer, slot1);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.LastWriteNode->Next->Pointer, slot2);
+    CPPUNIT_ASSERT_EQUAL(tripleBuffer.LastWriteNode->Next->Next->Pointer, slot3);
 
 
     // write while nobody's reading

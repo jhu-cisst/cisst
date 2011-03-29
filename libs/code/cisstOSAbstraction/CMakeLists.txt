@@ -94,11 +94,11 @@ endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 include (CheckCSourceCompiles)
 check_c_source_compiles (
 "int main(int argc, char * argv[]) {
-     int * p1; int * p2; int * p3; int * p4;
-     p1 = __sync_val_compare_and_swap(&p2, p3, p4);
+     int * p2; int * p3; int * p4;
+     __sync_bool_compare_and_swap(&p2, p3, p4);
      return 1;
  }"
- CISST_OSA_HAS_sync_val_compare_and_swap)
+ CISST_OSA_HAS_sync_bool_compare_and_swap)
 
 
 # Create the config file

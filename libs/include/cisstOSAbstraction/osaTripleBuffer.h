@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id $
+  $Id$
 
   Author(s): Martin Kelly, Anton Deguet
   Created on: 2011-03-15
@@ -23,8 +23,47 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstConfig.h> // to define CISST_OS and CISST_COMPILER
 #include <cisstOSAbstraction/osaConfig.h> // to know which atomic operations are available
 
-#include <cisstOSAbstraction/osaMutex.h>
+#include <cisstCommon/cmnAssert.h>
 
+#if CISST_OSA_HAS_sync_bool_compare_and_swap
+#define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
+#define OSA_ATOMIC_POINTER_BOOL_CAS(destination, compareTo, newValue) \
+    __sync_bool_compare_and_swap(&(destination), (compareTo), (newValue))
+
+#else
+    #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 0 
+#endif
+
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
+#include <cisstOSAbstraction/osaMutex.h>
+#endif
+
+
+/*!  Triple buffer to implement a thread safe, lock free, single
+  reader single writer container.  This relies on a LIFO circular
+  buffer with only three slots, one to read the latest value and two
+  to write (assuming the reading thread can be slow to read).
+
+  This class assumes read and write operations are performed in two
+  different threads.  The reader must trigger the following calls to
+  be safe: BeginRead, GetReadPointer and finally EndRead.  Similarly,
+  the writer must call BeginWrite, GetWritePointer and EndWrite.  It
+  is important to not cache the results of both GetReadPointer and
+  GetWritePointer.
+
+  The triple buffer can be constructed using three existing pointers
+  on valid memory slots or allocate the memory itself (see
+  constructors).
+
+  When compiled with a compiler/OS that supports atomic compare and
+  swap operations (CAS) such as gcc (__sync_bool_compare_and_swap) or
+  Visual Studio (InterlockCompareAndExchange), this container is lock
+  free.  Otherwise, the implementation relies on a mutex (using
+  osaMutex) to make sure the BeginRead, EndRead, BeginWrite and
+  EndWrite methods are thread safe.  Even in the later case, the mutex
+  is used for very brief operations so there shouldn't be any long
+  wait times.
+ */
 template <class _elementType>
 class osaTripleBuffer
 {
@@ -42,7 +81,6 @@ class osaTripleBuffer
     // did the buffer allocate memory or used existing pointers
     bool OwnMemory;
     pointer Memory;
-    pointer Pointers[3];
 
     // circular buffer node
     struct Node {
@@ -55,8 +93,9 @@ class osaTripleBuffer
     Node * WriteNode;
     Node * ReadNode;
 
-
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     osaMutex Mutex;
+#endif
 
 public:
     /*! Constructor that allocates memory for the triple buffer using
@@ -65,10 +104,9 @@ public:
         OwnMemory(true)
     {
         this->Memory = new value_type[3];
-        this->Pointers[0] = this->Memory;
-        this->Pointers[1] = this->Memory + 1;
-        this->Pointers[2] = this->Memory + 2;
-        SetupNodes();
+        SetupNodes(this->Memory,
+                   this->Memory + 1,
+                   this->Memory + 2);
     }
 
     /*! Constructor that allocates memory for the triple buffer using
@@ -78,10 +116,9 @@ public:
         OwnMemory(true),
         Memory(0)
     {
-        this->Pointers[0] = new value_type(initialValue);
-        this->Pointers[1] = new value_type(initialValue);
-        this->Pointers[2] = new value_type(initialValue);
-        SetupNodes();
+        SetupNodes(new value_type(initialValue),
+                   new value_type(initialValue),
+                   new value_type(initialValue));
     }
 
     /*! Constructor that doesn't allocate any memory, user has to
@@ -92,31 +129,34 @@ public:
         OwnMemory(false),
         Memory(0)
     {
-        this->Pointers[0] = pointer1;
-        this->Pointers[1] = pointer2;
-        this->Pointers[2] = pointer3;
-        SetupNodes();
+        SetupNodes(pointer1, pointer2, pointer3);
     }
 
-
-    inline void SetupNodes(void) {
+    /*! Internal method to setup all nodes of the circular buffer.  It
+      requires 3 valid pointers. */
+    inline void SetupNodes(pointer pointer1, pointer pointer2, pointer pointer3) {
+        CMN_ASSERT(pointer1);
+        CMN_ASSERT(pointer2);
+        CMN_ASSERT(pointer3);
         this->LastWriteNode = new Node();
-        this->LastWriteNode->Pointer = this->Pointers[0];
+        this->LastWriteNode->Pointer = pointer1;
         this->LastWriteNode->Next = new Node;
-        this->LastWriteNode->Next->Pointer = this->Pointers[1];
+        this->LastWriteNode->Next->Pointer = pointer2;
         this->LastWriteNode->Next->Next = new Node;
-        this->LastWriteNode->Next->Next->Pointer = this->Pointers[2];
+        this->LastWriteNode->Next->Next->Pointer = pointer3;
         this->LastWriteNode->Next->Next->Next = this->LastWriteNode;
     }
 
+    /*! Destructor.  If the memory is owned, it will delete the 3
+      objects allocated.  All nodes get deleted. */
     inline ~osaTripleBuffer() {
         if (this->OwnMemory) {
             if (this->Memory) {
                 delete[] this->Memory;
             } else {
-                delete this->Pointers[0];
-                delete this->Pointers[1];
-                delete this->Pointers[2];
+                delete this->LastWriteNode->Next->Next->Pointer;
+                delete this->LastWriteNode->Next->Pointer;
+                delete this->LastWriteNode->Pointer;
             }
         }
         delete this->LastWriteNode->Next->Next;
@@ -124,58 +164,80 @@ public:
         delete this->LastWriteNode;
     }
 
-
+    /*! Calls BeginRead, assign the last written value using the
+      operator = and then calls EndRead. */
     inline void Read(reference placeHolder) {
         this->BeginRead();
         placeHolder = *(ReadNode->Pointer);
         this->EndRead();
     }
 
-
+    /*! Calls BeginWrite, assign the new value to the current write
+      location using the operator = and then calls EndWrite. */
     inline void Write(const_reference newValue) {
         this->BeginWrite();
         *(WriteNode->Pointer) = newValue;
         this->EndWrite();
     }
 
-
+    /*! Function to access the memory to read safely.  This method
+      call must be preceeded by a call to BeginRead and followed by
+      a call to EndRead.  All three calls must be performed in the
+      same thread space. */ 
     inline const_pointer GetReadPointer(void) const {
         return this->ReadNode->Pointer;
     }
 
-
+    /*! Function to access the memory to write safely.  This method
+      call must be preceeded by a call to BeginWrite and followed by
+      a call to EndWrite.  All three calls must be performed in the
+      same thread space. */ 
     inline pointer GetWritePointer(void) const {
         return this->WriteNode->Pointer;
     }
 
-
+    /*! Method used to find and lock the read node in the triple
+      buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginRead(void) {
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = this->LastWriteNode;
         } Mutex.Unlock();
+#else
+        this->ReadNode = this->LastWriteNode;
+#endif
     }
 
-
+    /*! Method to unlock the read node. */
     inline void EndRead(void) {
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = 0;
         } Mutex.Unlock();
+#else
+        this->ReadNode = 0;
+#endif
     }
 
 
+    /*! Method used to find and lock the write node in the triple
+      buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginWrite(void) {
+        this->WriteNode = this->LastWriteNode->Next;
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
-            this->WriteNode = this->LastWriteNode->Next;
-            while (this->WriteNode == this->ReadNode) {
+            if (this->WriteNode == this->ReadNode) {
                 this->WriteNode = this->WriteNode->Next;
             }
         } Mutex.Unlock();
+#else
+        OSA_ATOMIC_POINTER_BOOL_CAS(this->WriteNode, this->ReadNode, this->WriteNode->Next);
+#endif // OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     }
 
 
+    /*! Method to unlock the write node. */
     inline void EndWrite(void) {
-        Mutex.Lock(); {
-            this->LastWriteNode = this->WriteNode;
-        } Mutex.Unlock();
+        this->LastWriteNode = this->WriteNode;
     }
 };
