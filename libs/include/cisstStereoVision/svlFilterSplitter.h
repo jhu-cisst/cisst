@@ -58,8 +58,8 @@ protected:
     virtual void AddOutputCommand(const OutputInfo & output);
 };
 
-typedef mtsGenericObjectProxy<svlFilterSplitter::OutputInfo> svlFilterSplitter_OutputInfo;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter_OutputInfo);
+typedef mtsGenericObjectProxy<svlFilterSplitter::OutputInfo> mts_svlFilterSplitter_OutputInfo;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(mts_svlFilterSplitter_OutputInfo);
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter)
 

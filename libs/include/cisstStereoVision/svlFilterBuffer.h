@@ -61,25 +61,41 @@ public:
     
     unsigned int GetWidth(unsigned int videoch = 0);
     unsigned int GetHeight(unsigned int videoch = 0);
-	unsigned int GetDataChannels();
+    unsigned int GetDataChannels();
 
-	vctDynamicMatrixRef<unsigned char> GetCurrentFrame();
-	int GetCurrentFrameNArray(NumpyNArrayType matrix_in);
+    vctDynamicMatrixRef<unsigned char> GetCurrentFrame();
+    int GetCurrentFrameNArray(NumpyNArrayType matrix_in);
 
-	
+
 private:
-	int VideoBindex;
-	vctDynamicMatrix<unsigned char> VideoBuffer[VBsize];
-	double VideoTimeStamp[VBsize];
-	osaThreadSignal IsFrameSetEvent;
-	bool IsFrameSet;
+    int VideoBindex;
+    vctDynamicMatrix<unsigned char> VideoBuffer[VBsize];
+    double VideoTimeStamp[VBsize];
+    osaThreadSignal IsFrameSetEvent;
+    bool IsFrameSet;
 
-	NumpyNArrayType svlBufferNArrayRef;
-	NumpyNArrayType numpyNArrayRef;
-        svlSample* OutputData;
+    NumpyNArrayType svlBufferNArrayRef;
+    NumpyNArrayType numpyNArrayRef;
+    svlSample* OutputData;
 
-    int Initialize(svlSample* inputdata);
-    int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* inputdata, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* inputdata, svlSample* &syncOutput);
+
+    //Warning: These are quick subs
+    virtual int  UpdateTypes(svlFilterInput &input, svlStreamType type){
+        return SVL_OK;
+    };
+    /*virtual int  Initialize(svlSample* syncInput, svlSample* &syncOutput){
+        return Initialize(syncInput);
+    };*/
+    virtual int  OnStart(unsigned int procCount){
+        return SVL_OK;}
+    /*virtual  int  Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput){
+        return ProcessFrame(procInfo,syncInput);
+    }*/
+    virtual void OnStop(void){}
+    virtual int  Release(void){return SVL_OK;}
+
 };
 
 #endif // _svlFilterCallback_h

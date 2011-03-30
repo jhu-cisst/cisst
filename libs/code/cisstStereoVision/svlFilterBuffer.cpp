@@ -43,22 +43,24 @@ svlFilterBuffer::~svlFilterBuffer()
 {
 }
 
-int svlFilterBuffer::Initialize(svlSample* inputdata)
+int svlFilterBuffer::Initialize(svlSample* inputdata, svlSample* &syncOutput)
 {
     OutputData = inputdata;
 	
 	for (int i=0; i<VBsize; i++)
 			VideoBuffer[i].SetSize(GetHeight(),  GetWidth() * GetDataChannels());
 
+    syncOutput = OutputData;
 
     return SVL_OK;
 }
 
-int svlFilterBuffer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterBuffer::Process(svlProcInfo* procInfo, svlSample* inputdata, svlSample* &syncOutput)
 {
 	//The callback call should be single threaded just in case
 	svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
 	
+    syncOutput = OutputData;
 
     _OnSingleThread(procInfo) {
 		int tmpind = 0;

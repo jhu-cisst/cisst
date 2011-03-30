@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 /**************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterSplitter)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSplitter_OutputInfo)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mts_svlFilterSplitter_OutputInfo)
 
 svlFilterSplitter::svlFilterSplitter() :
     svlFilterBase()
