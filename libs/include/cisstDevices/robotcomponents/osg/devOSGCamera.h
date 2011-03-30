@@ -115,12 +115,12 @@ class CISST_EXPORT devOSGCamera :
       */
       vctDynamicMatrix<double> rangedata;
 
-      //! Occlusion image.
+      //! visibility list
       /**
-	 At each image point [x,y] you get a list of pointer to bodies that 
+	 Each list element you get a list of pointer to bodies that 
 	 are sorted by visibility
       */
-      vctDynamicMatrix< std::list< devOSGBody* > > visibilityimage;
+      std::list< std::list< devOSGBody* > > visibilitylist;
       
       //! Depth image
       /**
@@ -137,22 +137,22 @@ class CISST_EXPORT devOSGCamera :
       Data( size_t width, size_t height );
       ~Data();
       
-      void RequestVisibilityImage() { visibilityrequest = true; }
+      void RequestVisibilityList()  { visibilityrequest = true; }
       void RequestRangeData()       { rangerequest = true; }
       void RequestDepthImage()      { depthrequest = true; }
       void RequestRGBImage()        { colorrequest = true; }
 
-      bool VisibilityImageRequested() const { return visibilityrequest; }
+      bool VisibilityListRequested() const { return visibilityrequest; }
       bool RangeDataRequested()       const { return rangerequest; }
       bool DepthImageRequested()      const { return depthrequest; }
       bool RGBImageRequested()        const { return colorrequest; }
 
-      vctDynamicMatrix< std::list<devOSGBody*> > GetVisibilityImage() const;
+      std::list< std::list<devOSGBody*> > GetVisibilityList() const;
       vctDynamicMatrix<double> GetRangeData() const;
       cv::Mat GetDepthImage() const;
       cv::Mat GetRGBImage() const;
 
-      void SetVisibilityImage(const vctDynamicMatrix< std::list<devOSGBody*> >& v);
+      void SetVisibilityList(const std::list< std::list<devOSGBody*> >& vl );
       void SetRangeData( const vctDynamicMatrix<double>& rangedata );
       void SetDepthImage( const cv::Mat& depthimage );
       void SetRGBImage( const cv::Mat& rgbimage );
@@ -179,7 +179,7 @@ class CISST_EXPORT devOSGCamera :
     void ComputeRangeData( osg::Camera* camera ) const;
 
     //! Convert the depth buffer to range data
-    void ComputeVisibilityImage( osg::Camera* camera ) const;
+    void ComputeVisibilityList( osg::Camera* camera ) const;
 
     //! Convert the depth buffer to a depth image
     void ComputeDepthImage( osg::Camera* camera ) const;

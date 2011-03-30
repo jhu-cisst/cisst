@@ -74,64 +74,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstDevices/devKeyboard.h"
 
 #if CISST_DEV_HAS_ROBOTCOMPONENTS
-
-  #if CISST_DEV_HAS_OSG 
-
-    %header %{
-      #include <cisstVector/vctTransformationTypes.h>
-      #include <cisstDevices/devPython.h>
-
-      #include <cisstDevices/robotcomponents/devRobotComponent.h>
-
-      #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
-      #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
-      #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
-      #include <cisstDevices/robotcomponents/osg/devOSGStereo.h>
-      #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
-
-     %}
-
-     %include "cisstDevices/robotcomponents/osg/devOSGWorld.h"
-     %include "cisstDevices/robotcomponents/osg/devOSGCamera.h"
-     %include "cisstDevices/robotcomponents/osg/devOSGMono.h"
-     %include "cisstDevices/robotcomponents/osg/devOSGStereo.h"
-     %include "cisstDevices/robotcomponents/osg/devOSGBody.h"
-
-    #if CISST_DEV_HAS_ODE
-
-      %header %{
-        #include <cisstVector/vctTransformationTypes.h>
-        #include <cisstDevices/devPython.h>
-
-        #include <cisstDevices/robotcomponents/devRobotComponent.h>
-
-        #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
-        #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
-        #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
-        #include <cisstDevices/robotcomponents/osg/devOSGStereo.h>
-        #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
-
-        #include <cisstDevices/robotcomponents/ode/devODEWorld.h>
-        #include <cisstDevices/robotcomponents/ode/devODEBody.h>
-      %}
-
-      %include "cisstDevices/robotcomponents/osg/devOSGWorld.h"
-      %include "cisstDevices/robotcomponents/osg/devOSGCamera.h"
-      %include "cisstDevices/robotcomponents/osg/devOSGMono.h"
-      %include "cisstDevices/robotcomponents/osg/devOSGStereo.h"
-      %include "cisstDevices/robotcomponents/osg/devOSGBody.h"
-
-      %include "cisstDevices/robotcomponents/ode/devODEWorld.h"
-      %include "cisstDevices/robotcomponents/ode/devODEBody.h"
-
-      namespace std {
-          %template(ContactList) list<devODEContact>;
-      }
-
-    #endif
-  
-  #endif
-
+    %include "cisstDevices/robotcomponents/devRobotComponents.i"
 #endif
 
 

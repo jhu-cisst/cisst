@@ -7,6 +7,12 @@
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
+class A{
+
+public:
+  A(){}
+};
+
 class CISST_EXPORT devOSGMono : public devOSGCamera {
 
  private:
@@ -56,12 +62,11 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
-  vctDynamicMatrix< std::list< devOSGBody* > > GetVisibilityImage();
+  std::list< std::list< devOSGBody* > > GetVisibilityList();
   vctDynamicMatrix<double> GetRangeData();
-  cv::Mat GetDepthImage();
-  cv::Mat GetRGBImage();
   vctDynamicNArray<unsigned char,3> GetRGBPlanarImage();
-  vctDynamicMatrix<unsigned char> GetRGBPixelImage();
+  cv::Mat GetRGBImage();
+  cv::Mat GetDepthImage();
 #endif
 
 };

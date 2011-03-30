@@ -32,7 +32,6 @@ devOSGCamera::FinalDrawCallback::Data::Data( size_t width, size_t height ) :
   depthrequest( false ),                        // no request
   colorrequest( false ),                        // no request
   rangedata( 3, width*height, VCT_COL_MAJOR ),       // 3xM*N 
-  visibilityimage( height, width, VCT_ROW_MAJOR ),   // vctDynamicMatrix
   depthimage( height, width, CV_32FC1 ),             // cv::Mat
   rgbimage( height, width, CV_8UC3 ){                // cv::Mat
 }
@@ -42,9 +41,9 @@ devOSGCamera::FinalDrawCallback::Data::~Data(){
   rgbimage.release();
 }
 
-vctDynamicMatrix< std::list<devOSGBody*> > 
-devOSGCamera::FinalDrawCallback::Data::GetVisibilityImage() const
-{ return visibilityimage; }
+std::list< std::list<devOSGBody*> >
+devOSGCamera::FinalDrawCallback::Data::GetVisibilityList() const
+{ return visibilitylist; }
 
 vctDynamicMatrix<double>
 devOSGCamera::FinalDrawCallback::Data::GetRangeData() const
@@ -59,9 +58,9 @@ devOSGCamera::FinalDrawCallback::Data::GetRGBImage() const
 { return rgbimage; }
 
 void 
-devOSGCamera::FinalDrawCallback::Data::SetVisibilityImage
-( const vctDynamicMatrix< std::list<devOSGBody*> >& visibilityimage )
-{ this->visibilityimage = visibilityimage; visibilityrequest = false;}
+devOSGCamera::FinalDrawCallback::Data::SetVisibilityList
+( const std::list< std::list<devOSGBody*> >& visibilitylist )
+{ this->visibilitylist = visibilitylist; visibilityrequest = false;}
 
 void
 devOSGCamera::FinalDrawCallback::Data::SetRangeData
@@ -159,8 +158,8 @@ void devOSGCamera::FinalDrawCallback::operator()( osg::RenderInfo& info ) const{
 	  if( data->DepthImageRequested() )
 	    { ComputeDepthImage( camera ); }
 	  
-	  if( data->VisibilityImageRequested() )
-	    { ComputeVisibilityImage( camera ); }
+	  if( data->VisibilityListRequested() )
+	    { ComputeVisibilityList( camera ); }
 	}
 	break;
 	
@@ -180,9 +179,22 @@ void devOSGCamera::FinalDrawCallback::operator()( osg::RenderInfo& info ) const{
   }
 }
 
+static bool CompareVisibilityList( const std::list< devOSGBody* >& l1,
+				   const std::list< devOSGBody* >& l2 ){
+  std::list< devOSGBody* >::const_iterator b1 = l1.begin();
+  std::list< devOSGBody* >::const_iterator b2 = l2.begin();
+  while( (b1!=l1.end()) && (b2!=l2.end()) ){
+    if( *b1 < *b2 ) return true;
+    if( *b2 < *b1 ) return false;
+    b1++;
+    b2++;
+  }
+  if( l1.size() < l2.size() ) return true;
+  else return false;
+}
 
 void
-devOSGCamera::FinalDrawCallback::ComputeVisibilityImage
+devOSGCamera::FinalDrawCallback::ComputeVisibilityList
 ( osg::Camera* camera ) const {
 
   // remove the const
@@ -199,11 +211,13 @@ devOSGCamera::FinalDrawCallback::ComputeVisibilityImage
     size_t width = viewport->width();
     size_t height = viewport->height();
 
-    vctDynamicMatrix< std::list< devOSGBody* > > visibility( height, width );
+    std::list< std::list< devOSGBody* > > visibilitylist;
 
     // For each pixel in the image
     for( size_t r=0; r<height; r++ ){
       for( size_t c=0; c<width; c++ ){
+
+	std::list< devOSGBody* > visibility;
 
 	double x = (2.0 * c ) / width  - 1.0;
 	double y = (2.0 * r ) / height - 1.0;
@@ -242,23 +256,19 @@ devOSGCamera::FinalDrawCallback::ComputeVisibilityImage
 	      
 	      // if successfull then add the body to the list
 	      if( body != NULL )
-		{ visibility[r][c].push_back( body ); }
+		{ visibility.push_back( body ); }
 	    }
 	  }
-	  visibility[r][c].unique();
-	  /*
-	  std::cout << r << " " << c << std::endl;
-	  std::list<devOSGBody*>::iterator body;
-	  for( body =visibility[r][c].begin(); 
-	       body!=visibility[r][c].end(); 
-	       body++ )
-	    { std::cout << (*body)->GetName() << std::endl; }
-	  */
+	  visibility.unique();
+	  visibilitylist.push_back( visibility );
+
+	  visibilitylist.sort( CompareVisibilityList );
+	  visibilitylist.unique();
+
 	}
       }
     }
-
-    data->SetVisibilityImage( visibility );
+    data->SetVisibilityList( visibilitylist );
   }
   
 }

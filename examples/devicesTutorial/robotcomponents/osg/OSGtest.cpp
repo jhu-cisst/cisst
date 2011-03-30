@@ -26,7 +26,7 @@ int main(){
 
   // Create a camera
   int x = 0, y = 0;
-  int width = 640, height = 480;
+  int width = 320, height = 240;
   double Znear = 0.1, Zfar = 10.0;
   devOSGMono* camera;
   camera = new devOSGMono( "camera",
@@ -90,16 +90,15 @@ int main(){
   std::cout << "ENTER to compute visibility image. " 
 	    << "This might take a while." << std::endl;
   cmnGetChar();
-  vctDynamicMatrix< std::list<devOSGBody*> > vis = camera->GetVisibilityImage();
+  std::list< std::list<devOSGBody*> > visibilitylist=camera->GetVisibilityList();
 
-  size_t row, col;
-  std::cout << "Enter pixels coordinates: row col ";
-  std::cin >> row >> col;
-
-  std::list<devOSGBody*> l = vis[row][col];
-  while( !l.empty() ){
-    std::cout << l.front()->GetName() << std::endl;
-    l.pop_front();
+  std::list< std::list<devOSGBody*> >::iterator vl;
+  for( vl = visibilitylist.begin(); vl != visibilitylist.end(); vl++ ){
+    std::list<devOSGBody*>::iterator body;
+    for( body = vl->begin(); body != vl->end(); body++ ){
+      std::cout << (*body)->GetName() << " ";
+    }
+    std::cout << std::endl;
   }
 
 

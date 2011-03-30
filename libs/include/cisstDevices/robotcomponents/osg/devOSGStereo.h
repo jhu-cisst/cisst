@@ -61,10 +61,10 @@ class CISST_EXPORT devOSGStereo : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
+  std::list< std::list< devOSGBody* > > GetVisibilityList( size_t idx );
   vctDynamicMatrix<double> GetRangeData( size_t idx );
-  cv::Mat GetRGBImage( size_t idx );
   vctDynamicNArray<unsigned char,3> GetRGBPlanarImage( size_t idx );
-  vctDynamicMatrix<unsigned char> GetRGBPixelImage( size_t idx );
+  cv::Mat GetRGBImage( size_t idx );
 #endif
 
 };
