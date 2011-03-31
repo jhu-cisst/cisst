@@ -31,7 +31,7 @@ typedef osaTripleBuffer<value_type> buffer_type;
 
 // sizes must be large enough to have a chance to find a problem but
 // short enough so that unit tests don't timeout.
-const size_t TestVectorSize = 100 * 1000; // 100,0000 elements * 500,000 iterations takes about a minute on a decent core 2 duo laptop
+const size_t TestVectorSize = 10 * 1000; // 10,0000 elements * 500,000 iterations takes about a minute on a decent core 2 duo laptop
 const size_t NumberOfIterations = 500 * 1000;
 
 bool WriteThreadDone;
@@ -59,6 +59,10 @@ void * osaTripleBufferTestWriteThread(buffer_type * buffer)
             }
         }
         buffer->EndWrite();
+        if (ErrorFoundInRead) {
+            WriteThreadDone = true;
+            return 0;
+        }
     }
     WriteThreadDone = true;
     return 0;

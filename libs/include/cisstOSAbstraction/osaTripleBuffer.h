@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnAssert.h>
 
-#if CISST_OSA_HAS_sync_bool_compare_and_swap_
+#if CISST_OSA_HAS_sync_bool_compare_and_swap
 #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
 #define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
     __sync_bool_compare_and_swap(destination, compareTo, newValue)
@@ -94,10 +94,12 @@ class osaTripleBuffer
         Node * Next;
     };
 
+    typedef Node * NodePointer;
+
     // last write node (behaves like a head in our lifo circular buffer
-    Node * LastWriteNode;
-    Node * WriteNode;
-    Node * ReadNode;
+    volatile NodePointer LastWriteNode;
+    volatile NodePointer WriteNode;
+    volatile NodePointer ReadNode;
 
     // bool for debug
     bool LastCompare;
@@ -257,9 +259,9 @@ public:
     /*! Method to display current state of triple buffer */
     void ToStream(std::ostream & outputStream) const {
         outputStream << "Node addresses from LastWriteNode: "
-                     << this->LastWriteNode << " "
-                     << this->LastWriteNode->Next << " "
-                     << this->LastWriteNode->Next->Next << std::endl
+                     << this->LastWriteNode << "[" << this->LastWriteNode->Pointer << "] "
+                     << this->LastWriteNode->Next << "[" << this->LastWriteNode->Next->Pointer << "] "
+                     << this->LastWriteNode->Next->Next << "[" << this->LastWriteNode->Next->Next->Pointer << "]" << std::endl
                      << "LastCompare of read/write: " << ((this->LastCompare) ? "equal" : "different") << std::endl
                      << "ReadNode address: " << this->ReadNode << std::endl
                      << "WriteNode address: " << this->WriteNode << std::endl;
