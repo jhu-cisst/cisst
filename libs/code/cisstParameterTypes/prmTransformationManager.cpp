@@ -21,7 +21,7 @@
 
 
 //default world definition: NULL reference, identity transform.
-prmTransformationFixed prmTransformationManager::TheWorld = prmTransformationFixed("The_World");
+prmTransformationFixed prmTransformationManager::TheWorld = prmTransformationFixed("World");
 
 //initialization of helper and traversal members
 prmTransformationManager::NodeListType prmTransformationManager::VisitedNodes;
@@ -235,7 +235,7 @@ bool prmTransformationManager::FindPathConnectedTree(const prmTransformationBase
     {
         current = current->Parent;
         current->Visited = true;
-        VisitedNodes.push_back(current);
+        VisitedNodes.push_front(current);
     }
 
     //path from source to root
@@ -247,7 +247,7 @@ bool prmTransformationManager::FindPathConnectedTree(const prmTransformationBase
     {
         current = current->Parent;
         current->Visited = true;
-        VisitedNodes2.push_back(current);
+        VisitedNodes2.push_front(current);
     }
 
      Path.clear();
@@ -464,12 +464,15 @@ bool prmTransformationManager::NodeCreatesCycle(const std::string & pName, const
 	prmTransformationBasePtr current;
 
     //dont allow attachment to orphan frames
+/*
     if(newFrame->Parent == NULL)
     {
         return true;
     }
     //avoid attaching a node to itself or again to its parent
 	if ((pName == newFrame->Name) || (pName == newFrame->Parent->Name))
+*/
+    if (pName == newFrame->Name)
 	{		
 		return true;
 	}
@@ -628,27 +631,30 @@ vctFrm3 prmTransformationManager::WRTReference(const prmTransformationBasePtr & 
 	vctFrm3 curxform;
 	prmTransformationBasePtr previous, current;
 	//perform a tree traversal to get all the frames needed
-	if (prmTransformationManager::FindPathConnectedTree(refFrame, tipFrame))
+
+    vctFrm3 prevxform; //identity
+	if (prmTransformationManager::FindPathConnectedTree(tipFrame, refFrame))
 	{
 		//multiply and return the result
 		NodeListType::iterator iter = prmTransformationManager::Path.begin();
 		previous = *iter;
-		xform = previous->WRTReference();
+		prevxform = previous->WRTReference();
 		++iter;
 		for (; iter!= prmTransformationManager::Path.end(); ++iter) 
 		{
 			current = *iter;
-			curxform = current->WRTReference();
+			prevxform = previous->WRTReference();
 			if (previous->IsParentOf(current))
 			{
-				xform = curxform.Inverse() * xform;
+				xform = xform * prevxform;
 			}
 			else
 			{
-				xform = xform * curxform;
+				xform = xform * prevxform.Inverse();
 			}
 			previous = current;
 		}
+    xform = xform * previous->WRTReference();
 	}
 	return xform; 
 }
