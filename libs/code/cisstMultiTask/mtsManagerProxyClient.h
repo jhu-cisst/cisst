@@ -68,7 +68,7 @@ protected:
     void StartClient(void);
 
     /*! Called when server disconnection is detected or any exception occurs. */
-    bool OnServerDisconnect(const Ice::Exception & ex);
+    void OnServerDisconnect(const Ice::Exception & ex);
 
     /*! Runner for callback thread to communicate with server */
     static void Runner(ThreadArguments<mtsManagerLocal> * arguments);
@@ -233,7 +233,7 @@ protected:
     private:
         /*! Ice objects */
         Ice::CommunicatorPtr Communicator;
-        IceUtil::ThreadPtr SenderThreadPtr;
+        SenderThread<ManagerClientIPtr> * SenderThreadPtr;
         Ice::LoggerPtr IceLogger;
 
         /*! Network event processor */

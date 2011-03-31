@@ -190,7 +190,7 @@ protected:
     private:
         /*! Ice objects */
         Ice::CommunicatorPtr Communicator;
-        IceUtil::ThreadPtr SenderThreadPtr;
+        SenderThread<ComponentInterfaceServerIPtr> * SenderThreadPtr;
         Ice::LoggerPtr IceLogger;
 
         /*! Network event handler */
