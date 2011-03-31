@@ -27,17 +27,20 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_OSA_HAS_sync_bool_compare_and_swap
 #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
-#define OSA_ATOMIC_POINTER_BOOL_CAS(destination, compareTo, newValue) \
+#define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
     __sync_bool_compare_and_swap(&(destination), (compareTo), (newValue))
+
+#elif defined (CISST_COMPILER_IS_MSVC)
+#include <windows.h>
+#define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
+#define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
+    InterlockedCompareExchangePointer((PVOID *)(&(destination)), (PVOID)(newValue), ((PVOID)(compareTo)))
 
 #else
     #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 0 
 #endif
 
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
 #include <cisstOSAbstraction/osaMutex.h>
-#endif
-
 
 /*!  Triple buffer to implement a thread safe, lock free, single
   reader single writer container.  This relies on a LIFO circular
@@ -57,7 +60,7 @@ http://www.cisst.org/cisst/license.txt.
 
   When compiled with a compiler/OS that supports atomic compare and
   swap operations (CAS) such as gcc (__sync_bool_compare_and_swap) or
-  Visual Studio (InterlockCompareAndExchange), this container is lock
+  Visual Studio (InterlockedCompareAndExchange), this container is lock
   free.  Otherwise, the implementation relies on a mutex (using
   osaMutex) to make sure the BeginRead, EndRead, BeginWrite and
   EndWrite methods are thread safe.  Even in the later case, the mutex
@@ -93,9 +96,7 @@ class osaTripleBuffer
     Node * WriteNode;
     Node * ReadNode;
 
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     osaMutex Mutex;
-#endif
 
 public:
     /*! Constructor that allocates memory for the triple buffer using
@@ -199,24 +200,16 @@ public:
     /*! Method used to find and lock the read node in the triple
       buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginRead(void) {
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = this->LastWriteNode;
         } Mutex.Unlock();
-#else
-        this->ReadNode = this->LastWriteNode;
-#endif
     }
 
     /*! Method to unlock the read node. */
     inline void EndRead(void) {
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = 0;
         } Mutex.Unlock();
-#else
-        this->ReadNode = 0;
-#endif
     }
 
 
@@ -231,7 +224,7 @@ public:
             }
         } Mutex.Unlock();
 #else
-        OSA_ATOMIC_POINTER_BOOL_CAS(this->WriteNode, this->ReadNode, this->WriteNode->Next);
+        OSA_ATOMIC_POINTER_CAS(this->WriteNode, this->ReadNode, this->WriteNode->Next);
 #endif // OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     }
 
