@@ -1337,10 +1337,24 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
         // Thus, a required interface proxy is created whenever a new connection is
         // established while a provided interface proxy is created only once when
         // a client component does not have it.
+        // 
+        // MJ (3/30/11): DESIGN CHANGE: For each connection, create a new provided interface 
+        // proxy "instance" to fix the thread-safety issue (i.e., shared
+        // serializer/deserializer of command proxy objects) and to potentially support
+        // blocking commands and uni-cast events.  This also resolves the duplicate broadcast
+        // event issue that existed with earlier design.
 
         // Check if a provided interface proxy already exists at client side.
+
+        // MJ: Note that connection id used here is pre-fetched.  A new connection id is
+        // issued later after all necessary proxy objects are successfully created.
+        const std::string providedInterfaceInstanceName(
+            mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
+                serverInterfaceProvidedNameActual, ConnectionID));
         bool foundProvidedInterfaceProxy = FindInterfaceProvidedOrOutput(
-            clientProcessName, serverComponentProxyName, serverInterfaceProvidedNameActual);
+            //clientProcessName, serverComponentProxyName, serverInterfaceProvidedNameActual);
+            clientProcessName, serverComponentProxyName, providedInterfaceInstanceName);
+        CMN_ASSERT(!foundProvidedInterfaceProxy);
 
         // Check if a required interface proxy already exists at server side.
         bool foundRequiredInterfaceProxy = FindInterfaceRequiredOrInput(
@@ -1419,6 +1433,8 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
 
         // Create provided interface proxy
         if (!foundProvidedInterfaceProxy) {
+            // MJ: could minimize network traffic if GCM caches provided interface
+            // description information
             // Extract provided interface information from the server process
             InterfaceProvidedDescription providedInterfaceDescription;
             if (LocalManager) {
@@ -1440,6 +1456,10 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
                     }
 
                 }
+
+                // MJ (3/30/11): switch name of provided interface proxy with name of provided
+                // interface "instance" (providedInterfaceInstanceName)
+                providedInterfaceDescription.InterfaceProvidedName = providedInterfaceInstanceName;
 
                 // Let the client process create provided interface proxy
                 if (LocalManager->GetProcessName() == clientProcessName) {
@@ -1467,6 +1487,10 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
                                              << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
                     return InvalidConnectionID;
                 }
+
+                // MJ (3/30/11): switch name of provided interface proxy with name of provided
+                // interface "instance" (providedInterfaceInstanceName)
+                providedInterfaceDescription.InterfaceProvidedName = providedInterfaceInstanceName;
 
                 // Let the client process create provided interface proxy
                 if (!LocalManagerConnected->CreateInterfaceProvidedProxy(
@@ -1681,6 +1705,12 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
         localConfiguration = ((serverProcessName == clientProcessName) &&
                                serverProcessName == mtsManagerLocal::ProcessNameOfLCMDefault);
+
+        // MJ: (03/30/11)
+        if (!localConfiguration) {
+            serverInterfaceName = 
+                mtsComponentProxy::GetNameOfProvidedInterfaceInstance(serverInterfaceName, connectionID);
+        }
 
 #if !CISST_MTS_HAS_ICE
         if (!localConfiguration) {

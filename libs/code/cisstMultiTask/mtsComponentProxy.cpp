@@ -226,6 +226,15 @@ bool mtsComponentProxy::RemoveInterfaceRequiredProxy(const std::string & require
     return true;
 }
 
+const std::string mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
+    const std::string & originalProvidedInterfaceName, const ConnectionIDType connectionID)
+{
+    std::stringstream ss;
+    ss << originalProvidedInterfaceName << "ForConn" << connectionID;
+
+    return ss.str();
+}
+
 //-----------------------------------------------------------------------------
 //  Methods for Client Components
 //-----------------------------------------------------------------------------

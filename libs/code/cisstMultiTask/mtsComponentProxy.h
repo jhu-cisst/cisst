@@ -161,9 +161,19 @@ public:
         \return True if success, false otherwise */
     bool RemoveInterfaceProvidedProxy(const std::string & providedInterfaceProxyName);
 
-    /*! Create or remove a required interface proxy */
+    /*! \brief Create or remove a required interface proxy */
     bool CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription);
     bool RemoveInterfaceRequiredProxy(const std::string & requiredInterfaceProxyName);
+
+    /*! \brief Get name of provided interface instance for new connection, 
+               which should be unique wihtin a component 
+        \param originalProvidedInterfaceName name of original provided interface
+        \param connectionID connection id
+     */
+    // MJ: can use separate file that collects string-based naming rules defined for
+    // identifying cisst-internal objects (e.g., MCC, MCS, proxy objects)
+    static const std::string GetNameOfProvidedInterfaceInstance(
+        const std::string & originalProvidedInterfaceName, const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Network Proxy
