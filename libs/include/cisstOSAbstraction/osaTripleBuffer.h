@@ -25,16 +25,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnAssert.h>
 
-#if CISST_OSA_HAS_sync_bool_compare_and_swap
+#if CISST_OSA_HAS_sync_bool_compare_and_swap_
 #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
 #define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
-    __sync_bool_compare_and_swap(&(destination), (compareTo), (newValue))
+    __sync_bool_compare_and_swap(destination, compareTo, newValue)
 
 #elif defined (CISST_COMPILER_IS_MSVC)
 #include <windows.h>
 #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
 #define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
-    InterlockedCompareExchangePointer((PVOID *)(&(destination)), (PVOID)(newValue), ((PVOID)(compareTo)))
+    InterlockedCompareExchangePointer((PVOID *)(destination), (PVOID)(newValue), ((PVOID)(compareTo)))
 
 #else
     #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 0 
@@ -86,7 +86,10 @@ class osaTripleBuffer
     pointer Memory;
 
     // circular buffer node
-    struct Node {
+    class Node {
+    public:
+        Node(const pointer data):
+            Pointer(data) {}
         pointer Pointer;
         Node * Next;
     };
@@ -96,7 +99,12 @@ class osaTripleBuffer
     Node * WriteNode;
     Node * ReadNode;
 
+    // bool for debug
+    bool LastCompare;
+
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     osaMutex Mutex;
+#endif
 
 public:
     /*! Constructor that allocates memory for the triple buffer using
@@ -139,19 +147,20 @@ public:
         CMN_ASSERT(pointer1);
         CMN_ASSERT(pointer2);
         CMN_ASSERT(pointer3);
-        this->LastWriteNode = new Node();
-        this->LastWriteNode->Pointer = pointer1;
-        this->LastWriteNode->Next = new Node;
-        this->LastWriteNode->Next->Pointer = pointer2;
-        this->LastWriteNode->Next->Next = new Node;
-        this->LastWriteNode->Next->Next->Pointer = pointer3;
+        this->ReadNode = 0;
+        this->WriteNode = 0;
+        this->LastWriteNode = new Node(pointer1);
+        this->LastWriteNode->Next = new Node(pointer2);
+        this->LastWriteNode->Next->Next = new Node(pointer3);
         this->LastWriteNode->Next->Next->Next = this->LastWriteNode;
     }
 
     /*! Destructor.  If the memory is owned, it will delete the 3
       objects allocated.  All nodes get deleted. */
     inline ~osaTripleBuffer() {
+        // free memory if we own it
         if (this->OwnMemory) {
+            // can be an array or three different pointers
             if (this->Memory) {
                 delete[] this->Memory;
             } else {
@@ -160,6 +169,7 @@ public:
                 delete this->LastWriteNode->Pointer;
             }
         }
+        // free nodes
         delete this->LastWriteNode->Next->Next;
         delete this->LastWriteNode->Next;
         delete this->LastWriteNode;
@@ -200,16 +210,24 @@ public:
     /*! Method used to find and lock the read node in the triple
       buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginRead(void) {
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = this->LastWriteNode;
         } Mutex.Unlock();
+#else
+        this->ReadNode = this->LastWriteNode;
+#endif
     }
 
     /*! Method to unlock the read node. */
     inline void EndRead(void) {
+#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = 0;
         } Mutex.Unlock();
+#else
+        this->ReadNode = 0;
+#endif
     }
 
 
@@ -219,12 +237,13 @@ public:
         this->WriteNode = this->LastWriteNode->Next;
 #if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
-            if (this->WriteNode == this->ReadNode) {
+            LastCompare = (this->WriteNode == this->ReadNode);
+            if (LastCompare) {
                 this->WriteNode = this->WriteNode->Next;
             }
         } Mutex.Unlock();
 #else
-        OSA_ATOMIC_POINTER_CAS(this->WriteNode, this->ReadNode, this->WriteNode->Next);
+        LastCompare = OSA_ATOMIC_POINTER_CAS(&WriteNode, ReadNode, WriteNode->Next);
 #endif // OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     }
 
@@ -232,5 +251,17 @@ public:
     /*! Method to unlock the write node. */
     inline void EndWrite(void) {
         this->LastWriteNode = this->WriteNode;
+    }
+
+
+    /*! Method to display current state of triple buffer */
+    void ToStream(std::ostream & outputStream) const {
+        outputStream << "Node addresses from LastWriteNode: "
+                     << this->LastWriteNode << " "
+                     << this->LastWriteNode->Next << " "
+                     << this->LastWriteNode->Next->Next << std::endl
+                     << "LastCompare of read/write: " << ((this->LastCompare) ? "equal" : "different") << std::endl
+                     << "ReadNode address: " << this->ReadNode << std::endl
+                     << "WriteNode address: " << this->WriteNode << std::endl;
     }
 };

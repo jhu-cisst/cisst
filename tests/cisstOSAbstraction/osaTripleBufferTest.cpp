@@ -76,6 +76,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
             const value_type * currentVector = buffer->GetReadPointer();
             size_t newFirstElement = currentVector->Element(0);
             if (newFirstElement < firstElement) {
+                buffer->ToStream(std::cerr);
                 ErrorFoundInRead = true;
                 std::cerr << "osaTripleBufferTestReadThread: unexpected first element "
                           << newFirstElement << ", should be higher than " << firstElement << std::endl;
@@ -86,6 +87,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
                 for (size_t i = 0; i < TestVectorSize; i++) {
                     element = currentVector->Element(i);
                     if (element != (firstElement + i)) {
+                        buffer->ToStream(std::cerr);
                         ErrorFoundInRead = true;
                         std::cerr << "osaTripleBufferTestReadThread: error while reading iteration "
                                   << firstElement << " at element " << i << ", expected " << firstElement + i << ", got "
