@@ -1706,11 +1706,12 @@ void mtsManagerGlobal::DisconnectInternal(void)
         localConfiguration = ((serverProcessName == clientProcessName) &&
                                serverProcessName == mtsManagerLocal::ProcessNameOfLCMDefault);
 
-        // MJ: (03/30/11)
+#if CISST_MTS_HAS_ICE
         if (!localConfiguration) {
             serverInterfaceName = 
                 mtsComponentProxy::GetNameOfProvidedInterfaceInstance(serverInterfaceName, connectionID);
         }
+#endif
 
 #if !CISST_MTS_HAS_ICE
         if (!localConfiguration) {
