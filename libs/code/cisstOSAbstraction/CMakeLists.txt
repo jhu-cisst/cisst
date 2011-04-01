@@ -33,7 +33,6 @@ set (SOURCE_FILES
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
      osaTimeServer.cpp
-     osaTripleBuffer.cpp
      )
 
 # all header files
@@ -89,16 +88,6 @@ else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
     cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_RT_LIBRARY)
   endif (UNIX AND NOT APPLE)
 endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-
-# For atomic operations with gcc
-include (CheckCSourceCompiles)
-check_c_source_compiles (
-"int main(int argc, char * argv[]) {
-     int * p2; int * p3; int * p4;
-     __sync_bool_compare_and_swap(&p2, p3, p4);
-     return 1;
- }"
- CISST_OSA_HAS_sync_bool_compare_and_swap)
 
 
 # Create the config file

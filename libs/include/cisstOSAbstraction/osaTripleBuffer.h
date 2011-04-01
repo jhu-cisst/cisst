@@ -21,25 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstConfig.h> // to define CISST_OS and CISST_COMPILER
-#include <cisstOSAbstraction/osaConfig.h> // to know which atomic operations are available
 
 #include <cisstCommon/cmnAssert.h>
-
-#if CISST_OSA_HAS_sync_bool_compare_and_swap
-#define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
-#define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
-    __sync_bool_compare_and_swap(destination, compareTo, newValue)
-
-#elif defined (CISST_COMPILER_IS_MSVC)
-#include <windows.h>
-#define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 1
-#define OSA_ATOMIC_POINTER_CAS(destination, compareTo, newValue) \
-    InterlockedCompareExchangePointer((PVOID *)(destination), (PVOID)(newValue), ((PVOID)(compareTo)))
-
-#else
-    #define OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS 0 
-#endif
-
 #include <cisstOSAbstraction/osaMutex.h>
 
 /*!  Triple buffer to implement a thread safe, lock free, single
@@ -58,14 +41,10 @@ http://www.cisst.org/cisst/license.txt.
   on valid memory slots or allocate the memory itself (see
   constructors).
 
-  When compiled with a compiler/OS that supports atomic compare and
-  swap operations (CAS) such as gcc (__sync_bool_compare_and_swap) or
-  Visual Studio (InterlockedCompareAndExchange), this container is lock
-  free.  Otherwise, the implementation relies on a mutex (using
-  osaMutex) to make sure the BeginRead, EndRead, BeginWrite and
-  EndWrite methods are thread safe.  Even in the later case, the mutex
-  is used for very brief operations so there shouldn't be any long
-  wait times.
+  The implementation relies on a mutex (using osaMutex) to make sure
+  the BeginRead, EndRead, BeginWrite and EndWrite methods are thread
+  safe.  The mutex is used for very brief
+  operations so there shouldn't be any long wait times.
  */
 template <class _elementType>
 class osaTripleBuffer
@@ -104,9 +83,9 @@ class osaTripleBuffer
     // bool for debug
     bool LastCompare;
 
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
+    // to make sure the ReadNode is thread safe
     osaMutex Mutex;
-#endif
+
 
 public:
     /*! Constructor that allocates memory for the triple buffer using
@@ -212,24 +191,16 @@ public:
     /*! Method used to find and lock the read node in the triple
       buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginRead(void) {
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = this->LastWriteNode;
         } Mutex.Unlock();
-#else
-        this->ReadNode = this->LastWriteNode;
-#endif
     }
 
     /*! Method to unlock the read node. */
     inline void EndRead(void) {
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             this->ReadNode = 0;
         } Mutex.Unlock();
-#else
-        this->ReadNode = 0;
-#endif
     }
 
 
@@ -237,16 +208,12 @@ public:
       buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginWrite(void) {
         this->WriteNode = this->LastWriteNode->Next;
-#if !OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
         Mutex.Lock(); {
             LastCompare = (this->WriteNode == this->ReadNode);
             if (LastCompare) {
                 this->WriteNode = this->WriteNode->Next;
             }
         } Mutex.Unlock();
-#else
-        LastCompare = OSA_ATOMIC_POINTER_CAS(&WriteNode, ReadNode, WriteNode->Next);
-#endif // OSA_TRIPLE_BUFFER_HAS_ATOMIC_CAS
     }
 
 

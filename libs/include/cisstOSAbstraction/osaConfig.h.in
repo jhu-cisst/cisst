@@ -28,7 +28,4 @@ http://www.cisst.org/cisst/license.txt.
 // Do we have linux/module.h, used only by RTAI
 #cmakedefine01 CISST_OSA_HAS_MODULE_H
 
-// Looking atomic built-ins, used by gcc
-#cmakedefine01 CISST_OSA_HAS_sync_bool_compare_and_swap
-
 #endif // _osaConfig_h
