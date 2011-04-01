@@ -39,7 +39,7 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     // define some values, ideally these come from a configuration
     // file and then configure the user interface
     double maxValue = 5.0; double minValue = 0.5;
-    double startValue =  1.0;
+    double startValue = 1.0;
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(startValue);
     UI.AmplitudeValue->value(startValue);

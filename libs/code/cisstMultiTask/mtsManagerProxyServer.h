@@ -396,7 +396,7 @@ protected:
     private:
         /*! Ice objects */
         Ice::CommunicatorPtr Communicator;
-        IceUtil::ThreadPtr SenderThreadPtr;
+        SenderThread<ManagerServerIPtr> * SenderThreadPtr;
         Ice::LoggerPtr IceLogger;
 
         /*! Network event handler */

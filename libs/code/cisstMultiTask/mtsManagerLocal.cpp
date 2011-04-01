@@ -163,6 +163,9 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
         return false;
     }
 
+    // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
+    osaSleep(1 * cmn_s);
+
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
         CMN_LOG_CLASS_INIT_ERROR << "Failed to register process name to the global component manager" << std::endl;
@@ -2537,7 +2540,10 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     const ConnectionIDType connectionID           = description.ConnectionID;
     const std::string serverProcessName           = description.Server.ProcessName;
     const std::string serverComponentName         = description.Server.ComponentName;
-    const std::string serverInterfaceProvidedName = description.Server.InterfaceName;
+    // MJ: (03/30/11)
+    const std::string serverInterfaceProvidedName = //description.Server.InterfaceName; 
+        mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
+            description.Server.InterfaceName, connectionID);
     const std::string clientProcessName           = description.Client.ProcessName;
     const std::string clientComponentName         = description.Client.ComponentName;
     const std::string clientInterfaceRequiredName = description.Client.InterfaceName;
@@ -2598,6 +2604,9 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     }
     // If server proxy is already running, fetch the access information
     else {
+        // MJ: (03/30/11) this should not be reached because each connection has its own provided interface instance
+        CMN_ASSERT(false); 
+        
         if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(clientProcessName,
                 serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointAccessInfo))
         {
