@@ -65,6 +65,7 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   //! Data used by ODE Tri Mesh
   dVector3* Vertices;
   int       VertexCount;
+  vctDynamicMatrix<double> vctVertices;
   dTriIndex* Indices;
   int        IndexCount;
 
@@ -85,10 +86,9 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 
   vctMatrixRotation3<double> GetOrientation() const;
   vctFixedSizeVector<double,3> GetPosition() const;
-
+  
  public:
 
-  
   //! Main constructor
   /**
      This create an ODE body that can be inserted in an ODE world. This body
@@ -179,6 +179,10 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   //! Query the ID of the body
   dGeomID GetGeomID() const { return geomid; }
 
+  vctFrm3 GetTransform() const;
+
+  vctDynamicMatrix<double> GetVertices() const;
+  
 };
 
 #endif

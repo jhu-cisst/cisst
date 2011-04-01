@@ -1,5 +1,5 @@
-#include <osgGA/TrackballManipulator>
 #include <cisstDevices/robotcomponents/osg/devOSGStereo.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 devOSGStereo::devOSGStereo( const std::string& name, 
 			    devOSGWorld* world,
@@ -40,7 +40,7 @@ devOSGStereo::devOSGStereo( const std::string& name,
     // Create a drawing callback. This callback is set to capture depth+color 
     // buffer (true, true)
     osg::ref_ptr<devOSGCamera::FinalDrawCallback> finaldrawcallback;
-    try{ finaldrawcallback =  new FinalDrawCallback( camera, true, true ); }
+    try{ finaldrawcallback =  new FinalDrawCallback( camera ); }
     catch( std::bad_alloc& ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< "Failed to allocate FinalDrawCallback."
@@ -74,7 +74,7 @@ devOSGStereo::devOSGStereo( const std::string& name,
     // Create a drawing callback. This callback is set to capture depth+color 
     // buffer (true, true)
     osg::ref_ptr<devOSGCamera::FinalDrawCallback> finaldrawcallback;
-    try{ finaldrawcallback =  new FinalDrawCallback( camera, true, true ); }
+    try{ finaldrawcallback =  new FinalDrawCallback( camera ); }
     catch( std::bad_alloc& ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< "Failed to allocate FinalDrawCallback."
@@ -159,69 +159,105 @@ void devOSGStereo::Run(){ devOSGCamera::Run(); }
 
 #if CISST_DEV_HAS_OPENCV22
 
-vctDynamicMatrix<double> devOSGStereo::GetRangeData( size_t idx ) const {
+std::list< std::list< devOSGBody* > > devOSGStereo::GetVisibilityList( size_t idx ){
+
+  // Get the left/right slave
+  const osg::View::Slave& slave = getSlave( idx );
+  osg::Camera* camera = slave._camera.get();
+
+  // get the camera final draw callback
+  osg::Camera::DrawCallback* dcb = NULL;
+  dcb = camera->getFinalDrawCallback();
+
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestVisibilityList();
+    while( data->VisibilityListRequested() ) {osaSleep( 1.0 );}
+    return data->GetVisibilityList();
+  }
+  return std::list< std::list< devOSGBody* > >();
+}
+
+vctDynamicNArray<unsigned char,3> devOSGStereo::GetRGBPlanarImage(size_t idx){
+
+  // Get the left/right slave
+  const osg::View::Slave& slave = getSlave( idx );
+  osg::Camera* camera = slave._camera.get();
+
+  // get the camera final draw callback
+  osg::Camera::DrawCallback* dcb = NULL;
+  dcb = camera->getFinalDrawCallback();
+
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestRGBImage();
+    osaSleep( 1.0 );
+    cv::Mat rgbimage = data->GetRGBImage();
+    cv::Size size = rgbimage.size();
+
+    vctDynamicNArray<unsigned char, 3> x;
+    x.SetSize( vctDynamicNArray<unsigned char, 3>::nsize_type( size.height, 
+							       size.width, 3 ) );
+    memcpy( x.Pointer(), 
+	    rgbimage.ptr<unsigned char>(), 
+	    size.height*size.width*3 );
+
+    return x;
+  }
+  return vctDynamicNArray<unsigned char, 3>();
+}
+
+vctDynamicMatrix<double> devOSGStereo::GetRangeData( size_t idx ) {
 
   // Get the left slave
   const osg::View::Slave& slave = getSlave( idx );
-  osg::Camera* camera = slave._camera.get();
+  osg::ref_ptr< osg::Camera > camera = slave._camera.get();
 
-  // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
+  osg::ref_ptr< osg::Camera::DrawCallback > dcb;
   dcb = camera->getFinalDrawCallback();
-
-  // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
-
-  CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetRangeData();
+ 
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestRangeData();
+    osaSleep( 1.0 );
+    return data->GetRangeData();
+  }
+  return vctDynamicMatrix<double>();
 
 }
 
-cv::Mat devOSGStereo::GetRGBImage( size_t idx ) const{
+cv::Mat devOSGStereo::GetRGBImage( size_t idx ) {
 
   // Get the left/right slave
   const osg::View::Slave& slave = getSlave( idx );
-  osg::Camera* camera = slave._camera.get();
+  osg::ref_ptr< osg::Camera > camera = slave._camera.get();
 
-  // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
-  dcb = camera->getFinalDrawCallback();
+  osg::ref_ptr< osg::Camera::DrawCallback > dcb;
+  dcb = getCamera()->getFinalDrawCallback();
 
-  // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
-
-  CMN_ASSERT( finaldrawcallback != NULL );
-  return finaldrawcallback->GetRGBImage();
+  // 
+  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+  osg::ref_ptr<devOSGCamera::FinalDrawCallback::Data> data = NULL;
+  data = dynamic_cast<devOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+  if( data != NULL ){
+    data->RequestRGBImage();
+    osaSleep( 1.0 );
+    return data->GetRGBImage();
+  }
+  return cv::Mat();
 
 }
 
-vctDynamicNArray<unsigned char,3> devOSGStereo::GetRGBPlanarImage(size_t idx)const{
 
-  // Get the left/right slave
-  const osg::View::Slave& slave = getSlave( idx );
-  osg::Camera* camera = slave._camera.get();
-
-  // get the camera final draw callback
-  const osg::Camera::DrawCallback* dcb = NULL;
-  dcb = camera->getFinalDrawCallback();
-
-  // cast
-  const devOSGCamera::FinalDrawCallback* finaldrawcallback = NULL;
-  finaldrawcallback=dynamic_cast<const devOSGCamera::FinalDrawCallback*>(dcb);
-
-  CMN_ASSERT( finaldrawcallback != NULL );
-  const cv::Mat& rgbimage = finaldrawcallback->GetRGBImage();
-
-  cv::Size size = rgbimage.size();
-  vctDynamicNArray<unsigned char, 3> x;
-  x.SetSize( vctDynamicNArray<unsigned char, 3>::nsize_type( size.height, size.width, 3 ) );
-  memcpy( x.Pointer(), rgbimage.ptr<unsigned char>(), size.height*size.width*3 );
-
-  return x;
-}
-
+/*
 vctDynamicMatrix<unsigned char> devOSGStereo::GetRGBPixelImage(size_t idx) const{
 
   // Get the left/right slave
@@ -245,5 +281,5 @@ vctDynamicMatrix<unsigned char> devOSGStereo::GetRGBPixelImage(size_t idx) const
 
   return x;
 }
-
+*/
 #endif

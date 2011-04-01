@@ -340,7 +340,7 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const 
 //-------------------------------------------------------------------------
 void mtsComponentInterfaceProxyServer::SendTestMessageFromServerToClient(const std::string & str)
 {
-    if (!this->IsActiveProxy()) return;
+    if (!IsActiveProxy()) return;
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendMessageFromServerToClient");
@@ -352,6 +352,7 @@ void mtsComponentInterfaceProxyServer::SendTestMessageFromServerToClient(const s
     ClientIDMapType::const_iterator itEnd = ClientIDMap.end();
     for (; it != itEnd; ++it) {
         clientProxy = &(it->second.ClientProxy);
+        if (!clientProxy->get()) continue;
         try {
             (*clientProxy)->TestMessageFromServerToClient(str);
         } catch (const ::Ice::Exception & ex) {
@@ -365,8 +366,10 @@ bool mtsComponentInterfaceProxyServer::SendFetchFunctionProxyPointers(
     const ClientIDType clientID, const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers)
 {
+    if (!IsActiveProxy()) return false;
+
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsComponentInterfaceProxyServer, "SendFetchFunctionProxyPointers: no proxy client found or inactive proxy: " << clientID);
         return false;
     }
@@ -388,8 +391,10 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType
                                                               const mtsBlockingType blocking,
                                                               mtsExecutionResult & executionResult)
 {
+    if (!IsActiveProxy()) return false;
+
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoid: no proxy client found or inactive proxy: " << clientID);
         return false;
     }
@@ -417,8 +422,10 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const C
                                                                          const mtsBlockingType blocking, mtsExecutionResult & executionResult,
                                                                          const mtsGenericObject & argument)
 {
+    if (!IsActiveProxy()) return false;
+
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: no proxy client found or inactive proxy: "
             << clientID << ", " << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
         return false;
@@ -463,8 +470,10 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const Cl
                                                                         mtsGenericObject & argument)
 
 {
+    if (!IsActiveProxy()) return false;
+
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) return false;
+    if (!clientProxy || !clientProxy->get()) return false;
 
     // Argument placeholder of which value is set by the read command
     std::string serializedArgument;
@@ -504,8 +513,10 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized
                                                                                  mtsExecutionResult & executionResult,
                                                                                  const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut)
 {
+    if (!IsActiveProxy()) return false;
+
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandQualifiedReadSerialized: no proxy client found or inactive proxy: " << clientID);
         return false;
     }
@@ -626,6 +637,9 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Stop()
         notify();
 
         callbackSenderThread = SenderThreadPtr;
+
+        // Prevent sender thread from sending any further message
+        SenderThreadPtr->StopSend();
         SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();

@@ -395,6 +395,14 @@ void devODEBody::BuildODETriMesh( dSpaceID spaceid,
     Vertices[i][2] = geometriesvertices[i][2];
   }
 
+  vctVertices.SetSize( 3, VertexCount );
+
+  for( size_t i=0; i<VertexCount; i++ ){
+    vctVertices[0][i] = Vertices[i][0];
+    vctVertices[1][i] = Vertices[i][1];
+    vctVertices[2][i] = Vertices[i][2];
+  }
+
   for( int i=0; i<IndexCount; i++ ){
     Indices[i] = geometriesindices[i];
   }
@@ -476,3 +484,10 @@ vctFixedSizeVector<double,3> devODEBody::GetPosition() const{
   return vctFixedSizeVector<double,3>( 0.0 );
 }
 
+
+vctFrm3 devODEBody::GetTransform() const{
+  return vctFrm3( GetOrientation(), GetPosition() );
+}
+
+vctDynamicMatrix<double> devODEBody::GetVertices() const
+{ return vctVertices; }

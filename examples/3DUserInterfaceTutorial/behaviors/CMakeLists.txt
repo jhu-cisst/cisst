@@ -19,6 +19,8 @@ add_library (3DUserInterfaceTutorialBehaviors
              MeasurementBehavior.cpp
              ImageViewer.h
              ImageViewer.cpp
+             ImageViewerKidney.h
+             ImageViewerKidney.cpp
              RegistrationBehavior.h
              RegistrationBehavior.cpp
 	     )

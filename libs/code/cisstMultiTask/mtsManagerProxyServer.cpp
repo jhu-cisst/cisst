@@ -873,7 +873,7 @@ bool mtsManagerProxyServer::ReceiveConnectServerSideInterfaceRequest(const Conne
 //-------------------------------------------------------------------------
 void mtsManagerProxyServer::SendTestMessageFromServerToClient(const std::string & str)
 {
-    if (!this->IsActiveProxy()) return;
+    if (!IsActiveProxy()) return;
 
     // iterate client map -> send message to ALL clients (broadcasts)
     ManagerClientProxyType * clientProxy;
@@ -881,11 +881,11 @@ void mtsManagerProxyServer::SendTestMessageFromServerToClient(const std::string 
     ClientIDMapType::const_iterator itEnd = ClientIDMap.end();
     for (; it != itEnd; ++it) {
         clientProxy = &(it->second.ClientProxy);
-        try
-        {
+        try {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendTestMessageFromServerToClient: " << str);
 #endif
+            if (!(*clientProxy).get()) continue;
             (*clientProxy)->TestMessageFromServerToClient(str);
         }
         catch (const ::Ice::Exception & ex)
@@ -901,8 +901,10 @@ void mtsManagerProxyServer::SendTestMessageFromServerToClient(const std::string 
 
 bool mtsManagerProxyServer::SendCreateComponentProxy(const std::string & componentProxyName, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendCreateComponentProxy: invalid client id (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -922,8 +924,10 @@ bool mtsManagerProxyServer::SendCreateComponentProxy(const std::string & compone
 
 bool mtsManagerProxyServer::SendRemoveComponentProxy(const std::string & componentProxyName, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendRemoveComponentProxy: invalid client id (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -944,8 +948,10 @@ bool mtsManagerProxyServer::SendRemoveComponentProxy(const std::string & compone
 bool mtsManagerProxyServer::SendCreateInterfaceProvidedProxy(const std::string & serverComponentProxyName,
     const ::mtsManagerProxy::InterfaceProvidedDescription & providedInterfaceDescription, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendCreateInterfaceProvidedProxy: invalid client id (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -966,8 +972,10 @@ bool mtsManagerProxyServer::SendCreateInterfaceProvidedProxy(const std::string &
 bool mtsManagerProxyServer::SendCreateInterfaceRequiredProxy(const std::string & clientComponentProxyName,
     const ::mtsManagerProxy::InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendCreateInterfaceRequiredProxy: invalid client id (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -988,8 +996,10 @@ bool mtsManagerProxyServer::SendCreateInterfaceRequiredProxy(const std::string &
 bool mtsManagerProxyServer::SendRemoveInterfaceProvidedProxy(const std::string & componentProxyName,
     const std::string & providedInterfaceProxyName, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendRemoveInterfaceProvidedProxy: invalid listenerID (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -1010,8 +1020,10 @@ bool mtsManagerProxyServer::SendRemoveInterfaceProvidedProxy(const std::string &
 bool mtsManagerProxyServer::SendRemoveInterfaceRequiredProxy(const std::string & componentProxyName,
     const std::string & requiredInterfaceProxyName, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendRemoveInterfaceRequiredProxy: invalid listenerID (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -1032,8 +1044,10 @@ bool mtsManagerProxyServer::SendRemoveInterfaceRequiredProxy(const std::string &
 bool mtsManagerProxyServer::SendConnectServerSideInterface(const ConnectionIDType connectionID,
     const ::mtsManagerProxy::ConnectionStringSet & connectionStrings, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendConnectServerSideInterface: invalid listenerID (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -1054,8 +1068,10 @@ bool mtsManagerProxyServer::SendConnectServerSideInterface(const ConnectionIDTyp
 bool mtsManagerProxyServer::SendConnectClientSideInterface(::Ice::Int connectionID,
     const ::mtsManagerProxy::ConnectionStringSet & connectionStrings, const std::string & clientID)
 {
+    if (!IsActiveProxy()) return false;
+
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendConnectClientSideInterface: invalid listenerID (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -1078,7 +1094,7 @@ bool mtsManagerProxyServer::SendGetInterfaceProvidedDescription(
     ::mtsManagerProxy::InterfaceProvidedDescription & providedInterfaceDescription, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetInterfaceProvidedDescription: invalid listenerID (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -1101,7 +1117,7 @@ bool mtsManagerProxyServer::SendGetInterfaceRequiredDescription(const std::strin
     const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetInterfaceRequiredDescription: invalid listenerID (" << clientID << ") or inactive server proxy");
         return false;
     }
@@ -1123,7 +1139,7 @@ void mtsManagerProxyServer::SendGetNamesOfCommands(std::vector<std::string>& nam
     const std::string & componentName, const std::string & providedInterfaceName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfCommands: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1145,7 +1161,7 @@ void mtsManagerProxyServer::SendGetNamesOfEventGenerators(std::vector<std::strin
     const std::string & componentName, const std::string & providedInterfaceName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfEventGenerators: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1167,7 +1183,7 @@ void mtsManagerProxyServer::SendGetNamesOfFunctions(std::vector<std::string>& na
     const std::string & componentName, const std::string & requiredInterfaceName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfFunctions: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1189,7 +1205,7 @@ void mtsManagerProxyServer::SendGetNamesOfEventHandlers(std::vector<std::string>
     const std::string & componentName, const std::string & requiredInterfaceName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetNamesOfEventHandlers: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1211,7 +1227,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfCommand(std::string & descriptio
     const std::string & providedInterfaceName, const std::string & commandName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfCommand: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1233,7 +1249,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventGenerator(std::string & des
     const std::string & providedInterfaceName, const std::string & eventGeneratorName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventGenerator: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1255,7 +1271,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfFunction(std::string & descripti
     const std::string & requiredInterfaceName, const std::string & functionName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfFunction: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1277,7 +1293,7 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventHandler(std::string & descr
     const std::string & requiredInterfaceName, const std::string & eventHandlerName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventHandler: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1299,7 +1315,7 @@ void mtsManagerProxyServer::SendGetArgumentInformation(std::string & argumentNam
     const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetArgumentInformation: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1321,7 +1337,7 @@ void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values, const s
     const std::string & providedInterfaceName, const std::string & commandName, const int scalarIndex, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetValuesOfCommand: invalid listenerID (" << clientID << ") or inactive server proxy");
         return;
     }
@@ -1346,7 +1362,7 @@ void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values, const s
 std::string mtsManagerProxyServer::SendGetProcessName(const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
-    if (!clientProxy) {
+    if (!clientProxy || !clientProxy->get()) {
         LogError(mtsManagerProxyServer, "SendGetProcessName: invalid listenerID (" << clientID << ") or inactive server proxy");
         return "";
     }
@@ -1442,6 +1458,9 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
         notify();
 
         callbackSenderThread = SenderThreadPtr;
+        
+        // Prevent sender thread from sending any further message
+        SenderThreadPtr->StopSend();
         SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();

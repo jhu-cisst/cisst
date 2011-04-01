@@ -172,8 +172,12 @@ void mtsComponentInterfaceProxyClient::StopProxy()
     LogPrint(mtsManagerProxyClient, "Stopped component interface proxy client");
 }
 
-bool mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception & ex)
+void mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception & ex)
 {
+    if (!IsActiveProxy()) {
+        return; // already detected disconnection
+    }
+
     // Ice - ConnectionLostException - forceful closure by peer
     // Ice - ForcedCloseConnectionException - after forceful closure by peer
     CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
@@ -181,8 +185,6 @@ bool mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception &
         << "(connection id: \"" << ConnectionID << "\")" << std::endl;
 
     StopProxy();
-
-    return true;
 }
 
 bool mtsComponentInterfaceProxyClient::AddPerEventSerializer(const CommandIDType commandID, mtsProxySerializer * serializer)
@@ -357,6 +359,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSeriali
 //-------------------------------------------------------------------------
 void mtsComponentInterfaceProxyClient::SendTestMessageFromClientToServer(const std::string & str) const
 {
+    if (!IsActiveProxy()) return;
+
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: MessageFromClientToServer");
 #endif
@@ -368,6 +372,8 @@ bool mtsComponentInterfaceProxyClient::SendFetchEventGeneratorProxyPointers(
     const std::string & clientComponentName, const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers)
 {
+    if (!IsActiveProxy()) return false;
+
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: FetchEventGeneratorProxyPointers: " << clientComponentName << ":" << requiredInterfaceName);
 #endif
@@ -384,6 +390,8 @@ bool mtsComponentInterfaceProxyClient::SendFetchEventGeneratorProxyPointers(
 
 bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType commandID)
 {
+    if (!IsActiveProxy()) return false;
+
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: SendExecuteEventVoid: " << commandID);
 #endif
@@ -401,6 +409,8 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType 
 
 bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const CommandIDType commandID, const mtsGenericObject & argument)
 {
+    if (!IsActiveProxy()) return false;
+
     // Get per-event serializer.
     mtsProxySerializer * serializer = PerEventSerializerMap[commandID];
     if (!serializer) {
@@ -423,7 +433,7 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const Com
     try {
         ComponentInterfaceServerProxy->ExecuteEventWriteSerialized(commandID, serializedArgument);
     } catch (const ::Ice::Exception & ex) {
-        LogError(mtsComponentInterfaceProxyServer, "SendExecuteEventWriteSerialized: network exception: " << ex);
+        LogError(mtsComponentInterfaceProxyClient, "SendExecuteEventWriteSerialized: network exception: " << ex);
         OnServerDisconnect(ex);
         return false;
     }
@@ -507,6 +517,9 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
         notify();
 
         callbackSenderThread = SenderThreadPtr;
+
+        // Prevent sender thread from sending any further message
+        SenderThreadPtr->StopSend();
         SenderThreadPtr = 0;
     }
     callbackSenderThread->getThreadControl().join();

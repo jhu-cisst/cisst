@@ -93,6 +93,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGCamera.h
     robotcomponents/osg/devOSGManipulator.h
     robotcomponents/osg/devOSGMono.h
+    robotcomponents/osg/devOSGPick.h
     robotcomponents/osg/devOSGStereo.h
     robotcomponents/osg/devOSGWorld.h
     )
@@ -104,6 +105,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGCamera.cpp
     robotcomponents/osg/devOSGManipulator.cpp
     robotcomponents/osg/devOSGMono.cpp
+    robotcomponents/osg/devOSGPick.cpp
     robotcomponents/osg/devOSGStereo.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
@@ -119,6 +121,7 @@ if( OPENSCENEGRAPH_FOUND )
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
       PARENT_SCOPE )
     cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
+    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
     
     SET( HEADER_FILES 
       

@@ -16,6 +16,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <osgDB/ReadFile> 
+#include <osg/PolygonMode>
+
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -126,8 +128,9 @@ devOSGBody::devOSGBody(	const std::string& name,
 			const vctFrm3& Rt,
 			const vctDynamicMatrix<double>& pc,
 			devOSGWorld* world,
+			unsigned char r, unsigned char g, unsigned char b,
 			const std::string& transformfn,
-			const std::string& switchfn ) : 
+			const std::string& switchfn ) :
   mtsComponent( name ),
   Rt_body( Rt.Rotation(), Rt.Translation() ),
   switch_body( true ){
@@ -150,7 +153,7 @@ devOSGBody::devOSGBody(	const std::string& name,
   // add the switch as the child of the transform node
   this->addChild( osgswitch );
 
-  Read3DData( pc );
+  Read3DData( pc, vctFixedSizeVector<unsigned char, 3>(r, g, b) );
 
   if( world != NULL )
     { world->addChild( this ); }
@@ -251,7 +254,8 @@ void devOSGBody::ReadModel( const std::string& model ){
 
 }
 
-void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
+void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
+			     const vctFixedSizeVector<unsigned char,3>& RGB ){
 
   size_t npoints= 0;
   if( pc.rows() == 3 )
@@ -291,7 +295,7 @@ void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
   }
   // add the set to the geometry
   pointsGeom->addPrimitiveSet( drawArrayPoints );
-  
+
   // add a vector of vertices
   osg::ref_ptr<osg::Vec3Array> vertexData;
   try{ vertexData = new osg::Vec3Array; }
@@ -304,6 +308,21 @@ void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
   
   for( size_t i=0; i<npoints; i++ )
     { vertexData->push_back( osg::Vec3( pc[0][i], pc[1][i], pc[2][i] ) ); }
+
+  osg::ref_ptr<osg::Vec4Array> colorArray = new osg::Vec4Array;
+  colorArray->push_back( osg::Vec4( RGB[0], RGB[1], RGB[2], 1.0f ) );
+  
+  osg::ref_ptr< osg::TemplateIndexArray< unsigned int, 
+					 osg::Array::UIntArrayType,
+					 4, 1 > > colorIndexArray;
+  colorIndexArray = new osg::TemplateIndexArray< unsigned int, 
+						 osg::Array::UIntArrayType,
+						 4, 1>;
+  colorIndexArray->push_back(0);
+
+  pointsGeom->setColorArray( colorArray );
+  pointsGeom->setColorIndices(colorIndexArray);
+  pointsGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
 
   drawArrayPoints->setFirst( 0 );
   drawArrayPoints->setCount( vertexData->size() );
@@ -345,7 +364,47 @@ void devOSGBody::Switch(){
 void devOSGBody::SetTransform( const vctFrame4x4<double>& Rt )
 { this->Rt_body = Rt; }
 
+void devOSGBody::SetTransform( const vctFrm3& Rt )
+{ SetTransform( vctFrame4x4<double>( vctMatrixRotation3<double>( Rt.Rotation(),
+								 VCT_NORMALIZE),
+				     Rt.Translation() ) ); }
+
 //! Set the switch of the body
 void devOSGBody::SetSwitch( bool onoff )
 { this->switch_body = onoff; }
   
+void devOSGBody::SetModeFill(){
+  osg::ref_ptr<osg::StateSet> state = getOrCreateStateSet();
+  osg::ref_ptr<osg::PolygonMode> pm;
+  pm = dynamic_cast<osg::PolygonMode*>
+    ( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+  if( !pm ){
+    pm = new osg::PolygonMode;
+    state->setAttribute( pm );
+  }
+  pm->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL );
+}
+
+void devOSGBody::SetModeLine(){
+  osg::ref_ptr<osg::StateSet> state = getOrCreateStateSet();
+  osg::ref_ptr<osg::PolygonMode> pm;
+  pm = dynamic_cast<osg::PolygonMode*>
+    ( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+  if( !pm ){
+    pm = new osg::PolygonMode;
+    state->setAttribute( pm );
+  }
+  pm->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE );
+}
+
+void devOSGBody::SetModePoint(){
+  osg::ref_ptr<osg::StateSet> state = getOrCreateStateSet();
+  osg::ref_ptr<osg::PolygonMode> pm;
+  pm = dynamic_cast<osg::PolygonMode*>
+    ( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+  if( !pm ){
+    pm = new osg::PolygonMode;
+    state->setAttribute( pm );
+  }
+  pm->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::POINT );
+}

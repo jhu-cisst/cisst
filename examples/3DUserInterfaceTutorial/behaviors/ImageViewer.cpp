@@ -418,7 +418,7 @@ ImageViewer::ImageViewer(const std::string & name):
     VolumeReader = vtkVolume16Reader::New();
     VolumeReader->SetDataDimensions(64,64);
     VolumeReader->SetDataByteOrderToLittleEndian();
-    VolumeReader->SetFilePrefix("/home/saw1/code/headsq/quarter");
+    VolumeReader->SetFilePrefix("E:/Demos/VTKData/headsq/quarter");
     VolumeReader->SetImageRange(1, 93);
     VolumeReader->SetDataSpacing(3.2, 3.2, 1.5);
 
