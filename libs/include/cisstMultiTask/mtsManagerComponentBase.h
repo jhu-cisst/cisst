@@ -134,6 +134,7 @@ public:
         const static std::string ComponentStop;
         const static std::string ComponentResume;
         const static std::string ComponentGetState;
+        const static std::string LoadLibrary;  // dynamic loading
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;

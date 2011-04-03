@@ -76,6 +76,7 @@ protected:
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
         mtsFunctionQualifiedRead ComponentGetState;
+        mtsFunctionQualifiedRead LoadLibrary;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -161,6 +162,7 @@ public:
                                                 InterfaceProvidedDescription & description) const;
     void InterfaceLCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface &intfc,
                                                 InterfaceRequiredDescription & description) const;
+    void InterfaceLCMCommands_LoadLibrary(const std::string &fileName, bool &result) const;
 
     /*! Event generators for InterfaceLCM's provided interface */
     mtsFunctionWrite InterfaceLCMEvents_ChangeState;
@@ -184,6 +186,7 @@ public:
                                                                     InterfaceProvidedDescription & description) const;
     void InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, 
                                                                     InterfaceRequiredDescription & description) const;
+    void InterfaceComponentCommands_LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const;
 
     /*! Event generators for InterfaceComponent's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;

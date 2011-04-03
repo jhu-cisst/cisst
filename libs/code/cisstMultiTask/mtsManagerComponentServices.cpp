@@ -47,6 +47,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.Resume);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                                                ServiceComponentManagement.GetState);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
+                                               ServiceComponentManagement.LoadLibrary);
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                                                ServiceGetters.GetNamesOfProcesses);
@@ -392,5 +394,18 @@ InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDe
     ServiceGetters.GetInterfaceRequiredDescription(argIn, argOut);
 
     return argOut;
+}
+
+bool mtsManagerComponentServices::Load(const std::string & fileName) const
+{
+    return Load(mtsManagerLocal::GetInstance()->GetProcessName(), fileName);
+}
+
+bool mtsManagerComponentServices::Load(const std::string & processName, const std::string & fileName) const
+{
+    mtsDescriptionLoadLibrary argIn(processName, fileName);
+    bool result = false;
+    ServiceComponentManagement.LoadLibrary(argIn, result);
+    return result;
 }
 

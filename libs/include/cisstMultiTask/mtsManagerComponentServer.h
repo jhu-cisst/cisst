@@ -71,6 +71,7 @@ protected:
         mtsFunctionQualifiedRead ComponentGetState;
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
+        mtsFunctionQualifiedRead LoadLibrary;
     } InterfaceGCMFunctionType;
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
@@ -108,6 +109,7 @@ public:
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
     void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, InterfaceProvidedDescription & description) const;
     void InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, InterfaceRequiredDescription & description) const;
+    void InterfaceGCMCommands_LoadLibrary(const mtsDescriptionLoadLibrary & lib, bool & result) const;
 
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;
