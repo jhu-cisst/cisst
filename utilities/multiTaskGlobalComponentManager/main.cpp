@@ -22,8 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstCommon/cmnGetChar.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
@@ -31,9 +30,10 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
-    cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
     // Create and start global component manager
     mtsManagerGlobal globalComponentManager;
@@ -54,12 +54,23 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // create the tasks, i.e. find the commands
     localManager->CreateAll();
+    localManager->WaitForStateAll(mtsComponentState::READY);
+
     // start the periodic Run
     localManager->StartAll();
+    localManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
-    while (1) {
-        osaSleep(100 * cmn_ms);
+    // loop until 'q' is pressed
+    int key = ' ';
+    std::cout << "Press 'q' to quit" << std::endl;
+    while (key != 'q') {
+        key = cmnGetChar();
     }
+
+    // cleanup
+    localManager->KillAll();
+    localManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
+    localManager->Cleanup();
 
     return 0;
 }
