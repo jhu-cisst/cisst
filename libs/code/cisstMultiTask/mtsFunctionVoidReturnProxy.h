@@ -48,6 +48,20 @@ public:
     inline mtsProxySerializer * GetSerializer(void) {
         return &Serializer;
     }
+
+    mtsExecutionResult Execute(mtsGenericObject & result) const {
+        std::cerr << "Function called" << std::endl;
+        mtsExecutionResult executionResult = Command ?
+            Command->Execute(result)
+            : mtsExecutionResult::FUNCTION_NOT_BOUND;
+        std::cerr << "Function returned " << executionResult << std::endl;
+        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+            this->ThreadSignalWait();
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
+        }
+        return executionResult;
+    }
+
 };
 
 #endif // _mtsFunctionVoidReturnProxy_h

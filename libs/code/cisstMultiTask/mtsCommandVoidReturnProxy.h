@@ -83,6 +83,7 @@ public:
         }
         mtsExecutionResult executionResult;
         if (NetworkProxyServer) {
+            std::cerr << "Sending command from command proxy" << std::endl; 
             if (!NetworkProxyServer->SendExecuteCommandVoidReturnSerialized(ClientID, CommandID,
                                                                             executionResult, result)) {
                 return mtsExecutionResult::NETWORK_ERROR;

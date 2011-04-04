@@ -407,7 +407,6 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
     const CommandVoidReturnVector::const_iterator itVoidReturnEnd = providedInterfaceDescription.CommandsVoidReturn.end();
     for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
         commandName = itVoidReturn->Name;
-        CMN_LOG_CLASS_INIT_ERROR << "not an error: creating " << commandName << std::endl;
         newCommandVoidReturn = new mtsCommandVoidReturnProxy(commandName);
         if (!providedInterfaceProxy->AddCommandVoidReturn(newCommandVoidReturn)) {
             delete newCommandVoidReturn;
