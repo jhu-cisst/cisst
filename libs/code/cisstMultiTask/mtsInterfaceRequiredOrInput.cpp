@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,11 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
+#include <cisstMultiTask/mtsComponent.h>
 
 
 mtsInterfaceRequiredOrInput::mtsInterfaceRequiredOrInput(const std::string & interfaceName,
+                                                         mtsComponent * component,
                                                          mtsRequiredType required):
     Name(interfaceName),
+    Component(component),
     Required(required)
 {
 }
@@ -37,6 +40,21 @@ mtsInterfaceRequiredOrInput::~mtsInterfaceRequiredOrInput()
 const std::string & mtsInterfaceRequiredOrInput::GetName(void) const
 {
     return this->Name;
+}
+
+
+const std::string mtsInterfaceRequiredOrInput::GetFullName(void) const
+{
+    if (this->Component) {
+        return this->Component->GetName() + ":" + this->GetName();
+    }
+    return "[no component]:" + this->GetName();
+}
+
+
+const mtsComponent *  mtsInterfaceRequiredOrInput::GetComponent(void) const
+{
+    return this->Component;
 }
 
 

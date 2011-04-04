@@ -30,6 +30,7 @@ ireTask::ireTask(const std::string &name, const std::string &startup) :
     mtsTaskContinuous(name), StartupCommands(startup)
 {
     EnableDynamicComponentManagement();
+    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
 }
 
 ireTask::~ireTask()

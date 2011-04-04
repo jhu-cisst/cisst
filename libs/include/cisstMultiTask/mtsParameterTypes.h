@@ -119,19 +119,20 @@ public:
 
     FullInterface Client;
     FullInterface Server;
-    int ConnectionID;
+    ConnectionIDType ConnectionID;
 #endif
 
-    mtsDescriptionConnection() : ConnectionID(-1) {}
+    mtsDescriptionConnection() : ConnectionID(InvalidConnectionID) {}
     mtsDescriptionConnection(const mtsDescriptionConnection &other);
     mtsDescriptionConnection(
         const std::string & clientProcessName, 
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, 
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const int connectionId = -1);
+        const ConnectionIDType connectionId = InvalidConnectionID);
     ~mtsDescriptionConnection() {}
 
+    void Init(void);
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);
@@ -244,19 +245,19 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArg);
 // Add Observers
 //
 
-class CISST_EXPORT mtsEventHandlerList : public mtsGenericObject
+class CISST_EXPORT mtsEventHandlerList: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 #ifndef SWIG
-    template <class _CommandType>
+    template <class _commandType>
     struct EventHandlerInfo {
         std::string EventName;
-        _CommandType *HandlerPtr;
+        _commandType * HandlerPointer;
         mtsRequiredType Required;
         bool Result;
-        EventHandlerInfo(const std::string &name, _CommandType *handler, mtsRequiredType required)
-            : EventName(name), HandlerPtr(handler), Required(required), Result(false) {}
+        EventHandlerInfo(const std::string & name, _commandType * handler, mtsRequiredType required)
+            : EventName(name), HandlerPointer(handler), Required(required), Result(false) {}
         ~EventHandlerInfo() {}
     };
 #endif
@@ -268,11 +269,11 @@ public:
 #endif
 
     mtsEventHandlerList() : Provided(0) {}
-    mtsEventHandlerList(mtsInterfaceProvided *provided) : Provided(provided) {}
+    mtsEventHandlerList(mtsInterfaceProvided * provided) : Provided(provided) {}
     ~mtsEventHandlerList() {}
 
 #ifndef SWIG
-    mtsInterfaceProvided *Provided;
+    mtsInterfaceProvided * Provided;
     std::vector<InfoVoid> VoidEvents;
     std::vector<InfoWrite> WriteEvents;
 #endif
@@ -283,5 +284,32 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsEventHandlerList);
+
+//-----------------------------------------------------------------------------
+//  For dynamically loading a library into a process
+//
+class CISST_EXPORT mtsDescriptionLoadLibrary: public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    std::string ProcessName;
+    std::string LibraryName;
+
+    /*! Default constructor */
+    mtsDescriptionLoadLibrary() {}
+    /*! Copy constructor */
+    mtsDescriptionLoadLibrary(const mtsDescriptionLoadLibrary &other);
+    /*! Constructor process name and library name */
+    mtsDescriptionLoadLibrary(const std::string &processName, const std::string &libraryName);
+    /*! Destructor */
+    ~mtsDescriptionLoadLibrary() {}
+
+    void ToStream(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionLoadLibrary);
 
 #endif // _mtsParameterTypes_h

@@ -47,6 +47,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsPython.h>
 %}
 
+// PK TEMP: need time.sleep until blocking commands supported over network
+%pythoncode %{
+   import time
+%}
+
 // use class type to create the correct Python type
 %apply cmnGenericObject * {mtsGenericObject *};
 
@@ -409,27 +414,35 @@ http://www.cisst.org/cisst/license.txt.
             if not isinstance(interfaceProvided, InterfaceProvidedDescription):
                 print 'Parameter must be of type InterfaceProvidedDescription'
                 return
-            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvided.InterfaceProvidedName, MTS_OPTIONAL)
+            interfaceProvidedNoSpace = interfaceProvided.InterfaceProvidedName.replace(' ', '')
+            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
             if not interfaceRequired:
                 return
+            self.__dict__[interfaceRequired.GetName()] = interfaceRequired
             for command in interfaceProvided.CommandsVoid:
-                self.__dict__[command.Name] = mtsFunctionVoid()
-                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+                func = mtsFunctionVoid()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             #for command in interfaceProvided.CommandsVoidReturn:
-            #    self.__dict__[command.Name] = mtsFunctionVoidReturn()
-            #    interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            #    func = mtsFunctionVoidReturn()
+            #    interfaceRequired.AddFunction(command.Name, func)
+            #    func.thisown = 0
             for command in interfaceProvided.CommandsWrite:
-                self.__dict__[command.Name] = mtsFunctionWrite()
-                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+                func = mtsFunctionWrite()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             #for command in interfaceProvided.CommandsWriteReturn:
-            #    self.__dict__[command.Name] = mtsFunctionWriteReturn()
-            #    interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+            #    func = mtsFunctionWriteReturn()
+            #    interfaceRequired.AddFunction(command.Name, func)
+            #    func.thisown = 0
             for command in interfaceProvided.CommandsQualifiedRead:
-                self.__dict__[command.Name] = mtsFunctionQualifiedRead()
-                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+                func = mtsFunctionQualifiedRead()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             for command in interfaceProvided.CommandsRead:
-                self.__dict__[command.Name] = mtsFunctionRead()
-                interfaceRequired.AddFunction(command.Name, self.__dict__[command.Name])
+                func = mtsFunctionRead()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             return interfaceRequired
             
         # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
@@ -453,6 +466,10 @@ http://www.cisst.org/cisst/license.txt.
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
                     manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
+                    # PK TEMP: need time.sleep until blocking commands supported over network
+                    time.sleep(1.0)
+                    interfaceRequired.UpdateFromC()
+                    return interfaceRequired
                 else:
                     print 'Parameter error: must specify (process, component, interface) or (component, interface)'
             except TypeError, e:
@@ -678,10 +695,16 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(InterfaceRequiredDescriptionProxy, Interfac
 
 // instantiate for types also instantiated in cisstVector wrappers
 MTS_INSTANTIATE_VECTOR(mtsDoubleVec, double);
-MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
-MTS_INSTANTIATE_VECTOR(mtsShortVec, short);
+MTS_INSTANTIATE_VECTOR(mtsFloatVec, float);
 MTS_INSTANTIATE_VECTOR(mtsLongVec, long);
+MTS_INSTANTIATE_VECTOR(mtsULongVec, unsigned long);
+MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
+MTS_INSTANTIATE_VECTOR(mtsUIntVec, unsigned int);
+MTS_INSTANTIATE_VECTOR(mtsShortVec, short);
+MTS_INSTANTIATE_VECTOR(mtsUShortVec, unsigned short);
+MTS_INSTANTIATE_VECTOR(mtsCharVec, char);
 MTS_INSTANTIATE_VECTOR(mtsUCharVec, unsigned char);
+MTS_INSTANTIATE_VECTOR(mtsBoolVec, bool);
 MTS_INSTANTIATE_VECTOR(mtsStdStringVec, std::string);
 
 // Wrap mtsMatrix

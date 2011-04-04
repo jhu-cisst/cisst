@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlBufferImage.h>
+#include <cisstStereoVision/svlConverters.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <string.h> // for memcpy
 
@@ -134,7 +135,50 @@ bool svlBufferImage::Push(const unsigned char* buffer, unsigned int size, bool t
 #if CISST_SVL_HAS_OPENCV
 bool svlBufferImage::PushIplImage(IplImage* image)
 {
-    return Push(reinterpret_cast<unsigned char*>(image->imageData), GetDataSize(), (image->origin != IPL_ORIGIN_TL));
+    const bool is_4_channel_input_padded = true; // Must be a bug in OpenCV 2.2
+    const int channels = image->widthStep / image->width;
+
+    if (channels == 3) { // No conversion needed
+        return Push(reinterpret_cast<unsigned char*>(image->imageData), GetDataSize(), image->origin != IPL_ORIGIN_TL);
+    }
+    else { // Conversion needed
+        const int pixelcount = image->width * image->height;
+        const int datasize = pixelcount * 3;
+
+        if (OCVConvBuffer.size() < static_cast<unsigned int>(datasize)) OCVConvBuffer.SetSize(datasize);
+
+        switch (channels) {
+            case 1:
+                svlConverter::Gray8toRGB24(reinterpret_cast<unsigned char*>(image->imageData), OCVConvBuffer.Pointer(), pixelcount);
+            break;
+
+            case 2:
+                svlConverter::RGB16toRGB24(reinterpret_cast<unsigned char*>(image->imageData), OCVConvBuffer.Pointer(), pixelcount);
+            break;
+
+            case 4:
+                if (is_4_channel_input_padded) {
+                    const int stride_in  = image->width * 4;
+                    const int stride_out = image->width * 3;
+                    const int height = image->height;
+                    unsigned char* input  = reinterpret_cast<unsigned char*>(image->imageData);
+                    unsigned char* output = OCVConvBuffer.Pointer();
+                    for (int i = 0; i < height; i ++) {
+                        memcpy(output, input, stride_out);
+                        input  += stride_in;
+                        output += stride_out;
+                    }
+                }
+                else {
+                    svlConverter::RGBA32toRGB24(reinterpret_cast<unsigned char*>(image->imageData), OCVConvBuffer.Pointer(), pixelcount);
+                }
+            break;
+
+            default:
+            return false;
+        }
+        return Push(OCVConvBuffer.Pointer(), GetDataSize(), image->origin != IPL_ORIGIN_TL);
+    }
 }
 #endif
 

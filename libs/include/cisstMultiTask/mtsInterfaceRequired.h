@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
 
 #include <cisstCommon/cmnNamedMap.h>
+#include <cisstOSAbstraction/osaThread.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
 
@@ -34,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 
 #include <cisstMultiTask/mtsFunctionBase.h>
 
@@ -109,6 +111,13 @@ protected:
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequired(void) {}
 
+    /*! Thread signal used for blocking calls.  It is shared between
+      all functions */
+    osaThreadSignal ThreadSignalForBlockingCommands;
+
+    /*! For event receiver. */
+    osaThreadSignal * GetThreadSignal(void);
+
  public:
 
     /*! Default size for mail boxes and argument queues used by event
@@ -128,7 +137,8 @@ protected:
       function even if this interface is not connected to a provided
       interface.
     */
-    mtsInterfaceRequired(const std::string & interfaceName, mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
+    mtsInterfaceRequired(const std::string & interfaceName, mtsComponent * component,
+                         mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
@@ -213,12 +223,17 @@ protected:
       Id so that GetCommandVoid and GetCommandWrite (queued
       commands) know which mailbox to use.  The user Id is provided
       by the provided interface when calling AllocateResources. */
- private:
 
-    bool BindCommands(const mtsInterfaceProvided *interfaceProvided);
+    bool AddSystemEventHandlers(void);
+
+ private:
+    void BlockingCommandExecutedHandler(void);
+
+    bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
     bool DetachCommands(void);
-    void GetEventList(mtsEventHandlerList &eventList);
-    bool CheckEventList(mtsEventHandlerList &eventList) const;
+
+    void GetEventList(mtsEventHandlerList & eventList);
+    bool CheckEventList(mtsEventHandlerList & eventList) const;
  public:
 
     void DisableAllEvents(void);
@@ -318,6 +333,9 @@ protected:
     typedef cmnNamedMap<mtsCommandWriteBase> EventHandlerWriteMapType;
     EventHandlerVoidMapType EventHandlersVoid;
     EventHandlerWriteMapType EventHandlersWrite;
+
+    /*! Get description of this interface (with serialized argument information) */
+    void GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription);
 
 public:
 

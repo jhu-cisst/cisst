@@ -157,19 +157,19 @@ CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface)
 #include <cisstMultiTask/mtsConfig.h>
 #if CISST_MTS_HAS_ICE
 
-#include <cisstMultiTask/mtsComponentInterfaceProxyClient.h>
+#include "mtsComponentInterfaceProxyClient.h"
 CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyClient)
 
-#include <cisstMultiTask/mtsComponentInterfaceProxyServer.h>
+#include "mtsComponentInterfaceProxyServer.h"
 CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyServer)
 
-#include <cisstMultiTask/mtsComponentProxy.h>
+#include "mtsComponentProxy.h"
 CMN_IMPLEMENT_SERVICES(mtsComponentProxy)
 
-#include <cisstMultiTask/mtsManagerProxyClient.h>
+#include "mtsManagerProxyClient.h"
 CMN_IMPLEMENT_SERVICES(mtsManagerProxyClient)
 
-#include <cisstMultiTask/mtsManagerProxyServer.h>
+#include "mtsManagerProxyServer.h"
 CMN_IMPLEMENT_SERVICES(mtsManagerProxyServer)
 
 #endif // CISST_MTS_HAS_ICE

@@ -45,6 +45,7 @@ svlFilterImageResizer::svlFilterImageResizer() :
     AddInputType("input", svlTypeImageMono8Stereo);
 //  TO DO:
 //    svlTypeImageMono16 and svlTypeImageMono16Stereo
+//    svlTypeImageMono32 and svlTypeImageMono32Stereo
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
@@ -120,12 +121,14 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
                 OutputImage = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
             break;
 
+            case svlTypeImageRGBA:          // To be added
+            case svlTypeImageRGBAStereo:    // To be added
             case svlTypeImageMono16:        // To be added
             case svlTypeImageMono16Stereo:  // To be added
+            case svlTypeImageMono32:        // To be added
+            case svlTypeImageMono32Stereo:  // To be added
 
                 // Other types may be added in the future
-            case svlTypeImageRGBA:
-            case svlTypeImageRGBAStereo:
             case svlTypeMatrixInt8:
             case svlTypeMatrixInt16:
             case svlTypeMatrixInt32:
@@ -143,6 +146,7 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
             break;
         }
 
@@ -164,7 +168,9 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
 
         syncOutput = OutputImage;
     }
-
+    else {
+        syncOutput = syncInput;
+    }
 
     return SVL_OK;
 }

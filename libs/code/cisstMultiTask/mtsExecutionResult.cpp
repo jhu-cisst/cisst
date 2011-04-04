@@ -64,7 +64,11 @@ const std::string & mtsExecutionResult::ToString(const Enum & value)
         "command argument queue full",
         "invalid input type",
         "underlying method or function returned \"false\"",
-        "network error"
+        "network error",
+        "invalid network command Id", 
+        "unable to dynamically create an argument",
+        "serialization failed"
+        "deserialization failed"
     };
     return resultDescription[value];
 }

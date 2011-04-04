@@ -80,6 +80,8 @@ svlSample* svlSample::GetNewFromType(svlStreamType type)
         case svlTypeImageMono8Stereo:  return new svlSampleImageMono8Stereo;  break;
         case svlTypeImageMono16:       return new svlSampleImageMono16;       break;
         case svlTypeImageMono16Stereo: return new svlSampleImageMono16Stereo; break;
+        case svlTypeImageMono32:       return new svlSampleImageMono32;       break;
+        case svlTypeImageMono32Stereo: return new svlSampleImageMono32Stereo; break;
         case svlTypeImage3DMap:        return new svlSampleImage3DMap;        break;
         case svlTypeMatrixInt8:        return new svlSampleMatrixInt8;        break;
         case svlTypeMatrixInt16:       return new svlSampleMatrixInt16;       break;
@@ -94,6 +96,7 @@ svlSample* svlSample::GetNewFromType(svlStreamType type)
         case svlTypeTransform3D:       return new svlSampleTransform3D;       break;
         case svlTypeTargets:           return new svlSampleTargets;           break;
         case svlTypeText:              return new svlSampleText;              break;
+        case svlTypeBlobs:             return new svlSampleBlobs;             break;
     }
     return 0;
 }

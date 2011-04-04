@@ -23,9 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <Python.h>
 
+#include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnCallbackStreambuf.h>
 #include <cisstCommon/cmnAssert.h>
 #include <cisstInteractive/ireFramework.h>
+
+#if (CISST_OS == CISST_LINUX)
+#include <dlfcn.h>
+#endif
 
 // PyTextCtrlHook
 //
@@ -323,6 +328,13 @@ void ireFramework::InitShellInstance(void)
 {
     Py_Initialize();
     PyEval_InitThreads();
+#if (CISST_OS == CISST_LINUX)
+    // For Linux, change dlopenflags to avoid swig::stop_iterator exceptions
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    PyThreadState *threadState = PyThreadState_Get();
+    threadState->interp->dlopenflags |= RTLD_GLOBAL;
+    PyGILState_Release(gstate);
+#endif
     IRE_State = IRE_INITIALIZED;
 }
 

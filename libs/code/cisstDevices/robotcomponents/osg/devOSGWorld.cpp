@@ -1,18 +1,39 @@
 #include <osg/Geometry>
 #include <osg/Geode>
+
+#include <cisstCommon/cmnLogger.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+
 #include <iostream>
 
 devOSGWorld::devOSGWorld(){
-
-  osg::Geometry* linesGeom = new osg::Geometry;
+  /*
+  osg::ref_ptr<osg::Geometry> linesGeom;
+  try{ linesGeom = new osg::Geometry; }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create a geometry." 
+		      << std::endl;
+  }
   
-  osg::DrawArrays* drawArrayLines;
-  drawArrayLines = new osg::DrawArrays( osg::PrimitiveSet::LINES ); 
-
+  osg::ref_ptr<osg::DrawArrays> drawArrayLines;
+  try{ drawArrayLines = new osg::DrawArrays( osg::PrimitiveSet::LINES ); }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create array of lines." 
+		      << std::endl;
+  }
   linesGeom->addPrimitiveSet(drawArrayLines);
-  osg::Vec3Array* vertexData = new osg::Vec3Array;
+
+  osg::ref_ptr<osg::Vec3Array> vertexData;
+  try{ vertexData = new osg::Vec3Array; }
+  catch( std::bad_alloc& ){ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to create vertices." 
+		      << std::endl;
+  }
   linesGeom->setVertexArray(vertexData);
+
 
   for( int i=-10; i<=10; i++ ){
     vertexData->push_back(osg::Vec3(-10, i, 0));
@@ -86,5 +107,6 @@ devOSGWorld::devOSGWorld(){
   
   addChild( geode );
 
+  */
 }
 

@@ -479,6 +479,105 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
     }
 }
 
+void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal)
+{
+    if (!input || !output || kernel.size() < 1) return;
+
+    const int kernel_size = kernel.size();
+    const int kernel_rad = kernel_size / 2;
+    unsigned int *input2;
+    int *kernelptr;
+    int i, j, k_val, sum;
+
+    if (horizontal) {
+
+        int k, k_from, k_to;
+
+        for (j = 0; j < height; j ++) {
+            for (i = 0; i < width; i ++) {
+
+                sum = 0;
+
+                kernelptr = kernel.Pointer();
+
+                k = kernel_size;
+                k_from = i - kernel_rad;
+                k_to   = k_from + kernel_size;
+                if (k_from < 0) {
+                    k += k_from;
+                    kernelptr -= k_from;
+                    k_from = 0;
+                }
+                if (k_to > width) {
+                    k -= k_to - width;
+                    k_to = width;
+                }
+
+                input2 = input + j * width + k_from;
+
+                while (k) {
+
+                    k_val = *kernelptr; kernelptr ++;
+                    sum += (*input2) * k_val; input2 ++; 
+
+                    k --;
+                }
+
+                sum >>= 10;
+
+                if (sum < 0) sum = 0;
+                *output = static_cast<unsigned int>(sum); output ++;
+            }
+        }
+
+    }
+    else {
+
+        const int rowstride_short = width - 1;
+        int l, l_from, l_to;
+
+        for (j = 0; j < height; j ++) {
+            for (i = 0; i < width; i ++) {
+
+                sum = 0;
+
+                kernelptr = kernel.Pointer();
+
+                l = kernel_size;
+                l_from = j - kernel_rad;
+                l_to   = l_from + kernel_size;
+                if (l_from < 0) {
+                    l += l_from;
+                    kernelptr -= l_from;
+                    l_from = 0;
+                }
+                if (l_to > height) {
+                    l -= l_to - height;
+                    l_to = height;
+                }
+
+                input2 = input + l_from * width + i;
+
+                while (l) {
+
+                    k_val = *kernelptr; kernelptr ++;
+                    sum += (*input2) * k_val; input2 ++; 
+
+                    input2 += rowstride_short;
+
+                    l --;
+                }
+
+                sum >>= 10;
+
+                if (sum < 0) sum = 0;
+                *output = static_cast<unsigned int>(sum); output ++;
+            }
+        }
+
+    }
+}
+
 void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
 {
     if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
@@ -806,6 +905,84 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 
             if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
             *output = static_cast<unsigned short>(sum); output ++;
+        }
+    }
+}
+
+void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
+{
+    if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
+
+    const int kernel_size = kernel.cols();
+    const int kernel_rad = kernel_size / 2;
+    const int rowstride_short = width - kernel_size;
+    int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
+    unsigned int *input2;
+    int *kernelptr;
+
+    for (j = 0; j < height; j ++) {
+        for (i = 0; i < width; i ++) {
+
+            sum = 0;
+
+            kernelstride = 0;
+            kernelptr = kernel.Pointer();
+
+            l = kernel_size;
+            l_from = j - kernel_rad;
+            l_to   = l_from + kernel_size;
+            if (l_from < 0) {
+                l += l_from;
+                kernelptr -= l_from * kernel_size;
+                
+                l_from = 0;
+            }
+            if (l_to > height) {
+                l -= l_to - height;
+                l_to = height;
+            }
+
+            k = kernel_size;
+            k_from = i - kernel_rad;
+            k_to   = k_from + kernel_size;
+            if (k_from < 0) {
+                k += k_from;
+                kernelptr -= k_from;
+                kernelstride -= k_from;
+                
+                k_from = 0;
+            }
+            if (k_to > width) {
+                k_ = k_to - width;
+                k -= k_;
+                kernelstride += k_;
+                
+                k_to = width;
+            }
+
+            input2 = input + l_from * width + k_from;
+
+            while (l) {
+
+                k_ = k;
+                while (k_) {
+
+                    k_val = *kernelptr; kernelptr ++;
+                    sum += (*input2) * k_val; input2 ++;
+
+                    k_ --;
+                }
+
+                input2 += rowstride_short + kernelstride;
+                kernelptr += kernelstride;
+
+                l --;
+            }
+
+            sum >>= 10;
+
+            if (sum < 0) sum = 0;
+            *output = static_cast<unsigned int>(sum); output ++;
         }
     }
 }

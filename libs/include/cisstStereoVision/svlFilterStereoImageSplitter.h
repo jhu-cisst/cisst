@@ -41,7 +41,7 @@ public:
     svlStereoLayout GetLayout();
 
 protected:
-    virtual int UpdateTypes(svlFilterInput &input, svlStreamType type);
+    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();

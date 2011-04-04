@@ -14,12 +14,14 @@
 #
 # --- end cisst license ---
 
+if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+
 # all source files
 set (SOURCE_FILES
      robDHTest.cpp
      robManipulatorTest.cpp
 #     robMassTest.cpp
-     robWAMKinematics.cpp
+     robRobotsKinematics.cpp
     )
 
 # all header files
@@ -27,7 +29,7 @@ set (HEADER_FILES
      robDHTest.h
      robManipulatorTest.h
 #     robMassTest.h
-     robWAMKinematics.h
+     robRobotsKinematics.h
      )
 
 # Add executable for C++ tests
@@ -38,3 +40,4 @@ cisst_target_link_libraries (cisstRobotTests cisstCommon cisstVector cisstRobot)
 # To generate a CTest list of tests
 cisst_add_test (cisstRobotTests ITERATIONS 10 INSTANCES 2)
 
+endif( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )

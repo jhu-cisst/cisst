@@ -3,6 +3,7 @@
 /* $Id$ */
 
 #include <string>
+#include <iostream>
 #include <deque>
 
 #ifndef _ccgComponent_h

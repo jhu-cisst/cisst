@@ -69,14 +69,14 @@ public:
                 {
                     if (VideoWriterFilter) {
                         if (Recording) {
-                            VideoWriterFilter->Pause();
+                            VideoWriterFilter->PauseAtTime();
                             SplitterOutput->SetBlock(true);
                             Recording = false;
                             cout << endl << " >>> Recording paused <<<" << endl;
                         }
                         else {
                             SplitterOutput->SetBlock(false);
-                            VideoWriterFilter->Record(-1);
+                            VideoWriterFilter->RecordAtTime();
                             Recording = true;
                             cout << endl << " >>> Recording started <<<" << endl;
                         }
@@ -208,15 +208,13 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     gamma.SetGamma(0.0);
 
     // setup splitter
-    splitter.AddOutput("output2", 8, 200);
+    splitter.AddOutput("output2", 8, 100);
     svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup video writer
     if (save == true) {
-        videowriter.DialogFilePath(SVL_LEFT);
-        videowriter.DialogCodec(SVL_LEFT);
-        videowriter.DialogFilePath(SVL_RIGHT);
-        videowriter.DialogCodec(SVL_RIGHT);
+        videowriter.DialogOpenFile(SVL_LEFT);
+        videowriter.DialogOpenFile(SVL_RIGHT);
         videowriter.Pause();
     }
 

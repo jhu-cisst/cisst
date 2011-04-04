@@ -38,9 +38,11 @@ namespace svlConverter
     void Gray8toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void Gray8toRGBA32(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void Gray8toGray16(unsigned char* input, unsigned short* output, const unsigned int pixelcount);
+    void Gray8toGray32(unsigned char* input, unsigned int* output, const unsigned int pixelcount);
     void Gray16toRGB24(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void Gray16toRGBA32(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void Gray16toGray8(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
+    void Gray16toGray32(unsigned short* input, unsigned int* output, const unsigned int pixelcount);
     void Gray32toRGB24(unsigned int* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void Gray32toRGBA32(unsigned int* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void Gray32toGray8(unsigned int* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
@@ -49,14 +51,17 @@ namespace svlConverter
     void int32toRGBA32(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue = -1);
     void int32toGray8(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue = -1);
     void int32toGray16(int* input, unsigned short* output, const unsigned int pixelcount, const int maxinputvalue = -1);
+    void int32toGray32(int* input, unsigned int* output, const unsigned int pixelcount);
     void float32toRGB24(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
     void float32toRGBA32(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
     void float32toGray8(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
     void float32toGray16(float* input, unsigned short* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
+    void float32toGray32(float* input, unsigned int* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
     void RGB16toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void RGB24toRGBA32(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void RGB24toGray8(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
     void RGB24toGray16(unsigned char* input, unsigned short* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
+    void RGB24toGray32(unsigned char* input, unsigned int* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
     void RGB24toYUV444(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void RGB24toYUV444P(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void BGR24toYUV422(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
@@ -69,6 +74,7 @@ namespace svlConverter
     void RGBA32toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void RGBA32toGray8(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
     void RGBA32toGray16(unsigned char* input, unsigned short* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
+    void RGBA32toGray32(unsigned char* input, unsigned int* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
     void YUV444toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void YUV444PtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void YUV422toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);

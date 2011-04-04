@@ -1,4 +1,5 @@
 
+# those will eventuall be removed
 option( CISST_DEV_HAS_ODE "Use support for ODE." OFF )
 option( CISST_DEV_HAS_GLUT "Use support for GLUT." OFF )
 
@@ -84,12 +85,15 @@ find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
 
 if( OPENSCENEGRAPH_FOUND )
 
+  set( CISST_DEV_HAS_OSG ON PARENT_SCOPE )
   SET( 
     HEADER_FILES 
     ${HEADER_FILES} 
     robotcomponents/osg/devOSGBody.h
     robotcomponents/osg/devOSGCamera.h
     robotcomponents/osg/devOSGManipulator.h
+    robotcomponents/osg/devOSGMono.h
+    robotcomponents/osg/devOSGPick.h
     robotcomponents/osg/devOSGStereo.h
     robotcomponents/osg/devOSGWorld.h
     )
@@ -100,6 +104,8 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGBody.cpp
     robotcomponents/osg/devOSGCamera.cpp
     robotcomponents/osg/devOSGManipulator.cpp
+    robotcomponents/osg/devOSGMono.cpp
+    robotcomponents/osg/devOSGPick.cpp
     robotcomponents/osg/devOSGStereo.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
@@ -110,10 +116,12 @@ if( OPENSCENEGRAPH_FOUND )
   find_package( ODE )
   if( ODE_FOUND )
 
+    set( CISST_DEV_HAS_ODE ON PARENT_SCOPE )
     set( CMAKE_CXX_FLAGS 
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
       PARENT_SCOPE )
     cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
+    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
     
     SET( HEADER_FILES 
       
@@ -122,7 +130,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEBody.h
       robotcomponents/ode/devODEJoint.h
       robotcomponents/ode/devODEServoMotor.h
-      #      robotcomponents/ode/devODEManipulator.h
+      robotcomponents/ode/devODEManipulator.h
       
       #      robotcomponents/ode/devODEBH.h
       #      robotcomponents/ode/devODEBHF1.h
@@ -139,7 +147,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEBody.cpp
       robotcomponents/ode/devODEJoint.cpp
       robotcomponents/ode/devODEServoMotor.cpp
-      #      robotcomponents/ode/devODEManipulator.cpp
+      robotcomponents/ode/devODEManipulator.cpp
       
       #      robotcomponents/ode/devODEBH.cpp
       #      robotcomponents/ode/devODEBHF1.cpp
@@ -151,7 +159,15 @@ if( OPENSCENEGRAPH_FOUND )
       )
     
   endif( ODE_FOUND )
-    
+
+  find_package( OpenCV2 )
+  if( OpenCV2_FOUND )
+    set( CISST_DEV_HAS_OPENCV22 ON PARENT_SCOPE )
+    MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+    cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OpenCV2_LIBRARIES)
+    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+  endif( OpenCV2_FOUND )
+  
 endif( OPENSCENEGRAPH_FOUND )
 
 # Check for GLUT

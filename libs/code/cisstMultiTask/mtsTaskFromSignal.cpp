@@ -83,8 +83,8 @@ void mtsTaskFromSignal::Kill(void)
 }
 
 
-mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                               mtsRequiredType required)
+mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                                         mtsRequiredType required)
 {
     // create a mailbox with post command queued command
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
@@ -106,8 +106,8 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string
 }
 
 
-mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                               mtsInterfaceQueueingPolicy queueingPolicy)
+mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
+                                                                                  mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
@@ -116,7 +116,7 @@ mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvided(const std::string
         // If the internal provided interface (i.e., for the Manager Component Client), then the "post command queued"
         // callable object should be the one defined in mtsTask, which processes the mailbox if the task is not active.
         // Note that if the task is active, we always wait for the task's DoRunInternal method to process this mailbox.
-        if (interfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided)
+        if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {

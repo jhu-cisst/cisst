@@ -27,11 +27,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstStereoVision/svlFile.h>
 
 
 class svlVideoCodecCVI : public svlVideoCodecBase, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
+public:
+    typedef struct _CompressionData {
+        unsigned char Level;
+        unsigned char Differential;
+    } CompressionData;
 
 public:
     svlVideoCodecCVI();
@@ -63,11 +70,13 @@ public:
 
 protected:
     const std::string CodecName;
-    const vctFixedSizeVector<std::string, 3> FileStartMarker;
+    const vctFixedSizeVector<std::string, 4> FileStartMarker;
     const std::string FrameStartMarker;
 
+    CompressionData Config;
+
     int Version;
-    std::fstream* File;
+    svlFile File;
     long long int FooterOffset;
     unsigned int PartCount;
     unsigned int Width;
@@ -82,6 +91,8 @@ protected:
     vctDynamicVector<long long int> FrameOffsets;
     vctDynamicVector<double> FrameTimestamps;
 
+    unsigned char* prevYuvBuffer;
+    unsigned int prevYuvBufferSize;
     unsigned char* yuvBuffer;
     unsigned int yuvBufferSize;
     unsigned char* comprBuffer;
@@ -93,13 +104,17 @@ protected:
     unsigned int saveBufferSize;
     unsigned int SaveBufferUsedSize;
     unsigned int SaveBufferUsedID;
-    osaThread SaveThread;
-    osaThreadSignal SaveInitEvent;
-    osaThreadSignal NewFrameEvent;
-    osaThreadSignal WriteDoneEvent;
+    osaThread* SaveThread;
+    osaThreadSignal* SaveInitEvent;
+    osaThreadSignal* NewFrameEvent;
+    osaThreadSignal* WriteDoneEvent;
     bool SaveInitialized;
     bool KillSaveThread;
     bool SaveThreadError;
+
+    void DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size);
+    void DiffDecode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size);
+
     void* SaveProc(int param);
 };
 

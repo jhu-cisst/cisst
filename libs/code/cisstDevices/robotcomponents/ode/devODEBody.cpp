@@ -2,6 +2,44 @@
 #include <cisstDevices/robotcomponents/ode/devODEWorld.h>
 #include <cisstVector/vctMatrixRotation3.h>
 
+
+devODEBody::devODEBody( const std::string& name,
+			const vctFrm3& Rt,
+			const std::string& model,
+			devODEWorld* world ) :
+  devOSGBody( name, Rt, model, world ),
+  world( world ),
+  bodyid( 0 ),
+  mass( NULL ),
+  geomid( 0 ),
+  Vertices( NULL ),
+  VertexCount( 0 ),
+  Indices( NULL ),
+  IndexCount( 0 ){
+
+  if( world != NULL ){
+
+    vctFrame4x4<double> Rtwb( Rt.Rotation(), Rt.Translation() );
+
+    world->Lock();
+
+    BuildODETriMesh( world->GetSpaceID(), vctFixedSizeVector<double,3>( 0.0 ) );
+
+    // set the body position
+    dGeomSetPosition( GetGeomID(), Rtwb[0][3], Rtwb[1][3], Rtwb[2][3] );
+    
+    // get the orientation of the body
+    dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
+		   Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
+		   Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
+    
+    // set the orientation
+    dGeomSetRotation( GetGeomID(), R );
+    
+    world->Unlock();
+  }
+}
+
 devODEBody::devODEBody( const std::string& name,
 		        const vctFrame4x4<double>& Rtwb,
 			const std::string& model,
@@ -18,6 +56,7 @@ devODEBody::devODEBody( const std::string& name,
   IndexCount( 0 ){
 
   if( world != NULL ){
+
     world->Lock();
 
     BuildODETriMesh( spaceid, vctFixedSizeVector<double,3>( 0.0 ) );
@@ -112,6 +151,158 @@ devODEBody::devODEBody( const std::string& name,
 
 }
 
+devODEBody::devODEBody( const std::string& name,
+			const vctFrm3& Rt,
+			const std::string& model,
+			devODEWorld* world, 
+			double m ) :
+
+  devOSGBody( name, Rt, model, world ),
+  world( world ),
+  bodyid( 0 ),
+  mass( NULL ),
+  geomid( 0 ),
+  Vertices( NULL ),
+  VertexCount( 0 ),
+  Indices( NULL ),
+  IndexCount( 0 ){
+
+  if( world != NULL ){
+
+    vctFrame4x4<double> Rtwb( Rt.Rotation(), Rt.Translation() );
+    vctFixedSizeVector<double,3> tbcom( 0.0 );
+    vctFixedSizeMatrix<double,3,3> moit = vctFixedSizeMatrix<double,3,3>::Eye();
+
+    // Ensure that the world isn't turning
+    world->Lock();
+
+    // Create the ode body
+    bodyid = dBodyCreate( world->GetWorldID() );
+
+    dBodySetData( GetBodyID(), (void*)this );
+
+    // Create and configure the mass 
+    this->mass = new dMass;
+    //dMassSetBoxTotal (mass, 1, 0.1, 0.1, 0.1 );
+    dMassSetParameters( mass,                                // 
+			m,                                   // mass
+			0.0, 0.0, 0.0,                       // center of mass
+			moit[0][0], moit[1][1], moit[2][2],  // tensor
+			moit[0][1], moit[0][2], moit[1][2] );
+
+    // set the mass of the body
+    dBodySetMass( GetBodyID(), this->mass );
+
+    // Build the mesh data
+    BuildODETriMesh( world->GetSpaceID(), tbcom );
+
+    // This is the center of mass. ODE requires that the coordinate frame of the
+    // body be a its center of mass. Thus, we must shift the position of the
+    // body to its center of mass.
+    
+    // Center of mass with respect to the body coordinate frame...
+    vctFrame4x4<double> Rtbcom( vctMatrixRotation3<double>(), tbcom );
+    this->Rtcomb = Rtbcom;
+    
+    // ...We actually want to remember its inverse...
+    this->Rtcomb.InverseSelf();
+    
+    // Center of mass wrt to the world frame
+    vctFrame4x4<double> Rtwcom = Rtwb * Rtbcom;
+    
+    // set the body position
+    dBodySetPosition( GetBodyID(), Rtwcom[0][3], Rtwcom[1][3], Rtwcom[2][3] );
+
+    // get the orientation of the body
+    dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
+		   Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
+		   Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
+    
+    // set the orientation
+    dBodySetRotation( GetBodyID(), R );
+    
+    // Ensure that the world isn't turning
+    world->Unlock();
+  }
+
+}
+
+devODEBody::devODEBody( const std::string& name,
+			const vctFrm3& Rt,
+			const std::string& model,
+			devODEWorld* world, 
+			double m,
+			const vctFixedSizeVector<double,3>& tbcom,
+			const vctFixedSizeMatrix<double,3,3>& moit ) :
+
+  devOSGBody( name, Rt, model, world ),
+  world( world ),
+  bodyid( 0 ),
+  mass( NULL ),
+  geomid( 0 ),
+  Vertices( NULL ),
+  VertexCount( 0 ),
+  Indices( NULL ),
+  IndexCount( 0 ){
+
+  if( world != NULL ){
+
+    vctFrame4x4<double> Rtwb( Rt.Rotation(), Rt.Translation() );
+
+    // Ensure that the world isn't turning
+    world->Lock();
+
+    // Create the ode body
+    bodyid = dBodyCreate( world->GetWorldID() );
+
+    dBodySetData( GetBodyID(), (void*)this );
+
+    // Create and configure the mass 
+    this->mass = new dMass;
+    //dMassSetBoxTotal (mass, 1, 0.1, 0.1, 0.1 );
+    dMassSetParameters( mass,                                // 
+			m,                                   // mass
+			0.0, 0.0, 0.0,                       // center of mass
+			moit[0][0], moit[1][1], moit[2][2],  // tensor
+			moit[0][1], moit[0][2], moit[1][2] );
+
+    // set the mass of the body
+    dBodySetMass( GetBodyID(), this->mass );
+
+    // Build the mesh data
+    BuildODETriMesh( world->GetSpaceID(), tbcom );
+
+    // This is the center of mass. ODE requires that the coordinate frame of the
+    // body be a its center of mass. Thus, we must shift the position of the
+    // body to its center of mass.
+    
+    // Center of mass with respect to the body coordinate frame...
+    vctFrame4x4<double> Rtbcom( vctMatrixRotation3<double>(), tbcom );
+    this->Rtcomb = Rtbcom;
+    
+    // ...We actually want to remember its inverse...
+    this->Rtcomb.InverseSelf();
+    
+    // Center of mass wrt to the world frame
+    vctFrame4x4<double> Rtwcom = Rtwb * Rtbcom;
+    
+    // set the body position
+    dBodySetPosition( GetBodyID(), Rtwcom[0][3], Rtwcom[1][3], Rtwcom[2][3] );
+
+    // get the orientation of the body
+    dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
+		   Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
+		   Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
+    
+    // set the orientation
+    dBodySetRotation( GetBodyID(), R );
+    
+    // Ensure that the world isn't turning
+    world->Unlock();
+  }
+
+}
+
 devODEBody::~devODEBody(){
   world->Lock();
 
@@ -143,10 +334,10 @@ void devODEBody::BuildODETriMesh( dSpaceID spaceid,
   // start a 0 vertex
   geometriesverticescount.push_back( 0 );
 
-  for( size_t i=0; i<geometries.size(); i++ ){
+  for( size_t i=0; i<osggeometries.size(); i++ ){
     
     // Get the OSG vertex array of the geometry
-    const osg::Array* vertexarray = geometries[i]->getVertexArray();
+    const osg::Array* vertexarray = osggeometries[i]->getVertexArray();
 
     // This part copies the vertices of a geometry in a temporary buffer
     // Ensure we are dealing with an array of 3d points
@@ -172,10 +363,10 @@ void devODEBody::BuildODETriMesh( dSpaceID spaceid,
     
     // Copy the indices in a temporary array
     // Process all the primitives in the geometry
-    for( size_t j=0; j<geometries[i]->getNumPrimitiveSets(); j++ ){
+    for( size_t j=0; j<osggeometries[i]->getNumPrimitiveSets(); j++ ){
       
       // get the ith primitive set
-      const osg::PrimitiveSet* primitiveset = geometries[i]->getPrimitiveSet( j );
+      const osg::PrimitiveSet* primitiveset=osggeometries[i]->getPrimitiveSet(j);
 
       // test that the primitive are triangles
       if( primitiveset->getMode() == osg::PrimitiveSet::TRIANGLES || 
@@ -202,6 +393,14 @@ void devODEBody::BuildODETriMesh( dSpaceID spaceid,
     Vertices[i][0] = geometriesvertices[i][0];
     Vertices[i][1] = geometriesvertices[i][1];
     Vertices[i][2] = geometriesvertices[i][2];
+  }
+
+  vctVertices.SetSize( 3, VertexCount );
+
+  for( size_t i=0; i<VertexCount; i++ ){
+    vctVertices[0][i] = Vertices[i][0];
+    vctVertices[1][i] = Vertices[i][1];
+    vctVertices[2][i] = Vertices[i][2];
   }
 
   for( int i=0; i<IndexCount; i++ ){
@@ -246,7 +445,7 @@ void devODEBody::Disable(){
 
 // This is different from the devOSGBody::Update since it gets the position/orientation
 // from ODE world and not from MTS
-void devODEBody::Update(){
+void devODEBody::Transform(){
   vctMatrixRotation3<double> R = GetOrientation();
   vctFixedSizeVector<double,3> t = GetPosition();
   SetMatrix( vctFrame4x4<double>(R,t) );
@@ -285,3 +484,10 @@ vctFixedSizeVector<double,3> devODEBody::GetPosition() const{
   return vctFixedSizeVector<double,3>( 0.0 );
 }
 
+
+vctFrm3 devODEBody::GetTransform() const{
+  return vctFrm3( GetOrientation(), GetPosition() );
+}
+
+vctDynamicMatrix<double> devODEBody::GetVertices() const
+{ return vctVertices; }

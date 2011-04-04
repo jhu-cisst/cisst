@@ -44,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
   handler to a required interface. Thus, the following three blocks of code can all be used
   to set an event handler:
 
-  \code 
+  \code
   mtsInterfaceRequired required;
 
   // Method 1: Add event handler directly to required interface (no event receiver)
@@ -84,22 +84,23 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstOSAbstraction/osaForwardDeclarations.h>
+
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
-class osaThreadSignal;
 
 // EventReceivers must be added before Bind (should add check for InterfaceProvidedOrOutput==0)
 // EventHandlers can be added at any time.
-// When Bind called, 
+// When Bind called,
 //    if no EventReceiver, directly add EventHandler
 //    if EventReceiver, set handler in it
 
 class CISST_EXPORT mtsEventReceiverBase {
 protected:
     std::string Name;
-    mtsInterfaceRequired *Required;   // Pointer to the required interface
-    osaThreadSignal *EventSignal;
+    mtsInterfaceRequired * Required;   // Pointer to the required interface
+    osaThreadSignal * EventSignal;
     bool Waiting;
     bool OwnEventSignal;   // true if we created our own thread signal
 

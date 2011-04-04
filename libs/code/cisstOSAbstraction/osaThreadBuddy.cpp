@@ -33,10 +33,8 @@ http://www.cisst.org/cisst/license.txt.
     #include <sys/stat.h>
     #include <unistd.h>
     #include <fstream> // to access /proc/modules
-#ifdef CMAKE_HAVE_QUERY_MODULE
+#ifdef CMAKE_HAVE_MODULE_H
     #include <linux/module.h> // to query kernel module information
-    // Just in case <linux/module.h> does not declare query_module (e.g., Fedora kernel 2.4.20)
-    extern "C" int query_module(const char *name, int which, void *buf, size_t bufsize, size_t *ret);
 #endif
     const char __lock_filepath[] = "/var/lock/subsys/rtai";
     const char __lock_filename[] = "/var/lock/subsys/rtai/rtai.lock";
@@ -111,7 +109,10 @@ void __os_init(void)
     } else {
         // Check version of Linux kernel. query_module is only present up until
         // kernel 2.4 and was removed in Linux 2.6.
-#ifdef CMAKE_HAVE_QUERY_MODULE
+#if defined(CMAKE_HAVE_MODULE_H) && defined(QM_INFO)
+        // Just in case <linux/module.h> does not declare query_module (e.g., Fedora kernel 2.4.20)
+        extern "C" int query_module(const char *name, int which, void *buf, size_t bufsize, size_t *ret);
+
         CMN_LOG_INIT_VERBOSE << "Linux kernel version: 2.4.x" << std::endl;
 
         bool found;
@@ -193,6 +194,7 @@ void __os_exit(void)
 }
 
 struct osaThreadBuddyInternals {
+    bool IsSuspended;
 #if (CISST_OS == CISST_LINUX_RTAI)
     // A pointer to the thread buddy on RTAI.
     RT_TASK *RTTask;
@@ -202,19 +204,16 @@ struct osaThreadBuddyInternals {
     // A pointer to void on all other operating systems
     HANDLE WaitTimer;
     LARGE_INTEGER DueTime;
-    bool IsSuspended;
     double TimerFrequency;
     char Name[6];
     osaThreadBuddyInternals() : WaitTimer(NULL) {}
 #elif (CISST_OS == CISST_QNX)
     //struct timespec DueTime;
-    bool IsSuspended;
     //char Name[6];
     int coid;          // connection id
     int chid;          // channel id
 #else
     struct timeval DueTime;
-    bool IsSuspended;
     char Name[6];
 #endif // end of others
 };
@@ -253,6 +252,7 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
 {
    
     Period = tv.sec*1000000000 + tv.nsec;
+    Data->IsSuspended = false;
 
 #if (CISST_OS == CISST_LINUX_RTAI)
     // nam2num converts the character string 'name' to a long, using just the first
@@ -304,7 +304,6 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
     }
 #elif (CISST_OS == CISST_WINDOWS)
     Data->DueTime.QuadPart = 0UL;
-    Data->IsSuspended = false;
     for (unsigned int i = 0; i < sizeof(Data->Name)-1; i++) Data->Name[i] = name[i];
     Data->Name[sizeof(Data->Name)-1] = 0;
     if (IsPeriodic()) {
@@ -350,7 +349,6 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
 #else // default unix
     Data->DueTime.tv_sec = 0;
     Data->DueTime.tv_usec = 0;
-    Data->IsSuspended = false;
     for (unsigned int i = 0; i < sizeof(Data->Name); i++) Data->Name[i] = name[i];
     Data->Name[sizeof(Data->Name)-1] = 0;
 #endif    
@@ -536,20 +534,17 @@ void osaThreadBuddy::MakeSoftRealTime(void)
 void osaThreadBuddy::Resume(void) 
 {
 #if (CISST_OS == CISST_LINUX_RTAI)
-    rt_task_resume(Data->RTTask);
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-#else
-    Data->IsSuspended = false;
+    if (Data->IsSuspended)
+        rt_task_resume(Data->RTTask);
 #endif
+    Data->IsSuspended = false;
 }
 
 void osaThreadBuddy::Suspend(void) 
 {
+    Data->IsSuspended = true;
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_suspend(Data->RTTask);
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-#else 
-    Data->IsSuspended = true;
 #endif
 }
 

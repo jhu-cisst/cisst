@@ -476,7 +476,7 @@ public:
     static T* CastArg(mtsGenericObject &arg) {
         FinalBaseType *tmp = dynamic_cast<FinalBaseType *>(&arg);
         if (!tmp) {
-            CMN_LOG_INIT_ERROR << "CastArgImpl could not cast from " << typeid(arg).name()
+            CMN_LOG_INIT_ERROR << "CastArg could not cast from " << typeid(arg).name()
                                << " to " << typeid(FinalBaseType).name() << std::endl;
             return 0;
         }
@@ -485,7 +485,7 @@ public:
     static const T* CastArg(const mtsGenericObject &arg) {
         const FinalBaseType *tmp = dynamic_cast<const FinalBaseType *>(&arg);
         if (!tmp) {
-            CMN_LOG_INIT_ERROR << "CastArgImpl could not cast from const " << typeid(arg).name()
+            CMN_LOG_INIT_ERROR << "CastArg could not cast from const " << typeid(arg).name()
                                << " to const " << typeid(FinalBaseType).name() << std::endl;
             return 0;
         }
@@ -513,8 +513,21 @@ public:
         return new FinalType(arg);
     }
 
-    static T* CastArg(mtsGenericObject &arg) { return dynamic_cast<T * >(&arg); }
-    static const T* CastArg(const mtsGenericObject &arg) { return dynamic_cast<const T * >(&arg); }
+    static T* CastArg(mtsGenericObject &arg) {
+        T* temp = dynamic_cast<T * >(&arg);
+        if (!temp)
+            CMN_LOG_INIT_ERROR << "CastArg for mts, could not cast from " << arg.Services()->GetName()
+                               << " to " << T::ClassServices()->GetName() << std::endl;
+        return temp;
+    }
+
+    static const T* CastArg(const mtsGenericObject &arg) {
+        const T* temp = dynamic_cast<const T * >(&arg);
+        if (!temp)
+            CMN_LOG_INIT_ERROR << "CastArg for mts, could not cast from const " << arg.Services()->GetName()
+                               <<" to " << T::ClassServices()->GetName() << std::endl;
+        return temp;
+    }
 };
 
 template<typename T>
@@ -536,16 +549,10 @@ public:
     }
 
     static T* CastArg(mtsGenericObject &arg) { 
-        T* tmp = impl::CastArg(arg);
-        if (!tmp)
-            CMN_LOG_INIT_ERROR << "CastArg could not cast from " << typeid(arg).name() << " to " << typeid(T).name() << std::endl;
-        return tmp;
+        return impl::CastArg(arg);
     }
     static const T* CastArg(const mtsGenericObject &arg) {
-        const T* tmp = impl::CastArg(arg);
-        if (!tmp)
-            CMN_LOG_INIT_ERROR << "CastArg could not cast from const " << typeid(arg).name() << " to const " << typeid(T).name() << std::endl;
-        return tmp;
+        return impl::CastArg(arg);
     }
 };
 

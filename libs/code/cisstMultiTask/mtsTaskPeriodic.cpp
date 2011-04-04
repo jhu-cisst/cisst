@@ -59,6 +59,7 @@ void mtsTaskPeriodic::StartupInternal(void) {
     ThreadBuddy.Create(GetName().c_str(), AbsoluteTimePeriod); // convert to nano seconds
 
     // Call base class StartupInternal, which also calls user-supplied Startup.
+    // If all goes well, this changes the state to READY.
     BaseType::StartupInternal();
 
     // allow no more stack allocation. allowing this will

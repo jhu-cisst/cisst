@@ -38,10 +38,12 @@ set (SOURCE_FILES
      mtsComponent.cpp
      mtsComponentState.cpp
      mtsComponentViewer.cpp
+     mtsConnection.cpp
 
      mtsEventReceiver.cpp
      mtsExecutionResult.cpp
 
+     mtsFunctionBase.cpp
      mtsFunctionQualifiedRead.cpp
      mtsFunctionRead.cpp
      mtsFunctionVoid.cpp
@@ -122,6 +124,7 @@ set (HEADER_FILES
      mtsComponentGeneratorMacros.h
      mtsComponentState.h
      mtsComponentViewer.h
+     mtsConnection.h
 
      mtsEventReceiver.h
      mtsExecutionResult.h
@@ -209,7 +212,9 @@ if (CISST_MTS_HAS_ICE)
        mtsComponentProxy.cpp
        )
 
-  set (HEADER_FILES ${HEADER_FILES}
+  set (ADDITIONAL_HEADER_FILES
+       ${ADDITIONAL_HEADER_FILES}
+
        mtsComponentProxy.h
 
        mtsProxyConfig.h
@@ -303,7 +308,7 @@ install_files (/include/cisstMultiTask
 # Add the config file to the project
 set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
-set (ADDITIONAL_HEADER_FILES ${CISST_MTS_CONFIG_FILE})
+set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE})
 
 # Create the CMake config file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
@@ -316,7 +321,8 @@ cisst_add_library(
   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}
-  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES})
+  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
+  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
 
 # Add linking to external libraries
@@ -335,6 +341,7 @@ if (CISST_MTS_HAS_ICE)
     set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
     target_link_libraries (cisstMultiTask
                            ${ICE_LIBRARIES})
+    link_directories(${ICE_LIBRARY_DIR})
     CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
   endif (WIN32)
 

@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,6 +21,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
+
+
+mtsFunctionVoidReturn::mtsFunctionVoidReturn(void):
+    mtsFunctionBase(false),
+    Command(0)
+{}
 
 
 mtsFunctionVoidReturn::~mtsFunctionVoidReturn()
@@ -55,7 +61,15 @@ bool mtsFunctionVoidReturn::Bind(CommandType * command)
 
 mtsExecutionResult mtsFunctionVoidReturn::Execute(mtsGenericObject & result) const
 {
-    return Command ? Command->Execute(result) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult executionResult = Command ?
+        Command->Execute(result)
+        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+        && !this->IsProxy) {
+        this->ThreadSignalWait();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return executionResult;
 }
 
 

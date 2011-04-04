@@ -91,12 +91,12 @@ inline bool IsTypeDouble<double>(double CMN_UNUSED(val)) { return true; }
 #define MIN_INT16   -32768
 #define MAX_INT32   2147483647
 #define MIN_INT32   -2147483647
-#define MAX_UINT8   255
-#define MIN_UINT8   0
-#define MAX_UINT16  65535
-#define MIN_UINT16  0
-#define MAX_UINT32  4294967295
-#define MIN_UINT32  0
+#define MAX_UINT8   255U
+#define MIN_UINT8   0U
+#define MAX_UINT16  65535U
+#define MIN_UINT16  0U
+#define MAX_UINT32  4294967295U
+#define MIN_UINT32  0U
 
 template <class __ValueType>
 static bool GetMaxValue(long long int& max) { max = 0; return false; }

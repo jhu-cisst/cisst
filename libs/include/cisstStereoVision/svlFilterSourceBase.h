@@ -89,7 +89,7 @@ private:
     // Hide input setup methods from derived classes
     int AddInput(const std::string &inputname, bool trunk = true);
     int AddInputType(const std::string &inputname, svlStreamType type);
-    int UpdateTypes(svlFilterInput &input, svlStreamType type);
+    int OnConnectInput(svlFilterInput &input, svlStreamType type);
 
     bool AutoTimestamp;
     osaStopwatch TargetTimer;

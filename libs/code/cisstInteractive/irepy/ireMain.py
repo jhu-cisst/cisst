@@ -857,7 +857,8 @@ class ireMain(wx.Frame):
         frame.Show(True)
         
     def OnTaskTree(self, event):        
-        taskManager = self.ObjectRegister.FindObject("TaskManager")
+        #taskManager = self.ObjectRegister.FindObject("TaskManager")
+        taskManager = mtsManagerLocal.GetInstance()
         if taskManager:
             frame = ireTaskTree(None, -1, "Task Manager", taskManager)
             frame.Show(True)
@@ -870,7 +871,8 @@ class ireMain(wx.Frame):
     def OnOscilloscope(self, event):        
         import gettext
         gettext.install("irepy")
-        taskManager = self.ObjectRegister.FindObject("TaskManager")
+        #taskManager = self.ObjectRegister.FindObject("TaskManager")
+        taskManager = mtsManagerLocal.GetInstance()
         if taskManager:
             self.scopeFrame = COscilloscope(self, taskManager)
             self.scopeFrame.Show()

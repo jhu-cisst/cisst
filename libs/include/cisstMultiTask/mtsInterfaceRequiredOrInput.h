@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,7 +53,10 @@ class CISST_EXPORT mtsInterfaceRequiredOrInput: public cmnGenericObject
 protected:
 
     /*! A string identifying the 'Name' of the required interface. */
-    std::string Name;
+    const std::string Name;
+
+    /*! Pointer on the device itself. */
+    mtsComponent * Component;
 
     /*! Indicates if the interface must be connected. */
     mtsRequiredType Required;
@@ -66,6 +69,7 @@ protected:
         \param interfaceName Name of required interface
     */
     mtsInterfaceRequiredOrInput(const std::string & interfaceName,
+                                mtsComponent * component,
                                 mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
@@ -73,6 +77,13 @@ protected:
 
     /*! Returns the name of the interface. */
     const std::string & GetName(void) const;
+
+    /*! Returns the name of the this interface as well as the
+      component that owns the interface. */
+    const std::string GetFullName(void) const;
+
+    /*! Get a const pointer on the component */
+    const mtsComponent * GetComponent(void) const;
 
     virtual const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const = 0;
 

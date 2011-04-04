@@ -53,7 +53,11 @@ class CISST_EXPORT mtsExecutionResult
         COMMAND_ARGUMENT_QUEUE_FULL,
         INVALID_INPUT_TYPE,
         METHOD_OR_FUNCTION_FAILED,
-        NETWORK_ERROR
+        NETWORK_ERROR,
+        INVALID_COMMAND_ID,
+        ARGUMENT_DYNAMIC_CREATION_FAILED,
+        SERIALIZATION_ERROR,
+        DESERIALIZATION_ERROR
     };
 
     /*! Default constructor, set value to DEV_OK. */

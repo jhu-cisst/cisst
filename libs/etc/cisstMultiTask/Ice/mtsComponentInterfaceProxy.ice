@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Min Yang Jung
   Created on: 2010-01-12
-  
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 //
-// This Slice file defines an interface between a provided interface and a 
+// This Slice file defines an interface between a provided interface and a
 // required interfaces.
 //
 
@@ -37,27 +37,27 @@ module mtsComponentInterfaceProxy
 	struct CommandVoidInfo {
 		string Name;
 	};
-	
-	struct CommandWriteInfo { 
+
+	struct CommandWriteInfo {
 		string Name;
         string ArgumentPrototypeSerialized;
 	};
-	
-	struct CommandReadInfo { 
+
+	struct CommandReadInfo {
 		string Name;
         string ArgumentPrototypeSerialized;
 	};
-	
-	struct CommandQualifiedReadInfo { 
+
+	struct CommandQualifiedReadInfo {
 		string Name;
         string Argument1PrototypeSerialized;
         string Argument2PrototypeSerialized;
 	};
-	
-	struct EventVoidInfo { 
+
+	struct EventVoidInfo {
 		string Name;
 	};
-	
+
 	struct EventWriteInfo {
 		string Name;
         string ArgumentPrototypeSerialized;
@@ -72,7 +72,7 @@ module mtsComponentInterfaceProxy
 
     //-----------------------------------------------------------------------------
 	//	Function Proxy Related Definition
-	//-----------------------------------------------------------------------------	
+	//-----------------------------------------------------------------------------
     // The information about the function proxies.
     struct FunctionProxyInfo {
         string Name;
@@ -85,7 +85,7 @@ module mtsComponentInterfaceProxy
     sequence<FunctionProxyInfo> FunctionProxySequence;
 
     struct FunctionProxyPointerSet {
-        // A name of the server task proxy. This is used as a key to find a server 
+        // A name of the server task proxy. This is used as a key to find a server
         // task proxy at client side.
         string ServerTaskProxyName;
         // A name of the provided interface proxy that has command proxies at client side.
@@ -122,16 +122,16 @@ module mtsComponentInterfaceProxy
         /*! Methods for testing */
         void TestMessageFromServerToClient(string str);
 
-        /*! Fetch function proxy pointers from a required interface proxy at 
+        /*! Fetch function proxy pointers from a required interface proxy at
             server side. */
         ["cpp:const"] idempotent
         bool FetchFunctionProxyPointers(string requiredInterfaceName, out FunctionProxyPointerSet functionProxyPointers);
 
         /*! Execute command across a network */
-		void ExecuteCommandVoid(long commandID, bool blocking);
-        void ExecuteCommandWriteSerialized(long commandID, string argument, bool blocking);
-        void ExecuteCommandReadSerialized(long commandID, out string argument);
-        void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut);
+		void ExecuteCommandVoid(long commandID, bool blocking, out byte executionResult);
+        void ExecuteCommandWriteSerialized(long commandID, string argument, bool blocking, out byte executionResult);
+        void ExecuteCommandReadSerialized(long commandID, out string argument, out byte executionResult);
+        void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut, out byte executionResult);
 	};
 
 	//-----------------------------------------------------------------------------

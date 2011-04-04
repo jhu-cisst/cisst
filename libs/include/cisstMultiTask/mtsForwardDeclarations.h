@@ -31,6 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
+// MJ: if this is an inappropriate place to define invalid connection id or
+// #include is not proper, we could move this to somewhere else (e.g. mtsManagerGlobal.h)
+#include <limits> // for invalid connection id
+
 #include <cisstMultiTask/mtsConfig.h>
 
 /*! Queueing policy for the interface */
@@ -130,18 +134,6 @@ class mtsStateTable;
 class mtsCollectorBase;
 class mtsCollectorState;
 
-
-// global function to retrieve object name if available
-inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {
-    return "UnnamedObject";
-}
-
-// overload for mtsGenericObject to give at least the class name
-inline std::string mtsObjectName(const mtsGenericObject * object) {
-    return object->Services()->GetName();
-}
-
-
 // classes defined when ICE is used
 #if CISST_MTS_HAS_ICE
 class mtsComponentProxy;
@@ -154,15 +146,29 @@ class mtsManagerProxyServer;
 class mtsManagerProxyClient;
 #endif // CISST_MTS_HAS_ICE
 
-
+// managers
 class mtsManagerLocal;
 class mtsManagerLocalInterface;
 class mtsManagerGlobal;
 class mtsManagerGlobalInterface;
+typedef unsigned int ConnectionIDType;
+// MJ: Slice only supports int type (-2^31 to 2^31-1)
+// See http://www.zeroc.com/doc/Ice-3.4.1/manual/Slice.5.8.html for details
+const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_limits<int>::max(); 
 
+// dynamic component composition
 class mtsManagerComponentServices;
 class mtsManagerComponentClient;
 class mtsManagerComponentServer;
 
-#endif  // _mtsForwardDeclarations_h
+// global function to retrieve object name if available
+inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {
+    return "UnnamedObject";
+}
 
+// overload for mtsGenericObject to give at least the class name
+inline std::string mtsObjectName(const mtsGenericObject * object) {
+    return object->Services()->GetName();
+}
+
+#endif  // _mtsForwardDeclarations_h

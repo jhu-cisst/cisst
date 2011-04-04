@@ -53,20 +53,7 @@ class CISST_EXPORT svlFilterInput: public mtsInterfaceInput
         return true;
     }
 
-    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) {
-        svlFilterOutput * output = dynamic_cast<svlFilterOutput *>(interfaceProvidedOrOutput);
-        if (output) {
-            output->Connect(this);
-            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: output filter \"" << output->GetName()
-                                       << "\" connected to input filter \"" << this->GetName()
-                                       << "\"" << std::endl;
-            return true;
-        }
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: provided/output interface \"" << interfaceProvidedOrOutput->GetName()
-                                 << "\" can't be connected to input filter \"" << this->GetName()
-                                 << "\" as it is not of type svlFilterOutput" << std::endl;
-        return false;
-    }
+    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
 
     bool Disconnect(void) {
         return true;

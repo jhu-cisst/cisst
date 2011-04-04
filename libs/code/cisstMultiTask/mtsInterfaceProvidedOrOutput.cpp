@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsComponent.h>
 
 
 mtsInterfaceProvidedOrOutput::mtsInterfaceProvidedOrOutput(const std::string & interfaceName,
@@ -36,9 +37,25 @@ const std::string & mtsInterfaceProvidedOrOutput::GetName(void) const
 {
     return this->Name;
 }
-    
+
+
+const std::string mtsInterfaceProvidedOrOutput::GetFullName(void) const
+{
+    if (this->Component) {
+        return this->Component->GetName() + ":" + this->GetName();
+    }
+    return "[no component]:" + this->GetName();
+}
+
+
+const mtsComponent *  mtsInterfaceProvidedOrOutput::GetComponent(void) const
+{
+    return this->Component;
+}
+
 
 void mtsInterfaceProvidedOrOutput::Cleanup(void)
 {
-    CMN_LOG_CLASS_INIT_DEBUG << "Cleanup: default implementation from mtsInterfaceProvidedOrOutput called" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "Cleanup: default implementation from mtsInterfaceProvidedOrOutput called for \""
+                             << this->GetFullName() << "\"" << std::endl;
 }

@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 %module cisstDevicesPython
 
 
+%include "std_list.i"
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_map.i"
@@ -71,4 +72,9 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 %include "cisstDevices/devKeyboard.h"
+
+#if CISST_DEV_HAS_ROBOTCOMPONENTS
+    %include "cisstDevices/robotcomponents/devRobotComponents.i"
+#endif
+
 

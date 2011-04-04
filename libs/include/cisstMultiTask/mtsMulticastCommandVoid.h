@@ -45,7 +45,7 @@ http://www.cisst.org/cisst/license.txt.
   one interface. This is the no argument version, that is the execute
   method takes no argument.
  */
-class mtsMulticastCommandVoid: public mtsCommandVoid
+class CISST_EXPORT mtsMulticastCommandVoid: public mtsCommandVoid
 {
 public:
     typedef mtsCommandVoid BaseType;

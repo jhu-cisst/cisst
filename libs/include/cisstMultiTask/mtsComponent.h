@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
@@ -162,11 +162,20 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         processing.  See Start. */
     virtual void Kill(void);
 
-    /*! Method to add a provided interface to the component.  This
-      method is virtual so that mtsTask can redefine it and
-      create a provided interface that includes queues for thread safety. */
-    virtual mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                        mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+    /*! Method to add a provided interface to the component. */
+    mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+
+    /*! Method to add a bare provided interface, i.e. without all the
+      system events.  This method should not be used by regular
+      users as it might break things like blocking commands.
+
+      This method is virtual so that mtsTask can redefine it and
+      create a provided interface that includes queues for thread
+      safety. */
+    virtual mtsInterfaceProvided *
+        AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
@@ -201,17 +210,21 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesOutput(void) const;
 
     /*! Remove a provided interface identified by its name */
-    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName);
+    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName, const bool skipDisconnect = false);
 
     /*! Remove an output interface identified by its name */
-    bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
+    //bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
 
     /*! Add a required interface.  This interface will later on be
       connected to another task and use the provided interface of the
       other task.  The required interface created also contains a list
       of event handlers to be used as observers. */
-    virtual mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                        mtsRequiredType isRequired = MTS_REQUIRED);
+    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                mtsRequiredType isRequired = MTS_REQUIRED);
+
+    virtual mtsInterfaceRequired *
+        AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                       mtsRequiredType isRequired = MTS_REQUIRED);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceRequired * AddRequiredInterface(const std::string & requiredInterfaceName) {
@@ -250,10 +263,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesInput(void) const;
 
     /*! Remove a required interface identified by its name */
-    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName);
+    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName, const bool skipDisconnect = false);
 
     /*! Remove an input interface identified by its name */
-    bool RemoveInterfaceInput(const std::string & interfaceInputName);
+    //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
     /*! Get pointer to manager component services, which extends the internal required interface
         to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
@@ -420,10 +433,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
 
     /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
-    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
-    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
-    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
-    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
+    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
+    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
+    void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
+    void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
 
  public:
 

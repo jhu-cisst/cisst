@@ -45,7 +45,8 @@ protected:
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;
         mtsFunctionWrite Resume;
-        mtsFunctionQualifiedRead GetState;    // in: process, component, out: state
+        mtsFunctionQualifiedRead GetState;     // in: process, component, out: state
+        mtsFunctionQualifiedRead LoadLibrary;  // in: process, library name, out: result (bool)
     } ServiceComponentManagement;
 
     // Getters
@@ -107,7 +108,7 @@ public:
     }
     //@}
 
-    /*! Wrappers for internal function object */
+    /*! Wrappers for internal function objects */
     //@{
     bool ComponentCreate(const std::string & className, const std::string & componentName) const;
     bool ComponentCreate(
@@ -132,6 +133,7 @@ public:
         const std::string & serverProcessName,
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
     bool Disconnect(const mtsDescriptionConnection & connection) const;
+    bool Disconnect(ConnectionIDType connectionID) const;
 
     bool ComponentStart(const std::string & componentName, const double delayInSecond = 0.0) const;
     bool ComponentStart(const std::string& processName, const std::string & componentName,
@@ -156,11 +158,15 @@ public:
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
 
-    InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName, 
+    InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;
-    InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName, 
+    InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;
-    
+
+    // Dynamically load the file (fileName) into the current process
+    bool Load(const std::string & fileName) const;
+    // Dynamically load the file (fileName) into the process processName
+    bool Load(const std::string & processName, const std::string & fileName) const;
     //@}
 
 };

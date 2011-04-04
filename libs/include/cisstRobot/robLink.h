@@ -92,8 +92,30 @@ class CISST_EXPORT robLink {
   robJoint::Type GetType() const;
  
   double Mass() const { return mass.Mass(); }
-  vctFixedSizeVector<double,3> CenterOfMass() const { return mass.CenterOfMass(); }
-  vctFixedSizeMatrix<double,3,3> MomentOfInertia() const { return mass.MomentOfInertia(); }
+
+  vctFixedSizeVector<double,3> CenterOfMass() const 
+  { return mass.CenterOfMass(); }
+  
+  vctFixedSizeMatrix<double,3,3> MomentOfInertiaAtCOM() const
+  { return mass.MomentOfInertiaAtCOM(); }
+
+  vctFixedSizeMatrix<double,3,3> MomentOfInertia() const
+  { return mass.MomentOfInertia(); }
+
+  double PositionMin() const {
+    if( kinematics != NULL ) { return kinematics->PositionMin(); }
+    return 0.0;
+  }
+
+  double PositionMax() const {
+    if( kinematics != NULL ) { return kinematics->PositionMax(); }
+    return 0.0;
+  }
+
+  double ForceTorqueMax() const {
+    if( kinematics != NULL ) { return kinematics->ForceTorqueMax(); }
+    return 0.0;
+  }
 
 };
 

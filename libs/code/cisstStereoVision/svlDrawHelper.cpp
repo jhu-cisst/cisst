@@ -22,6 +22,9 @@
 
 #include "svlDrawHelper.h"
 
+#define __LARGE_NUMBER   100000000
+#define __SMALL_NUMBER  -100000000
+
 
 /******************************/
 /*** svlDrawInternals class ***/
@@ -412,6 +415,8 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
 
     int miny = MIN3(oy1, oy2, oy3);
     int maxy = MAX3(oy1, oy2, oy3);
+    if (miny < 0) miny = 0;
+    if (maxy >= OutHeight) maxy = OutHeight - 1;
 
     int i, j, x, y, len;
     int *xs, *ys;
@@ -425,8 +430,8 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
     _olen[2] = GetLinePixels(_oxs[2], _oys[2], ox2, oy2, ox3, oy3);
 
     for (i = miny; i <= maxy; i ++) {
-        _lm_x[i] =  1000000;
-        _rm_x[i] = -1000000;
+        _lm_x[i] = __LARGE_NUMBER;
+        _rm_x[i] = __SMALL_NUMBER;
     }
 
     for (j = 0; j < 3; j ++) {
@@ -437,6 +442,8 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
         for (i = 0; i < len; i ++) {
             x = *xs; xs ++;
             y = *ys; ys ++;
+            if (y < 0 || y >= OutHeight) continue;
+
             if (x < _lm_x[y]) {
                 _lm_x[y] = x;
                 _lm_id[y] = j;
@@ -457,9 +464,6 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
 
     int id1, id2, pos1, pos2;
 
-    if (miny < 0) miny = 0;
-    if (maxy >= OutHeight) maxy = OutHeight - 1;
-
     for (i = miny; i <= maxy; i ++) {
         id1 = _lm_id[i];
         id2 = _rm_id[i];
@@ -467,8 +471,13 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
         pos1 = (_lm_pos[i] * ratio[id1]) >> 10;
         pos2 = (_rm_pos[i] * ratio[id2]) >> 10;
 
-        ResampleLine(_ixs[id1][pos1], _iys[id1][pos1], _ixs[id2][pos2], _iys[id2][pos2],
-                     _lm_x[i], i, _rm_x[i], i);
+        if (_lm_x[i] != __LARGE_NUMBER &&
+            _rm_x[i] != __SMALL_NUMBER) {
+            ResampleLine(_ixs[id1][pos1], _iys[id1][pos1],
+                         _ixs[id2][pos2], _iys[id2][pos2],
+                         _lm_x[i], i,
+                         _rm_x[i], i);
+        }
     }
 }
 
@@ -489,7 +498,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             if (dx >= dy) {
                 for (x = x1; x <= x2; x ++) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dy;
                     if ((eps << 1) >= dx) {
                         y ++;
@@ -500,7 +509,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             else {
                 for (y = y1; y <= y2; y ++) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dx;
                     if ((eps << 1) >= dy) {
                         x ++;
@@ -513,7 +522,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             if (dx >= abs(dy)) {
                 for (x = x1; x <= x2; x ++) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dy;
                     if ((eps << 1) <= -dx) {
                         y --;
@@ -524,7 +533,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             else {
                 for (y = y1; y >= y2; y --) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dx;
                     if ((eps << 1) >= -dy) {
                         x ++;
@@ -542,7 +551,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             if (dx >= dy) {
                 for (x = x1; x >= x2; x --) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dy;
                     if ((eps << 1) >= dx) {
                         y ++;
@@ -553,7 +562,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             else {
                 for (y = y1; y <= y2; y ++) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dx;
                     if ((eps << 1) >= dy) {
                         x --;
@@ -566,7 +575,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             if (dx >= abs(dy)) {
                 for (x = x1; x >= x2; x --) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dy;
                     if ((eps << 1) <= -dx) {
                         y --;
@@ -577,7 +586,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
             else {
                 for (y = y1; y >= y2; y --) {
                     *xs = x; *ys = y; xs ++; ys ++; len ++;
-
+                    
                     eps += dx;
                     if ((eps << 1) >= -dy) {
                         x --;

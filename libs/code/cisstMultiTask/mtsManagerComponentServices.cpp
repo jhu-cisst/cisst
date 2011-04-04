@@ -33,32 +33,34 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
 {
     if (InternalInterfaceRequired) {
         // Dynamic component composition (DCC) services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                                                ServiceComponentManagement.Create);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                                                ServiceComponentManagement.Disconnect);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                                                ServiceComponentManagement.Start);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
                                                ServiceComponentManagement.Stop);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
                                                ServiceComponentManagement.Resume);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                                                ServiceComponentManagement.GetState);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
+                                               ServiceComponentManagement.LoadLibrary);
         // Getter services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                                                ServiceGetters.GetNamesOfProcesses);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
                                                ServiceGetters.GetNamesOfComponents);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces,
                                                ServiceGetters.GetNamesOfInterfaces);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                                                ServiceGetters.GetListOfConnections);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
                                                ServiceGetters.GetInterfaceProvidedDescription);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription, 
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                                                ServiceGetters.GetInterfaceRequiredDescription);
 
         // Event receivers
@@ -117,11 +119,6 @@ bool mtsManagerComponentServices::Connect(
     const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
 {
-    if (!ServiceComponentManagement.Connect.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
-        return false;
-    }
-
     mtsDescriptionConnection arg;
     arg.Client.ProcessName   = clientProcessName;
     arg.Client.ComponentName = clientComponentName;
@@ -129,17 +126,25 @@ bool mtsManagerComponentServices::Connect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = -1;  // not yet assigned
 
     return Connect(arg);
 }
 
 bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & connection) const
 {
-    // MJ: TODO: change this with blocking command
-    ServiceComponentManagement.Connect(connection);
+    if (!ServiceComponentManagement.Connect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << connection << std::endl;
+    // Make a copy because the parameter is const
+    mtsDescriptionConnection conn(connection);
+    conn.ConnectionID = InvalidConnectionID;
+
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Connect(conn);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << conn << std::endl;
 
     return true;
 }
@@ -171,7 +176,7 @@ bool mtsManagerComponentServices::Disconnect(
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceProvidedName;
-    arg.ConnectionID = -1;  // not needed
+    arg.ConnectionID = InvalidConnectionID;  // not needed
 
     return Disconnect(arg);
 }
@@ -184,6 +189,12 @@ bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & co
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: requested component disconnection: " << connection << std::endl;
 
     return true;
+}
+
+bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) const
+{
+    // PK TEMP
+    return mtsManagerLocal::GetInstance()->Disconnect(connectionID);
 }
 
 bool mtsManagerComponentServices::ComponentStart(const std::string & componentName, const double delayInSecond) const
@@ -335,7 +346,7 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     return listOfConnections;
 }
 
-InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName, 
+InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
                              const std::string & componentName, const std::string &interfaceName) const
 {
     // output arg
@@ -360,7 +371,7 @@ InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDe
     return argOut;
 }
 
-InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName, 
+InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
                              const std::string & componentName, const std::string &interfaceName) const
 {
     // output arg
@@ -384,4 +395,17 @@ InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDe
 
     return argOut;
 }
-    
+
+bool mtsManagerComponentServices::Load(const std::string & fileName) const
+{
+    return Load(mtsManagerLocal::GetInstance()->GetProcessName(), fileName);
+}
+
+bool mtsManagerComponentServices::Load(const std::string & processName, const std::string & fileName) const
+{
+    mtsDescriptionLoadLibrary argIn(processName, fileName);
+    bool result = false;
+    ServiceComponentManagement.LoadLibrary(argIn, result);
+    return result;
+}
+

@@ -220,6 +220,8 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     std::string ipString;
     if (ipAddresses.size() == 0) {
         ipString += "Failed to retrieve IP address";
+        CMN_LOG_CLASS_INIT_ERROR << "GCMUITask: No IP address detected on this machine" << std::endl;
+        cmnThrow(std::runtime_error("No IP address detected on this machine"));
     } else {
         ipString += ipAddresses[0];
         for (StringVector::size_type i = 1; i < ipAddresses.size(); ++i) {
@@ -344,8 +346,9 @@ void GCMUITask::Run(void)
             ComponentViewer = new mtsComponentViewer("ComponentViewer");
             mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
             managerLocal->AddComponent(ComponentViewer);
-            osaSleep(0.1);
+            osaSleep(0.2);
             ComponentViewer->Create();
+            osaSleep(0.2);
             ComponentViewer->Start();
         }
         UI.ButtonTaskViewerClicked = false;
@@ -361,7 +364,6 @@ void GCMUITask::Run(void)
         ComponentViewer = 0;
     }
 #endif
-
     if (Fl::check() == 0) {
         Kill();
     }
@@ -713,7 +715,7 @@ void GCMUITask::PopulateComponents(const std::string & processName)
     std::string componentName;
     for (StringVector::size_type i = 0; i < names.size(); ++i) {
         componentName = names[i];
-        if (mtsManagerLocal::IsProxyComponent(componentName)) {
+        if (mtsManagerGlobal::IsProxyComponent(componentName)) {
             AddLineToBrowser(UI.BrowserComponents, componentName.c_str(), FLTK_COLOR_BLUE, FLTK_COLOR_WHITE, FLTK_STYLE_ITALIC);
         } else {
             AddLineToBrowser(UI.BrowserComponents, componentName.c_str());

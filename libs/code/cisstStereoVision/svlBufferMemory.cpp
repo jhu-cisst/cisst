@@ -37,9 +37,11 @@ svlBufferMemory::svlBufferMemory(unsigned int size) :
     Locked(2)
 {
     Buffer.SetSize(3, size);
+    Used.SetSize(3);
+    Used.SetAll(0);
 }
 
-unsigned int svlBufferMemory::GetSize()
+unsigned int svlBufferMemory::GetMaxSize()
 {
     return Buffer.cols();
 }
@@ -49,14 +51,12 @@ unsigned char* svlBufferMemory::GetPushBuffer()
     return Buffer.Row(Next).Pointer();
 }
 
-unsigned char* svlBufferMemory::GetPushBuffer(unsigned int& size)
+void svlBufferMemory::Push(unsigned int used)
 {
-    size = Buffer.cols();
-    return Buffer.Row(Next).Pointer();
-}
+    CMN_ASSERT(used <= Buffer.cols());
 
-void svlBufferMemory::Push()
-{
+    Used[Next] = used;
+
     // Atomic exchange of values
 #if (CISST_OS == CISST_WINDOWS)
     Next = InterlockedExchange(&Latest, Next);
@@ -73,15 +73,15 @@ void svlBufferMemory::Push()
     NewFrameEvent.Raise();
 }
 
-bool svlBufferMemory::Push(unsigned char* buffer, unsigned int size)
+bool svlBufferMemory::Push(unsigned char* buffer, unsigned int used)
 {
-    unsigned int datasize = Buffer.cols();
-    if (buffer == 0 || size < datasize) return false;
+    if (buffer == 0 || used > Buffer.cols()) return false;
 
     bool ret = true;
 
-    // Copy image to buffer
-    memcpy(Buffer.Row(Next).Pointer(), buffer, datasize);
+    // Copy memory to buffer
+    memcpy(Buffer.Row(Next).Pointer(), buffer, used);
+    Used[Next] = used;
 
     // Atomic exchange of values
 #if (CISST_OS == CISST_WINDOWS)
@@ -101,9 +101,13 @@ bool svlBufferMemory::Push(unsigned char* buffer, unsigned int size)
     return ret;
 }
 
-unsigned char* svlBufferMemory::Pull(bool waitfornew, double timeout)
+unsigned char* svlBufferMemory::Pull(unsigned int& used, double timeout)
 {
-    if (!waitfornew) return Buffer.Row(Latest).Pointer();
+    if (timeout <= 0.0) {
+        used = Used(Latest);
+        if (used) return Buffer.Row(Latest).Pointer();
+        return 0;
+    }
 
     if (!NewFrameEvent.Wait(timeout)) return 0;
 
@@ -120,6 +124,8 @@ unsigned char* svlBufferMemory::Pull(bool waitfornew, double timeout)
     CS.Leave();
 #endif
 
-    return Buffer.Row(Locked).Pointer();
+    used = Used(Locked);
+    if (used) return Buffer.Row(Locked).Pointer();
+    return 0;
 }
 

@@ -39,19 +39,22 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
 
-mtsDescriptionComponent::mtsDescriptionComponent(const mtsDescriptionComponent &other)
+mtsDescriptionComponent::mtsDescriptionComponent(const mtsDescriptionComponent & other):
+    mtsGenericObject(other)
 {
     this->ProcessName = other.ProcessName;
     this->ComponentName = other.ComponentName;
     this->ClassName = other.ClassName;
 }
 
-mtsDescriptionComponent::mtsDescriptionComponent(const std::string &processName, const std::string &componentName) :
-    ProcessName(processName), ComponentName(componentName)
+mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName):
+    mtsGenericObject(),
+    ProcessName(processName),
+    ComponentName(componentName)
 {
 }
 
-void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const 
+void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
     outputStream << ", Process: " << this->ProcessName
@@ -81,7 +84,8 @@ void mtsDescriptionComponent::DeSerializeRaw(std::istream & inputStream)
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
 
-mtsDescriptionInterface::mtsDescriptionInterface(const mtsDescriptionInterface &other)
+mtsDescriptionInterface::mtsDescriptionInterface(const mtsDescriptionInterface & other):
+    mtsGenericObject(other)
 {
     this->ProcessName = other.ProcessName;
     this->ComponentName = other.ComponentName;
@@ -89,7 +93,7 @@ mtsDescriptionInterface::mtsDescriptionInterface(const mtsDescriptionInterface &
     this->InterfaceProvidedNames = other.InterfaceProvidedNames;
 }
 
-void mtsDescriptionInterface::ToStream(std::ostream & outputStream) const 
+void mtsDescriptionInterface::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
     outputStream << ", Process: " << this->ProcessName
@@ -131,7 +135,8 @@ void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
 //
 CMN_IMPLEMENT_SERVICES(mtsDescriptionConnection);
 
-mtsDescriptionConnection::mtsDescriptionConnection(const mtsDescriptionConnection &other)
+mtsDescriptionConnection::mtsDescriptionConnection(const mtsDescriptionConnection & other):
+    mtsGenericObject(other)
 {
     Client.ProcessName   = other.Client.ProcessName;
     Client.ComponentName = other.Client.ComponentName;
@@ -140,14 +145,14 @@ mtsDescriptionConnection::mtsDescriptionConnection(const mtsDescriptionConnectio
     Server.ComponentName = other.Server.ComponentName;
     Server.InterfaceName = other.Server.InterfaceName;
     ConnectionID         = other.ConnectionID;
-}    
+}
 
 mtsDescriptionConnection::mtsDescriptionConnection(
     const std::string & clientProcessName,
     const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName, 
+    const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-    const int connectionId)
+    const ConnectionIDType connectionId)
 {
     Client.ProcessName   = clientProcessName;
     Client.ComponentName = clientComponentName;
@@ -156,6 +161,17 @@ mtsDescriptionConnection::mtsDescriptionConnection(
     Server.ComponentName = serverComponentName;
     Server.InterfaceName = serverInterfaceProvidedName;
     ConnectionID         = connectionId;
+}
+
+void mtsDescriptionConnection::Init(void)
+{
+    Client.ProcessName.clear();
+    Client.ComponentName.clear();
+    Client.InterfaceName.clear();
+    Server.ProcessName.clear();
+    Server.ComponentName.clear();
+    Server.InterfaceName.clear();
+    ConnectionID = InvalidConnectionID;
 }
 
 void mtsDescriptionConnection::ToStream(std::ostream & outputStream) const
@@ -198,7 +214,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
 
-mtsComponentStatusControl::mtsComponentStatusControl(const mtsComponentStatusControl &other)
+mtsComponentStatusControl::mtsComponentStatusControl(const mtsComponentStatusControl & other):
+    mtsGenericObject(other)
 {
     ProcessName   = other.ProcessName;
     ComponentName = other.ComponentName;
@@ -247,7 +264,8 @@ void mtsComponentStatusControl::DeSerializeRaw(std::istream & inputStream)
 //
 CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
 
-mtsComponentStateChange::mtsComponentStateChange(const mtsComponentStateChange &other)
+mtsComponentStateChange::mtsComponentStateChange(const mtsComponentStateChange & other):
+    mtsGenericObject(other)
 {
     ProcessName = other.ProcessName;
     ComponentName = other.ComponentName;
@@ -333,4 +351,44 @@ void mtsEventHandlerList::DeSerializeRaw(std::istream & inputStream)
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, Provided);
     CMN_LOG_CLASS_RUN_WARNING << "DeSerializeRaw not implemented" << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+//  LoadLibrary
+//
+CMN_IMPLEMENT_SERVICES(mtsDescriptionLoadLibrary);
+
+mtsDescriptionLoadLibrary::mtsDescriptionLoadLibrary(const mtsDescriptionLoadLibrary & other):
+    mtsGenericObject(other)
+{
+    this->ProcessName = other.ProcessName;
+    this->LibraryName = other.LibraryName;
+}
+
+mtsDescriptionLoadLibrary::mtsDescriptionLoadLibrary(const std::string & processName, const std::string & libraryName):
+    mtsGenericObject(),
+    ProcessName(processName),
+    LibraryName(libraryName)
+{
+}
+
+void mtsDescriptionLoadLibrary::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", Process: " << this->ProcessName
+                 << ", library: " << this->LibraryName;
+}
+
+void mtsDescriptionLoadLibrary::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->ProcessName);
+    cmnSerializeRaw(outputStream, this->LibraryName);
+}
+
+void mtsDescriptionLoadLibrary::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->ProcessName);
+    cmnDeSerializeRaw(inputStream, this->LibraryName);
 }

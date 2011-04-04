@@ -73,9 +73,9 @@ protected:
 
     /*! Delay given for the task to start.  During initialization the
       task thread will wait for the specified delay (set by default to
-      3 minutes in the constructor).  Increasing this delay can be
+      3 seconds in the constructor).  Increasing this delay can be
       useful when using mtsTaskFromCallback if the callback might take
-      more than 3 minutes to trigger the task's Run method. */
+      more than 3 seconds to trigger the task's Run method. */
     double InitializationDelay;
 
     /*! Mutex used when changing task states. Do not change this directly, use the
@@ -220,12 +220,12 @@ public:
     /********************* Methods to manage interfaces *******************/
 
     /* documented in base class */
-    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                mtsRequiredType required = MTS_REQUIRED);
+    mtsInterfaceRequired * AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                          mtsRequiredType required = MTS_REQUIRED);
 
     /* documented in base class */
-    mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
-                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+    mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
+                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
     /********************* Methods for task synchronization ***************/
 

@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,16 +46,32 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
-        static mtsExecutionResult Call(mtsCommandVoidReturn * command, _userType & argument) {
-            mtsGenericObjectProxyRef<_userType> argumentWrapped(argument); 
-            return command->Execute(argumentWrapped);
+        static mtsExecutionResult Call(const mtsFunctionVoidReturn * function,
+                                       mtsCommandVoidReturn * command,
+                                       _userType & argument) {
+            mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
+            mtsExecutionResult executionResult = command->Execute(argumentWrapped);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+                && !function->IsProxy) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
     template <typename _userType>
     class ConditionalWrap<_userType, true> {
     public:
-        static mtsExecutionResult Call(mtsCommandVoidReturn * command, _userType & argument) {
-            return command->Execute(argument);
+        static mtsExecutionResult Call(const mtsFunctionVoidReturn * function,
+                                       mtsCommandVoidReturn * command,
+                                       _userType & argument) {
+            mtsExecutionResult executionResult = command->Execute(argument);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
+                && !function->IsProxy) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
 #endif
@@ -63,7 +79,7 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
  public:
     /*! Default constructor.  Does nothing, use Instantiate before
       using. */
-    mtsFunctionVoidReturn(void): Command(0) {}
+    mtsFunctionVoidReturn(void);
 
     /*! Destructor. */
     ~mtsFunctionVoidReturn();
@@ -96,10 +112,9 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
 
     template <class _userType>
     mtsExecutionResult Execute(_userType & result) const {
-        mtsExecutionResult executionResult = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, result)
-          : mtsExecutionResult::FUNCTION_NOT_BOUND;
-        return executionResult;
+        return Command ?
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(this, Command, result)
+            : mtsExecutionResult::FUNCTION_NOT_BOUND;
     }
 #endif
 

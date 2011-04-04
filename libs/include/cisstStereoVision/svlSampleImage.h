@@ -60,6 +60,8 @@ public:
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const = 0;
     virtual void SetSize(const unsigned int width, const unsigned int height) = 0;
     virtual void SetSize(const unsigned int videochannel, const unsigned int width, const unsigned int height) = 0;
+    virtual int SetSize(const IplImage* ipl_image, const unsigned int videochannel = 0) = 0;
+    virtual int CopyOf(const IplImage* ipl_image, const unsigned int videochannel = 0) = 0;
     virtual unsigned int GetVideoChannels() const = 0;
     virtual unsigned int GetDataChannels() const = 0;
     virtual unsigned int GetBPP() const = 0;

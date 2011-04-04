@@ -1,9 +1,7 @@
-#include <osgGA/TrackballManipulator>
-
 #include <cisstDevices/robotcomponents/ode/devODEWorld.h>
 #include <cisstDevices/robotcomponents/ode/devODEManipulator.h>
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
-#include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
+#include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 
 #include <cisstCommon/cmnGetChar.h>
 
@@ -40,37 +38,28 @@ int main(){
   taskManager->AddComponent( world );
 
   // Create a camera
+  int x = 0, y = 0;
   int width = 640, height = 480;
-  devOSGCamera* camera = new devOSGCamera( "stereo",
-					   world,
-					   0, 0, width, height,
-					   55, 
-					   ((double)width)/((double)height),
-					   0.01, 10.0 );
-  // Add+configure the trackball of the camera
-  camera->setCameraManipulator( new osgGA::TrackballManipulator );
-  camera->getCameraManipulator()->setHomePosition( osg::Vec3d( 1,0,1 ),
-						   osg::Vec3d( 0,0,0 ),
-						   osg::Vec3d( 0,0,1 ) );
-  camera->home();
-
-  // add a bit more light
-  osg::ref_ptr<osg::Light> light = new osg::Light;
-  light->setAmbient( osg::Vec4( 1, 1, 1, 1 ) );
-  camera->setLight( light );
-  
-  // add the camera task
+  double Znear = 0.01, Zfar = 10.0;
+  devOSGMono* camera;
+  camera = new devOSGMono( "camera",
+			   world,
+			   x, y, width, height,
+			   55, ((double)width)/((double)height),
+			   Znear, Zfar );
+  // Add the camera component
   taskManager->AddComponent( camera );
 
-  std::string path("libs/etc/cisstRobot/WAM/");
+  // WAM stuff
+  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
-  models.push_back( path+"l1.obj" );
-  models.push_back( path+"l2.obj" );
-  models.push_back( path+"l3.obj" );
-  models.push_back( path+"l4.obj" );
-  models.push_back( path+"l5.obj" );
-  models.push_back( path+"l6.obj" );
-  models.push_back( path+"l7.obj" );
+  models.push_back( path+"l1.3ds" );
+  models.push_back( path+"l2.3ds" );
+  models.push_back( path+"l3.3ds" );
+  models.push_back( path+"l4.3ds" );
+  models.push_back( path+"l5.3ds" );
+  models.push_back( path+"l6.3ds" );
+  models.push_back( path+"l7.3ds" );
 
   vctDynamicVector<double> qinit(7, 0.0);
   devODEManipulator* WAM = new devODEManipulator( "WAM",
@@ -83,21 +72,25 @@ int main(){
 						  vctFrame4x4<double>(),
 						  qinit,
 						  models,
-						  path+"l0.obj" );
+						  path+"l0.3ds" );
   taskManager->AddComponent( WAM );
 
+  // Trajectory
   Trajectory trajectory;
   taskManager->AddComponent( &trajectory );
 
+  // Connect trajectory to robot
   taskManager->Connect( trajectory.GetName(), "Output",
 			WAM->GetName(),       devOSGManipulator::Input );
 
+  // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
 
   cmnGetChar();
 
   taskManager->KillAll();
-
+  taskManager->Cleanup();
+  
   return 0;
 }

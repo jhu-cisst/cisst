@@ -50,6 +50,8 @@ svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
 // Might be added in the future
 //    AddInputType("input", svlTypeImageMono16);
 //    AddInputType("input", svlTypeImageMono16Stereo);
+//    AddInputType("input", svlTypeImageMono32);
+//    AddInputType("input", svlTypeImageMono32Stereo);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);

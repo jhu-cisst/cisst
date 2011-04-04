@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
-#include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
+//#include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 #include <cisstDevices/robotcomponents/devRobotComponent.h>
 
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
@@ -32,50 +32,44 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstDevices/devExport.h>
 
+struct devODEContact{
+  
+  devODEBody* body1;
+  devODEBody* body2;
+  vctFixedSizeVector<double,3> position;
+  vctFixedSizeVector<double,3> normal;
+  double depth;
+  
+  devODEContact();
+
+  devODEContact( devODEBody* b1, 
+		 devODEBody* b2,
+		 const vctFixedSizeVector<double,3>& pos,
+		 const vctFixedSizeVector<double,3>& n,
+		 double d );
+  
+  friend std::ostream& operator <<( std::ostream& os, const devODEContact& c ){
+    
+    os << "Body1:    " << c.body1->GetName() << std::endl
+       << "Body2:    " << c.body2->GetName() << std::endl
+       << "Position: " << c.position << std::endl
+       << "Normal:   " << c.normal << std::endl
+       << "Depth:    " << c.depth;
+    
+    return os;
+  }
+  
+};
 
 class CISST_EXPORT devODEWorld : 
-  public devRobotComponent,
+
+  public mtsTaskPeriodic,
   public devOSGWorld {
-
- public:
-
-  struct Contact{
-    
-    devODEBody* body1;
-    devODEBody* body2;
-    vctFixedSizeVector<double,3> position;
-    vctFixedSizeVector<double,3> normal;
-    double depth;
-
-    Contact( devODEBody* b1, 
-	     devODEBody* b2,
-	     const vctFixedSizeVector<double,3>& pos,
-	     const vctFixedSizeVector<double,3>& n,
-	     double d ) :
-      body1( b1 ),
-      body2( b2 ),
-      position( pos ),
-      normal( n ),
-      depth( d ) {}
-
-    friend std::ostream& operator <<( std::ostream& os, 
-				      const devODEWorld::Contact& c ){
-
-      os << "Body1:    " << c.body1->GetName() << std::endl
-      	 << "Body2:    " << c.body2->GetName() << std::endl
-	 << "Position: " << c.position << std::endl
-	 << "Normal:   " << c.normal << std::endl
-	 << "Depth:    " << c.depth;
-      
-      return os;
-    }
-
-  };
 
  private:
   
   osaMutex ContactsListMutex;
-  std::list<devODEWorld::Contact> ContactsList;
+  std::list<devODEContact> ContactsList;
 
 
   //! The time step of the engine
@@ -138,7 +132,7 @@ class CISST_EXPORT devODEWorld :
                     \$\begin{bmatrix} 0 & 0 & -9.81 \end{bmatrix}\$.
   */
   devODEWorld( double period,
-	       osaCPUMask mask,
+	       osaCPUMask mask = OSA_CPUANY,
 	       const vctFixedSizeVector<double,3>& gravity = 
 	       vctFixedSizeVector<double,3>(0.0, 0.0, -9.81) );
 
@@ -175,11 +169,14 @@ class CISST_EXPORT devODEWorld :
   */
   void Collision( dGeomID o1, dGeomID o2 );
 
-  void RunComponent();
+  void Configure( const std::string& = "" ) {}
+  void Startup(){}
+  void Run();
+  void Cleanup(){}
 
   void Insert( devODEJoint* joint );
 
-  std::list< devODEWorld::Contact > QueryContacts( const std::string& name );
+  std::list< devODEContact > QueryContacts( const std::string& name );
 
   void Lock();
   void Unlock();

@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
+//#define __SHOW_WARPED_IMAGE
+
 
 ///////////////////////////////
 // CBackgroundTracker filter //
@@ -109,6 +111,7 @@ private:
 int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 {
     bool showgrid = false;
+    bool showrect = true;
 
     svlInitialize();
 
@@ -119,7 +122,9 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlFilterImageTracker tracker;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
+#ifdef __SHOW_WARPED_IMAGE
     svlFilterImageWindow window2;
+#endif // __SHOW_WARPED_IMAGE
 
     // setup source
 //    source.DialogFilePath();
@@ -133,7 +138,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     // setup tracker
     svlTrackerMSBruteForce trackeralgo;
     trackeralgo.SetParameters(svlNCC, // metric
-                              15,     // template radius
+                              16,     // template radius
                               20,     // search radius
                               3,      // number of scales
                               0, 0.0);
@@ -145,7 +150,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     tracker.SetROI(100, 100, 300, 300);
 
     const int radius = 40;
-    const int distance = 15;
+    const int distance = 20;
 
     const int targetcount = (radius * 2 + 1) * (radius * 2 + 1);
     svlSampleTargets targets;
@@ -180,7 +185,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlOverlayStaticPoly::Type points(5, svlPoint2D(-1, -1));
     poly_overlay.SetPoints(points);
     poly_overlay.SetColor(svlRGB(255, 255, 255));
-    overlay.AddOverlay(poly_overlay);
+    if (showrect) overlay.AddOverlay(poly_overlay);
     CBackgroundTracker bgtracker;
     bgtracker.SetBgPoly(&poly_overlay);
     bgtracker.SetGridSize(radius * 2 + 1, radius * 2 + 1);
@@ -195,16 +200,6 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
                                        svlRGB(0, 0, 128));    // background color
     overlay.AddOverlay(bg_fps_overlay);
 
-    // Add framerate overlay
-    svlOverlayFramerate tracker_fps_overlay(SVL_LEFT,
-                                            true,
-                                            &tracker,
-                                            svlRect(4, 24, 47, 40),
-                                            14.0,
-                                            svlRGB(255, 255, 255),
-                                            svlRGB(0, 128, 0));
-    overlay.AddOverlay(tracker_fps_overlay);
-
     overlay.AddQueuedItems();
 
     // chain filters to pipeline
@@ -214,7 +209,9 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     cropper.GetOutput()->Connect(tracker.GetInput());
     tracker.GetOutput()->Connect(overlay.GetInput());
     overlay.GetOutput()->Connect(window.GetInput());
+#ifdef __SHOW_WARPED_IMAGE
     tracker.GetOutput("warpedimage")->Connect(window2.GetInput());
+#endif // __SHOW_WARPED_IMAGE
 
     tracker.GetOutput("targets")->Connect(bgtracker.GetInput());
     bgtracker.GetOutput()->Connect(overlay.GetInput("targets"));

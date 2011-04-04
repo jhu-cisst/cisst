@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
+#define __CAMERA_SOURCE
+
 
 //////////////////////////////////
 //             main             //
@@ -33,30 +35,40 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlInitialize();
 
     svlStreamManager stream(2);
+#ifdef __CAMERA_SOURCE
+    svlFilterSourceVideoCapture source(1);
+#else // __CAMERA_SOURCE
     svlFilterSourceVideoFile source(1);
-    svlFilterSplitter splitter;
+#endif // __CAMERA_SOURCE
     svlFilterImageWindowTargetSelect selector;
     svlFilterImageTracker tracker;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
 
     // setup source
+#ifdef __CAMERA_SOURCE
+    if (source.LoadSettings("pointtracker.dat") != SVL_OK) {
+        source.DialogSetup();
+        source.SaveSettings("pointtracker.dat");
+    }
+#else // __CAMERA_SOURCE
     source.DialogFilePath();
+#endif // __CAMERA_SOURCE
 
     // setup selector
-    selector.SetMaxTargets(20);
+    selector.SetMaxTargets(10);
     selector.SetTitle("Select targets (then press SPACE)");
 
     // setup tracker
     svlTrackerMSBruteForce trackeralgo;
     trackeralgo.SetParameters(svlNCC, // metric
-                              25,     // template radius
+                              32,     // template radius
                               25,     // search radius
                               3,      // number of scales
                               0, 0.0);
     tracker.SetMovingAverageSmoothing(0.0);
     tracker.SetRigidBody(true);
-    tracker.SetRigidBodyConstraints(-0.4, 0.4, 0.8, 1.2);
+    tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
     tracker.SetTracker(trackeralgo);
 
     // Setup overlay
@@ -80,8 +92,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
                                             svlRGB(0, 128, 0));
     overlay.AddOverlay(tracker_fps_overlay);
 
-    // setup splitter
-    splitter.AddOutput("tracker");
+    overlay.AddQueuedItems();
 
     // setup results window
     window.SetPosition(50, 50);
@@ -89,14 +100,13 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
-    source.GetOutput()->Connect(splitter.GetInput());
-    splitter.GetOutput()->Connect(overlay.GetInput());
+    source.GetOutput()->Connect(selector.GetInput());
+    selector.GetOutput()->Connect(tracker.GetInput());
+    tracker.GetOutput()->Connect(overlay.GetInput());
     overlay.GetOutput()->Connect(window.GetInput());
 
-    splitter.GetOutput("tracker")->Connect(selector.GetInput());
-    selector.GetOutput()->Connect(tracker.GetInput());
     selector.GetOutput("targets")->Connect(tracker.GetInput("targets"));
-    tracker.GetOutput()->Connect(overlay.GetInput("targets"));
+    tracker.GetOutput("targets")->Connect(overlay.GetInput("targets"));
 
     // start stream
     stream.Play();

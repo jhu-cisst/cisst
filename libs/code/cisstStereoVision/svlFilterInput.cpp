@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 svlFilterInput::svlFilterInput(svlFilterBase* filter, bool trunk, const std::string &name) :
-    BaseType(name),
+    BaseType(name, filter),
     Filter(filter),
     Trunk(trunk),
     Connected(false),
@@ -42,6 +42,22 @@ svlFilterInput::svlFilterInput(svlFilterBase* filter, bool trunk, const std::str
 svlFilterInput::~svlFilterInput()
 {
     if (Buffer) delete Buffer;
+}
+
+bool svlFilterInput::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
+{
+    svlFilterOutput * output = dynamic_cast<svlFilterOutput *>(interfaceProvidedOrOutput);
+    if (output) {
+        output->ConnectInternal(this);
+        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: output filter \"" << output->GetName()
+                                   << "\" connected to input filter \"" << this->GetName()
+                                   << "\"" << std::endl;
+        return true;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: provided/output interface \"" << interfaceProvidedOrOutput->GetName()
+                             << "\" can't be connected to input filter \"" << this->GetName()
+                             << "\" as it is not of type svlFilterOutput" << std::endl;
+    return false;
 }
 
 bool svlFilterInput::IsTrunk(void) const
@@ -115,7 +131,7 @@ int svlFilterInput::PushSample(const svlSample* sample)
     else {
         // Manual setup
         Type = type;
-        if (Filter->UpdateTypes(*this, Type) != SVL_OK) return SVL_FAIL;
+        if (Filter->OnConnectInput(*this, Type) != SVL_OK) return SVL_FAIL;
     }
 
     if (!Buffer) Buffer = new svlBufferSample(Type);

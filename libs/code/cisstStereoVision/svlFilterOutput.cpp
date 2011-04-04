@@ -26,6 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlStreamBranchSource.h>
 #include <cisstStereoVision/svlFilterInput.h>
 
+#include <cisstOSAbstraction/osaSleep.h>  // PK TEMP
+
 svlFilterOutput::svlFilterOutput(svlFilterBase* filter, bool trunk, const std::string &name) :
     BaseType(name, filter),
     Filter(filter),
@@ -134,7 +136,7 @@ int svlFilterOutput::SetBlock(bool block)
     return SVL_OK;
 }
 
-int svlFilterOutput::Connect(svlFilterInput *input)
+int svlFilterOutput::ConnectInternal(svlFilterInput *input)
 {
     if (!this->Filter) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: this output is not associated to any filter" << std::endl;
@@ -177,7 +179,7 @@ int svlFilterOutput::Connect(svlFilterInput *input)
     }
     else {
         // Manual setup
-        if (input->Filter->UpdateTypes(*input, Type) != SVL_OK) {
+        if (input->Filter->OnConnectInput(*input, Type) != SVL_OK) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: input doesn't support output type (manual)" << std::endl;
             return SVL_FAIL;
         }
@@ -210,6 +212,30 @@ int svlFilterOutput::Connect(svlFilterInput *input)
     Connected = true;
 
     return SVL_OK;
+}
+
+int svlFilterOutput::Connect(svlFilterInput *input)
+{
+
+    if (!input) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: null input pointer passed to this method" << std::endl;
+        return SVL_FAIL;
+    }
+    if (!input->Filter) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is not associated to any filter" << std::endl;
+        return SVL_FAIL;
+    }
+    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+
+    LCM->AddComponent(input->Filter);
+    osaSleep(0.25);
+    if (LCM->Connect(input->Filter->GetName(), input->GetName(),
+                     this->Filter->GetName(), this->GetName())) {
+    osaSleep(0.5);  // PK TEMP (remove when Connect is a blocking command)
+       return SVL_OK;
+    }
+    else
+        return SVL_FAIL;
 }
 
 int svlFilterOutput::Disconnect(void)

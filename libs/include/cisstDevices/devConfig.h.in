@@ -40,4 +40,17 @@ http://www.cisst.org/cisst/license.txt.
 // Support for Claron MicronTracker.
 #cmakedefine01 CISST_DEV_HAS_MICRONTRACKER
 
+// 
+#cmakedefine01 CISST_DEV_HAS_ROBOTCOMPONENTS
+
+// Using OpenSceneGraph
+#cmakedefine01 CISST_DEV_HAS_OSG
+
+// Using ODE
+#cmakedefine01 CISST_DEV_HAS_ODE
+
+// Using ODE
+#cmakedefine01 CISST_DEV_HAS_OPENCV22
+
+
 #endif // _devConfig_h

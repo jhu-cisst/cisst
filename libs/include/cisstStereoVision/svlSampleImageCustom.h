@@ -153,6 +153,12 @@ public:
                 if (_VideoChannels == 2) return svlTypeImageMono16Stereo;
             }
         }
+        if (IsTypeUInt32<_ValueType>(static_cast<_ValueType>(0))) {
+            if (_DataChannels == 1) {
+                if (_VideoChannels == 1) return svlTypeImageMono32;
+                if (_VideoChannels == 2) return svlTypeImageMono32Stereo;
+            }
+        }
         if (IsTypeFloat<_ValueType>(static_cast<_ValueType>(0))) {
             if (_DataChannels == 3 && _VideoChannels == 1) return svlTypeImage3DMap;
         }
@@ -178,7 +184,7 @@ public:
         }
         return SVL_FAIL;
     }
-    
+
     int SetSize(const svlSample& sample)
     {
         const svlSampleImage* sampleimage = dynamic_cast<const svlSampleImage*>(&sample);
@@ -334,6 +340,11 @@ public:
                 return svlPixelMono16;
             break;
 
+            case svlTypeImageMono32:
+            case svlTypeImageMono32Stereo:
+                return svlPixelMono32;
+            break;
+
             case svlTypeImage3DMap:
                 return svlPixel3DFloat;
             break;
@@ -354,6 +365,7 @@ public:
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
             break;
         }
         return svlPixelUnknown;
@@ -422,6 +434,37 @@ public:
         }
     }
 
+#if CISST_SVL_HAS_OPENCV
+    int SetSize(const IplImage* ipl_image, const unsigned int videochannel = 0)
+#else // CISST_SVL_HAS_OPENCV
+    int SetSize(const IplImage* CMN_UNUSED(ipl_image), const unsigned int CMN_UNUSED(videochannel) = 0)
+#endif // CISST_SVL_HAS_OPENCV
+    {
+#if CISST_SVL_HAS_OPENCV
+        if (ipl_image && videochannel >= _VideoChannels) {
+            SetSize(videochannel, ipl_image->width, ipl_image->height);
+            return SVL_OK;
+        }
+#endif // CISST_SVL_HAS_OPENCV
+        return SVL_FAIL;
+    }
+
+#if CISST_SVL_HAS_OPENCV
+    int CopyOf(const IplImage* ipl_image, const unsigned int videochannel = 0)
+#else // CISST_SVL_HAS_OPENCV
+    int CopyOf(const IplImage* CMN_UNUSED(ipl_image), const unsigned int CMN_UNUSED(videochannel) = 0)
+#endif // CISST_SVL_HAS_OPENCV
+    {
+#if CISST_SVL_HAS_OPENCV
+        if (GetOCVImagePixelType(ipl_image) == GetPixelType()) {
+            if (SetSize(ipl_image, videochannel) != SVL_OK) return SVL_FAIL;
+            memcpy(GetUCharPointer(videochannel), ipl_image->imageData, GetDataSize(videochannel));
+            return SVL_OK;
+        }
+#endif // CISST_SVL_HAS_OPENCV
+        return SVL_FAIL;
+    }
+
     unsigned int GetVideoChannels() const
     {
         return _VideoChannels;
@@ -449,6 +492,8 @@ public:
             case svlTypeImageMono8Stereo:
             case svlTypeImageMono16:
             case svlTypeImageMono16Stereo:
+            case svlTypeImageMono32:
+            case svlTypeImageMono32Stereo:
             case svlTypeImage3DMap:
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
@@ -468,6 +513,7 @@ public:
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
             break;
         }
         return SVL_FAIL;
@@ -614,6 +660,25 @@ private:
         if (IsTypeUInt16<_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_16U;
         if (IsTypeFloat <_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_32F;
         return -1;
+    }
+
+    svlPixelType GetOCVImagePixelType(const IplImage* ipl_image)
+    {
+        if (!ipl_image) return svlPixelUnknown;
+
+        if (ipl_image->depth == IPL_DEPTH_8U) {
+            if (ipl_image->nChannels == 1) return svlPixelMono8;
+            if (ipl_image->nChannels == 3) return svlPixelRGB;
+            if (ipl_image->nChannels == 4) return svlPixelRGBA;
+        }
+        else if (ipl_image->depth == IPL_DEPTH_16U) {
+            if (ipl_image->nChannels == 1) return svlPixelMono16;
+        }
+        else if (ipl_image->depth == IPL_DEPTH_32F) {
+            if (ipl_image->nChannels == 1) return svlPixelMonoFloat;
+        }
+
+        return svlPixelUnknown;
     }
 #endif // CISST_SVL_HAS_OPENCV
 };

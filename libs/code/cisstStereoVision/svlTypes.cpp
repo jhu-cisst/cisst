@@ -321,3 +321,38 @@ void svlRGBA::Assign(unsigned char r_, unsigned char g_, unsigned char b_, unsig
     a = a_;
 }
 
+
+/*************************/
+/*** svlBlob class *******/
+/*************************/
+
+svlBlob::svlBlob() :
+    id(0),
+    used(false),
+    left(0),
+    right(0),
+    top(0),
+    bottom(0),
+    center_x(0),
+    center_y(0),
+    area(0),
+    circumference(0),
+    label(0)
+{
+}
+
+void svlBlob::Assign(const svlBlob & blob)
+{
+    id            = blob.id;
+    used          = blob.used;
+    left          = blob.left;
+    right         = blob.right;
+    top           = blob.top;
+    bottom        = blob.bottom;
+    center_x      = blob.center_x;
+    center_y      = blob.center_y;
+    area          = blob.area;
+    circumference = blob.circumference;
+    label         = blob.label;
+}
+

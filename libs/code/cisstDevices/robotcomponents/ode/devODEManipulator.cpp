@@ -119,7 +119,7 @@ devODEManipulator::devODEManipulator( const std::string& devname,
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
 
     int type = dJointTypeHinge;
-    if( links[i-1].GetType() == robLink::SLIDER )
+    if( links[i-1].GetType() == robKinematics::SLIDER )
       { type = dJointTypeSlider; }
 
     // This is a bit tricky. The min must be greater than -pi and the max must

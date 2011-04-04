@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class svlFile
 {
+public:
     enum OpenMode {
         R = 1,
         W = 2
@@ -35,21 +36,49 @@ class svlFile
 
 public:
     svlFile();
+    svlFile(const svlFile& file);
     svlFile(const std::string& filepath, const OpenMode mode = R);
     virtual ~svlFile();
 
-    virtual bool Open(const std::string& filepath, const OpenMode mode = R);
-    virtual bool Close();
+    virtual int Open(const std::string& filepath, const OpenMode mode = R);
+    virtual int Close();
     virtual bool IsOpen();
 
     virtual long long int Read(char* buffer, const long long int length);
     virtual long long int Write(const char* buffer, const long long int length);
 
-    virtual long long int GetPos();
-    virtual bool Seek(const long long int abspos);
+    template<class _ValueType>
+    bool Read(_ValueType& value)
+    {
+        long long int len = sizeof(_ValueType);
+        if (Read(reinterpret_cast<char*>(&value), len) < len) return false;
+        return true;
+    }
 
-protected:
-    svlFile(const svlFile& file);
+    template<class _ValueType>
+    bool Write(const _ValueType& value)
+    {
+        long long int len = sizeof(_ValueType);
+        if (Write(reinterpret_cast<const char*>(&value), len) < len) return false;
+        return true;
+    }
+
+    virtual long long int GetLength();
+    virtual long long int GetPos();
+    virtual int Seek(const long long int abspos);
+
+private:
+    OpenMode      Mode;
+    bool          Opened;
+    long long int Length;
+
+    // Internals that are OS-dependent in some way
+    enum {INTERNALS_SIZE = 16};
+    char Internals[INTERNALS_SIZE];
+
+    // Return the size of the actual object used by the OS.
+    // This is used for testing only.
+    static unsigned int SizeOfInternals();
 };
 
 #endif // _svlFile_h

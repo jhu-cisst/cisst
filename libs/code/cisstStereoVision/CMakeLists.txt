@@ -27,6 +27,7 @@ SET(SOURCE_FILES
   # Public System API
     svlTypes.cpp
     svlClassServices.cpp
+    svlSampleBlobs.cpp
     svlSampleText.cpp
     svlSampleTargets.cpp
     svlSampleTransform3D.cpp
@@ -65,12 +66,17 @@ SET(SOURCE_FILES
   # Filter API
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
+    svlFilterImageBlobDetector.cpp
+    svlFilterImageBlobTracker.cpp
     svlFilterImageCenterFinder.cpp
     svlFilterImageChannelSwapper.cpp
     svlFilterImageColorConverter.cpp
+    svlFilterImageColorSegmentation.cpp
     svlFilterImageConvolution.cpp
     svlFilterImageCropper.cpp
     svlFilterImageDeinterlacer.cpp
+    svlFilterImageDilation.cpp
+    svlFilterImageErosion.cpp
     svlFilterImageExposureCorrection.cpp
     svlFilterImageFileWriter.cpp
     svlFilterImageFlipRotate.cpp
@@ -78,6 +84,7 @@ SET(SOURCE_FILES
     svlFilterImageRectifier.cpp
     svlFilterImageResizer.cpp
     svlFilterImageSampler.cpp
+    svlFilterImageThresholding.cpp
     svlFilterImageTracker.cpp
     svlFilterImageTranslation.cpp
     svlFilterImageUnsharpMask.cpp
@@ -121,6 +128,7 @@ SET(HEADER_FILES
     svlProcInfo.h
     svlTypes.h
     svlTypeCheckers.h
+    svlSampleBlobs.h
     svlSampleText.h
     svlSampleTargets.h
     svlSampleTransform3D.h
@@ -158,12 +166,17 @@ SET(HEADER_FILES
   # Filter API
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
+    svlFilterImageBlobDetector.h
+    svlFilterImageBlobTracker.h
     svlFilterImageCenterFinder.h
     svlFilterImageChannelSwapper.h
     svlFilterImageColorConverter.h
+    svlFilterImageColorSegmentation.h
     svlFilterImageConvolution.h
     svlFilterImageCropper.h
     svlFilterImageDeinterlacer.h
+    svlFilterImageDilation.h
+    svlFilterImageErosion.h
     svlFilterImageExposureCorrection.h
     svlFilterImageFileWriter.h
     svlFilterImageFlipRotate.h
@@ -171,6 +184,7 @@ SET(HEADER_FILES
     svlFilterImageRectifier.h
     svlFilterImageResizer.h
     svlFilterImageSampler.h
+    svlFilterImageThresholding.h
     svlFilterImageTracker.h
     svlFilterImageTranslation.h
     svlFilterImageUnsharpMask.h
@@ -1068,6 +1082,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER
 SET(SOURCE_FILES
     ${SOURCE_FILES}
     svlInitializer.cpp
+    svlInitializerMacros.h
     svlVidCapSrcInitializer.h
     svlVidCapSrcInitializer.cpp
     svlImageCodecInitializer.h
@@ -1107,3 +1122,27 @@ if (CISST_HAS_SWIG_PYTHON)
 			CISST_LIBRARIES cisstStereoVision
                                         ${DEPENDENCIES})
 endif (CISST_HAS_SWIG_PYTHON)
+
+
+# Qt widgets
+if (CISST_HAS_OPENGL AND CISST_HAS_QT)
+
+  # to include Qt generated files
+  include_directories (${CMAKE_CURRENT_BINARY_DIR})
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                ../../include/cisstStereoVision/svlFilterImageQtWidget.h)
+
+  cisst_add_library (
+    LIBRARY cisstStereoVisionQt
+    LIBRARY_DIR cisstStereoVision
+    DEPENDENCIES cisstCommon
+                 cisstVector
+                 cisstStereoVision
+    SOURCE_FILES svlFilterImageQtWidget.cpp
+    HEADER_FILES svlFilterImageQtWidget.h
+                 svlExportQt.h
+    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+
+  target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+
+endif (CISST_HAS_OPENGL AND CISST_HAS_QT)

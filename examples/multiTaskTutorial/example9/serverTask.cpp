@@ -1,15 +1,28 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id$ */
+/*
+  $Id$
+
+  Author(s):  Anton Deguet
+  Created on: 2009-08-10
+
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
 
 #include <cisstCommon/cmnConstants.h>
-#include "serverTask.h"
-#include "fltkMutex.h"
-
-#if 0
-// MJ: test code
 #include <cisstOSAbstraction/osaSleep.h>
-#endif
+
+#include "serverTask.h"
+
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskDouble);
@@ -38,7 +51,7 @@ template <class _dataType>
 void serverTask<_dataType>::Void(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Void" << std::endl;
-    fltkMutex.Lock();
+    Fl::lock();
     {
         if (UI.VoidValue->value() == 0) {
             UI.VoidValue->value(1);
@@ -46,7 +59,9 @@ void serverTask<_dataType>::Void(void)
             UI.VoidValue->value(0);
         }
     }
-    fltkMutex.Unlock();
+    Fl::unlock();
+    Fl::awake();
+    osaSleep(10.0 * cmn_s);
 }
 
 
@@ -54,41 +69,42 @@ template <class _dataType>
 void serverTask<_dataType>::Write(const _dataType & data)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Write" << std::endl;
-    fltkMutex.Lock();
+    Fl::lock();
     {
         UI.WriteValue->value((double)data);
     }
-    fltkMutex.Unlock();
-#if 0
-    // MJ: test code
-    static int count = 0;
-    if (count++ >= 1) {
-        std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : START" << std::endl;
-        osaSleep((double)data);
-        std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : END" << std::endl;
-    }
-#endif
+    Fl::unlock();
+    Fl::awake();
 }
 
 
 template <class _dataType>
 void serverTask<_dataType>::QualifiedRead(const _dataType & data, _dataType & placeHolder) const
 {
-    placeHolder = data + _dataType(UI.ReadValue->value());
+    Fl::lock();
+    {
+        placeHolder = data + _dataType(UI.ReadValue->value());
+    }
+    Fl::unlock();
+    Fl::awake();
 }
 
 
 template <class _dataType>
-void serverTask<_dataType>::Startup(void)
+void serverTask<_dataType>::SendButtonClickEvent(void)
+{
+    EventVoid();
+}
+
+
+template <class _dataType>
+void serverTask<_dataType>::Configure(const std::string & CMN_UNUSED(filename))
 {
     // make the UI visible
-    fltkMutex.Lock();
-    {
-        UI.show(0, NULL);
-        UI.Opened = true;
-    }
-    fltkMutex.Unlock();
+    UI.show(0, NULL);
+    UI.Opened = true;
 }
+
 
 template <class _dataType>
 void serverTask<_dataType>::Run(void) {
@@ -96,7 +112,7 @@ void serverTask<_dataType>::Run(void) {
         // process the commands received, i.e. possible SetServerAmplitude
         ProcessQueuedCommands();
         // compute the new values based on the current time and amplitude
-        fltkMutex.Lock();
+        Fl::lock();
         {
             if (UI.VoidEventRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidEventRequested" << std::endl;
@@ -111,28 +127,19 @@ void serverTask<_dataType>::Run(void) {
             }
 
             this->ReadValue = _dataType(UI.ReadValue->value());
-            Fl::check();
         }
-    fltkMutex.Unlock();
+        Fl::unlock();
+        Fl::awake();
     }
 }
 
+
+template <class _dataType>
+bool serverTask<_dataType>::UIOpened(void) const
+{
+    return UI.Opened;
+}
+
+
 template class serverTask<double>;
 template class serverTask<mtsDouble>;
-
-
-/*
-  Author(s):  Anton Deguet
-  Created on: 2009-08-10
-
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
-
---- begin cisst license - do not edit ---
-
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
-
---- end cisst license ---
-
-*/

@@ -190,22 +190,24 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
 // PK: Should we check if Delete is being called on self?
 void osaThread::Delete(void)
 {
+    if (Valid) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    int retval = pthread_cancel (INTERNALS(Thread));
-    if( retval != 0 ){
-        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                          << "pthread_cancel failed. " 
-                          << strerror(retval) << ": " << retval 
-                          << std::endl;
-    }
+        int retval = pthread_cancel (INTERNALS(Thread));
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "pthread_cancel failed. " 
+                              << strerror(retval) << ": " << retval 
+                              << std::endl;
+        }
 #elif (CISST_OS == CISST_WINDOWS)
-    TerminateThread(INTERNALS(Thread), 0);
+        TerminateThread(INTERNALS(Thread), 0);
 #endif // CISST_WINDOWS
 
-    Valid = false;
+        Valid = false;
 
-    // wait for thread to terminate
-    Wait();
+        // wait for thread to terminate
+        Wait();
+    }
 }
 
 

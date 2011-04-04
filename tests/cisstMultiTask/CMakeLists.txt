@@ -34,7 +34,7 @@ set (SOURCE_FILES
      mtsMacrosTest.cpp
      mtsMatrixTest.cpp
      mtsSerializationTest.cpp
-     mtsManagerGlobalTest.cpp
+     # mtsManagerGlobalTest.cpp
      mtsManagerLocalTest.cpp
      )
 
@@ -52,7 +52,7 @@ set (HEADER_FILES
      mtsMatrixTest.h
      mtsSerializationTest.h
      mtsTestComponents.h
-     mtsManagerGlobalTest.h
+     # mtsManagerGlobalTest.h
      mtsManagerLocalTest.h
     )
 

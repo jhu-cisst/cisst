@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides
+  Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,7 +34,8 @@ mtsMailBox::mtsMailBox(const std::string & name,
                        mtsCallableVoidBase * postCommandQueuedCallable):
     CommandQueue(size, 0),
     Name(name),
-    PostCommandQueuedCallable(postCommandQueuedCallable)
+    PostCommandQueuedCallable(postCommandQueuedCallable),
+    PostCommandDequeuedCommand(0)
 {}
 
 
@@ -56,24 +57,6 @@ bool mtsMailBox::Write(mtsCommandBase * command)
         this->PostCommandQueuedCallable->Execute();
     }
     return result;
-}
-
-
-void mtsMailBox::ThreadSignalWait(void)
-{
-    this->ThreadSignal.Wait();
-}
-
-
-void mtsMailBox::ThreadSignalWait(double timeOutInSeconds)
-{
-    this->ThreadSignal.Wait(timeOutInSeconds);
-}
-
-
-osaThreadSignal * mtsMailBox::GetThreadSignal(void)
-{
-    return &ThreadSignal;
 }
 
 
@@ -155,16 +138,28 @@ bool mtsMailBox::ExecuteNext(void)
            }
        }
    }
-   catch (...) {
-       CMN_LOG_RUN_WARNING << "mtsMailbox::ExecuteNext caught exception, blocking = " << isBlocking << std::endl;
-       if (isBlocking)
-           this->ThreadSignal.Raise();
+   catch (std::exception & exceptionCaught) {
+       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
+                           << "\" caught exception \"" << exceptionCaught.what() << "\"" << std::endl;
+       if (isBlocking && this->PostCommandQueuedCallable) {
+           this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+       }
        CommandQueue.Get();  // Remove command from mailbox queue
        throw;
    }
-
-   if (isBlocking)
-      this->ThreadSignal.Raise();
+   catch (...) {
+       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
+                           << "\" caught exception, blocking = " << isBlocking << std::endl;
+       if (isBlocking && this->PostCommandDequeuedCommand) {
+           this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+       }
+       CommandQueue.Get();  // Remove command from mailbox queue
+       throw;
+   }
+   
+   if (isBlocking && this->PostCommandDequeuedCommand) {
+       this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+   }
    CommandQueue.Get();  // Remove command from mailbox queue
    return true;
 }
@@ -177,7 +172,14 @@ void mtsMailBox::SetSize(size_t size)
     }
 }
 
+
 bool mtsMailBox::IsEmpty(void) const
 {
     return CommandQueue.IsEmpty();
+}
+
+
+void mtsMailBox::SetPostCommandDequeuedCommand(mtsCommandVoid * command)
+{
+    this->PostCommandDequeuedCommand = command;
 }

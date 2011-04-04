@@ -28,17 +28,19 @@ mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiverVoid"),
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
 {
-    if (OwnEventSignal)
+    if (OwnEventSignal) {
         delete EventSignal;
+    }
 }
 
-void mtsEventReceiverBase::SetRequired(const std::string &name, mtsInterfaceRequired *req)
+void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceRequired * interfaceRequired)
 {
     Name = name;
-    Required = req; 
+    Required = interfaceRequired;
     EventSignal = 0;
-    if (Required && (Required->MailBox))
-      EventSignal = Required->MailBox->GetThreadSignal();
+    if (Required && (Required->MailBox)) {
+      EventSignal = Required->GetThreadSignal();
+    }
 }
 
 bool mtsEventReceiverBase::CheckRequired() const
@@ -167,7 +169,7 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
         CMN_LOG_RUN_ERROR << "mtsEventReceiverWrite: could not copy from " << arg.Services()->GetName()
                           << " to " << ArgPtr->Services()->GetName() << std::endl;
         ArgPtr = 0; // Set this to signal an error
-    }      
+    }
     if (UserHandler)
         UserHandler->Execute(arg, MTS_NOT_BLOCKING);
 }

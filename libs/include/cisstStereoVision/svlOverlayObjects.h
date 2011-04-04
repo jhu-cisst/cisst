@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterBase.h>
 #include <cisstStereoVision/svlDraw.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -156,6 +157,33 @@ private:
     bool ConfidenceColoring;
     bool Crosshair;
     unsigned int TargetSize;
+};
+
+
+class CISST_EXPORT svlOverlayBlobs : public svlOverlay, public svlOverlayInput
+{
+public:
+    svlOverlayBlobs();
+    svlOverlayBlobs(unsigned int videoch,
+                    bool visible,
+                    const std::string & inputname,
+                    unsigned int inputch,
+                    bool draw_id = false);
+    virtual ~svlOverlayBlobs();
+
+    void SetInputChannel(unsigned int inputch);
+    void SetDrawID(bool enable);
+
+    unsigned int GetInputChannel() const;
+    bool GetDrawID() const;
+
+protected:
+    virtual bool IsInputTypeValid(svlStreamType inputtype);
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    unsigned int InputCh;
+    bool DrawID;
 };
 
 
@@ -468,6 +496,7 @@ private:
     Type Poly;
     svlRGB Color;
     unsigned int Start;
+    osaCriticalSection CS;
 };
 
 

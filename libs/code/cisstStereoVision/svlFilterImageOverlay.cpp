@@ -36,10 +36,12 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
     LastOverlay(0),
     ImageInputsToAddUsed(0),
     TargetInputsToAddUsed(0),
+    BlobInputsToAddUsed(0),
     TextInputsToAddUsed(0),
     OverlaysToAddUsed(0),
     ImageInputsToAdd(10),
     TargetInputsToAdd(10),
+    BlobInputsToAdd(10),
     TextInputsToAdd(10),
     OverlaysToAdd(10)
 {
@@ -94,6 +96,28 @@ int svlFilterImageOverlay::AddInputTargets(const std::string &name)
         TargetInputsToAddUsed ++;
         if (TargetInputsToAddUsed > size) TargetInputsToAdd.resize(size + 10);
         TargetInputsToAdd[TargetInputsToAddUsed - 1] = name;
+
+        break;
+    }
+
+    CS.Leave();
+
+    return SVL_OK;
+}
+
+int svlFilterImageOverlay::AddInputBlobs(const std::string &name)
+{
+    if (GetInput(name)) return SVL_FAIL;
+
+    CS.Enter();
+
+    while (1) {
+        if (IsInputAlreadyQueued(name)) break;
+
+        unsigned int size = BlobInputsToAdd.size();
+        BlobInputsToAddUsed ++;
+        if (BlobInputsToAddUsed > size) BlobInputsToAdd.resize(size + 10);
+        BlobInputsToAdd[BlobInputsToAddUsed - 1] = name;
 
         break;
     }
@@ -158,7 +182,11 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
     _OnSingleThread(procInfo) {
         // Add queued inputs and overlays in a thread safe manner
-        if (ImageInputsToAddUsed || TargetInputsToAddUsed || TextInputsToAddUsed || OverlaysToAddUsed) AddQueuedItemsInternal();
+        if (ImageInputsToAddUsed  ||
+            TargetInputsToAddUsed ||
+            BlobInputsToAddUsed   ||
+            TextInputsToAddUsed   ||
+            OverlaysToAddUsed) AddQueuedItemsInternal();
 
         _SampleCacheMap::iterator itersample;
         svlSampleImage* src_image = dynamic_cast<svlSampleImage*>(syncInput);
@@ -202,6 +230,7 @@ bool svlFilterImageOverlay::IsInputAlreadyQueued(const std::string &name)
     unsigned int i;
     for (i = 0; i < ImageInputsToAddUsed;  i ++) if (ImageInputsToAdd[i]  == name) return true;
     for (i = 0; i < TargetInputsToAddUsed; i ++) if (TargetInputsToAdd[i] == name) return true;
+    for (i = 0; i < BlobInputsToAddUsed;   i ++) if (BlobInputsToAdd[i]   == name) return true;
     for (i = 0; i < TextInputsToAddUsed;   i ++) if (TextInputsToAdd[i]   == name) return true;
     return false;
 }
@@ -224,6 +253,13 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
         svlFilterInput* input = AddInput(TargetInputsToAdd[i], false);
         if (!input) continue;
         input->AddType(svlTypeTargets);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < BlobInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(BlobInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeBlobs);
         SampleCache[input] = 0;
     }
 
@@ -250,6 +286,7 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
 
     ImageInputsToAddUsed  = 0;
     TargetInputsToAddUsed = 0;
+    BlobInputsToAddUsed   = 0;
     TextInputsToAddUsed   = 0;
     OverlaysToAddUsed     = 0;
 

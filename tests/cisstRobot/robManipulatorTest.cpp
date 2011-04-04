@@ -3,7 +3,7 @@
 #include <cisstRobot/robManipulator.h>
 #include "robManipulatorTest.h"
 
-#include "robWAMKinematics.h"
+#include "robRobotsKinematics.h"
 
 vctDynamicVector<double> robManipulatorTest::RandomWAMVector() const {
 
@@ -33,7 +33,7 @@ void robManipulatorTest::TestForwardKinematics(){
     vctFrame4x4<double> Rt;
     for( size_t i=0; i<7; i++ ){
       vctFrame4x4<double> Rts =  WAM7.ForwardKinematics( q, i+1 );
-      Rt = Rt * WAM7FKine( i, q[i] ); 
+      Rt = Rt * FKineWAM7( i, q[i] ); 
       CPPUNIT_ASSERT( Rts.AlmostEqual( Rt ) );
     }
 

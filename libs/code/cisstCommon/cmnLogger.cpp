@@ -56,6 +56,19 @@ cmnLogMask cmnLogger::GetMaskInstance(void)
 }
 
 
+void cmnLogger::SetMaskFunctionInstance(cmnLogMask mask)
+{
+    CMN_LOG_INIT_VERBOSE << "Class cmnLogger: SetMaskFunction: function mask set to \"" << cmnLogMaskToString(mask) << "\"" << std::endl;
+    FunctionMask = mask;
+}
+
+
+cmnLogMask cmnLogger::GetMaskFunctionInstance(void)
+{
+    return FunctionMask;
+}
+
+
 cmnLogger::StreamBufType * cmnLogger::GetMultiplexerInstance(void)
 {
     return &(LoDMultiplexerStreambuf);

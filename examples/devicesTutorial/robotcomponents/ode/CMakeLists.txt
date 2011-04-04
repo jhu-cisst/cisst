@@ -13,30 +13,15 @@
 # --- end cisst license ---
 
 
-if(CISST_DEV_HAS_ODE )
+project( ode )
 
-  project( ode )
+add_executable( ODEtest ODEtest.cpp )
+add_executable( ODEstereo ODEstereo.cpp )
+add_executable( ODEwam ODEwam.cpp )
 
-  add_executable( ODEtest ODEtest.cpp )
-  add_executable( ODEstereo ODEstereo.cpp )
-  add_executable( ODEwam ODEwam.cpp )
+cisst_target_link_libraries( ODEtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-  cisst_target_link_libraries( ODEtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+cisst_target_link_libraries( ODEstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-  cisst_target_link_libraries( ODEstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
-
-  cisst_target_link_libraries( ODEwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
-
-  if( BUILD_LIBS_cisstStereoVision )
-
-    add_executable( ODEsvl ODEsvl.cpp )
-    cisst_target_link_libraries( ODEsvl cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstStereoVision)
-
-  endif( BUILD_LIBS_cisstStereoVision )
-
-endif( CISST_DEV_HAS_ODE )
-
-
-
-
+cisst_target_link_libraries( ODEwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 

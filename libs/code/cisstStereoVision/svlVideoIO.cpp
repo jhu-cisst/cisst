@@ -464,7 +464,8 @@ int svlVideoIO::ReleaseCompression(svlVideoIO::Compression *compression)
 
 svlVideoCodecBase::svlVideoCodecBase() :
     Codec(0),
-    Multithreaded(false)
+    Multithreaded(false),
+    VariableFramerate(false)
 {
 }
 
@@ -483,9 +484,14 @@ const std::string& svlVideoCodecBase::GetExtensions() const
     return ExtensionList;
 }
 
-bool svlVideoCodecBase::GetMultithreaded() const
+bool svlVideoCodecBase::IsMultithreaded() const
 {
     return Multithreaded;
+}
+
+bool svlVideoCodecBase::IsVariableFramerate() const
+{
+    return VariableFramerate;
 }
 
 int svlVideoCodecBase::SetPos(const int CMN_UNUSED(pos))
@@ -546,5 +552,10 @@ void svlVideoCodecBase::SetExtensionList(const std::string &list)
 void svlVideoCodecBase::SetMultithreaded(bool multithreaded)
 {
     Multithreaded = multithreaded;
+}
+
+void svlVideoCodecBase::SetVariableFramerate(bool variableframerate)
+{
+    VariableFramerate = variableframerate;
 }
 

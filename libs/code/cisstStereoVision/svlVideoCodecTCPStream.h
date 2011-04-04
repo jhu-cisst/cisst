@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi & Min Yang Jung
   Created on: 2010
@@ -71,6 +71,7 @@ protected:
     bool Writing;
     double Timestamp;
 
+    char* PacketData;
     unsigned char* yuvBuffer;
     unsigned int yuvBufferSize;
     unsigned char* comprBuffer;
@@ -78,17 +79,14 @@ protected:
     vctDynamicVector<unsigned int> ComprPartOffset;
     vctDynamicVector<unsigned int> ComprPartSize;
 
-    char* PacketData;
-    svlBufferMemory* streamingBuffer;
-    unsigned int streamingBufferSize;
-    unsigned int StreamingBufferUsedSize;
-    unsigned int StreamingBufferUsedID;
-
     int ServerSocket;
     osaThread* ServerThread;
     osaThreadSignal* ServerInitEvent;
     bool ServerInitialized;
     bool KillServerThread;
+
+    svlBufferMemory* ReceiveBuffer;
+    vctDynamicVector<svlBufferMemory*> SendBuffer;
 
     vctDynamicVector<osaThread*> SendThread;
     vctDynamicVector<int> SendConnection;
