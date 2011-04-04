@@ -879,18 +879,24 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const
 {
     std::vector<std::string> commands = GetNamesOfCommandsVoid();
-    std::vector<std::string> tmp = GetNamesOfCommandsVoidReturn();
+    std::vector<std::string> tmp;
+
+    tmp = GetNamesOfCommandsVoidReturn();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsWrite();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsWriteReturn();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsRead();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsQualifiedRead();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     return commands;
@@ -941,7 +947,7 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(v
 
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsVoid(void) const
 {
-    // should also get names of events defined in the end-user interfaceg
+    // should also get names of events defined in the end-user interface
     if (this->OriginalInterface) {
         return this->OriginalInterface->EventVoidGenerators.GetNames();
     }
@@ -1267,7 +1273,25 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
     }
 
-    // MJ TODO: Add support for CommandsVoidReturn and CommandsWriteReturn
+    // Extract void return commands
+    mtsCommandVoidReturn * voidReturnCommand;
+    CommandVoidReturnElement elementCommandVoidReturn;
+    const std::vector<std::string> namesOfVoidReturnCommand = GetNamesOfCommandsVoidReturn();
+    for (size_t i = 0; i < namesOfVoidReturnCommand.size(); ++i) {
+        voidReturnCommand = CommandsVoidReturn.GetItem(namesOfVoidReturnCommand[i]);
+        if (!voidReturnCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void return command: " << namesOfVoidReturnCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandVoidReturn.Name = voidReturnCommand->GetName();
+        // serialize result
+        streamBuffer.str("");
+        serializer.Serialize(*(voidReturnCommand->GetResultPrototype()));
+        elementCommandVoidReturn.ResultPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsVoidReturn.push_back(elementCommandVoidReturn);
+    }
 
     // Extract void events
     mtsMulticastCommandVoid * voidEvent;
