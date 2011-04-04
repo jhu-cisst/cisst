@@ -970,6 +970,11 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
         name += desc.CommandsQualifiedRead[i].Name;
         namesOfCommands.push_back(name);
     }
+    for (size_t i = 0; i < desc.CommandsVoidReturn.size(); ++i) {
+        name = "v) ";
+        name += desc.CommandsVoidReturn[i].Name;
+        namesOfCommands.push_back(name);
+    }
 }
 
 void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
@@ -1026,6 +1031,11 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunct
     for (size_t i = 0; i < desc.FunctionQualifiedReadNames.size(); ++i) {
         name = "Q) ";
         name += desc.FunctionQualifiedReadNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (size_t i = 0; i < desc.FunctionVoidReturnNames.size(); ++i) {
+        name = "v) ";
+        name += desc.FunctionVoidReturnNames[i];
         namesOfFunctions.push_back(name);
     }
 }
@@ -1119,6 +1129,7 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             }
             break;
         default:
+            CMN_LOG_CLASS_INIT_ERROR << "GetDescriptionOfCommand: type of command not handled for command \"" << commandName << "\"" << std::endl;
             description = "Failed to get command description";
             return;
     }
@@ -1247,6 +1258,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
             }
             break;
         default:
+            CMN_LOG_CLASS_INIT_ERROR << "GetDescriptionOfFunction: type of function not handled for command \"" << functionName << "\"" << std::endl;
             description = "Failed to get function description";
             return;
     }

@@ -53,6 +53,11 @@ namespace mtsInterfaceCommon {
         std::string Argument2PrototypeSerialized;
 	};
 
+	struct CommandVoidReturnElement {
+		std::string Name;
+        std::string ResultPrototypeSerialized;
+	};
+
     // Event object definition
 	struct EventVoidElement {
 		std::string Name;
@@ -68,6 +73,7 @@ namespace mtsInterfaceCommon {
 	typedef std::vector<CommandWriteElement>         CommandWriteVector;
 	typedef std::vector<CommandReadElement>          CommandReadVector;
 	typedef std::vector<CommandQualifiedReadElement> CommandQualifiedReadVector;
+	typedef std::vector<CommandVoidReturnElement>    CommandVoidReturnVector;
     typedef std::vector<EventVoidElement>            EventVoidVector;
     typedef std::vector<EventWriteElement>           EventWriteVector;
 
@@ -81,6 +87,7 @@ namespace mtsInterfaceCommon {
 		CommandWriteVector         CommandsWrite;
 		CommandReadVector          CommandsRead;
 		CommandQualifiedReadVector CommandsQualifiedRead;
+		CommandVoidReturnVector    CommandsVoidReturn;
 
         // Events
 		EventVoidVector  EventsVoid;
@@ -104,6 +111,7 @@ namespace mtsInterfaceCommon {
         CommandPointerNames FunctionWriteNames;
         CommandPointerNames FunctionReadNames;
         CommandPointerNames FunctionQualifiedReadNames;
+        CommandPointerNames FunctionVoidReturnNames;
 
         // Event handlers
         EventHandlerVoidVector  EventHandlersVoid;
@@ -188,6 +196,26 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, CommandQualifiedReadEl
         cmnThrow("cmnDeSerializeRaw(CommandQualifiedReadElement: Error occured with std::istream::read");
 }
 
+inline void cmnSerializeRaw(std::ostream & outputStream, const CommandVoidReturnElement & data)
+    throw (std::runtime_error)
+{
+    ::cmnSerializeRaw(outputStream, data.Name);
+    ::cmnSerializeRaw(outputStream, data.ResultPrototypeSerialized);
+    if (outputStream.fail()) {
+        cmnThrow("cmnSerializeRaw(CommandVoidReturnElement: Error occured with std::ostream::write");
+    }
+}
+
+inline void cmnDeSerializeRaw(std::istream & inputStream, CommandVoidReturnElement & data)
+    throw (std::runtime_error)
+{
+    ::cmnDeSerializeRaw(inputStream, data.Name);
+    ::cmnDeSerializeRaw(inputStream, data.ResultPrototypeSerialized);
+    if (inputStream.fail()) {
+        cmnThrow("cmnDeSerializeRaw(CommandVoidReturnElement: Error occured with std::istream::read");
+    }
+}
+
 inline void cmnSerializeRaw(std::ostream & outputStream, const EventVoidElement & data)
             throw (std::runtime_error)
 {
@@ -229,6 +257,7 @@ inline std::ostream & operator << (std::ostream & output,
            << ") Write(" << description.CommandsWrite.size()
            << ") Read(" << description.CommandsRead.size()
            << ") QualifiedRead(" << description.CommandsQualifiedRead.size()
+           << ") VoidReturn(" << description.CommandsVoidReturn.size()
            << "), Events Void(" << description.EventsVoid.size()
            << ") Write(" << description.EventsWrite.size() << ")" << std::endl;
     return output;
@@ -242,6 +271,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const InterfaceProvided
     ::cmnSerializeRaw(outputStream, description.CommandsWrite);
     ::cmnSerializeRaw(outputStream, description.CommandsRead);
     ::cmnSerializeRaw(outputStream, description.CommandsQualifiedRead);
+    ::cmnSerializeRaw(outputStream, description.CommandsVoidReturn);
     ::cmnSerializeRaw(outputStream, description.EventsVoid);
     ::cmnSerializeRaw(outputStream, description.EventsWrite);
     if (outputStream.fail())
@@ -256,6 +286,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, InterfaceProvidedDescr
     ::cmnDeSerializeRaw(inputStream, description.CommandsWrite);
     ::cmnDeSerializeRaw(inputStream, description.CommandsRead);
     ::cmnDeSerializeRaw(inputStream, description.CommandsQualifiedRead);
+    ::cmnDeSerializeRaw(inputStream, description.CommandsVoidReturn);
     ::cmnDeSerializeRaw(inputStream, description.EventsVoid);
     ::cmnDeSerializeRaw(inputStream, description.EventsWrite);
     if (inputStream.fail())
@@ -269,6 +300,7 @@ inline std::ostream & operator << (std::ostream & output,
            << ") Write(" << description.FunctionWriteNames.size()
            << ") Read(" << description.FunctionReadNames.size()
            << ") QualifiedRead(" << description.FunctionQualifiedReadNames.size()
+           << ") VoidReturn(" << description.FunctionVoidReturnNames.size()
            << "), Event Handlers Void(" << description.EventHandlersVoid.size()
            << ") Write(" << description.EventHandlersWrite.size() << ")" << std::endl;
     return output;
@@ -282,6 +314,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const InterfaceRequired
     ::cmnSerializeRaw(outputStream, description.FunctionWriteNames);
     ::cmnSerializeRaw(outputStream, description.FunctionReadNames);
     ::cmnSerializeRaw(outputStream, description.FunctionQualifiedReadNames);
+    ::cmnSerializeRaw(outputStream, description.FunctionVoidReturnNames);
     ::cmnSerializeRaw(outputStream, description.EventHandlersVoid);
     ::cmnSerializeRaw(outputStream, description.EventHandlersWrite);
     ::cmnSerializeRaw(outputStream, description.IsRequired);
@@ -297,6 +330,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, InterfaceRequiredDescr
     ::cmnDeSerializeRaw(inputStream, description.FunctionWriteNames);
     ::cmnDeSerializeRaw(inputStream, description.FunctionReadNames);
     ::cmnDeSerializeRaw(inputStream, description.FunctionQualifiedReadNames);
+    ::cmnDeSerializeRaw(inputStream, description.FunctionVoidReturnNames);
     ::cmnDeSerializeRaw(inputStream, description.EventHandlersVoid);
     ::cmnDeSerializeRaw(inputStream, description.EventHandlersWrite);
     if (inputStream.fail())

@@ -99,6 +99,10 @@ module mtsManagerProxy
         string Argument1PrototypeSerialized;
         string Argument2PrototypeSerialized;
 	};
+	struct CommandVoidReturnElement { 
+		string Name;
+        string ResultPrototypeSerialized;
+	};
 	struct EventVoidElement { 
 		string Name;
 	};
@@ -111,6 +115,7 @@ module mtsManagerProxy
 	sequence<CommandWriteElement>         CommandWriteSequence;
 	sequence<CommandReadElement>          CommandReadSequence;
 	sequence<CommandQualifiedReadElement> CommandQualifiedReadSequence;
+	sequence<CommandVoidReturnElement>    CommandVoidReturnSequence;
     sequence<EventVoidElement>            EventVoidSequence;
     sequence<EventWriteElement>           EventWriteSequence;
 
@@ -125,6 +130,7 @@ module mtsManagerProxy
 		CommandWriteSequence         CommandsWrite;
 		CommandReadSequence          CommandsRead;
 		CommandQualifiedReadSequence CommandsQualifiedRead;
+		CommandVoidReturnSequence    CommandsVoidReturn;
         // Events
 		EventVoidSequence            EventsVoid;
 		EventWriteSequence           EventsWrite;
@@ -147,6 +153,7 @@ module mtsManagerProxy
         CommandPointerNames FunctionWriteNames;
         CommandPointerNames FunctionReadNames;
         CommandPointerNames FunctionQualifiedReadNames;
+        CommandPointerNames FunctionVoidReturnNames;
         // Event handlers
         EventHandlerVoidSequence  EventHandlersVoid;
 		EventHandlerWriteSequence EventHandlersWrite;

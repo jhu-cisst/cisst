@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsFunctionReadProxy.h"
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
+#include "mtsFunctionVoidReturnProxy.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
 
@@ -354,6 +355,44 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSeriali
 #endif
 }
 
+
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized(const CommandIDType commandID,
+                                                                                 mtsExecutionResult & executionResult,
+                                                                                 std::string & serializedResult)
+{
+    mtsFunctionVoidReturnProxy * functionVoidReturnProxy = reinterpret_cast<mtsFunctionVoidReturnProxy*>(commandID);
+    if (!functionVoidReturnProxy) {
+        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: invalid proxy id of function qualified read: " << commandID);
+        executionResult = mtsExecutionResult::INVALID_COMMAND_ID;
+        return;
+    }
+
+    // Create a temporary argument which includes dynamic allocation internally.
+    // Therefore, this object should be deallocated manually.
+    mtsGenericObject * result =
+        dynamic_cast<mtsGenericObject *>(functionVoidReturnProxy->GetCommand()->GetResultPrototype()->Services()->Create());
+    if (!result) {
+        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: failed to create a temporary argument");
+        executionResult = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+        return;
+    }
+
+    // Execute the command
+    executionResult = (*functionVoidReturnProxy)(*result);
+
+    // Serialize
+    mtsProxySerializer * deserializer = functionVoidReturnProxy->GetSerializer();
+    deserializer->Serialize(*result, serializedResult);
+
+    // Deallocate memory
+    delete result;
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: sent " << serializedResult.size() << " bytes");
+#endif
+}
+
+
 //-------------------------------------------------------------------------
 //  Event Generators (Event Sender) : Client -> Server
 //-------------------------------------------------------------------------
@@ -573,7 +612,7 @@ mtsComponentInterfaceProxyClient
 ::ComponentInterfaceClientI
 ::ExecuteCommandVoid(::Ice::Long commandID,
                      bool blocking,
-                     ::Ice::Byte & result,
+                     ::Ice::Byte & executionResultByte,
                      const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -586,7 +625,7 @@ mtsComponentInterfaceProxyClient
     } else {
         ComponentInterfaceProxyClient->ReceiveExecuteCommandVoid(commandID, MTS_NOT_BLOCKING, executionResult);
     }
-    result = static_cast< ::Ice::Byte>(executionResult.GetResult());
+    executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }
 
 void
@@ -594,7 +633,7 @@ mtsComponentInterfaceProxyClient
 ::ComponentInterfaceClientI
 ::ExecuteCommandWriteSerialized(::Ice::Long commandID,
                                 const ::std::string & argument, bool blocking,
-                                ::Ice::Byte & result,
+                                ::Ice::Byte & executionResultByte,
                                 const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -607,7 +646,7 @@ mtsComponentInterfaceProxyClient
     } else {
         ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteSerialized(commandID, MTS_NOT_BLOCKING, executionResult, argument);
     }
-    result = static_cast< ::Ice::Byte>(executionResult.GetResult());
+    executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }
 
 
@@ -616,7 +655,7 @@ mtsComponentInterfaceProxyClient
 ::ComponentInterfaceClientI
 ::ExecuteCommandReadSerialized(::Ice::Long commandID,
                                ::std::string & argument,
-                               ::Ice::Byte & result,
+                               ::Ice::Byte & executionResultByte,
                                const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -624,7 +663,7 @@ mtsComponentInterfaceProxyClient
 #endif
     mtsExecutionResult executionResult;
     ComponentInterfaceProxyClient->ReceiveExecuteCommandReadSerialized(commandID, executionResult, argument);
-    result = static_cast< ::Ice::Byte>(executionResult.GetResult());
+    executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }
 
 
@@ -633,7 +672,7 @@ mtsComponentInterfaceProxyClient
 ::ComponentInterfaceClientI
 ::ExecuteCommandQualifiedReadSerialized(::Ice::Long commandID,
                                         const ::std::string & argumentIn, ::std::string & argumentOut,
-                                        ::Ice::Byte & result,
+                                        ::Ice::Byte & executionResultByte,
                                         const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -641,5 +680,22 @@ mtsComponentInterfaceProxyClient
 #endif
     mtsExecutionResult executionResult;
     ComponentInterfaceProxyClient->ReceiveExecuteCommandQualifiedReadSerialized(commandID, executionResult, argumentIn, argumentOut);
-    result = static_cast< ::Ice::Byte>(executionResult.GetResult());
+    executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
+}
+
+
+void
+mtsComponentInterfaceProxyClient
+::ComponentInterfaceClientI
+::ExecuteCommandVoidReturnSerialized(::Ice::Long commandID,
+                                     ::std::string & result,
+                                     ::Ice::Byte & executionResultByte,
+                                     const ::Ice::Current & CMN_UNUSED(current))
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoidReturnSerialized: " << commandID << ", " << argumentIn.size());
+#endif
+    mtsExecutionResult executionResult;
+    ComponentInterfaceProxyClient->ReceiveExecuteCommandVoidReturnSerialized(commandID, executionResult, result);
+    executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }

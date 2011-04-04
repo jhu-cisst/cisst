@@ -562,6 +562,53 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized
     return true;
 }
 
+
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                                                 mtsExecutionResult & executionResult,
+                                                                                 mtsGenericObject & result)
+{
+    if (!IsActiveProxy()) return false;
+
+    ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy || !clientProxy->get()) {
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoidReturnSerialized: no proxy client found or inactive proxy: " << clientID);
+        return false;
+    }
+
+    // Get per-command serializer
+    mtsProxySerializer * serializer = PerCommandSerializerMap[commandID];
+    if (!serializer) {
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoidReturnSerialized: cannot find per-command serializer");
+        return false;
+    }
+
+    // Argument placeholder of which value is set by the qualified read command
+    std::string serializedArgumentOut;
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandVoidReturnSerialized: " << commandID << ", " << serializedArgumentIn.size() << " bytes");
+#endif
+
+    try {
+        Ice::Byte result;
+        (*clientProxy)->ExecuteCommandVoidReturnSerialized(commandID,
+                                                           serializedArgumentOut,
+                                                           result);
+        executionResult = static_cast<mtsExecutionResult::Enum>(result);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoidReturnSerialized: network exception: " << ex);
+        OnClientDisconnect(clientID);
+        executionResult = mtsExecutionResult::NETWORK_ERROR;
+        return false;
+    }
+
+    // Deserialize
+    serializer->DeSerialize(serializedArgumentOut, result);
+
+    return true;
+}
+
+
 //-------------------------------------------------------------------------
 //  Definition by mtsComponentInterfaceProxy.ice
 //-------------------------------------------------------------------------

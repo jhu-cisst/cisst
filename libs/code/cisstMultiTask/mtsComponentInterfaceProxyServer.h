@@ -166,6 +166,9 @@ public:
     bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
                                                    mtsExecutionResult & executionResult,
                                                    const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut);
+    bool SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                mtsExecutionResult & executionResult,
+                                                mtsGenericObject & result);
 
     //-------------------------------------------------------------------------
     //  Getters

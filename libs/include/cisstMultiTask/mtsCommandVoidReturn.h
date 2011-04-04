@@ -66,6 +66,8 @@ public:
     /*! The constructor. Does nothing. */
     mtsCommandVoidReturn(void);
 
+    mtsCommandVoidReturn(const std::string & name);
+
     /*! The constructor.
       \param action Pointer to the member function that is to be called
       by the invoker of the command

@@ -262,6 +262,7 @@ void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
     dest.CommandsWrite.clear();
     dest.CommandsRead.clear();
     dest.CommandsQualifiedRead.clear();
+    dest.CommandsVoidReturn.clear();
     dest.EventsVoid.clear();
     dest.EventsWrite.clear();
 
@@ -308,6 +309,16 @@ void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
         dest.CommandsQualifiedRead.push_back(commandQualifiedRead);
     }
 
+    // Conversion of command void return vector
+    mtsInterfaceCommon::CommandVoidReturnElement commandVoidReturn;
+    ::mtsManagerProxy::CommandVoidReturnSequence::const_iterator itVoidReturn = src.CommandsVoidReturn.begin();
+    const ::mtsManagerProxy::CommandVoidReturnSequence::const_iterator itVoidReturnEnd = src.CommandsVoidReturn.end();
+    for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
+        commandVoidReturn.Name = itVoidReturn->Name;
+        commandVoidReturn.ResultPrototypeSerialized = itVoidReturn->ResultPrototypeSerialized;
+        dest.CommandsVoidReturn.push_back(commandVoidReturn);
+    }
+
     // Conversion of event void generator vector
     mtsInterfaceCommon::EventVoidElement eventVoid;
     ::mtsManagerProxy::EventVoidSequence::const_iterator itEventVoid = src.EventsVoid.begin();
@@ -336,6 +347,7 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
     dest.FunctionWriteNames.clear();
     dest.FunctionReadNames.clear();
     dest.FunctionQualifiedReadNames.clear();
+    dest.FunctionVoidReturnNames.clear();
     dest.EventHandlersVoid.clear();
     dest.EventHandlersWrite.clear();
 
@@ -356,6 +368,9 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
 
     // Conversion of function qualified read vector
     dest.FunctionQualifiedReadNames.insert(dest.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.end());
+
+    // Conversion of function qualified read vector
+    dest.FunctionVoidReturnNames.insert(dest.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.end());
 
     // Conversion of event void handler vector
     mtsInterfaceCommon::CommandVoidElement eventVoidHandler;
@@ -421,6 +436,7 @@ void mtsManagerProxyServer::ConstructInterfaceProvidedDescriptionFrom(
     dest.CommandsWrite.clear();
     dest.CommandsRead.clear();
     dest.CommandsQualifiedRead.clear();
+    dest.CommandsVoidReturn.clear();
     dest.EventsVoid.clear();
     dest.EventsWrite.clear();
 
@@ -467,6 +483,16 @@ void mtsManagerProxyServer::ConstructInterfaceProvidedDescriptionFrom(
         dest.CommandsQualifiedRead.push_back(commandQualifiedRead);
     }
 
+    // Construct command VoidReturn vector
+    ::mtsManagerProxy::CommandVoidReturnElement commandVoidReturn;
+    CommandVoidReturnVector::const_iterator itVoidReturn = src.CommandsVoidReturn.begin();
+    const CommandVoidReturnVector::const_iterator itVoidReturnEnd = src.CommandsVoidReturn.end();
+    for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
+        commandVoidReturn.Name = itVoidReturn->Name;
+        commandVoidReturn.ResultPrototypeSerialized = itVoidReturn->ResultPrototypeSerialized;
+        dest.CommandsVoidReturn.push_back(commandVoidReturn);
+    }
+
     // Construct event void generator vector
     ::mtsManagerProxy::EventVoidElement eventVoidGenerator;
     EventVoidVector::const_iterator itEventVoid = src.EventsVoid.begin();
@@ -495,6 +521,7 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
     dest.FunctionWriteNames.clear();
     dest.FunctionReadNames.clear();
     dest.FunctionQualifiedReadNames.clear();
+    dest.FunctionVoidReturnNames.clear();
     dest.EventHandlersVoid.clear();
     dest.EventHandlersWrite.clear();
 
@@ -515,6 +542,9 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
 
     // Construct function qualified read vector
     dest.FunctionQualifiedReadNames.insert(dest.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.end());
+
+    // Construct function qualified read vector
+    dest.FunctionVoidReturnNames.insert(dest.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.end());
 
     // Construct event void handler vector
     ::mtsManagerProxy::CommandVoidElement eventVoidHandler;
