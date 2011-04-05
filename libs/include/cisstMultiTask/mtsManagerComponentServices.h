@@ -135,13 +135,22 @@ public:
     bool Disconnect(const mtsDescriptionConnection & connection) const;
     bool Disconnect(ConnectionIDType connectionID) const;
 
-    bool ComponentStart(const std::string & componentName, const double delayInSecond = 0.0) const;
+    bool ComponentStart(const std::string & componentName, const double delayInSecond) const;
+    bool ComponentStart(const std::string & componentName) const
+         { return ComponentStart(componentName, 0.0); }
     bool ComponentStart(const std::string& processName, const std::string & componentName,
-                        const double delayInSecond = 0.0) const;
+                        const double delayInSecond) const;
+    bool ComponentStart(const std::string& processName, const std::string & componentName) const
+         { return ComponentStart(processName, componentName, 0.0); }
 
-    bool ComponentStop(const std::string & componentName, const double delayInSecond = 0.0) const;
+
+    bool ComponentStop(const std::string & componentName, const double delayInSecond) const;
+    bool ComponentStop(const std::string & componentName) const
+         { return ComponentStop(componentName, 0.0); }
     bool ComponentStop(const std::string& processName, const std::string & componentName,
-                       const double delayInSecond = 0.0) const;
+                       const double delayInSecond) const;
+    bool ComponentStop(const std::string& processName, const std::string & componentName) const
+         { return ComponentStop(processName, componentName, 0.0); }
 
     bool ComponentResume(const std::string & componentName, const double delayInSecond = 0.0) const;
     bool ComponentResume(const std::string& processName, const std::string & componentName,

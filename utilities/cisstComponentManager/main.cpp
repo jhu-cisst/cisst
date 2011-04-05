@@ -31,11 +31,19 @@ http://www.cisst.org/cisst/license.txt.
 
 class CommandEntryBase {
     std::string command;
+    std::string argInfo;
+    int numArgs;   // number of parameters (negative means variable)
 public:
-    CommandEntryBase(const std::string &cmd) : command(cmd) {}
+    CommandEntryBase(const std::string &cmd, const std::string argString, int nArgs) :
+                     command(cmd), argInfo(argString), numArgs(nArgs) {}
     virtual ~CommandEntryBase() {}
 
     std::string GetCommand(void) const { return command; }
+    std::string GetArgInfo(void) const { return argInfo; }
+
+    int GetNumArgs(void) const { return numArgs; }
+    bool IsValidNumArgs(int nArgs) const { return (numArgs<0)?true:(nArgs == numArgs); }
+
     virtual bool Execute(const std::vector<std::string> &args) const 
     { 
         CMN_LOG_RUN_ERROR << "CommandEntryBase::Execute called" << std::endl;
@@ -48,8 +56,9 @@ class CommandEntryFunction : public CommandEntryBase
     typedef bool (*ActionType)(const std::vector<std::string> &args);
     ActionType Action;
 public:
-    CommandEntryFunction(const std::string &cmd, ActionType action) :
-        CommandEntryBase(cmd), Action(action) {}
+    CommandEntryFunction(const std::string &cmd, const std::string &argString,
+                         ActionType action, int nArgs = -1) :
+        CommandEntryBase(cmd, argString, nArgs), Action(action) {}
     ~CommandEntryFunction() {}
 
     bool Execute(const std::vector<std::string> &args) const
@@ -57,19 +66,75 @@ public:
 };
 
 template <class _classType>
-class CommandEntryMethod : public CommandEntryBase
+class CommandEntryMethodVoid : public CommandEntryBase
 {
-    typedef bool (_classType::*ActionType)(const std::vector<std::string> &args) const;
+    typedef bool (_classType::*ActionType)(void) const;
     ActionType Action;
     _classType *classInstance;
+
 public:
-    CommandEntryMethod(const std::string &cmd, ActionType action, _classType *ptr) :
-        CommandEntryBase(cmd), Action(action), classInstance(ptr) {}
-    ~CommandEntryMethod() {}
+    CommandEntryMethodVoid(const std::string &cmd, const std::string &argString,
+                           ActionType action, _classType *ptr) :
+        CommandEntryBase(cmd, argString, 0), Action(action), classInstance(ptr) {}
+    ~CommandEntryMethodVoid() {}
 
     bool Execute(const std::vector<std::string> &args) const
-    { return (classInstance->*Action)(args); }
+    { return (classInstance->*Action)(); }
 };
+
+template <class _classType>
+class CommandEntryMethodStr1 : public CommandEntryBase
+{
+    typedef bool (_classType::*ActionType)(const std::string &arg1) const;
+    ActionType Action;
+    _classType *classInstance;
+
+public:
+    CommandEntryMethodStr1(const std::string &cmd, const std::string &argString,
+                           ActionType action, _classType *ptr) :
+        CommandEntryBase(cmd, argString, 1), Action(action), classInstance(ptr) {}
+    ~CommandEntryMethodStr1() {}
+
+    bool Execute(const std::vector<std::string> &args) const
+    { return (classInstance->*Action)(args[0]); }
+};
+
+template <class _classType>
+class CommandEntryMethodStr2 : public CommandEntryBase
+{
+    typedef bool (_classType::*ActionType)(const std::string &arg1, const std::string &arg2) const;
+    ActionType Action;
+    _classType *classInstance;
+
+public:
+    CommandEntryMethodStr2(const std::string &cmd, const std::string &argString,
+                           ActionType action, _classType *ptr) :
+        CommandEntryBase(cmd, argString, 2), Action(action), classInstance(ptr) {}
+    ~CommandEntryMethodStr2() {}
+
+    bool Execute(const std::vector<std::string> &args) const
+    { return (classInstance->*Action)(args[0], args[1]); }
+};
+
+
+template <class _classType>
+class CommandEntryMethodStr3 : public CommandEntryBase
+{
+    typedef bool (_classType::*ActionType)(const std::string &arg1, const std::string &arg2,
+                                           const std::string &arg3) const;
+    ActionType Action;
+    _classType *classInstance;
+
+public:
+    CommandEntryMethodStr3(const std::string &cmd, const std::string &argString,
+                           ActionType action, _classType *ptr) :
+        CommandEntryBase(cmd, argString, 3), Action(action), classInstance(ptr) {}
+    ~CommandEntryMethodStr3() {}
+
+    bool Execute(const std::vector<std::string> &args) const
+    { return (classInstance->*Action)(args[0], args[1], args[2]); }
+};
+
 
 class shellTask : public mtsTaskContinuous
 {
@@ -82,6 +147,11 @@ class shellTask : public mtsTaskContinuous
     {
         result_type operator()(first_argument_type p1, second_argument_type p2) const
         {
+            if (p1->GetCommand() == p2->GetCommand()) {
+                if ((p1->GetNumArgs() == -1) || (p2->GetNumArgs() == -1))
+                    return false;
+                return p1->GetNumArgs() < p2->GetNumArgs();
+            }
             return p1->GetCommand() < p2->GetCommand();
         }
     };
@@ -98,10 +168,10 @@ public:
     void Run(void);
     void Cleanup(void) {}
 
-    bool Quit(const std::vector<std::string> &args) const
+    bool Quit(void) const
     { /*Kill();*/ return true; }
-    bool Help(const std::vector<std::string> &args) const;
-    bool Debug(const std::vector<std::string> &args) const;
+    bool Help(void) const;
+    bool Debug(void) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(shellTask)
@@ -109,26 +179,41 @@ CMN_IMPLEMENT_SERVICES(shellTask)
 
 static bool gcmFunction(const std::vector<std::string> &args)
 {
-    if (args.size() == 2)
-        return (mtsManagerLocal::GetInstance(args[0], args[1]) != 0);
-    else {
-        std::cout << "Syntax: gcm ipAddr processName" << std::endl;
-        return false;
-    }
+    return mtsManagerLocal::GetInstance(args[0], args[1]) != 0;
 }
 
 void shellTask::Configure(const std::string &)
 {
-    CommandList.insert(new CommandEntryMethod<shellTask>("quit", &shellTask::Quit, this));
-    CommandList.insert(new CommandEntryMethod<shellTask>("help", &shellTask::Help, this));
-    CommandList.insert(new CommandEntryMethod<shellTask>("debug", &shellTask::Debug, this));
-    CommandList.insert(new CommandEntryFunction("gcm", gcmFunction));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("quit", "", &shellTask::Quit, this));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("help", "", &shellTask::Help, this));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("debug","",  &shellTask::Debug, this));
+    CommandList.insert(new CommandEntryFunction("gcm", "<ip_addr> <process_name>", gcmFunction, 2));
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
     if (Manager) {
-        CommandList.insert(new CommandEntryMethod<mtsManagerComponentServices>(
-                               "create", &mtsManagerComponentServices::ComponentCreate, Manager));
-        CommandList.insert(new CommandEntryMethod<mtsManagerComponentServices>(
-                               "start", &mtsManagerComponentServices::ComponentStart, Manager));
+        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
+                               "create", "<class_name> <component_name>",
+                               &mtsManagerComponentServices::ComponentCreate, Manager));
+        CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
+                               "create", "<process_name> <class_name> <component_name>",
+                               &mtsManagerComponentServices::ComponentCreate, Manager));
+        CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
+                               "start", "<component_name>",
+                               &mtsManagerComponentServices::ComponentStart, Manager));
+        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
+                               "start", "<process_name> <component_name>",
+                               &mtsManagerComponentServices::ComponentStart, Manager));
+        CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
+                               "stop", "<component_name>",
+                                &mtsManagerComponentServices::ComponentStop, Manager));
+        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
+                               "stop", "<process_name> <component_name>",
+                                &mtsManagerComponentServices::ComponentStop, Manager));
+        CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
+                               "load", "<file_name>",
+                                &mtsManagerComponentServices::Load, Manager));
+        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
+                               "load", "<process_name> <file_name>",
+                                &mtsManagerComponentServices::Load, Manager));
     }
 }
 
@@ -152,11 +237,19 @@ void shellTask::Run(void)
                 Kill();
             else {
                 CmdListType::iterator it;
-                it = CommandList.find(&CommandEntryBase(command));
+                // First, check if command exists
+                it = CommandList.find(&CommandEntryBase(command, "", -1));
                 if (it == CommandList.end())
                     std::cout << "Unknown command: " << command << std::endl;
-                else
-                    (*it)->Execute(args);  // could check return value
+                else {
+                    // if we didn't happen to get a match on number of args, try again
+                    if (!(*it)->IsValidNumArgs(args.size()))
+                        it = CommandList.find(&CommandEntryBase(command, "", args.size()));
+                    if (it == CommandList.end())
+                        std::cout << command << ": invalid number of parameters: " << args.size() << std::endl;
+                    else
+                        (*it)->Execute(args);  // could check return value
+                }
             }
         }
     }
@@ -164,17 +257,16 @@ void shellTask::Run(void)
         Kill();
 }
 
-bool shellTask::Help(const std::vector<std::string> &args) const
+bool shellTask::Help(void) const
 {
-    // For now, ignore args
     std::cout << "List of commands: " << std::endl;
     CmdListType::const_iterator it;
     for (it = CommandList.begin(); it != CommandList.end(); it++)
-        std::cout << " " << (*it)->GetCommand() << std::endl;
+        std::cout << " " << (*it)->GetCommand() << "\t" << (*it)->GetArgInfo() << std::endl;
     return true;
 }
 
-bool shellTask::Debug(const std::vector<std::string> &args) const
+bool shellTask::Debug(void) const
 {
     std::cout << "List of components: " << std::endl;
     std::vector<std::string> compList;
