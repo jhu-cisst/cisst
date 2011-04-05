@@ -55,6 +55,7 @@ class CommandEntryFunction : public CommandEntryBase
 {
     typedef bool (*ActionType)(const std::vector<std::string> &args);
     ActionType Action;
+
 public:
     CommandEntryFunction(const std::string &cmd, const std::string &argString,
                          ActionType action, int nArgs = -1) :
@@ -63,6 +64,23 @@ public:
 
     bool Execute(const std::vector<std::string> &args) const
     { return Action(args); }
+};
+
+template <class _classType>
+class CommandEntryMethodArgv : public CommandEntryBase
+{
+    typedef bool (_classType::*ActionType)(const std::vector<std::string> &args) const;
+    ActionType Action;
+    _classType *classInstance;
+
+public:
+    CommandEntryMethodArgv(const std::string &cmd, const std::string &argString,
+                           ActionType action, _classType *ptr, int nArgs = -1) :
+        CommandEntryBase(cmd, argString, nArgs), Action(action), classInstance(ptr) {}
+    ~CommandEntryMethodArgv() {}
+
+    bool Execute(const std::vector<std::string> &args) const
+    { return (classInstance->*Action)(args); }
 };
 
 template <class _classType>
@@ -171,7 +189,7 @@ public:
     bool Quit(void) const
     { /*Kill();*/ return true; }
     bool Help(void) const;
-    bool Debug(void) const;
+    bool List(const std::vector<std::string> &args) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(shellTask)
@@ -186,7 +204,8 @@ void shellTask::Configure(const std::string &)
 {
     CommandList.insert(new CommandEntryMethodVoid<shellTask>("quit", "", &shellTask::Quit, this));
     CommandList.insert(new CommandEntryMethodVoid<shellTask>("help", "", &shellTask::Help, this));
-    CommandList.insert(new CommandEntryMethodVoid<shellTask>("debug","",  &shellTask::Debug, this));
+    CommandList.insert(new CommandEntryMethodArgv<shellTask>("list", "[<process_name>]",
+                                                             &shellTask::List, this));
     CommandList.insert(new CommandEntryFunction("gcm", "<ip_addr> <process_name>", gcmFunction, 2));
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
     if (Manager) {
@@ -266,13 +285,24 @@ bool shellTask::Help(void) const
     return true;
 }
 
-bool shellTask::Debug(void) const
+bool shellTask::List(const std::vector<std::string> &args) const
 {
-    std::cout << "List of components: " << std::endl;
-    std::vector<std::string> compList;
-    compList = ManagerComponentServices->GetNamesOfComponents(mtsManagerLocal::GetInstance()->GetProcessName());
-    for (size_t i = 0; i < compList.size(); i++)
-        std::cout << "  " << compList[i] << std::endl;
+    std::vector<std::string> procList;
+    if (args.size() > 0) {
+        procList.push_back(args[0]);
+        std::cout << "List of all process components:" << std::endl;
+    }
+    else {
+        std::cout << "List of all processes/components:" << std::endl;
+        procList = ManagerComponentServices->GetNamesOfProcesses();
+    }
+    for (size_t i = 0; i < procList.size(); i++) {
+        std::cout << "  " << procList[i] << std::endl;
+        std::vector<std::string> compList;
+        compList = ManagerComponentServices->GetNamesOfComponents(procList[i]);
+        for (size_t j = 0; j < compList.size(); j++)
+            std::cout << "    " << compList[j] << std::endl;
+    }
     return true;
 }
 
