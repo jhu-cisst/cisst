@@ -47,7 +47,7 @@ public:
 
     virtual bool Execute(const std::vector<std::string> &args) const 
     { 
-        CMN_LOG_RUN_ERROR << "CommandEntryBase::Execute called" << std::endl;
+        std::cout << "CommandEntryBase::Execute called" << std::endl;
         return false;
     }
 };
@@ -194,8 +194,7 @@ public:
 class shellTask : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-    std::string curLine;
-    cmnTokenizer tokens;
+    std::string lastError;
 
     // Comparison operator for std::set
     struct CmdListLess: public std::binary_function<const CommandEntryBase*, const CommandEntryBase*, bool>
@@ -223,11 +222,13 @@ public:
     void Run(void);
     void Cleanup(void) {}
 
+    bool ExecuteLine(const std::string &curLine);
     bool Quit(void) const
     { /*Kill();*/ return true; }
-    bool Help(void) const;
+    bool Help(const std::vector<std::string> &args) const;
     bool List(const std::vector<std::string> &args) const;
     bool Connections(const std::vector<std::string> &args) const;
+    bool System(const std::string &cmdString) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(shellTask)
@@ -241,13 +242,15 @@ static bool gcmFunction(const std::vector<std::string> &args)
 void shellTask::Configure(const std::string &)
 {
     CommandList.insert(new CommandEntryMethodVoid<shellTask>("quit", "", &shellTask::Quit, this));
-    CommandList.insert(new CommandEntryMethodVoid<shellTask>("help", "", &shellTask::Help, this));
+    CommandList.insert(new CommandEntryMethodArgv<shellTask>("help", "[<command_name>]", &shellTask::Help, this));
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("list", "[<process_name>]",
                                                              &shellTask::List, this));
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("connections",
                                                              "[<process_name>] [<component_name>]",
                                                              &shellTask::Connections, this));
     CommandList.insert(new CommandEntryFunction("gcm", "<ip_addr> <process_name>", gcmFunction, 2));
+    CommandList.insert(new CommandEntryMethodStr1<shellTask>("system", "<\"string_to_execute\">",
+                                                             &shellTask::System, this));
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
     if (Manager) {
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
@@ -295,52 +298,87 @@ void shellTask::Configure(const std::string &)
     }
 }
 
+bool shellTask::ExecuteLine(const std::string &curLine)
+{
+    static cmnTokenizer tokens;
+    bool ret = true;
+    lastError = "";
+    tokens.Parse(curLine);
+    std::vector<const char *> argv;
+    tokens.GetArgvTokens(argv);
+    // GetArgvTokens sets argv[0]=0, and argv[argv.size()-1]=0
+    if ((argv.size() > 2) && argv[1]) {
+        ret = false;
+        std::string command;
+        std::vector<std::string> args;
+        command = std::string(argv[1]);
+        for (size_t i = 2; i < argv.size()-1; i++)
+            args.push_back(std::string(argv[i]?argv[i]:"NULL"));
+        if (command == "quit") {
+            Kill();
+            return true;
+        }
+        else {
+            CmdListType::iterator it;
+            // First, check if command exists
+            it = CommandList.find(&CommandEntryBase(command, "", -1));
+            if (it == CommandList.end())
+                lastError = std::string("Unknown command: ") + command;
+            else {
+                // if we didn't happen to get a match on number of args, try again
+                if (!(*it)->IsValidNumArgs(args.size()))
+                    it = CommandList.find(&CommandEntryBase(command, "", args.size()));
+                if (it == CommandList.end())
+                    lastError = command + ": invalid number of parameters";
+                else
+                    ret = (*it)->Execute(args);
+            }
+        }
+    }
+    return ret;
+}
+
 void shellTask::Run(void)
 {
+    static std::string curLine;
+
     // Display prompt
-    std::cout << "cisst> ";
+    std::cout << mtsManagerLocal::GetInstance()->GetProcessName() << "> ";
     getline(std::cin, curLine);
     if (std::cin.good()) {
-        tokens.Parse(curLine);
-        std::vector<const char *> argv;
-        tokens.GetArgvTokens(argv);
-        // GetArgvTokens sets argv[0]=0, and argv[argv.size()-1]=0
-        if ((argv.size() > 2) && argv[1]) {
-            std::string command;
-            std::vector<std::string> args;
-            command = std::string(argv[1]);
-            for (size_t i = 2; i < argv.size()-1; i++)
-                args.push_back(std::string(argv[i]?argv[i]:"NULL"));
-            if (command == "quit")
-                Kill();
-            else {
-                CmdListType::iterator it;
-                // First, check if command exists
-                it = CommandList.find(&CommandEntryBase(command, "", -1));
-                if (it == CommandList.end())
-                    std::cout << "Unknown command: " << command << std::endl;
-                else {
-                    // if we didn't happen to get a match on number of args, try again
-                    if (!(*it)->IsValidNumArgs(args.size()))
-                        it = CommandList.find(&CommandEntryBase(command, "", args.size()));
-                    if (it == CommandList.end())
-                        std::cout << command << ": invalid number of parameters: " << args.size() << std::endl;
-                    else
-                        (*it)->Execute(args);  // could check return value
-                }
-            }
+        if (!ExecuteLine(curLine)) {
+            if (lastError == "")
+                std::cout << "Failed" << std::endl;
+            else
+                std::cout << lastError << std::endl;
         }
     }
     else
         Kill();
 }
 
-bool shellTask::Help(void) const
+bool shellTask::Help(const std::vector<std::string> &args) const
 {
-    std::cout << "List of commands: " << std::endl;
     CmdListType::const_iterator it;
-    for (it = CommandList.begin(); it != CommandList.end(); it++)
-        std::cout << " " << (*it)->GetCommand() << "\t" << (*it)->GetArgInfo() << std::endl;
+    if (args.size() == 0) {
+        std::cout << "List of commands (type \"help <command_name>\" for details): " << std::endl;
+        std::string lastCommand;
+        for (it = CommandList.begin(); it != CommandList.end(); it++) {
+            std::string curCommand = (*it)->GetCommand();
+            if (curCommand != lastCommand) {
+                std::cout << "  " << curCommand << std::endl;
+                lastCommand = curCommand;
+            }
+        }
+    }
+    else if (args.size() == 1) {
+        for (it = CommandList.begin(); it != CommandList.end(); it++) {
+            if ((*it)->GetCommand() == args[0])
+                std::cout << "  " << (*it)->GetCommand() << " " << (*it)->GetArgInfo() << std::endl;
+        }
+    }
+    else
+        std::cout << "Syntax: help [<command_name>]" << std::endl;
     return true;
 }
 
@@ -412,31 +450,69 @@ bool shellTask::Connections(const std::vector<std::string> &args) const
     return true;
 }
 
+bool shellTask::System(const std::string &cmdString) const
+{
+    system(cmdString.c_str());  // return value may be platform-dependent
+    return true;
+}
+
+// Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename]
 int main(int argc, char * argv[])
 {
-    std::string globalComponentManagerIP;
+    mtsManagerGlobal *globalManager = 0;
+    mtsManagerLocal * localManager = 0;;
 
-    // Get the TaskManager instance and set operation mode
-    mtsManagerLocal * taskManager;
-    if (argc < 2)  // local configuration
-        taskManager = mtsManagerLocal::GetInstance();
-    else {         // network configuration
+    if ((argc < 2) || (strcmp(argv[1], "local") == 0) || (argv[1][0] == '-')) {
+        // Local configuration
+        std::string processName("ProcessShell");
+        if ((argc >= 3) && (argv[2][0] != '-'))
+            processName = argv[2];
+        // For now, ignoring processName
+        localManager = mtsManagerLocal::GetInstance();
+    }
+    else if (strcmp(argv[1], "global") == 0) {
+        // This is the GCM
+        globalManager = new mtsManagerGlobal;
+        if (!globalManager->StartServer()) {
+            std::cout << "Failed to start global component manager." << std::endl;
+            return 1;
+        }
+        std::cout << "Global component manager started..." << std::endl;
         try {
-            taskManager = mtsManagerLocal::GetInstance(argv[1], "ProcessShell");
+            localManager = mtsManagerLocal::GetInstance(*globalManager);
         } catch (...) {
-            CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
+            std::cout << "Failed to initialize local component manager." << std::endl;
+            return 1;
+        }
+    }
+    else if (argv[1][0] != '-') {
+        // Connecting to GCM at specified IP address
+        std::string processName("ProcessShell");
+        if ((argc >= 3) && (argv[2][0] != '-'))
+            processName = argv[2];
+        try {
+            localManager = mtsManagerLocal::GetInstance(argv[1], processName);
+        } catch (...) {
+            std::cout << "Failed to initialize local component manager." << std::endl;
             return 1;
         }
     }
 
     shellTask *shell = new shellTask("cisstShell");
-    taskManager->AddComponent(shell);
+    localManager->AddComponent(shell);
     shell->Configure("");
 
-    taskManager->CreateAll();
-    taskManager->StartAll();
+    localManager->CreateAll();
+    localManager->StartAll();
     /// does not return until shell task is exited
 
-    taskManager->Cleanup();
+    // Cleanup global component manager
+    // We don't delete it because that is currently done in localManager->Cleanup
+    if (globalManager) {
+        if (!globalManager->StopServer())
+            std::cout << "Failed to stop global component manager." << std::endl;
+    }
+
+    localManager->Cleanup();
     return 0;
 }
