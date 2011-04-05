@@ -291,6 +291,19 @@ mtsComponentState mtsManagerComponentServices::ComponentGetState(const mtsDescri
     return state;
 }
 
+std::string mtsManagerComponentServices::ComponentGetState(const std::string componentName) const
+{
+    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
+    return ComponentGetState(processName, componentName);
+}
+
+std::string mtsManagerComponentServices::ComponentGetState(const std::string & processName,
+                                                           const std::string componentName) const
+{
+    mtsComponentState state = ComponentGetState(mtsDescriptionComponent(processName, componentName));
+    return mtsComponentState::ToString(state.GetState());
+}
+
 std::vector<std::string> mtsManagerComponentServices::GetNamesOfProcesses(void) const
 {
     std::vector<std::string> namesOfProcesses;

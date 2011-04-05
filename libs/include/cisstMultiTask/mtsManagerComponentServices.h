@@ -157,6 +157,8 @@ public:
                          const double delayInSecond = 0.0) const;
 
     mtsComponentState ComponentGetState(const mtsDescriptionComponent &component) const;
+    std::string ComponentGetState(const std::string componentName) const;
+    std::string ComponentGetState(const std::string & processName, const std::string componentName) const;
 
     std::vector<std::string> GetNamesOfProcesses(void) const;
     std::vector<std::string> GetNamesOfComponents(const std::string & processName) const;
