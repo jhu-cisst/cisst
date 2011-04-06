@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 #include <set>
 #include <functional>
+#include <fstream>
 
 #include <cisstCommon/cmnTokenizer.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -194,7 +195,9 @@ public:
 class shellTask : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-    std::string lastError;
+    static std::string lastError;
+    int argc;
+    char **argv;
 
     // Comparison operator for std::set
     struct CmdListLess: public std::binary_function<const CommandEntryBase*, const CommandEntryBase*, bool>
@@ -213,31 +216,39 @@ class shellTask : public mtsTaskContinuous
    CmdListType CommandList;
 
 public:
-    shellTask(const std::string &name) : mtsTaskContinuous(name, 10, false)
+    // The constructor specifies that a new thread should be created (third parameter true)
+    // because otherwise the system doesn't work. It seems that the blocking I/O (i.e., waiting
+    // for input from cin) interferes with proper operation.
+    shellTask(const std::string &name, int _argc, char **_argv) : mtsTaskContinuous(name, 10, true), argc(_argc), argv(_argv)
     { EnableDynamicComponentManagement(); }
     ~shellTask() {}
 
     void Configure(const std::string & CMN_UNUSED(filename));
-    void Startup(void) {}
+    void Startup(void);
     void Run(void);
     void Cleanup(void) {}
 
-    bool ExecuteLine(const std::string &curLine);
-    bool Quit(void) const
-    { /*Kill();*/ return true; }
+    bool ExecuteLine(const std::string &curLine) const;
+    bool Quit(void) const;
     bool Help(const std::vector<std::string> &args) const;
     bool List(const std::vector<std::string> &args) const;
     bool Connections(const std::vector<std::string> &args) const;
     bool System(const std::string &cmdString) const;
+    bool ExecuteFile(const std::string &fileName) const;
+    bool Sleep(const std::string &time) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(shellTask)
 CMN_IMPLEMENT_SERVICES(shellTask)
 
+std::string shellTask::lastError;
+
+#if CISST_MTS_HAS_ICE
 static bool gcmFunction(const std::vector<std::string> &args)
 {
     return mtsManagerLocal::GetInstance(args[0], args[1]) != 0;
 }
+#endif
 
 void shellTask::Configure(const std::string &)
 {
@@ -248,9 +259,15 @@ void shellTask::Configure(const std::string &)
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("connections",
                                                              "[<process_name>] [<component_name>]",
                                                              &shellTask::Connections, this));
+#if CISST_MTS_HAS_ICE
     CommandList.insert(new CommandEntryFunction("gcm", "<ip_addr> <process_name>", gcmFunction, 2));
+#endif
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("system", "<\"string_to_execute\">",
                                                              &shellTask::System, this));
+    CommandList.insert(new CommandEntryMethodStr1<shellTask>("execute", "<file_name>",
+                                                             &shellTask::ExecuteFile, this));
+    CommandList.insert(new CommandEntryMethodStr1<shellTask>("sleep", "<file_name>",
+                                                             &shellTask::Sleep, this));
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
     if (Manager) {
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
@@ -298,11 +315,18 @@ void shellTask::Configure(const std::string &)
     }
 }
 
-bool shellTask::ExecuteLine(const std::string &curLine)
+bool shellTask::Quit(void) const
+{
+    shellTask *nonConstThis = const_cast<shellTask *>(this);
+    nonConstThis->Kill();
+    return true;
+}
+
+bool shellTask::ExecuteLine(const std::string &curLine) const
 {
     static cmnTokenizer tokens;
     bool ret = true;
-    lastError = "";
+    shellTask::lastError = "";
     tokens.Parse(curLine);
     std::vector<const char *> argv;
     tokens.GetArgvTokens(argv);
@@ -314,43 +338,53 @@ bool shellTask::ExecuteLine(const std::string &curLine)
         command = std::string(argv[1]);
         for (size_t i = 2; i < argv.size()-1; i++)
             args.push_back(std::string(argv[i]?argv[i]:"NULL"));
-        if (command == "quit") {
-            Kill();
-            return true;
-        }
+        CmdListType::const_iterator it;
+        // First, check if command exists
+        it = CommandList.find(&CommandEntryBase(command, "", -1));
+        if (it == CommandList.end())
+            shellTask::lastError = std::string("Unknown command: ") + command;
         else {
-            CmdListType::iterator it;
-            // First, check if command exists
-            it = CommandList.find(&CommandEntryBase(command, "", -1));
+            // if we didn't happen to get a match on number of args, try again
+            if (!(*it)->IsValidNumArgs(args.size()))
+                it = CommandList.find(&CommandEntryBase(command, "", args.size()));
             if (it == CommandList.end())
-                lastError = std::string("Unknown command: ") + command;
-            else {
-                // if we didn't happen to get a match on number of args, try again
-                if (!(*it)->IsValidNumArgs(args.size()))
-                    it = CommandList.find(&CommandEntryBase(command, "", args.size()));
-                if (it == CommandList.end())
-                    lastError = command + ": invalid number of parameters";
-                else
-                    ret = (*it)->Execute(args);
-            }
+                shellTask::lastError = command + ": invalid number of parameters";
+            else
+                ret = (*it)->Execute(args);
         }
     }
     return ret;
 }
 
+void shellTask::Startup(void)
+{
+    std::cout << "cisst Component Manager - type \"help\" for more information" << std::endl;
+}
+
 void shellTask::Run(void)
 {
     static std::string curLine;
-
+    static bool firstTime = true;
+    if (firstTime) {
+        // Execute any startup file that had been passed
+        for (int i = 1; i < argc; i++) {
+            if (strcmp(argv[i], "-e") == 0) {
+                i++;
+                if (i < argc)
+                    ExecuteFile(argv[i]);
+            }
+        }
+        firstTime = false;
+    }
     // Display prompt
     std::cout << mtsManagerLocal::GetInstance()->GetProcessName() << "> ";
     getline(std::cin, curLine);
     if (std::cin.good()) {
         if (!ExecuteLine(curLine)) {
-            if (lastError == "")
+            if (shellTask::lastError == "")
                 std::cout << "Failed" << std::endl;
             else
-                std::cout << lastError << std::endl;
+                std::cout << shellTask::lastError << std::endl;
         }
     }
     else
@@ -450,10 +484,70 @@ bool shellTask::Connections(const std::vector<std::string> &args) const
     return true;
 }
 
+#include <cisstMultiTask/mtsComponentViewer.h>
+
+#if (CISST_OS == CISST_WINDOWS)
+#include <windows.h>
+#endif
+
 bool shellTask::System(const std::string &cmdString) const
 {
+#if (CISST_OS == CISST_WINDOWS)
+    // Following should be moved to cisstOSAbstraction.
+    // It creates a new console window.
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory( &si, sizeof(si) );
+    si.cb = sizeof(si);
+    ZeroMemory( &pi, sizeof(pi) );
+
+    char *cmd = new char[cmdString.size()+1];
+    strcpy(cmd, cmdString.c_str());
+
+    // Start the child process. 
+    if( !CreateProcess( NULL,   // No module name (use command line)
+        cmd,                    // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        CREATE_NEW_CONSOLE,   // Create a new console
+        NULL,           // Use parent's environment block
+        NULL,           // Use parent's starting directory 
+        &si,            // Pointer to STARTUPINFO structure
+        &pi )           // Pointer to PROCESS_INFORMATION structure
+    ) 
+    {
+        std::cout << "CreateProcess returns " << GetLastError() << std::endl;
+        return false;
+    }
+#else
     system(cmdString.c_str());  // return value may be platform-dependent
+#endif
     return true;
+}
+
+bool shellTask::ExecuteFile(const std::string &fileName) const
+{
+    static std::string curLine;
+
+    std::ifstream file(fileName.c_str());
+    while (!file.eof()) {
+        getline(file, curLine);
+        if (!ExecuteLine(curLine))
+            return false;
+    }
+    return true;
+}
+
+bool shellTask::Sleep(const std::string &time) const
+{
+    double dtime;
+    if (sscanf(time.c_str(), "%lf", &dtime) == 1) {
+        osaSleep(dtime);
+        return true;
+    }
+    return false;
 }
 
 // Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename]
@@ -470,6 +564,7 @@ int main(int argc, char * argv[])
         // For now, ignoring processName
         localManager = mtsManagerLocal::GetInstance();
     }
+#if CISST_MTS_HAS_ICE
     else if (strcmp(argv[1], "global") == 0) {
         // This is the GCM
         globalManager = new mtsManagerGlobal;
@@ -497,21 +592,32 @@ int main(int argc, char * argv[])
             return 1;
         }
     }
+#else
+    else {
+        std::cout << "No network support -- set CISST_MTS_HAS_ICE via CMake" << std::endl;
+        return 1;
+    }
+#endif
 
-    shellTask *shell = new shellTask("cisstShell");
+    shellTask *shell = new shellTask("cisstShell", argc, argv);
     localManager->AddComponent(shell);
     shell->Configure("");
 
     localManager->CreateAll();
     localManager->StartAll();
-    /// does not return until shell task is exited
 
+    while (!shell->IsTerminated())
+        osaSleep(0.1);
+
+
+#if CISST_MTS_HAS_ICE
     // Cleanup global component manager
     // We don't delete it because that is currently done in localManager->Cleanup
     if (globalManager) {
         if (!globalManager->StopServer())
             std::cout << "Failed to stop global component manager." << std::endl;
     }
+#endif
 
     localManager->Cleanup();
     return 0;
