@@ -328,7 +328,16 @@ bool shellTask::ExecuteLine(const std::string &curLine) const
     static cmnTokenizer tokens;
     bool ret = true;
     shellTask::lastError = "";
-    tokens.Parse(curLine);
+    std::string procLine(curLine);
+    // Look for comment characters (# or //)
+    size_t pos;
+    pos = procLine.find('#');
+    if (pos != std::string::npos)
+        procLine.erase(pos);
+    pos = procLine.find("//");
+    if (pos != std::string::npos)
+        procLine.erase(pos);
+    tokens.Parse(procLine);
     std::vector<const char *> argv;
     tokens.GetArgvTokens(argv);
     // GetArgvTokens sets argv[0]=0, and argv[argv.size()-1]=0
