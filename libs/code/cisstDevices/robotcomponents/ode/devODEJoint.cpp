@@ -64,7 +64,7 @@ devODEJoint::devODEJoint( dWorldID world,
 
     // set the axis
     dJointSetSliderAxis(jointid, axis[0], axis[1], axis[2]);
-    
+
     dJointSetSliderParam(jointid, dParamLoStop, qmin );
     dJointSetSliderParam(jointid, dParamHiStop, qmax );
     dJointSetSliderParam(jointid, dParamBounce, 0.2);

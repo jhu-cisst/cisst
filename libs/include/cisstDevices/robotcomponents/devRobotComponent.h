@@ -252,6 +252,8 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   
  protected:
 
+  osaCPUMask GetCPUMask() const { return cpumask; }
+
   devRobotComponent::State GetState() const;
 
   devRobotComponent( const std::string& name, 

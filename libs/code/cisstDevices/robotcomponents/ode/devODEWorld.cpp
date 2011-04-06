@@ -46,11 +46,11 @@ devODEWorld::devODEWorld( double period,
   mtsTaskPeriodic( "ODEWorld", period, true ),
   timestep(period) {
 
-  dInitODE2(0);                             // initialize the engine
+  dInitODE2(0);                           // initialize the engine
 
-  worldid = dWorldCreate();                 // create new world for bodies
-  spaceid = dSimpleSpaceCreate(0);          // create a new space for geometries
-  contactsgid = dJointGroupCreate(0);       // create a new contact group
+  worldid = dWorldCreate();               // create new world for bodies
+  spaceid = dSimpleSpaceCreate(0);        // create a new space for geometries
+  contactsgid = dJointGroupCreate(0);     // create a new contact group
 
   floor = dCreatePlane( GetSpaceID(), 0.0, 0.0, 1.0, 0.0 );
   
@@ -67,8 +67,8 @@ devODEWorld::devODEWorld( double period,
   dWorldSetCFM( GetWorldID(), 0.0000001 );
   
   // set the surface layer depth
-  dWorldSetContactSurfaceLayer( GetWorldID(), 0.1 );
-  dWorldSetContactMaxCorrectingVel( GetWorldID(), 0.00001 );
+  dWorldSetContactSurfaceLayer( GetWorldID(), 0.0001 );
+  dWorldSetContactMaxCorrectingVel( GetWorldID(), 0.1 );
 }
 
 // destroy the world
@@ -123,16 +123,23 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
   
   for(size_t i=0; i<devODEWorld::NUM_CONTACTS; i++){
     contacts[i].surface.mode = (
-				dContactMu2     |
-				dContactBounce  |
-				dContactSoftERP |
-				dContactSoftCFM 
+				//dContactMu2 |
+				dContactBounce 
+				| dContactSoftERP
+				| dContactSoftCFM 
 				);
-    contacts[i].surface.mu = 1;
-    contacts[i].surface.mu2 = 1;
+    contacts[i].surface.mu = 100.8;
+    contacts[i].surface.mu2 = 10.8;
     contacts[i].surface.bounce = 0.1;
-    contacts[i].surface.soft_cfm = 0.00001;
-    contacts[i].surface.soft_erp = 0.3;
+    contacts[i].surface.soft_cfm = 0.0000001;
+    contacts[i].surface.soft_erp = 0.05;
+    /*
+    contacts[i].surface.mu = .2;
+    contacts[i].surface.mu2 = 0.2;
+    contacts[i].surface.bounce = 0.1;
+    contacts[i].surface.soft_cfm = 0.0001;
+    contacts[i].surface.soft_erp = 0.8;
+    */
   }
 
   int N = dCollide( o1, o2,
@@ -176,30 +183,32 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 static void space_collision(void *argv, dGeomID o1, dGeomID o2){
   devODEWorld* world = (devODEWorld*)argv;
 
-  if(!world->SelfCollision(o1, o2)){
+  // if either geoms is a space
+  if(dGeomIsSpace(o1) || dGeomIsSpace(o2)) {
+    // colliding a space with something
+    dSpaceCollide2(o1, o2, argv, &space_collision);
     
-    if (dGeomIsSpace(o1) || dGeomIsSpace(o2)) {
-      // colliding a space with something
-      dSpaceCollide2(o1, o2, argv, &space_collision);
-      
-      // collide all geoms internal to the space(s)
-      if(dGeomIsSpace (o1)) dSpaceCollide((dSpaceID)o1, argv, &space_collision);
-      if(dGeomIsSpace (o2)) dSpaceCollide((dSpaceID)o2, argv, &space_collision);
-    }
-    else {
-      // colliding two non-space geoms, so generate contacts
-      dBodyID b1 = dGeomGetBody( o1 );
-      dBodyID b2 = dGeomGetBody( o2 );
-
-      // dAreConnected doesn't like if both bodies are "zero" (that is if both
-      // geoms are non-placeable
-      if( b1 != 0 && b2 != 0 ) {
-	if( dAreConnected( b1, b2 ) == 0 )
-	  { world->Collision( o1, o2 ); }
-      }
-      else{ world->Collision( o1, o2 ); }
-    }
+    // collide all geoms internal to the space(s)
+    if(dGeomIsSpace (o1)) dSpaceCollide((dSpaceID)o1, argv, &space_collision);
+    if(dGeomIsSpace (o2)) dSpaceCollide((dSpaceID)o2, argv, &space_collision);
   }
+
+  else {
+
+    // colliding two non-space geoms, so generate contacts
+    dBodyID b1 = dGeomGetBody( o1 );
+    dBodyID b2 = dGeomGetBody( o2 );
+    
+    // dAreConnected doesn't like if both bodies are "zero" (that is if both
+    // geoms are non-placeable
+    if( b1 != 0 && b2 != 0 ) {
+      if( dAreConnected( b1, b2 ) == 0 )
+	{ world->Collision( o1, o2 ); }
+    }
+    else{ world->Collision( o1, o2 ); }
+  }
+
+
 }
 
 void devODEWorld::Lock()

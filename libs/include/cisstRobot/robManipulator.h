@@ -112,11 +112,12 @@ class CISST_EXPORT robManipulator{
      Compute the linear and angular accelerations of the last link. This is 
      akin to compute the forward recursion of the RNE.
   */
+  /*
   vctFixedSizeVector<double,6> 
   Acceleration( const vctDynamicVector<double>& q,
 		const vctDynamicVector<double>& qd,
 		const vctDynamicVector<double>& qdd ) const ;
-  
+  */
   //! Compute the bias acceleration
   /**
      The bias acceleration is the 6D vector Jdqd that is used to evaluate the

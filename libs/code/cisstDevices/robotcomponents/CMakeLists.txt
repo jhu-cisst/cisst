@@ -132,10 +132,10 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEServoMotor.h
       robotcomponents/ode/devODEManipulator.h
       
-      #      robotcomponents/ode/devODEBH.h
-      #      robotcomponents/ode/devODEBHF1.h
-      #      robotcomponents/ode/devODEBHF2.h
-      #      robotcomponents/ode/devODEBHF3.h
+      robotcomponents/ode/devODEBH.h
+      #robotcomponents/ode/devODEBHF1.h
+      #robotcomponents/ode/devODEBHF2.h
+      #robotcomponents/ode/devODEBHF3.h
       
       )
 
@@ -149,10 +149,10 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEServoMotor.cpp
       robotcomponents/ode/devODEManipulator.cpp
       
-      #      robotcomponents/ode/devODEBH.cpp
-      #      robotcomponents/ode/devODEBHF1.cpp
-      #      robotcomponents/ode/devODEBHF2.cpp
-      #      robotcomponents/ode/devODEBHF3.cpp
+      robotcomponents/ode/devODEBH.cpp
+      #robotcomponents/ode/devODEBHF1.cpp
+      #robotcomponents/ode/devODEBHF2.cpp
+      #robotcomponents/ode/devODEBHF3.cpp
       
       robotcomponents/ode/devODEWorld.cpp 
       

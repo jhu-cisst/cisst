@@ -34,10 +34,15 @@ class CISST_EXPORT devOSGManipulator :
 
  protected:
 
-  RnIO* input;                            // input of N joints
-  RnIO* output;                           // output of N joints
+  //! Input of N joints
+  RnIO* input;
+  //! Output of N joints
+  RnIO* output;
 
-  vctDynamicVector<double> q;             // N joints
+  //! Store the joints values
+  vctDynamicVector<double> q;
+
+  //! 
   std::vector< mtsDoubleFrm4x4 > mtsRtw;  // N+1 SE3 (N joints + base)
 
   void UpdateKinematics();
@@ -46,7 +51,13 @@ class CISST_EXPORT devOSGManipulator :
 			  const vctFrame4x4<double>& Rt,
 			  const std::string& model,
 			  devOSGWorld* world );
+
+  //! Read the state of the manipulator
+  virtual void Read();
   
+  //! Write the state of the manipulator
+  virtual void Write();
+
  public: 
 
   devOSGManipulator( const std::string& devname,
@@ -93,11 +104,6 @@ class CISST_EXPORT devOSGManipulator :
 		     const std::string& basemodel = "" );
 
   ~devOSGManipulator();
-
- protected:
-
-  void Read();
-  void Write();
 
 };
 

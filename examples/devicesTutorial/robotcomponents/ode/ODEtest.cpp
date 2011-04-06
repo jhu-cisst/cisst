@@ -61,9 +61,21 @@ int main(){
 			       data+"background.3ds",
 			       world );
 
+  
+  cmnGetChar();
+  background->SetSwitch( false );
+
+  cmnGetChar();
+  vctDynamicMatrix<double> v = hubble->GetVertices();
+  devOSGBody* cp = new devOSGBody( "cp", vctFrm3(), v, world );
 
   cmnGetChar();
 
+  vctDynamicMatrix<double> rd = camera->GetRangeData();
+  devOSGBody* osdrd = new devOSGBody( "rd", vctFrm3(), rd, world );
+
+  cmnGetChar();
+  
   taskManager->KillAll();
   taskManager->Cleanup();
 
