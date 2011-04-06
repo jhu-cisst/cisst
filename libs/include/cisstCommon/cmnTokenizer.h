@@ -132,12 +132,23 @@ class CISST_EXPORT cmnTokenizer
     }
 
 
-    /*! Return the number of tokens stored. */
+    /*! Return the number of tokens stored. Note that the last token is a NULL. */
     size_type GetNumTokens(void) const
     {
         return Tokens.size();
     }
 
+    /*! Return the specified token.
+        \param num the token number (0..GetNumTokens())
+        \returns pointer to token string (0 if not valid)
+    */
+    const char * GetToken(size_type num) const
+    {
+        if (( num >=0) && (num < Tokens.size()))
+            return Tokens[num];
+        else
+            return 0;
+    }
 
     /*!
       Return the array of tokens in an argv fashion.
