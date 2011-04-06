@@ -44,9 +44,10 @@ public:
     std::string GetArgInfo(void) const { return argInfo; }
 
     int GetNumArgs(void) const { return numArgs; }
+    void SetNumArgs(int nArgs) { numArgs = nArgs; }
     bool IsValidNumArgs(int nArgs) const { return (numArgs<0)?true:(nArgs == numArgs); }
 
-    virtual bool Execute(const std::vector<std::string> &args) const 
+    virtual bool Execute(const std::vector<std::string> &) const 
     { 
         std::cout << "CommandEntryBase::Execute called" << std::endl;
         return false;
@@ -98,7 +99,7 @@ public:
         CommandEntryBase(cmd, argString, 0), Action(action), classInstance(ptr) {}
     ~CommandEntryMethodVoid() {}
 
-    bool Execute(const std::vector<std::string> &args) const
+    bool Execute(const std::vector<std::string> &) const
     { return (classInstance->*Action)(); }
 };
 
@@ -340,13 +341,16 @@ bool shellTask::ExecuteLine(const std::string &curLine) const
             args.push_back(std::string(argv[i]?argv[i]:"NULL"));
         CmdListType::const_iterator it;
         // First, check if command exists
-        it = CommandList.find(&CommandEntryBase(command, "", -1));
+        CommandEntryBase temp(command, "", -1);
+        it = CommandList.find(&temp);
         if (it == CommandList.end())
             shellTask::lastError = std::string("Unknown command: ") + command;
         else {
             // if we didn't happen to get a match on number of args, try again
-            if (!(*it)->IsValidNumArgs(args.size()))
-                it = CommandList.find(&CommandEntryBase(command, "", args.size()));
+            if (!(*it)->IsValidNumArgs(args.size())) {
+                temp.SetNumArgs(args.size());
+                it = CommandList.find(&temp);
+            }
             if (it == CommandList.end())
                 shellTask::lastError = command + ": invalid number of parameters";
             else
@@ -492,7 +496,7 @@ bool shellTask::Connections(const std::vector<std::string> &args) const
 
 bool shellTask::System(const std::string &cmdString) const
 {
-#if (CISST_OS == CISST_WINDOWS)
+#if (CISST_OS == CISST_WINDOWS) && !defined(_UNICODE)
     // Following should be moved to cisstOSAbstraction.
     // It creates a new console window.
     STARTUPINFO si;

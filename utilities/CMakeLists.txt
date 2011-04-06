@@ -20,6 +20,7 @@ set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 if (BUILD_LIBS_cisstMultiTask)
   add_subdirectory (cisstComponentGenerator)
   add_subdirectory (cisstDataGenerator)
+  add_subdirectory (cisstComponentManager)
 
   if (CISST_HAS_QT AND BUILD_LIBS_cisstStereoVision)
     add_subdirectory (cisstDataPlayer)
