@@ -591,6 +591,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoidReturnSerialized(co
 
     try {
         Ice::Byte result;
+        std::cerr << "call to ice code" << std::endl;
         (*clientProxy)->ExecuteCommandVoidReturnSerialized(commandID,
                                                            serializedArgumentOut,
                                                            result);

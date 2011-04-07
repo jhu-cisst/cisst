@@ -387,11 +387,26 @@ bool mtsInterfaceRequired::AddSystemEventHandlers(void)
                                  << this->GetFullName() << "\"" << std::endl;
         return false;
     }
+    voidCommand =
+        this->AddEventHandlerVoid(&mtsInterfaceRequired::BlockingCommandReturnExecutedHandler,
+                                  this, "BlockingCommandReturnExecuted",
+                                  MTS_EVENT_NOT_QUEUED);
+    if (!(voidCommand)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEventHandlers: unable to add void event handler \"BlockingCommandReturnExecuted\" to interface \""
+                                 << this->GetFullName() << "\"" << std::endl;
+        return false;
+    }
     return true;
 }
 
 
 void mtsInterfaceRequired::BlockingCommandExecutedHandler(void)
+{
+    this->ThreadSignalForBlockingCommands.Raise();
+}
+
+
+void mtsInterfaceRequired::BlockingCommandReturnExecutedHandler(void)
 {
     this->ThreadSignalForBlockingCommands.Raise();
 }

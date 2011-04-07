@@ -590,6 +590,10 @@ protected: // PK TEMP
     /*! Command to trigger void event for blocking commands. */
     mtsCommandVoid * BlockingCommandExecuted;
 
+    /*! Command to trigger void event for blocking commands with a
+      return value. */
+    mtsCommandVoid * BlockingCommandReturnExecuted;
+
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
     ThisType * OriginalInterface;

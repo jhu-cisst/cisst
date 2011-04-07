@@ -228,6 +228,7 @@ protected:
 
  private:
     void BlockingCommandExecutedHandler(void);
+    void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
     bool DetachCommands(void);

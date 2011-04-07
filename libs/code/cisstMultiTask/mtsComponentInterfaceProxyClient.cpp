@@ -360,6 +360,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
                                                                                  mtsExecutionResult & executionResult,
                                                                                  std::string & serializedResult)
 {
+    std::cerr << "received command from ICE to execute function" << std::endl;
     mtsFunctionVoidReturnProxy * functionVoidReturnProxy = reinterpret_cast<mtsFunctionVoidReturnProxy*>(commandID);
     if (!functionVoidReturnProxy) {
         LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: invalid proxy id of function qualified read: " << commandID);
@@ -369,23 +370,29 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
 
     // Create a temporary argument which includes dynamic allocation internally.
     // Therefore, this object should be deallocated manually.
-    mtsGenericObject * result =
-        dynamic_cast<mtsGenericObject *>(functionVoidReturnProxy->GetCommand()->GetResultPrototype()->Services()->Create());
-    if (!result) {
-        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: failed to create a temporary argument");
-        executionResult = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
-        return;
+    // function proxy can store the result, needs to create on first run
+    if (functionVoidReturnProxy->GetResultPointer() == 0) {
+        mtsGenericObject * result =
+            dynamic_cast<mtsGenericObject *>(functionVoidReturnProxy->GetCommand()->GetResultPrototype()->Services()->Create());
+        if (result == 0) {
+            LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: failed to create a temporary argument");
+            executionResult = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+            return;
+        }
+        functionVoidReturnProxy->SetResultPointer(result);
     }
-
+ 
     // Execute the command
-    executionResult = (*functionVoidReturnProxy)(*result);
+    std::cerr << "executing function ... with placeholder " << *(functionVoidReturnProxy->GetResultPointer()) << std::endl;
+    executionResult = (*functionVoidReturnProxy)(*(functionVoidReturnProxy->GetResultPointer()));
+    std::cerr << "function returned ... " << std::endl;
 
-    // Serialize
-    mtsProxySerializer * deserializer = functionVoidReturnProxy->GetSerializer();
-    deserializer->Serialize(*result, serializedResult);
-
-    // Deallocate memory
-    delete result;
+    // Serialize if the command is not queued
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
+        mtsProxySerializer * deserializer = functionVoidReturnProxy->GetSerializer();
+        deserializer->Serialize(*(functionVoidReturnProxy->GetResultPointer()),
+                                serializedResult);
+    }
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: sent " << serializedResult.size() << " bytes");

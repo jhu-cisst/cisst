@@ -43,6 +43,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     QueueingPolicy(queueingPolicy),
     ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
     BlockingCommandExecuted(0),
+    BlockingCommandReturnExecuted(0),
     OriginalInterface(0),
     EndUserInterface(false),
     UserName("OriginalInterface"),
@@ -99,6 +100,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     MailBoxSize(mailBoxSize),
     ArgumentQueuesSize(argumentQueuesSize),
     BlockingCommandExecuted(0),
+    BlockingCommandReturnExecuted(0),
     OriginalInterface(originalInterface),
     EndUserInterface(true),
     UserName(userName),
@@ -870,6 +872,19 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
         MailBox->SetPostCommandDequeuedCommand(this->BlockingCommandExecuted);
     } else {
         CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: can not set mailbox post dequeued command for blocking commands for interface \""
+                                   << this->GetFullName() << "\"" << std::endl;
+    }
+
+    this->BlockingCommandReturnExecuted = AddEventVoid("BlockingCommandReturnExecuted");
+    if (!(this->BlockingCommandReturnExecuted)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEvents: unable to add void event \"BlockingCommandReturnExecuted\" to interface \""
+                                 << this->GetFullName() << "\"" << std::endl;
+        return false;
+    }
+    if (this->MailBox) {
+        MailBox->SetPostCommandReturnDequeuedCommand(this->BlockingCommandReturnExecuted);
+    } else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: can not set mailbox post dequeued command for blocking return commands for interface \""
                                    << this->GetFullName() << "\"" << std::endl;
     }
     return true;

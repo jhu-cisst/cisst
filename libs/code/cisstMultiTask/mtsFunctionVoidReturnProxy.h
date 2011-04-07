@@ -36,32 +36,32 @@ class CISST_EXPORT mtsFunctionVoidReturnProxy : public mtsFunctionVoidReturn {
 protected:
     typedef mtsFunctionVoidReturn BaseType;
     mtsProxySerializer Serializer;
-
+    mtsGenericObject * ResultPointer;
 public:
-    mtsFunctionVoidReturnProxy()
+    mtsFunctionVoidReturnProxy():
+        mtsFunctionVoidReturn(true /* this is a proxy class */),
+        ResultPointer(0)
     {}
 
     ~mtsFunctionVoidReturnProxy()
-    {}
+    {
+        if (this->ResultPointer) {
+            delete this->ResultPointer;
+        }
+    }
 
     /*! Getter */
     inline mtsProxySerializer * GetSerializer(void) {
-        return &Serializer;
+        return &(this->Serializer);
     }
 
-    mtsExecutionResult Execute(mtsGenericObject & result) const {
-        std::cerr << "Function called" << std::endl;
-        mtsExecutionResult executionResult = Command ?
-            Command->Execute(result)
-            : mtsExecutionResult::FUNCTION_NOT_BOUND;
-        std::cerr << "Function returned " << executionResult << std::endl;
-        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-            this->ThreadSignalWait();
-            return mtsExecutionResult::COMMAND_SUCCEEDED;
-        }
-        return executionResult;
+    inline mtsGenericObject * GetResultPointer(void) const {
+        return this->ResultPointer;
     }
 
+    inline void SetResultPointer(mtsGenericObject * genericObject) {
+        this->ResultPointer = genericObject;
+    }
 };
 
 #endif // _mtsFunctionVoidReturnProxy_h
