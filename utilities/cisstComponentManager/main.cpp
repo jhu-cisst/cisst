@@ -229,6 +229,7 @@ public:
     void Run(void);
     void Cleanup(void) {}
 
+    bool ExecuteMultiLine(const std::string &curLine) const;
     bool ExecuteLine(const std::string &curLine) const;
     bool Quit(void) const;
     bool Help(const std::vector<std::string> &args) const;
@@ -237,6 +238,7 @@ public:
     bool System(const std::string &cmdString) const;
     bool ExecuteFile(const std::string &fileName) const;
     bool Sleep(const std::string &time) const;
+    bool Viewer(void) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(shellTask)
@@ -269,6 +271,8 @@ void shellTask::Configure(const std::string &)
                                                              &shellTask::ExecuteFile, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("sleep", "<file_name>",
                                                              &shellTask::Sleep, this));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("viewer", "",
+                                                             &shellTask::Viewer, this));
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
     if (Manager) {
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
@@ -320,6 +324,20 @@ bool shellTask::Quit(void) const
 {
     shellTask *nonConstThis = const_cast<shellTask *>(this);
     nonConstThis->Kill();
+    return true;
+}
+
+bool shellTask::ExecuteMultiLine(const std::string &curLine) const
+{
+    cmnTokenizer tokens;
+    tokens.SetDelimiters(";\n");
+    tokens.Parse(curLine);
+    cmnTokenizer::size_type i;
+    for (i = 0; i < tokens.GetNumTokens(); i++) {
+        const char *cmd = tokens.GetToken(i);
+        if (cmd && !ExecuteLine(cmd))
+            return false;
+    }
     return true;
 }
 
@@ -385,6 +403,11 @@ void shellTask::Run(void)
                 i++;
                 if (i < argc)
                     ExecuteFile(argv[i]);
+            }
+            if (strcmp(argv[i], "-c") == 0) {
+                i++;
+                if (i < argc)
+                    ExecuteMultiLine(argv[i]);
             }
         }
         firstTime = false;
@@ -563,7 +586,18 @@ bool shellTask::Sleep(const std::string &time) const
     return false;
 }
 
-// Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename]
+// This is provided for user convenience.  The final "sleep" command is needed on Windows
+// because osaPipeExec interferes with cin/cout. Alternatively, it is possible to start the
+// viewer in a separate process.
+bool shellTask::Viewer(void) const
+{
+    //Following starts the viewer in a separate process
+    //return System("cisstComponentManager localhost ProcessViewer "
+    //                  "-c \"create mtsComponentViewer Viewer;sleep 0.5;start Viewer;sleep 10000\"");
+    return ExecuteMultiLine("create mtsComponentViewer Viewer;sleep 0.5;start Viewer;sleep 3");
+}
+
+// Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename] [-c commands]
 int main(int argc, char * argv[])
 {
     mtsManagerGlobal *globalManager = 0;
