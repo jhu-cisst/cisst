@@ -211,6 +211,9 @@ public:
      Returns true if valid data extracted for all keywords. */
    bool Parse(std::istream & inputStream);
 
+   /*! Returns true if valid data was parsed. */
+   bool IsValid(const std::string &name) const;
+
    /*! Write all {keyword,value} pairs to the output stream. If valid data was not
      parsed, will write "(invalid)". */
    void ToStream(std::ostream & outputStream) const;

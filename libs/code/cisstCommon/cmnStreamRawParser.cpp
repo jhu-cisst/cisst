@@ -67,6 +67,15 @@ bool cmnStreamRawParser::Parse(std::istream & inputStream)
     return success;
 }
 
+bool cmnStreamRawParser::IsValid(const std::string &name) const
+{
+    KeyListType::const_iterator it;
+    it = KeyList.find(&EntryBase(name));
+    if (it == KeyList.end())
+        return false;
+    return (*it)->isValid();
+}
+
 void cmnStreamRawParser::ToStream(std::ostream & outputStream) const
 {
     KeyListType::const_iterator it;
