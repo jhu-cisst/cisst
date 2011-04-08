@@ -208,7 +208,7 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
             CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `width`" << std::endl;
             break;
         }
-        if (Width < 1 || Width > 8192) {
+        if (Width < 1 || Width > MAX_DIMENSION) {
             CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `width`" << std::endl;
             break;
         }
@@ -218,7 +218,7 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
             CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `height`" << std::endl;
             break;
         }
-        if (Height < 1 || Height > 8192) {
+        if (Height < 1 || Height > MAX_DIMENSION) {
             CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `height`" << std::endl;
             break;
         }
@@ -291,7 +291,7 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
         CMN_LOG_CLASS_INIT_ERROR << "Create: already opened" << std::endl;
         return SVL_FAIL;
     }
-    if (width < 1 || width > 8192 || height < 1 || height > 8192) {
+    if (width < 1 || width > MAX_DIMENSION || height < 1 || height > MAX_DIMENSION) {
         CMN_LOG_CLASS_INIT_ERROR << "Create: invalid image dimensions" << std::endl;
         return SVL_FAIL;
     }

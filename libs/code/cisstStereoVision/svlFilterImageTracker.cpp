@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageTracker.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlTrackerMSBruteForce.h>
 
 #include <math.h>
 
@@ -59,7 +60,8 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyScaleLow(0.01),
     RigidBodyScaleHigh(100.0),
     Iterations(1),
-    WarpedImage(0)
+    WarpedImage(0),
+    Mosaic(0)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -76,6 +78,9 @@ svlFilterImageTracker::svlFilterImageTracker() :
 
     AddOutput("warpedimage", false);
     SetOutputType("warpedimage", svlTypeImageRGB);
+
+    AddOutput("mosaicimage", false);
+    SetOutputType("mosaicimage", svlTypeImageRGB);
 
     Trackers.SetSize(SVL_MAX_CHANNELS);
     Trackers.SetAll(0);
@@ -194,6 +199,12 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
         WarpedImage->SetSize(syncInput);
         WarpedImage->SetTimestamp(syncInput->GetTimestamp());
         GetOutput("warpedimage")->SetupSample(WarpedImage);
+
+        Mosaic = new svlSampleImageRGB;
+        if (!Mosaic) return SVL_FAIL;
+        Mosaic->SetSize(1600, 1600);
+        Mosaic->SetTimestamp(syncInput->GetTimestamp());
+        GetOutput("mosaicimage")->SetupSample(Mosaic);
     }
 
     syncOutput = syncInput;
@@ -238,6 +249,12 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         svlSampleTargets* target_input = dynamic_cast<svlSampleTargets*>(GetInput("targets")->PullSample(true, 0.0));
         if (target_input || ResetFlag) {
 
+            if (target_input) {
+                // Re-allocate work target buffer
+                targetcount = target_input->GetMaxTargets();
+                Targets.SetSize(VideoChannels, targetcount);
+            }
+
             for (vch = 0; vch < VideoChannels; vch ++) {
 
                 if (!Trackers[vch]) continue;
@@ -255,23 +272,21 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                 if (target_input) InitialTargets.CopyOf(*target_input);
                 OutputTargets.CopyOf(InitialTargets);
 
-                // Resize work target buffer
-                targetcount = OutputTargets.GetMaxTargets();
-                Targets.SetSize(VideoChannels, targetcount);
-                target_buffer = Targets.Pointer(vch, 0);
-
                 flag.SetRef(targetcount, OutputTargets.GetFlagPointer());
                 confidence.SetRef(targetcount, OutputTargets.GetConfidencePointer(vch));
                 position.SetRef(2, targetcount, OutputTargets.GetPositionPointer(vch));
 
+                target_buffer = Targets.Pointer(vch, 0);
+
                 for (i = 0; i < targetcount; i ++) {
 
                     // Storing temporary results until tracking starts
-                    target_buffer->used    = flag.Element(i) ? true : false;
-                    target_buffer->visible = false;
-                    target_buffer->conf    = confidence.Element(i);
-                    target_buffer->pos.x   = position.Element(0, i);
-                    target_buffer->pos.y   = position.Element(1, i);
+                    target_buffer->used            = flag.Element(i) ? true : false;
+                    target_buffer->visible         = false;
+                    target_buffer->conf            = confidence.Element(i);
+                    target_buffer->pos.x           = position.Element(0, i);
+                    target_buffer->pos.y           = position.Element(1, i);
+                    target_buffer->feature_quality = -1;
 
                     // Updating targets in trackers
                     Trackers[vch]->SetTarget(i, *target_buffer);
@@ -330,6 +345,10 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
             target_buffer ++;
         }
+
+        if (RigidBody) {
+            UpdateMosaicImage(vch, img->GetWidth(vch), img->GetHeight(vch), procInfo->id);
+        }
     }
 
     _SynchronizeThreads(procInfo);
@@ -379,6 +398,11 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                 WarpedImage->SetTimestamp(ts);
                 output->PushSample(WarpedImage);
             }
+            output = GetOutput("mosaicimage");
+            if (output) {
+                Mosaic->SetTimestamp(ts);
+                output->PushSample(Mosaic);
+            }
         }
     }
 
@@ -393,6 +417,10 @@ int svlFilterImageTracker::Release()
     if (WarpedImage) {
         delete WarpedImage;
         WarpedImage = 0;
+    }
+    if (Mosaic) {
+        delete Mosaic;
+        Mosaic = 0;
     }
 
     RigidBodyAngle.SetSize(0);
@@ -570,6 +598,84 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
     }
 }
 
+int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height, int threadid)
+{
+    svlTrackerMSBruteForce* tracker = dynamic_cast<svlTrackerMSBruteForce*>(Trackers[videoch]);
+    if (!tracker) return SVL_FAIL;
+
+    const int mosaic_width  = Mosaic->GetWidth(videoch);
+    const int mosaic_height = Mosaic->GetHeight(videoch);
+    const int mosaic_center_x = mosaic_width  >> 1;
+    const int mosaic_center_y = mosaic_height >> 1;
+    const int mosaic_stride = mosaic_width * 3;
+    const int image_center_x = width  >> 1;
+    const int image_center_y = height >> 1;
+    const int targetcount = Targets.size();
+    const int tmpl_radius = tracker->GetTemplateRadius();
+    const int tmpl_size = tmpl_radius * 2 + 1;
+    const int tmpl_stride = tmpl_size * 3;
+    unsigned char *mosaic_data = Mosaic->GetUCharPointer(videoch);
+
+    svlTarget2D *target = 0;
+    unsigned char *tdata, *mdata;
+    int i, k, txf, tyf, mxf, mxt, myf, myt, w, h;
+    vctDynamicVectorRef<unsigned char> template_ref;
+    unsigned int j;
+    vctInt2 pos;
+
+
+    memset(mosaic_data, 0, Mosaic->GetDataSize(videoch));
+
+    for (j = 0; j < VideoChannels; j ++) {
+        for (i = 0; i < targetcount; i ++) {
+            target = Targets.Pointer(j, i);
+
+            if (!target->used || target->feature_quality < 0) continue;
+
+            tracker->GetFeatureRef(i, template_ref);
+
+            InitialTargets.GetPosition(i, pos, j);
+
+            mxf = mosaic_center_x - image_center_x + pos.X() - tmpl_radius;
+            mxt = mxf + tmpl_size;
+            if (mxf < 0) {
+                txf = -mxf;
+                mxf = 0;
+            }
+            else {
+                txf = 0;
+            }
+            if (mxt > mosaic_width) mxt = mosaic_width;
+
+            myf = mosaic_center_y - image_center_y + pos.Y() - tmpl_radius;
+            myt = myf + tmpl_size;
+            if (myf < 0) {
+                tyf = -myf;
+                myf = 0;
+            }
+            else {
+                tyf = 0;
+            }
+            if (myt > mosaic_height) myt = mosaic_height;
+
+            w = (mxt - mxf) * 3;
+            h = myt - myf;
+            if (w <= 0 || h <= 0) continue;
+
+            tdata = template_ref.Pointer() + (tyf * tmpl_size + txf) * 3;
+            mdata = mosaic_data + (myf * mosaic_width + mxf) * 3;
+
+            for (k = 0; k < h; k ++) {
+                memcpy(mdata, tdata, w);
+                tdata += tmpl_stride;
+                mdata += mosaic_stride;
+            }
+        }
+    }
+    
+    return SVL_OK;
+}
+
 
 /**********************************/
 /*** svlImageTracker class ********/
@@ -620,11 +726,12 @@ int svlImageTracker::SetTargetCount(unsigned int targetcount)
 
     Targets.SetSize(targetcount);
     svlTarget2D target;
-    target.used    = false;
-    target.visible = false;
-    target.conf    = 0;
-    target.pos.x   = 0;
-    target.pos.y   = 0;
+    target.used            = false;
+    target.visible         = false;
+    target.conf            = 0;
+    target.pos.x           = 0;
+    target.pos.y           = 0;
+    target.feature_quality = -1;
     Targets.SetAll(target);
 
     return SVL_OK;
@@ -633,14 +740,27 @@ int svlImageTracker::SetTargetCount(unsigned int targetcount)
 int svlImageTracker::SetTarget(unsigned int targetid, const svlTarget2D & target)
 {
     if (targetid >= Targets.size()) return SVL_FAIL;
-    Targets[targetid] = target;
+
+    svlTarget2D & mytarget = Targets[targetid];
+    mytarget.used            = target.used;
+    mytarget.visible         = target.visible;
+    mytarget.conf            = target.conf;
+    mytarget.pos             = target.pos;
+
     return SVL_OK;
 }
 
 int svlImageTracker::GetTarget(unsigned int targetid, svlTarget2D & target)
 {
     if (targetid >= Targets.size()) return SVL_FAIL;
-    target = Targets[targetid];
+
+    svlTarget2D & mytarget = Targets[targetid];
+    target.used            = mytarget.used;
+    target.visible         = mytarget.visible;
+    target.conf            = mytarget.conf;
+    target.pos             = mytarget.pos;
+    target.feature_quality = mytarget.feature_quality;
+
     return SVL_OK;
 }
 

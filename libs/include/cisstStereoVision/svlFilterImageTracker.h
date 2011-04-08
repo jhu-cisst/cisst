@@ -64,6 +64,7 @@ protected:
 
     virtual void ReconstructRigidBody();
     virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
+    virtual int UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height, int threadid = -1);
 
 private:
     svlSampleTargets OutputTargets;
@@ -95,6 +96,8 @@ private:
     vctDynamicVector<double> WarpedRigidBodyScale;
     svlSampleImage* WarpedImage;
     vctDynamicVector<svlDraw::Internals> WarpInternals;
+
+    svlSampleImage* Mosaic;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)

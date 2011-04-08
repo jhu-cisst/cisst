@@ -146,6 +146,7 @@ struct CISST_EXPORT svlBlob
     unsigned int label;
 };
 
+
 #pragma pack()
 
 
@@ -218,7 +219,7 @@ struct CISST_EXPORT svlPoint2D
     svlPoint2D(int x, int y);
     void Assign(const svlPoint2D & point);
     void Assign(int x, int y);
-    
+
     int x;
     int y;
 };
@@ -235,11 +236,13 @@ struct CISST_EXPORT svlTarget2D
     void Assign(bool used, bool visible, unsigned char conf, svlPoint2D & pos);
     void Assign(int x, int y);
     void Assign(svlPoint2D & pos);
-    
+
     bool          used;
     bool          visible;
     unsigned char conf;
     svlPoint2D    pos;
+    int           feature_quality;
+    vctDynamicVector<unsigned char> feature_data;
 };
 
 #pragma pack()

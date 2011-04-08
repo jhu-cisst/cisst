@@ -273,6 +273,7 @@ void svlDraw::Poly(svlSampleImage* image,
                    unsigned int videoch,
                    const vctDynamicVectorRef<svlPoint2D> points,
                    svlRGB color,
+                   unsigned int thickness,
                    unsigned int start)
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
@@ -286,7 +287,21 @@ void svlDraw::Poly(svlSampleImage* image,
 
     for (i = 1; i < size; i ++) {
         if (end >= size) end = 0;
-        Line(image, videoch, points[start], points[end], color);
+        if (thickness == 1) {
+            Line(image, videoch, points[start], points[end], color);
+        }
+        else {
+#if CISST_SVL_HAS_OPENCV
+            cvLine(image->IplImageRef(videoch),
+                   cvPoint(points[start].x, points[start].y),
+                   cvPoint(points[end].x,   points[end].y),
+                   cvScalar(color.r, color.g, color.b),
+                   thickness);
+#else // CISST_SVL_HAS_OPENCV
+            // TO DO: line thickness to be implemented
+            Line(image, videoch, points[start], points[end], color);
+#endif // CISST_SVL_HAS_OPENCV
+        }
         start = end;
         end ++;
     }
