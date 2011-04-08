@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
-//#define __SHOW_WARPED_IMAGE
+#define __CAMERA_SOURCE
 
 
 ///////////////////////////////
@@ -110,47 +110,60 @@ private:
 
 int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 {
-    bool showgrid = false;
-    bool showrect = true;
+    const bool showgrid = true;
+    const bool showrect = true;
+    const bool showwarpedimage = false;
+    const bool showmosaic = true;
+    const unsigned int width  = 640;
+    const unsigned int height = 480;
+    const int radius = 20;
+    const int distance = height / 20;
 
     svlInitialize();
 
     svlStreamManager stream(2);
+#ifdef __CAMERA_SOURCE
+    svlFilterSourceVideoCapture source(1);
+#else // __CAMERA_SOURCE
     svlFilterSourceVideoFile source(1);
-    svlFilterImageCenterFinder centerfinder;
-    svlFilterImageCropper cropper;
+#endif // __CAMERA_SOURCE
     svlFilterImageTracker tracker;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
-#ifdef __SHOW_WARPED_IMAGE
     svlFilterImageWindow window2;
-#endif // __SHOW_WARPED_IMAGE
+    svlFilterImageFileWriter writer;
+    svlFilterImageResizer resizer;
+    svlFilterImageWindow window3;
 
     // setup source
-//    source.DialogFilePath();
+#ifdef __CAMERA_SOURCE
+    if (source.LoadSettings("gridtrackercam.dat") != SVL_OK) {
+        source.DialogSetup();
+        source.SaveSettings("gridtrackercam.dat");
+    }
+#else // __CAMERA_SOURCE
+    //    source.DialogFilePath();
     source.SetFilePath("crop2.avi");
+#endif // __CAMERA_SOURCE
 
-    centerfinder.AddReceiver(&cropper);
-    centerfinder.SetMask(false);
-    centerfinder.SetThreshold(15);
-    cropper.SetRectangle(0, 0, 400, 400);
+    // setup tracker algorithm
+    svlTrackerMSBruteForce trackeralgo;
+    trackeralgo.SetErrorMetric(svlSSD);
+    trackeralgo.SetScales(4);
+    trackeralgo.SetTemplateRadius(24);
+    trackeralgo.SetSearchRadius(50);
+    trackeralgo.SetTemplateUpdateWeight(0.0);
+    trackeralgo.SetConfidenceThreshold(0.50);
 
     // setup tracker
-    svlTrackerMSBruteForce trackeralgo;
-    trackeralgo.SetParameters(svlNCC, // metric
-                              16,     // template radius
-                              20,     // search radius
-                              3,      // number of scales
-                              0, 0.0);
     tracker.SetMovingAverageSmoothing(0.0);
     tracker.SetIterations(1);
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
     tracker.SetTracker(trackeralgo);
-    tracker.SetROI(100, 100, 300, 300);
-
-    const int radius = 40;
-    const int distance = 20;
+    tracker.SetROI(width / 2 - width / 3, height / 2 - height / 3,
+                   width / 2 + width / 3, height / 2 + height / 3);
+    tracker.SetFrameSkip(10);
 
     const int targetcount = (radius * 2 + 1) * (radius * 2 + 1);
     svlSampleTargets targets;
@@ -160,8 +173,8 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     targets.SetSize(2, targetcount, 1);
     for (j = -radius; j <= radius; j ++) {
         for (i = -radius; i <= radius; i ++) {
-            position.X() = 200 + distance * i;
-            position.Y() = 200 + distance * j;
+            position.X() = width / 2  + distance * i;
+            position.Y() = height / 2 + distance * j;
             targets.SetFlag(c, 1);
             targets.SetConfidence(c, 255);
             targets.SetPosition(c, position);
@@ -181,10 +194,13 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
                                       3);        // target size
     if (showgrid) overlay.AddOverlay(targets_overlay);
 
-    svlOverlayStaticPoly poly_overlay;
     svlOverlayStaticPoly::Type points(5, svlPoint2D(-1, -1));
-    poly_overlay.SetPoints(points);
-    poly_overlay.SetColor(svlRGB(255, 255, 255));
+    svlOverlayStaticPoly poly_overlay(SVL_LEFT,              // background video channel
+                                      true,                  // visible
+                                      points,                // point list
+                                      svlRGB(255, 255, 255), // poly color
+                                      2,                     // thickness;
+                                      0);                    // start;
     if (showrect) overlay.AddOverlay(poly_overlay);
     CBackgroundTracker bgtracker;
     bgtracker.SetBgPoly(&poly_overlay);
@@ -204,14 +220,20 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
-    source.GetOutput()->Connect(centerfinder.GetInput());
-    centerfinder.GetOutput()->Connect(cropper.GetInput());
-    cropper.GetOutput()->Connect(tracker.GetInput());
+    source.GetOutput()->Connect(tracker.GetInput());
     tracker.GetOutput()->Connect(overlay.GetInput());
     overlay.GetOutput()->Connect(window.GetInput());
-#ifdef __SHOW_WARPED_IMAGE
-    tracker.GetOutput("warpedimage")->Connect(window2.GetInput());
-#endif // __SHOW_WARPED_IMAGE
+    if (showwarpedimage) tracker.GetOutput("warpedimage")->Connect(window2.GetInput());
+    if (showmosaic) {
+        writer.SetFilePath("mosaic_", "bmp");
+        writer.Pause();
+        tracker.GetOutput("mosaicimage")->Connect(writer.GetInput());
+/*
+        writer.GetOutput()->Connect(resizer.GetInput());
+        resizer.SetOutputSize(800, 800);
+        resizer.GetOutput()->Connect(window3.GetInput());
+*/
+    }
 
     tracker.GetOutput("targets")->Connect(bgtracker.GetInput());
     bgtracker.GetOutput()->Connect(overlay.GetInput("targets"));
@@ -220,7 +242,15 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     stream.Play();
 
     int ch = 0;
-    while (ch != 'q') ch = cmnGetChar();
+    while (ch != 'q') {
+        ch = cmnGetChar();
+        switch (ch) {
+            case 'm':
+                writer.Record(1);
+                std::cerr << "Mosaic saved" << std::endl;
+            break;
+        }
+    }
 
     // release pipeline
     stream.Release();
