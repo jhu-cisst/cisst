@@ -77,6 +77,9 @@ http://www.cisst.org/cisst/license.txt.
 // Image structure definitions //
 /////////////////////////////////
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
 struct CISST_EXPORT svlBMPFileHeader
 {
     unsigned short bfType;
