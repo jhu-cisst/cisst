@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devSensableHD.h>
 
-#include "MapBehavior.h"
+#include <MapBehavior.h>
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>

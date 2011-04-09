@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
-#include "ImageViewer.h"
+#include <ImageViewer.h>
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>

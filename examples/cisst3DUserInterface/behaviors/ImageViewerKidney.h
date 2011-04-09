@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):	Anton Deguet, Simon DiMaio
+  Created on:	2009-09-13
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,13 +23,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface.h>
 
 // forward declaration for our visible objects
-class SimpleBehaviorVisibleObject;
+class ImageViewerKidneySurfaceVisibleObject;
 
-class SimpleBehavior: public ui3BehaviorBase
+// Always include last!
+#include <ui3BehaviorsExport.h>
+
+class CISST_EXPORT ImageViewerKidney: public ui3BehaviorBase
 {
 public:
-    SimpleBehavior(const std::string & name);
-    ~SimpleBehavior();
+    ImageViewerKidney(const std::string & name);
+    ~ImageViewerKidney();
 
     void Startup(void) {}
     void Cleanup(void) {}
@@ -42,20 +45,27 @@ public:
     void Configure(const std::string & CMN_UNUSED(configFile)) {}
     bool SaveConfiguration(const std::string & CMN_UNUSED(configFile)) { return true; }
     inline ui3VisibleObject * GetVisibleObject(void) {
-        return this->VisibleList;
+        return this->Widget3D;
     }
 
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
-    void ToggleColor(void);
-    void UpdateRelativePosition(void);
+    void ToggleHandles(void);
+    void ToggleOuter(void);
+    void ToggleTree(void);
+    void ToggleTumor(void);
+
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
-    bool Following;
 
-    ui3VisibleList * VisibleList;
-    SimpleBehaviorVisibleObject * VisibleObject1;
-    SimpleBehaviorVisibleObject * VisibleObject2;
-    double Counter;
+    ui3Widget3D * Widget3D;
+    ImageViewerKidneySurfaceVisibleObject * Outer;
+    bool OuterShow;
+    ImageViewerKidneySurfaceVisibleObject * Tree;
+    bool TreeShow;
+    ImageViewerKidneySurfaceVisibleObject * Tumor;
+    bool TumorShow;
+
+    bool Widget3DHandlesActive;
 };

@@ -28,7 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 class MapMarker;
 struct MarkerType;
 
-class MapBehavior : public ui3BehaviorBase
+// Always include last!
+#include "ui3BehaviorsExport.h"
+
+class CISST_EXPORT MapBehavior: public ui3BehaviorBase
 {
     public:
         MapBehavior(const std::string & name);
