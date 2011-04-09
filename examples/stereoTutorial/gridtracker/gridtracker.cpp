@@ -114,14 +114,14 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     const bool showrect = true;
     const bool showwarpedimage = false;
     const bool showmosaic = true;
-    const unsigned int width  = 640;
-    const unsigned int height = 480;
-    const int radius = 20;
-    const int distance = height / 20;
+    const unsigned int width  = 1600;
+    const unsigned int height = 1200;
+    const int radius = 40;
+    const int distance = 32;
 
     svlInitialize();
 
-    svlStreamManager stream(2);
+    svlStreamManager stream(8);
 #ifdef __CAMERA_SOURCE
     svlFilterSourceVideoCapture source(1);
 #else // __CAMERA_SOURCE
@@ -148,12 +148,12 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 
     // setup tracker algorithm
     svlTrackerMSBruteForce trackeralgo;
-    trackeralgo.SetErrorMetric(svlSSD);
-    trackeralgo.SetScales(4);
-    trackeralgo.SetTemplateRadius(24);
+    trackeralgo.SetErrorMetric(svlNCC);
+    trackeralgo.SetScales(3);
+    trackeralgo.SetTemplateRadius(12);
     trackeralgo.SetSearchRadius(50);
     trackeralgo.SetTemplateUpdateWeight(0.0);
-    trackeralgo.SetConfidenceThreshold(0.50);
+    trackeralgo.SetConfidenceThreshold(0.35);
 
     // setup tracker
     tracker.SetMovingAverageSmoothing(0.0);
@@ -161,8 +161,8 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
     tracker.SetTracker(trackeralgo);
-    tracker.SetROI(width / 2 - width / 3, height / 2 - height / 3,
-                   width / 2 + width / 3, height / 2 + height / 3);
+    tracker.SetROI(width / 2 - width / 4, height / 2 - height / 4,
+                   width / 2 + width / 4, height / 2 + height / 4);
     tracker.SetFrameSkip(10);
 
     const int targetcount = (radius * 2 + 1) * (radius * 2 + 1);
@@ -230,7 +230,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
         tracker.GetOutput("mosaicimage")->Connect(writer.GetInput());
 /*
         writer.GetOutput()->Connect(resizer.GetInput());
-        resizer.SetOutputSize(800, 800);
+        resizer.SetOutputSize(1200, 1200);
         resizer.GetOutput()->Connect(window3.GetInput());
 */
     }

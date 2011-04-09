@@ -244,12 +244,12 @@ int svlTrackerMSBruteForce::Initialize()
 
         // modify current parameters for multiscale processing + add some margin
         TemplateRadius = std::max(TemplateRadiusRequested, 3u);
-        SearchRadius = 1;
+        SearchRadius = 2;
     }
     else {
         // coarsest scale so go by the original parameters
         TemplateRadius = std::max(TemplateRadiusRequested, 3u);
-        SearchRadius = std::max(SearchRadiusRequested, 1u);
+        SearchRadius = std::max(SearchRadiusRequested, 2u);
     }
 
     templatesize = TemplateRadius * 2 + 1;
@@ -319,7 +319,7 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
 
         // Call lower scales recursively
         LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
-        LowerScale->Track(*LowerScaleImage);
+        LowerScale->Track(*LowerScaleImage, videoch);
 
         // Scale up the tracking results from the
         // lower scale and use that as new position
@@ -433,6 +433,183 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
             }
             else return SVL_FAIL;
 
+            if (ptgt->conf < ConfidenceThreshold) ptgt->conf = 0;
+            ptgt->conf = (static_cast<int>(ptgt->conf) * scalem1 + conf) / Scale;
+        }
+
+        if (ptgt->feature_quality == 256) {
+            // Determine the quality of the feature when it was first used
+            ptgt->feature_quality = ptgt->conf;
+        }
+
+        ptgt->pos.x = x + xpre;
+        ptgt->pos.y = y + ypre;
+
+#ifdef __DEBUG_TRACKER
+        cvNamedWindow(ScaleName.c_str(), CV_WINDOW_AUTOSIZE); 
+        cvShowImage(ScaleName.c_str(), image.IplImageRef(videoch));
+        cvWaitKey(1);
+#endif
+
+        // update templates with new tracking results
+        UpdateTemplate(image.GetUCharPointer(videoch),
+                       OrigTemplates[i],
+                       ptgt->feature_data.Pointer(),
+                       ptgt->pos.x - TemplateRadius,
+                       ptgt->pos.y - TemplateRadius);
+    }
+
+    return SVL_OK;
+}
+
+int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image, unsigned int videoch)
+{
+    if (!Initialized) return SVL_FAIL;
+
+    const int leftborder   = ROI.left   + TemplateRadius;
+    const int topborder    = ROI.top    + TemplateRadius;
+    const int rightborder  = ROI.right  - TemplateRadius;
+    const int bottomborder = ROI.bottom - TemplateRadius;
+    const unsigned int targetcount = Targets.size();
+    const unsigned int target_from = procInfo->id;
+    const unsigned int target_step = procInfo->count;
+    const unsigned int scalem1 = Scale - 1;
+    unsigned int templatesize = TemplateRadius * 2 + 1;
+    templatesize *= templatesize * 3;
+
+    svlTarget2D target, *ptgt;
+    int xpre, ypre, x, y;
+    unsigned char conf;
+    unsigned int i;
+
+
+    if (LowerScale) {
+
+        // Call lower scales recursively
+        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
+        LowerScale->Track(procInfo, *LowerScaleImage, videoch);
+
+        // Scale up the tracking results from the
+        // lower scale and use that as new position
+        for (i = target_from, ptgt = Targets.Pointer() + target_from;
+             i < targetcount;
+             i += target_step, ptgt += target_step) {
+
+            if (!ptgt->used) continue;
+
+            // Scale up lower scale results only if this target has been initialized earlier
+            if (ptgt->feature_quality >= 0) {
+
+                LowerScale->GetTarget(i, target);
+
+                // Scale up only valid lower scale results
+                if (target.feature_quality >= 0 && target.visible) {
+                    ptgt->conf    = target.conf;
+                    ptgt->pos.x   = target.pos.x * 2 + 1;
+                    ptgt->pos.y   = target.pos.y * 2 + 1;
+                }
+                else {
+                    ptgt->visible = false;
+                    ptgt->conf    = 0;
+                }
+            }
+        }
+    }
+
+
+    for (i = target_from, ptgt = Targets.Pointer() + target_from;
+         i < targetcount;
+         i += target_step, ptgt += target_step) {
+
+        if (!ptgt->used) {
+            ptgt->visible = false;
+            continue;
+        }
+
+        // Determine target visibility
+        x = ptgt->pos.x;
+        y = ptgt->pos.y;
+        if (x < leftborder || x >= rightborder || y < topborder  || y >= bottomborder) {
+            ptgt->visible = false;
+            ptgt->conf    = 0;
+            // Skip target if not visible
+            continue;
+        }
+        ptgt->visible = true;
+
+        // Check if this scale already has a template
+        // Acquire target templates if necessary
+        if (ptgt->feature_quality == -1) {
+            ptgt->feature_data.SetSize(templatesize);
+
+            // Update this scale's template with the
+            // new position estimated by the tracker
+            // filter
+            CopyTemplate(image.GetUCharPointer(videoch),
+                         OrigTemplates[i],
+                         ptgt->pos.x - TemplateRadius,
+                         ptgt->pos.y - TemplateRadius);
+            CopyTemplate(image.GetUCharPointer(videoch),
+                         ptgt->feature_data.Pointer(),
+                         ptgt->pos.x - TemplateRadius,
+                         ptgt->pos.y - TemplateRadius);
+
+            ptgt->conf            = 255;
+            ptgt->feature_quality = 256;
+        }
+    }
+
+
+    // Track targets
+    for (i = target_from, ptgt = Targets.Pointer() + target_from;
+         i < targetcount;
+         i += target_step, ptgt += target_step) {
+
+        // Skip non-visible targets
+        if (!ptgt->visible) continue;
+
+        // Skip templates with poor quality
+        if (ptgt->feature_quality < ConfidenceThreshold) {
+            ptgt->visible = false;
+            ptgt->conf    = 0;
+            continue;
+        }
+
+        // template matching + updating coordinates
+        xpre = ptgt->pos.x;
+        ypre = ptgt->pos.y;
+
+        if (Scale == 1) {
+            if (Metric == svlSAD) {
+                MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, false);
+            }
+            else if (Metric == svlSSD) {
+                MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, false);
+            }
+            else if (Metric == svlNCC) {
+                MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, true);
+            }
+            else return SVL_FAIL;
+        }
+        else {
+            if (Metric == svlSAD) {
+                MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, false);
+            }
+            else if (Metric == svlSSD) {
+                MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, false);
+            }
+            else if (Metric == svlNCC) {
+                MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, true);
+            }
+            else return SVL_FAIL;
+
+            if (ptgt->conf < ConfidenceThreshold) ptgt->conf = 0;
             ptgt->conf = (static_cast<int>(ptgt->conf) * scalem1 + conf) / Scale;
         }
 

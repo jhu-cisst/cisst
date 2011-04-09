@@ -241,7 +241,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
     const int weight = static_cast<int>(1000.0 * MovingAverageWeight);
     const int weightsum = weight + 1000;
-    unsigned int vch, i, targetcount;
+    unsigned int vch, i, targetcount = 0;
 
     // Resetting positions (if requested)
     _OnSingleThread(procInfo)
@@ -329,42 +329,44 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             img = WarpedImage;
         }
 
-        // Processing data
+        // Pre-processing data
         Trackers[vch]->PreProcessImage(*img, vch);
-        for (i = 0; i < Iterations; i ++) {
-            Trackers[vch]->Track(*img, vch);
-        }
-
-        target_buffer = Targets.Pointer(vch, 0);
-
-        // Retrieving results
-        for (i = 0; i < targetcount; i ++) {
-
-            if (target_buffer->used) Trackers[vch]->GetTarget(i, *target_buffer);
-            else target_buffer->visible = false;
-
-            target_buffer ++;
-        }
-
-        if (RigidBody) {
-            UpdateMosaicImage(vch, img->GetWidth(vch), img->GetHeight(vch), procInfo->id);
-        }
     }
 
     _SynchronizeThreads(procInfo);
 
-    if (RigidBody) {
-        _OnSingleThread(procInfo)
-        {
-            ReconstructRigidBody();
+    // Processing data
+    for (vch = 0; vch < VideoChannels; vch ++) {
+        if (!Trackers[vch]) continue;
+
+        for (i = 0; i < Iterations; i ++) {
+            Trackers[vch]->Track(procInfo, *img, vch);
         }
     }
+
+    _SynchronizeThreads(procInfo);
 
     _OnSingleThread(procInfo)
     {
         for (vch = 0; vch < VideoChannels; vch ++) {
 
             if (!Trackers[vch]) continue;
+
+            target_buffer = Targets.Pointer(vch, 0);
+
+            // Retrieving results
+            for (i = 0; i < targetcount; i ++) {
+
+                if (target_buffer->used) Trackers[vch]->GetTarget(i, *target_buffer);
+                else target_buffer->visible = false;
+
+                target_buffer ++;
+            }
+
+            if (RigidBody) {
+                ReconstructRigidBody(vch);
+                UpdateMosaicImage(vch, img->GetWidth(vch), img->GetHeight(vch));
+            }
 
             target_buffer = Targets.Pointer(vch, 0);
             flag.SetRef(targetcount, OutputTargets.GetFlagPointer());
@@ -432,113 +434,110 @@ int svlFilterImageTracker::Release()
     return SVL_OK;
 }
 
-void svlFilterImageTracker::ReconstructRigidBody()
+void svlFilterImageTracker::ReconstructRigidBody(unsigned int videoch)
 {
+    if (!Trackers[videoch]) return;
+
     const unsigned int targetcount = Targets.cols();
     double dconf, sum_conf, ax, ay, rx, ry, vx, vy, angle, cos_an, sin_an, scale;
     double proto_ax, proto_ay, proto_vx, proto_vy, proto_dist;
     vctDynamicMatrixRef<int> proto_pos;
     svlTarget2D *target;
 
-    unsigned int i, j;
+    unsigned int i;
     int conf;
 
-    for (j = 0; j < VideoChannels; j ++) {
+    proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(videoch));
 
-        if (!Trackers[j]) continue;
+    ax = ay = proto_ax = proto_ay = cos_an = sin_an = scale = sum_conf = 0.0;
 
-        proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(j));
+    // Compute center of weight
+    for (i = 0; i < targetcount; i ++) {
+        target = Targets.Pointer(videoch, i);
 
-        ax = ay = proto_ax = proto_ay = cos_an = sin_an = scale = sum_conf = 0.0;
+        if (target->visible) {
 
-        // Compute center of weight
-        for (i = 0; i < targetcount; i ++) {
-            target = Targets.Pointer(j, i);
+            conf      = target->conf;
+            ax       += target->pos.x           * conf;
+            ay       += target->pos.y           * conf;
+            proto_ax += proto_pos.Element(0, i) * conf;
+            proto_ay += proto_pos.Element(1, i) * conf;
+            sum_conf += conf;
+        }
+    }
+    if (sum_conf < 0.0001) return;
 
-            if (target->visible) {
+    ax       /= sum_conf;
+    ay       /= sum_conf;
+    proto_ax /= sum_conf;
+    proto_ay /= sum_conf;
 
-                conf      = target->conf;
-                ax       += target->pos.x           * conf;
-                ay       += target->pos.y           * conf;
-                proto_ax += proto_pos.Element(0, i) * conf;
-                proto_ay += proto_pos.Element(1, i) * conf;
-                sum_conf += conf;
+    // Compute angle and scale
+    sum_conf = 0.0;
+
+    for (i = 0; i < targetcount; i ++) {
+        target = Targets.Pointer(videoch, i);
+
+        if (target->visible) {
+
+            dconf      = target->conf;
+            vx         = static_cast<double>(target->pos.x) - ax;
+            vy         = static_cast<double>(target->pos.y) - ay;
+            proto_vx   = static_cast<double>(proto_pos.Element(0, i)) - proto_ax;
+            proto_vy   = static_cast<double>(proto_pos.Element(1, i)) - proto_ay;
+            proto_dist = sqrt(proto_vx * proto_vx + proto_vy * proto_vy);
+
+            if (proto_dist >= 0.0001) {
+                scale += dconf * sqrt(vx * vx + vy * vy);
+                sum_conf += dconf * proto_dist;
+
+                // Sum-up angle
+                dconf  *= proto_dist;
+                angle   = atan2(vy, vx) - atan2(proto_vy, proto_vx);
+                cos_an += dconf * cos(angle);
+                sin_an += dconf * sin(angle);
             }
         }
-        if (sum_conf < 0.0001) return;
+    }
+    if (sum_conf < 0.0001) return;
 
-        ax       /= sum_conf;
-        ay       /= sum_conf;
-        proto_ax /= sum_conf;
-        proto_ay /= sum_conf;
+    RigidBodyScale[videoch] = scale / sum_conf;
+    RigidBodyAngle[videoch] = atan2(sin_an, cos_an);
 
-        // Compute angle and scale
-        sum_conf = 0.0;
+    // Checking rigid body transformation constraints
+    if (RigidBodyScale[videoch] < RigidBodyScaleLow) RigidBodyScale[videoch] = RigidBodyScaleLow;
+    else if (RigidBodyScale[videoch] > RigidBodyScaleHigh) RigidBodyScale[videoch] = RigidBodyScaleHigh;
+    if (RigidBodyAngle[videoch] < RigidBodyAngleLow) RigidBodyAngle[videoch] = RigidBodyAngleLow;
+    else if (RigidBodyAngle[videoch] >RigidBodyAngleHigh) RigidBodyAngle[videoch] = RigidBodyAngleHigh;
 
-        for (i = 0; i < targetcount; i ++) {
-            target = Targets.Pointer(j, i);
+    // Reconstruct rigid body based on prototype
+    WarpedRigidBodyAngle[videoch] -= RigidBodyAngle[videoch];
+    WarpedRigidBodyScale[videoch] /= RigidBodyScale[videoch];
 
-            if (target->visible) {
+    scale = 1.0 / WarpedRigidBodyScale[videoch];
+    angle = -WarpedRigidBodyAngle[videoch];
+    cos_an = cos(angle);
+    sin_an = sin(angle);
+    rx = ROICenter[videoch].X();
+    ry = ROICenter[videoch].Y();
 
-                dconf      = target->conf;
-                vx         = static_cast<double>(target->pos.x) - ax;
-                vy         = static_cast<double>(target->pos.y) - ay;
-                proto_vx   = static_cast<double>(proto_pos.Element(0, i)) - proto_ax;
-                proto_vy   = static_cast<double>(proto_pos.Element(1, i)) - proto_ay;
-                proto_dist = sqrt(proto_vx * proto_vx + proto_vy * proto_vy);
+    for (i = 0; i < targetcount; i ++) {
+        target = Targets.Pointer(videoch, i);
 
-                if (proto_dist >= 0.0001) {
-                    scale += dconf * sqrt(vx * vx + vy * vy);
-                    sum_conf += dconf * proto_dist;
+        if (target->used) {
+            vx = proto_pos.Element(0, i) - proto_ax;
+            vy = proto_pos.Element(1, i) - proto_ay;
 
-                    // Sum-up angle
-                    dconf  *= proto_dist;
-                    angle   = atan2(vy, vx) - atan2(proto_vy, proto_vx);
-                    cos_an += dconf * cos(angle);
-                    sin_an += dconf * sin(angle);
-                }
-            }
-        }
-        if (sum_conf < 0.0001) return;
+            target->pos.x = static_cast<int>(vx + ax);
+            target->pos.y = static_cast<int>(vy + ay);
 
-        RigidBodyScale[j] = scale / sum_conf;
-        RigidBodyAngle[j] = atan2(sin_an, cos_an);
+            if (Trackers[videoch]) Trackers[videoch]->SetTarget(i, *target);
 
-        // Checking rigid body transformation constraints
-        if (RigidBodyScale[j] < RigidBodyScaleLow) RigidBodyScale[j] = RigidBodyScaleLow;
-        else if (RigidBodyScale[j] > RigidBodyScaleHigh) RigidBodyScale[j] = RigidBodyScaleHigh;
-        if (RigidBodyAngle[j] < RigidBodyAngleLow) RigidBodyAngle[j] = RigidBodyAngleLow;
-        else if (RigidBodyAngle[j] >RigidBodyAngleHigh) RigidBodyAngle[j] = RigidBodyAngleHigh;
+            vx += ax - rx;
+            vy += ay - ry;
 
-        // Reconstruct rigid body based on prototype
-        WarpedRigidBodyAngle[j] -= RigidBodyAngle[j];
-        WarpedRigidBodyScale[j] /= RigidBodyScale[j];
-
-        scale = 1.0 / WarpedRigidBodyScale[j];
-        angle = -WarpedRigidBodyAngle[j];
-        cos_an = cos(angle);
-        sin_an = sin(angle);
-        rx = ROICenter[j].X();
-        ry = ROICenter[j].Y();
-
-        for (i = 0; i < targetcount; i ++) {
-            target = Targets.Pointer(j, i);
-
-            if (target->used) {
-                vx = proto_pos.Element(0, i) - proto_ax;
-                vy = proto_pos.Element(1, i) - proto_ay;
-
-                target->pos.x = static_cast<int>(vx + ax);
-                target->pos.y = static_cast<int>(vy + ay);
-
-                if (Trackers[j]) Trackers[j]->SetTarget(i, *target);
-
-                vx += ax - rx;
-                vy += ay - ry;
-
-                target->pos.x = static_cast<int>(rx + scale * (vx * cos_an - vy * sin_an));
-                target->pos.y = static_cast<int>(ry + scale * (vx * sin_an + vy * cos_an));
-            }
+            target->pos.x = static_cast<int>(rx + scale * (vx * cos_an - vy * sin_an));
+            target->pos.y = static_cast<int>(ry + scale * (vx * sin_an + vy * cos_an));
         }
     }
 }
@@ -598,7 +597,7 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
     }
 }
 
-int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height, int threadid)
+int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height)
 {
     svlTrackerMSBruteForce* tracker = dynamic_cast<svlTrackerMSBruteForce*>(Trackers[videoch]);
     if (!tracker) return SVL_FAIL;
@@ -775,6 +774,17 @@ void svlImageTracker::ResetTargets()
 
 int svlImageTracker::PreProcessImage(svlSampleImage & CMN_UNUSED(image), unsigned int CMN_UNUSED(videoch))
 {
+    return SVL_OK;
+}
+
+int svlImageTracker::Track(svlProcInfo* procInfo, svlSampleImage & image, unsigned int videoch)
+{
+    if (procInfo->count > videoch) {
+        if (procInfo->id == videoch) return Track(image, videoch);
+    }
+    else {
+        if (procInfo->id == 0) return Track(image, videoch);
+    }
     return SVL_OK;
 }
 

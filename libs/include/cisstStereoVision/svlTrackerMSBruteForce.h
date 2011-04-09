@@ -57,6 +57,7 @@ public:
     virtual void ResetTargets();
     virtual int PreProcessImage(svlSampleImage & image, unsigned int videoch = SVL_LEFT);
 	virtual int Track(svlSampleImage & image, unsigned int videoch = SVL_LEFT);
+    virtual int Track(svlProcInfo* procInfo, svlSampleImage & image, unsigned int videoch = SVL_LEFT);
     virtual void Release();
 
 protected:

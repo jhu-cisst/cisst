@@ -304,12 +304,11 @@ int svlWindowManagerX11::DoModal(bool show, bool fullscreen)
     unsigned int winid;
 
     while (1) {
-#if CISST_SVL_HAS_XV
         osaSleep(0.001);
+#if CISST_SVL_HAS_XV
         if (!xvupdateimage) {
             while (XPending(xDisplay)) {
 #else // CISST_SVL_HAS_XV
-        osaSleep(0.001);
         if (XPending(xDisplay)) {
 #endif // CISST_SVL_HAS_XV
                 XNextEvent(xDisplay, &event);

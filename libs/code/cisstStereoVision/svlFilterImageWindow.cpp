@@ -345,8 +345,8 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     StopThread = false;
     WindowManager->ResetInitEvent();
     Thread->Create<svlWindowManagerThreadProc, svlFilterImageWindow*>(ThreadProc,
-                                                                    &svlWindowManagerThreadProc::Proc,
-                                                                    this);
+                                                                      &svlWindowManagerThreadProc::Proc,
+                                                                      this);
     WindowManager->WaitForInitEvent();
 
     syncOutput = syncInput;
@@ -357,7 +357,7 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
-    _SkipIfAlreadyProcessed(syncInput, syncOutput);
+//    _SkipIfAlreadyProcessed(syncInput, syncOutput);
     _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
