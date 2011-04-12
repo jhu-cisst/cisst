@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <cisstParameterTypes.h>
 #include <cisst3DUserInterface.h>
 #include <list>
 #include <limits>
