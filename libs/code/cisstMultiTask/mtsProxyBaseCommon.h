@@ -156,8 +156,8 @@ protected:
     class SenderThread : public IceUtil::Thread
     {
     private:
-        bool CanSend;
         const _SenderType Sender;
+        bool CanSend;
 
     public:
         SenderThread(const _SenderType& sender) : Sender(sender), CanSend(true) {}
