@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 
+#include <iostream>
+#include <iomanip>
 
 bool mtsGenericObject::SetTimestampIfAutomatic(double timestamp) {
     if (this->AutomaticTimestampMember) {
@@ -35,11 +37,19 @@ bool mtsGenericObject::SetTimestampIfAutomatic(double timestamp) {
 void mtsGenericObject::ToStream(std::ostream & outputStream) const {
     outputStream << "Timestamp (";
     if (this->AutomaticTimestamp()) {
-        outputStream << "automatic";
+        outputStream << "auto";
     } else {
         outputStream << "manual";
     }
-    outputStream << "): " << this->Timestamp();
+    outputStream << "): ";
+
+    std::ios_base::fmtflags flags = outputStream.flags();       // Save old flags
+    outputStream.setf(std::ios::fixed | std::ios::showpoint);
+    outputStream.precision(5);
+
+    outputStream  << this->Timestamp();
+    outputStream.flags(flags);                             // Restore old flags
+
     if (this->Valid()) {
         outputStream << " (valid)";
     } else {
