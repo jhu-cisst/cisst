@@ -18,7 +18,7 @@ set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 # Lists all examples (one per subdirectory)
 set (CISST_EXAMPLES
-     3DUserInterfaceTutorial
+     cisst3DUserInterface
      cisstMultiTask
      commonTutorial
      devicesTutorial

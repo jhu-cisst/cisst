@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet, Simon DiMaio
-  Created on:	2009-09-13
+  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on:	2008-05-23
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,16 +23,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface.h>
 
 // forward declaration for our visible objects
-class ImageViewerSkinVisibleObject;
-class ImageViewerBoneVisibleObject;
-class ImageViewerOutlineVisibleObject;
-class ImageViewerSlicesVisibleObject;
+class SimpleBehaviorVisibleObject;
 
-class ImageViewer: public ui3BehaviorBase
+// Always include last!
+#include <ui3BehaviorsExport.h>
+
+class CISST_EXPORT SimpleBehavior: public ui3BehaviorBase
 {
 public:
-    ImageViewer(const std::string & name);
-    ~ImageViewer();
+    SimpleBehavior(const std::string & name);
+    ~SimpleBehavior();
 
     void Startup(void) {}
     void Cleanup(void) {}
@@ -45,34 +45,20 @@ public:
     void Configure(const std::string & CMN_UNUSED(configFile)) {}
     bool SaveConfiguration(const std::string & CMN_UNUSED(configFile)) { return true; }
     inline ui3VisibleObject * GetVisibleObject(void) {
-        return this->Widget3D;
+        return this->VisibleList;
     }
 
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
-    void ToggleHandles(void);
-    void ToggleSkin(void);
-    void ToggleBone(void);
-    void ToggleSlicesAxial(void);
-    void ToggleSlicesCoronal(void);
-    void ToggleSlicesSagittal(void);
-
+    void ToggleColor(void);
+    void UpdateRelativePosition(void);
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
+    bool Following;
 
-    vtkVolume16Reader * VolumeReader;
-
-    ui3Widget3D * Widget3D;
-    ImageViewerSkinVisibleObject * Skin;
-    bool SkinShow;
-    ImageViewerBoneVisibleObject * Bone;
-    bool BoneShow;
-    ImageViewerOutlineVisibleObject * Outline;
-    ImageViewerSlicesVisibleObject * Slices;
-    bool SlicesAxialShow;
-    bool SlicesCoronalShow;
-    bool SlicesSagittalShow;
-
-    bool Widget3DHandlesActive;
+    ui3VisibleList * VisibleList;
+    SimpleBehaviorVisibleObject * VisibleObject1;
+    SimpleBehaviorVisibleObject * VisibleObject2;
+    double Counter;
 };

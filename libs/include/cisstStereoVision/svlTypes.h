@@ -77,6 +77,9 @@ http://www.cisst.org/cisst/license.txt.
 // Image structure definitions //
 /////////////////////////////////
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
 struct CISST_EXPORT svlBMPFileHeader
 {
     unsigned short bfType;
@@ -145,6 +148,7 @@ struct CISST_EXPORT svlBlob
     unsigned int circumference;
     unsigned int label;
 };
+
 
 #pragma pack()
 
@@ -218,7 +222,7 @@ struct CISST_EXPORT svlPoint2D
     svlPoint2D(int x, int y);
     void Assign(const svlPoint2D & point);
     void Assign(int x, int y);
-    
+
     int x;
     int y;
 };
@@ -235,11 +239,13 @@ struct CISST_EXPORT svlTarget2D
     void Assign(bool used, bool visible, unsigned char conf, svlPoint2D & pos);
     void Assign(int x, int y);
     void Assign(svlPoint2D & pos);
-    
+
     bool          used;
     bool          visible;
     unsigned char conf;
     svlPoint2D    pos;
+    int           feature_quality;
+    vctDynamicVector<unsigned char> feature_data;
 };
 
 #pragma pack()

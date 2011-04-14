@@ -309,8 +309,8 @@ int svlImageCodecPPM::Read(svlSampleImage &image, const unsigned int videoch, st
     int magicnumber = ppmOpen(stream, width, height);
     if (magicnumber < 0) return SVL_FAIL;
 
-    if (width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+    if (width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (width  != image.GetWidth(videoch) ||
         height != image.GetHeight(videoch)) {
@@ -330,8 +330,8 @@ int svlImageCodecPPM::Read(svlSampleImage &image, const unsigned int videoch, co
     int magicnumber = ppmOpen(buffer, buffersize, width, height);
     if (magicnumber < 0) return SVL_FAIL;
 
-    if (width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+    if (width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (width  != image.GetWidth(videoch) ||
         height != image.GetHeight(videoch)) {
@@ -370,8 +370,8 @@ int svlImageCodecPPM::Write(const svlSampleImage &image, const unsigned int vide
     height = image.GetHeight(videoch);
 
     if (image.GetBPP() != 3 ||
-        width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+        width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (codec == "pgm") {
         magicnumber = 5;
@@ -412,8 +412,8 @@ int svlImageCodecPPM::Write(const svlSampleImage &image, const unsigned int vide
     height = image.GetHeight(videoch);
 
     if (image.GetBPP() != 3 ||
-        width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+        width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     int magicnumber = 6;
     if (codec == "pgm") magicnumber = 5;

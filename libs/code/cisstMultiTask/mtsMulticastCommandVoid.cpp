@@ -61,7 +61,7 @@ mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(b
 
 
 void mtsMulticastCommandVoid::ToStream(std::ostream & outputStream) const {
-    outputStream << "mtsMulticastCommandVoid: " << this->Name;
+    outputStream << "mtsMulticastCommandVoid: \"" << this->Name << "\"";
     if (Commands.size() != 0) {
         outputStream << "\n  Registered observers:" << std::endl;
         for (unsigned int i = 0; i < Commands.size(); i++) {

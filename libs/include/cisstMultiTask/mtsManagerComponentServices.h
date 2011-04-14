@@ -45,7 +45,8 @@ protected:
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;
         mtsFunctionWrite Resume;
-        mtsFunctionQualifiedRead GetState;    // in: process, component, out: state
+        mtsFunctionQualifiedRead GetState;     // in: process, component, out: state
+        mtsFunctionQualifiedRead LoadLibrary;  // in: process, library name, out: result (bool)
     } ServiceComponentManagement;
 
     // Getters
@@ -107,7 +108,7 @@ public:
     }
     //@}
 
-    /*! Wrappers for internal function object */
+    /*! Wrappers for internal function objects */
     //@{
     bool ComponentCreate(const std::string & className, const std::string & componentName) const;
     bool ComponentCreate(
@@ -134,19 +135,30 @@ public:
     bool Disconnect(const mtsDescriptionConnection & connection) const;
     bool Disconnect(ConnectionIDType connectionID) const;
 
-    bool ComponentStart(const std::string & componentName, const double delayInSecond = 0.0) const;
+    bool ComponentStart(const std::string & componentName, const double delayInSecond) const;
+    bool ComponentStart(const std::string & componentName) const
+         { return ComponentStart(componentName, 0.0); }
     bool ComponentStart(const std::string& processName, const std::string & componentName,
-                        const double delayInSecond = 0.0) const;
+                        const double delayInSecond) const;
+    bool ComponentStart(const std::string& processName, const std::string & componentName) const
+         { return ComponentStart(processName, componentName, 0.0); }
 
-    bool ComponentStop(const std::string & componentName, const double delayInSecond = 0.0) const;
+
+    bool ComponentStop(const std::string & componentName, const double delayInSecond) const;
+    bool ComponentStop(const std::string & componentName) const
+         { return ComponentStop(componentName, 0.0); }
     bool ComponentStop(const std::string& processName, const std::string & componentName,
-                       const double delayInSecond = 0.0) const;
+                       const double delayInSecond) const;
+    bool ComponentStop(const std::string& processName, const std::string & componentName) const
+         { return ComponentStop(processName, componentName, 0.0); }
 
     bool ComponentResume(const std::string & componentName, const double delayInSecond = 0.0) const;
     bool ComponentResume(const std::string& processName, const std::string & componentName,
                          const double delayInSecond = 0.0) const;
 
     mtsComponentState ComponentGetState(const mtsDescriptionComponent &component) const;
+    std::string ComponentGetState(const std::string componentName) const;
+    std::string ComponentGetState(const std::string & processName, const std::string componentName) const;
 
     std::vector<std::string> GetNamesOfProcesses(void) const;
     std::vector<std::string> GetNamesOfComponents(const std::string & processName) const;
@@ -162,6 +174,10 @@ public:
     InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;
 
+    // Dynamically load the file (fileName) into the current process
+    bool Load(const std::string & fileName) const;
+    // Dynamically load the file (fileName) into the process processName
+    bool Load(const std::string & processName, const std::string & fileName) const;
     //@}
 
 };

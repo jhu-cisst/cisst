@@ -24,7 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 
 class MeasurementBehaviorVisibleObject;
 
-class MeasurementBehavior : public ui3BehaviorBase
+// Always include last!
+#include <ui3BehaviorsExport.h>
+
+class CISST_EXPORT MeasurementBehavior: public ui3BehaviorBase
 {
 public:
     MeasurementBehavior(const std::string & name);

@@ -84,13 +84,11 @@ class CISST_EXPORT devOSGBody :
   // The switch
   osg::ref_ptr< osg::Switch > osgswitch;
   
-  // A vector of geometries
-  std::vector<osg::Geometry*> osggeometries;
-
-
   void CreateInterface( const std::string& transformfn, 
 			const std::string& switchfn );
+
   void ReadModel( const std::string& fname );
+
   void Read3DData( const vctDynamicMatrix<double>& pc,
 		   const vctFixedSizeVector<unsigned char,3>& RGB = 
 		   vctFixedSizeVector<unsigned char,3>( 200, 200, 200 ) );

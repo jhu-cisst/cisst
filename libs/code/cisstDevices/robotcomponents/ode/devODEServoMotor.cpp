@@ -28,13 +28,14 @@ dJointID devODEServoMotor::MotorID() const { return amotorid; }
 void devODEServoMotor::SetPosition( double qs, double q, double dt ){
 
   double sign = 1.0;
-  if( qs < q )
-    { sign = -1.0; }
+  if( qs < q ) { sign = -1.0; }  // sign of the motion
 
-  if( vwmax * fabs( dt ) < fabs( qs-q ) )
-    { SetVelocity( sign*vwmax ); }
-  else
-    { SetVelocity( 0.0 ); }
+  double e = qs-q;
+  double qd = e / dt;
+  if( vwmax < fabs( qd ) )
+    { qd = sign*vwmax; }
+
+  SetVelocity( qd );
   
 }
 

@@ -36,8 +36,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
     // Create and start global component manager
-    mtsManagerGlobal globalComponentManager;
-    if (!globalComponentManager.StartServer()) {
+    mtsManagerGlobal * globalComponentManager = new mtsManagerGlobal;
+    if (!globalComponentManager->StartServer()) {
         CMN_LOG_INIT_ERROR << "Failed to start global component manager." << std::endl;
         return 1;
     }
@@ -46,7 +46,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // Get local component manager instance
     mtsManagerLocal * localManager;
     try {
-        localManager = mtsManagerLocal::GetInstance(globalComponentManager);
+        localManager = mtsManagerLocal::GetInstance(*globalComponentManager);
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
@@ -66,7 +66,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     while (key != 'q') {
         key = cmnGetChar();
     }
-
+    std::cout << "Quitting ..." << std::endl;
     // cleanup
     localManager->KillAll();
     localManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);

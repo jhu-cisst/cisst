@@ -5,6 +5,32 @@
 const std::string devSetPoints::Output          = "Output";
 const std::string devSetPoints::NextSetPoint     = "NextSetPoint";
 
+devSetPoints::devSetPoints( const std::string& taskname,
+			    const vctDynamicVector<double>& q ) :
+  devRobotComponent( taskname, 0.001, devSetPoints::ENABLED, OSA_CPUANY ),
+  cnt(0),
+  state( false ),
+  stateold( false ){
+
+  rnsetpoints.push_back( q );
+  rnoutput = ProvideOutputRn( devSetPoints::Output,
+			      devRobotComponent::POSITION,
+			      rnsetpoints[0].size() );
+
+  mtsInterfaceProvided* interface;
+  interface = GetInterfaceProvided( devRobotComponent::Control );
+  StateTable.AddData( state, "State" );
+  interface->AddCommandWriteState
+    ( StateTable, state, devSetPoints::NextSetPoint );
+
+  rnoutput->SetPosition( rnsetpoints[0] );
+}
+
+void devSetPoints::Insert( const vctDynamicVector<double>& q )
+{ rnsetpoints.push_back( q ); }
+
+void devSetPoints::Latch(){ state = ~state; }
+
 devSetPoints::devSetPoints
 ( const std::string& taskname,
   const std::vector< vctDynamicVector<double> >& setpoints ) :
@@ -101,7 +127,7 @@ devSetPoints::devSetPoints
 void devSetPoints::RunComponent(){
 
   if( state != stateold ){
-
+    
     if( !rnsetpoints.empty() ){
       cnt++;
       if( cnt < rnsetpoints.size() )

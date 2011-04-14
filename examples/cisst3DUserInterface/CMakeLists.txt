@@ -14,19 +14,22 @@
 
 if (BUILD_LIBS_cisst3DUserInterface)
 
+  find_package (VTK REQUIRED)
+  include (${VTK_USE_FILE})
+
   # library of sample behavior
-  add_subdirectory(behaviors)
   include_directories(behaviors)
+  add_subdirectory(behaviors)
 
   # programs, depends on hardware availability
 
   # Sensable specific examples, requires cisstDevices
   if (CISST_DEV_HAS_SENSABLEHD)
-    add_subdirectory(example1)
-    add_subdirectory(example2)
-    add_subdirectory(example5)
+    add_subdirectory(SensableNoVideo)
+    add_subdirectory(SensableStereoVideo)
+    add_subdirectory(SensableStereoVideoNetwork)
   else (CISST_DEV_HAS_SENSABLEHD)
-    message (WARNING " 3DUserInterface examples 1, 2, and 5 will not be compiled since they require CISST_DEV_HAS_SENSABLEHD")
+    message (WARNING " cisst3DUserInterface examples SensableNoVideo, SensableStereoVideo, and SensableStereoVideoNetwork will not be compiled since they require CISST_DEV_HAS_SENSABLEHD")
   endif (CISST_DEV_HAS_SENSABLEHD)
 
   # Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
@@ -39,12 +42,11 @@ if (BUILD_LIBS_cisst3DUserInterface)
       link_directories (${cisstDaVinci-isi-bbapi_LIBRARY_DIR})
     endif (CISST_UI3_HAS_DAVINCI_BBAPI)
     set(daVinci_ALL_LIBRARIES ${daVinci_LIBRARIES} ${BBAPI_LIBRARIES} ${cisstDaVinci-isi-bbapi_LIBRARIES})
-    add_subdirectory(example3)
-    add_subdirectory(example4)
+    add_subdirectory(daVinciStereoVideo)
   else (CISST_UI3_HAS_DAVINCI)
-    message (WARNING " 3DUserInterface examples 3 and 4 will not be compiled since they require CISST_UI3_HAS_DAVINCI")
+    message (WARNING " cisst3DUserInterface example daVinciStereoVideo will not be compiled since it requires CISST_UI3_HAS_DAVINCI")
   endif (CISST_UI3_HAS_DAVINCI)
 
 else (BUILD_LIBS_cisst3DUserInterface)
-  message (WARNING " 3DUserInterface examples will not be compiled since they require BUILD_LIBS_3DUserInterface")
+  message (WARNING " cisst3DUserInterface examples will not be compiled since they require BUILD_LIBS_3DUserInterface")
 endif (BUILD_LIBS_cisst3DUserInterface)

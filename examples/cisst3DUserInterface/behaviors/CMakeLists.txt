@@ -12,11 +12,16 @@
 #
 # --- end cisst license ---
 
-add_library (3DUserInterfaceTutorialBehaviors
+
+add_library (cisst3DUserInterfaceBehaviors
+             ${IS_SHARED}
+	     ui3BehaviorsExport.h
              SimpleBehavior.h
              SimpleBehavior.cpp
              MeasurementBehavior.h
              MeasurementBehavior.cpp
+             MapBehavior.h
+             MapBehavior.cpp
              ImageViewer.h
              ImageViewer.cpp
              ImageViewerKidney.h
@@ -25,4 +30,6 @@ add_library (3DUserInterfaceTutorialBehaviors
              RegistrationBehavior.cpp
 	     )
 
-cisst_target_link_libraries (3DUserInterfaceTutorialBehaviors  cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstRobot cisstParameterTypes cisst3DUserInterface)
+cisst_target_link_libraries (cisst3DUserInterfaceBehaviors
+                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                             cisstStereoVision cisstRobot cisstParameterTypes cisst3DUserInterface)

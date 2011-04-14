@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstCommon/cmnUnits.h>
 
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentClient);
@@ -483,6 +484,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                                       this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription,
                                       this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_LoadLibrary,
+                                      this, mtsManagerComponentBase::CommandNames::LoadLibrary);
     provided->AddEventWrite(this->InterfaceComponentEvents_AddComponent, 
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceComponentEvents_ChangeState, 
@@ -529,6 +532,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.ComponentResume);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                           InterfaceLCMFunction.ComponentGetState);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
+                          InterfaceLCMFunction.LoadLibrary);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                           InterfaceLCMFunction.GetNamesOfProcesses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
@@ -577,6 +582,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceRequiredDescription,
                              this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary,
+                             this, mtsManagerComponentBase::CommandNames::LoadLibrary);
     provided->AddEventWrite(this->InterfaceLCMEvents_ChangeState, 
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceLCM: successfully added \"LCM\" interfaces" << std::endl;
@@ -903,6 +910,20 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredD
     }
 }
 
+void mtsManagerComponentClient::InterfaceComponentCommands_LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (lib.ProcessName == LCM->GetProcessName())
+        InterfaceLCMCommands_LoadLibrary(lib.LibraryName, result);
+    else {
+        if (!InterfaceLCMFunction.LoadLibrary.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_LoadLibrary: function not bound to command" << std::endl;
+            return;
+        }
+        InterfaceLCMFunction.LoadLibrary(lib, result);
+    }
+}
+
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg)
 {
     // Steps to create a component dynamically :
@@ -1140,6 +1161,13 @@ void mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceRequiredDescrip
                                 << intfc.ComponentName << " required interface " << intfc.InterfaceRequiredNames[0] << std::endl;
         return;
     }
+}
+
+// This function is thread-safe, thus it can be called as a qualified read command
+void mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary(const std::string &fileName, bool &result) const
+{
+    osaDynamicLoader dl;
+    result = dl.Load(fileName.c_str());
 }
 
 void mtsManagerComponentClient::HandleAddComponentEvent(const mtsDescriptionComponent &component)

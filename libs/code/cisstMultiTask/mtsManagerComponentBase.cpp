@@ -53,6 +53,7 @@ const std::string mtsManagerComponentBase::CommandNames::GetEndUserInterface = "
 const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddObserverList";
 const std::string mtsManagerComponentBase::CommandNames::RemoveEndUserInterface = "RemoveEndUserInterface";
 const std::string mtsManagerComponentBase::CommandNames::RemoveObserverList = "RemoveObserverList";
+const std::string mtsManagerComponentBase::CommandNames::LoadLibrary = "LoadLibrary";
 
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";

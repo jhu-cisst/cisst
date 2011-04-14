@@ -366,7 +366,7 @@ svlDrawHelper::TriangleWarpInternals::TriangleWarpInternals() :
     _oxs(0),
     _oys(0)
 {
-    AllocateBuffers(8192);
+    AllocateBuffers(MAX_DIMENSION);
 }
 
 svlDrawHelper::TriangleWarpInternals::~TriangleWarpInternals()

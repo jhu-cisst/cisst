@@ -442,6 +442,8 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType 
     LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: SendExecuteEventVoid: " << commandID);
 #endif
 
+    std::cerr << "sending event void" << std::endl;
+
     try {
         ComponentInterfaceServerProxy->ExecuteEventVoid(commandID);
     } catch (const ::Ice::Exception & ex) {

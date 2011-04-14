@@ -59,13 +59,14 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     selector.SetMaxTargets(10);
     selector.SetTitle("Select targets (then press SPACE)");
 
-    // setup tracker
+    // setup tracker algorithm
     svlTrackerMSBruteForce trackeralgo;
-    trackeralgo.SetParameters(svlNCC, // metric
-                              32,     // template radius
-                              25,     // search radius
-                              3,      // number of scales
-                              0, 0.0);
+    trackeralgo.SetErrorMetric(svlNCC);
+    trackeralgo.SetScales(2);
+    trackeralgo.SetTemplateRadius(15);
+    trackeralgo.SetSearchRadius(30);
+
+    // setup tracker
     tracker.SetMovingAverageSmoothing(0.0);
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);

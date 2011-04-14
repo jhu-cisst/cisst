@@ -285,4 +285,31 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsEventHandlerList);
 
+//-----------------------------------------------------------------------------
+//  For dynamically loading a library into a process
+//
+class CISST_EXPORT mtsDescriptionLoadLibrary: public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    std::string ProcessName;
+    std::string LibraryName;
+
+    /*! Default constructor */
+    mtsDescriptionLoadLibrary() {}
+    /*! Copy constructor */
+    mtsDescriptionLoadLibrary(const mtsDescriptionLoadLibrary &other);
+    /*! Constructor process name and library name */
+    mtsDescriptionLoadLibrary(const std::string &processName, const std::string &libraryName);
+    /*! Destructor */
+    ~mtsDescriptionLoadLibrary() {}
+
+    void ToStream(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionLoadLibrary);
+
 #endif // _mtsParameterTypes_h

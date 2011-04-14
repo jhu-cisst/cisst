@@ -699,13 +699,11 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
+    // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
     this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, FinalType>(&AccessorType::Get, stateAccessor),
-                                  commandName,
-                                  mtsGenericTypes<mtsStateIndex>::ConditionalCreate(mtsStateIndex(), commandName),
-                                  mtsGenericTypes<FinalType>::ConditionalCreate(FinalType(stateData), commandName));
+                                  commandName, new mtsStateIndex, new FinalType(stateData));
     return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
-                                commandName,
-                                mtsGenericTypes<FinalType>::ConditionalCreate(FinalType(stateData), commandName));
+                                commandName, new FinalType(stateData));
 }
 
 template <class _elementType>
@@ -732,7 +730,6 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWriteState(const mtsStateT
                                                                  const std::string & commandName,
                                                                  mtsCommandQueueingPolicy queueingPolicy)
 {
-    typedef typename mtsGenericTypes<_elementType>::FinalBaseType FinalBaseType;
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
     AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
@@ -740,7 +737,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWriteState(const mtsStateT
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteState: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
-    return this->AddCommandWrite(new mtsCommandWrite<AccessorType, FinalBaseType>
+    return this->AddCommandWrite(new mtsCommandWrite<AccessorType, FinalType>
                                  (&AccessorType::SetCurrent, stateAccessor, commandName, FinalType(stateData)),
                                  queueingPolicy);
 }

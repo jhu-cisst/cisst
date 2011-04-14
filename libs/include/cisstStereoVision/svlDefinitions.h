@@ -166,7 +166,7 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_VCS_ARRAY_LENGTH                   50
 #define SVL_VCS_STRING_LENGTH                 128
 #define ST_DP_TEMP_BUFF_SIZE                 2048
-#define MAX_DIMENISION                       8192
+#define MAX_DIMENSION                       65536
 #define MAX_UI16_VAL                       0xFFFF
 #define MAX_I32_VAL                    0x7FFFFFFF
 #define BIG_I32_VAL                     100000000

@@ -1,40 +1,21 @@
 #include <cisstDevices/robotcomponents/ode/devODEWorld.h>
 #include <cisstDevices/robotcomponents/ode/devODEManipulator.h>
-#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
+
+#include <cisstDevices/robotcomponents/trajectories/devLinearRn.h>
+#include <cisstDevices/robotcomponents/trajectories/devSetPoints.h>
 
 #include <cisstCommon/cmnGetChar.h>
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
-// This is an example of a simple trajectory
-class Trajectory : public devRobotComponent{
-private:
-  RnIO* output;
-  vctDynamicVector<double> q;
-public:
-  Trajectory() :
-    devRobotComponent( "trajectory", 0.1, Trajectory::ENABLED, OSA_CPU1 ),
-    q( 7, 0.0 ){    
-    output = RequireOutputRn( "Output", Trajectory::POSITION, 7 );
-  }
-  void Configure( const std::string& CMN_UNUSED( argv ) = "" ){}
-  void Startup(){}
-  void Run(){
-    ProcessQueuedCommands();
-    for( size_t i=0; i<7; i++ ) q[i] += 0.01;
-    output->SetPosition( q );
-  }
-  void Cleanup(){}
-};
-
 int main(){
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   // Create the OSG World
-  devODEWorld* world = new devODEWorld( 0.001, OSA_CPU1 );
+  devODEWorld* world = new devODEWorld( 0.0005, OSA_CPU1 );
   taskManager->AddComponent( world );
 
   // Create a camera
@@ -50,6 +31,24 @@ int main(){
   // Add the camera component
   taskManager->AddComponent( camera );
 
+  vctDynamicVector<double> qinit(7, 0.0), qfinal( 7, 1.0 ), qdmax( 7, 0.1 );
+  std::vector< vctDynamicVector<double> > Q;
+  Q.push_back( qfinal );
+  Q.push_back( qinit );
+
+  devSetPoints setpoints( "setpoints", Q );
+  taskManager->AddComponent( &setpoints );
+
+  devLinearRn trajectory( "trajectory",
+			  0.01,
+			  devTrajectory::ENABLED,
+			  OSA_CPU1,
+			  devTrajectory::QUEUE,
+			  devTrajectory::POSITION,
+			  qinit,
+			  qdmax );
+  taskManager->AddComponent( &trajectory );
+
   // WAM stuff
   std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
@@ -61,26 +60,32 @@ int main(){
   models.push_back( path+"l6.3ds" );
   models.push_back( path+"l7.3ds" );
 
-  vctDynamicVector<double> qinit(7, 0.0);
+  vctMatrixRotation3<double> Rw0( 0.0, 0.0, -1.0,
+				  0.0, 1.0,  0.0,
+				  1.0, 0.0,  0.0 );
+  vctFixedSizeVector<double,3> tw0( 0.0, 0.0, 1.0 );
+  vctFrame4x4<double> Rtw0( Rw0, tw0 );
+  
   devODEManipulator* WAM = new devODEManipulator( "WAM",
-						  0.002,
+						  0.001,
 						  devManipulator::ENABLED,
 						  OSA_CPU1,
 						  world,
 						  devManipulator::POSITION,
 						  path+"wam7.rob",
-						  vctFrame4x4<double>(),
+						  Rtw0,
 						  qinit,
 						  models,
-						  path+"l0.3ds" );
+						  "" );
+						  //path+"l0.3ds" );
   taskManager->AddComponent( WAM );
 
-  // Trajectory
-  Trajectory trajectory;
-  taskManager->AddComponent( &trajectory );
 
   // Connect trajectory to robot
-  taskManager->Connect( trajectory.GetName(), "Output",
+  taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
+			trajectory.GetName(), devLinearRn::Input );
+
+  taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
 			WAM->GetName(),       devOSGManipulator::Input );
 
   // Start everything

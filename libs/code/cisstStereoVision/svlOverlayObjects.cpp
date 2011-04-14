@@ -1201,6 +1201,19 @@ void svlOverlayStaticTriangle::DrawInternal(svlSampleImage* bgimage, svlSample* 
 svlOverlayStaticPoly::svlOverlayStaticPoly() :
     svlOverlay(),
     Color(255, 255, 255),
+    Thickness(1),
+    Start(0)
+{
+}
+
+svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
+                                           bool visible,
+                                           const TypeRef poly,
+                                           svlRGB color) :
+    svlOverlay(videoch, visible),
+    Poly(poly),
+    Color(color),
+    Thickness(1),
     Start(0)
 {
 }
@@ -1209,10 +1222,12 @@ svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
                                            bool visible,
                                            const TypeRef poly,
                                            svlRGB color,
+                                           unsigned int thickness,
                                            unsigned int start) :
     svlOverlay(videoch, visible),
     Poly(poly),
     Color(color),
+    Thickness(thickness),
     Start(start)
 {
 }
@@ -1228,9 +1243,22 @@ void svlOverlayStaticPoly::SetPoints(const TypeRef points)
     CS.Leave();
 }
 
+void svlOverlayStaticPoly::SetPoints(const TypeRef points, unsigned int start)
+{
+    CS.Enter();
+        Poly = points;
+        Start = start;
+    CS.Leave();
+}
+
 void svlOverlayStaticPoly::SetColor(svlRGB color)
 {
     Color = color;
+}
+
+void svlOverlayStaticPoly::SetThickness(unsigned int thickness)
+{
+    Thickness = thickness;
 }
 
 void svlOverlayStaticPoly::SetStart(unsigned int start)
@@ -1246,6 +1274,11 @@ svlOverlayStaticPoly::TypeRef svlOverlayStaticPoly::GetPoints()
 svlRGB svlOverlayStaticPoly::GetColor() const
 {
     return Color;
+}
+
+unsigned int svlOverlayStaticPoly::GetThickness() const
+{
+    return Thickness;
 }
 
 unsigned int svlOverlayStaticPoly::GetStart() const
@@ -1323,7 +1356,7 @@ int svlOverlayStaticPoly::GetPoint(unsigned int idx, int & x, int & y) const
 void svlOverlayStaticPoly::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
     CS.Enter();
-        svlDraw::Poly(bgimage, VideoCh, Poly, Color, Start);
+        svlDraw::Poly(bgimage, VideoCh, Poly, Color, Thickness, Start);
     CS.Leave();
 }
 

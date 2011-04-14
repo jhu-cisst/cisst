@@ -23,14 +23,19 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface.h>
 
 // forward declaration for our visible objects
-class ImageViewerKidneySurfaceVisibleObject;
+class ImageViewerSkinVisibleObject;
+class ImageViewerBoneVisibleObject;
+class ImageViewerOutlineVisibleObject;
+class ImageViewerSlicesVisibleObject;
 
+// Always include last!
+#include <ui3BehaviorsExport.h>
 
-class ImageViewerKidney: public ui3BehaviorBase
+class CISST_EXPORT ImageViewer: public ui3BehaviorBase
 {
 public:
-    ImageViewerKidney(const std::string & name);
-    ~ImageViewerKidney();
+    ImageViewer(const std::string & name);
+    ~ImageViewer();
 
     void Startup(void) {}
     void Cleanup(void) {}
@@ -49,21 +54,28 @@ public:
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
     void ToggleHandles(void);
-    void ToggleOuter(void);
-    void ToggleTree(void);
-    void ToggleTumor(void);
+    void ToggleSkin(void);
+    void ToggleBone(void);
+    void ToggleSlicesAxial(void);
+    void ToggleSlicesCoronal(void);
+    void ToggleSlicesSagittal(void);
 
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
 
+    vtkVolume16Reader * VolumeReader;
+
     ui3Widget3D * Widget3D;
-    ImageViewerKidneySurfaceVisibleObject * Outer;
-    bool OuterShow;
-    ImageViewerKidneySurfaceVisibleObject * Tree;
-    bool TreeShow;
-    ImageViewerKidneySurfaceVisibleObject * Tumor;
-    bool TumorShow;
+    ImageViewerSkinVisibleObject * Skin;
+    bool SkinShow;
+    ImageViewerBoneVisibleObject * Bone;
+    bool BoneShow;
+    ImageViewerOutlineVisibleObject * Outline;
+    ImageViewerSlicesVisibleObject * Slices;
+    bool SlicesAxialShow;
+    bool SlicesCoronalShow;
+    bool SlicesSagittalShow;
 
     bool Widget3DHandlesActive;
 };

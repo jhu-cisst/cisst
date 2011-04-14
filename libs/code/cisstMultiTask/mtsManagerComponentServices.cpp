@@ -47,6 +47,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.Resume);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
                                                ServiceComponentManagement.GetState);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
+                                               ServiceComponentManagement.LoadLibrary);
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                                                ServiceGetters.GetNamesOfProcesses);
@@ -289,6 +291,19 @@ mtsComponentState mtsManagerComponentServices::ComponentGetState(const mtsDescri
     return state;
 }
 
+std::string mtsManagerComponentServices::ComponentGetState(const std::string componentName) const
+{
+    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
+    return ComponentGetState(processName, componentName);
+}
+
+std::string mtsManagerComponentServices::ComponentGetState(const std::string & processName,
+                                                           const std::string componentName) const
+{
+    mtsComponentState state = ComponentGetState(mtsDescriptionComponent(processName, componentName));
+    return mtsComponentState::ToString(state.GetState());
+}
+
 std::vector<std::string> mtsManagerComponentServices::GetNamesOfProcesses(void) const
 {
     std::vector<std::string> namesOfProcesses;
@@ -392,5 +407,18 @@ InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDe
     ServiceGetters.GetInterfaceRequiredDescription(argIn, argOut);
 
     return argOut;
+}
+
+bool mtsManagerComponentServices::Load(const std::string & fileName) const
+{
+    return Load(mtsManagerLocal::GetInstance()->GetProcessName(), fileName);
+}
+
+bool mtsManagerComponentServices::Load(const std::string & processName, const std::string & fileName) const
+{
+    mtsDescriptionLoadLibrary argIn(processName, fileName);
+    bool result = false;
+    ServiceComponentManagement.LoadLibrary(argIn, result);
+    return result;
 }
 

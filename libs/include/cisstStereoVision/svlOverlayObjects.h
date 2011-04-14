@@ -468,16 +468,24 @@ public:
     svlOverlayStaticPoly(unsigned int videoch,
                          bool visible,
                          const TypeRef poly,
+                         svlRGB color);
+    svlOverlayStaticPoly(unsigned int videoch,
+                         bool visible,
+                         const TypeRef poly,
                          svlRGB color,
-                         unsigned int start = 0);
+                         unsigned int thickness,
+                         unsigned int start);
     virtual ~svlOverlayStaticPoly();
 
     void SetPoints(const TypeRef points);
+    void SetPoints(const TypeRef points, unsigned int start);
     void SetColor(svlRGB color);
+    void SetThickness(unsigned int thickness);
     void SetStart(unsigned int start);
 
     TypeRef GetPoints();
     svlRGB GetColor() const;
+    unsigned int GetThickness() const;
     unsigned int GetStart() const;
 
     unsigned int AddPoint(svlPoint2D point);
@@ -495,6 +503,7 @@ protected:
 private:
     Type Poly;
     svlRGB Color;
+    unsigned int Thickness;
     unsigned int Start;
     osaCriticalSection CS;
 };

@@ -649,7 +649,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
             clientComponentName, clientInterfaceRequiredName, eventGeneratorProxyPointers))
     {
         CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: failed to fetch event generator proxy pointers: "
-            << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
+                                 << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
         return false;
     }
 
@@ -673,9 +673,10 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
 
         // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
+        std::cerr << "setting Id for handler .... ddddddddddddddddddddddddddddddddddd" << std::endl;
         if (!eventHandlerVoid->SetNetworkProxy(interfaceProxyClient)) {
             CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: "
-                << eventHandlerVoid->GetName() << std::endl;
+                                     << eventHandlerVoid->GetName() << std::endl;
             return false;
         }
 

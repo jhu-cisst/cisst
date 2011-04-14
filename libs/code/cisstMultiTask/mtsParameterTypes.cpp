@@ -352,3 +352,43 @@ void mtsEventHandlerList::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, Provided);
     CMN_LOG_CLASS_RUN_WARNING << "DeSerializeRaw not implemented" << std::endl;
 }
+
+//-----------------------------------------------------------------------------
+//  LoadLibrary
+//
+CMN_IMPLEMENT_SERVICES(mtsDescriptionLoadLibrary);
+
+mtsDescriptionLoadLibrary::mtsDescriptionLoadLibrary(const mtsDescriptionLoadLibrary & other):
+    mtsGenericObject(other)
+{
+    this->ProcessName = other.ProcessName;
+    this->LibraryName = other.LibraryName;
+}
+
+mtsDescriptionLoadLibrary::mtsDescriptionLoadLibrary(const std::string & processName, const std::string & libraryName):
+    mtsGenericObject(),
+    ProcessName(processName),
+    LibraryName(libraryName)
+{
+}
+
+void mtsDescriptionLoadLibrary::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", Process: " << this->ProcessName
+                 << ", library: " << this->LibraryName;
+}
+
+void mtsDescriptionLoadLibrary::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->ProcessName);
+    cmnSerializeRaw(outputStream, this->LibraryName);
+}
+
+void mtsDescriptionLoadLibrary::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->ProcessName);
+    cmnDeSerializeRaw(inputStream, this->LibraryName);
+}

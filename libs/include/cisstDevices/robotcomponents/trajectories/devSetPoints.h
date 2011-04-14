@@ -1,6 +1,7 @@
 
 
 #include <cisstCommon.h>
+#include <list>
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctQuaternionRotation3.h>
 #include <cisstVector/vctFrame4x4.h>
@@ -31,6 +32,8 @@ class CISST_EXPORT devSetPoints : public devRobotComponent {
 
  public:
 
+  devSetPoints( const std::string& taskname,
+		const vctDynamicVector<double>& q );
 
   devSetPoints( const std::string& taskname,
 		const std::vector< vctDynamicVector<double> >& setpoints );
@@ -47,6 +50,9 @@ class CISST_EXPORT devSetPoints : public devRobotComponent {
   ~devSetPoints(void) {};
 
   void RunComponent();
+
+  void Insert( const vctDynamicVector<double>& q );
+  void Latch();
   
   static const std::string Output;
   static const std::string NextSetPoint;
