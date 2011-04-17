@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsCollectorState.h>
 
 #include "mtsTestComponents.h"
 

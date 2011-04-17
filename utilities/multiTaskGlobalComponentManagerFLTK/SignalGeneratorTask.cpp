@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon/cmnConstants.h>
-#include <cisstVector.h>
 #include "SignalGeneratorTask.h"
+
+#include <cisstCommon/cmnConstants.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES(SignalGenerator);
@@ -61,7 +62,7 @@ void SignalGenerator::Run(void)
     std::stringstream ss;
     for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
         //newValue = sin((double)x) * (100.0 + 10.0 * (double)i) / 100.0;
-        newValue = sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 2.0) 
+        newValue = sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 2.0)
             * (100.0 + 10.0 * (double)i) / 100.0;
         if (i == PosGet.GetNumberOfScalar() - 1) {
             newValue *= 10; // to test GCM visualizer with a signal of large amplitude

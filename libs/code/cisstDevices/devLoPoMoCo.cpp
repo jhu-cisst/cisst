@@ -20,6 +20,8 @@
 
 #include <cisstDevices/devLoPoMoCo.h>
 #include <cisstCommon/cmnXMLPath.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+
 #include "devLoPoMoCoBoardIO.h"
 #include "devLoPoMoCoOffsets.h"
 #include <limits>
@@ -31,7 +33,7 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
     this->numberOfBoards = numberOfBoards;
     numberOfAxes = NB_AXIS * numberOfBoards;
 
-    CMN_LOG_CLASS_INIT_VERBOSE <<" Number of axes " << numberOfAxes<<std::endl; 
+    CMN_LOG_CLASS_INIT_VERBOSE <<" Number of axes " << numberOfAxes<<std::endl;
 
     // assigning sizes to variables
     BaseAddress.resize(numberOfBoards);
@@ -52,9 +54,9 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	NegativeIntercept.SetSize(numberOfAxes);
 	VoltageToCounts.SetSize(numberOfAxes);
 
-    mtsInterfaceProvided * provided = AddInterfaceProvided("WriteInterface"); 
-    if(provided) { 
-        //void commands, no parameters 
+    mtsInterfaceProvided * provided = AddInterfaceProvided("WriteInterface");
+    if(provided) {
+        //void commands, no parameters
         provided->AddCommandVoid(&devLoPoMoCo::LatchEncoders, this, "LatchEncoders");
         provided->AddCommandVoid(&devLoPoMoCo::StartMotorCurrentConv, this, "StartMotorCurrentConv");
         provided->AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConv, this, "StartPotFeedbackConv");
@@ -64,7 +66,7 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
         provided->AddCommandVoid(&devLoPoMoCo::LoadMotorVoltagesCurrentLimits, this, "LoadMotorVoltagesCurrentLimits");
         provided->AddCommandVoid(&devLoPoMoCo::EnableAll, this, "EnableAll");
         provided->AddCommandVoid(&devLoPoMoCo::DisableAll, this, "DisableAll");
-        
+
         // read commands
         provided->AddCommandRead(&devLoPoMoCo::GetPositions, this, "GetPositions", mtsLongVec(numberOfAxes));
         provided->AddCommandRead(&devLoPoMoCo::GetVelocities, this, "GetVelocities", mtsShortVec(numberOfAxes));
@@ -73,18 +75,18 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
         provided->AddCommandRead(&devLoPoMoCo::GetDigitalInput, this, "GetDigitalInput",mtsIntVec(numberOfAxes));
         // GSF -- GetLatchedIndex might only be available with 0xCCDD FPGA (MR-Robot)
         provided->AddCommandRead(&devLoPoMoCo::GetLatchedIndex, this, "GetLatchedIndex",mtsShortVec(numberOfAxes));
-        
+
         // Write methods
         // method , object carrying the method , interface name , command name and argument prototype
         provided->AddCommandWrite(&devLoPoMoCo::SetMotorVoltages, this, "SetMotorVoltages", mtsShortVec(numberOfAxes));
         provided->AddCommandWrite(&devLoPoMoCo::SetCurrentLimits, this, "SetCurrentLimits", mtsShortVec(numberOfAxes));
         provided->AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "SetDigitalOutput", mtsIntVec(numberOfBoards));
-        
+
         provided->AddCommandWrite(&devLoPoMoCo::Enable, this, "Enable", mtsShort());
         provided->AddCommandWrite(&devLoPoMoCo::Disable, this, "Disable", mtsShort());
         provided->AddCommandWrite(&devLoPoMoCo::ResetEncoders, this, "ResetEncoders", mtsShort());
         provided->AddCommandWrite(&devLoPoMoCo::SetPositions, this, "SetPositions", mtsLongVec(numberOfAxes));
-        
+
         // Qualified Read
         // method , object carrying the method , interface name , command name and argument prototype A and argument prototype B
         provided->AddCommandQualifiedRead(&devLoPoMoCo::FrequencyToRPS, this,
@@ -97,7 +99,7 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
                                 "MotorVoltagesToDAC", mtsDoubleVec(numberOfAxes),mtsShortVec(numberOfAxes));
         provided->AddCommandQualifiedRead(&devLoPoMoCo::CurrentLimitsToDAC, this,
                                 "CurrentLimitsToDAC", mtsDoubleVec(numberOfAxes),mtsShortVec(numberOfAxes));
-    } 
+    }
         // set the relative path to configuration files
         //RelativePathToConfigFiles(relativePathToConfigFiles);
 
@@ -138,13 +140,13 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 		CMN_LOG_CLASS_INIT_ERROR << "ConfigureOneBoard: could not configure single LoPoMoCo device" << std::endl;
 		return;
 	}
-    
+
 	struct stat st;
 	if (stat(filename.c_str(), &st) < 0) {
 		CMN_LOG_CLASS_INIT_ERROR << "ConfigureOneBoard: Invalid filename!! " << filename << std::endl;
 		return;
 	}
-    
+
 	CMN_LOG_CLASS_INIT_VERBOSE << "Configuring a LoPoMoCo board with \"" << filename <<"\"" << std::endl;
 	cmnXMLPath xmlConfig;
 	xmlConfig.SetInputSource(filename);
@@ -285,7 +287,7 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 		allFilesDefined &= xmlConfig.GetXMLValue(context.c_str(), path, configFiles[boardIndex]);
 	}
 
-    // Backward compatibility: if there is just one board and we failed to find a config file 
+    // Backward compatibility: if there is just one board and we failed to find a config file
     // entry in the passed XML file, then use the passed XML file as the config file.
     if (!allFilesDefined && (numberOfBoards == 1)) {
         parseInputArgument(filename, relativePathToConfigFiles, configFiles[0]);

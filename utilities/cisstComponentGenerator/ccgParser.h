@@ -6,10 +6,11 @@
 #ifndef _parser_h
 #define _parser_h
 
-#include <cisstCommon.h>
 
 #include <string>
 #include <ccgComponent.h>
+
+#include <cisstCommon/cmnGenericObject.h>
 
 enum ccgMacro {NEG_MACRO = -1,
                DECLARE_COMPONENT,

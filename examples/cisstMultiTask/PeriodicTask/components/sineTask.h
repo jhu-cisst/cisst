@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _sineTask_h
 #define _sineTask_h
 
-// include for the whole cisstMultiTask library
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsComponentGeneratorMacros.h>
 
 // check if this module is built as a DLL
 #ifdef cisstMultiTaskPeriodicTaskComponents_EXPORTS

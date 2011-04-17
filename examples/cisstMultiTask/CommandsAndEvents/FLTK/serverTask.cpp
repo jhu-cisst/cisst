@@ -18,11 +18,11 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon/cmnConstants.h>
-#include <cisstOSAbstraction/osaSleep.h>
-
 #include "serverTask.h"
 
+#include <cisstCommon/cmnConstants.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskDouble);
@@ -134,7 +134,7 @@ void serverTask<_dataType>::WriteReturn(const _dataType & data, _dataType & plac
     FLTK_CRITICAL_SECTION {
         placeHolder = _dataType(UI.ReadValue->value());
     }
-    
+
 }
 
 

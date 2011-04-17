@@ -23,7 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _clientTask_h
 #define _clientTask_h
 
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+
 #include "clientUI.h"
 
 class clientTaskBase: public mtsTaskPeriodic {

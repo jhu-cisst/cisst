@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devSensableHDMasterSlave_h
 #define _devSensableHDMasterSlave_h
 
-#include <cisstParameterTypes.h>
-#include <cisstCommon.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstDevices/devSensableHD.h>
 #include <cisstRobot/robCollaborativeControlForce.h>
