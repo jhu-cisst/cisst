@@ -93,7 +93,7 @@ public:
         , LCM_CONFIG_NETWORKED
         // Networked mode with global component manager: basically identical to
         // LCM_CONFIG_NETWORKED configuration except that LCM runs with the
-        // global component manager on a same process.
+        // global component manager on the same process.
         , LCM_CONFIG_NETWORKED_WITH_GCM
 #endif
     };

@@ -2558,11 +2558,11 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
         return false;
     }
     bool ret = ManagerComponent.Client->ConnectLocally(actualClientComponentName, clientInterfaceRequiredName,
-                                                       actualServerComponentName, serverInterfaceProvidedName);
+                                                       actualServerComponentName, description.Server.InterfaceName);
     if (!ret) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to connect two local interfaces: "
                                  << actualClientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                 << actualServerComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                 << actualServerComponentName << ":" << description.Server.InterfaceName << std::endl;
         return false;
     }
 
