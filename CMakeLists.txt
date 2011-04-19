@@ -72,6 +72,7 @@ endif (CMAKE_CL_64)
 option (BUILD_UTILITIES "Build utility programs built using cisst." ON)
 option (BUILD_TESTS "Build tests." OFF)
 option (BUILD_EXAMPLES "Build examples." OFF)
+option (BUILD_COMPONENTS "Build components." OFF)
 
 if (UNIX)
   option (BUILD_DOC "Build the documentation." OFF)
@@ -426,6 +427,10 @@ endif (BUILD_TESTS)
 if (BUILD_EXAMPLES)
   add_subdirectory (examples)
 endif (BUILD_EXAMPLES)
+
+if (BUILD_COMPONENTS)
+  add_subdirectory (components)
+endif (BUILD_COMPONENTS)
 
 if (BUILD_DOC)
   add_subdirectory (doc)
