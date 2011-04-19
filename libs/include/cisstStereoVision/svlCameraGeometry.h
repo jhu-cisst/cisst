@@ -24,10 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlCameraGeometry_h
 
 #include <ostream>
-
-#include <cisstStereoVision/svlExport.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctTransformationTypes.h>
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
 
 class CISST_EXPORT svlCameraGeometry
 {
