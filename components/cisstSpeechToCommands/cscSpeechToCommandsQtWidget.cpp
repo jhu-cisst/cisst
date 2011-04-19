@@ -40,12 +40,12 @@ cscSpeechToCommandsQtWidget::cscSpeechToCommandsQtWidget(void)
     CentralLayout = new QGridLayout(this);
     CentralLayout->setRowStretch(0, 1);
     CentralLayout->setColumnStretch(1, 1);
-    CentralLayout->addWidget(LabelWordRecognized, 1, 0);
-    CentralLayout->addWidget(ValueWordRecognized, 1, 1);
-    CentralLayout->addWidget(LabelContext, 2, 0);
-    CentralLayout->addWidget(ValueContext, 2, 1);
-    CentralLayout->addWidget(LabelVocabulary, 3, 0);
-    CentralLayout->addWidget(ValueVocabulary, 3, 1);
+    CentralLayout->addWidget(LabelWordRecognized, 0, 0);
+    CentralLayout->addWidget(ValueWordRecognized, 0, 1);
+    CentralLayout->addWidget(LabelContext, 1, 0);
+    CentralLayout->addWidget(ValueContext, 1, 1);
+    CentralLayout->addWidget(LabelVocabulary, 2, 0);
+    CentralLayout->addWidget(ValueVocabulary, 2, 1);
 }
 
 

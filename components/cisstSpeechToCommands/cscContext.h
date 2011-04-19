@@ -29,10 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 class cscSpeechToCommands;
 
 #include <cisstCommon/cmnNamedMap.h>
-#include "cscWordActions.h"
+#include <cisstSpeechToCommands/cscWordActions.h>
 
 // Always include last!
-#include "cscExport.h"
+#include <cisstSpeechToCommands/cscExport.h>
 
 class CISST_EXPORT cscContext: public cmnGenericObject
 {

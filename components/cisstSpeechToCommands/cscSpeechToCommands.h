@@ -24,20 +24,23 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <map>
 #include <string>
-#include <jni.h> // for friend forward declaration of callback WordRecognized
 #include "cscConfig.h"
-#include "cscContext.h"
+#include <cisstSpeechToCommands/cscContext.h>
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
 
 // Always include last!
-#include "cscExport.h"
+#include <cisstSpeechToCommands/cscExport.h>
 
+// forward declaration of class containing all Java members
+struct cscSpeechToCommandsJava;
+ 
 class CISST_EXPORT cscSpeechToCommands: public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    friend void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *, jobject, jlong, jstring);
+    friend void cscJavaWordRecognizedCallback(cscSpeechToCommands * speechToCommands,
+                                              const std::string & word);
 
     cscContext * CurrentContext;
     typedef cmnNamedMap<cscContext> ContextMap;
@@ -56,11 +59,7 @@ class CISST_EXPORT cscSpeechToCommands: public mtsTaskContinuous
 
     mtsStdString LastWordRecognized;
 
-    JNIEnv * JNIEnvironment;
-    JavaVM * JavaVirtualMachine;
-    jobject Sphinx4Wrapper;
-    jmethodID RecognizeWordJavaMethod;
-    jmethodID SetCurrentContextJavaMethod;
+    cscSpeechToCommandsJava * JavaData;
 
     // method called by Java when a word has been recognized
     void WordRecognizedCallback(const std::string & word);

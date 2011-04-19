@@ -23,6 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #define CISST_CSC_SPHINX4_DIR "@CISST_CSC_SPHINX4_DIR@"
 #define CISST_CSC_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@"
-#define CISST_CSC_BINARY_DIR "@CMAKE_CURRENT_BINARY_DIR@"
+#define CISST_CSC_JAVACLASS_DIR "@CISST_CSC_JAVACLASS_DIR@"
 
 #endif // _cscConfig_h

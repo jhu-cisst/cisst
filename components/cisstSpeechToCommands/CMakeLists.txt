@@ -19,23 +19,24 @@ include_directories (${JNI_INCLUDE_DIRS})
 # find Java
 find_package (Java REQUIRED)
 
-# find and use Sphinx 4
-find_path (CISST_CSC_SPHINX4_DIR
-           NAMES lib/sphinx4.jar)
-configure_file (cscConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/cscConfig.h" @ONLY)
-include_directories (${CMAKE_CURRENT_BINARY_DIR})
-
 # Java simplified wrapper for sphinx4
-set (CISST_CSC_SPHINX4_JAVA ${CMAKE_CURRENT_BINARY_DIR}/cscSphinx4.class)
+set (CISST_CSC_JAVACLASS_DIR ${LIBRARY_OUTPUT_PATH})
+set (CISST_CSC_SPHINX4_JAVA ${CISST_CSC_JAVACLASS_DIR}/cscSphinx4.class)
 add_custom_command (OUTPUT ${CISST_CSC_SPHINX4_JAVA}
                     COMMAND ${JAVA_COMPILE}
                     ARGS -classpath "${CISST_CSC_SPHINX4_DIR}/lib/sphinx4.jar"
-                         -d "${LIBRARY_OUTPUT_PATH}"
+                         -d "${CISST_CSC_JAVACLASS_DIR}"
                          "${CMAKE_CURRENT_SOURCE_DIR}/cscSphinx4.java"
                     DEPENDS cscSphinx4.java)
 
 # compile all Java based targets
 add_custom_target (cisstSpeechToCommandsJava ALL DEPENDS ${CISST_CSC_SPHINX4_JAVA})
+
+# find and use Sphinx 4
+find_path (CISST_CSC_SPHINX4_DIR
+           NAMES lib/sphinx4.jar)
+configure_file (cscConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/cscConfig.h" @ONLY)
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 # core library
 add_library (cisstSpeechToCommands SHARED

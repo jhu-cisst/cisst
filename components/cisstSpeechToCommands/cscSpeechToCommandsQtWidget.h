@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 // Always include last!
-#include "cscExportQt.h"
+#include <cisstSpeechToCommands/cscExportQt.h>
 class CISST_EXPORT cscSpeechToCommandsQtWidget : public QWidget
 {
     Q_OBJECT;

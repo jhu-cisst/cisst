@@ -32,21 +32,35 @@
 
 CMN_IMPLEMENT_SERVICES(cscSpeechToCommands);
 
+struct cscSpeechToCommandsJava
+{
+    JNIEnv * Environment;
+    JavaVM * VirtualMachine;
+    jobject Sphinx4Wrapper;
+    jmethodID RecognizeWordMethod;
+    jmethodID SetCurrentContextMethod;
+};
+
+
 cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
     mtsTaskContinuous(componentName),
     CurrentContext(0),
-    MicrophoneNumber(1),
-    JNIEnvironment(0),
-    JavaVirtualMachine(0)
+    MicrophoneNumber(1)
 {
+    // own named map of contexts
     Contexts.SetOwner(*this);
+
+    // allocate java data
+    this->JavaData = new cscSpeechToCommandsJava;
+    this->JavaData->Environment = 0;
+    this->JavaData->VirtualMachine = 0;
 
     // defaults
     ModelTopDir = "WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz";
     ModelFile = std::string(CISST_CSC_SPHINX4_DIR) + "/lib/" + ModelTopDir + ".jar";
     SphinxFile = std::string(CISST_CSC_SPHINX4_DIR) + "/lib/sphinx4.jar";
     TemplateFile = std::string(CISST_CSC_SOURCE_DIR) + "/cscSphinx4Config.xml.template";
-    SphinxWrapperDir = std::string(CISST_CSC_BINARY_DIR);
+    SphinxWrapperDir = std::string(CISST_CSC_JAVACLASS_DIR);
     ConfigName = "cscSphinx4.config.xml";
 
     // trigger for any word received
@@ -106,12 +120,14 @@ bool cscSpeechToCommands::SetCurrentContext(const std::string & contextName)
         CMN_LOG_CLASS_RUN_DEBUG << "SetCurrentContext: switching to context \"" << contextName << "\"" << std::endl;
         CurrentContext = context;
         // send starting context if the Java environment is already set
-        if (this->JNIEnvironment) {
+        if (this->JavaData->Environment) {
             jstring currentContext;
-            currentContext = this->JNIEnvironment->NewStringUTF(contextName.c_str());
-            JNIEnvironment->CallVoidMethod(this->Sphinx4Wrapper, this->SetCurrentContextJavaMethod,
-                                           currentContext);
-            this->JNIEnvironment->ReleaseStringUTFChars(currentContext, this->JNIEnvironment->GetStringUTFChars(currentContext, JNI_FALSE));
+            currentContext = this->JavaData->Environment->NewStringUTF(contextName.c_str());
+            this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper,
+                                                        this->JavaData->SetCurrentContextMethod,
+                                                        currentContext);
+            this->JavaData->Environment->ReleaseStringUTFChars(currentContext,
+                                                               this->JavaData->Environment->GetStringUTFChars(currentContext, JNI_FALSE));
         }
         // trigger event
         this->ContextChangedTrigger(mtsStdString(contextName));
@@ -213,11 +229,12 @@ bool cscSpeechToCommands::StartJava(void)
     option << "-Djava.class.path=." << pathDivider
            << this->ModelFile << pathDivider
            << this->SphinxFile << pathDivider
-           << this->SphinxWrapperDir << pathDivider
-		   << this->SphinxWrapperDir << "/../lib";
+           << this->SphinxWrapperDir;
     options[1].optionString = strdup(option.str().c_str());
     // third option
-    option.str("-Djava.library.path=.");
+    option.str("");
+    option << "-Djava.library.path=." << pathDivider
+           << this->SphinxWrapperDir;
     options[2].optionString = strdup(option.str().c_str());
     // arguments for VM
     vm_args.options = options;
@@ -230,77 +247,78 @@ bool cscSpeechToCommands::StartJava(void)
                              << " -> " << options[2].optionString << std::endl;
 
     // create the Java VM
-    result = JNI_CreateJavaVM(&(this->JavaVirtualMachine),
-                              (void **) &(this->JNIEnvironment),
+    result = JNI_CreateJavaVM(&(this->JavaData->VirtualMachine),
+                              (void **) &(this->JavaData->Environment),
                               &vm_args);
 
     if (result < 0) {
         CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't create Java VM" << std::endl;
-        this->JavaVirtualMachine = 0;
-        this->JNIEnvironment = 0;
+        this->JavaData->VirtualMachine = 0;
+        this->JavaData->Environment = 0;
         return false;
     }
 
     jclass sphinx4WrapperClass;
-    sphinx4WrapperClass = this->JNIEnvironment->FindClass("cscSphinx4");
+    sphinx4WrapperClass = this->JavaData->Environment->FindClass("cscSphinx4");
     if (sphinx4WrapperClass == 0) {
         CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java class \"cscSphinx4\"" << std::endl;
         return false;
     }
 
-    sphinx4WrapperConstructor = this->JNIEnvironment->GetMethodID(sphinx4WrapperClass, "<init>", "()V");
-    this->Sphinx4Wrapper = this->JNIEnvironment->NewObject(sphinx4WrapperClass, sphinx4WrapperConstructor);
+    sphinx4WrapperConstructor = this->JavaData->Environment->GetMethodID(sphinx4WrapperClass, "<init>", "()V");
+    this->JavaData->Sphinx4Wrapper = this->JavaData->Environment->NewObject(sphinx4WrapperClass, sphinx4WrapperConstructor);
     // use command line utility "javap: to find exact signature:
     //  javap -s -p cscSphinx4
     // (in build directory that has file cscSphinx4.class
 
     // method used to recognize a word
-    this->RecognizeWordJavaMethod = this->JNIEnvironment->GetMethodID(sphinx4WrapperClass,
-                                                                      "RecognizeWord",
-                                                                      "()V");
-    if (this->RecognizeWordJavaMethod == 0) {
+    this->JavaData->RecognizeWordMethod = this->JavaData->Environment->GetMethodID(sphinx4WrapperClass,
+                                                                                   "RecognizeWord",
+                                                                                   "()V");
+    if (this->JavaData->RecognizeWordMethod == 0) {
         CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cscSphinx4.RecognizeWord\"" << std::endl;
         return false;
     }
 
     // method used to change context/recognizer
-    this->SetCurrentContextJavaMethod = this->JNIEnvironment->GetMethodID(sphinx4WrapperClass,
-                                                                          "SetCurrentContext",
-                                                                          "(Ljava/lang/String;)V");
-    if (this->SetCurrentContextJavaMethod == 0) {
+    this->JavaData->SetCurrentContextMethod = this->JavaData->Environment->GetMethodID(sphinx4WrapperClass,
+                                                                                       "SetCurrentContext",
+                                                                                       "(Ljava/lang/String;)V");
+    if (this->JavaData->SetCurrentContextMethod == 0) {
         CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cscSphinx4.SetCurrentContextJavaMethod\"" << std::endl;
         return false;
     }
 
     // method used to configure/start sphinx4
-    startMethod = this->JNIEnvironment->GetMethodID(sphinx4WrapperClass,
-                                                    "Start",
-                                                    "(JLjava/lang/String;[Ljava/lang/String;Ljava/lang/String;)V");
+    startMethod = this->JavaData->Environment->GetMethodID(sphinx4WrapperClass,
+                                                           "Start",
+                                                           "(JLjava/lang/String;[Ljava/lang/String;Ljava/lang/String;)V");
     if (startMethod == 0) {
         CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cscSphinx4.Start\"" << std::endl;
         return false;
     }
 
     // send config file name
-    config = this->JNIEnvironment->NewStringUTF(ConfigName.c_str());
+    config = this->JavaData->Environment->NewStringUTF(ConfigName.c_str());
     // send list on contexts
-    contextList = this->JNIEnvironment->NewObjectArray(Contexts.size(),
-                                                       JNIEnvironment->FindClass("java/lang/String"), 0);
+    contextList = this->JavaData->Environment->NewObjectArray(Contexts.size(),
+                                                              this->JavaData->Environment->FindClass("java/lang/String"), 0);
     ContextMap::iterator iter;
     int i = 0;
     for (iter = Contexts.begin(); iter != Contexts.end(); iter++) {
-        jstring context = this->JNIEnvironment->NewStringUTF(iter->first.c_str());
-        this->JNIEnvironment->SetObjectArrayElement(contextList, i, context);
+        jstring context = this->JavaData->Environment->NewStringUTF(iter->first.c_str());
+        this->JavaData->Environment->SetObjectArrayElement(contextList, i, context);
         i++;
     }
     // send starting context
     CMN_ASSERT(this->CurrentContext);
-    currentContext = this->JNIEnvironment->NewStringUTF(CurrentContext->GetName().c_str());
+    currentContext = this->JavaData->Environment->NewStringUTF(CurrentContext->GetName().c_str());
 
     jlong thisPointer = (jlong)this;
-    JNIEnvironment->CallVoidMethod(this->Sphinx4Wrapper, startMethod,
-                                   thisPointer, config, contextList, currentContext);
-    JNIEnvironment->ReleaseStringUTFChars(config, JNIEnvironment->GetStringUTFChars(config, JNI_FALSE));
+    this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper, startMethod,
+                                                thisPointer, config, contextList, currentContext);
+    this->JavaData->Environment->ReleaseStringUTFChars(config,
+                                                       this->JavaData->Environment->GetStringUTFChars(config, JNI_FALSE));
     return true;
 }
 
@@ -432,13 +450,13 @@ void cscSpeechToCommands::Startup(void)
 
 void cscSpeechToCommands::Run(void)
 {
-    if (this->JNIEnvironment == 0) {
+    if (this->JavaData->Environment == 0) {
         this->StartJava();
         this->ContextChangedTrigger(mtsStdString(this->CurrentContext->GetName()));
     } else {
         // get latest word
-        JNIEnvironment->CallVoidMethod(this->Sphinx4Wrapper,
-                                       this->RecognizeWordJavaMethod);
+        this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper,
+                                                    this->JavaData->RecognizeWordMethod);
     }
 }
 
@@ -466,5 +484,5 @@ void cscSpeechToCommands::WordRecognizedCallback(const std::string & stdWord)
 void cscSpeechToCommands::Cleanup(void)
 {
     // todo, killing the java machine is a bit of a nightmare
-    this->JavaVirtualMachine->DestroyJavaVM();
+    this->JavaData->VirtualMachine->DestroyJavaVM();
 }

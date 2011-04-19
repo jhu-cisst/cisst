@@ -31,10 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <map>
 
-#include "cscSpeechToCommandsQtWidget.h"
+#include <cisstSpeechToCommands/cscSpeechToCommandsQtWidget.h>
 
 // Always include last!
-#include "cscExportQt.h"
+#include <cisstSpeechToCommands/cscExportQt.h>
 
 class CISST_EXPORT cscSpeechToCommandsQtComponent: public QObject, public mtsComponent
 {

@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 class cscSpeechToCommands;
 
 // Always include last!
-#include "cscExport.h"
+#include <cisstSpeechToCommands/cscExport.h>
 
 class CISST_EXPORT cscWordActions: public cmnGenericObject
 {
