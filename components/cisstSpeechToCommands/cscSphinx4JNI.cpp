@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "cscSphinx4JNI.h"
 #include "cscSpeechToCommands.h"
 
-void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *env, jobject obj, jlong speechToCommandsCppPointer, jstring wordJava)
+void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *env, jobject, jlong speechToCommandsCppPointer, jstring wordJava)
 {
     // convert JString to std::string
     const char * wordCharPointer = env->GetStringUTFChars(wordJava, 0);

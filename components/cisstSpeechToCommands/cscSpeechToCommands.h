@@ -83,7 +83,7 @@ public:
     void SetMicrophoneNumber(unsigned int microphoneNumber);
 
     // methods required for all tasks
-    void Configure(const std::string & filename = "");
+    void Configure(void);
     void Startup(void);
     void Run(void);
     void Cleanup(void);

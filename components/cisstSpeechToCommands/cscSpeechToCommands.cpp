@@ -305,7 +305,7 @@ bool cscSpeechToCommands::StartJava(void)
 }
 
 
-void cscSpeechToCommands::Configure(const std::string & filename)
+void cscSpeechToCommands::Configure(void)
 {
     // generate grammar files for each context
     // contextNameMap is a map from context name to grammar file name
