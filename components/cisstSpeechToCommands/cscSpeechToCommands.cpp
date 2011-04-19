@@ -213,10 +213,11 @@ bool cscSpeechToCommands::StartJava(void)
     option << "-Djava.class.path=." << pathDivider
            << this->ModelFile << pathDivider
            << this->SphinxFile << pathDivider
-           << this->SphinxWrapperDir;
+           << this->SphinxWrapperDir << pathDivider
+		   << this->SphinxWrapperDir << "/../lib";
     options[1].optionString = strdup(option.str().c_str());
     // third option
-    option.str( "-Djava.library.path=.");
+    option.str("-Djava.library.path=.");
     options[2].optionString = strdup(option.str().c_str());
     // arguments for VM
     vm_args.options = options;

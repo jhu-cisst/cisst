@@ -30,12 +30,12 @@ set (CISST_CSC_SPHINX4_JAVA ${CMAKE_CURRENT_BINARY_DIR}/cscSphinx4.class)
 add_custom_command (OUTPUT ${CISST_CSC_SPHINX4_JAVA}
                     COMMAND ${JAVA_COMPILE}
                     ARGS -classpath "${CISST_CSC_SPHINX4_DIR}/lib/sphinx4.jar"
-                         -d "${CMAKE_CURRENT_BINARY_DIR}"
+                         -d "${LIBRARY_OUTPUT_PATH}"
                          "${CMAKE_CURRENT_SOURCE_DIR}/cscSphinx4.java"
                     DEPENDS cscSphinx4.java)
 
 # compile all Java based targets
-add_custom_target (java ALL DEPENDS ${CISST_CSC_SPHINX4_JAVA})
+add_custom_target (cisstSpeechToCommandsJava ALL DEPENDS ${CISST_CSC_SPHINX4_JAVA})
 
 # core library
 add_library (cisstSpeechToCommands SHARED
@@ -48,7 +48,10 @@ add_library (cisstSpeechToCommands SHARED
              cscExport.h
              cscSpeechToCommands.h
              cscSpeechToCommands.cpp)
-target_link_libraries (cisstSpeechToCommands ${JNI_LIBRARIES})
+add_dependencies (cisstSpeechToCommands
+                  cisstSpeechToCommandsJava)
+target_link_libraries (cisstSpeechToCommands
+                       ${JNI_LIBRARIES})
 cisst_target_link_libraries (cisstSpeechToCommands
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
