@@ -52,7 +52,7 @@ bool mtsManagerLocal::UnitTestEnabled = false;
 bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 
 std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
-std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "LCM_with_GCM";
+std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
 mtsManagerLocal::mtsManagerLocal(void)
 {
