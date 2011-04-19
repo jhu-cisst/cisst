@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtWidget.cpp 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id: cscSpeechToCommandsQtWidget.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
 
   (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -28,26 +28,45 @@ cscSpeechToCommandsQtWidget::cscSpeechToCommandsQtWidget(void)
     ValueWordRecognized = new QLabel("nothing so far", this);
     LabelContext = new QLabel("Context: ", this);
     ValueContext = new QLabel("nothing so far", this);
+    LabelVocabulary = new QLabel("Vocabulary: ", this);
+    ValueVocabulary = new QLabel("", this);
 
     // configure the widgets
     LabelWordRecognized->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     LabelContext->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    LabelVocabulary->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     // create a layout for the widgets
     CentralLayout = new QGridLayout(this);
     CentralLayout->setRowStretch(0, 1);
     CentralLayout->setColumnStretch(1, 1);
-    CentralLayout->addWidget(LabelContext, 1, 0);
-    CentralLayout->addWidget(ValueContext, 1, 1);
-    CentralLayout->addWidget(LabelWordRecognized, 2, 0);
-    CentralLayout->addWidget(ValueWordRecognized, 2, 1);
+    CentralLayout->addWidget(LabelWordRecognized, 1, 0);
+    CentralLayout->addWidget(ValueWordRecognized, 1, 1);
+    CentralLayout->addWidget(LabelContext, 2, 0);
+    CentralLayout->addWidget(ValueContext, 2, 1);
+    CentralLayout->addWidget(LabelVocabulary, 3, 0);
+    CentralLayout->addWidget(ValueVocabulary, 3, 1);
 }
 
 
-// remove this include after slot AddWord does the right thing, i.e. not using cerr
-#include <iostream>
-
 void cscSpeechToCommandsQtWidget::AddWord(QString context, QString word)
 {
-    std::cerr << "QtWidget got: " << context.toStdString() << ":" << word.toStdString() << std::endl;
+    ContextMap.insert(context, word);
+}
+
+
+void cscSpeechToCommandsQtWidget::ContextChanged(QString context)
+{
+    QString newVocabulary;
+    QMultiMap<QString, QString>::iterator iter;
+    for (iter = ContextMap.find(context);
+         iter != ContextMap.end() && iter.key() == context;
+         iter++) {
+        newVocabulary += iter.value();
+        QMultiMap<QString, QString>::iterator next = iter+1;
+        if (next != ContextMap.end() && next.key() == context)
+            newVocabulary += '\n';
+    }
+    ValueContext->setText(context);
+    ValueVocabulary->setText(newVocabulary);
 }

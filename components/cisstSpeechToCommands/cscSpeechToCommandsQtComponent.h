@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtComponent.h 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id: cscSpeechToCommandsQtComponent.h 2936 2011-04-19 16:32:39Z mkelly9 $
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
 
   (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.

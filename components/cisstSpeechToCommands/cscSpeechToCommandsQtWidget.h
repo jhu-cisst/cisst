@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtWidget.h 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id: cscSpeechToCommandsQtWidget.h 2936 2011-04-19 16:32:39Z mkelly9 $
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
 
   (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QGridLayout>
 #include <QLabel>
+#include <QMultiMap>
 #include <QWidget>
 
 
@@ -36,14 +37,20 @@ class CISST_EXPORT cscSpeechToCommandsQtWidget : public QWidget
     cscSpeechToCommandsQtWidget(void);
     ~cscSpeechToCommandsQtWidget(void) {};
 
+    QMultiMap<QString, QString> ContextMap;
+
     QGridLayout * CentralLayout;
     QLabel * LabelContext;
     QLabel * ValueContext;
     QLabel * LabelWordRecognized;
     QLabel * ValueWordRecognized;
+    QLabel * LabelVocabulary;
+    QLabel * ValueVocabulary;
 
  public slots:
     void AddWord(QString context, QString word);
+    void ContextChanged(QString context);
+
 };
 
 #endif  // _cscSpeechToCommandsQtWidget_h

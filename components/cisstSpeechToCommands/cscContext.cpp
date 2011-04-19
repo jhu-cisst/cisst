@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscContext.cpp 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id: cscContext.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -75,7 +75,7 @@ const std::string & cscContext::GetName(void) const
 }
 
 
-std::vector<std::string> cscContext::GetWords(void)
+std::vector<std::string> cscContext::GetVocabulary(void)
 {
     std::vector<std::string> result;
     Words.GetNames(result);

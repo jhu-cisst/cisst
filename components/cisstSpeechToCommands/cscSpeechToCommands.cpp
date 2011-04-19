@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommands.cpp 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id: cscSpeechToCommands.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -149,7 +149,7 @@ void cscSpeechToCommands::GetContextWords(const mtsStdString & contextName,
 {
     cscContext * context = this->Contexts.GetItem(contextName);
     if (context) {
-        placeHolder = context->GetWords();
+        placeHolder = context->GetVocabulary();
     }
 }
 
@@ -323,7 +323,7 @@ void cscSpeechToCommands::Configure(const std::string & filename)
             " */\n\n"
             "grammar " << contextName << ";\n\n";
         std::vector<std::string>::iterator wIter;
-        std::vector<std::string> wordList = context->GetWords();
+        std::vector<std::string> wordList = context->GetVocabulary();
         for (wIter = wordList.begin(); wIter != wordList.end(); wIter++) {
             std::string word = *wIter;
             // JSFG grammar cannot handle spaces in tokens

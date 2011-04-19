@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscContext.h 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id: cscContext.h 2936 2011-04-19 16:32:39Z mkelly9 $
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -55,7 +55,7 @@ class CISST_EXPORT cscContext: public cmnGenericObject
     bool AddWord(const std::string & word);
     bool AddWordWithTransition(const std::string & word, const std::string & endContext);
     const std::string & GetName(void) const;
-    std::vector<std::string> GetWords(void);
+    std::vector<std::string> GetVocabulary(void);
     bool FilteringEnabled(void);
     void SetFiltering(bool filter);
 
