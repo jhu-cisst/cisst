@@ -2540,7 +2540,6 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     const ConnectionIDType connectionID           = description.ConnectionID;
     const std::string serverProcessName           = description.Server.ProcessName;
     const std::string serverComponentName         = description.Server.ComponentName;
-    // MJ: (03/30/11)
     const std::string serverInterfaceProvidedName = //description.Server.InterfaceName; 
         mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
             description.Server.InterfaceName, connectionID);
@@ -2558,7 +2557,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
         return false;
     }
     bool ret = ManagerComponent.Client->ConnectLocally(actualClientComponentName, clientInterfaceRequiredName,
-                                                       actualServerComponentName, description.Server.InterfaceName);
+                                                       actualServerComponentName, serverInterfaceProvidedName);
     if (!ret) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to connect two local interfaces: "
                                  << actualClientComponentName << ":" << clientInterfaceRequiredName << " - "
@@ -2604,7 +2603,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     }
     // If server proxy is already running, fetch the access information
     else {
-        // MJ: (03/30/11) this should not be reached because each connection has its own provided interface instance
+        // MJ: this should not be reached because each connection has its own provided interface instance
         CMN_ASSERT(false); 
         
         if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(clientProcessName,

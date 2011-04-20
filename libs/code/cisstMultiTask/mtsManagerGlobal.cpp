@@ -655,7 +655,8 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
                     // Remove the proxy components from LCM
                     if (peerProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM) {
                         if (!LocalManager->RemoveComponent(proxyComponentName, false)) {
-                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from LCM_with_GCM: "
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from "
+                                << mtsManagerLocal::ProcessNameOfLCMWithGCM << ": "
                                 << "\"" << peerProcessName << ":" << proxyComponentName << "\""
                                 << std::endl;
                             ret = false;
