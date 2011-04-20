@@ -228,8 +228,8 @@ int svlStreamManager::Initialize(void)
 void svlStreamManager::Release(void)
 {
     if (!Initialized) {
-        CMN_LOG_CLASS_INIT_WARNING << "Release: stream \"" << this->GetName()
-                                   << "\" is not initialized, release is not necessary" << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "Release: stream \"" << this->GetName()
+                                 << "\" is not initialized, release is not necessary" << std::endl;
         return;
     }
 
@@ -261,7 +261,7 @@ void svlStreamManager::Release(void)
 
         // Release filter
         if (filter->Initialized) {
-            if (!filter->Release()) {
+            if (filter->Release() != SVL_OK) {
                 CMN_LOG_CLASS_RUN_WARNING << "Release: stream \"" << this->GetName()
                                           << "\" ran into an error while releasing filter \""
                                           << filter->GetName() << "\"" << std::endl;

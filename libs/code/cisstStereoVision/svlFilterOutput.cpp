@@ -47,6 +47,7 @@ svlFilterOutput::svlFilterOutput(svlFilterBase* filter, bool trunk, const std::s
 
 svlFilterOutput::~svlFilterOutput(void)
 {
+    Disconnect();
     if (Stream) delete Stream;
     if (BranchSource) delete BranchSource;
 }
@@ -138,32 +139,32 @@ int svlFilterOutput::SetBlock(bool block)
 
 int svlFilterOutput::ConnectInternal(svlFilterInput *input)
 {
-    if (!this->Filter) {
+    if (!Filter) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: this output is not associated to any filter" << std::endl;
         return SVL_FAIL;
     }
     if (!input) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: null input pointer passed to this method" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): null input pointer passed to this method" << std::endl;
         return SVL_FAIL;
     }
     if (!input->Filter) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is not associated to any filter" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input passed to this method is not associated to any filter" << std::endl;
         return SVL_FAIL;
     }
     if (this->Connected) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: this output is already connected" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): this output is already connected" << std::endl;
         return SVL_FAIL;
     }
     if (input->Connected) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is already connected" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input passed to this method is already connected" << std::endl;
         return SVL_FAIL;
     }
     if (this->Filter->Initialized) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: filter associated to this output is already initialized" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): filter associated to this output is already initialized" << std::endl;
         return SVL_FAIL;
     }
     if (input->Filter->Initialized) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: filter associated to the input is already initialized" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): filter associated to the input is already initialized" << std::endl;
         return SVL_FAIL;
     }
 
@@ -171,7 +172,7 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
     if (input->Trunk && input->Filter->AutoType) {
         // Automatic setup
         if (!input->IsTypeSupported(Type)) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: input doesn't support output type (auto)" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input doesn't support output type (auto)" << std::endl;
             return SVL_FAIL;
         }
         svlFilterOutput* output = input->Filter->GetOutput();
@@ -180,7 +181,7 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
     else {
         // Manual setup
         if (input->Filter->OnConnectInput(*input, Type) != SVL_OK) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: input doesn't support output type (manual)" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input doesn't support output type (manual)" << std::endl;
             return SVL_FAIL;
         }
     }
@@ -216,7 +217,6 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
 
 int svlFilterOutput::Connect(svlFilterInput *input)
 {
-
     if (!input) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: null input pointer passed to this method" << std::endl;
         return SVL_FAIL;
@@ -225,23 +225,84 @@ int svlFilterOutput::Connect(svlFilterInput *input)
         CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is not associated to any filter" << std::endl;
         return SVL_FAIL;
     }
-    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
 
-    LCM->AddComponent(input->Filter);
+    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+    if (LCM->FindComponent(input->Filter->GetName())) {
+        CMN_LOG_CLASS_INIT_DEBUG << "Connect (\"" << input->Filter->GetName() << "\"): component already added to LCM" << std::endl;
+    }
+    else {
+        LCM->AddComponent(input->Filter);
+    }
+
     osaSleep(0.25);
+
     if (LCM->Connect(input->Filter->GetName(), input->GetName(),
                      this->Filter->GetName(), this->GetName())) {
-    osaSleep(0.5);  // PK TEMP (remove when Connect is a blocking command)
-       return SVL_OK;
+        osaSleep(0.5);  // PK TEMP (remove when Connect is a blocking command)
+        return SVL_OK;
     }
-    else
-        return SVL_FAIL;
+
+    return SVL_FAIL;
 }
 
 int svlFilterOutput::Disconnect(void)
 {
-    // TO DO
-    return SVL_FAIL;
+    if (!Filter) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: output is not associated to any filter" << std::endl;
+        return SVL_FAIL;
+    }
+    if (Filter->IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect (\"" << Filter->GetName() << "\"): filter is still running" << std::endl;
+        return SVL_FAIL;
+    }
+    if (!Connected) {
+        CMN_LOG_CLASS_INIT_DEBUG << "Disconnect (\"" << Filter->GetName() << "\"): output is not connected" << std::endl;
+        return SVL_FAIL;
+    }
+    if (!Connection) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect (\"" << Filter->GetName() << "\"): output's connection is a null pointer" << std::endl;
+        return SVL_FAIL;
+    }
+    if (!ConnectedFilter) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect (\"" << Filter->GetName() << "\"): output's connected filter is a null pointer" << std::endl;
+        return SVL_FAIL;
+    }
+
+    // Disconnect components
+    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+    if (!LCM->Disconnect(ConnectedFilter->GetName(), Connection->GetName(),
+                         this->Filter->GetName(), this->GetName())) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect (\"" << Filter->GetName() << "\"): failed to disconnect components" << std::endl;
+    }
+
+    if (!Trunk && Connection->Trunk) {
+        // Destroy stream branch
+        if (Stream) {
+            delete Stream;
+            Stream = 0;
+        }
+        if (BranchSource) {
+            delete BranchSource;
+            BranchSource = 0;
+        }
+    }
+    else {
+        if (!Connection->Trunk && Connection->Buffer) {
+            delete Connection->Buffer;
+            Connection->Buffer = 0;
+        }
+    }
+
+    // Disconnect filters
+    Connection->Connected = false;
+    Connection->Connection = 0;
+    Connection->Type = svlTypeInvalid;
+    Connection->ConnectedFilter = 0;
+    this->Connected = false;
+    this->Connection = 0;
+    this->ConnectedFilter = 0;
+
+    return SVL_OK;
 }
 
 void svlFilterOutput::SetupSample(svlSample* sample)

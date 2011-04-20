@@ -50,7 +50,6 @@ public:
 
     bool IsInitialized(void) const;
     bool IsRunning(void) const;
-
     unsigned int GetFrameCounter(void) const;
 
     svlFilterInput  * GetInput(void) const;
