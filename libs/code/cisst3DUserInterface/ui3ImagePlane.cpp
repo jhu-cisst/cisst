@@ -293,3 +293,126 @@ void ui3ImagePlane::SetImage(svlSampleImage* image, unsigned int channel)
     }
 }
 
+
+void ui3ImagePlane::SetImage(vtkImageData* image)
+{
+    int dims[3];
+    if (image){
+        image->GetDimensions(dims);
+    }
+
+    if (this->TextureBuffer &&
+        image &&
+        //image->GetVideoChannels() > channel &&
+        //image->GetWidth(channel) == this->BitmapWidth &&
+        //image->GetHeight(channel) == this->BitmapHeight
+        dims[0] == this->BitmapWidth &&
+        dims[1] == this->BitmapHeight &&
+        dims[2] == 1) {
+
+        //const unsigned int  datachannels = image->GetDataChannels();
+        //const unsigned int  bpp = image->GetBPP();
+
+        const unsigned int  bmpwidth = this->BitmapWidth;
+        const unsigned int  bmpheight = this->BitmapHeight;
+        const unsigned int  rightborder = (this->TextureWidth - bmpwidth) << 2;
+
+        //unsigned char *imagebuf = image->GetUCharPointer(channel);
+
+        unsigned char *texture = this->TextureBuffer;
+        unsigned int i, j;
+
+        if (image->GetScalarType() == VTK_UNSIGNED_CHAR){
+            // Copy Mono8 image to RGBA texture buffer
+
+            unsigned char *imagebuf = static_cast<unsigned char*>(image->GetScalarPointer());
+
+#ifdef USE_BGR
+            unsigned char r, g, b;
+#endif
+
+            for (j = 0; j < bmpheight; j ++) {
+                for (i = 0; i < bmpwidth; i ++) {
+#ifdef USE_BGR
+                    r = *imagebuf; //imagebuf ++;
+                    g = *imagebuf; //imagebuf ++;
+                    b = *imagebuf; imagebuf ++;
+                    *texture = b; texture ++;
+                    *texture = g; texture ++;
+                    *texture = r; texture += 2;
+#else
+                    *texture = *imagebuf; texture ++;   //imagebuf ++;
+                    *texture = *imagebuf; texture ++;   //imagebuf ++;
+                    *texture = *imagebuf; texture += 2; imagebuf ++;
+#endif
+                }
+                texture += rightborder;
+            }
+        }
+
+//        if (datachannels == 3 && bpp == 3) {
+//            // Copy RGB image to RGBA texture buffer
+//
+//#ifdef USE_BGR
+//            unsigned char r, g, b;
+//#endif
+//
+//            for (j = 0; j < bmpheight; j ++) {
+//                for (i = 0; i < bmpwidth; i ++) {
+//#ifdef USE_BGR
+//                    r = *imagebuf; imagebuf ++;
+//                    g = *imagebuf; imagebuf ++;
+//                    b = *imagebuf; imagebuf ++;
+//                    *texture = b; texture ++;
+//                    *texture = g; texture ++;
+//                    *texture = r; texture += 2;
+//#else
+//                    *texture = *imagebuf; imagebuf ++; texture ++;
+//                    *texture = *imagebuf; imagebuf ++; texture ++;
+//                    *texture = *imagebuf; imagebuf ++; texture += 2;
+//#endif
+//                }
+//                texture += rightborder;
+//            }
+//        }
+//        else if (datachannels == 4 && bpp == 4) {
+//            // Copy RGBA image to RGBA texture buffer
+//
+//#ifdef USE_BGR
+//            unsigned char r, g, b, a;
+//#else
+//            i = bmpwidth << 2;
+//#endif
+//
+//            for (j = 0; j < bmpheight; j ++) {
+//#ifdef USE_BGR
+//                for (i = 0; i < bmpwidth; i ++) {
+//                    r = *imagebuf; imagebuf ++;
+//                    g = *imagebuf; imagebuf ++;
+//                    b = *imagebuf; imagebuf ++;
+//                    a = *imagebuf; imagebuf ++;
+//                    *texture = b; texture ++;
+//                    *texture = g; texture ++;
+//                    *texture = r; texture ++;
+//                    *texture = a; texture ++;
+//                }
+//#else
+//                memcpy(texture, imagebuf, i);
+//                texture += i; imagebuf += i;
+//#endif
+//                texture += rightborder;
+//            }
+//        }
+        else {
+            // Other image formats not supported (as of now)
+            printf("=== Unsupported image for ui3ImagePlane::SetImage(vtkImageData* image) ===\n");
+            return;
+        }
+
+        // Signal VTK that the texture has been modified
+        this->ImageData->Modified();
+    }
+    else {
+        printf("=== Invalid image for ui3ImagePlane::SetImage(vtkImageData* image) ===\n");
+    }
+}
