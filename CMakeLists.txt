@@ -278,7 +278,9 @@ set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/libs/include
      ${cisst_SOURCE_DIR}/libs/include)
 if (BUILD_COMPONENTS)
-  set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR} ${cisst_SOURCE_DIR}/components)
+  set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR}
+                         ${cisst_BINARY_DIR}/components
+                         ${cisst_SOURCE_DIR}/components)
 endif (BUILD_COMPONENTS)
 include_directories (${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
