@@ -130,7 +130,7 @@ public:
 
     /* documented in base class */
     mtsExecutionResult Execute(mtsGenericObject & argument) {
-        return ConditionalCast<cmnIsDerivedFromTemplated<ReturnType, mtsGenericObjectProxy>::YES>
+        return ConditionalCast<cmnIsDerivedFromTemplated<ReturnType, mtsGenericObjectProxy>::IS_DERIVED>
             ::CallMethod(ClassInstantiation, Action, argument);
     }
 

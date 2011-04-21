@@ -92,7 +92,7 @@ public:
     template <class _userType>
     mtsExecutionResult operator()(_userType & argument) const {
         mtsExecutionResult result = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(Command, argument)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }

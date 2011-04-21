@@ -533,11 +533,11 @@ public:
 template<typename T>
 class mtsGenericTypes
 {
-    typedef mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES> impl;
+    typedef mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED> impl;
 public:
-    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalBaseType FinalBaseType;
-    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalType     FinalType;
-    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalRefType  FinalRefType;
+    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED>::FinalBaseType FinalBaseType;
+    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED>::FinalType     FinalType;
+    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED>::FinalRefType  FinalRefType;
     static FinalRefType *ConditionalWrap(T &obj) { return impl::ConditionalWrap(obj); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return impl::IsEqual(obj1, obj2); }
     static void ConditionalFree(const FinalRefType *obj) { impl::ConditionalFree(obj); }
@@ -577,10 +577,10 @@ public:
 template<typename T>
 class mtsGenericTypesUnwrap
 {
-    typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES> impl;
+    typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::IS_DERIVED> impl;
 public:
-    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::RefType RefType;
-    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::BaseType BaseType;
+    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::IS_DERIVED>::RefType RefType;
+    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::IS_DERIVED>::BaseType BaseType;
 };
 
 
