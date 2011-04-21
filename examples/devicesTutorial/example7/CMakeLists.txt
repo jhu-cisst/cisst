@@ -39,5 +39,5 @@ target_link_libraries(devicesTutorialExample7
                       )
 
 cisst_requires(devicesTutorialExample7
-               "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstDevices"
+               "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstDevices"
                )

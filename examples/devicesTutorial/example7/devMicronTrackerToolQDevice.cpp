@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsRequiredInterface.h>
-#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <QDir>
 #include <QString>
@@ -39,7 +39,7 @@ devMicronTrackerToolQDevice::devMicronTrackerToolQDevice(const std::string & tas
     ToolWidget.ToolGroup->setTitle(QString::fromStdString(taskName));
     CentralWidget.setWindowTitle(QString::fromStdString(taskName));
 
-    mtsRequiredInterface * required = AddRequiredInterface(taskName);
+    mtsInterfaceRequired * required = AddInterfaceRequired(taskName);
     if (required) {
        required->AddFunction("GetPositionCartesian", MTC.GetPositionCartesian);
        required->AddFunction("GetMarkerProjectionLeft", MTC.GetMarkerProjectionLeft);
@@ -82,23 +82,19 @@ void devMicronTrackerToolQDevice::timerEvent(QTimerEvent * event)
 
 void devMicronTrackerToolQDevice::RecordQSlot(void)
 {
-    QString path = QDir::currentPath() + "/CollectedPoints.csv";
+    vctRot3 rotation = MTC.PositionCartesian.Position().Rotation();
+    vct3 translation = MTC.PositionCartesian.Position().Translation();
+
+    QString path = QDir::currentPath() + "/RecordedPoses.m";
     std::ofstream file;
     file.open(path.toAscii(), std::ios::app);
-    file << MTC.PositionCartesian.Timestamp() << ", "
-         << MTC.PositionCartesian.Position().Translation().X() << ", "
-         << MTC.PositionCartesian.Position().Translation().Y() << ", "
-         << MTC.PositionCartesian.Position().Translation().Z() << std::endl;
-    file.close();
-    QPixmap originalPixmap = QPixmap::grabWindow(qApp->activeWindow()->winId());
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: point collected" << std::endl;
-    qApp->beep();
-
-    std::string dateTime;
-    osaGetDateTimeString(dateTime);
-    path = QDir::currentPath() + "/Screenshot-" + dateTime.c_str() + ".png";
-    if (!path.isEmpty()) {
-        originalPixmap.save(path, "png");
+    file << "pose-" << MTC.PositionCartesian.Timestamp() << " = [";
+    for (unsigned int row = 0; row < 3; row++) {
+        for (unsigned int col = 0; col < 3; col++) {
+            file << rotation(row,col) << ", ";
+        }
+        file << translation(row) << "; ";
     }
+    file << 0 << ", " << 0 << ", " << 0 << ", " << 1 << "];" << std::endl;
+    file.close();
 }

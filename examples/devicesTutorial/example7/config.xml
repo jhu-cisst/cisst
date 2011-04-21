@@ -1,25 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<config>
+<tracker>
 
-  <device calibration="C:\\Program Files\\Claron Technology\\MicronTracker\\CalibrationFiles"
-          markers="C:\\Program Files\\Claron Technology\\MicronTracker\\Markers" />
+  <controller calibration="C:\\Program Files\\Claron Technology\\MicronTracker\\CalibrationFiles\\"
+              markers="C:\\Program Files\\Claron Technology\\MicronTracker\\Markers\\" />
 
   <tools>
 
-    <tool name="MicronTracker Probe"
-          enabled="true"
-          serial="lptr"
-          description="MicronTracker probe (at JHMI)" />
+    <tool name="Pointer"
+          marker="lptr" />
 
-    <tool name="Calibration Block 1"
-          enabled="true"
-          serial="1b"
-          description="Calibration block 1 (at JHMI)" />
-
-    <tool name="Calibration Block 2"
-          enabled="true"
-          serial="2b"
-          description="Calibration block 2 (at JHMI)" />
+    <tool name="Reference"
+          marker="tool" />
   </tools>
-</config>
+</tracker>

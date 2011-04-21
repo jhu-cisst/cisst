@@ -41,69 +41,69 @@ http://www.cisst.org/cisst/license.txt.
 int main(int argc, char *argv[])
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_RUN_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example7-");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
 
-    // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("devMicronTracker", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("devMicronTrackerControllerQDevice", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("devMicronTrackerToolQDevice", CMN_LOG_LOD_RUN_VERBOSE);
+    // set the log level of detail on select components
+    cmnLogger::SetMaskClass("devMicronTracker", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("devMicronTrackerControllerQDevice", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("devMicronTrackerToolQDevice", CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
-    // create the tasks
-    devMicronTracker * taskMicronTracker = new devMicronTracker("taskMicronTracker", 50.0 * cmn_ms);
-    devMicronTrackerControllerQDevice * taskControllerQDevice = new devMicronTrackerControllerQDevice("taskControllerQDevice");
+    // create the components
+    devMicronTracker * componentMicronTracker = new devMicronTracker("componentMicronTracker", 50.0 * cmn_ms);
+    devMicronTrackerControllerQDevice * componentControllerQDevice = new devMicronTrackerControllerQDevice("componentControllerQDevice");
 
-    // configure the tasks
+    // configure the components
     cmnPath searchPath = std::string(CISST_SOURCE_ROOT) + "/examples/devicesTutorial/example7";
-    taskMicronTracker->Configure(searchPath.Find("config.xml"));
+    componentMicronTracker->Configure(searchPath.Find("config.xml"));
 
-    // add the tasks to the task manager
-    mtsManagerLocal * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddComponent(taskMicronTracker);
-    taskManager->AddComponent(taskControllerQDevice);
+    // add the components to the component manager
+    mtsManagerLocal * componentManager = mtsComponentManager::GetInstance();
+    componentManager->AddComponent(componentMicronTracker);
+    componentManager->AddComponent(componentControllerQDevice);
 
-    // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-    taskManager->Connect(taskControllerQDevice->GetName(), "Controller",
-                         taskMicronTracker->GetName(), "Controller");
+    // connect the components, e.g. RequiredInterface -> ProvidedInterface
+    componentManager->Connect(componentControllerQDevice->GetName(), "Controller",
+                              componentMicronTracker->GetName(), "Controller");
 
     // add data collection for devMicronTracker state table
-    mtsCollectorState * taskCollector =
-            new mtsCollectorState(taskMicronTracker->GetName(),
-                                  taskMicronTracker->GetDefaultStateTableName(),
-                                  mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
+    mtsCollectorState * componentCollector =
+        new mtsCollectorState(componentMicronTracker->GetName(),
+                              componentMicronTracker->GetDefaultStateTableName(),
+                              mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
 
     // add interfaces for tools and populate controller widget with tool widgets
-    for (unsigned int i = 0; i < taskMicronTracker->GetNumberOfTools(); i++) {
-        std::string toolName = taskMicronTracker->GetToolName(i);
-        devMicronTrackerToolQDevice * taskToolQDevice = new devMicronTrackerToolQDevice(toolName);
-        taskControllerQDevice->AddToolWidget(taskToolQDevice->GetWidget(),
-                                             taskToolQDevice->GetMarkerProjectionLeft(),
-                                             taskToolQDevice->GetMarkerProjectionRight());
-        taskManager->AddComponent(taskToolQDevice);
-        taskManager->Connect(toolName, toolName,
-                             taskMicronTracker->GetName(), toolName);
+    for (unsigned int i = 0; i < componentMicronTracker->GetNumberOfTools(); i++) {
+        std::string toolName = componentMicronTracker->GetToolName(i);
+        devMicronTrackerToolQDevice * componentToolQDevice = new devMicronTrackerToolQDevice(toolName);
+        componentControllerQDevice->AddToolWidget(componentToolQDevice->GetWidget(),
+                                                  componentToolQDevice->GetMarkerProjectionLeft(),
+                                                  componentToolQDevice->GetMarkerProjectionRight());
+        componentManager->AddComponent(componentToolQDevice);
+        componentManager->Connect(toolName, toolName,
+                                  componentMicronTracker->GetName(), toolName);
 
-        taskCollector->AddSignal(toolName + "Position");
+        componentCollector->AddSignal(toolName + "Position");
     }
-    taskManager->AddComponent(taskCollector);
-    taskCollector->Connect();
-    taskManager->Connect(taskControllerQDevice->GetName(), "DataCollector",
-                         taskCollector->GetName(), "Control");
+    componentManager->AddComponent(componentCollector);
+    componentCollector->Connect();
+    componentManager->Connect(componentControllerQDevice->GetName(), "DataCollector",
+                              componentCollector->GetName(), "Control");
 
-    // create and start all tasks
-    taskManager->CreateAll();
-    taskManager->StartAll();
+    // create and start all components
+    componentManager->CreateAll();
+    componentManager->StartAll();
 
     // create a main window to hold QWidgets
     QMainWindow * mainWindow = new QMainWindow();
-    mainWindow->setCentralWidget(taskControllerQDevice->GetWidget());
+    mainWindow->setCentralWidget(componentControllerQDevice->GetWidget());
     mainWindow->setWindowTitle("MicronTracker Controller");
     mainWindow->resize(0,0);
     mainWindow->show();
@@ -111,9 +111,9 @@ int main(int argc, char *argv[])
     // run Qt user interface
     application.exec();
 
-    // kill all tasks and perform cleanup
-    taskManager->KillAll();
-    taskManager->Cleanup();
+    // kill all components and perform cleanup
+    componentManager->KillAll();
+    componentManager->Cleanup();
 
     return 0;
 }
