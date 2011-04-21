@@ -59,6 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstStereoVision/svlStreamManager.h"
 
 %include "cisstStereoVision/svlFilterBase.h"
+%include "cisstStereoVision/svlFilterImageChannelSwapper.h"
 %include "cisstStereoVision/svlFilterImageFileWriter.h"
 %include "cisstStereoVision/svlFilterImageRectifier.h"
 %include "cisstStereoVision/svlFilterImageResizer.h"
@@ -227,4 +228,4 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 %include "cisstStereoVision/svlFilterOutput.h"
 %include "cisstStereoVision/svlFilterSplitter.h"
 
-
+%include "cisstStereoVision/svlBufferSample.h"

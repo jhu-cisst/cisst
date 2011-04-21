@@ -25,6 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlTypes.h>
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
+
 namespace svlConverter
 {
     int ConvertSample(const svlSample* inimage, svlSample* outimage,
@@ -35,7 +39,7 @@ namespace svlConverter
                      svlSampleImage* outimage, const unsigned int outchannel,
                      int param = 0, unsigned int threads = 1, unsigned int threadid = 0);
 
-    void Gray8toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
+    CISST_EXPORT void Gray8toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void Gray8toRGBA32(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void Gray8toGray16(unsigned char* input, unsigned short* output, const unsigned int pixelcount);
     void Gray8toGray32(unsigned char* input, unsigned int* output, const unsigned int pixelcount);
