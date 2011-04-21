@@ -97,6 +97,64 @@ public:
     inline static bool CopyConstructorAvailable(void) { return true; }
 };
 
+template<typename _class, typename _elementType>
+class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_ONEARG, _class, mtsGenericObjectProxy<_elementType> >
+{
+public:
+    typedef _class value_type;
+    typedef mtsGenericObjectProxy<_elementType> argTypeWrapped;
+
+    /*! Specialization of create when dynamic create is enabled. */
+    inline static _class * Create(const cmnGenericObject & arg) {
+        const mtsGenericObject *mts = dynamic_cast<const mtsGenericObject *>(&arg);
+        if (mts) return new value_type(*mtsGenericTypes<_elementType>::CastArg(*mts));
+        CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg::Create for proxy could not create object" << std::endl;
+        return 0;
+    }
+
+    inline static bool OneArgConstructorAvailable(void) { return true; }
+
+    inline static const cmnClassServicesBase *GetConstructorArgServices(void) {
+        return argTypeWrapped::ClassServices();
+    }
+};
+
+/*!  Specialization of cmnConditionalObjectFactoryOneArg with enabled
+     dynamic creation. Requires default constructor and SetName method.
+     This emulates a constructor with an std::string parameter and is provided
+     for backward compatibility.
+*/
+template<typename _class>
+class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_SETNAME, _class, mtsGenericObjectProxy<std::string> >
+{
+public:
+    typedef _class value_type;
+    typedef mtsGenericObjectProxy<std::string> argTypeWrapped;
+
+    /*! Specialization of create when dynamic creation is enabled. */
+    inline static _class * Create(const cmnGenericObject & arg) {
+        const mtsGenericObject *mts = dynamic_cast<const mtsGenericObject *>(&arg);
+        if (mts) {
+            const std::string *name = mtsGenericTypes<std::string>::CastArg(*mts);
+            if (name) {
+                _class *obj = new value_type;
+                obj->SetName(*name);
+                return obj;
+            }
+            CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg::Create for string proxy could not cast to string" << std::endl;
+            return 0;
+        }
+        CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg::Create for string proxy could not create object" << std::endl;
+        return 0;
+    }
+
+    inline static bool OneArgConstructorAvailable(void) { return true; }
+
+    inline static const cmnClassServicesBase *GetConstructorArgServices(void) {
+        return argTypeWrapped::ClassServices();
+    }
+};
+
 template<typename _elementType>
 class cmnConditionalObjectDestructor<true, mtsGenericObjectProxy<_elementType> >
 {
@@ -585,6 +643,13 @@ public:
     typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::BaseType BaseType;
 };
 
+// Some macros for creating class services
+
+#define CMN_IMPLEMENT_SERVICES_ONEARG(className, argType)     \
+        CMN_IMPLEMENT_SERVICES_INTERNAL(className, mtsGenericTypes<argType>::FinalType)
+
+#define CMN_IMPLEMENT_SERVICES_TEMPLATED_ONEARG(className, argType)     \
+        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, mtsGenericTypes<argType>::FinalType)
 
 #endif
 

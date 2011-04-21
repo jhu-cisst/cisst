@@ -219,13 +219,6 @@ template<> CISST_EXPORT \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
 //@}
 
-class cmnGenericObject;
-
-template <class _class>
-const _class *dummyCast(const cmnGenericObject &arg)
-{ return 0; }
-
-
 /*!
   \name Methods and function implementation
 
@@ -252,7 +245,7 @@ const _class *dummyCast(const cmnGenericObject &arg)
 #ifdef CMN_IMPLEMENT_SERVICES
 #undef CMN_IMPLEMENT_SERVICES
 #endif
-#define CMN_IMPLEMENT_SERVICES_INTERNAL(className, argType, argTypeWrapped, castFunc) \
+#define CMN_IMPLEMENT_SERVICES_INTERNAL(className, argType) \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
     static cmnClassServicesBase * classServices = cmnClassServicesInstantiate<className>(); \
@@ -262,19 +255,19 @@ cmnClassServicesBase * className::ClassServicesPointer = className::ClassService
 template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
-    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType, argTypeWrapped, castFunc> \
+    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
            classServices(#className, &typeid(className), className::InitialLoD);   \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
 #define CMN_IMPLEMENT_SERVICES(className) \
-        CMN_IMPLEMENT_SERVICES_INTERNAL(className, className, className, dummyCast<className>)
+    CMN_IMPLEMENT_SERVICES_INTERNAL(className, className)
 
 #ifdef CMN_IMPLEMENT_SERVICES_TEMPLATED
 #undef CMN_IMPLEMENT_SERVICES_TEMPLATED
 #endif
-#define CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, argType, argTypeWrapped, castFunc) \
+#define CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, argType) \
 template<> \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
@@ -291,14 +284,14 @@ const cmnClassServicesBase * className::Services(void) const \
 template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
-    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType, argTypeWrapped> \
+    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
            classServices(#className, &typeid(className), className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
 #define CMN_IMPLEMENT_SERVICES_TEMPLATED(className) \
-        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, className, className, dummyCast<className>)
+        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, className)
 
 //@}
 

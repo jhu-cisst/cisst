@@ -23,8 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnConstants.h>
 #include "clockComponent.h"
 
-#include <cisstMultiTask/mtsClassServices.h>  // PK TEMP?
-
 CMN_IMPLEMENT_SERVICES_ONEARG(clockComponent, std::string);
 
 clockComponent::clockComponent(const std::string & componentName):

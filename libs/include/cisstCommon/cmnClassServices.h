@@ -195,8 +195,7 @@ public:
 /*! Default implementation of cmnConditionalObjectFactoryOneArg with disabled
   dynamic creation.
 */
-template<int _dynamicCreation, typename _class, typename _argType, typename _argTypeWrapped,
-         const _argType * (*_castArg)(const cmnGenericObject &)>
+template<int _dynamicCreation, typename _class, typename _argType>
 class cmnConditionalObjectFactoryOneArg
 {
 public:
@@ -214,53 +213,31 @@ public:
     }
 };
 
+#if 0
 /*! Specialization of cmnConditionalObjectFactoryOneArg with enabled
-  dynamic creation.
+  dynamic creation.  Here, _argType must be derived from cmnGenericObject.
+  Note that the cisstMultiTask library removes this requirement by using
+  automatic wrapping with mtsGenericObjectProxy.
 */
-template<typename _class, typename _argType, typename _argTypeWrapped,
-         const _argType * (*_castArg)(const cmnGenericObject &)>
-class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_ONEARG, _class, _argType, _argTypeWrapped, _castArg>
+template<typename _class, typename _argType>
+class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_ONEARG, _class, _argType>
 {
 public:
     typedef _class value_type;
 
     /*! Specialization of create when dynamic create is enabled. */
     inline static _class * Create(const cmnGenericObject & arg) {
-        return new value_type(*_castArg(arg));
+        const _argType *argTyped = dynamic_cast<const _argType *>(&arg);
+        return new value_type(*argTyped);
     }
 
     inline static bool OneArgConstructorAvailable(void) { return true; }
 
     inline static const cmnClassServicesBase *GetConstructorArgServices(void) {
-        return _argTypeWrapped::ClassServices();
+        return _argType::ClassServices();
     }
 };
-
-/*!  Specialization of cmnConditionalObjectFactoryOneArg with enabled
-     dynamic creation. Requires default constructor and SetName method.
-     This emulates a constructor with an std::string parameter and is provided
-     for backward compatibility.
-*/
-template<typename _class, typename _argTypeWrapped,
-         const std::string * (*_castArg)(const cmnGenericObject &)>
-class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_SETNAME, _class, std::string, _argTypeWrapped, _castArg>
-{
-public:
-    typedef _class value_type;
-
-    /*! Specialization of create when dynamic creation is enabled. */
-    inline static _class * Create(const cmnGenericObject & arg) {
-         _class *obj = new value_type;
-         obj->SetName(*_castArg(arg));
-         return obj;
-    }
-
-    inline static bool OneArgConstructorAvailable(void) { return true; }
-
-    inline static const cmnClassServicesBase *GetConstructorArgServices(void) {
-        return _argTypeWrapped::ClassServices();
-    }
-};
+#endif
 
 //************************ Destructors ***********************
 
@@ -328,15 +305,14 @@ public:
 
   \sa cmnClassRegister cmnClassServicesBase
  */
-template <int _dynamicCreation, class _class, class _argType = _class, class _argTypeWrapped = _class,
-          const _argType * (*_castFunc)(const cmnGenericObject &) = dummyCast<_argType> >
+template <int _dynamicCreation, class _class, class _argType = _class>
 class cmnClassServices: public cmnClassServicesBase {
 
     typedef cmnConditionalObjectFactoryDefault<
 		((_dynamicCreation&CMN_DYNAMIC_CREATION_DEFAULT) == CMN_DYNAMIC_CREATION_DEFAULT), _class> FactoryDefaultType;
     typedef cmnConditionalObjectFactoryCopy<
 		((_dynamicCreation&CMN_DYNAMIC_CREATION_COPY) == CMN_DYNAMIC_CREATION_COPY), _class> FactoryCopyType;
-    typedef cmnConditionalObjectFactoryOneArg<_dynamicCreation, _class, _argType, _argTypeWrapped, _castFunc> FactoryOneArgType;
+    typedef cmnConditionalObjectFactoryOneArg<_dynamicCreation, _class, _argType> FactoryOneArgType;
     typedef cmnConditionalObjectDestructor<_dynamicCreation, _class> DestructorType;
 
  public:
