@@ -55,6 +55,7 @@ protected:
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
         mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
         mtsFunctionRead          GetListOfConnections;
+        mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } ServiceGetters;
@@ -170,6 +171,9 @@ public:
                               std::vector<std::string> & namesOfInterfacesProvided) const;
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
+
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(void) const;
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string &processName) const;
 
     InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;

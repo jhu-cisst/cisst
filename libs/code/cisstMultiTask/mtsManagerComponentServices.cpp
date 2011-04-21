@@ -58,6 +58,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetNamesOfInterfaces);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                                                ServiceGetters.GetListOfConnections);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
+                                               ServiceGetters.GetListOfComponentClasses);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
                                                ServiceGetters.GetInterfaceProvidedDescription);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
@@ -357,6 +359,21 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetListOfConnections: invalid function - has not been bound to command" << std::endl;
     return listOfConnections;
+}
+
+std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(void) const
+{
+    return GetListOfComponentClasses(mtsManagerLocal::GetInstance()->GetProcessName());
+}
+
+std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(const std::string &processName) const
+{
+    std::vector<mtsDescriptionComponentClass> listOfComponentClasses;
+    if (ServiceGetters.GetListOfComponentClasses.IsValid())
+        ServiceGetters.GetListOfComponentClasses(processName, listOfComponentClasses);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "GetListOfComponentClasses: invalid function - has not been bound to command" << std::endl;
+    return listOfComponentClasses;
 }
 
 InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,

@@ -480,6 +480,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetListOfComponentClasses,
+                              this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription,
                                       this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription,
@@ -542,6 +544,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetNamesOfInterfaces);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                           InterfaceLCMFunction.GetListOfConnections);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
+                          InterfaceLCMFunction.GetListOfComponentClasses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
                           InterfaceLCMFunction.GetInterfaceProvidedDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
@@ -584,6 +588,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary,
                              this, mtsManagerComponentBase::CommandNames::LoadLibrary);
+    provided->AddCommandRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses,
+                             this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddEventWrite(this->InterfaceLCMEvents_ChangeState, 
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceLCM: successfully added \"LCM\" interfaces" << std::endl;
@@ -874,6 +880,17 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections(
     }
 
     InterfaceLCMFunction.GetListOfConnections(listOfConnections);
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfComponentClasses(const std::string &processName,
+                                std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const
+{
+    if (!InterfaceLCMFunction.GetListOfComponentClasses.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetListOfComponentClasses: failed to execute \"GetListOfComponentClasses\"" << std::endl;
+        return;
+    }
+
+    InterfaceLCMFunction.GetListOfComponentClasses(processName, listOfComponentClasses);
 }
 
 void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
@@ -1168,6 +1185,26 @@ void mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary(const std::stri
 {
     osaDynamicLoader dl;
     result = dl.Load(fileName.c_str());
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses(
+                                std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const
+{
+    // Loop through the class register, looking for components that can be created with one argument.
+    cmnClassRegister::const_iterator it = cmnClassRegister::begin();
+    while (it != cmnClassRegister::end()) {
+        if (it->second->OneArgConstructorAvailable()) {
+            mtsDescriptionComponentClass classInfo;
+            classInfo.ClassName = it->first;
+            const cmnClassServicesBase *argServices = it->second->GetConstructorArgServices();
+            if (argServices) {
+                classInfo.ArgType = argServices->GetName();
+                classInfo.ArgTypeId = argServices->TypeInfoPointer()->name();
+            }
+            listOfComponentClasses.push_back(classInfo);
+        }
+        it++;
+    }
 }
 
 void mtsManagerComponentClient::HandleAddComponentEvent(const mtsDescriptionComponent &component)

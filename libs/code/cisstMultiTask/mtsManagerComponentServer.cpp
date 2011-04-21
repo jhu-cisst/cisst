@@ -105,6 +105,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses,
+                              this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescription,
                               this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceRequiredDescription,
@@ -165,6 +167,8 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->GetInterfaceRequiredDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
                           newFunctionSet->LoadLibrary);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
+                          newFunctionSet->GetListOfComponentClasses);
     required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this, 
                                    mtsManagerComponentBase::EventNames::ChangeState);
 
@@ -524,6 +528,24 @@ void mtsManagerComponentServer::InterfaceGCMCommands_LoadLibrary(const mtsDescri
     }
 
     functionSet->LoadLibrary(lib.LibraryName, result);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,
+                                std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const
+{
+    // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetListOfComponentClasses: failed to get function set for "
+                                << processName << std::endl;
+        return;
+    }
+    if (!functionSet->GetListOfComponentClasses.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetListOfComponentClasses: function not bound to command" << std::endl;
+        return;
+    }
+
+    functionSet->GetListOfComponentClasses(listOfComponentClasses);
 }
 
 void mtsManagerComponentServer::AddComponentEvent(const mtsDescriptionComponent &component)

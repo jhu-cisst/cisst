@@ -234,6 +234,7 @@ public:
     bool Quit(void) const;
     bool Help(const std::vector<std::string> &args) const;
     bool List(const std::vector<std::string> &args) const;
+    bool Classes(const std::vector<std::string> &args) const;
     bool Connections(const std::vector<std::string> &args) const;
     bool System(const std::string &cmdString) const;
     bool ExecuteFile(const std::string &fileName) const;
@@ -259,6 +260,8 @@ void shellTask::Configure(const std::string &)
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("help", "[<command_name>]", &shellTask::Help, this));
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("list", "[<process_name>]",
                                                              &shellTask::List, this));
+    CommandList.insert(new CommandEntryMethodArgv<shellTask>("classes", "[<process_name>]",
+                                                             &shellTask::Classes, this));
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("connections",
                                                              "[<process_name>] [<component_name>]",
                                                              &shellTask::Connections, this));
@@ -472,6 +475,27 @@ bool shellTask::List(const std::vector<std::string> &args) const
                       << ManagerComponentServices->ComponentGetState(procList[i], compList[j])
                       << ")" << std::endl;
         }
+    }
+    return true;
+}
+
+// List of components that can be dynamically created
+bool shellTask::Classes(const std::vector<std::string> &args) const
+{
+    std::vector<mtsDescriptionComponentClass> classList;
+    if (args.size() > 0)
+        classList = ManagerComponentServices->GetListOfComponentClasses(args[0]);
+    else
+        classList = ManagerComponentServices->GetListOfComponentClasses();
+
+    std::cout << "Component classes available for dynamic creation: " << std::endl;
+    for (size_t i = 0; i < classList.size(); i++) {
+        std::cout << "  " << classList[i].ClassName;
+        if (!classList[i].ArgType.empty()) {
+            std::cout << ", constructor arg = " << classList[i].ArgType
+                      << " (RTTI name = " << classList[i].ArgTypeId << ")";
+        }
+        std::cout << std::endl;
     }
     return true;
 }
