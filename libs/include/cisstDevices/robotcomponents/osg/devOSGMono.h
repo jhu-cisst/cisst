@@ -53,7 +53,8 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 	      double fovy, double aspectRatio,
 	      double zNear, double zFar,
 	      const std::string& fnname = "",
-	      bool trackball = true );
+	      bool trackball = true,
+	      bool offscreenrendering = false );
 
   ~devOSGMono();
 

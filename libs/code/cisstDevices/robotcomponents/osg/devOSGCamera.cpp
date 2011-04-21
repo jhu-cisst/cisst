@@ -360,8 +360,9 @@ devOSGCamera::FinalDrawCallback::ComputeRangeData
     osg::Matrixd modelm = camera->getViewMatrix();
     osg::Matrixd projm = camera->getProjectionMatrix();
 
-    for( size_t x=0; x<width; x++ ){
-      for( size_t y=0; y<height; y++ ){
+    //for( int y=0; y<height; y++ ){
+    for( int y=height-1; 0<=y; y-- ){
+      for( size_t x=0; x<width; x++ ){
 	GLdouble X, Y, Z;
 	float* d = (float*)depthbufferimg->data( x, y );
 	gluUnProject( x, y, *d, modelm.ptr(), projm.ptr(), view, &X, &Y, &Z );
@@ -428,8 +429,11 @@ devOSGCamera::FinalDrawCallback::ComputeRGBImage
 devOSGCamera::devOSGCamera( const std::string& name, 
 			    devOSGWorld* world,
 			    const std::string& fnname,
-			    bool trackball ) :  mtsTaskContinuous( name ),
-  osgViewer::Viewer(){
+			    bool trackball,
+			    bool offscreenrendering ) : 
+  mtsTaskContinuous( name ),
+  osgViewer::Viewer(),
+  offscreenrendering( offscreenrendering ){
 
   // Add a timeout as it can take time to load the windows
   SetInitializationDelay( 15.0 );
@@ -497,19 +501,15 @@ void devOSGCamera::Update(){
   }
 }
 
+vctFrm3 devOSGCamera::GetOrientationPosition() const {
 
-/*
-// Convert the depth buffer to something useful (depth values)
-void 
-devOSGCamera::FinalDrawCallback::ConvertDepthBuffer
-( osg::Camera* camera ) const {
+  osg::Matrixd Rt = getCameraManipulator()->getMatrix();
 
-  
-  // Should we care?
-  if( IsDepthBufferEnabled() ){
-    
-  }
+  vctMatrixRotation3<double> R( Rt(0, 0), Rt(1, 0), Rt(2, 0),
+				Rt(0, 1), Rt(1, 1), Rt(2, 1),
+				Rt(0, 2), Rt(1, 2), Rt(2, 2) );
+  vctFixedSizeVector<double,3> t( Rt(3, 0), Rt(3, 1), Rt(3, 2) );
 
+  return vctFrm3( R, t );
 }
 
-*/
