@@ -22,11 +22,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #if CISST_HAS_CISSTNETLIB
     #include <cisstNumerical/nmrLSSolver.h>
 #endif
 #include <cisstDevices/devNDISerial.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerial);
 
@@ -62,7 +62,7 @@ void devNDISerial::Configure(const std::string & filename)
 
     // initialize serial port
     std::string serialPort;
-    config.GetXMLValue("/config/controller", "@port", serialPort, "");
+    config.GetXMLValue("/tracker/controller", "@port", serialPort, "");
     if (serialPort.empty()) {
         CMN_LOG_CLASS_INIT_ERROR << "Configure: failed to read serial port from: " << filename << std::endl;
         return;
@@ -84,43 +84,39 @@ void devNDISerial::Configure(const std::string & filename)
     ResponseRead("OKAY");
 
     std::string toolDefinitionsDir;
-    config.GetXMLValue("/config/controller", "@tools", toolDefinitionsDir, "");
+    config.GetXMLValue("/tracker/controller", "@definitions", toolDefinitionsDir, "");
 
     // add tools
     int maxNumTools = 100;
     std::string toolName, toolSerial, toolSerialLast, toolDefinition;
-    bool toolEnabled;
     Tool * tool;
 
     for (int i = 0; i < maxNumTools; i++) {
         std::stringstream context;
-        context << "/config/tools/tool[" << i << "]";
+        context << "/tracker/tools/tool[" << i << "]";
         config.GetXMLValue(context.str().c_str(), "@name", toolName, "");
         if (toolName.empty()) {
             continue;
         }
         config.GetXMLValue(context.str().c_str(), "@serial", toolSerial);
         config.GetXMLValue(context.str().c_str(), "@definition", toolDefinition);
-        config.GetXMLValue(context.str().c_str(), "@enabled", toolEnabled);
         if (toolSerial != toolSerialLast) {
             toolSerialLast = toolSerial;
-            if (toolEnabled) {
-                if (toolDefinition == "") {
-                    tool = AddTool(toolName, toolSerial.c_str());
-                } else {
-	                std::string toolDefinitionPath = toolDefinitionsDir + toolDefinition;
-                    tool = AddTool(toolName, toolSerial.c_str(), toolDefinitionPath.c_str());
-                }
-                context << "/tooltip";
-                std::string rotation, translation;
-                config.GetXMLValue(context.str().c_str(), "@rotation", rotation);
-                config.GetXMLValue(context.str().c_str(), "@translation", translation);
-                std::stringstream offset(translation);
-                double value;
-                for (unsigned int i = 0; offset >> value; i++) {
-                    tool->TooltipOffset[i] = value;
-                    offset.ignore(1);
-                }
+            if (toolDefinition == "") {
+                tool = AddTool(toolName, toolSerial.c_str());
+            } else {
+                std::string toolDefinitionPath = toolDefinitionsDir + toolDefinition;
+                tool = AddTool(toolName, toolSerial.c_str(), toolDefinitionPath.c_str());
+            }
+            context << "/tooltip";
+            std::string rotation, translation;
+            config.GetXMLValue(context.str().c_str(), "@rotation", rotation);
+            config.GetXMLValue(context.str().c_str(), "@translation", translation);
+            std::stringstream offset(translation);
+            double value;
+            for (unsigned int i = 0; offset >> value; i++) {
+                tool->TooltipOffset[i] = value;
+                offset.ignore(1);
             }
         }
     }

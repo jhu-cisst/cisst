@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<config>
+<tracker>
 
   <controller port="COM1"
-              tools="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\"
-              note="NDI Polaris Vicra" />
+              definitions="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\" />
 
   <tools>
 
     <tool name="Pointer"
-          enabled="true"
           serial="34802401"
-          definition="8700340.rom"
-          note="Vicra default pointer">
+          definition="8700340.rom">
       <tooltip rotation="1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0"
                translation="-20.4072, -0.172478, -158.267" />
     </tool>
 
     <tool name="Reference"
-          enabled="true"
           serial="34801403"
-          definition="8700339.rom"
-          note="Vicra big reference">
+          definition="8700339.rom">
       <tooltip rotation="1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0"
                translation="0.0, 0.0, 0.0" />
     </tool>
   </tools>
-</config>
+</tracker>
