@@ -318,8 +318,8 @@ set (CISST_LIBS_UNSTABLE
      cisstInteractive
      cisstRobot
      cisstParameterTypes
-     cisstDevices
      cisstStereoVision
+     cisstDevices
      cisst3DUserInterface
      )
 
