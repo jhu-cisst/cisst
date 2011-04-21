@@ -20,27 +20,32 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief A cisst wrapper for Claron Micron Tracker.
+  \brief Device wrapper for Claron Micron Tracker.
   \ingroup cisstDevices
 
-  \bug Current CMake support is for Windows only.
-  \bug Automatic light coolness adjustment using CoolCard is not working.
+  \bug(auneri1) Hard coded to only support 640x480 resolution cameras.
+  \bug(auneri1) Automatic light coolness adjustment using CoolCard is not working.
 
-  \todo Make this device an mtsTaskContinuous.
-  \todo Mapping from markerName to markerHandle is needed.
-  \todo Refactor the method of obtaining marker projections for the controllerQDevice.
-  \todo Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet().
-  \todo Find a suitable State Table size.
-  \todo Move Qt widgets to the libs folder (overlaps with devNDISerial?).
-  \todo Verify the need for use of MTC() macro.
+  \warning(auneri1) HdrEnabledSet is disabled, since it's removed in the new API.
+
+  \todo(auneri1) CalibratePivot method needs outlier filtering.
+  \todo(auneri1) ComputeCameraModel method needs error analysis.
+  \todo(auneri1) Consider deriving from mtsTaskContinuous using an oscillating sleep.
+  \todo(auneri1) Mapping from markerName to markerHandle.
+  \todo(auneri1) Refactor the method of obtaining marker projections for the controllerQDevice.
+  \todo(auneri1) Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet.
+  \todo(auneri1) Refactor devNDISerial Qt widgets to a general "tracker" widget.
+  \todo(auneri1) Fix/suppress _WIN32_WINNT macro redefinition warning.
 */
 
 #ifndef _devMicronTracker_h
 #define _devMicronTracker_h
 
+#include <cisstVector/vctDynamicNArray.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstStereoVision/svlBufferSample.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 #include <MTC.h>
@@ -58,6 +63,7 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
         ~Tool(void) {};
 
         std::string Name;
+        mtHandle Handle;
         std::string SerialNumber;
         mtsInterfaceProvided * Interface;
         prmPositionCartesianGet TooltipPosition;
@@ -81,8 +87,16 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
         return Tools.size();
     }
     std::string GetToolName(const unsigned int index) const;
+    svlBufferSample * GetImageBufferLeft(void) {
+        return ImageBufferLeft;
+    }
+    svlBufferSample * GetImageBufferRight(void) {
+        return ImageBufferRight;
+    }
 
  protected:
+    enum { LEFT_CAMERA, RIGHT_CAMERA, MIDDLE_CAMERA };
+
     Tool * CheckTool(const std::string & serialNumber);
     Tool * AddTool(const std::string & name, const std::string & serialNumber);
 
@@ -93,12 +107,20 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     void ToggleTracking(const mtsBool & toggle);
     void Track(void);
     void CalibratePivot(const mtsStdString & toolName);
+    void ComputeCameraModel(const mtsStdString & pathRectificationLUT);
+
+    static const unsigned int FrameWidth = 640;
+    static const unsigned int FrameHeight = 480;
+    static const unsigned int FrameSize = FrameWidth * FrameHeight;
+
+    std::string CameraCalibrationDir;
+    std::string MarkerTemplatesDir;
 
     typedef cmnNamedMap<Tool> ToolsType;
     ToolsType Tools;
 
-    bool IsCapturing;
-    bool IsTracking;
+    mtsBool IsCapturing;
+    mtsBool IsTracking;
 
     mtHandle CurrentCamera;
     mtHandle IdentifyingCamera;
@@ -107,8 +129,12 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     mtHandle Path;
     mtsDoubleVec MarkerProjectionLeft;
 
-    mtsUCharVec CameraFrameLeft;
-    mtsUCharVec CameraFrameRight;
+    mtsStateTable ImageTable;
+    mtsUCharVec ImageLeft;
+    mtsUCharVec ImageRight;
+    svlSampleImageRGB * RGB;
+    svlBufferSample * ImageBufferLeft;
+    svlBufferSample * ImageBufferRight;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTracker);
