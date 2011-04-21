@@ -65,6 +65,8 @@ protected:
         mtsEventReceiverWrite    AddConnection;
         mtsEventReceiverWrite    RemoveConnection;
         mtsEventReceiverWrite    ChangeState;
+        mtsEventReceiverWrite    AddInterfaceProvidedOrOutput;
+        mtsEventReceiverWrite    AddInterfaceRequiredOrInput;
     } EventReceivers;
 
 public:

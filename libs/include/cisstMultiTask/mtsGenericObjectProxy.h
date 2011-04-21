@@ -42,16 +42,11 @@ template <class _elementType> class mtsGenericObjectProxyRef;
 // The specialization is that if the dynamic_cast to the Proxy type fails, we also try to dynamic_cast
 // to the ProxyRef type.
 template <typename _elementType>
-class cmnConditionalObjectFactory<CMN_DYNAMIC_CREATION, mtsGenericObjectProxy<_elementType> > {
+class cmnConditionalObjectFactoryCopy<true, mtsGenericObjectProxy<_elementType> > {
 public:
     typedef mtsGenericObjectProxy<_elementType> value_type;
     typedef mtsGenericObjectProxyRef<_elementType> value_reftype;
     typedef value_type * pointer;
-    typedef cmnGenericObject * generic_pointer;
-
-    inline static cmnGenericObject * Create(void) {
-        return new value_type;
-    }
 
     inline static cmnGenericObject * Create(const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
@@ -77,10 +72,6 @@ public:
         return false;
     }
 
-    inline static cmnGenericObject * CreateArray(size_t size) {
-        return new value_type[size];
-    }
-    
     inline static cmnGenericObject * CreateArray(size_t size, const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         pointer data, dummy;
@@ -103,6 +94,17 @@ public:
         return 0;
     }
 
+    inline static bool CopyConstructorAvailable(void) { return true; }
+};
+
+template<typename _elementType>
+class cmnConditionalObjectDestructor<true, mtsGenericObjectProxy<_elementType> >
+{
+    typedef mtsGenericObjectProxy<_elementType> value_type;
+    typedef mtsGenericObjectProxyRef<_elementType> value_reftype;
+    typedef value_type * pointer;
+    typedef cmnGenericObject * generic_pointer;
+public:
     inline static bool DeleteArray(generic_pointer & data, size_t & size) {
         pointer typedData = dynamic_cast<pointer>(data);
         if (typedData) {

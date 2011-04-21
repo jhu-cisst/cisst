@@ -219,6 +219,11 @@ template<> CISST_EXPORT \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
 //@}
 
+class cmnGenericObject;
+
+template <class _class>
+const _class *dummyCast(const cmnGenericObject &arg)
+{ return 0; }
 
 
 /*!
@@ -247,7 +252,7 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
 #ifdef CMN_IMPLEMENT_SERVICES
 #undef CMN_IMPLEMENT_SERVICES
 #endif
-#define CMN_IMPLEMENT_SERVICES(className) \
+#define CMN_IMPLEMENT_SERVICES_INTERNAL(className, argType, argTypeWrapped, castFunc) \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
     static cmnClassServicesBase * classServices = cmnClassServicesInstantiate<className>(); \
@@ -257,18 +262,19 @@ cmnClassServicesBase * className::ClassServicesPointer = className::ClassService
 template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
-    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className> classServices(#className, \
-                                                                                      &typeid(className), \
-                                                                                      className::InitialLoD); \
+    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType, argTypeWrapped, castFunc> \
+           classServices(#className, &typeid(className), className::InitialLoD);   \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
+#define CMN_IMPLEMENT_SERVICES(className) \
+        CMN_IMPLEMENT_SERVICES_INTERNAL(className, className, className, dummyCast<className>)
 
 #ifdef CMN_IMPLEMENT_SERVICES_TEMPLATED
 #undef CMN_IMPLEMENT_SERVICES_TEMPLATED
 #endif
-#define CMN_IMPLEMENT_SERVICES_TEMPLATED(className) \
+#define CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, argType, argTypeWrapped, castFunc) \
 template<> \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
@@ -285,12 +291,15 @@ const cmnClassServicesBase * className::Services(void) const \
 template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
-    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className> classServices(#className, \
-                                                                                      &typeid(className), \
-                                                                                      className::InitialLoD); \
+    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType, argTypeWrapped> \
+           classServices(#className, &typeid(className), className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
+
+#define CMN_IMPLEMENT_SERVICES_TEMPLATED(className) \
+        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, className, className, dummyCast<className>)
+
 //@}
 
 
@@ -310,16 +319,15 @@ static cmnClassServicesBase * className##ClassServicesPointer = className::Class
   not be able to compile the code generated if the default constructor
   is missing.
 */
-#ifdef CMN_DYNAMIC_CREATION
-#undef CMN_DYNAMIC_CREATION
-#endif
-#define CMN_DYNAMIC_CREATION true
 
+// Possible options for dynamic creation
+const int CMN_NO_DYNAMIC_CREATION = 0;       // no dynamic creation
+const int CMN_DYNAMIC_CREATION_DEFAULT = 1;  // dynamic creation with default constructor
+const int CMN_DYNAMIC_CREATION_COPY = 2;     // dynamic creation with copy constructor
+const int CMN_DYNAMIC_CREATION = 3;          // dynamic creation with default and/or copy constructor (backward compatibility)
+const int CMN_DYNAMIC_CREATION_SETNAME = 5;  // dynamic creation with default constructor and SetName method
+const int CMN_DYNAMIC_CREATION_ONEARG = 8;   // dynamic creation with one argument constructor (but not copy constructor)
 
-#ifdef CMN_NO_DYNAMIC_CREATION
-#undef CMN_NO_DYNAMIC_CREATION
-#endif
-#define CMN_NO_DYNAMIC_CREATION false
 //@}
 
 #endif // _cmnClassRegisterMacros_h

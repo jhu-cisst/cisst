@@ -23,7 +23,7 @@
 #ifndef _exampleComponent_h
 #define _exampleComponent_h
 
-//#define CAMERA_SOURCE
+#define CAMERA_SOURCE
 
 #include <cisstMultiTask.h>
 #include <cisstStereoVision/svlRequiredInterfaces.h>

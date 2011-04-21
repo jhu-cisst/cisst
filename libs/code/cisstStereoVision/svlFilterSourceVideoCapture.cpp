@@ -498,6 +498,7 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
 
         // Avoid infinite recursion by skipping self
         if ((*iter).first != "svlFilterSourceVideoCapture" &&
+            //(*iter).second && (*iter).second->IsVideoCaptureSource()) {
             (*iter).second) {
 
             // Most device objects can be created dynamically

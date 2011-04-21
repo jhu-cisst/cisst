@@ -78,7 +78,7 @@ int main(void)
     taskManager->Connect("ExampleComponent", "WindowConfig",  "Window",        "Settings");
     taskManager->Connect("ExampleComponent", "FilterParams",  "ExampleFilter", "Parameters");
 
-#if 0
+#if 1
     // create and add Component Viewer
     mtsComponentViewer * componentViewer = new mtsComponentViewer("ComponentViewer");
     taskManager->AddComponent(componentViewer);
