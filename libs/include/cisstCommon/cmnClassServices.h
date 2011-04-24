@@ -213,7 +213,6 @@ public:
     }
 };
 
-#if 0
 /*! Specialization of cmnConditionalObjectFactoryOneArg with enabled
   dynamic creation.  Here, _argType must be derived from cmnGenericObject.
   Note that the cisstMultiTask library removes this requirement by using
@@ -228,7 +227,14 @@ public:
     /*! Specialization of create when dynamic create is enabled. */
     inline static _class * Create(const cmnGenericObject & arg) {
         const _argType *argTyped = dynamic_cast<const _argType *>(&arg);
-        return new value_type(*argTyped);
+        if (argTyped)
+            return new value_type(*argTyped);
+        else {
+            CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg: failed to dynamic cast from " 
+                                 << arg.Services()->GetName() << " to "
+                                 << _argType::ClassServices()->GetName() << std::endl;
+            return 0;
+        }
     }
 
     inline static bool OneArgConstructorAvailable(void) { return true; }
@@ -237,7 +243,6 @@ public:
         return _argType::ClassServices();
     }
 };
-#endif
 
 //************************ Destructors ***********************
 

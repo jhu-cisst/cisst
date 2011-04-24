@@ -624,8 +624,57 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
 
 mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName)
 {
+    cmnGenericObject *baseObject = 0;
+    mtsComponent *newComponent = 0;
+    const cmnClassServicesBase *services = cmnClassRegister::FindClassServices(className);
+    if (!services) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: unable to create component of type \""
+                                 << className << "\" -- no services" << std::endl;
+        return 0;
+    }
+    if (services->OneArgConstructorAvailable()) {
+        const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
+        if (argServices) {
+            mtsGenericObjectProxyRef<std::string> tempRef(componentName);
+            if (argServices == mtsStdString::ClassServices())
+                baseObject = services->CreateWithArg(tempRef);
+            else {
+                cmnGenericObject *tempArg = argServices->Create();
+                if (tempArg) {
+                    std::stringstream ss;
+                    tempRef.ToStreamRaw(ss);
+                    if (!tempArg->FromStreamRaw(ss)) {
+                        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: Could not parse \"" 
+                                                 << componentName << "\" for constructor of "
+                                                 << className << std::endl;
+                    }
+                    else {
+                        baseObject = services->CreateWithArg(*tempArg);
+                    }
+                    delete tempArg;
+                }
+                else
+                    CMN_LOG_CLASS_INIT_ERROR << "Could not create constructor argument for " << className << std::endl;
+            }
+        }
+        if (baseObject) {
+            newComponent = dynamic_cast<mtsComponent *>(baseObject);
+            if (newComponent) {
+                CMN_LOG_CLASS_INIT_VERBOSE << "CreateComponentDynamically: successfully created new component: "
+                               << "\"" << newComponent->GetName() << "\" of type \""
+                                           << className << "\" with arg " << argServices->GetName() << std::endl;
+
+                return newComponent;
+            }
+            else
+                CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
+                                         << "\" is not derived from mtsComponent" << std::endl;
+        }
+    }
+
+    // Above should have worked, following is for backward compatibility
     // looking in class register to create this component
-    cmnGenericObject * baseObject = cmnClassRegister::Create(className);
+    baseObject = cmnClassRegister::Create(className);
     if (!baseObject) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: unable to create component of type \""
                                  << className << "\"" << std::endl;
@@ -633,7 +682,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
     }
 
     // make sure this is an mtsComponent
-    mtsComponent * newComponent = dynamic_cast<mtsComponent *>(baseObject);
+    newComponent = dynamic_cast<mtsComponent *>(baseObject);
     if (!newComponent) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
                                  << "\" is not derived from mtsComponent" << std::endl;
