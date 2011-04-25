@@ -468,10 +468,13 @@ http://www.cisst.org/cisst/license.txt.
                         return
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
-                    manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
-                    # PK TEMP: need time.sleep until blocking commands supported over network
-                    time.sleep(1.0)
-                    interfaceRequired.UpdateFromC()
+                    if interfaceRequired:
+                        manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
+                        # PK TEMP: need time.sleep until blocking commands supported over network
+                        time.sleep(1.0)
+                        interfaceRequired.UpdateFromC()
+                    else:
+                        print 'Unable to add required interface for ', interfaceName
                     return interfaceRequired
                 else:
                     print 'Parameter error: must specify (process, component, interface) or (component, interface)'
