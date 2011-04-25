@@ -56,12 +56,13 @@ void mtsManagerComponentClient::Cleanup(void)
 {
 }
 
-bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & className, const std::string & componentName)
+bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & className, const std::string & componentName,
+                                                         const std::string & constructorArgSerialized)
 {
     // Try to create component as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
-    mtsComponent * newComponent = LCM->CreateComponentDynamically(className, componentName);
+    mtsComponent * newComponent = LCM->CreateComponentDynamically(className, componentName, constructorArgSerialized);
     if (!newComponent) {
         CMN_LOG_CLASS_RUN_ERROR << "CreateAndAddNewComponent: failed to create component: " 
             << "\"" << componentName << "\" of type \"" << className << "\"" << std::endl;
@@ -951,7 +952,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDe
     //    InterfaceInternal's provided interface.
     // 5. Connect InterfaceInternal's interfaces to InterfaceComponent's
     //    interfaces.
-    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName)) {
+    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName, arg.ConstructorArgSerialized)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << arg << std::endl;
         return;
     }

@@ -106,6 +106,37 @@ bool mtsManagerComponentServices::ComponentCreate(
     return true;
 }
 
+bool mtsManagerComponentServices::ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const
+{
+    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
+    return ComponentCreate(processName, className, constructorArg);
+}
+
+bool mtsManagerComponentServices::ComponentCreate(
+    const std::string& processName, const std::string & className, const mtsGenericObject & constructorArg) const
+{
+    if (!ServiceComponentManagement.Create.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionComponent arg;
+    arg.ProcessName   = processName;
+    arg.ClassName     = className;
+    arg.ComponentName = "(serialized)";
+    std::stringstream buffer;
+    cmnSerializer serializer(buffer);
+    serializer.Serialize(constructorArg);
+    arg.ConstructorArgSerialized = buffer.str();
+
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Create(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: requested component creation: " << arg << std::endl;
+
+    return true;
+}
+
 bool mtsManagerComponentServices::Connect(
     const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const

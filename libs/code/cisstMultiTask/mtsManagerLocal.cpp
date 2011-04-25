@@ -622,7 +622,8 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     return true;
 }
 
-mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName)
+mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName,
+                                                           const std::string & constructorArgSerialized)
 {
     cmnGenericObject *baseObject = 0;
     mtsComponent *newComponent = 0;
@@ -632,14 +633,40 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                                  << className << "\" -- no services" << std::endl;
         return 0;
     }
-    if (services->OneArgConstructorAvailable()) {
-        const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
-        if (argServices) {
+    const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
+    if (services->OneArgConstructorAvailable() && argServices) {
+        // We can create the object using the "one argument" constructor.  This includes the case where
+        // the "one argument" constructor is just an std::string (including the combination of default
+        // constructor and SetName method).
+        cmnGenericObject *tempArg = 0;
+        if (!constructorArgSerialized.empty()) {
+            // Case 1: If the serialized constructor arg is not empty, then we just deserialize it and call
+            //         CreateWithArg.  We could check if the arg is the correct type, but CreateWithArg will
+            //         do it anyway.
+            std::stringstream buffer;
+            cmnDeSerializer deserializer(buffer);
+            try {
+                tempArg = dynamic_cast<const cmnGenericObject *>(deserializer.DeSerialize());
+            } catch (std::exception &e) {
+                CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: failed to deserialize constructor arg for class \""
+                                         << className << "\", error = " << e.what() << std::endl;
+                return 0;
+            }
+
+            baseObject = services->CreateWithArg(*tempArg);
+            delete tempArg;
+        }
+        else {
+            // Case 2: If the serialized constructor arg is empty, then we just have the componentName.
+            //         There are actually 2 sub-cases (see below)
             mtsGenericObjectProxyRef<std::string> tempRef(componentName);
             if (argServices == mtsStdString::ClassServices())
+                // Case 2a: We just have a string (component name)
                 baseObject = services->CreateWithArg(tempRef);
             else {
-                cmnGenericObject *tempArg = argServices->Create();
+                // Case 2b: The componentName actually contains the streamed constructor arg (i.e., created
+                //          with ToStreamRaw, rather than with SerializeRaw).
+                tempArg = argServices->Create();
                 if (tempArg) {
                     std::stringstream ss;
                     tempRef.ToStreamRaw(ss);
@@ -658,6 +685,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
             }
         }
         if (baseObject) {
+            // If we were able to create an object, dynamic cast it to an mtsComponent so that we can return it.
             newComponent = dynamic_cast<mtsComponent *>(baseObject);
             if (newComponent) {
                 CMN_LOG_CLASS_INIT_VERBOSE << "CreateComponentDynamically: successfully created new component: "
@@ -670,6 +698,11 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                 CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
                                          << "\" is not derived from mtsComponent" << std::endl;
         }
+    }
+    else if (!constructorArgSerialized.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
+                                 << "\" cannot handle serialized constructor arg" << std::endl;
+        return 0;
     }
 
     // Above should have worked, following is for backward compatibility

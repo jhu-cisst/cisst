@@ -117,6 +117,10 @@ public:
     bool ComponentCreate(
         const std::string& processName, const std::string & className, const std::string & componentName) const;
 
+    bool ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const;
+    bool ComponentCreate(
+        const std::string& processName, const std::string & className, const mtsGenericObject & constructorArg) const;
+
     bool Connect(
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;

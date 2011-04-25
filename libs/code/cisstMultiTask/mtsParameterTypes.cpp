@@ -45,6 +45,7 @@ mtsDescriptionComponent::mtsDescriptionComponent(const mtsDescriptionComponent &
     this->ProcessName = other.ProcessName;
     this->ComponentName = other.ComponentName;
     this->ClassName = other.ClassName;
+    this->ConstructorArgSerialized = other.ConstructorArgSerialized;
 }
 
 mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName):
@@ -60,6 +61,8 @@ void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const
     outputStream << ", Process: " << this->ProcessName
                  << ", Class: " << this->ClassName
                  << ", Name: " << this->ComponentName;
+    if (!this->ConstructorArgSerialized.empty())
+        outputStream << ", Constructor Arg: " << this->ConstructorArgSerialized;
 }
 
 void mtsDescriptionComponent::SerializeRaw(std::ostream & outputStream) const
@@ -68,6 +71,7 @@ void mtsDescriptionComponent::SerializeRaw(std::ostream & outputStream) const
     cmnSerializeRaw(outputStream, this->ProcessName);
     cmnSerializeRaw(outputStream, this->ClassName);
     cmnSerializeRaw(outputStream, this->ComponentName);
+    cmnSerializeRaw(outputStream, this->ConstructorArgSerialized);
 }
 
 void mtsDescriptionComponent::DeSerializeRaw(std::istream & inputStream)
@@ -76,6 +80,7 @@ void mtsDescriptionComponent::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ProcessName);
     cmnDeSerializeRaw(inputStream, this->ClassName);
     cmnDeSerializeRaw(inputStream, this->ComponentName);
+    cmnDeSerializeRaw(inputStream, this->ConstructorArgSerialized);
 }
 
 

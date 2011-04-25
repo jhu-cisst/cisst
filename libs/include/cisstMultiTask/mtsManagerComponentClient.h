@@ -107,7 +107,8 @@ protected:
     } GeneralInterface;
 
     /*! Create new component and add it to LCM */
-    bool CreateAndAddNewComponent(const std::string & className, const std::string & componentName);
+    bool CreateAndAddNewComponent(const std::string & className, const std::string & componentName,
+                                  const std::string & constructorArgSerialized);
 
     /*! \brief Connect two local interfaces.
         \param clientComponentName Name of client component

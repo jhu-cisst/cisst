@@ -56,6 +56,7 @@ public:
     std::string ProcessName;
     std::string ComponentName;
     std::string ClassName;
+    std::string ConstructorArgSerialized;
 
     /*! Default constructor */
     mtsDescriptionComponent() {}
