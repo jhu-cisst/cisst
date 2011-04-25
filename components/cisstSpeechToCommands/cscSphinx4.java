@@ -19,20 +19,20 @@
   --- end cisst license ---
 */
 
+import edu.cmu.sphinx.decoder.search.Token;
 import edu.cmu.sphinx.frontend.util.Microphone;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.*;
-import edu.cmu.sphinx.decoder.search.Token;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
+
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import javax.sound.sampled.*;
 
-import java.text.DecimalFormat;
-
 class cscSphinx4 {
-    HashMap<String, Recognizer> SphinxRecognizers;
-    Recognizer CurrentSphinxRecognizer;
-    ConfigurationManager SphinxConfigurationManager;
+    private HashMap<String, Recognizer> SphinxRecognizers;
+    private Recognizer CurrentSphinxRecognizer;
+    private ConfigurationManager SphinxConfigurationManager;
 
     // static method
     private native void WordRecognizedCallback(long speechToCommandsCppPointer, String word);
@@ -41,7 +41,7 @@ class cscSphinx4 {
         System.loadLibrary("cisstSpeechToCommands");
     }
     // pointer to C++ object used by WordRecognized
-    long SpeechToCommandsCppPointer;
+    private long SpeechToCommandsCppPointer;
 
     // sets the active context
     public void SetCurrentContext(String context) {
@@ -155,5 +155,4 @@ class cscSphinx4 {
         System.out.print(word);
         System.out.println(" (confidence: " + format.format(wr.getLogMath().logToLinear((float) wr.getConfidence())) + ')');
     }
-
 }

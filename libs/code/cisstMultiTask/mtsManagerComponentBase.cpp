@@ -118,7 +118,8 @@ bool mtsManagerComponentBase::IsNameOfInterfaceGCMRequired(const std::string & n
 
 bool mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(const std::string & nameOfInterface)
 {
-    return (nameOfInterface == GetNameOfInterfaceGCMProvided());
+    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided.size())
+            == GetNameOfInterfaceGCMProvided());
 }
 
 bool mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(const std::string & nameOfInterface)
@@ -128,7 +129,8 @@ bool mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(const std::string & n
 
 bool mtsManagerComponentBase::IsNameOfInterfaceLCMProvided(const std::string & nameOfInterface)
 {
-    return (nameOfInterface == GetNameOfInterfaceLCMProvided());
+    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided.size())
+            == GetNameOfInterfaceLCMProvided());
 }
 
 bool mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(const std::string & nameOfInterface)
@@ -140,7 +142,8 @@ bool mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(const std::stri
 
 bool mtsManagerComponentBase::IsNameOfInterfaceComponentProvided(const std::string & nameOfInterface)
 {
-    return (nameOfInterface == GetNameOfInterfaceComponentProvided());
+    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceComponentProvided.size())
+            == GetNameOfInterfaceComponentProvided());
 }
 
 bool mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(const std::string & nameOfInterface)
@@ -150,7 +153,8 @@ bool mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(const std::strin
 
 bool mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(const std::string & nameOfInterface)
 {
-    return (nameOfInterface == GetNameOfInterfaceInternalProvided());
+    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided.size())
+            == GetNameOfInterfaceInternalProvided());
 }
 
 const std::string mtsManagerComponentBase::GetNameOfInterfaceGCMRequiredFor(const std::string & processName)

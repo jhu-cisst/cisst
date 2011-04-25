@@ -80,7 +80,7 @@ template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & data)
     throw (std::runtime_error)
 {
-    typedef cmnSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::YES> impl;
+    typedef cmnSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::IS_DERIVED> impl;
     impl::SerializeRaw(outputStream, data);
 }
 

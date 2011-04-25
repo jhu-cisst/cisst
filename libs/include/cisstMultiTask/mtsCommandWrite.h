@@ -152,7 +152,7 @@ public:
                                        mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             //const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
-            return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::YES
+            return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::IS_DERIVED
                                   >::CallMethod(ClassInstantiation, Action, argument);
         }
         return mtsExecutionResult::COMMAND_DISABLED;
