@@ -492,8 +492,9 @@ bool shellTask::Classes(const std::vector<std::string> &args) const
     for (size_t i = 0; i < classList.size(); i++) {
         std::cout << "  " << classList[i].ClassName;
         if (!classList[i].ArgType.empty()) {
-            std::cout << ", constructor arg = " << classList[i].ArgType
-                      << " (RTTI name = " << classList[i].ArgTypeId << ")";
+            std::cout << " (" << classList[i].ArgType << ")";
+            // RTTI name can be rather long, so not displaying it
+            //        << " (RTTI name = " << classList[i].ArgTypeId << ")";
         }
         std::cout << std::endl;
     }

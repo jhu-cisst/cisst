@@ -643,7 +643,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
             // Case 1: If the serialized constructor arg is not empty, then we just deserialize it and call
             //         CreateWithArg.  We could check if the arg is the correct type, but CreateWithArg will
             //         do it anyway.
-            std::stringstream buffer;
+            std::stringstream buffer(constructorArgSerialized);
             cmnDeSerializer deserializer(buffer);
             try {
                 tempArg = dynamic_cast<const cmnGenericObject *>(deserializer.DeSerialize());

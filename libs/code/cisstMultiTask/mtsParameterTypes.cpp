@@ -60,9 +60,10 @@ void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const
     mtsGenericObject::ToStream(outputStream);
     outputStream << ", Process: " << this->ProcessName
                  << ", Class: " << this->ClassName
-                 << ", Name: " << this->ComponentName;
-    if (!this->ConstructorArgSerialized.empty())
-        outputStream << ", Constructor Arg: " << this->ConstructorArgSerialized;
+                 << ", Name: " << this->ComponentName
+                 << ", Constructor Arg Serialized: "
+                 << this->ConstructorArgSerialized.size()
+                 << " bytes";
 }
 
 void mtsDescriptionComponent::SerializeRaw(std::ostream & outputStream) const

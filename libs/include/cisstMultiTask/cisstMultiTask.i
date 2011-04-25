@@ -71,6 +71,9 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "cisstMultiTask/mtsExecutionResult.h"
 
+// Wrap base class
+%include "cisstMultiTask/mtsGenericObject.h"
+
 // Wrap commands
 %include "cisstMultiTask/mtsCommandBase.h"
 %include "cisstMultiTask/mtsCommandVoid.h"
@@ -609,9 +612,6 @@ public:
 
 %include "cisstMultiTask/mtsCollectorBase.h"
 %include "cisstMultiTask/mtsCollectorState.h"
-
-// Wrap base class
-%include "cisstMultiTask/mtsGenericObject.h"
 
 // Wrap some basic types
 %include "cisstMultiTask/mtsGenericObjectProxy.h"

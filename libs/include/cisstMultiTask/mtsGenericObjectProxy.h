@@ -38,6 +38,7 @@ template <class _elementType> class mtsGenericObjectProxyBase;
 template <class _elementType> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
 
+#ifndef SWIG
 // Class services specialization for proxy objects.  We assume that we always want dynamic creation.
 // The specialization is that if the dynamic_cast to the Proxy type fails, we also try to dynamic_cast
 // to the ProxyRef type.
@@ -192,6 +193,7 @@ public:
         return false;
     }
 };
+#endif  // !SWIG
 
 /*!  Proxy class used to create a simple mtsGenericObject, i.e. data
   object with a registered type, dynamic creation, serialization and
