@@ -157,9 +157,11 @@ void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &co
                             !mtsManagerGlobal::IsProxyComponent(connection.Server.ComponentName)))
 #endif
         {
-            std::string buffer = GetConnectionInUDrawGraphFormat(connection);
-            CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
-            WriteString(UDrawPipe, buffer);
+            if (connection.Server.InterfaceName != mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
+                std::string buffer = GetConnectionInUDrawGraphFormat(connection);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+                WriteString(UDrawPipe, buffer);
+            }
         }
     }
 }
