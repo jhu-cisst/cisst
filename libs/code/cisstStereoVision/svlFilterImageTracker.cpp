@@ -294,7 +294,12 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                     target_buffer ++;
                 }
             }
-
+/*
+            RigidBodyAngle.SetAll(0.0);
+            RigidBodyScale.SetAll(1.0);
+            WarpedRigidBodyAngle.SetAll(0.0);
+            WarpedRigidBodyScale.SetAll(1.0);
+*/
             ResetFlag = false;
         }
     }
