@@ -30,6 +30,8 @@ cscSpeechToCommandsQtWidget::cscSpeechToCommandsQtWidget(void)
     ValueContext = new QLabel("nothing so far", this);
     LabelVocabulary = new QLabel("Vocabulary: ", this);
     ValueVocabulary = new QLabel("", this);
+    WordSelector = new QComboBox(this);
+    TriggerButton = new QPushButton("Trigger", this);
 
     // configure the widgets
     LabelWordRecognized->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -46,27 +48,38 @@ cscSpeechToCommandsQtWidget::cscSpeechToCommandsQtWidget(void)
     CentralLayout->addWidget(ValueContext, 1, 1);
     CentralLayout->addWidget(LabelVocabulary, 2, 0);
     CentralLayout->addWidget(ValueVocabulary, 2, 1);
+    CentralLayout->addWidget(WordSelector, 3, 0);
+    CentralLayout->addWidget(TriggerButton, 3, 1);
 }
 
 
 void cscSpeechToCommandsQtWidget::AddWord(QString context, QString word)
 {
-    ContextMap.insert(context, word);
+    ContextMap.insert(std::pair<QString,QString>(context, word));
 }
 
 
 void cscSpeechToCommandsQtWidget::ContextChanged(QString context)
 {
+    WordSelector->clear();
+
     QString newVocabulary;
-    QMultiMap<QString, QString>::iterator iter;
-    for (iter = ContextMap.find(context);
-         iter != ContextMap.end() && iter.key() == context;
-         iter++) {
-        newVocabulary += iter.value();
-        QMultiMap<QString, QString>::iterator next = iter+1;
-        if (next != ContextMap.end() && next.key() == context)
+    // get the iterator bounds of all keys of a given value
+    std::pair<std::multimap<QString,QString>::iterator,std::multimap<QString,QString>::iterator> bounds;
+    bounds = ContextMap.equal_range(context);
+    int keysLeft = ContextMap.count(context);
+    std::multimap<QString,QString>::iterator iter;
+    for (iter = bounds.first; iter != bounds.second; iter++, keysLeft--) {
+        newVocabulary += iter->second;
+        WordSelector->addItem(iter->second);
+        if (keysLeft > 1)
             newVocabulary += '\n';
     }
     ValueContext->setText(context);
     ValueVocabulary->setText(newVocabulary);
+}
+
+void cscSpeechToCommandsQtWidget::GetTriggeredWord(void)
+{
+    emit WordTriggered(WordSelector->currentText());
 }

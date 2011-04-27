@@ -56,6 +56,9 @@ class CISST_EXPORT cscSpeechToCommandsQtComponent: public QObject, public mtsCom
     void ContextChangedQSignal(QString word);
     void WordAddedQSignal(QString context, QString word);
 
+ public slots:
+    void TriggerWord(QString word);
+
  protected:
     cscSpeechToCommandsQtWidget CentralWidget;
 
@@ -65,6 +68,7 @@ class CISST_EXPORT cscSpeechToCommandsQtComponent: public QObject, public mtsCom
 
     mtsFunctionRead GetContexts;
     mtsFunctionQualifiedRead GetContextWords;
+    mtsFunctionWrite TriggerWordFromUI;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cscSpeechToCommandsQtComponent);

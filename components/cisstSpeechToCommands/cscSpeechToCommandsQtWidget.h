@@ -21,11 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cscSpeechToCommandsQtWidget_h
 #define _cscSpeechToCommandsQtWidget_h
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QMultiMap>
+#include <QPushButton>
 #include <QWidget>
-
 
 // Always include last!
 #include <cisstSpeechToCommands/cscExportQt.h>
@@ -37,7 +37,7 @@ class CISST_EXPORT cscSpeechToCommandsQtWidget : public QWidget
     cscSpeechToCommandsQtWidget(void);
     ~cscSpeechToCommandsQtWidget(void) {};
 
-    QMultiMap<QString, QString> ContextMap;
+    std::multimap<QString,QString> ContextMap;
 
     QGridLayout * CentralLayout;
     QLabel * LabelContext;
@@ -46,10 +46,16 @@ class CISST_EXPORT cscSpeechToCommandsQtWidget : public QWidget
     QLabel * ValueWordRecognized;
     QLabel * LabelVocabulary;
     QLabel * ValueVocabulary;
+    QComboBox * WordSelector;
+    QPushButton * TriggerButton;
+
+ signals:
+    void WordTriggered(QString);
 
  public slots:
     void AddWord(QString context, QString word);
     void ContextChanged(QString context);
+    void GetTriggeredWord(void);
 
 };
 

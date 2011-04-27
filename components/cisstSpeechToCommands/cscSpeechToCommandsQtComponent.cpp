@@ -33,6 +33,7 @@ cscSpeechToCommandsQtComponent::cscSpeechToCommandsQtComponent(const std::string
     if (interfaceRequired) {
         interfaceRequired->AddFunction("GetContexts", GetContexts);
         interfaceRequired->AddFunction("GetContextWords", GetContextWords);
+        interfaceRequired->AddFunction("TriggerWordFromUI", TriggerWordFromUI);
         interfaceRequired->AddEventHandlerWrite(&cscSpeechToCommandsQtComponent::WordRecognizedHandler,
                                                 this, "WordRecognized");
         interfaceRequired->AddEventHandlerVoid(&cscSpeechToCommandsQtComponent::NoWordRecognizedHandler,
@@ -49,6 +50,12 @@ cscSpeechToCommandsQtComponent::cscSpeechToCommandsQtComponent(const std::string
 
     QObject::connect(this, SIGNAL(WordAddedQSignal(QString, QString)),
                      &CentralWidget, SLOT(AddWord(QString, QString)));
+
+    QObject::connect(CentralWidget.TriggerButton, SIGNAL(clicked()),
+                     &CentralWidget, SLOT(GetTriggeredWord()));
+
+    QObject::connect(&CentralWidget, SIGNAL(WordTriggered(QString)),
+                     this, SLOT(TriggerWord(QString)));
 }
 
 
@@ -89,6 +96,12 @@ void cscSpeechToCommandsQtComponent::Start(void)
 QWidget * cscSpeechToCommandsQtComponent::GetWidget(void)
 {
     return &CentralWidget;
+}
+
+
+void cscSpeechToCommandsQtComponent::TriggerWord(QString word)
+{
+    TriggerWordFromUI(mtsStdString(word.toStdString()));
 }
 
 

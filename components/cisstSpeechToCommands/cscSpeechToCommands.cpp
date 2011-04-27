@@ -75,6 +75,8 @@ cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
         interfaceProvided->AddCommandQualifiedRead(&cscSpeechToCommands::GetContextWords, this, "GetContextWords");
         // context changed
         interfaceProvided->AddEventWrite(this->ContextChangedTrigger, "ContextChanged", mtsStdString());
+        // get word from UI
+        interfaceProvided->AddCommandWrite(&cscSpeechToCommands::WordTriggeredFromUI, this, "TriggerWordFromUI");
         // word recognized
         mtsCommandWriteBase * eventWriteTrigger = interfaceProvided->AddEventWrite("WordRecognized", mtsStdString());
         if (eventWriteTrigger) {
@@ -167,6 +169,12 @@ void cscSpeechToCommands::GetContextWords(const mtsStdString & contextName,
     if (context) {
         placeHolder = context->GetVocabulary();
     }
+}
+
+
+void cscSpeechToCommands::WordTriggeredFromUI(const mtsStdString & word)
+{
+    WordRecognizedCallback(word);
 }
 
 
@@ -450,10 +458,13 @@ void cscSpeechToCommands::Startup(void)
 
 void cscSpeechToCommands::Run(void)
 {
+    ProcessQueuedCommands();
+    ProcessQueuedEvents();
     if (this->JavaData->Environment == 0) {
         this->StartJava();
         this->ContextChangedTrigger(mtsStdString(this->CurrentContext->GetName()));
-    } else {
+    }
+    else {
         // get latest word
         this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper,
                                                     this->JavaData->RecognizeWordMethod);

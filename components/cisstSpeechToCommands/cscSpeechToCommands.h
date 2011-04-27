@@ -77,6 +77,7 @@ public:
     void GetContexts(stdStringVec & placeHolder) const;
     void GetContextWords(const mtsStdString & contextName,
                          stdStringVec & placeHolder) const;
+    void WordTriggeredFromUI(const mtsStdString & word);
 
     unsigned int GetMicrophoneNumber(void) const;
     void SetMicrophoneNumber(unsigned int microphoneNumber);
