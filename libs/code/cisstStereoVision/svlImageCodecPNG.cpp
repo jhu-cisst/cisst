@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 const static int PNG_DEFAULT_QUALITY = 4;
 const static int PNG_SIG_SIZE = 8;
 
+
 /*****************************************/
 /*** Callbacks for reading from stream ***/
 /*****************************************/
@@ -333,6 +334,9 @@ int svlImageCodecPNG::Read(svlSampleImage &image, const unsigned int videoch, st
     // read image
     png_read_image(png_ptr, pngRows);
 
+    // read ending
+    png_read_end(png_ptr, info_ptr);
+
     if (color_type == PNG_COLOR_TYPE_GRAY) {
         // Gray8toRGB24 can do in-place conversion
         svlConverter::Gray8toRGB24(dest, dest, width * height);
@@ -437,6 +441,9 @@ int svlImageCodecPNG::Read(svlSampleImage &image, const unsigned int videoch, co
 
     // read image
     png_read_image(png_ptr, pngRows);
+
+    // read ending
+    png_read_end(png_ptr, info_ptr);
 
     if (color_type == PNG_COLOR_TYPE_GRAY) {
         // Gray8toRGB24 can do in-place conversion

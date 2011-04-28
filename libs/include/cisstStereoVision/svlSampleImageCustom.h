@@ -263,7 +263,7 @@ public:
         std::string codec;
         int compression;
         GetEncoder(codec, compression);
-        cmnSerializeRaw(outputStream, GetType());
+        cmnSerializeRaw(outputStream, static_cast<int>(GetType()));
         cmnSerializeRaw(outputStream, GetTimestamp());
         cmnSerializeRaw(outputStream, codec);
 
