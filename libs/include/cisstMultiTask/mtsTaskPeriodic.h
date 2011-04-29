@@ -46,11 +46,11 @@ public:
     bool IsHardRealTime;
     unsigned int StateTableSize;
 
-    mtsTaskPeriodicConstructorArg() {}
+    mtsTaskPeriodicConstructorArg() : mtsGenericObject() {}
     mtsTaskPeriodicConstructorArg(const std::string &name, double period, bool isHardRealTime = false,
                                   unsigned int sizeStateTable = STATE_TABLE_DEFAULT_SIZE) : 
-        Name(name), Period(period), IsHardRealTime(isHardRealTime), StateTableSize(sizeStateTable) {}
-    mtsTaskPeriodicConstructorArg(const mtsTaskPeriodicConstructorArg &other):
+        mtsGenericObject(), Name(name), Period(period), IsHardRealTime(isHardRealTime), StateTableSize(sizeStateTable) {}
+    mtsTaskPeriodicConstructorArg(const mtsTaskPeriodicConstructorArg &other) : mtsGenericObject(),
         Name(other.Name), Period(other.Period), IsHardRealTime(other.IsHardRealTime), StateTableSize(other.StateTableSize) {}
     ~mtsTaskPeriodicConstructorArg() {}
 
