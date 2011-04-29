@@ -40,6 +40,7 @@ protected:
     // Dynamic component management
     struct ManagementStruct {
         mtsFunctionWrite Create;
+        mtsFunctionWrite Configure;
         mtsFunctionWrite Connect;
         mtsFunctionWrite Disconnect;
         mtsFunctionWrite Start;
@@ -120,6 +121,10 @@ public:
     bool ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const;
     bool ComponentCreate(
         const std::string& processName, const std::string & className, const mtsGenericObject & constructorArg) const;
+
+    bool ComponentConfigure(const std::string & componentName, const std::string & configString) const;
+    bool ComponentConfigure(
+        const std::string& processName, const std::string & componentName, const std::string & configString) const;
 
     bool Connect(
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,

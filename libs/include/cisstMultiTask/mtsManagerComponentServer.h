@@ -63,6 +63,7 @@ protected:
         value = function object set instance) */
     typedef struct {
         mtsFunctionWrite ComponentCreate;
+        mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
@@ -97,6 +98,7 @@ public:
 
     /*! Commands */
     void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);

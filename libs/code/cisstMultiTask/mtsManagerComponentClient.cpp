@@ -461,6 +461,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
 
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate,
                               this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure,
+                              this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect,
@@ -523,6 +525,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
     }
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                           InterfaceLCMFunction.ComponentCreate);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
+                          InterfaceLCMFunction.ComponentConfigure);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           InterfaceLCMFunction.ComponentConnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
@@ -571,6 +575,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
     }
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate,
                              this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure,
+                             this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect,
@@ -691,6 +697,25 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const
         }
         //InterfaceLCMFunction.ComponentCreate.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentCreate(arg);
+    }
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string nameOfThisLCM = LCM->GetProcessName();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE || 
+        nameOfThisLCM == arg.ProcessName) 
+    {
+        InterfaceLCMCommands_ComponentConfigure(arg);
+        return;
+    } else {
+        if (!InterfaceLCMFunction.ComponentConfigure.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConfigure: failed to execute \"Component Configure\"" << std::endl;
+            return;
+        }
+        //InterfaceLCMFunction.ComponentConfigure.ExecuteBlocking(arg);
+        InterfaceLCMFunction.ComponentConfigure(arg);
     }
 }
 
@@ -958,6 +983,20 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDe
     }
 
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentCreate: successfully created new component: " << arg << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsComponent * component = LCM->GetComponent(arg.ComponentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConfigure - no component found: "
+            << arg.ComponentName << std::endl;
+        return;
+    }
+
+    // For now, using ConstructorArgSerialized field.
+    component->Configure(arg.ConstructorArgSerialized);
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg)

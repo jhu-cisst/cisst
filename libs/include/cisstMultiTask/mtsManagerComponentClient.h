@@ -70,6 +70,7 @@ protected:
     typedef struct {
         // Dynamic component management
         mtsFunctionWrite ComponentCreate;
+        mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
@@ -153,6 +154,7 @@ public:
 
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
@@ -173,6 +175,7 @@ public:
 
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);

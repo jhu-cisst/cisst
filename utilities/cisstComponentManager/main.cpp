@@ -284,6 +284,12 @@ void shellTask::Configure(const std::string &)
         CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
                                "create", "<process_name> <class_name> <component_name>",
                                &mtsManagerComponentServices::ComponentCreate, Manager));
+        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
+                               "configure", "<component_name> <config_string>",
+                               &mtsManagerComponentServices::ComponentConfigure, Manager));
+        CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
+                               "configure", "<process_name> <component_name> <config_string>",
+                               &mtsManagerComponentServices::ComponentConfigure, Manager));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "connect",
                                "<component1> <component1_interface> <component2> <component2_interface>",

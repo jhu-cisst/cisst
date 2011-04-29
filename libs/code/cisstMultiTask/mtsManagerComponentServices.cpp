@@ -35,6 +35,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
         // Dynamic component composition (DCC) services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                                                ServiceComponentManagement.Create);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
+                                               ServiceComponentManagement.Configure);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
@@ -133,6 +135,33 @@ bool mtsManagerComponentServices::ComponentCreate(
     ServiceComponentManagement.Create(arg);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: requested component creation: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsManagerComponentServices::ComponentConfigure(const std::string & componentName,
+                                                     const std::string & configString) const
+{
+    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
+    return ComponentConfigure(processName, componentName, configString);
+}
+
+bool mtsManagerComponentServices::ComponentConfigure(
+    const std::string& processName, const std::string & componentName, const std::string & configString) const
+{
+    if (!ServiceComponentManagement.Configure.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentConfigure: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionComponent arg;
+    arg.ProcessName   = processName;
+    arg.ComponentName = componentName;
+    // For now, use ConstructorArgSerialized
+    arg.ConstructorArgSerialized = configString;
+
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Configure(arg);
 
     return true;
 }

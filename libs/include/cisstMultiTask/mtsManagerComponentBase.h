@@ -128,6 +128,7 @@ public:
     public:
         // Dynamic component management
         const static std::string ComponentCreate;
+        const static std::string ComponentConfigure;
         const static std::string ComponentConnect;
         const static std::string ComponentDisconnect;
         const static std::string ComponentStart;
