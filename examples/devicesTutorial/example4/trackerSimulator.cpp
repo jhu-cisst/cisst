@@ -28,15 +28,15 @@ trackerSimulator::trackerSimulator(const std::string & taskName, double period):
     ExitFlag(false)
 {
     // required interfaces
-    mtsRequiredInterface * requiredInterface;
-    requiredInterface = AddRequiredInterface("RequiresPositionCartesian");
+    mtsInterfaceRequired * requiredInterface;
+    requiredInterface = AddInterfaceRequired("RequiresPositionCartesian");
     if (requiredInterface) {
         requiredInterface->AddFunction("GetPositionCartesian", GetPositionCartesian);
     }
 
     // provided interfaces
-    mtsProvidedInterface * providedInterface;
-    providedInterface = AddProvidedInterface("ProvidesPositionCartesian");
+    mtsInterfaceProvided * providedInterface;
+    providedInterface = AddInterfaceProvided("ProvidesPositionCartesian");
     if (providedInterface) {
         StateTable.AddData(FrameSend, "FrameSend");
         providedInterface->AddCommandReadState(StateTable, FrameSend, "GetPositionCartesian");
