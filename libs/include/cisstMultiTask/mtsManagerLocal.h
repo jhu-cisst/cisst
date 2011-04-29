@@ -302,7 +302,8 @@ public:
     //  Component Management
     //-------------------------------------------------------------------------
     /*! \brief Create a component.  Does not add it to the local component manager. */
-    mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName);
+    mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName,
+                                              const std::string & constructorArgSerialized);
 
     /*! \brief Add a component to this local component manager.
         \param component Component instance to be added */

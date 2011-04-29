@@ -38,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #undef CISST_THIS_LIBRARY_AS_DLL
 
 class CISST_EXPORT clockComponent: public mtsComponent {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
  protected:
 

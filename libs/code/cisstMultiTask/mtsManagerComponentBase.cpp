@@ -37,6 +37,7 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided 
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired       = "InterfaceGCMRequired";
 // Names of commands
 const std::string mtsManagerComponentBase::CommandNames::ComponentCreate  = "ComponentCreate";
+const std::string mtsManagerComponentBase::CommandNames::ComponentConfigure  = "ComponentConfigure";
 const std::string mtsManagerComponentBase::CommandNames::ComponentConnect = "Connect";
 const std::string mtsManagerComponentBase::CommandNames::ComponentDisconnect = "Disconnect";
 const std::string mtsManagerComponentBase::CommandNames::ComponentStart   = "ComponentStart";
@@ -47,6 +48,7 @@ const std::string mtsManagerComponentBase::CommandNames::GetNamesOfProcesses  = 
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfComponents = "GetNamesOfComponents";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces = "GetNamesOfInterfaces";
 const std::string mtsManagerComponentBase::CommandNames::GetListOfConnections = "GetListOfConnections";
+const std::string mtsManagerComponentBase::CommandNames::GetListOfComponentClasses = "GetListOfComponentClasses";
 const std::string mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription = "GetInterfaceProvidedDescription";
 const std::string mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription = "GetInterfaceRequiredDescription";
 const std::string mtsManagerComponentBase::CommandNames::GetEndUserInterface = "GetEndUserInterface";

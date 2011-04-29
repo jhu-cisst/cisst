@@ -29,9 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class cmnClassRegister;
 
-template <bool _hasDynamicCreation, class _class>
-class cmnClassServices;
-
 class cmnClassServicesBase;
 
 class cmnDeSerializer;

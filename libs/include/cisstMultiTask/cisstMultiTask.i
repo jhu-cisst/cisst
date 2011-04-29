@@ -71,6 +71,9 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "cisstMultiTask/mtsExecutionResult.h"
 
+// Wrap base class
+%include "cisstMultiTask/mtsGenericObject.h"
+
 // Wrap commands
 %include "cisstMultiTask/mtsCommandBase.h"
 %include "cisstMultiTask/mtsCommandVoid.h"
@@ -465,10 +468,13 @@ http://www.cisst.org/cisst/license.txt.
                         return
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
-                    manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
-                    # PK TEMP: need time.sleep until blocking commands supported over network
-                    time.sleep(1.0)
-                    interfaceRequired.UpdateFromC()
+                    if interfaceRequired:
+                        manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
+                        # PK TEMP: need time.sleep until blocking commands supported over network
+                        time.sleep(1.0)
+                        interfaceRequired.UpdateFromC()
+                    else:
+                        print 'Unable to add required interface for ', interfaceName
                     return interfaceRequired
                 else:
                     print 'Parameter error: must specify (process, component, interface) or (component, interface)'
@@ -610,9 +616,6 @@ public:
 %include "cisstMultiTask/mtsCollectorBase.h"
 %include "cisstMultiTask/mtsCollectorState.h"
 
-// Wrap base class
-%include "cisstMultiTask/mtsGenericObject.h"
-
 // Wrap some basic types
 %include "cisstMultiTask/mtsGenericObjectProxy.h"
 %define MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
@@ -648,6 +651,8 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 %include "cisstMultiTask/mtsParameterTypes.h"
 %template(mtsDescriptionConnectionVec) std::vector<mtsDescriptionConnection>;
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVecProxy, mtsDescriptionConnectionVec);
+%template(mtsDescriptionComponentClassVec) std::vector<mtsDescriptionComponentClass>;
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionComponentClassVecProxy, mtsDescriptionComponentClassVec);
 
 %include "cisstMultiTask/mtsComponentState.h"
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsComponentStateProxy, mtsComponentState);

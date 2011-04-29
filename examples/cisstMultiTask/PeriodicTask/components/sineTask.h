@@ -36,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT sineTask: public mtsTaskPeriodic {
     // used to control the log level, "Run Error" by default
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
  protected:
 
     // macros used by the cisst component generator
@@ -75,6 +75,7 @@ class CISST_EXPORT sineTask: public mtsTaskPeriodic {
     // interval between calls to the periodic Run).  Also used to
     // populate the interface(s)
     sineTask(const std::string & taskName, double period);
+    sineTask(const mtsTaskPeriodicConstructorArg &arg);
     ~sineTask() {};
     // all four methods are pure virtual in mtsTask
     void Configure(const std::string & CMN_UNUSED(filename)) {};
