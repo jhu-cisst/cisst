@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 ********************************/
 
 #include <iostream>
-
+#include <cisstVector/vctDynamicNArray.h>
 
 template <class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayTypemapsTest

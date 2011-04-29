@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 ********************************/
 
 #include <iostream>
+#include <cisstVector/vctDynamicVector.h>
+#include <cisstVector/vctRandom.h>
 
 typedef vct::size_type size_type;
 
