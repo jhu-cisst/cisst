@@ -29,16 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 ///////////////////////////////////
 
 #define _OnSingleThread(_info) \
-            if((_info)->id==0)
+            if((_info)->ID==0)
 #define _ParallelLoop(_info, _idx, _count) \
-            _idx=(_info)->id*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
-            for(const unsigned int _end=std::min((_count),((_info)->id+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
+            _idx=(_info)->ID*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
+            for(const unsigned int _end=std::min((_count),((_info)->ID+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
 #define _ParallelInterleavedLoop(_info, _idx, _count) \
-            _idx=(_info)->id;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
+            _idx=(_info)->ID;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
 #define _GetParallelSubRange(_info, _count, _from, _to) \
-            _to=(_count)/(_info)->count+1;_from=(_info)->id*_to;_to+=_from;if(_to>(_count)){_to=(_count);}
+            _to=(_count)/(_info)->count+1;_from=(_info)->ID*_to;_to+=_from;if(_to>(_count)){_to=(_count);}
 #define _SynchronizeThreads(_info) \
-            if((_info)->count>1){if((_info)->sync->Sync((_info)->id)!=SVL_SYNC_OK){return SVL_FAIL;}}
+            if((_info)->count>1){if((_info)->sync->Sync((_info)->ID)!=SVL_SYNC_OK){return SVL_FAIL;}}
 #define _CriticalSection(_info) \
             if((_info)->count>1){(_info)->cs->Enter();}for(bool _incs=true;_incs&&((_info)->count>1);_incs=false,(_info)->cs->Leave())
 

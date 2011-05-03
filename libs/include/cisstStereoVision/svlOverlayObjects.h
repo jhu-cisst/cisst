@@ -555,6 +555,9 @@ public:
     unsigned int GetBorderWidth() const;
     svlRGB GetBorderColor() const;
 
+    int GetValueInImagePos(double value, int & imagepos) const;
+    int GetImagePosInValue(int imagepos, double & value) const;
+
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
 

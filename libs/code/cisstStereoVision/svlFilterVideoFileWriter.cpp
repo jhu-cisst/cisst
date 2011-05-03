@@ -150,7 +150,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
             // Codec is responsible for thread synchronzation
             if (Codec[idx] && Codec[idx]->Write(procInfo, *img, idx) != SVL_OK) {
                 CMN_LOG_CLASS_INIT_ERROR << "Process: failed to write video frame on channel: " << idx
-                                         << ", in thread: " << procInfo->id << std::endl;
+                                         << ", in thread: " << procInfo->ID << std::endl;
                 ErrorOnChannel[idx] = true;
                 ErrorInProcess      = true;
             }

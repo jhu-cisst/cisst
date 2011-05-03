@@ -53,7 +53,7 @@ public:
     };
 
     typedef struct _DeviceInfo {
-	    int id;
+	    int ID;
 	    char name[SVL_VCS_STRING_LENGTH];
         PlatformType platform;
 	    int inputcount;

@@ -471,7 +471,7 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
     const int rightborder  = ROI.right  - TemplateRadius;
     const int bottomborder = ROI.bottom - TemplateRadius;
     const unsigned int targetcount = Targets.size();
-    const unsigned int target_from = procInfo->id;
+    const unsigned int target_from = procInfo->ID;
     const unsigned int target_step = procInfo->count;
     const unsigned int scalem1 = Scale - 1;
     unsigned int templatesize = TemplateRadius * 2 + 1;

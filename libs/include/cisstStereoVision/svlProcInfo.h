@@ -34,7 +34,7 @@ class svlSyncPoint;
 struct CISST_EXPORT svlProcInfo
 {
     unsigned int        count;
-    unsigned int        id;
+    unsigned int        ID;
     svlSyncPoint*       sync;
     osaCriticalSection* cs;
 };

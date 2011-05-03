@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 class svlWindowWin32
 {
 public:
-    svlWindowWin32(unsigned int id);
+    svlWindowWin32(unsigned int _id);
     virtual ~svlWindowWin32();
 
     virtual int Create(unsigned int width, unsigned int height, bool show,

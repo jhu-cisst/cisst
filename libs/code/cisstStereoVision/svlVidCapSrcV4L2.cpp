@@ -175,7 +175,7 @@ int svlVidCapSrcV4L2::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **de
                     tempinfo[counter].platform = svlFilterSourceVideoCapture::LinVideo4Linux2;
 
                     // id
-                    tempinfo[counter].id = i;
+                    tempinfo[counter].ID = i;
 
                     // name
                     sprintf(tempinfo[counter].name, "%s (%s)", devprops.card, tempname);

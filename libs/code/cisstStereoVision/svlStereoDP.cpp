@@ -56,7 +56,7 @@ svlStereoDP::svlStereoDP(int width, int height,
 {
     // ScoreTruncationLevel has been determined
     // experimentally in the Scharstein-Szelinski paper.
-    ScoreTruncationLevel = 25;
+    ScoreTruncationLevel = 255;
 
     // DiscontinuityThreshold is the threshold level
     // above which we assume that there is discontinuity
@@ -66,7 +66,7 @@ svlStereoDP::svlStereoDP(int width, int height,
     //    downscaled processing, this number is automatically
     //    compensated with the scaling factor.)
     if (scale == 0) DiscontinuityThreshold = 2.0;
-    else DiscontinuityThreshold = 1.5;
+    else DiscontinuityThreshold = 1.0;
 
     // MaxDisparityDifference defines what the maximal
     // difference may be between two neighboring disparities.
@@ -76,7 +76,7 @@ svlStereoDP::svlStereoDP(int width, int height,
     //    the original, high resolution image. In case of
     //    downscaled processing, this number is automatically
     //    compensated with the scaling factor.)
-    MaxDisparityDifference = 5;
+    MaxDisparityDifference = 3;
 
     // Initializing filter parameters
     ScaleFactor = scale;
@@ -370,7 +370,7 @@ void svlStereoDP::DisparityOptimization()
         /////////////////////////////////////////////
         // processing single node at position (i, j)
 
-            if (FrameCounter > 0) {
+            if (0) {//FrameCounter > 0) {
             // if not the first frame:
             //    perform narrowed search
 

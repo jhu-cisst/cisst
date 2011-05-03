@@ -203,7 +203,7 @@ int svlVidCapSrcOpenCV::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **
             deviceinfo[0][i].platform = svlFilterSourceVideoCapture::OpenCV;
 
             // id
-            deviceinfo[0][i].id = OCVDeviceID[i];
+            deviceinfo[0][i].ID = OCVDeviceID[i];
 
             // name
             std::stringstream strstr;

@@ -186,7 +186,7 @@ void svlVidCapSrcDC1394Context::Enumerate()
         else strcpy(tempvendor, "Unknown device vendor");
 
         // Fill device properties structure
-        tempinfo[NumberOfCameras].id = i;
+        tempinfo[NumberOfCameras].ID = i;
         if (BestOpMode[i] == DC1394_OPERATION_MODE_1394B) {
             sprintf(tempinfo[NumberOfCameras].name, "%s (%s) [1394B]", tempname, tempvendor);
         }

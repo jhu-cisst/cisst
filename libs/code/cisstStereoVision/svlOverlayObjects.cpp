@@ -1532,6 +1532,48 @@ svlRGB svlOverlayStaticBar::GetBorderColor() const
     return BorderColor;
 }
 
+int svlOverlayStaticBar::GetValueInImagePos(double value, int & imagepos) const
+{
+    int ret = SVL_OK;
+
+    double range;
+    if (Range[0] != Range[1]) range = Range[1] - Range[0];
+    else range = 100.0;
+    double position = (value - Range[0]) / range;
+    if (position < 0.0 || position > 1.0) ret = SVL_FAIL;
+
+    if (Vertical) {
+        imagepos = Rect.bottom - static_cast<int>(static_cast<double>(Rect.bottom - Rect.top) * position);
+    }
+    else {
+        imagepos = Rect.left + static_cast<int>(static_cast<double>(Rect.right - Rect.left) * position);
+    }
+
+    return ret;
+}
+
+int svlOverlayStaticBar::GetImagePosInValue(int imagepos, double & value) const
+{
+    int ret = SVL_OK;
+
+    double range;
+    if (Range[0] != Range[1]) range = Range[1] - Range[0];
+    else range = 100.0;
+
+    if (Vertical) {
+        if (imagepos < static_cast<int>(Rect.top) || imagepos > static_cast<int>(Rect.bottom)) ret = SVL_FAIL;
+
+        value = range * static_cast<double>(Rect.bottom - imagepos) / (Rect.bottom - Rect.top);
+    }
+    else {
+        if (imagepos < static_cast<int>(Rect.left) || imagepos > static_cast<int>(Rect.right)) ret = SVL_FAIL;
+
+        value = range * static_cast<double>(imagepos - Rect.left) / (Rect.right - Rect.left);
+    }
+
+    return ret;
+}
+
 void svlOverlayStaticBar::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
     svlRect rect1, rect2;

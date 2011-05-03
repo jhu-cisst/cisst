@@ -417,7 +417,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
     if (!Opened || Writing) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     unsigned int i, used, width, height, partcount, compressedpartsize, offset = 0, strmoffset;
     unsigned long longsize;
@@ -511,7 +511,7 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
         if (err) return SVL_FAIL;
     }
 
-    const unsigned int procid = procInfo->id;
+    const unsigned int procid = procInfo->ID;
     const unsigned int proccount = procInfo->count;
     unsigned int i, start, end, size, offset;
     unsigned char* strmbuf = SendBuffer[0]->GetPushBuffer();

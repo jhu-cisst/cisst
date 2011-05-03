@@ -38,7 +38,7 @@ public:
 
     int Count(unsigned int count);
     unsigned int Count();
-    int Sync(unsigned int id);
+    int Sync(unsigned int _id);
     void ReleaseAll();
 
 private:

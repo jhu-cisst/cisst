@@ -314,9 +314,9 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
         _SynchronizeThreads(procInfo);
 
-        vch = procInfo->id >> 1;
+        vch = procInfo->ID >> 1;
         if (vch < VideoChannels && Trackers[vch]) {
-            WarpImage(img, vch, procInfo->id);
+            WarpImage(img, vch, procInfo->ID);
         }
     }
 
@@ -785,10 +785,10 @@ int svlImageTracker::PreProcessImage(svlSampleImage & CMN_UNUSED(image), unsigne
 int svlImageTracker::Track(svlProcInfo* procInfo, svlSampleImage & image, unsigned int videoch)
 {
     if (procInfo->count > videoch) {
-        if (procInfo->id == videoch) return Track(image, videoch);
+        if (procInfo->ID == videoch) return Track(image, videoch);
     }
     else {
-        if (procInfo->id == 0) return Track(image, videoch);
+        if (procInfo->ID == 0) return Track(image, videoch);
     }
     return SVL_OK;
 }

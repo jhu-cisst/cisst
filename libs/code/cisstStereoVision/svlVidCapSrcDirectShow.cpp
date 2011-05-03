@@ -240,7 +240,7 @@ int svlVidCapSrcDirectShow::GetDeviceList(svlFilterSourceVideoCapture::DeviceInf
         for (i = 0; i < counter; i ++) {
             memcpy(deviceinfo[0][i].name, devnames[i], std::min(static_cast<int>(strlen(devnames[i])), static_cast<int>(SVL_VCS_STRING_LENGTH) - 1));
             if (TestOpen(i) == SVL_OK) {
-                deviceinfo[0][i].id = i;
+                deviceinfo[0][i].ID = i;
                 deviceinfo[0][i].testok = true;
                 deviceinfo[0][i].platform = svlFilterSourceVideoCapture::WinDirectShow;
                 GetDeviceInputs(pTestCapFilt, deviceinfo[0] + i);
