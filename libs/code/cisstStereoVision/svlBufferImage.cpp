@@ -29,19 +29,20 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlBufferImage class ********/
 /*********************************/
 
-svlBufferImage::svlBufferImage(unsigned int width, unsigned int height)
+svlBufferImage::svlBufferImage(unsigned int width, unsigned int height, unsigned int  number_of_channels )
 {
-    Buffer[0].SetSize(height, width * 3);
-    Buffer[1].SetSize(height, width * 3);
-    Buffer[2].SetSize(height, width * 3);
+    my_number_of_channels = number_of_channels;
+    Buffer[0].SetSize(height, width * my_number_of_channels);
+    Buffer[1].SetSize(height, width * my_number_of_channels);
+    Buffer[2].SetSize(height, width * my_number_of_channels);
 
 #if CISST_SVL_HAS_OPENCV
-    OCVImage[0] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
-    OCVImage[1] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
-    OCVImage[2] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
-    cvSetData(OCVImage[0], Buffer[0].Pointer(), width * 3);
-    cvSetData(OCVImage[1], Buffer[1].Pointer(), width * 3);
-    cvSetData(OCVImage[2], Buffer[2].Pointer(), width * 3);
+    OCVImage[0] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, my_number_of_channels);
+    OCVImage[1] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, my_number_of_channels);
+    OCVImage[2] = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, my_number_of_channels);
+    cvSetData(OCVImage[0], Buffer[0].Pointer(), width * my_number_of_channels);
+    cvSetData(OCVImage[1], Buffer[1].Pointer(), width * my_number_of_channels);
+    cvSetData(OCVImage[2], Buffer[2].Pointer(), width * my_number_of_channels);
 #endif // CISST_SVL_HAS_OPENCV
 
     Latest = 0;
@@ -61,7 +62,7 @@ svlBufferImage::~svlBufferImage()
 
 unsigned int svlBufferImage::GetWidth()
 {
-    return (Buffer[0].width() / 3);
+    return (Buffer[0].width() / my_number_of_channels);
 }
 
 unsigned int svlBufferImage::GetHeight()
@@ -106,7 +107,7 @@ void svlBufferImage::Push()
 bool svlBufferImage::Push(const unsigned char* buffer, unsigned int size, bool topdown)
 {
     unsigned int datasize = Buffer[0].width() * Buffer[0].height();
-    if (buffer == 0 || size < datasize) return false;
+    if (buffer == 0 || size != datasize) return false;
 
     bool ret = true;
 
@@ -138,12 +139,12 @@ bool svlBufferImage::PushIplImage(IplImage* image)
     const bool is_4_channel_input_padded = true; // Must be a bug in OpenCV 2.2
     const int channels = image->widthStep / image->width;
 
-    if (channels == 3) { // No conversion needed
+    if (channels == my_number_of_channels) { // No conversion needed
         return Push(reinterpret_cast<unsigned char*>(image->imageData), GetDataSize(), image->origin != IPL_ORIGIN_TL);
     }
     else { // Conversion needed
         const int pixelcount = image->width * image->height;
-        const int datasize = pixelcount * 3;
+        const int datasize = pixelcount * my_number_of_channels;
 
         if (OCVConvBuffer.size() < static_cast<unsigned int>(datasize)) OCVConvBuffer.SetSize(datasize);
 
@@ -159,7 +160,7 @@ bool svlBufferImage::PushIplImage(IplImage* image)
             case 4:
                 if (is_4_channel_input_padded) {
                     const int stride_in  = image->width * 4;
-                    const int stride_out = image->width * 3;
+                    const int stride_out = image->width * my_number_of_channels;
                     const int height = image->height;
                     unsigned char* input  = reinterpret_cast<unsigned char*>(image->imageData);
                     unsigned char* output = OCVConvBuffer.Pointer();

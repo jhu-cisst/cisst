@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT svlBufferImage
 {
 public:
-    svlBufferImage(unsigned int width, unsigned int height);
+    svlBufferImage(unsigned int width, unsigned int height, unsigned int  number_of_channels = 3);
     ~svlBufferImage();
 
     unsigned int GetWidth();
@@ -65,6 +65,7 @@ private:
     int InitializationCounter;
     osaThreadSignal NewFrameEvent;
     svlImageRGB Buffer[3];
+    unsigned int my_number_of_channels;
 #if CISST_SVL_HAS_OPENCV
     IplImage* OCVImage[3];
     vctDynamicVector<unsigned char> OCVConvBuffer;

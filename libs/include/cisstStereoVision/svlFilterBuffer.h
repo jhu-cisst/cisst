@@ -34,7 +34,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#define VBsize 10
 
 
 typedef vctDynamicNArrayRef<unsigned char,3> NumpyNArrayType;
@@ -63,14 +62,14 @@ public:
     unsigned int GetHeight(unsigned int videoch = 0);
     unsigned int GetDataChannels();
 
-    vctDynamicMatrixRef<unsigned char> GetCurrentFrame();
-    int GetCurrentFrameNArray(NumpyNArrayType matrix_in);
+    vctDynamicMatrixRef<unsigned char> GetCurrentFrame(bool wait_for_new);
+    int GetCurrentFrameNArray(NumpyNArrayType matrix_in,bool wait_for_new);
+    void SetProcessOneFrame(bool state_in) {ProcessOneFrame = state_in;}
 
 
 private:
-    int VideoBindex;
-    vctDynamicMatrix<unsigned char> VideoBuffer[VBsize];
-    double VideoTimeStamp[VBsize];
+    svlBufferImage * myBufferImage;
+    bool ProcessOneFrame;
     osaThreadSignal IsFrameSetEvent;
     bool IsFrameSet;
 

@@ -24,7 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 
 svlFilterBuffer::svlFilterBuffer() :
     svlFilterBase(),
-	VideoBindex(0),
+        myBufferImage(0),
+        ProcessOneFrame(false),
         IsFrameSet(false),
         OutputData(0)
 {
@@ -41,14 +42,15 @@ svlFilterBuffer::svlFilterBuffer() :
 
 svlFilterBuffer::~svlFilterBuffer()
 {
+    delete myBufferImage;
+    myBufferImage = 0;
 }
 
 int svlFilterBuffer::Initialize(svlSample* inputdata, svlSample* &syncOutput)
 {
     OutputData = inputdata;
 	
-	for (int i=0; i<VBsize; i++)
-			VideoBuffer[i].SetSize(GetHeight(),  GetWidth() * GetDataChannels());
+    myBufferImage = new svlBufferImage(GetWidth(),GetHeight(),GetDataChannels());
 
     syncOutput = OutputData;
 
@@ -57,28 +59,27 @@ int svlFilterBuffer::Initialize(svlSample* inputdata, svlSample* &syncOutput)
 
 int svlFilterBuffer::Process(svlProcInfo* procInfo, svlSample* inputdata, svlSample* &syncOutput)
 {
-	//The callback call should be single threaded just in case
-	svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
+    //The callback call should be single threaded just in case
+    svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
 	
     syncOutput = OutputData;
 
+
+
+
     _OnSingleThread(procInfo) {
-		int tmpind = 0;
-		if(!IsFrameSet){
-				IsFrameSetEvent.Raise();
-				IsFrameSet = true;
-			}
-					
-			tmpind = VideoBindex + 1;
-			tmpind %= VBsize;
-
-			VideoTimeStamp[tmpind] = inputdata->GetTimestamp();
-
-			// Get Image Data
-                        VideoBuffer[tmpind].FastCopyOf(img->GetMatrixRef());
-
-			VideoBindex = tmpind;
+        myBufferImage->Push(img->GetMatrixRef().Pointer(),img->GetMatrixRef().size(),false);
     }
+
+    if(!IsFrameSet){
+        IsFrameSetEvent.Raise();
+        IsFrameSet = true;
+    }
+
+
+    if(ProcessOneFrame)
+        return SVL_STOP_REQUEST;
+
     return SVL_OK;
 }
 
@@ -102,34 +103,52 @@ unsigned int svlFilterBuffer::GetDataChannels()
 }
 
 
-vctDynamicMatrixRef<unsigned char> svlFilterBuffer::GetCurrentFrame()
+vctDynamicMatrixRef<unsigned char> svlFilterBuffer::GetCurrentFrame(bool wait_for_new)
 {
-			if(!IsFrameSet){
-				IsFrameSetEvent.Wait();
-			}	
-			return VideoBuffer[VideoBindex];
-		}
+    if(!IsFrameSet){
+        IsFrameSetEvent.Wait();
+        if(ProcessOneFrame)
+            IsFrameSet = false;
+    }
+
+    svlImageRGB* current_image = myBufferImage->Pull(wait_for_new);
+    if(current_image){
+        return vctDynamicMatrixRef<unsigned char>(*current_image);
+    }else{
+        current_image = myBufferImage->Pull(false);
+        return vctDynamicMatrixRef<unsigned char>(*current_image);
+    }
+}
 
 
-int svlFilterBuffer::GetCurrentFrameNArray(NumpyNArrayType matrix_in)
+int svlFilterBuffer::GetCurrentFrameNArray(NumpyNArrayType matrix_in,bool wait_for_new)
 {
-			if(!IsFrameSet){
-				IsFrameSetEvent.Wait();
-			}
+    if(!IsFrameSet){
+        IsFrameSetEvent.Wait();
+        if(ProcessOneFrame)
+            IsFrameSet = false;
+    }
 
-		    vctDynamicMatrixRef<unsigned char> currentImage = VideoBuffer[VideoBindex];
+    svlImageRGB* current_image = myBufferImage->Pull(wait_for_new);
+     vctDynamicMatrixRef<unsigned char> currentImage;
+    if(current_image){
+        currentImage.SetRef(*current_image);
+    }else{
+        current_image = myBufferImage->Pull(false);
+        currentImage.SetRef(*current_image);
+    }
 
-			SizeType svlBufferNArrayRefSize(GetHeight(), GetWidth(), GetDataChannels());
-			StrideType svlBufferNArrayRefStride(currentImage.row_stride(), GetDataChannels(),currentImage.col_stride());
-			svlBufferNArrayRef.SetRef(currentImage.Pointer(),svlBufferNArrayRefSize,svlBufferNArrayRefStride);
+    SizeType svlBufferNArrayRefSize(GetHeight(), GetWidth(), GetDataChannels());
+    StrideType svlBufferNArrayRefStride(currentImage.row_stride(), GetDataChannels(),currentImage.col_stride());
+    svlBufferNArrayRef.SetRef(currentImage.Pointer(),svlBufferNArrayRefSize,svlBufferNArrayRefStride);
 
-			//Set RGA submatrix to the current image
-			//VideoBuffer[VideoBindex]
-			SizeType startPosition(0,0,0);
-			SizeType length(GetHeight(),GetWidth(),GetDataChannels());
-			numpyNArrayRef.SubarrayOf(matrix_in,startPosition,length);
+    //Set RGA submatrix to the current image
+    //VideoBuffer[VideoBindex]
+    SizeType startPosition(0,0,0);
+    SizeType length(GetHeight(),GetWidth(),GetDataChannels());
+    numpyNArrayRef.SubarrayOf(matrix_in,startPosition,length);
 
-			numpyNArrayRef.Assign(svlBufferNArrayRef);
+    numpyNArrayRef.Assign(svlBufferNArrayRef);
 
-			return SVL_OK;
-		}
+    return SVL_OK;
+}

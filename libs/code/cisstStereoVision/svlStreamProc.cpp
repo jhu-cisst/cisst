@@ -230,7 +230,7 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
                 }
             }
         }
-        if (status < 0) break;
+        if (status < 0 || status == SVL_STOP_REQUEST) break;
 
         // incrementing frame counter
         counter ++;
