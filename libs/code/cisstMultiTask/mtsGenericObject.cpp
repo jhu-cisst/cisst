@@ -72,6 +72,25 @@ void mtsGenericObject::ToStreamRaw(std::ostream & outputStream, const char delim
 }
 
 
+bool mtsGenericObject::FromStreamRaw(std::istream & inputStream, const char delimiter)
+{
+    // For now, only deal with space delimiters
+    if (!isspace(delimiter)) {
+        inputStream.setstate(std::ios::failbit | std::ios::badbit);
+        return false;
+    }
+    inputStream >> TimestampMember;
+    if (inputStream.fail())
+        return false;
+    inputStream >> AutomaticTimestampMember;
+    if (inputStream.fail())
+        return false;
+    inputStream >> ValidMember;
+    if (inputStream.fail())
+        return false;
+    return (typeid(this) == typeid(mtsGenericObject));
+}
+
 void mtsGenericObject::SerializeRaw(std::ostream & outputStream) const {
     cmnSerializeRaw(outputStream, this->Timestamp());
     cmnSerializeRaw(outputStream, this->AutomaticTimestamp());

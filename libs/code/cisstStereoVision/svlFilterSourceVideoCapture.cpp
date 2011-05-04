@@ -555,7 +555,7 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
 
             if (EnumeratedDevices[DeviceID[i]].platform == APIPlatforms[j]) {
                 // getting API specific device and channel IDs
-                APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
+                APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].ID;
                 APIChannelID[i] = chperapi[j];
 
                 API[i] = j;
@@ -724,7 +724,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
         // Create temporary DirectShow capture module and initialize it
         svlVidCapSrcDirectShow device;
         device.SetStreamCount(1);
-        if (device.SetDevice(EnumeratedDevices[DeviceID[videoch]].id,
+        if (device.SetDevice(EnumeratedDevices[DeviceID[videoch]].ID,
                              InputID[videoch]) != SVL_OK) return SVL_VCS_UNABLE_TO_OPEN;
         // If device properties are already available, load them up to the device
         if (DevSpecConfigBuffer[videoch] && DevSpecConfigBufferSize[videoch] > 0) {

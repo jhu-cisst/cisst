@@ -193,7 +193,7 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
             svlConverter::ConvertImage(dynamic_cast<svlSampleImage*>(syncInput),
                                        dynamic_cast<svlSampleImage*>(OutputSample),
                                        param,
-                                       procInfo->count, procInfo->id);
+                                       procInfo->count, procInfo->ID);
 
             return SVL_OK;
         }

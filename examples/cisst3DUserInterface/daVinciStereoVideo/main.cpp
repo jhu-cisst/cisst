@@ -62,13 +62,6 @@ int main()
     componentManager->AddComponent(daVinci);
 
     ui3Manager guiManager;
-
-#if HAS_ULTRASOUDS
-    BehaviorLUS behavior3("BehaviorLUS");
-    guiManager.AddBehavior(&behavior3,       // behavior reference
-                           1,             // position in the menu bar: default
-                           "LUS.png");            // icon file: no texture
-#else
     MeasurementBehavior measurementBehavior("Measure");
     guiManager.AddBehavior(&measurementBehavior,
                            1,
@@ -89,39 +82,42 @@ int main()
                            4,
                            "move.png");
 
-#endif
-
 #if HAS_ULTRASOUDS
-    svlStreamManager vidUltrasoundStream(1);  // running on multiple threads
+    svlInitialize();
 
-    svlFilterSourceVideoCapture vidUltrasoundSource(false); // mono source
+    BehaviorLUS lus("BehaviorLUS");
+    guiManager.AddBehavior(&lus,       // behavior reference
+                           5,             // position in the menu bar: default
+                           "LUS.png");            // icon file: no texture
+
+    svlStreamManager vidUltrasoundStream(1);  // running on single thread
+
+    svlFilterSourceVideoCapture vidUltrasoundSource(1); // mono source
     if (vidUltrasoundSource.LoadSettings("usvideo.dat") != SVL_OK) {
         cout << "Setup Ultrasound video input:" << endl;
         vidUltrasoundSource.DialogSetup();
         vidUltrasoundSource.SaveSettings("usvideo.dat");
     }
 
-    vidUltrasoundStream.Trunk().Append(&vidUltrasoundSource);  //this crashes
+    vidUltrasoundStream.SetSourceFilter(&vidUltrasoundSource);
     
     // add image cropper
     svlFilterImageCropper vidUltrasoundCropper;
     vidUltrasoundCropper.SetRectangle(186, 27, 186 + 360 - 1, 27 + 332 - 1);
-    vidUltrasoundStream.Trunk().Append(&vidUltrasoundCropper);
-
+    vidUltrasoundSource.GetOutput()->Connect(vidUltrasoundCropper.GetInput());
     // add guiManager as a filter to the pipeline, so it will receive video frames
-    // "StereoVideo" is defined in the UI Manager as a possible video interface    
-    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
-
+    // "StereoVideo" is defined in the UI Manager as a possible video interface
+    vidUltrasoundCropper.GetOutput()->Connect(lus.GetStreamSamplerFilter("USVideo")->GetInput());
 
     // add debug window
     svlFilterImageWindow vidUltrasoundWindow;
-    vidUltrasoundStream.Trunk().Append(&vidUltrasoundWindow);
+    lus.GetStreamSamplerFilter("USVideo")->GetOutput()->Connect(vidUltrasoundWindow.GetInput());
 
     // save one frame
-    svlFilterImageFileWriter vidUltrasoundWriter;
-    vidUltrasoundWriter.SetFilePath("usimage", "bmp");
-    vidUltrasoundWriter.Record(1);
-    vidUltrasoundStream.Trunk().Append(&vidUltrasoundWriter);
+    // svlFilterImageFileWriter vidUltrasoundWriter;
+    // vidUltrasoundWriter.SetFilePath("usimage", "bmp");
+    // vidUltrasoundWriter.Record(1);
+    // vidUltrasoundStream.Trunk().Append(&vidUltrasoundWriter);
 
     vidUltrasoundStream.Initialize();
 #endif
@@ -244,18 +240,14 @@ int main()
         ch = cmnGetChar();
         osaSleep(100.0 * cmn_ms);
     } while (ch != 'q');
-
-	
+#if HAS_ULTRASOUDS
+	vidUltrasoundStream.Release();
+#endif
 	std::cout << "Stopping components" << std::endl;
     componentManager->KillAll();
 	componentManager->WaitForStateAll(mtsComponentState::READY, 10.0 * cmn_s);
 
     componentManager->Cleanup();
-
-#if HAS_ULTRASOUDS
-    vidUltrasoundStream.RemoveAll();
-#endif
-
     return 0;
 }
 

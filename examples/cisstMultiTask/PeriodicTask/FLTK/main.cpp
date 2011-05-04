@@ -19,12 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
-
 #include <components/sineTask.h>
 #include <components/clockComponent.h>
+
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "displayTask.h"
 #include "displayUI.h"

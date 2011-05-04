@@ -61,7 +61,7 @@ void serverTask<_dataType>::Void(void)
     }
     Fl::unlock();
     Fl::awake();
-    osaSleep(10.0 * cmn_s);
+    //osaSleep(10.0 * cmn_s);
 }
 
 

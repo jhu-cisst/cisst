@@ -25,8 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(serverQtComponent);
 
 
-serverQtComponent::serverQtComponent(const std::string & taskName):
-    mtsDevice(taskName),
+serverQtComponent::serverQtComponent(const std::string & componentName):
+    mtsComponent(componentName),
     VoidCounter(0),
     ReadValue(0),
     QualifiedReadValue(0)
@@ -45,12 +45,12 @@ serverQtComponent::serverQtComponent(const std::string & taskName):
     // create the user interface
     ServerWidget.setupUi(&CentralWidget);
     MainWindow.setCentralWidget(&CentralWidget);
-    MainWindow.setWindowTitle(QString::fromStdString(taskName));
+    MainWindow.setWindowTitle(QString::fromStdString(componentName));
     MainWindow.show();
 
     // connect Qt signals to slots
     QObject::connect(this, SIGNAL(VoidQSignal(int)),
-                     ServerWidget.VoidValue, SLOT(setNum(int)));    
+                     ServerWidget.VoidValue, SLOT(setNum(int)));
     QObject::connect(this, SIGNAL(WriteQSignal(int)),
                      ServerWidget.WriteValue, SLOT(setNum(int)));
     QObject::connect(ServerWidget.ReadSlider, SIGNAL(valueChanged(int)),

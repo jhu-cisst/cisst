@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "svlTrackerCisstBase.h"
 
-#include <cisstCommon.h>
 #include <cisstConfig.h>
 
 #include "vctExtraTemplateFunctions.h"

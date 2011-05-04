@@ -136,7 +136,7 @@ struct CISST_EXPORT svlBlob
     svlBlob();
     void Assign(const svlBlob & blob);
 
-    unsigned int id;
+    unsigned int ID;
     bool         used;
     int          left;
     int          right;

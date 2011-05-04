@@ -266,7 +266,7 @@ int svlVideoCodecOpenCV::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
     if (!Opened || Writing) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     // Allocate image buffer if not done yet
     if (Width  != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
@@ -307,7 +307,7 @@ int svlVideoCodecOpenCV::Write(svlProcInfo* procInfo, const svlSampleImage &imag
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     // Return values undocumented: assuming success...
     cvWriteFrame(OCVWriter, image.IplImageRef(videoch));

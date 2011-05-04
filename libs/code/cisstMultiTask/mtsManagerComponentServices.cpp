@@ -35,6 +35,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
         // Dynamic component composition (DCC) services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                                                ServiceComponentManagement.Create);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
+                                               ServiceComponentManagement.Configure);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
@@ -58,6 +60,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetNamesOfInterfaces);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                                                ServiceGetters.GetListOfConnections);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
+                                               ServiceGetters.GetListOfComponentClasses);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
                                                ServiceGetters.GetInterfaceProvidedDescription);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
@@ -100,6 +104,64 @@ bool mtsManagerComponentServices::ComponentCreate(
     ServiceComponentManagement.Create(arg);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: requested component creation: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsManagerComponentServices::ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const
+{
+    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
+    return ComponentCreate(processName, className, constructorArg);
+}
+
+bool mtsManagerComponentServices::ComponentCreate(
+    const std::string& processName, const std::string & className, const mtsGenericObject & constructorArg) const
+{
+    if (!ServiceComponentManagement.Create.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionComponent arg;
+    arg.ProcessName   = processName;
+    arg.ClassName     = className;
+    arg.ComponentName = "(serialized)";
+    std::stringstream buffer;
+    cmnSerializer serializer(buffer);
+    serializer.Serialize(constructorArg);
+    arg.ConstructorArgSerialized = buffer.str();
+
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Create(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: requested component creation: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsManagerComponentServices::ComponentConfigure(const std::string & componentName,
+                                                     const std::string & configString) const
+{
+    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
+    return ComponentConfigure(processName, componentName, configString);
+}
+
+bool mtsManagerComponentServices::ComponentConfigure(
+    const std::string& processName, const std::string & componentName, const std::string & configString) const
+{
+    if (!ServiceComponentManagement.Configure.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentConfigure: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionComponent arg;
+    arg.ProcessName   = processName;
+    arg.ComponentName = componentName;
+    // For now, use ConstructorArgSerialized
+    arg.ConstructorArgSerialized = configString;
+
+    // MJ: TODO: change this with blocking command
+    ServiceComponentManagement.Configure(arg);
 
     return true;
 }
@@ -357,6 +419,21 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetListOfConnections: invalid function - has not been bound to command" << std::endl;
     return listOfConnections;
+}
+
+std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(void) const
+{
+    return GetListOfComponentClasses(mtsManagerLocal::GetInstance()->GetProcessName());
+}
+
+std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(const std::string &processName) const
+{
+    std::vector<mtsDescriptionComponentClass> listOfComponentClasses;
+    if (ServiceGetters.GetListOfComponentClasses.IsValid())
+        ServiceGetters.GetListOfComponentClasses(processName, listOfComponentClasses);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "GetListOfComponentClasses: invalid function - has not been bound to command" << std::endl;
+    return listOfComponentClasses;
 }
 
 InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,

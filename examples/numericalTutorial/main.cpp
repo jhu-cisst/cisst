@@ -3,7 +3,7 @@
 
 /*
   $Id$
- 
+
   Author(s): Anton Deguet
   Created on:	2006-01-12
 
@@ -25,9 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // include what is needed from cisst
 #include <cisstConfig.h>
-#include <cisstCommon.h>
-#include <cisstVector.h>
-#include <cisstNumerical.h>
 
 // system includes
 #include <iostream>
@@ -35,6 +32,14 @@ http://www.cisst.org/cisst/license.txt.
 // to simplify the code
 using namespace std;
 
+#include <cisstVector/vctFixedSizeVector.h>
+#include <cisstVector/vctFixedSizeMatrix.h>
+#include <cisstVector/vctDynamicVector.h>
+#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVector/vctRandom.h>
+
+#include <cisstNumerical/nmrSVD.h>
+#include <cisstNumerical/nmrSVDEconomy.h>
 #include "ExampleSVDUserOutputWorkspace.h"
 #include "ExampleSVDImplicitWorkspace.h"
 #include "ExampleSVDWorkspaceSize.h"
@@ -42,10 +47,16 @@ using namespace std;
 #include "ExampleSVDUpdateMatrixS.h"
 #include "ExampleSVDFixedSize.h"
 #include "ExampleSVDFixedSizeData.h"
+#include <cisstNumerical/nmrLU.h>
 #include "ExampleLUDynamicData.h"
+#include <cisstNumerical/nmrInverse.h>
 #include "ExampleInverse.h"
+#include <cisstNumerical/nmrPInverse.h>
+#include <cisstNumerical/nmrPInverseEconomy.h>
 #include "ExamplePInverse.h"
+#include <cisstNumerical/nmrIsOrthonormal.h>
 #include "ExampleIsOrthonormal.h"
+#include <cisstNumerical/nmrGaussJordanInverse.h>
 #include "ExampleGaussJordanInverse.h"
 
 int main(void)

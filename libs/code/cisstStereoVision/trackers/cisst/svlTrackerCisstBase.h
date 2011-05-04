@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlTrackerCisstBase_h
 #define _svlTrackerCisstBase_h
 
-#include <cisstVector.h>
 #include <cisstStereoVision/svlTypes.h>
 
 

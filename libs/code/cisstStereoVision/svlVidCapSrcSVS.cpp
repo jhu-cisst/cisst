@@ -101,7 +101,7 @@ int svlVidCapSrcSVS::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
     deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[2];
     memset(deviceinfo[0], 0, 2 * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
 
-    deviceinfo[0][0].id = 0;
+    deviceinfo[0][0].ID = 0;
     std::string str = "Small Vision System - Left";
     memset(deviceinfo[0][0].name, 0, SVL_VCS_STRING_LENGTH);
     memcpy(deviceinfo[0][0].name, str.c_str(), str.length());
@@ -110,7 +110,7 @@ int svlVidCapSrcSVS::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
     deviceinfo[0][0].platform = svlFilterSourceVideoCapture::WinSVS;
     deviceinfo[0][0].testok = true;
 
-    deviceinfo[0][1].id = 1;
+    deviceinfo[0][1].ID = 1;
     str = "Small Vision System - Right";
     memset(deviceinfo[0][1].name, 0, SVL_VCS_STRING_LENGTH);
     memcpy(deviceinfo[0][1].name, str.c_str(), str.length());

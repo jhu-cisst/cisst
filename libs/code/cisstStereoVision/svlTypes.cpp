@@ -335,7 +335,7 @@ void svlRGBA::Assign(unsigned char r_, unsigned char g_, unsigned char b_, unsig
 /*************************/
 
 svlBlob::svlBlob() :
-    id(0),
+    ID(0),
     used(false),
     left(0),
     right(0),
@@ -351,7 +351,7 @@ svlBlob::svlBlob() :
 
 void svlBlob::Assign(const svlBlob & blob)
 {
-    id            = blob.id;
+    ID            = blob.ID;
     used          = blob.used;
     left          = blob.left;
     right         = blob.right;

@@ -83,15 +83,15 @@ unsigned int svlSyncPoint::Count()
 //    Waits until all threads check in, then resumes the
 //    execution on all threads.
 // *******************************************************************
-int svlSyncPoint::Sync(unsigned int id)
+int svlSyncPoint::Sync(unsigned int _id)
 {
-    if (id >= ThreadCount) return SVL_SYNC_ERROR;
+    if (_id >= ThreadCount) return SVL_SYNC_ERROR;
 
     CS.Enter();
         CheckedInCounter --;
-        LastChanged = static_cast<int>(id);
+        LastChanged = static_cast<int>(_id);
 
-    if (CheckedInCounter == 0 && LastChanged == static_cast<int>(id)) {
+    if (CheckedInCounter == 0 && LastChanged == static_cast<int>(_id)) {
         // It will happen only in exactly one time,
         // after all threads checked in.
         // We can reset states  in order to prepare
@@ -102,7 +102,7 @@ int svlSyncPoint::Sync(unsigned int id)
         LastChanged = -1;
 
         for (unsigned int i = 0; i < ThreadCount; i ++) {
-            if (i != id) ReleaseEvent[i].Raise();
+            if (i != _id) ReleaseEvent[i].Raise();
         }
 
         CS.Leave();
@@ -113,7 +113,7 @@ int svlSyncPoint::Sync(unsigned int id)
         // We have to wait until all other threads
         // check in.
 
-        ReleaseEvent[id].Wait();
+        ReleaseEvent[_id].Wait();
     }
 
     return SVL_SYNC_OK;

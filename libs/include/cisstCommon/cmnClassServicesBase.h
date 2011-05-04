@@ -97,6 +97,9 @@ class CISST_EXPORT cmnClassServicesBase
     */
     virtual cmnGenericObject * Create(const cmnGenericObject & other) const = 0;
 
+    /*! Create with argument */
+    virtual cmnGenericObject * CreateWithArg(const cmnGenericObject & arg) const = 0;
+
     /*! Placement new using copy constructor */
     virtual bool Create(cmnGenericObject * existing, const cmnGenericObject & other) const = 0;
 
@@ -124,6 +127,15 @@ class CISST_EXPORT cmnClassServicesBase
 
     /*! Get the size of the class */
     virtual size_t GetSize(void) const = 0;
+
+    /*! returns information about what types of constructors are available */
+    virtual bool DefaultConstructorAvailable(void) const = 0;
+    virtual bool CopyConstructorAvailable(void) const = 0;
+    virtual bool OneArgConstructorAvailable(void) const = 0;
+
+    /*! return class services for constructor argument (0 if no class services
+      or does not exist) */
+    virtual const cmnClassServicesBase *GetConstructorArgServices(void) const = 0;
 
     /*! Get the name associated with the class.
 

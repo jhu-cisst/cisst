@@ -56,6 +56,7 @@ public:
     std::string ProcessName;
     std::string ComponentName;
     std::string ClassName;
+    std::string ConstructorArgSerialized;
 
     /*! Default constructor */
     mtsDescriptionComponent() {}
@@ -73,6 +74,49 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponent);
 
+
+//-----------------------------------------------------------------------------
+//  Component Class Description (for dynamic creation)
+//
+class CISST_EXPORT mtsDescriptionComponentClass: public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    std::string ClassName;   // Name of class
+    std::string ArgType;     // Constructor parameter type name (cisst class services)
+    std::string ArgTypeId;   // Constructor parameter type name (C++ RTTI)
+
+    /*! Default constructor */
+    mtsDescriptionComponentClass() {}
+    /*! Copy constructor */
+    mtsDescriptionComponentClass(const mtsDescriptionComponentClass &other);
+    /*! Destructor */
+    ~mtsDescriptionComponentClass() {}
+
+    void ToStream(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClass);
+
+typedef std::vector<mtsDescriptionComponentClass> mtsDescriptionComponentClassVec;
+typedef mtsGenericObjectProxy<mtsDescriptionComponentClassVec> mtsDescriptionComponentClassVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassVecProxy);
+
+// Define stream out operator for std::vector<mtsDescriptionComponentClass>
+inline std::ostream & operator << (std::ostream & output,
+                            const mtsDescriptionComponentClassVec & object) {
+    output << "[";
+    for (size_t i = 0; i < object.size(); i++) {
+        object[i].ToStream(output);
+        if (i < object.size()-1)
+            output << ", ";
+    }
+    output << "]";
+    return output;
+}
 
 //-----------------------------------------------------------------------------
 //  Interface Description

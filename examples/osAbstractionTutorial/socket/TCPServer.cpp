@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <string.h>
-
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
+#include <cisstCommon/cmnLogger.h>
+#include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaSocketServer.h>
 
 int main(void)
 {
@@ -92,7 +93,7 @@ int main(void)
                     socket->Close();
                     isServerConnected = false;
                 }
-                else { 
+                else {
                     // send
 #ifdef OSA_SOCKET_WITH_STREAM
                     *socket << buffer;
@@ -107,7 +108,7 @@ int main(void)
         //No connection so there is no need for this socket anymore.
         delete socket;
         socket=0;
-       
+
     }
 
     if (socket != 0) {

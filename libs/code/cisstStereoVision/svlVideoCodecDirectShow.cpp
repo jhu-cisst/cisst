@@ -386,7 +386,7 @@ int svlVideoCodecDirectShow::Read(svlProcInfo* procInfo, svlSampleImageBase &ima
     if (!Opened || Writing) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     // Allocate image buffer if not done yet
     if (Width  != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
@@ -465,7 +465,7 @@ int svlVideoCodecDirectShow::Write(svlProcInfo* procInfo, const svlSampleImageBa
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     FlipCopy(image.GetUCharPointer(videoch), comprBuffer);
 

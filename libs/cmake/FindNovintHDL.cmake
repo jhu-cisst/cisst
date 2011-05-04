@@ -8,40 +8,39 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 #
 # Try to find NOVINT HDL library (aka 3DTouch)
 #
 # The following values are defined
 #
-# NOVINT_INCLUDE_DIR          - include directories to use 
+# NOVINT_INCLUDE_DIR          - include directories to use
 # NOVINT_LIBRARIES            - libraries needed
 #
 # Important notes:
 # - Implemented for Windows only.
 
-IF(WIN32)
-  SET(NOVINT_SDK_DIR "C:/Program Files/Novint/HDAL_SDK_2.1.3")
+if (WIN32)
+  set (NOVINT_SDK_DIR "C:/Program Files/Novint/HDAL_SDK_2.1.3")
 
-  FIND_LIBRARY(NOVINT_LIB_HDL hdl ${NOVINT_SDK_DIR}/lib)
-  
-  SET(NOVINT_INCLUDE_DIR ${NOVINT_SDK_DIR}/include)
-  
-  
-  SET(NOVINT_LIBRARIES
-        ${NOVINT_LIB_HDL}) 
-		
-  FILE(TO_CMAKE_PATH "${NOVINT_INCLUDE_DIR}" NOVINT_INCLUDE_DIR)
-  FILE(TO_CMAKE_PATH "${NOVINT_LIBRARIES}" NOVINT_LIBRARIES)
+  find_library (NOVINT_LIB_HDL hdl ${NOVINT_SDK_DIR}/lib)
 
-  MARK_AS_ADVANCED(NOVINT_LIB_HDL
-                   NOVINT_INCLUDE_DIR
-				   NOVINT_SDK_DIR
-                   NOVINT_LIBRARIES)
+  set (NOVINT_INCLUDE_DIR ${NOVINT_SDK_DIR}/include)
 
-ENDIF(WIN32)
+  set (NOVINT_LIBRARIES
+       ${NOVINT_LIB_HDL})
+
+  file (TO_CMAKE_PATH "${NOVINT_INCLUDE_DIR}" NOVINT_INCLUDE_DIR)
+  file (TO_CMAKE_PATH "${NOVINT_LIBRARIES}" NOVINT_LIBRARIES)
+
+  mark_as_advanced (NOVINT_LIB_HDL
+                    NOVINT_INCLUDE_DIR
+                    NOVINT_SDK_DIR
+                    NOVINT_LIBRARIES)
+
+endif (WIN32)

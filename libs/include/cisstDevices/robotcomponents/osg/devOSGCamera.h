@@ -44,7 +44,6 @@ class CISST_EXPORT devOSGCamera :
   };
   
 
-
   //! Update Callback
   /**
      This callback is used to update the position/orientation of the camera
@@ -60,6 +59,8 @@ class CISST_EXPORT devOSGCamera :
     void operator()( osg::Node* node, osg::NodeVisitor* );
   };
 
+  //! Flag for offscreen rendering
+  bool offscreenrendering;
 
   //! Update the position and orientation of the camera
   /**
@@ -203,7 +204,6 @@ class CISST_EXPORT devOSGCamera :
     
   };
 
-
 #endif // CISST_DEV_HAS_OPENCV22
 
  public : 
@@ -230,12 +230,15 @@ class CISST_EXPORT devOSGCamera :
   devOSGCamera( const std::string& name,
 		devOSGWorld* world,
 		const std::string& fnname = "",
-		bool trackball = true );
+		bool trackball = true,
+		bool offscreenrendering = false );
 
   ~devOSGCamera();
 
   void setCullMask( osg::Node::NodeMask mask )
   { getCamera()->setCullMask( mask ); }
+
+  vctFrm3 GetOrientationPosition() const;  
 
   void Configure( const std::string& = "" ){}
   void Startup(){}

@@ -23,12 +23,19 @@ http://www.cisst.org/cisst/license.txt.
 #include "sineTask.h"
 
 // required to implement the class services, see cisstCommon
-CMN_IMPLEMENT_SERVICES(sineTask);
+CMN_IMPLEMENT_SERVICES_ONEARG(sineTask, mtsTaskPeriodicConstructorArg);
 
 sineTask::sineTask(const std::string & taskName, double period):
-    // base constructor, same task name and period.  Set the length of
-    // state table to 5000
+    // base constructor, same task name and period.
     mtsTaskPeriodic(taskName, period, false, 500)
+{
+    // call generated method to configure this component
+    InitComponent();
+}
+
+sineTask::sineTask(const mtsTaskPeriodicConstructorArg &arg):
+    // base constructor, same task name and period.
+    mtsTaskPeriodic(arg)
 {
     // call generated method to configure this component
     InitComponent();

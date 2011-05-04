@@ -263,7 +263,7 @@ public:
         std::string codec;
         int compression;
         GetEncoder(codec, compression);
-        cmnSerializeRaw(outputStream, GetType());
+        cmnSerializeRaw(outputStream, static_cast<int>(GetType()));
         cmnSerializeRaw(outputStream, GetTimestamp());
         cmnSerializeRaw(outputStream, codec);
 
@@ -552,7 +552,7 @@ public:
             const unsigned int width = GetWidth(videochannel);
 
             // Create sub-matrix reference
-            vctDynamicMatrixRef<_ValueType> subref(Image[videochannel], top, 0, height, width);
+            vctDynamicMatrixRef<_ValueType> subref(Image[videochannel], top, 0, height, width * _DataChannels);
 
             // Create sub-sample image
             svlSampleImageCustom<_ValueType, _DataChannels, 1>* subimage = new svlSampleImageCustom<_ValueType, _DataChannels, 1>(false);

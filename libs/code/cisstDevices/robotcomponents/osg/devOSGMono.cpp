@@ -7,8 +7,9 @@ devOSGMono::devOSGMono( const std::string& name,
 			double fovy, double aspectRatio,
 			double zNear, double zFar,
 			const std::string& fnname,
-			bool trackball ) :
-  devOSGCamera( name, world, fnname, trackball ),
+			bool trackball,
+			bool offscreenrendering ) :
+  devOSGCamera( name, world, fnname, trackball, offscreenrendering ),
   x( x ),                              // x position
   y( y ),                              // y position
   width( width ),                      // width of images
@@ -56,6 +57,7 @@ void devOSGMono::Startup(){
   traits->height = height;
   traits->windowDecoration = true;
   traits->doubleBuffer = true;
+  if( offscreenrendering ){ traits->pbuffer = true; }
   traits->sharedContext = 0;
   
   // Get the master camera
@@ -75,9 +77,8 @@ void devOSGMono::Startup(){
 
 }
 
-void devOSGMono::Run(){
-  devOSGCamera::Run();
-}
+void devOSGMono::Run()
+{  devOSGCamera::Run(); }
 
 #if CISST_DEV_HAS_OPENCV22
 

@@ -115,6 +115,10 @@ public:
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
 
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
+
     /*! Binary serialization */
     virtual void SerializeRaw(std::ostream & outputStream) const;
 

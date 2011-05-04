@@ -19,11 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
-
 #include "SignalGeneratorTask.h"
+
+#include <cisstCommon/cmnLogger.h>
+#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #define MAX_SIGNAL_COUNT 12
 
@@ -79,11 +79,11 @@ int main(int argc, char * argv[])
     taskManager->CreateAll();
     // start the periodic Run
     taskManager->StartAll();
-    
+
     while (1) {
         osaSleep(10 * cmn_ms);
     }
-    
+
     // cleanup
     taskManager->KillAll();
     taskManager->Cleanup();

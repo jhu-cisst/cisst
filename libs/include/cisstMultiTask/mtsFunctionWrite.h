@@ -99,7 +99,7 @@ public:
     template <class _userType>
     mtsExecutionResult Execute(const _userType & argument) const {
         mtsExecutionResult result = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_NOT_BLOCKING)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(Command, argument, MTS_NOT_BLOCKING)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
@@ -107,7 +107,7 @@ public:
     template <class _userType>
     mtsExecutionResult ExecuteBlocking(const _userType & argument) const {
         mtsExecutionResult executionResult = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_BLOCKING)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(Command, argument, MTS_BLOCKING)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
             && !this->IsProxy) {

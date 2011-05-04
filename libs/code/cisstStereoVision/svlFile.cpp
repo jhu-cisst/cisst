@@ -91,6 +91,8 @@ svlFile::svlFile() :
     Opened(false),
     Length(0)
 {
+    Internals = new char[INTERNALS_SIZE];
+
 #if (CISST_OS == CISST_WINDOWS) && (CISST_COMPILER > CISST_DOTNET2003)
     INTERNALS(File) = 0;
 #else // CISST_OS != CISST_WINDOWS
@@ -102,6 +104,8 @@ svlFile::svlFile(const svlFile& CMN_UNUSED(file)) :
     Opened(false),
     Length(0)
 {
+    Internals = new char[INTERNALS_SIZE];
+
 #if (CISST_OS == CISST_WINDOWS) && (CISST_COMPILER > CISST_DOTNET2003)
     INTERNALS(File) = 0;
 #else // CISST_OS != CISST_WINDOWS
@@ -113,6 +117,8 @@ svlFile::svlFile(const std::string& filepath, const OpenMode mode) :
     Opened(false),
     Length(0)
 {
+    Internals = new char[INTERNALS_SIZE];
+
 #if (CISST_OS == CISST_WINDOWS) && (CISST_COMPILER > CISST_DOTNET2003)
     INTERNALS(File) = 0;
 #else // CISST_OS != CISST_WINDOWS
@@ -131,6 +137,8 @@ svlFile::~svlFile()
 #else // CISST_OS != CISST_WINDOWS
     delete INTERNALS(Stream);
 #endif // CISST_OS
+
+    delete [] Internals;
 }
 
 unsigned int svlFile::SizeOfInternals()

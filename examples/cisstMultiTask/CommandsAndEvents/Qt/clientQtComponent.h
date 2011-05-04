@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _clientQtComponent_h
 #define _clientQtComponent_h
 
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsComponent.h>
 
 #include <QMainWindow>
 #include <QObject>
@@ -29,13 +29,13 @@ http://www.cisst.org/cisst/license.txt.
 #include "ui_clientQtWidget.h"
 
 
-class clientQtComponent : public QObject, public mtsDevice
+class clientQtComponent : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    clientQtComponent(const std::string & taskName);
+    clientQtComponent(const std::string & componentName);
     ~clientQtComponent(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename)) {};

@@ -72,6 +72,7 @@ endif (CMAKE_CL_64)
 option (BUILD_UTILITIES "Build utility programs built using cisst." ON)
 option (BUILD_TESTS "Build tests." OFF)
 option (BUILD_EXAMPLES "Build examples." OFF)
+option (BUILD_COMPONENTS "Build components." OFF)
 
 if (UNIX)
   option (BUILD_DOC "Build the documentation." OFF)
@@ -236,6 +237,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_definitions ("${XENOMAI_DEFINITIONS}")
     # add Xenomai wrappers for pthread
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
+
   endif (CISST_HAS_LINUX_XENOMAI)
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -276,6 +279,11 @@ endif (UNIX)
 set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/libs/include
      ${cisst_SOURCE_DIR}/libs/include)
+if (BUILD_COMPONENTS)
+  set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR}
+                         ${cisst_BINARY_DIR}/components
+                         ${cisst_SOURCE_DIR}/components)
+endif (BUILD_COMPONENTS)
 include_directories (${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
 # Additional link directories
@@ -426,6 +434,10 @@ endif (BUILD_TESTS)
 if (BUILD_EXAMPLES)
   add_subdirectory (examples)
 endif (BUILD_EXAMPLES)
+
+if (BUILD_COMPONENTS)
+  add_subdirectory (components)
+endif (BUILD_COMPONENTS)
 
 if (BUILD_DOC)
   add_subdirectory (doc)

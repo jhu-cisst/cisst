@@ -10,7 +10,13 @@
 class CMyEventHandler : public svlWindowEventHandlerBase
 {
 public:
+    CMyEventHandler();
+
     void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid);
+
+private:
+    svlRect ROI;
+    bool LMouseButtonPressed;
 };
 
 

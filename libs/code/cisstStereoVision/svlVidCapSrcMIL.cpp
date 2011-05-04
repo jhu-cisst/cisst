@@ -337,7 +337,7 @@ int svlVidCapSrcMIL::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             deviceinfo[0][i].platform = svlFilterSourceVideoCapture::MatroxImaging;
 
             // id
-            deviceinfo[0][i].id = devid[i];
+            deviceinfo[0][i].ID = devid[i];
 
             // name
             description = "Matrox Imaging Device (";

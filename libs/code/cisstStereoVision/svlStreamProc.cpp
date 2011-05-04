@@ -68,7 +68,7 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
     // Initializing thread info structure
     info.count = ThreadCount;
-    info.id    = ThreadID;
+    info.ID    = ThreadID;
     info.sync  = sync;
     info.cs    = baseref->CS;
 

@@ -52,7 +52,7 @@ bool mtsManagerLocal::UnitTestEnabled = false;
 bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 
 std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
-std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "LCM_with_GCM";
+std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
 mtsManagerLocal::mtsManagerLocal(void)
 {
@@ -622,10 +622,92 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     return true;
 }
 
-mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName)
+mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName,
+                                                           const std::string & constructorArgSerialized)
 {
+    cmnGenericObject *baseObject = 0;
+    mtsComponent *newComponent = 0;
+    const cmnClassServicesBase *services = cmnClassRegister::FindClassServices(className);
+    if (!services) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: unable to create component of type \""
+                                 << className << "\" -- no services" << std::endl;
+        return 0;
+    }
+    const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
+    if (services->OneArgConstructorAvailable() && argServices) {
+        // We can create the object using the "one argument" constructor.  This includes the case where
+        // the "one argument" constructor is just an std::string (including the combination of default
+        // constructor and SetName method).
+        cmnGenericObject *tempArg = 0;
+        if (!constructorArgSerialized.empty()) {
+            // Case 1: If the serialized constructor arg is not empty, then we just deserialize it and call
+            //         CreateWithArg.  We could check if the arg is the correct type, but CreateWithArg will
+            //         do it anyway.
+            std::stringstream buffer(constructorArgSerialized);
+            cmnDeSerializer deserializer(buffer);
+            try {
+                tempArg = dynamic_cast<const cmnGenericObject *>(deserializer.DeSerialize());
+            } catch (std::exception &e) {
+                CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: failed to deserialize constructor arg for class \""
+                                         << className << "\", error = " << e.what() << std::endl;
+                return 0;
+            }
+
+            baseObject = services->CreateWithArg(*tempArg);
+            delete tempArg;
+        }
+        else {
+            // Case 2: If the serialized constructor arg is empty, then we just have the componentName.
+            //         There are actually 2 sub-cases (see below)
+            mtsGenericObjectProxyRef<std::string> tempRef(componentName);
+            if (argServices == mtsStdString::ClassServices())
+                // Case 2a: We just have a string (component name)
+                baseObject = services->CreateWithArg(tempRef);
+            else {
+                // Case 2b: The componentName actually contains the streamed constructor arg (i.e., created
+                //          with ToStreamRaw, rather than with SerializeRaw).
+                tempArg = argServices->Create();
+                if (tempArg) {
+                    std::stringstream ss;
+                    tempRef.ToStreamRaw(ss);
+                    if (!tempArg->FromStreamRaw(ss)) {
+                        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: Could not parse \"" 
+                                                 << componentName << "\" for constructor of "
+                                                 << className << std::endl;
+                    }
+                    else {
+                        baseObject = services->CreateWithArg(*tempArg);
+                    }
+                    delete tempArg;
+                }
+                else
+                    CMN_LOG_CLASS_INIT_ERROR << "Could not create constructor argument for " << className << std::endl;
+            }
+        }
+        if (baseObject) {
+            // If we were able to create an object, dynamic cast it to an mtsComponent so that we can return it.
+            newComponent = dynamic_cast<mtsComponent *>(baseObject);
+            if (newComponent) {
+                CMN_LOG_CLASS_INIT_VERBOSE << "CreateComponentDynamically: successfully created new component: "
+                               << "\"" << newComponent->GetName() << "\" of type \""
+                                           << className << "\" with arg " << argServices->GetName() << std::endl;
+
+                return newComponent;
+            }
+            else
+                CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
+                                         << "\" is not derived from mtsComponent" << std::endl;
+        }
+    }
+    else if (!constructorArgSerialized.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
+                                 << "\" cannot handle serialized constructor arg" << std::endl;
+        return 0;
+    }
+
+    // Above should have worked, following is for backward compatibility
     // looking in class register to create this component
-    cmnGenericObject * baseObject = cmnClassRegister::Create(className);
+    baseObject = cmnClassRegister::Create(className);
     if (!baseObject) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: unable to create component of type \""
                                  << className << "\"" << std::endl;
@@ -633,7 +715,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
     }
 
     // make sure this is an mtsComponent
-    mtsComponent * newComponent = dynamic_cast<mtsComponent *>(baseObject);
+    newComponent = dynamic_cast<mtsComponent *>(baseObject);
     if (!newComponent) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: class \"" << className
                                  << "\" is not derived from mtsComponent" << std::endl;
@@ -667,7 +749,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         char buf[20];
         sprintf(buf, "_%lx", reinterpret_cast<unsigned long>(component));
         componentName.append(buf);
-        CMN_LOG_CLASS_INIT_WARNING << "AddComponent: assigning name \"" << componentName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: assigning name \"" << componentName << "\"" << std::endl;
         component->SetName(componentName);
     }
 
@@ -2552,7 +2634,6 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     const ConnectionIDType connectionID           = description.ConnectionID;
     const std::string serverProcessName           = description.Server.ProcessName;
     const std::string serverComponentName         = description.Server.ComponentName;
-    // MJ: (03/30/11)
     const std::string serverInterfaceProvidedName = //description.Server.InterfaceName; 
         mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
             description.Server.InterfaceName, connectionID);
@@ -2574,7 +2655,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     if (!ret) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to connect two local interfaces: "
                                  << actualClientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                 << actualServerComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                 << actualServerComponentName << ":" << description.Server.InterfaceName << std::endl;
         return false;
     }
 
@@ -2616,7 +2697,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     }
     // If server proxy is already running, fetch the access information
     else {
-        // MJ: (03/30/11) this should not be reached because each connection has its own provided interface instance
+        // MJ: this should not be reached because each connection has its own provided interface instance
         CMN_ASSERT(false); 
         
         if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(clientProcessName,

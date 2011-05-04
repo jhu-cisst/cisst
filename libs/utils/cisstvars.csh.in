@@ -24,6 +24,7 @@ set CISST_DIR="@cisst_BINARY_DIR@"
 set BUILD_TESTS=@BUILD_TESTS@
 set BUILD_EXAMPLES=@BUILD_EXAMPLES@
 set BUILD_UTILITIES=@BUILD_UTILITIES@
+set BUILD_COMPONENTS=@BUILD_COMPONENTS@
 
 set OS=`uname`
 
@@ -71,6 +72,14 @@ if (${BUILD_UTILITIES} == "ON") then
     setenv PATH "${CISST_DIR}/utilities/bin:$PATH"
     set LIBRARY_PATH="${CISST_DIR}/utilities/lib:$LIBRARY_PATH"
     setenv PYTHONPATH "${CISST_DIR}/utilities/lib:$PYTHONPATH"
+endif
+
+
+# Add path to components code
+if (${BUILD_COMPONENTS} == "ON") then
+    setenv PATH "${CISST_DIR}/components/bin:$PATH"
+    set LIBRARY_PATH="${CISST_DIR}/components/lib:$LIBRARY_PATH"
+    setenv PYTHONPATH "${CISST_DIR}/components/lib:$PYTHONPATH"
 endif
 
 
