@@ -110,4 +110,3 @@ protected:
 };
 
 #endif // _mtsCommandVoidReturn_h
-

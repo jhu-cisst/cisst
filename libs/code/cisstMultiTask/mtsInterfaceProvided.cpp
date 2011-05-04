@@ -51,6 +51,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     CommandsVoid("CommandsVoid", true),
     CommandsVoidReturn("CommandsVoidReturn", true),
     CommandsWrite("CommandsWrite", true),
+    CommandsWriteReturn("CommandsWriteReturn", true),
     CommandsRead("CommandsRead", true),
     CommandsQualifiedRead("CommandsQualifiedRead", true),
     EventVoidGenerators("EventVoidGenerators", true),
@@ -81,6 +82,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     CommandsVoid.SetOwner(*this);
     CommandsVoidReturn.SetOwner(*this);
     CommandsWrite.SetOwner(*this);
+    CommandsWriteReturn.SetOwner(*this);
     CommandsRead.SetOwner(*this);
     CommandsQualifiedRead.SetOwner(*this);
     EventVoidGenerators.SetOwner(*this);
@@ -108,6 +110,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     CommandsVoid("CommandsVoid", true),
     CommandsVoidReturn("CommandsVoidReturn", true),
     CommandsWrite("CommandsWrite", true),
+    CommandsWriteReturn("CommandsWriteReturn", true),
     CommandsRead("CommandsRead", true),
     CommandsQualifiedRead("CommandsQualifiedRead", true),
     EventVoidGenerators("EventVoidGenerators", true),
@@ -119,6 +122,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     CommandsVoid.SetOwner(*this);
     CommandsVoidReturn.SetOwner(*this);
     CommandsWrite.SetOwner(*this);
+    CommandsWriteReturn.SetOwner(*this);
     CommandsRead.SetOwner(*this);
     CommandsQualifiedRead.SetOwner(*this);
     EventVoidGenerators.SetOwner(*this);
@@ -543,6 +547,22 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: attempt to add undefined command (null callable pointer) to interface \""
+                             << this->GetFullName() << "\"" << std::endl;
+    return 0;
+}
+
+
+mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCommandWriteReturn * command)
+{
+    // check that the input is valid
+    if (command) {
+        if (!CommandsWriteReturn.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+        return command;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: attempt to add undefined command (null command pointer) to interface \""
                              << this->GetFullName() << "\"" << std::endl;
     return 0;
 }
@@ -1306,6 +1326,30 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         serializer.Serialize(*(voidReturnCommand->GetResultPrototype()));
         elementCommandVoidReturn.ResultPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsVoidReturn.push_back(elementCommandVoidReturn);
+    }
+
+    // Extract write return commands
+    mtsCommandWriteReturn * writeReturnCommand;
+    CommandWriteReturnElement elementCommandWriteReturn;
+    const std::vector<std::string> namesOfWriteReturnCommand = GetNamesOfCommandsWriteReturn();
+    for (size_t i = 0; i < namesOfWriteReturnCommand.size(); ++i) {
+        writeReturnCommand = CommandsWriteReturn.GetItem(namesOfWriteReturnCommand[i]);
+        if (!voidReturnCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write return command: " << namesOfWriteReturnCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandWriteReturn.Name = writeReturnCommand->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(writeReturnCommand->GetArgumentPrototype()));
+        elementCommandWriteReturn.ArgumentPrototypeSerialized = streamBuffer.str();
+        // serialize result
+        streamBuffer.str("");
+        serializer.Serialize(*(writeReturnCommand->GetResultPrototype()));
+        elementCommandWriteReturn.ResultPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsWriteReturn.push_back(elementCommandWriteReturn);
     }
 
     // Extract void events

@@ -670,6 +670,7 @@ protected:
     //@{
     mtsCommandVoid * AddCommandVoid(mtsCommandVoid * command);
     mtsCommandVoidReturn * AddCommandVoidReturn(mtsCommandVoidReturn * command);
+    mtsCommandWriteReturn * AddCommandWriteReturn(mtsCommandWriteReturn * command);
     mtsCommandRead * AddCommandRead(mtsCommandRead * command);
     mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCommandQualifiedRead * command);
     //@}

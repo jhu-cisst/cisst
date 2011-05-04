@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
 #include "mtsFunctionVoidReturnProxy.h"
+#include "mtsFunctionWriteReturnProxy.h"
 
 mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAndEventHandlerProxyMapElement() :
     FunctionVoidProxyMap("FunctionVoidProxyMap"),
@@ -36,6 +37,7 @@ mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAnd
     FunctionReadProxyMap("FunctionReadProxyMap"),
     FunctionQualifiedReadProxyMap("FunctionQualifiedReadProxyMap"),
     FunctionVoidReturnProxyMap("FunctionVoidReturnProxyMap"),
+    FunctionWriteReturnProxyMap("FunctionWriteReturnProxyMap"),
     EventGeneratorVoidProxyMap("EventGeneratorVoidProxyMap"),
     EventGeneratorWriteProxyMap("EventGeneratorWriteProxyMap")
 {
@@ -86,6 +88,7 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     mtsFunctionRead * functionReadProxy;
     mtsFunctionQualifiedRead * functionQualifiedReadProxy;
     mtsFunctionVoidReturn * functionVoidReturnProxy;
+    mtsFunctionWriteReturn * functionWriteReturnProxy;
 
     bool success;
 
@@ -150,6 +153,19 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
         if (!success) {
             CMN_ASSERT(RemoveInterfaceRequired(requiredInterfaceName));
             CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add void return function proxy: \"" << namesOfFunctionVoidReturn[i] << "\"" << std::endl;
+            return false;
+        }
+    }
+
+    // Create WriteReturn function proxies
+    const std::vector<std::string> namesOfFunctionWriteReturn = requiredInterfaceDescription.FunctionWriteReturnNames;
+    for (size_t i = 0; i < namesOfFunctionWriteReturn.size(); ++i) {
+        functionWriteReturnProxy = new mtsFunctionWriteReturnProxy();
+        success = requiredInterfaceProxy->AddFunction(namesOfFunctionWriteReturn[i], *functionWriteReturnProxy);
+        success &= mapElement->FunctionWriteReturnProxyMap.AddItem(namesOfFunctionWriteReturn[i], functionWriteReturnProxy);
+        if (!success) {
+            CMN_ASSERT(RemoveInterfaceRequired(requiredInterfaceName));
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add write return function proxy: \"" << namesOfFunctionWriteReturn[i] << "\"" << std::endl;
             return false;
         }
     }
@@ -433,6 +449,49 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         newCommandVoidReturn->SetResultPrototype(resultPrototype);
     }
 
+    // Create void return command proxies
+    mtsCommandWriteReturnProxy * newCommandWriteReturn = 0;
+    CommandWriteReturnVector::const_iterator itWriteReturn = providedInterfaceDescription.CommandsWriteReturn.begin();
+    const CommandWriteReturnVector::const_iterator itWriteReturnEnd = providedInterfaceDescription.CommandsWriteReturn.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        commandName = itWriteReturn->Name;
+        newCommandWriteReturn = new mtsCommandWriteReturnProxy(commandName);
+        if (!providedInterfaceProxy->AddCommandWriteReturn(newCommandWriteReturn)) {
+            delete newCommandWriteReturn;
+            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to add write return command proxy: " << commandName << std::endl;
+            return false;
+        }
+
+        // argument deserialization
+        streamBuffer.str("");
+        streamBuffer << itWriteReturn->ArgumentPrototypeSerialized;
+        try {
+            argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        } catch (std::exception e) {
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: write return command argument deserialization failed: " << e.what() << std::endl;
+            argumentPrototype = 0;
+        }
+
+        // result deserialization
+        streamBuffer.str("");
+        streamBuffer << itWriteReturn->ResultPrototypeSerialized;
+        try {
+            resultPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        } catch (std::exception e) {
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: write return command result deserialization failed: " << e.what() << std::endl;
+            resultPrototype = 0;
+        }
+
+        if (!argumentPrototype || !resultPrototype) {
+            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write return command proxy: " << commandName << std::endl;
+            return false;
+        }
+        newCommandWriteReturn->SetArgumentPrototype(argumentPrototype);
+        newCommandWriteReturn->SetResultPrototype(resultPrototype);
+    }
+
     // Create event generator proxies
     std::string eventName;
 
@@ -673,7 +732,6 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
 
         // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
-        std::cerr << "setting Id for handler .... ddddddddddddddddddddddddddddddddddd" << std::endl;
         if (!eventHandlerVoid->SetNetworkProxy(interfaceProxyClient)) {
             CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: "
                                      << eventHandlerVoid->GetName() << std::endl;
@@ -872,6 +930,28 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
         commandVoidReturn->Enable();
     }
 
+    // WriteReturn command
+    mtsCommandWriteReturnProxy * commandWriteReturn = 0;
+    mtsComponentInterfaceProxy::FunctionProxySequence::const_iterator itWriteReturn = functionProxyPointers.FunctionWriteReturnProxies.begin();
+    const mtsComponentInterfaceProxy::FunctionProxySequence::const_iterator itWriteReturnEnd = functionProxyPointers.FunctionWriteReturnProxies.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        commandWriteReturn = dynamic_cast<mtsCommandWriteReturnProxy*>(endUserInterface->GetCommandWriteReturn(itWriteReturn->Name));
+        if (!commandWriteReturn) {
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to update command write return proxy id: "
+                                     << itWriteReturn->Name << std::endl;
+            return false;
+        }
+        // Set client ID and network proxy
+        if (!commandWriteReturn->SetNetworkProxy(interfaceProxyServer, clientID)) {
+            CMN_LOG_CLASS_INIT_ERROR << "UpdateCommandProxyID: failed to set network proxy for write return command: "
+                                     << commandWriteReturn->GetName() << std::endl;
+            return false;
+        }
+        // Set command qualified read proxy's id and enable this command
+        commandWriteReturn->SetCommandID(itWriteReturn->FunctionProxyId);
+        commandWriteReturn->Enable();
+    }
+
     return true;
 }
 
@@ -938,6 +1018,15 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
         function.Name = itVoidReturn->first;
         function.FunctionProxyId = reinterpret_cast<CommandIDType>(itVoidReturn->second);
         functionProxyPointers.FunctionVoidReturnProxies.push_back(function);
+    }
+
+    // WriteReturn function proxy
+    FunctionWriteReturnProxyMapType::const_iterator itWriteReturn = mapElement->FunctionWriteReturnProxyMap.begin();
+    const FunctionWriteReturnProxyMapType::const_iterator itWriteReturnEnd = mapElement->FunctionWriteReturnProxyMap.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        function.Name = itWriteReturn->first;
+        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itWriteReturn->second);
+        functionProxyPointers.FunctionWriteReturnProxies.push_back(function);
     }
 
     return true;

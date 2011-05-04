@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
 #include "mtsFunctionVoidReturnProxy.h"
+#include "mtsFunctionWriteReturnProxy.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
 
@@ -360,10 +361,9 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
                                                                                  mtsExecutionResult & executionResult,
                                                                                  std::string & serializedResult)
 {
-    std::cerr << "received command from ICE to execute function" << std::endl;
     mtsFunctionVoidReturnProxy * functionVoidReturnProxy = reinterpret_cast<mtsFunctionVoidReturnProxy*>(commandID);
     if (!functionVoidReturnProxy) {
-        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: invalid proxy id of function qualified read: " << commandID);
+        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: invalid proxy id of function void return: " << commandID);
         executionResult = mtsExecutionResult::INVALID_COMMAND_ID;
         return;
     }
@@ -383,9 +383,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
     }
  
     // Execute the command
-    std::cerr << "executing function ... with placeholder " << *(functionVoidReturnProxy->GetResultPointer()) << std::endl;
     executionResult = (*functionVoidReturnProxy)(*(functionVoidReturnProxy->GetResultPointer()));
-    std::cerr << "function returned ... " << std::endl;
 
     // Serialize if the command is not queued
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
@@ -396,6 +394,65 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandVoidReturnSerialized: sent " << serializedResult.size() << " bytes");
+#endif
+}
+
+
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialized(const CommandIDType commandID,
+                                                                                  mtsExecutionResult & executionResult,
+                                                                                  const std::string & serializedArgument,
+                                                                                  std::string & serializedResult)
+{
+    mtsFunctionWriteReturnProxy * functionWriteReturnProxy = reinterpret_cast<mtsFunctionWriteReturnProxy*>(commandID);
+    if (!functionWriteReturnProxy) {
+        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: invalid proxy id of function write return: " << commandID);
+        executionResult = mtsExecutionResult::INVALID_COMMAND_ID;
+        return;
+    }
+
+    // Deserialize
+    mtsProxySerializer * deserializer = functionWriteReturnProxy->GetSerializer();
+    mtsGenericObject * argument = deserializer->DeSerialize(serializedArgument);
+    if (!argument) {
+        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: Deserialization failed");
+        executionResult = mtsExecutionResult::DESERIALIZATION_ERROR;
+        return;
+    }
+
+    // Create a temporary argument which includes dynamic allocation internally.
+    // Therefore, this object should be deallocated manually.
+    // function proxy can store the result, needs to create on first run
+    if (functionWriteReturnProxy->GetResultPointer() == 0) {
+        mtsGenericObject * result =
+            dynamic_cast<mtsGenericObject *>(functionWriteReturnProxy->GetCommand()->GetResultPrototype()->Services()->Create());
+        if (result == 0) {
+            LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: failed to create a temporary argument");
+            executionResult = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+            // release memory internally allocated by deserializer
+            delete argument;
+            return;
+        }
+        functionWriteReturnProxy->SetResultPointer(result);
+    }
+ 
+    // Execute the command
+    executionResult = (*functionWriteReturnProxy)(*argument, *(functionWriteReturnProxy->GetResultPointer()));
+
+    // Serialize if the command is not queued
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
+        mtsProxySerializer * deserializer = functionWriteReturnProxy->GetSerializer();
+        deserializer->Serialize(*(functionWriteReturnProxy->GetResultPointer()),
+                                serializedResult);
+    }
+
+    // Release memory internally created by deserializer
+    // delete argument;
+    // do not delete argument until command has been executed ...
+    // but need to delete later 
+    std::cerr << CMN_LOG_DETAILS << CMN_PRETTY_FUNCTION << " need to free memory after dequeue" << std::endl;
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: sent " << serializedResult.size() << " bytes");
 #endif
 }
 
@@ -441,8 +498,6 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: SendExecuteEventVoid: " << commandID);
 #endif
-
-    std::cerr << "sending event void" << std::endl;
 
     try {
         ComponentInterfaceServerProxy->ExecuteEventVoid(commandID);
@@ -706,5 +761,23 @@ mtsComponentInterfaceProxyClient
 #endif
     mtsExecutionResult executionResult;
     ComponentInterfaceProxyClient->ReceiveExecuteCommandVoidReturnSerialized(commandID, executionResult, result);
+    executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
+}
+
+
+void
+mtsComponentInterfaceProxyClient
+::ComponentInterfaceClientI
+::ExecuteCommandWriteReturnSerialized(::Ice::Long commandID,
+                                      const ::std::string & argument,
+                                      ::std::string & result,
+                                      ::Ice::Byte & executionResultByte,
+                                      const ::Ice::Current & CMN_UNUSED(current))
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteReturnSerialized: " << commandID << ", " << argumentIn.size());
+#endif
+    mtsExecutionResult executionResult;
+    ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteReturnSerialized(commandID, executionResult, argument, result);
     executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }

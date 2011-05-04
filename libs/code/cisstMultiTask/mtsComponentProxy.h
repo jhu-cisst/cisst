@@ -62,11 +62,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
+#include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include "mtsCommandVoidProxy.h"
 #include "mtsCommandWriteProxy.h"
 #include "mtsCommandReadProxy.h"
 #include "mtsCommandQualifiedReadProxy.h"
 #include "mtsCommandVoidReturnProxy.h"
+#include "mtsCommandWriteReturnProxy.h"
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include "mtsMulticastCommandWriteProxy.h"
 
@@ -105,6 +107,7 @@ protected:
     typedef cmnNamedMap<mtsFunctionRead>          FunctionReadProxyMapType;
     typedef cmnNamedMap<mtsFunctionQualifiedRead> FunctionQualifiedReadProxyMapType;
     typedef cmnNamedMap<mtsFunctionVoidReturn>    FunctionVoidReturnProxyMapType;
+    typedef cmnNamedMap<mtsFunctionWriteReturn>   FunctionWriteReturnProxyMapType;
 
     /*! Typedef for event generator proxies */
     typedef cmnNamedMap<mtsFunctionVoid>  EventGeneratorVoidProxyMapType;
@@ -117,6 +120,7 @@ protected:
         FunctionReadProxyMapType          FunctionReadProxyMap;
         FunctionQualifiedReadProxyMapType FunctionQualifiedReadProxyMap;
         FunctionVoidReturnProxyMapType    FunctionVoidReturnProxyMap;
+        FunctionWriteReturnProxyMapType   FunctionWriteReturnProxyMap;
         EventGeneratorVoidProxyMapType    EventGeneratorVoidProxyMap;
         EventGeneratorWriteProxyMapType   EventGeneratorWriteProxyMap;
 

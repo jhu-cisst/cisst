@@ -917,6 +917,8 @@ void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & require
     requiredInterfaceDescription.FunctionQualifiedReadNames = GetNamesOfFunctionsQualifiedRead();
     // Extract void return functions
     requiredInterfaceDescription.FunctionVoidReturnNames = GetNamesOfFunctionsVoidReturn();
+    // Extract write return functions
+    requiredInterfaceDescription.FunctionWriteReturnNames = GetNamesOfFunctionsWriteReturn();
 
     // Extract void event handlers
     CommandVoidElement elementEventVoidHandler;

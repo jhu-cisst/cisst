@@ -119,7 +119,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
     CPPUNIT_ASSERT(executionResult.IsOK());
     CPPUNIT_ASSERT(!stateCollectorTestDevice->CollectionRunning);
-    std::cerr << " from " << stateCollectorTestDevice->LastRange.First << " to " << stateCollectorTestDevice->LastRange.Last << std::endl;
     // since we had to do one advance, the collector should send a range event
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->BatchReadyEventCounter);
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->SamplesCollected);

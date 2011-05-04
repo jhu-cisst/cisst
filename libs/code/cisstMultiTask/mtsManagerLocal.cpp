@@ -215,9 +215,6 @@ void mtsManagerLocal::Cleanup(void)
         delete ManagerGlobal;
         ManagerGlobal = 0;
     }
-
-    ComponentMap.DeleteAll();
-
     __os_exit();
 }
 
@@ -1057,6 +1054,11 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
         name += desc.CommandsVoidReturn[i].Name;
         namesOfCommands.push_back(name);
     }
+    for (size_t i = 0; i < desc.CommandsWriteReturn.size(); ++i) {
+        name = "w) ";
+        name += desc.CommandsWriteReturn[i].Name;
+        namesOfCommands.push_back(name);
+    }
 }
 
 void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
@@ -1118,6 +1120,11 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunct
     for (size_t i = 0; i < desc.FunctionVoidReturnNames.size(); ++i) {
         name = "v) ";
         name += desc.FunctionVoidReturnNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (size_t i = 0; i < desc.FunctionWriteReturnNames.size(); ++i) {
+        name = "w) ";
+        name += desc.FunctionWriteReturnNames[i];
         namesOfFunctions.push_back(name);
     }
 }

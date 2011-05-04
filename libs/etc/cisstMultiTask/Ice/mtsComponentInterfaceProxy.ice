@@ -59,6 +59,12 @@ module mtsComponentInterfaceProxy
         string ResultPrototypeSerialized;
 	};
 
+	struct CommandWriteReturnInfo {
+		string Name;
+        string ArgumentPrototypeSerialized;
+        string ResultPrototypeSerialized;
+	};
+
 	struct EventVoidInfo {
 		string Name;
 	};
@@ -73,6 +79,7 @@ module mtsComponentInterfaceProxy
 	sequence<CommandReadInfo>          CommandReadSequence;
 	sequence<CommandQualifiedReadInfo> CommandQualifiedReadSequence;
 	sequence<CommandVoidReturnInfo>    CommandVoidReturnSequence;
+	sequence<CommandWriteReturnInfo>   CommandWriteReturnSequence;
     sequence<EventVoidInfo>            EventVoidSequence;
     sequence<EventWriteInfo>           EventWriteSequence;
 
@@ -102,6 +109,7 @@ module mtsComponentInterfaceProxy
         FunctionProxySequence FunctionReadProxies;
         FunctionProxySequence FunctionQualifiedReadProxies;
         FunctionProxySequence FunctionVoidReturnProxies;
+        FunctionProxySequence FunctionWriteReturnProxies;
     };
 
     //
@@ -140,6 +148,7 @@ module mtsComponentInterfaceProxy
         void ExecuteCommandReadSerialized(long commandID, out string argument, out byte executionResult);
         void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut, out byte executionResult);
         void ExecuteCommandVoidReturnSerialized(long commandID, out string result, out byte executionResult);
+        void ExecuteCommandWriteReturnSerialized(long commandID, string argumentIn, out string result, out byte executionResult);
 	};
 
 	//-----------------------------------------------------------------------------

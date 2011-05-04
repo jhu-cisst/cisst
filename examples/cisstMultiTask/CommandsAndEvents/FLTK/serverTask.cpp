@@ -47,7 +47,7 @@ serverTask<_dataType>::serverTask(const std::string & taskName, double period):
         provided->AddCommandVoid(&serverTask<_dataType>::VoidSlow, this, "VoidSlow");
         provided->AddCommandWrite(&serverTask<_dataType>::WriteSlow, this, "WriteSlow");
         provided->AddCommandVoidReturn(&serverTask<_dataType>::VoidReturn, this, "VoidReturn");
-        // provided->AddCommandWriteReturn(&serverTask<_dataType>::WriteReturn, this, "WriteReturn");
+        provided->AddCommandWriteReturn(&serverTask<_dataType>::WriteReturn, this, "WriteReturn");
         provided->AddEventVoid(this->EventVoid, "EventVoid");
         provided->AddEventWrite(this->EventWrite, "EventWrite", _dataType(3.14));
     }

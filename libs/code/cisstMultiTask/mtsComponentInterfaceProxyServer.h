@@ -169,6 +169,10 @@ public:
     bool SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
                                                 mtsExecutionResult & executionResult,
                                                 mtsGenericObject & result);
+    bool SendExecuteCommandWriteReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+                                                 mtsExecutionResult & executionResult,
+                                                 const mtsGenericObject & argument,
+                                                 mtsGenericObject & result);
 
     //-------------------------------------------------------------------------
     //  Getters

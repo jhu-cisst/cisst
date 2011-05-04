@@ -24,21 +24,21 @@ http://www.cisst.org/cisst/license.txt.
   \brief Defines a command proxy class with result.
 */
 
-#ifndef _mtsCommandVoidReturnProxy_h
-#define _mtsCommandVoidReturnProxy_h
+#ifndef _mtsCommandWriteReturnProxy_h
+#define _mtsCommandWriteReturnProxy_h
 
-#include <cisstMultiTask/mtsCommandVoidReturn.h>
+#include <cisstMultiTask/mtsCommandWriteReturn.h>
 #include "mtsCommandProxyBase.h"
 #include "mtsProxySerializer.h"
 
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandVoidReturnProxy is a proxy for mtsCommandVoidReturn.
+  mtsCommandWriteReturnProxy is a proxy for mtsCommandWriteReturn.
   When Execute() method is called, the command id with two payloads is sent to
   the connected peer interface across a network.
 */
-class mtsCommandVoidReturnProxy: public mtsCommandVoidReturn, public mtsCommandProxyBase
+class mtsCommandWriteReturnProxy: public mtsCommandWriteReturn, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
 
@@ -48,14 +48,14 @@ protected:
 
 public:
     /*! Typedef for base type */
-    typedef mtsCommandVoidReturn BaseType;
+    typedef mtsCommandWriteReturn BaseType;
 
     /*! Constructor. Command proxy is disabled by default and is enabled when
         command id and network proxy are set. */
-    mtsCommandVoidReturnProxy(const std::string & commandName): BaseType(commandName) {
+    mtsCommandWriteReturnProxy(const std::string & commandName): BaseType(commandName) {
         Disable();
     }
-    ~mtsCommandVoidReturnProxy() {
+    ~mtsCommandWriteReturnProxy() {
         if (ResultPrototype) {
             delete ResultPrototype;
         }
@@ -71,20 +71,27 @@ public:
         }
     }
 
+    /*! Set an argument prototype */
+    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
+        ArgumentPrototype = argumentPrototype;
+    }
+
     /*! Set result prototype */
     void SetResultPrototype(mtsGenericObject * resultPrototype) {
         ResultPrototype = resultPrototype;
     }
 
     /*! The execute method. */
-    mtsExecutionResult Execute(mtsGenericObject & result) {
+    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsGenericObject & result) {
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
         mtsExecutionResult executionResult;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandVoidReturnSerialized(ClientID, CommandID,
-                                                                            executionResult, result)) {
+            if (!NetworkProxyServer->SendExecuteCommandWriteReturnSerialized(ClientID, CommandID,
+                                                                             executionResult,
+                                                                             argument,
+                                                                             result)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
@@ -93,8 +100,8 @@ public:
 
     /*! Generate human readable description of this object */
     void ToStream(std::ostream & outputStream) const {
-        ToStreamBase("mtsCommandVoidReturnProxy", Name, CommandID, IsEnabled(), outputStream);
+        ToStreamBase("mtsCommandWriteReturnProxy", Name, CommandID, IsEnabled(), outputStream);
     }
 };
 
-#endif // _mtsCommandVoidReturnProxy_h
+#endif // _mtsCommandWriteReturnProxy_h

@@ -109,6 +109,10 @@ protected:
     void ReceiveExecuteCommandVoidReturnSerialized(const CommandIDType commandID,
                                                    mtsExecutionResult & executionResult,
                                                    std::string & serializedArgumentOut);
+    void ReceiveExecuteCommandWriteReturnSerialized(const CommandIDType commandID,
+                                                    mtsExecutionResult & executionResult,
+                                                    const std::string & serializedArgument,
+                                                    std::string & serializedArgumentOut);
 
 public:
     /*! Constructor and destructor */
@@ -192,6 +196,7 @@ protected:
         void ExecuteCommandReadSerialized(::Ice::Long, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandQualifiedReadSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandVoidReturnSerialized(::Ice::Long, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
+        void ExecuteCommandWriteReturnSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
     };
 };
 

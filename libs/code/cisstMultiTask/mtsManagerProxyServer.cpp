@@ -263,6 +263,7 @@ void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
     dest.CommandsRead.clear();
     dest.CommandsQualifiedRead.clear();
     dest.CommandsVoidReturn.clear();
+    dest.CommandsWriteReturn.clear();
     dest.EventsVoid.clear();
     dest.EventsWrite.clear();
 
@@ -319,6 +320,17 @@ void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
         dest.CommandsVoidReturn.push_back(commandVoidReturn);
     }
 
+    // Conversion of command write return vector
+    mtsInterfaceCommon::CommandWriteReturnElement commandWriteReturn;
+    ::mtsManagerProxy::CommandWriteReturnSequence::const_iterator itWriteReturn = src.CommandsWriteReturn.begin();
+    const ::mtsManagerProxy::CommandWriteReturnSequence::const_iterator itWriteReturnEnd = src.CommandsWriteReturn.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        commandWriteReturn.Name = itWriteReturn->Name;
+        commandWriteReturn.ArgumentPrototypeSerialized = itWriteReturn->ArgumentPrototypeSerialized;
+        commandWriteReturn.ResultPrototypeSerialized = itWriteReturn->ResultPrototypeSerialized;
+        dest.CommandsWriteReturn.push_back(commandWriteReturn);
+    }
+
     // Conversion of event void generator vector
     mtsInterfaceCommon::EventVoidElement eventVoid;
     ::mtsManagerProxy::EventVoidSequence::const_iterator itEventVoid = src.EventsVoid.begin();
@@ -348,6 +360,7 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
     dest.FunctionReadNames.clear();
     dest.FunctionQualifiedReadNames.clear();
     dest.FunctionVoidReturnNames.clear();
+    dest.FunctionWriteReturnNames.clear();
     dest.EventHandlersVoid.clear();
     dest.EventHandlersWrite.clear();
 
@@ -369,8 +382,11 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
     // Conversion of function qualified read vector
     dest.FunctionQualifiedReadNames.insert(dest.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.end());
 
-    // Conversion of function qualified read vector
+    // Conversion of function void return vector
     dest.FunctionVoidReturnNames.insert(dest.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.end());
+
+    // Conversion of function write return vector
+    dest.FunctionWriteReturnNames.insert(dest.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.end());
 
     // Conversion of event void handler vector
     mtsInterfaceCommon::CommandVoidElement eventVoidHandler;
@@ -437,6 +453,7 @@ void mtsManagerProxyServer::ConstructInterfaceProvidedDescriptionFrom(
     dest.CommandsRead.clear();
     dest.CommandsQualifiedRead.clear();
     dest.CommandsVoidReturn.clear();
+    dest.CommandsWriteReturn.clear();
     dest.EventsVoid.clear();
     dest.EventsWrite.clear();
 
@@ -493,6 +510,17 @@ void mtsManagerProxyServer::ConstructInterfaceProvidedDescriptionFrom(
         dest.CommandsVoidReturn.push_back(commandVoidReturn);
     }
 
+    // Construct command WriteReturn vector
+    ::mtsManagerProxy::CommandWriteReturnElement commandWriteReturn;
+    CommandWriteReturnVector::const_iterator itWriteReturn = src.CommandsWriteReturn.begin();
+    const CommandWriteReturnVector::const_iterator itWriteReturnEnd = src.CommandsWriteReturn.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        commandWriteReturn.Name = itWriteReturn->Name;
+        commandWriteReturn.ArgumentPrototypeSerialized = itWriteReturn->ArgumentPrototypeSerialized;
+        commandWriteReturn.ResultPrototypeSerialized = itWriteReturn->ResultPrototypeSerialized;
+        dest.CommandsWriteReturn.push_back(commandWriteReturn);
+    }
+
     // Construct event void generator vector
     ::mtsManagerProxy::EventVoidElement eventVoidGenerator;
     EventVoidVector::const_iterator itEventVoid = src.EventsVoid.begin();
@@ -522,6 +550,7 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
     dest.FunctionReadNames.clear();
     dest.FunctionQualifiedReadNames.clear();
     dest.FunctionVoidReturnNames.clear();
+    dest.FunctionWriteReturnNames.clear();
     dest.EventHandlersVoid.clear();
     dest.EventHandlersWrite.clear();
 
@@ -543,8 +572,11 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
     // Construct function qualified read vector
     dest.FunctionQualifiedReadNames.insert(dest.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.end());
 
-    // Construct function qualified read vector
+    // Construct function void return vector
     dest.FunctionVoidReturnNames.insert(dest.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.end());
+
+    // Construct function write return vector
+    dest.FunctionWriteReturnNames.insert(dest.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.end());
 
     // Construct event void handler vector
     ::mtsManagerProxy::CommandVoidElement eventVoidHandler;
