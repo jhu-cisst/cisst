@@ -36,15 +36,20 @@ class CISST_EXPORT mtsFunctionWriteReturnProxy : public mtsFunctionWriteReturn {
 protected:
     typedef mtsFunctionWriteReturn BaseType;
     mtsProxySerializer Serializer;
+    mtsGenericObject * ArgumentPointer;
     mtsGenericObject * ResultPointer;
 public:
     mtsFunctionWriteReturnProxy():
         mtsFunctionWriteReturn(true /* this is a proxy class */),
+        ArgumentPointer(0),
         ResultPointer(0)
     {}
 
     ~mtsFunctionWriteReturnProxy()
     {
+        if (this->ArgumentPointer) {
+            delete this->ArgumentPointer;
+        }
         if (this->ResultPointer) {
             delete this->ResultPointer;
         }
@@ -53,6 +58,14 @@ public:
     /*! Getter */
     inline mtsProxySerializer * GetSerializer(void) {
         return &(this->Serializer);
+    }
+
+    inline mtsGenericObject * GetArgumentPointer(void) const {
+        return this->ArgumentPointer;
+    }
+
+    inline void SetArgumentPointer(mtsGenericObject * genericObject) {
+        this->ArgumentPointer = genericObject;
     }
 
     inline mtsGenericObject * GetResultPointer(void) const {

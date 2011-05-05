@@ -368,9 +368,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
         return;
     }
 
-    // Create a temporary argument which includes dynamic allocation internally.
-    // Therefore, this object should be deallocated manually.
-    // function proxy can store the result, needs to create on first run
+    // Function proxy stores the result placeholder, needs to create on first run
     if (functionVoidReturnProxy->GetResultPointer() == 0) {
         mtsGenericObject * result =
             dynamic_cast<mtsGenericObject *>(functionVoidReturnProxy->GetCommand()->GetResultPrototype()->Services()->Create());
@@ -385,7 +383,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
     // Execute the command
     executionResult = (*functionVoidReturnProxy)(*(functionVoidReturnProxy->GetResultPointer()));
 
-    // Serialize if the command is not queued
+    // Serialize the result if the command is not queued - if the command is queued, the result will be sent later
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
         mtsProxySerializer * deserializer = functionVoidReturnProxy->GetSerializer();
         deserializer->Serialize(*(functionVoidReturnProxy->GetResultPointer()),
@@ -412,44 +410,49 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialize
 
     // Deserialize
     mtsProxySerializer * deserializer = functionWriteReturnProxy->GetSerializer();
-    mtsGenericObject * argument = deserializer->DeSerialize(serializedArgument);
-    if (!argument) {
-        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: Deserialization failed");
-        executionResult = mtsExecutionResult::DESERIALIZATION_ERROR;
-        return;
+
+    // Function proxy can store the result place holder, needs to create on first run
+    if (functionWriteReturnProxy->GetResultPointer() == 0) {
+        mtsGenericObject * argument =
+            dynamic_cast<mtsGenericObject *>(functionWriteReturnProxy->GetCommand()->GetArgumentPrototype()->Services()->Create());
+        if (argument == 0) {
+            LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: failed to create a placeholder for argument");
+            executionResult = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+            return;
+        }
+        functionWriteReturnProxy->SetArgumentPointer(argument);
     }
 
-    // Create a temporary argument which includes dynamic allocation internally.
-    // Therefore, this object should be deallocated manually.
-    // function proxy can store the result, needs to create on first run
+    // Function proxy can store the result place holder, needs to create on first run
     if (functionWriteReturnProxy->GetResultPointer() == 0) {
         mtsGenericObject * result =
             dynamic_cast<mtsGenericObject *>(functionWriteReturnProxy->GetCommand()->GetResultPrototype()->Services()->Create());
         if (result == 0) {
-            LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: failed to create a temporary argument");
+            LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: failed to create a placeholder for return value");
             executionResult = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
-            // release memory internally allocated by deserializer
-            delete argument;
             return;
         }
         functionWriteReturnProxy->SetResultPointer(result);
     }
+
+    // Try to deserialize argument, this might fail
+    if (!deserializer->DeSerialize(serializedArgument,
+                                   *(functionWriteReturnProxy->GetArgumentPointer()))) {
+        LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: deserialization failed");
+        executionResult = mtsExecutionResult::DESERIALIZATION_ERROR;
+        return;
+    }
  
     // Execute the command
-    executionResult = (*functionWriteReturnProxy)(*argument, *(functionWriteReturnProxy->GetResultPointer()));
+    executionResult = (*functionWriteReturnProxy)(*(functionWriteReturnProxy->GetArgumentPointer()),
+                                                  *(functionWriteReturnProxy->GetResultPointer()));
 
-    // Serialize if the command is not queued
+    // Serialize the result if the command is not queued - if the command is queued, the result will be sent later
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
         mtsProxySerializer * deserializer = functionWriteReturnProxy->GetSerializer();
         deserializer->Serialize(*(functionWriteReturnProxy->GetResultPointer()),
                                 serializedResult);
     }
-
-    // Release memory internally created by deserializer
-    // delete argument;
-    // do not delete argument until command has been executed ...
-    // but need to delete later 
-    std::cerr << CMN_LOG_DETAILS << CMN_PRETTY_FUNCTION << " need to free memory after dequeue" << std::endl;
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteReturnSerialized: sent " << serializedResult.size() << " bytes");
