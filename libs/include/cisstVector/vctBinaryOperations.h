@@ -448,6 +448,26 @@ class vctBinaryOperations {
 
 };
 
+// Specialize Addition for bool to avoid compiler warnings. Other binary operations
+// can be specialized if needed.
+template<>
+class vctBinaryOperations<bool, bool, bool>::Addition {
+    public:
+        /*!
+          Execute the operation.
+          \param input1 First operand.
+          \param input2 Second operand.
+        */
+        static inline bool Operate(const bool & input1, const bool & input2) {
+            return (input1|input2);
+        }
+
+        static inline bool NeutralElement()
+        {
+            return false;
+        }
+};
+
 
 #endif  // _vctBinaryOperations_h
 
