@@ -142,14 +142,15 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
                 CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `footer offset`" << std::endl;
                 break;
             }
+
+#ifdef READ_CORRUPT_V11_FILE
+            Version = 0;
+#else
             if (FooterOffset <= 0) {
                 CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `footer offset`" << std::endl;
                 break;
             }
 
-#ifdef READ_CORRUPT_V110_FILE
-            Version = 0;
-#else
             // Store file position
             pos = File.GetPos();
 
