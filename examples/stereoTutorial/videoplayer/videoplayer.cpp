@@ -23,8 +23,58 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
+
+
+////////////////////////////////////////
+//     Window event handler class     //
+////////////////////////////////////////
+
+class CViewerEventHandler : public svlWindowEventHandlerBase
+{
+public:
+    CViewerEventHandler() :
+        svlWindowEventHandlerBase()
+        ,Source(0)
+        ,Paused(false)
+        ,Quit(0)
+    {
+    }
+
+    void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
+    {
+        if (ascii) {
+            switch (eventid) {
+                case 'p':
+                    if (Source) {
+                        if (Paused) {
+                            // Resume playback
+                            Source->Play();
+                            Paused = false;
+                            cerr << "Playback resumed..." << endl;
+                        }
+                        else {
+                            // Pause source
+                            Source->Pause();
+                            Paused = true;
+                            cerr << "Playback paused..." << endl;
+                        }
+                    }
+                break;
+
+                case 'q':
+                    if (Quit) Quit[0] = true;
+                break;
+            }
+        }
+    }
+
+    svlFilterSourceVideoFile* Source;
+    bool Paused;
+    bool* Quit;
+};
 
 
 ////////////////////
@@ -33,6 +83,8 @@ using namespace std;
 
 int VideoPlayer(std::string pathname)
 {
+    bool quit = false;
+
     svlInitialize();
 
     // instantiating SVL stream and filters
@@ -40,6 +92,7 @@ int VideoPlayer(std::string pathname)
     svlFilterSourceVideoFile source(1);
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
+    CViewerEventHandler window_cb;
 
     // setup overlay
     svlOverlayFramerate ovrl_fps(0, true, &overlay, svlRect(4, 24, 49, 41),
@@ -64,7 +117,9 @@ int VideoPlayer(std::string pathname)
 
     // setup image window
     window.SetTitle("Video Player");
-//    window.SetFullScreen(true);
+    window.SetEventHandler(&window_cb);
+    window_cb.Source = &source;
+    window_cb.Quit   = &quit;
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
@@ -79,35 +134,12 @@ int VideoPlayer(std::string pathname)
     cerr << "Done" << endl;
 
     cerr << endl << "Keyboard commands:" << endl << endl;
-    cerr << "  In command window:" << endl;
+    cerr << "  In image window:" << endl;
     cerr << "    'p'   - Pause/Resume playback" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
-    
-    // wait for keyboard input in command window
-    int ch;
-    bool paused;
-    paused = false;
 
-    do {
-        ch = cmnGetChar();
-        
-        switch (ch) {
-            case 'p':
-                if (paused) {
-                    // Resume playback
-                    source.Play();
-                    paused = false;
-                    cerr << "Playback resumed..." << endl;
-                }
-                else {
-                    // Pause source
-                    source.Pause();
-                    paused = true;
-                    cerr << "Playback paused..." << endl;
-                }
-            break;
-        }
-    } while (ch != 'q');
+    // wait for quit command
+    while (!quit) osaSleep(0.1);
 
     cerr << endl;
 
