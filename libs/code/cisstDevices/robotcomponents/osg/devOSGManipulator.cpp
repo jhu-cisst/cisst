@@ -28,8 +28,12 @@ devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      double period,
 				      devManipulator::State state,
 				      osaCPUMask mask,
-				      devManipulator::Mode mode ):
-  devManipulator( devname, period, state, mask, mode ){}
+				      devManipulator::Mode mode ) :
+  devManipulator( devname, period, state, mask, mode ),
+  robManipulator(),
+  input( NULL ),
+  output( NULL ){}
+
 
 devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      double period,
@@ -39,7 +43,9 @@ devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      const std::string& robotfile,
 				      const vctFrame4x4<double>& Rtw0 ) :
   devManipulator( devname, period, state, mask, mode ),
-  robManipulator( robotfile, Rtw0 ) {}
+  robManipulator( robotfile, Rtw0 ),
+  input( NULL ),
+  output( NULL ){}
 
 devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      double period,
@@ -68,78 +74,32 @@ devOSGManipulator::devOSGManipulator( const std::string& devname,
 			    devRobotComponent::POSITION,
 			    qinit.size() );
 
-  // MTS transformations. One per link
-  mtsRtw.resize( this->links.size() + 1 );
 
-  // We need to add ourselves since we'll connect the links
-  mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
-  taskManager->AddComponent( this );
-
-  // Create a transformation interface to communicate with the links
-  mtsInterfaceProvided* provided;
-  provided = AddInterfaceProvided( "Transformation" );
-
-  devOSGBody* link = NULL;
-
-  if( provided != NULL ){
+  // If the base is not empty, add a body called "link0"
+  if( !basemodel.empty() ){
 
     std::ostringstream linkname;           // name of the link component
-    std::ostringstream dataname;           // name of the state table data
-    std::ostringstream cmndname;           // name of the command
     linkname << devname << "link" << 0;    // name of link 0
-    dataname << "Rtw" << 0;                // name of link 0 transformation
-    cmndname << "GetRtw" << 0;             // name of link 0 command
 
-    // Create the MTS stuff
-    StateTable.AddData( mtsRtw[0], dataname.str() );
-    provided->AddCommandReadState( StateTable, mtsRtw[0], cmndname.str() );
+    // Add the base to the group
+    vctFrame4x4<double> Rtw0 = ForwardKinematics( qinit, 0 );
+    // add the body as a child to the group
+    addChild( new devOSGBody( linkname.str(), Rtw0, basemodel ) );
 
-    // Create the link for the base
-    link=new devOSGBody(linkname.str(), Rtw0, basemodel, world, cmndname.str());
-    // Add the base
-    taskManager->AddComponent( link );
-    // Add the base to the OSG group
-    addChild( link );
+  }
 
-    // connect the manipulator to the base
-    taskManager->Connect( link->GetName(), "Transformation",
-    			  this->GetName(), "Transformation" );
+  // Add the remaining links called "linki"
+  for( size_t i=1; i<=links.size(); i++ ){
 
-    // Add the remaining links
-    for( size_t i=1; i<=links.size(); i++ ){
+    std::ostringstream linkname;           // name of the link component
+    linkname << devname << "link" << i;    // name of link i
 
-      linkname.clear();      linkname.str("");  // clear the string streams
-      dataname.clear();      dataname.str("");
-      cmndname.clear();      cmndname.str("");
-
-      linkname << devname << "link" << i;       // name of link i
-      dataname << "Rtw" << i;                   // name of link i transformation
-      cmndname << "GetRtw" << i;                // name of link i command
-      
-      // Create the MTS stuff
-      StateTable.AddData( mtsRtw[i], dataname.str() );
-      provided->AddCommandReadState( StateTable, mtsRtw[i], cmndname.str() );
-
-      // Create the link
-      link = new devOSGBody( linkname.str(), mtsRtw[i], models[i-1], 
-			     world, cmndname.str() );
-      // Add the link
-      taskManager->AddComponent( link );      
-
-      // Add the body to the OSG group
-      addChild( link );
-
-      // connect the manipulator to the link
-      taskManager->Connect( link->GetName(), "Transformation",
-			    this->GetName(), "Transformation" );
-
-    }
+    // Add the body to the OSG group
+    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    addChild( new devOSGBody( linkname.str(), Rtwi, models[i-1] ) );
 
   }
   
-  // Update the transformations
-  UpdateKinematics();
-
   // Add this manipulator to the world
   world->addChild( this );
 
@@ -151,16 +111,26 @@ devOSGManipulator::~devOSGManipulator(){
 }
 
 void devOSGManipulator::Read()
-{ output->SetPosition( q ); }
+{ output->SetPosition( this->q ); }
 
 void devOSGManipulator::Write(){
   double t;
+
   // Fetch the joint positions
-  input->GetPosition( q, t );
-  UpdateKinematics();
+  input->GetPosition( this->q, t );
+
+  // this is to skip the base if no model for the base is used
+  int startlink = 0;
+  if( links.size() == getNumChildren() )
+    { startlink = 1; }
+
+  for( unsigned int i=0; i<getNumChildren(); i++ ){ 
+
+    devOSGBody* body = dynamic_cast<devOSGBody*>( getChild( i ) );
+    if( body != NULL )
+      { body->SetTransform( ForwardKinematics( q , i+startlink ) ); }
+
+  }
+
 } 
 
-void devOSGManipulator::UpdateKinematics(){
-  for( size_t i=0; i<getNumChildren(); i++ )
-    { mtsRtw[i] = ForwardKinematics( q , i ); }
-}

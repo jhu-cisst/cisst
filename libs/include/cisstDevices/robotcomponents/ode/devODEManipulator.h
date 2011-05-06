@@ -254,6 +254,14 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
    */
   dBodyID GetBaseID() const;
 
+  virtual
+    vctFrame4x4<double> 
+    ForwardKinematics( const vctDynamicVector<double>& q, int N=-1 ) const;
+
+  void 
+    ForwardKinematics( const vctDynamicVector<double>& q, 
+		       vctFrm3& Rt, int N=-1 ) const;
+
   //! Attach a tool to the robot
   /**
      This attaches manipulator to the end-effector. This essentially create a 

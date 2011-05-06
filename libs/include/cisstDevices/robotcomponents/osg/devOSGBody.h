@@ -110,7 +110,7 @@ class CISST_EXPORT devOSGBody :
   devOSGBody( const std::string& name, 
 	      const vctFrame4x4<double>& Rt,
 	      const std::string& model,
-	      devOSGWorld* world,
+	      devOSGWorld* world = NULL,
 	      const std::string& transformfn = "",
 	      const std::string& switchfn = "" );
 
@@ -129,7 +129,7 @@ class CISST_EXPORT devOSGBody :
   devOSGBody( const std::string& name, 
 	      const vctFrm3& Rt,
 	      const std::string& model,
-	      devOSGWorld* world,
+	      devOSGWorld* world = NULL,
 	      const std::string& transformfn = "",
 	      const std::string& switchfn = "" );
 
@@ -137,7 +137,7 @@ class CISST_EXPORT devOSGBody :
   devOSGBody( const std::string& name, 
               const vctFrm3& Rt,
 	      const vctDynamicMatrix<double>& pc,
-	      devOSGWorld* world,
+	      devOSGWorld* world = NULL,
 	      unsigned char r=200, unsigned char g=200, unsigned char b=200,
               const std::string& transformfn = "",
 	      const std::string& switchfn = "" );

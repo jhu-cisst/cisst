@@ -76,8 +76,8 @@ int main(){
 						  Rtw0,
 						  qinit,
 						  models,
-						  "" );
-						  //path+"l0.3ds" );
+						  //"" );
+						  path+"l0.3ds" );
   taskManager->AddComponent( WAM );
 
 

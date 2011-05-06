@@ -29,9 +29,11 @@ void devOSGBody::TransformCallback::operator()( osg::Node* node,
   devOSGBody::UserData* userdata;
   userdata = dynamic_cast<devOSGBody::UserData*>( data );
 
+  // change the transform 
   if( userdata != NULL )
     { userdata->GetBody()->Transform(); }
   traverse( node, nv );
+
 }   
 
 // This is called at each update traversal
@@ -41,9 +43,11 @@ void devOSGBody::SwitchCallback::operator()( osg::Node* node,
   devOSGBody::UserData* userdata;
   userdata = dynamic_cast<devOSGBody::UserData*>( data );
 
+  // change the switch
   if( userdata != NULL )
     { userdata->GetBody()->Switch(); }
   traverse( node, nv );
+
 }   
 
 
@@ -66,17 +70,6 @@ devOSGBody::devOSGBody(	const std::string& name,
   // Configure the (transform) node
   this->setUserData( userdata );
   this->setUpdateCallback( new devOSGBody::TransformCallback );
-
-  /*
-  osg::StateSet* state = this->getOrCreateStateSet();
-  osg::ref_ptr<osg::Material> mat = new osg::Material;
-  mat->setDiffuse( osg::Material::FRONT,
-		   osg::Vec4( 0.f, 0.f, 0.f, 1.f ) );
-  mat->setSpecular( osg::Material::FRONT,
-		    osg::Vec4( 1.f, 1.f, 1.f, 1.f ) );
-  mat->setShininess( osg::Material::FRONT, 128.f );
-  state->setAttribute( mat.get() );
-  */
 
   // Create and configure the switch node
   osgswitch = new osg::Switch();
@@ -378,46 +371,3 @@ void devOSGBody::SetModePoint(){
 }
 
 
-    /*
-    // This blocks gets the geometry out of the node
-    // This is how it "should" work: First cast the node as a group
-    osg::Group* group = node->asGroup();
-    if( group != NULL ){
-
-      for( size_t g = 0; g<group->getNumChildren(); g++ ){
-
-	node = group->getChild( g );
-
-	// This node should be a geode
-	osg::Geode* geode = node->asGeode();
-	if( geode != NULL ){
-
-	  // Find if it has any drawables?
-	  for( size_t d=0; d<geode->getNumDrawables(); d++ ){
-	    // Get the first drawable
-	    osg::Drawable* drawable = geode->getDrawable( d );
-	  
-	    // Cast the drawable as a geometry
-	    osg::Geometry* geometry = drawable->asGeometry();
-	    if( geometry == NULL ){
-	      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-				<< "Failed to cast the drawable as a geometry."
-				<< std::endl;
-	    }
-	    else { osggeometries.push_back( geometry ); }
-
-	  }
-	}
-	else{
-	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			    << "Failed to cast node as a geode for : " << model 
-			    << std::endl;
-	}
-      }
-    }
-    else{
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< "Failed to cast node as a group for : " << model 
-			<< std::endl;
-    }
-    */

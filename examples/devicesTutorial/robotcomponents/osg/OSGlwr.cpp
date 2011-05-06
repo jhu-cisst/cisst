@@ -8,14 +8,11 @@
 
 #include <cisstCommon/cmnGetChar.h>
 
-#include <cisstMultiTask/mtsTaskManager.h>
-
 int main(){
 
   cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
-
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   // Create the OSG World
@@ -34,10 +31,9 @@ int main(){
   // Add the camera component
   taskManager->AddComponent( camera );
   
-  vctDynamicVector<double> qinit(7, 0.0), qfinal( 7, 1.0 ), qdmax( 7, 0.1 );
+  vctDynamicVector<double> qinit(7, 0.0), qfinal(7, 1.0), qdmax( 7, 0.1 );
   std::vector< vctDynamicVector<double> > Q;
   Q.push_back( qfinal );
-  Q.push_back( qinit );
 
   devSetPoints setpoints( "setpoints", Q );
   taskManager->AddComponent( &setpoints );
@@ -52,9 +48,8 @@ int main(){
 			  qdmax );
   taskManager->AddComponent( &trajectory );
 
-
-  // WAM stuff
-  std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
+  // LWR stuff
+  std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/LWR/");
   std::vector< std::string > models;
   models.push_back( path+"l1.obj" );
   models.push_back( path+"l2.obj" );
@@ -64,31 +59,30 @@ int main(){
   models.push_back( path+"l6.obj" );
   models.push_back( path+"l7.obj" );
 
-  devOSGManipulator* WAM = new devOSGManipulator( "WAM",
-						  0.01,
+  devOSGManipulator* LWR = new devOSGManipulator( "LWR",
+						  0.1,
 						  devManipulator::ENABLED,
 						  OSA_CPU1,
 						  world,
-						  path+"wam7.rob",
+						  path+"lwr.rob",
 						  vctFrame4x4<double>(),
 						  qinit,
 						  models,
 						  path+"l0.obj" );
-  taskManager->AddComponent( WAM );
+  taskManager->AddComponent( LWR );
 
   // Connect trajectory to robot
   taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
 			trajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
-			WAM->GetName(),       devOSGManipulator::Input );
+			LWR->GetName(),       devOSGManipulator::Input );
 
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
 
   cmnGetChar();
-
   taskManager->KillAll();
   taskManager->Cleanup();
 

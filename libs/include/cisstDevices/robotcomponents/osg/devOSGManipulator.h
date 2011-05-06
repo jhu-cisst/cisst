@@ -42,39 +42,51 @@ class CISST_EXPORT devOSGManipulator :
   //! Store the joints values
   vctDynamicVector<double> q;
 
-  //! 
-  std::vector< mtsDoubleFrm4x4 > mtsRtw;  // N+1 SE3 (N joints + base)
-
-  void UpdateKinematics();
-
-  devOSGBody* CreateLink( const std::string& name, 
-			  const vctFrame4x4<double>& Rt,
-			  const std::string& model,
-			  devOSGWorld* world );
-
   //! Read the state of the manipulator
   virtual void Read();
   
   //! Write the state of the manipulator
   virtual void Write();
 
- public: 
-
+  //! OSG Manipulator generic constructor
+  /**
+     This constructor initializes an OSG manipulator with the kinematics and 
+     dynamics contained in a file. Plus it initializes the OSG elements of the
+     manipulators (bodies and joints) for the engine.
+     \param devname   The name of the task
+     \param period    The period of the task
+     \param state     The initial state of the manipulator
+     \param mask      The CPU to host this task
+     \param inputmode The input mode
+  */
   devOSGManipulator( const std::string& devname,
 		     double period,
 		     devManipulator::State state,
 		     osaCPUMask mask,
-		     devManipulator::Mode mode,
+		     devManipulator::Mode inputmode );
+
+  //! OSG Manipulator generic constructor
+  /**
+     This constructor initializes an OSG manipulator with the kinematics and 
+     dynamics contained in a file. Plus it initializes the OSG elements of the
+     manipulators (bodies and joints) for the engine.
+     \param devname The name of the task
+     \param period The period of the task
+     \param state  The initial state of the manipulator
+     \param mask   The CPU to host this task
+     \param inputmode The input mode
+     \param robotfile The file with the kinematics and dynamics parameters
+     \param Rtw0 The offset transformation of the robot base
+  */
+  devOSGManipulator( const std::string& devname,
+		     double period,
+		     devManipulator::State state,
+		     osaCPUMask mask,
+		     devManipulator::Mode inputmode,
 		     const std::string& robotfile,
 		     const vctFrame4x4<double>& Rtw0 );
 
-  devOSGManipulator( const std::string& devname,
-		     double period,
-		     devManipulator::State state,
-		     osaCPUMask mask,
-		     devManipulator::Mode mode );
-
-
+ public: 
 
   //! OSG Manipulator generic constructor
   /**
