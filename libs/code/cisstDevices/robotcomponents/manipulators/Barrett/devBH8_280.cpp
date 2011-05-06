@@ -19,41 +19,34 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
 
 //CMN_IMPLEMENT_SERVICES(devBH8_280);
 
-const std::string devBH8_280::OutputInterface = "BH8_280OutputInterface";
-const std::string devBH8_280::Output          = "BH8_280Output";
-
-const std::string devBH8_280::InputInterface  = "BH8_280InputInterface";
-const std::string devBH8_280::Input           = "BH8_280Input";
-
-static double tstart = 0.0;
-
 // main constructor
 devBH8_280::devBH8_280( const std::string& taskname, 
 			double period, 
-			devCAN* candev, 
-			const vctDynamicVector<double>& qinit ) :
-  devManipulator( taskname, period, true ),
-  qinit( qinit ){
+			osaCPUMask cpumask,
+			devCAN* candev ):
+  devManipulator( taskname,
+		  period, 
+		  devManipulator::ENABLED, 
+		  cpumask, 
+		  devManipulator::FORCETORQUE ){
 
-  input = ProvideInputRn( taskname,
+  input = ProvideInputRn( devManipulator::Input,
                           devRobotComponent::POSITION |
 			  devRobotComponent::FORCETORQUE,
 			  4 );
 
-  // only 4 or 7 pucks are allowed
-  if( qinit.size() != 4 ){
-    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-		       << ": Expected 4 joints. Got " << qinit.size()
-		       << std::endl;
-    exit(-1);
-  }
+  output = ProvideOutputRn( devManipulator::Output,
+			    devRobotComponent::POSITION,
+			    4 );
+  
   // Adjust the pucks vector to the number of requested joints
-  pucks.resize( qinit.size() );
+  pucks.resize( 4 );
 
   // must have a CAN device
   if( candev == NULL ){
@@ -145,7 +138,7 @@ void devBH8_280::Configure( const std::string& ){
   CMN_LOG_INIT_VERBOSE << "Querying the status of the pucks" << std::endl;
   size_t npucksready = 0;
   for(size_t i=0; i<pucks.size(); i++){
-    //std::cout << std::endl << "Query puck " << i << std::endl;
+
     devProperty::Value pstatus;
     if(pucks[i].GetProperty(devProperty::STATUS, pstatus) != devPuck::ESUCCESS){
       CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -207,7 +200,7 @@ void devBH8_280::Configure( const std::string& ){
   mpos2jpos[0][0] = -0.0077437;
   mpos2jpos[1][1] = -0.0077437;
   mpos2jpos[2][2] = -0.0077437;
-  mpos2jpos[3][3] =  0.057268;
+  mpos2jpos[3][3] = -0.057268;
 
   jpos2mpos[0][0] = 1.0 / mpos2jpos[0][0];
   jpos2mpos[1][1] = 1.0 / mpos2jpos[1][1]; 
@@ -222,55 +215,64 @@ void devBH8_280::Configure( const std::string& ){
   //
   // Initialize the position of the BH8_280
   //
-  //SendPositions( qinit );
   
   for( size_t i=0; i<4; i++ ){
-
     pucks[i].SetProperty( devProperty::TIME2STOP, 250, true );
-    pucks[i].SetProperty( devProperty::COMMAND, 13, false );    
-    pucks[i].SetProperty( devProperty::MAXTRQ, 1000, true );
-    pucks[i].SetProperty( devProperty::TRQ, 0, true );
-    pucks[i].SetProperty( devProperty::POS, 0.0, true );
-    pucks[i].SetProperty( devProperty::MODE, devPuck::MODE_PID, true );
-
+    pucks[i].SetProperty( devProperty::MAXTRQ, 1500, true );
   }
+  
+  Hi();
+  osaSleep( 1.0 );
 
 }
 
+void devBH8_280::Hi(){
+  for( size_t i=0; i<4; i++ )
+    { pucks[i].SetProperty( devProperty::COMMAND, 13, false ); }
+}
+
+void devBH8_280::Open(){
+  for( size_t i=0; i<4; i++ )
+    { pucks[i].SetProperty( devProperty::COMMAND, 20 , false ); }
+}
+
+void devBH8_280::Close(){
+  for( size_t i=0; i<4; i++ )
+    { pucks[i].SetProperty( devProperty::COMMAND, 18 , false ); }
+}
+
+void devBH8_280::Home(){
+  for( size_t i=0; i<4; i++ )
+    { pucks[i].SetProperty( devProperty::COMMAND, 7 , false ); }
+}
+
+void devBH8_280::Default(){
+  for( size_t i=0; i<4; i++ )
+    { pucks[i].SetProperty( devProperty::COMMAND, 19 , false ); }
+}
+
 void devBH8_280::Read(){
-//vctDynamicVector<double> devBH8_280::Read(){
   vctDynamicVector<double> q;
   RecvPositions( q );
   output->SetPosition( q );
 }
 
 void devBH8_280::Write(){
-  //vctDynamicVector<double> qt(4, 0.0);
-  
-  /*
-  if( tstart == 0.0 ) tstart = osaGetTime();
-  
-  double t = osaGetTime()-tstart;
-  qt[0] = -cos(t * 0.2 ) + 1.0;
 
-  qt[1] = qt[0];
-  qt[2] = qt[0];
-  qt[3] = 0.0;
-  */
   vctDynamicVector<double> q;
   double t;
   input->GetPosition( q, t );
-
+  
   if( q.size() == 4 ){
     vctDynamicVector<double> qtmp( q );
 
-    for( size_t i=0; i<qtmp.size(); i++ ){
-      if( qtmp[i] <= 0 ) { qtmp[i] = 0; }
-    }
+    for( size_t i=0; i<qtmp.size(); i++ )
+      { if( qtmp[i] <= 0 ) { qtmp[i] = 0; } }
 
     SendPositions( qtmp );
 
   }
+
 }
 
 devBH8_280::Errno devBH8_280::SetPucksStatus( devProperty::Value ps, bool ver ){
@@ -314,10 +316,10 @@ devBH8_280::SendPositions( const vctDynamicVector<double>& jq ){
     // convert the motor positions to encoder ticks
     position = (devProperty::Value)floor((mq[i]*pucks[i].CountsPerRevolution())/
 					 (2.0*M_PI) );
-    
+
     // Set the motor position. Don't double check the position because the 
     // noise might change the encoder.
-    if( pucks[i].SetProperty( devProperty::POS, position, false ) 
+    if( pucks[i].SetProperty( devProperty::MECHANGLE_ENC, position, false ) 
 	!= devPuck::ESUCCESS ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to set pos of puck#: " 
@@ -326,14 +328,14 @@ devBH8_280::SendPositions( const vctDynamicVector<double>& jq ){
     }
 
   }
-  //std::cout << std::endl;
+
   return devBH8_280::ESUCCESS;
 }
 
 
 // query the joint positions
 devBH8_280::Errno devBH8_280::RecvPositions( vctDynamicVector<double>& jq ){
-  
+
   // Query all the motor (broadcast group)
   if( groups[ devGroup::HAND_POSITION ].GetProperty( devProperty::POS ) 
       //if( groups[ devGroup::HAND_POSITION ].GetProperty( devProperty::POS ) 
@@ -380,7 +382,6 @@ devBH8_280::Errno devBH8_280::RecvPositions( vctDynamicVector<double>& jq ){
 			  << std::endl;
       }
       
-      //std::cout << std::setw(15) << position;
       // convert the position from encoder ticks to radians
       mq[pid-11] = ( ((double)position) * 2.0 * M_PI  /
 		     ((double)pucks[pid-11].CountsPerRevolution() ) );
@@ -388,12 +389,8 @@ devBH8_280::Errno devBH8_280::RecvPositions( vctDynamicVector<double>& jq ){
     
   }
 
-  //std::cout << std::endl;
-  //std::cout << mq << std::endl;
   // convert the motor positions to joints positions
   jq = MotorsPos2JointsPos( mq );
-  //std::cout << jq << std::endl;
-  //CMN_LOG_RUN_ERROR << "Recv: " << jq << std::endl;
 
   return devBH8_280::ESUCCESS;
 

@@ -15,7 +15,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#if (CISST_OS == CISST_LINUX_XENOMAI)
+//#if (CISST_OS == CISST_LINUX_XENOMAI)
 
 #ifndef _devRTSocketCAN_h
 #define _devRTSocketCAN_h
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/can/devCAN.h>
 
 #include <rtdm/rtcan.h> // Defines for the RT CAN socket
+#include <native/task.h>
 #include <string>       // for device name (can0, can1,...)
 
 //! A Real Time Socket CAN device
@@ -39,6 +40,8 @@ http://www.cisst.org/cisst/license.txt.
 class devRTSocketCAN : public devCAN {
 
 private:
+
+  RT_TASK rt_task_desc;
 
   //! The name of the CAN device (can0, can1, ...)
   std::string devicename;
@@ -104,4 +107,4 @@ public:
 };
 
 #endif // _devRTSocketCAN_hpp
-#endif // XENOMAI
+//#endif // XENOMAI

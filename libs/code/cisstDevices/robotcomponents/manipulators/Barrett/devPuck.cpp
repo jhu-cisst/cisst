@@ -105,53 +105,54 @@ devPuck::ID devPuck::OriginID( const devCAN::Frame& canframe )
 devPuck::Errno devPuck::GetProperty( devProperty::ID propid,
  				     devProperty::Value& propvalue ){ 
 
+  CMN_LOG_RUN_DEBUG << "devPuck::GetProperty" << std::endl;
+
   // empty CAN frame
   devCAN::Frame sendcanframe;
     
   // pack the query in a can frame
 
-  CMN_LOG_RUN_VERBOSE << "Packing the property" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Packing the property: " << propid << std::endl;
   if(PackProperty(sendcanframe, devProperty::GET, propid) != devPuck::ESUCCESS){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to pack property " << propid
 			<< std::endl;
     return devPuck::EFAILURE;
   }
-  CMN_LOG_RUN_VERBOSE << "Property packed" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Property packed" << std::endl;
   
   // send the CAN frame
-  CMN_LOG_RUN_VERBOSE << "Sending property" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Sending property" << std::endl;
   if( canbus->Send( sendcanframe ) != devCAN::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Failed to querry puck." 
 		      << std::endl;
     return devPuck::EFAILURE;
   }
-  CMN_LOG_RUN_VERBOSE << "Property sent" << std::endl;
   
   // empty CAN frame
   devCAN::Frame recvcanframe;
 
   // receive the response in a CAN frame
-  CMN_LOG_RUN_VERBOSE << "Waiting for answer" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Waiting for reply" << std::endl;
   if( canbus->Recv( recvcanframe ) != devCAN::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Failed to receive property." 
 		      << std::endl;
     return devPuck::EFAILURE;
   }
-  CMN_LOG_RUN_VERBOSE << "Received property" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Received property" << std::endl;
   
   // unpack the can frame
   devProperty::ID recvpropid;
-  CMN_LOG_RUN_VERBOSE << "Unpacking property" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Unpacking property" << std::endl;
   if(UnpackCANFrame(recvcanframe, recvpropid, propvalue) != devPuck::ESUCCESS){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to unpack CAN frame."
 			<< std::endl;
     return devPuck::EFAILURE;
   }
-  CMN_LOG_RUN_VERBOSE << "Property unpacked" << std::endl;
+  CMN_LOG_RUN_DEBUG << "Unpacked property " << recvpropid << std::endl;
   
   // make sure that the property received is the one we asked for
   if( propid != recvpropid ){
@@ -169,10 +170,13 @@ devPuck::Errno devPuck::SetProperty( devProperty::ID propid,
 				     devProperty::Value propval,
 				     bool verify){
 
+  CMN_LOG_RUN_DEBUG << "devPuck::SetProperty" << std::endl;
+
   // empty CAN frame
   devCAN::Frame canframe;
 
   // pack the property ID and value in a "set" CAN frame 
+  CMN_LOG_RUN_DEBUG << "Packing the property: " << propid << std::endl;
   if( PackProperty( canframe, devProperty::SET, propid, propval ) 
       != devPuck::ESUCCESS ){
     CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
@@ -180,22 +184,28 @@ devPuck::Errno devPuck::SetProperty( devProperty::ID propid,
 			<< std::endl;
     return devPuck::EFAILURE;
   }
+  CMN_LOG_RUN_DEBUG << "Property packed" << std::endl;
   
   // send the CAN frame
+  CMN_LOG_RUN_DEBUG << "Sending property" << std::endl;
   if( canbus->Send( canframe ) != devCAN::ESUCCESS ){
     CMN_LOG_RUN_ERROR<< CMN_LOG_DETAILS
 		     << ": Failed to send the CAN frame." 
 		     << std::endl;
     return devPuck::EFAILURE;
   }
+  CMN_LOG_RUN_DEBUG << "Property sent" << std::endl;
   
   // do we double check that the value was set?
   if( verify ){
+    CMN_LOG_RUN_DEBUG << "Verifying value" << std::endl;
     
     // If we just changed the status of the puck, give it a bit of time to
     // initialize itself
     if( propid  == devProperty::STATUS && propval == devPuck::STATUS_READY )
       usleep(1000000);
+    else
+      usleep(10000);
 
     // query the puck to make sure that the property is set
     devProperty::Value recvpropval = rand();
@@ -211,6 +221,9 @@ devPuck::Errno devPuck::SetProperty( devProperty::ID propid,
 			  << ": Oop! Unexpected property value." 
 			  << std::endl;
       return devPuck::EFAILURE;
+    }
+    else{
+      CMN_LOG_RUN_DEBUG << "Property " << propid << " was set to " << propval << std::endl;
     }
   }
   
