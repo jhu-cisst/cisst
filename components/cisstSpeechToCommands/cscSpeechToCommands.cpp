@@ -28,8 +28,6 @@
 
 #include "cscSpeechToCommands.h"
 
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(cscSpeechToCommands);
@@ -42,6 +40,7 @@ struct cscSpeechToCommandsJava
     jmethodID RecognizeWordMethod;
     jmethodID SetCurrentContextMethod;
 };
+
 
 cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
     mtsTaskContinuous(componentName),
@@ -328,11 +327,6 @@ bool cscSpeechToCommands::StartJava(void)
                                                 thisPointer, config, contextList, currentContext);
     this->JavaData->Environment->ReleaseStringUTFChars(config,
                                                        this->JavaData->Environment->GetStringUTFChars(config, JNI_FALSE));
-
-    // start recognizing in separate thread
-    osaThread recognizeThread;
-    recognizeThread.Create<cscSpeechToCommands, void>(this, &cscSpeechToCommands::CallJavaRecognizeWord);
-
     return true;
 }
 
@@ -446,6 +440,7 @@ void cscSpeechToCommands::Configure(void)
     fileStream.close();
 }
 
+
 void cscSpeechToCommands::Startup(void)
 {
     // make sure we have at least one context and current context is set
@@ -461,17 +456,6 @@ void cscSpeechToCommands::Startup(void)
 }
 
 
-void * cscSpeechToCommands::CallJavaRecognizeWord(void)
-{
-    while (true) {
-        this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper,
-                                                    this->JavaData->RecognizeWordMethod);
-    }
-
-    return 0;
-}
-
-
 void cscSpeechToCommands::Run(void)
 {
     ProcessQueuedCommands();
@@ -481,8 +465,9 @@ void cscSpeechToCommands::Run(void)
         this->ContextChangedTrigger(mtsStdString(this->CurrentContext->GetName()));
     }
     else {
-        // Sleep to wait for more commands/events
-        osaSleep(15 * cmn_ms);
+        // get latest word
+        this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper,
+                                                    this->JavaData->RecognizeWordMethod);
     }
 }
 
