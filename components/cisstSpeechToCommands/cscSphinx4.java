@@ -29,10 +29,12 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import javax.sound.sampled.*;
 
-class cscSphinx4 {
+class cscSphinx4 extends Thread {
     private HashMap<String, Recognizer> SphinxRecognizers;
     private Recognizer CurrentSphinxRecognizer;
     private ConfigurationManager SphinxConfigurationManager;
+    private Microphone Microphone; 
+    private boolean RecognitionPaused; 
 
     // static method
     private native void WordRecognizedCallback(long speechToCommandsCppPointer, String word);
@@ -50,6 +52,7 @@ class cscSphinx4 {
         } else {
             throw new RuntimeException("Java Sphinx wrapper: could not switch to context \"" + context + "\"");
         }
+        PauseRecognition();
     }
 
     public void PrintAudioDevices() {
@@ -101,10 +104,10 @@ class cscSphinx4 {
         SetCurrentContext(startingContext);
         System.out.println("Java sphinx wrapper: looking for microphone");
         // start the microphone or exit if the program if this is not possible
-        Microphone microphone = (Microphone) SphinxConfigurationManager.lookup("microphone");
+        Microphone = (Microphone) SphinxConfigurationManager.lookup("microphone");
         System.out.println("Java sphinx wrapper: start recording");
         try {
-            microphone.startRecording();
+            Microphone.startRecording();
         } catch (Exception e) {
             System.out.println("Java sphinx wrapper: cannot start microphone");
             e.printStackTrace();
@@ -112,41 +115,59 @@ class cscSphinx4 {
             System.exit(1);
         }
         System.out.print("Java sphinx wrapper: microphone is setup: ");
-        System.out.println(microphone.getName());
+        System.out.println(Microphone.getName());
+
+        RecognitionPaused = false;
+
+        // start separate recognition thread
+        start();
     }
 
-    public void RecognizeWord() {
-        Result result = CurrentSphinxRecognizer.recognize();
-        String word;
-        if (result != null) {
-            word = result.getBestFinalResultNoFiller();
-            // System.out.println("-----");
-//             System.out.println(word);
-
-//             try {
-//                 DecimalFormat format = new DecimalFormat("#.#####");
-//                 ConfidenceScorer cs = (ConfidenceScorer) SphinxConfigurationManager.lookup("confidenceScorer");
-//                 ConfidenceResult cr = cs.score(result);
-//                 Path best = cr.getBestHypothesis();
-
-//                 System.out.println(best.getTranscription());
-//                 System.out.println("(confidence: " + format.format(best.getLogMath().logToLinear((float) best.getConfidence())) + ')');
-//                 System.out.println();
-//                 WordResult[] words = best.getWords();
-//                 for (WordResult wr : words) {
-//                     printWordConfidence(wr);
-//                 }
-//                 System.out.println();
-//             } catch (Exception e) {
-//                 System.out.println("Java: exception while scoring");
-//                 e.printStackTrace();
-//             }
-
-        } else {
-            word = "";
+    public void PauseRecognition() {
+        if (Microphone != null) {
+            Microphone.stopRecording();
+            RecognitionPaused = true;
         }
-        // finally, send word to C++ side
-        WordRecognizedCallback(SpeechToCommandsCppPointer, word);
+    }
+
+    public void run() {
+        while (true) {
+            if (RecognitionPaused) {
+                Microphone.startRecording();
+                RecognitionPaused = false;
+            }
+            Result result = CurrentSphinxRecognizer.recognize();
+            String word;
+            if (result != null) {
+                word = result.getBestFinalResultNoFiller();
+                // System.out.println("-----");
+    //             System.out.println(word);
+
+    //             try {
+    //                 DecimalFormat format = new DecimalFormat("#.#####");
+    //                 ConfidenceScorer cs = (ConfidenceScorer) SphinxConfigurationManager.lookup("confidenceScorer");
+    //                 ConfidenceResult cr = cs.score(result);
+    //                 Path best = cr.getBestHypothesis();
+
+    //                 System.out.println(best.getTranscription());
+    //                 System.out.println("(confidence: " + format.format(best.getLogMath().logToLinear((float) best.getConfidence())) + ')');
+    //                 System.out.println();
+    //                 WordResult[] words = best.getWords();
+    //                 for (WordResult wr : words) {
+    //                     printWordConfidence(wr);
+    //                 }
+    //                 System.out.println();
+    //             } catch (Exception e) {
+    //                 System.out.println("Java: exception while scoring");
+    //                 e.printStackTrace();
+    //             }
+
+            } else {
+                word = "";
+            }
+            // finally, send word to C++ side
+            WordRecognizedCallback(SpeechToCommandsCppPointer, word);
+        }
     }
 
     private static void printWordConfidence(WordResult wr) {

@@ -57,12 +57,15 @@ class CISST_EXPORT cscSpeechToCommands: public mtsTaskContinuous
     mtsMulticastCommandVoid * NoWordRecognizedTrigger;
     mtsFunctionWrite ContextChangedTrigger;
 
+    bool NewWordRecognized;
     mtsStdString LastWordRecognized;
 
     cscSpeechToCommandsJava * JavaData;
 
     // method called by Java when a word has been recognized
     void WordRecognizedCallback(const std::string & word);
+    // method to actually process the word, called periodically by Run
+    void HandleWord(const mtsStdString & word);
 
     void ReplaceAll(std::string & base, const std::string & s, const std::string & t);
     bool StartJava(void);
