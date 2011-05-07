@@ -163,6 +163,7 @@
     <component name="microphone"
                type="edu.cmu.sphinx.frontend.util.Microphone">
         <property name="closeBetweenUtterances" value="false"/>
+        <property name="keepLastAudio" value="true"/>
     </component>
 
     <!-- ******************************************************* -->

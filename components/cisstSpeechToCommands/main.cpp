@@ -52,7 +52,7 @@ int main(int argc, char ** argv) {
     cscSpeechToCommands * speechToCommands =
         new cscSpeechToCommands("mySpeechToCommands");
 
-    speechToCommands->SetMicrophoneNumber(1);
+    speechToCommands->SetMicrophoneNumber(4);
 
     cscContext * areYouTalkingToMe = speechToCommands->AddContext("areYouTalkingToMe");
     areYouTalkingToMe->SetFiltering(true);

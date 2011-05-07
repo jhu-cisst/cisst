@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 extern "C" {
 #endif
 
-    CISST_EXPORT void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *, jobject, jlong, jstring);
+CISST_EXPORT void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *, jobject, jlong, jstring);
 
 #ifdef __cplusplus
 }

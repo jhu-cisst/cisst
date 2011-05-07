@@ -61,6 +61,8 @@ class CISST_EXPORT cscSpeechToCommands: public mtsTaskContinuous
 
     cscSpeechToCommandsJava * JavaData;
 
+    // repeatedly call Java and ask it to recognize a word
+    void * CallJavaRecognizeWord(void);
     // method called by Java when a word has been recognized
     void WordRecognizedCallback(const std::string & word);
 
