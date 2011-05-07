@@ -265,7 +265,7 @@ bool mtsComponentInterfaceProxyServer::ReceiveFetchEventGeneratorProxyPointers(
     return ProxyOwner->GetEventGeneratorProxyPointer(clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers);
 }
 
-bool mtsComponentInterfaceProxyServer::AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer)
+bool mtsComponentInterfaceProxyServer::AddPerCommandSerializer(const mtsCommandIDType commandID, mtsProxySerializer * serializer)
 {
     PerCommandSerializerMapType::const_iterator it = PerCommandSerializerMap.find(commandID);
     if (!serializer || it != PerCommandSerializerMap.end()) {
@@ -292,7 +292,7 @@ bool mtsComponentInterfaceProxyServer::AddConnectionInformation(const Connection
     return true;
 }
 
-void mtsComponentInterfaceProxyServer::ReceiveExecuteEventVoid(const CommandIDType commandID)
+void mtsComponentInterfaceProxyServer::ReceiveExecuteEventVoid(const mtsCommandIDType commandID)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventVoid: " << commandID);
@@ -307,7 +307,7 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventVoid(const CommandIDTy
     eventVoidGeneratorProxy->Execute(MTS_NOT_BLOCKING);
 }
 
-void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument)
+void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const mtsCommandIDType commandID, const std::string & serializedArgument)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventWriteSerialized: " << commandID << ", " << serializedArgument.size() << " bytes");
@@ -387,7 +387,7 @@ bool mtsComponentInterfaceProxyServer::SendFetchFunctionProxyPointers(
     }
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID,
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                               const mtsBlockingType blocking,
                                                               mtsExecutionResult & executionResult)
 {
@@ -418,7 +418,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID,
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                                          const mtsBlockingType blocking, mtsExecutionResult & executionResult,
                                                                          const mtsGenericObject & argument)
 {
@@ -465,7 +465,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const C
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                                         mtsExecutionResult & executionResult,
                                                                         mtsGenericObject & argument)
 
@@ -509,7 +509,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const Cl
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                                                  mtsExecutionResult & executionResult,
                                                                                  const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut)
 {
@@ -563,7 +563,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized
 }
 
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                                               mtsExecutionResult & executionResult,
                                                                               mtsGenericObject & result)
 {
@@ -585,11 +585,16 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoidReturnSerialized(co
     // Argument placeholder of which value is set by the void return command
     std::string serializedResult;
 
+    // Send address of result, only used by queued commands
+    mtsObjectIDType resultAddress = reinterpret_cast<mtsObjectIDType>(&result);
+
     try {
         Ice::Byte result;
         (*clientProxy)->ExecuteCommandVoidReturnSerialized(commandID,
+                                                           resultAddress,
                                                            serializedResult,
                                                            result);
+
         executionResult = static_cast<mtsExecutionResult::Enum>(result);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoidReturnSerialized: network exception: " << ex);
@@ -605,7 +610,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoidReturnSerialized(co
 }
 
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteReturnSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                                                mtsExecutionResult & executionResult,
                                                                                const mtsGenericObject & argument,
                                                                                mtsGenericObject & result)

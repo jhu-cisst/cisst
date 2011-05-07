@@ -154,7 +154,7 @@ class mtsManagerGlobalInterface;
 typedef unsigned int ConnectionIDType;
 // MJ: Slice only supports int type (-2^31 to 2^31-1)
 // See http://www.zeroc.com/doc/Ice-3.4.1/manual/Slice.5.8.html for details
-const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_limits<int>::max(); 
+const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_limits<int>::max();
 
 // dynamic component composition
 class mtsManagerComponentServices;

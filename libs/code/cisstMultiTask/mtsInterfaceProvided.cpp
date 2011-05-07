@@ -155,7 +155,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             }
             CommandsVoid.AddItem(iterVoid->first, commandVoid, CMN_LOG_LEVEL_INIT_ERROR);
-            
+
         }
         // clone void return commands
         CommandVoidReturnMapType::const_iterator iterVoidReturn = originalInterface->CommandsVoidReturn.begin();
@@ -176,7 +176,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             }
             CommandsVoidReturn.AddItem(iterVoidReturn->first, commandVoidReturn, CMN_LOG_LEVEL_INIT_ERROR);
-            
+
         }
         // clone write commands
         CommandWriteMapType::const_iterator iterWrite = originalInterface->CommandsWrite.begin();

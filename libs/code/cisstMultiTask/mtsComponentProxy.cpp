@@ -24,14 +24,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include "mtsInterfaceRequiredProxy.h"
 #include "mtsFunctionReadProxy.h"
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
 #include "mtsFunctionVoidReturnProxy.h"
 #include "mtsFunctionWriteReturnProxy.h"
+#include "mtsCommandVoidProxyForReturnEvent.h"
 
-mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAndEventHandlerProxyMapElement() :
+
+mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAndEventHandlerProxyMapElement():
     FunctionVoidProxyMap("FunctionVoidProxyMap"),
     FunctionWriteProxyMap("FunctionWriteProxyMap"),
     FunctionReadProxyMap("FunctionReadProxyMap"),
@@ -44,8 +46,8 @@ mtsComponentProxy::FunctionProxyAndEventHandlerProxyMapElement::FunctionProxyAnd
     // Could pass mtsComponentProxy object to SetOwner().
 }
 
-mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
-  : mtsComponent(componentProxyName),
+mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName):
+    mtsComponent(componentProxyName),
     InterfaceProvidedNetworkProxies("InterfaceProvidedNetworkProxies"),
     InterfaceRequiredNetworkProxies("InterfaceRequiredNetworkProxies"),
     FunctionProxyAndEventHandlerProxyMap("FunctionProxyAndEventHandlerProxyMap")
@@ -62,6 +64,16 @@ mtsComponentProxy::~mtsComponentProxy()
     InterfaceRequiredNetworkProxies.DeleteAll();
     FunctionProxyAndEventHandlerProxyMap.DeleteAll();
 }
+
+
+
+mtsInterfaceRequired * mtsComponentProxy::AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                                         mtsRequiredType required)
+{
+    mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequiredProxy(interfaceRequiredName, this, 0, required);
+    return mtsComponent::AddInterfaceRequiredExisting(interfaceRequiredName, interfaceRequired);
+}
+
 
 //-----------------------------------------------------------------------------
 //  Methods for Server Components
@@ -147,7 +159,7 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     // Create VoidReturn function proxies
     const std::vector<std::string> namesOfFunctionVoidReturn = requiredInterfaceDescription.FunctionVoidReturnNames;
     for (size_t i = 0; i < namesOfFunctionVoidReturn.size(); ++i) {
-        functionVoidReturnProxy = new mtsFunctionVoidReturnProxy();
+        functionVoidReturnProxy = new mtsFunctionVoidReturnProxy(requiredInterfaceProxy); // needs to know owner interface
         success = requiredInterfaceProxy->AddFunction(namesOfFunctionVoidReturn[i], *functionVoidReturnProxy);
         success &= mapElement->FunctionVoidReturnProxyMap.AddItem(namesOfFunctionVoidReturn[i], functionVoidReturnProxy);
         if (!success) {
@@ -160,7 +172,7 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     // Create WriteReturn function proxies
     const std::vector<std::string> namesOfFunctionWriteReturn = requiredInterfaceDescription.FunctionWriteReturnNames;
     for (size_t i = 0; i < namesOfFunctionWriteReturn.size(); ++i) {
-        functionWriteReturnProxy = new mtsFunctionWriteReturnProxy();
+        functionWriteReturnProxy = new mtsFunctionWriteReturnProxy(requiredInterfaceProxy); // needs to know owner interface
         success = requiredInterfaceProxy->AddFunction(namesOfFunctionWriteReturn[i], *functionWriteReturnProxy);
         success &= mapElement->FunctionWriteReturnProxyMap.AddItem(namesOfFunctionWriteReturn[i], functionWriteReturnProxy);
         if (!success) {
@@ -180,7 +192,11 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDesc
     mtsCommandVoidProxy * newEventVoidHandlerProxy = 0;
     for (size_t i = 0; i < requiredInterfaceDescription.EventHandlersVoid.size(); ++i) {
         eventName = requiredInterfaceDescription.EventHandlersVoid[i].Name;
-        newEventVoidHandlerProxy = new mtsCommandVoidProxy(eventName);
+        if (eventName == "BlockingCommandReturnExecuted") {
+            newEventVoidHandlerProxy = new mtsCommandVoidProxyForReturnEvent(eventName, requiredInterfaceProxy);
+        } else {
+            newEventVoidHandlerProxy = new mtsCommandVoidProxy(eventName);
+        }
         if (!requiredInterfaceProxy->EventHandlersVoid.AddItem(eventName, newEventVoidHandlerProxy)) {
             delete newEventVoidHandlerProxy;
             CMN_ASSERT(RemoveInterfaceRequired(requiredInterfaceName));
@@ -697,15 +713,16 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
     mtsComponentInterfaceProxyClient * interfaceProxyClient = InterfaceRequiredNetworkProxies.GetItem(clientInterfaceRequiredName, CMN_LOG_LEVEL_RUN_VERBOSE);
     if (!interfaceProxyClient) {
         CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: no network interface proxy client found for required interface: "
-            << clientInterfaceRequiredName << std::endl;
+                                 << clientInterfaceRequiredName << std::endl;
         return false;
     }
 
     // Fetch pointers of event generator proxies from the connected provided
     // interface proxy at the client side.
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet eventGeneratorProxyPointers;
-    if (!interfaceProxyClient->SendFetchEventGeneratorProxyPointers(
-            clientComponentName, clientInterfaceRequiredName, eventGeneratorProxyPointers))
+    if (!interfaceProxyClient->SendFetchEventGeneratorProxyPointers(clientComponentName,
+                                                                    clientInterfaceRequiredName,
+                                                                    eventGeneratorProxyPointers))
     {
         CMN_LOG_CLASS_INIT_ERROR << "UpdateEventHandlerProxyID: failed to fetch event generator proxy pointers: "
                                  << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
@@ -808,7 +825,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(const ConnectionIDType connectionID
                                  << serverInterfaceProvidedName << std::endl;
         return false;
     }
-    
+
     mtsInterfaceProvided * endUserInterface = originalInterface->FindEndUserInterfaceByName(clientInterfaceRequiredName);
     if (!endUserInterface) {
         CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: failed to get end user provided interface: "
@@ -980,7 +997,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     const FunctionVoidProxyMapType::const_iterator itVoidEnd = mapElement->FunctionVoidProxyMap.end();
     for (; itVoid != itVoidEnd; ++itVoid) {
         function.Name = itVoid->first;
-        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itVoid->second);
+        function.FunctionProxyId = reinterpret_cast<mtsCommandIDType>(itVoid->second);
         functionProxyPointers.FunctionVoidProxies.push_back(function);
     }
 
@@ -989,7 +1006,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     const FunctionWriteProxyMapType::const_iterator itWriteEnd = mapElement->FunctionWriteProxyMap.end();
     for (; itWrite != itWriteEnd; ++itWrite) {
         function.Name = itWrite->first;
-        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itWrite->second);
+        function.FunctionProxyId = reinterpret_cast<mtsCommandIDType>(itWrite->second);
         functionProxyPointers.FunctionWriteProxies.push_back(function);
     }
 
@@ -998,7 +1015,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     const FunctionReadProxyMapType::const_iterator itReadEnd = mapElement->FunctionReadProxyMap.end();
     for (; itRead != itReadEnd; ++itRead) {
         function.Name = itRead->first;
-        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itRead->second);
+        function.FunctionProxyId = reinterpret_cast<mtsCommandIDType>(itRead->second);
         functionProxyPointers.FunctionReadProxies.push_back(function);
     }
 
@@ -1007,7 +1024,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     const FunctionQualifiedReadProxyMapType::const_iterator itQualifiedReadEnd = mapElement->FunctionQualifiedReadProxyMap.end();
     for (; itQualifiedRead != itQualifiedReadEnd; ++itQualifiedRead) {
         function.Name = itQualifiedRead->first;
-        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itQualifiedRead->second);
+        function.FunctionProxyId = reinterpret_cast<mtsCommandIDType>(itQualifiedRead->second);
         functionProxyPointers.FunctionQualifiedReadProxies.push_back(function);
     }
 
@@ -1016,7 +1033,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     const FunctionVoidReturnProxyMapType::const_iterator itVoidReturnEnd = mapElement->FunctionVoidReturnProxyMap.end();
     for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
         function.Name = itVoidReturn->first;
-        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itVoidReturn->second);
+        function.FunctionProxyId = reinterpret_cast<mtsCommandIDType>(itVoidReturn->second);
         functionProxyPointers.FunctionVoidReturnProxies.push_back(function);
     }
 
@@ -1025,7 +1042,7 @@ bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInt
     const FunctionWriteReturnProxyMapType::const_iterator itWriteReturnEnd = mapElement->FunctionWriteReturnProxyMap.end();
     for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
         function.Name = itWriteReturn->first;
-        function.FunctionProxyId = reinterpret_cast<CommandIDType>(itWriteReturn->second);
+        function.FunctionProxyId = reinterpret_cast<mtsCommandIDType>(itWriteReturn->second);
         functionProxyPointers.FunctionWriteReturnProxies.push_back(function);
     }
 
@@ -1068,7 +1085,7 @@ bool mtsComponentProxy::GetEventGeneratorProxyPointer(const std::string & client
             CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: no event void generator found: " << element.Name << std::endl;
             return false;
         }
-        element.EventGeneratorProxyId = reinterpret_cast<CommandIDType>(eventGenerator);
+        element.EventGeneratorProxyId = reinterpret_cast<mtsCommandIDType>(eventGenerator);
         eventGeneratorProxyPointers.EventGeneratorVoidProxies.push_back(element);
     }
 
@@ -1080,7 +1097,7 @@ bool mtsComponentProxy::GetEventGeneratorProxyPointer(const std::string & client
             CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: no event write generator found: " << element.Name << std::endl;
             return false;
         }
-        element.EventGeneratorProxyId = reinterpret_cast<CommandIDType>(eventGenerator);
+        element.EventGeneratorProxyId = reinterpret_cast<mtsCommandIDType>(eventGenerator);
         eventGeneratorProxyPointers.EventGeneratorWriteProxies.push_back(element);
     }
 

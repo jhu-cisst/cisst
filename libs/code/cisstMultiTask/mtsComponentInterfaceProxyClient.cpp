@@ -189,7 +189,7 @@ void mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception &
     StopProxy();
 }
 
-bool mtsComponentInterfaceProxyClient::AddPerEventSerializer(const CommandIDType commandID, mtsProxySerializer * serializer)
+bool mtsComponentInterfaceProxyClient::AddPerEventSerializer(const mtsCommandIDType commandID, mtsProxySerializer * serializer)
 {
     PerEventSerializerMapType::const_iterator it = PerEventSerializerMap.find(commandID);
     if (!serializer || it != PerEventSerializerMap.end()) {
@@ -223,7 +223,7 @@ bool mtsComponentInterfaceProxyClient::ReceiveFetchFunctionProxyPointers(
     return proxyOwner->GetFunctionProxyPointers(requiredInterfaceName, functionProxyPointers);
 }
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandIDType commandID,
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const mtsCommandIDType commandID,
                                                                  const mtsBlockingType blocking, mtsExecutionResult & executionResult)
 {
     mtsFunctionVoid * functionVoid = reinterpret_cast<mtsFunctionVoid *>(commandID);
@@ -241,7 +241,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandID
     }
 }
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID,
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(const mtsCommandIDType commandID,
                                                                             const mtsBlockingType blocking, mtsExecutionResult & executionResult,
                                                                             const std::string & serializedArgument)
 {
@@ -272,7 +272,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(cons
     delete argument;
 }
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const CommandIDType commandID,
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const mtsCommandIDType commandID,
                                                                            mtsExecutionResult & executionResult,
                                                                            std::string & serializedArgument)
 {
@@ -308,7 +308,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const
 #endif
 }
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandID,
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSerialized(const mtsCommandIDType commandID,
                                                                                     mtsExecutionResult & executionResult,
                                                                                     const std::string & serializedArgumentIn, std::string & serializedArgumentOut)
 {
@@ -357,7 +357,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSeriali
 }
 
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized(const CommandIDType commandID,
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized(const mtsCommandIDType commandID,
+                                                                                 const mtsObjectIDType resultAddress,
                                                                                  mtsExecutionResult & executionResult,
                                                                                  std::string & serializedResult)
 {
@@ -378,10 +379,16 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
             return;
         }
         functionVoidReturnProxy->SetResultPointer(result);
+        functionVoidReturnProxy->SetRemoteResultPointer(resultAddress);
     }
- 
+
     // Execute the command
     executionResult = (*functionVoidReturnProxy)(*(functionVoidReturnProxy->GetResultPointer()));
+
+    // Event will need to know which function was blocked
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+        functionVoidReturnProxy->SetAsLastFunction();
+    }
 
     // Serialize the result if the command is not queued - if the command is queued, the result will be sent later
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
@@ -396,9 +403,9 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
 }
 
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialized(const CommandIDType commandID,
-                                                                                  mtsExecutionResult & executionResult,
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialized(const mtsCommandIDType commandID,
                                                                                   const std::string & serializedArgument,
+                                                                                  mtsExecutionResult & executionResult,
                                                                                   std::string & serializedResult)
 {
     mtsFunctionWriteReturnProxy * functionWriteReturnProxy = reinterpret_cast<mtsFunctionWriteReturnProxy*>(commandID);
@@ -442,10 +449,15 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialize
         executionResult = mtsExecutionResult::DESERIALIZATION_ERROR;
         return;
     }
- 
+
     // Execute the command
     executionResult = (*functionWriteReturnProxy)(*(functionWriteReturnProxy->GetArgumentPointer()),
                                                   *(functionWriteReturnProxy->GetResultPointer()));
+
+    // Event will need to know which function was blocked
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+        functionWriteReturnProxy->SetAsLastFunction();
+    }
 
     // Serialize the result if the command is not queued - if the command is queued, the result will be sent later
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
@@ -494,7 +506,8 @@ bool mtsComponentInterfaceProxyClient::SendFetchEventGeneratorProxyPointers(
     }
 }
 
-bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType commandID)
+
+bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const mtsCommandIDType commandID)
 {
     if (!IsActiveProxy()) return false;
 
@@ -513,7 +526,8 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType 
     return true;
 }
 
-bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const CommandIDType commandID, const mtsGenericObject & argument)
+
+bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const mtsCommandIDType commandID, const mtsGenericObject & argument)
 {
     if (!IsActiveProxy()) return false;
 
@@ -755,6 +769,7 @@ void
 mtsComponentInterfaceProxyClient
 ::ComponentInterfaceClientI
 ::ExecuteCommandVoidReturnSerialized(::Ice::Long commandID,
+                                     ::Ice::Long resultAddress,
                                      ::std::string & result,
                                      ::Ice::Byte & executionResultByte,
                                      const ::Ice::Current & CMN_UNUSED(current))
@@ -763,7 +778,7 @@ mtsComponentInterfaceProxyClient
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoidReturnSerialized: " << commandID << ", " << argumentIn.size());
 #endif
     mtsExecutionResult executionResult;
-    ComponentInterfaceProxyClient->ReceiveExecuteCommandVoidReturnSerialized(commandID, executionResult, result);
+    ComponentInterfaceProxyClient->ReceiveExecuteCommandVoidReturnSerialized(commandID, resultAddress, executionResult, result);
     executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }
 
@@ -781,6 +796,6 @@ mtsComponentInterfaceProxyClient
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteReturnSerialized: " << commandID << ", " << argumentIn.size());
 #endif
     mtsExecutionResult executionResult;
-    ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteReturnSerialized(commandID, executionResult, argument, result);
+    ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteReturnSerialized(commandID, argument, executionResult, result);
     executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }

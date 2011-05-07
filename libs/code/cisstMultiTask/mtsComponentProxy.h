@@ -141,6 +141,10 @@ public:
 
     inline void Configure(const std::string & CMN_UNUSED(componentProxyName)) {};
 
+    mtsInterfaceRequired *
+        AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                       mtsRequiredType isRequired = MTS_REQUIRED);
+
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
     bool AddConnectionInformation(const std::string & serverInterfaceProvidedName, const ConnectionIDType connectionID);
@@ -173,8 +177,8 @@ public:
     bool CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription);
     bool RemoveInterfaceRequiredProxy(const std::string & requiredInterfaceProxyName);
 
-    /*! \brief Get name of provided interface instance for new connection, 
-               which should be unique wihtin a component 
+    /*! \brief Get name of provided interface instance for new connection,
+               which should be unique wihtin a component
         \param originalProvidedInterfaceName name of original provided interface
         \param connectionID connection id
      */

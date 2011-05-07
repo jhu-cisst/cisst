@@ -31,9 +31,12 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskmtsDouble);
 // macro to create an FLTK critical section with lock, unlock and awake
 #define FLTK_CRITICAL_SECTION Fl::lock(); for (bool firstRun = true; firstRun; firstRun = false, Fl::unlock(), Fl::awake())
 
+// delay for slow and blocking commands, number of 0.5 second hearbeats - e.g. 10 represents 5 seconds delay
+const unsigned int NB_HEARTBEATS = 10;
+
 template <class _dataType>
-serverTask<_dataType>::serverTask(const std::string & taskName, double period):
-    serverTaskBase(taskName, period)
+serverTask<_dataType>::serverTask(const std::string & taskName):
+    serverTaskBase(taskName, 50.0 * cmn_ms)
 {
     // add ServerData to the StateTable defined in mtsTask
     this->StateTable.AddData(ReadValue, "ReadValue");
@@ -91,7 +94,7 @@ template <class _dataType>
 void serverTask<_dataType>::VoidSlow(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "VoidSlow" << std::endl;
-    for (unsigned int index = 0; index < 6; ++index) {
+    for (unsigned int index = 0; index < NB_HEARTBEATS; ++index) {
         FLTK_CRITICAL_SECTION {
             if (UI.VoidValue->value() == 0) {
                 UI.VoidValue->value(1);
@@ -108,8 +111,8 @@ template <class _dataType>
 void serverTask<_dataType>::WriteSlow(const _dataType & data)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "WriteSlow" << std::endl;
-    for (unsigned int index = 0; index < 6; ++index) {
-        UI.WriteValue->value((double)data / (6 - index));
+    for (unsigned int index = 0; index < NB_HEARTBEATS; ++index) {
+        UI.WriteValue->value((double)data / (NB_HEARTBEATS - index));
         osaSleep(0.5 * cmn_s);
     }
 }
@@ -175,8 +178,7 @@ void serverTask<_dataType>::Run(void) {
 
             this->ReadValue = _dataType(UI.ReadValue->value());
 
-            UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 100.0));
-
+            UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 20.0));
         } // fltk critical section
     }
 }

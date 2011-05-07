@@ -147,7 +147,7 @@ module mtsComponentInterfaceProxy
         void ExecuteCommandWriteSerialized(long commandID, string argument, bool blocking, out byte executionResult);
         void ExecuteCommandReadSerialized(long commandID, out string argument, out byte executionResult);
         void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut, out byte executionResult);
-        void ExecuteCommandVoidReturnSerialized(long commandID, out string result, out byte executionResult);
+        void ExecuteCommandVoidReturnSerialized(long commandID, long resultAddress, out string result, out byte executionResult);
         void ExecuteCommandWriteReturnSerialized(long commandID, string argumentIn, out string result, out byte executionResult);
 	};
 

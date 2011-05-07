@@ -61,7 +61,7 @@ int main(int argc, char * argv[])
     }
 
     std::cout << "Starting server, IP = " << globalComponentManagerIP << std::endl;
-    std::cout << "Use " << (useGeneric ? "mtsDouble" : "double") << std::endl;
+    std::cout << "Using " << (useGeneric ? "mtsDouble" : "double") << std::endl;
 
     // Get the TaskManager instance and set operation mode
     mtsManagerLocal * componentManager;
@@ -73,12 +73,11 @@ int main(int argc, char * argv[])
     }
 
     // create our server task
-    const double PeriodServer = 10 * cmn_ms; // in milliseconds
     serverTaskBase * server;
     if (useGeneric) {
-        server = new serverTask<mtsDouble>("Server", PeriodServer);
+        server = new serverTask<mtsDouble>("Server");
     } else {
-        server = new serverTask<double>("Server", PeriodServer);
+        server = new serverTask<double>("Server");
     }
 
     server->Configure();

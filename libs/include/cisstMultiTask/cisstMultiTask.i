@@ -450,7 +450,7 @@ http://www.cisst.org/cisst/license.txt.
                 interfaceRequired.AddFunction(command.Name, func)
                 func.thisown = 0
             return interfaceRequired
-            
+
         # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
         # or ('component', 'interfaceProvided')
         def AddInterfaceRequiredAndConnect(self, otherComponentInterface):

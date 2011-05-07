@@ -48,7 +48,7 @@ protected:
     ComponentInterfaceClientIPtr Client;
 
     /*! Typedef for per-event argument serializer */
-    typedef std::map<CommandIDType, mtsProxySerializer *> PerEventSerializerMapType;
+    typedef std::map<mtsCommandIDType, mtsProxySerializer *> PerEventSerializerMapType;
     PerEventSerializerMapType PerEventSerializerMap;
 
     /*! Connection id that this proxy runs for. mtsComponentInterfaceProxyServer
@@ -95,24 +95,25 @@ protected:
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers) const;
 
     /*! Execute commands */
-    void ReceiveExecuteCommandVoid(const CommandIDType commandID,
+    void ReceiveExecuteCommandVoid(const mtsCommandIDType commandID,
                                    const mtsBlockingType blocking, mtsExecutionResult & executionResult);
-    void ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID,
+    void ReceiveExecuteCommandWriteSerialized(const mtsCommandIDType commandID,
                                               const mtsBlockingType blocking, mtsExecutionResult & executionResult,
                                               const std::string & serializedArgument);
-    void ReceiveExecuteCommandReadSerialized(const CommandIDType commandID,
+    void ReceiveExecuteCommandReadSerialized(const mtsCommandIDType commandID,
                                              mtsExecutionResult & executionResult,
                                              std::string & serializedArgument);
-    void ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandID,
+    void ReceiveExecuteCommandQualifiedReadSerialized(const mtsCommandIDType commandID,
                                                       mtsExecutionResult & executionResult,
                                                       const std::string & serializedArgumentIn, std::string & serializedArgumentOut);
-    void ReceiveExecuteCommandVoidReturnSerialized(const CommandIDType commandID,
+    void ReceiveExecuteCommandVoidReturnSerialized(const mtsCommandIDType commandID,
+                                                   const mtsObjectIDType resultAddress,
                                                    mtsExecutionResult & executionResult,
-                                                   std::string & serializedArgumentOut);
-    void ReceiveExecuteCommandWriteReturnSerialized(const CommandIDType commandID,
-                                                    mtsExecutionResult & executionResult,
+                                                   std::string & serializedResult);
+    void ReceiveExecuteCommandWriteReturnSerialized(const mtsCommandIDType commandID,
                                                     const std::string & serializedArgument,
-                                                    std::string & serializedArgumentOut);
+                                                    mtsExecutionResult & executionResult,
+                                                    std::string & serializedResult);
 
 public:
     /*! Constructor and destructor */
@@ -133,7 +134,7 @@ public:
     void SendTestMessageFromClientToServer(const std::string & str) const;
 
     /*! Register per-command (de)serializer */
-    bool AddPerEventSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
+    bool AddPerEventSerializer(const mtsCommandIDType commandID, mtsProxySerializer * serializer);
 
     /*! Fetch pointers of event generator proxies from a provided interface
         proxy at server side */
@@ -142,8 +143,8 @@ public:
         mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
     /*! Request execution of events */
-    bool SendExecuteEventVoid(const CommandIDType commandID);
-    bool SendExecuteEventWriteSerialized(const CommandIDType commandID, const mtsGenericObject & argument);
+    bool SendExecuteEventVoid(const mtsCommandIDType commandID);
+    bool SendExecuteEventWriteSerialized(const mtsCommandIDType commandID, const mtsGenericObject & argument);
 
     //-------------------------------------------------------------------------
     //  Interface Implementation (refer to mtsComponentInterfaceProxy.ice)
@@ -195,7 +196,7 @@ protected:
         void ExecuteCommandWriteSerialized(::Ice::Long, const ::std::string&, bool, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandReadSerialized(::Ice::Long, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandQualifiedReadSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
-        void ExecuteCommandVoidReturnSerialized(::Ice::Long, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
+        void ExecuteCommandVoidReturnSerialized(::Ice::Long commandId, ::Ice::Long resultAddress, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandWriteReturnSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
     };
 };

@@ -63,7 +63,7 @@ public:
 
     /*! Set command id and register serializer to network proxy. This method
         should be called after SetNetworkProxy() is called. */
-    void SetCommandID(const CommandIDType & commandID) {
+    void SetCommandID(const mtsCommandIDType & commandID) {
         mtsCommandProxyBase::SetCommandID(commandID);
 
         if (NetworkProxyServer) {

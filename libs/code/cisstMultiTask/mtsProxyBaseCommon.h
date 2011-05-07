@@ -46,8 +46,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 /*! Typedef for command ID to handle both 32 and 64 bit pointers */
-typedef cmnDeSerializer::TypeId CommandIDType;
-typedef ::Ice::Long IceCommandIDType;
+typedef cmnDeSerializer::TypeId mtsCommandIDType;
+typedef cmnDeSerializer::TypeId mtsObjectIDType;
+typedef ::Ice::Long mtsIceCommandIDType;
 
 /*! Enable/disable detailed log. This affects all proxy objects. */
 //#define ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -68,11 +69,11 @@ public:
     /*! The proxy status definition. This definition is adopted from mtsTask.h
         with slight modification.
 
-        PROXY_STATE_CONSTRUCTED  
-            : Set by mtsProxyBaseCommon constructor. 
+        PROXY_STATE_CONSTRUCTED
+            : Set by mtsProxyBaseCommon constructor.
               Initial state.
 
-        PROXY_STATE_INITIALIZING 
+        PROXY_STATE_INITIALIZING
             : Set by mtsProxyBaseClient::IceInitialize() or
               mtsProxyBaseServer::IceInitialize(), both of which internally calls
               mtsProxyBaseCommon::IceInitialize().
@@ -81,16 +82,16 @@ public:
         PROXY_STATE_READY
             : Set by either mtsProxyBaseServer::IceInitialize() or
               mtsProxyBaseClient::IceInitialize().
-              This state represents that a proxy object is successfully 
+              This state represents that a proxy object is successfully
               initialized and is ready to run.
 
         PROXY_STATE_ACTIVE
-            : Set by either mtsProxyBaseServer::SetAsActiveProxy() or 
+            : Set by either mtsProxyBaseServer::SetAsActiveProxy() or
               mtsProxyBaseClient::SetAsActiveProxy().
               If a proxy is in this state, it is running and can process events.
 
         PROXY_STATE_FINISHING
-            : Set by either mtsProxyBaseServer::Stop() or 
+            : Set by either mtsProxyBaseServer::Stop() or
               mtsProxyBaseClient::Stop() before trying to stop ICE proxy processing.
 
         PROXY_STATE_FINISHED
@@ -161,8 +162,8 @@ protected:
 
     public:
         SenderThread(const _SenderType& sender) : Sender(sender), CanSend(true) {}
-        virtual void run() { 
-            if (CanSend) Sender->Run(); 
+        virtual void run() {
+            if (CanSend) Sender->Run();
         }
         void StopSend(void) {
             CanSend = false;
@@ -346,7 +347,7 @@ public:
 
 
 template<class _proxyOwner>
-mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string& propertyFileName, 
+mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string& propertyFileName,
                                                     const ProxyTypes& CMN_UNUSED(proxyType))
 {
     ProxyBaseInitialize();
@@ -374,7 +375,7 @@ void mtsProxyBaseCommon<_proxyOwner>::ProxyBaseInitialize(void)
 }
 
 template<class _proxyOwner>
-void mtsProxyBaseCommon<_proxyOwner>::ChangeProxyState(const enum ProxyStateType newProxyState) 
+void mtsProxyBaseCommon<_proxyOwner>::ChangeProxyState(const enum ProxyStateType newProxyState)
 {
     StateChange.Lock();
     ProxyState = newProxyState;
@@ -393,7 +394,7 @@ void mtsProxyBaseCommon<_proxyOwner>::ChangeProxyState(const enum ProxyStateType
 }
 
 template<class _proxyOwner>
-void mtsProxyBaseCommon<_proxyOwner>::IceInitialize(void) 
+void mtsProxyBaseCommon<_proxyOwner>::IceInitialize(void)
 {
     ChangeProxyState(PROXY_STATE_INITIALIZING);
 
@@ -425,7 +426,7 @@ void mtsProxyBaseCommon<_proxyOwner>::IceCleanup(void)
 }
 
 template<class _proxyOwner>
-void mtsProxyBaseCommon<_proxyOwner>::SetProxyOwner(_proxyOwner * proxyOwner, 
+void mtsProxyBaseCommon<_proxyOwner>::SetProxyOwner(_proxyOwner * proxyOwner,
                                                             const std::string & suffix)
 {
     ProxyOwner = proxyOwner;

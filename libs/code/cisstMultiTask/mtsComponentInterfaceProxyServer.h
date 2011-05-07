@@ -49,7 +49,7 @@ protected:
     ComponentInterfaceServerIPtr Sender;
 
     /*! Per-command argument serializer */
-    typedef std::map<CommandIDType, mtsProxySerializer *> PerCommandSerializerMapType;
+    typedef std::map<mtsCommandIDType, mtsProxySerializer *> PerCommandSerializerMapType;
     PerCommandSerializerMapType PerCommandSerializerMap;
 
     /*! Map to retrieve connection information by client id.
@@ -117,9 +117,9 @@ protected:
                                                  const std::string & requiredInterfaceName,
                                                  mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
-    void ReceiveExecuteEventVoid(const CommandIDType commandID);
+    void ReceiveExecuteEventVoid(const mtsCommandIDType commandID);
 
-    void ReceiveExecuteEventWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument);
+    void ReceiveExecuteEventWriteSerialized(const mtsCommandIDType commandID, const std::string & serializedArgument);
 
 public:
     /*! Constructor and destructor */
@@ -133,7 +133,7 @@ public:
     void StopProxy(void);
 
     /*! Register per-command (de)serializer */
-    bool AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
+    bool AddPerCommandSerializer(const mtsCommandIDType commandID, mtsProxySerializer * serializer);
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy disconnection is detected. */
@@ -155,21 +155,21 @@ public:
         interface proxy at the server process.
         clientID designates which network proxy client should execute a command
         and commandID represents which function proxy object should be called. */
-    bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandVoid(const ClientIDType clientID, const mtsCommandIDType commandID,
                                 const mtsBlockingType blocking, mtsExecutionResult & executionResult);
-    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                            const mtsBlockingType blocking, mtsExecutionResult & executionResult,
                                            const mtsGenericObject & argument);
-    bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                           mtsExecutionResult & executionResult,
                                           mtsGenericObject & argument);
-    bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                    mtsExecutionResult & executionResult,
                                                    const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut);
-    bool SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                 mtsExecutionResult & executionResult,
                                                 mtsGenericObject & result);
-    bool SendExecuteCommandWriteReturnSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandWriteReturnSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                  mtsExecutionResult & executionResult,
                                                  const mtsGenericObject & argument,
                                                  mtsGenericObject & result);

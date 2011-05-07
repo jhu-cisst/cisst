@@ -668,7 +668,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                     std::stringstream ss;
                     tempRef.ToStreamRaw(ss);
                     if (!tempArg->FromStreamRaw(ss)) {
-                        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: Could not parse \"" 
+                        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: Could not parse \""
                                                  << componentName << "\" for constructor of "
                                                  << className << std::endl;
                     }
@@ -2641,7 +2641,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     const ConnectionIDType connectionID           = description.ConnectionID;
     const std::string serverProcessName           = description.Server.ProcessName;
     const std::string serverComponentName         = description.Server.ComponentName;
-    const std::string serverInterfaceProvidedName = //description.Server.InterfaceName; 
+    const std::string serverInterfaceProvidedName = //description.Server.InterfaceName;
         mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
             description.Server.InterfaceName, connectionID);
     const std::string clientProcessName           = description.Client.ProcessName;
@@ -2705,8 +2705,8 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     // If server proxy is already running, fetch the access information
     else {
         // MJ: this should not be reached because each connection has its own provided interface instance
-        CMN_ASSERT(false); 
-        
+        CMN_ASSERT(false);
+
         if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(clientProcessName,
                 serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointAccessInfo))
         {

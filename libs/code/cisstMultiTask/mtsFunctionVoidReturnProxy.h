@@ -28,20 +28,26 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsFunctionVoidReturnProxy_h
 
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
+#include "mtsInterfaceRequiredProxy.h"
 #include "mtsProxySerializer.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsFunctionVoidReturnProxy : public mtsFunctionVoidReturn {
+class CISST_EXPORT mtsFunctionVoidReturnProxy: public mtsFunctionVoidReturn {
 protected:
     typedef mtsFunctionVoidReturn BaseType;
+    mtsInterfaceRequiredProxy * InterfaceRequired;
     mtsProxySerializer Serializer;
     mtsGenericObject * ResultPointer;
+    mtsObjectIDType RemoteResultPointer;
+
 public:
-    mtsFunctionVoidReturnProxy():
+    mtsFunctionVoidReturnProxy(mtsInterfaceRequired * interfaceRequired):
         mtsFunctionVoidReturn(true /* this is a proxy class */),
         ResultPointer(0)
-    {}
+    {
+        this->InterfaceRequired = dynamic_cast<mtsInterfaceRequiredProxy *>(interfaceRequired);
+    }
 
     ~mtsFunctionVoidReturnProxy()
     {
@@ -61,6 +67,18 @@ public:
 
     inline void SetResultPointer(mtsGenericObject * genericObject) {
         this->ResultPointer = genericObject;
+    }
+
+    inline mtsObjectIDType GetRemoteResultPointer(void) const {
+        return this->RemoteResultPointer;
+    }
+
+    inline void SetRemoteResultPointer(const mtsObjectIDType remoteResultPointer) {
+        this->RemoteResultPointer = remoteResultPointer;
+    }
+
+    inline void SetAsLastFunction(void) {
+        this->InterfaceRequired->SetLastFunction(this);
     }
 };
 
