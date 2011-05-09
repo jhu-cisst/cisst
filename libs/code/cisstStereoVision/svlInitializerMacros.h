@@ -26,7 +26,8 @@
 // are added to the class register. Other approaches may be more efficient, such as:
 //     (A *)0
 //     A::ClassServices()->GetName()
-#define SVL_INITIALIZE(A) delete new A
+//#define SVL_INITIALIZE(A) delete new A
+#define SVL_INITIALIZE(A) (A *)0
 
 #endif // _svlInitializerMacros_h
 
