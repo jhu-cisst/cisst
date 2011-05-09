@@ -27,7 +27,7 @@ Original code courtesy of Ben Mitchell.
 #include <cisstStereoVision/svlImageIO.h>
 
 
-class svlImageCodecPPM : public svlImageCodecBase, public cmnGenericObject
+class svlImageCodecPPM : public svlImageCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

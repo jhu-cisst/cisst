@@ -29,11 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVidCapSrcSVS class *****/
 /*******************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcSVS)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcSVS, svlVidCapSrcBase)
 
 svlVidCapSrcSVS::svlVidCapSrcSVS() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Running(false),
     CaptureProc(0),

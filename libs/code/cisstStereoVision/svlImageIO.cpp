@@ -42,7 +42,7 @@ svlImageIO::svlImageIO()
 
     // Go through all registered classes
     for (cmnClassRegister::const_iterator iter = cmnClassRegister::begin(); iter != cmnClassRegister::end(); iter ++) {
-        if ((*iter).second && handlers < 256) {
+        if ((*iter).second && (handlers < 256) && (*iter).second->IsDerivedFrom<svlImageCodecBase>()) {
             go = (*iter).second->Create();
             ft = dynamic_cast<svlImageCodecBase*>(go);
             if (ft) {
@@ -362,7 +362,9 @@ int svlImageIO::Write(const svlSampleImage &image,
 /*** svlImageCodecBase class ******/
 /**********************************/
 
-svlImageCodecBase::svlImageCodecBase()
+CMN_IMPLEMENT_SERVICES(svlImageCodecBase)
+
+svlImageCodecBase::svlImageCodecBase() : cmnGenericObject()
 {
 }
 

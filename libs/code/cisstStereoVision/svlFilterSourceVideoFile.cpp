@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceVideoFile class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoFile, svlFilterSourceBase)
 
 svlFilterSourceVideoFile::svlFilterSourceVideoFile() :
     svlFilterSourceBase(false),  // manual timestamp management

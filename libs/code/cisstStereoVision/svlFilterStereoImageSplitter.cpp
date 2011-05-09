@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterStereoImageSplitter class ***/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterStereoImageSplitter)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterStereoImageSplitter, svlFilterBase)
 
 svlFilterStereoImageSplitter::svlFilterStereoImageSplitter() :
     svlFilterBase(),

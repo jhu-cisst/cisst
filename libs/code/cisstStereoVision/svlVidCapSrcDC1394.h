@@ -215,7 +215,7 @@ private:
 };
 
 
-class svlVidCapSrcDC1394 : public svlVidCapSrcBase, public cmnGenericObject
+class svlVidCapSrcDC1394 : public svlVidCapSrcBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

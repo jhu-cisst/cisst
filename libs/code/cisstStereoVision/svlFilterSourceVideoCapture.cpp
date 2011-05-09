@@ -88,7 +88,9 @@ void svlFilterSourceVideoCapture::Config::SetChannels(const int channels)
 /*** svlFilterSourceVideoCapture class *****/
 /*******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoCapture)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoCapture, svlFilterSourceBase)
+CMN_IMPLEMENT_SERVICES(svlVidCapSrcBase)
+
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Config)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_DeviceList)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_FormatList)
@@ -498,7 +500,7 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
 
         // Avoid infinite recursion by skipping self
         if ((*iter).first != "svlFilterSourceVideoCapture" &&
-            (*iter).second) {
+            (*iter).second && (*iter).second->IsDerivedFrom<svlVidCapSrcBase>()) {
 
             // Most device objects can be created dynamically
             go = (*iter).second->Create();

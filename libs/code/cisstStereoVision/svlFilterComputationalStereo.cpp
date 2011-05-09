@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterComputationalStereo class ****/
 /*******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterComputationalStereo)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterComputationalStereo, svlFilterBase)
 
 
 svlFilterComputationalStereo::svlFilterComputationalStereo() :

@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterStereoImageJoiner class *****/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterStereoImageJoiner)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterStereoImageJoiner, svlFilterBase)
 
 svlFilterStereoImageJoiner::svlFilterStereoImageJoiner() :
     svlFilterBase(),

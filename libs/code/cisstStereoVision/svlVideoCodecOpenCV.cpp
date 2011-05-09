@@ -32,11 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecOpenCV class *******/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecOpenCV)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecOpenCV, svlVideoCodecBase)
 
 svlVideoCodecOpenCV::svlVideoCodecOpenCV() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     Width(0),
     Height(0),
     BegPos(-1),

@@ -27,11 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVidCapSrcDirectShow class ****/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcDirectShow)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcDirectShow, svlVidCapSrcBase)
 
 svlVidCapSrcDirectShow::svlVidCapSrcDirectShow() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     Initialized(false),
     NumOfStreams(0),
     RunState(false),

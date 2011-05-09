@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageSampler class *********/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageSampler)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageSampler, svlFilterBase)
 
 svlFilterImageSampler::svlFilterImageSampler() :
     svlFilterBase()

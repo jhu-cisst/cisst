@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSplitter class **********/
 /**************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSplitter)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSplitter, svlFilterBase)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSplitter_OutputInfo)
 
 svlFilterSplitter::svlFilterSplitter() :

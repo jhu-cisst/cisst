@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageFlipRotate class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageFlipRotate)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageFlipRotate, svlFilterBase)
 
 svlFilterImageFlipRotate::svlFilterImageFlipRotate() :
     svlFilterBase(),

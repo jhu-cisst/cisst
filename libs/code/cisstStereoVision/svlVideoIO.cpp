@@ -47,7 +47,7 @@ svlVideoIO::svlVideoIO()
 
     // Go through all registered classes
     for (cmnClassRegister::const_iterator iter = cmnClassRegister::begin(); iter != cmnClassRegister::end(); iter ++) {
-        if ((*iter).second && handlers < 256) {
+        if ((*iter).second && (handlers < 256) && (*iter).second->IsDerivedFrom<svlVideoCodecBase>()) {
             go = (*iter).second->Create();
             ft = dynamic_cast<svlVideoCodecBase*>(go);
             if (ft) {
@@ -462,7 +462,10 @@ int svlVideoIO::ReleaseCompression(svlVideoIO::Compression *compression)
 /*** svlVideoCodecBase class ******/
 /**********************************/
 
+CMN_IMPLEMENT_SERVICES(svlVideoCodecBase)
+
 svlVideoCodecBase::svlVideoCodecBase() :
+    cmnGenericObject(),
     Codec(0),
     Multithreaded(false),
     VariableFramerate(false)

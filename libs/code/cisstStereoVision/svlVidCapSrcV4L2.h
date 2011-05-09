@@ -29,7 +29,7 @@ class svlBufferImage;
 class osaThread;
 class svlVidCapSrcV4L2Thread;
 
-class svlVidCapSrcV4L2 : public svlVidCapSrcBase, public cmnGenericObject
+class svlVidCapSrcV4L2 : public svlVidCapSrcBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

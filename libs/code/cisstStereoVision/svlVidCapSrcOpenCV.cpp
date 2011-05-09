@@ -48,11 +48,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVidCapSrcOpenCV class ********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcOpenCV)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcOpenCV, svlVidCapSrcBase)
 
 svlVidCapSrcOpenCV::svlVidCapSrcOpenCV() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

@@ -27,11 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlImageCodecBMP class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlImageCodecBMP)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlImageCodecBMP, svlImageCodecBase)
 
 svlImageCodecBMP::svlImageCodecBMP() :
-    svlImageCodecBase(),
-    cmnGenericObject()
+    svlImageCodecBase()
 {
     SetExtensionList(".bmp;");
 }

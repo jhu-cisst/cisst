@@ -38,6 +38,8 @@ class svlStreamProc;
 
 class CISST_EXPORT svlFilterSourceBase : public svlFilterBase
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+
 friend class svlFilterOutput;
 friend class svlStreamManager;
 friend class svlStreamProc;
@@ -102,6 +104,8 @@ private:
 
     SourceConfig SourceSettings;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceBase)
 
 #endif // _svlFilterSourceBase_h
 

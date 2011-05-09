@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageChannelSwapper class ***/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageChannelSwapper)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageChannelSwapper, svlFilterBase)
 
 svlFilterImageChannelSwapper::svlFilterImageChannelSwapper() :
     svlFilterBase()

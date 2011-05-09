@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageCenterFinder class ****/
 /*****************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageCenterFinder)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageCenterFinder, svlFilterBase)
 
 svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
     svlFilterBase(),

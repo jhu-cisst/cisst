@@ -373,11 +373,10 @@ svlVidCapSrcDC1394Context::~svlVidCapSrcDC1394Context()
 /*** svlVidCapSrcDC1394 class ********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcDC1394)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcDC1394, svlVidCapSrcBase)
 
 svlVidCapSrcDC1394::svlVidCapSrcDC1394() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

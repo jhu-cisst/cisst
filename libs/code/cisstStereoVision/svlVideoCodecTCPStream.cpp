@@ -96,11 +96,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecTCPStream class ****/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecTCPStream)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecTCPStream, svlVideoCodecBase)
 
 svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     CodecName("CISST Video Stream over TCP/IP"),
     FrameStartMarker("\r\nFrame\r\n"),
     File(0),

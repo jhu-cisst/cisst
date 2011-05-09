@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageThresholding class *****/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageThresholding)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageThresholding, svlFilterBase)
 
 svlFilterImageThresholding::svlFilterImageThresholding() :
     svlFilterBase(),

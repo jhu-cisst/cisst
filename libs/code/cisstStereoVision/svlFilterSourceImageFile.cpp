@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceImageFile class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceImageFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceImageFile, svlFilterSourceBase)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceImageFile_FileInfo)
 
 svlFilterSourceImageFile::svlFilterSourceImageFile() :

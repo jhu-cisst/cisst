@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 
 
-class svlImageCodecBMP : public svlImageCodecBase, public cmnGenericObject
+class svlImageCodecBMP : public svlImageCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

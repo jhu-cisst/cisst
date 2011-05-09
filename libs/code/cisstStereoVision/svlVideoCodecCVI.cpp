@@ -34,11 +34,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecCVI class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecCVI)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecCVI, svlVideoCodecBase)
 
 svlVideoCodecCVI::svlVideoCodecCVI() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     CodecName("CISST Video"),
     FileStartMarker("CisstSVLVideo\r\n",  // all version strings shall be of equal length
                     "CisstVid_1.10\r\n",
