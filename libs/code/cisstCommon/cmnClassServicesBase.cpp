@@ -25,8 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 
 cmnClassServicesBase::cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo,
+                                           const cmnClassServicesBase *parentServices,
                                            cmnLogMask mask):
     TypeInfoMember(typeInfo),
+    ParentServices(parentServices),
     LogMask(mask)
 {
     NameMember = cmnClassRegister::Register(this, className);
@@ -56,3 +58,15 @@ void cmnClassServicesBase::SetLogMask(cmnLogMask mask)
 {
     LogMask = mask;
 }
+
+bool cmnClassServicesBase::IsDerivedFrom(const cmnClassServicesBase *parentServices) const
+{
+    const cmnClassServicesBase *curServices = this;
+    while (curServices->ParentServices) {
+        if (curServices->ParentServices == parentServices)
+            return true;
+        curServices = curServices->ParentServices;
+    }
+    return false;
+}
+

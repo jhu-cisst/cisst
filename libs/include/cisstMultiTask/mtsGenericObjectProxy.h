@@ -648,12 +648,13 @@ public:
 
 // Some macros for creating class services
 
-#define CMN_IMPLEMENT_SERVICES_ONEARG(className, argType)     \
-        CMN_IMPLEMENT_SERVICES_INTERNAL(className, mtsGenericTypes<argType>::FinalType)
+#define CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(className, parentName, argType) \
+            CMN_IS_DERIVED_FROM_ASSERT(className, parentName) \
+            CMN_IMPLEMENT_SERVICES_INTERNAL(className, parentName::ClassServices(), mtsGenericTypes<argType>::FinalType)
 
-#define CMN_IMPLEMENT_SERVICES_TEMPLATED_ONEARG(className, argType)     \
-        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, mtsGenericTypes<argType>::FinalType)
-
+#define CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(className, parentName, argType) \
+            CMN_IS_DERIVED_FROM_ASSERT(className, parentName) \
+            CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, parentName::ClassServices(), mtsGenericTypes<argType>::FinalType)
 #endif
 
 /* Some basic types defined here for now, could move somewhere else. */

@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstCommon/cmnUnits.h>
 
-CMN_IMPLEMENT_SERVICES(mtsManagerComponentClient);
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
 mtsManagerComponentClient::mtsManagerComponentClient(const std::string & componentName)
     : mtsManagerComponentBase(componentName),

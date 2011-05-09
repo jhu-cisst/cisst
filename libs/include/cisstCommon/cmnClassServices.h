@@ -35,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassServicesBase.h>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnLogger.h>
+#include <cisstCommon/cmnClassRegisterMacros.h>
 
 /*! These classes are helpers for cmnClassServices.  Their goal is to
   specialize the various Create methods based on the first template parameter
@@ -337,8 +338,9 @@ class cmnClassServices: public cmnClassServicesBase {
       \param mask The log mask to be used with this class.
     */
     cmnClassServices(const std::string & className, const std::type_info * typeInfo,
+                     const cmnClassServicesBase *parentServices,
                      cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT):
-        BaseType(className, typeInfo, mask)
+        BaseType(className, typeInfo, parentServices, mask)
     {}
 
     /* documented in base class */

@@ -63,7 +63,7 @@ const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConne
 const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";
 
-CMN_IMPLEMENT_SERVICES(mtsManagerComponentBase);
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentBase, mtsTaskFromSignal);
 
 mtsManagerComponentBase::mtsManagerComponentBase(const std::string & componentName)
     : mtsTaskFromSignal(componentName, 50)
