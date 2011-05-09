@@ -69,13 +69,9 @@ public:
         // Event void execution: server (event generator) -> client (event handler)
         std::string serializedResult;
         Serializer.Serialize(*result, serializedResult);
-        if (!NetworkProxyClient->SendExecuteEventVoid(CommandID)) {
+        if (!NetworkProxyClient->SendExecuteEventReturnSerialized(CommandID, resultAddress, serializedResult)) {
             return mtsExecutionResult::NETWORK_ERROR;
         }
-        std::cerr << "---- adv: need to send result and result address back to sender .... " << *result << std::endl;
-        // if (!NetworkProxyClient->SendExecuteEventVoidReturnExecuted(CommandID, resultAddress, serializedResult)) {
-        //     return mtsExecutionResult::NETWORK_ERROR;
-        // }
         return executionResult;
     }
 

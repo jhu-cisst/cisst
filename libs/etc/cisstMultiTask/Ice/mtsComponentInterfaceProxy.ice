@@ -148,7 +148,7 @@ module mtsComponentInterfaceProxy
         void ExecuteCommandReadSerialized(long commandID, out string argument, out byte executionResult);
         void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut, out byte executionResult);
         void ExecuteCommandVoidReturnSerialized(long commandID, long resultAddress, out string result, out byte executionResult);
-        void ExecuteCommandWriteReturnSerialized(long commandID, string argumentIn, out string result, out byte executionResult);
+        void ExecuteCommandWriteReturnSerialized(long commandID, string argumentIn, long resultAddress, out string result, out byte executionResult);
 	};
 
 	//-----------------------------------------------------------------------------
@@ -179,6 +179,7 @@ module mtsComponentInterfaceProxy
         /*! Execute events across a network */
         void ExecuteEventVoid(long CommandID);
         void ExecuteEventWriteSerialized(long CommandID, string argument);
+        void ExecuteEventReturnSerialized(long CommandID, long resultAddress, string result);
 	};
 };
 

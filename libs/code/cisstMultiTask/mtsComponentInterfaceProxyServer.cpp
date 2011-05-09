@@ -330,9 +330,27 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const 
 
     eventWriteGeneratorProxy->Execute(*argument, MTS_NOT_BLOCKING);
 
-
     // Release memory internally created by deserializer
     delete argument;
+}
+
+void mtsComponentInterfaceProxyServer::ReceiveExecuteEventReturnSerialized(const mtsCommandIDType commandID,
+                                                                           const mtsObjectIDType resultAddress,
+                                                                           const std::string & result)
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventReturnSerialized: " << commandID << ", " << result.size() << " bytes");
+#endif
+    mtsGenericObject * resultPointer = reinterpret_cast<mtsGenericObject *>(resultAddress);
+    std::cerr << "---- adv: received " << result << " to deserialize at " << resultPointer << "/" << resultAddress << std::endl;
+
+    mtsMulticastCommandVoid * eventVoidGenerator = reinterpret_cast<mtsMulticastCommandVoid*>(commandID);
+    if (!eventVoidGenerator) {
+        LogError(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventReturnSerialized: invalid proxy id of event void: " << commandID);
+        return;
+    }
+
+    eventVoidGenerator->Execute(MTS_NOT_BLOCKING);
 }
 
 //-------------------------------------------------------------------------
@@ -641,6 +659,9 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteReturnSerialized(c
     // Argument placeholder of which value is set by the write return command
     std::string serializedResult;
 
+    // Send address of result, only used by queued commands
+    mtsObjectIDType resultAddress = reinterpret_cast<mtsObjectIDType>(&result);
+
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandWriteReturnSerialized: " << commandID << ", " << serializedResult.size() << " bytes");
 #endif
@@ -649,6 +670,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteReturnSerialized(c
         Ice::Byte result;
         (*clientProxy)->ExecuteCommandWriteReturnSerialized(commandID,
                                                             serializedArgument,
+                                                            resultAddress,
                                                             serializedResult,
                                                             result);
         executionResult = static_cast<mtsExecutionResult::Enum>(result);
@@ -849,4 +871,16 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ExecuteEventWr
 #endif
 
     ComponentInterfaceProxyServer->ReceiveExecuteEventWriteSerialized(commandID, argument);
+}
+
+void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ExecuteEventReturnSerialized(::Ice::Long commandID,
+                                                                                               ::Ice::Long resultAddress,
+                                                                                               const ::std::string & result,
+                                                                                               const ::Ice::Current & CMN_UNUSED(current))
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ComponentInterfaceServerI, "<<<<< RECV: ExecuteEventReturnSerialized: " << commandID);
+#endif
+
+    ComponentInterfaceProxyServer->ReceiveExecuteEventReturnSerialized(commandID, resultAddress, result);
 }

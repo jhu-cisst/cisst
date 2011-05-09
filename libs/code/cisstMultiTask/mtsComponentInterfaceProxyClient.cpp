@@ -379,8 +379,10 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
             return;
         }
         functionVoidReturnProxy->SetResultPointer(result);
-        functionVoidReturnProxy->SetRemoteResultPointer(resultAddress);
     }
+
+    // Store remote address for return value 
+    functionVoidReturnProxy->SetRemoteResultPointer(resultAddress);
 
     // Execute the command
     executionResult = (*functionVoidReturnProxy)(*(functionVoidReturnProxy->GetResultPointer()));
@@ -405,6 +407,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
 
 void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialized(const mtsCommandIDType commandID,
                                                                                   const std::string & serializedArgument,
+                                                                                  const mtsObjectIDType resultAddress,
                                                                                   mtsExecutionResult & executionResult,
                                                                                   std::string & serializedResult)
 {
@@ -449,6 +452,9 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialize
         executionResult = mtsExecutionResult::DESERIALIZATION_ERROR;
         return;
     }
+
+    // Store remote address for return value 
+    functionWriteReturnProxy->SetRemoteResultPointer(resultAddress);
 
     // Execute the command
     executionResult = (*functionWriteReturnProxy)(*(functionWriteReturnProxy->GetArgumentPointer()),
@@ -560,6 +566,29 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const mts
 
     return true;
 }
+
+
+bool mtsComponentInterfaceProxyClient::SendExecuteEventReturnSerialized(const mtsCommandIDType commandID,
+                                                                        const mtsObjectIDType resultAddress,
+                                                                        const std::string & result)
+{
+    if (!IsActiveProxy()) return false;
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: SendExecuteEventReturnSerialized: " << commandID);
+#endif
+
+    try {
+        ComponentInterfaceServerProxy->ExecuteEventReturnSerialized(commandID, resultAddress, result);
+    } catch (const ::Ice::Exception & ex) {
+        LogError(mtsComponentInterfaceProxyClient, "SendExecuteEventReturnSerialized: network exception: " << ex);
+        OnServerDisconnect(ex);
+        return false;
+    }
+
+    return true;
+}
+
 
 //-------------------------------------------------------------------------
 //  Definition by mtsComponentInterfaceProxy.ice
@@ -788,6 +817,7 @@ mtsComponentInterfaceProxyClient
 ::ComponentInterfaceClientI
 ::ExecuteCommandWriteReturnSerialized(::Ice::Long commandID,
                                       const ::std::string & argument,
+                                      ::Ice::Long resultAddress,
                                       ::std::string & result,
                                       ::Ice::Byte & executionResultByte,
                                       const ::Ice::Current & CMN_UNUSED(current))
@@ -796,6 +826,6 @@ mtsComponentInterfaceProxyClient
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteReturnSerialized: " << commandID << ", " << argumentIn.size());
 #endif
     mtsExecutionResult executionResult;
-    ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteReturnSerialized(commandID, argument, executionResult, result);
+    ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteReturnSerialized(commandID, argument, resultAddress, executionResult, result);
     executionResultByte = static_cast< ::Ice::Byte>(executionResult.GetResult());
 }

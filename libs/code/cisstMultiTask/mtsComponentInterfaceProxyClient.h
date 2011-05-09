@@ -112,6 +112,7 @@ protected:
                                                    std::string & serializedResult);
     void ReceiveExecuteCommandWriteReturnSerialized(const mtsCommandIDType commandID,
                                                     const std::string & serializedArgument,
+                                                    const mtsObjectIDType resultAddress,
                                                     mtsExecutionResult & executionResult,
                                                     std::string & serializedResult);
 
@@ -145,6 +146,7 @@ public:
     /*! Request execution of events */
     bool SendExecuteEventVoid(const mtsCommandIDType commandID);
     bool SendExecuteEventWriteSerialized(const mtsCommandIDType commandID, const mtsGenericObject & argument);
+    bool SendExecuteEventReturnSerialized(const mtsCommandIDType commandID, const mtsObjectIDType resultAddress, const std::string & result);
 
     //-------------------------------------------------------------------------
     //  Interface Implementation (refer to mtsComponentInterfaceProxy.ice)
@@ -196,8 +198,12 @@ protected:
         void ExecuteCommandWriteSerialized(::Ice::Long, const ::std::string&, bool, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandReadSerialized(::Ice::Long, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
         void ExecuteCommandQualifiedReadSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
-        void ExecuteCommandVoidReturnSerialized(::Ice::Long commandId, ::Ice::Long resultAddress, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
-        void ExecuteCommandWriteReturnSerialized(::Ice::Long, const ::std::string&, ::std::string&, ::Ice::Byte&, const ::Ice::Current&);
+        void ExecuteCommandVoidReturnSerialized(::Ice::Long commandId,
+                                                ::Ice::Long resultAddress, ::std::string & result,
+                                                ::Ice::Byte & executionResult, const ::Ice::Current&);
+        void ExecuteCommandWriteReturnSerialized(::Ice::Long commandId, const ::std::string & argument,
+                                                 ::Ice::Long resultAddress, ::std::string & result,
+                                                 ::Ice::Byte & executionResult, const ::Ice::Current&);
     };
 };
 

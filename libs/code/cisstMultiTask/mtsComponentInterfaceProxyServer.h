@@ -121,6 +121,9 @@ protected:
 
     void ReceiveExecuteEventWriteSerialized(const mtsCommandIDType commandID, const std::string & serializedArgument);
 
+    void ReceiveExecuteEventReturnSerialized(const mtsCommandIDType commandID, const mtsObjectIDType resultAddress,
+                                             const std::string & result);
+
 public:
     /*! Constructor and destructor */
     mtsComponentInterfaceProxyServer(const std::string & adapterName, const std::string & communicatorID);
@@ -243,6 +246,7 @@ protected:
         /*! Execute events */
         void ExecuteEventVoid(::Ice::Long, const ::Ice::Current&);
         void ExecuteEventWriteSerialized(::Ice::Long, const ::std::string &, const ::Ice::Current&);
+        void ExecuteEventReturnSerialized(::Ice::Long commandId, ::Ice::Long resultAddress, const ::std::string & result, const ::Ice::Current&);
     };
 };
 
