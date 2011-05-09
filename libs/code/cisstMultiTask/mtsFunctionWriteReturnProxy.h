@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2009-09-03
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,27 +28,21 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsFunctionWriteReturnProxy_h
 
 #include <cisstMultiTask/mtsFunctionWriteReturn.h>
+#include "mtsFunctionReturnProxyBase.h"
 #include "mtsInterfaceRequiredProxy.h"
 #include "mtsProxySerializer.h"
 
-#include <cisstMultiTask/mtsExport.h>
-
-class CISST_EXPORT mtsFunctionWriteReturnProxy: public mtsFunctionWriteReturn {
+class mtsFunctionWriteReturnProxy: public mtsFunctionWriteReturn, public mtsFunctionReturnProxyBase
+{
 protected:
-    typedef mtsFunctionWriteReturn BaseType;
-    mtsInterfaceRequiredProxy * InterfaceRequired;
-    mtsProxySerializer Serializer;
     mtsGenericObject * ArgumentPointer;
-    mtsGenericObject * ResultPointer;
-    mtsObjectIDType RemoteResultPointer;
 
 public:
     mtsFunctionWriteReturnProxy(mtsInterfaceRequired * interfaceRequired):
         mtsFunctionWriteReturn(true /* this is a proxy class */),
-        ArgumentPointer(0),
-        ResultPointer(0)
+        mtsFunctionReturnProxyBase(interfaceRequired),
+        ArgumentPointer(0)
     {
-        this->InterfaceRequired = dynamic_cast<mtsInterfaceRequiredProxy *>(interfaceRequired);
     }
 
     ~mtsFunctionWriteReturnProxy()
@@ -56,14 +50,6 @@ public:
         if (this->ArgumentPointer) {
             delete this->ArgumentPointer;
         }
-        if (this->ResultPointer) {
-            delete this->ResultPointer;
-        }
-    }
-
-    /*! Getter */
-    inline mtsProxySerializer * GetSerializer(void) {
-        return &(this->Serializer);
     }
 
     inline mtsGenericObject * GetArgumentPointer(void) const {
@@ -72,26 +58,6 @@ public:
 
     inline void SetArgumentPointer(mtsGenericObject * genericObject) {
         this->ArgumentPointer = genericObject;
-    }
-
-    inline mtsGenericObject * GetResultPointer(void) const {
-        return this->ResultPointer;
-    }
-
-    inline void SetResultPointer(mtsGenericObject * genericObject) {
-        this->ResultPointer = genericObject;
-    }
-
-    inline mtsObjectIDType GetRemoteResultPointer(void) const {
-        return this->RemoteResultPointer;
-    }
-
-    inline void SetRemoteResultPointer(const mtsObjectIDType remoteResultPointer) {
-        this->RemoteResultPointer = remoteResultPointer;
-    }
-
-    inline void SetAsLastFunction(void) {
-        this->InterfaceRequired->SetLastFunction(this);
     }
 };
 

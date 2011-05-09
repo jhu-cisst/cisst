@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Anton Deguet
   Created on: 2008-11-13
 
   (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -24,17 +24,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-// Always include last
-#include <cisstMultiTask/mtsExport.h>
+class mtsFunctionReturnProxyBase;
 
-class CISST_EXPORT mtsInterfaceRequiredProxy: public mtsInterfaceRequired
+class mtsInterfaceRequiredProxy: public mtsInterfaceRequired
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
- protected:
-    mtsFunctionBase * LastFunction;
+protected:
+    mtsFunctionReturnProxyBase * LastFunction;
 
- public:
+public:
 
     mtsInterfaceRequiredProxy(const std::string & interfaceName, mtsComponent * component,
                               mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
@@ -42,11 +41,11 @@ class CISST_EXPORT mtsInterfaceRequiredProxy: public mtsInterfaceRequired
     /*! Default destructor. */
     virtual ~mtsInterfaceRequiredProxy();
 
-    void SetLastFunction(mtsFunctionBase * lastFunction);
+    void SetLastFunction(mtsFunctionReturnProxyBase * lastFunction);
 
     void ResetLastFunction(void);
 
-    mtsFunctionBase * GetLastFunction(void) const;
+    mtsFunctionReturnProxyBase * GetLastFunction(void) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsInterfaceRequiredProxy)

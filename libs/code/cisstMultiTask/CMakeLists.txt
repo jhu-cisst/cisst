@@ -241,6 +241,7 @@ if (CISST_MTS_HAS_ICE)
 
        mtsFunctionReadProxy.h
        mtsFunctionWriteProxy.h
+       mtsFunctionReturnProxyBase.h
        mtsFunctionVoidReturnProxy.h
        mtsFunctionWriteReturnProxy.h
        mtsMulticastCommandWriteProxy.h

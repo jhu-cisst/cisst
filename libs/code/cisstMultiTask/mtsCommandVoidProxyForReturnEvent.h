@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2009-04-28
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -39,7 +39,7 @@ public:
     typedef mtsCommandVoidProxy BaseType;
 
     /*! Constructor. Command proxy is disabled by default and is enabled when
-        command id and network proxy are set. */
+      command id and network proxy are set. */
     mtsCommandVoidProxyForReturnEvent(const std::string & commandName,
                                       mtsInterfaceRequired * interfaceRequired):
         BaseType(commandName),
@@ -56,28 +56,13 @@ public:
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
-        std::cerr << "---- adv: this should be cleaned up, create a common base class for both Void/WriteReturnProxy functions" << std::endl;
         mtsExecutionResult executionResult;
-        mtsFunctionBase * lastFunction = this->InterfaceRequired->GetLastFunction();
-        mtsFunctionVoidReturnProxy * voidReturnProxy = 0;
-        mtsFunctionWriteReturnProxy * writeReturnProxy = 0;
-        mtsObjectIDType resultAddress;
-        mtsGenericObject * result;
-        voidReturnProxy = dynamic_cast<mtsFunctionVoidReturnProxy *>(lastFunction);
-        if (voidReturnProxy) {
-            result = voidReturnProxy->GetResultPointer();
-            resultAddress = voidReturnProxy->GetRemoteResultPointer();
-        } else {
-            writeReturnProxy = dynamic_cast<mtsFunctionWriteReturnProxy *>(lastFunction);
-            if (writeReturnProxy) {
-                result = writeReturnProxy->GetResultPointer();
-                resultAddress = writeReturnProxy->GetRemoteResultPointer();
-            } else {
-                CMN_LOG_RUN_ERROR << "hell ......." << std::endl;
-                return mtsExecutionResult::NETWORK_ERROR;
-            }
-        }
-
+        // figure out which function was blocking
+        mtsFunctionReturnProxyBase * lastFunction = this->InterfaceRequired->GetLastFunction();
+        // get address at which result should be sent
+        mtsObjectIDType resultAddress = lastFunction->GetRemoteResultPointer();
+        // get result itself
+        mtsGenericObject * result = lastFunction->GetResultPointer();
         InterfaceRequired->ResetLastFunction();
 
         CMN_ASSERT(!NetworkProxyServer);
@@ -87,7 +72,7 @@ public:
         if (!NetworkProxyClient->SendExecuteEventVoid(CommandID)) {
             return mtsExecutionResult::NETWORK_ERROR;
         }
-        std::cerr << "---- adv: need to send result and result address back to sender ...." << std::endl;
+        std::cerr << "---- adv: need to send result and result address back to sender .... " << *result << std::endl;
         // if (!NetworkProxyClient->SendExecuteEventVoidReturnExecuted(CommandID, resultAddress, serializedResult)) {
         //     return mtsExecutionResult::NETWORK_ERROR;
         // }
@@ -112,4 +97,3 @@ protected:
 };
 
 #endif // _mtsCommandVoidProxyForReturnEvent_h
-

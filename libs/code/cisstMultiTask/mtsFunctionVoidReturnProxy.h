@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2009-09-03
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,57 +28,21 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsFunctionVoidReturnProxy_h
 
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
+#include "mtsFunctionReturnProxyBase.h"
 #include "mtsInterfaceRequiredProxy.h"
 #include "mtsProxySerializer.h"
 
-#include <cisstMultiTask/mtsExport.h>
-
-class CISST_EXPORT mtsFunctionVoidReturnProxy: public mtsFunctionVoidReturn {
-protected:
-    typedef mtsFunctionVoidReturn BaseType;
-    mtsInterfaceRequiredProxy * InterfaceRequired;
-    mtsProxySerializer Serializer;
-    mtsGenericObject * ResultPointer;
-    mtsObjectIDType RemoteResultPointer;
-
+class mtsFunctionVoidReturnProxy: public mtsFunctionVoidReturn, public mtsFunctionReturnProxyBase
+{
 public:
     mtsFunctionVoidReturnProxy(mtsInterfaceRequired * interfaceRequired):
         mtsFunctionVoidReturn(true /* this is a proxy class */),
-        ResultPointer(0)
+        mtsFunctionReturnProxyBase(interfaceRequired)
     {
-        this->InterfaceRequired = dynamic_cast<mtsInterfaceRequiredProxy *>(interfaceRequired);
     }
 
     ~mtsFunctionVoidReturnProxy()
     {
-        if (this->ResultPointer) {
-            delete this->ResultPointer;
-        }
-    }
-
-    /*! Getter */
-    inline mtsProxySerializer * GetSerializer(void) {
-        return &(this->Serializer);
-    }
-
-    inline mtsGenericObject * GetResultPointer(void) const {
-        return this->ResultPointer;
-    }
-
-    inline void SetResultPointer(mtsGenericObject * genericObject) {
-        this->ResultPointer = genericObject;
-    }
-
-    inline mtsObjectIDType GetRemoteResultPointer(void) const {
-        return this->RemoteResultPointer;
-    }
-
-    inline void SetRemoteResultPointer(const mtsObjectIDType remoteResultPointer) {
-        this->RemoteResultPointer = remoteResultPointer;
-    }
-
-    inline void SetAsLastFunction(void) {
-        this->InterfaceRequired->SetLastFunction(this);
     }
 };
 

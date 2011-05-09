@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Anton Deguet
   Created on: 2008-11-13
 
   (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "mtsInterfaceRequiredProxy.h"
+#include "mtsFunctionReturnProxyBase.h"
 
 CMN_IMPLEMENT_SERVICES(mtsInterfaceRequiredProxy);
 
@@ -37,7 +38,7 @@ mtsInterfaceRequiredProxy::~mtsInterfaceRequiredProxy()
 }
 
 
-void mtsInterfaceRequiredProxy::SetLastFunction(mtsFunctionBase * lastFunction)
+void mtsInterfaceRequiredProxy::SetLastFunction(mtsFunctionReturnProxyBase * lastFunction)
 {
     CMN_ASSERT(this->LastFunction == 0); // this should have been reset to 0 when previous command is executed
     this->LastFunction = lastFunction;
@@ -48,10 +49,10 @@ void mtsInterfaceRequiredProxy::SetLastFunction(mtsFunctionBase * lastFunction)
 void mtsInterfaceRequiredProxy::ResetLastFunction(void)
 {
     this->LastFunction = 0;
- }
+}
 
 
-mtsFunctionBase * mtsInterfaceRequiredProxy::GetLastFunction(void) const
+mtsFunctionReturnProxyBase * mtsInterfaceRequiredProxy::GetLastFunction(void) const
 {
     return this->LastFunction;
 }
