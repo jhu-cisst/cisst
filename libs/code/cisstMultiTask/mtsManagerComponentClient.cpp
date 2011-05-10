@@ -459,8 +459,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
         return false;
     }
 
-    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate,
-                              this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
@@ -573,8 +573,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceLCM: failed to add \"LCM\" required interface: " << interfaceName << std::endl;
         return false;
     }
-    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate,
-                             this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure,
                              this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
@@ -681,24 +681,26 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
     return true;
 }
 
-void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg)
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
     if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE || 
-        nameOfThisLCM == arg.ProcessName) 
+        nameOfThisLCM == componentDescription.ProcessName) 
     {
-        InterfaceLCMCommands_ComponentCreate(arg);
+        InterfaceLCMCommands_ComponentCreate(componentDescription, result);
         return;
     } else {
-        if (!InterfaceLCMFunction.ComponentCreate.IsValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentCreate: failed to execute \"Component Create\"" << std::endl;
+        mtsExecutionResult executionResult = InterfaceLCMFunction.ComponentCreate(componentDescription, result);
+        if (!executionResult.IsOK()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentCreate: failed to execute \"Component Create\" command ("
+                                    << executionResult << ")" << std::endl;
             return;
         }
-        //InterfaceLCMFunction.ComponentCreate.ExecuteBlocking(arg);
-        InterfaceLCMFunction.ComponentCreate(arg);
     }
 }
+
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
 {
@@ -967,7 +969,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_LoadLibrary(const mts
     }
 }
 
-void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg)
+
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
     // Steps to create a component dynamically :
     // 1. Create a component
@@ -977,13 +980,18 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDe
     //    InterfaceInternal's provided interface.
     // 5. Connect InterfaceInternal's interfaces to InterfaceComponent's
     //    interfaces.
-    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName, arg.ConstructorArgSerialized)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << arg << std::endl;
+    if (!CreateAndAddNewComponent(componentDescription.ClassName,
+                                  componentDescription.ComponentName,
+                                  componentDescription.ConstructorArgSerialized)) {
+        result = false;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << componentDescription << std::endl;
         return;
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentCreate: successfully created new component: " << arg << std::endl;
+    result = true;
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentCreate: successfully created new component: " << componentDescription << std::endl;
 }
+
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
 {

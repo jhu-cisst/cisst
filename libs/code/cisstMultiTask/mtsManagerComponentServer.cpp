@@ -83,8 +83,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
         return false;
     }
 
-    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate,
-                              this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
@@ -215,26 +215,35 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     return true;
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg)
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
     // Check if a new component with the name specified can be created
-    if (GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to create component: " << arg << std::endl
+    if (GCM->FindComponent(componentDescription.ProcessName,
+                           componentDescription.ComponentName)) {
+        result = false;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to create component: " << componentDescription << std::endl
                                 << "InterfaceGCMCommands_ComponentCreate: component already exists" << std::endl;
         return;
     }
 
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(arg.ProcessName);
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(componentDescription.ProcessName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to execute \"Component Create\": " << arg << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to execute \"Component Create\": " << componentDescription << std::endl;
+        result = false;
         return;
     }
 
-    //functionSet->ComponentCreate.ExecuteBlocking(arg);
-    functionSet->ComponentCreate(arg);
+    mtsExecutionResult executionResult = functionSet->ComponentCreate(componentDescription, result);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << componentDescription << std::endl
+                                << " error \"" << executionResult << "\"" << std::endl;
+        result = false;
+    }
 }
+
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
 {

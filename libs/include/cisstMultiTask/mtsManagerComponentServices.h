@@ -39,7 +39,7 @@ protected:
     /*! Internal functions to use services provided by manager component client */
     // Dynamic component management
     struct ManagementStruct {
-        mtsFunctionWrite Create;
+        mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
         mtsFunctionWrite Connect;
         mtsFunctionWrite Disconnect;
@@ -113,8 +113,8 @@ public:
     /*! Wrappers for internal function objects */
     //@{
     bool ComponentCreate(const std::string & className, const std::string & componentName) const;
-    bool ComponentCreate(
-        const std::string& processName, const std::string & className, const std::string & componentName) const;
+    bool ComponentCreate(const std::string & processName, const std::string & className,
+                         const std::string & componentName) const;
 
     bool ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const;
     bool ComponentCreate(

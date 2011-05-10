@@ -103,7 +103,7 @@ int main(int argc, char * argv[])
 
     // cleanup
     componentManager->KillAll();
-    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
 
     componentManager->Cleanup();
 
