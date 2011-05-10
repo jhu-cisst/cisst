@@ -27,7 +27,7 @@
 //     (A *)0
 //     A::ClassServices()->GetName()
 //#define SVL_INITIALIZE(A) delete new A
-#define SVL_INITIALIZE(A) (A *)0
+#define SVL_INITIALIZE(A) A::ClassServices()
 
 #endif // _svlInitializerMacros_h
 
