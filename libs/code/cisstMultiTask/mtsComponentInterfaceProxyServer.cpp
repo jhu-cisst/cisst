@@ -298,7 +298,7 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventVoid(const mtsCommandI
     LogPrint(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventVoid: " << commandID);
 #endif
 
-    mtsMulticastCommandVoid * eventVoidGeneratorProxy = reinterpret_cast<mtsMulticastCommandVoid*>(commandID);
+    mtsMulticastCommandVoidProxy * eventVoidGeneratorProxy = reinterpret_cast<mtsMulticastCommandVoidProxy*>(commandID);
     if (!eventVoidGeneratorProxy) {
         LogError(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventVoid: invalid proxy id of event void: " << commandID);
         return;
@@ -336,21 +336,24 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const 
 
 void mtsComponentInterfaceProxyServer::ReceiveExecuteEventReturnSerialized(const mtsCommandIDType commandID,
                                                                            const mtsObjectIDType resultAddress,
-                                                                           const std::string & result)
+                                                                           const std::string & resultSerialized)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventReturnSerialized: " << commandID << ", " << result.size() << " bytes");
+    LogPrint(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventReturnSerialized: " << commandID << ", " << resultSerialized.size() << " bytes");
 #endif
-    mtsGenericObject * resultPointer = reinterpret_cast<mtsGenericObject *>(resultAddress);
-    std::cerr << "---- adv: received " << result << " to deserialize at " << resultPointer << "/" << resultAddress << std::endl;
-
-    mtsMulticastCommandVoid * eventVoidGenerator = reinterpret_cast<mtsMulticastCommandVoid*>(commandID);
-    if (!eventVoidGenerator) {
+    mtsCommandBase * basePointer = reinterpret_cast<mtsCommandBase*>(commandID);
+    mtsMulticastCommandVoidProxy * eventVoidGeneratorProxy = dynamic_cast<mtsMulticastCommandVoidProxy*>(basePointer);
+    if (!eventVoidGeneratorProxy) {
         LogError(mtsComponentInterfaceProxyServer, "ReceiveExecuteEventReturnSerialized: invalid proxy id of event void: " << commandID);
         return;
     }
+    // get a per-command serializer and deserialize where placeholder is
+    mtsProxySerializer * deserializer = eventVoidGeneratorProxy->GetSerializer();
+    mtsGenericObject * resultPointer = reinterpret_cast<mtsGenericObject *>(resultAddress);
+    deserializer->DeSerialize(resultSerialized, *resultPointer);
 
-    eventVoidGenerator->Execute(MTS_NOT_BLOCKING);
+    // wake up caller
+    eventVoidGeneratorProxy->Execute(MTS_NOT_BLOCKING);
 }
 
 //-------------------------------------------------------------------------

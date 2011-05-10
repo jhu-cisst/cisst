@@ -42,7 +42,7 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
     /*! Typedef for base type */
     typedef mtsProxyBaseServer<mtsComponentProxy, ComponentInterfaceClientProxyType, unsigned int> BaseServerType;
 
-protected:
+ protected:
     /*! Callback thread for bi-directional communication with server */
     class ComponentInterfaceServerI;
     typedef IceUtil::Handle<ComponentInterfaceServerI> ComponentInterfaceServerIPtr;
@@ -53,14 +53,14 @@ protected:
     PerCommandSerializerMapType PerCommandSerializerMap;
 
     /*! Map to retrieve connection information by client id.
-        key=(client id)
-        value=(an instance of mtsDescriptionConnection)
+      key=(client id)
+      value=(an instance of mtsDescriptionConnection)
 
-        This map is used to disconnect interface proxies when any error occurs or
-        Ice proxy disconnection is detected.
+      This map is used to disconnect interface proxies when any error occurs or
+      Ice proxy disconnection is detected.
 
-    typedef std::map<ClientIDType, mtsDescriptionConnection> ConnectionStringMapType;
-    ConnectionStringMapType ConnectionStringMap;
+      typedef std::map<ClientIDType, mtsDescriptionConnection> ConnectionStringMapType;
+      ConnectionStringMapType ConnectionStringMap;
     */
     typedef std::map<ClientIDType, ConnectionIDType> ClientConnectionIDMapType;
     ClientConnectionIDMapType ClientConnectionIDMap;
@@ -69,8 +69,8 @@ protected:
     static std::string ConnectionIDKey;
 
     /*! Communicator (proxy) id to initialize mtsComponentInterfaceProxyServer.
-        A component interface proxy client uses this id to connect to a proxy
-        server. */
+      A component interface proxy client uses this id to connect to a proxy
+      server. */
     static std::string InterfaceCommunicatorID;
 
     /*! Instance counter used to set a short name of this thread */
@@ -89,7 +89,7 @@ protected:
     static void Runner(ThreadArguments<mtsComponentProxy> * arguments);
 
     /*! Get a network proxy client using clientID. If no network proxy client
-        with the clientID is found or it's inactive proxy, returns NULL. */
+      with the clientID is found or it's inactive proxy, returns NULL. */
     ComponentInterfaceClientProxyType * GetNetworkProxyClient(const ClientIDType clientID);
 
     /*! Monitor all the current connections */
@@ -124,7 +124,7 @@ protected:
     void ReceiveExecuteEventReturnSerialized(const mtsCommandIDType commandID, const mtsObjectIDType resultAddress,
                                              const std::string & result);
 
-public:
+ public:
     /*! Constructor and destructor */
     mtsComponentInterfaceProxyServer(const std::string & adapterName, const std::string & communicatorID);
     ~mtsComponentInterfaceProxyServer();
@@ -139,7 +139,7 @@ public:
     bool AddPerCommandSerializer(const mtsCommandIDType commandID, mtsProxySerializer * serializer);
 
     /*! Register connection information which is used to clean up a logical
-        connection when a network proxy disconnection is detected. */
+      connection when a network proxy disconnection is detected. */
     bool AddConnectionInformation(const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
@@ -149,15 +149,14 @@ public:
     void SendTestMessageFromServerToClient(const std::string & str);
 
     /*! Fetch function proxy pointers from the connected required interface
-        proxy at server process. */
-    bool SendFetchFunctionProxyPointers(
-        const ClientIDType clientID, const std::string & requiredInterfaceName,
-        mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers);
+      proxy at server process. */
+    bool SendFetchFunctionProxyPointers(const ClientIDType clientID, const std::string & requiredInterfaceName,
+                                        mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers);
 
     /*! Execute commands and events. This will call function proxies in the required
-        interface proxy at the server process.
-        clientID designates which network proxy client should execute a command
-        and commandID represents which function proxy object should be called. */
+      interface proxy at the server process.
+      clientID designates which network proxy client should execute a command
+      and commandID represents which function proxy object should be called. */
     bool SendExecuteCommandVoid(const ClientIDType clientID, const mtsCommandIDType commandID,
                                 const mtsBlockingType blocking, mtsExecutionResult & executionResult);
     bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
@@ -193,9 +192,9 @@ public:
     //-------------------------------------------------------------------------
     //  Interface Implementation (refer to mtsComponentInterfaceProxy.ice)
     //-------------------------------------------------------------------------
-protected:
+ protected:
     class ComponentInterfaceServerI :
-        public mtsComponentInterfaceProxy::ComponentInterfaceServer, public IceUtil::Monitor<IceUtil::Mutex>
+            public mtsComponentInterfaceProxy::ComponentInterfaceServer, public IceUtil::Monitor<IceUtil::Mutex>
     {
     private:
         /*! Ice objects */
@@ -207,10 +206,9 @@ protected:
         mtsComponentInterfaceProxyServer * ComponentInterfaceProxyServer;
 
     public:
-        ComponentInterfaceServerI(
-            const Ice::CommunicatorPtr& communicator,
-            const Ice::LoggerPtr& logger,
-            mtsComponentInterfaceProxyServer * componentInterfaceProxyServer);
+        ComponentInterfaceServerI(const Ice::CommunicatorPtr& communicator,
+                                  const Ice::LoggerPtr& logger,
+                                  mtsComponentInterfaceProxyServer * componentInterfaceProxyServer);
         ~ComponentInterfaceServerI();
 
         /*! Proxy management */
@@ -237,11 +235,10 @@ protected:
         void Shutdown(const ::Ice::Current&);
 
         /*! Fetch pointers of event generator proxies from a provided interface
-            proxy at server side. */
-        bool FetchEventGeneratorProxyPointers(
-            const std::string & clientComponentName, const std::string & requiredInterfaceName,
-            mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers,
-            const ::Ice::Current & current) const;
+          proxy at server side. */
+        bool FetchEventGeneratorProxyPointers(const std::string & clientComponentName, const std::string & requiredInterfaceName,
+                                              mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers,
+                                              const ::Ice::Current & current) const;
 
         /*! Execute events */
         void ExecuteEventVoid(::Ice::Long, const ::Ice::Current&);

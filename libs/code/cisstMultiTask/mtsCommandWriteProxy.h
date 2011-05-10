@@ -53,7 +53,7 @@ public:
     typedef mtsCommandWriteBase BaseType;
 
     /*! Constructor. Command proxy is disabled by defaultand is enabled when
-        command id and network proxy are set. */
+      command id and network proxy are set. */
     mtsCommandWriteProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();
     }
@@ -65,7 +65,7 @@ public:
     }
 
     /*! Set command id and register serializer to network proxy. This method
-        should be called after SetNetworkProxy() is called. */
+      should be called after SetNetworkProxy() is called. */
     void SetCommandID(const mtsCommandIDType & commandID) {
         mtsCommandProxyBase::SetCommandID(commandID);
 

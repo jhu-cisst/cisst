@@ -49,7 +49,7 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \file
   \brief Declaration of mtsComponent
- */
+*/
 
 
 /*!
@@ -68,7 +68,7 @@ http://www.cisst.org/cisst/license.txt.
   thread safety mechanism.  The component class doesn't maintain a state
   as it relies on the underlying device to do so.  It is basically a
   pass-thru or wrapper.
- */
+*/
 class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -154,14 +154,14 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     virtual void Create(void);
 
     /*! Virtual method called after components are connected to start
-        the computations and message processing. */
+      the computations and message processing. */
     virtual void Start(void);
 
     /*! Virtual method to suspend the component (same as Stop). */
     virtual void Suspend(void);
 
     /*! Virtual method to stop the computations and message
-        processing.  See Start. */
+      processing.  See Start. */
     virtual void Kill(void);
 
     /*! Method to add a provided interface to the component. */
@@ -177,7 +177,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       safety. */
     virtual mtsInterfaceProvided *
         AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
+                                                bool isProxy = false);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
@@ -271,15 +272,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
     /*! Get pointer to manager component services, which extends the internal required interface
-        to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
+      to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
     mtsManagerComponentServices *GetManagerComponentServices(void)
     { return this->ManagerComponentServices; }
-
-#if 0
-    /*! Connect a required interface, used by mtsTaskManager */
-    bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
-                                         mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
-#endif
 
     /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName);
@@ -357,16 +352,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Default log file used for this component logging */
     std::ofstream * LogFile;
-
-    /*! Thread Id counter.  Used to count how many "user" tasks are
-      connected from a single thread.  In most cases the count
-      should be one. */
-    //@{
-#if 0
-    typedef std::pair<osaThreadId, unsigned int> ThreadIdCounterPairType;
-    typedef std::vector<ThreadIdCounterPairType> ThreadIdCountersType;
-    ThreadIdCountersType ThreadIdCounters;
-#endif
     //@}
 
     /*! Map of provided and output interfaces.  Used to store pointers
@@ -416,22 +401,22 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsManagerComponentServices * ManagerComponentServices;
 
     /*! \brief Enable support for dynamic component management services
-        \return Pointer to internal required interface, if success.
-                NULL otherwise.
-        \note If user component needs dynamic component management services,
-              this method should be called by user component's constructor */
+      \return Pointer to internal required interface, if success.
+      NULL otherwise.
+      \note If user component needs dynamic component management services,
+      this method should be called by user component's constructor */
     mtsInterfaceRequired * EnableDynamicComponentManagement(void);
 
     /*! Event generator to inform the manager component client of the state
-        change of this component */
+      change of this component */
     mtsFunctionWrite EventGeneratorChangeState;
 
     /*! \brief Add internal interfaces
-        \param useMangerComponentServices True to allow this component to use
-               dynamic component control services through mts command pattern
-               to control other components.
-               If true, the internal required interface is added to this
-               component (the internal provided interface is added by default) */
+      \param useMangerComponentServices True to allow this component to use
+      dynamic component control services through mts command pattern
+      to control other components.
+      If true, the internal required interface is added to this
+      component (the internal provided interface is added by default) */
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
 
     /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */

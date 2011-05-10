@@ -97,6 +97,7 @@ void clientTask<_dataType>::Run(void)
 {
     double valueToWrite;
     _dataType valueToRead;
+    valueToRead = 3.14;
 
     if (this->UIOpened()) {
         ProcessQueuedEvents();

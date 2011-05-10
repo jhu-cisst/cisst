@@ -190,17 +190,18 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvided(const std::string & in
 
 
 mtsInterfaceProvided * mtsComponent::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                                             mtsInterfaceQueueingPolicy queueingPolicy)
+                                                                             mtsInterfaceQueueingPolicy queueingPolicy,
+                                                                             bool isProxy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED)) {
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_BE_QUEUED to component \""
                                    << this->GetName() << "\", make sure you call ProcessQueuedCommands to empty the queues" << std::endl;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
         if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LEVEL_INIT_ERROR)) {
@@ -307,14 +308,14 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
                     // can be possibly disconnected.
                     if (!LCM->Disconnect(clientComponentName, clientInterfaceRequiredName,
                                          serverComponentName, serverInterfaceProvidedName))
-                    {
-                        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
-                            << interfaceProvidedName << "\""
-                            << ", failed to disconnect interfaces: "
-                            << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                            << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
-                        return false;
-                    } else {
+                        {
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                                                    << interfaceProvidedName << "\""
+                                                    << ", failed to disconnect interfaces: "
+                                                    << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                                    << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                            return false;
+                        } else {
                         ++removedUserCount;
                     }
                     break;
@@ -324,9 +325,9 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
 
         if (userCount != removedUserCount) {
             CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
-                << interfaceProvidedName << "\""
-                << ", some of connections are not removed."
-                << std::endl;
+                                    << interfaceProvidedName << "\""
+                                    << ", some of connections are not removed."
+                                    << std::endl;
         }
     }
 
@@ -349,7 +350,7 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
 
     if (!removed) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
-                                 << interfaceProvidedName << "\" from list" << std::endl;
+                                << interfaceProvidedName << "\" from list" << std::endl;
         return false;
     }
 
@@ -421,21 +422,21 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
             // can be possibly disconnected.
             if (!LCM->Disconnect(clientComponentName, clientInterfaceRequiredName,
                                  serverComponentName, serverInterfaceProvidedName))
-            {
-                CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
-                    << interfaceRequiredName << "\""
-                    << ", failed to disconnect interfaces: "
-                    << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                    << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
-                return false;
-            }
+                {
+                    CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
+                                            << interfaceRequiredName << "\""
+                                            << ", failed to disconnect interfaces: "
+                                            << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                            << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                    return false;
+                }
         }
     }
 
     // Now clean up internal data structures
     if (!InterfacesRequiredOrInput.RemoveItem(interfaceRequiredName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
-            << interfaceRequiredName << "\"" << std::endl;
+                                << interfaceRequiredName << "\"" << std::endl;
         return false;
     }
 
@@ -451,7 +452,7 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
 
     if (!removed) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
-                                 << interfaceRequiredName << "\" from list" << std::endl;
+                                << interfaceRequiredName << "\" from list" << std::endl;
         return false;
     }
 
@@ -782,7 +783,7 @@ cmnLogger::StreamBufType * mtsComponent::GetLogMultiplexer(void) const
 bool mtsComponent::IsRunning(void) const
 {
     return (this->State == mtsComponentState::ACTIVE);
- }
+}
 
 
 bool mtsComponent::IsStarted(void) const
@@ -828,7 +829,7 @@ mtsInterfaceRequired * mtsComponent::EnableDynamicComponentManagement(void)
     mtsInterfaceRequired * required = AddInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired());
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "EnableDynamicComponentManagement: failed to add internal required interface to component "
-            << "\"" << GetName() << "\"" << std::endl;
+                                 << "\"" << GetName() << "\"" << std::endl;
         return 0;
     } else {
         CMN_LOG_CLASS_INIT_VERBOSE << "EnableDynamicComponentManagement: successfully added internal required interface" << std::endl;
@@ -881,11 +882,11 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
         return false;
     }
     provided->AddCommandVoid(&mtsComponent::Start,
-                              this, mtsManagerComponentBase::CommandNames::ComponentStart, MTS_COMMAND_NOT_QUEUED);
+                             this, mtsManagerComponentBase::CommandNames::ComponentStart, MTS_COMMAND_NOT_QUEUED);
     provided->AddCommandVoid(&mtsComponent::Suspend,
-                              this, mtsManagerComponentBase::CommandNames::ComponentStop, MTS_COMMAND_NOT_QUEUED);
+                             this, mtsManagerComponentBase::CommandNames::ComponentStop, MTS_COMMAND_NOT_QUEUED);
     provided->AddCommandVoid(&mtsComponent::Start,
-                              this, mtsManagerComponentBase::CommandNames::ComponentResume, MTS_COMMAND_NOT_QUEUED);
+                             this, mtsManagerComponentBase::CommandNames::ComponentResume, MTS_COMMAND_NOT_QUEUED);
     provided->AddCommandRead(&mtsComponent::GetState,
                              this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_GetEndUserInterface, this,

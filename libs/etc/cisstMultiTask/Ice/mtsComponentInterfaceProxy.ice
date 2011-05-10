@@ -117,7 +117,7 @@ module mtsComponentInterfaceProxy
     //
     struct EventGeneratorProxyElement {
         string Name;
-        // This ID is set as a pointer to a event generator proxy poninter at client side.
+        // This ID is set as a pointer to a event generator proxy pointer at client side.
         // Note that type 'long' in slice is converted to ::Ice::Long which is
         // big enough to handle 64-bit numbers.
         long EventGeneratorProxyId;

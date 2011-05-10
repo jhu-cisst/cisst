@@ -37,8 +37,10 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                                            mtsInterfaceQueueingPolicy queueingPolicy,
-                                           mtsCallableVoidBase * postCommandQueuedCallable):
+                                           mtsCallableVoidBase * postCommandQueuedCallable,
+                                           bool isProxy):
     BaseType(name, component),
+    IsProxy(isProxy),
     MailBox(0),
     QueueingPolicy(queueingPolicy),
     ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
@@ -293,8 +295,8 @@ size_t mtsInterfaceProvided::ProcessMailBoxes(void)
         mtsMailBox * mailBox;
         for (;
              //iterator != end;
-            iterator != InterfacesProvidedCreated.end();
-            ++iterator) {
+             iterator != InterfacesProvidedCreated.end();
+             ++iterator) {
             mailBox = iterator->second->GetMailBox();
             if (mailBox) {
                 while (mailBox->ExecuteNext()) {
@@ -709,7 +711,9 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
     // finally, add system events
-    interfaceProvided->AddSystemEvents();
+    if (!this->IsProxy) {
+        interfaceProvided->AddSystemEvents();
+    }
 
     return interfaceProvided;
 }

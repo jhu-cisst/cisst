@@ -107,7 +107,8 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequiredWithoutSystemEvent
 
 
 mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                                                  mtsInterfaceQueueingPolicy queueingPolicy)
+                                                                                  mtsInterfaceQueueingPolicy queueingPolicy,
+                                                                                  bool isProxy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
@@ -118,14 +119,14 @@ mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvent
         // Note that if the task is active, we always wait for the task's DoRunInternal method to process this mailbox.
         if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable, isProxy);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
                                    << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe.  "
                                    << "Furthermore, the thread will not wake up since the post queued command will not be executed. "
                                    << std::endl;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
         if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {

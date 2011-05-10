@@ -381,7 +381,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoidReturnSerialized
         functionVoidReturnProxy->SetResultPointer(result);
     }
 
-    // Store remote address for return value 
+    // Store remote address for return value
     functionVoidReturnProxy->SetRemoteResultPointer(resultAddress);
 
     // Execute the command
@@ -453,7 +453,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialize
         return;
     }
 
-    // Store remote address for return value 
+    // Store remote address for return value
     functionWriteReturnProxy->SetRemoteResultPointer(resultAddress);
 
     // Execute the command
