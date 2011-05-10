@@ -129,6 +129,9 @@ class CISST_EXPORT cmnClassServicesBase
     /*! Get the size of the class */
     virtual size_t GetSize(void) const = 0;
 
+    /*! Returns whether dynamic creation is available */
+    virtual bool HasDynamicCreation(void) const = 0;
+
     /*! returns information about what types of constructors are available */
     virtual bool DefaultConstructorAvailable(void) const = 0;
     virtual bool CopyConstructorAvailable(void) const = 0;

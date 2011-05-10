@@ -389,6 +389,7 @@ class cmnClassServices: public cmnClassServicesBase {
     }
 
     /* documented in base class */
+    bool HasDynamicCreation(void) const { return (_dynamicCreation != CMN_NO_DYNAMIC_CREATION); }
     bool DefaultConstructorAvailable(void) const { return FactoryDefaultType::DefaultConstructorAvailable(); }
     bool CopyConstructorAvailable(void) const { return FactoryCopyType::CopyConstructorAvailable(); }
     bool OneArgConstructorAvailable(void) const { return FactoryOneArgType::OneArgConstructorAvailable(); }

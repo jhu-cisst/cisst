@@ -633,8 +633,13 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                                  << className << "\" -- no services" << std::endl;
         return 0;
     }
+    bool isComponent = services->IsDerivedFrom<mtsComponent>();
     const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
     if (services->OneArgConstructorAvailable() && argServices) {
+        if (!isComponent) {
+            CMN_LOG_CLASS_INIT_WARNING << "Class " << className << " has one arg constructor, "
+                                       << "but class services does not show inheritance from mtsComponent " << std::endl;
+        }
         // We can create the object using the "one argument" constructor.  This includes the case where
         // the "one argument" constructor is just an std::string (including the combination of default
         // constructor and SetName method).
@@ -721,6 +726,11 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                                  << "\" is not derived from mtsComponent" << std::endl;
         delete baseObject;
         return 0;
+    }
+
+    if (!isComponent) {
+        CMN_LOG_CLASS_INIT_WARNING << "Class " << className << " is derived from mtsComponent, "
+                                   << "but class services does not show inheritance from mtsComponent." << std::endl;
     }
 
     // rename the component
