@@ -35,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
     #define CMN_UNUSED(argument) argument
 #endif
 
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceBase, svlFilterBase)
 
 /***********************************************/
 /*** svlFilterSourceBase::SourceConfig class ***/

@@ -28,11 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecDirectShow class ***/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecDirectShow)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecDirectShow, svlVideoCodecBase)
 
 svlVideoCodecDirectShow::svlVideoCodecDirectShow() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     Width(0),
     Height(0),
     BegPos(-1),

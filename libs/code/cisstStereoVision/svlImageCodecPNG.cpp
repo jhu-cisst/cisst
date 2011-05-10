@@ -116,11 +116,10 @@ void PNG_user_flush_data_proc(png_structp CMN_UNUSED(png_ptr))
 /*** svlImageCodecPNG class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlImageCodecPNG)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlImageCodecPNG, svlImageCodecBase)
 
 svlImageCodecPNG::svlImageCodecPNG() :
     svlImageCodecBase(),
-    cmnGenericObject(),
     pngBuffer(0),
     pngRows(0),
     pngBufferSize(0),

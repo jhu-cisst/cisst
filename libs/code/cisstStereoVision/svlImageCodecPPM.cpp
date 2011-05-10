@@ -258,11 +258,10 @@ int ppmWrite(const unsigned char* buffer, const unsigned int width, const unsign
 /*** svlImageCodecPPM class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlImageCodecPPM)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlImageCodecPPM, svlImageCodecBase)
 
 svlImageCodecPPM::svlImageCodecPPM() :
     svlImageCodecBase(),
-    cmnGenericObject(),
     ppmBuffer(0),
     ppmBufferSize(0)
 {

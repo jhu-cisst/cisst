@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "sineTask.h"
 
 // required to implement the class services, see cisstCommon
-CMN_IMPLEMENT_SERVICES_ONEARG(sineTask, mtsTaskPeriodicConstructorArg);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(sineTask, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg);
 
 sineTask::sineTask(const std::string & taskName, double period):
     // base constructor, same task name and period.

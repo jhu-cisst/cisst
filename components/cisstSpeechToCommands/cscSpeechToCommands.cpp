@@ -28,6 +28,7 @@
 
 #include "cscSpeechToCommands.h"
 
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(cscSpeechToCommands);
@@ -37,7 +38,6 @@ struct cscSpeechToCommandsJava
     JNIEnv * Environment;
     JavaVM * VirtualMachine;
     jobject Sphinx4Wrapper;
-    jmethodID RecognizeWordMethod;
     jmethodID SetCurrentContextMethod;
 };
 
@@ -45,7 +45,8 @@ struct cscSpeechToCommandsJava
 cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
     mtsTaskContinuous(componentName),
     CurrentContext(0),
-    MicrophoneNumber(1)
+    MicrophoneNumber(1),
+    NewWordRecognized(false)
 {
     // own named map of contexts
     Contexts.SetOwner(*this);
@@ -279,15 +280,6 @@ bool cscSpeechToCommands::StartJava(void)
     //  javap -s -p cscSphinx4
     // (in build directory that has file cscSphinx4.class
 
-    // method used to recognize a word
-    this->JavaData->RecognizeWordMethod = this->JavaData->Environment->GetMethodID(sphinx4WrapperClass,
-                                                                                   "RecognizeWord",
-                                                                                   "()V");
-    if (this->JavaData->RecognizeWordMethod == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cscSphinx4.RecognizeWord\"" << std::endl;
-        return false;
-    }
-
     // method used to change context/recognizer
     this->JavaData->SetCurrentContextMethod = this->JavaData->Environment->GetMethodID(sphinx4WrapperClass,
                                                                                        "SetCurrentContext",
@@ -465,24 +457,31 @@ void cscSpeechToCommands::Run(void)
         this->ContextChangedTrigger(mtsStdString(this->CurrentContext->GetName()));
     }
     else {
-        // get latest word
-        this->JavaData->Environment->CallVoidMethod(this->JavaData->Sphinx4Wrapper,
-                                                    this->JavaData->RecognizeWordMethod);
+        if (NewWordRecognized) {
+            HandleWord(LastWordRecognized);
+            NewWordRecognized = false;
+        }
+        // Wait for more commands/events
+        osaSleep(15 * cmn_ms);
     }
+}
+
+void cscSpeechToCommands::HandleWord(const mtsStdString & word) {
+    // emit event as word has been recognized
+    this->WordRecognizedTrigger->Execute(word, MTS_NOT_BLOCKING);
+    // find word actions in context
+    CMN_ASSERT(this->CurrentContext);
+    this->CurrentContext->PerformActionsForWord(std::string(word));
 }
 
 
 void cscSpeechToCommands::WordRecognizedCallback(const std::string & stdWord)
 {
     if (stdWord != "" && stdWord != "<unk>") {
+        NewWordRecognized = true;
         mtsStdString word(stdWord);
         // save last recognized word for state table
         this->LastWordRecognized = word;
-        // emit event as word has been recognized
-        this->WordRecognizedTrigger->Execute(word, MTS_NOT_BLOCKING);
-        // find word actions in context
-        CMN_ASSERT(this->CurrentContext);
-        this->CurrentContext->PerformActionsForWord(stdWord);
     } else {
         if (stdWord == "<unk>")
             CMN_LOG_CLASS_INIT_DEBUG << "WordRecognizedCallback: word filtered out" << std::endl;

@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceVideoFile class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoFile, svlFilterSourceBase)
 
 svlFilterSourceVideoFile::svlFilterSourceVideoFile() :
     svlFilterSourceBase(false),  // manual timestamp management
@@ -184,16 +184,28 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
             if (Range[idx][0] >= 0 &&
                 Range[idx][0] <= Range[idx][1]) {
                 // Check if position is outside of the playback segment
-                if (pos < Range[idx][0] ||
-                    pos > Range[idx][1]) {
+                if (pos < Range[idx][0]) {
                     Codec[idx]->SetPos(Range[idx][0]);
                     ResetTimer = true;
+                }
+                else if (pos > Range[idx][1]) {
+                    if (!GetLoop()) {
+                        ret = SVL_STOP_REQUEST;
+                        break;
+                    }
+                    else {
+                        Codec[idx]->SetPos(Range[idx][0]);
+                        ResetTimer = true;
+                    }
                 }
             }
 
             ret = Codec[idx]->Read(0, *OutputImage, idx, true);
             if (ret == SVL_VID_END_REACHED) {
-                if (!GetLoop()) ret = SVL_STOP_REQUEST;
+                if (!GetLoop()) {
+                    ret = SVL_STOP_REQUEST;
+                    break;
+                }
                 else {
                     // Loop around
                     ret = Codec[idx]->Read(0, *OutputImage, idx, true);

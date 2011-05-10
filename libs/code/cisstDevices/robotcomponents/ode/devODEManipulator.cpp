@@ -117,7 +117,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     linkname << "link" << i;
 
     // obtain the position and orientation of the ith link 
-    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    vctFrame4x4<double> Rtwi = robManipulator::ForwardKinematics( qinit, i );
     devODEBody* link = NULL;
     link = new devODEBody( linkname.str(),                          // name
 			   Rtwi,
@@ -136,7 +136,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
 
   dBodyID b1 = NULL;
   if( base != NULL )
-    b1 = base->GetBodyID();
+    { b1 = base->GetBodyID(); }
 
   for( size_t i=0; i<links.size(); i++ ){
 
@@ -144,7 +144,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     dBodyID b2 = bodies[i]->GetBodyID();
     
     // obtain the position and orientation of the ith link
-    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    vctFrame4x4<double> Rtwi = robManipulator::ForwardKinematics( qinit, i );
     
     vctFixedSizeVector<double,3> anchor = Rtwi.Translation();
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
@@ -171,8 +171,11 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     world->Insert( joint );
     
     if( mode == devManipulator::POSITION || mode == devManipulator::VELOCITY ){
-      // I have no idea why the sign of the axis must be reversed
+      // for some all joints, save the first one must be inverted axis
       double sign = -1.0;
+      //if( base != NULL )
+      //sign = 1.0;
+
       Insert( new devODEServoMotor( world->GetWorldID(), 
 				    b1,             // the first body
 				    b2,             // the second body
@@ -193,8 +196,21 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
   //! Create a new space for the manipulator
   dSpaceID spaceid = dSimpleSpaceCreate( world->GetSpaceID() );
 
-  if( !basemodel.empty() )
-    { base = new devODEBody( "link0", Rtw0, basemodel, world, spaceid ); }
+  // is there a base?
+  if( !basemodel.empty() ){ 
+    base = new devODEBody( "link0", 
+			   Rtw0, 
+			   basemodel, 
+			   world, 
+			   1.0,                                    // m   
+			   vctFixedSizeVector<double,3>(0.0),      // com
+			   vctFixedSizeMatrix<double,3,3>::Eye(),
+			   spaceid );
+    
+    dJointID jid = dJointCreateFixed( WorldID(), 0 );
+    dJointAttach( jid, NULL, base->GetBodyID() );
+    dJointSetFixed( jid );
+  }
   
   // Create the links
   for( size_t i=1; i<=links.size(); i++ ){
@@ -203,7 +219,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     linkname << "link" << i;
 
     // obtain the position and orientation of the ith link 
-    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    vctFrame4x4<double> Rtwi = robManipulator::ForwardKinematics( qinit, i );
     devODEBody* link = NULL;
     link = new devODEBody( linkname.str(),                          // name
 			   Rtwi,
@@ -222,7 +238,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
 
   dBodyID b1 = NULL;
   if( base != NULL )
-    b1 = base->GetBodyID();
+    { b1 = base->GetBodyID(); }
 
   for( size_t i=0; i<links.size(); i++ ){
 
@@ -230,7 +246,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     dBodyID b2 = bodies[i]->GetBodyID();
     
     // obtain the position and orientation of the ith link
-    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    vctFrame4x4<double> Rtwi = robManipulator::ForwardKinematics( qinit, i );
     
     vctFixedSizeVector<double,3> anchor = Rtwi.Translation();
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
@@ -257,9 +273,11 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     world->Insert( joint );
 
     if( mode == devManipulator::POSITION || mode == devManipulator::VELOCITY ){
-      double sign = 1.0;
-      if( 0 < i ) sign = -1.0;
-      
+      // for some all joints, save the first one must be inverted axis
+      double sign = -1.0;
+      if( base == NULL && i == 0 )
+	sign = 1.0;
+
       Insert( new devODEServoMotor( world->GetWorldID(), 
 				    b1,             // the first body
 				    b2,             // the second body
@@ -281,6 +299,23 @@ void devODEManipulator::Attach( robManipulator* tool ){
     dJointID jid = dJointCreateFixed( WorldID(), 0 );
     dJointAttach( jid, bodies.back()->GetBodyID(), odetool->GetBaseID() );
     dJointSetFixed( jid );
+    /*
+    vctDynamicVector<double> q = GetJointsPositions();
+    vctFrame4x4<double> Rt = robManipulator::ForwardKinematics( q );
+    vctFixedSizeVector<double,3> z(0.0, 0.0, 1.0);
+    vctFixedSizeVector<double,3> anchor = Rt.Translation();
+    vctFixedSizeVector<double,3> axis = Rt.Rotation() * z;
+
+    devODEJoint* joint = NULL;
+    joint =  new devODEJoint( worldid,
+			      bodies.back()->GetBodyID(),
+			      odetool->GetBaseID(),
+			      dJointTypeSlider,
+			      anchor,
+			      axis,
+			      -0.101,
+			       0.101 );
+    */
   }
 
   robManipulator::Attach( tool );
@@ -376,7 +411,9 @@ void devODEManipulator::SetPosition( const vctDynamicVector<double>& qs ){
 
   if( qs.size() == servos.size() && q.size() == servos.size() ){
     for( size_t i = 0; i<qs.size(); i++ )
-      { servos[i]->SetPosition(  qs[i], q[i], GetPeriodicity() ); }
+      { 
+	servos[i]->SetPosition(  qs[i], q[i], GetPeriodicity() ); 
+      }
   }
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -480,4 +517,18 @@ void devODEManipulator::SetState( const devODEManipulator::State& state ){
 
 }
 
+vctFrame4x4<double> 
+devODEManipulator::ForwardKinematics( const vctDynamicVector<double>& q,int N )
+const { return robManipulator::ForwardKinematics( q, N ); }
 
+void devODEManipulator::ForwardKinematics( const vctDynamicVector<double>& q, 
+					   vctFrm3& Rt,
+					   int N ) const {
+
+  vctFrame4x4<double> Rt4x4 = robManipulator::ForwardKinematics( q, N );
+  vctMatrixRotation3<double> R( Rt4x4[0][0], Rt4x4[0][1], Rt4x4[0][2],
+				Rt4x4[1][0], Rt4x4[1][1], Rt4x4[1][2],
+				Rt4x4[2][0], Rt4x4[2][1], Rt4x4[2][2] );
+  Rt = vctFrm3( R, Rt4x4.Translation() );
+}
+    

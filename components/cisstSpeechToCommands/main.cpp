@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <iostream>
 #include "cscSpeechToCommands.h"
 #include "cscSpeechToCommandsQtComponent.h"
 
@@ -49,8 +48,7 @@ int main(int argc, char ** argv) {
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
-    cscSpeechToCommands * speechToCommands =
-        new cscSpeechToCommands("mySpeechToCommands");
+    cscSpeechToCommands * speechToCommands = new cscSpeechToCommands("mySpeechToCommands");
 
     speechToCommands->SetMicrophoneNumber(1);
 

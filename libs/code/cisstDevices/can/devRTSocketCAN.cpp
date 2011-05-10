@@ -33,6 +33,14 @@ devRTSocketCAN::devRTSocketCAN( const std::string& devicename,
   }
   this->devicename = devicename;
 
+  if( rt_task_self() == NULL ){
+    CMN_LOG_INIT_WARNING << "The RTSocketCAN device " << devicename
+			<< " was instantiated from a non-Xenomai context. "
+			<< "The task will be converted into a Xenomai task."
+			<< std::endl;
+    rt_task_shadow( &rt_task_desc, "", 80, 0 );
+  }
+
 }
 
 devRTSocketCAN::~devRTSocketCAN(){}
@@ -63,28 +71,6 @@ devCAN::Errno devRTSocketCAN::Open(){
 		      << std::endl;
     return devCAN::EFAILURE;
   }
-  /*
-  filters[0].can_mask = 0x0000041F;  // mask broadcast to a group
-  filters[0].can_id   = 0x00000403;  // allow group 3
-
-  filters[1].can_mask = 0x0000041F;  // mask broadcast to a group
-  filters[1].can_id   = 0x00000406;  // allow group 6
-
-  filters[2].can_mask = 0x0000041F;  // mask broadcast to a group
-  filters[2].can_id   = 0x00000000;  // allow direct messages to the host
-
-  // Set the filter to the socket
-  if( rt_dev_setsockopt( canfd, 
-			 SOL_CAN_RAW, 
-			 CAN_RAW_FILTER, 
-			 (void*)(&(filters[0])), 
-			 3*sizeof(struct can_filter) ) ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Couldn't set the socket filters." 
-		      << std::endl;
-    return devCAN::EFAILURE;
-  }
-  */
 
   // Bind the socket to the local address
   memset(&addr, 0, sizeof(addr));     // clear the address
@@ -112,15 +98,6 @@ devCAN::Errno devRTSocketCAN::Open(){
     return EFAILURE;
   }
 
-  /*
-  can_ctrlmode_t* can_ctrlmode = (can_ctrlmode_t *)&ifr.ifr_ifru;
-  *can_ctrlmode = CAN_CTRLMODE_LISTENONLY; // is this correct?
-  if( rt_dev_ioctl(canfd, SIOCSCANCTRLMODE, &ifr) ){
-    perror("devRTSocketCAN::open: Couldn't set the control mode: ");
-    return FAILURE;
-  }
-  */
-
   // Set the mode 
   CAN_MODE* mode = (CAN_MODE*)&ifr.ifr_ifru;
   *mode = CAN_MODE_START;
@@ -131,17 +108,16 @@ devCAN::Errno devRTSocketCAN::Open(){
     return EFAILURE;
   }
 
-  nanosecs_rel_t timeout = 50000000;
+  nanosecs_rel_t timeout = 0;
   if (rt_dev_ioctl(canfd, RTCAN_RTIOC_SND_TIMEOUT, &timeout) ){
     perror("devRTSocketCAN::open: Couldn't set the send timeout: ");
     return EFAILURE;
   }
-
+  
   if( rt_dev_ioctl(canfd, RTCAN_RTIOC_RCV_TIMEOUT, &timeout) ){
     perror("devRTSocketCAN::open: Couldn't set the recv timeout: ");
     return EFAILURE;
   }
-
 
   return ESUCCESS;
 }
@@ -161,8 +137,7 @@ devCAN::Errno devRTSocketCAN::Close(){
 // Note that block is useless for Socket CAN
 devCAN::Errno devRTSocketCAN::Send( const devCAN::Frame& canframe, 
 				    devCAN::Flags  ){
-  //std::cout << "SEND" << std::endl;
-  //std::cout << canframe << std::endl;
+
   // copy the data in to a RTSocket CAN frame
   // can_frame_t is defined in xenomai/include/rtdm/rtcan.h
   can_frame_t frame;
@@ -178,17 +153,10 @@ devCAN::Errno devRTSocketCAN::Send( const devCAN::Frame& canframe,
 			   (void*)&frame, 
 			   sizeof(can_frame_t), 
 			   0 );
-  /*
-  int error = rt_dev_sendto( canfd, 
-			   (void*)&frame, 
-			   sizeof(can_frame_t), 
-			   0,
-			   (struct sockaddr*)&addr, 
-			   sizeof(addr) );
-  */
+
   if( error < 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to send CAN frame." 
+		      << ": Failed to send CAN frame " << error
 		      << std::endl;
     return EFAILURE;
   }
@@ -204,19 +172,9 @@ devCAN::Errno devRTSocketCAN::Recv( devCAN::Frame& canframe,
   memset(&frame, 0, sizeof(frame));  // clear the frame
   
   int error =  rt_dev_recv( canfd, 
-				(void*)&frame, 
-				sizeof(can_frame_t), 
-				0 );
-  /*
-  struct sockaddr_can addr;          // the source address
-  socklen_t addrlen = sizeof(addr);  // the size of the source address
-  int error =  rt_dev_recvfrom( canfd, 
-				(void*)&frame, 
-				sizeof(can_frame_t), 
-				0,
-				(struct sockaddr*)&addr, 
-				&addrlen );
-  */
+			    (void*)&frame, 
+			    sizeof(can_frame_t), 
+			    0 );
 
   if( error < 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -234,11 +192,7 @@ devCAN::Errno devRTSocketCAN::Recv( devCAN::Frame& canframe,
 devCAN::Errno devRTSocketCAN::AddFilter( const devCAN::Filter& filter ){
 
   if( filterscnt < devRTSocketCAN::MAX_NUM_FILTERS ){
-    /*
-    std::cout << std::hex << std::setfill('0') << std::setw(4)
-	      << (int)filter.mask << " " << (int)filter.id
-	      << std::dec << std::endl;
-    */
+
     filters[filterscnt].can_mask = filter.mask;
     filters[filterscnt].can_id   = filter.id;
     filterscnt++;
@@ -269,32 +223,4 @@ devCAN::Errno devRTSocketCAN::AddFilter( const devCAN::Filter& filter ){
 
 #endif
 
-
-  // Set CAN filters
-  // These are WAM specific filters and don't belong here
-
-  /*
-  filters[0].can_mask = 0x000005EF;  // Mask position feedback from puck 12
-  filters[1].can_mask = 0x000005EF;  // Mask property feedback from puck 11
-  filters[2].can_mask = 0x000005EF;  // Mask position feedback from puck 12
-  filters[3].can_mask = 0x000005EF;  // Mask property feedback from puck 12
-  filters[4].can_mask = 0x000005EF;  // Mask position feedback from puck 13
-  filters[5].can_mask = 0x000005EF;  // Mask property feedback from puck 13
-  filters[6].can_mask = 0x000005EF;  // Mask position feedback from puck 14
-  filters[7].can_mask = 0x000005EF;  // Mask property feedback from puck 14
-
-  filters[0].can_id   = 0x00000566;  // Match property feedback from puck 11
-  filters[1].can_id   = 0x00000586;  // Match property feedback from puck 12
-  filters[2].can_id   = 0x000005A6;  // Match property feedback from puck 13
-  filters[3].can_id   = 0x000005C6;  // Match property feedback from puck 14
-
-  filters[4].can_id   = 0x00000563;  // Match position feedback from puck 12
-  filters[5].can_id   = 0x00000583;  // Match position feedback from puck 12
-  filters[6].can_id   = 0x000005A3;  // Match position feedback from puck 13
-  filters[7].can_id   = 0x000005C3;  // Match position feedback from puck 14
-
-  //filters[8].can_mask = 0x0000041F;  // mask broadcast to a group
-  //filters[8].can_id   = 0x00000000;  // allow direct messages to the host
-  
-  */
 

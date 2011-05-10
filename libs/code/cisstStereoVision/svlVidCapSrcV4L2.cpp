@@ -53,11 +53,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVidCapSrcV4L2 class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcV4L2)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcV4L2, svlVidCapSrcBase)
 
 svlVidCapSrcV4L2::svlVidCapSrcV4L2() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

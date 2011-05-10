@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageBlobTracker class ***/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageBlobTracker)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageBlobTracker, svlFilterBase)
 
 svlFilterImageBlobTracker::svlFilterImageBlobTracker() :
     svlFilterBase(),

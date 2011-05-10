@@ -29,7 +29,7 @@ devSetPoints::devSetPoints( const std::string& taskname,
 void devSetPoints::Insert( const vctDynamicVector<double>& q )
 { rnsetpoints.push_back( q ); }
 
-void devSetPoints::Latch(){ state = ~state; }
+void devSetPoints::Latch(){ state = !state; }
 
 devSetPoints::devSetPoints
 ( const std::string& taskname,

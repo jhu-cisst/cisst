@@ -268,6 +268,9 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   void Run();
   void Cleanup(){}
 
+  void Enable() { mtsState = devRobotComponent::ENABLED; }
+  void Disable() { mtsState = devRobotComponent::DISABLED; }
+
   static const std::string Control;
   static const std::string EnableCommand;
 

@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageCropper class **********/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageCropper)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageCropper, svlFilterBase)
 
 svlFilterImageCropper::svlFilterImageCropper() :
     svlFilterBase(),

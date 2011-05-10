@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageQtWidget.h>
 
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageQtWidget);
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageQtWidget, svlFilterBase)
 
 
 svlFilterImageQtWidget::svlFilterImageQtWidget(QWidget * parent):

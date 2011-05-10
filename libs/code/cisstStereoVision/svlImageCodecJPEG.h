@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlImageIO.h>
 
 
-class svlImageCodecJPEG : public svlImageCodecBase, public cmnGenericObject
+class svlImageCodecJPEG : public svlImageCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageDeinterlacer class *****/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageDeinterlacer)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageDeinterlacer, svlFilterBase)
 
 svlFilterImageDeinterlacer::svlFilterImageDeinterlacer() :
     svlFilterBase()

@@ -1,0 +1,8 @@
+7
+standard -1.5708  0.0000  0.0000  0.3100 revolute active 0.0 -2.6179 2.6179 160 
+standard  1.5708  0.0000  0.0000  0.0000 revolute active 0.0 -1.9634 1.9634 160
+standard -1.5708  0.0000  0.0000  0.4000 revolute active 0.0 -2.7488 2.7488 160
+standard  1.5708  0.0000  0.0000  0.0000 revolute active 0.0 -2.7488 2.7488 160
+standard -1.5708  0.0000  0.0000  0.3900 revolute active 0.0 -0.8726 3.1000 160
+standard  1.5708  0.0000  0.0000  0.0000 revolute active 0.0 -3.0543 3.0543 130
+standard  0.0000  0.0000  0.0000  0.0660 revolute active 0.0 -3.0543 3.0543 130

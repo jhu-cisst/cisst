@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnConstants.h>
 #include "clockComponent.h"
 
-CMN_IMPLEMENT_SERVICES_ONEARG(clockComponent, std::string);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(clockComponent, mtsComponent, std::string);
 
 clockComponent::clockComponent(const std::string & componentName):
     mtsComponent(componentName)

@@ -547,4 +547,11 @@ public:
 };
 #endif // !SWIG
 
+// A static (compile-time) assertion that the Derived class is, in fact, derived from the Base class.
+// This has been written to try to generate a comprehensible error message.
+template <typename Derived, typename Base, bool b> struct cmnIsDerivedFromAssert { };
+template <typename Derived, typename Base> struct cmnIsDerivedFromAssert<Derived, Base, true> { typedef bool ASSERT; };
+#define CMN_IS_DERIVED_FROM_ASSERT(Derived, Base) \
+    typedef cmnIsDerivedFromAssert<Derived, Base, cmnIsDerivedFrom<Derived, Base>::IS_DERIVED>::ASSERT Derived##_##Base;
+
 #endif // _cmnTypeTraits_h

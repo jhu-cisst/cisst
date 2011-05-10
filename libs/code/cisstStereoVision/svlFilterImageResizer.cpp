@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageResizer class **********/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageResizer)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageResizer, svlFilterBase)
 
 svlFilterImageResizer::svlFilterImageResizer() :
     svlFilterBase(),

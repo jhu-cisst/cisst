@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 
+#include <cisstVector/vctTransformationTypes.h>
+
 #include <cisstRobot/robLink.h>
 #include <cisstRobot/robExport.h>
 
@@ -188,6 +190,14 @@ public:
     robManipulator::Errno 
     InverseKinematics( vctDynamicVector<double>& q, 
 		       const vctFrame4x4<double>& Rts, 
+		       double tolerance=1e-12, 
+		       size_t Niteration=1000 );
+  
+
+  virtual 
+    robManipulator::Errno 
+    InverseKinematics( vctDynamicVector<double>& q, 
+		       const vctFrm3& Rts, 
 		       double tolerance=1e-12, 
 		       size_t Niteration=1000 );
   

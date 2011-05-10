@@ -59,6 +59,7 @@ class CISST_EXPORT cmnClassServicesBase
     */
     cmnClassServicesBase(const std::string & className,
                          const std::type_info * typeInfo,
+                         const cmnClassServicesBase *parentServices,
                          cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT);
 
 
@@ -172,12 +173,25 @@ class CISST_EXPORT cmnClassServicesBase
         SetLogMask(mask);
     }
 
+    const cmnClassServicesBase *GetParentServices(void) const {
+        return ParentServices;
+    }
+
+    bool IsDerivedFrom(const cmnClassServicesBase *parentServices) const;
+
+    template <class _Parent>
+    bool IsDerivedFrom(void) const {
+        return IsDerivedFrom(_Parent::ClassServices());
+    }
 
 private:
     /*! The name of the class. */
     const std::string * NameMember;
 
     const std::type_info * TypeInfoMember;
+
+    /*! Class services of parent class (0 if no parent, or not known) */
+    const cmnClassServicesBase *ParentServices;
 
     /*! The log Level of Detail. */
     cmnLogMask LogMask;

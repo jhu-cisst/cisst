@@ -34,11 +34,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecCVI class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecCVI)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecCVI, svlVideoCodecBase)
 
 svlVideoCodecCVI::svlVideoCodecCVI() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     CodecName("CISST Video"),
     FileStartMarker("CisstSVLVideo\r\n",  // all version strings shall be of equal length
                     "CisstVid_1.10\r\n",
@@ -142,14 +141,15 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
                 CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `footer offset`" << std::endl;
                 break;
             }
+
+#ifdef READ_CORRUPT_V11_FILE
+            Version = 0;
+#else
             if (FooterOffset <= 0) {
                 CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `footer offset`" << std::endl;
                 break;
             }
 
-#ifdef READ_CORRUPT_V110_FILE
-            Version = 0;
-#else
             // Store file position
             pos = File.GetPos();
 

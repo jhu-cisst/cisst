@@ -32,7 +32,10 @@ using namespace std;
 
 int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
 {
-    const bool resize = false;
+    const bool resize   = false;
+    const bool cropping = false;
+    const double crop_start = 0.0;
+    const double crop_end   = 1304623501.0 - 1.0;
 
     svlInitialize();
 
@@ -99,7 +102,20 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
 
     cerr << "Converting: '" << src_path << "' to '" << dst_path <<"' using codec: '" << encoder << "'" << endl;
 
-    // initialize and start stream
+    // initialize stream
+    if (stream.Initialize() != SVL_OK) goto labError;
+
+    if (cropping) {
+        vctInt2 range;
+        range.Assign(source.GetPositionAtTime(crop_start),
+                     source.GetPositionAtTime(crop_end));
+        if (range[0] < 0) range[0] = 0;
+        if (range[1] >= source.GetLength()) range[1] = source.GetLength() - 1;
+        cerr << "Cropping video frames from #" << range[0] << " to #" << range[1] << endl;
+        source.SetRange(range);
+    }
+
+    // start stream
     if (stream.Play() != SVL_OK) goto labError;
 
     do {

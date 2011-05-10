@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFile.h>
 
 
-class svlVideoCodecCVI : public svlVideoCodecBase, public cmnGenericObject
+class svlVideoCodecCVI : public svlVideoCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

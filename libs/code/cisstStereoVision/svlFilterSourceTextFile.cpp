@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceTextFile class ***/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceTextFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceTextFile, svlFilterSourceBase)
 
 svlFilterSourceTextFile::svlFilterSourceTextFile() :
     svlFilterSourceBase(false),  // manual timestamp management

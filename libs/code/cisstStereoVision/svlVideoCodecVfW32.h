@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "vfw.h"
 
 
-class svlVideoCodecVfW32 : public svlVideoCodecBase, public cmnGenericObject
+class svlVideoCodecVfW32 : public svlVideoCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

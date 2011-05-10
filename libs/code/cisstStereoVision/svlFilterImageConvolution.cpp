@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageConvolution class *****/
 /*****************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageConvolution)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageConvolution, svlFilterBase)
 
 svlFilterImageConvolution::svlFilterImageConvolution() :
     svlFilterBase(),

@@ -45,13 +45,15 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT devWAM : public devManipulator {
 
-private:
+ public:
 
   enum Errno{ ESUCCESS, EFAILURE };
 
+ private:
+
   // WAM specific members
   //
-
+  
   RnIO* input;
   RnIO* output;
 

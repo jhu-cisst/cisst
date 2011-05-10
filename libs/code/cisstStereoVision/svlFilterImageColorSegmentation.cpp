@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageColorSegmentation class *****/
 /***********************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageColorSegmentation)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageColorSegmentation, svlFilterBase)
 
 svlFilterImageColorSegmentation::svlFilterImageColorSegmentation() :
     svlFilterBase(),

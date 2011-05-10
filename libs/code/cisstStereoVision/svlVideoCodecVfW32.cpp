@@ -28,11 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecVfW32 class ********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecVfW32)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecVfW32, svlVideoCodecBase)
 
 svlVideoCodecVfW32::svlVideoCodecVfW32() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     Width(0),
     Height(0),
     BegPos(-1),

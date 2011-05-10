@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnClassRegisterMacros_h
 #define _cmnClassRegisterMacros_h
 
+#include <cisstCommon/cmnTypeTraits.h>
+
 /*!
   \file
   \brief Class registration macros.
@@ -247,7 +249,7 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
 #ifdef CMN_IMPLEMENT_SERVICES
 #undef CMN_IMPLEMENT_SERVICES
 #endif
-#define CMN_IMPLEMENT_SERVICES_INTERNAL(className, argType) \
+#define CMN_IMPLEMENT_SERVICES_INTERNAL(className, parentServices, argType) \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
     static cmnClassServicesBase * classServices = cmnClassServicesInstantiate<className>(); \
@@ -258,18 +260,22 @@ template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
     static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
-           classServices(#className, &typeid(className), className::InitialLoD);   \
+           classServices(#className, &typeid(className), parentServices, className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
 #define CMN_IMPLEMENT_SERVICES(className) \
-    CMN_IMPLEMENT_SERVICES_INTERNAL(className, className)
+    CMN_IMPLEMENT_SERVICES_INTERNAL(className, 0, className)
+
+#define CMN_IMPLEMENT_SERVICES_DERIVED(className, parentName) \
+            CMN_IS_DERIVED_FROM_ASSERT(className, parentName) \
+            CMN_IMPLEMENT_SERVICES_INTERNAL(className, parentName::ClassServices(), className)
 
 #ifdef CMN_IMPLEMENT_SERVICES_TEMPLATED
 #undef CMN_IMPLEMENT_SERVICES_TEMPLATED
 #endif
-#define CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, argType) \
+#define CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, parentServices, argType) \
 template<> \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
@@ -287,13 +293,17 @@ template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
     static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
-           classServices(#className, &typeid(className), className::InitialLoD); \
+           classServices(#className, &typeid(className), parentServices, className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
 #define CMN_IMPLEMENT_SERVICES_TEMPLATED(className) \
-        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, className)
+        CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, 0, className)
+
+#define CMN_IMPLEMENT_SERVICES_DERIVED_TEMPLATED(className, parentName) \
+            CMN_IS_DERIVED_FROM_ASSERT(className, parentName) \
+            CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, parentName::ClassServices(), className)
 
 //@}
 

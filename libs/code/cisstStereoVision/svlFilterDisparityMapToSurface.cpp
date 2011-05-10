@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterDisparityMapToSurface class ***/
 /********************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterDisparityMapToSurface)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterDisparityMapToSurface, svlFilterBase)
 
 svlFilterDisparityMapToSurface::svlFilterDisparityMapToSurface() :
     svlFilterBase()
