@@ -1238,10 +1238,12 @@ void mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary(const std::stri
 void mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses(
                                 std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const
 {
-    // Loop through the class register, looking for components that can be created with one argument.
+    // Loop through the class register, looking for components that can be created with one argument
+    // or derived from mtsComponent (and have dynamic creation enabled).
     cmnClassRegister::const_iterator it = cmnClassRegister::begin();
     while (it != cmnClassRegister::end()) {
         if (it->second->OneArgConstructorAvailable()) {
+            // CMN_DYNAMIC_CREATION_ONEARG or CMN_DYNAMIC_CREATION_SETNAME
             mtsDescriptionComponentClass classInfo;
             classInfo.ClassName = it->first;
             const cmnClassServicesBase *argServices = it->second->GetConstructorArgServices();
@@ -1249,6 +1251,14 @@ void mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses(
                 classInfo.ArgType = argServices->GetName();
                 classInfo.ArgTypeId = argServices->TypeInfoPointer()->name();
             }
+            listOfComponentClasses.push_back(classInfo);
+        }
+        else if (it->second->HasDynamicCreation() && it->second->IsDerivedFrom<mtsComponent>()) {
+            // Backward compatibility (CMN_DYNAMIC_CREATION)
+            mtsDescriptionComponentClass classInfo;
+            classInfo.ClassName = it->first;
+            classInfo.ArgType = "std::string";
+            classInfo.ArgTypeId = typeid(std::string).name();
             listOfComponentClasses.push_back(classInfo);
         }
         it++;
