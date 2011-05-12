@@ -375,8 +375,13 @@ void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 {
     StartAllComponents();
     PingAllComponents();
+
     VerifyProcesses();
+
     SendAndVerify(PipeConfigurationManager, "createComponent server mtsTestDevice1 server", "component created");
+    SendAndVerify(PipeProcessServer, "has_component server", "server found");
+    PingAllComponents();
+
     StopAllComponents();
 
     /*

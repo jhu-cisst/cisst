@@ -186,7 +186,9 @@ void mtsManagerProxyServer::StopProxy(void)
 
     IceGUID = "";
 
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer, "Stopped manager proxy server");
+#endif
 }
 
 bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
@@ -226,7 +228,9 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
     }
     //*/
 
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed disconnected process: \"" << processName << "\"");
+#endif
 
     return true;
 }
@@ -1501,7 +1505,7 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         try {
             ManagerProxyServer->MonitorConnections();
         } catch (const Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected: " << ex.what());
+            LogError(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected: " << ex.what());
         }
     }
 #endif
@@ -1527,8 +1531,10 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer::ManagerServerI,
         "Stopped and destroyed callback thread to communicate with clients");
+#endif
 }
 
  bool mtsManagerProxyServer::ManagerServerI::IsActiveProxy() const

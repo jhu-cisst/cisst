@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsManagerComponentServices.h>
 
 #include "mtsTestComponents.h"
 
@@ -107,6 +108,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // normal operations
     bool stop = false;
     std::string process1Name, process2Name, component1Name, component2Name, componentType;
+    mtsManagerComponentServices * services = configurationManager->GetManagerComponentServices();
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
@@ -117,7 +119,11 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             std::cin >> process1Name;
             std::cin >> componentType;
             std::cin >> component1Name;
-            std::cout << "need to implement dynamic creation for " << process1Name << " " << componentType << " " << component1Name << std::endl;
+            //if (services->ComponentCreate(process1Name, componentType, component1Name)) {
+                std::cout << "component created" << std::endl;
+                //} else {
+                //std::cout << "component creation failed" << std::endl;
+                //}
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }

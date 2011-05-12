@@ -171,7 +171,9 @@ void mtsComponentInterfaceProxyClient::StopProxy()
 
     IceGUID = "";
 
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "Stopped component interface proxy client");
+#endif
 }
 
 void mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception & ex)

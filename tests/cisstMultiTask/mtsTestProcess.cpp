@@ -81,12 +81,16 @@ int main(int argc, char * argv[])
 
     // normal operations
     bool stop = false;
+    std::string componentName;
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
             stop = true;
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
+        } else if (command == std::string("has_component")) {
+            std::cin >> componentName;
+            std::cout << componentName << " found" << std::endl;
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }

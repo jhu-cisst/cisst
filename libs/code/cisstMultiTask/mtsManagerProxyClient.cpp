@@ -174,8 +174,9 @@ void mtsManagerProxyClient::StopProxy()
     }
 
     IceGUID = "";
-
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "Stopped manager proxy client");
+#endif
 }
 
 void mtsManagerProxyClient::OnServerDisconnect(const Ice::Exception & ex)
@@ -982,7 +983,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
+            LogError(mtsManagerProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
             if (ManagerProxyClient) {
                 ManagerProxyClient->OnServerDisconnect(ex);
             }
@@ -990,7 +991,9 @@ void mtsManagerProxyClient::ManagerClientI::Run()
     }
 #endif
 
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "mtsManagerProxyClient::ManagerClientI - terminated");
+#endif
 }
 
 void mtsManagerProxyClient::ManagerClientI::Stop()
@@ -1012,8 +1015,9 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
         SenderThreadPtr = 0;
     }
     callbackSenderThread->getThreadControl().join();
-
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ManagerClientI, "Stopped and destroyed callback thread to communicate with server");
+#endif
 }
 
 bool mtsManagerProxyClient::ManagerClientI::IsActiveProxy() const
