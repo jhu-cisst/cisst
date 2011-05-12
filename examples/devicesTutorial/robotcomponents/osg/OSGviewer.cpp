@@ -1,10 +1,8 @@
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
-#include <cisstDevices/robotcomponents/osg/devOSGPick.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
-
 #include <cisstCommon/cmnGetChar.h>
 
 #include <cisstDevices/devConfig.h>
@@ -12,7 +10,7 @@
 #include <opencv2/opencv.hpp>
 #endif
 
-int main(){
+int main( int argc, char** argv ){
 
   cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
@@ -32,25 +30,13 @@ int main(){
 			   world,
 			   x, y, width, height,
 			   55.0, ((double)width)/((double)height),
-			   Znear, Zfar );
-  // Add the camera component
+			   Znear, Zfar,
+			   "", true, false );
   taskManager->AddComponent( camera );
 
-  camera->addEventHandler( new devOSGPick() );
-
   // Create objects
-  std::string data( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/" );
-  vctFrame4x4<double> Rt( vctMatrixRotation3<double>(),
-			  vctFixedSizeVector<double,3>(0.0, 0.0, 0.5) );
-  osg::ref_ptr<devOSGBody> hubble;
-
-  vctFrame4x4<double> eye;
-  osg::ref_ptr<devOSGBody> background;
-  hubble = new devOSGBody( "hubble", Rt, data+"hst.3ds", world );
-  background = new devOSGBody( "background", 
-			       eye, 
-			       data+"background.3ds", 
-			       world );
+  osg::ref_ptr<devOSGBody> object;
+  object = new devOSGBody( "object", vctFrame4x4<double>(), argv[1], world );
 
   // Start the camera
   taskManager->CreateAll();

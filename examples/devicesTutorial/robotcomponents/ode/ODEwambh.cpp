@@ -8,11 +8,11 @@
 
 #include <cisstCommon/cmnGetChar.h>
 
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsTaskManager.h>
-
-
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -56,13 +56,13 @@ int main(){
 
   std::string WAMpath(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
-  models.push_back( WAMpath+"l1.3ds" );
-  models.push_back( WAMpath+"l2.3ds" );
-  models.push_back( WAMpath+"l3.3ds" );
-  models.push_back( WAMpath+"l4.3ds" );
-  models.push_back( WAMpath+"l5.3ds" );
-  models.push_back( WAMpath+"l6.3ds" );
-  models.push_back( WAMpath+"l7.3ds" );
+  models.push_back( WAMpath+"l1.obj" );
+  models.push_back( WAMpath+"l2.obj" );
+  models.push_back( WAMpath+"l3.obj" );
+  models.push_back( WAMpath+"l4.obj" );
+  models.push_back( WAMpath+"l5.obj" );
+  models.push_back( WAMpath+"l6.obj" );
+  models.push_back( WAMpath+"l7.obj" );
 
   vctMatrixRotation3<double> Rw0( 0.0, 0.0, -1.0,
 				  0.0, 1.0,  0.0,
@@ -80,7 +80,7 @@ int main(){
 						Rtw0,
 						WAMqinit,
 						models,
-						WAMpath+"l0.3ds" );
+						WAMpath+"l0.obj" );
   taskManager->AddComponent( WAM );
 
   // BH stuff
@@ -141,6 +141,7 @@ int main(){
   taskManager->CreateAll();
   taskManager->StartAll();
 
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
 
   taskManager->KillAll();

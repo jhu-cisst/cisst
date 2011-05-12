@@ -7,10 +7,11 @@
 
 #include <cisstCommon/cmnGetChar.h>
 
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsTaskManager.h>
-
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -52,13 +53,13 @@ int main(){
   // WAM stuff
   std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
-  models.push_back( path+"l1.3ds" );
-  models.push_back( path+"l2.3ds" );
-  models.push_back( path+"l3.3ds" );
-  models.push_back( path+"l4.3ds" );
-  models.push_back( path+"l5.3ds" );
-  models.push_back( path+"l6.3ds" );
-  models.push_back( path+"l7.3ds" );
+  models.push_back( path+"l1.obj" );
+  models.push_back( path+"l2.obj" );
+  models.push_back( path+"l3.obj" );
+  models.push_back( path+"l4.obj" );
+  models.push_back( path+"l5.obj" );
+  models.push_back( path+"l6.obj" );
+  models.push_back( path+"l7.obj" );
 
   vctMatrixRotation3<double> Rw0( 0.0, 0.0, -1.0,
 				  0.0, 1.0,  0.0,
@@ -77,21 +78,21 @@ int main(){
 						  qinit,
 						  models,
 						  //"" );
-						  path+"l0.3ds" );
+						  path+"l0.obj" );
   taskManager->AddComponent( WAM );
-
 
   // Connect trajectory to robot
   taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
 			trajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
-			WAM->GetName(),       devOSGManipulator::Input );
+			WAM->GetName(),       devManipulator::Input );
 
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
 
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
 
   taskManager->KillAll();

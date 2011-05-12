@@ -367,7 +367,7 @@ void devODEManipulator::Read()
 
 void devODEManipulator::Write(){
   
-  switch( GetMode() ){
+  switch( GetInputMode() ){
 
   case devManipulator::POSITION: 
     {
@@ -375,7 +375,7 @@ void devODEManipulator::Write(){
       double t;
       input->GetPosition( q, t ); 
       if( q.size() == links.size() ) 
-	SetPosition( q );
+	SetPositions( q );
     }
     break;
 
@@ -385,7 +385,7 @@ void devODEManipulator::Write(){
       double t;
       input->GetVelocity( qd, t ); 
       if( qd.size() == links.size() ) 
-	SetVelocity( qd );
+	SetVelocities( qd );
     }
     break;
 
@@ -405,50 +405,61 @@ void devODEManipulator::Write(){
   }
 }
 
-void devODEManipulator::SetPosition( const vctDynamicVector<double>& qs ){
+devODEManipulator::Errno
+devODEManipulator::SetPositions( const vctDynamicVector<double>& qs ){
   
   vctDynamicVector<double> q = GetJointsPositions();
 
   if( qs.size() == servos.size() && q.size() == servos.size() ){
     for( size_t i = 0; i<qs.size(); i++ )
-      { 
-	servos[i]->SetPosition(  qs[i], q[i], GetPeriodicity() ); 
-      }
+      { servos[i]->SetPosition(  qs[i], q[i], GetPeriodicity() ); }
+    return devODEManipulator::ESUCCESS;
   }
+
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " Expected " << servos.size() 
 		      << " velocities. Got " << qs.size() 
 		      << std::endl;
+    return devODEManipulator::EFAILURE;
   }
 
 }
 
-void devODEManipulator::SetVelocity( const vctDynamicVector<double>& qds ){
+devODEManipulator::Errno
+devODEManipulator::SetVelocities( const vctDynamicVector<double>& qds ){
 
   if( qds.size() == servos.size() ){
     for( size_t i = 0; i<qds.size(); i++ )
       { servos[i]->SetVelocity(  qds[i] ); }
+    return devODEManipulator::ESUCCESS;
   }
+
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " Expected " << servos.size() 
 		      << " velocities. Got " << qds.size() 
 		      << std::endl;
+    return devODEManipulator::EFAILURE;
   }
 
 }
 
-void devODEManipulator::SetForcesTorques( const vctDynamicVector<double>& ft) {
+devODEManipulator::Errno
+devODEManipulator::SetForcesTorques( const vctDynamicVector<double>& ft) {
+
   if( ft.size() == joints.size() ){
     for(size_t i=0; i<joints.size() && i<ft.size(); i++ )
       { joints[i]->SetForceTorque( ft[i] ); }
+    return devODEManipulator::ESUCCESS;
   }
+
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " Expected " << joints.size() 
-		      << " velocities. Got " << ft.size() 
+		      << " forces/torques. Got " << ft.size() 
 		      << std::endl;
+    return devODEManipulator::EFAILURE;
   }
 
 }

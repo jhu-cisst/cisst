@@ -32,6 +32,21 @@ class CISST_EXPORT devOSGManipulator :
   public robManipulator,
   public osg::Group {
 
+ private:
+
+  //! Store the current joints values
+  vctDynamicVector<double> q;
+
+  //! Store the previous joints values
+  vctDynamicVector<double> qold;
+
+  
+  //! Store the current joints velocities
+  vctDynamicVector<double> qd;
+
+  //! Store the previous joints velocities
+  vctDynamicVector<double> qdold;
+
  protected:
 
   //! Input of N joints
@@ -39,16 +54,13 @@ class CISST_EXPORT devOSGManipulator :
   //! Output of N joints
   RnIO* output;
 
-  //! Store the joints values
-  vctDynamicVector<double> q;
-
   //! Read the state of the manipulator
   virtual void Read();
   
   //! Write the state of the manipulator
   virtual void Write();
 
-  //! OSG Manipulator generic constructor
+  //! OSG Manipulator protected constructor
   /**
      This constructor initializes an OSG manipulator with the kinematics and 
      dynamics contained in a file. Plus it initializes the OSG elements of the
@@ -116,6 +128,54 @@ class CISST_EXPORT devOSGManipulator :
 		     const std::string& basemodel = "" );
 
   ~devOSGManipulator();
+
+
+  //! Return the joints positions
+  /**
+     Query each ODE joint and return the joint positions
+     \return A vector of joints positions
+  */
+  virtual vctDynamicVector<double> GetJointsPositions() const ;
+
+  //! Return the joints velocities
+  /**
+     Query each ODE joint and return the joint velocities
+     \return A vector of joints velocities
+  */
+  virtual vctDynamicVector<double> GetJointsVelocities() const ;
+
+  //! Set the joint position
+  /**
+     This sets the position command of ODE (internal) servo motors. This does not
+     instantly changes the position. The position values are used to set the 
+     velocity of the ODE servo motors.
+     \param qs A vector of joint positions
+  */
+  virtual 
+    devOSGManipulator::Errno 
+    SetPositions( const vctDynamicVector<double>& qs );
+
+  //! Set the joint velocity
+  /**
+     This sets the velocity command of ODE (internal) servo motors. This does not
+     instantly changes the velocity. The velocity values are used to set the 
+     velocity of the ODE servo motors.
+     \param qsd A vector of joint velocities
+  */
+  virtual 
+    devOSGManipulator::Errno 
+    SetVelocities( const vctDynamicVector<double>& qsd );
+
+  //! Set the joint forces or torques
+  /**
+     This sets the force/torque value of each joint. This method does NOT apply 
+     the FT right away. The FT will be applied at the next iteration of the 
+     world.
+     \param ft A vector of joint forces/torques
+  */
+  virtual
+    devOSGManipulator::Errno 
+    SetForcesTorques( const vctDynamicVector<double>& ft);
 
 };
 

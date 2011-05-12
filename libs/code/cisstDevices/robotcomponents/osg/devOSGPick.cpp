@@ -49,6 +49,8 @@ bool devOSGPick::handle( const osgGA::GUIEventAdapter& ea,
 
 }
 
+
+
 // Perform a pick operation.
 bool devOSGPick::Pick( double x, double y, osgViewer::Viewer* viewer ){
 

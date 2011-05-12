@@ -85,7 +85,9 @@ class CISST_EXPORT devODEBH : public devODEManipulator {
      velocity of the ODE servo motors.
      \param qs A vector of joint positions
   */
-  virtual void SetPosition( const vctDynamicVector<double>& qs );
+  virtual 
+    devODEBH::Errno 
+    SetPositions( const vctDynamicVector<double>& qs );
   
   //! Set the joint velocity
   /**
@@ -94,7 +96,9 @@ class CISST_EXPORT devODEBH : public devODEManipulator {
      velocity of the ODE servo motors.
      \param qsd A vector of joint velocities
   */
-  //virtual void SetVelocity( const vctDynamicVector<double>& qsd );
+  virtual
+    devODEBH::Errno 
+    SetVelocities( const vctDynamicVector<double>& qsd );
 
   //! Set the joint forces or torques
   /**
@@ -103,7 +107,9 @@ class CISST_EXPORT devODEBH : public devODEManipulator {
      world.
      \param ft A vector of joint forces/torques
   */
-  //virtual void SetForcesTorques( const vctDynamicVector<double>& ft);
+  virtual 
+    devODEBH::Errno 
+    SetForcesTorques( const vctDynamicVector<double>& ft);
 
   //! Return the state of the robot
   /**

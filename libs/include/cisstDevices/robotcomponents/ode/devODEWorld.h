@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstDevices/devExport.h>
 
-struct devODEContact{
+struct CISST_EXPORT devODEContact{
   
   devODEBody* body1;
   devODEBody* body2;

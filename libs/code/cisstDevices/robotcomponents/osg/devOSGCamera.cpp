@@ -469,8 +469,7 @@ devOSGCamera::devOSGCamera( const std::string& name,
     // add a bit more light
     osg::ref_ptr<osg::Light> light = new osg::Light;
     light->setAmbient( osg::Vec4( .9, .9, .9, 1 ) );
-    //light->setDiffuse( osg::Vec4( .7, .7, .7, 1 ) );
-    //light->setSpecular( osg::Vec4( .7, .7, .7, 1 ) );
+    light->setSpecular( osg::Vec4( .9, .9, .9, 1 ) );
     setLight( light );
   }
 

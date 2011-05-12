@@ -194,21 +194,25 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
 
   //! Set the joint position
   /**
-     This sets the position command of ODE (internal) servo motors. This does not
-     instantly changes the position. The position values are used to set the 
+     This sets the position command of ODE (internal) servo motors. This does 
+     not instantly changes the position. The position values are used to set the
      velocity of the ODE servo motors.
      \param qs A vector of joint positions
   */
-  virtual void SetPosition( const vctDynamicVector<double>& qs );
+  virtual 
+    devODEManipulator::Errno
+    SetPositions( const vctDynamicVector<double>& qs );
 
   //! Set the joint velocity
   /**
-     This sets the velocity command of ODE (internal) servo motors. This does not
-     instantly changes the velocity. The velocity values are used to set the 
+     This sets the velocity command of ODE (internal) servo motors. This does 
+     not instantly changes the velocity. The velocity values are used to set the
      velocity of the ODE servo motors.
      \param qsd A vector of joint velocities
   */
-  virtual void SetVelocity( const vctDynamicVector<double>& qsd );
+  virtual 
+    devODEManipulator::Errno 
+    SetVelocities( const vctDynamicVector<double>& qsd );
 
   //! Set the joint forces or torques
   /**
@@ -217,7 +221,9 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
      world.
      \param ft A vector of joint forces/torques
   */
-  virtual void SetForcesTorques( const vctDynamicVector<double>& ft);
+  virtual 
+    devODEManipulator::Errno 
+    SetForcesTorques( const vctDynamicVector<double>& ft);
 
 
   //! The ODE state of the manipulator
@@ -226,8 +232,8 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
   //! Return the state of the robot
   /**
      For an ODE manipulator, the state of a manipulator is defined by the 
-     position/orientation and the velocity of each link. It is not defined by the
-     position/velocity of each joint.
+     position/orientation and the velocity of each link. It is not defined by 
+     the position/velocity of each joint.
      This method queries each link of the robot for its state 
      (position/orientation + angular/linear velocities) and return them in a 
      vector.
@@ -238,8 +244,8 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
   //! Set the state of the robot
   /**
      For an ODE manipulator, the state of a manipulator is defined by the 
-     position/orientation and the velocity of each link. It is not defined by the
-     position/velocity of each joint.
+     position/orientation and the velocity of each link. It is not defined by 
+     the position/velocity of each joint.
      This method set the state of each link of the robot: 
      (position/orientation + angular/linear velocities) and return them in a 
      vector.

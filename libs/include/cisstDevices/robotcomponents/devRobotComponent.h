@@ -235,13 +235,6 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   }; // End SO3IO
 
 
- private:
-  
-  osaCPUMask cpumask;
-
-  mtsBool mtsState;
-  bool risingedge;
-
  public:
 
   enum State
@@ -249,6 +242,13 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
     DISABLED,
     ENABLED
   };
+
+ private:
+
+  osaCPUMask cpumask;
+
+  devRobotComponent::State state;
+  bool statechange;
   
  protected:
 
@@ -268,11 +268,12 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   void Run();
   void Cleanup(){}
 
-  void Enable() { mtsState = devRobotComponent::ENABLED; }
-  void Disable() { mtsState = devRobotComponent::DISABLED; }
+  void EnableCommand() { state = devRobotComponent::ENABLED; }
+  void DisableCommand() { state = devRobotComponent::DISABLED; }
 
   static const std::string Control;
-  static const std::string EnableCommand;
+  static const std::string Enable;
+  static const std::string Disable;
 
  protected:
 
