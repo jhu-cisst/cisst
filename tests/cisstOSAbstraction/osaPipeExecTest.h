@@ -18,9 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _osaPipeExecTest_h
-#define _osaPipeExecTest_h
-
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -46,4 +43,3 @@ public:
     /*! Test communication with cisstOSAbstractionTestsPipeUtility */
     void TestPipe(void);
 };
-#endif // _osaPipeExecTest_h
