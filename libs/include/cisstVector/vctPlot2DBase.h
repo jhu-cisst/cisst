@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstOSAbstraction.h>
 
 // Always include last
 #include <cisstVector/vctExport.h>
@@ -59,18 +60,29 @@ public:
         friend class vctPlot2DOpenGL;
         friend class vctPlot2DVTK;
     public:
-        Trace(const std::string & name, size_t numberOfPoints, size_t pointSize = 2);
+        Trace(const std::string & name, size_t numberOfPoints, size_t PointSize = 2);
         ~Trace();
 
         void AddPoint(const vctDouble2 & point);
+        void AppendPoint(const vctDouble2 & point);
+        vctDouble2 GetPointAt(size_t index);
+        void SetPointAt(size_t index, const vctDouble2 & point);
+        void SetArrayAt(size_t index, const double * pointArray, size_t size);
+        bool PrependArray(const double * pointArray, size_t arraySize);
+        bool AppendArray(const double * pointArray, size_t arraySize);
         void Freeze(bool freeze);
 
         void ComputeDataRangeX(double & min, double & max);
         void ComputeDataRangeY(double & min, double & max);
         void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
+        void GetLeftRightDataX(double & min, double &max);
 
         void SetNumberOfPoints(size_t numberOfPoints);
+        void GetNumberOfPoints(size_t &numberOfPoints, size_t &bufferSize);
         void SetColor(const vctDouble3 & colorInRange0To1);
+
+        void SetSize(size_t numberOfPoints);
+        void ReSize(size_t numberOfPoints);
 
     protected:
         /*! Trace name, used for GUI */
@@ -80,7 +92,7 @@ public:
         bool Frozen;
         /*! Actual buffer containing the data, contiguous for rendering */
         double * Buffer;
-        size_t pointSize;
+        size_t PointSize;
         /*! Vector of references to the data to add, compute min/max, ... */
         typedef vctFixedSizeVectorRef<double, 2, 1> PointRef;
         vctDynamicVector<PointRef> Data;
@@ -88,6 +100,8 @@ public:
         size_t IndexLast;
         vctDouble3 Color;
         double LineWidth;
+        // Critical Section
+        osaCriticalSection CriticalSectionForBuffer;
     };
 
     /*! Storage for a given vertical line. */
@@ -112,7 +126,7 @@ public:
     };
 
 
-    vctPlot2DBase(size_t pointSize = 2);
+    vctPlot2DBase(size_t PointSize = 2);
     virtual ~vctPlot2DBase(void) {};
 
     /*! Set the number of points for all traces. */
