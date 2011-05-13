@@ -63,13 +63,7 @@ private:
     std::vector <double> *TimeStamps;
     std::vector <double> *Data;
 
-    // Ping Pong buffer
-    std::vector <double> TimeStampsPool1;
-    std::vector <double> DataPool1;
-    std::vector <double> TimeStampsPool2;
-    std::vector <double> DataPool2;
-    bool PingPongAdded;
-
+    double TopBoundary, LowBoundary;
 
 
     // PoolPoint is pointing to ping pong buffer
@@ -79,6 +73,7 @@ private:
     double ZoomScaleValue;
     mtsDouble LastTime;
     mtsDouble Plot2DTime;
+    double TimeBoundary;
 
     struct{
         mtsFunctionRead GetVectorIndex;
@@ -87,6 +82,7 @@ private:
     }Plot2DAccess;
 
     // Parser for data file
+    mtsTaskManager * taskManager;
     cdpPlayerParseStatTableData Parser;
     osaCriticalSection CS;
 
