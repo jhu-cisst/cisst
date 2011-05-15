@@ -39,3 +39,4 @@ cisst_target_link_libraries( OSGstereox2 cisstCommon cisstVector cisstOSAbstract
 cisst_target_link_libraries( OSGwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
 cisst_target_link_libraries( OSGlwr cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+

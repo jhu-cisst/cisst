@@ -74,12 +74,14 @@
   #include <cisstDevices/robotcomponents/ode/devODEBody.h>
   #include <cisstDevices/robotcomponents/ode/devODEManipulator.h>
   #include <cisstDevices/robotcomponents/ode/devODEBH.h>
+  #include <cisstDevices/robotcomponents/ode/devODEGripper.h>
 %}
 
 %include "cisstDevices/robotcomponents/ode/devODEWorld.h"
 %include "cisstDevices/robotcomponents/ode/devODEBody.h"
 %include "cisstDevices/robotcomponents/ode/devODEManipulator.h"
 %include "cisstDevices/robotcomponents/ode/devODEBH.h"
+%include "cisstDevices/robotcomponents/ode/devODEGripper.h"
 
 namespace std {
   %template(ContactList) list<devODEContact>;

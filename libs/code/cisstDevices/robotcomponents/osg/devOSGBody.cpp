@@ -194,6 +194,7 @@ void devOSGBody::ReadModel( const std::string& model ){
   std::string path;
   size_t found;
 #if (CISST_OS == CISST_WINDOWS)
+  found = model.rfind( '/' );
 #else
   found = model.rfind( '/' );
 #endif    

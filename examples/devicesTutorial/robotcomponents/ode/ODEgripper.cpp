@@ -1,5 +1,5 @@
 #include <cisstDevices/robotcomponents/ode/devODEWorld.h>
-#include <cisstDevices/robotcomponents/ode/devODEBH.h>
+#include <cisstDevices/robotcomponents/ode/devODEGripper.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 
 #include <cisstDevices/robotcomponents/trajectories/devLinearRn.h>
@@ -33,10 +33,9 @@ int main(){
   // Add the camera component
   taskManager->AddComponent( camera );
 
-  vctDynamicVector<double> qinit( 4, 0.0 ), qfinal( 4, 1.0 ), qdmax( 4, 0.1 );
+  vctDynamicVector<double> qinit( 1, 0.0 ), qfinal( 1, 0.04 ), qdmax( 1, 0.01 );
   std::vector< vctDynamicVector<double> > Q;
   Q.push_back( qfinal );
-  Q.push_back( qinit );
 
   devSetPoints setpoints( "setpoints", Q );
   taskManager->AddComponent( &setpoints );
@@ -51,29 +50,28 @@ int main(){
 			  qdmax );
   taskManager->AddComponent( &trajectory );
   
-  // BH stuff
-  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/BH/");
-  devODEBH* BH = new devODEBH( "BH",
-			       0.002,
-			       devManipulator::ENABLED,
-			       OSA_CPU1,
-			       world,
-			       devManipulator::POSITION,
-			       path+"f1f2.rob",
-			       path+"f3.rob",
-			       vctFrame4x4<double>(),
-			       path+"l0.obj",
-			       path+"l1.obj",
-			       path+"l2.obj",
-			       path+"l3.obj" );
-  taskManager->AddComponent( BH );
-  
+  // Gripper stuff
+  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/gripper/");
+  devODEGripper* gripper = new devODEGripper( "gripper",
+					      0.002,
+					      devManipulator::ENABLED,
+					      OSA_CPU1,
+					      world,
+					      devManipulator::POSITION,
+					      path+"f1.rob",
+					      path+"f2.rob",
+					      vctFrame4x4<double>(),
+					      path+"l0.obj",
+					      path+"l1.obj",
+					      path+"l1.obj" );
+  taskManager->AddComponent( gripper );
+
   // Connect trajectory to robot
   taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
 			trajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
-			BH->GetName(),        devManipulator::Input );
+			gripper->GetName(),   devManipulator::Input );
   
   // Start everything
   taskManager->CreateAll();

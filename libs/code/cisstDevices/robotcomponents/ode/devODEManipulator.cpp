@@ -81,7 +81,7 @@ devODEManipulator::devODEManipulator( const std::string& devname,
 				      const std::string& basemodel ) :
 
   devOSGManipulator( devname, period, state, mask, mode, robotfilename, 
-		     vctFrame4x4<double>( Rtw0.Rotation(), Rtw0.Translation() )),
+		     vctFrame4x4<double>( Rtw0.Rotation(), Rtw0.Translation())),
   worldid( world->GetWorldID() ),
   qinit( qinit ),
   base( NULL ){
@@ -107,6 +107,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
 					  devManipulator::Mode mode,
 					  const std::vector<std::string>& models,
 					  devODEBody* base ){
+
   //! Create a new space for the manipulator
   dSpaceID spaceid = dSimpleSpaceCreate( world->GetSpaceID() );
 
@@ -145,14 +146,14 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     
     // obtain the position and orientation of the ith link
     vctFrame4x4<double> Rtwi = robManipulator::ForwardKinematics( qinit, i );
-    
+
     vctFixedSizeVector<double,3> anchor = Rtwi.Translation();
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
 
-    int type = dJointTypeHinge;
+    dJointType type = dJointTypeHinge;
     if( links[i].GetType() == robKinematics::SLIDER )
       { type = dJointTypeSlider; }
-
+    
     // This is a bit tricky. The min must be greater than -pi and the max must
     // be less than pi. Otherwise it really screw things up
     double qmin = links[i].PositionMin();
@@ -181,7 +182,8 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
 				    b2,             // the second body
 				    axis*sign,      // the Z axis 
 				    10,             // fudged values
-				    links[i].ForceTorqueMax() ) );
+				    links[i].ForceTorqueMax(),
+				    type ) );
     }
 
     b1 = b2;  // proximal is now distal
@@ -251,7 +253,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     vctFixedSizeVector<double,3> anchor = Rtwi.Translation();
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
 
-    int type = dJointTypeHinge;
+    dJointType type = dJointTypeHinge;
     if( links[i].GetType() == robKinematics::SLIDER )
       { type = dJointTypeSlider; }
 
@@ -283,7 +285,8 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
 				    b2,             // the second body
 				    axis*sign,      // the Z axis 
 				    10,             // fudged values
-				    links[i].ForceTorqueMax() ) );
+				    links[i].ForceTorqueMax(),
+				    type ) );
     }
     b1 = b2;  // proximal is now distal
   }
@@ -407,7 +410,6 @@ void devODEManipulator::Write(){
 
 devODEManipulator::Errno
 devODEManipulator::SetPositions( const vctDynamicVector<double>& qs ){
-  
   vctDynamicVector<double> q = GetJointsPositions();
 
   if( qs.size() == servos.size() && q.size() == servos.size() ){

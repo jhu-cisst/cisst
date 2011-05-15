@@ -54,6 +54,8 @@ class CISST_EXPORT devOSGManipulator :
   //! Output of N joints
   RnIO* output;
 
+  devOSGBody* base;
+
   //! Read the state of the manipulator
   virtual void Read();
   
@@ -119,7 +121,7 @@ class CISST_EXPORT devOSGManipulator :
   devOSGManipulator( const std::string& devname,
 		     double period,
 		     devManipulator::State state,
-		     osaCPUMask mask,
+		     osaCPUMask cpumask,
 		     devOSGWorld* world,
 		     const std::string& robotfn,
 		     const vctFrame4x4<double>& Rtw0,

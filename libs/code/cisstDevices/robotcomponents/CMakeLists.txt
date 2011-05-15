@@ -132,6 +132,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEManipulator.h
       
       robotcomponents/ode/devODEBH.h
+      robotcomponents/ode/devODEGripper.h
       
       )
 
@@ -146,6 +147,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEManipulator.cpp
       
       robotcomponents/ode/devODEBH.cpp
+      robotcomponents/ode/devODEGripper.cpp
       
       robotcomponents/ode/devODEWorld.cpp 
       

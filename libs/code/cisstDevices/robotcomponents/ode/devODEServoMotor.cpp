@@ -5,25 +5,35 @@ devODEServoMotor::devODEServoMotor( dWorldID world,
 				    dBodyID body2,
 				    const vctFixedSizeVector<double,3>& axis,
 				    double vwmax,
-				    double ftmax ) : 
+				    double ftmax,
+				    dJointType motortype ) : 
   vwmax( fabs( vwmax ) ),
   ftmax( fabs( ftmax ) ) {
-      
-  amotorid = dJointCreateAMotor( world, 0 );          // create the friction
-  dJointAttach( MotorID(), body1, body2 );            // attach the joint
-  dJointSetAMotorMode( MotorID(), dAMotorUser );      // motor is in user mode
+  
+  if( motortype == dJointTypeHinge ){
+    motorid = dJointCreateAMotor( world, 0 );       // create the motor
+    dJointAttach( MotorID(), body1, body2 );        // attach the joint
+    dJointSetAMotorMode( MotorID(), dAMotorUser );  // motor is in user mode
+    dJointSetAMotorNumAxes( MotorID(), 1 );         // only 1 axis
+    dJointSetAMotorAxis( MotorID(), 0, 2, axis[0], axis[1], axis[2] );
 
-  dJointSetAMotorNumAxes( MotorID(), 1 );             // only 1 axis
+    SetVelocity( 0.0 );    // idle the motor
 
-  // set the axis
-  dJointSetAMotorAxis( MotorID(), 0, 2, axis[0], axis[1], axis[2] );
+  }
 
-  // idle the motor
-  SetVelocity( 0.0 );
+  if( motortype == dJointTypeSlider ){
+    motorid = dJointCreateLMotor( world, 0 );     // create the motor
+    dJointAttach( MotorID(), body1, body2 );      // attach the joint
+    dJointSetLMotorNumAxes( MotorID(), 1 );       // 1 axis 
+    dJointSetLMotorAxis( MotorID(), 0, 2, axis[0], axis[1], axis[2] );
+
+    SetVelocity( 0.0 );    // idle the motor
+
+  }
   
 }
 
-dJointID devODEServoMotor::MotorID() const { return amotorid; }
+dJointID devODEServoMotor::MotorID() const { return motorid; }
 
 void devODEServoMotor::SetPosition( double qs, double q, double dt ){
 
@@ -41,9 +51,16 @@ void devODEServoMotor::SetPosition( double qs, double q, double dt ){
 
 
 void devODEServoMotor::SetVelocity( double qd ){
+  
+  if( dJointGetType( MotorID() ) == dJointTypeAMotor ){
+    dJointSetAMotorParam( MotorID(), dParamVel,  qd );
+    dJointSetAMotorParam( MotorID(), dParamFMax, ftmax );
+  }
 
-  dJointSetAMotorParam( MotorID(), dParamVel,  qd );
-  dJointSetAMotorParam( MotorID(), dParamFMax, ftmax );
+  if( dJointGetType( MotorID() ) == dJointTypeLMotor ){
+    dJointSetLMotorParam( MotorID(), dParamVel,  qd );
+    dJointSetLMotorParam( MotorID(), dParamFMax, ftmax );
+  }
   
 }
 
