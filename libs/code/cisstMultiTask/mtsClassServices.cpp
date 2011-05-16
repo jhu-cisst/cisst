@@ -152,6 +152,32 @@ CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface)
 CMN_IMPLEMENT_SERVICES(mtsManagerLocal)
 CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface)
 
+#include <cisstMultiTask/mtsInterfaceCommon.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceProvidedDescriptionProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
+
+#include <cisstMultiTask/mtsParameterTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
+CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
+
+CMN_IMPLEMENT_SERVICES(mtsDescriptionComponentClass);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassVecProxy);
+
+CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
+
+CMN_IMPLEMENT_SERVICES(mtsDescriptionConnection);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
+
+CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
+
+CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
+
+CMN_IMPLEMENT_SERVICES(mtsEndUserInterfaceArg);
+
+CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
+
+CMN_IMPLEMENT_SERVICES(mtsDescriptionLoadLibrary);
+
 
 /* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>
