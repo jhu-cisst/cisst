@@ -1338,7 +1338,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
     const std::vector<std::string> namesOfWriteReturnCommand = GetNamesOfCommandsWriteReturn();
     for (size_t i = 0; i < namesOfWriteReturnCommand.size(); ++i) {
         writeReturnCommand = CommandsWriteReturn.GetItem(namesOfWriteReturnCommand[i]);
-        if (!voidReturnCommand) {
+        if (!writeReturnCommand) {
             CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write return command: " << namesOfWriteReturnCommand[i] << std::endl;
             success = false;
             continue;

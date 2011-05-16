@@ -424,7 +424,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialize
     mtsProxySerializer * deserializer = functionWriteReturnProxy->GetSerializer();
 
     // Function proxy can store the result place holder, needs to create on first run
-    if (functionWriteReturnProxy->GetResultPointer() == 0) {
+    if (functionWriteReturnProxy->GetArgumentPointer() == 0) {
         mtsGenericObject * argument =
             dynamic_cast<mtsGenericObject *>(functionWriteReturnProxy->GetCommand()->GetArgumentPrototype()->Services()->Create());
         if (argument == 0) {
@@ -469,7 +469,6 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteReturnSerialize
 
     // Serialize the result if the command is not queued - if the command is queued, the result will be sent later
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
-        mtsProxySerializer * deserializer = functionWriteReturnProxy->GetSerializer();
         deserializer->Serialize(*(functionWriteReturnProxy->GetResultPointer()),
                                 serializedResult);
     }
