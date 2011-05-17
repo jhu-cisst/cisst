@@ -61,7 +61,7 @@ vctPlot2DBase::Trace::~Trace()
 
 void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
 {
-    this->CriticalSectionForBuffer.Enter();
+    //this->CriticalSectionForBuffer.Enter();
     if (!this->Frozen) {
         // look where to store this point
         if (!this->Empty) {
@@ -80,12 +80,12 @@ void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
         }
         this->Data.Element(IndexLast).Assign(point);
     }
-    this->CriticalSectionForBuffer.Leave();
+    //this->CriticalSectionForBuffer.Leave();
 }
 
 void vctPlot2DBase::Trace::AppendPoint(const vctDouble2 & point)
 {
-    this->CriticalSectionForBuffer.Enter();
+    //this->CriticalSectionForBuffer.Enter();
     if (!this->Frozen) {
         // look where to store this point
         if (!this->Empty) {
@@ -104,7 +104,7 @@ void vctPlot2DBase::Trace::AppendPoint(const vctDouble2 & point)
         }
         this->Data.Element(IndexLast).Assign(point);
     }
-    this->CriticalSectionForBuffer.Leave();
+    //this->CriticalSectionForBuffer.Leave();
 }
 
 vctDouble2 vctPlot2DBase::Trace::GetPointAt(size_t index){
@@ -127,7 +127,7 @@ void vctPlot2DBase::Trace::SetArrayAt(size_t index, const double * pointArray, s
     if((index+ (size/this->PointSize) ) >= Data.size() )
         cmnThrow("vctPlot2DBase: SetArrayAt: Index+size bigger than bufferSize");
 
-    memcpy((this->Buffer+index*this->PointSize), pointArray, size);
+    memcpy((this->Buffer+index*this->PointSize), pointArray, size*sizeof(double));
     return;
 }
 
@@ -139,11 +139,11 @@ bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySi
     if(this->IndexFirst > this->IndexLast || ( (Data.size() - this->IndexLast-1) * this->PointSize) < arraySize)
         return result;    
 
-    this->CriticalSectionForBuffer.Enter();
+    //this->CriticalSectionForBuffer.Enter();
     if (!this->Frozen) {
         // copy to last
         if(!this->Empty){
-            memcpy((this->Buffer+ this->IndexLast+1), pointArray, arraySize*sizeof(double));
+            memcpy((this->Buffer+ (this->IndexLast+1)*this->PointSize), pointArray, arraySize*sizeof(double));
             this->IndexLast += arraySize/this->PointSize;
         }
         else{
@@ -152,7 +152,7 @@ bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySi
         }
         result = true;
     }       
-    this->CriticalSectionForBuffer.Leave();
+    //this->CriticalSectionForBuffer.Leave();
     return result;
 }
 
@@ -164,7 +164,7 @@ bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arrayS
     bool result = false;
     if(this->IndexFirst > this->IndexLast || ( (Data.size() - this->IndexLast-1) * this->PointSize) < arraySize)
         return result;    
-    this->CriticalSectionForBuffer.Enter();    
+    //this->CriticalSectionForBuffer.Enter();    
     if (!this->Frozen) {        
         double *NewBuffer = new double [Data.size()*this->PointSize];
         memset(NewBuffer, 0 , Data.size()*this->PointSize*sizeof(double));
@@ -186,7 +186,7 @@ bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arrayS
             this->IndexLast = (arraySize/ this->PointSize)-1;
         result = true;
     }
-    this->CriticalSectionForBuffer.Leave();
+    //this->CriticalSectionForBuffer.Leave();
     return result;
 }
 
@@ -206,7 +206,7 @@ void vctPlot2DBase::Trace::Freeze(bool freeze)
 void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 {
     // using pointer arithmetic
-    CriticalSectionForBuffer.Enter();
+    //CriticalSectionForBuffer.Enter();
     PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
@@ -237,7 +237,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
             max.Y() = value;
         }
     }
-    CriticalSectionForBuffer.Leave();
+    //CriticalSectionForBuffer.Leave();
 }
 
 void vctPlot2DBase::Trace::GetLeftRightDataX(double &min, double &max){
@@ -247,7 +247,7 @@ void vctPlot2DBase::Trace::GetLeftRightDataX(double &min, double &max){
 }
 void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
 {
-    CriticalSectionForBuffer.Enter();
+    //CriticalSectionForBuffer.Enter();
     // using pointer arithmetic
     PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
@@ -273,14 +273,14 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
             max = value;
         }
     }
-    CriticalSectionForBuffer.Leave();
+    //CriticalSectionForBuffer.Leave();
 }
 
 
 void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
 {
     // using pointer arithmetic
-    CriticalSectionForBuffer.Enter();
+    //CriticalSectionForBuffer.Enter();
     PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
@@ -305,11 +305,11 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
             max = value;
         }
     }
-    CriticalSectionForBuffer.Leave();
+    //CriticalSectionForBuffer.Leave();
 }
 
 void vctPlot2DBase::Trace::SetNumberOfPoints(size_t numberOfPoints){
-    CriticalSectionForBuffer.Enter();
+    //CriticalSectionForBuffer.Enter();
     delete Buffer;       
     Buffer = new double[PointSize * numberOfPoints];
     //memset(this->Buffer, 0, sizeof(vctDouble2) * numberOfPoints * sizeof(double));
@@ -326,23 +326,23 @@ void vctPlot2DBase::Trace::SetNumberOfPoints(size_t numberOfPoints){
          index++) {
         this->Data.Element(index).SetRef(this->Buffer + this->PointSize * index);
     }
-    CriticalSectionForBuffer.Leave();
+    //CriticalSectionForBuffer.Leave();
 }
 
 void  vctPlot2DBase::Trace::GetNumberOfPoints(size_t &numberOfPoints, size_t &bufferSize){
-    CriticalSectionForBuffer.Enter();
+    //CriticalSectionForBuffer.Enter();
     if(IndexFirst < IndexLast)
         numberOfPoints = IndexLast - IndexFirst +1;
     else
         numberOfPoints =  Data.size() - IndexFirst+ IndexLast+1;        
     
     bufferSize = Data.size();
-    CriticalSectionForBuffer.Leave();
+    //CriticalSectionForBuffer.Leave();
     return ;
 }
 
 void vctPlot2DBase::Trace::SetSize(size_t numberOfPoints){
-    this->CriticalSectionForBuffer.Enter();
+    //this->CriticalSectionForBuffer.Enter();
     delete Buffer;
     Buffer = new double[PointSize * numberOfPoints];
     //memset(this->Buffer, 0, sizeof(vctDouble2) * numberOfPoints * sizeof(double));
@@ -359,7 +359,7 @@ void vctPlot2DBase::Trace::SetSize(size_t numberOfPoints){
          index++) {
         this->Data.Element(index).SetRef(this->Buffer + this->PointSize * index);
     }
-    this->CriticalSectionForBuffer.Leave();
+    //this->CriticalSectionForBuffer.Leave();
 }
 
 void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints){
@@ -411,7 +411,7 @@ void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints){
         memcpy( (NewBuffer+(Data.size() -  this->IndexFirst)*this->PointSize), IndexNow, BytesToCopy);
     }
 
-    this->CriticalSectionForBuffer.Enter();
+    //this->CriticalSectionForBuffer.Enter();
     this->Data.SetSize(numberOfPoints);
     size_t index;
     for (index = 0;
@@ -423,7 +423,7 @@ void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints){
     Buffer = NewBuffer;
     this->IndexFirst = 0;
     this->IndexLast = TempIndexLast;
-    this->CriticalSectionForBuffer.Leave();
+    //this->CriticalSectionForBuffer.Leave();
     return;
 }
 
@@ -644,7 +644,7 @@ void vctPlot2DBase::ComputeDataRangeX(double & min, double & max)
         size_t traceIndex;
         const size_t numberOfTraces = this->Traces.size();
         vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
-        trace->CriticalSectionForBuffer.Enter();
+        //trace->CriticalSectionForBuffer.Enter();
         min = trace->Data.Element(trace->IndexFirst).X();
         max = min;
         for (traceIndex = 0;
@@ -652,7 +652,7 @@ void vctPlot2DBase::ComputeDataRangeX(double & min, double & max)
              traceIndex++) {
             this->Traces[traceIndex]->ComputeDataRangeX(min, max);
         }
-        trace->CriticalSectionForBuffer.Leave();
+        //trace->CriticalSectionForBuffer.Leave();
     }
 }
 
@@ -666,7 +666,7 @@ void vctPlot2DBase::ComputeDataRangeY(double & min, double & max)
         size_t traceIndex;
         const size_t numberOfTraces = this->Traces.size();
         vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
-        trace->CriticalSectionForBuffer.Enter();
+        //trace->CriticalSectionForBuffer.Enter();
         min = trace->Data.Element(trace->IndexFirst).Y();
 
         max = min;
@@ -675,7 +675,7 @@ void vctPlot2DBase::ComputeDataRangeY(double & min, double & max)
              traceIndex++) {
             this->Traces[traceIndex]->ComputeDataRangeY(min, max);
         }
-        trace->CriticalSectionForBuffer.Leave();
+        //trace->CriticalSectionForBuffer.Leave();
     }
 }
 
@@ -690,7 +690,7 @@ void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
         size_t traceIndex;
         const size_t numberOfTraces = this->Traces.size();
         vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
-         trace->CriticalSectionForBuffer.Enter();
+         //trace->CriticalSectionForBuffer.Enter();
         min.Assign(trace->Data.Element(trace->IndexFirst));
         max.Assign(min);
         for (traceIndex = 0;
@@ -698,7 +698,7 @@ void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
              traceIndex++) {
             this->Traces[traceIndex]->ComputeDataRangeXY(min, max);
         }
-        trace->CriticalSectionForBuffer.Leave();
+        //trace->CriticalSectionForBuffer.Leave();
     }
 }
 
