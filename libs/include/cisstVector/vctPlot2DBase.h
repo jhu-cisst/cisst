@@ -101,7 +101,7 @@ public:
         vctDouble3 Color;
         double LineWidth;
         // Critical Section
-        osaCriticalSection CriticalSectionForBuffer;
+        //osaCriticalSection CriticalSectionForBuffer;
     };
 
     /*! Storage for a given vertical line. */
