@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #include <cisstDevices/devMicronTracker.h>
 
-CMN_IMPLEMENT_SERVICES(devMicronTracker);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(devMicronTracker, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg);
 
 // macro to check for and report MTC usage errors
 #define MTC(func) { int retval = func; if (retval != mtOK) CMN_LOG_CLASS_RUN_ERROR << "MTC: " << MTLastErrorString() << std::endl;};
@@ -36,6 +36,20 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
     mtsTaskPeriodic(taskName, period, false, 100),
     IsCapturing(false),
     IsTracking(false)
+{
+    InitComponent();
+}
+
+
+devMicronTracker::devMicronTracker(const mtsTaskPeriodicConstructorArg &arg) :
+    mtsTaskPeriodic(arg),
+    IsCapturing(false),
+    IsTracking(false)
+{
+    InitComponent();
+}
+
+void devMicronTracker::InitComponent(void)
 {
     CameraFrameLeft.SetSize(640 * 480);
     CameraFrameRight.SetSize(640 * 480);
@@ -56,7 +70,6 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
         provided->AddCommandReadState(StateTable, IsTracking, "IsTracking");
     }
 }
-
 
 void devMicronTracker::Configure(const std::string & filename)
 {

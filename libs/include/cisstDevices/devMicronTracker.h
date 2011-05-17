@@ -48,7 +48,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
  protected:
     class Tool
@@ -70,6 +70,7 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 
  public:
     devMicronTracker(const std::string & taskName, const double period);
+    devMicronTracker(const mtsTaskPeriodicConstructorArg &arg);
     ~devMicronTracker(void) {};
 
     void Configure(const std::string & filename = "");
@@ -83,6 +84,8 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     std::string GetToolName(const unsigned int index) const;
 
  protected:
+    void InitComponent(void);  // called from constructor
+
     Tool * CheckTool(const std::string & serialNumber);
     Tool * AddTool(const std::string & name, const std::string & serialNumber);
 
