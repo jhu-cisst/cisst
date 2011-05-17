@@ -378,7 +378,8 @@ void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 
     VerifyProcesses();
 
-    SendAndVerify(PipeConfigurationManager, "createComponent server mtsTestDevice1 server", "component created");
+    SendAndVerify(PipeProcessServer, "dynamic_load cisstMultiTaskTestsLib", "cisstMultiTaskTestsLib loaded");
+    SendAndVerify(PipeConfigurationManager, "create_component server mtsTestDevice1_mtsInt server", "component created");
     SendAndVerify(PipeProcessServer, "has_component server", "server found");
     PingAllComponents();
 

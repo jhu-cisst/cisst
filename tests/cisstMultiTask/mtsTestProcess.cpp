@@ -22,8 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include <fstream>
 #include "mtsTestComponents.h"
 
 int main(int argc, char * argv[])
@@ -36,6 +38,15 @@ int main(int argc, char * argv[])
         std::cerr << "Usage: " << argv[0] << " <process_name>" << std::endl;
         return 1;
     }
+
+    // configure log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::HaltDefaultLog();
+    std::string logFileName = processName + "-log.txt";
+    std::ofstream logFile(logFileName.c_str());
+    cmnLogger::AddChannel(logFile, CMN_LOG_ALLOW_ALL);
 
     std::string command;
 
@@ -81,16 +92,29 @@ int main(int argc, char * argv[])
 
     // normal operations
     bool stop = false;
-    std::string componentName;
+    std::string componentName, libraryName;
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
             stop = true;
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
+        } else if (command == std::string("dynamic_load")) {
+            std::cin >> libraryName;
+#if CISST_BUILD_SHARED_LIBS
+            osaDynamicLoader dynamicLoader;
+            std::string path = CISST_BUILD_ROOT + std::string("/tests/lib/") + CMAKE_CFG_INTDIR_WITH_QUOTES;
+            if (dynamicLoader.Load(libraryName.c_str(), path.c_str())) {
+                std::cout << libraryName << " loaded" << std::endl;
+            } else {
+                std::cout << "failed to load " << libraryName << std::endl;
+            }
+#else
+            std::cout << libraryName << " loaded" << std::endl;
+#endif
         } else if (command == std::string("has_component")) {
             std::cin >> componentName;
-            std::cout << componentName << " found" << std::endl;
+            std::cout << componentName << " not found" << std::endl;
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
@@ -111,6 +135,10 @@ int main(int argc, char * argv[])
     while (true) {
         osaSleep(1.0 * cmn_hour);
     }
+
+    // stop log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
+    logFile.close();
 
     return 0;
 }

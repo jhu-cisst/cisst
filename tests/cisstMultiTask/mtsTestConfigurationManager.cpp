@@ -38,6 +38,7 @@ public:
     mtsTestConfigurationManager(void):
         mtsComponent("configuration_manager")
     {
+        UseSeparateLogFileDefault(false);
         InterfaceToComponentManager = EnableDynamicComponentManagement();
     }
 
@@ -52,6 +53,14 @@ CMN_IMPLEMENT_SERVICES(mtsTestConfigurationManager);
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
+    // configure log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::HaltDefaultLog();
+    std::ofstream logFile("mtsTestConfigurationManager-log.txt");
+    cmnLogger::AddChannel(logFile, CMN_LOG_ALLOW_ALL);
+
     std::string command;
 
     // get local component manager instance
@@ -115,15 +124,15 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             stop = true;
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
-        } else if (command == std::string("createComponent")) {
+        } else if (command == std::string("create_component")) {
             std::cin >> process1Name;
             std::cin >> componentType;
             std::cin >> component1Name;
-            //if (services->ComponentCreate(process1Name, componentType, component1Name)) {
+            if (services->ComponentCreate(process1Name, componentType, component1Name)) {
                 std::cout << "component created" << std::endl;
-                //} else {
-                //std::cout << "component creation failed" << std::endl;
-                //}
+            } else {
+                std::cout << "component creation failed" << std::endl;
+            }
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
@@ -144,6 +153,10 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     while (true) {
         osaSleep(1.0 * cmn_hour);
     }
+
+    // stop log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
+    logFile.close();
 
     return 0;
 }
