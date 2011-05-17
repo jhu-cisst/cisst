@@ -142,8 +142,8 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
 
     // MJ: TODO: change this with blocking command
     bool result;
-    mtsExecutionResult executionResult = ServiceComponentManagement.Create(componentDescription, result);
     std::cerr << CMN_LOG_DETAILS << CMN_PRETTY_FUNCTION << " - need to handle return values" << std::endl;
+    mtsExecutionResult executionResult = ServiceComponentManagement.Create(componentDescription, result);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: requested component creation: " << componentDescription << std::endl;
     return true;

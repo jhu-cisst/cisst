@@ -73,12 +73,12 @@ public:
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
+        this->ArgumentPrototype = argumentPrototype;
     }
 
     /*! Set result prototype */
     void SetResultPrototype(mtsGenericObject * resultPrototype) {
-        ResultPrototype = resultPrototype;
+        this->ResultPrototype = resultPrototype;
     }
 
     /*! The execute method. */

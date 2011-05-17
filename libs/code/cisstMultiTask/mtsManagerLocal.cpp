@@ -622,12 +622,12 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
 mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName,
                                                            const std::string & constructorArgSerialized)
 {
-    cmnGenericObject *baseObject = 0;
-    mtsComponent *newComponent = 0;
-    const cmnClassServicesBase *services = cmnClassRegister::FindClassServices(className);
+    cmnGenericObject * baseObject = 0;
+    mtsComponent * newComponent = 0;
+    const cmnClassServicesBase * services = cmnClassRegister::FindClassServices(className);
     if (!services) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: unable to create component of type \""
-                                 << className << "\" -- no services" << std::endl;
+                                 << className << "\" -- no services (make sure the macros CMN_DECLARE_SERVICES and CMN_IMPLEMENT_SERVICES have been used)" << std::endl;
         return 0;
     }
     bool isComponent = services->IsDerivedFrom<mtsComponent>();

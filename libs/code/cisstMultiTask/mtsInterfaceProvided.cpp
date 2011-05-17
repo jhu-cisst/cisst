@@ -210,7 +210,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
              iterWriteReturn++) {
             commandQueuedWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(iterWriteReturn->second);
             if (commandQueuedWriteReturn) {
-                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox);
+                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox); // no argument queue size, since this is a blocking command there can only be one call 
                 CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued write return command \"" << iterWriteReturn->first
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             } else {
