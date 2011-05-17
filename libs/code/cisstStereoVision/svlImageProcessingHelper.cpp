@@ -1652,8 +1652,10 @@ labError:
 * Output:
 *	bool									- true for success, false otherwise
 *
+*
+* Last Change, S. Schafer, 2011/05/17, added Thin Prism Distortion
 ***********************************************************************************************************/
-bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,5> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch)
 {
 
 	//==============Setup, Variables==============//
@@ -1771,6 +1773,8 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 
 	vctVec r2, r4, r6, kr2, kr4, kr6, x1squared, x2squared,cdist, ones2x1, a1tangential, a1tangential2, a2tangential, a3tangential, deltaX1, deltaX2;
 
+	vctVec du_TP, dv_TP; //for thisn prism -SS
+
 	vctMat xdtemp;
 
 	xdtemp.SetSize(2,height*width);
@@ -1790,6 +1794,12 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 	a3tangential.SetSize(x1.size());
 	deltaX1.SetSize(x1.size());
 	deltaX2.SetSize(x1.size());
+
+	//added -SS
+	du_TP.SetSize(x1.size());
+	dv_TP.SetSize(x2.size());
+	//~added
+
 
 	//% Add distortion
 	//r2 = x(1,:).^2 + x(2,:).^2;
@@ -1877,6 +1887,20 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 
 	deltaX2.Add(a3tangential.Multiply(k[2]));
 
+	//before we apply all this we have to determined the thin prism distortion -SS
+	//this prism distortion: du = s1*(u^2+v^2), dv = s2*(u^2+v^2)
+
+	//ThinPrism -SS
+	du_TP.SetAll(0.0);
+	du_TP.Assign(r2);
+	du_TP.Multiply(k[5]);
+
+	dv_TP.SetAll(0.0);
+	dv_TP.Assign(r2);
+	dv_TP.Multiply(k[6]);
+	//~ThinPrism
+
+
 	//MOVED FROM RADIAL DISTORTION
 	//xd1 = x .* (ones(2,1)*cdist);
 	x.ElementwiseMultiply(xdtemp);
@@ -1884,6 +1908,11 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 	//xd = xd1 + delta_x;
 	x1.Add(deltaX1);
 	x2.Add(deltaX2);
+
+	//Add ThinPrism to distortion -SS
+	x1.Add(du_TP);
+	x2.Add(dv_TP);
+	//~Add
 
 #pragma endregion DISTORTION
 	//==============Distortion calculation==============//

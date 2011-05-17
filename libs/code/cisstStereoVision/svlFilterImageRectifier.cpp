@@ -141,8 +141,10 @@ int svlFilterImageRectifier::LoadTable(const std::string &filepath, unsigned int
 * Output:
 *	int										- SVL integer indicator
 *
+*
+* Last Change, S. Schafer, 2011/05/17, changed "vctFixedSizeVector<double,5> k", to "vctFixedSizeVector<double,7> k"
 ***********************************************************************************************************/
-int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,5> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch)
 {
 
     if (IsInitialized() == true) return SVL_ALREADY_INITIALIZED;

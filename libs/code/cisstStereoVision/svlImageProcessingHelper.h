@@ -108,7 +108,8 @@ namespace svlImageProcessingHelper
         virtual ~RectificationInternals();
 
         bool Load(const std::string &filepath, int exponentlen = 3);
-		bool SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,5> k, double alpha, vct3x3 KK_new,unsigned int videoch);
+		//changed to <double,7> from <double, 5> -SS
+		bool SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch);
 		void TransposeLUTArray2(unsigned int* index, unsigned int size, unsigned int width, unsigned int height);
 
         unsigned int Width;
