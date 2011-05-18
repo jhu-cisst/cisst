@@ -116,14 +116,32 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // normal operations
     bool stop = false;
-    std::string process1Name, process2Name, component1Name, component2Name, componentType;
+    std::string
+        process1Name, process2Name,
+        component1Name, component2Name,
+        libraryName, componentType;
     mtsManagerComponentServices * services = configurationManager->GetManagerComponentServices();
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
             stop = true;
+
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
+
+        } else if (command == "dynamic_load") {
+            std::cin >> process1Name;
+            std::cin >> libraryName;
+#if CISST_BUILD_SHARED_LIBS
+            if (services->Load(process1Name, libraryName)) {
+                std::cout << libraryName << " loaded on " << process1Name << std::endl;
+            } else {
+                std::cout << "failed to load " << libraryName << " on " << process1Name << std::endl;
+            }
+#else
+            std::cout << libraryName << " loaded on " << process1Name << std::endl;
+#endif
+
         } else if (command == std::string("create_component")) {
             std::cin >> process1Name;
             std::cin >> componentType;
@@ -133,6 +151,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             } else {
                 std::cout << "component creation failed" << std::endl;
             }
+
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
