@@ -49,6 +49,7 @@ public:
     int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
     int SetPosition(const int position, unsigned int videoch = SVL_LEFT);
     int GetPosition(unsigned int videoch = SVL_LEFT) const;
+    int SetRange(const int from, const int to, unsigned int videoch = SVL_LEFT);
     int SetRange(const vctInt2 range, unsigned int videoch = SVL_LEFT);
     int GetRange(vctInt2& range, unsigned int videoch = SVL_LEFT) const;
     int GetLength(unsigned int videoch = SVL_LEFT) const;
@@ -71,6 +72,7 @@ private:
     vctDynamicVector<std::string> FilePath;
     vctDynamicVector<int> Length;
     vctDynamicVector<int> Position;
+    vctDynamicVector<bool> UseRange;
     vctDynamicVector<vctInt2> Range;
     vctDynamicVector<svlVideoCodecBase*> Codec;
     bool ResetTimer;

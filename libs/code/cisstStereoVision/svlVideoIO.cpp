@@ -116,6 +116,7 @@ int svlVideoIO::DialogCodec(const std::string &filename, Compression **compressi
 
         std::cout << "Enter file extension: ";
         std::cin >> path;
+        std::cin.ignore();
         if (path[0] != '.') path.insert(0, ".");
     }
 
@@ -128,7 +129,7 @@ int svlVideoIO::DialogCodec(const std::string &filename, Compression **compressi
 
     int ret = SVL_OK;
 
-    if (codec->DialogCompression() == SVL_OK) {
+    if (codec->DialogCompression(filename) == SVL_OK) {
         compression[0] = codec->GetCompression();
         if (!(compression[0])) ret = SVL_FAIL;
     }
@@ -214,6 +215,7 @@ int svlVideoIO::DialogFilePath(bool save, const std::string &title, std::string 
 
     std::cout << title << ": ";
     std::cin >> filename;
+    std::cin.ignore();
 
     return SVL_OK;
 
@@ -339,6 +341,7 @@ int svlVideoIO::GetExtension(const std::string &filename,
         extension = filename;
     }
 
+    // Convert upper-case characters to lower-case
     char ch;
     const int offset = 'a' - 'A';
     const unsigned int len = extension.size();
@@ -535,6 +538,15 @@ int svlVideoCodecBase::SetCompression(const svlVideoIO::Compression * CMN_UNUSED
 int svlVideoCodecBase::DialogCompression()
 {
     return SVL_FAIL;
+}
+
+int svlVideoCodecBase::DialogCompression(const std::string &filename)
+{
+    if (!filename.empty()) {
+        CMN_LOG_INIT_WARNING << "svlVideoCodecBase::DialogCompression - This codec (" << GetName()
+                             << ") ignores filename argument (" << filename << ")" << std::endl;
+    }
+    return DialogCompression();
 }
 
 int svlVideoCodecBase::SetTimestamp(const double CMN_UNUSED(timestamp))

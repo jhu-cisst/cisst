@@ -285,8 +285,8 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
-            svlVideoCodecOpenCV.h       # private header
-            svlVideoCodecOpenCV.cpp
+            #svlVideoCodecOpenCV.h       # private header
+            #svlVideoCodecOpenCV.cpp
             svlTrackerOCVMeanShift.cpp
             )
         IF(NOT WIN32)
@@ -434,8 +434,8 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
-            svlVideoCodecOpenCV.h       # private header
-            svlVideoCodecOpenCV.cpp
+            #svlVideoCodecOpenCV.h       # private header
+            #svlVideoCodecOpenCV.cpp
             svlTrackerOCVMeanShift.cpp
             )
         IF(NOT WIN32)
@@ -653,6 +653,128 @@ ELSE(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
     SET(CISST_SVL_HAS_PNG OFF CACHE BOOL "PNG disabled" FORCE)
     MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_PNG)
 ENDIF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
+
+
+IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
+    SET(FFMPEG_OPTIONS
+        FFMPEG_avcodec_INCLUDE_DIR
+        FFMPEG_avformat_INCLUDE_DIR
+        FFMPEG_avutil_INCLUDE_DIR
+        FFMPEG_swscale_INCLUDE_DIR
+        FFMPEG_avcodec_LIBRARY
+        FFMPEG_avformat_LIBRARY
+        FFMPEG_avutil_LIBRARY
+        FFMPEG_swscale_LIBRARY
+        CACHE INTERNAL "List of FFMPEG options"
+        )
+
+    SET(FFMPEG_FOUND "NO")
+    FIND_PATH(FFMPEG_avcodec_INCLUDE_DIR avcodec.h
+              PATHS
+                "/usr/include/libavcodec"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libavcodec"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where avcodec.h can be found"
+              )
+    FIND_PATH(FFMPEG_avformat_INCLUDE_DIR avformat.h
+              PATHS
+                "/usr/include/libavformat"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libavformat"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where avformat.h can be found"
+              )
+    FIND_PATH(FFMPEG_avutil_INCLUDE_DIR avutil.h
+              PATHS
+                "/usr/include/libavutil"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libavutil"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where avutil.h can be found"
+              )
+    FIND_PATH(FFMPEG_swscale_INCLUDE_DIR swscale.h
+              PATHS
+                "/usr/include/libswscale"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libswscale"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where swscale.h can be found"
+              )
+    FIND_LIBRARY(FFMPEG_avcodec_LIBRARY avcodec
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG avcodec library be found"
+                 )
+    FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG avformat library be found"
+                 )
+    FIND_LIBRARY(FFMPEG_avutil_LIBRARY avutil
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG avutil library be found"
+                 )
+    FIND_LIBRARY(FFMPEG_swscale_LIBRARY swscale
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG swscale library be found"
+                 )
+    IF(FFMPEG_avcodec_INCLUDE_DIR AND FFMPEG_avformat_INCLUDE_DIR AND FFMPEG_avutil_INCLUDE_DIR AND FFMPEG_swscale_INCLUDE_DIR)
+        IF(FFMPEG_avcodec_LIBRARY AND FFMPEG_avformat_LIBRARY AND FFMPEG_avutil_LIBRARY AND FFMPEG_swscale_LIBRARY)
+            SET(FFMPEG_FOUND "YES")
+        ENDIF(FFMPEG_avcodec_LIBRARY AND FFMPEG_avformat_LIBRARY AND FFMPEG_avutil_LIBRARY AND FFMPEG_swscale_LIBRARY)
+    ENDIF(FFMPEG_avcodec_INCLUDE_DIR AND FFMPEG_avformat_INCLUDE_DIR AND FFMPEG_avutil_INCLUDE_DIR AND FFMPEG_swscale_INCLUDE_DIR)
+
+    IF(FFMPEG_FOUND)
+        MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
+
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${FFMPEG_avcodec_INCLUDE_DIR}"
+            "${FFMPEG_avformat_INCLUDE_DIR}"
+            "${FFMPEG_avutil_INCLUDE_DIR}"
+            "${FFMPEG_swscale_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${FFMPEG_avcodec_LIBRARY}"
+            "${FFMPEG_avformat_LIBRARY}"
+            "${FFMPEG_avutil_LIBRARY}"
+            "${FFMPEG_swscale_LIBRARY}"
+            )
+
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlVideoCodecFFMPEG.h     # private header
+            svlVideoCodecFFMPEG.cpp
+            )
+        MESSAGE(STATUS "FFMPEG found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" ON)
+
+    ELSE(FFMPEG_FOUND)
+        IF(CISST_SVL_HAS_FFMPEG)
+            MARK_AS_ADVANCED(CLEAR ${FFMPEG_OPTIONS})
+            MESSAGE(FATAL_ERROR "FFMPEG required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_FFMPEG)
+            MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
+            OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" OFF)
+        ENDIF(CISST_SVL_HAS_FFMPEG)
+    ENDIF(FFMPEG_FOUND)
+
+ELSE(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
+    OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" OFF)
+ENDIF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
 
 
 # Matrox Imaging Library
@@ -1063,6 +1185,7 @@ MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DIRECTSHOW)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_SVS)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_VIDEO4LINUX2)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DC1394)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_FFMPEG)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_X11)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_XV)
 IF(CMAKE_SYSTEM_NAME MATCHES Darwin)

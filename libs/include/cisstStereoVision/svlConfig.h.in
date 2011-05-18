@@ -48,6 +48,9 @@ http://www.cisst.org/cisst/license.txt.
 // Support for IEEE1394B switch on Darwin
 #cmakedefine01 CISST_SVL_DC1394_ENABLE_800Mbps
 
+// Support for FFMPEG
+#cmakedefine01 CISST_SVL_HAS_FFMPEG
+
 // Support for video4linux2
 #cmakedefine01 CISST_SVL_HAS_VIDEO4LINUX2
 
