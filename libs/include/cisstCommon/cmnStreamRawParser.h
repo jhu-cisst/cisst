@@ -96,12 +96,15 @@ class CISST_EXPORT cmnStreamRawParser
    protected:
        std::string key;
        char delimiter;
+       bool required;
        bool valid;
     public:
-       EntryBase(const std::string &name, char delim = ' ') : key(name), delimiter(delim), valid(false) {}
+       EntryBase(const std::string &name, char delim = ' ', bool req = true) :
+                 key(name), delimiter(delim), required(req), valid(false) {}
        virtual ~EntryBase() {}
 
        std::string GetKey() const { return key; }
+       bool isRequired() const { return required; }
        bool isValid() const { return valid; }
        void SetValid(bool val) { valid = val; }
 
@@ -114,7 +117,8 @@ class CISST_EXPORT cmnStreamRawParser
    class Entry : public EntryBase {
        _elementType *valuePtr;
    public:
-       Entry(const std::string &name, _elementType &data, char delim = ' ') : EntryBase(name, delim), valuePtr(&data) {}
+       Entry(const std::string &name, _elementType &data, char delim = ' ', bool req = true) :
+             EntryBase(name, delim, req), valuePtr(&data) {}
        ~Entry() {}
 
        bool Parse(std::istream &inputStream) {
@@ -137,7 +141,8 @@ class CISST_EXPORT cmnStreamRawParser
    class EntryStreamable : public EntryBase {
        _elementType *valuePtr;
    public:
-       EntryStreamable(const std::string &name, _elementType &data) : EntryBase(name, ' '), valuePtr(&data) {}
+       EntryStreamable(const std::string &name, _elementType &data, bool req = true) :
+                       EntryBase(name, ' ', req), valuePtr(&data) {}
        ~EntryStreamable() {}
 
        bool Parse(std::istream &inputStream) {
@@ -180,9 +185,9 @@ public:
        \returns true if successful; false if not (e.g., duplicate entry)
    */
    template <class _elementType>
-   bool AddEntry(const std::string &name, _elementType &data, char delim = ' ')
+   bool AddEntry(const std::string &name, _elementType &data, char delim = ' ', bool req = true)
    {
-       cmnStreamRawParser::EntryBase *newEntry = new Entry<_elementType>(name, data, delim);
+       cmnStreamRawParser::EntryBase *newEntry = new Entry<_elementType>(name, data, delim, req);
        bool result = KeyList.insert(newEntry).second;
        if (!result) delete newEntry;  // if not inserted, delete entry
        return result;
@@ -196,9 +201,9 @@ public:
        \returns true if successful; false if not (e.g., duplicate entry)
    */
    template <class _elementType>
-   bool AddEntryStreamable(const std::string &name, _elementType &data)
+   bool AddEntryStreamable(const std::string &name, _elementType &data, bool req = true)
    {
-       cmnStreamRawParser::EntryBase *newEntry = new EntryStreamable<_elementType>(name, data);
+       cmnStreamRawParser::EntryBase *newEntry = new EntryStreamable<_elementType>(name, data, req);
        bool result = KeyList.insert(newEntry).second;
        if (!result) delete newEntry;  // if not inserted, delete entry
        return result;
@@ -208,7 +213,7 @@ public:
    void SetAllValid(bool val = true);
 
    /*! Parse the input stream, extracting the data for all keywords that are found.
-     Returns true if valid data extracted for all keywords. */
+     Returns true if valid data extracted for all required keywords. */
    bool Parse(std::istream & inputStream);
 
    /*! Returns true if valid data was parsed. */
