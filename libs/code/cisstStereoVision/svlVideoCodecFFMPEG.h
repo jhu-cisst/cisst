@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlTypes.h>
-//#include <cisstStereoVision/svlFile.h>
 
 extern "C" {
     #include <avcodec.h>
@@ -91,7 +90,6 @@ private:
     AVFrame *pFrame;
     AVFrame *pFrameRGB;
     SwsContext *pConvertCtx;
-//    svlFile *OutputFile;
     int VideoStreamID;
     int LastExtractedFrame;
     int LastDTS;
@@ -105,7 +103,6 @@ private:
     vctDynamicVector<unsigned int> EncoderIDs;
 
     void BuildIndex();
-//    int  WriteFooter();
     void ConfigureEncoder();
     void BuildEncoderList();
     int GetEncoderID(CodecID codec_id);

@@ -56,12 +56,11 @@ svlVideoCodecFFMPEG::svlVideoCodecFFMPEG() :
     pFrame(0),
     pFrameRGB(0),
     pConvertCtx(0),
-//    OutputFile(0),
     VideoStreamID(-1),
     RepeatFrame(false)
 {
     SetName("FFMPEG Codec");
-    SetExtensionList(".avi;.mpg;.mpeg;.dv;.wmv;.mov;.m4v;.mp4;.flv;");
+    SetExtensionList(".avi;.mpg;.mpeg;.dv;.wmv;.mov;.m4v;.mp4;.flv;.ogg;.asv;.rv;.roq;");
     SetMultithreaded(false);
     SetVariableFramerate(false);
 
@@ -257,18 +256,7 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
     bool error = false;
 
     while (1) {
-/*
-        // Open file for writing
-        OutputFile = new svlFile(filename, svlFile::W);
-        if (!OutputFile) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to instantiate file class" << std::endl;
-            break;
-        }
-        if (!OutputFile->IsOpen()) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to open video file for writing" << std::endl;
-            break;
-        }
-*/
+
         AVOutputFormat *output_format = av_guess_format("avi", NULL, NULL);
         if (!output_format) {
             CMN_LOG_CLASS_INIT_ERROR << "Create: failed to allocate output format" << std::endl;
@@ -340,15 +328,6 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
             break;
         }
 
-/*
-        // Allocate encoder context and set values to default
-        pEncoderCtx = avcodec_alloc_context();
-        if (!pEncoderCtx) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to allocate encoder context" << std::endl;
-            break;
-        }
-*/
-
         // Allocate an RGB frame
         pFrameRGB = avcodec_alloc_frame();
         if (!pFrameRGB) {
@@ -370,13 +349,6 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
                   << "kbps, gop=" << pEncoderCtx->gop_size << ")" << std::endl;
 #endif // __FFMPEG_VERBOSE__
 
-/*
-        // Open codec
-        if (avcodec_open(pEncoderCtx, av_codec) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to open FFMPEG encoder" << std::endl;
-            break;
-        }
-*/
         // Allocate image conversion context
         pConvertCtx = sws_getContext(width,
                                      height, 
@@ -464,13 +436,7 @@ int svlVideoCodecFFMPEG::Close()
         sws_freeContext(pConvertCtx);
         pConvertCtx = 0;
     }
-/*
-    if (OutputFile) {
-        OutputFile->Close();
-        delete OutputFile;
-        OutputFile = 0;
-    }
-*/
+
     VideoStreamID = -1;
     Width         = 0;
     Height        = 0;
@@ -691,7 +657,7 @@ int svlVideoCodecFFMPEG::SetCompression(const svlVideoIO::Compression *compressi
     else {
         local_data->EncoderID = Config.EncoderID;
     }
-    if (input_data->Bitrate >= 100 && input_data->Bitrate <= 64000) {
+    if (input_data->Bitrate >= 100 && input_data->Bitrate <= 100000) {
         Config.Bitrate = local_data->Bitrate = input_data->Bitrate;
     }
     else {
@@ -757,9 +723,6 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &filename)
     unsigned int encoder_id, encoder_count = 0;
     vctDynamicVector<unsigned int> encoder_list(EncoderIDs.size());
 
-    // Print video encoder list
-    std::cout << " List of available encoders:" << std::endl;
-
     if (extension == "mpg" || extension == "mpeg") {
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG1VIDEO);
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG2VIDEO);
@@ -770,12 +733,12 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &filename)
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MSMPEG4V3);
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_DVVIDEO);
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MJPEG);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_JPEGLS);
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_HUFFYUV);
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FFV1);
 //        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H261);
 //        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H263);
 //        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_LJPEG);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_JPEGLS);
 //        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RAWVIDEO);
 //        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MSMPEG4V1);
 //        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H263P);
@@ -806,25 +769,28 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &filename)
     }
     else if (extension == "flv") {
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FLV1);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_SVQ1);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FLASHSV);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_SVQ1);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FLASHSV);
     }
     else if (extension == "rv") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RV10);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RV20);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RV10);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RV20);
     }
     else if (extension == "asv") {
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ASV1);
         encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ASV2);
     }
     else if (extension == "roq") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ROQ);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ROQ);
     }
     else if (extension == "mov") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_QTRLE);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_QTRLE);
+        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_DVVIDEO);
+        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG4);
+        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MJPEG);
     }
     else if (extension == "m4v" || extension == "mp4") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H264);
+//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H264);
     }
 
     if (encoder_count < 1) {
@@ -836,6 +802,7 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &filename)
         return DialogCompression();
     }
 
+    std::cout << " List of available encoders:" << std::endl;
     for (unsigned int i = 0; i < encoder_count; i ++) {
         std::cout << "  " << i << ") " << EncoderNames[encoder_list[i]] << std::endl;
     }
@@ -863,7 +830,7 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &extension, unsigne
     int min, max, defaultval;
     int bitrate = 0, gop = 0;
 
-    min = 100; max = 64000; defaultval = 4000;
+    min = 100; max = 100000; defaultval = 4000;
     std::cout << " # Enter bitrate [kbps] (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
     std::cin.getline(input, 256);
     if (std::cin.gcount() > 1) {
@@ -1093,13 +1060,7 @@ int svlVideoCodecFFMPEG::Write(svlProcInfo* procInfo, const svlSampleImage &imag
                     CMN_LOG_CLASS_INIT_ERROR << "Write - failed to write encoded data to disk" << std::endl;
                     break;
                 }
-/*
-                // Write encoded data to disk
-                if (OutputFile->Write(reinterpret_cast<char*>(OutputBuffer.Pointer()), out_size) < out_size) {
-                    CMN_LOG_CLASS_INIT_ERROR << "Write - failed to write encoded data to disk" << std::endl;
-                    break;
-                }
-*/
+
                 return SVL_OK;
             }
         }
@@ -1200,19 +1161,7 @@ void svlVideoCodecFFMPEG::BuildIndex()
     // Set `UseIndex` flag
     UseIndex = useindex;
 }
-/*
-int svlVideoCodecFFMPEG::WriteFooter()
-{
-    // Add stream-end marker to close video file
-    unsigned char output[4] = { 0x00, 0x00, 0x01, 0xb7 };
-    if (OutputFile->Write(reinterpret_cast<char*>(output), 4) < 4) {
-        CMN_LOG_CLASS_INIT_ERROR << "WriteFooter - failed to write file footer to disk" << std::endl;
-        return SVL_FAIL;
-    }
 
-    return SVL_OK;
-}
-*/
 void svlVideoCodecFFMPEG::ConfigureEncoder()
 {
     CodecID codec_id = static_cast<CodecID>(EncoderIDs[Config.EncoderID]);

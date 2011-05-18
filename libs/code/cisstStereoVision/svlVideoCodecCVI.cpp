@@ -716,7 +716,7 @@ int svlVideoCodecCVI::DialogCompression()
         return SVL_FAIL;
     }
 
-    std::cout << std::endl << " # Enter compression level [0-9]: ";
+    std::cout << " # Enter compression level [0-9]: ";
     int level = 0;
     while (level < '0' || level > '9') level = cmnGetChar();
     level -= '0';
