@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#define __STDC_CONSTANT_MACROS
+
 #include "svlVideoCodecFFMPEG.h"
 
 
@@ -30,6 +32,18 @@ http://www.cisst.org/cisst/license.txt.
 #else // __FFMPEG_VERBOSE__
     #define __AV_LOG_LEVEL__ 16
 #endif // __FFMPEG_VERBOSE__
+
+#if LIBAVCODEC_VERSION_INT < ((52 << 16) + (64 << 8))
+    #define AVMEDIA_TYPE_VIDEO  CODEC_TYPE_VIDEO
+#endif
+
+#ifndef AVSEEK_FLAG_FRAME
+    #define AVSEEK_FLAG_FRAME   8
+#endif
+
+#ifndef AV_PKT_FLAG_KEY
+    #define AV_PKT_FLAG_KEY     0x0001
+#endif
 
 
 /*********************************/
@@ -257,7 +271,12 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
 
     while (1) {
 
+#if LIBAVFORMAT_VERSION_INT < ((52 << 16) + (45 << 8))
+        AVOutputFormat *output_format = guess_stream_format("avi", NULL, NULL);
+#else
+// libAVFormat version >= 52.45.0
         AVOutputFormat *output_format = av_guess_format("avi", NULL, NULL);
+#endif
         if (!output_format) {
             CMN_LOG_CLASS_INIT_ERROR << "Create: failed to allocate output format" << std::endl;
             break;
@@ -550,7 +569,12 @@ int svlVideoCodecFFMPEG::SetPos(const int pos)
                     break;
                 }
                 // Decode video frame
+#if LIBAVCODEC_VERSION_INT < ((52 << 16) + (25 << 8))
+                if (avcodec_decode_video(pDecoderCtx, pFrame, &frameFinished, packet.data, packet.size) < 0) {
+#else
+// libAVCodec version >= 52.25.0
                 if (avcodec_decode_video2(pDecoderCtx, pFrame, &frameFinished, &packet) < 0) {
+#endif
                     av_free_packet(&packet);
                     error = true;
                     break;
@@ -946,7 +970,12 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
             }
 
             // Decode video frame
+#if LIBAVCODEC_VERSION_INT < ((52 << 16) + (25 << 8))
+            if (avcodec_decode_video(pDecoderCtx, pFrame, &frameFinished, packet.data, packet.size) < 0) {
+#else
+// libAVCodec version >= 52.25.0
             if (avcodec_decode_video2(pDecoderCtx, pFrame, &frameFinished, &packet) < 0) {
+#endif
                 CMN_LOG_CLASS_INIT_ERROR << "Read: failed to decode video frame" << std::endl;
                 av_free_packet(&packet);
                 break;
@@ -1098,7 +1127,12 @@ void svlVideoCodecFFMPEG::BuildIndex()
         }
 
         // Decode video frame
+#if LIBAVCODEC_VERSION_INT < ((52 << 16) + (25 << 8))
+        if (avcodec_decode_video(pDecoderCtx, pFrame, &frameFinished, packet.data, packet.size) < 0) {
+#else
+// libAVCodec version >= 52.25.0
         if (avcodec_decode_video2(pDecoderCtx, pFrame, &frameFinished, &packet) < 0) {
+#endif
             av_free_packet(&packet);
             break;
         }
@@ -1157,6 +1191,7 @@ void svlVideoCodecFFMPEG::BuildIndex()
     LastExtractedFrame = -1;
     Position = -1;
     SetPos(0);
+
 
     // Set `UseIndex` flag
     UseIndex = useindex;
