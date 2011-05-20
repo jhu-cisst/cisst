@@ -175,6 +175,7 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %template(cmnLODMultiplexerStreambufChar) cmnLODMultiplexerStreambuf<char>;
 %include "cisstCommon/cmnCallbackStreambuf.h"
 %template(cmnCallbackStreambufChar) cmnCallbackStreambuf<char>;
+%include "cisstCommon/cmnLogLoD.h"
 %include "cisstCommon/cmnLogger.h"
 
 // Wrap cmnPath
