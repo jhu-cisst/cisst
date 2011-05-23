@@ -25,6 +25,7 @@ add_subdirectory (pointtracker)
 add_subdirectory (gridtracker)
 add_subdirectory (exposurecorrection)
 add_subdirectory (svlmts1)
+add_subdirectory (cameraCalibration)
 #ADD_SUBDIRECTORY(webgui)
 
 else (BUILD_LIBS_cisstStereoVision)
