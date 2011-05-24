@@ -45,14 +45,20 @@ http://www.cisst.org/cisst/license.txt.
   For convenience (and to conform to C++ naming rules), the ' and '' are omitted
   from the naming convention.
 
+  In this implementation, \f$\phi\f$ and \f$\psi\f$ are in the range (\f$-\pi\f$, \f$+\pi\f$],
+  and \f$\theta\f$ is in the range [\f$-\frac{\pi, 2}\f$, \f$+\frac{\pi, 2}\f$].
+  (QUESTION: should the \f$\theta\f$ range be inclusive of \f$-\frac{\pi, 2}\f$?).
+  All angles are in radians.
+
   Because there are so many possible Euler angle conventions, we implement a
   base class, vctEulerRotation3, and then specialize it with derived classes
-  that are templated by the vctEulerRotation3::EulerOrder enum (see vctForwardDeclarations.h).
+  that are templated by the vctEulerRotation3Order::OrderType enum (see vctForwardDeclarations.h).
 
   Note that we could have also templated the Euler angle class by element type (double or float),
   but decided that this was not worthwhile -- all Euler angle rotation classes use double.
 */
 
+#ifndef SWIG
 // helper functions for subtemplated methods of a templated class
 
 template <vctEulerRotation3Order::OrderType order, class _matrixType>
@@ -64,12 +70,15 @@ template <vctEulerRotation3Order::OrderType order, class _matrixType>
 void
 vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<order> & eulerRot,
                                    vctMatrixRotation3Base<_matrixType> & matrixRot);
+#endif
+
+namespace vctEulerRotation3Order {
+    std::string CISST_EXPORT ToString(vctEulerRotation3Order::OrderType order);
+};
 
 // This base class may not be necessary; if we keep it, it could be moved to vctEulerRotation3Base.h
-class vctEulerRotation3Base {
+class CISST_EXPORT vctEulerRotation3Base {
 protected:
-    typedef vctEulerRotation3Base ThisType;
-
     /*! Traits used for all useful types and values related to the element type. */
     typedef cmnTypeTraits<double> TypeTraits;
 
@@ -110,8 +119,11 @@ public:
     double beta() const { return angles[1]; }
     double gamma() const { return angles[2]; }
 
-    /*! Normalizes this rotation */
-    ThisType & NormalizedSelf(void);
+    /*! Inverts this rotation */
+    vctEulerRotation3Base & InverseSelf(void);
+
+    /*! Normalizes this rotation (ensures angles are within limits) */
+    vctEulerRotation3Base & NormalizedSelf(void);
 
     /*! Test if this rotation is normalized.  This method checks that
       the angles are in the valid range.
@@ -125,11 +137,12 @@ public:
 // Euler angle class templated by order convention
 
 template <vctEulerRotation3Order::OrderType order>
-class vctEulerRotation3<order> : public vctEulerRotation3Base {
+class vctEulerRotation3 : public vctEulerRotation3Base {
     typedef vctEulerRotation3<order> ThisType;
     typedef vctEulerRotation3Base BaseType;
 
 public:
+
     vctEulerRotation3() : BaseType() {}
     vctEulerRotation3(double phi, double theta, double psi) : BaseType(phi, theta, psi) {}
     vctEulerRotation3(double *a) : BaseType(a) {}
@@ -177,10 +190,25 @@ public:
         return *this;
     }
 
+    /*! Set this rotation as the inverse of another one.  See also
+        InverseSelf(). */
+    inline ThisType & InverseOf(const ThisType & otherRotation) {
+        *this = otherRotation;
+        InverseSelf();
+        return *this;
+    }
+
+    /*! Create and return by copy the inverse of this rotation. */
+    inline ThisType Inverse(void) const {
+        ThisType result(*this);
+        result.InverseSelf();
+        return result;
+    }
+
     /*!
       Sets this rotation as the normalized version of another one.
 
-      \param otherRotation Axis angle rotation used to compute the
+      \param otherRotation Euler rotation used to compute the
       normalized rotation. */
     inline ThisType & NormalizedOf(const ThisType & otherRotation) {
         angles = otherRotation.angles;
@@ -244,6 +272,92 @@ public:
         return thisNorm.AlmostEqual(other.Normalized(), tolerance);
     }
 
+    std::string ToString(void) const {
+        std::stringstream outputStream;
+        ToStream(outputStream);
+        return outputStream.str();
+    }
+
+    /*!  Print the Euler rotation in a human readable format */
+    void ToStream(std::ostream & outputStream) const {
+        outputStream << "Euler " << vctEulerRotation3Order::ToString(order) << ": " << angles << std::endl;
+    }
+
+    /*! Print in machine processable format */
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const {
+        this->angles.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "angle-");
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const
+    {
+        angles.SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream)
+    {
+        angles.DeSerializeRaw(inputStream);
+    }
+
 };
+
+#ifndef SWIG
+#ifdef CISST_COMPILER_IS_MSVC
+// declare instances of helper functions
+#define DECLARE_EULER_TEMPLATES(ORDER) \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 1, 4> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+            const vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRot); \
+    template CISST_EXPORT void  \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+            vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void  \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+            vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void  \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+            vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void  \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+            vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+            vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+            vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 1, 4> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+            vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRot); \
+    template CISST_EXPORT void \
+    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+            vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRot);
+
+DECLARE_EULER_TEMPLATES(vctEulerRotation3Order::ZYZ)
+#endif // CISST_COMPILER_IS_MSVC
+#endif // !SWIG
 
 #endif  // _vctEulerRotation3_h

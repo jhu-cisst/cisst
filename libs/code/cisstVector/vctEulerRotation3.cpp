@@ -20,26 +20,58 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctEulerRotation3.h>
 #include <cisstVector/vctMatrixRotation3Base.h>
 
+namespace vctEulerRotation3Order {
+
+std::string ToString(vctEulerRotation3Order::OrderType order)
+{
+    std::string str;
+    switch(order) {
+    case vctEulerRotation3Order::ZYZ:
+        str = "ZYZ";
+        break;
+    default:
+        str = "UNDEFINED";
+        break;
+    }
+    return str;
+}
+
+};
+
+vctEulerRotation3Base & vctEulerRotation3Base::InverseSelf(void)
+{
+    double tmp = angles[0];
+    if (angles[2] == cmnPI)
+        angles[0] = angles[2];
+    else
+        angles[0] = -angles[2];
+    angles[1] = -angles[1];
+    if (tmp == cmnPI)
+        angles[2] = tmp;
+    else
+        angles[2] = -tmp;
+    return *this;
+}
+
 vctEulerRotation3Base & vctEulerRotation3Base::NormalizedSelf(void)
 {
-    // TO FIX: angles[0] and angles[2] have 2*PI range -- should this be [0, 2*PI] or [-PI, PI]?
-    //         angles[1] has PI range -- should this be [0, PI] or [-PI/2, PI/2]?
-    angles[0] = fmod(angles[0], 2.0 * cmnPI);
-    if (angles[0] < 0.0)
-        angles[0] += (2.0 * cmnPI);
-    angles[2] = fmod(angles[2], 2.0 * cmnPI);
-    if (angles[2] < 0.0)
-        angles[2] += (2.0 * cmnPI);
+    // TODO: limit angles[1] to -PI/2 to PI/2
+    while (angles[0] > cmnPI)
+        angles[0] -= cmnPI;
+    while (angles[0] < -cmnPI)
+        angles[0] += cmnPI;
+    while (angles[2] > cmnPI)
+        angles[2] -= cmnPI;
+    while (angles[2] < -cmnPI)
+        angles[2] += cmnPI;
     return *this;
 }
 
 bool vctEulerRotation3Base::IsNormalized(double tolerance) const
 {
-    // TO FIX: angles[0] and angles[2] have 2*PI range -- should this be [0, 2*PI] or [-PI, PI]?
-    //         angles[1] has PI range -- should this be [0, PI] or [-PI/2, PI/2]?
-    return ((angles[0] >= 0.0) && (angles[0] < 2*cmnPI) &&
-            (angles[1] >= 0.0) && (angles[1] < cmnPI) &&
-            (angles[2] >= 0.0) && (angles[2] < 2*cmnPI));
+    return ((angles[0] > -cmnPI) && (angles[0] <= cmnPI) &&
+            (angles[1] >= -cmnPI/2) && (angles[1] <= cmnPI/2) &&
+            (angles[2] > -cmnPI) && (angles[2] <= cmnPI));
 }
 
 
