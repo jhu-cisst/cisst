@@ -216,6 +216,14 @@ class vctRodriguezRotation3Base;
 template <class _elementType>
 class vctRodriguezRotation3;
 
+namespace vctEulerRotation3Order {
+//enum OrderType { XZX, XZY, XYX, XYZ, YXY, YXZ, YZY, YZX, ZYZ, ZYX, ZXZ, ZXY };
+enum OrderType { ZYZ };
+};
+
+template <vctEulerRotation3Order::OrderType order>
+class vctEulerRotation3;
+
 template <class _containerType>
 class vctMatrixRotation2Base;
 

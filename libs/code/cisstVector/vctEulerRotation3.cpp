@@ -55,36 +55,40 @@ vctEulerRotation3Base & vctEulerRotation3Base::InverseSelf(void)
 
 vctEulerRotation3Base & vctEulerRotation3Base::NormalizedSelf(void)
 {
-    // TODO: limit angles[1] to -PI/2 to PI/2
+    // TODO: limit angles[1] to 0 to PI
     while (angles[0] > cmnPI)
-        angles[0] -= cmnPI;
-    while (angles[0] < -cmnPI)
-        angles[0] += cmnPI;
+        angles[0] -= 2*cmnPI;
+    while (angles[0] <= -cmnPI)
+        angles[0] += 2*cmnPI;
     while (angles[2] > cmnPI)
-        angles[2] -= cmnPI;
-    while (angles[2] < -cmnPI)
-        angles[2] += cmnPI;
+        angles[2] -= 2*cmnPI;
+    while (angles[2] <= -cmnPI)
+        angles[2] += 2*cmnPI;
     return *this;
 }
 
-bool vctEulerRotation3Base::IsNormalized(double tolerance) const
+bool vctEulerRotation3Base::IsNormalized(double CMN_UNUSED(tolerance)) const
 {
+#if 0
     return ((angles[0] > -cmnPI) && (angles[0] <= cmnPI) &&
-            (angles[1] >= -cmnPI/2) && (angles[1] <= cmnPI/2) &&
+            (angles[1] >= 0.0) && (angles[1] <= cmnPI) &&
             (angles[2] > -cmnPI) && (angles[2] <= cmnPI));
+#else
+    return true;
+#endif
 }
 
 
-template <vctEulerRotation3Order::OrderType order, class _matrixType>
-void
-vctEulerRotation3FromRaw(vctEulerRotation3<order> & eulerRot,
-                         const vctMatrixRotation3Base<_matrixType> & matrixRot)
+template <class _matrixType>
+void vctEulerFromMatrixRotation3(vctEulerZYZRotation3 & eulerRot,
+                                 const vctMatrixRotation3Base<_matrixType> & matrixRot)
 {
     typedef typename _matrixType::value_type value_type;
 
-    double phi = 0.0;
-    double theta = 0.0;
-    double psi = 0.0;
+    // Initialize to the current Euler angles -- these are used to resolve the singularity (gimbal lock)
+    double phi = eulerRot.phi();
+    double theta = eulerRot.theta();
+    double psi = eulerRot.psi();
 
     if((matrixRot.Element(0,2) * matrixRot.Element(0,2) + matrixRot.Element(1,2) * matrixRot.Element(1,2))  < 0.0001) {
         if (matrixRot.Element(2,2) > 0){
@@ -103,20 +107,19 @@ vctEulerRotation3FromRaw(vctEulerRotation3<order> & eulerRot,
         }
     }
     else  {  // non-singular config.
-        phi = atan(matrixRot.Element(1,2) / matrixRot.Element(0,2));
+        phi = atan(matrixRot.Element(1,2)/matrixRot.Element(0,2));
         double  cphi = cos(phi);
         double  sphi = sin(phi);
         theta = atan2((cphi * matrixRot.Element(0,2) + sphi * matrixRot.Element(1,2)), (double)matrixRot.Element(2,2));
         psi = atan2((-sphi * matrixRot.Element(0,0) + cphi * matrixRot.Element(1,0)),
                     (-sphi * matrixRot.Element(0,1) + cphi * matrixRot.Element(1,1)));
     }
-    eulerRot = vctEulerRotation3<order>(phi, theta, psi);
+    eulerRot = vctEulerZYZRotation3(phi, theta, psi);
 }
 
-template <vctEulerRotation3Order::OrderType order, class _matrixType>
-void
-vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<order> & eulerRot,
-                                   vctMatrixRotation3Base<_matrixType> & matrixRot)
+template <class _matrixType>
+void vctEulerToMatrixRotation3(const vctEulerZYZRotation3 & eulerRot,
+                               vctMatrixRotation3Base<_matrixType> & matrixRot)
 {
     typedef typename _matrixType::value_type value_type;
 
@@ -143,52 +146,52 @@ vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<order> & eulerRot,
 // force instantiation of helper functions
 #define INSTANTIATE_EULER_TEMPLATES(ORDER) \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 1, 4> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRot); \
     template void \
-    vctEulerRotation3FromRaw(vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRot); \
     template void  \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
             vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
     template void  \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
             vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
     template void  \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
             vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
     template void  \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot,  \
             vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3, VCT_COL_MAJOR> > & matrixRot); \
     template void \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
             vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRot); \
     template void \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
             vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 1, 4> > & matrixRot); \
     template void \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
             vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRot); \
     template void \
-    vctEulerRotation3ToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
+    vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
             vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRot);
 
 // Instantiate templates for each supported Euler angle convention (e.g., ZYZ)
