@@ -38,6 +38,12 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #endif
 
+#if (CISST_OS == CISST_LINUX) ||(CISST_OS == CISST_LINUX_RTAI) ||(CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#endif
 
 struct osaSocketInternals {
     struct sockaddr_in ServerAddr;
@@ -120,6 +126,39 @@ osaSocket::~osaSocket(void)
 
 std::string osaSocket::GetLocalhostIP(void)
 {
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+    
+    struct ifaddrs *ifaddr;
+    
+    if(getifaddrs(&ifaddr) == -1) {
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "Failed to get network interfaces." 
+                          << std::endl;
+        return 0;
+    }
+
+    int family = ifaddr->ifa_addr->sa_family;
+        
+    // Only keep AF_INET interfaces
+    if( family == AF_INET ){
+        char host[255];
+        int s = getnameinfo( ifaddr->ifa_addr,
+                             (family==AF_INET) ? sizeof(struct sockaddr_in) :
+                             sizeof(struct sockaddr_in6),
+                             host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+        if(s != 0) {
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to convert socket address."
+                              << std::endl;
+            return 0;
+        }
+        return std::string(host);
+    }
+    
+    return std::string();
+
+#else
+
 #if (CISST_OS == CISST_WINDOWS)
     WSADATA wsaData;
     int retval = WSAStartup(WINSOCKVERSION, &wsaData);
@@ -148,10 +187,47 @@ std::string osaSocket::GetLocalhostIP(void)
     WSACleanup();
 #endif
     return inet_ntoa(localAddr);
+#endif
 }
 
 int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
 {    
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+    
+    struct ifaddrs *ifaddr, *ifa;
+    char host[255];
+    
+    if(getifaddrs(&ifaddr) == -1) {
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "Failed to get network interfaces." 
+                          << std::endl;
+        return 0;
+    }
+
+    for( ifa=ifaddr; ifa!=NULL; ifa=ifa->ifa_next) {
+        int family = ifa->ifa_addr->sa_family;
+        
+        // Only keep AF_INET interfaces
+        if( family == AF_INET ){
+
+            int s = getnameinfo( ifa->ifa_addr,
+                                (family==AF_INET) ? sizeof(struct sockaddr_in) :
+                                 sizeof(struct sockaddr_in6),
+                                 host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if(s != 0) {
+                CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                                  << "Failed to convert socket address."
+                                  << std::endl;
+                return 0;
+            }
+            IPaddress.push_back( host );
+        }
+    }
+
+    return IPaddress.size();
+
+#else
+
 #if (CISST_OS == CISST_WINDOWS)
     WSADATA wsaData;
     int retval = WSAStartup(WINSOCKVERSION, &wsaData);
@@ -196,6 +272,7 @@ int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
 #endif
 
     return i;
+#endif
 }
 
 
