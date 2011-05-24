@@ -88,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
 //#define _NET_VERBOSE_
 
 #define MAX_CLIENTS         5
-#define PACKET_SIZE         100u
+#define PACKET_SIZE         1400u
 #define BROKEN_FRAME        1
 
 
