@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: main.cpp 2934 2011-04-19 03:29:58Z adeguet1 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -19,44 +19,51 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "cscSpeechToCommands.h"
-#include "cscSpeechToCommandsQtComponent.h"
+#include <cisstSphinx4/mtsSphinx4.h>
+#include <cisstSphinx4/mtsSphinx4QtComponent.h>
 
 #include <QApplication>
-#include <QTabWidget>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QWidget>
 
-int main(int argc, char ** argv) {
-
+int main(int argc, char ** argv)
+{
+    int microphoneNumber = 1; // default
+    if (argc == 2) {
+        microphoneNumber = atoi(argv[1]);
+    } else {
+        std::cout << "Usage: " << argv[0]
+                  << " <microphone-number> (default is " << microphoneNumber
+                  << ")" << std::endl;
+    }
+    std::cout << "Using microphone " << microphoneNumber << std::endl;
+        
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_DEBUG);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    cmnLogger::SetMaskClassMatching("csc", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mtsSphinx4", CMN_LOG_ALLOW_ALL);
 
     // create Qt user interface
     QApplication application(argc, argv);
 
     // create a vertical widget for quit button and tabs
     QWidget * mainWidget = new QWidget();
-    mainWidget->setWindowTitle("cisstSpeechToCommands example");
+    mainWidget->setWindowTitle("cisstSphinx4 example");
     QVBoxLayout * mainLayout = new QVBoxLayout(mainWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
-    cscSpeechToCommands * speechToCommands = new cscSpeechToCommands("mySpeechToCommands");
+    mtsSphinx4 * sphinx4 = new mtsSphinx4("Sphinx4");
 
-    speechToCommands->SetMicrophoneNumber(1);
+    sphinx4->SetMicrophoneNumber(microphoneNumber);
 
-    cscContext * areYouTalkingToMe = speechToCommands->AddContext("areYouTalkingToMe");
+    mtsSphinx4::Context * areYouTalkingToMe = sphinx4->AddContext("areYouTalkingToMe");
     areYouTalkingToMe->SetFiltering(true);
-    cscContext * confirmStart = speechToCommands->AddContext("confirmStart");
-    cscContext * constructiveConversation = speechToCommands->AddContext("constructiveConversation");
-    cscContext * confirmStop = speechToCommands->AddContext("confirmStop");
+    mtsSphinx4::Context * confirmStart = sphinx4->AddContext("confirmStart");
+    mtsSphinx4::Context * constructiveConversation = sphinx4->AddContext("constructiveConversation");
+    mtsSphinx4::Context * confirmStop = sphinx4->AddContext("confirmStop");
 
     areYouTalkingToMe->AddWordWithTransition("voice control", "confirmStart");
 
@@ -81,17 +88,17 @@ int main(int argc, char ** argv) {
     confirmStop->AddWordWithTransition("yes", "areYouTalkingToMe");
     confirmStop->AddWordWithTransition("no", "constructiveConversation");
 
-    speechToCommands->SetCurrentContext("areYouTalkingToMe");
-    speechToCommands->Configure(); // creates all configurations files for Sphinx
-    componentManager->AddComponent(speechToCommands);
+    sphinx4->SetCurrentContext("areYouTalkingToMe");
+    sphinx4->Configure(); // creates all configurations files for Sphinx
+    componentManager->AddComponent(sphinx4);
 
-    cscSpeechToCommandsQtComponent * speechQtComponent
-        = new cscSpeechToCommandsQtComponent("SpeechQtComponent");
-    mainLayout->addWidget(speechQtComponent->GetWidget());
-    componentManager->AddComponent(speechQtComponent);
+    mtsSphinx4QtComponent * sphinx4QtComponent
+        = new mtsSphinx4QtComponent("Sphinx4QtComponent");
+    mainLayout->addWidget(sphinx4QtComponent->GetWidget());
+    componentManager->AddComponent(sphinx4QtComponent);
 
-    componentManager->Connect(speechQtComponent->GetName(), "SpeechToCommands",
-                              speechToCommands->GetName(), "Default");
+    componentManager->Connect(sphinx4QtComponent->GetName(), "Sphinx4",
+                              sphinx4->GetName(), "Default");
 
     mainWidget->show();
 

@@ -2,7 +2,7 @@
 /* ex: set filetype=java softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSphinx4.java 2931 2011-04-18 20:35:27Z adeguet1 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -29,7 +29,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import javax.sound.sampled.*;
 
-class cscSphinx4 extends Thread {
+class cisstSphinx4 extends Thread {
     private HashMap<String, Recognizer> SphinxRecognizers;
     private Recognizer CurrentSphinxRecognizer;
     private ConfigurationManager SphinxConfigurationManager;
@@ -37,13 +37,13 @@ class cscSphinx4 extends Thread {
     private boolean RecognitionPaused; 
 
     // static method
-    private native void WordRecognizedCallback(long speechToCommandsCppPointer, String word);
+    private native void WordRecognizedCallback(long sphinx4WrapperPointer, String word);
     // library that defines static method called via JNI
     static {
-        System.loadLibrary("cisstSpeechToCommands");
+        System.loadLibrary("cisstSphinx4");
     }
     // pointer to C++ object used by WordRecognized
-    private long SpeechToCommandsCppPointer;
+    private long Sphinx4WrapperPointer;
 
     // sets the active context
     public void SetCurrentContext(String context) {
@@ -65,18 +65,18 @@ class cscSphinx4 extends Thread {
         }
     }
 
-    public void Start(long speechToCommandsCppPointer,
+    public void Start(long sphinx4WrapperPointer,
                       String configName,
                       String[] contextList,
                       String startingContext) {
         System.out.println("Java Sphinx wrapper: start");
-        SpeechToCommandsCppPointer = speechToCommandsCppPointer;
+        Sphinx4WrapperPointer = sphinx4WrapperPointer;
         PrintAudioDevices(); // to be removed
         SphinxRecognizers = new HashMap<String, Recognizer>();
 
         System.out.println("Java sphinx wrapper: create configuration manager");
         try {
-            SphinxConfigurationManager = new ConfigurationManager(cscSphinx4.class.getResource(configName));
+            SphinxConfigurationManager = new ConfigurationManager(cisstSphinx4.class.getResource(configName));
         } catch (Exception e) {
             System.out.println("Java sphinx wrapper: exception while creating Sphinx configuration manager for file:");
             System.out.println(configName);
@@ -166,7 +166,7 @@ class cscSphinx4 extends Thread {
                 word = "";
             }
             // finally, send word to C++ side
-            WordRecognizedCallback(SpeechToCommandsCppPointer, word);
+            WordRecognizedCallback(Sphinx4WrapperPointer, word);
         }
     }
 

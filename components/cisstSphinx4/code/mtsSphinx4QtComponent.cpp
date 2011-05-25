@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtComponent.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
+  $Id$
 
   Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
@@ -20,25 +20,25 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-#include "cscSpeechToCommandsQtComponent.h"
+#include <cisstSphinx4/mtsSphinx4QtComponent.h>
 
-CMN_IMPLEMENT_SERVICES(cscSpeechToCommandsQtComponent);
+CMN_IMPLEMENT_SERVICES(mtsSphinx4QtComponent);
 
 
-cscSpeechToCommandsQtComponent::cscSpeechToCommandsQtComponent(const std::string & componentName):
+mtsSphinx4QtComponent::mtsSphinx4QtComponent(const std::string & componentName):
     mtsComponent(componentName)
 {
     // create the cisstMultiTask interface with commands and events
-    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("SpeechToCommands");
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Sphinx4");
     if (interfaceRequired) {
         interfaceRequired->AddFunction("GetContexts", GetContexts);
         interfaceRequired->AddFunction("GetContextWords", GetContextWords);
         interfaceRequired->AddFunction("TriggerWordFromUI", TriggerWordFromUI);
-        interfaceRequired->AddEventHandlerWrite(&cscSpeechToCommandsQtComponent::WordRecognizedHandler,
+        interfaceRequired->AddEventHandlerWrite(&mtsSphinx4QtComponent::WordRecognizedHandler,
                                                 this, "WordRecognized");
-        interfaceRequired->AddEventHandlerVoid(&cscSpeechToCommandsQtComponent::NoWordRecognizedHandler,
+        interfaceRequired->AddEventHandlerVoid(&mtsSphinx4QtComponent::NoWordRecognizedHandler,
                                                this, "NoWordRecognized");
-        interfaceRequired->AddEventHandlerWrite(&cscSpeechToCommandsQtComponent::ContextChangedHandler,
+        interfaceRequired->AddEventHandlerWrite(&mtsSphinx4QtComponent::ContextChangedHandler,
                                                 this, "ContextChanged");
     }
     // Connect Qt signals to slots
@@ -59,7 +59,7 @@ cscSpeechToCommandsQtComponent::cscSpeechToCommandsQtComponent(const std::string
 }
 
 
-void cscSpeechToCommandsQtComponent::Start(void)
+void mtsSphinx4QtComponent::Start(void)
 {
     stdStringVec contexts, words;
     std::string currentContext, currentWord;
@@ -93,31 +93,31 @@ void cscSpeechToCommandsQtComponent::Start(void)
 }
 
 
-QWidget * cscSpeechToCommandsQtComponent::GetWidget(void)
+QWidget * mtsSphinx4QtComponent::GetWidget(void)
 {
     return &CentralWidget;
 }
 
 
-void cscSpeechToCommandsQtComponent::TriggerWord(QString word)
+void mtsSphinx4QtComponent::TriggerWord(QString word)
 {
     TriggerWordFromUI(mtsStdString(word.toStdString()));
 }
 
 
-void cscSpeechToCommandsQtComponent::WordRecognizedHandler(const mtsStdString & word)
+void mtsSphinx4QtComponent::WordRecognizedHandler(const mtsStdString & word)
 {
     emit WordRecognizedQSignal(QString(word.Data.c_str()));
 }
 
 
-void cscSpeechToCommandsQtComponent::NoWordRecognizedHandler(void)
+void mtsSphinx4QtComponent::NoWordRecognizedHandler(void)
 {
     emit NoWordRecognizedQSignal();
 }
 
 
-void cscSpeechToCommandsQtComponent::ContextChangedHandler(const mtsStdString & context)
+void mtsSphinx4QtComponent::ContextChangedHandler(const mtsStdString & context)
 {
     emit ContextChangedQSignal(QString(context.Data.c_str()));
 }

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscExportQt.h 2802 2011-03-22 15:32:16Z adeguet1 $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2011-02-15
@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 // check if this module is build as a DLL
-#ifdef cisstSpeechToCommandsQt_EXPORTS
+#ifdef cisstSphinx4Qt_EXPORTS
 #define CISST_THIS_LIBRARY_AS_DLL
 #endif
 

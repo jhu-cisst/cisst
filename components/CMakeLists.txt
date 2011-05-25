@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 2448 2011-04-09 15:31:41Z adeguet1 $
+# $Id$
 #
 # (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
@@ -16,12 +16,11 @@
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-# cisstSpeechToCommands
+# cisstSphinx4, wrapper for CMU Sphinx 4 to generate commands from speech
 if (BUILD_LIBS_cisstMultiTask)
-  option (CISST_BUILD_COMP_cisstSpeechToCommands "Build component cisstSpeechToCommands (requires JNI and CMU Sphinx)" OFF)
-  mark_as_advanced (CISST_BUILD_COMP_cisstSpeechToCommands)
-  if (CISST_BUILD_COMP_cisstSpeechToCommands)
-    add_subdirectory (cisstSpeechToCommands)
-  endif (CISST_BUILD_COMP_cisstSpeechToCommands)
+  option (CISST_BUILD_COMP_cisstSphinx4 "Build component cisstSphinx4 (requires JNI and CMU Sphinx 4)" OFF)
+  if (CISST_BUILD_COMP_cisstSphinx4)
+    add_subdirectory (cisstSphinx4)
+  endif (CISST_BUILD_COMP_cisstSphinx4)
 endif (BUILD_LIBS_cisstMultiTask)
 

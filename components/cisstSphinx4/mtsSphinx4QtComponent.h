@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtComponent.h 2936 2011-04-19 16:32:39Z mkelly9 $
+  $Id$
 
   Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _cscSpeechToCommandsQtComponent_h
-#define _cscSpeechToCommandsQtComponent_h
+#ifndef _mtsSphinx4QtComponent_h
+#define _mtsSphinx4QtComponent_h
 
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
@@ -31,19 +31,19 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <map>
 
-#include <cisstSpeechToCommands/cscSpeechToCommandsQtWidget.h>
+#include <cisstSphinx4/mtsSphinx4QtWidget.h>
 
 // Always include last!
-#include <cisstSpeechToCommands/cscExportQt.h>
+#include <cisstSphinx4/mtsSphinx4ExportQt.h>
 
-class CISST_EXPORT cscSpeechToCommandsQtComponent: public QObject, public mtsComponent
+class CISST_EXPORT mtsSphinx4QtComponent: public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    cscSpeechToCommandsQtComponent(const std::string & componentName);
-    ~cscSpeechToCommandsQtComponent(void) {};
+    mtsSphinx4QtComponent(const std::string & componentName);
+    ~mtsSphinx4QtComponent(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
     void Start(void);
@@ -60,7 +60,7 @@ class CISST_EXPORT cscSpeechToCommandsQtComponent: public QObject, public mtsCom
     void TriggerWord(QString word);
 
  protected:
-    cscSpeechToCommandsQtWidget CentralWidget;
+    mtsSphinx4QtWidget CentralWidget;
 
     void WordRecognizedHandler(const mtsStdString & word);
     void NoWordRecognizedHandler(void);
@@ -71,6 +71,6 @@ class CISST_EXPORT cscSpeechToCommandsQtComponent: public QObject, public mtsCom
     mtsFunctionWrite TriggerWordFromUI;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cscSpeechToCommandsQtComponent);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsSphinx4QtComponent);
 
-#endif  // _cscSpeechToCommandsQtComponent_h
+#endif  // _mtsSphinx4QtComponent_h

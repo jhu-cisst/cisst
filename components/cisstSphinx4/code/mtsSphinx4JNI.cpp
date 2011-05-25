@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSphinx4JNI.cpp 2771 2011-03-11 19:45:58Z adeguet1 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -20,24 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <string>
-#include "cscSphinx4JNI.h"
-#include "cscSpeechToCommands.h"
+#include "mtsSphinx4JNI.h"
+#include <cisstSphinx4/mtsSphinx4.h>
 
-void cscJavaWordRecognizedCallback(cscSpeechToCommands * speechToCommands,
-                                   const std::string & word)
+void mtsSphinx4JavaWordRecognizedCallback(mtsSphinx4 * sphinx4Wrapper,
+                                          const std::string & word)
 {
-    speechToCommands->WordRecognizedCallback(word);
+    sphinx4Wrapper->WordRecognizedCallback(word);
 }
 
 
-void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *env, jobject, jlong speechToCommandsCppPointer, jstring wordJava)
+void JNICALL Java_cisstSphinx4_WordRecognizedCallback(JNIEnv *env, jobject, jlong sphinx4WrapperPointer, jstring wordJava)
 {
     // convert JString to std::string
     const char * wordCharPointer = env->GetStringUTFChars(wordJava, 0);
     const std::string word(wordCharPointer);
-    cscSpeechToCommands * speechToCommands = reinterpret_cast<cscSpeechToCommands *>(speechToCommandsCppPointer);
-    CMN_ASSERT(speechToCommands != 0);
-    cscJavaWordRecognizedCallback(speechToCommands, word);
+    mtsSphinx4 * sphinx4Wrapper = reinterpret_cast<mtsSphinx4 *>(sphinx4WrapperPointer);
+    CMN_ASSERT(sphinx4Wrapper != 0);
+    mtsSphinx4JavaWordRecognizedCallback(sphinx4Wrapper, word);
     // release Java string
     env->ReleaseStringUTFChars(wordJava, wordCharPointer);
 }

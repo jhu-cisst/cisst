@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommands.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -26,14 +26,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cscSpeechToCommands.h"
+#include <cisstSphinx4/mtsSphinx4.h>
 
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
-CMN_IMPLEMENT_SERVICES(cscSpeechToCommands);
+CMN_IMPLEMENT_SERVICES(mtsSphinx4);
 
-struct cscSpeechToCommandsJava
+struct mtsSphinx4Java
 {
     JNIEnv * Environment;
     JavaVM * VirtualMachine;
@@ -42,7 +42,7 @@ struct cscSpeechToCommandsJava
 };
 
 
-cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
+mtsSphinx4::mtsSphinx4(const std::string & componentName):
     mtsTaskContinuous(componentName),
     CurrentContext(0),
     MicrophoneNumber(1),
@@ -52,17 +52,17 @@ cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
     Contexts.SetOwner(*this);
 
     // allocate java data
-    this->JavaData = new cscSpeechToCommandsJava;
+    this->JavaData = new mtsSphinx4Java;
     this->JavaData->Environment = 0;
     this->JavaData->VirtualMachine = 0;
 
     // defaults
     ModelTopDir = "WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz";
-    ModelFile = std::string(CISST_CSC_SPHINX4_DIR) + "/lib/" + ModelTopDir + ".jar";
-    SphinxFile = std::string(CISST_CSC_SPHINX4_DIR) + "/lib/sphinx4.jar";
-    TemplateFile = std::string(CISST_CSC_SOURCE_DIR) + "/cscSphinx4Config.xml.template";
-    SphinxWrapperDir = std::string(CISST_CSC_JAVACLASS_DIR);
-    ConfigName = "cscSphinx4.config.xml";
+    ModelFile = std::string(CISST_SPHINX4_DIST_DIR) + "/lib/" + ModelTopDir + ".jar";
+    SphinxFile = std::string(CISST_SPHINX4_DIST_DIR) + "/lib/sphinx4.jar";
+    TemplateFile = std::string(CISST_SPHINX4_TEMPLATE_DIR) + "/cisstSphinx4.xml.template";
+    SphinxWrapperDir = std::string(CISST_SPHINX4_JAVACLASS_DIR);
+    ConfigName = "cisstSphinx4.config.xml";
 
     // trigger for any word received
     WordRecognizedTrigger = new mtsMulticastCommandWrite<mtsStdString>("WordRecognized", mtsStdString());
@@ -72,12 +72,12 @@ cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
     mtsInterfaceProvided * interfaceProvided = this->AddInterfaceProvided("Default");
     if (interfaceProvided) {
         // query list of contexts and words per context
-        interfaceProvided->AddCommandRead(&cscSpeechToCommands::GetContexts, this, "GetContexts");
-        interfaceProvided->AddCommandQualifiedRead(&cscSpeechToCommands::GetContextWords, this, "GetContextWords");
+        interfaceProvided->AddCommandRead(&mtsSphinx4::GetContexts, this, "GetContexts");
+        interfaceProvided->AddCommandQualifiedRead(&mtsSphinx4::GetContextWords, this, "GetContextWords");
         // context changed
         interfaceProvided->AddEventWrite(this->ContextChangedTrigger, "ContextChanged", mtsStdString());
         // get word from UI
-        interfaceProvided->AddCommandWrite(&cscSpeechToCommands::WordTriggeredFromUI, this, "TriggerWordFromUI");
+        interfaceProvided->AddCommandWrite(&mtsSphinx4::WordTriggeredFromUI, this, "TriggerWordFromUI");
         // word recognized
         mtsCommandWriteBase * eventWriteTrigger = interfaceProvided->AddEventWrite("WordRecognized", mtsStdString());
         if (eventWriteTrigger) {
@@ -98,15 +98,15 @@ cscSpeechToCommands::cscSpeechToCommands(const std::string & componentName):
 }
 
 
-cscContext * cscSpeechToCommands::AddContext(const std::string & contextName)
+mtsSphinx4::Context * mtsSphinx4::AddContext(const std::string & contextName)
 {
-    cscContext * context = new cscContext(contextName);
+    Context * context = new Context(contextName);
     if (context == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddContext: failed to create new cscContext" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddContext: failed to create new context" << std::endl;
         return 0;
     }
     if (Contexts.AddItem(context->GetName(), context)) {
-        context->SpeechToCommands = this;
+        context->Sphinx4Wrapper = this;
         CMN_LOG_CLASS_INIT_DEBUG << "AddContext: added context \"" << context->GetName() << "\"" << std::endl;
         return context;
     }
@@ -116,9 +116,9 @@ cscContext * cscSpeechToCommands::AddContext(const std::string & contextName)
 }
 
 
-bool cscSpeechToCommands::SetCurrentContext(const std::string & contextName)
+bool mtsSphinx4::SetCurrentContext(const std::string & contextName)
 {
-    cscContext * context = this->Contexts.GetItem(contextName);
+    Context * context = this->Contexts.GetItem(contextName);
     if (context) {
         CMN_LOG_CLASS_RUN_DEBUG << "SetCurrentContext: switching to context \"" << contextName << "\"" << std::endl;
         CurrentContext = context;
@@ -141,17 +141,17 @@ bool cscSpeechToCommands::SetCurrentContext(const std::string & contextName)
 }
 
 
-bool cscSpeechToCommands::SetCurrentContext(const cscContext * context)
+bool mtsSphinx4::SetCurrentContext(const mtsSphinx4::Context * context)
 {
     if (context) {
         return this->SetCurrentContext(context->GetName());
     }
-    CMN_LOG_CLASS_RUN_ERROR << "SetCurrentContext: null pointer on cscContext" << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "SetCurrentContext: null pointer on context" << std::endl;
     return 0;
 }
 
 
-void cscSpeechToCommands::GetContexts(stdStringVec & placeHolder) const
+void mtsSphinx4::GetContexts(stdStringVec & placeHolder) const
 {
     ContextMap::const_iterator iterator;
     ContextMap::const_iterator end = Contexts.end();
@@ -163,55 +163,61 @@ void cscSpeechToCommands::GetContexts(stdStringVec & placeHolder) const
 }
 
 
-void cscSpeechToCommands::GetContextWords(const mtsStdString & contextName,
+void mtsSphinx4::GetContextWords(const mtsStdString & contextName,
                                           stdStringVec & placeHolder) const
 {
-    cscContext * context = this->Contexts.GetItem(contextName);
+    Context * context = this->Contexts.GetItem(contextName);
     if (context) {
         placeHolder = context->GetVocabulary();
     }
 }
 
 
-void cscSpeechToCommands::WordTriggeredFromUI(const mtsStdString & word)
+void mtsSphinx4::WordTriggeredFromUI(const mtsStdString & word)
 {
     WordRecognizedCallback(word);
 }
 
 
-unsigned int cscSpeechToCommands::GetMicrophoneNumber(void) const
+unsigned int mtsSphinx4::GetMicrophoneNumber(void) const
 {
     return this->MicrophoneNumber;
 }
 
 
-void cscSpeechToCommands::SetMicrophoneNumber(unsigned int microphoneNumber)
+void mtsSphinx4::SetMicrophoneNumber(unsigned int microphoneNumber)
 {
     this->MicrophoneNumber = microphoneNumber;
 }
 
 
-void cscSpeechToCommands::PrintAudioDevices(void)
+void mtsSphinx4::PrintAudioDevices(void)
 {
 
 }
 
 
-void cscSpeechToCommands::ReplaceAll(std::string & base,
-                                     const std::string & s,
-                                     const std::string & t)
+bool mtsSphinx4::ReplaceAll(std::string & base,
+                            const std::string & s,
+                            const std::string & t)
 {
-    size_t sLength = s.length();
-    size_t tLength = t.length();
-    size_t foundPosition = base.find(s);
-    while (foundPosition != std::string::npos) {
-        base.replace(foundPosition, sLength, t);
-        foundPosition = base.find(s, foundPosition + tLength);
+    try {
+        size_t sLength = s.length();
+        size_t tLength = t.length();
+        size_t foundPosition = base.find(s);
+        while (foundPosition != std::string::npos) {
+            base.replace(foundPosition, sLength, t);
+            foundPosition = base.find(s, foundPosition + tLength);
+        }
+    } catch (std::exception & except) {
+        CMN_LOG_CLASS_RUN_ERROR << "ReplaceAll: got exception " << except.what() << std::endl;
+        return false;
     }
+    return true;
 }
 
 
-bool cscSpeechToCommands::StartJava(void)
+bool mtsSphinx4::StartJava(void)
 {
     jint result;
     jmethodID sphinx4WrapperConstructor;
@@ -268,9 +274,9 @@ bool cscSpeechToCommands::StartJava(void)
     }
 
     jclass sphinx4WrapperClass;
-    sphinx4WrapperClass = this->JavaData->Environment->FindClass("cscSphinx4");
+    sphinx4WrapperClass = this->JavaData->Environment->FindClass("cisstSphinx4");
     if (sphinx4WrapperClass == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java class \"cscSphinx4\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java class \"cisstSphinx4\"" << std::endl;
         return false;
     }
 
@@ -285,7 +291,7 @@ bool cscSpeechToCommands::StartJava(void)
                                                                                        "SetCurrentContext",
                                                                                        "(Ljava/lang/String;)V");
     if (this->JavaData->SetCurrentContextMethod == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cscSphinx4.SetCurrentContextJavaMethod\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cisstSphinx4.SetCurrentContextJavaMethod\"" << std::endl;
         return false;
     }
 
@@ -294,7 +300,7 @@ bool cscSpeechToCommands::StartJava(void)
                                                            "Start",
                                                            "(JLjava/lang/String;[Ljava/lang/String;Ljava/lang/String;)V");
     if (startMethod == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cscSphinx4.Start\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "StartJava: can't find Java method \"cisstSphinx4.Start\"" << std::endl;
         return false;
     }
 
@@ -323,7 +329,7 @@ bool cscSpeechToCommands::StartJava(void)
 }
 
 
-void cscSpeechToCommands::Configure(void)
+void mtsSphinx4::Configure(void)
 {
     // generate grammar files for each context
     // contextNameMap is a map from context name to grammar file name
@@ -331,7 +337,7 @@ void cscSpeechToCommands::Configure(void)
     ContextMap::iterator cIter;
     for (cIter = Contexts.begin(); cIter != Contexts.end(); cIter++) {
         std::string contextName = cIter->first;
-        cscContext * context = cIter->second;
+        Context * context = cIter->second;
 
         // generate grammar file
         std::ofstream fileStream((contextName + std::string(".gram")).c_str());
@@ -347,8 +353,14 @@ void cscSpeechToCommands::Configure(void)
             std::string word = *wIter;
             // JSFG grammar cannot handle spaces in tokens
             std::string wordNoWhiteSpace = word;
-            ReplaceAll(wordNoWhiteSpace, " ", "");
-            ReplaceAll(wordNoWhiteSpace, "\t", "");
+            if (!ReplaceAll(wordNoWhiteSpace, " ", "")) {
+                CMN_LOG_CLASS_INIT_ERROR << "Configure: error occurred while replacing spaces" << std::endl;
+                return;
+            }
+            if (!ReplaceAll(wordNoWhiteSpace, "\t", "")) {
+                CMN_LOG_CLASS_INIT_ERROR << "Configure: error occurred while replacing tabs" << std::endl;
+                return;
+            }
             fileStream << "public <" << wordNoWhiteSpace << "> = " << word << ";\n";
         }
         fileStream.close();
@@ -422,10 +434,18 @@ void cscSpeechToCommands::Configure(void)
     buffer[length] = 0;
     std::string templateString = std::string(buffer);
     delete[] buffer;
-    templateString.replace(templateString.find("    <!-- CONTEXT-SPECIFIC SECTION, TO BE REPLACED -->\n"),
-                           std::string("    <!-- CONTEXT-SPECIFIC SECTION, TO BE REPLACED -->\n").length(),
-                           contextString);
-    ReplaceAll(templateString, "___VAR_MODEL_TOP_DIR___", ModelTopDir);
+    try {
+        templateString.replace(templateString.find("    <!-- CONTEXT-SPECIFIC SECTION, TO BE REPLACED -->\n"),
+                               std::string("    <!-- CONTEXT-SPECIFIC SECTION, TO BE REPLACED -->\n").length(),
+                               contextString);
+    } catch (std::exception & except) {
+        CMN_LOG_CLASS_INIT_ERROR << "Configure: exception caught in replace from template \"" << TemplateFile << "\"" << std::endl;
+        return;
+    }
+    if (!ReplaceAll(templateString, "___VAR_MODEL_TOP_DIR___", ModelTopDir)) {
+        CMN_LOG_CLASS_INIT_ERROR << "Configure: error occurred while replacing ___VAR_MODEL_TOP_DIR___" << std::endl;
+        return;
+    }
 
     std::ofstream fileStream(ConfigName.c_str());
     fileStream << templateString << std::endl << "<!-- end of file after configuration -->" << std::endl;
@@ -433,7 +453,7 @@ void cscSpeechToCommands::Configure(void)
 }
 
 
-void cscSpeechToCommands::Startup(void)
+void mtsSphinx4::Startup(void)
 {
     // make sure we have at least one context and current context is set
     if (this->Contexts.size() == 0) {
@@ -448,7 +468,7 @@ void cscSpeechToCommands::Startup(void)
 }
 
 
-void cscSpeechToCommands::Run(void)
+void mtsSphinx4::Run(void)
 {
     ProcessQueuedCommands();
     ProcessQueuedEvents();
@@ -466,7 +486,7 @@ void cscSpeechToCommands::Run(void)
     }
 }
 
-void cscSpeechToCommands::HandleWord(const mtsStdString & word) {
+void mtsSphinx4::HandleWord(const mtsStdString & word) {
     // emit event as word has been recognized
     this->WordRecognizedTrigger->Execute(word, MTS_NOT_BLOCKING);
     // find word actions in context
@@ -475,7 +495,7 @@ void cscSpeechToCommands::HandleWord(const mtsStdString & word) {
 }
 
 
-void cscSpeechToCommands::WordRecognizedCallback(const std::string & stdWord)
+void mtsSphinx4::WordRecognizedCallback(const std::string & stdWord)
 {
     if (stdWord != "" && stdWord != "<unk>") {
         NewWordRecognized = true;
@@ -491,7 +511,7 @@ void cscSpeechToCommands::WordRecognizedCallback(const std::string & stdWord)
 }
 
 
-void cscSpeechToCommands::Cleanup(void)
+void mtsSphinx4::Cleanup(void)
 {
     // todo, killing the java machine is a bit of a nightmare
     this->JavaData->VirtualMachine->DestroyJavaVM();

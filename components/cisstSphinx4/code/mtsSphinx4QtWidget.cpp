@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtWidget.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
+  $Id$
 
   Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
@@ -18,10 +18,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "cscSpeechToCommandsQtWidget.h"
+#include <cisstSphinx4/mtsSphinx4QtWidget.h>
 
 
-cscSpeechToCommandsQtWidget::cscSpeechToCommandsQtWidget(void)
+mtsSphinx4QtWidget::mtsSphinx4QtWidget(void)
 {
     // create the widgets
     LabelWordRecognized = new QLabel("Recognized word: ", this);
@@ -53,13 +53,13 @@ cscSpeechToCommandsQtWidget::cscSpeechToCommandsQtWidget(void)
 }
 
 
-void cscSpeechToCommandsQtWidget::AddWord(QString context, QString word)
+void mtsSphinx4QtWidget::AddWord(QString context, QString word)
 {
     ContextMap.insert(std::pair<QString,QString>(context, word));
 }
 
 
-void cscSpeechToCommandsQtWidget::ContextChanged(QString context)
+void mtsSphinx4QtWidget::ContextChanged(QString context)
 {
     WordSelector->clear();
 
@@ -79,7 +79,8 @@ void cscSpeechToCommandsQtWidget::ContextChanged(QString context)
     ValueVocabulary->setText(newVocabulary);
 }
 
-void cscSpeechToCommandsQtWidget::GetTriggeredWord(void)
+
+void mtsSphinx4QtWidget::GetTriggeredWord(void)
 {
     emit WordTriggered(WordSelector->currentText());
 }

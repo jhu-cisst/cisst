@@ -2,13 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSphinx4JNI.h 2771 2011-03-11 19:45:58Z adeguet1 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,22 +18,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <jni.h>
+#ifndef _mtsSphinx4Config_h
+#define _mtsSphinx4Config_h
 
-#ifndef _cscSphinx4JNI_h
-#define _cscSphinx4JNI_h
+// ---- file automatically generated, do not modify ----
 
-// Always include last!
-#include "cscExport.h"
+#define CISST_SPHINX4_DIST_DIR "@CISST_SPHINX4_DIST_DIR@"
+#define CISST_SPHINX4_TEMPLATE_DIR "@CISST_SPHINX4_TEMPLATE_DIR@"
+#define CISST_SPHINX4_JAVACLASS_DIR "@CISST_SPHINX4_JAVACLASS_DIR@"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    CISST_EXPORT void JNICALL Java_cscSphinx4_WordRecognizedCallback(JNIEnv *, jobject, jlong, jstring);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // __cplusplus
+#endif // _mtsSphinx4Config_h

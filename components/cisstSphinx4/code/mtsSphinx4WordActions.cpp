@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscWordActions.cpp 2771 2011-03-11 19:45:58Z adeguet1 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -21,30 +21,30 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <map>
-#include "cscWordActions.h"
-#include "cscSpeechToCommands.h"
+#include <cisstSphinx4/mtsSphinx4.h>
 
-CMN_IMPLEMENT_SERVICES(cscWordActions);
+typedef mtsSphinx4::WordActions mtsSphinx4WordActions;
+CMN_IMPLEMENT_SERVICES(mtsSphinx4WordActions);
 
 
-cscWordActions::cscWordActions():
+mtsSphinx4::WordActions::WordActions():
     IsTransition(false),
     EndContext("not set")
 {
 }
 
 
-cscWordActions::cscWordActions(const std::string & endContext):
+mtsSphinx4::WordActions::WordActions(const std::string & endContext):
     IsTransition(true),
     EndContext(endContext)
 {
 }
 
 
-bool cscWordActions::PerformActions(cscSpeechToCommands * speechToCommands) const
+bool mtsSphinx4::WordActions::PerformActions(mtsSphinx4 * sphinx4wrapper) const
 {
     if (this->IsTransition) {
-        return speechToCommands->SetCurrentContext(this->EndContext);
+        return sphinx4wrapper->SetCurrentContext(this->EndContext);
     }
     return false;
 }

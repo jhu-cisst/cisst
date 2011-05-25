@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscContext.cpp 2936 2011-04-19 16:32:39Z mkelly9 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
@@ -20,13 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <map>
-#include "cscContext.h"
+#include <cisstSphinx4/mtsSphinx4.h>
 
-CMN_IMPLEMENT_SERVICES(cscContext);
+typedef mtsSphinx4::Context mtsSphinx4Context;
+CMN_IMPLEMENT_SERVICES(mtsSphinx4Context);
 
 #include <cisstCommon/cmnAssert.h>
 
-cscContext::cscContext(const std::string & name):
+mtsSphinx4::Context::Context(const std::string & name):
     Name(name),
     OutOfGrammarFiltering(false)
 {
@@ -34,7 +35,7 @@ cscContext::cscContext(const std::string & name):
 }
 
 
-bool cscContext::AddWordWithActions(const std::string & word, cscWordActions * wordActions)
+bool mtsSphinx4::Context::AddWordWithActions(const std::string & word, mtsSphinx4::WordActions * wordActions)
 {
     if (Words.AddItem(word, wordActions, CMN_LOG_LOD_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_DEBUG << "AddWord: added word \"" << word << "\""
@@ -46,9 +47,9 @@ bool cscContext::AddWordWithActions(const std::string & word, cscWordActions * w
     return false;
 }
 
-bool cscContext::AddWord(const std::string & word)
+bool mtsSphinx4::Context::AddWord(const std::string & word)
 {
-    cscWordActions * wordActions = new cscWordActions();
+    mtsSphinx4::WordActions * wordActions = new mtsSphinx4::WordActions();
     if (this->AddWordWithActions(word, wordActions)) {
         return true;
     }
@@ -57,9 +58,9 @@ bool cscContext::AddWord(const std::string & word)
 }
 
 
-bool cscContext::AddWordWithTransition(const std::string & word, const std::string & endContext)
+bool mtsSphinx4::Context::AddWordWithTransition(const std::string & word, const std::string & endContext)
 {
-    cscWordActions * wordActions = new cscWordActions(endContext);
+    mtsSphinx4::WordActions * wordActions = new mtsSphinx4::WordActions(endContext);
     if (this->AddWordWithActions(word, wordActions)) {
         return true;
     }
@@ -68,13 +69,13 @@ bool cscContext::AddWordWithTransition(const std::string & word, const std::stri
 }
 
 
-const std::string & cscContext::GetName(void) const
+const std::string & mtsSphinx4::Context::GetName(void) const
 {
 	return this->Name;
 }
 
 
-std::vector<std::string> cscContext::GetVocabulary(void)
+std::vector<std::string> mtsSphinx4::Context::GetVocabulary(void)
 {
     std::vector<std::string> result;
     Words.GetNames(result);
@@ -82,13 +83,13 @@ std::vector<std::string> cscContext::GetVocabulary(void)
 }
 
 
-bool cscContext::PerformActionsForWord(const std::string & word)
+bool mtsSphinx4::Context::PerformActionsForWord(const std::string & word)
 {
-    cscWordActions * wordActions = this->Words.GetItem(word);
+    mtsSphinx4::WordActions * wordActions = this->Words.GetItem(word);
     if (wordActions) {
         CMN_LOG_CLASS_RUN_DEBUG << "PerformActionsForWord: performing actions for word \"" << word << "\"" << std::endl;
-        CMN_ASSERT(this->SpeechToCommands);
-        wordActions->PerformActions(this->SpeechToCommands);
+        CMN_ASSERT(this->Sphinx4Wrapper);
+        wordActions->PerformActions(this->Sphinx4Wrapper);
         return true;
     }
     CMN_LOG_CLASS_RUN_ERROR << "PerformActionsForWord: can't find word \"" << word
@@ -96,12 +97,14 @@ bool cscContext::PerformActionsForWord(const std::string & word)
     return false;
 }
 
-bool cscContext::FilteringEnabled(void)
+
+bool mtsSphinx4::Context::FilteringEnabled(void)
 {
     return OutOfGrammarFiltering;
 }
 
-void cscContext::SetFiltering(bool filter)
+
+void mtsSphinx4::Context::SetFiltering(bool filter)
 {
     OutOfGrammarFiltering = filter;
 }

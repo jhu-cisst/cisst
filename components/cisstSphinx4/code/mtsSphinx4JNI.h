@@ -2,12 +2,13 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscConfig.h.in 2802 2011-03-22 15:32:16Z adeguet1 $
+  $Id$
 
   Author(s):  Martin Kelly, Anton Deguet
   Created on: 2011-02-15
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,11 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _cscConfig_h
-#define _cscConfig_h
+#include <jni.h>
 
-#define CISST_CSC_SPHINX4_DIR "@CISST_CSC_SPHINX4_DIR@"
-#define CISST_CSC_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@"
-#define CISST_CSC_JAVACLASS_DIR "@CISST_CSC_JAVACLASS_DIR@"
+#ifndef _mtsSphinx4JNI_h
+#define _mtsSphinx4JNI_h
 
-#endif // _cscConfig_h
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    // class name in Java is cisstSphinx4
+    void JNICALL Java_cisstSphinx4_WordRecognizedCallback(JNIEnv *, jobject, jlong, jstring);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __cplusplus

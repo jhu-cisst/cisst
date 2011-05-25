@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cscSpeechToCommandsQtWidget.h 2936 2011-04-19 16:32:39Z mkelly9 $
+  $Id$
 
   Author(s):  Anton Deguet, Martin Kelly
   Created on: 2011-03-07
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _cscSpeechToCommandsQtWidget_h
-#define _cscSpeechToCommandsQtWidget_h
+#ifndef _mtsSphinx4QtWidget_h
+#define _mtsSphinx4QtWidget_h
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -28,14 +28,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 
 // Always include last!
-#include <cisstSpeechToCommands/cscExportQt.h>
-class CISST_EXPORT cscSpeechToCommandsQtWidget : public QWidget
+#include <cisstSphinx4/mtsSphinx4ExportQt.h>
+class CISST_EXPORT mtsSphinx4QtWidget : public QWidget
 {
     Q_OBJECT;
 
  public:
-    cscSpeechToCommandsQtWidget(void);
-    ~cscSpeechToCommandsQtWidget(void) {};
+    mtsSphinx4QtWidget(void);
+    ~mtsSphinx4QtWidget(void) {};
 
     std::multimap<QString,QString> ContextMap;
 
@@ -59,4 +59,4 @@ class CISST_EXPORT cscSpeechToCommandsQtWidget : public QWidget
 
 };
 
-#endif  // _cscSpeechToCommandsQtWidget_h
+#endif  // _mtsSphinx4QtWidget_h
