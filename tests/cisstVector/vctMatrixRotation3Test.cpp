@@ -226,6 +226,14 @@ void vctMatrixRotation3Test::TestConversionEulerZYZFloat(void) {
     TestConversionEuler<float, vctEulerRotation3Order::ZYZ>();
 }
 
+void vctMatrixRotation3Test::TestConversionEulerZYXDouble(void) {
+    TestConversionEuler<double, vctEulerRotation3Order::ZYX>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerZYXFloat(void) {
+    TestConversionEuler<float, vctEulerRotation3Order::ZYX>();
+}
+
 
 template <class _elementType>
 void vctMatrixRotation3Test::TestFromSignaturesQuaternion(void) {

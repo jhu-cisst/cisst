@@ -218,7 +218,7 @@ class vctRodriguezRotation3;
 
 namespace vctEulerRotation3Order {
 //enum OrderType { XZX, XZY, XYX, XYZ, YXY, YXZ, YZY, YZX, ZYZ, ZYX, ZXZ, ZXY };
-enum OrderType { ZYZ };
+enum OrderType { ZYZ, ZYX };
 };
 
 template <vctEulerRotation3Order::OrderType order>

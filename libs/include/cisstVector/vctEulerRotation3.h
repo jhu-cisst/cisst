@@ -34,8 +34,7 @@ http://www.cisst.org/cisst/license.txt.
   There are several conventions for Euler angle rotations, which depend on
   the order of rotations about the axes, and whether the rotations are intrinsic
   (i.e., about the body's coordinate frame) or extrinsic (i.e., about the world
-  coordinate frame). Generally, intrinsic rotations are used, though it seems
-  that yaw-pitch-roll is usually defined using extrinsic rotations.
+  coordinate frame).
 
   We use the common convention of three letters to define the order of 
   (intrinsic) rotations.  For example, ZYZ refers to a rotation of \f$\phi\f$
@@ -43,7 +42,8 @@ http://www.cisst.org/cisst/license.txt.
   Y', followed by a rotation of \f$\psi\f$ (or \f$\gamma\f$) about Z''.  Here, the Y' and Z''
   denote that the rotations are about the new (rotated) Y and Z axes, respectively.
   For convenience (and to conform to C++ naming rules), the ' and '' are omitted
-  from the naming convention.
+  from the naming convention. Note that when composing intrinsic rotations, the order
+  is as follows:  \f$R_Z(\alpha) R_Y(\beta) R_Z(\gamma)\f$.
   All angles are in radians.
 
   The range of angles must still be determined.  One possibility is to have
@@ -73,6 +73,7 @@ http://www.cisst.org/cisst/license.txt.
                       vctMatrixRotation3Base<_matrixType> & matrixRot);
 
 DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYZ)
+DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYX)
 
 #endif
 
@@ -310,6 +311,9 @@ public:
 /*! Define an Euler angle rotation in dimension 3 using ZYZ order. */
 typedef vctEulerRotation3<vctEulerRotation3Order::ZYZ> vctEulerZYZRotation3;
 
+/*! Define an Euler angle rotation in dimension 3 using ZYX (yaw-pitch-roll) order. */
+typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
+
 #ifndef SWIG
 #ifdef CISST_COMPILER_IS_MSVC
 // declare instances of helper functions
@@ -364,6 +368,7 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYZ> vctEulerZYZRotation3;
             vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRot);
 
 DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYZ)
+DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYX)
 #endif // CISST_COMPILER_IS_MSVC
 #endif // !SWIG
 

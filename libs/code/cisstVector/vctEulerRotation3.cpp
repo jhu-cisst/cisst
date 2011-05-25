@@ -29,6 +29,9 @@ std::string ToString(vctEulerRotation3Order::OrderType order)
     case vctEulerRotation3Order::ZYZ:
         str = "ZYZ";
         break;
+    case vctEulerRotation3Order::ZYX:
+        str = "ZYX";
+        break;
     default:
         str = "UNDEFINED";
         break;
@@ -79,6 +82,39 @@ bool vctEulerRotation3Base::IsNormalized(double CMN_UNUSED(tolerance)) const
 }
 
 
+/*****************************************************************************
+
+  ZYZ Euler angles. This is an intrinsic rotation, where phi (angle[0]) is
+  rotation about the Z axis, theta (angle[1]) is rotation about the Y' axis,
+  and psi (angle[2]) is rotation about the Z'' axis.
+
+ *****************************************************************************/
+template <class _matrixType>
+void vctEulerToMatrixRotation3(const vctEulerZYZRotation3 & eulerRot,
+                               vctMatrixRotation3Base<_matrixType> & matrixRot)
+{
+    typedef typename _matrixType::value_type value_type;
+
+    double cphi = cos(eulerRot.phi());      // 0
+    double sphi = sin(eulerRot.phi());
+    double ctheta = cos(eulerRot.theta());  // 1
+    double stheta = sin(eulerRot.theta());
+    double cpsi = cos(eulerRot.psi());      // 2
+    double spsi = sin(eulerRot.psi());
+
+    matrixRot.Element(0, 0) = static_cast<value_type>(cphi * ctheta * cpsi - sphi * spsi);
+    matrixRot.Element(0, 1) = static_cast<value_type>(-cphi * ctheta * spsi - sphi * cpsi);
+    matrixRot.Element(0, 2) = static_cast<value_type>(cphi * stheta);
+
+    matrixRot.Element(1, 0) = static_cast<value_type>(sphi * ctheta * cpsi + cphi * spsi);
+    matrixRot.Element(1, 1) = static_cast<value_type>(-sphi * ctheta * spsi + cphi * cpsi);
+    matrixRot.Element(1, 2) = static_cast<value_type>(sphi * stheta);
+
+    matrixRot.Element(2, 0) = static_cast<value_type>(-stheta * cpsi);
+    matrixRot.Element(2, 1) = static_cast<value_type>(stheta * spsi);
+    matrixRot.Element(2, 2) = static_cast<value_type>(ctheta);
+}
+
 template <class _matrixType>
 void vctEulerFromMatrixRotation3(vctEulerZYZRotation3 & eulerRot,
                                  const vctMatrixRotation3Base<_matrixType> & matrixRot)
@@ -117,31 +153,62 @@ void vctEulerFromMatrixRotation3(vctEulerZYZRotation3 & eulerRot,
     eulerRot = vctEulerZYZRotation3(phi, theta, psi);
 }
 
+/*****************************************************************************
+
+  ZYX Euler angles, which can be called Yaw-Pitch-Roll. This is an intrinsic
+  rotation of yaw about the Z axis, pitch about the Y' axis, and roll
+  about the X'' axis.  Note that this is also equivalent to an extrinsic
+  XYZ rotation, with the angles in reverse order (i.e., roll about the X axis,
+  pitch about the Y axis, and yaw about the Z axis). In this context, roll, pitch
+  and yaw do not have the same meaning as in aircraft dynamics.
+
+ *****************************************************************************/
 template <class _matrixType>
-void vctEulerToMatrixRotation3(const vctEulerZYZRotation3 & eulerRot,
+void vctEulerToMatrixRotation3(const vctEulerZYXRotation3 & eulerRot,
                                vctMatrixRotation3Base<_matrixType> & matrixRot)
 {
     typedef typename _matrixType::value_type value_type;
 
-    double cphi = cos(eulerRot.phi());      // 1
-    double sphi = sin(eulerRot.phi());
-    double ctheta = cos(eulerRot.theta());  // 2
-    double stheta = sin(eulerRot.theta());
-    double cpsi = cos(eulerRot.psi());      // 3
-    double spsi = sin(eulerRot.psi());
+    double  yaw = eulerRot.alpha();
+    double  pitch = eulerRot.beta();
+    double  roll = eulerRot.gamma();
 
-    matrixRot.Element(0, 0) = static_cast<value_type>(cphi * ctheta * cpsi - sphi * spsi);
-    matrixRot.Element(0, 1) = static_cast<value_type>(-cphi * ctheta * spsi - sphi * cpsi);
-    matrixRot.Element(0, 2) = static_cast<value_type>(cphi * stheta);
+    double cosYaw = cos(yaw);
+    double sinYaw = sin(yaw);
 
-    matrixRot.Element(1, 0) = static_cast<value_type>(sphi * ctheta * cpsi + cphi * spsi);
-    matrixRot.Element(1, 1) = static_cast<value_type>(-sphi * ctheta * spsi + cphi * cpsi);
-    matrixRot.Element(1, 2) = static_cast<value_type>(sphi * stheta);
+    double cosPitch = cos(pitch);
+    double sinPitch = sin(pitch);
 
-    matrixRot.Element(2, 0) = static_cast<value_type>(-stheta * cpsi);
-    matrixRot.Element(2, 1) = static_cast<value_type>(stheta * spsi);
-    matrixRot.Element(2, 2) = static_cast<value_type>(ctheta);
+    double cosRoll = cos(roll);
+    double sinRoll = sin(roll);
+
+    matrixRot.Element(0,0) = static_cast<value_type>(cosYaw * cosPitch);
+    matrixRot.Element(0,1) = static_cast<value_type>(cosYaw * sinPitch * sinRoll - sinYaw * cosRoll);
+    matrixRot.Element(0,2) = static_cast<value_type>(cosYaw * sinPitch * cosRoll + sinYaw * sinRoll);
+ 
+    matrixRot.Element(1,0) = static_cast<value_type>(sinYaw * cosPitch);
+    matrixRot.Element(1,1) = static_cast<value_type>(cosYaw * cosRoll + sinYaw * sinPitch * sinRoll);
+    matrixRot.Element(1,2) = static_cast<value_type>(sinYaw * sinPitch * cosRoll - cosYaw * sinRoll);
+   
+    matrixRot.Element(2,0) = static_cast<value_type>(-sinPitch);
+    matrixRot.Element(2,1) = static_cast<value_type>(cosPitch * sinRoll);
+    matrixRot.Element(2,2) = static_cast<value_type>(cosPitch * cosRoll);
 }
+
+template <class _matrixType>
+void vctEulerFromMatrixRotation3(vctEulerZYXRotation3 & eulerRot,
+                                 const vctMatrixRotation3Base<_matrixType> & matrixRot)
+{
+    // Implementation currently does not handle "gimble lock" (singularity)
+    double yaw = atan2((double) matrixRot.Element(1,0), (double) matrixRot.Element(0,0));
+    double cosYaw = cos(yaw);
+    double sinYaw = sin(yaw);
+    double pitch = atan2((double) -matrixRot.Element(2,0),
+                         cosYaw*matrixRot.Element(0,0) + sinYaw*matrixRot(1,0));
+    double roll = atan2( sinYaw*matrixRot.Element(0,2) - cosYaw*matrixRot.Element(1,2),
+                       -sinYaw*matrixRot.Element(0,1) + cosYaw*matrixRot.Element(1,1)); 
+    eulerRot = vctEulerZYXRotation3(yaw, pitch, roll);
+}   
 
 // force instantiation of helper functions
 #define INSTANTIATE_EULER_TEMPLATES(ORDER) \
@@ -196,5 +263,6 @@ void vctEulerToMatrixRotation3(const vctEulerZYZRotation3 & eulerRot,
 
 // Instantiate templates for each supported Euler angle convention (e.g., ZYZ)
 INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZYZ)
+INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZYX)
 
 
