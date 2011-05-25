@@ -87,16 +87,27 @@ if (ICE_ICE_H_INCLUDE_DIR)
   message (STATUS "Setting ICE_HOME to ${ICE_HOME}")
 
   # include and lib dirs are easy
-  set (ICE_INCLUDE_DIR
-       ${ICE_ICE_H_INCLUDE_DIR}
-       ${ICE_HOME}/share/slice
-       ${ICE_HOME}/share/ice/slice
-       ${ICE_HOME}/share/Ice/slice
-       # For Ice installation via Ubuntu Synaptic package manager
-       ${ICE_HOME}/share/Ice-3.4.1/slice
-       ${ICE_HOME}/share/Ice-3.4.0/slice
-       ${ICE_HOME}/share/Ice-3.3.1/slice
-       ${ICE_HOME}/share/Ice-3.3.0/slice )
+  if (WIN32)  
+    set (ICE_INCLUDE_DIR
+        ${ICE_ICE_H_INCLUDE_DIR}
+        ${ICE_HOME}/slice
+        ${ICE_HOME}/Ice/slice
+        ${ICE_HOME}/Ice-3.4.1/slice
+        ${ICE_HOME}/Ice-3.4.0/slice
+        ${ICE_HOME}/Ice-3.3.1/slice
+        ${ICE_HOME}/Ice-3.3.0/slice )
+  else (WIN32)
+    set (ICE_INCLUDE_DIR
+        ${ICE_ICE_H_INCLUDE_DIR}
+        ${ICE_HOME}/share/slice
+        ${ICE_HOME}/share/ice/slice
+        ${ICE_HOME}/share/Ice/slice
+        # For Ice installation via Ubuntu Synaptic package manager
+        ${ICE_HOME}/share/Ice-3.4.1/slice
+        ${ICE_HOME}/share/Ice-3.4.0/slice
+        ${ICE_HOME}/share/Ice-3.3.1/slice
+        ${ICE_HOME}/share/Ice-3.3.0/slice )
+  endif (WIN32)
   set (ICE_LIBRARY_DIR ${ICE_HOME}/lib)
 
   # debian package splits off slice files into a different place
