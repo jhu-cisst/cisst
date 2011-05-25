@@ -11,10 +11,12 @@ class vctPlot2DBaseTestClass: public vctPlot2DBase
     virtual void Render(void){};
 };
 
-class vctPlot2DBaseTest : public CppUnit::TestFixture
+class vctPlot2DBaseTest: public CppUnit::TestFixture
 {        
     CPPUNIT_TEST_SUITE(vctPlot2DBaseTest);
-    CPPUNIT_TEST(TestBufferManipulating);    
+    {
+	CPPUNIT_TEST(TestBufferManipulating);
+    } 
     CPPUNIT_TEST_SUITE_END();
     
  public:
@@ -24,8 +26,10 @@ class vctPlot2DBaseTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
     
-    /*! Test the Prepend, Append, SetPoint methods */
+    /*! Test the Prepend, Append, SetPoint methods. */
     void TestBufferManipulating(void);
+
+    /*! Test range computation, min, max, ... */
 };
 
 

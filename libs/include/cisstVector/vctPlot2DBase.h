@@ -60,29 +60,79 @@ public:
         friend class vctPlot2DOpenGL;
         friend class vctPlot2DVTK;
     public:
-        Trace(const std::string & name, size_t numberOfPoints, size_t PointSize = 2);
+        Trace(const std::string & name, size_t numberOfPoints, size_t pointDimension = 2);
         ~Trace();
 
-        void AddPoint(const vctDouble2 & point);
+        // see AppendPoint
+        CISST_DEPRECATED void AddPoint(const vctDouble2 & point);
+        /*! Insert point at last position and move last position
+          forward.  If the circular buffer is full, this methods
+          overwrite the first element. */ 
         void AppendPoint(const vctDouble2 & point);
-        vctDouble2 GetPointAt(size_t index);
+
+        /*! Get point value in the buffer relative to first element.
+          This method will throw an std::runtime_error if the index
+          is invalid, i.e. greater than the buffer size. */
+        vctDouble2 GetPointAt(size_t index) throw (std::runtime_error);
+
+        /*! Set point value at a given position, relative to first
+          element.  This method will throw an std::runtime_error if
+          the index is invalid, i.e. greater than the buffer size. */
         void SetPointAt(size_t index, const vctDouble2 & point);
-        void SetArrayAt(size_t index, const double * pointArray, size_t size);
-        bool PrependArray(const double * pointArray, size_t arraySize);
+
+        /*! Replaces "size" points data starting at "index".  This
+          methods assumes that the point size of the user provided
+          buffer matches the internal buffer.  If either the point
+          size, index or size of user provided data is incorrect, an
+          exception is thrown. */
+        void SetArrayAt(size_t index, const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
+        
+        /*! Prepend user provided data at the beginning of the
+          circular buffer.  If the buffer is full or doesn't have
+          enough free space, data will be overwritten at the end of
+          buffer.  This method will throw an exception if either the
+          array size or index is invalid. */
+        bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2);
+        
+        /*! Append user provided data at the end of the circular
+          buffer.  If the buffer is full or doesn't have enough free
+          space, data will be overwritten at the beginning of buffer.
+          This method will throw an exception if either the array size
+          or index is invalid. */
         bool AppendArray(const double * pointArray, size_t arraySize);
+        
         void Freeze(bool freeze);
 
-        void ComputeDataRangeX(double & min, double & max);
+        /*! Compute min and max over all points to recenter display.  If the buffer contains no point, returns 0. */
+        //@{
+        void ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false);
         void ComputeDataRangeY(double & min, double & max);
         void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
-        void GetLeftRightDataX(double & min, double &max);
+        //@}
 
-        void SetNumberOfPoints(size_t numberOfPoints);
-        void GetNumberOfPoints(size_t &numberOfPoints, size_t &bufferSize);
+        // use ComputeDataRangeX with assumesDataSorted = true
+        void CISST_DEPRECATED GetLeftRightDataX(double & min, double & max);
+
+        void CISST_DEPRECATED SetNumberOfPoints(size_t numberOfPoints);
+        void CISST_DEPRECATED GetNumberOfPoints(size_t &numberOfPoints, size_t &bufferSize);
+
+        /*! Get size of circular buffer. */
+        size_t GetSize(void) const;
+
+        /*! Get number of points. */
+        size_t GetNumberOfPoints(void) const;
+
         void SetColor(const vctDouble3 & colorInRange0To1);
 
+        /*! Destructive resize, this method resize the circular buffer
+          and sets the first and last pointers to the buffer's
+          beginning. */
         void SetSize(size_t numberOfPoints);
-        void ReSize(size_t numberOfPoints);
+
+        /*! Non destructive resize.  If the new buffer is bigger,
+          preserves all points.  If the new buffer is smaller,
+          preserves the data at the end by default. */
+        void Resize(size_t numberOfPoints, bool trimOlder = true);
 
     protected:
         /*! Trace name, used for GUI */
