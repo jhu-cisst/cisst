@@ -76,6 +76,9 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
 
     Config.Level        = 4;
     Config.Differential = 0;
+
+    ProcInfoSingleThread.count = 1;
+    ProcInfoSingleThread.ID    = 0;
 }
 
 svlVideoCodecCVI::~svlVideoCodecCVI()
@@ -777,6 +780,8 @@ int svlVideoCodecCVI::SetTimestamp(const double timestamp)
 
 int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
         CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
@@ -937,6 +942,8 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
 
 int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
         CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;

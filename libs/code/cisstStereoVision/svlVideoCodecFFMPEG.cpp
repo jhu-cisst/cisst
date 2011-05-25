@@ -89,6 +89,9 @@ svlVideoCodecFFMPEG::svlVideoCodecFFMPEG() :
     Config.EncoderID = 0;
     Config.Bitrate   = 4000;
     Config.GoP       = 30;
+
+    ProcInfoSingleThread.count = 1;
+    ProcInfoSingleThread.ID    = 0;
 }
 
 svlVideoCodecFFMPEG::~svlVideoCodecFFMPEG()
@@ -908,6 +911,8 @@ double svlVideoCodecFFMPEG::GetTimestamp() const
 
 int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
         CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
@@ -1020,6 +1025,8 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
 
 int svlVideoCodecFFMPEG::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
         CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
