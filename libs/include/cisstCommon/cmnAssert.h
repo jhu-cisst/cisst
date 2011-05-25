@@ -40,46 +40,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 
-
-#ifndef DOXYGEN
-
-// No __FUNCTION__ for g++ version < 2.6 __FUNCDNAME__ Valid only
-// within a function and returns the decorated name of the enclosing
-// function (as a string). __FUNCDNAME__ is not expanded if you use
-// the /EP or /P compiler option.  __FUNCSIG__ Valid only within a
-// function and returns the signature of the enclosing function (as a
-// string). __FUNCSIG__ is not expanded if you use the /EP or /P
-// compiler option.  __FUNCTION__ Valid only within a function and
-// returns the undecorated name of the enclosing function (as a
-// string). __FUNCTION__ is not expanded if you use the /EP or /P
-// compiler option.
-
-
-// Visual C++
-#ifdef CISST_COMPILER_IS_MSVC
-    #ifdef __FUNCSIG__
-        #define CMN_PRETTY_FUNCTION	__FUNCSIG__
-    #else
-        #warning "With Visual Studio, you need /EP or /P to have __FUNCSIG__"
-    #endif
-
-// GNU CC and Intel CC
-#elif (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC)
-    #define CMN_PRETTY_FUNCTION __PRETTY_FUNCTION__
-
-// Otherwise
-#else
-	#warning "Visual C++, GNU C++ and Intel CC are supported so far"
-#endif
-
-// Set a default value
-#ifndef CMN_PRETTY_FUNCTION
-    #define CMN_PRETTY_FUNCTION ""
-#endif
-
-#endif // DOXYGEN
-
-
 /*!
   \ingroup cisstCommon
 
