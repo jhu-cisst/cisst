@@ -71,7 +71,7 @@ protected:
         // Dynamic component management
         mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
-        mtsFunctionWrite ComponentConnect;
+        mtsFunctionWriteReturn ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
@@ -104,7 +104,7 @@ protected:
     // Because any thread can call these methods, thread-safety is obtained by using a mutex.
     struct GeneralInterfaceStruct {
         osaMutex Mutex;        
-        mtsFunctionWrite ComponentConnect;
+        mtsFunctionWriteReturn ComponentConnect;
     } GeneralInterface;
 
     /*! Create new component and add it to LCM */
@@ -150,12 +150,13 @@ public:
 
     // Called from LCM
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                 bool byPassInterface);
 
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
@@ -176,7 +177,7 @@ public:
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);

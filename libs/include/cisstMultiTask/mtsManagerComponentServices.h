@@ -41,7 +41,7 @@ protected:
     struct ManagementStruct {
         mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
-        mtsFunctionWrite Connect;
+        mtsFunctionWriteReturn Connect;
         mtsFunctionWrite Disconnect;
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;
@@ -124,14 +124,12 @@ public:
     bool ComponentConfigure(
         const std::string& processName, const std::string & componentName, const std::string & configString) const;
 
-    bool Connect(
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
-    bool Connect(
-        const std::string & clientProcessName,
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+    bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+    bool Connect(const std::string & clientProcessName,
+                 const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & serverProcessName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
     bool Connect(const mtsDescriptionConnection & connection) const;
 
     bool Disconnect(

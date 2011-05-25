@@ -87,8 +87,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
-                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
@@ -221,9 +221,9 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDe
     // Check if a new component with the name specified can be created
     if (GCM->FindComponent(componentDescription.ProcessName,
                            componentDescription.ComponentName)) {
-        result = false;
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to create component: " << componentDescription << std::endl
                                 << "InterfaceGCMCommands_ComponentCreate: component already exists" << std::endl;
+        result = false;
         return;
     }
 
@@ -270,7 +270,8 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mt
     functionSet->ComponentConfigure(arg);
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg)
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result)
 {
     // We don't check argument validity with the GCM at this stage and rely on 
     // the current normal connection procedure (GCM allows connection at the 
@@ -280,15 +281,21 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(connectionDescription.Client.ProcessName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << arg << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << connectionDescription << std::endl;
+        result = false;
         return;
     }
 
-    //functionSet->ComponentConnect.ExecuteBlocking(arg);
-    functionSet->ComponentConnect(arg);
+    mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription, result);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
+                                << " error \"" << executionResult << "\"" << std::endl;
+        result = false;
+    }
 }
+
 
 // MJ: Another method that does the same thing but accepts a single parameter 
 // as connection id should be added.

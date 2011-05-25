@@ -97,12 +97,15 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
     componentDescription.ProcessName   = processName;
     componentDescription.ClassName     = className;
     componentDescription.ComponentName = componentName;
+
+    // call blocking command
     bool result;
     mtsExecutionResult executionResult = ServiceComponentManagement.Create(componentDescription, result);
 
     // check is command was sent properly
     if (!executionResult.IsOK()) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to execute command \"Create\"" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to execute command \"Create\" (error "
+                                << executionResult << ")" << std::endl;
         return false;
     }
 
@@ -140,12 +143,23 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
     serializer.Serialize(constructorArg);
     componentDescription.ConstructorArgSerialized = buffer.str();
 
-    // MJ: TODO: change this with blocking command
+    // call blocking command
     bool result;
-    std::cerr << CMN_LOG_DETAILS << CMN_PRETTY_FUNCTION << " - need to handle return values" << std::endl;
     mtsExecutionResult executionResult = ServiceComponentManagement.Create(componentDescription, result);
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: requested component creation: " << componentDescription << std::endl;
+    // check is command was sent properly
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to execute command \"Create\" (error "
+                                << executionResult << ")" << std::endl;
+        return false;
+    }
+
+    if (result == false) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to create component: " << componentDescription << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: successfully create component: " << componentDescription << std::endl;
     return true;
 }
 
@@ -177,50 +191,63 @@ bool mtsManagerComponentServices::ComponentConfigure(
     return true;
 }
 
-bool mtsManagerComponentServices::Connect(
-    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
+
+bool mtsManagerComponentServices::Connect(const std::string & clientComponentName,
+                                          const std::string & clientInterfaceRequiredName,
+                                          const std::string & serverComponentName,
+                                          const std::string & serverInterfaceProvidedName) const
 {
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
     return Connect(thisProcessName, clientComponentName, clientInterfaceRequiredName,
                    thisProcessName, serverComponentName, serverInterfaceProvidedName);
 }
 
-bool mtsManagerComponentServices::Connect(
-    const std::string & clientProcessName,
-    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName,
-    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
-{
-    mtsDescriptionConnection arg;
-    arg.Client.ProcessName   = clientProcessName;
-    arg.Client.ComponentName = clientComponentName;
-    arg.Client.InterfaceName = clientInterfaceRequiredName;
-    arg.Server.ProcessName   = serverProcessName;
-    arg.Server.ComponentName = serverComponentName;
-    arg.Server.InterfaceName = serverInterfaceProvidedName;
 
-    return Connect(arg);
+bool mtsManagerComponentServices::Connect(const std::string & clientProcessName,
+                                          const std::string & clientComponentName,
+                                          const std::string & clientInterfaceRequiredName,
+                                          const std::string & serverProcessName,
+                                          const std::string & serverComponentName,
+                                          const std::string & serverInterfaceProvidedName) const
+{
+    mtsDescriptionConnection connectionDescription;
+    connectionDescription.Client.ProcessName   = clientProcessName;
+    connectionDescription.Client.ComponentName = clientComponentName;
+    connectionDescription.Client.InterfaceName = clientInterfaceRequiredName;
+    connectionDescription.Server.ProcessName   = serverProcessName;
+    connectionDescription.Server.ComponentName = serverComponentName;
+    connectionDescription.Server.InterfaceName = serverInterfaceProvidedName;
+
+    return Connect(connectionDescription);
 }
 
-bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & connection) const
+
+bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & connectionDescription) const
 {
-    if (!ServiceComponentManagement.Connect.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentConnect: invalid function - has not been bound to command" << std::endl;
+    // Make a copy because the parameter is const
+    mtsDescriptionConnection conn(connectionDescription);
+    conn.ConnectionID = InvalidConnectionID;
+
+    // call blocking command
+    bool result;
+    mtsExecutionResult executionResult = ServiceComponentManagement.Connect(conn, result);
+
+    // check is command was sent properly
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to execute command \"Connect\" (error "
+                                << executionResult << ")" << std::endl;
         return false;
     }
 
-    // Make a copy because the parameter is const
-    mtsDescriptionConnection conn(connection);
-    conn.ConnectionID = InvalidConnectionID;
+    if (result == false) {
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to connect: " << connectionDescription << std::endl;
+        return false;
+    }
 
-    // MJ: TODO: change this with blocking command
-    ServiceComponentManagement.Connect(conn);
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentConnect: requested component connection: " << conn << std::endl;
-
+    CMN_LOG_CLASS_RUN_VERBOSE << "Connect: successfully connected: " << connectionDescription << std::endl;
     return true;
 }
+
 
 bool mtsManagerComponentServices::Disconnect(
     const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,

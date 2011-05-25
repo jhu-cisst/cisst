@@ -41,11 +41,6 @@ public:
         UseSeparateLogFileDefault(false);
         InterfaceToComponentManager = EnableDynamicComponentManagement();
     }
-
-    // ManagerComponentServices->RequestComponentCreate(processName, componentType, componentName)
-    // ManagerComponentServices->RequestComponentConnect(processName, componentName, interfaceRequiredName,
-    //                                                   processName, componentName, interfaceProvidedName))
-
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestConfigurationManager);
@@ -74,7 +69,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             return 1;
         }
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"connect\" first" << std::endl;
         return 1;
     }
     // send message to acknowledge connection
@@ -110,7 +105,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         // send message to confirm everything seems fine
         std::cout << "start succeeded" << std::endl;
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"start\" first" << std::endl;
         return 1;
     }
 
@@ -119,6 +114,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     std::string
         process1Name, process2Name,
         component1Name, component2Name,
+        requiredInterface, providedInterface,
         libraryName, componentType;
     mtsManagerComponentServices * services = configurationManager->GetManagerComponentServices();
     while (!stop) {
@@ -150,6 +146,24 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
                 std::cout << "component created" << std::endl;
             } else {
                 std::cout << "component creation failed" << std::endl;
+            }
+
+        } else if (command == std::string("connect")) {
+            std::cin >> process1Name;
+            std::cin >> component1Name;
+            std::cin >> requiredInterface;
+            std::cin >> process2Name;
+            std::cin >> component2Name;
+            std::cin >> providedInterface;
+            if (services->Connect(process1Name, component1Name, requiredInterface,
+                                  process2Name, component2Name, providedInterface)) {
+                std::cout << "connection succeeded" << std::endl;
+            } else {
+                std::cout << "connection failed for required "
+                          << process1Name << ":" << component1Name << ":" << requiredInterface
+                          << " to "
+                          << process2Name << ":" << component2Name << ":" << providedInterface
+                          << std::endl;
             }
 
         } else {

@@ -60,7 +60,7 @@ int main(int argc, char * argv[])
             return 1;
         }
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"connect\" first" << std::endl;
         return 1;
     }
     // send message to acknowledge connection
@@ -85,7 +85,7 @@ int main(int argc, char * argv[])
         // send message to confirm everything seems fine
         std::cout << "start succeeded" << std::endl;
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"start\" first" << std::endl;
         return 1;
     }
 

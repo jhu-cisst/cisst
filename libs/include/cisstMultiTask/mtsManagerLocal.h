@@ -362,7 +362,8 @@ public:
               reported to the global component manager (the local component
               manager does not keep any connection information). */
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                 bool byPassInterface = false);
 
 #if CISST_MTS_HAS_ICE
     /*! \brief Connect two remote interfaces

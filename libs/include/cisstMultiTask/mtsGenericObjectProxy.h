@@ -269,6 +269,8 @@ public:
 
     typedef _elementType value_type;
 
+    value_type Dummy;
+
     // CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     // Dirty Trick: this class uses the class services of the dereferenced (derived) type
     //enum {HAS_DYNAMIC_CREATION = DeRefType::HAS_DYNAMIC_CREATION};
@@ -294,8 +296,18 @@ public:
     inline ~mtsGenericObjectProxyBase(void) {}
 
     /*! Return pointer to data */
-    virtual value_type& GetData(void) = 0;
-    virtual const value_type& GetData(void) const = 0;
+    virtual value_type & GetData(void) {
+        std::cerr << "-------* " << typeid(this).name() << std::endl;
+        bool test;
+        std::cerr << "-------- " << typeid(test).name() << std::endl;
+        std::cerr << "-------- " << typeid(_elementType).name() << std::endl;
+        return Dummy;
+    };
+    virtual const value_type & GetData(void) const  {
+        std::cerr << "-------* const " << typeid(this).name() << std::endl;
+        std::cerr << "-------- const " << typeid(_elementType).name() << std::endl;
+        return Dummy;
+    };
 
     /*! Conversion assignment. */
     ThisType & operator=(const ThisType &data) {
