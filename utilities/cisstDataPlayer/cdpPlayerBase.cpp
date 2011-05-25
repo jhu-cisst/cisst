@@ -29,7 +29,7 @@ CMN_IMPLEMENT_SERVICES(cdpPlayerBase);
 
 cdpPlayerBase::cdpPlayerBase(const std::string & name, double period):
     mtsTaskPeriodic(name,period),
-    Sync(true),
+    Sync(false),
     State(STOP),
     Time(0),
     PlayStartTime(0),
@@ -89,7 +89,7 @@ void cdpPlayerBase::ErrorMessage(const std::string &msg){
 
     //    ErrorMessageDialog->showMessage(tr(msg.c_str()));
 
-    int ret = QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()),tr(msg.c_str()));
+    QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()),tr(msg.c_str()));
 }
 
 

@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QGridLayout>
 #include <iostream>
 #include <sstream>
+#include <QFileDialog>
 
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstStereoVision/svlFilterOutput.h>
@@ -29,11 +30,12 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdpPlayerVideo);
 
 cdpPlayerVideo::cdpPlayerVideo(const std::string & name, double period):
-    cdpPlayerBase(name,period)
+    cdpPlayerBase(name,period),
+    TimestampOverlay(0)
 {
 
     // create the user interface
-        // create the user interface
+    // create the user interface
     ExWidget.setupUi(&Widget);
     VideoWidget = new svlFilterImageQtWidget();
 
@@ -72,6 +74,10 @@ void cdpPlayerVideo::MakeQTConnections(void)
 
     QObject::connect(ExWidget.SetSaveEndButton, SIGNAL(clicked()),
                      this, SLOT( QSlotSetSaveEndClicked()) );
+
+    QObject::connect(ExWidget.OpenFileButton, SIGNAL(clicked()),
+                     this, SLOT( QSlotOpenFileClicked()) );
+
 }
 
 
@@ -80,14 +86,13 @@ void cdpPlayerVideo::Configure(const std::string & CMN_UNUSED(filename))
     MakeQTConnections();
 
 
-
     //Widget.setWindowTitle(QString::fromStdString(GetName()));
-   // Widget.show();
+    // Widget.show();
     MainWindow.setWindowTitle(QString::fromStdString(GetName()));
     MainWindow.resize(300,500);
     MainWindow.show();
-    LoadData();
-    UpdateLimits();
+    //    LoadData();
+    //  UpdateLimits();
 
 }
 
@@ -118,7 +123,7 @@ void cdpPlayerVideo::Run(void)
             //Load and Prep current data
 	    //source.Play();
 	    //CMN_LOG_CLASS_RUN_WARNING<<"pos: "<<source.GetPositionAtTime(Time.Data)<<std::endl;
-             //CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
+            //CMN_LOG_CLASS_RUN_WARNING<<"at T: "<<source.GetTimeAtPosition(source.GetPositionAtTime(Time.Data))<<std::endl;
 	    Source.SetPosition(Source.GetPositionAtTime(Time.Data));
 	    Source.Play();
         }
@@ -266,15 +271,22 @@ void cdpPlayerVideo::QSlotStopClicked(void)
 void cdpPlayerVideo::LoadData(void)
 {
 
-    SetupPipeline();
+    QString fileName = QFileDialog::getOpenFileName(&Widget, tr("Select video file"),tr("./"),tr("Audio (*.cvi *.avi *.mpg *.mov *.mpeg)"));
+
+    if (fileName.isEmpty()) {
+        CMN_LOG_CLASS_RUN_WARNING<<"File not selected, no data to load"<<std::endl;
+        return;
+    }
+
+    SetupPipeline(fileName.toStdString());
 
     vctInt2 range;
-    Source.GetRange(range);
+
+    range[0] = 0;
+    range[1] = Source.GetLength();
 
     PlayerDataInfo.DataStart() = Source.GetTimeAtPosition(range[0]);
     PlayerDataInfo.DataEnd() = Source.GetTimeAtPosition(range[1]);
-//    PlayerDataInfo.DataStart() = 1297723451.415;
-//    PlayerDataInfo.DataEnd() = 1297723900.022;
 
     if (Time < PlayerDataInfo.DataStart()) {
         Time = PlayerDataInfo.DataStart();
@@ -304,6 +316,12 @@ void cdpPlayerVideo::QSlotSetSaveEndClicked(void)
 }
 
 
+void cdpPlayerVideo::QSlotOpenFileClicked(void){
+
+    LoadData();
+
+}
+
 void cdpPlayerVideo::UpdateLimits()
 {
     ExWidget.TimeSlider->setRange((int)PlayerDataInfo.DataStart(), (int)PlayerDataInfo.DataEnd());
@@ -316,23 +334,42 @@ void cdpPlayerVideo::UpdateLimits()
 }
 
 
-void cdpPlayerVideo::SetupPipeline()
+void cdpPlayerVideo::SetupPipeline(const std::string &filename)
 {
     // Add timestamp overlay
-    TimestampOverlay = new svlOverlayTimestamp (0, true, VideoWidget, svlRect(4, 4, 134, 21),
-						15.0, svlRGB(255, 200, 200), svlRGB(32, 32, 32));
-    Overlay.AddOverlay(*TimestampOverlay);
+
+    StreamManager.Release();
+
     Source.SetChannelCount(1);
 
-    std::string pathname = "/mnt/2TB/TestRecordings/laser.cvi";
-    if (Source.SetFilePath(pathname) != SVL_OK) {
+    if (Source.SetFilePath(filename) != SVL_OK) {
 	std::cerr << std::endl << "Wrong file name... " << std::endl;
     }
 
-    // chain filters to pipeline
-    StreamManager.SetSourceFilter(&Source); // chain filters to pipeline
-    Source.GetOutput()->Connect(Overlay.GetInput());
-    Overlay.GetOutput()->Connect(VideoWidget->GetInput());
+    if (!TimestampOverlay) {
+
+        TimestampOverlay = new svlOverlayTimestamp (0, true, VideoWidget, svlRect(4, 4, 134, 21),
+                                                    15.0, svlRGB(255, 200, 200), svlRGB(32, 32, 32));
+        Overlay.AddOverlay(*TimestampOverlay);
+
+        // chain filters to pipeline
+        StreamManager.SetSourceFilter(&Source); // chain filters to pipeline
+        Source.GetOutput()->Connect(Overlay.GetInput());
+        Overlay.GetOutput()->Connect(VideoWidget->GetInput());
+
+    }
     StreamManager.Play();
     Source.Pause();
+
+
+    //Source.SetRange(Source.GetTimeAtPosition(0))
+
 }
+
+void cdpPlayerVideo::SetSync(bool isSynced) {
+
+  ExWidget.SyncCheck->setChecked(isSynced);
+  Sync = isSynced;
+
+}
+
