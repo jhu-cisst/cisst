@@ -102,6 +102,8 @@ private:
     vctDynamicVector<std::string> EncoderNames;
     vctDynamicVector<unsigned int> EncoderIDs;
 
+    svlProcInfo ProcInfoSingleThread;
+
     void BuildIndex();
     void ConfigureEncoder();
     void BuildEncoderList();

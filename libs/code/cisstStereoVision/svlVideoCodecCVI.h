@@ -112,6 +112,8 @@ protected:
     bool KillSaveThread;
     bool SaveThreadError;
 
+    svlProcInfo ProcInfoSingleThread;
+
     void DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size);
     void DiffDecode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size);
 
