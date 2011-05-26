@@ -37,7 +37,7 @@ cmnXMLPath::~cmnXMLPath()
 
 
 
-void cmnXMLPath::SetInputSource(const char *filename)
+void cmnXMLPath::SetInputSource(const char * filename)
 {
 	/* Load XML document */
     Document = xmlParseFile(filename);
@@ -55,19 +55,24 @@ void cmnXMLPath::SetInputSource(const char *filename)
 }
 
 
-void cmnXMLPath::PrintValue(std::ostream &out, const char *context, const char *XPath)
+void cmnXMLPath::SetInputSource(const std::string & fileName) {
+    this->SetInputSource(fileName.c_str());
+}
+
+
+void cmnXMLPath::PrintValue(std::ostream & out, const char * context, const char * XPath)
 {
 	std::string str;
     if (GetXMLValue(context, XPath, str) == false) {
-        CMN_LOG_CLASS_INIT_WARNING << "PrintValue: no nodes matched the location path \"" << XPath
-                                   << "\"" << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "PrintValue: no nodes matched the location path \"" << XPath
+                                  << "\"" << std::endl;
     } else {
         out << str << std::endl;
     }
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar **storage)
+bool cmnXMLPath::GetXMLValueXMLChar(const char * context, const char * XPath, xmlChar **storage)
 {
 	/* Evaluate xpath expression */
 	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
@@ -88,23 +93,23 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar *
 			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
 				cur = nodes->nodeTab[i];
 				*storage = xmlNodeGetContent(cur);
-				CMN_LOG_INIT_VERBOSE << "GetXMLValue: read Xpath: " << XPath << " Node name: "
-                                     << cur->name << " Content: " << *storage << std::endl;
+				CMN_LOG_CLASS_RUN_VERBOSE << "GetXMLValueXMLChar: read Xpath: " << XPath << " Node name: "
+                                          << cur->name << " Content: " << *storage << std::endl;
 			} else {
 				cur = nodes->nodeTab[i];
-				CMN_LOG_CLASS_INIT_WARNING << "GetXMLValue: node is not attribute node \"" << XPath
-                                           << "\" Node name: " << cur->name << std::endl;
+				CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueXMLChar: node is not attribute node \"" << XPath
+                                          << "\" Node name: " << cur->name << std::endl;
 			}
 		}
 		return true;
 	}
-	CMN_LOG_CLASS_INIT_WARNING << "GetXMLValue: unable to match the location path \"" << XPath
-                               << "\"" << std::endl;
+	CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueXMLChar: unable to match the location path [" << XPath
+                              << "] in context [" << context << "]" << std::endl;
 	return false;
 }
 
 
-bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xmlChar *storage)
+bool cmnXMLPath::SetXMLValueXMLChar(const char * context, const char * XPath, const xmlChar *storage)
 {
 	/* Evaluate xpath expression */
 	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
@@ -132,8 +137,8 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			CMN_ASSERT(nodes->nodeTab[i] != 0);
 			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
 				xmlNodeSetContent(nodes->nodeTab[i], storage);
-				CMN_LOG_INIT_VERBOSE << "SetXMLValue: write Xpath: " << XPath << " Node name: "
-                                     << nodes->nodeTab[i]->name << " Content: " << storage << std::endl;
+				CMN_LOG_CLASS_RUN_VERBOSE << "SetXMLValueXMLChar: write Xpath: " << XPath << " Node name: "
+                                          << nodes->nodeTab[i]->name << " Content: " << storage << std::endl;
 			}
 			/*
 			* All the elements returned by an XPath query are pointers to
@@ -159,48 +164,116 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			else
 			{
 				cur = nodes->nodeTab[i];
-				CMN_LOG_CLASS_INIT_WARNING << "SetXMLValue: node is not attribute node \"" << XPath
-                                           << "\" Node name: " << cur->name << std::endl;
+				CMN_LOG_CLASS_RUN_WARNING << "SetXMLValueXMLChar: node is not attribute node \"" << XPath
+                                          << "\" Node name: " << cur->name << std::endl;
 			}
 		}
 		return true;
 	}
-	CMN_LOG_CLASS_INIT_WARNING << "SetXMLValue: enable to match the location path \"" << XPath
-                               << "\"" << std::endl;
+	CMN_LOG_CLASS_RUN_WARNING << "SetXMLValueXMLChar: enable to match the location path \"" << XPath
+                              << "\"" << std::endl;
 	return false;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, std::string &storage)
+// -------------------- methods to set/get bool ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & value)
+{
+    bool result = false;
+	xmlChar * tmpStorage = 0;
+	if (GetXMLValueXMLChar(context, XPath, &tmpStorage) && tmpStorage != 0) {
+		for (int i = 0;
+             tmpStorage[i] != '\0';
+             tmpStorage[i] = toupper(tmpStorage[i]), i++)
+        {}
+		if (strncmp((char*)tmpStorage, "FALSE", 5) == 0) {
+			value = false;
+			return true;
+		} else if (strncmp((char*)tmpStorage, "TRUE", 4) == 0) {
+			value = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+    return result;
+}
+
+
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool &value, const bool & valueIfMissing)
+{
+	bool ret_value;
+	bool tmp_value;
+	ret_value = GetXMLValue(context, XPath, tmp_value);
+	if (ret_value) {
+        value = tmp_value;
+	} else {
+        value = valueIfMissing;
+    }
+	return ret_value;
+}
+
+
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const bool & value)
+{
+	bool result = false;
+	std::string tmpStorage((value)?"true":"false");
+	if (SetXMLValueXMLChar(context, XPath, (xmlChar*)(tmpStorage.c_str()))) {
+		return true;
+	}
+	return result;
+}
+
+
+// -------------------- methods to set/get int ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int & value)
 {
 	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
-		storage = (tmpStorage)?(char*)tmpStorage:"";
+	if (GetXMLValueXMLChar(context, XPath, &tmpStorage)  && tmpStorage != 0) {
+		value = atoi((char*) tmpStorage);
 		return true;
 	}
-	return false;
+    return false;
 }
 
 
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, const std::string &storage)
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int & value, const int & valueIfMissing)
 {
-	xmlChar* tmpStorage = (xmlChar*)storage.c_str();
-	if (SetXMLValue(context, XPath, tmpStorage)) {
-		return true;
-	}
-	return false;
+	bool ret_value;
+	int tmp_value;
+	ret_value = GetXMLValue(context, XPath, tmp_value);
+	if (ret_value) {
+        value = tmp_value;
+	} else {
+        value = valueIfMissing;
+    }
+	return ret_value;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, double &value)
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const int & value)
+{
+	bool result = false;
+	std::stringstream tmpStorage;
+	// this way we can control the printing format.
+	tmpStorage << cmnPrintf("%d") << value;
+	if (SetXMLValueXMLChar(context, XPath, (xmlChar*)tmpStorage.str().c_str())) {
+		return true;
+	}
+    return result;
+}
+
+
+// -------------------- methods to set/get double ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value)
 {
 	bool result = false;
 	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
+	if (GetXMLValueXMLChar(context, XPath, &tmpStorage) && tmpStorage != 0) {
 		// special treatment for select floating points eps, -Inf & Inf
 		for (int i = 0;
              tmpStorage[i] != '\0';
-             tmpStorage[i]=toupper(tmpStorage[i]), i++)
+             tmpStorage[i] = toupper(tmpStorage[i]), i++)
         {}
 		if ((strncmp((char*)tmpStorage, "INF", 3) == 0) || (strncmp((char*)tmpStorage, "1.#INF", 6) == 0)) {
 			value = std::numeric_limits<double>::infinity();
@@ -217,7 +290,21 @@ bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, double &val
 }
 
 
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, double value)
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing)
+{
+	bool ret_value;
+	double tmp_value;
+	ret_value = GetXMLValue(context, XPath, tmp_value);
+	if (ret_value) {
+        value = tmp_value;
+	} else {
+        value = valueIfMissing;
+    }
+	return ret_value;
+}
+
+
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const double & value)
 {
 	bool result = false;
 	std::stringstream tmpStorage;
@@ -227,111 +314,44 @@ bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, double valu
 	} else {
 		tmpStorage << cmnPrintf("%f") << value;
 	}
-	if (SetXMLValue(context, XPath, (xmlChar*)tmpStorage.str().c_str())) {
+	if (SetXMLValueXMLChar(context, XPath, (xmlChar*)tmpStorage.str().c_str())) {
 		return true;
 	}
     return result;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, int &value)
+// -------------------- methods to set/get std::string ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string & storage)
 {
 	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage)  && tmpStorage != 0) {
-		value = atoi((char*) tmpStorage);
+	if (GetXMLValueXMLChar(context, XPath, &tmpStorage) && tmpStorage != 0) {
+		storage = (tmpStorage)?(char*)tmpStorage:"";
 		return true;
 	}
-    return false;
+	return false;
 }
 
 
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, int value)
-{
-	bool result = false;
-	std::stringstream tmpStorage;
-	// this way we can control the printing format.
-	tmpStorage << cmnPrintf("%d") << value;
-	if (SetXMLValue(context, XPath,		(xmlChar*)tmpStorage.str().c_str())) {
-		return true;
-	}
-    return result;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, bool &value)
-{
-    bool result = false;
-	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
-		for (int i = 0;
-             tmpStorage[i] != '\0';
-             tmpStorage[i]=toupper(tmpStorage[i]), i++)
-        {}
-		if (strncmp((char*)tmpStorage, "FALSE", 5) == 0) {
-			value = false;
-			return true;
-		} else if (strncmp((char*)tmpStorage, "TRUE", 4) == 0) {
-			value = true;
-			return true;
-		} else {
-			return false;
-		}
-	}
-    return result;
-}
-
-
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, bool value)
-{
-	bool result = false;
-	std::string tmpStorage((value)?"true":"false");
-	if (SetXMLValue(context, XPath, (xmlChar*)(tmpStorage.c_str()))) {
-		return true;
-	}
-	return result;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool &value, const bool &valueifmissing)
-{
-	bool ret_value;
-	bool tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int &value, const int &valueifmissing)
-{
-	bool ret_value;
-	int tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double &value, const double &valueifmissing)
-{
-	bool ret_value;
-	double tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string &value, const std::string &valueifmissing)
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string & value, const std::string & valueIfMissing)
 {
 	bool ret_value;
 	std::string tmp_value;
 	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
+	if (ret_value) {
+        value = tmp_value;
+	} else {
+        value = valueIfMissing;
+    }
 	return ret_value;
 }
 
+
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const std::string & storage)
+{
+	xmlChar* tmpStorage = (xmlChar*)storage.c_str();
+	if (SetXMLValueXMLChar(context, XPath, tmpStorage)) {
+		return true;
+	}
+	return false;
+}

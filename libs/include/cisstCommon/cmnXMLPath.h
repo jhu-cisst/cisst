@@ -126,11 +126,11 @@ class CISST_EXPORT cmnXMLPath: public cmnGenericObject {
 protected:
 
 	/*! Get the XPath result and cast it as internal storage type based on the library */
-	bool GetXMLValue(const char * context, const char * XPath, xmlChar **storage);
+	bool GetXMLValueXMLChar(const char * context, const char * XPath, xmlChar **storage);
 
 	/*! set the value of attribute returned by XPath expression to value help by
 	internal storage type based on the library*/
-	bool SetXMLValue(const char * context, const char * XPath, const xmlChar *storage);
+	bool SetXMLValueXMLChar(const char * context, const char * XPath, const xmlChar *storage);
 
 
 public:
@@ -140,37 +140,62 @@ public:
     /*! Destructor */
     virtual ~cmnXMLPath();
 
-    /*! Set the input source file2 */
+    /*! Set the input source file */
     //@{
     void SetInputSource(const char *filename);
-    inline void SetInputSource(const std::string & fileName) {
-        this->SetInputSource(fileName.c_str());
-    }
+    void SetInputSource(const std::string & fileName);
     //@}
 
     /*! For debugging. Print the attribute value as a string on stream */
-    void PrintValue(std::ostream &out, const char *context, const char *XPath);
+    void PrintValue(std::ostream & out, const char * context, const char * XPath);
 
 	/*! Get/Set the XPath result and cast it as bool */
-    bool GetXMLValue(const char * context, const char * XPath, bool &value);
-	bool GetXMLValue(const char * context, const char * XPath, bool &value, const bool &valueifmissing);
-    bool SetXMLValue(const char * context, const char * XPath, bool value);
+    //@{
+    bool GetXMLValue(const char * context, const char * XPath, bool & value);
+	bool GetXMLValue(const char * context, const char * XPath, bool & value, const bool & valueIfMissing);
+    bool SetXMLValue(const char * context, const char * XPath, const bool & value);
+    //@}
 
     /*! Get/Set the XPath result and cast it as int */
-    bool GetXMLValue(const char * context, const char * XPath, int &value);
-	bool GetXMLValue(const char * context, const char * XPath, int &value, const int &valueifmissing);
-	bool SetXMLValue(const char * context, const char * XPath, int value);
+    //@{
+    bool GetXMLValue(const char * context, const char * XPath, int & value);
+	bool GetXMLValue(const char * context, const char * XPath, int & value, const int & valueIfMissing);
+	bool SetXMLValue(const char * context, const char * XPath, const int & value);
+    //@}
 
     /*! Get/Set the XPath result and cast it as double */
-    bool GetXMLValue(const char * context, const char * XPath, double &value);
-	bool GetXMLValue(const char * context, const char * XPath, double &value, const double &valueifmissing);
-	bool SetXMLValue(const char * context, const char * XPath, double value);
+    //@{
+    bool GetXMLValue(const char * context, const char * XPath, double & value);
+	bool GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing);
+	bool SetXMLValue(const char * context, const char * XPath, const double & value);
+    //@}
 
     /*! Get/Set the XPath result and cast it as string */
-    bool GetXMLValue(const char * context, const char * XPath, std::string &storage);
-	bool GetXMLValue(const char * context, const char * XPath, std::string &storage, const std::string &valueifmissing);
-    bool SetXMLValue(const char * context, const char * XPath, const std::string &storage);
+    //@{
+    bool GetXMLValue(const char * context, const char * XPath, std::string & value);
+	bool GetXMLValue(const char * context, const char * XPath, std::string & value, const std::string & valueIfMissing);
+    bool SetXMLValue(const char * context, const char * XPath, const std::string & value);
+    //@}
 
+
+    /*! Templated helpers to define context and path using std::string */
+    //@{
+    template <class __elementType>
+    bool GetXMLValue(const std::string & context, const std::string & XPath, __elementType & value) {
+        return this->GetXMLValue(context.c_str(), XPath.c_str(), value);
+    }
+
+    template <class __elementType>
+    bool GetXMLValue(const std::string & context, const std::string & XPath, __elementType & value, const __elementType & valueIfMissing) {
+        return this->GetXMLValue(context.c_str(), XPath.c_str(), value, valueIfMissing);
+    }
+
+    template <class __elementType>
+    bool SetXMLValue(const std::string & context, const std::string & XPath, const __elementType & value)
+    {
+        return this->SetXMLValue(context.c_str(), XPath.c_str(), value);
+    }
+    //@}
 };
 
 
