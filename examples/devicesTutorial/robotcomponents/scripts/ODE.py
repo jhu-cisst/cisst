@@ -84,9 +84,7 @@ def ODEWAMBH( wamname, bhname, world, Rtw0, period=0.002 ):
 
 
 def ODELWR( name, world, Rtw0, period=0.002 ):
-#    cisst_source_root = os.environ['CISST_SOURCE_ROOT']
-    cisst_source_root = "E:\\src\\cisst"
-#    cisst_source_root = "E:\\src\\cisst"
+    cisst_source_root = os.environ['CISST_SOURCE_ROOT']
     cad_base   =   cisst_source_root+'/libs/etc/cisstRobot/LWR/l0.obj'
     cad_models = [ cisst_source_root+'/libs/etc/cisstRobot/LWR/l1.obj', 
                    cisst_source_root+'/libs/etc/cisstRobot/LWR/l2.obj', 

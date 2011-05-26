@@ -2,6 +2,10 @@ from RobotComponents import *
 from ODE             import *
 from OSG             import *
 
+cmnLogger.SetMask( CMN_LOG_ALLOW_ALL )
+cmnLogger.SetMaskFunction( CMN_LOG_ALLOW_ALL )
+cmnLogger.SetMaskDefaultLog( CMN_LOG_ALLOW_ALL )
+
 world = ODEWorld()
 
 cameara = OSGMono( 'camera', world )
@@ -19,7 +23,7 @@ tw0[2] = 1.0;
 
 # create the trajectory + setpoint generator
 wamqinit = array( [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00] )
-wamqdmax = array( [0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10] )
+wamqdmax = array( [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01] )
 wamsetpoints = SetPoints( 'WAMsetpoints', wamqinit );
 wamtrajectory = TrajectoryJoints( 'WAMtrajectory', wamqinit, wamqdmax )
 
@@ -52,7 +56,7 @@ wamq = array( [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00] )
 wamsetpoints.Insert( wamq )
 wamsetpoints.Latch()
 
-bhq = array( [1.00, 1.00, 1.00, 1.00 ] )
+bhq = array( [2.00, 2.00, 2.00, 2.00 ] )
 bhsetpoints.Insert( bhq )
 bhsetpoints.Latch()
 
