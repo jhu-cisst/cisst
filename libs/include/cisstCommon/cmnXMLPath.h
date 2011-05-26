@@ -109,8 +109,6 @@ http://www.cisst.org/cisst/license.txt.
   and axis/@name="x"/filter/@pgain
   Yes that simple!
   */
-
-
 class CISST_EXPORT cmnXMLPath: public cmnGenericObject {
     /*! Register this class with a default level of detail 1.  Levels
       of details are 1 for errors, 2 for warnings and 3 for very
@@ -142,8 +140,14 @@ public:
 
     /*! Set the input source file */
     //@{
-    void SetInputSource(const char *filename);
+    void SetInputSource(const char * filename);
     void SetInputSource(const std::string & fileName);
+    //@}
+
+    /*! Save to file */
+    //@{
+    bool SaveAs(const char * filename) const;
+    bool SaveAs(const std::string & fileName) const;
     //@}
 
     /*! For debugging. Print the attribute value as a string on stream */

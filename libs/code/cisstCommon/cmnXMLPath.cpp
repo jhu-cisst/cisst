@@ -55,8 +55,24 @@ void cmnXMLPath::SetInputSource(const char * filename)
 }
 
 
-void cmnXMLPath::SetInputSource(const std::string & fileName) {
+void cmnXMLPath::SetInputSource(const std::string & fileName)
+{
     this->SetInputSource(fileName.c_str());
+}
+
+
+bool cmnXMLPath::SaveAs(const char * filename) const
+{
+    if (xmlSaveFile(filename, this->Document) <= 0) {
+        return false;
+    }
+    return true;
+}
+
+
+bool cmnXMLPath::SaveAs(const std::string & filename) const
+{
+    return this->SaveAs(filename.c_str());
 }
 
 

@@ -29,6 +29,7 @@ class cmnXMLPathTest: public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(cmnXMLPathTest);
     {
         CPPUNIT_TEST(TestReadExistingFile);
+        CPPUNIT_TEST(TestCopyReadExistingFile);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -41,6 +42,12 @@ class cmnXMLPathTest: public CppUnit::TestFixture
 
     /*! Test read existing file */
     void TestReadExistingFile(void);
+
+    /*! Test read existing file copy */
+    void TestCopyReadExistingFile(void);
+
+protected:
+    void TestExistingFile1(const std::string & testFile);
 };
 
 

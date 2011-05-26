@@ -25,13 +25,38 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstCommon/cmnPath.h>
 
+
 void cmnXMLPathTest::TestReadExistingFile(void)
 {
+    // find original file and test
     cmnPath filePath;
     filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
     CPPUNIT_ASSERT(!(testFile == ""));
+    TestExistingFile1(testFile);
+}
 
+
+void cmnXMLPathTest::TestCopyReadExistingFile(void)
+{
+    // find original file
+    cmnPath filePath;
+    filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
+    std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
+    CPPUNIT_ASSERT(!(testFile == ""));
+    // read file
+    cmnXMLPath xmlPath;
+    xmlPath.SetInputSource(testFile);
+    // make a copy
+    std::string copy = "cmnXMLPathTestFile1-copy.xml";
+    xmlPath.SaveAs(copy);
+    // test copy
+    TestExistingFile1(copy);
+}
+
+
+void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
+{
     cmnXMLPath xmlPath;
     xmlPath.SetInputSource(testFile);
 
