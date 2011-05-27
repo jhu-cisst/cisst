@@ -1077,6 +1077,19 @@ ELSE(UNIX)
 
 ENDIF(UNIX)
 
+# Options for BlackMagic DeckLink SDK
+option (CISST_SVL_HAS_BM_DECKLINK "Compile BlackMagic(BM) DeckLink extensions" OFF)
+if (CISST_SVL_HAS_BM_DECKLINK)
+  # find_package (DeckLink)
+  # include_directories (${DeckLink}_INCLUDE_DIR)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       svlVidCapSrcBMD.h      # private header
+       svlVidCapSrcBMD.cpp
+       )
+endif (CISST_SVL_HAS_BM_DECKLINK)
+            
+            
 # Set SVL options to 'advanced' to hide them from beginner user
 #MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_OPENCV)

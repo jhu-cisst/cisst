@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
 
 //there aren't directives in OpenCV v.5, but they exist in OpenCV v.4
 #undef CV_MIN
@@ -73,15 +73,16 @@ class CISST_EXPORT svlCCCameraCalibration
 		std::vector<cv::Mat> tvecs;
 		int flags;
 		std::vector<cv::Point3f> objectImagePoints;
-		std::vector<std::vector<cv::Point3f>> objectPoints;
-		std::vector<std::vector<cv::Point3f>> projectedObjectPoints;
-		std::vector<std::vector<cv::Point2f>> imagePoints;
-		std::vector<std::vector<cv::Point2f>> projectedImagePoints;
+		std::vector<std::vector<cv::Point3f> > objectPoints;
+		std::vector<std::vector<cv::Point3f> > projectedObjectPoints;
+		std::vector<std::vector<cv::Point2f> > imagePoints;
+		std::vector<std::vector<cv::Point2f> > projectedImagePoints;
 		svlCCOriginDetector* calOriginDetector; 
 		svlCCCornerDetector* calCornerDetector;
 
 		std::vector<svlCCPointsFileIO*> pointFiles;
-		const static bool debug = true;
+		// const static 
+		bool debug;
 		int minCornerThreshold;
 		double rootMeanSquaredThreshold;
 		int maxCalibrationIteration;

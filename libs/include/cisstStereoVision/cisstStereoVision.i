@@ -73,6 +73,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstStereoVision/svlFilterImageWindow.h"
 
 %include "cisstStereoVision/svlFilterSourceImageFile.h"
+%include "cisstStereoVision/svlCCCameraCalibration.h"
 
 %{
 

@@ -49,6 +49,7 @@ public:
         LinLibDC1394    = 3,
         OpenCV          = 4,
         MatroxImaging   = 5,
+        BlackmagicDeckLink = 6,
         NumberOfPlatformTypes
     };
 
