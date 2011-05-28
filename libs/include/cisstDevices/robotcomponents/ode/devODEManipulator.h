@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vector>
 
-
 #include <cisstDevices/robotcomponents/osg/devOSGManipulator.h>
 
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
@@ -225,6 +224,7 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
     devODEManipulator::Errno 
     SetForcesTorques( const vctDynamicVector<double>& ft);
 
+#ifndef SWIG
 
   //! The ODE state of the manipulator
   typedef std::vector< devODEBody::State > State;
@@ -252,6 +252,7 @@ class CISST_EXPORT devODEManipulator : public devOSGManipulator {
   */
   virtual void SetState( const devODEManipulator::State& state );
 
+#endif
 
   //! Return the base ID of the manipulator.
   /**

@@ -480,6 +480,8 @@ vctDynamicVector<double> devODEManipulator::GetJointsVelocities() const {
   return qd;
 }
 
+#ifndef SWIG
+
 devODEManipulator::State devODEManipulator::GetState() const {
 
   devODEManipulator::State state;
@@ -529,6 +531,8 @@ void devODEManipulator::SetState( const devODEManipulator::State& state ){
   }
 
 }
+
+#endif
 
 vctFrame4x4<double> 
 devODEManipulator::ForwardKinematics( const vctDynamicVector<double>& q,int N )
