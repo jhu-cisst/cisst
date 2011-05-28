@@ -14,9 +14,11 @@
 
 IF(CISST_SVL_HAS_X11 OR WIN32)
 
-    ADD_EXECUTABLE(svlExCameraCalibration cameraCalibration.cpp)
+	IF(CISST_SVL_HAS_OPENCV)
+		ADD_EXECUTABLE(svlExCameraCalibration cameraCalibration.cpp)
 
-    CISST_REQUIRES("svlExCameraCalibration" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision")
-
+		CISST_REQUIRES("svlExCameraCalibration" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision")
+	ENDIF(CISST_SVL_HAS_OPENCV)
+	
 ENDIF(CISST_SVL_HAS_X11 OR WIN32)
 

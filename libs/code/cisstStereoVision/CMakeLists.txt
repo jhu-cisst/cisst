@@ -291,12 +291,7 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             svlFilterToolTracker.cpp
             svlVideoCodecOpenCV.h       # private header
             svlVideoCodecOpenCV.cpp
-            svlTrackerOCVMeanShift.cpp
-			svlCCOriginDetector.cpp
-            svlCCCalibrationGrid.cpp
-            svlCCCornerDetector.cpp
-			svlCCFileIO.cpp
-			svlCCCameraCalibration.cpp			
+            svlTrackerOCVMeanShift.cpp		
             )
         IF(NOT WIN32)
             SET(SOURCE_FILES
@@ -309,13 +304,7 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             ${HEADER_FILES}
             svlFilterImageZoom.h
             svlFilterToolTracker.h
-            svlTrackerOCVMeanShift.h
-			svlCCOriginDetector.h
-			svlCCOriginDetector.h
-            svlCCCalibrationGrid.h
-            svlCCCornerDetector.h
-			svlCCFileIO.h
-			svlCCCameraCalibration.h			
+            svlTrackerOCVMeanShift.h		
             )
         MESSAGE(STATUS "OpenCV 2.2+ found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)
@@ -452,11 +441,11 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
             svlVideoCodecOpenCV.h       # private header
             svlVideoCodecOpenCV.cpp
             svlTrackerOCVMeanShift.cpp
-			svlCCOriginDetector.cpp
-            svlCCCalibrationGrid.cpp
-            svlCCCornerDetector.cpp
-			svlCCFileIO.cpp	
+			svlCCCalibrationGrid.cpp
 			svlCCCameraCalibration.cpp
+			svlCCCornerDetector.cpp
+			svlCCOriginDetector.cpp
+			svlCCFileIO.cpp						
             )
         IF(NOT WIN32)
             SET(SOURCE_FILES
@@ -470,12 +459,11 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
             svlFilterImageZoom.h
             svlFilterToolTracker.h
             svlTrackerOCVMeanShift.h
-			svlCCOriginDetector.h	
+			svlCCCalibrationGrid.h
+			svlCCCameraCalibration.h
+			svlCCCornerDetector.h
 			svlCCOriginDetector.h
-			svlCCOriginDetector.h
-            svlCCCalibrationGrid.h
-            svlCCCornerDetector.h
-			svlCCCameraCalibration.h			
+			svlCCFileIO.h			
             )
         MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)

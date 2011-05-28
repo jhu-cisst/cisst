@@ -35,14 +35,11 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
     cmnGenericObject(),
     NumOfStreams(0),
     Running(false),
-    CaptureProc(0),
-    CaptureThread(0),
-    deckLinkObj(0),
-    OutputBuffer(0)
+    ImageBuffer(0)
 {
     BMDNumberOfDevices = 0;
 	BMDVideoInputFlags			inputFlags = 0;
-	BMDDisplayMode				displayMode = bmdModeNTSC; //bmdModeHD1080p30, bmdModeNTSC
+	BMDDisplayMode				displayMode = bmdModeHD1080p30;
 	SetWidthHeightByBMDDisplayMode();
 	BMDPixelFormat				pixelFormat = bmdFormat8BitARGB;//bmdFormat8BitYUV
 }
@@ -140,6 +137,9 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
 		deckLink->Release();
 	}
 
+	if(deckLinkIterator != NULL)
+		deckLinkIterator->Release();
+
 	// Create an IDeckLinkIterator object to enumerate all DeckLink cards in the system
 	deckLinkIterator = GetIDeckLinkIterator();
 
@@ -188,6 +188,8 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
         deviceinfo[0] = 0;
     }
 
+	if(deckLinkIterator != NULL)
+		deckLinkIterator->Release();
     return numDevices;
 }
 
@@ -199,7 +201,7 @@ int svlVidCapSrcBMD::Open()
     Close();
 
 	IDeckLinkIterator			*deckLinkIterator = GetIDeckLinkIterator();
-
+	DeckLinkCaptureDelegate 	*delegate;
 	int							displayModeCount = 0;
 	int							exitStatus = 1;
 	int							ch;
@@ -226,20 +228,35 @@ int svlVidCapSrcBMD::Open()
     
 		if (deckLink->QueryInterface(IID_IDeckLinkInput, (void**)&deckLinkInput) != S_OK)
 			goto labError;
-
+		
+		// Set callback delgate
+		delegate = new DeckLinkCaptureDelegate(ImageBuffer[i]);
+		deckLinkInput->SetCallback(delegate);
+		
 		// Opening device
 		result = deckLinkInput->EnableVideoInput(selectedDisplayMode, pixelFormat, inputFlags);
 	    if(result != S_OK) goto labError;
+
+		// Starting Stream
+		result = deckLinkInput->StartStreams();
+		if(result != S_OK)
+		{
+			goto labError;
+		}
 
         // Allocate capture buffers
         ImageBuffer[i] = new svlBufferImage(width, height);
     }
 
     Initialized = true;
+	if(deckLinkIterator != NULL)
+		deckLinkIterator->Release();
     return SVL_OK;
 
 labError:
     Close();
+	if(deckLinkIterator != NULL)
+		deckLinkIterator->Release();
     return SVL_FAIL;
 }
 
@@ -268,6 +285,7 @@ void svlVidCapSrcBMD::Close()
 			goto labError;
 
 		// Closing device
+		result = deckLinkInput->StopStreams();
 		result = deckLinkInput->DisableVideoInput();
 
         if (ImageBuffer[i]) {
@@ -281,6 +299,7 @@ int svlVidCapSrcBMD::Start()
 {
     if (!Initialized) return SVL_FAIL;
     Running = true;
+
     return SVL_OK;
 }
 
@@ -288,13 +307,6 @@ svlImageRGB* svlVidCapSrcBMD::GetLatestFrame(bool waitfornew, unsigned int video
 {
     if (videoch >= NumOfStreams || DeviceID[videoch] < 0) return 0;
     return ImageBuffer[videoch]->Pull(waitfornew);
-}
-
-int svlVidCapSrcBMD::CaptureFrame()
-{
-	//TODO
-
-    return SVL_FAIL;
 }
 
 int svlVidCapSrcBMD::Stop()
@@ -360,45 +372,154 @@ int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     return SVL_OK;
 }
 
-void svlVidCapSrcBMD::ConvertRGB32toRGB24(unsigned char* source, unsigned char* dest, const int pixcount)
+/**************************************/
+/*** DeckLinkCaptureDelegate class ******/
+/**************************************/
+
+DeckLinkCaptureDelegate::DeckLinkCaptureDelegate(svlBufferImage* buffer) : m_refCount(0)
 {
+	m_buffer = vidCh;
+	pthread_mutex_init(&m_mutex, NULL);
+}
+
+DeckLinkCaptureDelegate::~DeckLinkCaptureDelegate()
+{
+	pthread_mutex_destroy(&m_mutex);
+}
+
+ULONG DeckLinkCaptureDelegate::AddRef(void)
+{
+	pthread_mutex_lock(&m_mutex);
+		m_refCount++;
+	pthread_mutex_unlock(&m_mutex);
+
+	return (ULONG)m_refCount;
+}
+
+ULONG DeckLinkCaptureDelegate::Release(void)
+{
+	pthread_mutex_lock(&m_mutex);
+		m_refCount--;
+	pthread_mutex_unlock(&m_mutex);
+
+	if (m_refCount == 0)
+	{
+		delete this;
+		return 0;
+	}
+
+	return (ULONG)m_refCount;
+}
+
+HRESULT DeckLinkCaptureDelegate::VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioFrame)
+{
+	IDeckLinkVideoFrame*	                rightEyeFrame = NULL;
+	IDeckLinkVideoFrame3DExtensions*        threeDExtensions = NULL;
+	void*					frameBytes;
+	void*					audioFrameBytes;
+	
+	// Handle Video Frame
+	if(videoFrame)
+	{	
+		// If 3D mode is enabled we retreive the 3D extensions interface which gives.
+		// us access to the right eye frame by calling GetFrameForRightEye() .
+		if ( (videoFrame->QueryInterface(IID_IDeckLinkVideoFrame3DExtensions, (void **) &threeDExtensions) != S_OK) ||
+			(threeDExtensions->GetFrameForRightEye(&rightEyeFrame) != S_OK))
+		{
+			rightEyeFrame = NULL;
+		}
+		
+		if (threeDExtensions)
+			threeDExtensions->Release();
+
+		if (videoFrame->GetFlags() & bmdFrameHasNoInputSource)
+		{
+			fprintf(stderr, "Frame received (#%lu) - No input signal detected\n", frameCount);
+		}
+		else
+		{
+			const char *timecodeString = NULL;
+			if (g_timecodeFormat != 0)
+			{
+				IDeckLinkTimecode *timecode;
+				if (videoFrame->GetTimecode(g_timecodeFormat, &timecode) == S_OK)
+				{
+					timecode->GetString(&timecodeString);
+				}
+			}
+
+			fprintf(stderr, "Frame received (#%lu) [%s] - %s - Size: %li bytes\n", 
+				frameCount,
+				timecodeString != NULL ? timecodeString : "No timecode",
+				rightEyeFrame != NULL ? "Valid Frame (3D left/right)" : "Valid Frame", 
+				videoFrame->GetRowBytes() * videoFrame->GetHeight());
+
+			if (timecodeString)
+				free((void*)timecodeString);
+
+			//if (videoOutputFile != -1)
+			//{
+			//	videoFrame->GetBytes(&frameBytes);
+			//	write(videoOutputFile, frameBytes, videoFrame->GetRowBytes() * videoFrame->GetHeight());
+			//	
+			//	if (rightEyeFrame)
+			//	{
+			//		rightEyeFrame->GetBytes(&frameBytes);
+			//		write(videoOutputFile, frameBytes, videoFrame->GetRowBytes() * videoFrame->GetHeight());
+			//	}
+			//}
+
+			processVideFrame(videFrame);
+			
+		}
+		
+		if (rightEyeFrame)
+			rightEyeFrame->Release();
+
+		frameCount++;
+
+		//if (g_maxFrames > 0 && frameCount >= g_maxFrames)
+		//{
+		//	pthread_cond_signal(&sleepCond);
+		//}
+	}
+
+	// Audio Frame NOT HANDLED
+	//if (audioFrame)
+	//{
+	//	if (audioOutputFile != -1)
+	//	{
+	//		audioFrame->GetBytes(&audioFrameBytes);
+	//		write(audioOutputFile, audioFrameBytes, audioFrame->GetSampleFrameCount() * g_audioChannels * (g_audioSampleDepth / 8));
+	//	}
+	//}
+    
+	return S_OK;
+}
+
+void DeckLinkCaptureDelegate::processVideoFrames(IDeckLinkVideoInputFrame* videoFrame)
+{
+	void* source;
     unsigned char r, g, b;
-    for (int i = 0; i < pixcount; i ++) {
-        r = *source;
-        source ++;
-        g = *source;
-        source ++;
-        b = *source;
-        source += 2;
+	unsigned char* dest = ImageBuffer[vidCh]->GetPushBuffer();
 
-        *dest = b;
-        dest ++;
-        *dest = g;
-        dest ++;
-        *dest = r;
-        dest ++;
-    }
+	videoFrame->GetBytes(&source);
+
+	//HOW TO HANDLE RAW BYTES?
+    r = *source;
+    source ++;
+    g = *source;
+    source ++;
+    b = *source;
+    source += 2;
+
+    *dest = b;
+    dest ++;
+    *dest = g;
+    dest ++;
+    *dest = r;
+    dest ++;
 }
 
 
-/**************************************/
-/*** svlVidCapSrcBMDThread class ******/
-/**************************************/
-
-void* svlVidCapSrcBMDThread::Proc(svlVidCapSrcBMD* baseref)
-{
-    // signal success to main thread
-    Error = false;
-    InitSuccess = true;
-    InitEvent.Raise();
-
-    while (baseref->Running) {
-        if (baseref->CaptureFrame() != SVL_OK) {
-            Error = true;
-            break;
-        }
-    }
-
-	return this;
-}
 

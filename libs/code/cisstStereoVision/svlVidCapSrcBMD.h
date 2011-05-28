@@ -22,6 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlVidCapSrcBMD_h
 #define _svlVidCapSrcBMD_h
 
+
+#include <pthread.h>
+#include <unistd.h>
+
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstStereoVision/svlBufferImage.h>
 #include <DeckLinkAPI.h>
@@ -65,34 +69,32 @@ private:
 	BMDPixelFormat				pixelFormat;
 	int width, height;
 
-    svlVidCapSrcBMDThread* CaptureProc;
-    osaThread* CaptureThread;
-	IDeckLink* deckLinkObj;
 	int	BMDNumberOfDevices;
 	int* DeviceID;
     svlBufferImage** ImageBuffer;
 
 	void SetWidthHeightByBMDDisplayMode();
 	IDeckLinkIterator* GetIDeckLinkIterator();
-    int CaptureFrame();
-    void ConvertRGB32toRGB24(unsigned char* source, unsigned char* dest, const int pixcount);
+  
 };
 
-
-class svlVidCapSrcBMDThread
+class DeckLinkCaptureDelegate : public IDeckLinkInputCallback
 {
 public:
-    svlVidCapSrcBMDThread() { InitSuccess = false; }
-    ~svlVidCapSrcBMDThread() {}
-    void* Proc(svlVidCapSrcBMD* baseref);
+	DeckLinkCaptureDelegate();
+	~DeckLinkCaptureDelegate();
 
-    bool WaitForInit() { InitEvent.Wait(); return InitSuccess; }
-    bool IsError() { return Error; }
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, LPVOID *ppv) { return E_NOINTERFACE; }
+	virtual ULONG STDMETHODCALLTYPE AddRef(void);
+	virtual ULONG STDMETHODCALLTYPE  Release(void);
+	virtual HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents, IDeckLinkDisplayMode*, BMDDetectedVideoInputFormatFlags);
+	virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame*, IDeckLinkAudioInputPacket*) {return S_OK;}
+	void processVideoFrames(IDeckLinkVideoInputFrame* videoFrame);
 
 private:
-    bool Error;
-    osaThreadSignal InitEvent;
-    bool InitSuccess;
+	ULONG				m_refCount;
+	pthread_mutex_t		m_mutex;
+	svlBufferImage*		m_buffer;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(svlVidCapSrcBMD)
