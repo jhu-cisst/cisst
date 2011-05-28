@@ -27,9 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 // system includes
 #include <iostream>
 
-// to simplify the code
-using namespace std;
-
 #include <cisstStereoVision/svlCCFileIO.h>
 
 //================== Subclass of svlCCFileIO for the points file (DRL .pts) type ==================//

@@ -22,9 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlCCOriginDetector.h>
 #include <limits>
 
-using namespace cv;
-using namespace std;
-
 svlCCCornerDetector::svlCCCornerDetector(int width, int height)
 {
 	checkerBoardWidth = width;
@@ -47,32 +44,32 @@ void svlCCCornerDetector::reset()
 	chessboardCorners.clear();
 }
 
-void svlCCCornerDetector::findChessboard(Mat matImage, IplImage* iplImage)
+void svlCCCornerDetector::findChessboard(cv::Mat matImage, IplImage* iplImage)
 {
 	// Convert to grayscale
 	IplImage* iplGray = cvCreateImage(matImage.size(), IPL_DEPTH_8U, 1);
 	cvCvtColor(iplImage, iplGray, CV_BGR2GRAY);
-	Mat matGray;
+	cv::Mat matGray;
 	cvtColor(matImage, matGray, CV_BGR2GRAY);
 	cv::Size innerBoardSize = cv::Size(checkerBoardWidth-1,checkerBoardHeight-1);
 
 	// Check for chess board
 	int checkCheckerBoard = cvCheckChessboard(iplGray, innerBoardSize);
 	if(debug)	
-		cout << "Image is checkerBoard: " << checkCheckerBoard << endl;	
+		std::cout << "Image is checkerBoard: " << checkCheckerBoard << std::endl;	
 
 	if(checkCheckerBoard == 1)
 	{
 		// Find checker board corners
 		int chessboardCornersCount, chessboardCornersFound;
-		chessboardCornersFound = findChessboardCorners(matGray, innerBoardSize, chessboardCorners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+		chessboardCornersFound = cv::findChessboardCorners(matGray, innerBoardSize, chessboardCorners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
 
        // Improve the found corners' coordinate accuracy
 	   if(chessboardCornersFound) 
-		   cornerSubPix( iplGray, chessboardCorners, Size(11,11), Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+		   cornerSubPix( iplGray, chessboardCorners, cv::Size(11,11), cv::Size(-1,-1), cv::TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
 
 		if(debug)
-			cout << "found: " << chessboardCornersFound << " # corners: "<< chessboardCorners.size() << endl;
+			std::cout << "found: " << chessboardCornersFound << " # corners: "<< chessboardCorners.size() << std::endl;
 
 		if((chessboardCorners.size() > 0)&&(chessboardCornersFound == 1)){
 			cornerDetectionFlag = OPENCV_CHESSBOARD;
@@ -90,11 +87,11 @@ void svlCCCornerDetector::findGoodFeaturesNormalized(cv::Mat matImage, cv::Mat m
 
 	////////////////////Features from normalized histogram/////////////////
 	// Perform histogram equalization
-	Mat matNormalizedR = Mat(matImage.rows,matImage.cols,CV_8UC1);
-	Mat matNormalizedG = Mat(matImage.rows,matImage.cols,CV_8UC1);
-	Mat matNormalizedB = Mat(matImage.rows,matImage.cols,CV_8UC1);
-	Mat matNormalized = Mat(matImage.rows,matImage.cols,CV_8UC3);
-	vector<Mat> planes;
+	cv::Mat matNormalizedR = cv::Mat(matImage.rows,matImage.cols,CV_8UC1);
+	cv::Mat matNormalizedG = cv::Mat(matImage.rows,matImage.cols,CV_8UC1);
+	cv::Mat matNormalizedB = cv::Mat(matImage.rows,matImage.cols,CV_8UC1);
+	cv::Mat matNormalized = cv::Mat(matImage.rows,matImage.cols,CV_8UC3);
+	std::vector<cv::Mat> planes;
 	cv::split(matImage, planes);
 	planes.at(0).convertTo(planes.at(0),CV_8UC1);
 	planes.at(1).convertTo(planes.at(1),CV_8UC1);
@@ -110,16 +107,16 @@ void svlCCCornerDetector::findGoodFeaturesNormalized(cv::Mat matImage, cv::Mat m
 	matNormalized.convertTo(matNormalized,CV_32FC1);
 
 	// Convert to grayscale
-	Mat matGrayNorm = Mat(matImage.rows,matImage.cols,CV_32FC1);
+	cv::Mat matGrayNorm = cv::Mat(matImage.rows,matImage.cols,CV_32FC1);
 	cvtColor(matNormalized, matGrayNorm, CV_BGR2GRAY);
 
 	// Gaussian blur to eliminate specular noise
-	Mat matGrayNormSmooth = Mat(matImage.rows,matImage.cols,CV_32FC1);
+	cv::Mat matGrayNormSmooth = cv::Mat(matImage.rows,matImage.cols,CV_32FC1);
 	cv::boxFilter(matGrayNorm,matGrayNormSmooth,matImage.depth(),cv::Size(min_distance,min_distance));
 	matGrayNormSmooth.convertTo(matGrayNormSmooth,CV_32FC1);
 
 	// Get Features
-	cv::goodFeaturesToTrack(matGrayNormSmooth,chessboardCornersNorm,maxCorners,quality_level,min_distance,Mat(),eig_block_size,use_harris);
+	cv::goodFeaturesToTrack(matGrayNormSmooth,chessboardCornersNorm,maxCorners,quality_level,min_distance,cv::Mat(),eig_block_size,use_harris);
 	matGrayNormSmooth.convertTo(matGrayNormSmooth,CV_8UC1);
 	if(chessboardCornersNorm.size() > 0)
 	{
@@ -158,7 +155,7 @@ void svlCCCornerDetector::findGoodFeaturesNormalized(cv::Mat matImage, cv::Mat m
 void svlCCCornerDetector::findGoodFeatures(cv::Mat matImage)
 {
 	//check for HD
-	if(max(matImage.rows,matImage.cols) > 1000)
+	if(std::max(matImage.rows,matImage.cols) > 1000)
 	{
 		min_distance = 10;
 		maxCorners = 400;
@@ -171,16 +168,16 @@ void svlCCCornerDetector::findGoodFeatures(cv::Mat matImage)
 
 	////////// Features from Image //////////
 	// Convert to grayscale
-	Mat matGray = Mat(matImage.rows,matImage.cols,CV_32FC1);
+	cv::Mat matGray = cv::Mat(matImage.rows,matImage.cols,CV_32FC1);
 	cvtColor(matImage, matGray, CV_BGR2GRAY);
 
 	// Gaussian blur to eliminate specular noise
-	Mat matGraySmooth = Mat(matImage.rows,matImage.cols,CV_32FC1);
+	cv::Mat matGraySmooth = cv::Mat(matImage.rows,matImage.cols,CV_32FC1);
 	cv::boxFilter(matGray,matGraySmooth,matImage.depth(),cv::Size(min_distance,min_distance));
 	matGraySmooth.convertTo(matGraySmooth,CV_32FC1);
 	
 	// Get features
-	cv::goodFeaturesToTrack(matGraySmooth,chessboardCorners,maxCorners,quality_level,min_distance,Mat(),eig_block_size,use_harris);
+	cv::goodFeaturesToTrack(matGraySmooth,chessboardCorners,maxCorners,quality_level,min_distance,cv::Mat(),eig_block_size,use_harris);
 
 	// Refine features
 	matGraySmooth.convertTo(matGraySmooth,CV_8UC1);
@@ -214,7 +211,7 @@ bool svlCCCornerDetector::nearestCorner(IplImage* iplImage, cv::Point2f targetPo
 {
 	float currentMinDistance, minDistance;
 	cv::Point2f currentTargetCorner = targetPoint;
-	minDistance = numeric_limits<float>::max( );
+	minDistance = std::numeric_limits<float>::max( );
 
 	switch(cornerDetectionFlag)
 	{
@@ -246,7 +243,7 @@ bool svlCCCornerDetector::nearestCorner(IplImage* iplImage, cv::Point2f targetPo
 	}
 	if(debug)
 	{
-		cout << "Given target point (" << targetPoint.x << "," << targetPoint.y << ") found corner at (" <<  corner->x << "," << corner->y << ") distance: " <<  minDistance << endl;	
+		std::cout << "Given target point (" << targetPoint.x << "," << targetPoint.y << ") found corner at (" <<  corner->x << "," << corner->y << ") distance: " <<  minDistance << std::endl;	
 	}
 
 	if(draw && minDistance <= distanceThreshold && debug)

@@ -21,8 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
 #include <limits>
 
-using namespace cv;
-using namespace std;
 svlCCCalibrationGrid::svlCCCalibrationGrid(IplImage* iplImage, cv::Size boardSize, float gridSize)
 {
 	this->iplImage = iplImage;
@@ -32,7 +30,7 @@ svlCCCalibrationGrid::svlCCCalibrationGrid(IplImage* iplImage, cv::Size boardSiz
 	this->cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
 	this->distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
 	this->groundTruthCameraTransformation = cvCreateMat(3,4,CV_64F);
-	this->calibrationError = numeric_limits<double>::max( );;
+	this->calibrationError = std::numeric_limits<double>::max( );;
 	this->minGridPoints = 10;
 	this->refineThreshold = 2;
 }
@@ -41,7 +39,7 @@ bool svlCCCalibrationGrid::isHighDefinition()
 {
 	if(iplImage == NULL)
 		return false;
-	return (max(iplImage->height,iplImage->width) > 1000);
+	return (std::max(iplImage->height,iplImage->width) > 1000);
 }
 
 /**************************************************************************************************
@@ -79,8 +77,8 @@ void svlCCCalibrationGrid::create2DChessboardCorners(bool visible)
 			visibility[i][j] = visible;
 			if(debug && j<5 && i<5)
 			{
-				cout << "create2DChessboardCorners: at " << i << "," << j << ": (" << calibrationGridOrigin.x+(i-width/2)*gridSizePixel << ",";
-				cout << calibrationGridOrigin.y+(j-height/2)*gridSizePixel << ")" << endl;
+				std::cout << "create2DChessboardCorners: at " << i << "," << j << ": (" << calibrationGridOrigin.x+(i-width/2)*gridSizePixel << ",";
+				std::cout << calibrationGridOrigin.y+(j-height/2)*gridSizePixel << ")" << std::endl;
 			}
 
 		}
@@ -106,7 +104,7 @@ float svlCCCalibrationGrid::nearestCorner(cv::Point2f targetPoint, cv::Point2f* 
 {
 	float currentMinDistance, minDistance, normDistance;
 	cv::Point2f currentTargetCorner = targetPoint;
-	minDistance = numeric_limits<float>::max( );
+	minDistance = std::numeric_limits<float>::max( );
 	cv::Point2f* cornerNorm = new cv::Point2f();
 
 	for(int i = 0; i < corners.size(); i++ )
@@ -152,7 +150,7 @@ float svlCCCalibrationGrid::nearestCornerNorm(cv::Point2f targetPoint, cv::Point
 {
 	float currentMinDistance, minDistance;
 	cv::Point2f currentTargetCorner = targetPoint;
-	minDistance = numeric_limits<float>::max( );
+	minDistance = std::numeric_limits<float>::max( );
 
 	for(int i = 0; i < normCorners.size(); i++ )
 	{
@@ -238,23 +236,23 @@ void svlCCCalibrationGrid::compareGroundTruth()
 		}
 	}
 	averageDistance /= count;
-	cout << "Comparing ground truth max distance " << maxDistance <<  " Point (" << maxPoint.x << "," << maxPoint.y << ")" << endl;
-	cout <<	" avg distance: " << averageDistance << " from " << count << " out of " << grid.size() << endl << endl; 
+	std::cout << "Comparing ground truth max distance " << maxDistance <<  " Point (" << maxPoint.x << "," << maxPoint.y << ")" << std::endl;
+	std::cout <<	" avg distance: " << averageDistance << " from " << count << " out of " << grid.size() << std::endl << std::endl; 
 
-	cout << "rmatrix: " << rmatrix.at<double>(0,0) <<","<< rmatrix.at<double>(0,1)<<","<< rmatrix.at<double>(0,2) <<","<< endl;
-	cout << "rmatrix: " << rmatrix.at<double>(1,0) <<","<< rmatrix.at<double>(1,1)<<","<< rmatrix.at<double>(1,2) <<","<< endl;
-	cout << "rmatrix: " << rmatrix.at<double>(2,0) <<","<< rmatrix.at<double>(2,1)<<","<< rmatrix.at<double>(2,2) <<","<< endl;
-	cout << "tvect: " << tvec.at<double>(0,0) <<","<< tvec.at<double>(0,1) <<","<< tvec.at<double>(0,2) <<","<< endl;
+	std::cout << "rmatrix: " << rmatrix.at<double>(0,0) <<","<< rmatrix.at<double>(0,1)<<","<< rmatrix.at<double>(0,2) <<","<< std::endl;
+	std::cout << "rmatrix: " << rmatrix.at<double>(1,0) <<","<< rmatrix.at<double>(1,1)<<","<< rmatrix.at<double>(1,2) <<","<< std::endl;
+	std::cout << "rmatrix: " << rmatrix.at<double>(2,0) <<","<< rmatrix.at<double>(2,1)<<","<< rmatrix.at<double>(2,2) <<","<< std::endl;
+	std::cout << "tvect: " << tvec.at<double>(0,0) <<","<< tvec.at<double>(0,1) <<","<< tvec.at<double>(0,2) <<","<< std::endl;
 
-	cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[0]-rmatrix.at<double>(0,0) <<","<< groundTruthCameraTransformation->data.fl[1]-rmatrix.at<double>(0,1)<<","<< groundTruthCameraTransformation->data.fl[2]-rmatrix.at<double>(0,2) <<","<< endl;
-	cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[4]-rmatrix.at<double>(1,0) <<","<< groundTruthCameraTransformation->data.fl[5]-rmatrix.at<double>(1,1)<<","<< groundTruthCameraTransformation->data.fl[6]-rmatrix.at<double>(1,2) <<","<< endl;
-	cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[8]-rmatrix.at<double>(2,0) <<","<< groundTruthCameraTransformation->data.fl[9]-rmatrix.at<double>(2,1)<<","<< groundTruthCameraTransformation->data.fl[10]-rmatrix.at<double>(1,2) <<","<< endl;
-	cout << "delta tvect: " << groundTruthCameraTransformation->data.fl[3]-tvec.at<double>(0,0) <<","<< groundTruthCameraTransformation->data.fl[7]-tvec.at<double>(0,1)<<","<< groundTruthCameraTransformation->data.fl[11]-tvec.at<double>(0,2) <<","<< endl;
+	std::cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[0]-rmatrix.at<double>(0,0) <<","<< groundTruthCameraTransformation->data.fl[1]-rmatrix.at<double>(0,1)<<","<< groundTruthCameraTransformation->data.fl[2]-rmatrix.at<double>(0,2) <<","<< std::endl;
+	std::cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[4]-rmatrix.at<double>(1,0) <<","<< groundTruthCameraTransformation->data.fl[5]-rmatrix.at<double>(1,1)<<","<< groundTruthCameraTransformation->data.fl[6]-rmatrix.at<double>(1,2) <<","<< std::endl;
+	std::cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[8]-rmatrix.at<double>(2,0) <<","<< groundTruthCameraTransformation->data.fl[9]-rmatrix.at<double>(2,1)<<","<< groundTruthCameraTransformation->data.fl[10]-rmatrix.at<double>(1,2) <<","<< std::endl;
+	std::cout << "delta tvect: " << groundTruthCameraTransformation->data.fl[3]-tvec.at<double>(0,0) <<","<< groundTruthCameraTransformation->data.fl[7]-tvec.at<double>(0,1)<<","<< groundTruthCameraTransformation->data.fl[11]-tvec.at<double>(0,2) <<","<< std::endl;
 	
-	cout << "worldToTCP: " << worldToTCP->data.fl[0] <<","<< worldToTCP->data.fl[1]<<","<< worldToTCP->data.fl[2] <<","<< worldToTCP->data.fl[3] << endl;
-	cout << "worldToTCP: " << worldToTCP->data.fl[4] <<","<< worldToTCP->data.fl[5]<<","<< worldToTCP->data.fl[6] <<","<< worldToTCP->data.fl[7] << endl;
-	cout << "worldToTCP: " << worldToTCP->data.fl[8] <<","<< worldToTCP->data.fl[9]<<","<< worldToTCP->data.fl[10] <<","<< worldToTCP->data.fl[11] <<endl;
-	cout << "worldToTCP: " << worldToTCP->data.fl[12] <<","<< worldToTCP->data.fl[13]<<","<< worldToTCP->data.fl[14] <<","<< worldToTCP->data.fl[15] <<endl;
+	std::cout << "worldToTCP: " << worldToTCP->data.fl[0] <<","<< worldToTCP->data.fl[1]<<","<< worldToTCP->data.fl[2] <<","<< worldToTCP->data.fl[3] << std::endl;
+	std::cout << "worldToTCP: " << worldToTCP->data.fl[4] <<","<< worldToTCP->data.fl[5]<<","<< worldToTCP->data.fl[6] <<","<< worldToTCP->data.fl[7] << std::endl;
+	std::cout << "worldToTCP: " << worldToTCP->data.fl[8] <<","<< worldToTCP->data.fl[9]<<","<< worldToTCP->data.fl[10] <<","<< worldToTCP->data.fl[11] <<std::endl;
+	std::cout << "worldToTCP: " << worldToTCP->data.fl[12] <<","<< worldToTCP->data.fl[13]<<","<< worldToTCP->data.fl[14] <<","<< worldToTCP->data.fl[15] <<std::endl;
 }
 
 /**************************************************************************************************
@@ -346,8 +344,8 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 
 			if(debug)
 			{
-				cout << "Dest blob points: " << coordsDst->data.fl[2*index] << "," << coordsDst->data.fl[2*index+1] << endl;		
-				cout << "Src grid points: " << coordsSrc->data.fl[2*index] << "," << coordsSrc->data.fl[2*index+1] << endl;
+				std::cout << "Dest blob points: " << coordsDst->data.fl[2*index] << "," << coordsDst->data.fl[2*index+1] << std::endl;		
+				std::cout << "Src grid points: " << coordsSrc->data.fl[2*index] << "," << coordsSrc->data.fl[2*index+1] << std::endl;
 			}
 		}
 	}
@@ -524,13 +522,13 @@ void svlCCCalibrationGrid::findInitialCorners(CvMat* coordsSrc, CvMat* coordsDst
 	findInitialCornerHelper(coordsSrc, coordsDst, false);
 
 	//if(debug)
-	cout << "size of grid in pixels: " << gridSizePixel << endl;
+	std::cout << "size of grid in pixels: " << gridSizePixel << std::endl;
 }
 
 void svlCCCalibrationGrid::homographyCorrelation(double threshold)
 {
 	// we call create2DChessboardCorners at homographyInlierLevel=1 after finding initial corners
-	for(homographyInlierLevel = 1; homographyInlierLevel < max(boardSize.width/2,boardSize.height/2); homographyInlierLevel++)
+	for(homographyInlierLevel = 1; homographyInlierLevel < std::max(boardSize.width/2,boardSize.height/2); homographyInlierLevel++)
 	{
 		updateHomography(threshold);	
 	}
@@ -590,7 +588,7 @@ void svlCCCalibrationGrid::correlate(svlCCOriginDetector* originDetector, svlCCC
 			optimizeCalibration();
 
 			if(debug)
-				cout << "Average grid size in pixels " << gridSizePixel << endl;
+				std::cout << "Average grid size in pixels " << gridSizePixel << std::endl;
 			break;
 		default:
 			valid = false;
@@ -610,7 +608,7 @@ void svlCCCalibrationGrid::correlate(svlCCOriginDetector* originDetector, svlCCC
 ***********************************************************************************************************/
 void svlCCCalibrationGrid::optimizeCalibration()
 {
-	double prevRMS = numeric_limits<double>::max( );
+	double prevRMS = std::numeric_limits<double>::max( );
 	double rootMeanSquaredThreshold = 1;
 	double rms;
 	int maxCalibrationIteration = 5;
@@ -644,12 +642,12 @@ void svlCCCalibrationGrid::optimizeCalibration()
 	pPrevThreshold = prevThreshold;
 
 	// check for bad calibration
-	if(prevRMS == numeric_limits<double>::max( ))
+	if(prevRMS == std::numeric_limits<double>::max( ))
 		return;
 	
 	rms = refine(rvec, tvec, cameraMatrix, distCoeffs, refineThreshold, false,true);	
 
-	while((rms < numeric_limits<double>::max( )) && (rms > rootMeanSquaredThreshold)&& (iteration < maxCalibrationIteration))
+	while((rms < std::numeric_limits<double>::max( )) && (rms > rootMeanSquaredThreshold)&& (iteration < maxCalibrationIteration))
 	{
 		// Lower threshold for higher iteration of optimization
 		//if(iteration > 1)
@@ -688,7 +686,7 @@ void svlCCCalibrationGrid::optimizeCalibration()
 	numberGoodPointsAfterOpt = getGoodImagePoints().size();
 
 	//if(debug)
-	cout << "Count before refinement: " <<numberGoodPointsBeforeOpt<< " after: " <<numberGoodPointsAfterOpt <<" valid: " << valid <<endl;
+	std::cout << "Count before refinement: " <<numberGoodPointsBeforeOpt<< " after: " <<numberGoodPointsAfterOpt <<" valid: " << valid <<std::endl;
 }
 
 /**************************************************************************************************
@@ -712,20 +710,20 @@ void svlCCCalibrationGrid::optimizeCalibration()
 double svlCCCalibrationGrid::refine(const cv::Mat& localRvec, const cv::Mat& localTvec, const cv::Mat& localCameraMatrix, const cv::Mat& localDistCoeffs, float threshold, bool runHomography, bool checkNormalized)
 {
 	projectedImagePoints.clear();
-    projectPoints(Mat(getAllCalibrationGridPoints3D()), localRvec, localTvec, localCameraMatrix, localDistCoeffs, projectedImagePoints);
+	projectPoints(cv::Mat(getAllCalibrationGridPoints3D()), localRvec, localTvec, localCameraMatrix, localDistCoeffs, projectedImagePoints);
 	cv::Point2f* corner = new cv::Point2f();
 	cv::Point2f foundCorner;
 	float distance;
 	int index; 
 
 	if(debug)
-		cout << "Number of good points before refinement: " << getGoodImagePoints().size() << endl;
+		std::cout << "Number of good points before refinement: " << getGoodImagePoints().size() << std::endl;
 
 	for( int j = 0; j < (boardSize.height); j++ )
 		for( int i = 0; i < (boardSize.width); i++ )	
 		{
 			index = j*boardSize.width+i;
-			if(nearestCorner(projectedImagePoints.at(index),corner,threshold, checkNormalized && threshold<=2 && max(iplImage->height,iplImage->width)>1000) < threshold)
+			if(nearestCorner(projectedImagePoints.at(index),corner,threshold, checkNormalized && threshold<=2 && std::max(iplImage->height,iplImage->width)>1000) < threshold)
 			{
 				foundCorner = cv::Point2f(corner->x,corner->y);
 				imagePoints[i][j] = foundCorner;
@@ -739,7 +737,7 @@ double svlCCCalibrationGrid::refine(const cv::Mat& localRvec, const cv::Mat& loc
 		updateHomography(threshold);
 
 	if(debug)
-		cout << "Number of good points after refinement: " << getGoodImagePoints().size() << endl;
+		std::cout << "Number of good points after refinement: " << getGoodImagePoints().size() << std::endl;
 
 	return runCalibration();
 }
@@ -766,15 +764,15 @@ int svlCCCalibrationGrid::applyHomography(double homography[], float threshold)
 	cv::Point2f* corner = new cv::Point2f();
 	cv::Point2f foundCorner;
 
-	int iStart = -1*min(homographyInlierLevel+1,boardSize.width/2);
-	int iEnd = min(homographyInlierLevel+1,boardSize.width/2-1);
-	int jStart = -1*min(homographyInlierLevel+1,boardSize.height/2);
-	int jEnd = min(homographyInlierLevel+1,boardSize.height/2-1);
+	int iStart = -1*std::min(homographyInlierLevel+1,boardSize.width/2);
+	int iEnd = std::min(homographyInlierLevel+1,boardSize.width/2-1);
+	int jStart = -1*std::min(homographyInlierLevel+1,boardSize.height/2);
+	int jEnd = std::min(homographyInlierLevel+1,boardSize.height/2-1);
 
-	int iStartPrevious = -1*min(homographyInlierLevel,boardSize.width/2);
-	int iEndPrevious = min(homographyInlierLevel,boardSize.width/2-1);
-	int jStartPrevious = -1*min(homographyInlierLevel,boardSize.height/2);
-	int jEndPrevious = min(homographyInlierLevel,boardSize.height/2-1);
+	int iStartPrevious = -1*std::min(homographyInlierLevel,boardSize.width/2);
+	int iEndPrevious = std::min(homographyInlierLevel,boardSize.width/2-1);
+	int jStartPrevious = -1*std::min(homographyInlierLevel,boardSize.height/2);
+	int jEndPrevious = std::min(homographyInlierLevel,boardSize.height/2-1);
 
 	int indexX, indexY;
 
@@ -813,7 +811,7 @@ int svlCCCalibrationGrid::applyHomography(double homography[], float threshold)
 		}
 	
 	if(adjustment > 0 && debug)
-		cout << "Homography Level: " << homographyInlierLevel << " threshold: " << threshold+adjustment << " adjustment " << adjustment << endl;
+		std::cout << "Homography Level: " << homographyInlierLevel << " threshold: " << threshold+adjustment << " adjustment " << adjustment << std::endl;
 
 	return countWithinThreshold;
 }
@@ -838,10 +836,10 @@ bool svlCCCalibrationGrid::updateHomography(float threshold)
 	CvMat* coordsSrc;
 	CvMat* coordsDst;
 	int count = 0;
-	int iStart = -1*min(homographyInlierLevel+1,boardSize.width/2);
-	int iEnd = min(homographyInlierLevel+1,boardSize.width/2-1);
-	int jStart = -1*min(homographyInlierLevel+1,boardSize.height/2);
-	int jEnd = min(homographyInlierLevel+1,boardSize.height/2-1);
+	int iStart = -1*std::min(homographyInlierLevel+1,boardSize.width/2);
+	int iEnd = std::min(homographyInlierLevel+1,boardSize.width/2-1);
+	int jStart = -1*std::min(homographyInlierLevel+1,boardSize.height/2);
+	int jEnd = std::min(homographyInlierLevel+1,boardSize.height/2-1);
 	int indexX, indexY;
 
 	if(homographyInlierLevel == 1)
@@ -904,17 +902,17 @@ bool svlCCCalibrationGrid::updateHomography(float threshold)
 	if(cvFindHomography(coordsSrc, coordsDst, &_homography))//, 0, 2.5, 0);
 	{
 		if(debug)
-			cout << "Homography success! " << endl;
+			std::cout << "Homography success! " << std::endl;
 	}
 	else
 	{
-		cout << "Homography failed! "<< endl;
+		std::cout << "Homography failed! "<< std::endl;
 		return false;
 	}
 
 	int countWithinThreshold = applyHomography(homography,threshold);
 
-	if(debug && homographyInlierLevel >= max(boardSize.width/2,boardSize.height/2)-1)
+	if(debug && homographyInlierLevel >= std::max(boardSize.width/2,boardSize.height/2)-1)
 	{
 		char s[20];
 		char t[20];
@@ -976,9 +974,9 @@ std::vector<cv::Point3f> svlCCCalibrationGrid::getGoodCalibrationGridPoints3D()
 				goodCalibrationGridPoints.push_back(cv::Point3f((i-boardSize.width/2)*20,(j-boardSize.height/2)*20,0));
 				if(debug)
 				{
-					cout << "getGoodCalibrationGridPoints3D: at " << i << "," << j << " (" << point.x<< ",";
-					cout << point.y << ")" << " : (" << imagePoints[i][j].x << ",";
-					cout << imagePoints[i][j].y << ")" << endl;
+					std::cout << "getGoodCalibrationGridPoints3D: at " << i << "," << j << " (" << point.x<< ",";
+					std::cout << point.y << ")" << " : (" << imagePoints[i][j].x << ",";
+					std::cout << imagePoints[i][j].y << ")" << std::endl;
 					//cvCircle( iplImage,imagePoints[i][j], 5, cvScalar(0,128,255), 1, 8, 0 );
 				}
 			}else{
@@ -1042,8 +1040,8 @@ double svlCCCalibrationGrid::runCalibration()
 	std::vector<std::vector<cv::Point3f>> objectPoints;
 	std::vector<std::vector<cv::Point2f>> imagePoints;
 	std::vector<std::vector<cv::Point2f>> localProjectedImagePoints;
-	double rms = numeric_limits<double>::max( );
-	double projectedImagePointsRMS = numeric_limits<double>::max( );
+	double rms = std::numeric_limits<double>::max( );
+	double projectedImagePointsRMS = std::numeric_limits<double>::max( );
 
 	objectPoints.push_back(getGoodCalibrationGridPoints3D());
 	imagePoints.push_back(getGoodImagePoints());
@@ -1097,8 +1095,8 @@ void svlCCCalibrationGrid::printCalibrationParameters()
 	}
 
 
-	cout << "rvect: " << rvec.at<double>(0,0) <<","<< rvec.at<double>(0,1) <<","<< rvec.at<double>(0,2) <<","<< endl;
-	cout << "tvect: " << tvec.at<double>(0,0) <<","<< tvec.at<double>(0,1) <<","<< tvec.at<double>(0,2) <<","<< endl;
+	std::cout << "rvect: " << rvec.at<double>(0,0) <<","<< rvec.at<double>(0,1) <<","<< rvec.at<double>(0,2) <<","<< std::endl;
+	std::cout << "tvect: " << tvec.at<double>(0,0) <<","<< tvec.at<double>(0,1) <<","<< tvec.at<double>(0,2) <<","<< std::endl;
 }
 
 

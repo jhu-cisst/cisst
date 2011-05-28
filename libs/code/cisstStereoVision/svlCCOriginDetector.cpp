@@ -31,8 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h> 
 #include <cisstStereoVision/svlCCOriginDetector.h>
 
-using namespace std;
-
 svlCCOriginDetector::svlCCOriginDetector(int colorModeFlag)
 {
 	originColorModeFlag = colorModeFlag;
@@ -64,7 +62,7 @@ void svlCCOriginDetector::findOriginByColor( IplImage* iplImage)
 	// find blobs
 	int blobIndexFlag[] = {0,0,0,0};
 	int blobThresholds[] = {29,29,29,29};
-	bool blobsFound = findColorBlobs(iplImage, (float)max(iplImage->width,iplImage->height),blobIndexFlag,blobThresholds);
+	bool blobsFound = findColorBlobs(iplImage, (float)std::max(iplImage->width,iplImage->height),blobIndexFlag,blobThresholds);
 	// find intersection of blobs
 
 	if(blobsFound)
@@ -85,7 +83,7 @@ void svlCCOriginDetector::findOriginByColor( IplImage* iplImage)
 			{
 				colorBlobs[YELLOW_INDEX] = predictedBlob;
 				if(debug)
-					cout << "updated blue blob at: " << predictedBlob.x << "," << predictedBlob.y << endl;
+					std::cout << "updated blue blob at: " << predictedBlob.x << "," << predictedBlob.y << std::endl;
 				blobIndexFlag[YELLOW_INDEX] = 1;
 				findColorBlobs(iplImage,2*distanceBetweenTwoPoints(origin.x,origin.y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y),blobIndexFlag,blobThresholds);
 				predictedBlob = cv::Point2f(origin.x+0.75*(colorBlobs.at(RED_INDEX).y-colorBlobs.at(GREEN_INDEX).y)/2,origin.y-0.75*(colorBlobs.at(RED_INDEX).x-colorBlobs.at(GREEN_INDEX).x)/2);
@@ -112,7 +110,7 @@ void svlCCOriginDetector::findOriginByColor( IplImage* iplImage)
 
 				colorBlobs[BLUE_INDEX] = predictedBlob;
 				if(debug)
-					cout << "updated blue blob at: " << predictedBlob.x << "," << predictedBlob.y << endl;
+					std::cout << "updated blue blob at: " << predictedBlob.x << "," << predictedBlob.y << std::endl;
 				blobIndexFlag[BLUE_INDEX] = 1;
 				findColorBlobs(iplImage,2*distanceBetweenTwoPoints(origin.x,origin.y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y),blobIndexFlag,blobThresholds);
 				predictedBlob = cv::Point2f(origin.x+0.75*(colorBlobs.at(RED_INDEX).y-colorBlobs.at(GREEN_INDEX).y)/2,origin.y-0.75*(colorBlobs.at(RED_INDEX).x-colorBlobs.at(GREEN_INDEX).x)/2);
@@ -228,7 +226,7 @@ bool svlCCOriginDetector::findColorBlobs(IplImage* iplImage, float radius, int f
 		int newThreshold = ((data[i*step+j*channels+b0] - data[i*step+j*channels+b1]) + (data[i*step+j*channels+b0] - data[i*step+j*channels+b2]))/2;
 		//min of precomputed threshold and avg of differences with R,G
 		if(newThreshold > 5)		
-			thresholds[BLUE_INDEX] = min(thresholds[BLUE_INDEX],newThreshold);
+			thresholds[BLUE_INDEX] = std::min(thresholds[BLUE_INDEX],newThreshold);
 	}else if(flag[YELLOW_INDEX])
 	{
 		j = colorBlobs.at(BLUE_INDEX).x;
@@ -236,7 +234,7 @@ bool svlCCOriginDetector::findColorBlobs(IplImage* iplImage, float radius, int f
 		int newThreshold = ((data[i*step+j*channels+y0] - data[i*step+j*channels+y2]) + (data[i*step+j*channels+y0] - data[i*step+j*channels+y2]))/2;
 		//min of precomputed threshold and avg of differences with R,G
 		if(newThreshold > 5)		
-			thresholds[YELLOW_INDEX] = min(thresholds[YELLOW_INDEX],newThreshold);
+			thresholds[YELLOW_INDEX] = std::min(thresholds[YELLOW_INDEX],newThreshold);
 	}
 
 	// select pixels with more than this threshold
@@ -338,29 +336,29 @@ void svlCCOriginDetector::drawColorBlobs(IplImage* iplImage)
 {
 
 	if(debug)
-		cout << "drawColorBlobs start, total: " <<colorBlobs.size() << endl;
+		std::cout << "drawColorBlobs start, total: " <<colorBlobs.size() << std::endl;
 
     for(int i = 0; i < colorBlobs.size(); i++ )
     {
 		if(i==0)
 		{
 			if(debug)
-				cout << "Found red blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << endl;
+				std::cout << "Found red blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << std::endl;
 			cvCircle( iplImage, cvPoint(colorBlobs.at(i).x,colorBlobs.at(i).y), 5, CV_RGB(255,0,0), -1, 8, 0 );
 		}else if(i==1)
 		{
 			if(debug)
-				cout << "Found green blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << endl;
+				std::cout << "Found green blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << std::endl;
 			cvCircle( iplImage, cvPoint(colorBlobs.at(i).x,colorBlobs.at(i).y), 5, CV_RGB(0,255,0), -1, 8, 0 );
 		}else if(i==2 && originColorModeFlag == RGB)
 		{
 			if(debug)
-				cout << "Found blue blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << endl;
+				std::cout << "Found blue blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << std::endl;
 			cvCircle( iplImage, cvPoint(colorBlobs.at(i).x,colorBlobs.at(i).y), 5, CV_RGB(0,0,255), -1, 8, 0 );
 		}else if(i==3 && originColorModeFlag == RGY)
 		{
 			if(debug)
-				cout << "Found yellow blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << endl;
+				std::cout << "Found yellow blob at " << colorBlobs.at(i).x << "," << colorBlobs.at(i).y << std::endl;
 			cvCircle( iplImage, cvPoint(colorBlobs.at(i).x,colorBlobs.at(i).y), 5, CV_RGB(255,255,0), -1, 8, 0 );
 		}
     }
@@ -372,7 +370,7 @@ void svlCCOriginDetector::drawColorBlobs(IplImage* iplImage)
 		cvLine(iplImage,cvPoint(colorBlobs.at(YELLOW_INDEX).x,colorBlobs.at(YELLOW_INDEX).y),origin,CV_RGB(0,0,255));
 
 	//if(debug)
-		cout << "Calculated origin at " << origin.x << "," << origin.y << endl;
+		std::cout << "Calculated origin at " << origin.x << "," << origin.y << std::endl;
 	cvCircle( iplImage, cvPoint((int)origin.x,(int)origin.y), 5, CV_RGB(255,0,0), -1, 8, 0 );
 	cvCircle( iplImage, cvPoint((int)origin.x,(int)origin.y), 5, CV_RGB(255,255,255), -1, 8, 0 );
 }

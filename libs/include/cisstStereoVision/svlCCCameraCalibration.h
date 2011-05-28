@@ -32,9 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-using namespace std;
-//using namespace cv;
-
 //there aren't directives in OpenCV v.5, but they exist in OpenCV v.4
 #undef CV_MIN
 #undef CV_MAX
