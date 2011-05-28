@@ -20,8 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCCalibrationGrid_h
 #define _svlCCCalibrationGrid_h
+#ifndef _highgui_h
 #include <highgui.h>
+#endif
+#ifndef _cv_h
 #include <cv.h>
+#endif
 #include <math.h>
 #include <iostream>
 #include "svlCCOriginDetector.h"
@@ -35,7 +39,7 @@ class svlCCCalibrationGrid
 		double refine(const cv::Mat& localRvec, const cv::Mat& localTvec, const cv::Mat& localCameraMatrix, const cv::Mat& localDistCoeffs, float threshold, bool runHomography, bool checkNormalized);
 		std::vector<cv::Point2f> getGoodImagePoints();
 		std::vector<cv::Point3f> getGoodCalibrationGridPoints3D();
-		std::vector<cv::Point2f> svlCCCalibrationGrid::getGoodProjectedImagePoints();
+		std::vector<cv::Point2f> getGoodProjectedImagePoints();
 		void optimizeCalibration();
 		void compareGroundTruth();
 		void printCalibrationParameters();

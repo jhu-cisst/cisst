@@ -1,28 +1,27 @@
 #ifndef _svlCCFileIO_h
 #define _svlCCFileIO_h
+#ifndef _cv_h
 #include <cv.h>
-
-using namespace std;
-using namespace cv;
+#endif
 
 class svlCCFileIO
 {
 public:
 	enum formatEnum {ORIGINAL, IMPROVED}; // For subclass of svlCCFileIO for the DLR .pts type
 // Constructor takes filename string of file to read in
-	svlCCFileIO::svlCCFileIO(const char* filename): END(-1)
+	svlCCFileIO(const char* filename): END(-1)
 	{
 		myFileName = filename;
 
 	}
 // Parses file into lines, and passes each line to ParseLine()
-	void svlCCFileIO::parseFile()
+	void parseFile()
 	{
 		char buffer[200];
 		int lineNum = 0;
 		int sectionNum = 0;
 
-		ifstream& fileStream = openFile(myFileName);
+		std::ifstream& fileStream = openFile(myFileName);
 
 		try{
 			while (fileStream.good() && !fileStream.eof() && !fileStream.fail())
@@ -40,13 +39,13 @@ public:
 
 					if (fileStream.fail() && !fileStream.eof())
 					{
-						cout << "fileStream FAILED" << endl;
+						std::cout << "fileStream FAILED" << std::endl;
 						break;
 					}
 			}
-		}catch(ios_base::failure)
+		}catch(std::ios_base::failure)
 		{
-			cout << myFileName << " failed." << endl;
+			std::cout << myFileName << " failed." << std::endl;
 			return;
 		}
 	}
@@ -59,7 +58,7 @@ protected:
 	class SectionFormat
 	{
 	public:
-		SectionFormat::SectionFormat(int lnNum, char* fmtarray)
+		SectionFormat(int lnNum, char* fmtarray)
 		{
 			lineNum = lnNum;
 			fmt = fmtarray;
@@ -68,30 +67,30 @@ protected:
 		char* fmt;
 	};
 // Creates an ifstream object for the specified file
-	ifstream& svlCCFileIO::openFile(const char* filename)
+	std::ifstream& openFile(const char* filename)
 	{
 		// from C++ for dummies
-		ifstream* pFileStream = new ifstream(filename);
+		std::ifstream* pFileStream = new std::ifstream(filename);
 
 		if (pFileStream->good())
 		{
-			cerr << "Sucessfully opened " << filename << endl;
+			std::cerr << "Sucessfully opened " << filename << std::endl;
 		}
 		else
 		{
-			cerr << "Could not open " << filename << endl;
+			std::cerr << "Could not open " << filename << std::endl;
 			//delete pFileStream;
 		}
 		return *pFileStream;
 	}
 
 	//Parses a line from a file according to a format string
-	void svlCCFileIO::parseLine(char line[], char format[], int lineNum)
+	void parseLine(char line[], char format[], int lineNum)
 	{
 		char buffer[200];
 		int i = 0;
 		int numsRead = 0;
-		istringstream inp(line);
+		std::istringstream inp(line);
 		double d;
 
 		while(format[i] != '\n')
@@ -101,7 +100,7 @@ protected:
 				i++;
 				char delim = format[i];
 				inp.getline(buffer,200,delim);	
-				istringstream inp2(buffer);
+				std::istringstream inp2(buffer);
 				while(inp2 >> d) {
 					data[lineNum][numsRead] = d;
 					numsRead++;
@@ -164,7 +163,7 @@ public:
 
 protected:
 	const static bool debug = false;
-	void svlCCDLRCalibrationFileIO::printCameraMatrix();
+	void printCameraMatrix();
 
 };
 

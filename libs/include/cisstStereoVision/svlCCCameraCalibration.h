@@ -20,14 +20,23 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCCameraCalibration_h
 #define _svlCCCameraCalibration_h
-
+#ifndef _cv_h
 #include <cv.h>
+#endif
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstStereoVision/svlCCCalibrationGrid.h>
 #include <cisstStereoVision/svlCCOriginDetector.h>
 #include <cisstStereoVision/svlCCCornerDetector.h>
 #include <cisstStereoVision/svlCCFileIO.h>
 #include <limits>
+
+//there aren't directives in OpenCV v.5, but they exist in OpenCV v.4
+#undef CV_MIN
+#undef CV_MAX
+#define  CV_MIN(a, b)   ((a) <= (b) ? (a) : (b)) 
+#define  CV_MAX(a, b)   ((a) >= (b) ? (a) : (b))
+
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -43,19 +52,19 @@ class CISST_EXPORT svlCCCameraCalibration
 
 	public:
 		svlCCCameraCalibration();
-		bool processImages(string imageDirectory, string imagePrefix, string imageType, int startIndex, int stopIndex, cv::Size boardSize, int originDetectorColorModeFlag);
+		bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, cv::Size boardSize, int originDetectorColorModeFlag);
 		void printCalibrationParameters();
 		cv::Mat cameraMatrix, distCoeffs;
 		std::vector<svlSampleImageRGB> images;
 		cv::Size imageSize;
 
 	private:
-		double computeReprojectionErrors(
-	        const vector<vector<Point3f> >& objectPoints,
-	        const vector<vector<Point2f> >& imagePoints,
-	        const vector<Mat>& rvecs, const vector<Mat>& tvecs,
-	        const Mat& cameraMatrix, const Mat& distCoeffs,
-	        vector<float>& perViewErrors, bool projected );
+	double computeReprojectionErrors(
+		const std::vector<std::vector<cv::Point3f> >& objectPoints,
+		const std::vector<std::vector<cv::Point2f> >& imagePoints,
+		const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs,
+			const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs,
+	        std::vector<float>& perViewErrors, bool projected );
 		void updateCalibrationGrids();
 		double runCalibration(bool projected);
 		bool checkCalibration(bool projected);

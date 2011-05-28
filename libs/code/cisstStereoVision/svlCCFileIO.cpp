@@ -136,14 +136,14 @@ void svlCCPointsFileIO::repackData(IplImage* iplImage)
 			//cvCircle( iplImage, cv::Point2f(imageSize.width/2+data[index][0]/20*30,imageSize.height/2+data[index][1]/20*30), 5, colors[1], 1, 8, 0 );
 			cvCircle( iplImage, cv::Point2f(data[index][0],data[index][1]), 5, colors[1], 1, 8, 0 );
 			cvCircle( iplImage, cv::Point2f(data[index][3],data[index][4]), 5, colors[6], 1, 8, 0 );
-			cout << "repackData at point: " << i << " (" << data[index][0] << ",";
-			cout << data[index][1] << ")" << " : (" << data[index][3] << ",";
-			cout << data[index][4] << ")" << endl;
+			std::cout << "repackData at point: " << i << " (" << data[index][0] << ",";
+			std::cout << data[index][1] << ")" << " : (" << data[index][3] << ",";
+			std::cout << data[index][4] << ")" << std::endl;
 		}
 
 	}
 	if(debug)
-		cout << "read " << pointsCount << " points" <<endl;
+		std::cout << "read " << pointsCount << " points" <<std::endl;
 
 	// Free memory
 	rvect.~Mat();
@@ -160,8 +160,8 @@ void svlCCPointsFileIO::showData()
 {
 	if(debug)
 	{
-		cout << "pointsCount = " << pointsCount << endl;
-		cout << "Image size: " << imageSize.width << "," << imageSize.height << endl;
+		std::cout << "pointsCount = " << pointsCount << std::endl;
+		std::cout << "Image size: " << imageSize.width << "," << imageSize.height << std::endl;
 	}
 }
 
@@ -194,16 +194,16 @@ void svlCCDLRCalibrationFileIO::repackData(int numImages)
 	this->numImages = numImages;	
 
 	//cameraMatrix;
-	cout<<"focal length: " << focalLength.x<<","<<focalLength.y << endl;
-	cout<<"pricipal point: " << principalPoint.x<<","<<principalPoint.y << endl;
-	cout<<"alpha " << alpha << endl;
-	cout<<"distortion coeffs " << distCoeffs.at<double>(0,0) <<","<< distCoeffs.at<double>(1,0) <<","<< distCoeffs.at<double>(2,0) << endl;
-	cout<<"data 15: " << data[15][0] <<","<< data[15][1] <<","<< data[15][2] << endl;
-	cout<<"data 16: " << data[16][0] <<","<< data[16][1] <<","<< data[16][2] << endl;
+	std::cout<<"focal length: " << focalLength.x<<","<<focalLength.y << std::endl;
+	std::cout<<"pricipal point: " << principalPoint.x<<","<<principalPoint.y << std::endl;
+	std::cout<<"alpha " << alpha << std::endl;
+	std::cout<<"distortion coeffs " << distCoeffs.at<double>(0,0) <<","<< distCoeffs.at<double>(1,0) <<","<< distCoeffs.at<double>(2,0) << std::endl;
+	std::cout<<"data 15: " << data[15][0] <<","<< data[15][1] <<","<< data[15][2] << std::endl;
+	std::cout<<"data 16: " << data[16][0] <<","<< data[16][1] <<","<< data[16][2] << std::endl;
 
-	cout<<"tcpToCamera1 " << tcpToCamera.at<double>(0,0) <<","<< tcpToCamera.at<double>(0,1) <<","<< tcpToCamera.at<double>(0,2) <<","<< tcpToCamera.at<double>(0,3)<< endl;
-	cout<<"tcpToCamera1 " << tcpToCamera.at<double>(1,0) <<","<< tcpToCamera.at<double>(1,1) <<","<< tcpToCamera.at<double>(1,2) <<","<< tcpToCamera.at<double>(1,3)<< endl;
-	cout<<"tcpToCamera1 " << tcpToCamera.at<double>(2,0) <<","<< tcpToCamera.at<double>(2,1) <<","<< tcpToCamera.at<double>(2,2) <<","<< tcpToCamera.at<double>(2,3)<< endl;
+	std::cout<<"tcpToCamera1 " << tcpToCamera.at<double>(0,0) <<","<< tcpToCamera.at<double>(0,1) <<","<< tcpToCamera.at<double>(0,2) <<","<< tcpToCamera.at<double>(0,3)<< std::endl;
+	std::cout<<"tcpToCamera1 " << tcpToCamera.at<double>(1,0) <<","<< tcpToCamera.at<double>(1,1) <<","<< tcpToCamera.at<double>(1,2) <<","<< tcpToCamera.at<double>(1,3)<< std::endl;
+	std::cout<<"tcpToCamera1 " << tcpToCamera.at<double>(2,0) <<","<< tcpToCamera.at<double>(2,1) <<","<< tcpToCamera.at<double>(2,2) <<","<< tcpToCamera.at<double>(2,3)<< std::endl;
 
 	int index = 28;
 	for(int i=0;i<numImages;i++)
@@ -241,9 +241,9 @@ void svlCCDLRCalibrationFileIO::printCameraMatrix()
 	for(int i=0;i<numImages;i++)
 	{
 		CvMat* m = (CvMat*) cameraMatrix[i];
-		cout<<"CameraMatrix # " << i << " " << m->data.fl[0]<<","<< m->data.fl[1] <<","<< m->data.fl[2] <<","<< m->data.fl[3]<< endl;
-		cout<<"CameraMatrix # " << i << " " << m->data.fl[4]<<","<< m->data.fl[5] <<","<< m->data.fl[6] <<","<< m->data.fl[7]<< endl;
-		cout<<"CameraMatrix # " << i << " " << m->data.fl[8]<<","<< m->data.fl[9] <<","<< m->data.fl[10] <<","<< m->data.fl[11]<<endl<<endl;
+		std::cout<<"CameraMatrix # " << i << " " << m->data.fl[0]<<","<< m->data.fl[1] <<","<< m->data.fl[2] <<","<< m->data.fl[3]<< std::endl;
+		std::cout<<"CameraMatrix # " << i << " " << m->data.fl[4]<<","<< m->data.fl[5] <<","<< m->data.fl[6] <<","<< m->data.fl[7]<< std::endl;
+		std::cout<<"CameraMatrix # " << i << " " << m->data.fl[8]<<","<< m->data.fl[9] <<","<< m->data.fl[10] <<","<< m->data.fl[11]<<std::endl<<std::endl;
 	}
 }
 

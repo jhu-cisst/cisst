@@ -20,16 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCCornerDetector_h
 #define _svlCCCornerDetector_h
+#ifndef _highgui_h
 #include <highgui.h>
+#endif
+#ifndef _cl_h
 #include <cv.h>
+#endif
 #include <math.h>
 #include <iostream>
-
-//there aren't directives in OpenCV v.5, but they exist in OpenCV v.4
-#undef CV_MIN
-#undef CV_MAX
-#define  CV_MIN(a, b)   ((a) <= (b) ? (a) : (b)) 
-#define  CV_MAX(a, b)   ((a) >= (b) ? (a) : (b))
 
 class svlCCCornerDetector
 {

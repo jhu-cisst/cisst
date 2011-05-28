@@ -55,6 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSourceImageFile.h>
 
 #include <cisstStereoVision/svlBufferSample.h>
+#if CISST_SVL_HAS_OPENCV
 #include <cisstStereoVision/svlCCCameraCalibration.h>
-
+#endif //CISST_SVL_HAS_OPENCV
 #endif // _svlPython_h
