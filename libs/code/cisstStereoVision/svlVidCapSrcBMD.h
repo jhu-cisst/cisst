@@ -22,14 +22,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlVidCapSrcBMD_h
 #define _svlVidCapSrcBMD_h
 
+//#include <pthread.h>
+//#include <unistd.h>
 
-#include <pthread.h>
-#include <unistd.h>
-
-#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
-#include <cisstStereoVision/svlBufferImage.h>
-#include <DeckLinkAPI.h>
-
+//#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+//#include <cisstStereoVision/svlBufferImage.h>
+#include <cisstStereoVision.h>
+#include "DeckLinkAPI_h.h"
 
 class svlBufferImage;
 class osaThread;
@@ -64,8 +63,9 @@ public:
 private:
     unsigned int NumOfStreams;
 	bool Running;
+	bool Initialized;
 	BMDVideoInputFlags			inputFlags;
-	BMDDisplayMode				selectedDisplayMode;
+	BMDDisplayMode				displayMode;
 	BMDPixelFormat				pixelFormat;
 	int width, height;
 
@@ -81,19 +81,22 @@ private:
 class DeckLinkCaptureDelegate : public IDeckLinkInputCallback
 {
 public:
-	DeckLinkCaptureDelegate();
+	DeckLinkCaptureDelegate(svlBufferImage* buffer);
 	~DeckLinkCaptureDelegate();
 
 	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, LPVOID *ppv) { return E_NOINTERFACE; }
 	virtual ULONG STDMETHODCALLTYPE AddRef(void);
 	virtual ULONG STDMETHODCALLTYPE  Release(void);
-	virtual HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents, IDeckLinkDisplayMode*, BMDDetectedVideoInputFormatFlags);
-	virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame*, IDeckLinkAudioInputPacket*) {return S_OK;}
-	void processVideoFrames(IDeckLinkVideoInputFrame* videoFrame);
+	virtual HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents, IDeckLinkDisplayMode*, BMDDetectedVideoInputFormatFlags){return S_OK;}
 
+	virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame*, IDeckLinkAudioInputPacket*); 
 private:
+	void processVideoFrame(IDeckLinkVideoInputFrame* videoFrame);
+
 	ULONG				m_refCount;
-	pthread_mutex_t		m_mutex;
+	//pthread_mutex_t		m_mutex;
+	BMDTimecodeFormat		g_timecodeFormat;
+	int frameCount;
 	svlBufferImage*		m_buffer;
 };
 
