@@ -132,7 +132,7 @@ public:
 	svlCCPointsFileIO(const char* filename, int fileFormat);
 	void repackData();
 	void repackData(IplImage* iplImage);
-	float errorCheck(vctDynamicVector<vctDynamicVector<vct3>> Dc, vctDynamicVector<vctDynamicVector<vct3>> Ac, vctDynamicVector<vctDynamicVector<vct3>> Cc);
+	float errorCheck(vctDynamicVector<vctDynamicVector<vct3> > Dc, vctDynamicVector<vctDynamicVector<vct3> > Ac, vctDynamicVector<vctDynamicVector<vct3> > Cc);
 	void showData();
 	
 	std::vector<cv::Point2f> imagePoints;

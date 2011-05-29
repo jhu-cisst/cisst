@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif 
 
 #include "cv.h" 
-#include "conio.h"
+//#include "conio.h"
 #include "highgui.h" 
 
 #include <math.h> 

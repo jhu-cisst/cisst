@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlCCCameraCalibration.h>
+#include <sstream>
 
 svlCCCameraCalibration::svlCCCameraCalibration()
 {
@@ -553,10 +554,13 @@ bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::stri
 
 	for(int i=startIndex;i<stopIndex+1;i++){
 		// image file
-		itoa(i,buffer,10);
+        //itoa(i,buffer,10);
+        std::stringstream out;
+        out << i;
 		currentFileName = imageDirectory;
 		currentImagePrefix = imagePrefix;
-		currentFileName.append(currentImagePrefix.append(buffer).append(imageType));
+        currentFileName.append(currentImagePrefix.append(out.str()).append(imageType));
+		//currentFileName.append(currentImagePrefix.append(buffer).append(imageType));
 		if(debug)
 			std::cout << "Attempting to load image, " << currentFileName << std::endl;
 		if(!(matImage=cv::imread(currentFileName, 1)).data)
@@ -577,10 +581,13 @@ bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::stri
 		calibrationGrid->correlate(calOriginDetector, calCornerDetector);
 
 		// tracker coords file
-		itoa(i,buffer,10);
+		//itoa(i,buffer,10);
+        //std::stringstream out;
+        //out << i;
 		currentFileName = imageDirectory;
 		currentImagePrefix = imagePrefix;
-		currentFileName.append(currentImagePrefix.append(buffer).append(".coords"));
+		//currentFileName.append(currentImagePrefix.append(buffer).append(".coords"));
+		currentFileName.append(currentImagePrefix.append(out.str()).append(".coords"));
 		if(debug)
 			std::cout << "Reading coords for " << currentFileName << std::endl;
 
@@ -592,14 +599,15 @@ bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::stri
 		if(groundTruthTest)
 		{
 			// points file
-			itoa(i,buffer,10);
+			//itoa(i,buffer,10);
 			currentFileName = imageDirectory;
 			currentImagePrefix = "shot";
-			currentFileName.append(currentImagePrefix.append(buffer).append(".pts"));
+            currentFileName.append(currentImagePrefix.append(out.str()).append(".pts"));
+			//currentFileName.append(currentImagePrefix.append(buffer).append(".pts"));
 			if(debug)
 				std::cout << "Reading points for " << currentFileName << std::endl;
 
-			svlCCPointsFileIO pointsFileIO(currentFileName.c_str(),svlCCFileIO::formatEnum::IMPROVED);
+                svlCCPointsFileIO pointsFileIO(currentFileName.c_str(),svlCCFileIO::IMPROVED);
 			pointsFileIO.parseFile();
 			pointsFileIO.repackData(image.IplImageRef());
 

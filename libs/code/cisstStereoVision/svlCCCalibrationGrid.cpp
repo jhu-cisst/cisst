@@ -270,10 +270,10 @@ void svlCCCalibrationGrid::compareGroundTruth()
 ***********************************************************************************************************/
 void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coordsDst, bool initial)
 {
-	float distanceFromOriginToRed = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::RED_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::RED_INDEX).y);
-	float distanceFromOriginToGreen = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::GREEN_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::GREEN_INDEX).y);
-	float distanceFromOriginToBlue = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::BLUE_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::BLUE_INDEX).y);
-	float distanceFromOriginToYellow = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX).y);
+	float distanceFromOriginToRed = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::RED_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::RED_INDEX).y);
+	float distanceFromOriginToGreen = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::GREEN_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::GREEN_INDEX).y);
+	float distanceFromOriginToBlue = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::BLUE_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::BLUE_INDEX).y);
+	float distanceFromOriginToYellow = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::YELLOW_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::YELLOW_INDEX).y);
 
 	cv::Point2f extrapolatedCornerSrc;
 	cv::Point2f extrapolatedCornerDst;
@@ -285,11 +285,11 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 
 	for(int i=0;i<colorBlobsFromDetector.size();i++)
 	{
-		if(((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB) && (i== svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX))||
-			((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY) && (i== svlCCOriginDetector::colorIndexEnum::BLUE_INDEX)))
+		if(((originColorModeFlag == svlCCOriginDetector::RGB) && (i== svlCCOriginDetector::YELLOW_INDEX))||
+			((originColorModeFlag == svlCCOriginDetector::RGY) && (i== svlCCOriginDetector::BLUE_INDEX)))
 			continue;
 		index = i;
-		if((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY) && (i== svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX))
+		if((originColorModeFlag == svlCCOriginDetector::RGY) && (i== svlCCOriginDetector::YELLOW_INDEX))
 			index = i-1;
 		coordsDst->data.fl[scale*index] = colorBlobsFromDetector.at(i).x;
 		coordsDst->data.fl[scale*index+1] = colorBlobsFromDetector.at(i).y;
@@ -309,27 +309,27 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 
 		switch(i)
 		{
-		case (int)svlCCOriginDetector::colorIndexEnum::RED_INDEX:
+		case (int)svlCCOriginDetector::RED_INDEX:
 			extrapolatedCornerSrc = cv::Point2f(calibrationGridOrigin.x+gridSizePixel/2,calibrationGridOrigin.y-gridSizePixel/2);
 			break;
-		case (int)svlCCOriginDetector::colorIndexEnum::GREEN_INDEX:
+		case (int)svlCCOriginDetector::GREEN_INDEX:
 			extrapolatedCornerSrc = cv::Point2f(calibrationGridOrigin.x-gridSizePixel/2,calibrationGridOrigin.y+gridSizePixel/2);
 			break;
-		case (int)svlCCOriginDetector::colorIndexEnum::BLUE_INDEX:
-			if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB)
+		case (int)svlCCOriginDetector::BLUE_INDEX:
+			if(originColorModeFlag == svlCCOriginDetector::RGB)
 				extrapolatedCornerSrc = cv::Point2f(calibrationGridOrigin.x-gridSizePixel/2,calibrationGridOrigin.y-gridSizePixel/2);
 			break;
-		case (int)svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX:
-			if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY)
+		case (int)svlCCOriginDetector::YELLOW_INDEX:
+			if(originColorModeFlag == svlCCOriginDetector::RGY)
 				extrapolatedCornerSrc = cv::Point2f(calibrationGridOrigin.x-gridSizePixel/2,calibrationGridOrigin.y-gridSizePixel/2);
 			break;
 		default:
-			printf("Unrecognized color index %d\n", i);	
+			//printf("Unrecognized color index %d\n", i);	
 			break;
 		}
 
-		if(((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB) && (i!= svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX))||
-			((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY) && (i!= svlCCOriginDetector::colorIndexEnum::BLUE_INDEX)))
+		if(((originColorModeFlag == svlCCOriginDetector::RGB) && (i!= svlCCOriginDetector::YELLOW_INDEX))||
+			((originColorModeFlag == svlCCOriginDetector::RGY) && (i!= svlCCOriginDetector::BLUE_INDEX)))
 		{
 			coordsSrc->data.fl[scale*index] = extrapolatedCornerSrc.x;
 			coordsSrc->data.fl[scale*index+1] = extrapolatedCornerSrc.y;
@@ -351,19 +351,19 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 	}
 
 	//non-colored corner
-	//if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB)
-	extrapolatedCornerSrc = extrapolateFromTwoPoints(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+3], calibrationGridOrigin.x,calibrationGridOrigin.y);
-	//else if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY)
-	//	extrapolatedCornerSrc = extrapolateFromTwoPoints(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+3], calibrationGridOrigin.x,calibrationGridOrigin.y);
+	//if(originColorModeFlag == svlCCOriginDetector::RGB)
+	extrapolatedCornerSrc = extrapolateFromTwoPoints(coordsSrc->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+3], calibrationGridOrigin.x,calibrationGridOrigin.y);
+	//else if(originColorModeFlag == svlCCOriginDetector::RGY)
+	//	extrapolatedCornerSrc = extrapolateFromTwoPoints(coordsSrc->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+3], calibrationGridOrigin.x,calibrationGridOrigin.y);
 	coordsSrc->data.fl[numDetectorColorBlobs*scale] = extrapolatedCornerSrc.x;
 	coordsSrc->data.fl[numDetectorColorBlobs*scale+1] = extrapolatedCornerSrc.y;
 
 	if(initial)
 	{
-		//if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB)
-		extrapolatedCornerDst = extrapolateFromTwoPoints(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+3], imageOrigin.x,imageOrigin.y);
-		//if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY)
-		//	extrapolatedCornerDst = extrapolateFromTwoPoints(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+3], imageOrigin.x,imageOrigin.y);
+		//if(originColorModeFlag == svlCCOriginDetector::RGB)
+		extrapolatedCornerDst = extrapolateFromTwoPoints(coordsDst->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+3], imageOrigin.x,imageOrigin.y);
+		//if(originColorModeFlag == svlCCOriginDetector::RGY)
+		//	extrapolatedCornerDst = extrapolateFromTwoPoints(coordsDst->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+3], imageOrigin.x,imageOrigin.y);
 
 		//nearestCorner(extrapolatedCornerDst, corner, distanceFromOriginToRed/2, false);
 		if(nearestCorner(extrapolatedCornerDst, corner, distanceFromOriginToRed/2, false) >= distanceFromOriginToRed/2)
@@ -384,55 +384,55 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 	//midpoint corners
 	for(int i=0;i<colorBlobsFromDetector.size();i++)
 	{
-		if(((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB) && (i== svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX))||
-			((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY) && (i== svlCCOriginDetector::colorIndexEnum::BLUE_INDEX)))
+		if(((originColorModeFlag == svlCCOriginDetector::RGB) && (i== svlCCOriginDetector::YELLOW_INDEX))||
+			((originColorModeFlag == svlCCOriginDetector::RGY) && (i== svlCCOriginDetector::BLUE_INDEX)))
 			continue;
 		index = i;
-		if((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY) && (i== svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX))
+		if((originColorModeFlag == svlCCOriginDetector::RGY) && (i== svlCCOriginDetector::YELLOW_INDEX))
 			index = i-1;
 		switch(i)
 		{
-		case (int)svlCCOriginDetector::colorIndexEnum::RED_INDEX:
+		case (int)svlCCOriginDetector::RED_INDEX:
 			extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[numDetectorColorBlobs*scale],coordsSrc->data.fl[numDetectorColorBlobs*scale+1]);
 			if(initial)
 				extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[numDetectorColorBlobs*scale],coordsDst->data.fl[numDetectorColorBlobs*scale+1]);
 			break;
-		case (int)svlCCOriginDetector::colorIndexEnum::GREEN_INDEX:
-			//if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB)
+		case (int)svlCCOriginDetector::GREEN_INDEX:
+			//if(originColorModeFlag == svlCCOriginDetector::RGB)
 			//{
-				extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+3]);
+				extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+3]);
 				if(initial)
-					extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::BLUE_INDEX+3]);
-			//}else if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY)
+					extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::BLUE_INDEX+3]);
+			//}else if(originColorModeFlag == svlCCOriginDetector::RGY)
 			//{
-			//	extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+3]);
+			//	extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+3]);
 			//	if(initial)
-			//		extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX+3]);
+			//		extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::YELLOW_INDEX+3]);
 			//}
 			break;
-		case (int)svlCCOriginDetector::colorIndexEnum::BLUE_INDEX:
-			if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB)
+		case (int)svlCCOriginDetector::BLUE_INDEX:
+			if(originColorModeFlag == svlCCOriginDetector::RGB)
 			{
-				extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+3]);
+				extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::RED_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::RED_INDEX+3]);
 				if(initial)
-					extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+3]);
+					extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::RED_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::RED_INDEX+3]);
 			}
 			break;
-		case (int)svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX:
-			if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY)
+		case (int)svlCCOriginDetector::YELLOW_INDEX:
+			if(originColorModeFlag == svlCCOriginDetector::RGY)
 			{
-				extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+3]);
+				extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::RED_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::RED_INDEX+3]);
 				if(initial)
-					extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::RED_INDEX+3]);
+					extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::RED_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::RED_INDEX+3]);
 			}
 			break;
 		default:
-			printf("Unrecognized color index %d\n", i);	
+			//printf("Unrecognized color index %d\n", i);	
 			break;
 		}
 
-		if(((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB) && (i!= svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX))||
-			((originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY) && (i!= svlCCOriginDetector::colorIndexEnum::BLUE_INDEX)))
+		if(((originColorModeFlag == svlCCOriginDetector::RGB) && (i!= svlCCOriginDetector::YELLOW_INDEX))||
+			((originColorModeFlag == svlCCOriginDetector::RGY) && (i!= svlCCOriginDetector::BLUE_INDEX)))
 		{
 			extrapolatedCornerSrc = midPointBetweenTwoPoints(coordsSrc->data.fl[scale*index+2],coordsSrc->data.fl[scale*index+3],extrapolatedCornerSrc.x,extrapolatedCornerSrc.y);
 			coordsSrc->data.fl[(numDetectorColorBlobs+1)*scale+index*2] = extrapolatedCornerSrc.x;
@@ -453,14 +453,14 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 		}
 	}
 	//non-colored corner
-	extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::GREEN_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::colorIndexEnum::GREEN_INDEX+3]);
+	extrapolatedCornerSrc = cv::Point2f(coordsSrc->data.fl[scale*svlCCOriginDetector::GREEN_INDEX+2],coordsSrc->data.fl[scale*svlCCOriginDetector::GREEN_INDEX+3]);
 	extrapolatedCornerSrc = midPointBetweenTwoPoints(coordsSrc->data.fl[numDetectorColorBlobs*scale],coordsSrc->data.fl[numDetectorColorBlobs*scale+1],extrapolatedCornerSrc.x,extrapolatedCornerSrc.y);
 	coordsSrc->data.fl[(numDetectorColorBlobs+1)*scale+6] = extrapolatedCornerSrc.x;
 	coordsSrc->data.fl[(numDetectorColorBlobs+1)*scale+7] = extrapolatedCornerSrc.y;
 
 	if(initial)
 	{
-		extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::GREEN_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::colorIndexEnum::GREEN_INDEX+3]);
+		extrapolatedCornerDst = cv::Point2f(coordsDst->data.fl[scale*svlCCOriginDetector::GREEN_INDEX+2],coordsDst->data.fl[scale*svlCCOriginDetector::GREEN_INDEX+3]);
 		extrapolatedCornerDst = midPointBetweenTwoPoints(coordsDst->data.fl[numDetectorColorBlobs*scale],coordsDst->data.fl[numDetectorColorBlobs*scale+1],extrapolatedCornerDst.x,extrapolatedCornerDst.y);
 		if(nearestCorner(extrapolatedCornerDst, corner, distanceFromOriginToRed/2, false) >= distanceFromOriginToRed/2)
 		{
@@ -493,15 +493,15 @@ void svlCCCalibrationGrid::findInitialCorners(CvMat* coordsSrc, CvMat* coordsDst
 	calibrationGridColorBlobs = cvCreateMat(3,2, CV_32F);
 	imageColorBlobs = cvCreateMat(3,2, CV_32F);
 
-	float distanceFromOriginToRed = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::RED_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::RED_INDEX).y);
-	float distanceFromOriginToGreen = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::GREEN_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::GREEN_INDEX).y);
-	float distanceFromOriginToBlue = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::BLUE_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::BLUE_INDEX).y);
-	float distanceFromOriginToYellow = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::colorIndexEnum::YELLOW_INDEX).y);
+	float distanceFromOriginToRed = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::RED_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::RED_INDEX).y);
+	float distanceFromOriginToGreen = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::GREEN_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::GREEN_INDEX).y);
+	float distanceFromOriginToBlue = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::BLUE_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::BLUE_INDEX).y);
+	float distanceFromOriginToYellow = distanceBetweenTwoPoints(originFromDetector.x,originFromDetector.y,colorBlobsFromDetector.at(svlCCOriginDetector::YELLOW_INDEX).x,colorBlobsFromDetector.at(svlCCOriginDetector::YELLOW_INDEX).y);
 	float sizePixel = 0;
 	
-	if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGB)
+	if(originColorModeFlag == svlCCOriginDetector::RGB)
 		gridSizePixel = 2*(distanceFromOriginToRed+distanceFromOriginToGreen+distanceFromOriginToBlue)/3;
-	else if(originColorModeFlag == svlCCOriginDetector::colorModeEnum::RGY)
+	else if(originColorModeFlag == svlCCOriginDetector::RGY)
 		gridSizePixel = 2*(distanceFromOriginToRed+distanceFromOriginToGreen+distanceFromOriginToYellow)/3;
 
 
@@ -562,7 +562,7 @@ void svlCCCalibrationGrid::correlate(svlCCOriginDetector* originDetector, svlCCC
 	//check for orientation detection
 	switch(originDetectionFlag)
 	{
-		case (int)svlCCOriginDetector::originDetectionEnum::COLOR:
+    case (int)svlCCOriginDetector::COLOR:
 			valid = true;
 			break;
 		default:
@@ -576,7 +576,7 @@ void svlCCCalibrationGrid::correlate(svlCCOriginDetector* originDetector, svlCCC
 	//check for corner detection
 	switch(cornerDetectionFlag)
 	{
-		case (int)svlCCCornerDetector::cornerDetectionEnum::FEATURES:
+		case (int)svlCCCornerDetector::FEATURES:
 			valid = true;
 			corners = cornerDetector->getChessboardCorners();	
 			normCorners = cornerDetector->getChessboardCornersNormalized();	
@@ -921,7 +921,7 @@ bool svlCCCalibrationGrid::updateHomography(float threshold)
 		for( int i = 0; i < (boardSize.width); i++ )	
 			for( int j = 0; j < (boardSize.height); j++ )
 			{
-				sprintf(s, "%d", i*boardSize.width+j) ;
+				//sprintf(s, "%d", i*boardSize.width+j) ;
 				if(visibility[i][j]){
 					//sprintf(t, "%d", j) ;
 					//cvPutText(iplImage,s,cv::Point2f(imagePoints[i][j].x,imagePoints[i][j].y),&font,cvScalar(255,100,100,255));
@@ -1037,9 +1037,9 @@ double svlCCCalibrationGrid::runCalibration()
 	cv::Mat localDistCoeffs = cv::Mat::zeros(5, 1, CV_64F);
 	std::vector<cv::Mat> rvecs, tvecs;
 	int flags = 0;;
-	std::vector<std::vector<cv::Point3f>> objectPoints;
-	std::vector<std::vector<cv::Point2f>> imagePoints;
-	std::vector<std::vector<cv::Point2f>> localProjectedImagePoints;
+	std::vector<std::vector<cv::Point3f> > objectPoints;
+	std::vector<std::vector<cv::Point2f> > imagePoints;
+	std::vector<std::vector<cv::Point2f> > localProjectedImagePoints;
 	double rms = std::numeric_limits<double>::max( );
 	double projectedImagePointsRMS = std::numeric_limits<double>::max( );
 
@@ -1058,7 +1058,7 @@ double svlCCCalibrationGrid::runCalibration()
 				localDistCoeffs, rvecs, tvecs, flags);
 			
 			if(debug)
-				printf("grid::calibrateCamera: %d points, RMS:%g, improved:%g\n", imagePoints.at(0).size(), rms, projectedImagePointsRMS);
+				//printf("grid::calibrateCamera: %d points, RMS:%g, improved:%g\n", imagePoints.at(0).size(), rms, projectedImagePointsRMS);
 
 			if(rms < calibrationError)
 			{
