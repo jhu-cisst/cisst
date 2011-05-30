@@ -126,5 +126,23 @@ void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
         value.str("");
         value << "value-" << intValue;
         CPPUNIT_ASSERT_EQUAL(value.str(), stringValue);
+
+        // query by attribute value
+        context.str("");
+        context << "data-1/data-1-2/data-1-2-x[@intAttribute="<< index << "]";
+        // get int attribute (value between 1 and 3)
+        path.str("");
+        path << "@intAttribute";
+        dataFound = xmlPath.GetXMLValue(context.str(), path.str(), intValue);
+        CPPUNIT_ASSERT(dataFound);
+        // get string (value "value-<index>")
+        path.str("");
+        path << "data-1-2-x-y/@stringAttribute";
+        dataFound = xmlPath.GetXMLValue(context.str(), path.str(), stringValue);
+        CPPUNIT_ASSERT(dataFound);
+        // compare string to index 
+        value.str("");
+        value << "value-" << index;
+        CPPUNIT_ASSERT_EQUAL(value.str(), stringValue);
     }
 }
