@@ -32,34 +32,14 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnXMLPath_h
 
 #include <cisstConfig.h>
+#include <cisstCommon/cmnGenericObject.h>
 
 #if CISST_HAS_XML
 
-#include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnTokenizer.h>
-#include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnAssert.h>
-
-
-#include <cassert>
-#include <vector>
-#include <string>
-
-#include <iostream>
-
-#include <libxml/tree.h>
-#include <libxml/parser.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-
 #include <cisstCommon/cmnExport.h>
 
-
-// At some point, windows.h is going to be included (OS abstraction).
-// This instructs the compiler to include only the bare minimum of
-// Windows header files.  Specifically, it prevents namespace
-// collisions between MsXml and Xerces/Xalan.
-// #define WIN32_LEAN_AND_MEAN
+// forward declaration of struct containing all data used by wrapper.
+struct cmnXMLPathData;
 
 /*!
   \ingroup cisstCommon
@@ -84,52 +64,38 @@ http://www.cisst.org/cisst/license.txt.
   GetXMLValue, which accepts a context and a XPath
   As an example consider the following config file
   <code> <config>
-  	<device name="mei">
-  		<axis name="x" axis-on-amp="1" logical-axis-no="1">
-			<filter pgain="1000" ipgain="100" dgain="200" />
-			<encoder out-units="mm" multiplier="0.123" />
-		</axis>
-		...
-		<axis name="rx" axis-on-amp="5" logical-axis-no="4">
-			 <filter pgain="100" ipgain="10" dgain="50"  />
-			 <encoder out-units="rad" multiplier="0.564" />
-		</axis>
-	</device>
-	<task name="forceservo">
-		<provides name="startservo" argtype="bool" />
-		<provides name="stopservo" argtype="bool" />
-		...
-		<state name="velocity" elementtype="std::vector[double]" />
-		<state name="force" elementtype="cmnFNTNmData" />
-		...
-	</task>
-	</config>
+      <device name="mei">
+          <axis name="x" axis-on-amp="1" logical-axis-no="1">
+            <filter pgain="1000" ipgain="100" dgain="200" />
+            <encoder out-units="mm" multiplier="0.123" />
+        </axis>
+        ...
+        <axis name="rx" axis-on-amp="5" logical-axis-no="4">
+             <filter pgain="100" ipgain="10" dgain="50"  />
+             <encoder out-units="rad" multiplier="0.564" />
+        </axis>
+    </device>
+    <task name="forceservo">
+        <provides name="startservo" argtype="bool" />
+        <provides name="stopservo" argtype="bool" />
+        ...
+        <state name="velocity" elementtype="std::vector[double]" />
+        <state name="force" elementtype="cmnFNTNmData" />
+        ...
+    </task>
+    </config>
   </code>
   Now the value of pgain for axis can be read by passing /config/device as context
-  and axis/@name="x"/filter/@pgain
+  and axis[@name="x"]/filter/@pgain
   Yes that simple!
   */
-class CISST_EXPORT cmnXMLPath: public cmnGenericObject {
-    /*! Register this class with a default level of detail 1.  Levels
-      of details are 1 for errors, 2 for warnings and 3 for very
-      verbose.  */
+class CISST_EXPORT cmnXMLPath: public cmnGenericObject
+{
+    /*! Register this class with a default log mask */
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-	/*! Libxml2 document source */
-	xmlDocPtr Document;
-
-	/*! Xpath context used by libxml2 */
-	xmlXPathContextPtr XPathContext;
-
 protected:
-
-	/*! Get the XPath result and cast it as internal storage type based on the library */
-	bool GetXMLValueXMLChar(const char * context, const char * XPath, xmlChar **storage);
-
-	/*! set the value of attribute returned by XPath expression to value help by
-	internal storage type based on the library*/
-	bool SetXMLValueXMLChar(const char * context, const char * XPath, const xmlChar *storage);
-
+    cmnXMLPathData * Data;
 
 public:
     /*! Constructor */
@@ -153,31 +119,31 @@ public:
     /*! For debugging. Print the attribute value as a string on stream */
     void PrintValue(std::ostream & out, const char * context, const char * XPath);
 
-	/*! Get/Set the XPath result and cast it as bool */
+    /*! Get/Set the XPath result and cast it as bool */
     //@{
     bool GetXMLValue(const char * context, const char * XPath, bool & value);
-	bool GetXMLValue(const char * context, const char * XPath, bool & value, const bool & valueIfMissing);
+    bool GetXMLValue(const char * context, const char * XPath, bool & value, const bool & valueIfMissing);
     bool SetXMLValue(const char * context, const char * XPath, const bool & value);
     //@}
 
     /*! Get/Set the XPath result and cast it as int */
     //@{
     bool GetXMLValue(const char * context, const char * XPath, int & value);
-	bool GetXMLValue(const char * context, const char * XPath, int & value, const int & valueIfMissing);
-	bool SetXMLValue(const char * context, const char * XPath, const int & value);
+    bool GetXMLValue(const char * context, const char * XPath, int & value, const int & valueIfMissing);
+    bool SetXMLValue(const char * context, const char * XPath, const int & value);
     //@}
 
     /*! Get/Set the XPath result and cast it as double */
     //@{
     bool GetXMLValue(const char * context, const char * XPath, double & value);
-	bool GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing);
-	bool SetXMLValue(const char * context, const char * XPath, const double & value);
+    bool GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing);
+    bool SetXMLValue(const char * context, const char * XPath, const double & value);
     //@}
 
     /*! Get/Set the XPath result and cast it as string */
     //@{
     bool GetXMLValue(const char * context, const char * XPath, std::string & value);
-	bool GetXMLValue(const char * context, const char * XPath, std::string & value, const std::string & valueIfMissing);
+    bool GetXMLValue(const char * context, const char * XPath, std::string & value, const std::string & valueIfMissing);
     bool SetXMLValue(const char * context, const char * XPath, const std::string & value);
     //@}
 
