@@ -22,23 +22,25 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlVidCapSrcBMD_h
 #define _svlVidCapSrcBMD_h
 
-//#include <pthread.h>
-//#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-//#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
-//#include <cisstStereoVision/svlBufferImage.h>
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#include <cisstStereoVision/svlBufferImage.h>
 #include <cisstStereoVision.h>
+
+#ifdef _WIN32
 #include "DeckLinkAPI_h.h"
+#else
+#include "DeckLinkAPI.h"
+#include "DeckLinkAPIDispatch.cpp"
+#endif //_WIN32
 
 class svlBufferImage;
-class osaThread;
-class svlVidCapSrcBMDThread;
 
 class svlVidCapSrcBMD : public svlVidCapSrcBase, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-
-friend class svlVidCapSrcBMDThread;
 
 public:
     svlVidCapSrcBMD();

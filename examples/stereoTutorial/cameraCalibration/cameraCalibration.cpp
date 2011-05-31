@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 	int startIndex = 0;
 	int stopIndex = 9;
 	cv::Size boardSize = cv::Size(18,16);
-	int originDetectorColorModeFlag = svlCCOriginDetector::colorModeEnum::RGY;
+	int originDetectorColorModeFlag = svlCCOriginDetector::RGY;
 
     if (argc == 3)
 	{

@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "svlVidCapSrcBMD.h"
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstStereoVision/svlBufferImage.h>
 
 
@@ -35,6 +34,7 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
     cmnGenericObject(),
     NumOfStreams(0),
     Running(false),
+	Initialized(false),
     ImageBuffer(0)
 {
     BMDNumberOfDevices = 0;
@@ -53,6 +53,8 @@ svlVidCapSrcBMD::~svlVidCapSrcBMD()
 
 void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
 {
+	width = 1920;
+	height = 1080; 
 	switch(displayMode)
 	{
 		case bmdModeNTSC: bmdModeNTSC2398: bmdModePAL: bmdModeNTSCp: bmdModePALp:
@@ -64,6 +66,7 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
 			 bmdModeHD1080p50:bmdModeHD1080p5994:bmdModeHD1080p6000:
 			width = 1920;
 			height = 1080; 
+			printf("Width:%d, Height:%d\n", width, height);	
 			break;
 		case bmdModeHD720p50: bmdModeHD720p5994: bmdModeHD720p60:
 			width = 1920;
@@ -75,8 +78,13 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
 			break;		
 		default:
 			printf("Unrecognized display mode: %d\n", displayMode);	
+            break;
 	}
+
+	printf("Width:%d, Height:%d\n", width, height);	
 }
+
+IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
 
 IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
 {
@@ -99,7 +107,7 @@ IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
 
 svlFilterSourceVideoCapture::PlatformType svlVidCapSrcBMD::GetPlatformType()
 {
-    return svlFilterSourceVideoCapture::BlackmagicDeckLink;
+    return svlFilterSourceVideoCapture::BlackMagicDeckLink;
 }
 
 int svlVidCapSrcBMD::SetStreamCount(unsigned int numofstreams)
@@ -148,16 +156,16 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
         deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[BMDNumberOfDevices];
 		while (deckLinkIterator->Next(&deckLink) == S_OK)
 		{
-			BSTR		deviceNameBSTR = NULL;
-			result = deckLink->GetModelName(&deviceNameBSTR);
+			//char *		deviceNameString = NULL;
+			//result = deckLink->GetModelName((const char **) &deviceNameString);
 			//if (result == S_OK)
 			//{
-				//_bstr_t		deviceName(deviceNameBSTR, false);
+				//_bstr_t		deviceName(deviceNameString, false);
 				//printf("=============== %s ===============\n\n", (char*)deviceName);
 			//}
 
             // platform
-            deviceinfo[0][i].platform = svlFilterSourceVideoCapture::BlackmagicDeckLink;
+            deviceinfo[0][i].platform = svlFilterSourceVideoCapture::BlackMagicDeckLink;
 
             // id
             deviceinfo[0][i].id = i;
@@ -229,6 +237,8 @@ int svlVidCapSrcBMD::Open()
 			goto labError;
 		
 		// Set callback delgate
+        // Allocate capture buffers
+        ImageBuffer[i] = new svlBufferImage(width, height);
 		delegate = new DeckLinkCaptureDelegate(ImageBuffer[i]);
 		deckLinkInput->SetCallback(delegate);
 		
@@ -242,9 +252,6 @@ int svlVidCapSrcBMD::Open()
 		{
 			goto labError;
 		}
-
-        // Allocate capture buffers
-        ImageBuffer[i] = new svlBufferImage(width, height);
     }
 
     Initialized = true;
@@ -383,7 +390,7 @@ int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
-    format.framerate = 25.0;
+    format.framerate = 30.0;
     format.custom_mode = -1;
 
     return SVL_OK;
