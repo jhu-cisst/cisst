@@ -26,6 +26,26 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 
 
+void cmnXMLPathTest::setUp(void)
+{
+    // set log to see all
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("cmnXMLPath", CMN_LOG_ALLOW_ALL); 
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+}
+
+
+void cmnXMLPathTest::tearDown(void)
+{
+    // reset log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_DEFAULT);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_DEFAULT);
+    cmnLogger::SetMaskClassMatching("cmnXMLPath", cmnXMLPath::InitialLoD); 
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_DEFAULT);
+}
+
+
 void cmnXMLPathTest::TestReadExistingFile(void)
 {
     // find original file and test
