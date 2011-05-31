@@ -24,6 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstInteractive/ireTask.h>
 
+// Syntax:
+//   cisstIREComponent                 -- starts IRE, connecting to GCM at localhost, using wxPython
+//   cisstIREComponent IP_Addr         -- starts IRE, connecting to GCM at IP_Addr, using wxPython
+//   cisstIREComponent IP_Addr ipython -- starts IRE, connecting to GCM at IP_Addr, using IPython
+
 int main(int argc, char * argv[])
 {
     std::string globalComponentManagerIP;
@@ -45,7 +50,10 @@ int main(int argc, char * argv[])
 
     cmnObjectRegister::Register("TaskManager", taskManager);
 
-    ireTask *ire = new ireTask("IRE");  // Could add startup string as second parameter
+    bool useIPython = false;
+    if ((argc > 2) && (strncmp(argv[2], "ipy", 3) == 0))
+        useIPython = true;
+    ireTask *ire = new ireTask("IRE", useIPython);  // Could add startup string as third parameter
     taskManager->AddComponent(ire);
 
     taskManager->CreateAll();
