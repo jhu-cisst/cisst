@@ -99,7 +99,7 @@ public:
           space, data will be overwritten at the beginning of buffer.
           This method will throw an exception if either the array size
           or index is invalid. */
-        bool AppendArray(const double * pointArray, size_t arraySize);
+        bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2);
         
         void Freeze(bool freeze);
 
@@ -132,7 +132,7 @@ public:
         /*! Non destructive resize.  If the new buffer is bigger,
           preserves all points.  If the new buffer is smaller,
           preserves the data at the end by default. */
-        void Resize(size_t numberOfPoints, bool trimOlder = true);
+        void ReSize(size_t numberOfPoints, bool trimOlder = true);
 
     protected:
         /*! Trace name, used for GUI */
