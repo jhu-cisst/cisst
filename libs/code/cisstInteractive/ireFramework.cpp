@@ -326,6 +326,26 @@ ireFramework* ireFramework::Instance(void) {
 //
 void ireFramework::InitShellInstance(void)
 {
+    if (IsInitialized()) {
+        CMN_LOG_INIT_WARNING << "ireFramework already initialized" << std::endl;
+        return;
+    }
+#if (CISST_OS == CISST_LINUX)
+    // Need following to avoid having PyExc_ValueError be an undefined symbol
+    // when loading the IRE (wxPython version). The Python library is already loaded,
+    // but the symbols are not global -- this is fixed by the dlopen call below with
+    // RTLD_NOLOAD (doesn't load the library -- assumes it is already loaded).
+    char libname[40];
+    sprintf(libname, "libpython%d.%d.so", (int)PY_MAJOR_VERSION, (int)PY_MINOR_VERSION);
+    dlopen(libname, RTLD_LAZY | RTLD_NOLOAD | RTLD_GLOBAL);
+    const char *msg = dlerror();
+    if (msg) {
+        std::cerr << "InitShellInstance: dlerror when loading " << libname
+                           << ": " << msg << std::endl;
+        CMN_LOG_INIT_ERROR << "InitShellInstance: dlerror when loading " << libname
+                           << ": " << msg << std::endl;
+    }
+#endif
     Py_Initialize();
     PyEval_InitThreads();
 #if (CISST_OS == CISST_LINUX)
@@ -487,7 +507,10 @@ void ireFramework::Reset()
 
 void ireFramework::UnblockThreads()
 {
-    IreThreadState = static_cast<void *>(PyEval_SaveThread());
+    if ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE))
+        IreThreadState = static_cast<void *>(PyEval_SaveThread());
+    else
+        IreThreadState = 0;
 }
 
 void ireFramework::BlockThreads()

@@ -50,10 +50,10 @@ int main(int argc, char * argv[])
 
     cmnObjectRegister::Register("TaskManager", taskManager);
 
-    bool useIPython = false;
+    IRE_Shell shell = IRE_WXPYTHON;
     if ((argc > 2) && (strncmp(argv[2], "ipy", 3) == 0))
-        useIPython = true;
-    ireTask *ire = new ireTask("IRE", useIPython);  // Could add startup string as third parameter
+        shell = IRE_IPYTHON;
+    ireTask *ire = new ireTask("IRE", shell);  // Could add startup string as third parameter
     taskManager->AddComponent(ire);
 
     taskManager->CreateAll();

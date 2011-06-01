@@ -34,6 +34,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstInteractive/ireExport.h>
 
 
+//enum IRE_Shell { IRE_WXPYTHON, IRE_IPYTHON, IRE_PYTHON };
+enum IRE_Shell { IRE_WXPYTHON, IRE_IPYTHON };
+
 /*!
   \brief Interactive Research Environment (IRE) Task
 
@@ -44,14 +47,14 @@ class ireTaskConstructorArg : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
     std::string Name;
-    bool UseIPython;
+    IRE_Shell   Shell;
     std::string Startup;
 
-    ireTaskConstructorArg() : mtsGenericObject(), UseIPython(false) {}
-    ireTaskConstructorArg(const std::string &name, bool useIPython = false, const std::string &startup = "") :
-        mtsGenericObject(), Name(name), UseIPython(useIPython), Startup(startup) {}
+    ireTaskConstructorArg() : mtsGenericObject(), Shell(IRE_WXPYTHON) {}
+    ireTaskConstructorArg(const std::string &name, IRE_Shell shell = IRE_WXPYTHON, const std::string &startup = "") :
+        mtsGenericObject(), Name(name), Shell(shell), Startup(startup) {}
     ireTaskConstructorArg(const ireTaskConstructorArg &other) :
-        mtsGenericObject(), Name(other.Name), UseIPython(other.UseIPython), Startup(other.Startup) {}
+        mtsGenericObject(), Name(other.Name), Shell(other.Shell), Startup(other.Startup) {}
     ~ireTaskConstructorArg() {}
 
     void SerializeRaw(std::ostream & outputStream) const;
@@ -72,15 +75,14 @@ CMN_DECLARE_SERVICES_INSTANTIATION(ireTaskConstructorArg);
 
 class CISST_EXPORT ireTask : public mtsTaskContinuous {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
+    typedef mtsTaskContinuous BaseType;
 
-    bool UseIPython;
+    IRE_Shell Shell;
     std::string StartupCommands;  // startup string
 
 public:
-    typedef mtsTaskContinuous BaseType;
-
     ireTask(const std::string &name = "IRE",
-            bool useIPython = false,
+            IRE_Shell shell = IRE_WXPYTHON,
             const std::string &startup = "");
     ireTask(const ireTaskConstructorArg &arg);
 

@@ -33,22 +33,24 @@ void ireTaskConstructorArg::SerializeRaw(std::ostream & outputStream) const
 {
     mtsGenericObject::SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, Name);
-    cmnSerializeRaw(outputStream, UseIPython);
+    cmnSerializeRaw(outputStream, static_cast<int>(Shell));
     cmnSerializeRaw(outputStream, Startup);
 }
 
 void ireTaskConstructorArg::DeSerializeRaw(std::istream & inputStream)
 {
+    int temp;
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, Name);
-    cmnDeSerializeRaw(inputStream, UseIPython);
+    cmnDeSerializeRaw(inputStream, temp);
+    Shell = static_cast<IRE_Shell>(temp);
     cmnDeSerializeRaw(inputStream, Startup);
 }
 
 void ireTaskConstructorArg::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Name: " << Name
-                 << ", UseIPython: " << UseIPython
+                 << ", Shell: " << Shell
                  << ", Startup: " << Startup << std::endl;
 }
 
@@ -58,11 +60,11 @@ void ireTaskConstructorArg::ToStreamRaw(std::ostream & outputStream, const char 
     mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     if (headerOnly) {
         outputStream << headerPrefix << "-name" << delimiter
-                     << headerPrefix << "-useIPython" << delimiter
+                     << headerPrefix << "-shell" << delimiter
                      << headerPrefix << "-startup";
     } else {
         outputStream << this->Name << delimiter
-                     << this->UseIPython << delimiter
+                     << this->Shell << delimiter
                      << this->Startup;
     }
 }
@@ -70,7 +72,7 @@ void ireTaskConstructorArg::ToStreamRaw(std::ostream & outputStream, const char 
 bool ireTaskConstructorArg::FromStreamRaw(std::istream & inputStream, const char delimiter)
 {
     mtsGenericObject::FromStreamRaw(inputStream, delimiter);
-    UseIPython = false;
+    Shell = IRE_WXPYTHON;
     Startup.clear();
     if (inputStream.fail())
         return false;
@@ -79,14 +81,18 @@ bool ireTaskConstructorArg::FromStreamRaw(std::istream & inputStream, const char
         return false;
     if (inputStream.eof())
         return (typeid(*this) == typeid(ireTaskConstructorArg));
-    std::string useIPythonString;
-    inputStream >> useIPythonString;
+    std::string ShellString;
+    inputStream >> ShellString;
     if (inputStream.fail())
         return false;
-    // Set UseIPython true if string is "1", "true", or if first 3 letters equal "ipy"
-    if ((useIPythonString == "1") || (useIPythonString == "true") ||
-        (useIPythonString.compare(0,3,"ipy") == 0))
-        UseIPython = true;
+    // Set ShellString to IPython if first 3 letters equal "ipy" or to Python
+    //     if first 2 letters equal "py"; otherwise, leave it for wxPython
+    if (ShellString.compare(0,3,"ipy") == 0)
+        Shell = IRE_IPYTHON;
+#if 0
+    else if (ShellString.compare(0,2,"py") == 0)
+        Shell = IRE_PYTHON;
+#endif
     if (inputStream.eof())
         return (typeid(*this) == typeid(ireTaskConstructorArg));
     std::string buffer;
@@ -103,15 +109,15 @@ bool ireTaskConstructorArg::FromStreamRaw(std::istream & inputStream, const char
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(ireTask, mtsTaskContinuous, ireTaskConstructorArg)
 
-ireTask::ireTask(const std::string &name, bool useIPython, const std::string &startup) :
-    mtsTaskContinuous(name), UseIPython(useIPython), StartupCommands(startup)
+ireTask::ireTask(const std::string &name, IRE_Shell shell, const std::string &startup) :
+    mtsTaskContinuous(name), Shell(shell), StartupCommands(startup)
 {
     EnableDynamicComponentManagement();
     SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
 }
 
 ireTask::ireTask(const ireTaskConstructorArg &arg) :
-    mtsTaskContinuous(arg.Name), UseIPython(arg.UseIPython), StartupCommands(arg.Startup)
+    mtsTaskContinuous(arg.Name), Shell(arg.Shell), StartupCommands(arg.Startup)
 {
     EnableDynamicComponentManagement();
     SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
@@ -140,13 +146,14 @@ void ireTask::Startup(void)
             << "Manager = " << GetName() << ".GetManagerComponentServices(); "
             << StartupCommands;
     try {
-        ireFramework::LaunchIREShell(startup.str().c_str(), true, UseIPython);
+        ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON));
     }
     catch (...) {
-        if (UseIPython)
+        if (Shell == IRE_IPYTHON)
             CMN_LOG_CLASS_INIT_ERROR << "Could not launch IPython shell" << std::endl;
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not launch IRE shell (wxPython)" << std::endl;
+        return;
     }
     while (ireFramework::IsStarting()) {
         // Need following call to give the IRE thread some time to execute.
