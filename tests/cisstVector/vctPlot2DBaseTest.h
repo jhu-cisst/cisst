@@ -16,6 +16,7 @@ class vctPlot2DBaseTest: public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(vctPlot2DBaseTest);
     {
 	CPPUNIT_TEST(TestBufferManipulating);
+    CPPUNIT_TEST(TestRangeComputation);
     } 
     CPPUNIT_TEST_SUITE_END();
     
@@ -30,6 +31,8 @@ class vctPlot2DBaseTest: public CppUnit::TestFixture
     void TestBufferManipulating(void);
 
     /*! Test range computation, min, max, ... */
+    void TestRangeComputation(void);
+
 };
 
 
