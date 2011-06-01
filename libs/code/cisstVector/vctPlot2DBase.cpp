@@ -111,6 +111,7 @@ vctDouble2 vctPlot2DBase::Trace::GetPointAt(size_t index){
 
     if(index >= Data.size() )
         cmnThrow("vctPlot2DBase: GetPointAt: Index bigger than bufferSize");
+    index = ((index+this->IndexFirst) %  Data.size());   
     return Data.at(index);
 }
 
@@ -118,13 +119,14 @@ void vctPlot2DBase::Trace::SetPointAt(size_t index, const vctDouble2 & point){
 
     if(index >= Data.size() )
         cmnThrow("vctPlot2DBase: SetPointAt: Index bigger than bufferSize");
+    index = ((index+this->IndexFirst) %  Data.size());
     this->Data.Element(index).Assign(point);
     return;
 }
 
-void vctPlot2DBase::Trace::SetArrayAt(size_t index, const double * pointArray, size_t size){
+void vctPlot2DBase::Trace::SetArrayAt(size_t index, const double * pointArray, size_t size, size_t pointDimension){
 
-    if((index+ (size/this->PointSize) ) >= Data.size() )
+    if((index+ (size/this->PointSize) ) >= Data.size() && pointDimension != this->PointSize )
         cmnThrow("vctPlot2DBase: SetArrayAt: Index+size bigger than bufferSize");
 
     memcpy((this->Buffer+index*this->PointSize), pointArray, size*sizeof(double));
@@ -132,61 +134,116 @@ void vctPlot2DBase::Trace::SetArrayAt(size_t index, const double * pointArray, s
 }
 
 
-bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySize)
+bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySize,  size_t pointDimension)
 {
     bool result = false;
     // check if there is enough space for array we want to insert
-    if(this->IndexFirst > this->IndexLast || ( (Data.size() - this->IndexLast-1) * this->PointSize) < arraySize)
-        return result;
 
-    //this->CriticalSectionForBuffer.Enter();
+    if(arraySize > (Data.size()*this->PointSize) || pointDimension != this->PointSize )
+        cmnThrow("AppendArray, arraySizeinvalid or pointDimension not match");
+
+    double *NewBuffer = new double [Data.size()*this->PointSize];
+    memset(NewBuffer, 0 , Data.size()*this->PointSize*sizeof(double));
+
     if (!this->Frozen) {
-        // copy to last
+        int tempIndexLast =this->IndexLast , tempIndexFirst= this->IndexFirst;
+
         if(!this->Empty){
-            memcpy((this->Buffer+ (this->IndexLast+1)*this->PointSize), pointArray, arraySize*sizeof(double));
-            this->IndexLast += arraySize/this->PointSize;
-        }
-        else{
-            memcpy(this->Buffer, pointArray, arraySize*sizeof(double));
-            this->IndexLast = (arraySize/this->PointSize -1);
-        }
-        result = true;
-    }
-    //this->CriticalSectionForBuffer.Leave();
-    return result;
-}
-
-
-
-bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arraySize)
-{
-    // check if there is enough space for array we want to insert
-    bool result = false;
-    if(this->IndexFirst > this->IndexLast || ( (Data.size() - this->IndexLast-1) * this->PointSize) < arraySize)
-        return result;
-    //this->CriticalSectionForBuffer.Enter();
-    if (!this->Frozen) {
-        double *NewBuffer = new double [Data.size()*this->PointSize];
-        memset(NewBuffer, 0 , Data.size()*this->PointSize*sizeof(double));
-        // first section
-        memcpy(NewBuffer, pointArray, arraySize*sizeof(double));
-        // second section
-        if(!this->Empty)
-            memcpy((NewBuffer+arraySize), Buffer, (this->IndexLast+1)*this->PointSize*sizeof(double));
-
+            if(tempIndexLast < tempIndexFirst ){
+                // buffer full, move tempIndexFirst for pointArray
+                tempIndexFirst += arraySize/this->PointSize;
+                if(tempIndexFirst > Data.size())
+                    tempIndexFirst = tempIndexFirst - Data.size()-1 ;                
+            }else{
+                size_t sizeToMove = 0;
+                sizeToMove = (Data.size()-this->IndexLast-1); 
+                sizeToMove = (sizeToMove > (arraySize/this->PointSize))? 0:((arraySize/this->PointSize)-sizeToMove);
+                tempIndexFirst = tempIndexFirst +sizeToMove;
+                if(tempIndexFirst == Data.size())
+                    this->Empty = true;                                 
+            }
+        }        
+        size_t dataCopied = 0;
+        if(!this->Empty){
+            if(tempIndexLast < tempIndexFirst){                
+                memcpy((NewBuffer), Buffer+(tempIndexFirst*this->PointSize), (Data.size()-tempIndexFirst)*this->PointSize*sizeof(double));
+                dataCopied = (Data.size()-tempIndexFirst);                
+                memcpy((NewBuffer+(dataCopied*this->PointSize)), Buffer, (tempIndexLast+1)*this->PointSize*sizeof(double));                
+                dataCopied +=  (tempIndexLast+1);                
+            }else{
+                memcpy((NewBuffer), Buffer+(tempIndexFirst*this->PointSize), (tempIndexLast - tempIndexFirst +  1)*this->PointSize*sizeof(double));
+                dataCopied = (tempIndexLast - tempIndexFirst +  1);                                
+            }
+        }                
+        memcpy(NewBuffer+(dataCopied*this->PointSize), pointArray, arraySize*sizeof(double));
+        dataCopied += (arraySize/this->PointSize);
         delete Buffer;
         Buffer = NewBuffer;
         for(size_t i = 0; i < Data.size(); i++){
             this->Data.Element(i).SetRef(this->Buffer + this->PointSize * i);
         }
         this->IndexFirst = 0;
-        if(!this->Empty)
-            this->IndexLast += (arraySize/ this->PointSize);
-        else
-            this->IndexLast = (arraySize/ this->PointSize)-1;
+        this->IndexLast = dataCopied-1;
+        this->Empty = false;
+        result = true;        
+    }
+
+    return result;
+}
+
+
+
+bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension)
+{
+    // check if there is enough space for array we want to insert
+    bool result = false;
+
+    if(arraySize > (Data.size()*this->PointSize) || pointDimension != this->PointSize )
+        cmnThrow("PrependArray, arraySizeinvalid or pointDimension not match");    
+
+    if (!this->Frozen) {
+        int tempIndexLast =this->IndexLast , tempIndexFirst= this->IndexFirst;
+        double *NewBuffer = new double [Data.size()*this->PointSize];
+        memset(NewBuffer, 0 , Data.size()*this->PointSize*sizeof(double));
+        if(!this->Empty){
+            if(tempIndexLast < tempIndexFirst ){
+                // buffer full, move tempIndexFirst for pointArray
+                tempIndexLast -= arraySize/this->PointSize;
+                if(tempIndexLast < 0)
+                    tempIndexLast = Data.size() + tempIndexLast ;                 
+            }else{
+                size_t sizeToMove = 0;
+                sizeToMove = (Data.size()-this->IndexLast-1); 
+                sizeToMove = (sizeToMove > (arraySize/this->PointSize))? 0:((arraySize/this->PointSize)-sizeToMove);
+                tempIndexLast = tempIndexLast - sizeToMove; 
+                if(tempIndexLast < 0)
+                    this->Empty = true;
+            }
+        }        
+        size_t dataCopied = 0;
+        if(!this->Empty){
+            if(tempIndexLast < tempIndexFirst){                
+                memcpy((NewBuffer+arraySize), Buffer+(tempIndexFirst*this->PointSize), (Data.size()-tempIndexFirst)*this->PointSize*sizeof(double));
+                dataCopied = (Data.size()-tempIndexFirst);                
+                memcpy((NewBuffer+arraySize+(dataCopied*this->PointSize)), Buffer, (tempIndexLast+1)*this->PointSize*sizeof(double));                
+                dataCopied +=  (tempIndexLast+1);                
+            }else{
+                memcpy((NewBuffer+arraySize), Buffer+(tempIndexFirst*this->PointSize), (tempIndexLast - tempIndexFirst +  1)*this->PointSize*sizeof(double));
+                dataCopied = (tempIndexLast - tempIndexFirst +  1);                                
+            }
+        }        
+        memcpy(NewBuffer, pointArray, arraySize*sizeof(double));
+        dataCopied += (arraySize/this->PointSize);
+        delete Buffer;
+        Buffer = NewBuffer;
+        for(size_t i = 0; i < Data.size(); i++){
+            this->Data.Element(i).SetRef(this->Buffer + this->PointSize * i);
+        }
+        this->IndexFirst = 0;        
+        this->IndexLast = dataCopied-1;
+        this->Empty = false;
         result = true;
     }
-    //this->CriticalSectionForBuffer.Leave();
     return result;
 }
 
@@ -206,8 +263,7 @@ void vctPlot2DBase::Trace::Freeze(bool freeze)
 
 void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 {
-    // using pointer arithmetic
-    //CriticalSectionForBuffer.Enter();
+    // using pointer arithmetic    
     PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
@@ -238,7 +294,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
             max.Y() = value;
         }
     }
-    //CriticalSectionForBuffer.Leave();
+   
 }
 
 void vctPlot2DBase::Trace::GetLeftRightDataX(double &min, double &max){
@@ -246,13 +302,19 @@ void vctPlot2DBase::Trace::GetLeftRightDataX(double &min, double &max){
     max = Data.at(this->IndexLast).X();
 
 }
-void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
+void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max,  bool assumesDataSorted)
 {
     //CriticalSectionForBuffer.Enter();
     // using pointer arithmetic
     PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
+
+    if(assumesDataSorted){
+        min = Data.at(this->IndexFirst).X();
+        max = Data.at(this->IndexLast).X();
+        return;
+    }
 
     // if the buffer is full, just scan all elements otherwise scan up to last index
     if (this->IndexLast < this->IndexFirst) {
@@ -330,12 +392,28 @@ void vctPlot2DBase::Trace::SetNumberOfPoints(size_t numberOfPoints){
     //CriticalSectionForBuffer.Leave();
 }
 
+        /*! Get size of circular buffer. */
+size_t vctPlot2DBase::Trace::GetSize(void) const{
+    return Data.size();
+}
+
+        /*! Get number of points. */
+size_t vctPlot2DBase::Trace::GetNumberOfPoints(void) const{    
+    size_t numberOfPoints = 0;
+    if(this->IndexFirst < this->IndexLast)
+        numberOfPoints = this->IndexLast - this->IndexFirst +1;
+    else
+        numberOfPoints =  Data.size() - this->IndexFirst+ this->IndexLast+1;
+    
+    return numberOfPoints;
+}
+
 void  vctPlot2DBase::Trace::GetNumberOfPoints(size_t &numberOfPoints, size_t &bufferSize){
     //CriticalSectionForBuffer.Enter();
-    if(IndexFirst < IndexLast)
-        numberOfPoints = IndexLast - IndexFirst +1;
+    if(this->IndexFirst < this->IndexLast)
+        numberOfPoints = this->IndexLast - this->IndexFirst +1;
     else
-        numberOfPoints =  Data.size() - IndexFirst+ IndexLast+1;
+        numberOfPoints =  Data.size() - this->IndexFirst+ this->IndexLast+1;
 
     bufferSize = Data.size();
     //CriticalSectionForBuffer.Leave();
@@ -363,7 +441,7 @@ void vctPlot2DBase::Trace::SetSize(size_t numberOfPoints){
     //this->CriticalSectionForBuffer.Leave();
 }
 
-void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints){
+void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints, bool trimOlder){
 
     // same size, do nothing
     if(Data.size() == numberOfPoints) {
@@ -383,11 +461,19 @@ void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints){
     size_t TempIndexLast=0;
     // we move index to where it should be, while shrinking
     if(numberOfPoints < DataAmount){
-        // we need to cut some data off
-        this->IndexFirst += (DataAmount - numberOfPoints) ;
-        if(this->IndexFirst  >= Data.size() ){
-            // overflow, move to buffer head
-            this->IndexFirst = this->IndexFirst-Data.size();
+        // we need to cut some data off        
+        if(trimOlder){
+            this->IndexFirst += (DataAmount - numberOfPoints) ;
+
+            if(this->IndexFirst  >= Data.size() ){
+                // overflow, move to buffer head
+                this->IndexFirst = this->IndexFirst-Data.size();
+            }
+        }else{
+            this->IndexLast = this->IndexFirst + numberOfPoints - 1;
+            if(this->IndexLast >=  Data.size()){
+                this->IndexLast = this->IndexLast  - Data.size();
+            }
         }
         TempIndexLast = numberOfPoints- 1;
     }else
@@ -397,7 +483,7 @@ void vctPlot2DBase::Trace::ReSize(size_t numberOfPoints){
     if(this-> IndexFirst <= this->IndexLast){
         // continuous array
         size_t BytesToCopy = ( this->IndexLast -  this->IndexFirst+1) * this->PointSize * sizeof(double);
-        double *IndexNow = this->Buffer;
+        double *IndexNow = this->Buffer+this-> IndexFirst*this->PointSize ;        
         memcpy(NewBuffer, IndexNow, BytesToCopy);
     }else{
         // first part
@@ -526,7 +612,7 @@ void vctPlot2DBase::SetNumberOfPoints(size_t numberOfPoints)
 
 void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
 {
-    this->Traces[traceId]->AddPoint(point);
+    this->Traces[traceId]->AppendPoint(point);
 }
 
 
