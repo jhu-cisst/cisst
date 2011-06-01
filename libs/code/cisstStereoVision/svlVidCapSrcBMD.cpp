@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "svlVidCapSrcBMD.h"
 #include <cisstStereoVision/svlBufferImage.h>
+#include <cisstStereoVision/svlConverters.h>
 
 
 /*******************************/
@@ -41,7 +42,7 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
 	inputFlags = 0;
 	displayMode = bmdModeHD1080p30;
 	SetWidthHeightByBMDDisplayMode();
-	pixelFormat = bmdFormat8BitARGB;//bmdFormat8BitYUV
+        pixelFormat = bmdFormat8BitYUV;//bmdFormat8BitARGB;
 }
 
 svlVidCapSrcBMD::~svlVidCapSrcBMD()
@@ -61,9 +62,10 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
 			width = 720;
 			height = 480; //sometimes 486?
 			break;
-		case bmdModeHD1080p2398: bmdModeHD1080p24: bmdModeHD1080p25: bmdModeHD1080p2997: bmdModeHD1080p30:
+                case bmdModeHD1080p2398: bmdModeHD1080p24: bmdModeHD1080p25: bmdModeHD1080p2997:
 			 bmdModeHD1080i50: bmdModeHD1080i5994:bmdModeHD1080i6000:
 			 bmdModeHD1080p50:bmdModeHD1080p5994:bmdModeHD1080p6000:
+                case bmdModeHD1080p30:
 			width = 1920;
 			height = 1080; 
 			printf("Width:%d, Height:%d\n", width, height);	
@@ -156,13 +158,13 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
         deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[BMDNumberOfDevices];
 		while (deckLinkIterator->Next(&deckLink) == S_OK)
 		{
-			//char *		deviceNameString = NULL;
-			//result = deckLink->GetModelName((const char **) &deviceNameString);
-			//if (result == S_OK)
-			//{
+                        char *		deviceNameString = NULL;
+                        result = deckLink->GetModelName((const char **)(&deviceNameString));
+                        if (result == S_OK)
+                        {
 				//_bstr_t		deviceName(deviceNameString, false);
 				//printf("=============== %s ===============\n\n", (char*)deviceName);
-			//}
+                        }
 
             // platform
             deviceinfo[0][i].platform = svlFilterSourceVideoCapture::BlackMagicDeckLink;
@@ -171,12 +173,12 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             deviceinfo[0][i].id = i;
 
             // name
-            //description = (char*)deviceName;
+            std::string description = deviceNameString;
 
-            //memset(deviceinfo[0][i].name, 0, SVL_VCS_STRING_LENGTH);
-            //memcpy(deviceinfo[0][i].name,
-            //       description.c_str(),
-            //       std::min(SVL_VCS_STRING_LENGTH - 1, static_cast<int>(description.length())));
+            memset(deviceinfo[0][i].name, 0, SVL_VCS_STRING_LENGTH);
+            memcpy(deviceinfo[0][i].name,
+                   description.c_str(),
+                   std::min(SVL_VCS_STRING_LENGTH - 1, static_cast<int>(description.length())));
 
             // inputs
             deviceinfo[0][i].inputcount = 0;
@@ -404,6 +406,7 @@ DeckLinkCaptureDelegate::DeckLinkCaptureDelegate(svlBufferImage* buffer) : m_ref
 {
 	//pthread_mutex_init(&m_mutex, NULL);
 	g_timecodeFormat = (BMDTimecodeFormat)0;
+        m_buffer = buffer;
 }
 
 DeckLinkCaptureDelegate::~DeckLinkCaptureDelegate()
@@ -424,7 +427,7 @@ ULONG DeckLinkCaptureDelegate::AddRef(void)
 ULONG DeckLinkCaptureDelegate::Release(void)
 {
 	//pthread_mutex_lock(&m_mutex);
-		m_refCount--;
+        m_refCount--;
 	//pthread_mutex_unlock(&m_mutex);
 
 	if (m_refCount == 0)
@@ -440,8 +443,6 @@ HRESULT DeckLinkCaptureDelegate::VideoInputFrameArrived(IDeckLinkVideoInputFrame
 {
 	IDeckLinkVideoFrame*	                rightEyeFrame = NULL;
 	IDeckLinkVideoFrame3DExtensions*        threeDExtensions = NULL;
-	void*					frameBytes;
-	void*					audioFrameBytes;
 	
 	// Handle Video Frame
 	if(videoFrame)
@@ -461,39 +462,9 @@ HRESULT DeckLinkCaptureDelegate::VideoInputFrameArrived(IDeckLinkVideoInputFrame
 		{
 			fprintf(stderr, "Frame received (#%lu) - No input signal detected\n", frameCount);
 		}
-		else
+                else
+                //process standard SDI input
 		{
-			//const char *timecodeString = NULL;
-			//if (g_timecodeFormat != 0)
-			//{
-			//	IDeckLinkTimecode *timecode;
-			//	if (videoFrame->GetTimecode(g_timecodeFormat, &timecode) == S_OK)
-			//	{
-			//		timecode->GetString(&timecodeString);
-			//	}
-			//}
-
-			//fprintf(stderr, "Frame received (#%lu) [%s] - %s - Size: %li bytes\n", 
-			//	frameCount,
-			//	timecodeString != NULL ? timecodeString : "No timecode",
-			//	rightEyeFrame != NULL ? "Valid Frame (3D left/right)" : "Valid Frame", 
-			//	videoFrame->GetRowBytes() * videoFrame->GetHeight());
-
-			//if (timecodeString)
-			//	free((void*)timecodeString);
-
-			//if (videoOutputFile != -1)
-			//{
-			//	videoFrame->GetBytes(&frameBytes);
-			//	write(videoOutputFile, frameBytes, videoFrame->GetRowBytes() * videoFrame->GetHeight());
-			//	
-			//	if (rightEyeFrame)
-			//	{
-			//		rightEyeFrame->GetBytes(&frameBytes);
-			//		write(videoOutputFile, frameBytes, videoFrame->GetRowBytes() * videoFrame->GetHeight());
-			//	}
-			//}
-
 			processVideoFrame(videoFrame);
 			
 		}
@@ -503,47 +474,25 @@ HRESULT DeckLinkCaptureDelegate::VideoInputFrameArrived(IDeckLinkVideoInputFrame
 
 		frameCount++;
 
-		//if (g_maxFrames > 0 && frameCount >= g_maxFrames)
-		//{
-		//	pthread_cond_signal(&sleepCond);
-		//}
 	}
 
 	// Audio Frame NOT HANDLED
 	//if (audioFrame)
-	//{
-	//	if (audioOutputFile != -1)
-	//	{
-	//		audioFrame->GetBytes(&audioFrameBytes);
-	//		write(audioOutputFile, audioFrameBytes, audioFrame->GetSampleFrameCount() * g_audioChannels * (g_audioSampleDepth / 8));
-	//	}
-	//}
+
     
 	return S_OK;
 }
 
 void DeckLinkCaptureDelegate::processVideoFrame(IDeckLinkVideoInputFrame* videoFrame)
 {
-	void* source;
-    unsigned char r, g, b;
+	void* source;;
 	unsigned char* dest = m_buffer->GetPushBuffer();
 
 	videoFrame->GetBytes(&source);
 
-	//HOW TO HANDLE RAW BYTES?
-    //r = *source;
-    //source ++;
-    //g = *source;
-    //source ++;
-    //b = *source;
-    //source += 2;
 
-    //*dest = b;
-    //dest ++;
-    //*dest = g;
-    //dest ++;
-    //*dest = r;
-    //dest ++;
+        svlConverter::YUV422toRGB24(static_cast<unsigned char *>(source), dest,videoFrame->GetHeight()*videoFrame->GetWidth(),true,true,true);
+
 }
 
 

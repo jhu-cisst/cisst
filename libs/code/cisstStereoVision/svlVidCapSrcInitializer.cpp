@@ -49,6 +49,10 @@
 //#include "svlVidCapSrcMIL.h"
 //#endif // CISST_SVL_HAS_MIL
 
+// See header for details:
+#if CISST_SVL_HAS_BM_DECKLINK
+#include "svlVidCapSrcBMD.h"
+#endif // CISST_SVL_HAS_BM_DECKLINK
 
 void svlInitializeVideoCapture()
 {
@@ -75,5 +79,9 @@ void svlInitializeVideoCapture()
 #ifdef _svlVidCapSrcDC1394_h
     SVL_INITIALIZE(svlVidCapSrcDC1394);
 #endif // _svlVidCapSrcDC1394_h4
+
+#ifdef _svlVidCapSrcBMD_h
+    SVL_INITIALIZE(svlVidCapSrcBMD);
+#endif // _svlVidCapSrcBMD_h
 }
 
