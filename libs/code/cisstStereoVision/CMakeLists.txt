@@ -1068,13 +1068,19 @@ ENDIF(UNIX)
 # Options for BlackMagic DeckLink SDK
 option (CISST_SVL_HAS_BM_DECKLINK "Compile BlackMagic(BM) DeckLink extensions" OFF)
 if (CISST_SVL_HAS_BM_DECKLINK)
-  # find_package (DeckLink)
-  # include_directories (${DeckLink}_INCLUDE_DIR)
-  set (SOURCE_FILES
-       ${SOURCE_FILES}
-       svlVidCapSrcBMD.h      # private header
-       svlVidCapSrcBMD.cpp
-       )
+  find_package (DeckLink REQUIRED)
+  if (DeckLink_FOUND)
+    include_directories (${DeckLink_INCLUDE_DIR})
+    set (SOURCE_FILES
+         ${SOURCE_FILES}
+         svlVidCapSrcBMD.h      # private header
+         svlVidCapSrcBMD.cpp
+         )
+    set (ADDITIONAL_SOURCE_FILES
+         ${ADDITIONAL_SOURCE_FILES}
+         ${DeckLink_EXTRA_CODE})
+    mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_EXTRA_CODE)
+  endif (DeckLink_FOUND)
 endif (CISST_SVL_HAS_BM_DECKLINK)
             
             
@@ -1136,7 +1142,8 @@ cisst_add_library (
   LIBRARY cisstStereoVision
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
-  HEADER_FILES ${HEADER_FILES})
+  HEADER_FILES ${HEADER_FILES}
+  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES})
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)

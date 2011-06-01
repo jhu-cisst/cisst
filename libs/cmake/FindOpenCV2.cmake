@@ -8,7 +8,7 @@
 #  OpenCV2_INCLUDE_DIRS
 #  OpenCV2_LIBRARIES
 #
-# $Id: $
+# $Id$
 #  
 # Balazs [2011-01-18]:
 # - Created from scratch for the reorganized OpenCV 2 structure introduced at version 2.2
