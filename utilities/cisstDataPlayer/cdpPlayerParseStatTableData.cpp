@@ -123,7 +123,7 @@ void cdpPlayerParseStatTableData::TestIndex(void){
 // return next boundary of time
 void cdpPlayerParseStatTableData::GetBoundary(vctPlot2DBase::Trace *  TraceHandle, double &TopBoundary, double &LowBoundary){
 
-    TraceHandle->GetLeftRightDataX(LowBoundary,TopBoundary);
+    TraceHandle->ComputeDataRangeX(LowBoundary,TopBoundary, true);
     return;
 }
 
@@ -219,8 +219,9 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
     double LeftBoundaryTime = 0.0, RightBoundaryTime = 0.0;
     size_t ElementsNumber =0, TraceBufferSize = 0;
 
-    if(ResetTraceBuffer){
-        TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);     
+    if(ResetTraceBuffer){         
+        ElementsNumber = TraceHandle->GetNumberOfPoints();
+        TraceBufferSize = TraceHandle->GetSize();
         TraceHandle->SetSize(TraceBufferSize);
     }
     // Get Max & Minimum Time
@@ -244,7 +245,7 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
     // find where is the LeftBoundaryPosition & RightBoundaryPosition
     // where is TimeStampForSearch postition in index file?     
     double  min, max;
-    TraceHandle->GetLeftRightDataX(min,max);   
+    TraceHandle->ComputeDataRangeX(min,max,true);   
     if(min<= LeftBoundaryTime && (LeftBoundaryTime >=  MinimumTime && !ResetTraceBuffer)){
         LeftBoundaryPosition = GetDataPoisitionFromFile(max,  IndexOfTimeField);             
         RightBoundaryPosition = GetDataPoisitionFromFile(RightBoundaryTime, IndexOfTimeField);       
@@ -270,17 +271,21 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
                 break;
             DataElement = strtod(Token.at(IndexOfDataField).c_str() , NULL);
             TimeElement = strtod(Token.at(IndexOfTimeField).c_str() , NULL);
-            TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);       
+//            TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);       
+            ElementsNumber = TraceHandle->GetNumberOfPoints();
+            TraceBufferSize = TraceHandle->GetSize();
             if(ElementsNumber == TraceBufferSize && (LeftBoundaryTime <= min)){     
                 // Buffer overflow, we need to add size
                 TraceBufferSize *= 1.5;
                 TraceHandle->ReSize(TraceBufferSize);
             }
-            TraceHandle->AddPoint(vctDouble2(TimeElement,DataElement));
-            TraceHandle->GetLeftRightDataX(min,max);       
+            TraceHandle->AppendPoint(vctDouble2(TimeElement,DataElement));
+            TraceHandle->ComputeDataRangeX(min,max,true);       
         }       
         // should we resize to a smaller one?
-        TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);  
+        //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);  
+        ElementsNumber = TraceHandle->GetNumberOfPoints();
+        TraceBufferSize = TraceHandle->GetSize();
         if(TraceBufferSize > ElementsNumber*1.5){
             TraceHandle->ReSize(ElementsNumber*1.5);
         }
@@ -288,7 +293,9 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
     }
     else if(min > RightBoundaryTime || max < LeftBoundaryTime){        
         // if every thing is not in our range, reset buffer and reload everything
-        TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);     
+        //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);
+        ElementsNumber = TraceHandle->GetNumberOfPoints();
+        TraceBufferSize = TraceHandle->GetSize();
         TraceHandle->SetSize(TraceBufferSize);
         LeftBoundaryPosition = GetDataPoisitionFromFile(LeftBoundaryTime  ,IndexOfTimeField);
         RightBoundaryPosition = GetDataPoisitionFromFile(RightBoundaryTime, IndexOfTimeField);
@@ -298,8 +305,7 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
         // load Data from File: [LeftBoundaryPosition, RightBoundaryPosition]
         inf.open(Header.FilePath.c_str(), std::ios_base::binary | std::ios_base::in);
         inf.seekg(LeftBoundaryPosition, std::ios::beg);
-        double TimeElement = 0, DataElement;
-        double CurrentPos;
+        double TimeElement = 0, DataElement;        
         char *StringBuffer = new char [RightBoundaryPosition - LeftBoundaryPosition];
         inf.read(StringBuffer, RightBoundaryPosition - LeftBoundaryPosition);
         std::string stringvalues(StringBuffer,  RightBoundaryPosition - LeftBoundaryPosition);
@@ -315,18 +321,22 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
             DataElement = strtod(Token.at(IndexOfDataField).c_str() , NULL);
             TimeElement = strtod(Token.at(IndexOfTimeField).c_str() , NULL);
 
-            TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);       
+            //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);       
+            ElementsNumber = TraceHandle->GetNumberOfPoints();
+            TraceBufferSize = TraceHandle->GetSize();
             if(ElementsNumber == TraceBufferSize && (LeftBoundaryTime <= min)){
                 // Buffer overflow, we need to add size
                 TraceBufferSize *= 1.5;
                 TraceHandle->ReSize(TraceBufferSize);
             }
         
-            TraceHandle->AddPoint(vctDouble2(TimeElement,DataElement));
-            TraceHandle->GetLeftRightDataX(min,max);       
+            TraceHandle->AppendPoint(vctDouble2(TimeElement,DataElement));
+            TraceHandle->ComputeDataRangeX(min,max,true);       
         }        
         // should we resize to a smaller one?
-        TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);  
+        //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);  
+        ElementsNumber = TraceHandle->GetNumberOfPoints();
+        TraceBufferSize = TraceHandle->GetSize();
         if(TraceBufferSize > ElementsNumber*1.5){
             TraceHandle->ReSize(ElementsNumber*1.5);
         }
@@ -334,7 +344,9 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
     }
     else{               
         // reload only what we need 
-        TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);     
+        //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);
+        ElementsNumber = TraceHandle->GetNumberOfPoints();
+        TraceBufferSize = TraceHandle->GetSize();
         TraceHandle->ReSize(TraceBufferSize);
         LeftBoundaryPosition = GetDataPoisitionFromFile(LeftBoundaryTime  ,IndexOfTimeField);        
         //*********************************************************************************************
@@ -360,13 +372,14 @@ void cdpPlayerParseStatTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trace
                 if(Token.size() < IndexOfDataField || Token.size() <  IndexOfTimeField || iss.eof())
                     break;
                 DataElement = strtod(Token.at(IndexOfDataField).c_str() , NULL);
-                TimeElement = strtod(Token.at(IndexOfTimeField).c_str() , NULL);
-                //TraceHandle->AddPoint(vctDouble2(TimeElement,DataElement));
+                TimeElement = strtod(Token.at(IndexOfTimeField).c_str() , NULL);                
                 TimeDataBuffer.push_back(TimeElement);
                 TimeDataBuffer.push_back(DataElement);
             }                            
             // reset buffer size for prepend data
-            TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);            
+            //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);          
+            ElementsNumber = TraceHandle->GetNumberOfPoints();
+            TraceBufferSize = TraceHandle->GetSize();
             if((TraceBufferSize - ElementsNumber) < TimeDataBuffer.size()){               
                 TraceHandle->ReSize(TraceBufferSize+ TimeDataBuffer.size());       
             }            
