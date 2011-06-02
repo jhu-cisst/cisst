@@ -29,12 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlBufferImage.h>
 #include <cisstStereoVision.h>
 
-#ifdef _WIN32
-#include "DeckLinkAPI_h.h"
-#else
 #include "DeckLinkAPI.h"
-#include "DeckLinkAPIDispatch.cpp"
-#endif //_WIN32
 
 class svlBufferImage;
 

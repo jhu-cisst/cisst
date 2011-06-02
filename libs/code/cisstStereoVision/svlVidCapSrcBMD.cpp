@@ -159,7 +159,7 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
 		while (deckLinkIterator->Next(&deckLink) == S_OK)
 		{
                         char *		deviceNameString = NULL;
-                        result = deckLink->GetModelName((const char **)(&deviceNameString));
+                        // adeguet1        result = deckLink->GetModelName((const char **)(&deviceNameString));
                         if (result == S_OK)
                         {
 				//_bstr_t		deviceName(deviceNameString, false);
