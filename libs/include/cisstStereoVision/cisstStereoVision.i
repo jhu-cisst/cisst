@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "swigrun.i"
 
 %import "cisstConfig.h"
+%import "cisstStereoVision/svlConfig.h"
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
@@ -73,9 +74,9 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstStereoVision/svlFilterImageWindow.h"
 
 %include "cisstStereoVision/svlFilterSourceImageFile.h"
-    #if CISST_SVL_HAS_OPENCV
+#if CISST_SVL_HAS_OPENCV
 %include "cisstStereoVision/svlCCCameraCalibration.h"
-    #endif //CISST_SVL_HAS_OPENCV
+#endif //CISST_SVL_HAS_OPENCV
 %{
 
 
