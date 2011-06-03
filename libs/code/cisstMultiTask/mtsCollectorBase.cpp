@@ -107,7 +107,7 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
         // create the output file
         this->OutputFile = new std::ofstream;
         this->OutputFile->precision(10);
-        this->OutputFile->setf(0,std::ios::floatfield);
+        this->OutputFile->unsetf(std::ios::floatfield);
         this->OutputHeaderFile = new std::ofstream;
         // uses the oftream as our ostream
         this->OutputStreamHeader = this->OutputHeaderFile;
