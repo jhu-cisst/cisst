@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cdpPlayerVideo.h 2308 2011-02-15 22:01:00Z adeguet1 $
+  $Id$
 
   Author(s): Marcin Balicki
   Created on: 2011-02-10
@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlStreamManager.h>
 #include <cisstStereoVision/svlFilterImageOverlay.h>
-#include <cisstStereoVision/svlFilterImageQtWidget.h>
+#include <cisstStereoVision/svlFilterImageOpenGLQtWidget.h>
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
 
 //! todo Think about the thread safety issue. (At the moment, mtscommands and qslots can manipulte same data at the same time)
@@ -77,7 +77,7 @@ private:
     void SetupPipeline(const std::string &filename);
 
     QWidget MainWindow;
-    svlFilterImageQtWidget * VideoWidget;
+    svlFilterImageOpenGLQtWidget * VideoWidget;
 
      // instantiating SVL stream and filters
     svlStreamManager StreamManager;;

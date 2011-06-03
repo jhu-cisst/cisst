@@ -1,5 +1,5 @@
 /*
-  $Id: cdpPlayerVideo.cpp 2308 2011-02-15 22:01:00Z adeguet1 $
+  $Id$
 
   Author(s): Marcin Balicki
   Created on: 2011-02-10
@@ -37,7 +37,7 @@ cdpPlayerVideo::cdpPlayerVideo(const std::string & name, double period):
     // create the user interface
     // create the user interface
     ExWidget.setupUi(&Widget);
-    VideoWidget = new svlFilterImageQtWidget();
+    VideoWidget = new svlFilterImageOpenGLQtWidget();
 
     QGridLayout *CentralLayout = new QGridLayout(&MainWindow);
     CentralLayout->setContentsMargins(0, 0, 0, 0);
@@ -342,7 +342,8 @@ void cdpPlayerVideo::SetupPipeline(const std::string &filename)
 
     Source.SetChannelCount(1);
 
-    if (Source.SetFilePath(filename) != SVL_OK) {
+    std::string pathname = "/Users/anton/devel/test480.cvi";
+    if (Source.SetFilePath(pathname) != SVL_OK) {
 	std::cerr << std::endl << "Wrong file name... " << std::endl;
     }
 

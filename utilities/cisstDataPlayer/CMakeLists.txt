@@ -43,6 +43,8 @@ add_library (cisstDataPlayerComponents
              cdpPlayerPlot2D.cpp
              cdpPlayerVideo.h
              cdpPlayerVideo.cpp
+             cdpPlayerParseStateTableData.h
+             cdpPlayerParseStateTableData.cpp
              )
 
 cisst_target_link_libraries (cisstDataPlayerComponents

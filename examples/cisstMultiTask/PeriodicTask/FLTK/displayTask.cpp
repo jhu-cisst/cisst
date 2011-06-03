@@ -76,10 +76,10 @@ void displayTask::Run(void)
     {
         UI.Data->value(Data);
         UI.Time->value(Time); // display in seconds
-        UI.DataTrace->AddPoint(vctDouble2(Data.Timestamp(),
-                                          Data.Data));
-        UI.TriggerTrace->AddPoint(vctDouble2(Data.Timestamp(),
-                                             UI.Trigger->value() * UI.Amplitude->value()));
+        UI.DataTrace->AppendPoint(vctDouble2(Data.Timestamp(),
+                                             Data.Data));
+        UI.TriggerTrace->AppendPoint(vctDouble2(Data.Timestamp(),
+                                                UI.Trigger->value() * UI.Amplitude->value()));
         UI.Plot->redraw();
         // check if the user has entered a new amplitude in UI
         if (UI.AmplitudeChanged) {

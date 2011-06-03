@@ -1,7 +1,7 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 /*
-  $Id: main.cpp 2341 2011-02-22 20:16:56Z adeguet1 $
+  $Id$
   
   Author(s): Marcin Balicki
   Created on: 2011-02-10
