@@ -78,7 +78,7 @@ public:
         /*! Set point value at a given position, relative to first
           element.  This method will throw an std::runtime_error if
           the index is invalid, i.e. greater than the buffer size. */
-        void SetPointAt(size_t index, const vctDouble2 & point);
+        void SetPointAt(size_t index, const vctDouble2 & point) throw (std::runtime_error);
 
         /*! Replaces "size" points data starting at "index".  This
           methods assumes that the point size of the user provided
@@ -92,29 +92,29 @@ public:
           enough free space, data will be overwritten at the end of
           buffer.  This method will throw an exception if either the
           array size or index is invalid. */
-        bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2);
+        bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
         
         /*! Append user provided data at the end of the circular
           buffer.  If the buffer is full or doesn't have enough free
           space, data will be overwritten at the beginning of buffer.
           This method will throw an exception if either the array size
           or index is invalid. */
-        bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2);
+        bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
         
         void Freeze(bool freeze);
 
         /*! Compute min and max over all points to recenter display.  If the buffer contains no point, returns 0. */
         //@{
-        void ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false);
-        void ComputeDataRangeY(double & min, double & max);
-        void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
+        void ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false) const;
+        void ComputeDataRangeY(double & min, double & max) const;
+        void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max) const;
         //@}
 
         // use ComputeDataRangeX with assumesDataSorted = true
-        void CISST_DEPRECATED GetLeftRightDataX(double & min, double & max);
+        void CISST_DEPRECATED GetLeftRightDataX(double & min, double & max) const;
 
         void CISST_DEPRECATED SetNumberOfPoints(size_t numberOfPoints);
-        void CISST_DEPRECATED GetNumberOfPoints(size_t &numberOfPoints, size_t &bufferSize);
+        void CISST_DEPRECATED GetNumberOfPoints(size_t & numberOfPoints, size_t & bufferSize) const;
 
         /*! Get size of circular buffer. */
         size_t GetSize(void) const;
@@ -132,7 +132,7 @@ public:
         /*! Non destructive resize.  If the new buffer is bigger,
           preserves all points.  If the new buffer is smaller,
           preserves the data at the end by default. */
-        void ReSize(size_t numberOfPoints, bool trimOlder = true);
+        void Resize(size_t numberOfPoints, bool trimOlder = true);
 
     protected:
         /*! Trace name, used for GUI */
@@ -150,8 +150,6 @@ public:
         size_t IndexLast;
         vctDouble3 Color;
         double LineWidth;
-        // Critical Section
-        //osaCriticalSection CriticalSectionForBuffer;
     };
 
     /*! Storage for a given vertical line. */
@@ -272,7 +270,6 @@ public:
 #if 0
     // no yet implemented
     void SetGridColor(const vctDouble3 & colorInRange0To1);
-
 #endif
 
     /*! Set color for a specific trace.  Deprecated, use
