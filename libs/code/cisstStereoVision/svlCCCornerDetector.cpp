@@ -195,7 +195,7 @@ void svlCCCornerDetector::findGoodFeatures(cv::Mat matImage)
 	}
 
 	//if(debug)
-	//	printf("Number of good features: %d\n", chessboardCorners.size());	
+            std::cout << "Number of good features: " << chessboardCorners.size() << std::endl;
 
 	// Free Memory
 	matGray.~Mat();
@@ -228,8 +228,8 @@ bool svlCCCornerDetector::nearestCorner(IplImage* iplImage, cv::Point2f targetPo
 			}	
 			break;
 		default:
-            std::cout << "Unrecognized flag or no corners found: " << cornerDetectionFlag << std::endl;    
-			//printf("Unrecognized flag or no corners found: %d\n", cornerDetectionFlag);	
+                    std::cout << "Unrecognized flag or no corners found: " << cornerDetectionFlag << std::endl;
+
 	}
 
 	if(minDistance > distanceThreshold)
@@ -258,8 +258,8 @@ bool svlCCCornerDetector::nearestCorner(IplImage* iplImage, cv::Point2f targetPo
 
 void svlCCCornerDetector::drawCorners(IplImage* iplImage)
 {
-	//if(debug)
-		//printf("Drawing corners with flag: %d\n", cornerDetectionFlag);	
+        if(debug)
+            std::cout << "Drawing corners with flag: " << cornerDetectionFlag << std::endl;
 
 	switch(cornerDetectionFlag)
 	{
@@ -275,8 +275,8 @@ void svlCCCornerDetector::drawCorners(IplImage* iplImage)
 			//}
 			break;
 		default:
-            std::cout << "Unrecognized flag or no corners found: " << cornerDetectionFlag << std::endl;    
-			//printf("Unrecognized flag or no corners found: %d\n", cornerDetectionFlag);	
+                        std::cout << "Unrecognized flag or no corners found: " << cornerDetectionFlag << std::endl;
+
 	}
 }
 

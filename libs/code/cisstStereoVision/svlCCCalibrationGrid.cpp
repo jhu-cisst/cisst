@@ -29,6 +29,8 @@ svlCCCalibrationGrid::svlCCCalibrationGrid(IplImage* iplImage, cv::Size boardSiz
 	this->valid = false;
 	this->cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
 	this->distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
+        this->rvec = cv::Mat::zeros(3,1,CV_64F);
+        this->tvec = cv::Mat::zeros(3,1,CV_64F);
 	this->groundTruthCameraTransformation = cvCreateMat(3,4,CV_64F);
 	this->calibrationError = std::numeric_limits<double>::max( );;
 	this->minGridPoints = 10;
@@ -324,7 +326,7 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
 				extrapolatedCornerSrc = cv::Point2f(calibrationGridOrigin.x-gridSizePixel/2,calibrationGridOrigin.y-gridSizePixel/2);
 			break;
 		default:
-			//printf("Unrecognized color index %d\n", i);	
+                        std::cout << "Unrecognized color index "<< i << std::endl;
 			break;
 		}
 
@@ -1058,7 +1060,7 @@ double svlCCCalibrationGrid::runCalibration()
 				localDistCoeffs, rvecs, tvecs, flags);
 			
 			if(debug)
-				//printf("grid::calibrateCamera: %d points, RMS:%g, improved:%g\n", imagePoints.at(0).size(), rms, projectedImagePointsRMS);
+                            std::cout << "grid::calibrateCamera:" << imagePoints.at(0).size() << " points, RMS:"<< rms << ", improved:" << projectedImagePointsRMS << std::endl;
 
 			if(rms < calibrationError)
 			{
