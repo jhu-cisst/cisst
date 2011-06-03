@@ -1,7 +1,9 @@
 
 # add OpenNi
-set( HEADER_FILES ../cisstOpenNI.h )
-set( SOURCE_FILES cisstOpenNI.cpp )
+set( HEADER_FILES	../cisstOpenNI.h
+					../cisstOpenNISkeleton.h )
+set( SOURCE_FILES	cisstOpenNI.cpp
+					cisstOpenNISkeleton.cpp )
 
 # Finally create the library
 add_library( cisstOpenNI ${HEADER_FILES} ${SOURCE_FILES} )
