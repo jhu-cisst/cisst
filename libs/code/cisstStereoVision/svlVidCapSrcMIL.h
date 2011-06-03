@@ -66,7 +66,7 @@ private:
 };
 
 
-class svlVidCapSrcMIL : public svlVidCapSrcBase, public cmnGenericObject
+class svlVidCapSrcMIL : public svlVidCapSrcBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

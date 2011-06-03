@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterBase.h>
 #include <cisstStereoVision/svlDraw.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -156,6 +157,33 @@ private:
     bool ConfidenceColoring;
     bool Crosshair;
     unsigned int TargetSize;
+};
+
+
+class CISST_EXPORT svlOverlayBlobs : public svlOverlay, public svlOverlayInput
+{
+public:
+    svlOverlayBlobs();
+    svlOverlayBlobs(unsigned int videoch,
+                    bool visible,
+                    const std::string & inputname,
+                    unsigned int inputch,
+                    bool draw_id = false);
+    virtual ~svlOverlayBlobs();
+
+    void SetInputChannel(unsigned int inputch);
+    void SetDrawID(bool enable);
+
+    unsigned int GetInputChannel() const;
+    bool GetDrawID() const;
+
+protected:
+    virtual bool IsInputTypeValid(svlStreamType inputtype);
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    unsigned int InputCh;
+    bool DrawID;
 };
 
 
@@ -440,16 +468,24 @@ public:
     svlOverlayStaticPoly(unsigned int videoch,
                          bool visible,
                          const TypeRef poly,
+                         svlRGB color);
+    svlOverlayStaticPoly(unsigned int videoch,
+                         bool visible,
+                         const TypeRef poly,
                          svlRGB color,
-                         unsigned int start = 0);
+                         unsigned int thickness,
+                         unsigned int start);
     virtual ~svlOverlayStaticPoly();
 
     void SetPoints(const TypeRef points);
+    void SetPoints(const TypeRef points, unsigned int start);
     void SetColor(svlRGB color);
+    void SetThickness(unsigned int thickness);
     void SetStart(unsigned int start);
 
     TypeRef GetPoints();
     svlRGB GetColor() const;
+    unsigned int GetThickness() const;
     unsigned int GetStart() const;
 
     unsigned int AddPoint(svlPoint2D point);
@@ -467,7 +503,9 @@ protected:
 private:
     Type Poly;
     svlRGB Color;
+    unsigned int Thickness;
     unsigned int Start;
+    osaCriticalSection CS;
 };
 
 
@@ -516,6 +554,9 @@ public:
     svlRGB GetBackgroundColor() const;
     unsigned int GetBorderWidth() const;
     svlRGB GetBorderColor() const;
+
+    int GetValueInImagePos(double value, int & imagepos) const;
+    int GetImagePosInValue(int imagepos, double & value) const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);

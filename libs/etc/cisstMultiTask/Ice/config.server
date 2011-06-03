@@ -51,7 +51,7 @@ Ice.Warn.Connections = 0
 # 2 = like 1, but more detailed
 # 3 = like 2, but also trace data transfer
 #
-Ice.Trace.Network = 0
+Ice.Trace.Network = 2
 
 #
 # Timeout in msec
@@ -59,7 +59,7 @@ Ice.Trace.Network = 0
 Ice.Override.Timeout = 10000
 Ice.Override.ConnectTimeout = 3000
 # Message size in KB (eg 50MB 51200)
-Ice.MessageSizeMax = 51200
+Ice.MessageSizeMax = 300000
 
 #------------------------------------------------------------------------------
 # Server-specific Properties

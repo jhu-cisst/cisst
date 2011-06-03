@@ -179,11 +179,10 @@ void JPEG_term_destination_proc(j_compress_ptr CMN_UNUSED(cinfo))
 /*** svlImageCodecJPEG class *********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlImageCodecJPEG)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlImageCodecJPEG, svlImageCodecBase)
 
 svlImageCodecJPEG::svlImageCodecJPEG() :
     svlImageCodecBase(),
-    cmnGenericObject(),
     jpegBuffer(0),
     jpegRowBuffer(0),
     jpegBufferSize(0),

@@ -71,6 +71,8 @@ int svlFilterImageUnsharpMask::Initialize(svlSample* syncInput, svlSample* &sync
         case svlTypeImageMono8Stereo:
         case svlTypeImageMono16:
         case svlTypeImageMono16Stereo:
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
         case svlTypeMatrixInt8:
         case svlTypeMatrixInt16:
@@ -85,6 +87,7 @@ int svlFilterImageUnsharpMask::Initialize(svlSample* syncInput, svlSample* &sync
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
             return SVL_INVALID_INPUT_TYPE;
     }
 

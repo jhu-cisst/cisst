@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsComponentViewer.h>
 
 using namespace std;
 
@@ -111,6 +113,8 @@ public:
 
 int CameraViewer(bool interpolation, bool save, int width, int height)
 {
+    mtsComponentViewer *componentViewer = 0;
+
     svlInitialize();
 
     // instantiating SVL stream and filters
@@ -268,6 +272,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         cerr << "    'v'   - Start new video file" << endl;
     }
     cerr << "    'i'   - Adjust image properties" << endl;
+    cerr << "    'c'   - Start Component Viewer (requires uDrawGraph)" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
 
     do {
@@ -287,6 +292,21 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
                 cerr << endl << endl;
                 source.DialogImageProperties();
                 cerr << endl << endl;
+            break;
+
+            case 'c':
+                 // create and add Component Viewer
+                if (!componentViewer) {
+                    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+                    componentViewer = new mtsComponentViewer("ComponentViewer");
+                    LCM->AddComponent(componentViewer);
+                    // NOTE: currently need to call CreateAll and StartAll
+                    // (rather than componentViewer->Create, componentViewer->Start)
+                    // to be sure that LCM and GCM are created. This would not be
+                    // the case if CreateAll and StartAll were called earlier.
+                    LCM->CreateAll();
+                    LCM->StartAll();
+                }
             break;
 
             default:

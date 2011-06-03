@@ -16,6 +16,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <osgDB/ReadFile> 
+#include <osg/PolygonMode>
+#include <osg/Material>
+
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -26,9 +29,11 @@ void devOSGBody::TransformCallback::operator()( osg::Node* node,
   devOSGBody::UserData* userdata;
   userdata = dynamic_cast<devOSGBody::UserData*>( data );
 
+  // change the transform 
   if( userdata != NULL )
     { userdata->GetBody()->Transform(); }
   traverse( node, nv );
+
 }   
 
 // This is called at each update traversal
@@ -38,9 +43,11 @@ void devOSGBody::SwitchCallback::operator()( osg::Node* node,
   devOSGBody::UserData* userdata;
   userdata = dynamic_cast<devOSGBody::UserData*>( data );
 
+  // change the switch
   if( userdata != NULL )
     { userdata->GetBody()->Switch(); }
   traverse( node, nv );
+
 }   
 
 
@@ -126,8 +133,9 @@ devOSGBody::devOSGBody(	const std::string& name,
 			const vctFrm3& Rt,
 			const vctDynamicMatrix<double>& pc,
 			devOSGWorld* world,
+			unsigned char r, unsigned char g, unsigned char b,
 			const std::string& transformfn,
-			const std::string& switchfn ) : 
+			const std::string& switchfn ) :
   mtsComponent( name ),
   Rt_body( Rt.Rotation(), Rt.Translation() ),
   switch_body( true ){
@@ -150,7 +158,7 @@ devOSGBody::devOSGBody(	const std::string& name,
   // add the switch as the child of the transform node
   this->addChild( osgswitch );
 
-  Read3DData( pc );
+  Read3DData( pc, vctFixedSizeVector<unsigned char, 3>(r, g, b) );
 
   if( world != NULL )
     { world->addChild( this ); }
@@ -180,11 +188,13 @@ void devOSGBody::ReadModel( const std::string& model ){
 
   osg::ref_ptr< osgDB::ReaderWriter::Options > options;
   // "noRotation" is to cancel the default -X in .obj files
-  options = new osgDB::ReaderWriter::Options("noRotation");
+  //options = new osgDB::ReaderWriter::Options("noRotation");
+  options = new osgDB::ReaderWriter::Options();
 
   std::string path;
   size_t found;
 #if (CISST_OS == CISST_WINDOWS)
+  found = model.rfind( '/' );
 #else
   found = model.rfind( '/' );
 #endif    
@@ -196,52 +206,8 @@ void devOSGBody::ReadModel( const std::string& model ){
   osg::ref_ptr<osg::Node> node = osgDB::readNodeFile( model, options );
 
   if( node != NULL ){
-    
     // Add the node to the transformation node
     osgswitch->addChild( node );
-
-    // This blocks gets the geometry out of the node
-    // This is how it "should" work: First cast the node as a group
-    osg::Group* group = node->asGroup();
-    if( group != NULL ){
-
-      for( size_t g = 0; g<group->getNumChildren(); g++ ){
-
-	node = group->getChild( g );
-
-	// This node should be a geode
-	osg::Geode* geode = node->asGeode();
-	if( geode != NULL ){
-
-	  // Find if it has any drawables?
-	  for( size_t d=0; d<geode->getNumDrawables(); d++ ){
-	    // Get the first drawable
-	    osg::Drawable* drawable = geode->getDrawable( d );
-	  
-	    // Cast the drawable as a geometry
-	    osg::Geometry* geometry = drawable->asGeometry();
-	    if( geometry == NULL ){
-	      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-				<< "Failed to cast the drawable as a geometry."
-				<< std::endl;
-	    }
-	    else { osggeometries.push_back( geometry ); }
-
-	  }
-	}
-	else{
-	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			    << "Failed to cast node as a geode for : " << model 
-			    << std::endl;
-	}
-      }
-    }
-    else{
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< "Failed to cast node as a group for : " << model 
-			<< std::endl;
-    }
-
   }
   else{
     CMN_LOG_RUN_ERROR
@@ -251,7 +217,8 @@ void devOSGBody::ReadModel( const std::string& model ){
 
 }
 
-void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
+void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
+			     const vctFixedSizeVector<unsigned char,3>& RGB ){
 
   size_t npoints= 0;
   if( pc.rows() == 3 )
@@ -291,7 +258,7 @@ void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
   }
   // add the set to the geometry
   pointsGeom->addPrimitiveSet( drawArrayPoints );
-  
+
   // add a vector of vertices
   osg::ref_ptr<osg::Vec3Array> vertexData;
   try{ vertexData = new osg::Vec3Array; }
@@ -304,6 +271,21 @@ void devOSGBody::Read3DData( const vctDynamicMatrix<double>& pc ){
   
   for( size_t i=0; i<npoints; i++ )
     { vertexData->push_back( osg::Vec3( pc[0][i], pc[1][i], pc[2][i] ) ); }
+
+  osg::ref_ptr<osg::Vec4Array> colorArray = new osg::Vec4Array;
+  colorArray->push_back( osg::Vec4( RGB[0], RGB[1], RGB[2], 1.0f ) );
+  
+  osg::ref_ptr< osg::TemplateIndexArray< unsigned int, 
+					 osg::Array::UIntArrayType,
+					 4, 1 > > colorIndexArray;
+  colorIndexArray = new osg::TemplateIndexArray< unsigned int, 
+						 osg::Array::UIntArrayType,
+						 4, 1>;
+  colorIndexArray->push_back(0);
+
+  pointsGeom->setColorArray( colorArray );
+  pointsGeom->setColorIndices(colorIndexArray);
+  pointsGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
 
   drawArrayPoints->setFirst( 0 );
   drawArrayPoints->setCount( vertexData->size() );
@@ -321,6 +303,7 @@ void devOSGBody::SetMatrix( const vctFrame4x4<double>& Rt ){
 // This is called from the body's callback
 // This reads a transformation if the body is connected to an interface
 void devOSGBody::Transform(){
+
   // Get the transformation if possible
   if( ReadTransformation.IsValid() ){
     mtsDoubleFrm4x4 Rt;
@@ -329,13 +312,14 @@ void devOSGBody::Transform(){
   }
   else
     { SetMatrix( Rt_body ); }
+
 }
 
 void devOSGBody::Switch(){
   // Get the transformation if possible
-  if( ReadTransformation.IsValid() ){
+  if( ReadSwitch.IsValid() ){
     mtsBool mtsswitch;
-    ReadTransformation( mtsswitch );
+    ReadSwitch( mtsswitch );
     osgswitch->setValue( 0, mtsswitch );
   }
   else
@@ -345,7 +329,49 @@ void devOSGBody::Switch(){
 void devOSGBody::SetTransform( const vctFrame4x4<double>& Rt )
 { this->Rt_body = Rt; }
 
+void devOSGBody::SetTransform( const vctFrm3& Rt )
+{ SetTransform( vctFrame4x4<double>( vctMatrixRotation3<double>( Rt.Rotation(),
+								 VCT_NORMALIZE),
+				     Rt.Translation() ) ); }
+
 //! Set the switch of the body
 void devOSGBody::SetSwitch( bool onoff )
 { this->switch_body = onoff; }
   
+void devOSGBody::SetModeFill(){
+  osg::ref_ptr<osg::StateSet> state = getOrCreateStateSet();
+  osg::ref_ptr<osg::PolygonMode> pm;
+  pm = dynamic_cast<osg::PolygonMode*>
+    ( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+  if( !pm ){
+    pm = new osg::PolygonMode;
+    state->setAttribute( pm );
+  }
+  pm->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL );
+}
+
+void devOSGBody::SetModeLine(){
+  osg::ref_ptr<osg::StateSet> state = getOrCreateStateSet();
+  osg::ref_ptr<osg::PolygonMode> pm;
+  pm = dynamic_cast<osg::PolygonMode*>
+    ( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+  if( !pm ){
+    pm = new osg::PolygonMode;
+    state->setAttribute( pm );
+  }
+  pm->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE );
+}
+
+void devOSGBody::SetModePoint(){
+  osg::ref_ptr<osg::StateSet> state = getOrCreateStateSet();
+  osg::ref_ptr<osg::PolygonMode> pm;
+  pm = dynamic_cast<osg::PolygonMode*>
+    ( state->getAttribute( osg::StateAttribute::POLYGONMODE ));
+  if( !pm ){
+    pm = new osg::PolygonMode;
+    state->setAttribute( pm );
+  }
+  pm->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::POINT );
+}
+
+

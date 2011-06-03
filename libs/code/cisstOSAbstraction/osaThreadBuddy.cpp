@@ -51,14 +51,42 @@ http://www.cisst.org/cisst/license.txt.
     #include <unistd.h>
 #endif
 
+#if (CISST_OS == CISST_LINUX_RTAI)
+int GetStat(const char * path, struct stat * st)
+{
+    int ret = stat(path, st);
+    if (ret == -1) { // 0: success, -1: error
+        std::string msg;
+        switch (errno) {
+            case EACCES: msg = "Search permission is denied for one of the directories in the path prefix of path"; break;
+            case EBADF: msg = "filedes is bad."; break;
+            case EFAULT: msg = "Bad address."; break;
+            case ELOOP: msg = "Too many symbolic links encountered while traversing the path."; break;
+            case ENAMETOOLONG: msg = "File name too long."; break;
+            case ENOENT: msg = "A component of the path does not exist, or the path is an empty string."; break;
+            case ENOMEM: msg = "Out of memory (i.e. kernel memory)."; break;
+            case ENOTDIR: msg = "A component of the path is not a directory."; break;
+            default: msg = "Unknown";
+        }
+        std::cerr << "__osa_init stat() error: " << msg << "(filename: " << path << ")" << std::endl;
+    }
+
+    return ret;
+}
+#endif
+
 void __os_init(void) 
 {
 #if (CISST_OS == CISST_LINUX_RTAI)
     struct stat st, st_1;
-    stat(__lock_filename, &st);
-    if (st.st_nlink > 1) {
-        std::cerr << "__os_init Info: Another real-time program is already running" << std::endl;
-    } 
+    int ret = GetStat(__lock_filename, &st);
+    if (ret == 0) {
+        if (st.st_nlink > 1) {
+            std::cerr << "__os_init Info: Another real-time program is already running" << std::endl;
+        } 
+    } else {
+        std::cerr << "__os_init Info: failed to get lock file status" << std::endl;
+    }
 
     // Check if all the required realtime kernel modules are loaded properly.
     // MJUNG: This is to prevent cisst from crashing with segmentation fault when
@@ -95,7 +123,7 @@ void __os_init(void)
                 }
             }
             if (!found) {
-                CMN_LOG_INIT_ERROR << "Check real-time module: " << RTModuleNames[i]
+                std::cerr << "Check real-time module: " << RTModuleNames[i]
                     << " is missing. Please load the module." << std::endl;
             }
 
@@ -103,7 +131,7 @@ void __os_init(void)
         }
 
         if (!allModulesLoaded) {
-            CMN_LOG_INIT_ERROR << "Please load the missing module(s)." << std::endl;
+            std::cerr << "Please load the missing module(s)." << std::endl;
             exit(1);
         }
     } else {
@@ -126,11 +154,11 @@ void __os_init(void)
                 found = false;
                 switch (queryResult) {
                     case ENOENT: 
-                        CMN_LOG_INIT_ERROR << "Check real-time module: " << RTModuleNames[i]
+                        std::cerr << "Check real-time module: " << RTModuleNames[i]
                             << " is missing. Please load the module." << std::endl;
                         break;
                     default:
-                        CMN_LOG_INIT_ERROR << "Check real-time module: unknown error" << std::endl;
+                        std::cerr << "Check real-time module: unknown error" << std::endl;
                 }
             } else {
                 found = true;
@@ -140,7 +168,7 @@ void __os_init(void)
         }
 
         if (!allModulesLoaded) {
-            CMN_LOG_INIT_ERROR << "Please load the missing module(s)." << std::endl;
+            std::cerr << "Please load the missing module(s)." << std::endl;
             exit(1);
         }
 #else
@@ -155,9 +183,13 @@ void __os_init(void)
     // obtain a lock
     sprintf(__lock_file, "%s.%d", __lock_filename, getpid());
     link(__lock_filename, __lock_file);
-    stat(__lock_filename, &st_1);
-    if (st_1.st_nlink < st.st_nlink) {
-        std::cerr << " __os_init Error: Couldnt create a link to lock" << std::endl;
+    ret = GetStat(__lock_filename, &st_1);
+    if (ret == 0) {
+        if (st_1.st_nlink < st.st_nlink) {
+            std::cerr << " __os_init Error: Couldnt create a link to lock" << std::endl;
+        }
+    } else {
+        std::cerr << "__os_init Error: failed to get lock file status" << std::endl;
     }
     //rt_linux_use_fpu(1);  // this is only needed if running inside the kernel.
                             // otherwise, simply use the uses_fpu flag at task creation.
@@ -165,7 +197,7 @@ void __os_init(void)
     //nothing is to be done now. later when we have our own dispatcher we might want to add
     //some code here
 #elif (CISST_OS == CISST_QNX)
-    // MJUNG: TODO: need to research how to setup hard realtime under QNX, if necessary.
+    // nop
 #else // default unix   
     // nop
 #endif
@@ -178,12 +210,16 @@ void __os_exit(void)
     struct stat st;
     // unlink lock file
     unlink(__lock_file);
-    stat(__lock_filename, &st);
-    if (st.st_nlink > 1) {
-        std::cerr << "__os_exit Info: Another real-time program is running, we don't stop the timer." << std::endl;
+    int ret = GetStat(__lock_filename, &st);
+    if (ret == 0) {
+        if (st.st_nlink > 1) {
+            std::cerr << "__os_exit Info: Another real-time program is running, we don't stop the timer." << std::endl;
+        } else {
+            stop_rt_timer();
+            return;
+        }
     } else {
-        stop_rt_timer();
-        return;
+        std::cerr << "__os_exit Info: failed to get lock file status" << std::endl;
     }
 #elif (CISST_OS == CISST_WINDOWS)
     //nothing is to be done now. later when we have our own dispatcher we might want to add
@@ -259,13 +295,13 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
     // 6 characters.
     Data->RTTask = rt_task_init_schmod(nam2num(name), 0, stack_size, 0, SCHED_FIFO, 0xF);
     if (!Data->RTTask) {
-        CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to initialize real-time task: \"" << name << "\"" << std::endl;
-        CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
+        std::cerr << "osaThreadBuddy: failed to initialize real-time task: \"" << name << "\"" << std::endl;
+        std::cerr << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
         exit(1);
     }
     if (rt_task_use_fpu(Data->RTTask, 1) < 0) {
-        CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to allocate FPU" << std::endl;
-        CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
+        std::cerr << "osaThreadBuddy: failed to allocate FPU" << std::endl;
+        std::cerr << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
         exit(1);
     }
     // maybe this should be just before we make code real-time
@@ -275,8 +311,8 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
     mlockall(MCL_CURRENT | MCL_FUTURE);
     if (IsPeriodic()) {
         if (0 != rt_task_make_periodic_relative_ns(Data->RTTask, 0, (unsigned long)Period)) {
-            CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to make task run periodically" << std::endl;
-            CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
+            std::cerr << "osaThreadBuddy: failed to make task run periodically" << std::endl;
+            std::cerr << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
             exit(1);
         }
     }

@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFile.h>
 
 
-class svlVideoCodecCVI : public svlVideoCodecBase, public cmnGenericObject
+class svlVideoCodecCVI : public svlVideoCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -111,6 +111,8 @@ protected:
     bool SaveInitialized;
     bool KillSaveThread;
     bool SaveThreadError;
+
+    svlProcInfo ProcInfoSingleThread;
 
     void DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size);
     void DiffDecode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size);

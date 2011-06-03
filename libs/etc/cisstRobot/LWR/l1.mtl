@@ -1,0 +1,32 @@
+#
+# Wavefront material file: e:\src\cisst\libs\etc\cisstrobot\lwr\l1.mtl
+#
+# Converted by the PolyTrans geometry converter from Okino Computer Graphics, Inc.
+# Date/time of export: 05/12/2011 11:08:11
+#
+# Bounding box of geometry = (-0.06199,-0.06058,-0.1915) to (0.06199,0.11593,0.06055).
+
+newmtl default
+	Ns 32
+	d 1
+	illum 2
+	Kd 0.4 0.4 0.4
+	Ks 0.7 0.7 0.7
+	Ka 0.3 0.3 0.3
+
+newmtl orange_016
+	Ns 100
+	d 1
+	illum 2
+	Kd 0.917647 0.518201 0.183529
+	Ks 1 0.564706 0.2
+	Ka 0.458824 0.2591 0.0917647
+
+newmtl silver_015
+	Ns 100
+	d 1
+	illum 2
+	Kd 0.74902 0.74902 0.74902
+	Ks 0.74902 0.74902 0.74902
+	Ka 0.375978 0.375978 0.375978
+

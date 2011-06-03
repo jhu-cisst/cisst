@@ -113,39 +113,65 @@ int svlFilterVideoExposureManager::Process(svlProcInfo* procInfo, svlSample* syn
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
-    _SkipIfDisabled();
 
     if (SourceFilter) {
         _OnSingleThread(procInfo)
         {
             svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
             const unsigned int videochannels = img->GetVideoChannels();
-            int change, exposure;
-            unsigned int maxval;
-            double area;
 
-            // Compute size of saturated area
-            GetSaturationRatio(img, SVL_LEFT, area, maxval);
-            if (area < Tolerance) change = (255 - maxval) / 4;
-            else change = static_cast<int>((Tolerance - area) * 10);
+            if (IsEnabled()) {
+                int change, exposure;
+                unsigned int maxval;
+                double area;
 
-            // Get exposure parameters from the capture filter
-            svlFilterSourceVideoCapture::ImageProperties properties;
-            SourceFilter->GetImageProperties(properties, SVL_LEFT);
+                // Compute size of saturated area
+                GetSaturationRatio(img, SVL_LEFT, area, maxval);
+                if (area < Tolerance) change = (255 - maxval) / 8;
+                else change = static_cast<int>((Tolerance - area) * 5);
 
-            // Make sure auto-shutter and auto-gain are turned off
-            properties.manual |= svlFilterSourceVideoCapture::propShutter + svlFilterSourceVideoCapture::propGain;
+                // Get exposure parameters from the capture filter
+                svlFilterSourceVideoCapture::ImageProperties properties;
+                SourceFilter->GetImageProperties(properties, SVL_LEFT);
 
-            exposure = static_cast<int>(properties.shutter + properties.gain) + change;
-            properties.shutter = static_cast<unsigned int>(std::max(0, std::min(exposure, MaxShutter)));
-            properties.gain = static_cast<unsigned int>(std::max(0, std::min(exposure - MaxShutter, MaxGain)));
+                // Make sure auto-shutter and auto-gain are turned off
+                properties.manual |= svlFilterSourceVideoCapture::propShutter + svlFilterSourceVideoCapture::propGain;
 
-            // Set modified exposure parameters in the capture filter
-            if (change != 0) {
-                properties.mask = svlFilterSourceVideoCapture::propShutter + svlFilterSourceVideoCapture::propGain;
-                SourceFilter->SetImageProperties(properties, SVL_LEFT);
+                exposure = static_cast<int>(properties.shutter + properties.gain) + change;
+                properties.shutter = static_cast<unsigned int>(std::max(0, std::min(exposure, MaxShutter)));
+                properties.gain = static_cast<unsigned int>(std::max(0, std::min(exposure - MaxShutter, MaxGain)));
+
+                // Set modified exposure parameters in the capture filter
+                if (change != 0) {
+                    properties.mask = svlFilterSourceVideoCapture::propShutter + svlFilterSourceVideoCapture::propGain;
+                    for (unsigned int i = 0; i < videochannels; i ++) {
+                        SourceFilter->SetImageProperties(properties, i);
+                    }
+                }
+            }
+            else {
+                bool modified;
+                svlFilterSourceVideoCapture::ImageProperties properties;
+
                 for (unsigned int i = 0; i < videochannels; i ++) {
-                    SourceFilter->SetImageProperties(properties, SVL_RIGHT);
+                    // Get exposure parameters from the capture filter
+                    SourceFilter->GetImageProperties(properties, i);
+
+                    // Make sure auto-shutter and auto-gain are turned on
+                    modified = false;
+                    if (properties.manual & svlFilterSourceVideoCapture::propShutter) {
+                        properties.manual -= svlFilterSourceVideoCapture::propShutter;
+                        modified = true;
+                    }
+                    if (properties.manual & svlFilterSourceVideoCapture::propGain) {
+                        properties.manual -= svlFilterSourceVideoCapture::propGain;
+                        modified = true;
+                    }
+                    if (!modified) continue;
+
+                    // Set modified exposure parameters in the capture filter
+                    properties.mask = svlFilterSourceVideoCapture::propShutter + svlFilterSourceVideoCapture::propGain;
+                    SourceFilter->SetImageProperties(properties, i);
                 }
             }
         }

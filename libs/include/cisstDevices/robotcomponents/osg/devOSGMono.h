@@ -7,6 +7,7 @@
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
+
 class CISST_EXPORT devOSGMono : public devOSGCamera {
 
  private:
@@ -47,7 +48,8 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 	      double fovy, double aspectRatio,
 	      double zNear, double zFar,
 	      const std::string& fnname = "",
-	      bool trackball = true );
+	      bool trackball = true,
+	      bool offscreenrendering = false );
 
   ~devOSGMono();
 
@@ -56,10 +58,11 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 
 #if CISST_DEV_HAS_OPENCV22
  public:
-  vctDynamicMatrix<double> GetRangeData() const;
-  cv::Mat GetRGBImage() const;
-  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage() const;
-  vctDynamicMatrix<unsigned char> GetRGBPixelImage() const;
+  std::list< std::list< devOSGBody* > > GetVisibilityList();
+  vctDynamicMatrix<double> GetRangeData();
+  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage();
+  cv::Mat GetRGBImage();
+  cv::Mat GetDepthImage();
 #endif
 
 };

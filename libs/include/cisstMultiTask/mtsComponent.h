@@ -33,9 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
+#include <cisstMultiTask/mtsFunctionVoidReturn.h>
 #include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>

@@ -24,17 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstStereoVision/svlBufferImage.h>
 
-#ifdef _MSC_VER
-    // Quick fix for Visual Studio Intellisense:
-    // The Intellisense parser can't handle the CMN_UNUSED macro
-    // correctly if defined in cmnPortability.h, thus
-    // we should redefine it here for it.
-    // Removing this part of the code will not effect compilation
-    // in any way, on any platforms.
-    #undef CMN_UNUSED
-    #define CMN_UNUSED(argument) argument
-#endif
-
 // For compatibility with earlier OpenCV versions
 #ifndef CV_CAP_UNICAP
     #define CV_CAP_UNICAP   600
@@ -48,11 +37,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVidCapSrcOpenCV class ********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcOpenCV)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcOpenCV, svlVidCapSrcBase)
 
 svlVidCapSrcOpenCV::svlVidCapSrcOpenCV() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),
@@ -203,7 +191,7 @@ int svlVidCapSrcOpenCV::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **
             deviceinfo[0][i].platform = svlFilterSourceVideoCapture::OpenCV;
 
             // id
-            deviceinfo[0][i].id = OCVDeviceID[i];
+            deviceinfo[0][i].ID = OCVDeviceID[i];
 
             // name
             std::stringstream strstr;
@@ -331,8 +319,8 @@ int svlVidCapSrcOpenCV::Start()
         CaptureThread[i] = new osaThread;
         Running = true;
         CaptureThread[i]->Create<svlVidCapSrcOpenCVThread, svlVidCapSrcOpenCV*>(CaptureProc[i],
-                                                                      &svlVidCapSrcOpenCVThread::Proc,
-                                                                      this);
+                                                                                &svlVidCapSrcOpenCVThread::Proc,
+                                                                                this);
         if (CaptureProc[i]->WaitForInit() == false) return SVL_FAIL;
     }
 

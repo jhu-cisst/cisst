@@ -32,9 +32,9 @@ http://www.cisst.org/cisst/license.txt.
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-svlWindowWin32::svlWindowWin32(unsigned int id)
+svlWindowWin32::svlWindowWin32(unsigned int _id)
 {
-    ID = id;    
+    ID = _id;    
     hWnd = NULL;
     ClientOffsetX = 0;
     ClientOffsetY = 0;

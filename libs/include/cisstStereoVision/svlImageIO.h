@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlImageIO_h
 #define _svlImageIO_h
 
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 #include <cisstVector/vctDynamicVector.h>
 #include <string>
@@ -39,8 +40,9 @@ class cmnClassServicesBase;
 /*** svlImageCodecBase class *********/
 /*************************************/
 
-class CISST_EXPORT svlImageCodecBase
+class CISST_EXPORT svlImageCodecBase : public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
 public:
     svlImageCodecBase();
     virtual ~svlImageCodecBase();
@@ -68,6 +70,7 @@ private:
     std::string ExtensionList;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlImageCodecBase)
 
 /***********************************/
 /*** svlImageIO class **************/

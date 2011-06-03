@@ -72,6 +72,7 @@ endif (CMAKE_CL_64)
 option (BUILD_UTILITIES "Build utility programs built using cisst." ON)
 option (BUILD_TESTS "Build tests." OFF)
 option (BUILD_EXAMPLES "Build examples." OFF)
+option (BUILD_COMPONENTS "Build components." OFF)
 
 if (UNIX)
   option (BUILD_DOC "Build the documentation." OFF)
@@ -141,7 +142,6 @@ endif (LIBXML2_FOUND)
 
 if (CISST_HAS_XML)
   find_package (LibXml2 REQUIRED)
-  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES LIBXML2_INCLUDE_DIR)
   cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
 endif (CISST_HAS_XML)
 
@@ -236,6 +236,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_definitions ("${XENOMAI_DEFINITIONS}")
     # add Xenomai wrappers for pthread
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
+
   endif (CISST_HAS_LINUX_XENOMAI)
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -276,10 +278,21 @@ endif (UNIX)
 set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/libs/include
      ${cisst_SOURCE_DIR}/libs/include)
+if (BUILD_COMPONENTS)
+  set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR}
+                         ${cisst_BINARY_DIR}/components
+                         ${cisst_SOURCE_DIR}/components)
+endif (BUILD_COMPONENTS)
 include_directories (${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
 # Additional link directories
 link_directories (${CISST_ADDITIONAL_LINK_DIRECTORIES})
+
+
+# To allow mixing static and dynamic libraries
+if (CMAKE_COMPILER_IS_GNUCXX)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif (CMAKE_COMPILER_IS_GNUCXX)
 
 
 # To have more warnings with gcc
@@ -420,6 +433,10 @@ endif (BUILD_TESTS)
 if (BUILD_EXAMPLES)
   add_subdirectory (examples)
 endif (BUILD_EXAMPLES)
+
+if (BUILD_COMPONENTS)
+  add_subdirectory (components)
+endif (BUILD_COMPONENTS)
 
 if (BUILD_DOC)
   add_subdirectory (doc)

@@ -28,11 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecVfW32 class ********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecVfW32)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecVfW32, svlVideoCodecBase)
 
 svlVideoCodecVfW32::svlVideoCodecVfW32() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     Width(0),
     Height(0),
     BegPos(-1),
@@ -384,7 +383,7 @@ int svlVideoCodecVfW32::Read(svlProcInfo* procInfo, svlSampleImage &image, const
     if (!Opened || Writing) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     // Allocate image buffer if not done yet
     if (Width  != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
@@ -447,7 +446,7 @@ int svlVideoCodecVfW32::Write(svlProcInfo* procInfo, const svlSampleImage &image
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     FlipCopy(image.GetUCharPointer(videoch), comprBuffer);
 

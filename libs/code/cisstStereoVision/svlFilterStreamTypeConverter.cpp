@@ -62,24 +62,28 @@ int svlFilterStreamTypeConverter::SetType(svlStreamType inputtype, svlStreamType
 
     ///////////////////////////////////////////////////////////////////
     // Single channel image mappings:
-        if (((inputtype == svlTypeImageRGB   ||
-              inputtype == svlTypeImageRGBA  ||
-              inputtype == svlTypeImageMono8 ||
-              inputtype == svlTypeImageMono16) &&
-                 (outputtype == svlTypeImageRGB   ||
-                  outputtype == svlTypeImageRGBA  ||
-                  outputtype == svlTypeImageMono8 ||
-                  outputtype == svlTypeImageMono16))      ||
+        if (((inputtype == svlTypeImageRGB    ||
+              inputtype == svlTypeImageRGBA   ||
+              inputtype == svlTypeImageMono8  ||
+              inputtype == svlTypeImageMono16 ||
+              inputtype == svlTypeImageMono32) &&
+                 (outputtype == svlTypeImageRGB    ||
+                  outputtype == svlTypeImageRGBA   ||
+                  outputtype == svlTypeImageMono8  ||
+                  outputtype == svlTypeImageMono16 ||
+                  outputtype == svlTypeImageMono32))      ||
     ///////////////////////////////////////////////////////////////////
     // Stereo image mappings:
-            ((inputtype == svlTypeImageRGBStereo   ||
-              inputtype == svlTypeImageRGBAStereo  ||
-              inputtype == svlTypeImageMono8Stereo ||
-              inputtype == svlTypeImageMono16Stereo) &&
-                (outputtype == svlTypeImageRGBStereo   ||
-                 outputtype == svlTypeImageRGBAStereo  ||
-                 outputtype == svlTypeImageMono8Stereo ||
-                 outputtype == svlTypeImageMono16Stereo)) ||
+            ((inputtype == svlTypeImageRGBStereo    ||
+              inputtype == svlTypeImageRGBAStereo   ||
+              inputtype == svlTypeImageMono8Stereo  ||
+              inputtype == svlTypeImageMono16Stereo ||
+              inputtype == svlTypeImageMono32Stereo) &&
+                (outputtype == svlTypeImageRGBStereo    ||
+                 outputtype == svlTypeImageRGBAStereo   ||
+                 outputtype == svlTypeImageMono8Stereo  ||
+                 outputtype == svlTypeImageMono16Stereo ||
+                 outputtype == svlTypeImageMono32Stereo)) ||
     ///////////////////////////////////////////////////////////////////
     // Matrix mappings:
             ((inputtype == svlTypeMatrixInt8   ||
@@ -108,16 +112,18 @@ int svlFilterStreamTypeConverter::SetType(svlStreamType inputtype, svlStreamType
               inputtype == svlTypeMatrixUInt16 ||
               inputtype == svlTypeMatrixUInt32 ||
               inputtype == svlTypeMatrixFloat) &&
-                 (outputtype == svlTypeImageRGB   ||
-                  outputtype == svlTypeImageRGBA  ||
-                  outputtype == svlTypeImageMono8 ||
-                  outputtype == svlTypeImageMono16))      ||
+                 (outputtype == svlTypeImageRGB    ||
+                  outputtype == svlTypeImageRGBA   ||
+                  outputtype == svlTypeImageMono8  ||
+                  outputtype == svlTypeImageMono16 ||
+                  outputtype == svlTypeImageMono32))      ||
     ///////////////////////////////////////////////////////////////////
     // Image-to-matrix mappings:
-            ((inputtype == svlTypeImageRGB   ||
-              inputtype == svlTypeImageRGBA  ||
-              inputtype == svlTypeImageMono8 ||
-              inputtype == svlTypeImageMono16) &&
+            ((inputtype == svlTypeImageRGB    ||
+              inputtype == svlTypeImageRGBA   ||
+              inputtype == svlTypeImageMono8  ||
+              inputtype == svlTypeImageMono16 ||
+              inputtype == svlTypeImageMono32) &&
                  (outputtype == svlTypeMatrixInt8   ||
                   outputtype == svlTypeMatrixInt16  ||
                   outputtype == svlTypeMatrixInt32  ||
@@ -187,7 +193,7 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
             svlConverter::ConvertImage(dynamic_cast<svlSampleImage*>(syncInput),
                                        dynamic_cast<svlSampleImage*>(OutputSample),
                                        param,
-                                       procInfo->count, procInfo->id);
+                                       procInfo->count, procInfo->ID);
 
             return SVL_OK;
         }

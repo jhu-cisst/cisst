@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageSampler class *********/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageSampler)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageSampler, svlFilterBase)
 
 svlFilterImageSampler::svlFilterImageSampler() :
     svlFilterBase()
@@ -38,8 +38,12 @@ svlFilterImageSampler::svlFilterImageSampler() :
     AddInputType("input", svlTypeImageMono8Stereo);
     AddInputType("input", svlTypeImageMono16);
     AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageMono32);
+    AddInputType("input", svlTypeImageMono32Stereo);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
+    AddInputType("input", svlTypeImageRGBA);
+    AddInputType("input", svlTypeImageRGBAStereo);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
@@ -70,6 +74,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
     Release();
 
     switch (GetInput()->GetType()) {
+        case svlTypeImageMono32:
         case svlTypeImageMono16:
         case svlTypeImageMono8:
             dibhdrsize = sizeof(svlDIBHeader) + 256 * sizeof(svlRGBA);
@@ -105,6 +110,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             FileHeader[0]->bfSize = FileHeader[0]->bfOffBits + image->GetWidth() * image->GetHeight();
         break;
 
+        case svlTypeImageMono32Stereo:
         case svlTypeImageMono16Stereo:
             ImageBuffer = new svlSampleImageMono8Stereo;
             ImageBuffer->SetSize(*image);
@@ -171,6 +177,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             FileHeader[1]->bfSize = FileHeader[1]->bfOffBits + image->GetWidth(SVL_RIGHT) * image->GetHeight(SVL_RIGHT);
         break;
 
+        case svlTypeImageRGBA:
         case svlTypeImageRGB:
             ucharptr = new unsigned char[sizeof(svlDIBHeader)];
             memset(ucharptr, 0, sizeof(svlDIBHeader) * sizeof(unsigned char));
@@ -180,7 +187,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             DIBHeader[0]->biWidth = image->GetWidth();
 	        DIBHeader[0]->biHeight = -1 * static_cast<int>(image->GetHeight());
 	        DIBHeader[0]->biPlanes = 1;
-	        DIBHeader[0]->biBitCount = 24;
+	        DIBHeader[0]->biBitCount = image->GetBPP() * 8;
 	        DIBHeader[0]->biCompression = 0;
 	        DIBHeader[0]->biSizeImage = 0;
 	        DIBHeader[0]->biXPelsPerMeter = 0;
@@ -197,6 +204,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             FileHeader[0]->bfSize = FileHeader[0]->bfOffBits + image->GetDataSize();
         break;
 
+        case svlTypeImageRGBAStereo:
         case svlTypeImageRGBStereo:
             image = dynamic_cast<svlSampleImageRGBStereo*>(syncInput);
 
@@ -212,7 +220,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             DIBHeader[SVL_LEFT]->biWidth = image->GetWidth(SVL_LEFT);
 	        DIBHeader[SVL_LEFT]->biHeight = -1 * static_cast<int>(image->GetHeight(SVL_LEFT));
 	        DIBHeader[SVL_LEFT]->biPlanes = 1;
-	        DIBHeader[SVL_LEFT]->biBitCount = 24;
+	        DIBHeader[SVL_LEFT]->biBitCount = image->GetBPP() * 8;
 	        DIBHeader[SVL_LEFT]->biCompression = 0;
 	        DIBHeader[SVL_LEFT]->biSizeImage = 0;
 	        DIBHeader[SVL_LEFT]->biXPelsPerMeter = 0;
@@ -224,7 +232,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             DIBHeader[SVL_RIGHT]->biWidth = image->GetWidth(SVL_RIGHT);
 	        DIBHeader[SVL_RIGHT]->biHeight = -1 * static_cast<int>(image->GetHeight(SVL_RIGHT));
 	        DIBHeader[SVL_RIGHT]->biPlanes = 1;
-	        DIBHeader[SVL_RIGHT]->biBitCount = 24;
+	        DIBHeader[SVL_RIGHT]->biBitCount = image->GetBPP() * 8;
 	        DIBHeader[SVL_RIGHT]->biCompression = 0;
 	        DIBHeader[SVL_RIGHT]->biSizeImage = 0;
 	        DIBHeader[SVL_RIGHT]->biXPelsPerMeter = 0;
@@ -248,8 +256,6 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             FileHeader[1]->bfSize = FileHeader[1]->bfOffBits + image->GetDataSize(SVL_RIGHT);
         break;
 
-        case svlTypeImageRGBA:
-        case svlTypeImageRGBAStereo:
         case svlTypeMatrixInt8:
         case svlTypeMatrixInt16:
         case svlTypeMatrixInt32:
@@ -267,6 +273,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeBlobs:
             return SVL_INVALID_INPUT_TYPE;
     }
 
@@ -308,15 +315,37 @@ int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                 outimage = ImageBuffer;
             break;
 
+            case svlTypeImageMono32:
+                // Convert grayscale32 values to grayscale8
+                svlConverter::Gray32toGray8(reinterpret_cast<unsigned int*>(inimage->GetUCharPointer()),
+                                            ImageBuffer->GetUCharPointer(),
+                                            inimage->GetWidth() * inimage->GetHeight(),
+                                            0);
+                outimage = ImageBuffer;
+            break;
+
+            case svlTypeImageMono32Stereo:
+                // Convert grayscale32 values to grayscale8
+                svlConverter::Gray32toGray8(reinterpret_cast<unsigned int*>(inimage->GetUCharPointer(SVL_LEFT)),
+                                            ImageBuffer->GetUCharPointer(SVL_LEFT),
+                                            inimage->GetWidth(SVL_LEFT) * inimage->GetHeight(SVL_LEFT),
+                                            0);
+                svlConverter::Gray32toGray8(reinterpret_cast<unsigned int*>(inimage->GetUCharPointer(SVL_RIGHT)),
+                                            ImageBuffer->GetUCharPointer(SVL_RIGHT),
+                                            inimage->GetWidth(SVL_RIGHT) * inimage->GetHeight(SVL_RIGHT),
+                                            0);
+                outimage = ImageBuffer;
+            break;
+
             case svlTypeImageMono8:
             case svlTypeImageMono8Stereo:
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
+            case svlTypeImageRGBA:
+            case svlTypeImageRGBAStereo:
                 outimage = dynamic_cast<svlSampleImage*>(syncInput);
             break;
 
-            case svlTypeImageRGBA:
-            case svlTypeImageRGBAStereo:
             case svlTypeMatrixInt8:
             case svlTypeMatrixInt16:
             case svlTypeMatrixInt32:
@@ -334,6 +363,7 @@ int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeBlobs:
                 return SVL_INVALID_INPUT_TYPE;
         }
 

@@ -93,7 +93,7 @@ public:
         , LCM_CONFIG_NETWORKED
         // Networked mode with global component manager: basically identical to
         // LCM_CONFIG_NETWORKED configuration except that LCM runs with the
-        // global component manager on a same process.
+        // global component manager on the same process.
         , LCM_CONFIG_NETWORKED_WITH_GCM
 #endif
     };
@@ -302,7 +302,8 @@ public:
     //  Component Management
     //-------------------------------------------------------------------------
     /*! \brief Create a component.  Does not add it to the local component manager. */
-    mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName);
+    mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName,
+                                              const std::string & constructorArgSerialized);
 
     /*! \brief Add a component to this local component manager.
         \param component Component instance to be added */

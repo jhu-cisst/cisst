@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageRectifier class ********/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageRectifier)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageRectifier, svlFilterBase)
 
 svlFilterImageRectifier::svlFilterImageRectifier() :
     svlFilterBase(),

@@ -22,7 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _displayTask_h
 #define _displayTask_h
 
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsComponentGeneratorMacros.h>
+
 #include "displayUI.h"
 
 class displayTask: public mtsTaskPeriodic {

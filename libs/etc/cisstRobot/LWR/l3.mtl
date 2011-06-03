@@ -1,0 +1,17 @@
+# Blender3D MTL File: 
+# Material Count: 2
+newmtl silver_005
+	Ns 100
+	d 1
+	illum 2
+	Kd 0.74902 0.74902 0.74902
+	Ks 0.74902 0.74902 0.74902
+	Ka 0.375978 0.375978 0.375978
+
+newmtl orange_005
+	Ns 100
+	d 1
+	illum 2
+	Kd 0.921569 0.521569 0.184314
+	Ks 1 0.565957 0.2
+	Ka 0.458824 0.259675 0.0917647

@@ -76,6 +76,7 @@ typedef short cmnLogMask;
 #define CMN_LOG_ALLOW_ALL                 0xFF // 11111111
 #define CMN_LOG_ALLOW_DEFAULT CMN_LOG_ALLOW_ERRORS_AND_WARNINGS
 
+#ifndef SWIG
 /*! Values used to represent the different level of details associated
   to messages and filters used in cmnLogger.  The higher the value the
   less important the message is.  Lower values are used for the
@@ -97,6 +98,7 @@ typedef short cmnLogMask;
 #define CMN_LOG_LOD_VERY_VERBOSE CMN_LOG_LOD_RUN_DEBUG
 #define CMN_LOG_DEFAULT_LOD      CMN_LOG_ALLOW_ERRORS_AND_WARNINGS
 //@}
+#endif
 
 /*! Convert a log level to an index.  The index value will be between
   0 and 8 (included).  This can be used to list all possible levels

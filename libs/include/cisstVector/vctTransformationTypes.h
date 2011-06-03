@@ -35,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctRodriguezRotation3.h>
 #include <cisstVector/vctQuaternionRotation3.h>
 #include <cisstVector/vctMatrixRotation3.h>
+#include <cisstVector/vctEulerRotation3.h>
 #include <cisstVector/vctAngleRotation2.h>
 #include <cisstVector/vctMatrixRotation2.h>
 #include <cisstVector/vctFrameBase.h>
@@ -98,6 +99,7 @@ typedef vctRodriguezRotation3<double> vctRodRot3;
 typedef vctRodriguezRotation3<float> vctFloatRodRot3;
 //@}
 
+// Euler angle typedefs are in vctEulerRotation3.h
 
 /*! Define a rotation in dimension 3 using a 3 by 3 matrix of
   doubles. */

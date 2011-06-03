@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceDummy class ******/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceDummy)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceDummy, svlFilterSourceBase)
 
 svlFilterSourceDummy::svlFilterSourceDummy() :
     svlFilterSourceBase(),

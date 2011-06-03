@@ -71,6 +71,88 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_SVL_HAS_OPENCV2
 
 
+#pragma pack(1)
+
+/////////////////////////////////
+// Image structure definitions //
+/////////////////////////////////
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
+struct CISST_EXPORT svlBMPFileHeader
+{
+    unsigned short bfType;
+    unsigned int bfSize;
+    unsigned short bfReserved1;
+    unsigned short bfReserved2;
+    unsigned int bfOffBits;
+};
+
+struct CISST_EXPORT svlDIBHeader
+{
+    unsigned int biSize;
+    int biWidth;
+    int biHeight;
+    unsigned short biPlanes;
+    unsigned short biBitCount;
+    unsigned int biCompression;
+    unsigned int biSizeImage;
+    int biXPelsPerMeter;
+    int biYPelsPerMeter;
+    unsigned int biClrUsed;
+    unsigned int biClrImportant;
+};
+
+struct CISST_EXPORT svlRGB
+{
+    svlRGB();
+    svlRGB(unsigned char r, unsigned char g, unsigned char b);
+    void Assign(const svlRGB & color);
+    void Assign(unsigned char r, unsigned char g, unsigned char b);
+
+    unsigned char b;
+    unsigned char g;
+    unsigned char r;
+};
+
+struct CISST_EXPORT svlRGBA
+{
+    svlRGBA();
+    svlRGBA(const svlRGB & rgb, unsigned char a);
+    svlRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+    void Assign(const svlRGBA & color);
+    void Assign(const svlRGB & rgb, unsigned char a);
+    void Assign(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+
+    unsigned char b;
+    unsigned char g;
+    unsigned char r;
+    unsigned char a;
+};
+
+struct CISST_EXPORT svlBlob
+{
+    svlBlob();
+    void Assign(const svlBlob & blob);
+
+    unsigned int ID;
+    bool         used;
+    int          left;
+    int          right;
+    int          top;
+    int          bottom;
+    int          center_x;
+    int          center_y;
+    unsigned int area;
+    unsigned int circumference;
+    unsigned int label;
+};
+
+
+#pragma pack()
+
+
 #include <cisstStereoVision/svlSample.h>
 #include <cisstStereoVision/svlSampleImage.h>
 #include <cisstStereoVision/svlSampleImageCustom.h>
@@ -81,6 +163,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlSampleTransform3D.h>
 #include <cisstStereoVision/svlSampleTargets.h>
 #include <cisstStereoVision/svlSampleText.h>
+#include <cisstStereoVision/svlSampleBlobs.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -139,7 +222,7 @@ struct CISST_EXPORT svlPoint2D
     svlPoint2D(int x, int y);
     void Assign(const svlPoint2D & point);
     void Assign(int x, int y);
-    
+
     int x;
     int y;
 };
@@ -156,67 +239,13 @@ struct CISST_EXPORT svlTarget2D
     void Assign(bool used, bool visible, unsigned char conf, svlPoint2D & pos);
     void Assign(int x, int y);
     void Assign(svlPoint2D & pos);
-    
+
     bool          used;
     bool          visible;
     unsigned char conf;
     svlPoint2D    pos;
-};
-
-
-/////////////////////////////////
-// Image structure definitions //
-/////////////////////////////////
-
-struct CISST_EXPORT svlBMPFileHeader
-{
-    unsigned short bfType;
-    unsigned int bfSize;
-    unsigned short bfReserved1;
-    unsigned short bfReserved2;
-    unsigned int bfOffBits;
-};
-
-struct CISST_EXPORT svlDIBHeader
-{
-    unsigned int biSize;
-    int biWidth;
-    int biHeight;
-    unsigned short biPlanes;
-    unsigned short biBitCount;
-    unsigned int biCompression;
-    unsigned int biSizeImage;
-    int biXPelsPerMeter;
-    int biYPelsPerMeter;
-    unsigned int biClrUsed;
-    unsigned int biClrImportant;
-};
-
-struct CISST_EXPORT svlRGB
-{
-    svlRGB();
-    svlRGB(unsigned char r, unsigned char g, unsigned char b);
-    void Assign(const svlRGB & color);
-    void Assign(unsigned char r, unsigned char g, unsigned char b);
-
-    unsigned char b;
-    unsigned char g;
-    unsigned char r;
-};
-
-struct CISST_EXPORT svlRGBA
-{
-    svlRGBA();
-    svlRGBA(const svlRGB & rgb, unsigned char a);
-    svlRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-    void Assign(const svlRGBA & color);
-    void Assign(const svlRGB & rgb, unsigned char a);
-    void Assign(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-
-    unsigned char b;
-    unsigned char g;
-    unsigned char r;
-    unsigned char a;
+    int           feature_quality;
+    vctDynamicVector<unsigned char> feature_data;
 };
 
 #pragma pack()

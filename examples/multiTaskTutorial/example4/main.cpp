@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     taskManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
     taskManager->Connect("DISP", "Clock", "CLOC", "MainInterface");
 
-    ireTask *ire = new ireTask("IRE", "from example4 import *");
+    ireTask *ire = new ireTask("IRE", IRE_WXPYTHON, "from example4 import *");
     taskManager->AddComponent(ire);
 
     // create and add Component Viewer

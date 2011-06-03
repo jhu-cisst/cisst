@@ -223,8 +223,8 @@ public:
 
     /* documented in base class */
     mtsExecutionResult Execute(const mtsGenericObject & argument, mtsGenericObject & result) {
-        return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::YES,
-                               cmnIsDerivedFromTemplated<ResultType, mtsGenericObjectProxy>::YES>
+        return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::IS_DERIVED,
+                               cmnIsDerivedFromTemplated<ResultType, mtsGenericObjectProxy>::IS_DERIVED>
             ::CallMethod(ClassInstantiation, Action, argument, result);
     }
 

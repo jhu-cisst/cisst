@@ -3,13 +3,14 @@
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
-#include <cisstCommon/cmnGetChar.h>
-
-#include <cisstMultiTask/mtsTaskManager.h>
 
 #include <cisstCommon/cmnGetChar.h>
 
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -24,7 +25,7 @@ int main(){
   devOSGStereo* stereocam=new devOSGStereo( "stereo",
 					    world,
 					    x, y, width, height,
-					    55, ((double)width)/((double)height),
+					    55,((double)width)/((double)height),
 					    Znear, Zfar,
 					    baseline );
   // Add the camera component
@@ -46,20 +47,8 @@ int main(){
   taskManager->CreateAll();
   taskManager->StartAll();
 
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
-
-  // The next block reads and saves OpenCV images and save them to disk
-#if CISST_DEV_HAS_OPENCV22
-  vctDynamicMatrix<double> range = stereocam->GetRangeData( 0 );
-
-  cv::Mat leftrgb = stereocam->GetRGBImage( 0 );
-  cv::imwrite( "LEFTrgb.bmp", leftrgb );
-
-  cv::Mat rightrgb = stereocam->GetRGBImage( 1 );
-  cv::imwrite( "RIGHTrgb.bmp", rightrgb );
-  
-  cmnGetChar();
-#endif
 
   // Kill everything
   taskManager->KillAll();

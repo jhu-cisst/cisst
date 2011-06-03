@@ -23,6 +23,7 @@
 #ifndef _svlImageCodecInitializer_h
 #define _svlImageCodecInitializer_h
 
+#include "svlInitializerMacros.h"
 
 void svlInitializeImageCodecs();
 

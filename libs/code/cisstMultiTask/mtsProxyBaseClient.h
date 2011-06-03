@@ -62,7 +62,7 @@ protected:
     virtual void CreateProxy(void) = 0;
 
     /*! Called whenever server disconnection is detected */
-    virtual bool OnServerDisconnect(const Ice::Exception & ex) = 0;
+    virtual void OnServerDisconnect(const Ice::Exception & ex) = 0;
 
     /*! Remove ICE proxy client object */
     virtual void RemoveProxy(void) = 0;

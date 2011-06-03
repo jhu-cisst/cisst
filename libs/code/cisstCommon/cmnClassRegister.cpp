@@ -69,10 +69,12 @@ std::string cmnClassRegister::ToStringInstance(void) const {
 
 bool cmnClassRegister::SetLogMaskClass(const std::string & name, cmnLogMask mask)
 {
+    bool result = false;
     // see if class is registered.  If so, copy preferences (lod)
     cmnClassServicesBase* classServicesPointer = FindClassServices(name);
     if (classServicesPointer != NULL) {
         classServicesPointer->SetLogMask(mask);
+        result = true;
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLogMask: class \"" << classServicesPointer->GetName()
                              << "\" log mask has been set to \""
                              << cmnLogMaskToString(mask) << "\"" << std::endl;
@@ -81,7 +83,7 @@ bool cmnClassRegister::SetLogMaskClass(const std::string & name, cmnLogMask mask
         CMN_LOG_INIT_WARNING << "Class cmnClassRegister: SetLogMask: class \"" << name
                              << "\" is not registered (yet?) " << std::endl;
     }
-    return false;
+    return result;
 }
 
 

@@ -4,23 +4,23 @@
 const std::string devManipulator::Input  = "Input";
 const std::string devManipulator::Output = "Output";
 
-const std::string devManipulator::SetMode = "SetMode";
+const std::string devManipulator::SetInputMode = "SetInputMode";
 
 devManipulator::devManipulator( const std::string& name, 
 				double period,
 				devManipulator::State state,
 				osaCPUMask cpumask,
-				devManipulator::Mode mode ) : 
+				devManipulator::Mode inputmode ) : 
   devRobotComponent( name, period, state, cpumask ),
-  mtsMode( mode ){
+  mtsInputMode( inputmode ){
 
   // Create the control interface
-  mtsInterfaceProvided* cinterface;
-  cinterface = GetInterfaceProvided( devRobotComponent::Control );
-  if( cinterface ){
-    StateTable.AddData( mtsMode, "Mode" );
-    cinterface->AddCommandWriteState
-      ( StateTable, mtsMode, devManipulator::SetMode );
+  mtsInterfaceProvided* controlinterface;
+  controlinterface = GetInterfaceProvided( devRobotComponent::Control );
+  if( controlinterface != NULL ){
+    controlinterface->AddCommandWrite( &devManipulator::SetInputModeCommand,
+				       this,
+				       devManipulator::SetInputMode );
   }
   else{
     CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -30,9 +30,39 @@ devManipulator::devManipulator( const std::string& name,
  
 }
 
-devManipulator::Mode devManipulator::GetMode(){
-  int tmpMode = mtsMode;
-  switch( tmpMode ){
+void devManipulator::SetInputModeCommand(const int& inputmode){
+
+  switch( devManipulator::Mode( inputmode ) ){
+  case devManipulator::POSITION:
+    SetPositionInputMode();
+    break;
+  case devManipulator::VELOCITY:
+    SetVelocityInputMode();
+    break;
+  case devManipulator::FORCETORQUE:
+    SetForceTorqueInputMode();
+    break;
+  default:
+    break;
+  }
+
+}
+
+//! Set the manipulator in position mode
+void devManipulator::SetPositionInputMode() 
+{ mtsInputMode = devManipulator::POSITION; }
+
+//! Set the manipulator in position mode
+void devManipulator::SetVelocityInputMode()
+{ mtsInputMode = devManipulator::VELOCITY; }
+
+//! Set the manipulator in force/torque mode
+void devManipulator::SetForceTorqueInputMode()
+{ mtsInputMode = devManipulator::FORCETORQUE; }
+
+devManipulator::Mode devManipulator::GetInputMode(){
+  int mode = mtsInputMode;
+  switch( mode ){
   case devManipulator::POSITION:     return devManipulator::POSITION;
   case devManipulator::VELOCITY:     return devManipulator::VELOCITY;
   case devManipulator::FORCETORQUE:  return devManipulator::FORCETORQUE;

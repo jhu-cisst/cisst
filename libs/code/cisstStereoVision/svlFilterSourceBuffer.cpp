@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceBuffer class *****/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceBuffer)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceBuffer, svlFilterSourceBase)
 
 svlFilterSourceBuffer::svlFilterSourceBuffer() :
     svlFilterSourceBase(),

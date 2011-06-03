@@ -157,10 +157,16 @@ protected:
     {
     private:
         const _SenderType Sender;
+        bool CanSend;
 
     public:
-        SenderThread(const _SenderType& sender) : Sender(sender) {}
-        virtual void run() { Sender->Run(); }
+        SenderThread(const _SenderType& sender) : Sender(sender), CanSend(true) {}
+        virtual void run() { 
+            if (CanSend) Sender->Run(); 
+        }
+        void StopSend(void) {
+            CanSend = false;
+        }
     };
 
     /*! Mutex to change proxy state */

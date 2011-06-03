@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <qedit.h>
 
 
-class svlVideoCodecDirectShow : public svlVideoCodecBase, public cmnGenericObject
+class svlVideoCodecDirectShow : public svlVideoCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

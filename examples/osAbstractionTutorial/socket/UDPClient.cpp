@@ -18,8 +18,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
+#include <cisstCommon/cmnLogger.h>
+#include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaSocket.h>
 
 int main(void)
 {

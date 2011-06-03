@@ -22,12 +22,21 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _sineTask_h
 #define _sineTask_h
 
-// include for the whole cisstMultiTask library
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsComponentGeneratorMacros.h>
 
-class sineTask: public mtsTaskPeriodic {
+// check if this module is built as a DLL
+#ifdef cisstMultiTaskPeriodicTaskComponents_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
+#include <cisstCommon/cmnExportMacros.h>
+
+// avoid impact on other modules
+#undef CISST_THIS_LIBRARY_AS_DLL
+
+class CISST_EXPORT sineTask: public mtsTaskPeriodic {
     // used to control the log level, "Run Error" by default
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
  protected:
 
     // macros used by the cisst component generator
@@ -66,6 +75,7 @@ class sineTask: public mtsTaskPeriodic {
     // interval between calls to the periodic Run).  Also used to
     // populate the interface(s)
     sineTask(const std::string & taskName, double period);
+    sineTask(const mtsTaskPeriodicConstructorArg &arg);
     ~sineTask() {};
     // all four methods are pure virtual in mtsTask
     void Configure(const std::string & CMN_UNUSED(filename)) {};

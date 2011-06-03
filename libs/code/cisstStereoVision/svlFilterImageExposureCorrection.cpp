@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageExposureCorrection class ***/
 /**********************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageExposureCorrection)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageExposureCorrection, svlFilterBase)
 
 svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
     svlFilterBase(),
@@ -50,6 +50,8 @@ svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
 // Might be added in the future
 //    AddInputType("input", svlTypeImageMono16);
 //    AddInputType("input", svlTypeImageMono16Stereo);
+//    AddInputType("input", svlTypeImageMono32);
+//    AddInputType("input", svlTypeImageMono32Stereo);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);

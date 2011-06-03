@@ -63,6 +63,7 @@ protected:
         value = function object set instance) */
     typedef struct {
         mtsFunctionWrite ComponentCreate;
+        mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
@@ -71,6 +72,8 @@ protected:
         mtsFunctionQualifiedRead ComponentGetState;
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
+        mtsFunctionQualifiedRead LoadLibrary;
+        mtsFunctionRead GetListOfComponentClasses;
     } InterfaceGCMFunctionType;
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
@@ -95,6 +98,7 @@ public:
 
     /*! Commands */
     void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
@@ -108,6 +112,9 @@ public:
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
     void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, InterfaceProvidedDescription & description) const;
     void InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, InterfaceRequiredDescription & description) const;
+    void InterfaceGCMCommands_LoadLibrary(const mtsDescriptionLoadLibrary & lib, bool & result) const;
+    void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName, 
+                                                        std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
 
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;

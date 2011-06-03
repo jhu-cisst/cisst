@@ -186,7 +186,7 @@ void svlVidCapSrcDC1394Context::Enumerate()
         else strcpy(tempvendor, "Unknown device vendor");
 
         // Fill device properties structure
-        tempinfo[NumberOfCameras].id = i;
+        tempinfo[NumberOfCameras].ID = i;
         if (BestOpMode[i] == DC1394_OPERATION_MODE_1394B) {
             sprintf(tempinfo[NumberOfCameras].name, "%s (%s) [1394B]", tempname, tempvendor);
         }
@@ -373,11 +373,10 @@ svlVidCapSrcDC1394Context::~svlVidCapSrcDC1394Context()
 /*** svlVidCapSrcDC1394 class ********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcDC1394)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcDC1394, svlVidCapSrcBase)
 
 svlVidCapSrcDC1394::svlVidCapSrcDC1394() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

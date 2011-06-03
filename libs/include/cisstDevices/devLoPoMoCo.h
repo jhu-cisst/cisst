@@ -26,8 +26,10 @@
 #ifndef _devLoPoMoCo_h
 #define _devLoPoMoCo_h
 
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsVector.h>
+
 #include <cisstDevices/devConfig.h>
-#include <cisstMultiTask.h>
 #include <vector>
 #include <string>
 #include <ostream>
@@ -122,7 +124,7 @@ public:
 
     /*! Number of axis per board */
     enum {NB_AXIS = 4};
- 
+
 	/*! Constructor. Prepares the maps. */
 	devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoards);
 

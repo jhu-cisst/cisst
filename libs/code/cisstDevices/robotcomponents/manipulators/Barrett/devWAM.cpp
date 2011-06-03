@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 using namespace std;
 
-//CMN_IMPLEMENT_SERVICES(devWAM);
-
 const std::string devWAM::OutputInterface = "WAMOutputInterface";
 const std::string devWAM::Output          = "WAMOutput";
 
@@ -33,17 +31,21 @@ devWAM::devWAM( const std::string& taskname,
 		osaCPUMask mask,
 		devCAN* candev, 
 		const vctDynamicVector<double>& qinit ) :
-  devManipulator( taskname, period, devManipulator::ENABLED, mask, devManipulator::FORCETORQUE ),
+  devManipulator( taskname, 
+		  period, 
+		  devManipulator::ENABLED, mask, 
+		  devManipulator::FORCETORQUE ),
   input( NULL ),
   output( NULL ),
   qinit( qinit ),
   q( qinit ){
 
+
   // only 4 or 7 pucks are allowed
   if( qinit.size() != 4 && qinit.size() != 7 ){
     CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-		       << ": Expected 4 or 7 pucks. Got " << qinit.size()
-		       << std::endl;
+			     << ": Expected 4 or 7 pucks. Got " << qinit.size()
+			     << std::endl;
     exit(-1);
   }
 
@@ -89,8 +91,8 @@ void devWAM::Configure( const std::string& ){
   CMN_LOG_INIT_VERBOSE << "Opening the CAN device." << std::endl;
   if( candev->Open() != devCAN::ESUCCESS ){
     CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-		       << ": Failed to open the CAN device. Exiting."
-		       << std::endl;
+			     << ": Failed to open the CAN device. Exiting."
+			     << std::endl;
     exit(-1);
   }
   CMN_LOG_INIT_VERBOSE << "The CAN device is opened." << std::endl;
@@ -335,6 +337,7 @@ void devWAM::Configure( const std::string& ){
   //
   SendPositions( qinit );
   input->SetPosition( qinit );
+
 }
 
 
@@ -504,6 +507,7 @@ void devWAM::Read(){
 }
 
 devWAM::Errno devWAM::QueryPositions(){
+
   // Query all the motor (broadcast group)
   if( groups[ devGroup::UPPERARM_POSITION ].GetProperty( devProperty::POS ) 
       != devGroup::ESUCCESS ){
@@ -578,7 +582,7 @@ devWAM::Errno devWAM::RecvPositions( vctDynamicVector<double>& jq ){
 }
 
 void devWAM::Write(){
-  
+
   switch( GetMode() ){
    
   case devManipulator::FORCETORQUE:
@@ -593,12 +597,8 @@ void devWAM::Write(){
   case devManipulator::POSITION:
     {
       double t;
-      static double q7 = 0.0;
-      q7 += 0.0001;
       vctDynamicVector<double> q;
       input->GetPosition( q, t );
-      q[0] = q7;
-      //std::cout << "Qin: " << q << std::endl;
       SendPositions( q );
     }
     break;
@@ -607,7 +607,6 @@ void devWAM::Write(){
   case devManipulator::IDLE:
     {
       vctDynamicVector<double> jt( pucks.size(), 0.0 );
-      //std::cout << "I: " << jt << std::endl;
       SendTorques( jt );
     }
     break;
@@ -617,7 +616,7 @@ void devWAM::Write(){
 
 // Send joint torques
 devWAM::Errno devWAM::SendTorques( const vctDynamicVector<double>& jt ){
-  
+
   if( jt.size() != pucks.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected " << pucks.size() << " joint torques. "
@@ -631,7 +630,6 @@ devWAM::Errno devWAM::SendTorques( const vctDynamicVector<double>& jt ){
 
   // Is the upperarm group empty?
   if( !groups[devGroup::UPPERARM].Empty() ){
-
     // TODO: this block should be in devGroup
 
     // copy the first 4 torques in a 4 array
@@ -768,39 +766,3 @@ vctDynamicVector<double>
 devWAM::JointsTrq2MotorsTrq( const vctDynamicVector<double>& jt )
 {  return jtrq2mtrq*jt;  }
 
-  /*
-  if( firsttime ){
-
-    vctDynamicVector<double> jt(7, 0.0);
-    std::cout << jt << std::endl;
-    //SendTorques( jt );
-    firsttime = false;
-
-    switch( GetMode() ){
-    case devManipulator::FORCETORQUE:
-      SetPucksMode( devPuck::MODE_TORQUE );
-      break;
-    case devManipulator::POSITION:
-      SetPucksMode( devPuck::MODE_POSITION );
-      break;
-    }
-
-
-  }
-  */
-  //else{
-  //devProperty::Value val;
-  //pucks[0].GetProperty( devProperty::MODE, val );
-  //std::cout << val << std::endl;
-  /*(
-  if( GetMode() == devManipulator::POSITION && val == devPuck::MODE_TORQUE){
-
-    SetPucksMode( devPuck::MODE_POSITION );
-
-	for( int i=0; i<7; i++ ){
-	  pucks[i].GetProperty( devProperty::MODE, val );
-	  std::cout << val << " ";
-	}
-	std::cout << std::endl;
-      }
-  */

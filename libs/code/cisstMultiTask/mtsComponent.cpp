@@ -593,7 +593,6 @@ const mtsInterfaceProvidedOrOutput * mtsComponent::GetInterfaceProvidedOrOutputF
 
 #if 0  // Obsolete
 // PK: Following code is obsolete -- connections should be made in mtsManagerComponentClient
-// Right now, this is only used for input/output interfaces.
 // In retrospect, maybe it was not a good idea to combine Required/Input and Provided/Output interfaces.
 bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                                    mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)

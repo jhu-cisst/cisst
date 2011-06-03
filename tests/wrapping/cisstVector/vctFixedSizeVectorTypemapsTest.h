@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
  TODO       todo
 ********************************/
 
-#include <cisstVector.h>
 #include <iostream>
 
 template <class _elementType, vct::size_type _size>

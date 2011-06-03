@@ -33,6 +33,7 @@ class cmnTypeTraitsTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestFloatingPointsFloat);
     CPPUNIT_TEST(TestNonFloatingPointsInt);
     CPPUNIT_TEST(TestNonFloatingPointsChar);
+    CPPUNIT_TEST(TestIsDerivedFrom);
     CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -54,6 +55,8 @@ class cmnTypeTraitsTest : public CppUnit::TestFixture
     void TestNonFloatingPointsInt(void);
     void TestNonFloatingPointsChar(void);
 
+    /*! Test for cmnIsDerivedFrom */
+    void TestIsDerivedFrom(void);
 };
 
 

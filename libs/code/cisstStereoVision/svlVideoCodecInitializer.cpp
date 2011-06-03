@@ -24,6 +24,7 @@
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstStereoVision/svlVideoIO.h>
 #include "svlVideoCodecInitializer.h"
 
 #if (CISST_OS == CISST_WINDOWS)
@@ -35,29 +36,37 @@
 #include "svlVideoCodecTCPStream.h"
 #endif // CISST_SVL_HAS_ZLIB
 
+#if CISST_SVL_HAS_FFMPEG
+#include "svlVideoCodecFFMPEG.h"
+#endif // CISST_SVL_HAS_FFMPEG
+/*
 #if CISST_SVL_HAS_OPENCV
 #include "svlVideoCodecOpenCV.h"
 #endif // CISST_SVL_HAS_OPENCV
-
+*/
 
 void svlInitializeVideoCodecs()
 {
 #ifdef _svlVideoCodecVfW32_h
-    delete new svlVideoCodecVfW32;
+    SVL_INITIALIZE(svlVideoCodecVfW32);
 #endif // _svlVideoCodecVfW32_h
 
 #ifdef _svlVideoCodecCVI_h
-    delete new svlVideoCodecCVI;
+    SVL_INITIALIZE(svlVideoCodecCVI);
 #endif // _svlVideoCodecCVI_h
 
 #ifdef _svlVideoCodecTCPStream_h
-    delete new svlVideoCodecTCPStream;
+    SVL_INITIALIZE(svlVideoCodecTCPStream);
 #endif // _svlVideoCodecTCPStream_h
-    
-#ifdef _svlVideoCodecOpenCV_h
-    delete new svlVideoCodecOpenCV;
-#endif // _svlVideoCodecOpenCV_h
 
+#if CISST_SVL_HAS_FFMPEG
+    SVL_INITIALIZE(svlVideoCodecFFMPEG);
+#endif // CISST_SVL_HAS_FFMPEG
+/*
+#ifdef _svlVideoCodecOpenCV_h
+    SVL_INITIALIZE(svlVideoCodecOpenCV);
+#endif // _svlVideoCodecOpenCV_h
+*/
     // Create svlVideoIO singleton object
     svlVideoIO::GetInstance();
 }

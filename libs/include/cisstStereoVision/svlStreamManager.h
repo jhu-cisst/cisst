@@ -61,6 +61,11 @@ public:
     int WaitForStop(double timeout = -1.0);
     int GetStreamStatus(void) const;
 
+    // Virtual methods from mtsComponent (these are temporary measures until 
+    // ticket #67 is resolved)
+    void Start(void) { Play(); }
+    void Suspend(void) { Stop(); }
+
 private:
     unsigned int ThreadCount;
     vctDynamicVector<svlStreamProc*> StreamProcInstance;

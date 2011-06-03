@@ -132,30 +132,28 @@ class CISST_EXPORT cmnTokenizer
     }
 
 
-    /*! Return the number of tokens stored. */
-    size_type GetNumTokens(void) const
-    {
+    /*! Return the number of tokens stored. Note that the last token is a NULL. */
+    size_type GetNumTokens(void) const {
         return Tokens.size();
     }
 
+    /*! Return the specified token.
+        \param num the token number (0..GetNumTokens())
+        \returns pointer to token string (0 if not valid)
+    */
+    const char * GetToken(size_type num) const;
 
     /*!
       Return the array of tokens in an argv fashion.
-      
+
       \note This parsing returns exactly the tokens in the input
       string.  For an argv-style set of argument, one needs to have
       the "name of the program" argument in index 0, and the arguments
       starting at index 1.  Use the method GetArgvTokens() for
       that.
     */
-    const char * const * GetTokensArray(void) const
-    {
-        if (Tokens.empty()) {
-            return 0;
-        }
-        return &(Tokens[0]);
-    }
-    
+    const char * const * GetTokensArray(void) const;
+
     /*! This method will fill the input vector with the tokens, but
       first set the 0-index element to NULL, to follow the argv
       convention, where argv[0] contains the "name of the program". */

@@ -79,6 +79,7 @@ set(HEADER_FILES
 
 # Conditional inclusion of cmnXMLPath in the cisstCommon project.
 if (CISST_HAS_XML)
+  include_directories (${LIBXML2_INCLUDE_DIR})
   set (SOURCE_FILES ${SOURCE_FILES} cmnXMLPath.cpp)
   set (HEADER_FILES ${HEADER_FILES} cmnXMLPath.h)
 endif (CISST_HAS_XML)

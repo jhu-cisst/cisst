@@ -74,7 +74,7 @@ private:
 
     // Internals that are OS-dependent in some way
     enum {INTERNALS_SIZE = 16};
-    char Internals[INTERNALS_SIZE];
+    char* Internals;
 
     // Return the size of the actual object used by the OS.
     // This is used for testing only.

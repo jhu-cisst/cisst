@@ -88,7 +88,9 @@ void svlFilterSourceVideoCapture::Config::SetChannels(const int channels)
 /*** svlFilterSourceVideoCapture class *****/
 /*******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoCapture)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoCapture, svlFilterSourceBase)
+CMN_IMPLEMENT_SERVICES(svlVidCapSrcBase)
+
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Config)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_DeviceList)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_FormatList)
@@ -498,7 +500,7 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
 
         // Avoid infinite recursion by skipping self
         if ((*iter).first != "svlFilterSourceVideoCapture" &&
-            (*iter).second) {
+            (*iter).second && (*iter).second->IsDerivedFrom<svlVidCapSrcBase>()) {
 
             // Most device objects can be created dynamically
             go = (*iter).second->Create();
@@ -555,7 +557,7 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
 
             if (EnumeratedDevices[DeviceID[i]].platform == APIPlatforms[j]) {
                 // getting API specific device and channel IDs
-                APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
+                APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].ID;
                 APIChannelID[i] = chperapi[j];
 
                 API[i] = j;
@@ -668,6 +670,7 @@ int svlFilterSourceVideoCapture::DialogDevice()
 
     std::cout << std::endl << " # Enter device ID: ";
     std::cin >> deviceid;
+    std::cin.ignore();
     if (deviceid < 0) deviceid = 0;
     if (deviceid >= listsize) deviceid = listsize - 1;
 
@@ -687,6 +690,7 @@ int svlFilterSourceVideoCapture::DialogInput(unsigned int deviceid)
     if (listsize > 0) {
         std::cout << std::endl << "  # Enter input ID: ";
         std::cin >> inputid;
+        std::cin.ignore();
         if (inputid < 0) inputid = 0;
         if (inputid >= listsize) inputid = listsize - 1;
     }
@@ -724,7 +728,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
         // Create temporary DirectShow capture module and initialize it
         svlVidCapSrcDirectShow device;
         device.SetStreamCount(1);
-        if (device.SetDevice(EnumeratedDevices[DeviceID[videoch]].id,
+        if (device.SetDevice(EnumeratedDevices[DeviceID[videoch]].ID,
                              InputID[videoch]) != SVL_OK) return SVL_VCS_UNABLE_TO_OPEN;
         // If device properties are already available, load them up to the device
         if (DevSpecConfigBuffer[videoch] && DevSpecConfigBufferSize[videoch] > 0) {
@@ -776,7 +780,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 if (std::cin.gcount() > 1) roiwidth = atoi(input);
                 else roiwidth = defaultval;
                 std::cout << "    ROI width = " << roiwidth << std::endl;
-                if (roiwidth < 1 || roiwidth >= static_cast<int>(formats[formatid].custom_maxwidth)) {
+                if (roiwidth < 1 || roiwidth > static_cast<int>(formats[formatid].custom_maxwidth)) {
                     std::cout << "  -!- Invalid ROI width" << std::endl;
                     return SVL_FAIL;
                 }
@@ -789,7 +793,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 if (std::cin.gcount() > 1) roiheight = atoi(input);
                 else roiheight = defaultval;
                 std::cout << "    ROI height = " << roiheight << std::endl;
-                if (roiheight < 1 || roiheight >= static_cast<int>(formats[formatid].custom_maxheight)) {
+                if (roiheight < 1 || roiheight > static_cast<int>(formats[formatid].custom_maxheight)) {
                     std::cout << "  -!- Invalid ROI height" << std::endl;
                     return SVL_FAIL;
                 }
@@ -802,7 +806,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 if (std::cin.gcount() > 1) roileft = atoi(input);
                 else roileft = defaultval;
                 std::cout << "    ROI left = " << roileft << std::endl;
-                if (roileft < 0 || roileft >= (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
+                if (roileft < 0 || roileft > (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
                     std::cout << "  -!- Invalid ROI left" << std::endl;
                     return SVL_FAIL;
                 }
@@ -815,7 +819,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 if (std::cin.gcount() > 1) roitop = atoi(input);
                 else roitop = defaultval;
                 std::cout << "    ROI top = " << roitop << std::endl;
-                if (roitop < 0 || roitop >= (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
+                if (roitop < 0 || roitop > (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
                     std::cout << "  -!- Invalid ROI top" << std::endl;
                     return SVL_FAIL;
                 }
@@ -830,7 +834,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                     return SVL_FAIL;
                 }
 
-                defaultval = -1;
+                defaultval = 0;
                 std::cout << "  == Select color space ==" << std::endl;
                 for (i = 0; i < PixelTypeCount && formats[formatid].custom_colorspaces[i] != PixelUnknown; i ++) {
                     std::cout << "  " << i << ") " << GetPixelTypeName(formats[formatid].custom_colorspaces[i]) << std::endl;
@@ -979,8 +983,8 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
         proc = new svlVidCapSrcDialogThread(videoch);
         thread = new osaThread;
         thread->Create<svlVidCapSrcDialogThread, svlFilterSourceVideoCapture*>(proc,
-                                                                                  &svlVidCapSrcDialogThread::Proc,
-                                                                                  this);
+                                                                               &svlVidCapSrcDialogThread::Proc,
+                                                                               this);
         if (proc->WaitForInit()) {
             GetImageProperties(videoch);
 

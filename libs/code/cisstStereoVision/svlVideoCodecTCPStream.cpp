@@ -96,11 +96,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecTCPStream class ****/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecTCPStream)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecTCPStream, svlVideoCodecBase)
 
 svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     CodecName("CISST Video Stream over TCP/IP"),
     FrameStartMarker("\r\nFrame\r\n"),
     File(0),
@@ -417,7 +416,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
     if (!Opened || Writing) return SVL_FAIL;
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     unsigned int i, used, width, height, partcount, compressedpartsize, offset = 0, strmoffset;
     unsigned long longsize;
@@ -511,7 +510,7 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
         if (err) return SVL_FAIL;
     }
 
-    const unsigned int procid = procInfo->id;
+    const unsigned int procid = procInfo->ID;
     const unsigned int proccount = procInfo->count;
     unsigned int i, start, end, size, offset;
     unsigned char* strmbuf = SendBuffer[0]->GetPushBuffer();
@@ -1173,6 +1172,11 @@ int svlVideoCodecTCPStream::ParseFilename(const std::string & filename)
     if (pos != std::string::npos) {
         // Extract address string (substring before '@')
         SocketAddress = filename.substr(0, pos);
+
+        // From DanO (02-22-2011)
+        if (SocketAddress.find_last_of("/\\")) {
+            SocketAddress = SocketAddress.substr(SocketAddress.find_last_of("/\\") + 1);
+        }
 
         // Extract port (numerical string after '@')
         pos += 1;

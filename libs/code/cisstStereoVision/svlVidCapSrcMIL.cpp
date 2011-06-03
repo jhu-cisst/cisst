@@ -222,11 +222,10 @@ MIL_INT MFTYPE MILProcessingCallback(MIL_INT HookType, MIL_ID HookId, void MPTYP
 /*** svlVidCapSrcMIL class ***********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcMIL)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcMIL, svlVidCapSrcBase)
 
 svlVidCapSrcMIL::svlVidCapSrcMIL() :
     svlVidCapSrcBase(),
-    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),
@@ -337,7 +336,7 @@ int svlVidCapSrcMIL::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             deviceinfo[0][i].platform = svlFilterSourceVideoCapture::MatroxImaging;
 
             // id
-            deviceinfo[0][i].id = devid[i];
+            deviceinfo[0][i].ID = devid[i];
 
             // name
             description = "Matrox Imaging Device (";

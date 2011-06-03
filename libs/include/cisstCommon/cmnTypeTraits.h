@@ -504,8 +504,8 @@ CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(bool, true, true, false, false);
 #ifndef SWIG
 /*! Check whether class T is derived from class Base
     Examples:
-       cmnIsDerivedFrom<double, cmnGenericObject>::YES is false
-       cmnIsDerivedFrom<cmnDouble, cmnGenericObject>::YES is true
+       cmnIsDerivedFrom<double, cmnGenericObject>::IS_DERIVED is false
+       cmnIsDerivedFrom<cmnDouble, cmnGenericObject>::IS_DERIVED is true
 */
 template <typename T, typename Base>
 class cmnIsDerivedFrom {
@@ -516,8 +516,8 @@ private:
     static One Test(const Base *obj);
     static Two Test(...);
 public:
-    enum { YES = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
-    enum { NO = !YES};
+    enum { IS_DERIVED = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
+    enum { IS_NOT_DERIVED = !IS_DERIVED};
 };
 
 /*! Check whether class T is derived from class templated class Base.
@@ -525,12 +525,12 @@ public:
     is not known.
 
     Examples:
-       cmnIsDerivedFromTemplated<double, cmnGenericObjectProxy>::YES is false
-       cmnIsDerivedFromTemplated<cmnDouble, cmnGenericObjectProxy>::YES is true
+       cmnIsDerivedFromTemplated<double, cmnGenericObjectProxy>::IS_DERIVED is false
+       cmnIsDerivedFromTemplated<cmnDouble, cmnGenericObjectProxy>::IS_DERIVED is true
 
     Note that if you know the template argument to the Base class, you can
     instead use:
-       cmnIsDerivedFrom<cmnDouble, cmnGenericObjectProxy<double> >::YES
+       cmnIsDerivedFrom<cmnDouble, cmnGenericObjectProxy<double> >::IS_DERIVED
 
 */
 template <typename T, template <typename> class Base>
@@ -542,9 +542,16 @@ private:
     template <typename C> static One Test(const Base<C> *obj);
     static Two Test(...);
 public:
-    enum { YES = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
-    enum { NO = !YES};
+    enum { IS_DERIVED = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
+    enum { IS_NOT_DERIVED = !IS_DERIVED};
 };
 #endif // !SWIG
+
+// A static (compile-time) assertion that the Derived class is, in fact, derived from the Base class.
+// This has been written to try to generate a comprehensible error message.
+template <typename Derived, typename Base, bool b> struct cmnIsDerivedFromAssert { };
+template <typename Derived, typename Base> struct cmnIsDerivedFromAssert<Derived, Base, true> { typedef bool ASSERT; };
+#define CMN_IS_DERIVED_FROM_ASSERT(Derived, Base) \
+    typedef cmnIsDerivedFromAssert<Derived, Base, cmnIsDerivedFrom<Derived, Base>::IS_DERIVED>::ASSERT Derived##_##Base;
 
 #endif // _cmnTypeTraits_h

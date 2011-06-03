@@ -20,6 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <ode/ode.h>
 
+#include <osg/Geode>
+#include <osg/TriangleFunctor>
+
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
@@ -40,6 +43,46 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 
 
  private:
+
+  // This class is used to extract the triangle mesh out of the OSG
+  // classes/structures. It is a geode visitor that traverse the drawable 
+  // objects and extract all the triangles from all the drawables
+  class GeodeVisitor : public osg::NodeVisitor {
+
+  private:
+
+    // Create a structure to hold a triangle
+    struct Triangle
+    { dVector3 v1, v2, v3; };
+
+    // For each drawable, a TriangleExtractor object is created. The operator() 
+    // is called for each triangle of the drawable
+    struct TriangleExtractor {
+
+      // The list of triangles for a drawable
+      std::vector< devODEBody::GeodeVisitor::Triangle > drawabletriangles;
+
+      // This method is called for each triangle of the drawable. All it does
+      // is to copy the vertices to the vector
+      inline void operator ()( const osg::Vec3& v1, 
+			       const osg::Vec3& v2, 
+			       const osg::Vec3& v3, 
+			       bool treatVertexDataAsTemporary );
+    };
+
+  public:
+
+    // the list of triangles for the geode (composed of several drawables)
+    std::vector< devODEBody::GeodeVisitor::Triangle > geodetriangles;
+    
+    // Default constructor
+    GeodeVisitor();
+
+    // This method is called for each geode. It scans all the drawable of the 
+    // geode and extract/copy the triangles to the triangle vector
+    virtual void apply( osg::Geode& geode );
+    
+  };
 
   //! The World ID
   devODEWorld* world;
@@ -65,6 +108,7 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   //! Data used by ODE Tri Mesh
   dVector3* Vertices;
   int       VertexCount;
+  vctDynamicMatrix<double> vctVertices;
   dTriIndex* Indices;
   int        IndexCount;
 
@@ -85,10 +129,9 @@ class CISST_EXPORT devODEBody : public devOSGBody {
 
   vctMatrixRotation3<double> GetOrientation() const;
   vctFixedSizeVector<double,3> GetPosition() const;
-
+  
  public:
 
-  
   //! Main constructor
   /**
      This create an ODE body that can be inserted in an ODE world. This body
@@ -179,6 +222,10 @@ class CISST_EXPORT devODEBody : public devOSGBody {
   //! Query the ID of the body
   dGeomID GetGeomID() const { return geomid; }
 
+  vctFrm3 GetTransform() const;
+
+  vctDynamicMatrix<double> GetVertices() const;
+  
 };
 
 #endif

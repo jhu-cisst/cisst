@@ -118,9 +118,10 @@ http://www.cisst.org/cisst/license.txt.
   #CMN_LOG_CLASS.
 
   The message is streamed along with a Level of Detail to cmnLogger
-  provided that the overall log mask must allow the level of detail
-  associated to the message.  The overall mask can be set using
-  cmnLogger::SetMask.
+  provided that the function and overall log masks allow the level of
+  detail associated to the message.  The overall mask can be set using
+  cmnLogger::SetMask.  The function mask can be set using
+  cmnLogger::SetMaskFunction.
 
   The macro creates an output stream if the level of detail of the
   message satisfies the criterion defined above.  It can be used as
@@ -133,7 +134,7 @@ http://www.cisst.org/cisst/license.txt.
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG(lod) \
-    (!(cmnLogger::GetMask() & lod))? \
+    (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod))?  \
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - ")
 
@@ -248,6 +249,12 @@ class CISST_EXPORT cmnLogger {
     */
     cmnLogMask Mask;
 
+    /*! Function mask.  Similar to the global mask, it is used for all
+      logs not associated to a "registered" class.  This applies to
+      all logs generated using the macros CMN_LOG_<level> but not to
+      logs generated using the macros CMN_LOG_CLASS_<level>. */
+    cmnLogMask FunctionMask;
+
     /*! Single multiplexer used to stream the log out */
     StreamBufType LoDMultiplexerStreambuf;
 
@@ -258,6 +265,14 @@ class CISST_EXPORT cmnLogger {
     /*! Instance specific implementation of GetMaskInstance.
       \sa GetMask */
     cmnLogMask GetMaskInstance(void);
+
+    /*! Instance specific implementation of SetMaskFunction.
+      \sa SetMaskFunction */
+    void SetMaskFunctionInstance(cmnLogMask mask);
+
+    /*! Instance specific implementation of GetMaskFunctionInstance.
+      \sa GetMaskFunction */
+    cmnLogMask GetMaskFunctionInstance(void);
 
     /*! Instance specific implementation of GetMultiplexer.
       \sa GetMultiplexer */
@@ -313,6 +328,22 @@ class CISST_EXPORT cmnLogger {
 
     static cmnLogMask CISST_DEPRECATED GetLoD(void) {
         return Instance()->GetMaskInstance();
+    }
+
+
+    /*! Set the "function" mask used to filter the log messages.
+      \param mask The function mask used to filter the log.
+      \sa SetMaskFunctionInstance */
+    static void SetMaskFunction(cmnLogMask mask) {
+        Instance()->SetMaskFunctionInstance(mask);
+    }
+
+
+    /*! Get the function mask used to filter the log messages.
+      \return The function mask used to filter the log.
+      \sa GetMaskInstance */
+    static cmnLogMask GetMaskFunction(void) {
+        return Instance()->GetMaskFunctionInstance();
     }
 
 

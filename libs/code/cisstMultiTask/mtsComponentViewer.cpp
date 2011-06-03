@@ -32,7 +32,7 @@ void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, 
     pipe.Write(s, s.length());
 }
 
-CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
 mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     mtsTaskFromSignal(name),
@@ -42,6 +42,7 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     ConnectionStarted(false),
     WaitingForResponse(false)
 {
+    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
         ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
@@ -60,11 +61,6 @@ mtsComponentViewer::~mtsComponentViewer()
 
 void mtsComponentViewer::Startup(void)
 {
-    // Try to connect to UDrawGraph viewer
-    if (!UDrawPipeConnected)
-        ConnectToUDrawGraph();
-    if (UDrawPipeConnected)
-        SendAllInfo();
 }
 
 void mtsComponentViewer::Run(void)
@@ -73,6 +69,7 @@ void mtsComponentViewer::Run(void)
        ConnectToUDrawGraph();
        if (UDrawPipeConnected) {
            CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
+           // Should flush all events before calling SendAllInfo
            SendAllInfo();
        }
     }
@@ -139,9 +136,11 @@ void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &co
                             !mtsManagerGlobal::IsProxyComponent(connection.Server.ComponentName)))
 #endif
         {
-            std::string buffer = GetConnectionInUDrawGraphFormat(connection);
-            CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
-            WriteString(UDrawPipe, buffer);
+            if (connection.Server.InterfaceName != mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
+                std::string buffer = GetConnectionInUDrawGraphFormat(connection);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+                WriteString(UDrawPipe, buffer);
+            }
         }
     }
 }
@@ -237,7 +236,14 @@ void *mtsComponentViewer::ReadFromUDrawGraph(int)
             // Wake up Component Viewer (mtsTaskFromSignal) to process response
             PostCommandQueuedMethod();
             // Wait until component viewer signals that it is ready for new data
-            ReadyToRead.Wait(3.0);  // 3 second timeout
+            if (GetState() == mtsComponentState::ACTIVE)
+                ReadyToRead.Wait(3.0);  // 3 second timeout
+            else {
+                CMN_LOG_CLASS_INIT_WARNING << "ReadFromUDrawGraph: waiting for ComponentViewer to become active"
+                                           << ", current state = " 
+                                           << mtsComponentState::ToString(GetState().GetState()) << std::endl;
+                ReadyToRead.Wait();    // no timeout
+            }
         }
         else {
             CMN_LOG_CLASS_INIT_WARNING << "ReadFromUDrawGraph: not ready to read new responses" << std::endl;
@@ -566,6 +572,11 @@ std::string mtsComponentViewer::GetConnectionInUDrawGraphFormat(const mtsDescrip
          (mtsManagerComponentBase::IsManagerComponentClient(connection.Server.ComponentName) &&
           !mtsManagerComponentBase::IsManagerComponentServer(connection.Client.ComponentName)))
         swapped = true;
+    bool SVLio = false;
+    // PK TEMP: Check for SVL input/output. In the future, this should be an attribute in the "connection"
+    // structure received from the GCM.
+    if ((connection.Client.InterfaceName == "input") && (connection.Server.InterfaceName == "output"))
+        SVLio = true;
     char IDString[20];
     std::string message("graph(update([],[new_edge(\"");
     sprintf(IDString, "%d", connection.ConnectionID);
@@ -573,17 +584,22 @@ std::string mtsComponentViewer::GetConnectionInUDrawGraphFormat(const mtsDescrip
     message.append("\", \"CONNECTION\", [a(\"OBJECT\", \"");
     message.append(IDString);
     message.append("\"), a(\"INFO\", \"");
-    message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
+    if (SVLio)
+        message.append(connection.Server.InterfaceName + "<->" + connection.Client.InterfaceName);
+    else
+        message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
     message.append("\")");
     if (swapped)
         message.append(", a(\"_DIR\", \"first\")");
+    if (SVLio)
+        message.append(", a(\"EDGEPATTERN\", \"double;solid;5;0\"), a(\"HEAD\", \"arrow\")");
     message.append("], \"");
-    if (swapped)
+    if (swapped || SVLio)
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
     else
         message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
     message.append("\", \"");
-    if (swapped)
+    if (swapped || SVLio)
         message.append(connection.Client.ProcessName + ":" + connection.Client.ComponentName);
     else
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);

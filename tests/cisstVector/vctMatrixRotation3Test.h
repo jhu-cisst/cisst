@@ -48,6 +48,12 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
     CPPUNIT_TEST(TestConversionRodriguezDouble);
     CPPUNIT_TEST(TestConversionRodriguezFloat);
 
+    CPPUNIT_TEST(TestConversionEulerZYZDouble);
+    CPPUNIT_TEST(TestConversionEulerZYZFloat);
+
+    CPPUNIT_TEST(TestConversionEulerZYXDouble);
+    CPPUNIT_TEST(TestConversionEulerZYXFloat);
+
     CPPUNIT_TEST(TestFromSignaturesQuaternionDouble);
     CPPUNIT_TEST(TestFromSignaturesQuaternionFloat);
 
@@ -128,6 +134,14 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
         void TestConversionRodriguez(void);
     void TestConversionRodriguezDouble(void);
     void TestConversionRodriguezFloat(void);
+
+    /*! Test the conversion from and to Euler rotation */
+    template<class _elementType, vctEulerRotation3Order::OrderType order>
+        void TestConversionEuler(void);
+    void TestConversionEulerZYZDouble(void);
+    void TestConversionEulerZYZFloat(void);
+    void TestConversionEulerZYXDouble(void);
+    void TestConversionEulerZYXFloat(void);
 
     /*! Test signatures for From(quaternion) */
     template<class _elementType>

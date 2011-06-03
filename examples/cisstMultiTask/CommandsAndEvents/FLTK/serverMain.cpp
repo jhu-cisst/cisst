@@ -20,11 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
-
 #include "serverTask.h"
+
+#include <cisstOSAbstraction/osaSleep.h>
 
 int main(int argc, char * argv[])
 {

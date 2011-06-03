@@ -35,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
     #define CMN_UNUSED(argument) argument
 #endif
 
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceBase, svlFilterBase)
 
 /***********************************************/
 /*** svlFilterSourceBase::SourceConfig class ***/
@@ -175,7 +176,7 @@ bool svlFilterSourceBase::IsTargetTimerRunning()
     return TargetTimer.IsRunning();
 }
 
-int svlFilterSourceBase::UpdateTypes(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))
+int svlFilterSourceBase::OnConnectInput(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))
 {
     return SVL_FAIL;
 }

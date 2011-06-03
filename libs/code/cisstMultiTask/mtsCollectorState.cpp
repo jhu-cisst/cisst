@@ -386,7 +386,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
     std::ostringstream out;          
     osaGetDateTimeString(currentDateTime);
 
-    if(this->OutputStreamHeader){        
+    if (this->OutputStreamHeader) {        
 
         //this->OutputStreamHeader = (std::ostream*) &out;
         out << "Ticks";
@@ -401,13 +401,14 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
         // process the content and make header file
         std::cerr << out.str(); 
         
-        std::vector <std::string> FieldName;
-        std::vector <double> FieldValue;        
+        std::vector <std::string> fieldNames;
+        std::vector <double> fieldValues;        
         std::istringstream iss(out.str());
         std::string token;
         // get token
-        while(getline(iss, token, this->Delimiter))
-            FieldName.push_back(token);
+        while (getline(iss, token, this->Delimiter)) {
+            fieldNames.push_back(token);
+        }
         
         // FileName:
         // Date:
@@ -433,29 +434,29 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
             *(this->OutputStreamHeader) << "Binary" << std::endl;
         }
         // Delimiter
-        *(this->OutputStreamHeader) << this->Delimiter<< std::endl;
+        *(this->OutputStreamHeader) << this->Delimiter << std::endl;
 
         // Number Of Fields
-        *(this->OutputStreamHeader) << FieldName.size() << std::endl;
-        unsigned int TimeElementsNumber = 0, DtaElementsNumber = 0;
-        for(int i = 0; i< FieldName.size(); i++){
-            std::string element = FieldName.at(i); 
-            if(element.find("time") != std::string::npos){// this is a time element
-                TimeElementsNumber ++;
-            }else{
-                DtaElementsNumber ++;
+        *(this->OutputStreamHeader) << fieldNames.size() << std::endl;
+        size_t timeElementsNumber = 0, dtaElementsNumber = 0;
+        for (size_t i = 0; i< fieldNames.size(); i++) {
+            std::string element = fieldNames.at(i); 
+            if (element.find("time") != std::string::npos) {// this is a time element
+                timeElementsNumber ++;
+            } else {
+                dtaElementsNumber ++;
             }
         }
         // Number Of Time Fields: 
-        *(this->OutputStreamHeader) << TimeElementsNumber << std::endl;
+        *(this->OutputStreamHeader) << timeElementsNumber << std::endl;
         // Number Of Data Fields:
-        *(this->OutputStreamHeader) << DtaElementsNumber << std::endl;
+        *(this->OutputStreamHeader) << dtaElementsNumber << std::endl;
         // All Fields
-        for(int i = 0; i< FieldName.size(); i++){
-            std::string element = FieldName.at(i); 
-            if(element.find("time") != std::string::npos){// this is a time element
+        for (size_t i = 0; i< fieldNames.size(); i++) {
+            std::string element = fieldNames.at(i); 
+            if (element.find("time") != std::string::npos) {// this is a time element
                 *(this->OutputStreamHeader) << "Time: " << element << std::endl;
-            }else{
+            } else {
                 *(this->OutputStreamHeader) << "Data:  " << element << std::endl;
             }
         }        

@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterLightSourceBuddy class *****/
 /*****************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterLightSourceBuddy)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterLightSourceBuddy, svlFilterBase)
 
 svlFilterLightSourceBuddy::svlFilterLightSourceBuddy() :
     svlFilterBase(),

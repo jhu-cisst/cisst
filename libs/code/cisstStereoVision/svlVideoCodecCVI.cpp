@@ -34,11 +34,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecCVI class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlVideoCodecCVI)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecCVI, svlVideoCodecBase)
 
 svlVideoCodecCVI::svlVideoCodecCVI() :
     svlVideoCodecBase(),
-    cmnGenericObject(),
     CodecName("CISST Video"),
     FileStartMarker("CisstSVLVideo\r\n",  // all version strings shall be of equal length
                     "CisstVid_1.10\r\n",
@@ -77,6 +76,9 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
 
     Config.Level        = 4;
     Config.Differential = 0;
+
+    ProcInfoSingleThread.count = 1;
+    ProcInfoSingleThread.ID    = 0;
 }
 
 svlVideoCodecCVI::~svlVideoCodecCVI()
@@ -92,7 +94,7 @@ svlVideoCodecCVI::~svlVideoCodecCVI()
 int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
 {
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "Open: already opened" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Open: codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
@@ -142,14 +144,15 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
                 CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `footer offset`" << std::endl;
                 break;
             }
+
+#ifdef READ_CORRUPT_V11_FILE
+            Version = 0;
+#else
             if (FooterOffset <= 0) {
                 CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `footer offset`" << std::endl;
                 break;
             }
 
-#ifdef READ_CORRUPT_V110_FILE
-            Version = 0;
-#else
             // Store file position
             pos = File.GetPos();
 
@@ -208,7 +211,7 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
             CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `width`" << std::endl;
             break;
         }
-        if (Width < 1 || Width > 8192) {
+        if (Width < 1 || Width > MAX_DIMENSION) {
             CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `width`" << std::endl;
             break;
         }
@@ -218,7 +221,7 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
             CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `height`" << std::endl;
             break;
         }
-        if (Height < 1 || Height > 8192) {
+        if (Height < 1 || Height > MAX_DIMENSION) {
             CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `height`" << std::endl;
             break;
         }
@@ -288,10 +291,10 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
 int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double CMN_UNUSED(framerate))
 {
 	if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: already opened" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Create: codec is already open" << std::endl;
         return SVL_FAIL;
     }
-    if (width < 1 || width > 8192 || height < 1 || height > 8192) {
+    if (width < 1 || width > MAX_DIMENSION || height < 1 || height > MAX_DIMENSION) {
         CMN_LOG_CLASS_INIT_ERROR << "Create: invalid image dimensions" << std::endl;
         return SVL_FAIL;
     }
@@ -660,8 +663,13 @@ int svlVideoCodecCVI::SetCompression(const svlVideoIO::Compression *compression)
 {
     if (Opened || !compression || compression->size < sizeof(svlVideoIO::Compression)) return SVL_FAIL;
 
+    // Create a safe copy of the string `extension`
+    char _ext[16];
+    memcpy(_ext, compression->extension, 15);
+    _ext[15] = 0;
+
     std::string extensionlist(GetExtensions());
-    std::string extension(compression->extension);
+    std::string extension(_ext);
     extension += ";";
     if (extensionlist.find(extension) == std::string::npos) {
         CMN_LOG_CLASS_INIT_ERROR << "SetCompression: codec parameters do not match this codec" << std::endl;
@@ -707,11 +715,11 @@ int svlVideoCodecCVI::SetCompression(const svlVideoIO::Compression *compression)
 int svlVideoCodecCVI::DialogCompression()
 {
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: already open" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
-    std::cout << std::endl << " # Enter compression level [0-9]: ";
+    std::cout << " # Enter compression level [0-9]: ";
     int level = 0;
     while (level < '0' || level > '9') level = cmnGetChar();
     level -= '0';
@@ -772,22 +780,24 @@ int svlVideoCodecCVI::SetTimestamp(const double timestamp)
 
 int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
     }
     if (!Opened || Writing) {
-        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") file needs to be opened for reading" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") file needs to be opened for reading" << std::endl;
         return SVL_FAIL;
     }
 
     // Uses only a single thread
-    if (procInfo && procInfo->id != 0) return SVL_OK;
+    if (procInfo && procInfo->ID != 0) return SVL_OK;
 
     // Allocate image buffer if not done yet
     if (Width  != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
         if (noresize) {
-            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") unexpected change in image dimensions" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") unexpected change in image dimensions" << std::endl;
             return SVL_FAIL;
         }
         image.SetSize(videoch, Width, Height);
@@ -808,7 +818,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
 
         // Look up the position in the frame offsets table and move the file pointer
         if (File.Seek(FrameOffsets[Pos]) != SVL_OK) {
-            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to seek to frame=" << Pos << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to seek to frame=" << Pos << std::endl;
             return SVL_FAIL;
         }
 
@@ -824,12 +834,12 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             // Go to the beginning of the data, just after the header
 #ifdef READ_CORRUPT_V11_FILE
             if (File.Seek(35) != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to seek to position=35" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to seek to position=35" << std::endl;
                 return SVL_FAIL;
             }
 #else
             if (File.Seek(27) != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to seek to position=27" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to seek to position=27" << std::endl;
                 return SVL_FAIL;
             }
 #endif
@@ -843,7 +853,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
         if (File.Read(strbuffer, len) != len) break;
         strbuffer[FrameStartMarker.length()] = 0;
         if (FrameStartMarker.compare(strbuffer) != 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read `frame start marker`" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to read `frame start marker`" << std::endl;
             return SVL_FAIL;
         }
 
@@ -851,7 +861,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
         len = sizeof(double);
         if (File.Read(reinterpret_cast<char*>(&Timestamp), len) != len) break;
         if (Timestamp < 0.0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read `frame timestamp`" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to read `frame timestamp`" << std::endl;
             return SVL_FAIL;
         }
 
@@ -862,7 +872,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             len = sizeof(unsigned int);
             if (File.Read(reinterpret_cast<char*>(&compressedpartsize), len) != len) break;
             if (compressedpartsize == 0 || compressedpartsize > comprBufferSize) {
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read `compressed part size`" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to read `compressed part size`" << std::endl;
                 return SVL_FAIL;
             }
 
@@ -873,7 +883,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             // Decompress frame part
             longsize = yuvBufferSize - offset;
             if (uncompress(yuvBuffer + offset, &longsize, comprBuffer, compressedpartsize) != Z_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to uncompress data" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to uncompress data" << std::endl;
                 return SVL_FAIL;
             }
 
@@ -906,7 +916,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             }
             else {
                 // If it was the first frame, then file is invalid, let it fail
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read first frame" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to read first frame" << std::endl;
             }
         }
     }
@@ -922,7 +932,7 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
             }
             else {
                 // If it was the first frame, then file is invalid, let it fail
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->id << ") failed to read first frame" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to read first frame" << std::endl;
             }
         }
     }
@@ -932,22 +942,24 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
 
 int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
     }
     if (!Opened || !Writing) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") file needs to be opened for writing" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") file needs to be opened for writing" << std::endl;
         return SVL_FAIL;
     }
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") unexpected change in image dimensions" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") unexpected change in image dimensions" << std::endl;
         return SVL_FAIL;
     }
 
     // Check for video saving errors
     if (SaveThreadError) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") error detected on saving thread" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") error detected on saving thread" << std::endl;
         return SVL_FAIL;
     }
 
@@ -966,7 +978,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
             len = sizeof(unsigned int);
             if (File.Write(reinterpret_cast<char*>(&procInfo->count), len) != len) {
                 err = true;
-                CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") failed to write `part count`" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") failed to write `part count`" << std::endl;
             }
         }
 
@@ -976,7 +988,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
         if (err) return SVL_FAIL;
     }
 
-    const unsigned int procid = procInfo->id;
+    const unsigned int procid = procInfo->ID;
     const unsigned int proccount = procInfo->count;
     unsigned int start, end, size, offset;
     unsigned long comprsize;
@@ -1009,7 +1021,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
         // Compress part
         if (compress2(comprBuffer + ComprPartOffset[procid], &comprsize, yuvBuffer + offset, size, compr) != Z_OK) {
             err = true;
-            CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->id << ") failed to compress data" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") failed to compress data" << std::endl;
             break;
         }
         ComprPartSize[procid] = comprsize;

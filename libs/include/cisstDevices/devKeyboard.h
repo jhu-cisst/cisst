@@ -23,8 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devKeyboard_h
 #define _devKeyboard_h
 
-#include <cisstCommon.h>
-#include <cisstParameterTypes.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <map>

@@ -21,10 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCollectorEvent.h>
-CMN_IMPLEMENT_SERVICES(mtsCollectorEvent)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorEvent, mtsCollectorBase)   // derives from mtsTaskFromSignal
 
 #include <cisstMultiTask/mtsCollectorState.h>
- CMN_IMPLEMENT_SERVICES(mtsCollectorState)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorState, mtsCollectorBase)   // derives from mtsTaskFromSignal
 
 #include <cisstMultiTask/mtsComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsComponent)
@@ -46,20 +46,20 @@ CMN_IMPLEMENT_SERVICES(mtsStateTable)
 CMN_IMPLEMENT_SERVICES(mtsStateTableIndexRange)
 
 #include <cisstMultiTask/mtsTask.h>
-CMN_IMPLEMENT_SERVICES(mtsTask)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsTask, mtsComponent)
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
-CMN_IMPLEMENT_SERVICES(mtsTaskContinuous)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskContinuous, mtsTask)
 
 #include <cisstMultiTask/mtsTaskFromCallback.h>
-CMN_IMPLEMENT_SERVICES(mtsTaskFromCallback)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskFromCallback, mtsTask)
 CMN_IMPLEMENT_SERVICES(mtsTaskFromCallbackAdapter)
 
 #include <cisstMultiTask/mtsTaskFromSignal.h>
-CMN_IMPLEMENT_SERVICES(mtsTaskFromSignal)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskFromSignal, mtsTaskContinuous)
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
-CMN_IMPLEMENT_SERVICES(mtsTaskPeriodic)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskPeriodic, mtsTaskContinuous)
 
 #include <cisstMultiTask/mtsFixedSizeVectorTypes.h>
 #define MTS_FIXED_SIZE_VECTOR_IMPLEMENT(ElementType)   \
@@ -164,7 +164,7 @@ CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyClient)
 CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyServer)
 
 #include "mtsComponentProxy.h"
-CMN_IMPLEMENT_SERVICES(mtsComponentProxy)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsComponentProxy, mtsComponent)
 
 #include "mtsManagerProxyClient.h"
 CMN_IMPLEMENT_SERVICES(mtsManagerProxyClient)

@@ -29,16 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 ///////////////////////////////////
 
 #define _OnSingleThread(_info) \
-            if((_info)->id==0)
+            if((_info)->ID==0)
 #define _ParallelLoop(_info, _idx, _count) \
-            _idx=(_info)->id*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
-            for(const unsigned int _end=std::min((_count),((_info)->id+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
+            _idx=(_info)->ID*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
+            for(const unsigned int _end=std::min((_count),((_info)->ID+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
 #define _ParallelInterleavedLoop(_info, _idx, _count) \
-            _idx=(_info)->id;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
+            _idx=(_info)->ID;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
 #define _GetParallelSubRange(_info, _count, _from, _to) \
-            _to=(_count)/(_info)->count+1;_from=(_info)->id*_to;_to+=_from;if(_to>(_count)){_to=(_count);}
+            _to=(_count)/(_info)->count+1;_from=(_info)->ID*_to;_to+=_from;if(_to>(_count)){_to=(_count);}
 #define _SynchronizeThreads(_info) \
-            if((_info)->count>1){if((_info)->sync->Sync((_info)->id)!=SVL_SYNC_OK){return SVL_FAIL;}}
+            if((_info)->count>1){if((_info)->sync->Sync((_info)->ID)!=SVL_SYNC_OK){return SVL_FAIL;}}
 #define _CriticalSection(_info) \
             if((_info)->count>1){(_info)->cs->Enter();}for(bool _incs=true;_incs&&((_info)->count>1);_incs=false,(_info)->cs->Leave())
 
@@ -166,7 +166,7 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_VCS_ARRAY_LENGTH                   50
 #define SVL_VCS_STRING_LENGTH                 128
 #define ST_DP_TEMP_BUFF_SIZE                 2048
-#define MAX_DIMENISION                       8192
+#define MAX_DIMENSION                       65536
 #define MAX_UI16_VAL                       0xFFFF
 #define MAX_I32_VAL                    0x7FFFFFFF
 #define BIG_I32_VAL                     100000000
@@ -192,6 +192,8 @@ enum svlStreamType
     ,svlTypeImageMono8Stereo  // Dual Grayscale image (8bpp)
     ,svlTypeImageMono16       // Single Grayscale image (16bpp)
     ,svlTypeImageMono16Stereo // Dual Grayscale image (16bpp)
+    ,svlTypeImageMono32       // Single Grayscale image (32bpp)
+    ,svlTypeImageMono32Stereo // Dual Grayscale image (32bpp)
     ,svlTypeImage3DMap        // Three floats per pixel for storing 3D coordinates
     ,svlTypeMatrixInt8        // Matrix of type 'char'
     ,svlTypeMatrixInt16       // Matrix of type 'short'
@@ -206,6 +208,7 @@ enum svlStreamType
     ,svlTypeTransform3D       // 3D transformation
     ,svlTypeTargets           // Vector of N dimensional points
     ,svlTypeText              // Textual data
+    ,svlTypeBlobs             // Image blobs
 };
 
 
@@ -258,6 +261,7 @@ enum svlPixelType
 {
     svlPixelMono8,
     svlPixelMono16,
+    svlPixelMono32,
     svlPixelRGB,
     svlPixelRGBA,
     svlPixelMonoFloat,

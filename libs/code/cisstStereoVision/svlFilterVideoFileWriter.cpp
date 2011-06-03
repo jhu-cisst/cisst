@@ -126,7 +126,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
 
     if (CaptureLength == 0) {
         if (ActionTime < syncInput->GetTimestamp()) {
-            CS.Leave();
+            _OnSingleThread(procInfo) CS.Leave();
             return SVL_OK;
         }
         // Process remaining samples in the buffer when paused
@@ -134,7 +134,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
     else {
         // Drop frames when restarted
         if (ActionTime > syncInput->GetTimestamp()) {
-            CS.Leave();
+            _OnSingleThread(procInfo) CS.Leave();
             return SVL_OK;
         }
     }
@@ -150,7 +150,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
             // Codec is responsible for thread synchronzation
             if (Codec[idx] && Codec[idx]->Write(procInfo, *img, idx) != SVL_OK) {
                 CMN_LOG_CLASS_INIT_ERROR << "Process: failed to write video frame on channel: " << idx
-                                         << ", in thread: " << procInfo->id << std::endl;
+                                         << ", in thread: " << procInfo->ID << std::endl;
                 ErrorOnChannel[idx] = true;
                 ErrorInProcess      = true;
             }
@@ -373,13 +373,17 @@ int svlFilterVideoFileWriter::DialogCodec(const std::string &extension, unsigned
 
     // Get framerate if needed
     if (!codec->IsVariableFramerate()) {
-        int framerate;
-        std::cout << std::endl << " # Enter video framerate [1-1000]: ";
-        std::cin >> framerate;
-        if (framerate < 1 || framerate > 1000) {
-            framerate = 30;
-            CMN_LOG_CLASS_INIT_WARNING << "DialogCodec: invalid framerate; framerate set to default=" << framerate << std::endl;
+        char input[256];
+        int min = 1, max = 120, defaultval = 30, framerate = 0;
+        std::cout << " # Enter video frame rate (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
+        std::cin.getline(input, 256);
+        if (std::cin.gcount() > 1) {
+            framerate = atoi(input);
+            if (framerate < min) framerate = min;
+            if (framerate > max) framerate = max;
         }
+        else framerate = defaultval;
+        std::cout << "    Framerate = " << framerate << std::endl;
         Framerate[videoch] = static_cast<double>(framerate);
     }
     else {

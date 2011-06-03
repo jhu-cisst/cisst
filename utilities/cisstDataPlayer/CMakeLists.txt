@@ -62,3 +62,14 @@ target_link_libraries (cisstDataPlayer
 
 cisst_target_link_libraries (cisstDataPlayer
                              cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+
+
+add_executable (qtVideoPlayer
+                qtVideoPlayer.cpp)
+
+target_link_libraries (qtVideoPlayer
+                       cisstDataPlayerComponents
+                       ${QT_LIBRARIES})
+
+cisst_target_link_libraries (qtVideoPlayer
+                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)

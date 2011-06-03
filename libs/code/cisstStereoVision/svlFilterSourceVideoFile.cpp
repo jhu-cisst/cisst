@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceVideoFile class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoFile, svlFilterSourceBase)
 
 svlFilterSourceVideoFile::svlFilterSourceVideoFile() :
     svlFilterSourceBase(false),  // manual timestamp management
@@ -102,6 +102,8 @@ int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
     FilePath.SetSize(channelcount);
     Length.SetSize(channelcount);
     Position.SetSize(channelcount);
+    UseRange.SetSize(channelcount);
+    UseRange.SetAll(false);
     Range.SetSize(channelcount);
     Range.SetAll(vctInt2(-1, -1));
 
@@ -141,8 +143,11 @@ int svlFilterSourceVideoFile::Initialize(svlSample* &syncOutput)
 
         Length[i] = Codec[i]->GetEndPos() + 1;
         Position[i] = Codec[i]->GetPos();
-        if (Range[i][0] < 0) Range[i][0] = 0;
-        if (Range[i][1] < 0) Range[i][1] = Length[i];
+
+        if (UseRange[i]) {
+            if (Range[i][0] < 0) Range[i][0] = 0;
+            if (Range[i][1] < 0) Range[i][1] = Length[i];
+        }
 
         // Create image sample of matching dimensions
         OutputImage->SetSize(i, width, height);
@@ -181,19 +186,30 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
             pos = Codec[idx]->GetPos();
             Position[idx] = pos;
 
-            if (Range[idx][0] >= 0 &&
-                Range[idx][0] <= Range[idx][1]) {
+            if (UseRange[idx]) {
                 // Check if position is outside of the playback segment
-                if (pos < Range[idx][0] ||
-                    pos > Range[idx][1]) {
+                if (pos < Range[idx][0]) {
                     Codec[idx]->SetPos(Range[idx][0]);
                     ResetTimer = true;
+                }
+                else if (pos > Range[idx][1]) {
+                    if (!GetLoop()) {
+                        ret = SVL_STOP_REQUEST;
+                        break;
+                    }
+                    else {
+                        Codec[idx]->SetPos(Range[idx][0]);
+                        ResetTimer = true;
+                    }
                 }
             }
 
             ret = Codec[idx]->Read(0, *OutputImage, idx, true);
             if (ret == SVL_VID_END_REACHED) {
-                if (!GetLoop()) ret = SVL_STOP_REQUEST;
+                if (!GetLoop()) {
+                    ret = SVL_STOP_REQUEST;
+                    break;
+                }
                 else {
                     // Loop around
                     ret = Codec[idx]->Read(0, *OutputImage, idx, true);
@@ -327,6 +343,13 @@ int svlFilterSourceVideoFile::GetPosition(unsigned int videoch) const
     return Codec[videoch]->GetPos();
 }
 
+int svlFilterSourceVideoFile::SetRange(const int from, const int to, unsigned int videoch)
+{
+    vctInt2 range;
+    range.Assign(from, to);
+    return SetRange(range, videoch);
+}
+
 int svlFilterSourceVideoFile::SetRange(const vctInt2 range, unsigned int videoch)
 {
     if (Codec.size() <= videoch) {
@@ -334,6 +357,7 @@ int svlFilterSourceVideoFile::SetRange(const vctInt2 range, unsigned int videoch
         return SVL_FAIL;
     }
     Range[videoch] = range;
+    UseRange[videoch] = true;
     return SVL_OK;
 }
 
@@ -341,6 +365,10 @@ int svlFilterSourceVideoFile::GetRange(vctInt2& range, unsigned int videoch) con
 {
     if (Codec.size() <= videoch) {
         CMN_LOG_CLASS_INIT_ERROR << "GetRange: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
+    if (!UseRange[videoch]) {
+        CMN_LOG_CLASS_INIT_WARNING << "GetRange: range is not set for video channel: " << videoch << std::endl;
         return SVL_FAIL;
     }
     range = Range[videoch];

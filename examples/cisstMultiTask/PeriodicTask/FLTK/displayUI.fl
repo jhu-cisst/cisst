@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0
 header_name {.h} 
 code_name {.cxx}
 class displayUI {open
@@ -61,16 +61,16 @@ class displayUI {open
     code {TriggerWaitChanged = false;} {}
     code {Closed = false;} {}
   }
-  decl {bool AmplitudeChanged;} {public local
+  decl {bool AmplitudeChanged;} {public
   }
-  decl {bool TriggerChanged;} {public local
+  decl {bool TriggerChanged;} {public
   }
-  decl {bool TriggerWaitChanged;} {public local
+  decl {bool TriggerWaitChanged;} {public
   }
-  decl {bool Closed;} {public local
+  decl {bool Closed;} {public
   }
-  decl {vctPlot2DBase::Trace * DataTrace;} {public local
+  decl {vctPlot2DBase::Trace * DataTrace;} {public
   }
-  decl {vctPlot2DBase::Trace * TriggerTrace;} {public local
+  decl {vctPlot2DBase::Trace * TriggerTrace;} {public
   }
 } 

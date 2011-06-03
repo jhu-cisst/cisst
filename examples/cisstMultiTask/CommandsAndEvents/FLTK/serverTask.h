@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _serverTask_h
 #define _serverTask_h
 
-// include for the whole cisstMultiTask library
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+
 #include "serverUI.h"
 
 class serverTaskBase: public mtsTaskPeriodic {

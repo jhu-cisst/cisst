@@ -655,7 +655,8 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
                     // Remove the proxy components from LCM
                     if (peerProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM) {
                         if (!LocalManager->RemoveComponent(proxyComponentName, false)) {
-                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from LCM_with_GCM: "
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from "
+                                << mtsManagerLocal::ProcessNameOfLCMWithGCM << ": "
                                 << "\"" << peerProcessName << ":" << proxyComponentName << "\""
                                 << std::endl;
                             ret = false;
@@ -1337,10 +1338,24 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
         // Thus, a required interface proxy is created whenever a new connection is
         // established while a provided interface proxy is created only once when
         // a client component does not have it.
+        // 
+        // MJ (3/30/11): DESIGN CHANGE: For each connection, create a new provided interface 
+        // proxy "instance" to fix the thread-safety issue (i.e., shared
+        // serializer/deserializer of command proxy objects) and to potentially support
+        // blocking commands and uni-cast events.  This also resolves the duplicate broadcast
+        // event issue that existed with earlier design.
 
         // Check if a provided interface proxy already exists at client side.
+
+        // MJ: Note that connection id used here is pre-fetched.  A new connection id is
+        // issued later after all necessary proxy objects are successfully created.
+        const std::string providedInterfaceInstanceName(
+            mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
+                serverInterfaceProvidedNameActual, ConnectionID));
         bool foundProvidedInterfaceProxy = FindInterfaceProvidedOrOutput(
-            clientProcessName, serverComponentProxyName, serverInterfaceProvidedNameActual);
+            //clientProcessName, serverComponentProxyName, serverInterfaceProvidedNameActual);
+            clientProcessName, serverComponentProxyName, providedInterfaceInstanceName);
+        CMN_ASSERT(!foundProvidedInterfaceProxy);
 
         // Check if a required interface proxy already exists at server side.
         bool foundRequiredInterfaceProxy = FindInterfaceRequiredOrInput(
@@ -1419,6 +1434,8 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
 
         // Create provided interface proxy
         if (!foundProvidedInterfaceProxy) {
+            // MJ: could minimize network traffic if GCM caches provided interface
+            // description information
             // Extract provided interface information from the server process
             InterfaceProvidedDescription providedInterfaceDescription;
             if (LocalManager) {
@@ -1440,6 +1457,10 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
                     }
 
                 }
+
+                // MJ (3/30/11): switch name of provided interface proxy with name of provided
+                // interface "instance" (providedInterfaceInstanceName)
+                providedInterfaceDescription.InterfaceProvidedName = providedInterfaceInstanceName;
 
                 // Let the client process create provided interface proxy
                 if (LocalManager->GetProcessName() == clientProcessName) {
@@ -1467,6 +1488,10 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
                                              << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
                     return InvalidConnectionID;
                 }
+
+                // MJ (3/30/11): switch name of provided interface proxy with name of provided
+                // interface "instance" (providedInterfaceInstanceName)
+                providedInterfaceDescription.InterfaceProvidedName = providedInterfaceInstanceName;
 
                 // Let the client process create provided interface proxy
                 if (!LocalManagerConnected->CreateInterfaceProvidedProxy(
@@ -1682,6 +1707,13 @@ void mtsManagerGlobal::DisconnectInternal(void)
         localConfiguration = ((serverProcessName == clientProcessName) &&
                                serverProcessName == mtsManagerLocal::ProcessNameOfLCMDefault);
 
+#if CISST_MTS_HAS_ICE
+        if (!localConfiguration) {
+            serverInterfaceName = 
+                mtsComponentProxy::GetNameOfProvidedInterfaceInstance(serverInterfaceName, connectionID);
+        }
+#endif
+
 #if !CISST_MTS_HAS_ICE
         if (!localConfiguration) {
             CMN_LOG_CLASS_RUN_ERROR << "Disconnect: invalid process names requested for disconnection: "
@@ -1718,7 +1750,6 @@ void mtsManagerGlobal::DisconnectInternal(void)
             // When removing connection between (InterfaceComponentRequired, InterfaceInternalProvided),
             // clean up required interface "InterfaceComponentRequiredFor(UserComponent)" of
             // manager component "LCM_MCC" together.
-
             const std::string nameOfLCM_MCC = // LCM_MCC
                 mtsManagerComponentBase::GetNameOfManagerComponentClientFor(mtsManagerLocal::ProcessNameOfLCMDefault);
             if ((serverComponentName != nameOfLCM_MCC) && (clientComponentName == nameOfLCM_MCC) &&
@@ -1836,6 +1867,14 @@ void mtsManagerGlobal::DisconnectInternal(void)
                         << "\"" << std::endl;
                 }
             }
+
+            // Naming rule for provided interface instances does not apply to the MCS in the GCM
+            if (serverProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM &&
+                serverComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) 
+            {
+                serverInterfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided;
+            }
+
             if (FindInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceName)) {
                 if (!RemoveConnectionOfInterfaceProvidedOrOutput(
                         serverProcessName, serverComponentName, serverInterfaceName, connectionID))

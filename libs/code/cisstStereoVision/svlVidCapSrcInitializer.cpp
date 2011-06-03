@@ -57,23 +57,23 @@ void svlInitializeVideoCapture()
 #endif // _svlVidCapSrcMIL_h
 
 #ifdef _svlVidCapSrcDirectShow_h
-    delete new svlVidCapSrcDirectShow;
+    SVL_INITIALIZE(svlVidCapSrcDirectShow);
 #endif // _svlVidCapSrcDirectShow_h
 
 #ifdef _svlVidCapSrcSVS_h
-    delete new svlVidCapSrcSVS;
+    SVL_INITIALIZE(svlVidCapSrcSVS);
 #endif // _svlVidCapSrcSVS_h
 
 #ifdef _svlVidCapSrcV4L2_h
-    delete new svlVidCapSrcV4L2;
+    SVL_INITIALIZE(svlVidCapSrcV4L2);
 #endif // _svlVidCapSrcV4L2_h
 
 #ifdef _svlVidCapSrcOpenCV_h
-    delete new svlVidCapSrcOpenCV;
+    SVL_INITIALIZE(svlVidCapSrcOpenCV);
 #endif // _svlVidCapSrcOpenCV_h
 
 #ifdef _svlVidCapSrcDC1394_h
-    delete new svlVidCapSrcDC1394;
+    SVL_INITIALIZE(svlVidCapSrcDC1394);
 #endif // _svlVidCapSrcDC1394_h4
 }
 

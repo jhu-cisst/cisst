@@ -38,6 +38,8 @@ class svlStreamProc;
 
 class CISST_EXPORT svlFilterSourceBase : public svlFilterBase
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+
 friend class svlFilterOutput;
 friend class svlStreamManager;
 friend class svlStreamProc;
@@ -89,7 +91,7 @@ private:
     // Hide input setup methods from derived classes
     int AddInput(const std::string &inputname, bool trunk = true);
     int AddInputType(const std::string &inputname, svlStreamType type);
-    int UpdateTypes(svlFilterInput &input, svlStreamType type);
+    int OnConnectInput(svlFilterInput &input, svlStreamType type);
 
     bool AutoTimestamp;
     osaStopwatch TargetTimer;
@@ -102,6 +104,8 @@ private:
 
     SourceConfig SourceSettings;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceBase)
 
 #endif // _svlFilterSourceBase_h
 

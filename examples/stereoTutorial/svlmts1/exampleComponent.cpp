@@ -21,6 +21,9 @@
  */
 
 #include "exampleComponent.h"
+#ifdef CAMERA_SOURCE
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#endif
 
 
 /******************************/

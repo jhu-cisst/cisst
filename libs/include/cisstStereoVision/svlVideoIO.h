@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlVideoIO_h
 #define _svlVideoIO_h
 
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 #include <string>
@@ -92,8 +93,9 @@ public:
 /*** svlVideoCodecBase class *********/
 /*************************************/
 
-class CISST_EXPORT svlVideoCodecBase
+class CISST_EXPORT svlVideoCodecBase : public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
 public:
     svlVideoCodecBase();
     virtual ~svlVideoCodecBase();
@@ -120,6 +122,7 @@ public:
     virtual svlVideoIO::Compression* GetCompression() const;
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
+    virtual int DialogCompression(const std::string &filename);
 
     virtual double GetTimestamp() const = 0;
     virtual int SetTimestamp(const double timestamp);
@@ -141,6 +144,8 @@ private:
     bool Multithreaded;
     bool VariableFramerate;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlVideoCodecBase)
 
 #endif // _svlVideoIO_h
 

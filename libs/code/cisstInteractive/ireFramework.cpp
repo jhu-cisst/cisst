@@ -326,6 +326,26 @@ ireFramework* ireFramework::Instance(void) {
 //
 void ireFramework::InitShellInstance(void)
 {
+    if (IsInitialized()) {
+        CMN_LOG_INIT_WARNING << "ireFramework already initialized" << std::endl;
+        return;
+    }
+#if (CISST_OS == CISST_LINUX)
+    // Need following to avoid having PyExc_ValueError be an undefined symbol
+    // when loading the IRE (wxPython version). The Python library is already loaded,
+    // but the symbols are not global -- this is fixed by the dlopen call below with
+    // RTLD_NOLOAD (doesn't load the library -- assumes it is already loaded).
+    char libname[40];
+    sprintf(libname, "libpython%d.%d.so", (int)PY_MAJOR_VERSION, (int)PY_MINOR_VERSION);
+    dlopen(libname, RTLD_LAZY | RTLD_NOLOAD | RTLD_GLOBAL);
+    const char *msg = dlerror();
+    if (msg) {
+        std::cerr << "InitShellInstance: dlerror when loading " << libname
+                           << ": " << msg << std::endl;
+        CMN_LOG_INIT_ERROR << "InitShellInstance: dlerror when loading " << libname
+                           << ": " << msg << std::endl;
+    }
+#endif
     Py_Initialize();
     PyEval_InitThreads();
 #if (CISST_OS == CISST_LINUX)
@@ -375,99 +395,83 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         cmnThrow(std::runtime_error("LaunchIREShellInstance: invalid IRE state."));
     }
     IRE_State = IRE_LAUNCHED;
-
-    // Initialize ireLogger module, which is used for the cmnLogger output window
-    PyTextCtrlHook::InitModule("ireLogger");
-    PySys_SetArgv(2, const_cast<char **>(python_args));
-
-    if (useIPython) {
-        PyRun_SimpleString(startup);
-        PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
-        PyRun_SimpleString("ipshell = IPShellEmbed()\n");
-        PyRun_SimpleString("ipshell()\n");
-        IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
-        return;
-    }
-
-
-    PyObject *pName, *pModule, *pDict, *pFunc;
-    PyObject *pArgs, *pValue;
-
-    pName = PyString_FromString("irepy");
-
-    pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
+    NewPythonThread = newPythonThread;
 
     if (pInstance)
         Py_DECREF(pInstance);
     pInstance = 0;
 
-    NewPythonThread = newPythonThread;
-    if (pModule != NULL) {
-        // pDict is borrowed - no need to decref
-        pDict = PyModule_GetDict(pModule);
+    // Initialize ireLogger module, which is used for the cmnLogger output window
+    PyTextCtrlHook::InitModule("ireLogger");
+    PySys_SetArgv(2, const_cast<char **>(python_args));
 
-        if (NewPythonThread) {
-            PyObject* pClass = PyDict_GetItemString(pDict, "IreThread");
-
-            // Create an instance of the class
-            if (PyCallable_Check(pClass))
-            {
-                pInstance = PyObject_CallObject(pClass, NULL);
-            }
-            if (pInstance)
-                PyObject_CallMethod(pInstance, "start", NULL);
-            else {
-                IRE_State = IRE_FINISHED;
-                PyErr_Clear();
-                cmnThrow(std::runtime_error("LaunchIREShellInstance: Could not create IRE thread."));
-            }
-        }
-        else {
-            // pFunc is borrowed
-            pFunc = PyDict_GetItemString(pDict, "launch");
-
-            if (pFunc && PyCallable_Check(pFunc)) {
-                pArgs = PyTuple_New(0);
-
-                // pValue is NOT borrowed - remember to decref
-                pValue = PyObject_CallObject(pFunc, pArgs);
-            }
-            else {
-                if (PyErr_Occurred()) {
-
-                    IRE_State = IRE_FINISHED;
-                    PyErr_Clear();
-                    cmnThrow(std::runtime_error("LaunchIREShellInstance: Call to the launch() function failed."));
-                }
-            }
-
-            //decref all PyObjects
-            Py_DECREF(pValue);
-            Py_DECREF(pArgs);
-        }
-        Py_DECREF(pModule);
-    }
-    else {
+    // Get global dictionary (pModule and pDict are borrowed references)
+    PyObject *pModule = PyImport_AddModule("__main__");
+    PyObject *pDict = PyModule_GetDict(pModule);
+    if (pDict == NULL) {
         IRE_State = IRE_FINISHED;
         PyErr_Clear();
-        cmnThrow(std::runtime_error("LaunchIREShellInstance: import irepy has failed.  Check libraries."));
+        cmnThrow(std::runtime_error("LaunchIREShellInstance: could not get global dictionary"));
     }
-#if 0
-    // Set IRE_State to IRE_FINISHED on exit, unless IRE started in a new Python thread.
-    // Not necessary because IRE_State is modified by callback from IRE Python call.
-    if (!NewPythonThread)
-        IRE_State = IRE_FINISHED;
-#endif
+
+    char launchString[32];
+    if (useIPython) {
+        PyRun_SimpleString(startup);
+        PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
+        PyRun_SimpleString("ipshell = IPShellEmbed()\n");
+        strcpy(launchString, "ipshell(local_ns = globals())");
+        IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
+    }
+    else {
+        PyRun_SimpleString("from irepy import ireMain");
+        strcpy(launchString, "ireMain.launchIrePython()");
+    }
+
+    if (NewPythonThread) {
+        PyRun_SimpleString("import threading\n");
+        char buffer[300];
+        sprintf(buffer, "class IreThread(threading.Thread):\n"
+                        "    def __init__(self):\n"
+                        "        threading.Thread.__init__(self)\n"
+                        "    def run(self):\n"
+                        "        %s",
+                        launchString);
+        PyRun_SimpleString(buffer);
+        PyObject* pClass = PyDict_GetItemString(pDict, "IreThread");
+
+        // Create an instance of the class
+        if (PyCallable_Check(pClass))
+            pInstance = PyObject_CallObject(pClass, NULL);
+        if (pInstance) {
+            PyObject_CallMethod(pInstance, "start", NULL);
+        }
+        else {
+            IRE_State = IRE_FINISHED;
+            PyErr_Clear();
+            cmnThrow(std::runtime_error("LaunchIREShellInstance: Could not create IRE thread."));
+        }
+    }
+    else {
+        PyRun_SimpleString(launchString);
+    }
 }
 
 void ireFramework::JoinIREShellInstance(double timeout)
 {
-    if (NewPythonThread && ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE))) {
-        if (timeout >= 0)
-            PyObject_CallMethod(pInstance, "join", "(f)", timeout);
+    if (NewPythonThread && pInstance && ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE))) {
+        // First, check whether the Python thread is still alive.
+        PyObject *result;
+        result = PyObject_CallMethod(pInstance, "isAlive", NULL);
+        bool isAlive = (result == Py_True);
+        Py_DECREF(result);
+        if (isAlive) {
+            if (timeout >= 0)
+                PyObject_CallMethod(pInstance, "join", "(f)", timeout);
+            else
+                PyObject_CallMethod(pInstance, "join", NULL);
+        }
         else
-            PyObject_CallMethod(pInstance, "join", NULL);
+            IRE_State = IRE_FINISHED;
     }
 }
 
@@ -483,18 +487,6 @@ bool ireFramework::IsActive()
 
 bool ireFramework::IsFinished()
 {
-#if 0
-    // Code for checking whether Python thread is still alive.
-    // This is not needed because the IRE Python code calls
-    // SetActiveFlag(False) on exit (via the callback function).
-    if (NewPythonThread && pInstance) {
-        PyObject *result;
-        result = PyObject_CallMethod(pInstance, "isAlive", NULL);
-        bool ret = (result == Py_True);
-        Py_DECREF(result);
-        return ret;
-    }
-#endif
     return (IRE_State == IRE_FINISHED);
 }
 
@@ -515,7 +507,10 @@ void ireFramework::Reset()
 
 void ireFramework::UnblockThreads()
 {
-    IreThreadState = static_cast<void *>(PyEval_SaveThread());
+    if ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE))
+        IreThreadState = static_cast<void *>(PyEval_SaveThread());
+    else
+        IreThreadState = 0;
 }
 
 void ireFramework::BlockThreads()

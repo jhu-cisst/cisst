@@ -201,6 +201,14 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
         this->From(rodriguezRotation);
     }
 
+    /*! Constructor from a vctEulerRotation3. */
+    template <vctEulerRotation3Order::OrderType order>
+    inline vctMatrixRotation3(const vctEulerRotation3<order> & eulerRotation)
+        throw(std::runtime_error)
+    {
+        this->From(eulerRotation);
+    }
+
     /*!
       \name Constructors without normalization test
 
@@ -334,6 +342,19 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
             this->FromRaw(rodriguezRotation);
         }
     }
+
+    /*! Construction from a vctEulerRotation3. */
+    template <vctEulerRotation3Order::OrderType order>
+    inline vctMatrixRotation3(const vctEulerRotation3<order> & eulerRotation,
+                              bool normalizeInput)
+    {
+        if (normalizeInput) {
+            this->FromNormalized(eulerRotation);
+        } else {
+            this->FromRaw(eulerRotation);
+        }
+    }
+
     //@}
 
     /*! Initialize this rotation matrix with a 3x3 matrix.  This

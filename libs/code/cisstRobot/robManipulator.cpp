@@ -241,6 +241,15 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
 
 robManipulator::Errno 
 robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
+				   const vctFrm3& Rts,
+				   double tolerance, 
+				   size_t Niterations ){
+  vctFrame4x4<double> Rts4x4( Rts.Rotation(), Rts.Translation() );
+  return InverseKinematics( q, Rts4x4, tolerance, Niterations );
+}
+
+robManipulator::Errno 
+robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
 				   const vctFrame4x4<double>& Rts,
 				   double tolerance, 
 				   size_t Niterations ){

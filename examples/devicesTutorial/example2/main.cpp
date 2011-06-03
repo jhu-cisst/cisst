@@ -9,44 +9,34 @@
 #include "displayTask.h"
 #include "displayUI.h"
 
-using namespace std;
-
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_RUN_ERROR);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_RUN_ERROR);
-    cmnClassRegister::SetLoD("devSartoriusSerial", CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMaskClass("devSartoriusSerial", CMN_LOG_ALLOW_ALL);
 
     // create our two tasks
     const long PeriodDisplay = 10; // in milliseconds
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
     displayTask * displayTaskObject =
         new displayTask("Display", PeriodDisplay * cmn_ms);
     displayTaskObject->Configure();
-    taskManager->AddComponent(displayTaskObject);
+    componentManager->AddComponent(displayTaskObject);
 
     devSartoriusSerial * scaleObject = new devSartoriusSerial("Sartorius", "/dev/tty.KeySerial1");
-	taskManager->AddComponent(scaleObject);
+	componentManager->AddComponent(scaleObject);
 
     // connect the tasks
-    taskManager->Connect("Display", "Scale", "Sartorius", "Scale");
-
-    // generate a nice tasks diagram
-    std::ofstream dotFile("example1.dot"); 
-    taskManager->ToStreamDot(dotFile);
-    dotFile.close();
-
+    componentManager->Connect("Display", "Scale", "Sartorius", "Scale");
     // create the tasks, i.e. find the commands
-    taskManager->CreateAll();
+    componentManager->CreateAll();
     // start the periodic Run
-    taskManager->StartAll();
+    componentManager->StartAll();
 
     // wait until the close button of the UI is pressed
     while (1) {
@@ -57,14 +47,14 @@ int main(void)
         }
     }
     // cleanup
-    taskManager->KillAll();
+    componentManager->KillAll();
 
     osaSleep(PeriodDisplay * 2);
     while (!displayTaskObject->IsTerminated()) {
         osaSleep(PeriodDisplay);
         std::cout << "." << std::flush;
     }
-    taskManager->Cleanup();
+    componentManager->Cleanup();
     return 0;
 }
 

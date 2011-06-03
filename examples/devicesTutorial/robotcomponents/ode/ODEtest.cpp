@@ -4,11 +4,13 @@
 
 #include <cisstVector/vctAxisAngleRotation3.h>
 
-#include <cisstMultiTask/mtsTaskManager.h>
-
 #include <cisstCommon/cmnGetChar.h>
 
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -61,9 +63,13 @@ int main(){
 			       data+"background.3ds",
 			       world );
 
-
+  
   cmnGetChar();
+  background->SetSwitch( false );
 
+  std::cout << "ENTER to exit." << std::endl;
+  cmnGetChar();
+  
   taskManager->KillAll();
   taskManager->Cleanup();
 

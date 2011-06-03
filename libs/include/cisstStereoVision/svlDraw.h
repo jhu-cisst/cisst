@@ -57,7 +57,7 @@ namespace svlDraw
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, svlTriangle & tri, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, svlPoint2D corner1, svlPoint2D corner2, svlPoint2D corner3, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, int x1, int y1, int x2, int y2, int x3, int y3, svlRGB color, svlDraw::Internals& internals);
-    void CISST_EXPORT Poly(svlSampleImage* image, unsigned int videoch, const vctDynamicVectorRef<svlPoint2D> points, svlRGB color, unsigned int start = 0);
+    void CISST_EXPORT Poly(svlSampleImage* image, unsigned int videoch, const vctDynamicVectorRef<svlPoint2D> points, svlRGB color, unsigned int thickness, unsigned int start);
     void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, svlPoint2D center, vctInt2 radii, svlRGB color, double from_angle = 0.0, double to_angle = 360.0, double rotation = 0.0, int thickness = 1);
     void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, svlRGB color, unsigned int radius = 5);
     void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned int radius = 5);

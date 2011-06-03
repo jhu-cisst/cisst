@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageConvolution class *****/
 /*****************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageConvolution)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageConvolution, svlFilterBase)
 
 svlFilterImageConvolution::svlFilterImageConvolution() :
     svlFilterBase(),
@@ -43,6 +43,8 @@ svlFilterImageConvolution::svlFilterImageConvolution() :
     AddInputType("input", svlTypeImageMono8Stereo);
     AddInputType("input", svlTypeImageMono16);
     AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageMono32);
+    AddInputType("input", svlTypeImageMono32Stereo);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);

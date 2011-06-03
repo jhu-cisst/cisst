@@ -59,12 +59,21 @@ bool cmnStreamRawParser::Parse(std::istream & inputStream)
     }
     bool success = true;
     for (it = KeyList.begin(); it != KeyList.end(); it++) {
-        if (!(*it)->isValid()) {
+        if ((*it)->isRequired() && !(*it)->isValid()) {
             CMN_LOG_INIT_WARNING << "cmnStreamRawParser: missing data for " << (*it)->GetKey() << std::endl;
             success = false;
         }
     }
     return success;
+}
+
+bool cmnStreamRawParser::IsValid(const std::string &name) const
+{
+    KeyListType::const_iterator it;
+    it = KeyList.find(&EntryBase(name));
+    if (it == KeyList.end())
+        return false;
+    return (*it)->isValid();
 }
 
 void cmnStreamRawParser::ToStream(std::ostream & outputStream) const

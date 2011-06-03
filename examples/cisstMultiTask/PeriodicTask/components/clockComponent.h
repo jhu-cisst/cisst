@@ -23,12 +23,23 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _clockComponent_h
 #define _clockComponent_h
 
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 
-class clockComponent: public mtsComponent {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-    
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsComponentGeneratorMacros.h>
+
+// check if this module is built as a DLL
+#ifdef cisstMultiTaskPeriodicTaskComponents_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
+#include <cisstCommon/cmnExportMacros.h>
+
+// avoid impact on other modules
+#undef CISST_THIS_LIBRARY_AS_DLL
+
+class CISST_EXPORT clockComponent: public mtsComponent {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
+
  protected:
 
     // macros used by the cisst component generator
@@ -41,7 +52,7 @@ class clockComponent: public mtsComponent {
 
     osaStopwatch Timer;  // this is the actual component (wrapped)
     void GetTime(mtsDouble & time) const;  // used by the command "GetTime"
-	
+
  public:
     clockComponent(const std::string & componentName);
     ~clockComponent() {};

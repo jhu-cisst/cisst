@@ -64,6 +64,8 @@ public:
     virtual void Run(void) {};        // performed periodically
     virtual void Cleanup(void) {}; // user defined cleanup
 
+    virtual void SetSynced(bool isSynced) { Sync = isSynced; };
+
     //States of operation
     enum {STOP, PLAY, SEEK};
 

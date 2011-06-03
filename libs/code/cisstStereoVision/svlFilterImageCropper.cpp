@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageCropper class **********/
 /******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageCropper)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageCropper, svlFilterBase)
 
 svlFilterImageCropper::svlFilterImageCropper() :
     svlFilterBase(),
@@ -39,10 +39,12 @@ svlFilterImageCropper::svlFilterImageCropper() :
     AddInputType("input", svlTypeImageRGBA);
     AddInputType("input", svlTypeImageMono8);
     AddInputType("input", svlTypeImageMono16);
+    AddInputType("input", svlTypeImageMono32);
     AddInputType("input", svlTypeImageRGBStereo);
     AddInputType("input", svlTypeImageRGBAStereo);
     AddInputType("input", svlTypeImageMono8Stereo);
     AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageMono32Stereo);
     AddInputType("input", svlTypeImage3DMap);
 
     AddOutput("output", true);

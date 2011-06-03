@@ -84,14 +84,14 @@ class CISST_EXPORT devOSGBody :
   // The switch
   osg::ref_ptr< osg::Switch > osgswitch;
   
-  // A vector of geometries
-  std::vector<osg::Geometry*> osggeometries;
-
-
   void CreateInterface( const std::string& transformfn, 
 			const std::string& switchfn );
+
   void ReadModel( const std::string& fname );
-  void Read3DData( const vctDynamicMatrix<double>& pc );
+
+  void Read3DData( const vctDynamicMatrix<double>& pc,
+		   const vctFixedSizeVector<unsigned char,3>& RGB = 
+		   vctFixedSizeVector<unsigned char,3>( 200, 200, 200 ) );
 
  public: 
 
@@ -110,7 +110,7 @@ class CISST_EXPORT devOSGBody :
   devOSGBody( const std::string& name, 
 	      const vctFrame4x4<double>& Rt,
 	      const std::string& model,
-	      devOSGWorld* world,
+	      devOSGWorld* world = NULL,
 	      const std::string& transformfn = "",
 	      const std::string& switchfn = "" );
 
@@ -129,7 +129,7 @@ class CISST_EXPORT devOSGBody :
   devOSGBody( const std::string& name, 
 	      const vctFrm3& Rt,
 	      const std::string& model,
-	      devOSGWorld* world,
+	      devOSGWorld* world = NULL,
 	      const std::string& transformfn = "",
 	      const std::string& switchfn = "" );
 
@@ -137,7 +137,8 @@ class CISST_EXPORT devOSGBody :
   devOSGBody( const std::string& name, 
               const vctFrm3& Rt,
 	      const vctDynamicMatrix<double>& pc,
-	      devOSGWorld* world,
+	      devOSGWorld* world = NULL,
+	      unsigned char r=200, unsigned char g=200, unsigned char b=200,
               const std::string& transformfn = "",
 	      const std::string& switchfn = "" );
 
@@ -145,10 +146,14 @@ class CISST_EXPORT devOSGBody :
 
   //! Set the transform of the body
   void SetTransform( const vctFrame4x4<double>& Rt );
+  void SetTransform( const vctFrm3& Rt );
 
   //! Set the switch of the body
   void SetSwitch( bool onoff );
   
+  void SetModeLine();
+  void SetModePoint();
+  void SetModeFill();
 };
 
 #endif

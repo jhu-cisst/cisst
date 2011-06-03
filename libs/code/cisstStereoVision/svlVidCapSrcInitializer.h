@@ -23,6 +23,8 @@
 #ifndef _svlVidCapSrcInitializer_h
 #define _svlVidCapSrcInitializer_h
 
+#include "svlInitializerMacros.h"
+
 // Includes for handling device specific API
 // interactions that cannot otherwise be abstracted
 

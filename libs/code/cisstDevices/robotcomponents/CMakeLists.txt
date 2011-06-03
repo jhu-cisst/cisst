@@ -1,5 +1,4 @@
 
-# those will eventuall be removed
 option( CISST_DEV_HAS_ODE "Use support for ODE." OFF )
 option( CISST_DEV_HAS_GLUT "Use support for GLUT." OFF )
 
@@ -81,7 +80,7 @@ if( CISST_DEV_HAS_RTSOCKETCAN )
 
 endif( CISST_DEV_HAS_RTSOCKETCAN )
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil )
 
 if( OPENSCENEGRAPH_FOUND )
 
@@ -93,6 +92,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGCamera.h
     robotcomponents/osg/devOSGManipulator.h
     robotcomponents/osg/devOSGMono.h
+    robotcomponents/osg/devOSGPick.h
     robotcomponents/osg/devOSGStereo.h
     robotcomponents/osg/devOSGWorld.h
     )
@@ -104,6 +104,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGCamera.cpp
     robotcomponents/osg/devOSGManipulator.cpp
     robotcomponents/osg/devOSGMono.cpp
+    robotcomponents/osg/devOSGPick.cpp
     robotcomponents/osg/devOSGStereo.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
@@ -118,7 +119,8 @@ if( OPENSCENEGRAPH_FOUND )
     set( CMAKE_CXX_FLAGS 
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
       PARENT_SCOPE )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARY )
+    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
     
     SET( HEADER_FILES 
       
@@ -129,10 +131,8 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEServoMotor.h
       robotcomponents/ode/devODEManipulator.h
       
-      #      robotcomponents/ode/devODEBH.h
-      #      robotcomponents/ode/devODEBHF1.h
-      #      robotcomponents/ode/devODEBHF2.h
-      #      robotcomponents/ode/devODEBHF3.h
+      robotcomponents/ode/devODEBH.h
+      robotcomponents/ode/devODEGripper.h
       
       )
 
@@ -146,10 +146,8 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEServoMotor.cpp
       robotcomponents/ode/devODEManipulator.cpp
       
-      #      robotcomponents/ode/devODEBH.cpp
-      #      robotcomponents/ode/devODEBHF1.cpp
-      #      robotcomponents/ode/devODEBHF2.cpp
-      #      robotcomponents/ode/devODEBHF3.cpp
+      robotcomponents/ode/devODEBH.cpp
+      robotcomponents/ode/devODEGripper.cpp
       
       robotcomponents/ode/devODEWorld.cpp 
       

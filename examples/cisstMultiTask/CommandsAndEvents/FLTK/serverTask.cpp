@@ -18,11 +18,11 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon/cmnConstants.h>
-#include <cisstOSAbstraction/osaSleep.h>
-
 #include "serverTask.h"
 
+#include <cisstCommon/cmnConstants.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskDouble);
@@ -46,8 +46,8 @@ serverTask<_dataType>::serverTask(const std::string & taskName, double period):
         provided->AddCommandQualifiedRead(&serverTask<_dataType>::QualifiedRead, this, "QualifiedRead");
         provided->AddCommandVoid(&serverTask<_dataType>::VoidSlow, this, "VoidSlow");
         provided->AddCommandWrite(&serverTask<_dataType>::WriteSlow, this, "WriteSlow");
-        provided->AddCommandVoidReturn(&serverTask<_dataType>::VoidReturn, this, "VoidReturn");
-        provided->AddCommandWriteReturn(&serverTask<_dataType>::WriteReturn, this, "WriteReturn");
+        // provided->AddCommandVoidReturn(&serverTask<_dataType>::VoidReturn, this, "VoidReturn");
+        // provided->AddCommandWriteReturn(&serverTask<_dataType>::WriteReturn, this, "WriteReturn");
         provided->AddEventVoid(this->EventVoid, "EventVoid");
         provided->AddEventWrite(this->EventWrite, "EventWrite", _dataType(3.14));
     }
@@ -134,7 +134,7 @@ void serverTask<_dataType>::WriteReturn(const _dataType & data, _dataType & plac
     FLTK_CRITICAL_SECTION {
         placeHolder = _dataType(UI.ReadValue->value());
     }
-    
+
 }
 
 

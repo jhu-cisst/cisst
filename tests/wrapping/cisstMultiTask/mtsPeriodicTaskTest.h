@@ -22,8 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsPeriodicTaskTest_h
 #define _mtsPeriodicTaskTest_h
 
-// include for the whole cisstMultiTask library
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
 
 // code required for the DLL generation
 #ifdef cisstMultiTaskPythonTest_EXPORTS
@@ -35,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsPeriodicTaskTest: public mtsTaskPeriodic {
     // used to control the log level, "Run Error" by default
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
  protected:
     // double
     mtsDouble Double;

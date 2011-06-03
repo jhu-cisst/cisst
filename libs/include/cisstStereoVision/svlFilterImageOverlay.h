@@ -44,6 +44,7 @@ public:
 
     int AddInputImage(const std::string &name);
     int AddInputTargets(const std::string &name);
+    int AddInputBlobs(const std::string &name);
     int AddInputText(const std::string &name);
     void AddOverlay(svlOverlay & overlay);
     int AddQueuedItems();
@@ -61,10 +62,12 @@ private:
 
     unsigned int ImageInputsToAddUsed;
     unsigned int TargetInputsToAddUsed;
+    unsigned int BlobInputsToAddUsed;
     unsigned int TextInputsToAddUsed;
     unsigned int OverlaysToAddUsed;
     vctDynamicVector<std::string> ImageInputsToAdd;
     vctDynamicVector<std::string> TargetInputsToAdd;
+    vctDynamicVector<std::string> BlobInputsToAdd;
     vctDynamicVector<std::string> TextInputsToAdd;
     vctDynamicVector<svlOverlay*> OverlaysToAdd;
 

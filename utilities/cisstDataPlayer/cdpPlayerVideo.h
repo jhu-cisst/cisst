@@ -55,6 +55,9 @@ public:
     void Run(void);
     void Cleanup(void) {};
 
+    //If not synced then the player needs to go through Manager in order to play.
+    void SetSync(bool isSynced);
+
 private:
 
     Ui::cdpPlayerWidget ExWidget;
@@ -71,7 +74,7 @@ private:
     void LoadData(void);
     void UpdateLimits(void);
 
-    void SetupPipeline(void);
+    void SetupPipeline(const std::string &filename);
 
     QWidget MainWindow;
     svlFilterImageOpenGLQtWidget * VideoWidget;
@@ -90,6 +93,7 @@ private slots:
     void QSlotStopClicked(void);
     void QSlotSetSaveStartClicked(void);
     void QSlotSetSaveEndClicked(void);
+    void QSlotOpenFileClicked(void);
 
 };
 
