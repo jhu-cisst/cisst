@@ -212,7 +212,7 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             else
                 description = deviceNameBSTR;
 
-#else
+#elsif (CISST_OS == CISST_LINUX)
             char *		deviceNameString = NULL;
             result = deckLink->GetModelName((const char **)(&deviceNameString));
             // name
@@ -220,7 +220,17 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
                 description = "BlackMagic DeckLink";
             else
                 description = deviceNameString;
-
+#else // Mac OS
+            CFStringRef deviceNameCFString = 0;
+            result = deckLink->GetModelName(&deviceNameCFString);
+            if (result != S_OK) {
+                description = "BlackMagic DeckLink";
+            } else {
+                char deviceName[64];
+                CFStringGetCString(deviceNameCFString, deviceName, sizeof(deviceName), kCFStringEncodingMacRoman);
+                description = deviceName;
+            }
+            
 #endif // _WIN32
 
             // platform
