@@ -210,7 +210,7 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             if(result!= S_OK)
                 description = "BlackMagic DeckLink";
             else
-                description = deviceNameBSTR;
+                description = (char *) deviceNameBSTR;
 
 #elsif (CISST_OS == CISST_LINUX)
             char *		deviceNameString = NULL;
