@@ -30,8 +30,8 @@ int main(){
 	cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
 	cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
-	cisstOpenNI kinect( "C:/dev/OpenNI/data/SamplesConfig.xml" );
-    kinect.Configure();
+	cisstOpenNI kinect;
+    kinect.Configure( "C:/dev/OpenNI/data/SamplesConfig.xml" );
 
 	while(true){
         

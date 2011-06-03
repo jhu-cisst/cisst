@@ -34,7 +34,7 @@ private:
 public:
 
     //! Default Constructor
-    cisstOpenNI( const std::string& devname = "" );
+    cisstOpenNI();
 
     //! Default DeConstructor
     ~cisstOpenNI();
@@ -44,7 +44,7 @@ public:
     Creates all nodes, populates callback lists and establishes contexts for depth, rgbImage
     and users.
     */
-    void Configure();
+    void Configure( const std::string& devname = "" );
 
     //! Update All
     /**

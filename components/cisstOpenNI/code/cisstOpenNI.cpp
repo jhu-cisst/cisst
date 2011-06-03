@@ -108,12 +108,9 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(xn::SkeletonCapability& cap
     openNIDataObject->UserCalibrationEndCallback(capability,bSuccess,nId);
 }
 
-cisstOpenNI::cisstOpenNI( const std::string& fname  ){
-
+cisstOpenNI::cisstOpenNI(){
 
     this->Data = new cisstOpenNIData;
-
-    this->name = fname;
     this->skeletons.resize(6);
 
 }
@@ -125,7 +122,10 @@ cisstOpenNI::~cisstOpenNI()
 
 }
 
-void cisstOpenNI::Configure(){
+void cisstOpenNI::Configure( const std::string& fname  ){
+
+    // Store XML Config File
+    this->name = fname;
 
     // Errors
     xn::EnumerationErrors errors;
