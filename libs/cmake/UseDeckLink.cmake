@@ -30,7 +30,7 @@ if (DeckLink_FOUND)
     include_directories (${DeckLink_IDL_BINARY_DIR})
     set (DeckLink_INCLUDE_DIR ${DeckLink_INCLUDE_DIR} ${DeckLink_IDL_BINARY_DIR})
     # create library using idl and c file generated from idl
-    add_library (BlackMagicDeckLink
+    add_library (BlackMagicDeckLink STATIC
                  ${DeckLink_EXTRA_CODE_IDL}
 		 "${DeckLink_IDL_BINARY_DIR}/DeckLinkAPI_i.c")
     set_source_files_properties ("${DeckLink_IDL_BINARY_DIR}/DeckLinkAPI_i.c" PROPERTIES GENERATED TRUE)
@@ -39,7 +39,7 @@ if (DeckLink_FOUND)
 
   else (WIN32)
     # on Mac and Linux, create a static library from cpp file 
-    add_library (BlackMagicDeckLink
+    add_library (BlackMagicDeckLink STATIC
                  ${DeckLink_EXTRA_CODE_CPP})
   endif (WIN32)
 
