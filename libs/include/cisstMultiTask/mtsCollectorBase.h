@@ -117,6 +117,7 @@ protected:
 
     /*! Output file name, including working directory. */
     std::string OutputFileName;
+    std::string OutputHeaderFileName;
 
     /*! Current directory to save data */
     mtsStdString WorkingDirectoryMember;
@@ -125,6 +126,9 @@ protected:
       class or provided by a user. */
     std::ostream * OutputStream;
     std::ofstream * OutputFile;
+    // add header file stream
+    std::ofstream * OutputHeaderFile;
+    std::ostream * OutputStreamHeader;
 
     /*! Check if the output file is already opened */
     bool FileOpened;

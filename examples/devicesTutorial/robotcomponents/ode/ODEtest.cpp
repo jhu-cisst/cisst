@@ -4,11 +4,13 @@
 
 #include <cisstVector/vctAxisAngleRotation3.h>
 
-#include <cisstMultiTask/mtsTaskManager.h>
-
 #include <cisstCommon/cmnGetChar.h>
 
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -65,15 +67,7 @@ int main(){
   cmnGetChar();
   background->SetSwitch( false );
 
-  cmnGetChar();
-  vctDynamicMatrix<double> v = hubble->GetVertices();
-  devOSGBody* cp = new devOSGBody( "cp", vctFrm3(), v, world );
-
-  cmnGetChar();
-
-  vctDynamicMatrix<double> rd = camera->GetRangeData();
-  devOSGBody* osdrd = new devOSGBody( "rd", vctFrm3(), rd, world );
-
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
   
   taskManager->KillAll();

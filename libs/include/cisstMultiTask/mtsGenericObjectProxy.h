@@ -296,18 +296,8 @@ public:
     inline ~mtsGenericObjectProxyBase(void) {}
 
     /*! Return pointer to data */
-    virtual value_type & GetData(void) {
-        std::cerr << "-------* " << typeid(this).name() << std::endl;
-        bool test;
-        std::cerr << "-------- " << typeid(test).name() << std::endl;
-        std::cerr << "-------- " << typeid(_elementType).name() << std::endl;
-        return Dummy;
-    };
-    virtual const value_type & GetData(void) const  {
-        std::cerr << "-------* const " << typeid(this).name() << std::endl;
-        std::cerr << "-------- const " << typeid(_elementType).name() << std::endl;
-        return Dummy;
-    };
+    virtual value_type & GetData(void) = 0;
+    virtual const value_type & GetData(void) const = 0;
 
     /*! Conversion assignment. */
     ThisType & operator=(const ThisType &data) {

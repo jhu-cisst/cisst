@@ -37,6 +37,12 @@ set (HEADER_FILES
      cmnTypeTraitsTest.h
     )
 
+# tests that depends on external packages
+if (CISST_HAS_XML)
+  set (SOURCE_FILES ${SOURCE_FILES} cmnXMLPathTest.cpp)
+  set (HEADER_FILES ${HEADER_FILES} cmnXMLPathTest.h)
+endif (CISST_HAS_XML)
+
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries (cisstCommonTests cisstTestsMain)

@@ -73,7 +73,7 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
         }
         writer.OpenFile(dst_path);
     }
-    if (!loadcodec) {
+    if (loadcodec) {
         writer.SaveCodec("codec.dat");
     }
     std::string encoder;

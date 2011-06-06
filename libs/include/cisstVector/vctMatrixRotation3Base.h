@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctAxisAngleRotation3.h>
 #include <cisstVector/vctRodriguezRotation3Base.h>
 #include <cisstVector/vctQuaternionRotation3Base.h>
+#include <cisstVector/vctEulerRotation3.h>
 #include <cisstVector/vctExport.h>
 
 
@@ -201,6 +202,16 @@ public:
         return this->FromRaw(rodriguezRotation);
     }
 
+    /*! Conversion from an Euler rotation. */
+    template <vctEulerRotation3Order::OrderType order>
+    inline ThisType &
+    From(const vctEulerRotation3<order> & eulerRotation)
+        throw(std::runtime_error)
+    {
+        this->ThrowUnlessIsNormalized(eulerRotation);
+        return this->FromRaw(eulerRotation);
+    }
+
     //@}
 
 
@@ -299,6 +310,15 @@ public:
     FromNormalized(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
     {
         return this->FromRaw(rodriguezRotation.Normalized());
+    }
+
+
+    /*! Conversion from an Euler rotation. */
+    template <vctEulerRotation3Order::OrderType order>
+    inline ThisType &
+    FromNormalized(const vctEulerRotation3<order> & eulerRotation)
+    {
+        return this->FromRaw(eulerRotation.Normalized());
     }
     //@}
 
@@ -410,6 +430,14 @@ public:
     inline ThisType &
     FromRaw(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) {
         return this->FromRaw(vctAxisAngleRotation3<value_type>(rodriguezRotation, VCT_DO_NOT_NORMALIZE));
+    }
+
+    /*! Conversion from an Euler angle rotation */
+    template <vctEulerRotation3Order::OrderType order>
+    inline ThisType &
+    FromRaw(const vctEulerRotation3<order> & eulerRotation) {
+        vctEulerToMatrixRotation3(eulerRotation, *this);
+        return *this;
     }
 
     /*! A complementary form of assigning one matrix rotation to

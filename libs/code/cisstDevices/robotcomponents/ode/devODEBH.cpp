@@ -198,34 +198,159 @@ void devODEBH::Read()
 { output->SetPosition( GetJointsPositions() ); }
 
 void devODEBH::Write(){
-
   vctDynamicVector<double> q(4,0.0);
   double t;
   input->GetPosition( q, t ); 
-
-  SetPosition( q );
-
+  SetPositions( q );
 }
 
-void devODEBH::SetPosition( const vctDynamicVector<double>& qs ){
+devODEBH::Errno devODEBH::SetPositions( const vctDynamicVector<double>& qs ){
 
   if( qs.size() == 4 ){
 
     if( f1 != NULL ){ 
       vctDynamicVector<double> q( 3, qs[3], qs[0], qs[0]*45.0/140.0 );
-      f1->SetPosition( q );
+      if( f1->SetPositions( q ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set position of finger 1."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
     }
+
     if( f2 != NULL ){
       vctDynamicVector<double> q( 3, -qs[3], qs[1], qs[1]*45.0/140.0 );
-      f2->SetPosition( q );
+      if( f2->SetPositions( q ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set position of finger 2."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
     }
+
     if( f3 != NULL ){
       vctDynamicVector<double> q( 2,         qs[2], qs[2]*45.0/140.0 );
-      f3->SetPosition( q );
+      if( f3->SetPositions( q ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set position of finger 3."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+      
     }
+
+    return devODEBH::ESUCCESS;
+
+  }
+  
+  else{
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Expected 4 joints values. Got " << qs.size()
+		      << std::endl;
+
+    return devODEBH::EFAILURE;  
   }
 
 }
+
+devODEBH::Errno devODEBH::SetVelocities( const vctDynamicVector<double>& qds ){
+
+  if( qds.size() == 4 ){
+
+    if( f1 != NULL ){ 
+      vctDynamicVector<double> qd( 3, qds[3], qds[0], qds[0]*45.0/140.0 );
+      if( f1->SetVelocities( qd ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set velocities of finger 1."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+    }
+
+    if( f2 != NULL ){
+      vctDynamicVector<double> qd( 3, -qds[3], qds[1], qds[1]*45.0/140.0 );
+      if( f2->SetVelocities( qd ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set velocities of finger 2."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+    }
+
+    if( f3 != NULL ){
+      vctDynamicVector<double> qd( 2,         qds[2], qds[2]*45.0/140.0 );
+      if( f3->SetVelocities( qd ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set position of finger 3."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+      
+    }
+
+    return devODEBH::ESUCCESS;
+  }
+
+  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		    << "Expected 4 joints velocities. Got " << qds.size()
+		    << std::endl;
+
+  return devODEBH::EFAILURE;  
+
+}
+
+devODEBH::Errno 
+devODEBH::SetForcesTorques( const vctDynamicVector<double>& fts ){
+
+  if( fts.size() == 4 ){
+
+    if( f1 != NULL ){ 
+      vctDynamicVector<double> ft( 3, fts[3], fts[0], fts[0]*45.0/140.0 );
+      if( f1->SetForcesTorques( ft ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set F/T of finger 1."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+    }
+
+    if( f2 != NULL ){
+      vctDynamicVector<double> ft( 3, -fts[3], fts[1], fts[1]*45.0/140.0 );
+      if( f2->SetForcesTorques( ft ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set F/T of finger 2."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+    }
+
+    if( f3 != NULL ){
+      vctDynamicVector<double> ft( 2,         fts[2], fts[2]*45.0/140.0 );
+      if( f3->SetForcesTorques( ft ) != devODEManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set F/T of finger 3."
+			  << std::endl;
+	return devODEBH::EFAILURE;
+      }
+      
+    }
+
+    return devODEBH::ESUCCESS;
+  }
+
+  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		    << "Expected 4 joints values. Got " << fts.size()
+		    << std::endl;
+
+  return devODEBH::EFAILURE;  
+
+}
+
+
+
+
+
+
 
 
 

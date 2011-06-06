@@ -11,7 +11,7 @@ class CISST_EXPORT devODEServoMotor {
 
  private:
 
-  dJointID amotorid;
+  dJointID motorid;
 
   double vwmax;
   double ftmax;
@@ -23,7 +23,8 @@ class CISST_EXPORT devODEServoMotor {
 		    dBodyID body2,
 		    const vctFixedSizeVector<double,3>& axis,
 		    double vwmax,
-		    double ftmax );
+		    double ftmax,
+		    dJointType motortype );
 
   dJointID MotorID() const;
 

@@ -7,11 +7,6 @@
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
-class A{
-
-public:
-  A(){}
-};
 
 class CISST_EXPORT devOSGMono : public devOSGCamera {
 

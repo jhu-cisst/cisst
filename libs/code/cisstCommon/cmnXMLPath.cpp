@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor
+  Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,316 +22,491 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnXMLPath.h>
+
+#include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPrintf.h>
+
 #include <limits>
-#include <string.h> // for strncmp
+
+#if CISST_HAS_QT
+#define CISST_HAS_QT_XML 0 // not ready yet
+#else
+#define CISST_HAS_QT_XML 0
+#endif
+
+#if CISST_HAS_QT_XML
+
+#include <QFile>
+#include <QDomDocument>
+#include <QXmlQuery>
+
+class cmnXMLPathData
+{
+public:
+    // default ctor
+    cmnXMLPathData(void):
+        File(0),
+        Document(0)
+    {}
+
+    // default dtor
+    ~cmnXMLPathData()
+    {
+        if (this->Document) {
+            delete this->Document;
+        }
+        if (this->File) {
+            this->File->close();
+            delete this->File;
+        }
+    }
+
+    // to allow log to be associate to owner class
+    const cmnClassServicesBase * OwnerServices;
+
+    // methods use to emulate the cmnGenericObject interface used by
+    // CMN_LOG_CLASS macros.
+    inline const cmnClassServicesBase * Services(void) const {
+        return this->OwnerServices;
+    }
+
+    inline cmnLogger::StreamBufType * GetLogMultiplexer(void) const {
+        return cmnLogger::GetMultiplexer();
+    }
+
+    // File used by Qt
+    QFile * File;
+
+    // Dom Document
+    QDomDocument * Document;
+
+    // set input
+    void SetInputSource(const char * filename)
+    {
+        std::string docName = std::string("cmnXMLPath") + filename;
+        this->Document = new QDomDocument(docName.c_str());
+        this->File = new QFile(filename);
+        if (!this->File->open(QIODevice::ReadOnly)) {
+            CMN_LOG_CLASS_INIT_ERROR << "SetInputSource (Qt): an error occured while opening \"" << filename << "\"" << std::endl;
+            return;
+        }
+        if (!this->Document->setContent(this->File)) {
+            CMN_LOG_CLASS_INIT_ERROR << "SetInputSource (Qt): an error occured while loading \"" << filename << "\"" << std::endl;
+            this->File->close();
+            return;
+        }
+    }
+
+    bool SaveAs(const char * filename) const
+    {
+        std::ofstream file(filename);
+        if (!file) {
+            CMN_LOG_CLASS_INIT_ERROR << "SaveAs (Qt): failed to open file \"" << filename << "\"" << std::endl;
+            return false;
+        }
+        file << this->Document->toString().toStdString();
+        file.close();
+        return true;
+    }
+
+    // generic string get
+    bool GetXMLValueStdString(const char * context, const char * XPath, std::string & storage)
+    {
+        QXmlQuery query;
+        QString result;
+        query.setFocus(this->File);
+        QString path = context;
+        path += "/";
+        path += XPath;
+        query.setQuery(path);
+#if 0
+        if (!query.isValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): invalid query \"" << path.toStdString() << "\"" << std::endl;
+            return false;
+        }
+        query.evaluateTo(&result);
+#endif
+        std::cerr << "----- result " << result.toStdString() << std::endl;
+        return true;
+    }
+
+    bool SetXMLValueStdString(const char * context, const char * XPath, const std::string & storage)
+    {
+        return true;
+    }
+};
 
 
-cmnXMLPath::cmnXMLPath()
-{}
+#else
 
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+
+class cmnXMLPathData
+{
+public:
+    // to allow log to be associate to owner class
+    const cmnClassServicesBase * OwnerServices;
+
+    // methods use to emulate the cmnGenericObject interface used by
+    // CMN_LOG_CLASS macros.
+    inline const cmnClassServicesBase * Services(void) const {
+        return this->OwnerServices;
+    }
+
+    inline cmnLogger::StreamBufType * GetLogMultiplexer(void) const {
+        return cmnLogger::GetMultiplexer();
+    }
+
+    // Libxml2 document source
+    xmlDocPtr Document;
+
+    // Xpath context used by libxml2
+    xmlXPathContextPtr XPathContext;
+
+    // set input
+    void SetInputSource(const char * filename)
+    {
+        this->Document = xmlParseFile(filename);
+        if (this->Document == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "SetInputSource (libxml2): an error occured while parsing \"" << filename << "\"" << std::endl;
+        }
+        CMN_ASSERT(this->Document != 0);
+
+        this->XPathContext = xmlXPathNewContext(this->Document);
+        if (this->XPathContext == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "SetInputSource (libxml2): an error occured while parsing \"" << filename << "\"" << std::endl;
+            xmlFreeDoc(this->Document);
+        }
+        CMN_ASSERT(this->XPathContext != 0);
+    }
+
+    bool SaveAs(const char * filename) const
+    {
+        if (xmlSaveFile(filename, this->Document) <= 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "SaveAs (libxml2): failed to open file \"" << filename << "\"" << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    // generic string get
+    bool GetXMLValueStdString(const char * context, const char * XPath, std::string & storage)
+    {
+        /* Evaluate xpath expression */
+        /* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
+           document root in libxml2 */
+        std::string xpathlibxml("/");
+        xpathlibxml += context;
+        xpathlibxml += "/";
+        xpathlibxml += XPath;
+        xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(xpathlibxml.c_str()),
+                                                            this->XPathContext);
+        bool attributeFound = false;
+        if (xpathObj != 0) {
+            xmlNodePtr currentNode;
+            xmlNodeSetPtr nodes = xpathObj->nodesetval;
+            unsigned int size = (nodes)? nodes->nodeNr: 0;
+            unsigned int i;
+            for (i = 0; i < size; ++i) {
+                CMN_ASSERT(nodes->nodeTab[i] != 0);
+                if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
+                    currentNode = nodes->nodeTab[i];
+                    storage = reinterpret_cast<char *>(xmlNodeGetContent(currentNode));
+                    attributeFound = true;
+                    CMN_LOG_CLASS_RUN_VERBOSE << "GetXMLValueStdString (libxml2): read Xpath [" << XPath << "] Node name ["
+                                              << currentNode->name << "] Content [" << storage << "]" << std::endl;
+                } else {
+                    currentNode = nodes->nodeTab[i];
+                    CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueStdString (libxml2): node is not attribute node [" << XPath
+                                              << "] Node name [" << currentNode->name << "]" << std::endl;
+                }
+            }
+        }
+        if (!attributeFound) {
+            CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueStdString (libxml2): unable to match the location path [" << XPath
+                                      << "] in context [" << context << "]" << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    // set value
+    bool SetXMLValueStdString(const char * context, const char * XPath, const std::string & storage)
+    {
+        /* Evaluate xpath expression */
+        /* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
+           document root in libxml2 */
+        std::string xpathlibxml("/");
+        xpathlibxml += context;
+        xpathlibxml += "/";
+        xpathlibxml += XPath;
+        xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(xpathlibxml.c_str()),
+                                                            this->XPathContext);
+        if (xpathObj != 0) {
+            xmlNodePtr currentNode;
+            xmlNodeSetPtr nodes = xpathObj->nodesetval;
+            int size = (nodes)? nodes->nodeNr: 0;
+            int i;
+
+            /*
+              NOTE: the nodes are processed in reverse order, i.e. reverse
+              document order because xmlNodeSetContent can actually
+              free up descendant of the node and such nodes may have
+              been selected too ! Handling in reverse order ensure
+              that descendant are accessed first, before they get
+              removed. Mixing XPath and modifications on a tree must
+              be done carefully !
+            */
+            for (i = size - 1; i >= 0; i--) {
+                CMN_ASSERT(nodes->nodeTab[i] != 0);
+                if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
+                    xmlNodeSetContent(nodes->nodeTab[i], reinterpret_cast<const xmlChar *>(storage.c_str()));
+                    CMN_LOG_CLASS_RUN_VERBOSE << "SetXMLValueStdString: write Xpath [" << XPath << "] Node name ["
+                                              << nodes->nodeTab[i]->name << "] Content [" << storage << "]" << std::endl;
+                }
+                /*
+                  All the elements returned by an XPath query are pointers to
+                  elements from the tree *except* namespace nodes where the XPath
+                  semantic is different from the implementation in libxml2 tree.
+                  As a result when a returned node set is freed when
+                  xmlXPathFreeObject() is called, that routine must check the
+                  element type. But node from the returned set may have been removed
+                  by xmlNodeSetContent() resulting in access to freed data.
+                  This can be exercised by running
+                  valgrind xpath2 test3.xml '//discarded' discarded
+
+                  There is 2 ways around it:
+                  - make a copy of the pointers to the nodes from the result set
+                    then call xmlXPathFreeObject() and then modify the nodes
+                  - remove the reference to the modified nodes from the node set
+                    as they are processed, if they are not namespace nodes.
+                */
+                else if (nodes->nodeTab[i]->type != XML_NAMESPACE_DECL) {
+                    nodes->nodeTab[i] = 0;
+                } else {
+                    currentNode = nodes->nodeTab[i];
+                    CMN_LOG_CLASS_RUN_WARNING << "SetXMLValueStdString (libxml2): node is not attribute node [" << XPath
+                                              << "] Node name [" << currentNode->name << "]" << std::endl;
+                }
+            }
+            return true;
+        }
+        CMN_LOG_CLASS_RUN_WARNING << "SetXMLValueStdString (libxml2): enable to match the location path \[" << XPath
+                                  << "]" << std::endl;
+        return false;
+    }
+};
+
+#endif
+
+
+cmnXMLPath::cmnXMLPath():
+    Data(0)
+{
+    // create internal data and set pointers to services to control log
+    this->Data = new cmnXMLPathData();
+    this->Data->OwnerServices = this->Services();
+}
 
 
 cmnXMLPath::~cmnXMLPath()
-{}
-
-
-
-void cmnXMLPath::SetInputSource(const char *filename)
 {
-	/* Load XML document */
-    Document = xmlParseFile(filename);
-    if (Document == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetInputSource: an error occured while parsing \"" << filename << "\"" << std::endl;
+    if (this->Data) {
+        delete this->Data;
     }
-    CMN_ASSERT(Document != 0);
-
-	XPathContext = xmlXPathNewContext(Document);
-	if(XPathContext == NULL) {
-		CMN_LOG_CLASS_INIT_ERROR << "SetInputSource: an error occured while parsing \"" << filename << "\"" << std::endl;
-		xmlFreeDoc(Document);
-	}
-	CMN_ASSERT(XPathContext != 0);
 }
 
 
-void cmnXMLPath::PrintValue(std::ostream &out, const char *context, const char *XPath)
+void cmnXMLPath::SetInputSource(const char * filename)
 {
-	std::string str;
+    this->Data->SetInputSource(filename);
+}
+
+
+void cmnXMLPath::SetInputSource(const std::string & fileName)
+{
+    this->SetInputSource(fileName.c_str());
+}
+
+
+bool cmnXMLPath::SaveAs(const char * filename) const
+{
+    return this->Data->SaveAs(filename);
+}
+
+
+bool cmnXMLPath::SaveAs(const std::string & filename) const
+{
+    return this->SaveAs(filename.c_str());
+}
+
+
+void cmnXMLPath::PrintValue(std::ostream & outputStream, const char * context, const char * XPath)
+{
+    std::string str;
     if (GetXMLValue(context, XPath, str) == false) {
-        CMN_LOG_CLASS_INIT_WARNING << "PrintValue: no nodes matched the location path \"" << XPath
-                                   << "\"" << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "PrintValue: no nodes matched the location path [" << XPath
+                                  << "]" << std::endl;
     } else {
-        out << str << std::endl;
+        outputStream << str << std::endl;
     }
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar **storage)
+// -------------------- methods to set/get bool ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & value)
 {
-	/* Evaluate xpath expression */
-	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
-	document root in libxml2 */
-	std::string xpathlibxml("/");
-	xpathlibxml += context;
-	xpathlibxml += "/";
-	xpathlibxml += XPath;
-    xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression((xmlChar *)(xpathlibxml.c_str()), XPathContext);
-	if(xpathObj != NULL) {
-		xmlNodePtr cur;
-		xmlNodeSetPtr nodes = xpathObj->nodesetval;
-		int size = (nodes)? nodes->nodeNr: 0;
-		int i;
-
-		for(i = 0; i < size; ++i) {
-			CMN_ASSERT(nodes->nodeTab[i] != 0);
-			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
-				cur = nodes->nodeTab[i];
-				*storage = xmlNodeGetContent(cur);
-				CMN_LOG_INIT_VERBOSE << "GetXMLValue: read Xpath: " << XPath << " Node name: "
-                                     << cur->name << " Content: " << *storage << std::endl;
-			} else {
-				cur = nodes->nodeTab[i];
-				CMN_LOG_CLASS_INIT_WARNING << "GetXMLValue: node is not attribute node \"" << XPath
-                                           << "\" Node name: " << cur->name << std::endl;
-			}
-		}
-		return true;
-	}
-	CMN_LOG_CLASS_INIT_WARNING << "GetXMLValue: unable to match the location path \"" << XPath
-                               << "\"" << std::endl;
-	return false;
-}
-
-
-bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xmlChar *storage)
-{
-	/* Evaluate xpath expression */
-	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
-	document root in libxml2 */
-	std::string xpathlibxml("/");
-	xpathlibxml += context;
-	xpathlibxml += "/";
-	xpathlibxml += XPath;
-	xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression((xmlChar *)(xpathlibxml.c_str()), XPathContext);
-	if(xpathObj != NULL) {
-		xmlNodePtr cur;
-		xmlNodeSetPtr nodes = xpathObj->nodesetval;
-		int size = (nodes)? nodes->nodeNr: 0;
-		int i;
-
-		/*
-		* NOTE: the nodes are processed in reverse order, i.e. reverse document
-		*       order because xmlNodeSetContent can actually free up descendant
-		*       of the node and such nodes may have been selected too ! Handling
-		*       in reverse order ensure that descendant are accessed first, before
-		*       they get removed. Mixing XPath and modifications on a tree must be
-		*       done carefully !
-		*/
-		for(i = size - 1; i >= 0; i--) {
-			CMN_ASSERT(nodes->nodeTab[i] != 0);
-			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
-				xmlNodeSetContent(nodes->nodeTab[i], storage);
-				CMN_LOG_INIT_VERBOSE << "SetXMLValue: write Xpath: " << XPath << " Node name: "
-                                     << nodes->nodeTab[i]->name << " Content: " << storage << std::endl;
-			}
-			/*
-			* All the elements returned by an XPath query are pointers to
-			* elements from the tree *except* namespace nodes where the XPath
-			* semantic is different from the implementation in libxml2 tree.
-			* As a result when a returned node set is freed when
-			* xmlXPathFreeObject() is called, that routine must check the
-			* element type. But node from the returned set may have been removed
-			* by xmlNodeSetContent() resulting in access to freed data.
-			* This can be exercised by running
-			*       valgrind xpath2 test3.xml '//discarded' discarded
-			* There is 2 ways around it:
-			*   - make a copy of the pointers to the nodes from the result set
-			*     then call xmlXPathFreeObject() and then modify the nodes
-			* or
-			*   - remove the reference to the modified nodes from the node set
-			*     as they are processed, if they are not namespace nodes.
-			*/
-			else if (nodes->nodeTab[i]->type != XML_NAMESPACE_DECL)
-			{
-				nodes->nodeTab[i] = NULL;
-			}
-			else
-			{
-				cur = nodes->nodeTab[i];
-				CMN_LOG_CLASS_INIT_WARNING << "SetXMLValue: node is not attribute node \"" << XPath
-                                           << "\" Node name: " << cur->name << std::endl;
-			}
-		}
-		return true;
-	}
-	CMN_LOG_CLASS_INIT_WARNING << "SetXMLValue: enable to match the location path \"" << XPath
-                               << "\"" << std::endl;
-	return false;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, std::string &storage)
-{
-	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
-		storage = (tmpStorage)?(char*)tmpStorage:"";
-		return true;
-	}
-	return false;
-}
-
-
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, const std::string &storage)
-{
-	xmlChar* tmpStorage = (xmlChar*)storage.c_str();
-	if (SetXMLValue(context, XPath, tmpStorage)) {
-		return true;
-	}
-	return false;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, double &value)
-{
-	bool result = false;
-	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
-		// special treatment for select floating points eps, -Inf & Inf
-		for (int i = 0;
-             tmpStorage[i] != '\0';
-             tmpStorage[i]=toupper(tmpStorage[i]), i++)
-        {}
-		if ((strncmp((char*)tmpStorage, "INF", 3) == 0) || (strncmp((char*)tmpStorage, "1.#INF", 6) == 0)) {
-			value = std::numeric_limits<double>::infinity();
-		} else if ((strncmp((char*)tmpStorage, "-INF", 4) == 0) || (strncmp((char*)tmpStorage, "-1.#INF", 7) == 0)) {
-			value = -1*std::numeric_limits<double>::infinity();
-		} else if (strncmp((char*)tmpStorage, "EPS", 3) == 0) {
-			value = std::numeric_limits<double>::epsilon();
-		} else {
-			value = atof((char*) tmpStorage);
-		}
-		return true;
-	}
-    return result;
-}
-
-
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, double value)
-{
-	bool result = false;
-	std::stringstream tmpStorage;
-	// this way we can control the printing size.
-	if (fabs(value) < 1e-3) {
-		tmpStorage << cmnPrintf("%g") << value;
-	} else {
-		tmpStorage << cmnPrintf("%f") << value;
-	}
-	if (SetXMLValue(context, XPath, (xmlChar*)tmpStorage.str().c_str())) {
-		return true;
-	}
-    return result;
-}
-
-
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, int &value)
-{
-	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage)  && tmpStorage != 0) {
-		value = atoi((char*) tmpStorage);
-		return true;
-	}
+    std::string storage;
+    if (!this->Data->GetXMLValueStdString(context, XPath, storage)) {
+        return false;
+    }
+    std::transform(storage.begin(), storage.end(), storage.begin(), ::toupper);
+    if (storage == "FALSE") {
+        value = false;
+        return true;
+    } else if (storage == "TRUE") {
+        value = true;
+        return true;
+    } else {
+        return false;
+    }
     return false;
 }
 
 
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, int value)
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & value, const bool & valueIfMissing)
 {
-	bool result = false;
-	std::stringstream tmpStorage;
-	// this way we can control the printing format.
-	tmpStorage << cmnPrintf("%d") << value;
-	if (SetXMLValue(context, XPath,		(xmlChar*)tmpStorage.str().c_str())) {
-		return true;
-	}
-    return result;
+    bool ret_value;
+    bool tmp_value;
+    ret_value = GetXMLValue(context, XPath, tmp_value);
+    if (ret_value) {
+        value = tmp_value;
+    } else {
+        value = valueIfMissing;
+    }
+    return ret_value;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, bool &value)
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const bool & value)
 {
-    bool result = false;
-	xmlChar* tmpStorage = 0;
-	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
-		for (int i = 0;
-             tmpStorage[i] != '\0';
-             tmpStorage[i]=toupper(tmpStorage[i]), i++)
-        {}
-		if (strncmp((char*)tmpStorage, "FALSE", 5) == 0) {
-			value = false;
-			return true;
-		} else if (strncmp((char*)tmpStorage, "TRUE", 4) == 0) {
-			value = true;
-			return true;
-		} else {
-			return false;
-		}
-	}
-    return result;
+    std::string storage((value)?"true":"false");
+    return this->Data->SetXMLValueStdString(context, XPath, storage);
+
 }
 
 
-bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, bool value)
+// -------------------- methods to set/get int ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int & value)
 {
-	bool result = false;
-	std::string tmpStorage((value)?"true":"false");
-	if (SetXMLValue(context, XPath, (xmlChar*)(tmpStorage.c_str()))) {
-		return true;
-	}
-	return result;
+    std::string storage;
+    if (this->Data->GetXMLValueStdString(context, XPath, storage)) {
+        value = atoi(storage.c_str());
+        return true;
+    }
+    return false;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool &value, const bool &valueifmissing)
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int & value, const int & valueIfMissing)
 {
-	bool ret_value;
-	bool tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
+    bool ret_value;
+    int tmp_value;
+    ret_value = GetXMLValue(context, XPath, tmp_value);
+    if (ret_value) {
+        value = tmp_value;
+    } else {
+        value = valueIfMissing;
+    }
+    return ret_value;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int &value, const int &valueifmissing)
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const int & value)
 {
-	bool ret_value;
-	int tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
+    std::stringstream storage;
+    // this way we can control the printing format.
+    storage << cmnPrintf("%d") << value;
+    return this->Data->SetXMLValueStdString(context, XPath, storage.str());
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double &value, const double &valueifmissing)
+// -------------------- methods to set/get double ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value)
 {
-	bool ret_value;
-	double tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
+    std::string storage;
+    if (!this->Data->GetXMLValueStdString(context, XPath, storage)) {
+        return false;
+    }
+
+    // special treatment for select floating points eps, -Inf & Inf
+    std::transform(storage.begin(), storage.end(), storage.begin(), ::toupper);
+    if ((storage == "INF") || (storage == "1.#INF")) {
+        value = std::numeric_limits<double>::infinity();
+    } else if ((storage == "-INF") || (storage == "1.#INF")) {
+        value = -1*std::numeric_limits<double>::infinity();
+    } else if (storage == "EPS") {
+        value = std::numeric_limits<double>::epsilon();
+    } else {
+        value = atof(storage.c_str());
+    }
+    return true;
 }
 
 
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string &value, const std::string &valueifmissing)
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing)
 {
-	bool ret_value;
-	std::string tmp_value;
-	ret_value = GetXMLValue(context, XPath, tmp_value);
-	if (ret_value) value = tmp_value;
-	else value = valueifmissing;
-	return ret_value;
+    bool ret_value;
+    double tmp_value;
+    ret_value = GetXMLValue(context, XPath, tmp_value);
+    if (ret_value) {
+        value = tmp_value;
+    } else {
+        value = valueIfMissing;
+    }
+    return ret_value;
 }
 
+
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const double & value)
+{
+    std::stringstream storage;
+    // this way we can control the printing size.
+    if (fabs(value) < 1e-3) {
+        storage << cmnPrintf("%g") << value;
+    } else {
+        storage << cmnPrintf("%f") << value;
+    }
+    return this->Data->SetXMLValueStdString(context, XPath, storage.str());
+}
+
+
+// -------------------- methods to set/get std::string ---------------------
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string & storage)
+{
+    storage = "";
+    return this->Data->GetXMLValueStdString(context, XPath, storage);
+}
+
+
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string & value, const std::string & valueIfMissing)
+{
+    bool ret_value;
+    std::string tmp_value;
+    ret_value = GetXMLValue(context, XPath, tmp_value);
+    if (ret_value) {
+        value = tmp_value;
+    } else {
+        value = valueIfMissing;
+    }
+    return ret_value;
+}
+
+
+bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const std::string & storage)
+{
+    return this->Data->SetXMLValueStdString(context, XPath, storage);
+}

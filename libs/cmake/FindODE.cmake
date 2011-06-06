@@ -1,17 +1,35 @@
 
-set( ODE_SEARCH_PATH /usr /usr/local )
+if (WIN32)
+  
+  find_path( ODE_INCLUDE_DIR ode/ode.h 
+    PATHS ENV ODE_ROOT_PATH PATH_SUFFIXES include )
 
-find_path( ODE_DIR include/ode/ode.h ${ODE_SEARCH_PATH} )
+  find_library( ODE_LIBRARY NAMES ode ode_double 
+    PATHS ENV ODE_ROOT_PATH PATH_SUFFIXES lib )
 
-if( ODE_DIR ) 
+else (WIN32)
 
-  set( ODE_INCLUDE_DIR ${ODE_DIR}/include )
-  set( ODE_FOUND true )
+  if (APPLE)
 
-  find_library( ODE_LIBRARIES ode ${ODE_DIR}/lib)
 
-  mark_as_advanced( ODE_DIR ODE_LIBRARIES )
+  else (APPLE)
 
-endif( ODE_DIR )
+    find_path( ODE_INCLUDE_DIR ode/ode.h )
+    find_library( ODE_LIBRARY ode )
+
+  endif (APPLE)
+
+endif (WIN32)
+
+set( ODE_FOUND FALSE )
+
+if( ODE_INCLUDE_DIR ) 
+  if( ODE_LIBRARY )
+    set( ODE_FOUND TRUE )
+  endif( ODE_LIBRARY )
+endif( ODE_INCLUDE_DIR )
+
+mark_as_advanced( ODE_INCLUDE_DIR ODE_LIBRARY )
+
 
 

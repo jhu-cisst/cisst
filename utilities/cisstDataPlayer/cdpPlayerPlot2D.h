@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cdpPlayerExample.h 2308 2011-02-15 22:01:00Z adeguet1 $
+  $Id$
 
   Author(s): Marcin Balicki
   Created on: 2011-02-10
@@ -24,10 +24,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QObject>
 #include <QtGui/QCloseEvent>
+#include <cisstMultiTask.h>
 
 #include "ui_cdpPlayerWidget.h"
 #include "cdpPlayerBase.h"
+#include "cdpPlayerParseStateTableData.h"
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 // Always include last
 #include "cdpExport.h"
@@ -57,11 +60,34 @@ private:
     vctPlot2DBase::Trace * TracePointer;
     vctPlot2DBase::VerticalLine * VerticalLinePointer;
 
-    std::vector <double> TimeStamps;
-    std::vector <double> Data;
-    size_t VectorIndex;
-    double ZoomScale;
+    std::vector <double> *TimeStamps;
+    std::vector <double> *Data;
 
+    double TopBoundary, LowBoundary;
+
+
+    // PoolPoint is pointing to ping pong buffer
+    mtsInt PoolPoint;
+    // VectorIndex is point to the data we are playing
+    mtsInt VectorIndex;
+    double ZoomScaleValue;
+    mtsDouble LastTime;
+    mtsDouble Plot2DTime;
+    double TimeBoundary;
+
+    struct{
+        mtsFunctionRead GetVectorIndex;
+        mtsFunctionRead GetZoomScale;
+        mtsFunctionWrite WriteVectorIndex;
+    }Plot2DAccess;
+
+    // Parser for data file
+    mtsTaskManager * taskManager;
+    cdpPlayerParseStateTableData Parser;
+    osaCriticalSection CS;
+
+    void SetVectorIndex(const mtsInt & index){ VectorIndex = index; };
+    
     void MakeQTConnections(void);
     //by calling "emit QSignalQTUpdate" this function will be called.
     //used this to udpate qt widgets in a thread safe way.

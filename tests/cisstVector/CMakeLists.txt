@@ -53,6 +53,8 @@ set (SOURCE_FILES
      vctVarStrideMatrixIteratorTest.cpp
      vctVarStrideNArrayIteratorTest.cpp
      vctVarStrideVectorIteratorTest.cpp
+     
+     vctPlot2DBaseTest.cpp
     )
 
 # all header files
@@ -102,6 +104,8 @@ set (HEADER_FILES
      vctVarStrideMatrixIteratorTest.h
      vctVarStrideNArrayIteratorTest.h
      vctVarStrideVectorIteratorTest.h
+     
+     vctPlot2DBaseTest.h
      )
 
 # Add executable for C++ tests

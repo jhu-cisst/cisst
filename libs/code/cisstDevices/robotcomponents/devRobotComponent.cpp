@@ -2,8 +2,9 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstDevices/robotcomponents/devRobotComponent.h>
 
-const std::string devRobotComponent::Control       = "Control";
-const std::string devRobotComponent::EnableCommand = "EnableCommand";
+const std::string devRobotComponent::Control = "Control";
+const std::string devRobotComponent::Enable  = "Enable";
+const std::string devRobotComponent::Disable = "Disable";
 
 // Create an IO for a task/component
 devRobotComponent::IO::IO( mtsTask* task, 
@@ -254,7 +255,6 @@ devRobotComponent::RnIO::GetPosition
   if( IOType() == IO::REQUIRE_INPUT )
     { mtsFnReadPosition( mtsq ); }
   q = vctDynamicVector<double>( mtsq );
-  //std::cerr << "mts: " << mtsq.Timestamp() << std::endl;
   t = mtsq.Timestamp();
 }
 
@@ -1086,16 +1086,19 @@ devRobotComponent::devRobotComponent( const std::string& name,
 				      osaCPUMask cpumask ) :
   mtsTaskPeriodic( name, period, true ),
   cpumask( cpumask ),
-  mtsState( (bool)state ),
-  risingedge( false ) {
+  state( state ),
+  statechange( false ) {
   
   // Create the control interface
-  mtsInterfaceProvided* cinterface;
-  cinterface = AddInterfaceProvided( devRobotComponent::Control );
-  if( cinterface ){
-    StateTable.AddData( mtsState, "Enabled" );
-    cinterface->AddCommandWriteState
-      ( StateTable, mtsState, devRobotComponent::EnableCommand );
+  mtsInterfaceProvided* controlinterface;
+  controlinterface = AddInterfaceProvided( devRobotComponent::Control );
+  if( controlinterface ){
+    controlinterface->AddCommandVoid( &devRobotComponent::EnableCommand, 
+				      this, 
+				      devRobotComponent::Enable );
+    controlinterface->AddCommandVoid( &devRobotComponent::DisableCommand,
+				      this,
+				      devRobotComponent::Disable );
   }
 
 }
@@ -1285,7 +1288,7 @@ devRobotComponent::RequireInputSE3
 
 
 devRobotComponent::State devRobotComponent::GetState() const
-{ return devRobotComponent::State( (int) mtsState ); }
+{ return state; }
 
 void devRobotComponent::Startup(){
 
@@ -1306,9 +1309,9 @@ void devRobotComponent::Run(){
 
   if( GetState() == devRobotComponent::ENABLED ){
 
-    if( !risingedge ){
-      CMN_LOG_RUN_WARNING << GetName() << " is enabled." << std::endl;
-      risingedge = true;
+    if( !statechange ){
+      CMN_LOG_RUN_VERBOSE << GetName() << " is enabled." << std::endl;
+      statechange = true;
     }
 
     RunComponent(); 
@@ -1317,9 +1320,9 @@ void devRobotComponent::Run(){
 
   else{
 
-    if( risingedge ){
-      CMN_LOG_RUN_WARNING << GetName() << " is disabled." << std::endl;
-      risingedge = false;
+    if( statechange ){
+      CMN_LOG_RUN_VERBOSE << GetName() << " is disabled." << std::endl;
+      statechange = false;
     }
 
   }

@@ -59,7 +59,7 @@ bool cmnStreamRawParser::Parse(std::istream & inputStream)
     }
     bool success = true;
     for (it = KeyList.begin(); it != KeyList.end(); it++) {
-        if (!(*it)->isValid()) {
+        if ((*it)->isRequired() && !(*it)->isValid()) {
             CMN_LOG_INIT_WARNING << "cmnStreamRawParser: missing data for " << (*it)->GetKey() << std::endl;
             success = false;
         }

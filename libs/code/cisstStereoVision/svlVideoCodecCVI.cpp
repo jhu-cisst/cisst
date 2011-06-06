@@ -76,6 +76,9 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
 
     Config.Level        = 4;
     Config.Differential = 0;
+
+    ProcInfoSingleThread.count = 1;
+    ProcInfoSingleThread.ID    = 0;
 }
 
 svlVideoCodecCVI::~svlVideoCodecCVI()
@@ -91,7 +94,7 @@ svlVideoCodecCVI::~svlVideoCodecCVI()
 int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
 {
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "Open: already opened" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Open: codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
@@ -288,7 +291,7 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
 int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double CMN_UNUSED(framerate))
 {
 	if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: already opened" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Create: codec is already open" << std::endl;
         return SVL_FAIL;
     }
     if (width < 1 || width > MAX_DIMENSION || height < 1 || height > MAX_DIMENSION) {
@@ -660,8 +663,13 @@ int svlVideoCodecCVI::SetCompression(const svlVideoIO::Compression *compression)
 {
     if (Opened || !compression || compression->size < sizeof(svlVideoIO::Compression)) return SVL_FAIL;
 
+    // Create a safe copy of the string `extension`
+    char _ext[16];
+    memcpy(_ext, compression->extension, 15);
+    _ext[15] = 0;
+
     std::string extensionlist(GetExtensions());
-    std::string extension(compression->extension);
+    std::string extension(_ext);
     extension += ";";
     if (extensionlist.find(extension) == std::string::npos) {
         CMN_LOG_CLASS_INIT_ERROR << "SetCompression: codec parameters do not match this codec" << std::endl;
@@ -707,11 +715,11 @@ int svlVideoCodecCVI::SetCompression(const svlVideoIO::Compression *compression)
 int svlVideoCodecCVI::DialogCompression()
 {
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: already open" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
-    std::cout << std::endl << " # Enter compression level [0-9]: ";
+    std::cout << " # Enter compression level [0-9]: ";
     int level = 0;
     while (level < '0' || level > '9') level = cmnGetChar();
     level -= '0';
@@ -772,6 +780,8 @@ int svlVideoCodecCVI::SetTimestamp(const double timestamp)
 
 int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
         CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
@@ -932,6 +942,8 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
 
 int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) {
         CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;

@@ -19,6 +19,7 @@
 set (SOURCE_FILES
      vctAngleRotation2.cpp
      vctAxisAngleRotation3.cpp
+     vctEulerRotation3.cpp
      vctFrameBase.cpp
      vctFrame4x4ConstBase.cpp
      vctMatrixRotation2.cpp
@@ -78,6 +79,7 @@ set (HEADER_FILES
      vctDynamicVectorRefOwner.h
      vctDynamicVectorTypes.h
 
+     vctEulerRotation3.h
      vctExport.h
      vctFastCopy.h
  

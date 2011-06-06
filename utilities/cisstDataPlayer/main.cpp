@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     cdpPlayerManager * playerManager = new cdpPlayerManager("PlayerManager", 1.0 * cmn_ms);
     cdpPlayerExample * player = new cdpPlayerExample("Player", 1.0 * cmn_ms);
     cdpPlayerVideo * videoPlayer = new cdpPlayerVideo("VideoPlayer", 1.0 * cmn_ms);
-    cdpPlayerPlot2D * plotPlayer = new cdpPlayerPlot2D("PlotPlayer", 1.0 * cmn_ms);
+    cdpPlayerPlot2D * plotPlayer = new cdpPlayerPlot2D("PlotPlayer", 40.0 * cmn_ms);
 
 
     componentManager->AddComponent(playerManager);
@@ -52,6 +52,13 @@ int main(int argc, char *argv[])
     componentManager->AddComponent(videoPlayer);
     componentManager->AddComponent(plotPlayer);
 
+    //Connect provider/required interface of Base Class for Qt Thread
+    componentManager->Connect( player->GetName(), "GetStatus", player->GetName(), "ProvidesStatus");
+    componentManager->Connect( videoPlayer->GetName(), "GetStatus", videoPlayer->GetName(), "ProvidesStatus");
+    componentManager->Connect( plotPlayer->GetName(), "GetStatus",plotPlayer->GetName(), "ProvidesStatus");
+    
+    //Connect componets-added interfaces for Qt Thread
+    componentManager->Connect( plotPlayer->GetName(), "Get2DPlotStatus",plotPlayer->GetName(), "Provides2DPlot");    
 
     // create the components, i.e. find the commands
     componentManager->CreateAll();

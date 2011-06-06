@@ -204,7 +204,7 @@ void cdpPlayerManager::Run(void)
 void cdpPlayerManager::ErrorMessage(const std::string & message)
 {
     //    ErrorMessageDialog->showMessage(tr(msg.c_str()));
-    int ret = QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()),tr(message.c_str()));
+    QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()),tr(message.c_str()));
 }
 
 
@@ -404,4 +404,7 @@ void cdpPlayerManager::AddPlayer(cdpPlayerBase *player)
     // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
     mtsTaskManager::GetInstance()->Connect(player->GetName(), "RequiresPlayerManager",
                                            this->GetName(), "ProvidesPlayerManager");
+
+    player->SetSynced(true);
+
 }

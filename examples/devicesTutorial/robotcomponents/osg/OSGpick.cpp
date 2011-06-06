@@ -1,15 +1,9 @@
-
-#include <cisstDevices/devKeyboard.h>
-
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGPick.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
-#include <cisstCommon/cmnGetChar.h>
-
-#include <cisstMultiTask/mtsTaskManager.h>
 
 #include <cisstCommon/cmnGetChar.h>
 
@@ -19,6 +13,10 @@
 #endif
 
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 

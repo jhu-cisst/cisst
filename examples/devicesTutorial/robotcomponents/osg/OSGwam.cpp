@@ -1,5 +1,4 @@
 #include <cisstDevices/robotcomponents/osg/devOSGManipulator.h>
-#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
@@ -7,8 +6,6 @@
 #include <cisstDevices/robotcomponents/trajectories/devSetPoints.h>
 
 #include <cisstCommon/cmnGetChar.h>
-
-#include <cisstMultiTask/mtsTaskManager.h>
 
 int main(){
 
@@ -87,6 +84,7 @@ int main(){
   taskManager->CreateAll();
   taskManager->StartAll();
 
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
 
   taskManager->KillAll();

@@ -3,6 +3,7 @@
 
 #include <osgGA/GUIEventHandler>
 #include <osgViewer/Viewer>
+#include <cisstDevices/devExport.h>
 
 class CISST_EXPORT devOSGPick : public osgGA::GUIEventHandler{
 

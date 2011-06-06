@@ -89,7 +89,8 @@ void vctPlot2DOpenGL::Render(void)
          traceIndex < numberOfTraces;
          traceIndex++) {
         trace = this->Traces[traceIndex];
-        if (trace->Visible) {
+        //trace->CriticalSectionForBuffer.Enter();
+        if (trace->Visible) {            
             numberOfPoints = trace->Data.size();
             glColor3d(trace->Color.Element(0),
                       trace->Color.Element(1),
@@ -127,6 +128,7 @@ void vctPlot2DOpenGL::Render(void)
                 glDisableClientState(GL_VERTEX_ARRAY);
             }
         }
+        //trace->CriticalSectionForBuffer.Leave();
     }
 
     // render vertical lines

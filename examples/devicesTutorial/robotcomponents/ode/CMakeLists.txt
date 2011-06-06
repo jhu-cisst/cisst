@@ -15,11 +15,16 @@
 
 project( ode )
 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" )
+
 add_executable( ODEtest ODEtest.cpp )
 add_executable( ODEstereo ODEstereo.cpp )
 add_executable( ODEwam ODEwam.cpp )
 add_executable( ODEbh ODEbh.cpp )
 add_executable( ODEwambh ODEwambh.cpp )
+add_executable( ODElwr ODElwr.cpp )
+add_executable( ODEgripper ODEgripper.cpp )
+add_executable( ODElwrgripper ODElwrgripper.cpp )
 
 cisst_target_link_libraries( ODEtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstRobot cisstNumerical )
 
@@ -30,4 +35,10 @@ cisst_target_link_libraries( ODEwam cisstCommon cisstVector cisstOSAbstraction c
 cisst_target_link_libraries( ODEbh cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstRobot cisstNumerical )
 
 cisst_target_link_libraries( ODEwambh cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstRobot cisstNumerical )
+
+cisst_target_link_libraries( ODElwr cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstRobot cisstNumerical )
+
+cisst_target_link_libraries( ODEgripper cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstRobot cisstNumerical )
+
+cisst_target_link_libraries( ODElwrgripper cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask cisstRobot cisstNumerical )
 

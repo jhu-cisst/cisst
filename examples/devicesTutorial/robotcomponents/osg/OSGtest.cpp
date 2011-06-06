@@ -1,15 +1,8 @@
-
-#include <cisstDevices/devKeyboard.h>
-
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
-#include <cisstCommon/cmnGetChar.h>
-
-#include <cisstMultiTask/mtsTaskManager.h>
-
 #include <cisstCommon/cmnGetChar.h>
 
 #include <cisstDevices/devConfig.h>

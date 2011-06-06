@@ -188,11 +188,13 @@ void devOSGBody::ReadModel( const std::string& model ){
 
   osg::ref_ptr< osgDB::ReaderWriter::Options > options;
   // "noRotation" is to cancel the default -X in .obj files
-  options = new osgDB::ReaderWriter::Options("noRotation");
+  //options = new osgDB::ReaderWriter::Options("noRotation");
+  options = new osgDB::ReaderWriter::Options();
 
   std::string path;
   size_t found;
 #if (CISST_OS == CISST_WINDOWS)
+  found = model.rfind( '/' );
 #else
   found = model.rfind( '/' );
 #endif    
@@ -301,6 +303,7 @@ void devOSGBody::SetMatrix( const vctFrame4x4<double>& Rt ){
 // This is called from the body's callback
 // This reads a transformation if the body is connected to an interface
 void devOSGBody::Transform(){
+
   // Get the transformation if possible
   if( ReadTransformation.IsValid() ){
     mtsDoubleFrm4x4 Rt;
@@ -309,13 +312,14 @@ void devOSGBody::Transform(){
   }
   else
     { SetMatrix( Rt_body ); }
+
 }
 
 void devOSGBody::Switch(){
   // Get the transformation if possible
-  if( ReadTransformation.IsValid() ){
+  if( ReadSwitch.IsValid() ){
     mtsBool mtsswitch;
-    ReadTransformation( mtsswitch );
+    ReadSwitch( mtsswitch );
     osgswitch->setValue( 0, mtsswitch );
   }
   else

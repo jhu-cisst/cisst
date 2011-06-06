@@ -118,7 +118,7 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     }
 
     // Give proxies some time to start up
-    // osaSleep(2.0 * cmn_s);
+    osaSleep(2.0 * cmn_s);
 
     // Set this machine's IP
     SetIPAddress();
@@ -164,7 +164,7 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     }
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
-    osaSleep(1 * cmn_s);
+    osaSleep(1.0 * cmn_s);
 
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
@@ -177,10 +177,10 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     // to the global component manager.
     ManagerGlobal = globalComponentManagerProxy;
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager     : NETWORK mode" << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "Global component manager IP : " << GlobalComponentManagerIP << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "This process name           : " << ProcessName << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "This process IP             : " << ProcessIP << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager     : NETWORK mode" << std::endl
+                               << "Global component manager IP : " << GlobalComponentManagerIP << std::endl
+                               << "This process name           : " << ProcessName << std::endl
+                               << "This process IP             : " << ProcessIP << std::endl;
 
     return true;
 }
@@ -2112,7 +2112,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        // osaSleep(0.1);  // PK TEMP until blocking commands supported
+        osaSleep(0.1);  // PK TEMP until blocking commands supported
     }
 
     mtsInterfaceRequiredOrInput * interfaceRequiredOrInput;
@@ -2132,7 +2132,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        // osaSleep(0.1);  // PK TEMP until blocking commands supported
+        osaSleep(0.1);  // PK TEMP until blocking commands supported
     }
     return true;
 }
