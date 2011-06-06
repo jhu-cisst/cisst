@@ -47,6 +47,23 @@ public:
     {
         if (ascii) {
             switch (eventid) {
+                case 'n':
+                    if (Source) {
+                        int pos = Source->GetPosition() - 100;
+                        if (pos < 0) pos = 0;
+                        Source->SetPosition(pos);
+                    }
+                break;
+
+                case 'm':
+                    if (Source) {
+                        int pos = Source->GetPosition() + 100;
+                        int len = Source->GetLength();
+                        if (pos >= len) pos = len - 1;
+                        Source->SetPosition(pos);
+                    }
+                break;
+
                 case 'p':
                     if (Source) {
                         if (Paused) {
@@ -83,6 +100,8 @@ public:
 
 int VideoPlayer(std::string pathname)
 {
+//    pathname = "/Users/vagvoba/MediaSamples/training.avi";
+
     bool quit = false;
 
     svlInitialize();
@@ -126,17 +145,16 @@ int VideoPlayer(std::string pathname)
     source.GetOutput()->Connect(overlay.GetInput());
     overlay.GetOutput()->Connect(window.GetInput());
 
-    cerr << endl << "Starting stream... ";
-
-    // initialize and start stream
-    if (stream.Play() != SVL_OK) goto labError;
-
-    cerr << "Done" << endl;
-
+    cerr << endl << "Starting stream... " << endl;
     cerr << endl << "Keyboard commands:" << endl << endl;
     cerr << "  In image window:" << endl;
     cerr << "    'p'   - Pause/Resume playback" << endl;
+    cerr << "    'n'   - Seek 100 frames back" << endl;
+    cerr << "    'm'   - Seek 100 frames forward" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
+
+    // initialize and start stream
+    if (stream.Play() != SVL_OK) goto labError;
 
     // wait for quit command
     while (!quit) osaSleep(0.1);
