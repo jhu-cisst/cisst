@@ -27,11 +27,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#include <cisstStereoVision/svlQtWidgetVideoEncoder.h>
+//#define USE_QT_DIALOGS
+
+#ifdef USE_QT_DIALOGS
+    #include <cisstStereoVision/svlQtWidgetVideoEncoder.h>
+#endif
+
 
 using namespace std;
-
-//#define USE_QT_DIALOGS
 
 bool interpolation = false;
 bool save = false;
