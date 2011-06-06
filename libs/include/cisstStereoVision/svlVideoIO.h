@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlVideoIO_h
 #define _svlVideoIO_h
 
-#include <cisstCommon/cmnGenericObject.h>
+#include <cisstMultiTask/mtsComponent.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 #include <string>
@@ -93,14 +93,15 @@ public:
 /*** svlVideoCodecBase class *********/
 /*************************************/
 
-class CISST_EXPORT svlVideoCodecBase : public cmnGenericObject
+class CISST_EXPORT svlVideoCodecBase : public mtsComponent
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+
 public:
     svlVideoCodecBase();
     virtual ~svlVideoCodecBase();
 
-    const std::string& GetName() const;
+    const std::string& GetEncoderName() const;
     const std::string& GetExtensions() const;
     bool IsMultithreaded() const;
     bool IsVariableFramerate() const;
@@ -130,6 +131,27 @@ public:
     virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false) = 0;
     virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch) = 0;
 
+public:
+    virtual void SetExtension(const std::string & extension) = 0;
+    virtual void SetEncoderID(const int & encoder_id) = 0;
+    virtual void SetCompressionLevel(const int & compr_level) = 0;
+    virtual void SetQualityBased(const bool & enabled) = 0;
+    virtual void SetTargetQuantizer(const double & target_quant) = 0;
+    virtual void SetDatarate(const int & datarate) = 0;
+    virtual void SetKeyFrameEvery(const int & key_every) = 0;
+    virtual void IsCompressionLevelEnabled(bool & enabled) const = 0;
+    virtual void IsEncoderListEnabled(bool & enabled) const = 0;
+    virtual void IsTargetQuantizerEnabled(bool & enabled) const = 0;
+    virtual void IsDatarateEnabled(bool & enabled) const = 0;
+    virtual void IsKeyFrameEveryEnabled(bool & enabled) const = 0;
+    virtual void GetCompressionLevel(int & compr_level) const = 0;
+    virtual void GetEncoderList(std::string & encoder_list) const = 0;
+    virtual void GetEncoderID(int & encoder_id) const = 0;
+    virtual void GetQualityBased(bool & enabled) const = 0;
+    virtual void GetTargetQuantizer(double & target_quant) const = 0;
+    virtual void GetDatarate(int & datarate) const = 0;
+    virtual void GetKeyFrameEvery(int & key_every) const = 0;
+
 protected:
     void SetName(const std::string &name);
     void SetExtensionList(const std::string &list);
@@ -139,10 +161,15 @@ protected:
     svlVideoIO::Compression* Codec;
 
 private:
-    std::string Name;
+    std::string EncoderName;
     std::string ExtensionList;
     bool Multithreaded;
     bool VariableFramerate;
+
+    bool ComponentAddedtoLCM;
+    std::string EncoderConnectedComponent;
+    std::string EncoderConnectedInterface;
+    void CreateInterfaces();
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(svlVideoCodecBase)
