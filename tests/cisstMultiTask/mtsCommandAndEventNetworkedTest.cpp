@@ -60,15 +60,24 @@ bool mtsCommandAndEventNetworkedTest::SendAndReceive(osaPipeExec & pipe,
     const osaTimeServer & timeServer = mtsComponentManager::GetInstance()->GetTimeServer();
     const double endTime = timeServer.GetRelativeTime() + timeOut;
     bool timeExpired = false;
-    while ((charRead != '\n')
-           && (!timeExpired)) {
+    do {
         byteRead = pipe.Read(&charRead, 1);
+        CMN_ASSERT(byteRead < 2);
         if ((byteRead == 1)
+            && (charRead != '\r')
             && (charRead != '\n')) {
             received = received + charRead;
         }
         timeExpired = (timeServer.GetRelativeTime() > endTime);
+    } while ((charRead != '\r')
+             && (charRead != '\n')
+             && (!timeExpired));
+
+    // for windows, we need to read the \n after \r
+    if (charRead == '\r') {
+        byteRead = pipe.Read(&charRead, 1);
     }
+
     if (timeExpired) {
         CMN_LOG_CLASS_RUN_ERROR << "SendAndReceive: timed out while sending \"" << send
                                 << "\" on pipe \"" << pipe.GetName() << "\", allowed time was "
@@ -92,7 +101,7 @@ void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
         CPPUNIT_FAIL(message);
         return;
     }
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(pipeName, expected, answer);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(pipeName, std::string(expected), std::string(answer));
 }
 
 
