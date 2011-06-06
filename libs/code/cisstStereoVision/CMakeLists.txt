@@ -1215,6 +1215,18 @@ SET(HEADER_FILES
     ${HEADER_FILES}
     svlInitializer.h)
 
+# Add svlFilterImageOpenGL is OpenGL is used
+if (CISST_HAS_OPENGL)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       svlFilterImageOpenGL.cpp
+       )
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       svlFilterImageOpenGL.h
+       )
+endif (CISST_HAS_OPENGL)
+
 # Create the config file
 SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
 CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstStereoVision/svlConfig.h.in
@@ -1234,7 +1246,8 @@ cisst_add_library (
   LIBRARY cisstStereoVision
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
-  HEADER_FILES ${HEADER_FILES})
+  HEADER_FILES ${HEADER_FILES}
+  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
@@ -1267,11 +1280,11 @@ IF(CISST_HAS_QT)
     IF(CISST_HAS_OPENGL)
         SET(SVL_QT_HEADER_FILES
             ${SVL_QT_HEADER_FILES}
-            svlFilterImageQtWidget.h
+            svlFilterImageOpenGLQtWidget.h
             )
         SET(SVL_QT_SOURCE_FILES
             ${SVL_QT_SOURCE_FILES}
-            svlFilterImageQtWidget.cpp
+            svlFilterImageOpenGLQtWidget.cpp
             )
     ENDIF(CISST_HAS_OPENGL)
 
