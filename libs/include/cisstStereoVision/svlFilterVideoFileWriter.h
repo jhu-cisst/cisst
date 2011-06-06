@@ -42,19 +42,24 @@ public:
     svlFilterVideoFileWriter();
     ~svlFilterVideoFileWriter();
 
-    int OpenFile(const std::string &filepath, unsigned int videoch = SVL_LEFT);
     int DialogOpenFile(unsigned int videoch = SVL_LEFT);
-    int CloseFile(unsigned int videoch = SVL_LEFT);
-
-    int SetCodec(const svlVideoIO::Compression *compression, double framerate, unsigned int videoch = SVL_LEFT);
+    int DialogFramerate(unsigned int videoch = SVL_LEFT);
     int DialogCodec(const std::string &extension, unsigned int videoch = SVL_LEFT);
+
+    int SetFilePath(const std::string &filepath, unsigned int videoch = SVL_LEFT);
+    int SetFramerate(const double framerate, unsigned int videoch = SVL_LEFT);
+    int SetCodecParams(const svlVideoIO::Compression *compression, unsigned int videoch = SVL_LEFT);
     int ResetCodec(unsigned int videoch = SVL_LEFT);
     int SaveCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT) const;
     int LoadCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT);
 
     int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
     int GetCodecName(std::string &name, unsigned int videoch = SVL_LEFT) const;
-    int GetCodec(svlVideoIO::Compression **compression, unsigned int videoch = SVL_LEFT) const;
+    int GetCodecParams(svlVideoIO::Compression **compression, unsigned int videoch = SVL_LEFT) const;
+
+    int OpenFile(unsigned int videoch = SVL_LEFT);
+    int CISST_DEPRECATED OpenFile(const std::string &filepath, unsigned int videoch = SVL_LEFT);
+    int CloseFile(unsigned int videoch = SVL_LEFT);
 
     void Record(int frames = -1);
     void RecordAtTime(int frames = -1, double time = -1.0);
@@ -83,6 +88,7 @@ private:
     vctDynamicVector<bool> ErrorOnChannel;
     vctDynamicVector<vctUInt2> ImageDimensions;
     vctDynamicVector<svlVideoCodecBase*> Codec;
+    vctDynamicVector<svlVideoCodecBase*> CodecProto;
     vctDynamicVector<svlVideoIO::Compression*> CodecParam;
     vctDynamicVector<std::string> FilePath;
     vctDynamicVector<double> Framerate;

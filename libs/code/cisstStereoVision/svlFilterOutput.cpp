@@ -194,7 +194,7 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
 
         // Connect filters
         svlFilterOutput* output = BranchSource->GetOutput();
-        if (output) output->Connect(input);
+        if (output) output->ConnectInternal(input);
     }
     else {
         if (!input->Trunk) {

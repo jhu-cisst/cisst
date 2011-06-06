@@ -419,14 +419,14 @@ class CISST_EXPORT IReqFilterStereoImageJoiner
 public:
     IReqFilterStereoImageJoiner(const std::string& name, mtsComponent* owner);
     ~IReqFilterStereoImageJoiner();
-    
+
     mtsFunctionWrite SetLayout;
     mtsFunctionRead  GetLayout;
-    
+
 private:
     IReqFilterStereoImageJoiner();
     IReqFilterStereoImageJoiner(const IReqFilterStereoImageJoiner& instance);
-    
+
     std::string Name;
     mtsComponent* Owner;
 };
@@ -456,6 +456,45 @@ public:
 private:
     IReqFilterImageWindow();
     IReqFilterImageWindow(const IReqFilterImageWindow& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/******************************/
+/*** IReqVideoEncoder class ***/
+/******************************/
+
+class CISST_EXPORT IReqVideoEncoder
+{
+public:
+    IReqVideoEncoder(const std::string& name, mtsComponent* owner);
+    ~IReqVideoEncoder();
+
+    mtsFunctionWrite SetExtension;
+    mtsFunctionWrite SetEncoderID;
+    mtsFunctionWrite SetCompressionLevel;
+    mtsFunctionWrite SetQualityBased;
+    mtsFunctionWrite SetTargetQuantizer;
+    mtsFunctionWrite SetDatarate;
+    mtsFunctionWrite SetKeyFrameEvery;
+    mtsFunctionRead IsCompressionLevelEnabled;
+    mtsFunctionRead IsEncoderListEnabled;
+    mtsFunctionRead IsTargetQuantizerEnabled;
+    mtsFunctionRead IsDatarateEnabled;
+    mtsFunctionRead IsKeyFrameEveryEnabled;
+    mtsFunctionRead GetCompressionLevel;
+    mtsFunctionRead GetEncoderList;
+    mtsFunctionRead GetEncoderID;
+    mtsFunctionRead GetQualityBased;
+    mtsFunctionRead GetTargetQuantizer;
+    mtsFunctionRead GetDatarate;
+    mtsFunctionRead GetKeyFrameEvery;
+
+private:
+    IReqVideoEncoder();
+    IReqVideoEncoder(const IReqVideoEncoder& instance);
 
     std::string Name;
     mtsComponent* Owner;

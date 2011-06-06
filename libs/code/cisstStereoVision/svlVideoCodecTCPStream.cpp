@@ -194,12 +194,12 @@ int svlVideoCodecTCPStream::Open(const std::string &filename, unsigned int &widt
 int svlVideoCodecTCPStream::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double CMN_UNUSED(framerate))
 {
 	if (Opened || ParseFilename(filename) != SVL_OK ||
-        width < 1 || width > 4096 || height < 1 || height > 4096) return SVL_FAIL;
+        width < 1 || width > MAX_DIMENSION || height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (!Codec) {
         // Set default compression level to 4
         Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
-        std::string name("CISST Video Stream (CVI)");
+        std::string name("CISST Video Stream over TCP/IP");
         memset(&(Codec->extension[0]), 0, 16);
         memcpy(&(Codec->extension[0]), ".ncvi", 5);
         memset(&(Codec->name[0]), 0, 64);
@@ -604,6 +604,82 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
     }
 
 	return SVL_OK;
+}
+
+void svlVideoCodecTCPStream::SetExtension(const std::string & extension)
+{
+}
+
+void svlVideoCodecTCPStream::SetEncoderID(const int & encoder_id)
+{
+}
+
+void svlVideoCodecTCPStream::SetCompressionLevel(const int & compr_level)
+{
+}
+
+void svlVideoCodecTCPStream::SetQualityBased(const bool & enabled)
+{
+}
+
+void svlVideoCodecTCPStream::SetTargetQuantizer(const double & target_quant)
+{
+}
+
+void svlVideoCodecTCPStream::SetDatarate(const int & datarate)
+{
+}
+
+void svlVideoCodecTCPStream::SetKeyFrameEvery(const int & key_every)
+{
+}
+
+void svlVideoCodecTCPStream::IsCompressionLevelEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecTCPStream::IsEncoderListEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecTCPStream::IsTargetQuantizerEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecTCPStream::IsDatarateEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecTCPStream::IsKeyFrameEveryEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecTCPStream::GetCompressionLevel(int & compr_level) const
+{
+}
+
+void svlVideoCodecTCPStream::GetEncoderList(std::string & encoder_list) const
+{
+}
+
+void svlVideoCodecTCPStream::GetEncoderID(int & encoder_id) const
+{
+}
+
+void svlVideoCodecTCPStream::GetQualityBased(bool & enabled) const
+{
+}
+
+void svlVideoCodecTCPStream::GetTargetQuantizer(double & target_quant) const
+{
+}
+
+void svlVideoCodecTCPStream::GetDatarate(int & datarate) const
+{
+}
+
+void svlVideoCodecTCPStream::GetKeyFrameEvery(int & key_every) const
+{
 }
 
 void* svlVideoCodecTCPStream::ServerProc(unsigned short port)

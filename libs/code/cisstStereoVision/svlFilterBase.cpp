@@ -25,22 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 
-#ifdef _MSC_VER
-    // Quick fix for Visual Studio Intellisense:
-    // The Intellisense parser can't handle the CMN_UNUSED macro
-    // correctly if defined in cmnPortability.h, thus
-    // we should redefine it here for it.
-    // Removing this part of the code will not effect compilation
-    // in any way, on any platforms.
-    #undef CMN_UNUSED
-    #define CMN_UNUSED(argument) argument
-#endif
-
-CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterBase, mtsComponent)
 
 /*************************************/
 /*** svlFilterBase class *************/
 /*************************************/
+
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterBase, mtsComponent)
 
 svlFilterBase::svlFilterBase() :
     mtsComponent(),
