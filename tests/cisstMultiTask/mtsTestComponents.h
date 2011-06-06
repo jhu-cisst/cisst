@@ -35,6 +35,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
+// Always include last
+#include "mtsTestExport.h"
+
 // overall constant, assumes this a maximum delay to transition from
 // one state to another
 const double StateTransitionMaximumDelay = 5.0 * cmn_s;

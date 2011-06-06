@@ -17,6 +17,7 @@
 # test library
 add_library (cisstMultiTaskTestsLib
              ${IS_SHARED}
+             mtsTestExport.h
              mtsMacrosTestClasses.h
              mtsMacrosTestClasses.cpp
              mtsTestComponents.h
