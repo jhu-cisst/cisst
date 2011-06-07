@@ -779,7 +779,7 @@ void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
             SendThread[clientid]->Create<svlVideoCodecUDPStream, unsigned int>(this, &svlVideoCodecUDPStream::SendProc, clientid);
 
         while(!KillServerThread) {
-                osaSleep(2);
+                osaSleep(0.1);
 	}
 
     if (ServerInitialized) {
@@ -933,7 +933,7 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecUDPStream::ReceiveProc - WSAStartup failed" << std::endl;
 #endif
-            break;
+            exit(1);
         }
         wsa_running = true;
 #ifdef _NET_VERBOSE_
@@ -974,7 +974,7 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
         ReceiveSub->Create<svlVideoCodecUDPStream,unsigned int>(this, &svlVideoCodecUDPStream::Receive,0);
 
         while (!KillReceiveThread) {
-            osaSleep(2);
+            osaSleep(0.1);
         }
 
         if (ReceiveInitialized) {
