@@ -29,18 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "zlib.h"
 
-typedef struct {
-	unsigned int applicationID;
-	unsigned int packet;
-	unsigned int frame;
-	unsigned int indexInFrame;
-	unsigned short totalInFrame;
-} header;
-
-typedef struct {
-//put timestamps here
-} timesync;
-
 #if (CISST_OS == CISST_WINDOWS)
 #define WINSOCKVERSION MAKEWORD(2,2)
 
@@ -79,6 +67,16 @@ typedef struct {
 
 #endif
 
+
+struct PacketHeaderType {
+	unsigned int applicationID;
+	unsigned int packet;
+	unsigned int frame;
+	unsigned int indexInFrame;
+	unsigned short totalInFrame;
+};
+
+
 #if (CISST_OS == CISST_WINDOWS)
     #define __errno         WSAGetLastError()
     #define __ECONNABORTED  WSAECONNABORTED
@@ -91,15 +89,15 @@ typedef struct {
 
 //#define _NET_VERBOSE_
 
-#define MAX_CLIENTS                     5
 #define PACKET_SIZE			1316u
-#define	DATA_SIZE			(PACKET_SIZE - sizeof(header))
-#define BROKEN_FRAME                    1
+#define	DATA_SIZE			(PACKET_SIZE - sizeof(PacketHeaderType))
+#define BROKEN_FRAME        1
 
 #define MAX_RATE			120 //in Mbps
 #define BURST				3 //this implies that we send 2^BURST packets at once.
 #define	WAIT_TIME			((PACKET_SIZE*(1<<BURST)*8*1.0)/(MAX_RATE*1000000)) //in seconds
 #define WRAP_AROUND			50000  // corresponds to 13 hours before time origin is reset
+
 
 
 /************************************/
@@ -112,8 +110,8 @@ svlVideoCodecUDPStream::svlVideoCodecUDPStream() :
     svlVideoCodecBase(),
     CodecName("CISST Video Stream over UDP"),
     FrameStartMarker("\r\nFrame\r\n"),
-    pktcount(0),
-    start_t(0),
+    PacketCount(0),
+    StartTime(0),
     File(0),
     PartCount(0),
     Width(0),
@@ -134,7 +132,7 @@ svlVideoCodecUDPStream::svlVideoCodecUDPStream() :
     ServerInitEvent(0),
     ServerInitialized(false),
     ReceiveBuffer(0),
-    SendThreadSync(0),
+    SendBuffer(0),
     ReceiveSocket(-1),
     ReceiveThread(0),
     ReceiveInitEvent(0),
@@ -147,24 +145,20 @@ svlVideoCodecUDPStream::svlVideoCodecUDPStream() :
     SetMultithreaded(true);
     SetVariableFramerate(true);
 
-    SendBuffer.SetSize(MAX_CLIENTS);
-    SendBuffer.SetAll(0);
-
     SockAddr = new char[sizeof(sockaddr_in)];
     PacketData = new char[DATA_SIZE];
 
-    ots = new osaTimeServer();
-    //ots->SetTimeOrigin();
+    TimeServer = new osaTimeServer();
+    //TimeServer->SetTimeOrigin();
 }
 
 svlVideoCodecUDPStream::~svlVideoCodecUDPStream()
 {
     Close();
 
-    if (ots) delete ots;
-
+    delete TimeServer;
     delete ReceiveBuffer;
-    for (unsigned int i = 0; i < MAX_CLIENTS; i ++) delete SendBuffer[i];
+    delete SendBuffer;
     
     if (yuvBuffer) delete [] yuvBuffer;
     if (comprBuffer) delete [] comprBuffer;
@@ -266,14 +260,12 @@ int svlVideoCodecUDPStream::Create(const std::string &filename, const unsigned i
         }
 
         // Allocate streaming buffers if not done yet
-        for (unsigned int i = 0; i < MAX_CLIENTS; i ++) {
-            if (!SendBuffer[i]) {
-                SendBuffer[i] = new svlBufferMemory(size);
-            }
-            else if (SendBuffer[i] && SendBuffer[i]->GetMaxSize() < size) {
-                delete SendBuffer[i];
-                SendBuffer[i] = new svlBufferMemory(size);
-            }
+        if (!SendBuffer) {
+            SendBuffer = new svlBufferMemory(size);
+        }
+        else if (SendBuffer && SendBuffer->GetMaxSize() < size) {
+            delete SendBuffer;
+            SendBuffer = new svlBufferMemory(size);
         }
 
         // Start data saving thread
@@ -539,7 +531,7 @@ int svlVideoCodecUDPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
     const unsigned int procid = procInfo->ID;
     const unsigned int proccount = procInfo->count;
     unsigned int i, start, end, size, offset;
-    unsigned char* strmbuf = SendBuffer[0]->GetPushBuffer();
+    unsigned char* strmbuf = SendBuffer->GetPushBuffer();
     unsigned long comprsize;
     int compr = Codec->data[0];
 
@@ -617,14 +609,8 @@ int svlVideoCodecUDPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
             used += ComprPartSize[i];
         }
 
-        // Signal data sending threads
-        for (i = 1; i < MAX_CLIENTS; i ++) {
-            if (SendConnection[i] >= 0) {
-                memcpy(SendBuffer[i]->GetPushBuffer(), strmbuf, used);
-                SendBuffer[i]->Push(used);
-            }
-        }
-        SendBuffer[0]->Push(used);
+        // Signal data sending thread
+        SendBuffer->Push(used);
 
 		EndPos ++; Pos ++;
     }
@@ -710,7 +696,6 @@ void svlVideoCodecUDPStream::GetKeyFrameEvery(int & key_every) const
 
 void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
 {
-    unsigned int clientid;
 	int ret;
 
 #if (CISST_OS == CISST_WINDOWS)
@@ -718,12 +703,15 @@ void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
 #endif
     bool socket_open = false;
 
+    while (1) {
+
 #if (CISST_OS == CISST_WINDOWS)
         WSADATA wsaData;
         if (WSAStartup(WINSOCKVERSION, &wsaData) != 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecUDPStream::ServerProc - WSAStartup failed" << std::endl;
 #endif
+            break;
         }
         wsa_running = true;
 #ifdef _NET_VERBOSE_
@@ -736,21 +724,22 @@ void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecUDPStream::ServerProc - cannot create socket" << std::endl;
 #endif
+            break;
         }
         socket_open = true;
 #ifdef _NET_VERBOSE_
         std::cerr << "svlVideoCodecUDPStream::ServerProc - socket created" << std::endl;
 #endif
 
-        memset(&s_address, 0, sizeof(sockaddr_in));
+        memset(&SendAddress, 0, sizeof(sockaddr_in));
 
-        s_address.sin_family = AF_INET;
-        s_address.sin_port = htons(port);
+        SendAddress.sin_family = AF_INET;
+        SendAddress.sin_port = htons(port);
 
 #if (CISST_OS == CISST_WINDOWS)
-        ret = inet_pton4(SocketAddress.c_str(), (unsigned char*)(&s_address.sin_addr));
+        ret = inet_pton4(SocketAddress.c_str(), (unsigned char*)(&SendAddress.sin_addr));
 #else
-        ret = inet_pton(AF_INET, SocketAddress.c_str(), &s_address.sin_addr);
+        ret = inet_pton(AF_INET, SocketAddress.c_str(), &SendAddress.sin_addr);
 #endif
 
 #ifdef _NET_VERBOSE_
@@ -760,41 +749,28 @@ void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
         ServerInitialized = true;
         ServerInitEvent->Raise();
 
-        // Create client pool
-        SendThread.SetSize(MAX_CLIENTS);
-        SendConnection.SetSize(MAX_CLIENTS);
-        KillSendThread.SetSize(MAX_CLIENTS);
-        for (clientid = 0; clientid < MAX_CLIENTS; clientid ++) {
-            SendThread[clientid]      = new osaThread;
-            SendConnection[clientid]  = -1;
-            KillSendThread[clientid]  = false;
-        }
+        KillSendThread = false;
+        SendConnection = ServerSocket;
+        SendThread = new osaThread;
+        SendThread->Create<svlVideoCodecUDPStream, int>(this, &svlVideoCodecUDPStream::SendProc, 0);
 
+        while (!KillServerThread) osaSleep(0.1);
 
-
-            clientid = 0;
-
-            KillSendThread[clientid] = false;
-            SendConnection[clientid] = ServerSocket;
-            SendThread[clientid]->Create<svlVideoCodecUDPStream, unsigned int>(this, &svlVideoCodecUDPStream::SendProc, clientid);
-
-        while(!KillServerThread) {
-                osaSleep(0.1);
+        break;
 	}
 
     if (ServerInitialized) {
 #ifdef _NET_VERBOSE_
         std::cerr << "svlVideoCodecUDPStream::ServerProc - shutting down all connections" << std::endl;
 #endif
-        // Destroy client pool
-        for (clientid = 0; clientid < SendThread.size(); clientid ++) {
-            if (SendConnection[clientid] >= 0) {
-                KillSendThread[clientid] = true;
-                SendThread[clientid]->Wait();
-            }
-            delete SendThread[clientid];
-            SendThread[clientid] = 0;
+        // Destroy client
+        if (SendConnection >= 0) {
+            KillSendThread = true;
+            SendThread->Wait();
         }
+        delete SendThread;
+        SendThread = 0;
+
         ServerInitialized = false;
     }
     else {
@@ -813,106 +789,113 @@ void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
     return this;
 }
 
-void* svlVideoCodecUDPStream::SendProc(unsigned int clientid)
+void* svlVideoCodecUDPStream::SendProc(int CMN_UNUSED(param))
 {
     unsigned char* strmbuf;
 	unsigned char localbuf[PACKET_SIZE];
-    unsigned int used = 0;
+    unsigned int i, ssize, used = 0;
+    double then;
     int ret;
-        double then;
-	sizepkt = 0;
 
-	header hdr;
+	SizePacket = 0;
+
+	PacketHeaderType hdr;
 	hdr.frame = 1;
 	hdr.packet = 1;
 	hdr.applicationID = 25;
 	hdr.indexInFrame = 0;
 	hdr.totalInFrame = 0;
 
-    while (!KillSendThread[clientid]) {
-
+    while (!KillSendThread) {
 
         // Wait until new frame is acquired
         strmbuf = 0;
-        while (!strmbuf && !KillSendThread[clientid]) {
-            strmbuf = SendBuffer[clientid]->Pull(used, 0.1);
+        while (!strmbuf && !KillSendThread) {
+            strmbuf = SendBuffer->Pull(used, 0.1);
         }
 
-        if (KillSendThread[clientid]) { break; }
+        if (KillSendThread) break;
 
 #ifdef _NET_VERBOSE_
         std::cerr << "svlVideoCodecUDPStream::SendProc - sending frame (" << used << " bytes)" << std::endl;
 #endif
 
-			unsigned int i;
-			unsigned int ssize = DATA_SIZE;
-			hdr.indexInFrame = 0;
-			hdr.frame++;
-			// this is the ceiling function to determine number of packets total to be sent in this frame
-			hdr.totalInFrame = (used+(DATA_SIZE-1))/DATA_SIZE;
-			for (i = 0; i < used; i += DATA_SIZE) {
-				memset(localbuf,0,PACKET_SIZE);
-				memcpy(localbuf,&hdr,sizeof(header));
+        ssize = DATA_SIZE;
 
-				if (used - i >= DATA_SIZE) {
-					memcpy(localbuf+sizeof(header),strmbuf + i,DATA_SIZE);
-				}
-				else {
-					memcpy(localbuf+sizeof(header),strmbuf + i,used - i);
-					ssize = used - i;
-				}
-				hdr.indexInFrame++;
-				hdr.packet++;
-				if ( ((hdr.indexInFrame >> BURST) << BURST) == hdr.indexInFrame) { 
-					//figure out ''then''
-					then = ots->GetRelativeTime() + WAIT_TIME;
-					//while not then;
-					while(ots->GetRelativeTime() < then) osaSleep(0.001);
-					//std::cout << ots->GetRelativeTime() << ", " << WAIT_TIME << std::endl;
+        hdr.indexInFrame = 0;
+        hdr.frame ++;
+        // this is the ceiling function to determine number of packets total to be sent in this frame
+        hdr.totalInFrame = (used + (DATA_SIZE - 1)) / DATA_SIZE;
 
-				
-				} //flow control
-				ret = sendto(SendConnection[clientid], reinterpret_cast<const char*>(localbuf), ssize + sizeof(header), 
-								0, (sockaddr*)&s_address, sizeof(s_address));
+        for (i = 0; i < used; i += DATA_SIZE) {
+            memset(localbuf, 0, PACKET_SIZE);
+            memcpy(localbuf, &hdr, sizeof(PacketHeaderType));
 
-				if (ret > 0) {
-					if (pktcount == 0)
-						start_t = osaGetTime();
-					pktcount++;
-					sizepkt += ret;
-					if ( ((pktcount >> 14) << 14) == pktcount) {
+            if (used - i >= DATA_SIZE) {
+                memcpy(localbuf + sizeof(PacketHeaderType), strmbuf + i, DATA_SIZE);
+            }
+            else {
+                memcpy(localbuf + sizeof(PacketHeaderType), strmbuf + i, used - i);
+                ssize = used - i;
+            }
+            hdr.indexInFrame ++;
+            hdr.packet ++;
+            if ( ((hdr.indexInFrame >> BURST) << BURST) == hdr.indexInFrame) { 
+                //figure out ''then''
+                then = TimeServer->GetRelativeTime() + WAIT_TIME;
+                //while not then;
+                while(TimeServer->GetRelativeTime() < then) osaSleep(0.001);
+                //std::cout << TimeServer->GetRelativeTime() << ", " << WAIT_TIME << std::endl;
+            } //flow control
+
+            ret = sendto(SendConnection,
+                         reinterpret_cast<const char*>(localbuf),
+                         ssize + sizeof(PacketHeaderType), 
+                         0,
+                         (sockaddr*)&SendAddress,
+                         sizeof(SendAddress));
+
+            if (ret > 0) {
+                if (PacketCount == 0) StartTime = osaGetTime();
+                PacketCount ++;
+                SizePacket += ret;
+                if (((PacketCount >> 14) << 14) == PacketCount) {
 #ifdef _NET_VERBOSE_
-                                                std::cout << "sent packet #" << pktcount << " and BW = " << (sizepkt*8) / (1000000*(osaGetTime()-start_t)) << " Mbps. Most recent frame was "<< (used/DATA_SIZE +1) << " packets" << std::endl;
+                    std::cout << "sent packet #" << PacketCount << " and BW = "
+                              << (SizePacket * 8) / (1000000 * (osaGetTime() - StartTime))
+                              << " Mbps. Most recent frame was "
+                              << (used/DATA_SIZE + 1) << " packets" << std::endl;
 #endif
-						sizepkt = 0;
-						start_t = osaGetTime();
-					}
-				}
+                    SizePacket = 0;
+                    StartTime = osaGetTime();
+                }
+            }
 
-				if (ret < 0) {
+            if (ret < 0) {
 #ifdef _NET_VERBOSE_
-                                        std::cerr << "svlVideoCodecUDPStream::SendProc - send failed to " << SendConnection[clientid] << "(" << __errno << ")" << std::endl;
+                std::cerr << "svlVideoCodecUDPStream::SendProc - send failed to "
+                          << SendConnection << "(" << __errno << ")" << std::endl;
 #endif
-					KillSendThread[clientid] = true;
-					break;
-				}
+                KillSendThread = true;
+                break;
+            }
 
-			}
-			if (ots->GetRelativeTime() > WRAP_AROUND) {
-				ots->SetTimeOrigin();
-			}
+        }
+        if (TimeServer->GetRelativeTime() > WRAP_AROUND) {
+            TimeServer->SetTimeOrigin();
+        }
     }
 
 #if (CISST_OS == CISST_WINDOWS)
-    closesocket(SendConnection[clientid]);
+    closesocket(SendConnection);
 #else
-    close(SendConnection[clientid]);
+    close(SendConnection);
 #endif
 
-    SendConnection[clientid] = -1;
+    SendConnection = -1;
 
 #ifdef _NET_VERBOSE_
-    std::cerr << "svlVideoCodecUDPStream::SendProc - client (" << clientid << ") shut down" << std::endl;
+    std::cerr << "svlVideoCodecUDPStream::SendProc - client shut down" << std::endl;
 #endif
 
     return this;
@@ -927,13 +910,15 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
     bool socket_open      = false;
     bool socket_connected = false;
 
+    while (1) {
+
 #if (CISST_OS == CISST_WINDOWS)
         WSADATA wsaData;
         if (WSAStartup(WINSOCKVERSION, &wsaData) != 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecUDPStream::ReceiveProc - WSAStartup failed" << std::endl;
 #endif
-            exit(1);
+            break;
         }
         wsa_running = true;
 #ifdef _NET_VERBOSE_
@@ -944,34 +929,34 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
         ReceiveSocket = socket(AF_INET, SOCK_DGRAM, 0);
         if (ReceiveSocket < 0) {
             std::cout << "svlVideoCodecUDPStream::ReceiveProc - cannot create socket" << std::endl;
-            exit(1);
+            break;
         }
         socket_open = true;
 #ifdef _NET_VERBOSE_
         std::cerr << "svlVideoCodecUDPStream::ReceiveProc - socket created" << std::endl;
 #endif
 
-        memset(&r_address, 0, sizeof(sockaddr_in));
-        r_address.sin_family = AF_INET;
-        r_address.sin_port = htons(SocketPort);
-        s_address.sin_addr.s_addr = INADDR_ANY;
+        memset(&ReceiveAddress, 0, sizeof(sockaddr_in));
+        ReceiveAddress.sin_family = AF_INET;
+        ReceiveAddress.sin_port = htons(SocketPort);
+        SendAddress.sin_addr.s_addr = INADDR_ANY;
 
-        ret = bind(ReceiveSocket, (sockaddr*)(&r_address), sizeof(sockaddr_in));
+        ret = bind(ReceiveSocket, (sockaddr*)(&ReceiveAddress), sizeof(sockaddr_in));
         if (ret < 0) {
                 std::cout << "svlVideoCodecUDPStream::ReceiveProc - bind failed (port=" << SocketPort << ")" << std::endl;
 #if (CISST_OS == CISST_WINDOWS)
                 std::cerr << "Windows reports error " << WSAGetLastError() << std::endl;
 #endif
 //#endif
-            exit(1);
+            break;
         }
-        
-        ReceiveSub      = new osaThread;
-        KillReceiveSub  = false;
+
+        ReceiveSub = new osaThread;
+        KillReceiveSub = false;
         socket_connected = true;
         ReceiveInitialized = true;
         ReceiveInitEvent->Raise();
-        ReceiveSub->Create<svlVideoCodecUDPStream,unsigned int>(this, &svlVideoCodecUDPStream::Receive,0);
+        ReceiveSub->Create<svlVideoCodecUDPStream, int>(this, &svlVideoCodecUDPStream::Receive, 0);
 
         while (!KillReceiveThread) {
             osaSleep(0.1);
@@ -990,6 +975,9 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
             ReceiveInitEvent->Raise();
         }
 
+        break;
+    }
+
     if (!socket_open) {
 #ifdef _NET_VERBOSE_
         std::cerr << "svlVideoCodecUDPStream::ReceiveProc - client failed to initialize" << std::endl;
@@ -997,13 +985,14 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
         ReceiveInitEvent->Raise();
     }
 
-if (socket_open) {
+    if (socket_open) {
 #if (CISST_OS == CISST_WINDOWS)
         closesocket(ReceiveSocket);
 #else
         close(ReceiveSocket);
 #endif
-}
+    }
+
 #if (CISST_OS == CISST_WINDOWS)
     if (wsa_running) WSACleanup();
 #endif
@@ -1012,7 +1001,7 @@ if (socket_open) {
     return this;
 }
 
-void* svlVideoCodecUDPStream::Receive(unsigned int dummy)
+void* svlVideoCodecUDPStream::Receive(int CMN_UNUSED(param))
 {
     const unsigned char* fsm = reinterpret_cast<const unsigned char*>(FrameStartMarker.c_str());
     const unsigned int fsm_len = FrameStartMarker.length();
@@ -1024,9 +1013,10 @@ void* svlVideoCodecUDPStream::Receive(unsigned int dummy)
     bool started = false;
     fd_set mask;
     int ret;
-    header hdr;
-    sizepkt = 0;
-    struct timeval select_to;
+    PacketHeaderType hdr;
+    timeval select_to;
+
+    SizePacket = 0;
 
     while (!KillReceiveSub) {
         // Wait for new packet
@@ -1059,18 +1049,19 @@ void* svlVideoCodecUDPStream::Receive(unsigned int dummy)
             break;
         }
         else if (ret > 0) {
-                if (pktcount == 0)
-                        start_t = osaGetTime();
-                pktcount++;
-                sizepkt += ret;
-                if ( ((pktcount >> 13) << 13) == pktcount) {
-                        //std::cerr << "received packet #" << pktcount << " and BW = " << (sizepkt*8) / (1000000*(osaGetTime()-start_t)) << " Mbps" << std::endl;
-                        sizepkt = 0;
-                        start_t = osaGetTime();
-                }
+
+            if (PacketCount == 0) StartTime = osaGetTime();
+
+            PacketCount ++;
+            SizePacket += ret;
+            if ( ((PacketCount >> 13) << 13) == PacketCount) {
+                    //std::cerr << "received packet #" << PacketCount << " and BW = " << (SizePacket*8) / (1000000*(osaGetTime()-StartTime)) << " Mbps" << std::endl;
+                    SizePacket = 0;
+                    StartTime = osaGetTime();
+            }
 
             // Check if it starts with a "frame start marker"
-            framestart = CompareData(localbuf+sizeof(header), fsm, fsm_len);
+            framestart = CompareData(localbuf+sizeof(PacketHeaderType), fsm, fsm_len);
 
             if (!framestart) {
                 if (!started) {
@@ -1093,7 +1084,7 @@ void* svlVideoCodecUDPStream::Receive(unsigned int dummy)
                 }
                 else {
                     // Extract dimensions from header
-                    int offset = fsm_len + sizeof(unsigned int) + sizeof(header);
+                    int offset = fsm_len + sizeof(unsigned int) + sizeof(PacketHeaderType);
                     const unsigned int w = reinterpret_cast<unsigned int*>(localbuf + offset)[0];
                     offset += sizeof(unsigned int);
                     const unsigned int h = reinterpret_cast<unsigned int*>(localbuf + offset)[0];
@@ -1124,7 +1115,7 @@ void* svlVideoCodecUDPStream::Receive(unsigned int dummy)
 
                     //Possible problem: we think this hasn't been set yet and won't be until the memcopy below
                     // Get "data size after frame start marker"
-                    framesize = reinterpret_cast<unsigned int*>(localbuf + sizeof(header) + fsm_len)[0] + fsm_len;
+                    framesize = reinterpret_cast<unsigned int*>(localbuf + sizeof(PacketHeaderType) + fsm_len)[0] + fsm_len;
                     // Don't request the rest of the data if buffer size is too small
                     if (framesize > size) {
                         std::cout << "svlVideoCodecUDPStream::Receive - received data larger than buffer" << std::endl;
@@ -1136,9 +1127,9 @@ void* svlVideoCodecUDPStream::Receive(unsigned int dummy)
                     started = true;
                 }
             }
-            memcpy(&hdr, localbuf, sizeof(header));
-            memcpy(framebuf + (hdr.indexInFrame*DATA_SIZE), localbuf+sizeof(header), ret-sizeof(header));
-            size += ret-sizeof(header);
+            memcpy(&hdr, localbuf, sizeof(PacketHeaderType));
+            memcpy(framebuf + (hdr.indexInFrame * DATA_SIZE), localbuf + sizeof(PacketHeaderType), ret - sizeof(PacketHeaderType));
+            size += ret-sizeof(PacketHeaderType);
 
             if (framesize == size) {
                 //std::cout << "svlVideoCodecUDPStream::Receive - frame received (" << framesize << ")" << std::endl;

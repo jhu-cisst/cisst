@@ -93,8 +93,9 @@ protected:
     const std::string CodecName;
     const std::string FrameStartMarker;
 
-    unsigned int pktcount, temp;
-    double sizepkt, start_t, end_t;
+    unsigned int PacketCount;
+    double StartTime;
+    int SizePacket; // Why is it here and not in the .cpp?
 
     std::fstream* File;
     unsigned int PartCount;
@@ -115,7 +116,7 @@ protected:
     vctDynamicVector<unsigned int> ComprPartOffset;
     vctDynamicVector<unsigned int> ComprPartSize;
 
-    sockaddr_in s_address;
+    sockaddr_in SendAddress;
     int ServerSocket;
     osaThread *ServerThread;
     osaThreadSignal* ServerInitEvent;
@@ -123,15 +124,14 @@ protected:
     bool KillServerThread;
 
     svlBufferMemory* ReceiveBuffer;
-    vctDynamicVector<svlBufferMemory*> SendBuffer;
+    svlBufferMemory* SendBuffer;
 
-    osaThread *SendThreadSync;
-    vctDynamicVector<osaThread*> SendThread;
-    vctDynamicVector<int> SendConnection;
-    vctDynamicVector<bool> KillSendThread;
+    osaThread *SendThread;
+    int SendConnection;
+    bool KillSendThread;
 
     int ReceiveSocket;
-    sockaddr_in r_address;
+    sockaddr_in ReceiveAddress;
     osaThread *ReceiveThread;
     osaThreadSignal* ReceiveInitEvent;
     bool ReceiveInitialized;
@@ -145,7 +145,7 @@ protected:
     std::string SocketAddress;
     char* SockAddr;
 
-    osaTimeServer *ots;
+    osaTimeServer *TimeServer;
 
     //unsigned int		totalReceived=0;/*The number of packets we know we definitely got*/
     //unsigned int		totalPackets=0;/*The total number of packets (we think) the sender sent so far*/
@@ -158,10 +158,10 @@ protected:
     void  CloseSocket();
     void* ServerProc(unsigned short port);
     //void* ServerSync(unsigned short port);
-    void* SendProc(unsigned int clientid);
+    void* SendProc(int param);
     void* ReceiveProc(int param);
     //void* ReceiveSync(int param);
-    void*  Receive(unsigned int dummy);
+    void*  Receive(int param);
     bool  CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size);
     int   ParseFilename(const std::string & filename);
 };
