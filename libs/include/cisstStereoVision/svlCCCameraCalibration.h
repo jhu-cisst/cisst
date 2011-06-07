@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstStereoVision/svlFilterImageRectifier.h>
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
 #include <cisstStereoVision/svlCCOriginDetector.h>
 #include <cisstStereoVision/svlCCCornerDetector.h>
@@ -52,11 +53,13 @@ class CISST_EXPORT svlCCCameraCalibration
 
 	public:
 		svlCCCameraCalibration();
-		bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, cv::Size boardSize, int originDetectorColorModeFlag);
-		void printCalibrationParameters();
+		bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
+		svlFilterImageRectifier* getRectifier();
+        void printCalibrationParameters();
 		cv::Mat cameraMatrix, distCoeffs;
 		std::vector<svlSampleImageRGB> images;
 		cv::Size imageSize;
+
 
 	private:
 	double computeReprojectionErrors(

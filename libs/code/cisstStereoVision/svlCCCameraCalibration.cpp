@@ -509,13 +509,14 @@ bool svlCCCameraCalibration::calibration(bool groundTruthTest)
 *	bool											- Success indicator						
 *
 ***********************************************************************************************************/
-bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, cv::Size boardSize, int originDetectorColorModeFlag)
+bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag)
 {
 
 	cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
 	distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
 	bool ok = false;
 	bool groundTruthTest = false;
+    cv::Size boardSize(boardWidth,boardHeight);
 
 	std::string currentFileName;
 	std::string currentImagePrefix;
@@ -626,4 +627,49 @@ bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::stri
 	ok = calibration(groundTruthTest);
 
 	return ok;
+}
+
+svlFilterImageRectifier* svlCCCameraCalibration::getRectifier()
+{
+	//if(debug)
+	//{
+    std::cout << "==========GetRectifier==============" << std::endl;
+	//}
+
+	bool debug = true;
+	svlFilterImageRectifier *rectifier = (svlFilterImageRectifier *)new svlFilterImageRectifier();
+	vct3x3 R = vct3x3::Eye();
+
+	vct2 f(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
+	vct2 c(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));
+	vctFixedSizeVector<double,7> k(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),distCoeffs.at<double>(4,0),0.0,0.0);//-0.36,0.1234,0.0,0,0);//
+
+	double alpha = 0.0;//assumed to be square pixels
+	vct3x3 KK_new = vct3x3::Eye();
+	unsigned int videoch = 0;
+
+	KK_new.at(0,0) = cameraMatrix.at<double>(0,0);
+	KK_new.at(0,1) = 0;
+	KK_new.at(0,2) = cameraMatrix.at<double>(0,2);
+	KK_new.at(1,0) = 0;
+	KK_new.at(1,1) = cameraMatrix.at<double>(1,1);
+	KK_new.at(1,2) = cameraMatrix.at<double>(1,2);
+	KK_new.at(2,0) = 0;
+	KK_new.at(2,1) = 0;
+	KK_new.at(2,2) = 1;
+
+	//unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,5> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+	int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, R,f,c,k,alpha,KK_new,videoch);
+
+	if(result == SVL_OK)
+	{
+		//vctFixedSizeVector<svlImageProcessing::Internals, SVL_MAX_CHANNELS> Tables = rectifier->GetTables();
+		//table = dynamic_cast<svlImageProcessingHelper::RectificationInternals*>(Tables[videoch].Get());
+        if (debug) {
+			printf("svlFilterImageRectifier SetTableFromCameraCalibration: success! %d\n", result);
+		}
+		return rectifier;
+	}else{
+		return NULL;
+	}
 }
