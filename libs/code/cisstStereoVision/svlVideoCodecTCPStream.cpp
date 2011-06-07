@@ -88,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
 //#define _NET_VERBOSE_
 
 #define MAX_CLIENTS         5
-#define PACKET_SIZE         1400u
+#define PACKET_SIZE         10240u
 #define BROKEN_FRAME        1
 
 
@@ -1120,6 +1120,7 @@ int svlVideoCodecTCPStream::Receive()
                    reinterpret_cast<char*>(buffer),
                    std::min(size, PACKET_SIZE),
                    0);
+
         if (ret == 0) {
 #ifdef _NET_VERBOSE_
                     std::cerr << "svlVideoCodecTCPStream::Receive - connection terminated" << std::endl;
@@ -1186,15 +1187,15 @@ int svlVideoCodecTCPStream::Receive()
                     }
 
                     // Signal "frame start"
-                    size = 0;
+                    size = framesize;
                     started = true;
                 }
             }
 
             buffer += ret;
-            size += ret;
+            size -= ret;
 
-            if (framesize == size) {
+            if (size == 0) {
 #ifdef _NET_VERBOSE_
                 std::cerr << "svlVideoCodecTCPStream::Receive - frame received (" << framesize << ")" << std::endl;
 #endif
@@ -1217,11 +1218,12 @@ int svlVideoCodecTCPStream::Receive()
                 }
                 else {
 #ifdef _NET_VERBOSE_
-                    std::cerr << "svlVideoCodecTCPStream::Receive - recv failed (" << err << ")" << std::endl;
+                    std::cerr << "svlVideoCodecTCPStream::Receive - recv failed (" << err << ")"<< std::endl;
 #endif
                 }
                 KillReceiveThread = true;
                 break;
+
             }
         }
     }
