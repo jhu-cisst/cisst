@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlQtWorkThread_h
 #define _svlQtWorkThread_h
 
-#include <QtGUI>
+#include <QtGui>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>

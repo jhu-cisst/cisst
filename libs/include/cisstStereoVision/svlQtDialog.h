@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlQtDialog_h
 
 #include <cisstOSAbstraction/osaThreadSignal.h>
-#include <QtGUI>
+#include <QtGui>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>
