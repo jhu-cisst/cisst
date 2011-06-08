@@ -110,6 +110,12 @@ public:
     void SetInputSource(const std::string & fileName);
     //@}
 
+    /*! Set the input source file */
+    //@{
+    bool ValidateWithSchema(const char * filename);
+    bool ValidateWithSchema(const std::string & fileName);
+    //@}
+
     /*! Save to file */
     //@{
     bool SaveAs(const char * filename) const;

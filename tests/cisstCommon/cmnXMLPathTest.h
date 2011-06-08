@@ -45,7 +45,7 @@ class cmnXMLPathTest: public CppUnit::TestFixture
     void TestCopyReadExistingFile(void);
 
 protected:
-    void TestExistingFile1(const std::string & testFile);
+    void TestExistingFile1(const std::string & testFile, const std::string & schemaFile);
 };
 
 

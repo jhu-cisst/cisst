@@ -25,14 +25,20 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstCommon/cmnPath.h>
 
+//#include <QtCore/QCoreApplication>
+//QCoreApplication *app;
 
 void cmnXMLPathTest::setUp(void)
 {
     // set log to see all
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClassMatching("cmnXMLPath", CMN_LOG_ALLOW_ALL); 
+    cmnLogger::SetMaskClassMatching("cmnXMLPath", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+
+//    int argc = 1;
+//    char * argv = "";
+//    app = new QCoreApplication(argc, &argv);
 }
 
 
@@ -41,8 +47,10 @@ void cmnXMLPathTest::tearDown(void)
     // reset log
     cmnLogger::SetMask(CMN_LOG_ALLOW_DEFAULT);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_DEFAULT);
-    cmnLogger::SetMaskClassMatching("cmnXMLPath", cmnXMLPath::InitialLoD); 
+    cmnLogger::SetMaskClassMatching("cmnXMLPath", cmnXMLPath::InitialLoD);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_DEFAULT);
+
+//    delete app;
 }
 
 
@@ -52,8 +60,10 @@ void cmnXMLPathTest::TestReadExistingFile(void)
     cmnPath filePath;
     filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
+    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
-    TestExistingFile1(testFile);
+    CPPUNIT_ASSERT(!(schemaFile == ""));
+    TestExistingFile1(testFile, schemaFile);
 }
 
 
@@ -63,7 +73,9 @@ void cmnXMLPathTest::TestCopyReadExistingFile(void)
     cmnPath filePath;
     filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
+    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
+    CPPUNIT_ASSERT(!(schemaFile == ""));
     // read file
     cmnXMLPath xmlPath;
     xmlPath.SetInputSource(testFile);
@@ -71,14 +83,17 @@ void cmnXMLPathTest::TestCopyReadExistingFile(void)
     std::string copy = "cmnXMLPathTestFile1-copy.xml";
     xmlPath.SaveAs(copy);
     // test copy
-    TestExistingFile1(copy);
+    TestExistingFile1(copy, schemaFile);
 }
 
 
-void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
+void cmnXMLPathTest::TestExistingFile1(const std::string & testFile, const std::string & schemaFile)
 {
     cmnXMLPath xmlPath;
     xmlPath.SetInputSource(testFile);
+
+    // validate with schema
+    CPPUNIT_ASSERT(xmlPath.ValidateWithSchema(schemaFile));
 
     // start reading
     int intValue;
@@ -160,7 +175,7 @@ void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
         path << "data-1-2-x-y/@stringAttribute";
         dataFound = xmlPath.GetXMLValue(context.str(), path.str(), stringValue);
         CPPUNIT_ASSERT(dataFound);
-        // compare string to index 
+        // compare string to index
         value.str("");
         value << "value-" << index;
         CPPUNIT_ASSERT_EQUAL(value.str(), stringValue);

@@ -39,6 +39,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <QFile>
 #include <QDomDocument>
 #include <QXmlQuery>
+#include <QXmlResultItems>
+#include <QXmlSchema>
+#include <QXmlSchemaValidator>
 
 class cmnXMLPathData
 {
@@ -86,7 +89,7 @@ public:
         std::string docName = std::string("cmnXMLPath") + filename;
         this->Document = new QDomDocument(docName.c_str());
         this->File = new QFile(filename);
-        if (!this->File->open(QIODevice::ReadOnly)) {
+        if (!this->File->open(QIODevice::ReadOnly | QIODevice::Text)) {
             CMN_LOG_CLASS_INIT_ERROR << "SetInputSource (Qt): an error occured while opening \"" << filename << "\"" << std::endl;
             return;
         }
@@ -95,6 +98,25 @@ public:
             this->File->close();
             return;
         }
+    }
+
+    bool ValidateWithSchema(const char * filename)
+    {
+        QXmlSchema schema;
+        if (!schema.load(QUrl(filename))) {
+            CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (Qt): the schema cannot be loaded \""
+                                     << filename << "\"" << std::endl;
+        }
+        if (!schema.isValid()) {
+            CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (Qt): the schema itself is not valid \""
+                                     << filename << "\"" << std::endl;
+            return false;
+        }
+        QXmlSchemaValidator validator(schema);
+        if (!validator.validate(this->Document->toByteArray())) {
+            return false;
+        }
+        return true;
     }
 
     bool SaveAs(const char * filename) const
@@ -113,21 +135,33 @@ public:
     bool GetXMLValueStdString(const char * context, const char * XPath, std::string & storage)
     {
         QXmlQuery query;
-        QString result;
-        query.setFocus(this->File);
-        QString path = context;
+        QXmlResultItems results;
+        query.setFocus(this->Document->toString());
+        QString path = "data(";
+        path += context;
         path += "/";
         path += XPath;
+        path += ")";
         query.setQuery(path);
-#if 0
         if (!query.isValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): invalid query \"" << path.toStdString() << "\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): invalid query for path [" << path.toStdString() << "]" << std::endl;
+            std::cerr << "1" << std::endl;
             return false;
         }
-        query.evaluateTo(&result);
-#endif
-        std::cerr << "----- result " << result.toStdString() << std::endl;
-        return true;
+        query.evaluateTo(&results);
+        if (results.hasError()) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): query result has errors for path [" << path.toStdString() << "]" << std::endl;
+            std::cerr << "2" << std::endl;
+            return false;
+        }
+        bool attributeFound = false;
+        for (QXmlItem result = results.next(); !result.isNull(); result = results.next()) {
+            storage = result.toAtomicValue().toString().toStdString();
+            attributeFound = true;
+            CMN_LOG_CLASS_RUN_VERBOSE << "GetXMLValueStdString (Qt): read path [" << path.toStdString()
+                                      << "]  Content [" << storage << "]" << std::endl;
+        }
+        return attributeFound;
     }
 
     bool SetXMLValueStdString(const char * context, const char * XPath, const std::string & storage)
@@ -143,6 +177,7 @@ public:
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include <libxml/xmlschemas.h>
 
 class cmnXMLPathData
 {
@@ -181,6 +216,47 @@ public:
             xmlFreeDoc(this->Document);
         }
         CMN_ASSERT(this->XPathContext != 0);
+    }
+
+    bool ValidateWithSchema(const char * filename)
+    {
+        xmlDocPtr schema_doc = xmlReadFile(filename, NULL, XML_PARSE_NONET);
+        if (schema_doc == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): the schema cannot be loaded or is not well-formed \""
+                                     << filename << "\"" << std::endl;
+            return false;
+        }
+        xmlSchemaParserCtxtPtr parser_ctxt = xmlSchemaNewDocParserCtxt(schema_doc);
+        if (parser_ctxt == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): unable to create a parser context for the schema \""
+                                     << filename << "\"" << std::endl;
+            xmlFreeDoc(schema_doc);
+            return false;
+        }
+        xmlSchemaPtr schema = xmlSchemaParse(parser_ctxt);
+        if (schema == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): the schema itself is not valid \""
+                                     << filename << "\"" << std::endl;
+            xmlSchemaFreeParserCtxt(parser_ctxt);
+            xmlFreeDoc(schema_doc);
+            return false;
+        }
+        xmlSchemaValidCtxtPtr valid_ctxt = xmlSchemaNewValidCtxt(schema);
+        if (valid_ctxt == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): unable to create a validation context for the schema \""
+                                     << filename << "\"" << std::endl;
+            xmlSchemaFree(schema);
+            xmlSchemaFreeParserCtxt(parser_ctxt);
+            xmlFreeDoc(schema_doc);
+            return false;
+        }
+        xmlSchemaSetValidErrors(valid_ctxt, (xmlValidityErrorFunc)fprintf, (xmlValidityWarningFunc)fprintf, stderr);
+        int is_valid = (xmlSchemaValidateDoc(valid_ctxt, this->Document) == 0);
+        xmlSchemaFreeValidCtxt(valid_ctxt);
+        xmlSchemaFree(schema);
+        xmlSchemaFreeParserCtxt(parser_ctxt);
+        xmlFreeDoc(schema_doc);
+        return is_valid ? true : false;
     }
 
     bool SaveAs(const char * filename) const
@@ -329,6 +405,18 @@ void cmnXMLPath::SetInputSource(const char * filename)
 void cmnXMLPath::SetInputSource(const std::string & fileName)
 {
     this->SetInputSource(fileName.c_str());
+}
+
+
+bool cmnXMLPath::ValidateWithSchema(const char * filename)
+{
+    return this->Data->ValidateWithSchema(filename);
+}
+
+
+bool cmnXMLPath::ValidateWithSchema(const std::string & fileName)
+{
+    return this->ValidateWithSchema(fileName.c_str());
 }
 
 
