@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _SynchronizeThreads(_info) \
             if((_info)->count>1){if((_info)->sync->Sync((_info)->ID)!=SVL_SYNC_OK){return SVL_FAIL;}}
 #define _CriticalSection(_info) \
-            if((_info)->count>1){(_info)->cs->Enter();}for(bool _incs=true;_incs&&((_info)->count>1);_incs=false,(_info)->cs->Leave())
+            if((_info)->count>1){(_info)->cs->Enter();}for(bool _incs=true;_incs;_incs=false,((_info)->count>1)?(_info)->cs->Leave():void())
 
 
 ///////////////////
