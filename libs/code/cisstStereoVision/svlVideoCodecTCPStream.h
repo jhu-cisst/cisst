@@ -35,6 +35,11 @@ class svlVideoCodecTCPStream : public svlVideoCodecBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    enum CompressorType {
+        CVI,
+        JPEG
+    };
+
     svlVideoCodecTCPStream();
     virtual ~svlVideoCodecTCPStream();
 
@@ -78,6 +83,8 @@ public:
     virtual void GetKeyFrameEvery(int & key_every) const;
 
 protected:
+    CompressorType Compressor;
+
     const std::string CodecName;
     const std::string FrameStartMarker;
 

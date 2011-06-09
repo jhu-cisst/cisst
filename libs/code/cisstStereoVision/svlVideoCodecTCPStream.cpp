@@ -100,6 +100,7 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecTCPStream, svlVideoCodecBase)
 
 svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     svlVideoCodecBase(),
+    Compressor(JPEG),
     CodecName("CISST Video Stream over TCP/IP"),
     FrameStartMarker("\r\nFrame\r\n"),
     File(0),
@@ -467,12 +468,24 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
             compressedpartsize = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
             strmoffset += sizeof(unsigned int);
 
-            // Decompress frame part
-            longsize = yuvBufferSize - offset;
-            if (uncompress(yuvBuffer + offset, &longsize, strmbuf + strmoffset, compressedpartsize) != Z_OK) break;
+            if (Compressor == CVI) {
+                // Decompress frame part
+                longsize = yuvBufferSize - offset;
+                if (uncompress(yuvBuffer + offset, &longsize, strmbuf + strmoffset, compressedpartsize) != Z_OK) break;
 
-            // Convert YUV422 planar to RGB format
-            svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
+                // Convert YUV422 planar to RGB format
+                svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
+            }
+            else if (Compressor == JPEG) {
+                svlSampleImageRGB subimage;
+
+                // Compress sub-image into buffer
+                svlImageIO::Read(subimage, 0, "jpg", strmbuf + strmoffset, compressedpartsize);
+
+                // Copy sub-image into buffer
+                longsize = subimage.GetDataSize();
+                memcpy(img + offset, subimage.GetUCharPointer(), longsize);
+            }
 
             strmoffset += compressedpartsize;
             offset += longsize;
@@ -531,14 +544,33 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
         size = Width * (end - start);
         ComprPartOffset[procid] = procid * comprsize;
 
-        // Convert RGB to YUV422 planar format
-        svlConverter::RGB24toYUV422P(const_cast<unsigned char*>(image.GetUCharPointer(videoch)) + offset * 3, yuvBuffer + offset * 2, size);
+        if (Compressor == CVI) {
+            // Convert RGB to YUV422 planar format
+            svlConverter::RGB24toYUV422P(const_cast<unsigned char*>(image.GetUCharPointer(videoch)) + offset * 3, yuvBuffer + offset * 2, size);
 
-        // Compress part
-        if (compress2(comprBuffer + ComprPartOffset[procid], &comprsize, yuvBuffer + offset * 2, size * 2, compr) != Z_OK) {
-            err = true;
-            break;
+            // Compress part
+            if (compress2(comprBuffer + ComprPartOffset[procid], &comprsize, yuvBuffer + offset * 2, size * 2, compr) != Z_OK) {
+                err = true;
+                break;
+            }
         }
+        else if (Compressor == JPEG) {
+            // Get sub-image reference
+            svlSampleImage *subimage = const_cast<svlSampleImage&>(image).GetSubImage(start, end - start, videoch);
+
+            // Compress sub-image into buffer
+            size_t csize = size * 2;
+            svlImageIO::Write(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[procid], csize, 85);
+            comprsize = csize;
+
+            // Delete sub-image reference
+            delete subimage;
+        }
+
+        _CriticalSection(procInfo) {
+            std::cerr << "(" << procInfo->ID << ", " << size * 3 << ", " << comprsize << ") ";
+        }
+
         ComprPartSize[procid] = comprsize;
 
         break;
