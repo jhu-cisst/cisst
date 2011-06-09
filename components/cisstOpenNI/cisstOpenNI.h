@@ -20,6 +20,8 @@ class cisstOpenNIData;
 
 class CISST_EXPORT cisstOpenNI {
 
+    friend class cisstOpenNISkeleton;
+
 private:
 
     //! Private OpenNI Data Structure
@@ -28,7 +30,7 @@ private:
     //! Identifier for the openNI Object
     std::string name;
 
-    std::vector<cisstOpenNISkeleton> skeletons;
+    std::vector<cisstOpenNISkeleton*> skeletons;
 
 
 public:
@@ -38,6 +40,9 @@ public:
 
     //! Default DeConstructor
     ~cisstOpenNI();
+
+    //! Clean Up and Exit
+    void CleanupExit();
 
     //! Configure
     /**
@@ -53,6 +58,9 @@ public:
     */
     void UpdateAll();
 
+    //! INit skeletons
+    void InitSkeletons();
+
     //! Get range data
     /**
     Query the depth generator to obtain a depth image and convert the image to a points
@@ -65,10 +73,19 @@ public:
 
     //! Get depth image
     /**
-    Query the depth generator to obtain a depth image. The value at each pixel represents
-    the depth of the picture element. This method is non-const due to updating the context.
+    Query the depth generator to obtain a depth image. Resulting image as 8-bit depth. 
+    The value at each pixel represents the depth of the picture element. This method 
+    is non-const due to updating the context.
     */
-    vctDynamicMatrix<double> GetDepthImage();
+    vctDynamicMatrix<double> GetDepthImage8bit();
+
+    //! Get depth image
+    /**
+    Query the depth generator to obtain a depth image. Resulting image as 11-bit depth. 
+    The value at each pixel represents the depth of the picture element. This method 
+    is non-const due to updating the context.
+    */
+    vctDynamicMatrix<double> GetDepthImage11bit();
 
     //! Get (interlaced) RGB image
     /**
@@ -84,7 +101,7 @@ public:
     //! Get Current User Skeletons
     /**
     */
-    std::vector<cisstOpenNISkeleton> UpdateAndGetUserSkeletons();
+    std::vector<cisstOpenNISkeleton*> &UpdateAndGetUserSkeletons();
 
 };
 

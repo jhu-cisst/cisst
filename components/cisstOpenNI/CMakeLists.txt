@@ -12,8 +12,6 @@
 #
 # --- end cisst license ---
 
-# for generated config files
-
 
 set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/code/cmake/Modules )
 

@@ -37,10 +37,10 @@ int main(){
         
         // Wait and Update All
         kinect.UpdateAll();
-		vctDynamicMatrix<double> depth = kinect.GetDepthImage();
+		vctDynamicMatrix<double> depth = kinect.GetDepthImage8bit();
 		vctDynamicMatrix<unsigned char> rgb = kinect.GetRGBImage();
 		vctDynamicMatrix<double> range = kinect.GetRangeData();
-        std::vector<cisstOpenNISkeleton> skeletons = kinect.UpdateAndGetUserSkeletons();
+        std::vector<cisstOpenNISkeleton*> skeletons = kinect.UpdateAndGetUserSkeletons();
 
 		osaSleep(10*cmn_ms);
 	}

@@ -2,8 +2,8 @@
 #define _cisstOpenNISkeleton_h
 
 #include <cisstVector.h>
-#include <XnCppWrapper.h>
-#include <XnOS.h>
+
+class cisstOpenNI;
 
 class CISST_EXPORT cisstOpenNISkeleton {
 
@@ -21,20 +21,19 @@ private:
 	//! Skeleton has been populated coorectly
 	bool exists;
 
+    cisstOpenNI* OpenNI;
+
 
 public:
 
 	//! Default Constructor
-	cisstOpenNISkeleton();
+	cisstOpenNISkeleton( cisstOpenNI * openNI);
 
 	//! Default Deconstructor
 	~cisstOpenNISkeleton();
 
 	//! Build Skeleton Using XN Context for a given user
-	void Update(	XnUserID id, 
-				    xn::Context &context, 
-				    xn::DepthGenerator &depthgenerator, 
-				    xn::UserGenerator &usergenerator);
+	void Update(int id);
 
 	void SetExists(bool val);
 
