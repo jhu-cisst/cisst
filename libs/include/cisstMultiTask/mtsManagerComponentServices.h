@@ -41,7 +41,7 @@ protected:
     struct ManagementStruct {
         mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
-        mtsFunctionWriteReturn Connect;
+        mtsFunctionWrite Connect;
         mtsFunctionWrite Disconnect;
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;

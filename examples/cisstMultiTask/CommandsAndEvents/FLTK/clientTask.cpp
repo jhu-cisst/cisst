@@ -44,8 +44,8 @@ clientTask<_dataType>::clientTask(const std::string & taskName):
         required->AddFunction("QualifiedRead", this->QualifiedRead);
         required->AddFunction("VoidSlow", this->VoidSlow);
         required->AddFunction("WriteSlow", this->WriteSlow);
-        // required->AddFunction("VoidReturn", this->VoidReturn);
-        // required->AddFunction("WriteReturn", this->WriteReturn);
+        required->AddFunction("VoidReturn", this->VoidReturn);
+        required->AddFunction("WriteReturn", this->WriteReturn);
         required->AddEventHandlerVoid(&clientTask<_dataType>::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask<_dataType>::EventWriteHandler, this, "EventWrite");
     }

@@ -512,8 +512,7 @@ bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
             if (!Connect(ManagerComponent.Client->GetName(),
                          mtsManagerComponentBase::GetNameOfInterfaceLCMRequired(),
                          mtsManagerComponentBase::GetNameOfManagerComponentServer(),
-                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided(),
-                         true)
+                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided())
                 )
             {
                 CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: failed to connect: "
@@ -594,9 +593,7 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     const std::string nameOfinterfaceComponentRequired
         = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
     if (!Connect(managerComponent->GetName(), nameOfinterfaceComponentRequired,
-                 componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided(),
-                 true))
-    {
+                 componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: failed to connect: "
                                  << managerComponent->GetName() << ":" << nameOfinterfaceComponentRequired
                                  << " - "
@@ -610,9 +607,7 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     // provided interface.
     if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
         if (!Connect(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-                     managerComponent->GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided(),
-                     true))
-        {
+                     managerComponent->GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: failed to connect: "
                                      << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
                                      << " - "
@@ -1711,8 +1706,7 @@ void mtsManagerLocal::KillAll(void)
 }
 
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                              const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-                              bool byPassInterface)
+                              const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
     if (!ManagerComponent.Client) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: MCC not yet created" << std::endl;
@@ -1720,8 +1714,7 @@ bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std
     }
 
     return ManagerComponent.Client->Connect(clientComponentName, clientInterfaceRequiredName,
-                                            serverComponentName, serverInterfaceProvidedName,
-                                            byPassInterface);
+                                            serverComponentName, serverInterfaceProvidedName);
 }
 
 ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,

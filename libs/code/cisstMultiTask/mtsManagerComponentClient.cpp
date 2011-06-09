@@ -463,8 +463,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-    provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
-                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
+                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart,
@@ -505,20 +505,14 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
     // Create an end user interface for internal invocations (via GeneralInterface). These internal invocations
     // are made by methods of this class, so we cannot assume that there is only one thread. Thus, to achieve thread-safety
     // we need to use osaMutex.
-    
-    mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("BecauseINeedIt");
+    mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("Self");
     interfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                    GeneralInterface.ComponentConnect);
     mtsInterfaceProvided * interfaceProvidedToSelf = provided->GetEndUserInterface("Self");
     if (interfaceProvidedToSelf) {
-        /*
-        GeneralInterface
-            .ComponentConnect
-            .Bind(interfaceProvidedToSelf
-                  ->GetCommandWriteReturn(mtsManagerComponentBase::CommandNames::ComponentConnect));
-        */
         if (!interfaceRequired->ConnectTo(interfaceProvidedToSelf)) {
-            std::cerr << "grrrrrrrrrrrrrrrrrrrrr" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceComponent: failed to connect \"Self\" required interface to \"Self\" provided interface" << std::endl;
+            return false;
         }
     }
 
@@ -589,8 +583,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure,
                              this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-    provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
-                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
+                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect,
                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart,
@@ -667,16 +661,15 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
 
 
 bool mtsManagerComponentClient::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-                                        bool byPassInterface)
+                                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string processName = LCM->GetProcessName();
     mtsDescriptionConnection connectionDescription(processName, clientComponentName, clientInterfaceRequiredName,
                                                    processName, serverComponentName, serverInterfaceProvidedName);
-    bool result;
+    bool result = true;
     if (!IsRunning()) {
-        InterfaceComponentCommands_ComponentConnect(connectionDescription, result);
+        InterfaceComponentCommands_ComponentConnect(connectionDescription /*, result*/);
     } else {
         if (!GeneralInterface.ComponentConnect.IsValid()) {
             CMN_LOG_CLASS_INIT_WARNING << "Connect: GeneralInterface not yet valid, initializing." << std::endl;
@@ -689,13 +682,12 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
         // note that we have a mutex around a blocking command, ...
         GeneralInterface.Mutex.Lock();
         CMN_LOG_CLASS_INIT_DEBUG << "Connect: Calling ComponentConnect for " << connectionDescription << std::endl;
-        if (!byPassInterface) {
-            GeneralInterface.ComponentConnect(connectionDescription, result);
-        } else {
-            std::cerr << "------------------------- bypass for " << connectionDescription << std::endl;
-            InterfaceComponentCommands_ComponentConnect(connectionDescription, result);
-        }
-        std::cerr << "----------------------- result of component connect " << result << std::endl;
+        //if (!byPassInterface) {
+        GeneralInterface.ComponentConnect(connectionDescription /*, result*/);
+        //} else {
+        //std::cerr << "------------------------- bypass for " << connectionDescription << std::endl;
+        //InterfaceComponentCommands_ComponentConnect(connectionDescription, result);
+        //}
         GeneralInterface.Mutex.Unlock();
     }
     return result;
@@ -740,7 +732,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure(co
 }
 
 
-void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result)
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
@@ -748,10 +740,10 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(cons
         (nameOfThisLCM == connectionDescription.Client.ProcessName &&
          nameOfThisLCM == connectionDescription.Server.ProcessName))
     {
-        InterfaceLCMCommands_ComponentConnect(connectionDescription, result);
+        InterfaceLCMCommands_ComponentConnect(connectionDescription /*, result*/);
         return;
     }
-    mtsExecutionResult executionResult = InterfaceLCMFunction.ComponentConnect(connectionDescription, result);
+    mtsExecutionResult executionResult = InterfaceLCMFunction.ComponentConnect(connectionDescription /*, result*/);
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConnect: failed to execute \"Component Component\" command ("
                                 << executionResult << ")" << std::endl;
@@ -1027,7 +1019,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure(const mt
 }
 
 
-void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result)
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/)
 {
     // Try to connect interfaces as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
@@ -1044,15 +1036,15 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
                           connectionDescription.Server.InterfaceName)) {
             CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: failed to execute \"Component Connect\": "
                                     << connectionDescription << std::endl;
-            result = false;
+            // result = false;
         } else {
             CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << connectionDescription << std::endl;
-            result = true;
+            // result = true;
         }
 #else
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: Cannot connect to external process without CISST_MTS_HAS_ICE, connection = "
                                 << connectionDescription << std::endl;
-        result = false;
+        // result = false;
 #endif
         return;
     }
@@ -1063,7 +1055,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
     if (connectionId < 0) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: failed to execute \"Connect Setup\": "
                                 << connectionDescription << std::endl;
-        result = false;
+        // result = false;
         return;
     }
 
@@ -1076,7 +1068,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
                        connectionDescription.Server.ComponentName, connectionDescription.Server.InterfaceName);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << connectionDescription << std::endl;
-    result = true;
+    // result = true;
 }
 
 

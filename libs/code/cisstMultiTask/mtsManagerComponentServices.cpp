@@ -229,8 +229,8 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
     conn.ConnectionID = InvalidConnectionID;
 
     // call blocking command
-    bool result;
-    mtsExecutionResult executionResult = ServiceComponentManagement.Connect(conn, result);
+    // bool result;
+    mtsExecutionResult executionResult = ServiceComponentManagement.Connect(conn /*, result*/);
 
     // check is command was sent properly
     if (!executionResult.IsOK()) {
@@ -238,12 +238,12 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
                                 << executionResult << ")" << std::endl;
         return false;
     }
-
+    /*
     if (result == false) {
         CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to connect: " << connectionDescription << std::endl;
         return false;
     }
-
+    */
     CMN_LOG_CLASS_RUN_VERBOSE << "Connect: successfully connected: " << connectionDescription << std::endl;
     return true;
 }

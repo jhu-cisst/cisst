@@ -87,8 +87,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
-                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
+                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
@@ -271,7 +271,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mt
 }
 
 
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result)
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/)
 {
     // We don't check argument validity with the GCM at this stage and rely on 
     // the current normal connection procedure (GCM allows connection at the 
@@ -284,15 +284,15 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
     InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(connectionDescription.Client.ProcessName);
     if (!functionSet) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << connectionDescription << std::endl;
-        result = false;
+        // result = false;
         return;
     }
 
-    mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription, result);
+    mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription /*, result*/);
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
                                 << " error \"" << executionResult << "\"" << std::endl;
-        result = false;
+        // result = false;
     }
 }
 
