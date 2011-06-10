@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnExport.h>
 
 // forward declaration of struct containing all data used by wrapper.
-struct cmnXMLPathData;
+class cmnXMLPathData;
 
 /*!
   \ingroup cisstCommon

@@ -370,7 +370,7 @@ public:
             }
             return true;
         }
-        CMN_LOG_CLASS_RUN_WARNING << "SetXMLValueStdString (libxml2): enable to match the location path \[" << XPath
+        CMN_LOG_CLASS_RUN_WARNING << "SetXMLValueStdString (libxml2): enable to match the location path [" << XPath
                                   << "]" << std::endl;
         return false;
     }

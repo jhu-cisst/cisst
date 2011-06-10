@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cmnXMLPathTest.h"
 
+#include <limits>
+
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstCommon/cmnPath.h>
 
