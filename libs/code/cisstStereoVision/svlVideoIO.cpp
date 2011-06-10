@@ -331,8 +331,7 @@ int svlVideoIO::GetWindowsExtensionFilter(std::string &filter)
     return SVL_OK;
 }
 
-int svlVideoIO::GetExtension(const std::string &filename,
-                             std::string &extension)
+int svlVideoIO::GetExtension(const std::string &filename, std::string &extension)
 {
     size_t dotpos = filename.find_last_of('.');
     // If no '.' is found, then take the whole string as extension

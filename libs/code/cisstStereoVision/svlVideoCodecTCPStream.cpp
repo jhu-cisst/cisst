@@ -129,7 +129,7 @@ svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     ReceiveInitialized(false)
 {
     SetName("CISST Video Stream over TCP/IP");
-    SetExtensionList(".ncvi;");
+    SetExtensionList(".ncvi;.njpg;");
     SetMultithreaded(true);
     SetVariableFramerate(true);
 
@@ -156,6 +156,13 @@ svlVideoCodecTCPStream::~svlVideoCodecTCPStream()
 int svlVideoCodecTCPStream::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
 {
     if (Opened || ParseFilename(filename) != SVL_OK) return SVL_FAIL;
+
+    std::string extensionlist(GetExtensions());
+    std::string extension;
+    svlVideoIO::GetExtension(filename, extension);
+         if (extension == "ncvi") Compressor = CVI;
+    else if (extension == "njpg") Compressor = JPEG;
+    else return SVL_FAIL;
 
     while (1) {
 
@@ -198,17 +205,14 @@ int svlVideoCodecTCPStream::Create(const std::string &filename, const unsigned i
         width < 1 || width > MAX_DIMENSION || height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (!Codec) {
-        // Set default compression level to 4
-        Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
-        std::string name("CISST Video Stream over TCP/IP");
-        memset(&(Codec->extension[0]), 0, 16);
-        memcpy(&(Codec->extension[0]), ".ncvi", 5);
-        memset(&(Codec->name[0]), 0, 64);
-        memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
-        Codec->size = sizeof(svlVideoIO::Compression);
-        Codec->datasize = 1;
-        Codec->data[0] = 4;
+        // Get default codec parameters
+        Codec = GetCompression();
     }
+
+    std::string extension(Codec->extension);
+         if (extension == ".ncvi") Compressor = CVI;
+    else if (extension == ".njpg") Compressor = JPEG;
+    else return SVL_FAIL;
 
     unsigned int size;
 
@@ -333,15 +337,20 @@ svlVideoIO::Compression* svlVideoCodecTCPStream::GetCompression() const
     unsigned int size = sizeof(svlVideoIO::Compression);
     svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
 
-    std::string name("CISST Video Stream over TCP/IP");
-    memset(&(compression->extension[0]), 0, 16);
-    memcpy(&(compression->extension[0]), ".ncvi", 5);
-    memset(&(compression->name[0]), 0, 64);
-    memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
-    compression->size = size;
-    compression->datasize = 1;
-    if (Codec) compression->data[0] = Codec->data[0];
-    else compression->data[0] = 4; // Set default compression level to 4
+    if (Codec) {
+        memcpy(compression, Codec, size);
+    }
+    else {
+        // Set default compressor to JPEG, compression level to 75
+        std::string name("CISST Video Stream over TCP/IP");
+        memset(&(compression->extension[0]), 0, 16);
+        memcpy(&(compression->extension[0]), ".njpg", 5);
+        memset(&(compression->name[0]), 0, 64);
+        memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
+        compression->size = size;
+        compression->datasize = 1;
+        compression->data[0] = 75;
+    }
 
     return compression;
 }
@@ -363,12 +372,23 @@ int svlVideoCodecTCPStream::SetCompression(const svlVideoIO::Compression *compre
 
     std::string name("CISST Video Stream over TCP/IP");
     memset(&(Codec->extension[0]), 0, 16);
+    memcpy(&(Codec->extension[0]), extension.c_str(), std::min(static_cast<int>(extension.length()) - 1, 15));
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     Codec->size = sizeof(svlVideoIO::Compression);
     Codec->datasize = 1;
-    if (compression->data[0] <= 9) Codec->data[0] = compression->data[0];
-    else Codec->data[0] = 4;
+
+    unsigned char max, defaultval;
+    if (extension == ".ncvi;") {
+        max        = 9;
+        defaultval = 4;
+    }
+    else if (extension == ".njpg;") {
+        max        = 100;
+        defaultval = 75;
+    }
+    if (compression->data[0] > max) Codec->data[0] = defaultval;
+    else Codec->data[0] = compression->data[0];
 
     return SVL_OK;
 }
@@ -377,25 +397,76 @@ int svlVideoCodecTCPStream::DialogCompression()
 {
     if (Opened) return SVL_FAIL;
 
-    std::cout << std::endl << " # Enter compression level [0-9]: ";
-    int level = 0;
-    while (level < '0' || level > '9') level = cmnGetChar();
-    level -= '0';
-    std::cout << level << std::endl;
+    std::string extension;
+    std::cout << " # Enable lossy (JPEG) compression ('y' or other): ";
+    int ival = cmnGetChar();
+    if (ival == 'y' || ival == 'Y') {
+        std::cout << "YES" << std::endl;
+        return DialogCompression(".njpg");
+    }
+    std::cout << "NO" << std::endl;
+    return DialogCompression(".ncvi");
+}
+
+int svlVideoCodecTCPStream::DialogCompression(const std::string &filename)
+{
+    if (filename.empty()) DialogCompression();
+
+    if (Opened) return SVL_FAIL;
+
+    std::string extensionlist(GetExtensions());
+    std::string extension;
+    svlVideoIO::GetExtension(filename, extension);
+    extension.insert(0, ".");
+    extension += ";";
+    if (extensionlist.find(extension) == std::string::npos) {
+        // Codec parameters do not match this codec
+        return SVL_FAIL;
+    }
+
+    int min, max, defaultval;
+    if (extension == ".njpg;") {
+        min        = 0;
+        max        = 100;
+        defaultval = 75;
+        std::cout << " # Enter quality level (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
+    }
+    else if (extension == ".ncvi;") {
+        min        = 0;
+        max        = 9;
+        defaultval = 4;
+        std::cout << " # Enter compression level (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
+    }
+
+    int level;
+    char input[256];
+    std::cin.getline(input, 256);
+    if (std::cin.gcount() > 1) {
+        level = atoi(input);
+        if (level < min) level = min;
+        if (level > max) level = max;
+    }
+    else level = defaultval;
+    if (extension == ".njpg;") {
+        std::cout << "    Quality level = " << level << std::endl;
+    }
+    else if (extension == ".ncvi;") {
+        std::cout << "    Compression level = " << level << std::endl;
+    }
 
     svlVideoIO::ReleaseCompression(Codec);
     Codec = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[sizeof(svlVideoIO::Compression)]);
 
     std::string name("CISST Video Stream over TCP/IP");
     memset(&(Codec->extension[0]), 0, 16);
-    memcpy(&(Codec->extension[0]), ".ncvi", 5);
+    memcpy(&(Codec->extension[0]), extension.c_str(), std::min(static_cast<int>(extension.length()) - 1, 15));
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     Codec->size = sizeof(svlVideoIO::Compression);
     Codec->datasize = 1;
     Codec->data[0] = static_cast<unsigned char>(level);
-
-	return SVL_OK;
+    
+    return SVL_OK;
 }
 
 double svlVideoCodecTCPStream::GetTimestamp() const
@@ -480,7 +551,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
                 svlSampleImageRGB subimage;
 
                 // Compress sub-image into buffer
-                svlImageIO::Read(subimage, 0, "jpg", strmbuf + strmoffset, compressedpartsize);
+                if (svlImageIO::Read(subimage, 0, "jpg", strmbuf + strmoffset, compressedpartsize) != SVL_OK) break;
 
                 // Copy sub-image into buffer
                 longsize = subimage.GetDataSize();
@@ -560,17 +631,17 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
 
             // Compress sub-image into buffer
             size_t csize = size * 2;
-            svlImageIO::Write(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[procid], csize, 85);
+            svlImageIO::Write(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[procid], csize, compr);
             comprsize = csize;
 
             // Delete sub-image reference
             delete subimage;
         }
-
+/*
         _CriticalSection(procInfo) {
             std::cerr << "(" << procInfo->ID << ", " << size * 3 << ", " << comprsize << ") ";
         }
-
+*/
         ComprPartSize[procid] = comprsize;
 
         break;

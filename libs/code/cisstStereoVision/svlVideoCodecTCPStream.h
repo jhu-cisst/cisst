@@ -54,6 +54,7 @@ public:
     virtual svlVideoIO::Compression* GetCompression() const;
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
+    virtual int DialogCompression(const std::string &filename);
 
     virtual double GetTimestamp() const;
     virtual int SetTimestamp(const double timestamp);
