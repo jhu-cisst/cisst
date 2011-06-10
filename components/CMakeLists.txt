@@ -26,4 +26,9 @@ if (BUILD_LIBS_cisstMultiTask)
   endif (CISST_BUILD_COMP_cisstSphinx4)
 endif (BUILD_LIBS_cisstMultiTask)
 
-add_subdirectory( cisstOpenNI )
+# cisstOpenNI, wrappers for OpenNI Kinect
+option (CISST_BUILD_COMP_cisstOpenNI "Build component cisstOpenNI (requires OpenNI)" OFF)
+if (CISST_BUILD_COMP_cisstOpenNI)
+  add_subdirectory (cisstOpenNI)
+endif (CISST_BUILD_COMP_cisstOpenNI)
+
