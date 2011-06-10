@@ -548,14 +548,21 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
                 svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
             }
             else if (Compressor == JPEG) {
-                svlSampleImageRGB subimage;
+                // Compute part size and offset
+                unsigned int size = height / partcount + 1;
+                unsigned int start = i * size;
+                if (start >= height) break;
+                unsigned int end = start + size;
+                if (end > height) end = height;
 
-                // Compress sub-image into buffer
-                if (svlImageIO::Read(subimage, 0, "jpg", strmbuf + strmoffset, compressedpartsize) != SVL_OK) break;
+                // Get sub-image reference
+                svlSampleImage *subimage = const_cast<svlSampleImage&>(image).GetSubImage(start, end - start, videoch);
 
-                // Copy sub-image into buffer
-                longsize = subimage.GetDataSize();
-                memcpy(img + offset, subimage.GetUCharPointer(), longsize);
+                // Decompress buffer into sub-image
+                if (svlImageIO::Read(subimage[0], 0, "jpg", strmbuf + strmoffset, compressedpartsize, true) != SVL_OK) break;
+
+                // Delete sub-image reference
+                delete subimage;
             }
 
             strmoffset += compressedpartsize;
