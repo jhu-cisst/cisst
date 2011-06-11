@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 
 #if (CISST_OS == CISST_WINDOWS)
+    #include <windows.h>
     #include "commdlg.h"
 #endif // CISST_WINDOWS
 

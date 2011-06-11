@@ -22,6 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageOpenGL.h>
 
+#if (CISST_OS == CISST_WINDOWS)
+  #include <windows.h>
+#endif
+
 #if (CISST_OS == CISST_DARWIN)
   #include <OpenGL/gl.h>
 #else
