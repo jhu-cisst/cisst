@@ -90,7 +90,6 @@ protected:
     const std::string FrameStartMarker;
 
     std::fstream* File;
-    unsigned int PartCount;
     unsigned int Width;
     unsigned int Height;
     int BegPos;
@@ -99,6 +98,8 @@ protected:
     bool Opened;
     bool Writing;
     double Timestamp;
+
+    svlProcInfo ProcInfoSingleThread;
 
     char* PacketData;
     unsigned char* yuvBuffer;
@@ -114,9 +115,10 @@ protected:
     bool ServerInitialized;
     bool KillServerThread;
 
+    bool ReadError;
     svlBufferMemory* ReceiveBuffer;
-    vctDynamicVector<svlBufferMemory*> SendBuffer;
 
+    vctDynamicVector<svlBufferMemory*> SendBuffer;
     vctDynamicVector<osaThread*> SendThread;
     vctDynamicVector<int> SendConnection;
     vctDynamicVector<bool> KillSendThread;

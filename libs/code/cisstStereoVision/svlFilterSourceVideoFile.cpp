@@ -179,70 +179,165 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
     double timestamp, timespan;
     int pos, ret = SVL_OK;
 
-    _ParallelLoop(procInfo, idx, videochannels)
-    {
-        if (Codec[idx]) {
+    // TO DO: add a little more sophisticated logic here
+    if (Codec[0]->IsMultithreaded()) {
+        // Codecs are multithreaded, so it's worth
+        // splitting work between all threads
 
-            pos = Codec[idx]->GetPos();
-            Position[idx] = pos;
+        for (idx = 0; idx < videochannels; idx ++) {
 
-            if (UseRange[idx]) {
-                // Check if position is outside of the playback segment
-                if (pos < Range[idx][0]) {
-                    Codec[idx]->SetPos(Range[idx][0]);
-                    ResetTimer = true;
+            if (Codec[idx]) {
+
+                // Seek (if needed) to frame that needs to be extracted
+                _OnSingleThread(procInfo)
+                {
+                    pos = Codec[idx]->GetPos();
+                    Position[idx] = pos;
+
+                    if (UseRange[idx]) {
+                        // Check if position is outside of the playback segment
+                        if (pos < Range[idx][0]) {
+                            Codec[idx]->SetPos(Range[idx][0]);
+                            ResetTimer = true;
+                        }
+                        else if (pos > Range[idx][1]) {
+                            if (!GetLoop()) {
+                                ret = SVL_STOP_REQUEST;
+                                break;
+                            }
+                            else {
+                                Codec[idx]->SetPos(Range[idx][0]);
+                                ResetTimer = true;
+                            }
+                        }
+                    }
                 }
-                else if (pos > Range[idx][1]) {
+
+                _SynchronizeThreads(procInfo);
+
+                // Extract frame
+                ret = Codec[idx]->Read(procInfo, *OutputImage, idx, true);
+
+                if (ret == SVL_VID_END_REACHED && !GetLoop()) {
+                    ret = SVL_STOP_REQUEST;
+                    break;
+                }
+
+                // Manage looped playback and frame timing
+                _OnSingleThread(procInfo)
+                {
+                    if (ret == SVL_VID_END_REACHED) {
+                        // Loop around
+                        ret = Codec[idx]->Read(0, *OutputImage, idx, true);
+                    }
+                    if (ret != SVL_OK) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
+                        break;
+                    }
+
+                    // Run timer based in the first video channel
+                    if (idx == 0) {
+
+                        // Get timestamp stored in the video file
+                        timestamp = Codec[idx]->GetTimestamp();
+                        if (timestamp > 0.0) {
+
+                            if (!IsTargetTimerRunning()) {
+
+                                // Try to keep orignal frame intervals
+                                if (ResetTimer || Codec[idx]->GetPos() == 1) {
+                                    FirstTimestamp = timestamp;
+                                    Timer.Reset();
+                                    Timer.Start();
+                                    ResetTimer = false;
+                                }
+                                else {
+                                    timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
+                                    if (timespan > 0.0) osaSleep(timespan);
+                                }
+                            }
+                        }
+
+                        OutputImage->SetTimestamp(timestamp);
+                    }
+                }
+            }
+        }
+    }
+    else {
+        // Codecs are not multithreaded, so assigning
+        // each video channel to a single thread
+
+        _ParallelLoop(procInfo, idx, videochannels)
+        {
+            if (Codec[idx]) {
+
+                // Seek (if needed) to frame that needs to be extracted
+                pos = Codec[idx]->GetPos();
+                Position[idx] = pos;
+
+                if (UseRange[idx]) {
+                    // Check if position is outside of the playback segment
+                    if (pos < Range[idx][0]) {
+                        Codec[idx]->SetPos(Range[idx][0]);
+                        ResetTimer = true;
+                    }
+                    else if (pos > Range[idx][1]) {
+                        if (!GetLoop()) {
+                            ret = SVL_STOP_REQUEST;
+                            break;
+                        }
+                        else {
+                            Codec[idx]->SetPos(Range[idx][0]);
+                            ResetTimer = true;
+                        }
+                    }
+                }
+
+                // Extract frame
+                ret = Codec[idx]->Read(0, *OutputImage, idx, true);
+
+                // Manage looped playback and errors
+                if (ret == SVL_VID_END_REACHED) {
                     if (!GetLoop()) {
                         ret = SVL_STOP_REQUEST;
                         break;
                     }
                     else {
-                        Codec[idx]->SetPos(Range[idx][0]);
-                        ResetTimer = true;
+                        // Loop around
+                        ret = Codec[idx]->Read(0, *OutputImage, idx, true);
                     }
                 }
-            }
-
-            ret = Codec[idx]->Read(0, *OutputImage, idx, true);
-            if (ret == SVL_VID_END_REACHED) {
-                if (!GetLoop()) {
-                    ret = SVL_STOP_REQUEST;
+                if (ret != SVL_OK) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
                     break;
                 }
-                else {
-                    // Loop around
-                    ret = Codec[idx]->Read(0, *OutputImage, idx, true);
-                }
-            }
-            if (ret != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
-                break;
-            }
 
-            if (idx == 0) {
+                // Run timer based in the first video channel
+                if (idx == 0) {
 
-                // Get timestamp stored in the video file
-                timestamp = Codec[idx]->GetTimestamp();
-                if (timestamp > 0.0) {
+                    // Get timestamp stored in the video file
+                    timestamp = Codec[idx]->GetTimestamp();
+                    if (timestamp > 0.0) {
 
-                    if (!IsTargetTimerRunning()) {
+                        if (!IsTargetTimerRunning()) {
 
-                        // Try to keep orignal frame intervals
-                        if (ResetTimer || Codec[idx]->GetPos() == 1) {
-                            FirstTimestamp = timestamp;
-                            Timer.Reset();
-                            Timer.Start();
-                            ResetTimer = false;
-                        }
-                        else {
-                            timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
-                            if (timespan > 0.0) osaSleep(timespan);
+                            // Try to keep orignal frame intervals
+                            if (ResetTimer || Codec[idx]->GetPos() == 1) {
+                                FirstTimestamp = timestamp;
+                                Timer.Reset();
+                                Timer.Start();
+                                ResetTimer = false;
+                            }
+                            else {
+                                timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
+                                if (timespan > 0.0) osaSleep(timespan);
+                            }
                         }
                     }
-                }
 
-                OutputImage->SetTimestamp(timestamp);
+                    OutputImage->SetTimestamp(timestamp);
+                }
             }
         }
     }

@@ -104,7 +104,6 @@ svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     CodecName("CISST Video Stream over TCP/IP"),
     FrameStartMarker("\r\nFrame\r\n"),
     File(0),
-    PartCount(0),
     Width(0),
     Height(0),
     BegPos(-1),
@@ -138,6 +137,9 @@ svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
 
     SockAddr = new char[sizeof(sockaddr_in)];
     PacketData = new char[PACKET_SIZE];
+
+    ProcInfoSingleThread.count = 1;
+    ProcInfoSingleThread.ID    = 0;
 }
 
 svlVideoCodecTCPStream::~svlVideoCodecTCPStream()
@@ -148,7 +150,7 @@ svlVideoCodecTCPStream::~svlVideoCodecTCPStream()
     for (unsigned int i = 0; i < MAX_CLIENTS; i ++) delete SendBuffer[i];
     
     if (yuvBuffer) delete [] yuvBuffer;
-    if (comprBuffer) delete [] comprBuffer;
+    if (comprBuffer && comprBufferSize) delete [] comprBuffer;
     if (SockAddr) delete [] SockAddr;
     if (PacketData) delete [] PacketData;
 }
@@ -241,7 +243,7 @@ int svlVideoCodecTCPStream::Create(const std::string &filename, const unsigned i
             comprBufferSize = size;
         }
         else if (comprBuffer && comprBufferSize < size) {
-            delete [] comprBuffer;
+            if (comprBufferSize) delete [] comprBuffer;
             comprBuffer = new unsigned char[size];
             comprBufferSize = size;
         }
@@ -484,95 +486,122 @@ int svlVideoCodecTCPStream::SetTimestamp(const double timestamp)
 
 int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!Opened || Writing) return SVL_FAIL;
 
-    // Uses only a single thread
-    if (procInfo && procInfo->ID != 0) return SVL_OK;
-
-    unsigned int i, used, width, height, partcount, compressedpartsize, offset = 0, strmoffset;
+    unsigned int i, used, partcount, compressedpartsize, offset, strmoffset;
     unsigned long longsize;
-    unsigned char *img, *strmbuf = 0;
+    unsigned char *strmbuf = 0;
     int ret = SVL_FAIL;
 
-    // Wait until new frame is received
-    while (!strmbuf) {
-        strmbuf = ReceiveBuffer->Pull(used, 0.1);
-    }
-    if (!strmbuf || !used) return SVL_FAIL;
+    _OnSingleThread(procInfo)
+    {
+        ReadError = true;
+        while (1) {
+            // Wait until new frame is received
+            while (!strmbuf) {
+                strmbuf = ReceiveBuffer->Pull(used, 0.1);
+            }
+            if (!strmbuf || !used) break;
 
-    while (1) {
-        // file start marker
-        strmoffset = FrameStartMarker.length();
+            // file start marker
+            strmoffset = FrameStartMarker.length();
 
-        // frame data size after file start marker
-        strmoffset += sizeof(unsigned int);
-
-        // image width
-        width = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
-        strmoffset += sizeof(unsigned int);
-
-        // image height
-        height = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
-        strmoffset += sizeof(unsigned int);
-
-        // timestamp
-        Timestamp = reinterpret_cast<double*>(strmbuf + strmoffset)[0];
-        strmoffset += sizeof(double);
-        // Do not return timestamp for now...
-        Timestamp = -1;
-
-        // part count
-        partcount = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
-        strmoffset += sizeof(unsigned int);
-
-        // Allocate image buffer if not done yet
-        if (width != image.GetWidth(videoch) || height != image.GetHeight(videoch)) {
-            if (noresize) break;
-            image.SetSize(videoch, width, height);
-        }
-
-        img = image.GetUCharPointer(videoch);
-
-        for (i = 0; i < partcount; i ++) {
-            // compressed part size
-            compressedpartsize = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
+            // frame data size after file start marker
             strmoffset += sizeof(unsigned int);
 
+            // image width
+            Width = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
+            strmoffset += sizeof(unsigned int);
+
+            // image height
+            Height = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
+            strmoffset += sizeof(unsigned int);
+
+            // timestamp
+            Timestamp = reinterpret_cast<double*>(strmbuf + strmoffset)[0];
+            strmoffset += sizeof(double);
+            // Do not return timestamp for now...
+            Timestamp = -1;
+
+            // part count
+            partcount = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
+            strmoffset += sizeof(unsigned int);
+
+            // Allocate image buffer if not done yet
+            if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
+                if (noresize) break;
+                image.SetSize(videoch, Width, Height);
+            }
+
+            // Change part size and offset vector sizes if changed
+            ComprPartOffset.SetSize(partcount);
+            ComprPartSize.SetSize(partcount);
+
+            // Calculate and store part sizes and offsets
+            for (i = 0; i < partcount; i ++) {
+                compressedpartsize = reinterpret_cast<unsigned int*>(strmbuf + strmoffset)[0];
+                strmoffset += sizeof(unsigned int);
+                ComprPartSize[i]   = compressedpartsize;
+                ComprPartOffset[i] = strmoffset;
+                strmoffset += compressedpartsize;
+            }
+
+            // Store compressed data buffer pointer
+            comprBuffer = strmbuf;
+
+            ReadError = false;
+            break;
+        }
+    }
+
+    _SynchronizeThreads(procInfo);
+    if (ReadError) return SVL_FAIL;
+
+    unsigned int size, start, end;
+    unsigned char *img = image.GetUCharPointer(videoch);
+    partcount = ComprPartOffset.size();
+    ret = SVL_OK;
+
+    _ParallelLoop(procInfo, i, partcount)
+    {
+        while (1) {
+            ret = SVL_FAIL;
+
+            // Compute part size and offset
+            size = Height / partcount + 1;
+            start = i * size;
+            if (start >= Height) break;
+            end = start + size;
+            if (end > Height) end = Height;
+
             if (Compressor == CVI) {
+                offset = start * Width * 2;
+                longsize = (end - start) * Width * 2;
+
                 // Decompress frame part
-                longsize = yuvBufferSize - offset;
-                if (uncompress(yuvBuffer + offset, &longsize, strmbuf + strmoffset, compressedpartsize) != Z_OK) break;
+                if (uncompress(yuvBuffer + offset, &longsize, comprBuffer + ComprPartOffset[i], ComprPartSize[i]) != Z_OK) break;
 
                 // Convert YUV422 planar to RGB format
                 svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
             }
             else if (Compressor == JPEG) {
-                // Compute part size and offset
-                unsigned int size = height / partcount + 1;
-                unsigned int start = i * size;
-                if (start >= height) break;
-                unsigned int end = start + size;
-                if (end > height) end = height;
 
                 // Get sub-image reference
                 svlSampleImage *subimage = const_cast<svlSampleImage&>(image).GetSubImage(start, end - start, videoch);
 
                 // Decompress buffer into sub-image
-                if (svlImageIO::Read(subimage[0], 0, "jpg", strmbuf + strmoffset, compressedpartsize, true) != SVL_OK) break;
+                if (svlImageIO::Read(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[i], ComprPartSize[i], true) != SVL_OK) break;
 
                 // Delete sub-image reference
                 delete subimage;
             }
 
-            strmoffset += compressedpartsize;
-            offset += longsize;
+            ret = SVL_OK;
+            break;
         }
-        if (i < PartCount) break;
-
-        ret = SVL_OK;
-
-        break;
     }
 
     return ret;
@@ -580,6 +609,8 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
 
 int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
+    if (!procInfo) procInfo = &ProcInfoSingleThread;
+
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!Opened || !Writing) return SVL_FAIL;
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) return SVL_FAIL;
