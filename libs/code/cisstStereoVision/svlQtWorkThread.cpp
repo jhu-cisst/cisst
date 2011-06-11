@@ -42,3 +42,6 @@ svlQtWorkThread::~svlQtWorkThread()
     this->wait();
 }
 
+void svlQtWorkThread::run()
+{
+}
