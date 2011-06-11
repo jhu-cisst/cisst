@@ -45,7 +45,6 @@ struct osaCriticalSectionInternals
 osaCriticalSection::osaCriticalSection()
 {
 #if (CISST_OS == CISST_WINDOWS)
-    std::cerr << sizeof(osaCriticalSectionInternals) << std::endl;
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     ::InitializeCriticalSection(&INTERNALS(CriticalSectionHandle));
 #endif
