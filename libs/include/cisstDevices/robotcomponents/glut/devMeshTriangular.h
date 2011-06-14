@@ -80,7 +80,7 @@ public:
      \param filename The filename of the OBJ file
      \param SUCCESS if the file was properly loaded. ERROR otherwise.
    */
-  devGeometry::Errno LoadOBJ( const std::string& filename );
+  devGeometry::Errno LoadOBJ( const std::string& filename, bool rotateX90=false);
 
   //! Draw the mesh in OpenGL
   /**

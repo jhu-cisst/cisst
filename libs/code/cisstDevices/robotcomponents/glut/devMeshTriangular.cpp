@@ -95,7 +95,8 @@ void devMeshTriangular::Draw( ) const{
   glMultMatrix( Rtcopy.InverseSelf() ); // push the transformation's inverse
 }
 
-devGeometry::Errno devMeshTriangular::LoadOBJ( const std::string& filename ){
+devGeometry::Errno devMeshTriangular::LoadOBJ( const std::string& filename,
+					       bool rotateX90 ){
 
   std::string line;
   std::ifstream ifs;
@@ -240,8 +241,14 @@ devGeometry::Errno devMeshTriangular::LoadOBJ( const std::string& filename ){
   // copy the vertex coordinates from the vectors
   for(size_t i=0; i<nvertices; i++){
     vx[i] = vertices[i][0];
-    vy[i] = vertices[i][1];
-    vz[i] = vertices[i][2];
+    if( rotateX90 ){
+      vy[i] = -vertices[i][2];
+      vz[i] = vertices[i][1];
+    }
+    else{
+      vy[i] = vertices[i][1];
+      vz[i] = vertices[i][2];
+    }
   }
 
   // copty the facets vertices index and compute the normals
