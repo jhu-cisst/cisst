@@ -166,7 +166,7 @@ void cdpPlayerPlot2D::Run(void)
             Time = PlayUntilTime;
             State = STOP;
         }
-        else {            
+        else {
             if((ZoomScaleValue)  > (TimeBoundary-Time )*(0.8) && TimeBoundary <  PlayUntilTime.Data){
                 Parser.LoadDataFromFile(TracePointer, Time, ZoomScaleValue, false);
                 //Parser.TriggerLoadDataFromFile(TracePointer, Time, ZoomScaleValue, false);
@@ -217,8 +217,8 @@ void cdpPlayerPlot2D::UpdatePlot(void)
     Plot2DAccess.GetZoomScale(ScaleValue);
 
     Plot->SetContinuousFitX(false);    
-    Plot->FitX(Time.Data-ScaleValue ,  Time.Data+ScaleValue, 0);
-    VerticalLinePointer->SetX(Time.Data);
+    Plot->FitX(Time.Data-ScaleValue-PlayerDataInfo.DataStart() ,  Time.Data+ScaleValue-PlayerDataInfo.DataStart(), 0);
+    VerticalLinePointer->SetX(Time.Data-PlayerDataInfo.DataStart());
     // UpdateGL should be called at Qt thread
 }
 
@@ -284,7 +284,7 @@ void cdpPlayerPlot2D::Seek(const mtsDouble & time)
         State = SEEK;
         PlayUntilTime = PlayerDataInfo.DataEnd();
         // this will cause state table write command overflow
-        //BaseAccess.WriteTime(time);        
+        //BaseAccess.WriteTime(time);
         Time = time;
         lasttime = time;
     }
@@ -375,9 +375,9 @@ void cdpPlayerPlot2D::LoadData(void)
 
     //This is the standard.
     PlayUntilTime = PlayerDataInfo.DataEnd();
+    Time =  PlayerDataInfo.DataStart();
 
     UpdatePlayerInfo(PlayerDataInfo);
-    UpdateLimits();
 }
 
 
@@ -421,7 +421,7 @@ void cdpPlayerPlot2D::OpenFile(void)
    QString result;
 
 
-    result = QFileDialog::getOpenFileName(mainWidget, "Open File", 0, 0);
+    result = QFileDialog::getOpenFileName(mainWidget, "Open File", tr("./"), tr("Desc (*.desc)"));
     if (!result.isNull()) {
         size_t i = 0;
 
@@ -432,6 +432,7 @@ void cdpPlayerPlot2D::OpenFile(void)
         TimeBoundary = TopBoundary;
         ResetPlayer();
         UpdatePlot();
+        BaseAccess.WriteTime(LowBoundary);
     }
 }
 
@@ -450,8 +451,8 @@ void cdpPlayerPlot2D::UpdateLimits()
 
 bool cdpPlayerPlot2D::ExtractDataFromStateTableCSVFile(QString & path){
 
-    const std::string TimeFieldName("SineData-timestamp");
-    const std::string DataFieldName("SineData-data");
+    const std::string TimeFieldName("TimeStamp");
+    const std::string DataFieldName("TipForceNorm_Nm");
     std::string Path(path.toStdString());
 
     // open header file
@@ -466,8 +467,7 @@ bool cdpPlayerPlot2D::ExtractDataFromStateTableCSVFile(QString & path){
 
     Parser.GetBoundary(TracePointer,TopBoundary,LowBoundary);
 
-    Parser.GetBeginEndTime(PlayerDataInfo.DataStart(), PlayerDataInfo.DataEnd());
-
+    Parser.GetBeginEndTime(PlayerDataInfo.DataStart(), PlayerDataInfo.DataEnd());    
 //    Data = &DataPool1;
 //    TimeStamps =&TimeStampsPool1;
 

@@ -114,19 +114,8 @@ private:
     double TimeRange;
     bool ResetBuffer;
     bool StartRun;
+    double TimeBaseOffset;
     osaCriticalSection CS; 
-/*
-    struct{
-        struct{
-            vctDynamicVector<TimeField> Time;    
-            std::vector <int> pos;
-        }Time;
-        struct{
-            vctDynamicVector<DataField> Data;
-            std::vector <int> pos;
-        }Data;
-    }Elements;
-*/
 
 };
 

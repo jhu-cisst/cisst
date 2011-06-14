@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+
 #include <cisstOSAbstraction/osaGetTime.h>
 #include "cdpPlayerParseStateTableData.h"
 
@@ -75,9 +76,9 @@ void cdpPlayerParseStateTableData::ParseHeader(std::string Path) {
 
 // read data File and make index for every 1MB data
 void cdpPlayerParseStateTableData::GenerateIndex(void) {
-    const unsigned long interval = 1<<12; //512 K
+    const unsigned long interval = 1<<10; //512 K
     size_t totalBytes = 0;    
-    size_t Boundary = interval;
+    size_t boundary = interval;
     size_t FileSize = 0;
     IndexElement TempElement = {0," "};
     IndexElement LastElement ={0," "};
@@ -92,8 +93,8 @@ void cdpPlayerParseStateTableData::GenerateIndex(void) {
         FileSize = inf.tellg();
         inf.seekg(0,std::ios::beg);
 
-        while(Boundary < FileSize ) {
-            inf.seekg(Boundary,std::ios::beg);
+        while(boundary < FileSize ) {
+            inf.seekg(boundary,std::ios::beg);
             // we don't know where is here in file, but next line should be good
             std::getline(inf, TempElement.LineAtIndex); 
             // get good one
@@ -101,17 +102,20 @@ void cdpPlayerParseStateTableData::GenerateIndex(void) {
             std::getline(inf, TempElement.LineAtIndex);             
             TempElement.LineAtIndex = TempElement.LineAtIndex;
              Index.push_back(TempElement);
-             Boundary+= interval;
+             boundary+= interval;
         }
 
-        // get last line and position
-        totalBytes = inf.tellg();
-        while(!std::getline(inf, TempElement.LineAtIndex).eof()) {
-            LastElement.ByteCount = totalBytes;
-            LastElement.LineAtIndex = TempElement.LineAtIndex;
+        if(FileSize != inf.tellg()){
+            // get last line and position        
             totalBytes = inf.tellg();
+            while(totalBytes != FileSize) {
+                std::getline(inf, TempElement.LineAtIndex);
+                LastElement.ByteCount = totalBytes;
+                LastElement.LineAtIndex = TempElement.LineAtIndex;
+                totalBytes = inf.tellg();
+            }
+            Index.push_back(LastElement);
         }
-        Index.push_back(LastElement);
     }
 }
 
@@ -144,6 +148,8 @@ void cdpPlayerParseStateTableData::TestIndex(void) {
 void cdpPlayerParseStateTableData::GetBoundary(vctPlot2DBase::Trace *  TraceHandle, double &TopBoundary, double &LowBoundary) {
 
     TraceHandle->ComputeDataRangeX(LowBoundary,TopBoundary, true);
+    LowBoundary += this->TimeBaseOffset;
+    TopBoundary += this->TimeBaseOffset;
     return;
 }
 
@@ -238,7 +244,6 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
     size_t LeftBoundaryPosition = 0, RightBoundaryPosition = 0;
     double LeftBoundaryTime = 0.0, RightBoundaryTime = 0.0;
     size_t ElementsNumber =0, TraceBufferSize = 0;
-
     if (ResetTraceBuffer) {         
         ElementsNumber = TraceHandle->GetNumberOfPoints();
         TraceBufferSize = TraceHandle->GetSize();
@@ -249,29 +254,33 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
     std::getline(inf, TempLine);
     Tokenize(TempLine, Token, Header.Delimiter);    
     MinimumTime = strtod(Token.at(IndexOfTimeField).c_str() , NULL);
+    TimeBaseOffset = MinimumTime;
     inf.close();
     Token.clear();
-    Tokenize(Index.at(Index.size()-1).LineAtIndex, Token, Header.Delimiter);        
-    MaxmumTime =strtod(Token.at(IndexOfTimeField).c_str() , NULL);  
-
-    LeftBoundaryTime = (TimeStampForSearch-(1.5*VisualRange)) ;
-    LeftBoundaryTime = (LeftBoundaryTime<MinimumTime)?MinimumTime:LeftBoundaryTime;
+    Tokenize(Index.at(Index.size()-1).LineAtIndex, Token, Header.Delimiter);      
+    MaxmumTime =strtod(Token.at(IndexOfTimeField).c_str() , NULL);      
+    MinimumTime -= TimeBaseOffset;
+    MaxmumTime -= TimeBaseOffset;
+    LeftBoundaryTime = (TimeStampForSearch-(1.5*VisualRange));
+    if(TimeStampForSearch!=0)
+        LeftBoundaryTime -= TimeBaseOffset;    
+    LeftBoundaryTime = (LeftBoundaryTime<MinimumTime)?MinimumTime:LeftBoundaryTime;   
     RightBoundaryTime = (TimeStampForSearch+(1.5*VisualRange));
+    if(TimeStampForSearch!=0)
+        RightBoundaryTime -= TimeBaseOffset;
     RightBoundaryTime = (RightBoundaryTime>MaxmumTime)?MaxmumTime:RightBoundaryTime;
 
     if ( RightBoundaryTime < MinimumTime || LeftBoundaryTime > MaxmumTime ||  LeftBoundaryTime >= RightBoundaryTime) 
         return;
-   
     // find where is the LeftBoundaryPosition & RightBoundaryPosition
     // where is TimeStampForSearch postition in index file?     
     double  min, max;
     TraceHandle->ComputeDataRangeX(min,max,true);   
-    if (min<= LeftBoundaryTime && (LeftBoundaryTime >=  MinimumTime && !ResetTraceBuffer)) {
-        LeftBoundaryPosition = GetDataPoisitionFromFile(max,  IndexOfTimeField);             
-        RightBoundaryPosition = GetDataPoisitionFromFile(RightBoundaryTime, IndexOfTimeField);       
+    if (min<= LeftBoundaryTime && (LeftBoundaryTime >=  MinimumTime && !ResetTraceBuffer)) {       
+        LeftBoundaryPosition = GetDataPoisitionFromFile(max+TimeBaseOffset,  IndexOfTimeField);             
+        RightBoundaryPosition = GetDataPoisitionFromFile(RightBoundaryTime+TimeBaseOffset, IndexOfTimeField);       
         if (LeftBoundaryPosition >= RightBoundaryPosition)
             return;
-       
         // load Data from File: [LeftBoundaryPosition, RightBoundaryPosition]
         inf.open(Header.FilePath.c_str(), std::ios_base::binary | std::ios_base::in);
         inf.seekg(LeftBoundaryPosition, std::ios::beg);
@@ -280,12 +289,11 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
         inf.read(StringBuffer, RightBoundaryPosition - LeftBoundaryPosition);
         std::string stringvalues(StringBuffer, RightBoundaryPosition - LeftBoundaryPosition);
         std::istringstream iss (stringvalues);
-        inf.close();                
+        inf.close();
         while(1) {         
             std::string TempLine = "aaaa";
             std::vector <std::string> Token;         
             std::getline(iss, TempLine);           
-            
             Tokenize(TempLine, Token, Header.Delimiter);
             if (Token.size() < IndexOfDataField || Token.size() <  IndexOfTimeField || iss.eof())
                 break;
@@ -299,6 +307,7 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
                 TraceBufferSize *= 1.5;
                 TraceHandle->Resize(TraceBufferSize);
             }
+            TimeElement -= TimeBaseOffset;
             TraceHandle->AppendPoint(vctDouble2(TimeElement,DataElement));
             TraceHandle->ComputeDataRangeX(min,max,true);       
         }       
@@ -317,8 +326,8 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
         ElementsNumber = TraceHandle->GetNumberOfPoints();
         TraceBufferSize = TraceHandle->GetSize();
         TraceHandle->SetSize(TraceBufferSize);
-        LeftBoundaryPosition = GetDataPoisitionFromFile(LeftBoundaryTime  ,IndexOfTimeField);
-        RightBoundaryPosition = GetDataPoisitionFromFile(RightBoundaryTime, IndexOfTimeField);
+        LeftBoundaryPosition = GetDataPoisitionFromFile(LeftBoundaryTime+TimeBaseOffset  ,IndexOfTimeField);
+        RightBoundaryPosition = GetDataPoisitionFromFile(RightBoundaryTime+TimeBaseOffset, IndexOfTimeField);
 
         if (LeftBoundaryPosition >= RightBoundaryPosition)
             return;        
@@ -349,8 +358,8 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
                 TraceBufferSize *= 1.5;
                 TraceHandle->Resize(TraceBufferSize);
             }
-        
-            TraceHandle->AppendPoint(vctDouble2(TimeElement,DataElement));
+            TimeElement -= TimeBaseOffset;
+            TraceHandle->AppendPoint(vctDouble2(TimeElement,DataElement));            
             TraceHandle->ComputeDataRangeX(min,max,true);       
         }        
         // should we resize to a smaller one?
@@ -362,17 +371,17 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
         }
         delete StringBuffer;
     }
-    else{               
+    else{
         // reload only what we need 
         //TraceHandle->GetNumberOfPoints(ElementsNumber, TraceBufferSize);
         ElementsNumber = TraceHandle->GetNumberOfPoints();
         TraceBufferSize = TraceHandle->GetSize();
         TraceHandle->Resize(TraceBufferSize);
-        LeftBoundaryPosition = GetDataPoisitionFromFile(LeftBoundaryTime  ,IndexOfTimeField);        
+        LeftBoundaryPosition = GetDataPoisitionFromFile(LeftBoundaryTime+TimeBaseOffset  ,IndexOfTimeField);        
         //*********************************************************************************************
         // SECTION ONE, prepend data
         //*********************************************************************************************
-        RightBoundaryPosition = GetDataPoisitionFromFile(min  ,IndexOfTimeField);        
+        RightBoundaryPosition = GetDataPoisitionFromFile(min+TimeBaseOffset  ,IndexOfTimeField);        
         {
             inf.open(Header.FilePath.c_str(), std::ios_base::binary | std::ios_base::in);
             inf.seekg(LeftBoundaryPosition, std::ios::beg);
@@ -393,6 +402,7 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
                     break;
                 DataElement = strtod(Token.at(IndexOfDataField).c_str() , NULL);
                 TimeElement = strtod(Token.at(IndexOfTimeField).c_str() , NULL);                
+                TimeElement -= TimeBaseOffset;
                 TimeDataBuffer.push_back(TimeElement);
                 TimeDataBuffer.push_back(DataElement);
             }                            
@@ -411,7 +421,6 @@ void cdpPlayerParseStateTableData::LoadDataFromFile(vctPlot2DBase::Trace *  Trac
         // SECTION 2, append data, we let PLAY to load data ahead
         //*********************************************************************************************
     }
-
     return;
 }
 
@@ -487,3 +496,4 @@ void cdpPlayerParseStateTableData::Run(void) {
     this->LoadDataFromFile(TracePointer, MiddleTime, TimeRange, ResetBuffer);
     return;
 }
+
