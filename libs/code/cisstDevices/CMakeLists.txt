@@ -18,6 +18,7 @@
 # set the library name
 set (LIBRARY cisstDevices)
 set (LIBRARY_INCLUDE_DIR ${cisstLibs_SOURCE_DIR}/include/${LIBRARY})
+set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot)
 
 # make sure all options are set for all devices to OFF
 option (CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
@@ -137,6 +138,7 @@ if (CISST_HAS_XML)
   set (HEADER_FILES
        ${HEADER_FILES}
        devNDISerial.h)
+  set (DEPENDENCIES ${DEPENDENCIES} cisstCommonXML)
 
   if (CISST_DEV_HAS_MICRONTRACKER)
     find_path (MicronTracker_INCLUDE_DIR
