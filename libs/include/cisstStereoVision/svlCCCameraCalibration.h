@@ -38,6 +38,10 @@ http://www.cisst.org/cisst/license.txt.
 #define  CV_MIN(a, b)   ((a) <= (b) ? (a) : (b)) 
 #define  CV_MAX(a, b)   ((a) >= (b) ? (a) : (b))
 
+typedef vctDynamicNArrayRef<unsigned char,3> NumpyNArrayType;
+typedef NumpyNArrayType::nsize_type SizeType;
+typedef NumpyNArrayType::nindex_type IndexType;
+typedef NumpyNArrayType::nstride_type StrideType;
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -51,54 +55,56 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT svlCCCameraCalibration
 {
 
-	public:
-		svlCCCameraCalibration();
-		bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
-		svlFilterImageRectifier* getRectifier();
-        void printCalibrationParameters();
-		cv::Mat cameraMatrix, distCoeffs;
-		std::vector<svlSampleImageRGB> images;
-		cv::Size imageSize;
+public:
+    svlCCCameraCalibration();
+    bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
+    svlFilterImageRectifier* getRectifier(){return rectifier;};
+    void printCalibrationParameters();
+    cv::Mat cameraMatrix, distCoeffs;
+    std::vector<svlSampleImageRGB> images;
+    cv::Size imageSize;
+    int setBufferSample(svlFilterSourceDummy* source, int index);
 
+private:
+    double computeReprojectionErrors(
+            const std::vector<std::vector<cv::Point3f> >& objectPoints,
+            const std::vector<std::vector<cv::Point2f> >& imagePoints,
+            const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs,
+            const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs,
+            std::vector<float>& perViewErrors, bool projected );
+    void updateCalibrationGrids();
+    double runCalibration(bool projected);
+    bool checkCalibration(bool projected);
+    double calibrate(bool projected);
+    void refineGrids(int localThreshold);
+    void optimizeCalibration();
+    bool calibration(bool groundTruthTest);
+    int setRectifier();
 
-	private:
-	double computeReprojectionErrors(
-		const std::vector<std::vector<cv::Point3f> >& objectPoints,
-		const std::vector<std::vector<cv::Point2f> >& imagePoints,
-		const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs,
-			const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs,
-	        std::vector<float>& perViewErrors, bool projected );
-		void updateCalibrationGrids();
-		double runCalibration(bool projected);
-		bool checkCalibration(bool projected);
-		double calibrate(bool projected);
-		void refineGrids(int localThreshold);
-		void optimizeCalibration();
-		bool calibration(bool groundTruthTest);
+    ////////// Parameters //////////
+    std::vector<svlCCCalibrationGrid*> calibrationGrids;
+    std::vector<cv::Mat> rvecs;
+    std::vector<cv::Mat> tvecs;
+    int flags;
+    std::vector<cv::Point3f> objectImagePoints;
+    std::vector<std::vector<cv::Point3f> > objectPoints;
+    std::vector<std::vector<cv::Point3f> > projectedObjectPoints;
+    std::vector<std::vector<cv::Point2f> > imagePoints;
+    std::vector<std::vector<cv::Point2f> > projectedImagePoints;
+    svlCCOriginDetector* calOriginDetector;
+    svlCCCornerDetector* calCornerDetector;
 
-		////////// Parameters //////////
-		std::vector<svlCCCalibrationGrid*> calibrationGrids;
-		std::vector<cv::Mat> rvecs;
-		std::vector<cv::Mat> tvecs;
-		int flags;
-		std::vector<cv::Point3f> objectImagePoints;
-		std::vector<std::vector<cv::Point3f> > objectPoints;
-		std::vector<std::vector<cv::Point3f> > projectedObjectPoints;
-		std::vector<std::vector<cv::Point2f> > imagePoints;
-		std::vector<std::vector<cv::Point2f> > projectedImagePoints;
-		svlCCOriginDetector* calOriginDetector; 
-		svlCCCornerDetector* calCornerDetector;
+    std::vector<svlCCPointsFileIO*> pointFiles;
+    bool debug;
+    int minCornerThreshold;
+    double rootMeanSquaredThreshold;
+    int maxCalibrationIteration;
+    //Hard coded to 25 for now
+    int visibility[25];
+    int refineThreshold;
+    int pointsCount;
 
-		std::vector<svlCCPointsFileIO*> pointFiles;
-		// const static 
-		bool debug;
-		int minCornerThreshold;
-		double rootMeanSquaredThreshold;
-		int maxCalibrationIteration;
-		//Hard coded to 25 for now
-		int visibility[25];
-		int refineThreshold;
-		int pointsCount;
+    svlFilterImageRectifier *rectifier;
 
 };
 

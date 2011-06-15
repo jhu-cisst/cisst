@@ -121,6 +121,30 @@ int svlFilterSourceDummy::SetImage(const svlSampleImage & image)
     return SVL_OK;
 }
 
+int svlFilterSourceDummy::SetImageOverwrite(const svlSampleImage & image)
+{
+
+    svlStreamType type = image.GetType();
+
+    // Other types may be added in the future
+    if (type != svlTypeImageRGB && type != svlTypeImageRGBStereo) return SVL_FAIL;
+
+    if (OutputSample && OutputSample->GetType() != type) {
+        delete OutputSample;
+        OutputSample = svlSample::GetNewFromType(type);
+    }
+    else if (!OutputSample) OutputSample = svlSample::GetNewFromType(type);
+
+    OutputSample->CopyOf(image);
+
+    GetOutput()->SetType(type);
+
+    Noise = false;
+
+    return SVL_OK;
+}
+
+
 int svlFilterSourceDummy::SetDimensions(unsigned int width, unsigned int height)
 {
     if (IsInitialized() == true)

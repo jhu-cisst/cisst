@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 bool debug = false;
-cv::Size imageSize;
-cv::Mat cameraMatrix, distCoeffs;
 
 /**************************************************************************************************
 * getRectifier()					
@@ -60,15 +58,15 @@ int main(int argc, char** argv)
 
     // Creating SVL objects
     svlStreamManager stream(2); // number of threads per stream
-    svlSampleImageRGB image;
     svlFilterSourceDummy source;
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
     svlFilterSplitter splitter;
     svlFilterImageUnsharpMask filtering;
     svlFilterImageWindow window2;
-	svlFilterImageRectifier* rectifier;
-	svlCCCameraCalibration* svlCCObject = new svlCCCameraCalibration();
+    svlFilterImageRectifier* rectifier;
+    svlCCCameraCalibration* svlCCObject = new svlCCCameraCalibration();
+    rectifier = svlCCObject->getRectifier();
 
     // Setup dummy video source
     source.SetTargetFrequency(30.0);
@@ -87,34 +85,36 @@ int main(int argc, char** argv)
     filtering.SetAmount(200);
     filtering.SetRadius(3);
 
-	bool ok = false;
+    bool ok = false;
+    int ch;
+    int index = 1;
 
-	string imageDirectory = "./Images/SD/";
-	string imagePrefix = "image0";
-	string imageType = ".png";
-	int startIndex = 0;
-	int stopIndex = 9;
-	int boardWidth = 18;
+    string imageDirectory = "./Images/SD/";
+    string imagePrefix = "image0";
+    string imageType = ".png";
+    int startIndex = 0;
+    int stopIndex = 9;
+    int boardWidth = 18;
     int boardHeight = 16;
-	int originDetectorColorModeFlag = svlCCOriginDetector::RGY;
+    int originDetectorColorModeFlag = svlCCOriginDetector::RGY;
 
     if (argc == 3)
-	{
-		imageDirectory = argv[1];
-		imagePrefix = argv[2];
-	}
-	else if(argc == 8)
-	{
-		imageDirectory = argv[1];
-		imagePrefix = argv[2];
-		imageType = argv[3];
-		startIndex = atoi(argv[4]);
-		stopIndex = atoi(argv[5]);
-		boardWidth = atoi(argv[6]);
+    {
+        imageDirectory = argv[1];
+        imagePrefix = argv[2];
+    }
+    else if(argc == 8)
+    {
+        imageDirectory = argv[1];
+        imagePrefix = argv[2];
+        imageType = argv[3];
+        startIndex = atoi(argv[4]);
+        stopIndex = atoi(argv[5]);
+        boardWidth = atoi(argv[6]);
         boardHeight = atoi(argv[7]);
-	}
+    }
     else 
-	{
+    {
         cout << endl << "svlExCameraCalibration - cisstStereoVision example by Wen P. Liu" << endl;
         cout << "Command line format:" << endl;
         cout << "     svlExCameraCalibration imageDirectory imagePrefix imageType" << endl;
@@ -123,28 +123,25 @@ int main(int argc, char** argv)
         cout << "Examples:" << endl;
         cout << "     svlExExposureCorrection ./Images/SD/ image0 " << endl;
         cout << "     svlExExposureCorrection ./Images/SD/ image0 .png 0 9 18 16" << endl;
-		goto labError;
+        goto labError;
     }
 
     cout << "Calling svlExCameraCalibration " << imageDirectory << " "<< imagePrefix << " " << imageType << " ";
-	cout << startIndex << " " << stopIndex << " " << boardWidth << " " << boardHeight << endl; 
+    cout << startIndex << " " << stopIndex << " " << boardWidth << " " << boardHeight << endl;
 
-	//SD arguments
-	//./Images/SD/ image0 .png 0 9 18 16
-	//HD arguments
-	//D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image0
+    //SD arguments
+    //./Images/SD/ image0 .png 0 9 18 16
+    //HD arguments
+    //D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image0
 
-	ok = svlCCObject->processImages(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,originDetectorColorModeFlag);
+    ok = svlCCObject->processImages(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,originDetectorColorModeFlag);
 
-	if(ok && svlCCObject->images.size() > 0)
-	{
-		imageSize = svlCCObject->imageSize;
-		svlCCObject->printCalibrationParameters();
-		rectifier = svlCCObject->getRectifier();
-		source.SetImage(svlCCObject->images.back());
-	}else
-		goto labError;
-
+    if(ok && svlCCObject->images.size() > 0)
+    {
+        svlCCObject->printCalibrationParameters();
+        source.SetImageOverwrite(svlCCObject->images.front());
+    }else
+        goto labError;
 
     // Setup branch window
     window2.SetTitle("Original");
@@ -152,35 +149,46 @@ int main(int argc, char** argv)
     // Add new output to splitter
     splitter.AddOutput("output2");
 
-	printf("Using rectification\n");
-	stream.SetSourceFilter(&source);
-	source.GetOutput()->Connect(splitter.GetInput());
-	splitter.GetOutput()->Connect(filtering.GetInput());
-	filtering.GetOutput()->Connect(rectifier->GetInput());
-	rectifier->GetOutput()->Connect(window.GetInput());
+    printf("Using rectification\n");
+    stream.SetSourceFilter(&source);
+    source.GetOutput()->Connect(splitter.GetInput());
+    splitter.GetOutput()->Connect(filtering.GetInput());
+    filtering.GetOutput()->Connect(rectifier->GetInput());
+    rectifier->GetOutput()->Connect(window.GetInput());
 
-	splitter.GetOutput("output2")->Connect(window2.GetInput());
+    splitter.GetOutput("output2")->Connect(window2.GetInput());
 
     cout << "Streaming is just about to start." << endl;
-    cout << "Press any key to stop stream..." << endl;
+    cout << "Press any key to toggle images..." << endl;
+    cout << "Press 'q' to stop stream..." << endl;
+    cout << "Showing Image# " << index << endl;
 
     // Initialize and start stream
     if (stream.Play() != SVL_OK) goto labError;
 
-	// hand-eye calibration
-	//if(ok)
-	//	runHandEye();
+    // hand-eye calibration
+    //if(ok)
+    //	runHandEye();
 
     // Wait for user input
-    cmnGetChar();
+    do
+    {
+        ch = cmnGetChar();
+        source.SetImageOverwrite(svlCCObject->images.at(index));
+        index++;
+        cout << "Showing Image# " << index << endl;
+        if(index > svlCCObject->images.size()-1)
+            index = 0;
+    }while (ch != 'q');
 
     // Safely stopping and deconstructing stream before de-allocation
+    stream.Stop();
     stream.Release();
 
     cout << "Success... Quitting." << endl;
     return 1;
 
-labError:
+    labError:
     cout << "Error occured... Quitting." << endl;
 
     return 1;

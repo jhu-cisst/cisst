@@ -54,7 +54,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_EXPORT
 #define CISST_DEPRECATED
 
-
+%include "cisstStereoVision/svlDefinitions.h"
 %include "cisstStereoVision/svlInitializer.h"
 
 %include "cisstStereoVision/svlStreamManager.h"
@@ -65,6 +65,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstStereoVision/svlFilterImageRectifier.h"
 %include "cisstStereoVision/svlFilterImageResizer.h"
 %include "cisstStereoVision/svlFilterSourceBase.h"
+%include "cisstStereoVision/svlFilterSourceDummy.h"
 %include "cisstStereoVision/svlFilterSourceVideoFile.h"
 %include "cisstStereoVision/svlFilterVideoFileWriter.h"
 %include "cisstStereoVision/svlFilterSourceBuffer.h"

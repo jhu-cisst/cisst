@@ -41,6 +41,7 @@ public:
 
     int SetType(svlStreamType type);
     int SetImage(const svlSampleImage & image);
+    int SetImageOverwrite(const svlSampleImage & image);
 
     int SetDimensions(unsigned int width, unsigned int height);
     void EnableNoiseImage(bool noise);

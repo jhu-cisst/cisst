@@ -162,6 +162,23 @@ int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,u
 
 }
 
+int svlFilterImageRectifier::SetTableFromCameraCalibrationOverwrite(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+{
+
+    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
+
+    svlImageProcessingHelper::RectificationInternals* table = new svlImageProcessingHelper::RectificationInternals;
+    if (!table->SetFromCameraCalibration(height,width,R, f, c, k, alpha, KK_new, videoch)) {
+        delete table;
+        return SVL_FAIL;
+        }
+
+    Tables[videoch].Set(table);
+
+    return SVL_OK;
+
+}
+
 
 void svlFilterImageRectifier::EnableInterpolation(bool enable)
 {
