@@ -113,36 +113,38 @@ void cisstOpenNI::InitSkeletons(){
 
 }
 
-vctDynamicMatrix<double> cisstOpenNI::GetDepthImage8bit(){
+void cisstOpenNI::GetDepthImageRaw(vctDynamicMatrix<double> & placeHolder){
 
     // Get data
     xn::DepthMetaData depthMD;
     Data->depthgenerator.GetMetaData( depthMD );
     const XnDepthPixel* pDepth = depthMD.Data();
 
-    vctDynamicMatrix<double> depthimage( depthMD.YRes(), depthMD.XRes() );
-    double* ptr = depthimage.Pointer();
-    for( size_t i=0; i<depthMD.YRes()*depthMD.XRes(); i++ )
-    { ptr[i] =  255.0 * pDepth[i] / 2048.0; }
-
-    return depthimage;
-
+    placeHolder.SetSize( depthMD.YRes(), depthMD.XRes() );
+    double* ptr = placeHolder.Pointer();
+    const size_t end = depthMD.YRes()*depthMD.XRes();
+    for( size_t i = 0; i < end; i++ )
+    {
+        (*ptr) = (*pDepth);
+        ptr++; pDepth++;
+    }
 }
 
-vctDynamicMatrix<double> cisstOpenNI::GetDepthImage11bit(){
+void cisstOpenNI::GetDepthImage(vctDynamicMatrix<double> & placeHolder){
 
     // Get data
     xn::DepthMetaData depthMD;
     Data->depthgenerator.GetMetaData( depthMD );
     const XnDepthPixel* pDepth = depthMD.Data();
 
-    vctDynamicMatrix<double> depthimage( depthMD.YRes(), depthMD.XRes() );
-    double* ptr = depthimage.Pointer();
-    for( size_t i=0; i<depthMD.YRes()*depthMD.XRes(); i++ )
-    { ptr[i] =  pDepth[i]; }
-
-    return depthimage;
-
+    placeHolder.SetSize( depthMD.YRes(), depthMD.XRes() );
+    double* ptr = placeHolder.Pointer();
+    const size_t end = depthMD.YRes()*depthMD.XRes();
+    for( size_t i = 0; i < end; i++ )
+    {
+        (*ptr) =  255.0 * (*pDepth) / 2048.0;
+        ptr++; pDepth++;
+    }
 }
 
 vctDynamicMatrix<double> cisstOpenNI::GetRangeData(){

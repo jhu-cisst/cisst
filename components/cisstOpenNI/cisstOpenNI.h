@@ -71,21 +71,21 @@ public:
     */
     vctDynamicMatrix<double> GetRangeData();
 
-    //! Get depth image
+    //! Get Raw Depth Image
     /**
     Query the depth generator to obtain a depth image. Resulting image as 8-bit depth. 
     The value at each pixel represents the depth of the picture element. This method 
     is non-const due to updating the context.
     */
-    vctDynamicMatrix<double> GetDepthImage8bit();
+    void GetDepthImageRaw(vctDynamicMatrix<double> & placeHolder);
 
-    //! Get depth image
+    //! Get Depth Image
     /**
     Query the depth generator to obtain a depth image. Resulting image as 11-bit depth. 
     The value at each pixel represents the depth of the picture element. This method 
     is non-const due to updating the context.
     */
-    vctDynamicMatrix<double> GetDepthImage11bit();
+    void GetDepthImage(vctDynamicMatrix<double> & placeHolder);
 
     //! Get (interlaced) RGB image
     /**
