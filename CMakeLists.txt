@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -131,20 +131,6 @@ if (CISST_HAS_SWIG_PYTHON)
 endif (CISST_HAS_SWIG_PYTHON)
 
 
-# Use XML or not
-find_package (LibXml2)
-if (LIBXML2_FOUND)
-  Option (CISST_HAS_XML "Include cmnXMLPath in the version (requires libxml2)" ON)
-  mark_as_advanced (CISST_HAS_XML)
-else (LIBXML2_FOUND)
-  option (CISST_HAS_XML "Include cmnXMLPath in the version (requires libxml2)" OFF)
-endif (LIBXML2_FOUND)
-
-if (CISST_HAS_XML)
-  find_package (LibXml2 REQUIRED)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
-endif (CISST_HAS_XML)
-
 # Support for OpenGL
 find_package (OpenGL)
 if (OPENGL_FOUND)
@@ -162,6 +148,8 @@ endif (CISST_HAS_OPENGL)
 
 # Support for QT
 set (QT_USE_QTOPENGL ON)
+set (QT_USE_QTXML ON)
+set (QT_USE_QTXMLPATTERNS ON)
 find_package (Qt4)
 if (QT_FOUND)
   option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" ON)
@@ -172,15 +160,20 @@ endif (QT_FOUND)
 
 # if detected or if user requests it
 if (CISST_HAS_QT)
+  # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
-  set (QT_USE_QTOPENGL ON)
+  # XML Qt based
+  option (CISST_HAS_QT_XML "Use Qt XML and Patterns for cmnXMLPath" ON)
+  mark_as_advanced (CISST_HAS_QT_XML)
+  # Qt is now required
   find_package (Qt4 REQUIRED)
   include (${QT_USE_FILE})
   set (CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
   mark_as_advanced (CISST_QT_PACKAGE)
   cisst_add_to_internal (CISST_ADDITIONAL_PACKAGES CISST_QT_PACKAGE)
   cisst_add_to_internal (CISST_ADDITIONAL_CMAKE_FILES QT_USE_FILE)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES QT_LIBRARIES)
 endif (CISST_HAS_QT)
 
 # Support for FLTK
@@ -193,8 +186,10 @@ else (FLTK_FOUND)
 endif (FLTK_FOUND)
 
 if (CISST_HAS_FLTK)
+  # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
+  # FLTK is now required
   find_package(FLTK REQUIRED)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES FLTK_LIBRARIES)
@@ -202,6 +197,33 @@ if (CISST_HAS_FLTK)
   # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES FLTK_LIBRARY_DIRS)
 endif (CISST_HAS_FLTK)
+
+# Use XML or not, using libxml2 over
+find_package (LibXml2)
+if (LIBXML2_FOUND AND NOT CISST_HAS_QT_XML)
+  option (CISST_HAS_LIBXML2_XML "Use libxml2 for cmnXMLPath" ON)
+else (LIBXML2_FOUND AND NOT CISST_HAS_QT_XML)
+  option (CISST_HAS_LIBXML2_XML "Use libxml2 for cmnXMLPath" OFF)
+endif (LIBXML2_FOUND AND NOT CISST_HAS_QT_XML)
+mark_as_advanced (CISST_HAS_LIBXML2_XML)
+
+if (CISST_HAS_LIBXML2_XML)
+  find_package (LibXml2 REQUIRED)
+  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
+endif (CISST_HAS_LIBXML2_XML)
+
+# Safety check
+if (CISST_HAS_LIBXML2_XML AND CISST_HAS_QT_XML)
+  message (SEND_ERROR "You must choose either CISST_HAS_LIBXML2_XML or CISST_HAS_QT_XML")
+endif (CISST_HAS_LIBXML2_XML AND CISST_HAS_QT_XML)
+
+# Do we have some kind of XML?
+if (CISST_HAS_LIBXML2_XML OR CISST_HAS_QT_XML)
+  set (CISST_HAS_XML ON)
+else (CISST_HAS_LIBXML2_XML OR CISST_HAS_QT_XML)
+  set (CISST_HAS_XML OFF)
+endif (CISST_HAS_LIBXML2_XML OR CISST_HAS_QT_XML)
+mark_as_advanced (CISST_HAS_XML)
 
 # Extra link flag if for Apple
 if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
@@ -413,7 +435,16 @@ foreach (lib ${CISST_LIBS})
     endif (CISST_HAS_FLTK)
   endif (BUILD_LIBS_${lib})
 endforeach (lib)
-cisst_cmake_debug("Libraries to be built: ${CISST_LIBRARIES}")
+
+# Add cisstCommonXML if needed
+if (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+  set (CISST_BUILD_cisstCommonXML ON)
+  set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
+else (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+  set (CISST_BUILD_cisstCommonXML OFF)
+endif (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+
+cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 
 # Conditional builds
 if (BUILD_UTILITIES)

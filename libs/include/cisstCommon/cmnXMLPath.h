@@ -36,7 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_XML
 
-#include <cisstCommon/cmnExport.h>
+// always include last
+#include <cisstCommon/cmnExportXML.h>
 
 // forward declaration of struct containing all data used by wrapper.
 class cmnXMLPathData;
@@ -49,6 +50,7 @@ class cmnXMLPathData;
   XPath query expressions are passed to a processor method (GetXMLValue),
   along with a context and typed output param reference, which processes
   the query and returns results as the output parameter type.
+
   Error checking is limited:
   ** SetInputSource() tries to catch as many exceptions as possible,
   and does no error checking whatsoever.  Data may be missing and
@@ -63,6 +65,7 @@ class cmnXMLPathData;
   SetInputSource, and Get any attribute value of a tag using
   GetXMLValue, which accepts a context and a XPath
   As an example consider the following config file
+
   <code> <config>
       <device name="mei">
           <axis name="x" axis-on-amp="1" logical-axis-no="1">
@@ -88,6 +91,10 @@ class cmnXMLPathData;
   Now the value of pgain for axis can be read by passing /config/device as context
   and axis[@name="x"]/filter/@pgain
   Yes that simple!
+
+  \todo Add tests in all methods to make sure input is defined
+  \todo Add write Qt
+  \todo Add tests to get nodes, not just attributes (might already work on libxml2)
   */
 class CISST_EXPORT cmnXMLPath: public cmnGenericObject
 {
@@ -115,6 +122,12 @@ public:
     bool ValidateWithSchema(const char * filename);
     bool ValidateWithSchema(const std::string & fileName);
     //@}
+
+    /*! Get the error reported by the last call to ValidateWithSchema.
+      Both errors and warnings are listed, one per line.  The exact
+      message depends on the underlying library used, i.e. Qt or
+      libxml2. */
+    const std::string & GetLastErrors(void) const;
 
     /*! Save to file */
     //@{

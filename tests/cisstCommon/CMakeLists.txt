@@ -68,3 +68,7 @@ endif (NOT CISST_BUILD_SHARED_LIBS)
 # To generate a CTest list of tests
 cisst_add_test (cisstCommonTests ITERATIONS 2 INSTANCES 2)
 
+if (CISST_HAS_XML)
+  cisst_target_link_libraries (cisstCommonTests cisstCommonXML)
+endif (CISST_HAS_XML)
+

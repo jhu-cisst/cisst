@@ -77,17 +77,23 @@ set(HEADER_FILES
     cmnUnits.h
     )
 
-# Conditional inclusion of cmnXMLPath in the cisstCommon project.
-if (CISST_HAS_XML)
-  include_directories (${LIBXML2_INCLUDE_DIR})
-  set (SOURCE_FILES ${SOURCE_FILES} cmnXMLPath.cpp)
-  set (HEADER_FILES ${HEADER_FILES} cmnXMLPath.h)
-endif (CISST_HAS_XML)
-
 cisst_add_library (
   LIBRARY cisstCommon
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})
+
+# XML Library
+if (CISST_HAS_XML)
+  include_directories (${LIBXML2_INCLUDE_DIR})
+  cisst_add_library (
+    LIBRARY cisstCommonXML
+    LIBRARY_DIR cisstCommon
+    DEPENDENCIES cisstCommon
+    SOURCE_FILES cmnXMLPath.cpp
+    HEADER_FILES cmnExportXML.h
+                 cmnXMLPath.h
+  )
+endif (CISST_HAS_XML)
 
 # Qt widgets
 if (CISST_HAS_QT)

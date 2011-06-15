@@ -23,16 +23,39 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnXMLPath.h>
 
+CMN_IMPLEMENT_SERVICES(cmnXMLPath);
+
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPrintf.h>
 
 #include <limits>
 
-#if CISST_HAS_QT
-#define CISST_HAS_QT_XML 0 // not ready yet
-#else
-#define CISST_HAS_QT_XML 0
-#endif
+// common to libxml2 and Qt implementations
+class cmnXMLPathDataBase
+{
+public:
+    // to allow log to be associate to owner class
+    const cmnClassServicesBase * OwnerServices;
+
+    // methods use to emulate the cmnGenericObject interface used by
+    // CMN_LOG_CLASS macros.
+    inline const cmnClassServicesBase * Services(void) const {
+        return this->OwnerServices;
+    }
+
+    inline cmnLogger::StreamBufType * GetLogMultiplexer(void) const {
+        return cmnLogger::GetMultiplexer();
+    }
+
+    // string to hold all errors
+    std::string Errors;
+
+    // access to errors
+    inline const std::string & GetLastErrors(void) const {
+        return this->Errors;
+    }
+};
+
 
 #if CISST_HAS_QT_XML
 
@@ -42,15 +65,31 @@ http://www.cisst.org/cisst/license.txt.
 #include <QXmlResultItems>
 #include <QXmlSchema>
 #include <QXmlSchemaValidator>
+#include <QAbstractMessageHandler>
+#include <QRegExp>
 
-class cmnXMLPathData
+class cmnXMLPathMessageHandler: public QAbstractMessageHandler
+{
+public:
+    cmnXMLPathData * Data;
+protected:
+    void handleMessage(QtMsgType type,
+                       const QString & description,
+                       const QUrl & identifier,
+                       const QSourceLocation & sourceLocation);
+};
+
+class cmnXMLPathData: public cmnXMLPathDataBase
 {
 public:
     // default ctor
     cmnXMLPathData(void):
         File(0),
         Document(0)
-    {}
+    {
+        // give pointer to this data object to message hnadler
+        this->MessageHandler.Data = this;
+    }
 
     // default dtor
     ~cmnXMLPathData()
@@ -64,18 +103,8 @@ public:
         }
     }
 
-    // to allow log to be associate to owner class
-    const cmnClassServicesBase * OwnerServices;
-
-    // methods use to emulate the cmnGenericObject interface used by
-    // CMN_LOG_CLASS macros.
-    inline const cmnClassServicesBase * Services(void) const {
-        return this->OwnerServices;
-    }
-
-    inline cmnLogger::StreamBufType * GetLogMultiplexer(void) const {
-        return cmnLogger::GetMultiplexer();
-    }
+    // Message handler
+    cmnXMLPathMessageHandler MessageHandler;
 
     // File used by Qt
     QFile * File;
@@ -102,6 +131,7 @@ public:
 
     bool ValidateWithSchema(const char * filename)
     {
+        this->Errors = "";
         QXmlSchema schema;
         if (!schema.load(QUrl(filename))) {
             CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (Qt): the schema cannot be loaded \""
@@ -113,10 +143,35 @@ public:
             return false;
         }
         QXmlSchemaValidator validator(schema);
+        validator.setMessageHandler(&MessageHandler);
         if (!validator.validate(this->Document->toByteArray())) {
+            CMN_LOG_CLASS_RUN_ERROR << "ValidateWithSchema: using schema \"" << filename << "\", Qt reported: " << std::endl
+                                    << this->Errors;
             return false;
         }
         return true;
+    }
+
+    void AppendToErrors(QtMsgType type,
+                        const QString & description,
+                        const QUrl & identifier,
+                        const QSourceLocation & sourceLocation) {
+        std::string message;
+        if (type == QtWarningMsg) {
+            message = "Warning: ";
+        } else {
+            message = "Error: ";
+        }
+        QString strippedDescription = description;
+        strippedDescription.remove(QRegExp("<[^>]*>"));
+        message += strippedDescription.toStdString();
+        message += " (";
+        message += identifier.toString().toStdString();
+        message += ", ";
+        message += sourceLocation.uri().toString().toStdString();
+        message += "\n";
+        CMN_LOG_CLASS_RUN_DEBUG << "AppendToErrors: received: " << message;
+        this->Errors += message;
     }
 
     bool SaveAs(const char * filename) const
@@ -145,13 +200,11 @@ public:
         query.setQuery(path);
         if (!query.isValid()) {
             CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): invalid query for path [" << path.toStdString() << "]" << std::endl;
-            std::cerr << "1" << std::endl;
             return false;
         }
         query.evaluateTo(&results);
         if (results.hasError()) {
             CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): query result has errors for path [" << path.toStdString() << "]" << std::endl;
-            std::cerr << "2" << std::endl;
             return false;
         }
         bool attributeFound = false;
@@ -166,9 +219,18 @@ public:
 
     bool SetXMLValueStdString(const char * context, const char * XPath, const std::string & storage)
     {
-        return true;
+        CMN_LOG_CLASS_INIT_ERROR << "SetXMLValueStdString: not implemented for Qt yet " << CMN_LOG_DETAILS << std::endl;
+        return false;
     }
 };
+
+
+void cmnXMLPathMessageHandler::handleMessage(QtMsgType type,
+                                             const QString & description,
+                                             const QUrl & identifier,
+                                             const QSourceLocation & sourceLocation) {
+    this->Data->AppendToErrors(type, description, identifier, sourceLocation);
+}
 
 
 #else
@@ -179,22 +241,13 @@ public:
 #include <libxml/xpathInternals.h>
 #include <libxml/xmlschemas.h>
 
-class cmnXMLPathData
+// error and warning handlers
+void cmnXMLPathErrorFunc(void * context, const char * format, const char * message);
+void cmnXMLPathWarningFunc(void * context, const char * format, const char * message);
+
+class cmnXMLPathData: public cmnXMLPathDataBase
 {
 public:
-    // to allow log to be associate to owner class
-    const cmnClassServicesBase * OwnerServices;
-
-    // methods use to emulate the cmnGenericObject interface used by
-    // CMN_LOG_CLASS macros.
-    inline const cmnClassServicesBase * Services(void) const {
-        return this->OwnerServices;
-    }
-
-    inline cmnLogger::StreamBufType * GetLogMultiplexer(void) const {
-        return cmnLogger::GetMultiplexer();
-    }
-
     // Libxml2 document source
     xmlDocPtr Document;
 
@@ -218,47 +271,65 @@ public:
         CMN_ASSERT(this->XPathContext != 0);
     }
 
+    // schema validation
     bool ValidateWithSchema(const char * filename)
     {
-        xmlDocPtr schema_doc = xmlReadFile(filename, NULL, XML_PARSE_NONET);
-        if (schema_doc == 0) {
+        this->Errors = "";
+        xmlDocPtr schemaDoc = xmlReadFile(filename, NULL, XML_PARSE_NONET);
+        if (schemaDoc == 0) {
             CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): the schema cannot be loaded or is not well-formed \""
                                      << filename << "\"" << std::endl;
             return false;
         }
-        xmlSchemaParserCtxtPtr parser_ctxt = xmlSchemaNewDocParserCtxt(schema_doc);
-        if (parser_ctxt == 0) {
+        xmlSchemaParserCtxtPtr parserContext = xmlSchemaNewDocParserCtxt(schemaDoc);
+        if (parserContext == 0) {
             CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): unable to create a parser context for the schema \""
                                      << filename << "\"" << std::endl;
-            xmlFreeDoc(schema_doc);
+            xmlFreeDoc(schemaDoc);
             return false;
         }
-        xmlSchemaPtr schema = xmlSchemaParse(parser_ctxt);
+        xmlSchemaPtr schema = xmlSchemaParse(parserContext);
         if (schema == 0) {
             CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): the schema itself is not valid \""
                                      << filename << "\"" << std::endl;
-            xmlSchemaFreeParserCtxt(parser_ctxt);
-            xmlFreeDoc(schema_doc);
+            xmlSchemaFreeParserCtxt(parserContext);
+            xmlFreeDoc(schemaDoc);
             return false;
         }
-        xmlSchemaValidCtxtPtr valid_ctxt = xmlSchemaNewValidCtxt(schema);
-        if (valid_ctxt == 0) {
+        xmlSchemaValidCtxtPtr validationContext = xmlSchemaNewValidCtxt(schema);
+        if (validationContext == 0) {
             CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (libxml2): unable to create a validation context for the schema \""
                                      << filename << "\"" << std::endl;
             xmlSchemaFree(schema);
-            xmlSchemaFreeParserCtxt(parser_ctxt);
-            xmlFreeDoc(schema_doc);
+            xmlSchemaFreeParserCtxt(parserContext);
+            xmlFreeDoc(schemaDoc);
             return false;
         }
-        xmlSchemaSetValidErrors(valid_ctxt, (xmlValidityErrorFunc)fprintf, (xmlValidityWarningFunc)fprintf, stderr);
-        int is_valid = (xmlSchemaValidateDoc(valid_ctxt, this->Document) == 0);
-        xmlSchemaFreeValidCtxt(valid_ctxt);
+        // xmlSchemaSetValidErrors(validationContext, (xmlValidityErrorFunc)fprintf, (xmlValidityWarningFunc)fprintf, stderr);
+        xmlSchemaSetValidErrors(validationContext,
+                                (xmlValidityErrorFunc) cmnXMLPathErrorFunc,
+                                (xmlValidityWarningFunc) cmnXMLPathWarningFunc, this);
+        int isValid = (xmlSchemaValidateDoc(validationContext, this->Document) == 0);
+        xmlSchemaFreeValidCtxt(validationContext);
         xmlSchemaFree(schema);
-        xmlSchemaFreeParserCtxt(parser_ctxt);
-        xmlFreeDoc(schema_doc);
-        return is_valid ? true : false;
+        xmlSchemaFreeParserCtxt(parserContext);
+        xmlFreeDoc(schemaDoc);
+        if (!isValid) {
+            CMN_LOG_CLASS_RUN_ERROR << "ValidateWithSchema: using schema \"" << filename << "\", libxml2 reported: " << std::endl
+                                    << this->Errors;
+        }
+        return isValid ? true : false;
     }
 
+    void AppendToErrors(const std::string & prefix, const char * format, const char * message)
+    {
+        std::stringstream stream;
+        stream << prefix << cmnPrintf(format) << message;
+        CMN_LOG_CLASS_RUN_DEBUG << "AppendToErrors: received: " << stream.str();
+        this->Errors += stream.str();
+    }
+
+    // save to file
     bool SaveAs(const char * filename) const
     {
         if (xmlSaveFile(filename, this->Document) <= 0) {
@@ -340,7 +411,7 @@ public:
                 CMN_ASSERT(nodes->nodeTab[i] != 0);
                 if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
                     xmlNodeSetContent(nodes->nodeTab[i], reinterpret_cast<const xmlChar *>(storage.c_str()));
-                    CMN_LOG_CLASS_RUN_VERBOSE << "SetXMLValueStdString: write Xpath [" << XPath << "] Node name ["
+                    CMN_LOG_CLASS_RUN_VERBOSE << "SetXMLValueStdString (libxml2): write Xpath [" << XPath << "] Node name ["
                                               << nodes->nodeTab[i]->name << "] Content [" << storage << "]" << std::endl;
                 }
                 /*
@@ -376,7 +447,22 @@ public:
     }
 };
 
+
+void cmnXMLPathErrorFunc(void * context, const char * format, const char * message)
+{
+    cmnXMLPathData * data = reinterpret_cast<cmnXMLPathData *>(context);
+    data->AppendToErrors("Error: ", format, message);
+}
+
+void cmnXMLPathWarningFunc(void * context, const char * format, const char * message)
+{
+    cmnXMLPathData * data = reinterpret_cast<cmnXMLPathData *>(context);
+    data->AppendToErrors("Warning: ", format, message);
+}
+
 #endif
+
+
 
 
 cmnXMLPath::cmnXMLPath():
@@ -417,6 +503,12 @@ bool cmnXMLPath::ValidateWithSchema(const char * filename)
 bool cmnXMLPath::ValidateWithSchema(const std::string & fileName)
 {
     return this->ValidateWithSchema(fileName.c_str());
+}
+
+
+const std::string & cmnXMLPath::GetLastErrors(void) const
+{
+    return this->Data->GetLastErrors();
 }
 
 
@@ -535,7 +627,7 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & 
     if ((storage == "INF") || (storage == "1.#INF")) {
         value = std::numeric_limits<double>::infinity();
     } else if ((storage == "-INF") || (storage == "1.#INF")) {
-        value = -1*std::numeric_limits<double>::infinity();
+        value = -1.0 * std::numeric_limits<double>::infinity();
     } else if (storage == "EPS") {
         value = std::numeric_limits<double>::epsilon();
     } else {
@@ -562,11 +654,18 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & 
 bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const double & value)
 {
     std::stringstream storage;
-    // this way we can control the printing size.
-    if (fabs(value) < 1e-3) {
-        storage << cmnPrintf("%g") << value;
+    // treat infinity cases
+    if (value == std::numeric_limits<double>::infinity()) {
+        storage << "INF";
+    } else if (value == -1.0 * std::numeric_limits<double>::infinity()) {
+        storage << "-INF";
     } else {
-        storage << cmnPrintf("%f") << value;
+        // this way we can control the printing size.
+        if (fabs(value) < 1e-3) {
+            storage << cmnPrintf("%g") << value;
+        } else {
+            storage << cmnPrintf("%f") << value;
+        }
     }
     return this->Data->SetXMLValueStdString(context, XPath, storage.str());
 }
