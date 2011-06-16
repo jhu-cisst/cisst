@@ -235,7 +235,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstDevicesBuild.cmake.in
 
 # Finally create the library
 cisst_add_library (LIBRARY cisstDevices
-                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot
+                   DEPENDENCIES ${DEPENDENCIES}
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}

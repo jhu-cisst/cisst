@@ -438,10 +438,10 @@ endforeach (lib)
 
 # Add cisstCommonXML if needed
 if (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
-  set (CISST_BUILD_cisstCommonXML ON)
+  set (BUILD_LIBS_cisstCommonXML ON CACHE BOOL "Build cisstCommonXML" FORCE)
   set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
 else (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
-  set (CISST_BUILD_cisstCommonXML OFF)
+  set (BUILD_LIBS_cisstCommonXML OFF CACHE BOOL "Build cisstCommonXML" FORCE)
 endif (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
 
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
