@@ -84,7 +84,9 @@ cisst_add_library (
 
 # XML Library
 if (CISST_HAS_XML)
-  include_directories (${LIBXML2_INCLUDE_DIR})
+  if (CISST_HAS_LIBXML2_XML)
+    include_directories (${LIBXML2_INCLUDE_DIR})
+  endif (CISST_HAS_LIBXML2_XML)
   cisst_add_library (
     LIBRARY cisstCommonXML
     LIBRARY_DIR cisstCommon
