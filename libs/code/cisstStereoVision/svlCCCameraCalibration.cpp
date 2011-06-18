@@ -25,11 +25,36 @@ http://www.cisst.org/cisst/license.txt.
 svlCCCameraCalibration::svlCCCameraCalibration()
 {
     minCornerThreshold = 5;
-    rootMeanSquaredThreshold = 1;
     maxCalibrationIteration = 10;
-    refineThreshold = 2;
     rectifier = (svlFilterImageRectifier *)new svlFilterImageRectifier();
+    reset();
     debug = false;
+}
+
+void svlCCCameraCalibration::reset()
+{
+    images.clear();
+    cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
+    distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
+    calibrationGrids.clear();
+    rvecs.clear();
+    tvecs.clear();
+    objectImagePoints.clear();
+    objectPoints.clear();
+    projectedObjectPoints.clear();
+    imagePoints.clear();
+    projectedImagePoints.clear();
+    pointFiles.clear();
+    rootMeanSquaredThreshold = 1;
+    for (int i = 0 ; i < 25 ; i++ )
+    {
+        visibility[i] = 0;
+    }
+    refineThreshold = 2;
+    pointsCount = 0;
+
+    svlFilterImageRectifier *rectifier;
+
 }
 
 void svlCCCameraCalibration::printCalibrationParameters()
@@ -514,8 +539,8 @@ bool svlCCCameraCalibration::calibration(bool groundTruthTest)
 bool svlCCCameraCalibration::processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag)
 {
 
-    cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
-    distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
+    reset();
+
     bool ok = false;
     bool groundTruthTest = false;
     cv::Size boardSize(boardWidth,boardHeight);

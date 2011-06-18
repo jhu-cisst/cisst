@@ -53,6 +53,9 @@ svlFilterImageFileWriter::svlFilterImageFileWriter() :
 
     // Continuous saving by default
     CaptureLength = -1;
+
+    CaptureSequenceEnabled = false;
+    CaptureSequenceCounter = 0;
 }
 
 svlFilterImageFileWriter::~svlFilterImageFileWriter()
@@ -104,6 +107,11 @@ int svlFilterImageFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
             path.precision(3);
             path << std::fixed << syncInput->GetTimestamp();
         }
+        else if(CaptureSequenceEnabled)
+        {
+            path.fill('0');
+            path << std::setw(3) << CaptureSequenceCounter << std::setw(1);
+        }
         else {
             path.fill('0');
             path << std::setw(7) << FrameCounter << std::setw(1);
@@ -119,6 +127,7 @@ int svlFilterImageFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
     _OnSingleThread(procInfo)
     {
         if (CaptureLength > 0) CaptureLength --;
+        CaptureSequenceCounter++;
     }
 
     return SVL_OK;
@@ -179,6 +188,11 @@ int svlFilterImageFileWriter::SetCompression(int compression, int videoch)
 void svlFilterImageFileWriter::EnableTimestamps(bool enable)
 {
     TimestampsEnabled = enable;
+}
+
+void svlFilterImageFileWriter::EnableCaptureSequence(bool enable)
+{
+    CaptureSequenceEnabled = enable;
 }
 
 void svlFilterImageFileWriter::Pause()

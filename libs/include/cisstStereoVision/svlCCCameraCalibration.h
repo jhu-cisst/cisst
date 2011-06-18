@@ -60,7 +60,6 @@ public:
     bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
     svlFilterImageRectifier* getRectifier(){return rectifier;};
     void printCalibrationParameters();
-    cv::Mat cameraMatrix, distCoeffs;
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
     int setBufferSample(svlFilterSourceDummy* source, int index);
@@ -80,8 +79,10 @@ private:
     void optimizeCalibration();
     bool calibration(bool groundTruthTest);
     int setRectifier();
+    void reset();
 
     ////////// Parameters //////////
+    cv::Mat cameraMatrix, distCoeffs;
     std::vector<svlCCCalibrationGrid*> calibrationGrids;
     std::vector<cv::Mat> rvecs;
     std::vector<cv::Mat> tvecs;
@@ -99,7 +100,7 @@ private:
     int minCornerThreshold;
     double rootMeanSquaredThreshold;
     int maxCalibrationIteration;
-    //Hard coded to 25 for now
+    //Hard coded to 25 maximum number of grids for now
     int visibility[25];
     int refineThreshold;
     int pointsCount;

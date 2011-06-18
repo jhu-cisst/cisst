@@ -42,6 +42,7 @@ public:
     int SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch = SVL_LEFT);
     int SetCompression(int compression, int videoch = SVL_LEFT);
     void EnableTimestamps(bool enable = true);
+    void EnableCaptureSequence(bool enable = true);
     void Pause();
     void Record(int frames = -1);
 
@@ -57,7 +58,9 @@ private:
     vctDynamicVector<bool> Disabled;
     vctDynamicVector<int> Compression;
     bool TimestampsEnabled;
+    bool CaptureSequenceEnabled;
     unsigned int CaptureLength;
+    unsigned int CaptureSequenceCounter;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageFileWriter)
