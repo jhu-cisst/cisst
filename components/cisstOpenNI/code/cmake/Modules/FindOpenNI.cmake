@@ -13,7 +13,9 @@ if( WIN32 )
 else( WIN32 )
      
   if( APPLE )
-    
+    find_path( OPENNI_INCLUDE_DIR XnOpenNI.h PATH_SUFFIXES ni )
+    find_library( OPENNI_LIBRARY           OpenNI )
+	
   else( APPLE )
     
     # Find the file XnOpenNI.h
