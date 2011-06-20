@@ -6,6 +6,10 @@
 #include <cisstOpenNI/cisstOpenNIExport.h>
 #include <cisstOpenNI/cisstOpenNISkeleton.h>
 
+#define WAIT_AND_UPDATE_ALL         1
+#define WAIT_ANY_UPDATE_ONE         2
+#define WAIT_NONE_UPDATE_ALL        3
+
 /*! 
 \todo move ctor code to Configure method
 \todo move all use of OpenNI symbols to .cpp file, i.e. do not include Xn files in cisstOpenNI.h
@@ -56,7 +60,7 @@ public:
     Calls the wait and update all method of the XN wrapper.  
     This needs to be called each iteration.
     */
-    void UpdateAll();
+    void Update(int type);
 
     //! INit skeletons
     void InitSkeletons();

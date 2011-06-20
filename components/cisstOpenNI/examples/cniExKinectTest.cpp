@@ -36,7 +36,7 @@ int main(){
 	while(true){
         
         // Wait and Update All
-        kinect.UpdateAll();
+        kinect.Update(WAIT_NONE_UPDATE_ALL);
 		//vctDynamicMatrix<double> depth = kinect.GetDepthImage8bit();
 		vctDynamicMatrix<unsigned char> rgb = kinect.GetRGBImage();
 		vctDynamicMatrix<double> range = kinect.GetRangeData();

@@ -96,11 +96,16 @@ void cisstOpenNI::Configure( const std::string& fname  ){
 
 }
 
-void cisstOpenNI::UpdateAll(){
+void cisstOpenNI::Update(int type){
     
-    // Query the context
-    Data->context.WaitNoneUpdateAll();
-
+    
+    // Query the context based on type
+    if(type == WAIT_NONE_UPDATE_ALL)
+        Data->context.WaitNoneUpdateAll();
+    else if(type == WAIT_AND_UPDATE_ALL)
+        Data->context.WaitAndUpdateAll();
+    else if(type == WAIT_ANY_UPDATE_ONE)
+        Data->context.WaitAnyUpdateAll();
 }
 
 void cisstOpenNI::InitSkeletons(){
