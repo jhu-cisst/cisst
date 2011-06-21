@@ -33,7 +33,7 @@ svlCCCornerDetector::svlCCCornerDetector(int width, int height)
 	eig_block_size = 5;
 	use_harris = false;
 	maxCorners = 200;
-	subPixTermEpsilon = 0.001;
+        subPixTermEpsilon = 0.0001;
 	
 	reset();
 }

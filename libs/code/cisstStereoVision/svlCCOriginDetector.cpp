@@ -74,15 +74,15 @@ void svlCCOriginDetector::findOriginByColor( IplImage* iplImage)
 
 		float distanceBetweenGreenRed = distanceBetweenTwoPoints(colorBlobs.at(RED_INDEX).x, colorBlobs.at(RED_INDEX).y, colorBlobs.at(GREEN_INDEX).x, colorBlobs.at(GREEN_INDEX).y);
 		predictedBlob = cv::Point2f(origin.x+0.75*(colorBlobs.at(RED_INDEX).y-colorBlobs.at(GREEN_INDEX).y)/2,origin.y-0.75*(colorBlobs.at(RED_INDEX).x-colorBlobs.at(GREEN_INDEX).x)/2);
-
-		if(originColorModeFlag == RGY)
+                
+                if(originColorModeFlag == RGY)
 		{
 			//fix yellow blob if its not in proximty to green and red
 			if(distanceBetweenTwoPoints(predictedBlob.x,predictedBlob.y,colorBlobs.at(YELLOW_INDEX).x,colorBlobs.at(YELLOW_INDEX).y) > distanceBetweenGreenRed/4)
 			{
 				colorBlobs[YELLOW_INDEX] = predictedBlob;
-				if(debug)
-					std::cout << "updated blue blob at: " << predictedBlob.x << "," << predictedBlob.y << std::endl;
+                                //if(debug)
+                                        std::cout << "updated yellow blob at: " << predictedBlob.x << "," << predictedBlob.y << std::endl;
 				blobIndexFlag[YELLOW_INDEX] = 1;
 				findColorBlobs(iplImage,2*distanceBetweenTwoPoints(origin.x,origin.y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y),blobIndexFlag,blobThresholds);
 				predictedBlob = cv::Point2f(origin.x+0.75*(colorBlobs.at(RED_INDEX).y-colorBlobs.at(GREEN_INDEX).y)/2,origin.y-0.75*(colorBlobs.at(RED_INDEX).x-colorBlobs.at(GREEN_INDEX).x)/2);
@@ -123,11 +123,12 @@ void svlCCOriginDetector::findOriginByColor( IplImage* iplImage)
 				originDetectionFlag = COLOR;
 			}
 		}
-		//find RGB blob intersection for origin
-		if(originColorModeFlag == RGY)
-			origin = intersectionByColorBlobs(colorBlobs.at(YELLOW_INDEX).x,colorBlobs.at(YELLOW_INDEX).y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y,colorBlobs.at(GREEN_INDEX).x,colorBlobs.at(GREEN_INDEX).y);
-		else if(originColorModeFlag == RGB)
-			origin = intersectionByColorBlobs(colorBlobs.at(BLUE_INDEX).x,colorBlobs.at(BLUE_INDEX).y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y,colorBlobs.at(GREEN_INDEX).x,colorBlobs.at(GREEN_INDEX).y);
+
+                blobIndexFlag[RED_INDEX] = 1;
+                blobIndexFlag[GREEN_INDEX] = 1;
+                blobIndexFlag[BLUE_INDEX] = 1;
+                findColorBlobs(iplImage,2*distanceBetweenTwoPoints(origin.x,origin.y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y),blobIndexFlag,blobThresholds);
+
 	}
 }
 
@@ -226,15 +227,35 @@ bool svlCCOriginDetector::findColorBlobs(IplImage* iplImage, float radius, int f
 		//min of precomputed threshold and avg of differences with R,G
 		if(newThreshold > 5)		
 			thresholds[BLUE_INDEX] = std::min(thresholds[BLUE_INDEX],newThreshold);
-	}else if(flag[YELLOW_INDEX])
+        }
+        if(flag[YELLOW_INDEX])
 	{
-		j = colorBlobs.at(BLUE_INDEX).x;
-		i = colorBlobs.at(BLUE_INDEX).y;
+                j = colorBlobs.at(YELLOW_INDEX).x;
+                i = colorBlobs.at(YELLOW_INDEX).y;
 		int newThreshold = ((data[i*step+j*channels+y0] - data[i*step+j*channels+y2]) + (data[i*step+j*channels+y0] - data[i*step+j*channels+y2]))/2;
 		//min of precomputed threshold and avg of differences with R,G
 		if(newThreshold > 5)		
 			thresholds[YELLOW_INDEX] = std::min(thresholds[YELLOW_INDEX],newThreshold);
 	}
+        if(flag[RED_INDEX])
+        {
+                j = colorBlobs.at(RED_INDEX).x;
+                i = colorBlobs.at(RED_INDEX).y;
+                int newThreshold = ((data[i*step+j*channels+r0] - data[i*step+j*channels+r1]) + (data[i*step+j*channels+r0] - data[i*step+j*channels+r2]))/2;
+                //min of precomputed threshold and avg of differences with R,G
+                if(newThreshold > 5)
+                        thresholds[RED_INDEX] = std::min(thresholds[RED_INDEX],newThreshold);
+        }
+        if(flag[GREEN_INDEX])
+        {
+                j = colorBlobs.at(GREEN_INDEX).x;
+                i = colorBlobs.at(GREEN_INDEX).y;
+                int newThreshold = ((data[i*step+j*channels+g0] - data[i*step+j*channels+g1]) + (data[i*step+j*channels+g0] - data[i*step+j*channels+g2]))/2;
+                //min of precomputed threshold and avg of differences with R,G
+                if(newThreshold > 5)
+                        thresholds[GREEN_INDEX] = std::min(thresholds[GREEN_INDEX],newThreshold);
+        }
+
 
 	// select pixels with more than this threshold
 	// of one channel versus the other two
@@ -323,6 +344,12 @@ bool svlCCOriginDetector::findColorBlobs(IplImage* iplImage, float radius, int f
 	else if(originColorModeFlag == RGY)
 		colorBlobs[YELLOW_INDEX] = cv::Point2f(yx,yy);
 
+        //find RGB blob intersection for origin
+        if(originColorModeFlag == RGY)
+                origin = intersectionByColorBlobs(colorBlobs.at(YELLOW_INDEX).x,colorBlobs.at(YELLOW_INDEX).y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y,colorBlobs.at(GREEN_INDEX).x,colorBlobs.at(GREEN_INDEX).y);
+        else if(originColorModeFlag == RGB)
+                origin = intersectionByColorBlobs(colorBlobs.at(BLUE_INDEX).x,colorBlobs.at(BLUE_INDEX).y,colorBlobs.at(RED_INDEX).x,colorBlobs.at(RED_INDEX).y,colorBlobs.at(GREEN_INDEX).x,colorBlobs.at(GREEN_INDEX).y);
+
 	return((rn>nThreshold) &&(gn>nThreshold)&&(((originColorModeFlag == RGB)&&(bn>nThreshold))||((yn>nThreshold)&&(originColorModeFlag == RGY))));
 }
 
@@ -401,7 +428,7 @@ void svlCCOriginDetector::detectOrigin(IplImage* iplImage)
 
 	// draw color blobs
 	//if(debug)
-		drawColorBlobs(iplImage);
+                drawColorBlobs(iplImage);
 
 }
 
