@@ -23,7 +23,16 @@ cisst_target_link_libraries(cisstComponentManager cisstCommon cisstOSAbstraction
 
 # PK: check whether the following is still needed
 if(UNIX)
+  # For QNX
+  SET(IS_QNX FALSE)
+  IF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+    SET(IS_QNX TRUE)
+  MESSAGE("QNX detected")
+  ENDIF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+
   if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_libraries(cisstComponentManager util)
+    if(NOT IS_QNX)  
+      target_link_libraries(cisstComponentManager util)
+    endif(NOT IS_QNX)  
   endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif(UNIX)

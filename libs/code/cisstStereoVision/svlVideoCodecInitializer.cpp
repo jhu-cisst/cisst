@@ -34,6 +34,7 @@
 #if CISST_SVL_HAS_ZLIB
 #include "svlVideoCodecCVI.h"
 #include "svlVideoCodecTCPStream.h"
+#include "svlVideoCodecUDPStream.h"
 #endif // CISST_SVL_HAS_ZLIB
 
 #if CISST_SVL_HAS_FFMPEG
@@ -58,6 +59,10 @@ void svlInitializeVideoCodecs()
 #ifdef _svlVideoCodecTCPStream_h
     SVL_INITIALIZE(svlVideoCodecTCPStream);
 #endif // _svlVideoCodecTCPStream_h
+
+#ifdef _svlVideoCodecUDPStream_h
+    SVL_INITIALIZE(svlVideoCodecUDPStream);
+#endif // _svlVideoCodecUDPStream_h
 
 #if CISST_SVL_HAS_FFMPEG
     SVL_INITIALIZE(svlVideoCodecFFMPEG);

@@ -41,6 +41,8 @@ class svlVideoCodecFFMPEG : public svlVideoCodecBase
 public:
     typedef struct _CompressionData {
         unsigned int EncoderID;
+        bool         QualityBased;
+        double       TargetQuantizer;
         unsigned int Bitrate;
         unsigned int GoP;
     } CompressionData;
@@ -67,6 +69,27 @@ public:
 
     virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false);
     virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch);
+
+public:
+    virtual void SetExtension(const std::string & extension);
+    virtual void SetEncoderID(const int & encoder_id);
+    virtual void SetCompressionLevel(const int & compr_level);
+    virtual void SetQualityBased(const bool & enabled);
+    virtual void SetTargetQuantizer(const double & target_quant);
+    virtual void SetDatarate(const int & datarate);
+    virtual void SetKeyFrameEvery(const int & key_every);
+    virtual void IsCompressionLevelEnabled(bool & enabled) const;
+    virtual void IsEncoderListEnabled(bool & enabled) const;
+    virtual void IsTargetQuantizerEnabled(bool & enabled) const;
+    virtual void IsDatarateEnabled(bool & enabled) const;
+    virtual void IsKeyFrameEveryEnabled(bool & enabled) const;
+    virtual void GetCompressionLevel(int & compr_level) const;
+    virtual void GetEncoderList(std::string & encoder_list) const;
+    virtual void GetEncoderID(int & encoder_id) const;
+    virtual void GetQualityBased(bool & enabled) const;
+    virtual void GetTargetQuantizer(double & target_quant) const;
+    virtual void GetDatarate(int & datarate) const;
+    virtual void GetKeyFrameEvery(int & key_every) const;
 
 protected:
     CompressionData Config;
@@ -107,7 +130,7 @@ private:
     void BuildIndex();
     void ConfigureEncoder();
     void BuildEncoderList();
-    int GetEncoderID(CodecID codec_id);
+    int GetFFMPEGEncoderID(CodecID codec_id) const;
     std::string GetExtensionFromEncoderID(unsigned int encoder_id);
 };
 

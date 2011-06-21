@@ -22,17 +22,27 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cmnXMLPathTest.h"
 
-#include <cisstCommon/cmnXMLPath.h>
+#include <limits>
+
 #include <cisstCommon/cmnPath.h>
 
+#if CISST_HAS_QT_XML
+  #include <QtCore/QCoreApplication>
+  QCoreApplication * GlobalQApplication;
+#endif
 
 void cmnXMLPathTest::setUp(void)
 {
     // set log to see all
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClassMatching("cmnXMLPath", CMN_LOG_ALLOW_ALL); 
+    cmnLogger::SetMaskClassMatching("cmnXMLPath", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+#if CISST_HAS_QT_XML
+    int argc = 1;
+    char * argv = "";
+    GlobalQApplication = new QCoreApplication(argc, &argv);
+#endif
 }
 
 
@@ -41,8 +51,11 @@ void cmnXMLPathTest::tearDown(void)
     // reset log
     cmnLogger::SetMask(CMN_LOG_ALLOW_DEFAULT);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_DEFAULT);
-    cmnLogger::SetMaskClassMatching("cmnXMLPath", cmnXMLPath::InitialLoD); 
+    cmnLogger::SetMaskClassMatching("cmnXMLPath", cmnXMLPath::InitialLoD);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_DEFAULT);
+#if CISST_HAS_QT_XML
+    delete GlobalQApplication;
+#endif
 }
 
 
@@ -52,8 +65,14 @@ void cmnXMLPathTest::TestReadExistingFile(void)
     cmnPath filePath;
     filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
+    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
-    TestExistingFile1(testFile);
+    CPPUNIT_ASSERT(!(schemaFile == ""));
+
+    // create path and test
+    cmnXMLPath xmlPath;
+    xmlPath.SetInputSource(testFile);
+    TestExistingFile1(xmlPath, schemaFile);
 }
 
 
@@ -63,7 +82,9 @@ void cmnXMLPathTest::TestCopyReadExistingFile(void)
     cmnPath filePath;
     filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
+    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
+    CPPUNIT_ASSERT(!(schemaFile == ""));
     // read file
     cmnXMLPath xmlPath;
     xmlPath.SetInputSource(testFile);
@@ -71,14 +92,17 @@ void cmnXMLPathTest::TestCopyReadExistingFile(void)
     std::string copy = "cmnXMLPathTestFile1-copy.xml";
     xmlPath.SaveAs(copy);
     // test copy
-    TestExistingFile1(copy);
+    cmnXMLPath xmlPathCopy;
+    xmlPathCopy.SetInputSource(copy);
+    TestExistingFile1(xmlPath, schemaFile);
 }
 
 
-void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
+void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string & schemaFile)
 {
-    cmnXMLPath xmlPath;
-    xmlPath.SetInputSource(testFile);
+    // validate with schema
+    bool validatedWithSchema = xmlPath.ValidateWithSchema(schemaFile);
+    CPPUNIT_ASSERT(validatedWithSchema);
 
     // start reading
     int intValue;
@@ -108,7 +132,7 @@ void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
     CPPUNIT_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), doubleValue);
     dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@doubleAttributeMinusInf", doubleValue);
     CPPUNIT_ASSERT(dataFound);
-    CPPUNIT_ASSERT_EQUAL(-1 * std::numeric_limits<double>::infinity(), doubleValue);
+    CPPUNIT_ASSERT_EQUAL(-1.0 * std::numeric_limits<double>::infinity(), doubleValue);
 
     // testing string
     dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@stringAttribute", stringValue);
@@ -160,9 +184,97 @@ void cmnXMLPathTest::TestExistingFile1(const std::string & testFile)
         path << "data-1-2-x-y/@stringAttribute";
         dataFound = xmlPath.GetXMLValue(context.str(), path.str(), stringValue);
         CPPUNIT_ASSERT(dataFound);
-        // compare string to index 
+        // compare string to index
         value.str("");
         value << "value-" << index;
         CPPUNIT_ASSERT_EQUAL(value.str(), stringValue);
     }
+}
+
+
+void cmnXMLPathTest::TestWrite(void)
+{
+    // find original file and test
+    cmnPath filePath;
+    filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
+    std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
+    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
+    CPPUNIT_ASSERT(!(testFile == ""));
+    CPPUNIT_ASSERT(!(schemaFile == ""));
+
+    cmnXMLPath xmlPath;
+    xmlPath.SetInputSource(testFile);
+
+    // modify
+    bool dataFound;
+
+    dataFound = xmlPath.SetXMLValue("data-1/data-1-1", "@intAttribute", 6);
+    CPPUNIT_ASSERT(dataFound);
+
+    dataFound = xmlPath.SetXMLValue("data-1", "data-1-1/@boolAttribute", true);
+    CPPUNIT_ASSERT(dataFound);
+
+    dataFound = xmlPath.SetXMLValue("", "data-1/data-1-1/@doubleAttribute", 3.14);
+    CPPUNIT_ASSERT(dataFound);
+
+    dataFound = xmlPath.SetXMLValue("data-1/data-1-1", "@doubleAttributeInf", -1.0 * std::numeric_limits<double>::infinity());
+    CPPUNIT_ASSERT(dataFound);
+    dataFound = xmlPath.SetXMLValue("data-1/data-1-1", "@doubleAttributeMinusInf", std::numeric_limits<double>::infinity());
+    CPPUNIT_ASSERT(dataFound);
+
+    dataFound = xmlPath.SetXMLValue("data-1/data-1-1", "@stringAttribute", std::string("Goodbye!"));
+    CPPUNIT_ASSERT(dataFound);
+
+    // test using current path
+    TestModifiedFile1(xmlPath, schemaFile);
+
+    // save and test
+    std::string copy = "cmnXMLPathTestFile1-modified.xml";
+    xmlPath.SaveAs(copy);
+    cmnXMLPath xmlPathCopy;
+    xmlPathCopy.SetInputSource(copy);
+    TestModifiedFile1(xmlPathCopy, schemaFile);
+}
+
+ 
+void cmnXMLPathTest::TestModifiedFile1(cmnXMLPath & xmlPath, const std::string & schemaFile)
+{
+    // validate with schema
+    bool validatedWithSchema = xmlPath.ValidateWithSchema(schemaFile);
+    CPPUNIT_ASSERT(validatedWithSchema);
+
+    // start reading
+    int intValue;
+    bool boolValue = true;
+    double doubleValue;
+    std::string stringValue;
+    bool dataFound;
+
+    // read using const char * for path and context
+    dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@intAttribute", intValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(6, intValue);
+
+    // slightly different way (!= context/path)
+    dataFound = xmlPath.GetXMLValue("data-1", "data-1-1/@boolAttribute", boolValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(true, boolValue);
+
+    // slightly different way (!= context/path)
+    dataFound = xmlPath.GetXMLValue("", "data-1/data-1-1/@doubleAttribute", doubleValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(3.14, doubleValue);
+
+    // testing inf and -inf
+    dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@doubleAttributeInf", doubleValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(-1.0 * std::numeric_limits<double>::infinity(), doubleValue);
+    dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@doubleAttributeMinusInf", doubleValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), doubleValue);
+
+    // testing string
+    dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@stringAttribute", stringValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(std::string("Goodbye!"), stringValue);
 }

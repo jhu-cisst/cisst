@@ -16,7 +16,11 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
 
     ADD_EXECUTABLE(svlExCameraViewer cameraviewer.cpp)
 
-    CISST_REQUIRES("svlExCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision")
+    IF(CISST_HAS_QT)
+        CISST_REQUIRES("svlExCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstStereoVisionQt")
+    ELSE(CISST_HAS_QT)
+        CISST_REQUIRES("svlExCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision")
+    ENDIF(CISST_HAS_QT)
 
 ENDIF(CISST_SVL_HAS_X11 OR WIN32)
 

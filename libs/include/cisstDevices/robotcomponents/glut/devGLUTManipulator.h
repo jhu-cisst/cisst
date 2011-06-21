@@ -61,7 +61,8 @@ class CISST_EXPORT devGLUTManipulator :
 		      const vctFrame4x4<double>& Rtw0,
 		      const vctDynamicVector<double>& qinit,
 		      const std::vector<std::string>& geomfiles,
-		      const std::string& basefile );
+		      const std::string& basefile,
+		      bool rotateX90 = false );
 
   ~devGLUTManipulator(){}
 

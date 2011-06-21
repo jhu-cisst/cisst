@@ -463,6 +463,82 @@ int svlVideoCodecVfW32::Write(svlProcInfo* procInfo, const svlSampleImage &image
     return SVL_FAIL;
 }
 
+void svlVideoCodecVfW32::SetExtension(const std::string & extension)
+{
+}
+
+void svlVideoCodecVfW32::SetEncoderID(const int & encoder_id)
+{
+}
+
+void svlVideoCodecVfW32::SetCompressionLevel(const int & compr_level)
+{
+}
+
+void svlVideoCodecVfW32::SetQualityBased(const bool & enabled)
+{
+}
+
+void svlVideoCodecVfW32::SetTargetQuantizer(const double & target_quant)
+{
+}
+
+void svlVideoCodecVfW32::SetDatarate(const int & datarate)
+{
+}
+
+void svlVideoCodecVfW32::SetKeyFrameEvery(const int & key_every)
+{
+}
+
+void svlVideoCodecVfW32::IsCompressionLevelEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecVfW32::IsEncoderListEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecVfW32::IsTargetQuantizerEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecVfW32::IsDatarateEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecVfW32::IsKeyFrameEveryEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecVfW32::GetCompressionLevel(int & compr_level) const
+{
+}
+
+void svlVideoCodecVfW32::GetEncoderList(std::string & encoder_list) const
+{
+}
+
+void svlVideoCodecVfW32::GetEncoderID(int & encoder_id) const
+{
+}
+
+void svlVideoCodecVfW32::GetQualityBased(bool & enabled) const
+{
+}
+
+void svlVideoCodecVfW32::GetTargetQuantizer(double & target_quant) const
+{
+}
+
+void svlVideoCodecVfW32::GetDatarate(int & datarate) const
+{
+}
+
+void svlVideoCodecVfW32::GetKeyFrameEvery(int & key_every) const
+{
+}
+
 void svlVideoCodecVfW32::Flip(unsigned char* image)
 {
     const unsigned int stride = Width * 3;

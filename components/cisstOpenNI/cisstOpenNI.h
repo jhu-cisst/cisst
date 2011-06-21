@@ -6,6 +6,10 @@
 #include <cisstOpenNI/cisstOpenNIExport.h>
 #include <cisstOpenNI/cisstOpenNISkeleton.h>
 
+#define WAIT_AND_UPDATE_ALL         1
+#define WAIT_ANY_UPDATE_ONE         2
+#define WAIT_NONE_UPDATE_ALL        3
+
 /*! 
 \todo move ctor code to Configure method
 \todo move all use of OpenNI symbols to .cpp file, i.e. do not include Xn files in cisstOpenNI.h
@@ -20,6 +24,8 @@ class cisstOpenNIData;
 
 class CISST_EXPORT cisstOpenNI {
 
+    friend class cisstOpenNISkeleton;
+
 private:
 
     //! Private OpenNI Data Structure
@@ -28,7 +34,7 @@ private:
     //! Identifier for the openNI Object
     std::string name;
 
-    std::vector<cisstOpenNISkeleton> skeletons;
+    std::vector<cisstOpenNISkeleton*> skeletons;
 
 
 public:
@@ -38,6 +44,9 @@ public:
 
     //! Default DeConstructor
     ~cisstOpenNI();
+
+    //! Clean Up and Exit
+    void CleanupExit();
 
     //! Configure
     /**
@@ -51,7 +60,10 @@ public:
     Calls the wait and update all method of the XN wrapper.  
     This needs to be called each iteration.
     */
-    void UpdateAll();
+    void Update(int type);
+
+    //! INit skeletons
+    void InitSkeletons();
 
     //! Get range data
     /**
@@ -63,12 +75,21 @@ public:
     */
     vctDynamicMatrix<double> GetRangeData();
 
-    //! Get depth image
+    //! Get Raw Depth Image
     /**
-    Query the depth generator to obtain a depth image. The value at each pixel represents
-    the depth of the picture element. This method is non-const due to updating the context.
+    Query the depth generator to obtain a depth image. Resulting image as 8-bit depth. 
+    The value at each pixel represents the depth of the picture element. This method 
+    is non-const due to updating the context.
     */
-    vctDynamicMatrix<double> GetDepthImage();
+    void GetDepthImageRaw(vctDynamicMatrix<double> & placeHolder);
+
+    //! Get Depth Image
+    /**
+    Query the depth generator to obtain a depth image. Resulting image as 11-bit depth. 
+    The value at each pixel represents the depth of the picture element. This method 
+    is non-const due to updating the context.
+    */
+    void GetDepthImage(vctDynamicMatrix<double> & placeHolder);
 
     //! Get (interlaced) RGB image
     /**
@@ -84,7 +105,7 @@ public:
     //! Get Current User Skeletons
     /**
     */
-    std::vector<cisstOpenNISkeleton> UpdateAndGetUserSkeletons();
+    std::vector<cisstOpenNISkeleton*> &UpdateAndGetUserSkeletons();
 
 };
 

@@ -4,7 +4,7 @@
 
   <data-1-1 intAttribute = "5"
             boolAttribute = "false"
-	    doubleAttribute = "1.234"
+            doubleAttribute = "1.234"
             doubleAttributeInf = "INF"
             doubleAttributeMinusInf = "-INF"
             stringAttribute = "Hello!"/>

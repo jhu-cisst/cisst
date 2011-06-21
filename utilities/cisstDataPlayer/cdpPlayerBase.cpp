@@ -78,7 +78,7 @@ cdpPlayerBase::cdpPlayerBase(const std::string & name, double period):
 
     // add Requred interface which point back to our own state table
     // The reason is we may use those interfaces in the QT thread
-    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("GetStatus");
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("GetStatus", MTS_OPTIONAL);
     if (interfaceRequired) {
         interfaceRequired->AddFunction("IsSyncing", BaseAccess.IsSyncing);
         interfaceRequired->AddFunction("GetState", BaseAccess.GetState);

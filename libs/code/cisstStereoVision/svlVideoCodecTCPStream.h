@@ -35,6 +35,11 @@ class svlVideoCodecTCPStream : public svlVideoCodecBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    enum CompressorType {
+        CVI,
+        JPEG
+    };
+
     svlVideoCodecTCPStream();
     virtual ~svlVideoCodecTCPStream();
 
@@ -49,6 +54,7 @@ public:
     virtual svlVideoIO::Compression* GetCompression() const;
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
+    virtual int DialogCompression(const std::string &filename);
 
     virtual double GetTimestamp() const;
     virtual int SetTimestamp(const double timestamp);
@@ -56,12 +62,34 @@ public:
     virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false);
     virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch);
 
+public:
+    virtual void SetExtension(const std::string & extension);
+    virtual void SetEncoderID(const int & encoder_id);
+    virtual void SetCompressionLevel(const int & compr_level);
+    virtual void SetQualityBased(const bool & enabled);
+    virtual void SetTargetQuantizer(const double & target_quant);
+    virtual void SetDatarate(const int & datarate);
+    virtual void SetKeyFrameEvery(const int & key_every);
+    virtual void IsCompressionLevelEnabled(bool & enabled) const;
+    virtual void IsEncoderListEnabled(bool & enabled) const;
+    virtual void IsTargetQuantizerEnabled(bool & enabled) const;
+    virtual void IsDatarateEnabled(bool & enabled) const;
+    virtual void IsKeyFrameEveryEnabled(bool & enabled) const;
+    virtual void GetCompressionLevel(int & compr_level) const;
+    virtual void GetEncoderList(std::string & encoder_list) const;
+    virtual void GetEncoderID(int & encoder_id) const;
+    virtual void GetQualityBased(bool & enabled) const;
+    virtual void GetTargetQuantizer(double & target_quant) const;
+    virtual void GetDatarate(int & datarate) const;
+    virtual void GetKeyFrameEvery(int & key_every) const;
+
 protected:
+    CompressorType Compressor;
+
     const std::string CodecName;
     const std::string FrameStartMarker;
 
     std::fstream* File;
-    unsigned int PartCount;
     unsigned int Width;
     unsigned int Height;
     int BegPos;
@@ -70,6 +98,8 @@ protected:
     bool Opened;
     bool Writing;
     double Timestamp;
+
+    svlProcInfo ProcInfoSingleThread;
 
     char* PacketData;
     unsigned char* yuvBuffer;
@@ -85,9 +115,10 @@ protected:
     bool ServerInitialized;
     bool KillServerThread;
 
+    bool ReadError;
     svlBufferMemory* ReceiveBuffer;
-    vctDynamicVector<svlBufferMemory*> SendBuffer;
 
+    vctDynamicVector<svlBufferMemory*> SendBuffer;
     vctDynamicVector<osaThread*> SendThread;
     vctDynamicVector<int> SendConnection;
     vctDynamicVector<bool> KillSendThread;

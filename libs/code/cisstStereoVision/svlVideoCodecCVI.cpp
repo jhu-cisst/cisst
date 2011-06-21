@@ -1079,6 +1079,82 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 	return SVL_OK;
 }
 
+void svlVideoCodecCVI::SetExtension(const std::string & extension)
+{
+}
+
+void svlVideoCodecCVI::SetEncoderID(const int & encoder_id)
+{
+}
+
+void svlVideoCodecCVI::SetCompressionLevel(const int & compr_level)
+{
+}
+
+void svlVideoCodecCVI::SetQualityBased(const bool & enabled)
+{
+}
+
+void svlVideoCodecCVI::SetTargetQuantizer(const double & target_quant)
+{
+}
+
+void svlVideoCodecCVI::SetDatarate(const int & datarate)
+{
+}
+
+void svlVideoCodecCVI::SetKeyFrameEvery(const int & key_every)
+{
+}
+
+void svlVideoCodecCVI::IsCompressionLevelEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecCVI::IsEncoderListEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecCVI::IsTargetQuantizerEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecCVI::IsDatarateEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecCVI::IsKeyFrameEveryEnabled(bool & enabled) const
+{
+}
+
+void svlVideoCodecCVI::GetCompressionLevel(int & compr_level) const
+{
+}
+
+void svlVideoCodecCVI::GetEncoderList(std::string & encoder_list) const
+{
+}
+
+void svlVideoCodecCVI::GetEncoderID(int & encoder_id) const
+{
+}
+
+void svlVideoCodecCVI::GetQualityBased(bool & enabled) const
+{
+}
+
+void svlVideoCodecCVI::GetTargetQuantizer(double & target_quant) const
+{
+}
+
+void svlVideoCodecCVI::GetDatarate(int & datarate) const
+{
+}
+
+void svlVideoCodecCVI::GetKeyFrameEvery(int & key_every) const
+{
+}
+
 void svlVideoCodecCVI::DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size)
 {
     if (!input || !previous || !output || !size) return;

@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterVideoFileWriter.h>
 #include <cisstStereoVision/svlFile.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstCommon/cmnGetChar.h>
 
 
@@ -59,6 +60,7 @@ svlFilterVideoFileWriter::~svlFilterVideoFileWriter()
     Release();
 
     for (unsigned int i = 0; i < CodecParam.size(); i ++) {
+        svlVideoIO::ReleaseCodec(CodecProto[i]);
         svlVideoIO::ReleaseCompression(CodecParam[i]);
     }
 
@@ -200,89 +202,6 @@ int svlFilterVideoFileWriter::Release()
     return SVL_OK;
 }
 
-int svlFilterVideoFileWriter::OpenFile(const std::string &filepath, unsigned int videoch)
-{
-    UpdateCodecCount(videoch + 1);
-
-    if (ImageDimensions[videoch].X() == 0 || ImageDimensions[videoch].Y() == 0) {
-        // Ooops, we don't know the image dimensions yet
-        // Delay this call. It will be executed on `Initialize`
-        FilePath[videoch] = filepath;
-        return SVL_OK;
-    }
-
-    CS.Enter();
-
-    while (1) {
-
-        // Close video file if currently open
-        if (Codec[videoch]) {
-            svlVideoIO::ReleaseCodec(Codec[videoch]);
-        }
-
-        // Get video codec for file extension
-        Codec[videoch] = svlVideoIO::GetCodec(filepath);
-        if (!Codec[videoch]) {
-            CMN_LOG_CLASS_INIT_ERROR << "OpenFile: failed to find suitable codec for file \"" << filepath
-                                     << "\" on channel: " << videoch << std::endl;
-            break;
-        }
-
-        // Apply compression settings configured before this call
-        if (!CodecParam[videoch] || Codec[videoch]->SetCompression(CodecParam[videoch]) != SVL_OK) {
-
-            // Set compression settings to default
-            svlVideoIO::Compression* compression = Codec[videoch]->GetCompression();
-            if (Codec[videoch]->SetCompression(compression) != SVL_OK) {
-                CMN_LOG_CLASS_INIT_WARNING << "OpenFile: failed to configure video compression for file \"" << filepath
-                                           << "\" on channel: " << videoch << std::endl;
-            }
-            svlVideoIO::ReleaseCompression(compression);
-        }
-
-        // Open video file
-        if (Codec[videoch]->Create(filepath,
-                                   ImageDimensions[videoch].X(),
-                                   ImageDimensions[videoch].Y(),
-                                   Framerate[videoch]) != SVL_OK) {
-            CMN_LOG_CLASS_INIT_ERROR << "OpenFile: failed to create video file \"" << filepath
-                                     << "\" on channel: " << videoch << std::endl;
-            break;
-        }
-
-        FilePath[videoch]  = filepath;
-
-        // Update `CodecsMultithreaded` flag
-        bool multithreaded = true;
-        for (unsigned int i = 0; i < Codec.size(); i ++) {
-            if (Codec[i] && !Codec[i]->IsMultithreaded()) {
-                multithreaded = false;
-                break;
-            }
-        }
-        CodecsMultithreaded = multithreaded;
-
-        CS.Leave();
-
-        std::stringstream strstr;
-        strstr << "OpenFile: succeeded to create video file \"" << filepath;
-        if (Codec[videoch]->IsVariableFramerate()) strstr << "\" (variable framerate)";
-        else strstr << "\" (framerate=" << Framerate[videoch] << ")";
-        strstr << " on channel: " << videoch;
-        CMN_LOG_CLASS_INIT_VERBOSE << strstr.str() << std::endl;
-
-        ErrorOnChannel[videoch] = false;
-
-        return SVL_OK;
-    }
-
-    CS.Leave();
-
-    CloseFile(videoch);
-
-    return SVL_FAIL;
-}
-
 int svlFilterVideoFileWriter::DialogOpenFile(unsigned int videoch)
 {
     std::ostringstream out;
@@ -290,6 +209,13 @@ int svlFilterVideoFileWriter::DialogOpenFile(unsigned int videoch)
     std::string path, title(out.str());
 
     if (svlVideoIO::DialogFilePath(true, title, path) == SVL_OK) {
+
+        SetFilePath(path, videoch);
+
+        // Open codec dialog
+        if (DialogFramerate(videoch) != SVL_OK) {
+            CMN_LOG_CLASS_INIT_WARNING << "DialogOpenFile: failed to set video framerate" << std::endl;
+        }
 
         UpdateCodecCount(videoch + 1);
 
@@ -300,32 +226,73 @@ int svlFilterVideoFileWriter::DialogOpenFile(unsigned int videoch)
             }
         }
 
-        return OpenFile(path, videoch);
+        return OpenFile(videoch);
     }
 
     return SVL_FAIL;
 }
 
-int svlFilterVideoFileWriter::CloseFile(unsigned int videoch)
+int svlFilterVideoFileWriter::DialogFramerate(unsigned int videoch)
 {
-    if (videoch >= Codec.size()) {
-        CMN_LOG_CLASS_INIT_ERROR << "CloseFile: video channel out of range: " << videoch << std::endl;
-        return SVL_FAIL;
+    UpdateCodecCount(videoch + 1);
+
+    char input[256];
+    double min = 0.1, max = 1000.0, defaultval = 30.0, framerate;
+    std::cout << " # Enter video frame rate (min=" << std::fixed << std::setprecision(1) << min
+                                       << "; max=" << std::fixed << std::setprecision(1) << max
+                                       << "; default=" << std::fixed << std::setprecision(1) << defaultval << "): ";
+    std::cin.getline(input, 256);
+    if (std::cin.gcount() > 1) {
+        framerate = atof(input);
+        if (framerate < min) framerate = min;
+        if (framerate > max) framerate = max;
     }
-
-    CS.Enter();
-
-    if (Codec[videoch]) {
-        svlVideoIO::ReleaseCodec(Codec[videoch]);
-        Codec[videoch] = 0;
-    }
-
-    CS.Leave();
+    else framerate = defaultval;
+    std::cout << "    Framerate = " << std::fixed << std::setprecision(2) << framerate << std::endl;
+    Framerate[videoch] = framerate;
 
     return SVL_OK;
 }
 
-int svlFilterVideoFileWriter::SetCodec(const svlVideoIO::Compression *compression, double framerate, unsigned int videoch)
+int svlFilterVideoFileWriter::DialogCodec(const std::string &extension, unsigned int videoch)
+{
+    // The argument `extension` may be file extension or file name or full path
+
+    UpdateCodecCount(videoch + 1);
+
+    // Add '.' before extension in order to make sure `svlVideoIO::GetCodec`
+    // and `svlVideoIO::DialogCodec` accept it as filename
+    std::string filename(extension);
+    filename.insert(0, ".");
+
+    if (svlVideoIO::DialogCodec(filename, &(CodecParam[videoch])) != SVL_OK || !CodecParam[videoch]) {
+        CodecParam[videoch] = 0;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogCodec: failed to configure video compression" << std::endl;
+        return SVL_FAIL;
+    }
+
+    return SVL_OK;
+}
+
+int svlFilterVideoFileWriter::SetFilePath(const std::string &filepath, unsigned int videoch)
+{
+    UpdateCodecCount(videoch + 1);
+
+    FilePath[videoch] = filepath;
+
+    return SVL_OK;
+}
+
+int svlFilterVideoFileWriter::SetFramerate(const double framerate, unsigned int videoch)
+{
+    UpdateCodecCount(videoch + 1);
+
+    Framerate[videoch] = framerate;
+
+    return SVL_OK;
+}
+
+int svlFilterVideoFileWriter::SetCodecParams(const svlVideoIO::Compression *compression, unsigned int videoch)
 {
     if (!compression || compression->size < sizeof(svlVideoIO::Compression)) {
         CMN_LOG_CLASS_INIT_ERROR << "SetCodec: invalid compression structure" << std::endl;
@@ -344,59 +311,6 @@ int svlFilterVideoFileWriter::SetCodec(const svlVideoIO::Compression *compressio
     memcpy(CodecParam[videoch], compression, compression->size);
     CodecParam[videoch]->size = compression->size;
 
-    Framerate[videoch] = framerate;
-
-    return SVL_OK;
-}
-
-int svlFilterVideoFileWriter::DialogCodec(const std::string &extension, unsigned int videoch)
-{
-    // The argument `extension` may be file extension or file name or full path
-
-    UpdateCodecCount(videoch + 1);
-
-    // Add '.' before extension in order to make sure `svlVideoIO::GetCodec`
-    // and `svlVideoIO::DialogCodec` accept it as filename
-    std::string filename(extension);
-    filename.insert(0, ".");
-
-    svlVideoCodecBase *codec = svlVideoIO::GetCodec(filename);
-    if (!codec) {
-        // Get extension only
-        std::string ext;
-        svlVideoIO::GetExtension(filename, ext);
-
-        CMN_LOG_CLASS_INIT_ERROR << "DialogCodec: failed to find suitable codec for extension \"" << ext
-                                 << "\" on channel: " << videoch << std::endl;
-        return SVL_FAIL;
-    }
-
-    // Get framerate if needed
-    if (!codec->IsVariableFramerate()) {
-        char input[256];
-        int min = 1, max = 120, defaultval = 30, framerate = 0;
-        std::cout << " # Enter video frame rate (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
-        std::cin.getline(input, 256);
-        if (std::cin.gcount() > 1) {
-            framerate = atoi(input);
-            if (framerate < min) framerate = min;
-            if (framerate > max) framerate = max;
-        }
-        else framerate = defaultval;
-        std::cout << "    Framerate = " << framerate << std::endl;
-        Framerate[videoch] = static_cast<double>(framerate);
-    }
-    else {
-        Framerate[videoch] = -1.0;
-    }
-    svlVideoIO::ReleaseCodec(codec);
-
-    if (svlVideoIO::DialogCodec(filename, &(CodecParam[videoch])) != SVL_OK || !CodecParam[videoch]) {
-        CodecParam[videoch] = 0;
-        CMN_LOG_CLASS_INIT_ERROR << "DialogCodec: failed to configure video compression" << std::endl;
-        return SVL_FAIL;
-    }
-
     return SVL_OK;
 }
 
@@ -409,7 +323,7 @@ int svlFilterVideoFileWriter::ResetCodec(unsigned int videoch)
 
     svlVideoIO::ReleaseCompression(CodecParam[videoch]);
     CodecParam[videoch] = 0;
-    Framerate[videoch]  = -1.0;
+    Framerate[videoch]  = 30.0;
 
     return SVL_OK;
 }
@@ -466,7 +380,7 @@ int svlFilterVideoFileWriter::LoadCodec(const std::string &filepath, unsigned in
 
         // Read "framerate"
         if (!file.Read(Framerate[videoch])) break;
-        if (Framerate[videoch] <= 0.1) Framerate[videoch] = 0.1;
+        if (Framerate[videoch] < 0.1) Framerate[videoch] = 0.1;
         else if (Framerate[videoch] > 1000.0) Framerate[videoch] = 1000.0;
 
         // Read "codec params size"
@@ -524,7 +438,7 @@ int svlFilterVideoFileWriter::GetCodecName(std::string &encoder, unsigned int vi
     return SVL_OK;
 }
 
-int svlFilterVideoFileWriter::GetCodec(svlVideoIO::Compression **compression, unsigned int videoch) const
+int svlFilterVideoFileWriter::GetCodecParams(svlVideoIO::Compression **compression, unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
         CMN_LOG_CLASS_INIT_ERROR << "GetCodec: video channel out of range: " << videoch << std::endl;
@@ -538,6 +452,112 @@ int svlFilterVideoFileWriter::GetCodec(svlVideoIO::Compression **compression, un
 
     compression[0] = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[CodecParam[videoch]->size]);
     memcpy(compression[0], CodecParam[videoch], CodecParam[videoch]->size);
+
+    return SVL_OK;
+}
+
+int svlFilterVideoFileWriter::OpenFile(unsigned int videoch)
+{
+    UpdateCodecCount(videoch + 1);
+
+    if (ImageDimensions[videoch].X() == 0 || ImageDimensions[videoch].Y() == 0) {
+        // Ooops, we don't know the image dimensions yet
+        // Delay this call. It will be executed on `Initialize`
+        return SVL_OK;
+    }
+
+    CS.Enter();
+
+    while (1) {
+
+        // Close video file if currently open
+        if (Codec[videoch]) {
+            svlVideoIO::ReleaseCodec(Codec[videoch]);
+        }
+
+        // Get video codec for file extension
+        Codec[videoch] = svlVideoIO::GetCodec(FilePath[videoch]);
+        if (!Codec[videoch]) {
+            CMN_LOG_CLASS_INIT_ERROR << "OpenFile: failed to find suitable codec for file \"" << FilePath[videoch]
+                                     << "\" on channel: " << videoch << std::endl;
+            break;
+        }
+
+        // Apply compression settings configured before this call
+        if (!CodecParam[videoch] || Codec[videoch]->SetCompression(CodecParam[videoch]) != SVL_OK) {
+
+            // Set compression settings to default
+            svlVideoIO::Compression* compression = Codec[videoch]->GetCompression();
+            if (Codec[videoch]->SetCompression(compression) != SVL_OK) {
+                CMN_LOG_CLASS_INIT_WARNING << "OpenFile: failed to configure video compression for file \"" << FilePath[videoch]
+                                           << "\" on channel: " << videoch << std::endl;
+            }
+            svlVideoIO::ReleaseCompression(compression);
+        }
+
+        // Open video file
+        if (Codec[videoch]->Create(FilePath[videoch],
+                                   ImageDimensions[videoch].X(),
+                                   ImageDimensions[videoch].Y(),
+                                   Framerate[videoch]) != SVL_OK) {
+            CMN_LOG_CLASS_INIT_ERROR << "OpenFile: failed to create video file \"" << FilePath[videoch]
+                                     << "\" on channel: " << videoch << std::endl;
+            break;
+        }
+
+        // Update `CodecsMultithreaded` flag
+        bool multithreaded = true;
+        for (unsigned int i = 0; i < Codec.size(); i ++) {
+            if (Codec[i] && !Codec[i]->IsMultithreaded()) {
+                multithreaded = false;
+                break;
+            }
+        }
+        CodecsMultithreaded = multithreaded;
+
+        CS.Leave();
+
+        std::stringstream strstr;
+        strstr << "OpenFile: succeeded to create video file \"" << FilePath[videoch];
+        if (Codec[videoch]->IsVariableFramerate()) strstr << "\" (variable framerate)";
+        else strstr << "\" (framerate=" << std::fixed << std::setprecision(2) << Framerate[videoch] << ")";
+        strstr << " on channel: " << videoch;
+        CMN_LOG_CLASS_INIT_VERBOSE << strstr.str() << std::endl;
+
+        ErrorOnChannel[videoch] = false;
+
+        return SVL_OK;
+    }
+
+    CS.Leave();
+
+    CloseFile(videoch);
+
+    return SVL_FAIL;
+}
+
+int svlFilterVideoFileWriter::OpenFile(const std::string &filepath, unsigned int videoch)
+{
+    if (SetFilePath(filepath, videoch) != SVL_OK ||
+        OpenFile(videoch)              != SVL_OK) return SVL_FAIL;
+    return SVL_OK;
+}
+
+int svlFilterVideoFileWriter::CloseFile(unsigned int videoch)
+{
+    if (videoch >= Codec.size()) {
+        CMN_LOG_CLASS_INIT_ERROR << "CloseFile: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
+
+    CS.Enter();
+
+    if (Codec[videoch]) {
+        svlVideoIO::ReleaseCodec(Codec[videoch]);
+        Codec[videoch] = 0;
+    }
+
+    CS.Leave();
 
     return SVL_OK;
 }
@@ -595,6 +615,7 @@ void svlFilterVideoFileWriter::UpdateCodecCount(const unsigned int count)
         ErrorOnChannel.resize(count);
         ImageDimensions.resize(count);
         Codec.resize(count);
+        CodecProto.resize(count);
         CodecParam.resize(count);
         FilePath.resize(count);
         Framerate.resize(count);
@@ -602,9 +623,10 @@ void svlFilterVideoFileWriter::UpdateCodecCount(const unsigned int count)
             ErrorOnChannel[i] = false;
             ImageDimensions[i].SetAll(0);
             Codec[i]          = 0;
+            CodecProto[i]     = 0;
             CodecParam[i]     = 0;
             FilePath[i]       = "";
-            Framerate[i]      = -1.0;
+            Framerate[i]      = 30.0;
         }
     }
 }

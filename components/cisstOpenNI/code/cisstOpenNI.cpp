@@ -1,112 +1,6 @@
 #include <cisstOpenNI/cisstOpenNI.h>
+#include "cisstOpenNIData.h"
 
-#include <XnCppWrapper.h>
-#include <XnOS.h>
-
-class cisstOpenNIData
-{
-
-public:
-
-    //! OpenNI context
-    xn::Context context;
-
-    //! Depth image generator
-    xn::DepthGenerator depthgenerator;
-
-    //! RGB image generator
-    xn::ImageGenerator rgbgenerator;
-
-    //! User Skeleton generator
-    xn::UserGenerator usergenerator;
-
-    //! User Pose State
-    XnBool needPose;
-
-    //! Pose Callback String
-    XnChar strPose[20];
-
-    //! New User Callback
-    /**
-    */
-    void NewUserCallback(           xn::UserGenerator& generator, 
-                                    XnUserID nId);
-
-    //! New User Calibration Pose Detected
-    /**
-    */
-    void UserPoseDetectedCallback(  xn::PoseDetectionCapability& capability,
-                                    const XnChar* strPose,
-                                    XnUserID nId);
-
-    //! User Calibration End
-    /**
-    Cues that the calibration has ended, either with success or failure.
-    */
-    void UserCalibrationEndCallback(xn::SkeletonCapability& capability,
-                                    XnBool bSuccess,  
-                                    XnUserID nId);
-
-};
-
-//----------------------------------------------------------------------------/
-// BEGIN Callbacks
-//----------------------------------------------------------------------------/
-
-// Callback: New user was detected
-void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, 
-                                   XnUserID nId, 
-                                   void* pCookie)
-{
-    printf("New User %d\n", nId);
-
-    cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
-
-    openNIDataObject->NewUserCallback(generator,nId);
-}
-
-// Callback: An existing user was lost
-void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator, 
-                                    XnUserID nId, 
-                                    void* pCookie)
-{
-    printf("Lost user %d\n", nId);
-
-    cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
-}
-
-
-// Callback: Detected a pose
-void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capability, 
-                                            const XnChar* strPose, 
-                                            XnUserID nId, 
-                                            void* pCookie)
-{
-    printf("Pose %s detected for user %d\n", strPose, nId);
-
-    cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
-
-    openNIDataObject->UserPoseDetectedCallback(capability,strPose,nId);
-}
-
-// Callback: Started calibration
-void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& capability, 
-                                                       XnUserID nId, 
-                                                       void* pCookie)
-{
-    printf("Calibration started for user %d\n", nId);
-}
-
-// Callback: Finished calibration
-void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(xn::SkeletonCapability& capability, 
-                                                     XnUserID nId, 
-                                                     XnBool bSuccess, 
-                                                     void* pCookie)
-{
-    cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
-
-    openNIDataObject->UserCalibrationEndCallback(capability,bSuccess,nId);
-}
 
 cisstOpenNI::cisstOpenNI(){
 
@@ -120,6 +14,11 @@ cisstOpenNI::~cisstOpenNI()
     if(this->Data)
         delete this->Data;
 
+
+}
+
+void cisstOpenNI::CleanupExit(){
+    Data->context.Shutdown();
 }
 
 void cisstOpenNI::Configure( const std::string& fname  ){
@@ -197,27 +96,60 @@ void cisstOpenNI::Configure( const std::string& fname  ){
 
 }
 
-void cisstOpenNI::UpdateAll(){
+void cisstOpenNI::Update(int type){
     
-    // Query the context
-    Data->context.WaitAndUpdateAll();
+    
+    // Query the context based on type
+    if(type == WAIT_NONE_UPDATE_ALL)
+        Data->context.WaitNoneUpdateAll();
+    else if(type == WAIT_AND_UPDATE_ALL)
+        Data->context.WaitAndUpdateAll();
+    else if(type == WAIT_ANY_UPDATE_ONE)
+        Data->context.WaitAnyUpdateAll();
+}
+
+void cisstOpenNI::InitSkeletons(){
+
+    cisstOpenNISkeleton* skeleton;
+    for(int i = 0; i<6; i++){
+        skeleton = new cisstOpenNISkeleton(this);
+        skeletons.push_back(skeleton);
+    }
 
 }
 
-vctDynamicMatrix<double> cisstOpenNI::GetDepthImage(){
+void cisstOpenNI::GetDepthImageRaw(vctDynamicMatrix<double> & placeHolder){
 
     // Get data
     xn::DepthMetaData depthMD;
     Data->depthgenerator.GetMetaData( depthMD );
     const XnDepthPixel* pDepth = depthMD.Data();
 
-    vctDynamicMatrix<double> depthimage( depthMD.YRes(), depthMD.XRes() );
-    double* ptr = depthimage.Pointer();
-    for( size_t i=0; i<depthMD.YRes()*depthMD.XRes(); i++ )
-    { ptr[i] =  pDepth[i] / 1000.0; }
+    placeHolder.SetSize( depthMD.YRes(), depthMD.XRes() );
+    double* ptr = placeHolder.Pointer();
+    const size_t end = depthMD.YRes()*depthMD.XRes();
+    for( size_t i = 0; i < end; i++ )
+    {
+        (*ptr) = (*pDepth);
+        ptr++; pDepth++;
+    }
+}
 
-    return depthimage;
+void cisstOpenNI::GetDepthImage(vctDynamicMatrix<double> & placeHolder){
 
+    // Get data
+    xn::DepthMetaData depthMD;
+    Data->depthgenerator.GetMetaData( depthMD );
+    const XnDepthPixel* pDepth = depthMD.Data();
+
+    placeHolder.SetSize( depthMD.YRes(), depthMD.XRes() );
+    double* ptr = placeHolder.Pointer();
+    const size_t end = depthMD.YRes()*depthMD.XRes();
+    for( size_t i = 0; i < end; i++ )
+    {
+        (*ptr) =  255.0 * (*pDepth) / 2048.0;
+        ptr++; pDepth++;
+    }
 }
 
 vctDynamicMatrix<double> cisstOpenNI::GetRangeData(){
@@ -301,11 +233,11 @@ vctDynamicNArray<unsigned char,3> cisstOpenNI::GetRGBPlanarImage(){
 
 }
 
-std::vector<cisstOpenNISkeleton> cisstOpenNI::UpdateAndGetUserSkeletons(){
+std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
 
     // Initialize Users
-    XnUserID aUsers[15];
-    XnUInt16 nUsers = 15;
+    XnUserID aUsers[6];
+    XnUInt16 nUsers = 6;
     Data->usergenerator.GetUsers(aUsers, nUsers);
 
     if(nUsers > 6) printf("More users than max allowance\n");
@@ -314,59 +246,11 @@ std::vector<cisstOpenNISkeleton> cisstOpenNI::UpdateAndGetUserSkeletons(){
     {
         if (Data->usergenerator.GetSkeletonCap().IsTracking(aUsers[i]))
         {
-            this->skeletons[i].Update(aUsers[i],Data->context, Data->depthgenerator, Data->usergenerator);
+            this->skeletons[i]->Update(aUsers[i]);
         }else{
-            this->skeletons[i].SetExists(false);
+            this->skeletons[i]->SetExists(false);
         }
     }
 
-    return this->skeletons;
-
+    return skeletons;
 }
-
-void cisstOpenNIData::NewUserCallback(  xn::UserGenerator& generator, 
-                                    XnUserID nId)
-{
-    if (this->needPose)
-    {
-        usergenerator.GetPoseDetectionCap().StartPoseDetection(this->strPose, nId);
-    }
-    else
-    {
-        usergenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
-    }
-}
-
-void cisstOpenNIData::UserPoseDetectedCallback( xn::PoseDetectionCapability& capability,
-                                            const XnChar* strPose,
-                                            XnUserID nId)
-{ 
-	usergenerator.GetPoseDetectionCap().StopPoseDetection(nId);
-	usergenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
-}
-
-void cisstOpenNIData::UserCalibrationEndCallback(   xn::SkeletonCapability& capability,
-                                                XnBool bSuccess,  
-                                                XnUserID nId)
-{ 
-	if (bSuccess)
-	{
-		// Calibration succeeded
-		printf("Calibration complete, start tracking user %d\n", nId);
-		usergenerator.GetSkeletonCap().StartTracking(nId);
-	}
-	else
-	{
-		// Calibration failed
-		printf("Calibration failed for user %d\n", nId);
-		if (this->needPose)
-		{
-			usergenerator.GetPoseDetectionCap().StartPoseDetection(this->strPose, nId);
-		}
-		else
-		{
-			usergenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
-		}
-	}
-}
-

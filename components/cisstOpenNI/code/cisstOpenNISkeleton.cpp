@@ -1,26 +1,28 @@
 #include <cisstOpenNI/cisstOpenNISkeleton.h>
+#include <cisstOpenNI/cisstOpenNI.h>
+#include "cisstOpenNIData.h"
 
-cisstOpenNISkeleton::cisstOpenNISkeleton()
+cisstOpenNISkeleton::cisstOpenNISkeleton(cisstOpenNI * openNI)
 {
 
     points3D.resize(25);
     points2D.resize(25);
     confidence.resize(25);
 
+    this->OpenNI = openNI;
+
+
 }
 
 cisstOpenNISkeleton::~cisstOpenNISkeleton(){}
 
-void cisstOpenNISkeleton::Update(XnUserID id,
-                                xn::Context &context,
-                                xn::DepthGenerator &depthgenerator,
-                                xn::UserGenerator &usergenerator)
+void cisstOpenNISkeleton::Update(int id)
 {
 
     for(int i = 1; i < points3D.size();i++){
         XnSkeletonJointPosition pos;
         XnSkeletonJoint joint = XnSkeletonJoint(i);
-        usergenerator.GetSkeletonCap().GetSkeletonJointPosition(id,joint,pos);
+        this->OpenNI->Data->usergenerator.GetSkeletonCap().GetSkeletonJointPosition(id,joint,pos);
 
         if (pos.fConfidence < 0.5 || pos.fConfidence < 0.5)
         {
@@ -41,7 +43,7 @@ void cisstOpenNISkeleton::Update(XnUserID id,
 
             XnPoint3D tempPt[1];
             tempPt[0] = pos.position;
-            depthgenerator.ConvertRealWorldToProjective(1, tempPt, tempPt);
+            this->OpenNI->Data->depthgenerator.ConvertRealWorldToProjective(1, tempPt, tempPt);
 
             points2D[joint][0] = tempPt[0].X;
             points2D[joint][1] = tempPt[0].Y;

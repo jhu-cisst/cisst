@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <cisstCommon/cmnXMLPath.h>
 
 class cmnXMLPathTest: public CppUnit::TestFixture
 {
@@ -30,6 +31,7 @@ class cmnXMLPathTest: public CppUnit::TestFixture
     {
         CPPUNIT_TEST(TestReadExistingFile);
         CPPUNIT_TEST(TestCopyReadExistingFile);
+        CPPUNIT_TEST(TestWrite);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -44,8 +46,12 @@ class cmnXMLPathTest: public CppUnit::TestFixture
     /*! Test read existing file copy */
     void TestCopyReadExistingFile(void);
 
+    /*! Test read existing file and modify */
+    void TestWrite(void);
+
 protected:
-    void TestExistingFile1(const std::string & testFile);
+    void TestExistingFile1(cmnXMLPath & xmlPath, const std::string & schemaFile);
+    void TestModifiedFile1(cmnXMLPath & xmlPath, const std::string & schemaFile);
 };
 
 

@@ -1453,3 +1453,91 @@ void svlConverter::YUV422PtoRGB24(unsigned char* input, unsigned char* output, c
     }
 }
 
+void svlConverter::UYVYtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1, bool ch2, bool ch3)
+{
+    const unsigned int pixelcounthalf = pixelcount >> 1;
+    unsigned char *y1, *y2, *u, *v, *r1, *g1, *b1, *r2, *g2, *b2;
+    int ty1, ty2, tv1, tv2, tu1, tu2, res;
+
+    u  = input;
+    y1 = u  + 1;
+    v  = y1 + 1;
+    y2 = v  + 1;
+
+    b1 = output;
+    g1 = b1 + 1;
+    r1 = g1 + 1;
+    b2 = r1 + 1;
+    g2 = b2 + 1;
+    r2 = g2 + 1;
+
+    for (unsigned int i = 0; i < pixelcounthalf; i ++) {
+        tu1 = *u;
+        tu1 -= 128;
+
+        tv1 = *v;
+        tv1 -= 128;
+
+        ty1 = *y1;
+        ty1 -= 16;
+        ty1 *= 298;
+
+        ty2 = *y2;
+        ty2 -= 16;
+        ty2 *= 298;
+
+        tu2 = tu1 * 517;
+
+        if (ch3) {
+            res = (ty1 + tu2) >> 8;
+            if (res > 255) res = 255;
+            else if (res < 0) res = 0;
+            *b1 = static_cast<unsigned char>(res);
+            res = (ty2 + tu2) >> 8;
+            if (res > 255) res = 255;
+            else if (res < 0) res = 0;
+            *b2 = static_cast<unsigned char>(res);
+        }
+
+        tu2 = tu1 * 100;
+        tv2 = tv1 * 208;
+        tv2 -= tu2;
+
+        if (ch2) {
+            res = (ty1 - tv2) >> 8;
+            if (res > 255) res = 255;
+            else if (res < 0) res = 0;
+            *g1 = static_cast<unsigned char>(res);
+            res = (ty2 - tv2) >> 8;
+            if (res > 255) res = 255;
+            else if (res < 0) res = 0;
+            *g2 = static_cast<unsigned char>(res);
+        }
+
+        tv2 = tv1 * 409;
+
+        if (ch1) {
+            res = (ty1 + tv2) >> 8;
+            if (res > 255) res = 255;
+            else if (res < 0) res = 0;
+            *r1 = static_cast<unsigned char>(res);
+            res = (ty2 + tv2) >> 8;
+            if (res > 255) res = 255;
+            else if (res < 0) res = 0;
+            *r2 = static_cast<unsigned char>(res);
+        }
+
+        y1 += 4;
+        u += 4;
+        y2 += 4;
+        v += 4;
+
+        r1 += 6;
+        g1 += 6;
+        b1 += 6;
+        r2 += 6;
+        g2 += 6;
+        b2 += 6;
+    }
+}
+

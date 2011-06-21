@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,6 +51,12 @@ http://www.cisst.org/cisst/license.txt.
 
 // Using XML or not
 #cmakedefine01 CISST_HAS_XML
+
+// Using libxml2 for cmnXMLPath
+#cmakedefine01 CISST_HAS_LIBXML2_XML
+
+// Using Qt XML for cmnXMLPath
+#cmakedefine01 CISST_HAS_QT_XML
 
 // Using IRE (and Swig/Python) or not
 #cmakedefine01 CISST_HAS_IRE

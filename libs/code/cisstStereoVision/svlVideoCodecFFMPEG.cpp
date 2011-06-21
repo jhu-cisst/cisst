@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define __STDC_CONSTANT_MACROS
 
 #include "svlVideoCodecFFMPEG.h"
-
+#include <cisstCommon/cmnGetChar.h>
 
 //#define __FFMPEG_VERBOSE__
 
@@ -86,9 +86,11 @@ svlVideoCodecFFMPEG::svlVideoCodecFFMPEG() :
     BuildEncoderList();
 
     // Set default compression settings
-    Config.EncoderID = 0;
-    Config.Bitrate   = 4000;
-    Config.GoP       = 30;
+    Config.EncoderID       = 0;
+    Config.QualityBased    = false;
+    Config.TargetQuantizer = 3.0;
+    Config.Bitrate         = 4000;
+    Config.GoP             = 30;
 
     ProcInfoSingleThread.count = 1;
     ProcInfoSingleThread.ID    = 0;
@@ -102,7 +104,7 @@ svlVideoCodecFFMPEG::~svlVideoCodecFFMPEG()
 int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
 {
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "Open: codec is already open" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Open - codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
@@ -115,12 +117,12 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
 
         // Open video file
         if (av_open_input_file(&pFormatCtx, filename.c_str(), 0, 0, 0) != 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to open file: " << filename << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Open - failed to open file: " << filename << std::endl;
             break;
         }
         // Retrieve stream information
         if (av_find_stream_info(pFormatCtx) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to find stream info" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Open - failed to find stream info" << std::endl;
             break;
         }
 
@@ -138,7 +140,7 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
             }
         }
         if (VideoStreamID < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to find a video stream" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Open - failed to find a video stream" << std::endl;
             break;
         }
 
@@ -148,13 +150,13 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
         // Find the decoder for the video stream
         av_codec = avcodec_find_decoder(pDecoderCtx->codec_id);
         if(av_codec == 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Open: unsupported video codec" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Open - unsupported video codec" << std::endl;
             break;
         }
 
         // Open codec
         if(avcodec_open(pDecoderCtx, av_codec) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Open: failed to open FFMPEG decoder" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Open - failed to open FFMPEG decoder" << std::endl;
             break;
         }
 
@@ -245,24 +247,24 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
 int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int width, const unsigned int height, const double framerate)
 {
 	if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: codec is already open" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Create - codec is already open" << std::endl;
         return SVL_FAIL;
     }
     if (width < 1 || width > MAX_DIMENSION || height < 1 || height > MAX_DIMENSION) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: invalid image dimensions" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Create - invalid image dimensions" << std::endl;
         return SVL_FAIL;
     }
     if ((width % 2) != 0 || (height % 2) != 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: width and height must be multiples of 2" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Create - width and height must be multiples of 2" << std::endl;
         return SVL_FAIL;
     }
     double _framerate = framerate;
     if (_framerate < 0.1) {
-        CMN_LOG_CLASS_INIT_WARNING << "Create: invalid framerate; using default setting (30.0) instead" << std::endl;
+        CMN_LOG_CLASS_INIT_WARNING << "Create - invalid framerate; using default setting (30.0) instead" << std::endl;
         _framerate = 30.0;
     }
     if (Config.EncoderID >= EncoderIDs.size()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: invalid encoder" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Create - invalid encoder" << std::endl;
         return SVL_FAIL;
     }
 
@@ -281,24 +283,24 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
         AVOutputFormat *output_format = av_guess_format("avi", NULL, NULL);
 #endif
         if (!output_format) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to allocate output format" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to allocate output format" << std::endl;
             break;
         }
         if (output_format->flags & AVFMT_NOFILE) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: format doesn't require file to be created" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - format doesn't require file to be created" << std::endl;
             break;
         }
 
         pFormatCtx = avformat_alloc_context();
         if (!pFormatCtx) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to allocate format context" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to allocate format context" << std::endl;
             break;
         }
         pFormatCtx->oformat = output_format;
 
         pStream = av_new_stream(pFormatCtx, 0);
         if (!pStream || !pStream->codec) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to allocate video stream" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to allocate video stream" << std::endl;
             break;
         }
         pEncoderCtx = pStream->codec;
@@ -320,17 +322,17 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
 
         av_codec = avcodec_find_encoder(pEncoderCtx->codec_id);
         if (!av_codec) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to find video encoder (" << EncoderNames[Config.EncoderID] << ")" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to find video encoder (" << EncoderNames[Config.EncoderID] << ")" << std::endl;
             break;
         }
 
         if (avcodec_open(pEncoderCtx, av_codec) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to open encoder" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to open encoder" << std::endl;
             break;
         }
 
         if (av_set_parameters(pFormatCtx, 0) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: invalid output format parameters" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - invalid output format parameters" << std::endl;
             break;
         }
 
@@ -341,12 +343,12 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
 #endif // __FFMPEG_VERBOSE__
 
         if (url_fopen(&pFormatCtx->pb, filename.c_str(), URL_WRONLY) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to create file" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to create file" << std::endl;
             break;
         }
 
         if (av_write_header(pFormatCtx) != 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write file header" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create - failed to write file header" << std::endl;
             break;
         }
 
@@ -490,15 +492,15 @@ int svlVideoCodecFFMPEG::GetPos() const
 int svlVideoCodecFFMPEG::SetPos(const int pos)
 {
     if (!Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetPos: file has not been opened yet" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetPos - file has not been opened yet" << std::endl;
         return SVL_FAIL;
     }
     if (Writing) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetPos: file is open for writing" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetPos - file is open for writing" << std::endl;
         return SVL_FAIL;
     }
     if (Length < 1) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetPos: seeking not supported" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetPos - seeking not supported" << std::endl;
         return SVL_FAIL;
     }
 
@@ -535,7 +537,7 @@ int svlVideoCodecFFMPEG::SetPos(const int pos)
     if (!UseIndex || KeyFrameIndex[_pos] == _pos) {
         if (av_seek_frame(pFormatCtx, VideoStreamID, _pos * Framestep,
                           AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_ANY | AVSEEK_FLAG_FRAME) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "SetPos: failed while seeking to position: " << _pos << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "SetPos - failed while seeking to position: " << _pos << std::endl;
             CS.Leave();
             return SVL_FAIL;
         }
@@ -547,7 +549,7 @@ int svlVideoCodecFFMPEG::SetPos(const int pos)
         // Seek back to the closest key-frame
         if (av_seek_frame(pFormatCtx, VideoStreamID, KeyFrameIndex[_pos],
                           AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME) < 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "SetPos: failed while seeking to key-frame position: " << KeyFrameIndex[_pos] << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "SetPos - failed while seeking to key-frame position: " << KeyFrameIndex[_pos] << std::endl;
             CS.Leave();
             return SVL_FAIL;
         }
@@ -592,7 +594,7 @@ int svlVideoCodecFFMPEG::SetPos(const int pos)
             }
 
             if (error) {
-                CMN_LOG_CLASS_INIT_ERROR << "SetPos: failed while reconstructing non-key-frame: " << _pos << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "SetPos - failed while reconstructing non-key-frame: " << _pos << std::endl;
                 CS.Leave();
                 return SVL_FAIL;
             }
@@ -618,7 +620,7 @@ svlVideoIO::Compression* svlVideoCodecFFMPEG::GetCompression() const
     }
     else {
         unsigned int size = sizeof(svlVideoIO::Compression) - sizeof(unsigned char) + sizeof(CompressionData);
-        svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
+        compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
 
         // Output settings
         CompressionData* output_data = reinterpret_cast<CompressionData*>(&(compression->data[0]));
@@ -633,9 +635,11 @@ svlVideoIO::Compression* svlVideoCodecFFMPEG::GetCompression() const
         compression->datasize = sizeof(CompressionData);
 
         // CVI specific settings
-        output_data->EncoderID = Config.EncoderID;
-        output_data->Bitrate   = Config.Bitrate;
-        output_data->GoP       = Config.GoP;
+        output_data->EncoderID       = Config.EncoderID;
+        output_data->QualityBased    = Config.QualityBased;
+        output_data->TargetQuantizer = Config.TargetQuantizer;
+        output_data->Bitrate         = Config.Bitrate;
+        output_data->GoP             = Config.GoP;
     }
 
     return compression;
@@ -657,7 +661,7 @@ int svlVideoCodecFFMPEG::SetCompression(const svlVideoIO::Compression *compressi
     std::string extension(_ext);
     extension += ";";
     if (extensionlist.find(extension) == std::string::npos) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetCompression: codec parameters do not match this codec" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompression - codec parameters do not match this codec" << std::endl;
         return SVL_FAIL;
     }
 
@@ -684,12 +688,23 @@ int svlVideoCodecFFMPEG::SetCompression(const svlVideoIO::Compression *compressi
     else {
         local_data->EncoderID = Config.EncoderID;
     }
+
+    Config.QualityBased = local_data->QualityBased = input_data->QualityBased;
+
+    if (input_data->TargetQuantizer >= 1.0 && input_data->TargetQuantizer <= 10.0) {
+        Config.TargetQuantizer = local_data->TargetQuantizer = input_data->TargetQuantizer;
+    }
+    else {
+        local_data->TargetQuantizer = Config.TargetQuantizer;
+    }
+
     if (input_data->Bitrate >= 100 && input_data->Bitrate <= 100000) {
         Config.Bitrate = local_data->Bitrate = input_data->Bitrate;
     }
     else {
         local_data->Bitrate = Config.Bitrate;
     }
+
     if (input_data->GoP >= 1 && input_data->GoP <= 300) {
         Config.GoP = local_data->GoP = input_data->GoP;
     }
@@ -703,7 +718,7 @@ int svlVideoCodecFFMPEG::SetCompression(const svlVideoIO::Compression *compressi
 int svlVideoCodecFFMPEG::DialogCompression()
 {
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: codec is already open" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression - codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
@@ -740,7 +755,7 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &filename)
     if (filename.empty()) return DialogCompression();
 
     if (Opened) {
-        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression: codec is already open" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "DialogCompression - codec is already open" << std::endl;
         return SVL_FAIL;
     }
 
@@ -751,73 +766,73 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &filename)
     vctDynamicVector<unsigned int> encoder_list(EncoderIDs.size());
 
     if (extension == "mpg" || extension == "mpeg") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG1VIDEO);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG2VIDEO);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MPEG1VIDEO);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MPEG2VIDEO);
     }
     else if (extension == "avi") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG4);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MSMPEG4V2);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MSMPEG4V3);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_DVVIDEO);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MJPEG);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_HUFFYUV);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FFV1);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H261);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H263);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_LJPEG);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_JPEGLS);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RAWVIDEO);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MSMPEG4V1);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H263P);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H264);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ZLIB);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_SNOW);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_PNG);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_PPM);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_PBM);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_PGM);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_PGMYUV);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_PAM);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FFVHUFF);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_BMP);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ZMBV);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_TARGA);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_TIFF);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MPEG4);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MSMPEG4V2);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MSMPEG4V3);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_DVVIDEO);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MJPEG);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_HUFFYUV);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_FFV1);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_H261);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_H263);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_LJPEG);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_JPEGLS);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_RAWVIDEO);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MSMPEG4V1);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_H263P);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_H264);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_ZLIB);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_SNOW);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_PNG);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_PPM);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_PBM);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_PGM);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_PGMYUV);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_PAM);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_FFVHUFF);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_BMP);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_ZMBV);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_TARGA);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_TIFF);
     }
     else if (extension == "ogg") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_THEORA);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_THEORA);
     }
     else if (extension == "dv") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_DVVIDEO);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_DVVIDEO);
     }
     else if (extension == "wmv") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_WMV1);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_WMV2);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_WMV1);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_WMV2);
     }
     else if (extension == "flv") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FLV1);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_SVQ1);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_FLASHSV);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_FLV1);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_SVQ1);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_FLASHSV);
     }
     else if (extension == "rv") {
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RV10);
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_RV20);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_RV10);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_RV20);
     }
     else if (extension == "asv") {
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ASV1);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ASV2);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_ASV1);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_ASV2);
     }
     else if (extension == "roq") {
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_ROQ);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_ROQ);
     }
     else if (extension == "mov") {
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_QTRLE);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_DVVIDEO);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MPEG4);
-        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_MJPEG);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_QTRLE);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_DVVIDEO);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MPEG4);
+        encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_MJPEG);
     }
     else if (extension == "m4v" || extension == "mp4") {
-//        encoder_list[encoder_count ++] = GetEncoderID(CODEC_ID_H264);
+//      encoder_list[encoder_count ++] = GetFFMPEGEncoderID(CODEC_ID_H264);
     }
 
     if (encoder_count < 1) {
@@ -854,30 +869,59 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &extension, unsigne
     std::cout << " Encoder selected: " << EncoderNames[encoder_id] << std::endl;
 
     char input[256];
-    int min, max, defaultval;
-    int bitrate = 0, gop = 0;
+    int min, max, defaultval, ival;
+    bool   quality_based = false;
+    double target_q      = Config.TargetQuantizer;
+    int    bitrate       = Config.Bitrate;
+    int    gop           = Config.GoP;
 
-    min = 100; max = 100000; defaultval = 4000;
-    std::cout << " # Enter bitrate [kbps] (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
-    std::cin.getline(input, 256);
-    if (std::cin.gcount() > 1) {
-        bitrate = atoi(input);
-        if (bitrate < min) bitrate = min;
-        if (bitrate > max) bitrate = max;
+    std::cout << " # Enable quality based compression ('y' or other): ";
+    ival = cmnGetChar();
+    if (ival == 'y' || ival == 'Y') {
+        quality_based = true;
+        std::cout << "YES" << std::endl;
     }
-    else bitrate = defaultval;
-    std::cout << "    Bitrate = " << bitrate << std::endl;
+    else {
+        quality_based = false;
+        std::cout << "NO" << std::endl;
+    }
 
-    min = 1; max = 300; defaultval = 30;
-    std::cout << " # Enter GoP size [every Nth frame is keyframe] (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
-    std::cin.getline(input, 256);
-    if (std::cin.gcount() > 1) {
-        gop = atoi(input);
-        if (gop < min) gop = 0;
-        if (gop > max) gop = max;
+    if (quality_based) {
+        min = 1; max = 10; defaultval = 3;
+        std::cout << " # Enter target quantizer (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
+        std::cin.getline(input, 256);
+        if (std::cin.gcount() > 1) {
+            ival = atoi(input);
+            if (ival < min) ival = min;
+            if (ival > max) ival = max;
+        }
+        else ival = defaultval;
+        std::cout << "    Target quantizer = " << ival << std::endl;
+        target_q = static_cast<double>(ival);
     }
-    else gop = defaultval;
-    std::cout << "    GoP size = " << std::max(1, gop) << std::endl;
+    else {
+        min = 100; max = 100000; defaultval = 4000;
+        std::cout << " # Enter bitrate [kbps] (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
+        std::cin.getline(input, 256);
+        if (std::cin.gcount() > 1) {
+            bitrate = atoi(input);
+            if (bitrate < min) bitrate = min;
+            if (bitrate > max) bitrate = max;
+        }
+        else bitrate = defaultval;
+        std::cout << "    Bitrate = " << bitrate << std::endl;
+
+        min = 1; max = 300; defaultval = 30;
+        std::cout << " # Enter GoP size [every Nth frame is keyframe] (min=" << min << "; max=" << max << "; default=" << defaultval << "): ";
+        std::cin.getline(input, 256);
+        if (std::cin.gcount() > 1) {
+            gop = atoi(input);
+            if (gop < min) gop = 0;
+            if (gop > max) gop = max;
+        }
+        else gop = defaultval;
+        std::cout << "    GoP size = " << std::max(1, gop) << std::endl;
+    }
 
     svlVideoIO::ReleaseCompression(Codec);
     unsigned int size = sizeof(svlVideoIO::Compression) - sizeof(unsigned char) + sizeof(CompressionData);
@@ -896,9 +940,11 @@ int svlVideoCodecFFMPEG::DialogCompression(const std::string &extension, unsigne
     Codec->datasize = sizeof(CompressionData);
 
     // FFMPEG specific settings
-    Config.EncoderID = local_data->EncoderID = encoder_id;
-    Config.Bitrate   = local_data->Bitrate   = bitrate;
-    Config.GoP       = local_data->GoP       = gop;
+    Config.EncoderID       = local_data->EncoderID       = encoder_id;
+    Config.QualityBased    = local_data->QualityBased    = quality_based;
+    Config.TargetQuantizer = local_data->TargetQuantizer = target_q;
+    Config.Bitrate         = local_data->Bitrate         = bitrate;
+    Config.GoP             = local_data->GoP             = gop;
 
     return SVL_OK;
 }
@@ -914,11 +960,11 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
     if (!procInfo) procInfo = &ProcInfoSingleThread;
 
     if (videoch >= image.GetVideoChannels()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Read - (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
     }
     if (!Opened || Writing) {
-        CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") file needs to be opened for reading" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Read - (thread=" << procInfo->ID << ") file needs to be opened for reading" << std::endl;
         return SVL_FAIL;
     }
 
@@ -928,7 +974,7 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
     // Allocate image buffer if not done yet
     if (Width  != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
         if (noresize) {
-            CMN_LOG_CLASS_INIT_ERROR << "Read: unexpected change in image dimensions" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Read - unexpected change in image dimensions" << std::endl;
             return SVL_FAIL;
         }
         image.SetSize(videoch, Width, Height);
@@ -965,11 +1011,11 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
                     Length = Position;
                     CS.Leave();
                     SetPos(0);
-                    CMN_LOG_CLASS_INIT_WARNING << "Read: unexpected end-of-file" << std::endl;
+                    CMN_LOG_CLASS_INIT_WARNING << "Read - unexpected end-of-file" << std::endl;
                     return SVL_VID_END_REACHED;
                 }
                 else {
-                    CMN_LOG_CLASS_INIT_ERROR << "Read: failed to extract frame" << std::endl;
+                    CMN_LOG_CLASS_INIT_ERROR << "Read - failed to extract frame" << std::endl;
                 }
                 break;
             }
@@ -981,7 +1027,7 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
 // libAVCodec version >= 52.25.0
             if (avcodec_decode_video2(pDecoderCtx, pFrame, &frameFinished, &packet) < 0) {
 #endif
-                CMN_LOG_CLASS_INIT_ERROR << "Read: failed to decode video frame" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Read - failed to decode video frame" << std::endl;
                 av_free_packet(&packet);
                 break;
             }
@@ -1028,15 +1074,15 @@ int svlVideoCodecFFMPEG::Write(svlProcInfo* procInfo, const svlSampleImage &imag
     if (!procInfo) procInfo = &ProcInfoSingleThread;
 
     if (videoch >= image.GetVideoChannels()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write - (thread=" << procInfo->ID << ") video channel out of range: " << videoch << std::endl;
         return SVL_FAIL;
     }
     if (!Opened || !Writing) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") file needs to be opened for writing" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write - (thread=" << procInfo->ID << ") file needs to be opened for writing" << std::endl;
         return SVL_FAIL;
     }
 	if (Width != image.GetWidth(videoch) || Height != image.GetHeight(videoch)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Write: (thread=" << procInfo->ID << ") unexpected change in image dimensions" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write - (thread=" << procInfo->ID << ") unexpected change in image dimensions" << std::endl;
         return SVL_FAIL;
     }
 
@@ -1107,6 +1153,336 @@ int svlVideoCodecFFMPEG::Write(svlProcInfo* procInfo, const svlSampleImage &imag
     }
 
     return SVL_FAIL;
+}
+
+void svlVideoCodecFFMPEG::SetExtension(const std::string & extension)
+{
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetExtension - codec is already open" << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetExtension - called (\"" << extension << "\")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+
+    memset(&(compr->extension[0]), 0, 16);
+    memcpy(&(compr->extension[0]), extension.c_str(), std::min(static_cast<int>(extension.size()), 15));
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::SetEncoderID(const int & encoder_id)
+{
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetEncoderID - codec is already open" << std::endl;
+        return;
+    }
+    if (encoder_id < 0 || encoder_id >= static_cast<int>(EncoderIDs.size())) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetEncoderID - argument out of range [0, " << EncoderIDs.size() - 1 << "]" << std::endl;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetEncoderID - called (" << encoder_id << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->EncoderID = encoder_id;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::SetCompressionLevel(const int & CMN_UNUSED(compr_level))
+{
+    CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - feature is not supported by the FFMPEG codec" << std::endl;
+}
+
+void svlVideoCodecFFMPEG::SetQualityBased(const bool & enabled)
+{
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetQualityBased - codec is already open" << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetQualityBased - called (" << enabled << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->QualityBased = enabled;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::SetTargetQuantizer(const double & target_quant)
+{
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetTargetQuantizer - codec is already open" << std::endl;
+        return;
+    }
+    if (target_quant < 1.0 || target_quant > 10.0) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetTargetQuantizer - argument out of range [1.0, 10.0]" << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetTargetQuantizer - called (" << std::fixed << target_quant << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->TargetQuantizer = target_quant;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::SetDatarate(const int & datarate)
+{
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetDatarate - codec is already open" << std::endl;
+        return;
+    }
+    if (datarate < 100 || datarate > 100000) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetDatarate - argument out of range [100, 100000]" << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetDatarate - called (" << datarate << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->Bitrate = datarate;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::SetKeyFrameEvery(const int & key_every)
+{
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetKeyFrameEvery - codec is already open" << std::endl;
+        return;
+    }
+    if (key_every < 1 || key_every > 300) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetKeyFrameEvery - argument out of range [1, 300]" << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetKeyFrameEvery - called (" << key_every << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->GoP = key_every;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::IsCompressionLevelEnabled(bool & enabled) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsCompressionLevelEnabled - called" << std::endl;
+    enabled = false;
+}
+
+void svlVideoCodecFFMPEG::IsEncoderListEnabled(bool & enabled) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsEncoderListEnabled - called" << std::endl;
+    enabled = true;
+}
+
+void svlVideoCodecFFMPEG::IsTargetQuantizerEnabled(bool & enabled) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsTargetQuantizerEnabled - called" << std::endl;
+    enabled = true;
+}
+
+void svlVideoCodecFFMPEG::IsDatarateEnabled(bool & enabled) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsDatarateEnabled - called" << std::endl;
+    enabled = true;
+}
+
+void svlVideoCodecFFMPEG::IsKeyFrameEveryEnabled(bool & enabled) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsFramesEveryEnabled - called" << std::endl;
+    enabled = true;
+}
+
+void svlVideoCodecFFMPEG::GetCompressionLevel(int & compr_level) const
+{
+    CMN_LOG_CLASS_INIT_ERROR << "GetCompressionLevel - feature is not supported by the FFMPEG codec" << std::endl;
+    compr_level = -1;
+}
+
+void svlVideoCodecFFMPEG::GetEncoderList(std::string & encoder_list) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetEncoderList - called" << std::endl;
+
+    // Extract current extension field
+    svlVideoIO::Compression* compr = GetCompression();
+    std::string extension = compr->extension;
+    svlVideoIO::ReleaseCompression(compr);
+
+    int encid;
+    std::stringstream strstr;
+
+    if (extension.empty()) {
+
+        const unsigned int encoder_count = EncoderIDs.size();
+        if (encoder_count > 0) {
+            for (unsigned int i = 0; i < encoder_count; i ++) {
+                strstr << i << ":" << EncoderNames[i] << "\n";
+            }
+        }
+        else {
+            strstr << ":\n";
+        }
+
+    }
+    else {
+
+        if (extension == "mpg" || extension == "mpeg") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_MPEG1VIDEO); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_MPEG2VIDEO); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "avi") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_MPEG4); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_MSMPEG4V2); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_MSMPEG4V3); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_DVVIDEO); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_MJPEG); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_HUFFYUV); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_FFV1); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_H261); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_H263); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_LJPEG); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_JPEGLS); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_RAWVIDEO); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_MSMPEG4V1); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_H263P); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_H264); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_ZLIB); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_SNOW); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PNG); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PPM); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PBM); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PGM); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PGMYUV); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PAM); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_FFVHUFF); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_PGMYUV); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_BMP); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_ZMBV); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_TARGA); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_TIFF); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "ogg") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_THEORA); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "dv") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_DVVIDEO); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "wmv") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_WMV1); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_WMV2); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "flv") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_FLV1); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_SVQ1); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_FLASHSV); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "rv") {
+//          encid = GetFFMPEGEncoderID(CODEC_ID_RV10); strstr << encid << ":" << EncoderNames[encid] << "\n";
+//          encid = GetFFMPEGEncoderID(CODEC_ID_RV20); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            strstr << ":\n";
+        }
+        else if (extension == "asv") {
+            encid = GetFFMPEGEncoderID(CODEC_ID_ASV1); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_ASV2); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "roq") {
+//          encid = GetFFMPEGEncoderID(CODEC_ID_ROQ); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            strstr << ":\n";
+        }
+        else if (extension == "mov") {
+//          encid = GetFFMPEGEncoderID(CODEC_ID_QTRLE); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_DVVIDEO); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_MPEG4); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            encid = GetFFMPEGEncoderID(CODEC_ID_MJPEG); strstr << encid << ":" << EncoderNames[encid] << "\n";
+        }
+        else if (extension == "m4v" || extension == "mp4") {
+//          encid = GetFFMPEGEncoderID(CODEC_ID_H264); strstr << encid << ":" << EncoderNames[encid] << "\n";
+            strstr << ":\n";
+        }
+
+    }
+
+    encoder_list = strstr.str();
+}
+
+void svlVideoCodecFFMPEG::GetEncoderID(int & encoder_id) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetEncoderID - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    encoder_id = data->EncoderID;
+
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::GetQualityBased(bool & enabled) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetQualityBased - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    enabled = data->QualityBased;
+
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::GetTargetQuantizer(double & target_quant) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetTargetQuantizer - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    target_quant = data->TargetQuantizer;
+
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::GetDatarate(int & datarate) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetDatarate - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    datarate = data->Bitrate;
+
+    svlVideoIO::ReleaseCompression(compr);
+}
+
+void svlVideoCodecFFMPEG::GetKeyFrameEvery(int & key_every) const
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetKeyFrameEvery - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    key_every = data->GoP;
+
+    svlVideoIO::ReleaseCompression(compr);
 }
 
 void svlVideoCodecFFMPEG::BuildIndex()
@@ -1252,7 +1628,7 @@ void svlVideoCodecFFMPEG::BuildEncoderList()
     EncoderIDs.resize(encoder_count);
 }
 
-int svlVideoCodecFFMPEG::GetEncoderID(CodecID codec_id)
+int svlVideoCodecFFMPEG::GetFFMPEGEncoderID(CodecID codec_id) const
 {
     for (unsigned int i = 0; i < EncoderIDs.size(); i ++) {
         if (EncoderIDs[i] == static_cast<unsigned int>(codec_id)) return i;

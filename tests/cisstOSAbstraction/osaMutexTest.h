@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2008-01-30
-  
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,31 +19,32 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
-
-#include <cisstOSAbstraction/osaMutex.h>
 
 class osaMutexTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(osaMutexTest);
-    CPPUNIT_TEST(TestMutexInternalsSize);
-    CPPUNIT_TEST(TestLockBlocks);
+    {
+        CPPUNIT_TEST(TestMutexInternalsSize);
+        CPPUNIT_TEST(TestMutexLockBlocks);
+        CPPUNIT_TEST(TestCriticalSectionInternalsSize);
+        CPPUNIT_TEST(TestCriticalSectionLockBlocks);
+    }
     CPPUNIT_TEST_SUITE_END();
-    
- public:
+
+public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
     /*! Test that structure for internal size is large enough */
     void TestMutexInternalsSize(void);
+    void TestCriticalSectionInternalsSize(void);
 
     /*! Check that locks do block */
-    void TestLockBlocks(void);
+    void TestMutexLockBlocks(void);
+    void TestCriticalSectionLockBlocks(void);
 };
-
-

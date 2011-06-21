@@ -27,6 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 
+#if (CISST_OS == CISST_WINDOWS)
+#include <windows.h>
+#endif 
+
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 

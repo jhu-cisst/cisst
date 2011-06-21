@@ -73,7 +73,7 @@ class CISST_EXPORT robLink {
      mass (1 double): The mass of the body
      center of mass (3 double): \f$ \begin{matrix}x&y&z\end{matrix} \f$
      principal moment of inertia (3 double): 
-                          \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{matrix} \f$
+                          \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{bmatrix} \f$
      body principal axis (9 double): 
   */
   robLink::Errno Read( std::istream& is );

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cniExKinectTest.cpp 2378 2011-03-14 04:27:41Z pkazanz1 $
+  $Id$
 
   Author(s):  Kelleher Guerin and Simon Leonard
   Created on: 2008
@@ -36,11 +36,11 @@ int main(){
 	while(true){
         
         // Wait and Update All
-        kinect.UpdateAll();
-		vctDynamicMatrix<double> depth = kinect.GetDepthImage();
+        kinect.Update(WAIT_NONE_UPDATE_ALL);
+		//vctDynamicMatrix<double> depth = kinect.GetDepthImage8bit();
 		vctDynamicMatrix<unsigned char> rgb = kinect.GetRGBImage();
 		vctDynamicMatrix<double> range = kinect.GetRangeData();
-        std::vector<cisstOpenNISkeleton> skeletons = kinect.UpdateAndGetUserSkeletons();
+        std::vector<cisstOpenNISkeleton*> skeletons = kinect.UpdateAndGetUserSkeletons();
 
 		osaSleep(10*cmn_ms);
 	}

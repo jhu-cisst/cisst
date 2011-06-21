@@ -42,15 +42,3 @@ CMN_IMPLEMENT_SERVICES(cmnPath);
 
 #include <cisstCommon/cmnSerializer.h>
 CMN_IMPLEMENT_SERVICES(cmnSerializer);
-
-
-/* ----------- config dependent ------------- */
-
-#include <cisstConfig.h>
-
-#if CISST_HAS_XML
-
-  #include <cisstCommon/cmnXMLPath.h>
-  CMN_IMPLEMENT_SERVICES(cmnXMLPath);
-
-#endif // CISST_HAS_XML

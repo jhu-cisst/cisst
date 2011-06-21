@@ -22,6 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageOpenGL.h>
 
+#if (CISST_OS == CISST_WINDOWS)
+  #include <windows.h>
+#endif
+
 #if (CISST_OS == CISST_DARWIN)
   #include <OpenGL/gl.h>
 #else
@@ -122,12 +126,8 @@ int svlFilterImageOpenGL::Initialize(svlSample * syncInput, svlSample* &syncOutp
 {
     Release();
 
-    Image = dynamic_cast<svlSampleImage*>(svlSampleImage::GetNewFromType(syncInput->GetType()));
-    svlSampleImage * imagePointer = dynamic_cast<svlSampleImage*>(syncInput);
-
-    for (size_t i = 0; i < Image->GetVideoChannels(); i++) {
-        Image->SetSize(i, imagePointer->GetWidth(), imagePointer->GetHeight());
-    }
+    Image = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
+    Image->SetSize(syncInput);
 
     syncOutput = syncInput;
 
@@ -138,17 +138,11 @@ int svlFilterImageOpenGL::Initialize(svlSample * syncInput, svlSample* &syncOutp
 int svlFilterImageOpenGL::Process(svlProcInfo * procInfo, svlSample * syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
-    _SkipIfAlreadyProcessed(syncInput, syncOutput);
     _SkipIfDisabled();
-
-    svlSampleImage * imagePointer = dynamic_cast<svlSampleImage*>(syncInput);
-    const size_t videochannels = imagePointer->GetVideoChannels();
 
     _OnSingleThread(procInfo)
     {
-        for (size_t i = 0; i < videochannels; i++) {
-            memcpy(Image->GetUCharPointer(i), imagePointer->GetUCharPointer(i), Image->GetDataSize(i));
-        }
+        Image->CopyOf(syncInput);
         std::cerr << "end of svl process" << std::endl;
         PostProcess();
     }
@@ -200,3 +194,4 @@ void svlFilterImageOpenGL::CheckGLError(const std::string & functionName)
         }
     }
 }
+

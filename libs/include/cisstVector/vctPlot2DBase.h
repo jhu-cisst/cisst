@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstOSAbstraction.h>
 
 // Always include last
 #include <cisstVector/vctExport.h>

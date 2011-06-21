@@ -561,6 +561,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
             svlVideoCodecCVI.cpp
             svlVideoCodecTCPStream.h        # private header
             svlVideoCodecTCPStream.cpp
+            svlVideoCodecUDPStream.h        # private header
+            svlVideoCodecUDPStream.cpp
             )
         MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)
@@ -1244,7 +1246,8 @@ cisst_add_library (
   LIBRARY cisstStereoVision
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
-  HEADER_FILES ${HEADER_FILES})
+  HEADER_FILES ${HEADER_FILES}
+  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
@@ -1256,24 +1259,63 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 
 # Qt widgets
-if (CISST_HAS_OPENGL AND CISST_HAS_QT)
+IF(CISST_HAS_QT)
+    SET(SVL_QT_HEADER_FILES
+        svlQtWorkThread.h
+        svlQtDialog.h
+        svlQtWidgetVideoEncoder.h
+        svlQtWidgetVidCapSrcImageProperties.h
+        )
+    SET(SVL_QT_SOURCE_FILES
+        svlQtWorkThread.cpp
+        svlQtDialog.cpp
+        svlQtWidgetVideoEncoder.cpp
+        svlQtWidgetVidCapSrcImageProperties.cpp
+        )
+    SET(SVL_QT_UI_FILES
+        svlQtWidgetVideoEncoder.ui
+        svlQtWidgetVidCapSrcImageProperties.ui
+        )
 
-  # to include Qt generated files
-  include_directories (${CMAKE_CURRENT_BINARY_DIR})
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../../include/cisstStereoVision/svlFilterImageOpenGLQtWidget.h)
+    IF(CISST_HAS_OPENGL)
+        SET(SVL_QT_HEADER_FILES
+            ${SVL_QT_HEADER_FILES}
+            svlFilterImageOpenGLQtWidget.h
+            )
+        SET(SVL_QT_SOURCE_FILES
+            ${SVL_QT_SOURCE_FILES}
+            svlFilterImageOpenGLQtWidget.cpp
+            )
+    ENDIF(CISST_HAS_OPENGL)
 
-  cisst_add_library (
-    LIBRARY cisstStereoVisionQt
-    LIBRARY_DIR cisstStereoVision
-    DEPENDENCIES cisstCommon
-                 cisstVector
-                 cisstStereoVision
-    SOURCE_FILES svlFilterImageOpenGLQtWidget.cpp
-    HEADER_FILES svlFilterImageOpenGLQtWidget.h
-                 svlExportQt.h
-    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+    # Include Qt generated files
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-  target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+    FOREACH(HEADER ${SVL_QT_HEADER_FILES})
+        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP
+                     ../../include/cisstStereoVision/${HEADER}
+                     )
+    ENDFOREACH(HEADER)
 
-endif (CISST_HAS_OPENGL AND CISST_HAS_QT)
+    FOREACH(UI ${SVL_QT_UI_FILES})
+        QT4_WRAP_UI(SVL_QT_WRAPPED_UI
+                    ${UI}
+                    )
+    ENDFOREACH(UI)
+
+    CISST_ADD_LIBRARY(LIBRARY cisstStereoVisionQt
+                      LIBRARY_DIR cisstStereoVision
+                      DEPENDENCIES cisstCommon
+                                   cisstVector
+                                   cisstStereoVision
+                      SOURCE_FILES ${SVL_QT_SOURCE_FILES}
+                      HEADER_FILES ${SVL_QT_HEADER_FILES}
+                                   svlExportQt.h
+                      ADDITIONAL_SOURCE_FILES ${SVL_QT_WRAPPED_CPP}
+                                              ${SVL_QT_WRAPPED_UI}
+                      )
+
+    TARGET_LINK_LIBRARIES(cisstStereoVisionQt ${QT_LIBRARIES})
+
+ENDIF(CISST_HAS_QT)
+
