@@ -57,12 +57,15 @@ class CISST_EXPORT svlCCCameraCalibration
 
 public:
     svlCCCameraCalibration();
-    bool processImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
+    bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
     svlFilterImageRectifier* getRectifier(){return rectifier;};
     void printCalibrationParameters();
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
     int setBufferSample(svlFilterSourceDummy* source, int index);
+    bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
+    bool runCalibration();
+    int setImageVisibility(int index, int visible);
 
 private:
     double computeReprojectionErrors(
@@ -72,7 +75,7 @@ private:
             const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs,
             std::vector<float>& perViewErrors, bool projected );
     void updateCalibrationGrids();
-    double runCalibration(bool projected);
+    double runOpenCVCalibration(bool projected);
     bool checkCalibration(bool projected);
     double calibrate(bool projected);
     void refineGrids(int localThreshold);
@@ -80,30 +83,54 @@ private:
     bool calibration(bool groundTruthTest);
     int setRectifier();
     void reset();
+    vct2 getFocii(){ return f;};
+    vct2 getCameraCenter(){ return c;};
+    vctFixedSizeVector<double,7> getDistortionCoefficients(){return k;};
 
     ////////// Parameters //////////
+    //camera parameters
     cv::Mat cameraMatrix, distCoeffs;
+    vct2 f;
+    vct2 c;
+    vctFixedSizeVector<double,7> k;
+    //vector of calibration grids
     std::vector<svlCCCalibrationGrid*> calibrationGrids;
+    //vector of rotation matrices
     std::vector<cv::Mat> rvecs;
+    //vector of translation matrices
     std::vector<cv::Mat> tvecs;
+    //flag for OpenCV camera calibration, default to 0
     int flags;
-    std::vector<cv::Point3f> objectImagePoints;
+    //size of calibration grid
+    cv::Size boardSize;
+    //vector of 3D calibration grid points
     std::vector<std::vector<cv::Point3f> > objectPoints;
+    //vector of projected calibration grid points
     std::vector<std::vector<cv::Point3f> > projectedObjectPoints;
+    //vector of 2D image points of calibration grid
     std::vector<std::vector<cv::Point2f> > imagePoints;
+    //vector of 2D projected image points of calibration grid
     std::vector<std::vector<cv::Point2f> > projectedImagePoints;
     svlCCOriginDetector* calOriginDetector;
     svlCCCornerDetector* calCornerDetector;
 
+    //vector of track point files (.coords)
     std::vector<svlCCPointsFileIO*> pointFiles;
-    bool debug;
+    //DLR results for ground truth testing
+    svlCCDLRCalibrationFileIO* dlrFileIO;
     int minCornerThreshold;
     double rootMeanSquaredThreshold;
     int maxCalibrationIteration;
-    //Hard coded to 25 maximum number of grids for now
-    int visibility[25];
+    int maxNumberOfGrids;
+    int* visibility;
     int refineThreshold;
+    //number of points used  for calibration during optimization
     int pointsCount;
+    svlSampleImageRGB image;
+
+    bool debug;
+    //compare with DLR
+    bool groundTruthTest;
 
     svlFilterImageRectifier *rectifier;
 

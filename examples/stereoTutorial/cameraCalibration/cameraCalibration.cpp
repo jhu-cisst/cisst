@@ -90,8 +90,8 @@ int main(int argc, char** argv)
     int index = 1;
 
     string imageDirectory = "./Images/SD/";
-    string imagePrefix = "image0";
-    string imageType = ".png";
+    string imagePrefix = "image";
+    string imageType = "png";
     int startIndex = 0;
     int stopIndex = 9;
     int boardWidth = 18;
@@ -119,10 +119,10 @@ int main(int argc, char** argv)
         cout << "Command line format:" << endl;
         cout << "     svlExCameraCalibration imageDirectory imagePrefix imageType" << endl;
         cout << "     OPTIONAL [startIndex stopIndex boardSizeWidth boardSizeHeight]" << endl;
-        cout << "     (defaults [0 9 .png 18 16])" << endl;
+        cout << "     (defaults [0 9 png 18 16])" << endl;
         cout << "Examples:" << endl;
-        cout << "     svlExExposureCorrection ./Images/SD/ image0 " << endl;
-        cout << "     svlExExposureCorrection ./Images/SD/ image0 .png 0 9 18 16" << endl;
+        cout << "     svlExExposureCorrection ./Images/SD/ image " << endl;
+        cout << "     svlExExposureCorrection ./Images/SD/ image png 0 9 18 16" << endl;
         goto labError;
     }
 
@@ -130,11 +130,11 @@ int main(int argc, char** argv)
     cout << startIndex << " " << stopIndex << " " << boardWidth << " " << boardHeight << endl;
 
     //SD arguments
-    //./Images/SD/ image0 .png 0 9 18 16
+    //./Images/SD/ image png 0 9 18 16
     //HD arguments
-    //D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image0
+    //D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image
 
-    ok = svlCCObject->processImages(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,originDetectorColorModeFlag);
+    ok = svlCCObject->process(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,originDetectorColorModeFlag);
 
     if(ok && svlCCObject->images.size() > 0)
     {
