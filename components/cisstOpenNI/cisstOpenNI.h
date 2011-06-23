@@ -104,8 +104,18 @@ public:
 
     //! Get Current User Skeletons
     /**
-    */
+     */
     std::vector<cisstOpenNISkeleton*> &UpdateAndGetUserSkeletons();
+
+    //! Get Current User Skeletons
+    /**
+     */
+    void UpdateUserSkeletons();
+
+    //! Get Current User Skeletons
+    /**
+     */
+    std::vector<cisstOpenNISkeleton*> &GetUserSkeletons();
 
 };
 

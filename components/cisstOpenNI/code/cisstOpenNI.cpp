@@ -13,8 +13,6 @@ cisstOpenNI::~cisstOpenNI()
 {
     if(this->Data)
         delete this->Data;
-
-
 }
 
 void cisstOpenNI::CleanupExit(){
@@ -61,9 +59,6 @@ void cisstOpenNI::Configure( const std::string& fname  ){
         status = Data->usergenerator.Create(Data->context);
     }
 
-
-
-
     XnCallbackHandle hUserCallbacks, hCalibrationCallbacks, hPoseCallbacks;
     if (!Data->usergenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON))
     {
@@ -97,8 +92,6 @@ void cisstOpenNI::Configure( const std::string& fname  ){
 }
 
 void cisstOpenNI::Update(int type){
-    
-    
     // Query the context based on type
     if(type == WAIT_NONE_UPDATE_ALL)
         Data->context.WaitNoneUpdateAll();
@@ -254,3 +247,36 @@ std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
 
     return skeletons;
 }
+
+void cisstOpenNI::UpdateUserSkeletons(){
+    
+    // Initialize Users
+    XnUserID aUsers[6];
+    XnUInt16 nUsers = 6;
+    Data->usergenerator.GetUsers(aUsers, nUsers);
+    
+    if(nUsers > 6) printf("More users than max allowance\n");
+    
+    for (int i = 0; i < 5; ++i)
+    {
+        if (Data->usergenerator.GetSkeletonCap().IsTracking(aUsers[i]))
+        {
+            this->skeletons[i]->Update(aUsers[i]);
+        }else{
+            this->skeletons[i]->SetExists(false);
+        }
+    }    
+}
+
+std::vector<cisstOpenNISkeleton*> &cisstOpenNI::GetUserSkeletons(){
+    return skeletons;
+}
+
+
+
+
+
+
+
+
+
