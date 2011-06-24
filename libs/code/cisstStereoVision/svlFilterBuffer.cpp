@@ -65,17 +65,15 @@ int svlFilterBuffer::Process(svlProcInfo* procInfo, svlSample* inputdata, svlSam
     syncOutput = OutputData;
 
 
-
-
     _OnSingleThread(procInfo) {
         myBufferImage->Push(img->GetMatrixRef().Pointer(),img->GetMatrixRef().size(),false);
-    }
 
-    if(!IsFrameSet){
-        IsFrameSetEvent.Raise();
-        IsFrameSet = true;
-    }
+        if(!IsFrameSet){
+            IsFrameSetEvent.Raise();
+            IsFrameSet = true;
+        }
 
+    }
 
     if(ProcessOneFrame)
         return SVL_STOP_REQUEST;
@@ -107,8 +105,6 @@ vctDynamicMatrixRef<unsigned char> svlFilterBuffer::GetCurrentFrame(bool wait_fo
 {
     if(!IsFrameSet){
         IsFrameSetEvent.Wait();
-        if(ProcessOneFrame)
-            IsFrameSet = false;
     }
 
     svlImageRGB* current_image = myBufferImage->Pull(wait_for_new);
@@ -125,8 +121,6 @@ int svlFilterBuffer::GetCurrentFrameNArray(NumpyNArrayType matrix_in,bool wait_f
 {
     if(!IsFrameSet){
         IsFrameSetEvent.Wait();
-        if(ProcessOneFrame)
-            IsFrameSet = false;
     }
 
     svlImageRGB* current_image = myBufferImage->Pull(wait_for_new);
@@ -143,7 +137,6 @@ int svlFilterBuffer::GetCurrentFrameNArray(NumpyNArrayType matrix_in,bool wait_f
     svlBufferNArrayRef.SetRef(currentImage.Pointer(),svlBufferNArrayRefSize,svlBufferNArrayRefStride);
 
     //Set RGA submatrix to the current image
-    //VideoBuffer[VideoBindex]
     SizeType startPosition(0,0,0);
     SizeType length(GetHeight(),GetWidth(),GetDataChannels());
     numpyNArrayRef.SubarrayOf(matrix_in,startPosition,length);
