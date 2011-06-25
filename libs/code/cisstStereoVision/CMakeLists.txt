@@ -445,6 +445,7 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
 			svlCCCameraCalibration.cpp
 			svlCCCornerDetector.cpp
 			svlCCOriginDetector.cpp
+			svlCCHandEyeCalibration.cpp			
 			svlCCFileIO.cpp						
             )
         IF(NOT WIN32)
@@ -463,6 +464,7 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
 			svlCCCameraCalibration.h
 			svlCCCornerDetector.h
 			svlCCOriginDetector.h
+			svlCCHandEyeCalibration.h			
 			svlCCFileIO.h			
             )
         MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")

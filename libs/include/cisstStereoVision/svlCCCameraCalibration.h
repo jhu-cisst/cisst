@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
 #include <cisstStereoVision/svlCCOriginDetector.h>
 #include <cisstStereoVision/svlCCCornerDetector.h>
+#include <cisstStereoVision/svlCCHandEyeCalibration.h>
 #include <cisstStereoVision/svlCCFileIO.h>
 #include <limits>
 
@@ -59,13 +60,15 @@ public:
     svlCCCameraCalibration();
     bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
     svlFilterImageRectifier* getRectifier(){return rectifier;};
+    int setBufferSample(svlFilterSourceDummy* source, int index);
+    bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
+    bool runCameraCalibration();
+    bool runHandEyeCalibration();
+    int setImageVisibility(int index, int visible);
+    std::vector<svlCCCalibrationGrid*> getCalibrationGrids(){return calibrationGrids;};
     void printCalibrationParameters();
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
-    int setBufferSample(svlFilterSourceDummy* source, int index);
-    bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
-    bool runCalibration();
-    int setImageVisibility(int index, int visible);
 
 private:
     double computeReprojectionErrors(
@@ -113,6 +116,8 @@ private:
     std::vector<std::vector<cv::Point2f> > projectedImagePoints;
     svlCCOriginDetector* calOriginDetector;
     svlCCCornerDetector* calCornerDetector;
+    svlCCHandEyeCalibration* calHandEye;
+    svlFilterImageRectifier *rectifier;
 
     //vector of track point files (.coords)
     std::vector<svlCCPointsFileIO*> pointFiles;
@@ -131,9 +136,6 @@ private:
     bool debug;
     //compare with DLR
     bool groundTruthTest;
-
-    svlFilterImageRectifier *rectifier;
-
 };
 
 #endif

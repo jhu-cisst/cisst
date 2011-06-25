@@ -15,13 +15,15 @@ public:
 
 	}
 // Parses file into lines, and passes each line to ParseLine()
-	void parseFile()
+	bool parseFile()
 	{
 		char buffer[200];
 		int lineNum = 0;
 		int sectionNum = 0;
 
 		std::ifstream& fileStream = openFile(myFileName);
+        if(fileStream.bad())
+            return false;
 
 		try{
 			while (fileStream.good() && !fileStream.eof() && !fileStream.fail())
@@ -40,13 +42,13 @@ public:
 					if (fileStream.fail() && !fileStream.eof())
 					{
 						std::cout << "fileStream FAILED" << std::endl;
-						break;
+						return false;
 					}
 			}
 		}catch(std::ios_base::failure)
 		{
 			std::cout << myFileName << " failed." << std::endl;
-			return;
+			return false;
 		}
 	}
 	// Virtual method to repack the file data into file-specific data structures
@@ -79,7 +81,6 @@ protected:
 		else
 		{
 			std::cerr << "Could not open " << filename << std::endl;
-			//delete pFileStream;
 		}
 		return *pFileStream;
 	}

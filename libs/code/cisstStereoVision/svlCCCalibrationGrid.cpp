@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
-#include <limits>
 
 svlCCCalibrationGrid::svlCCCalibrationGrid(IplImage* iplImage, cv::Size boardSize, float gridSize)
 {
@@ -35,6 +34,7 @@ svlCCCalibrationGrid::svlCCCalibrationGrid(IplImage* iplImage, cv::Size boardSiz
 	this->calibrationError = std::numeric_limits<double>::max( );;
 	this->minGridPoints = 10;
 	this->refineThreshold = 2;
+    debug = false;
 }
 
 bool svlCCCalibrationGrid::isHighDefinition()

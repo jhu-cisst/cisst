@@ -28,8 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #include <math.h>
 #include <iostream>
-#include "svlCCOriginDetector.h"
-#include "svlCCCornerDetector.h"
+#include <limits>
+#include <cisstStereoVision/svlCCOriginDetector.h>
+#include <cisstStereoVision/svlCCCornerDetector.h>
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
 
 class svlCCCalibrationGrid
 {
@@ -63,6 +66,7 @@ class svlCCCalibrationGrid
 		cv::Mat tvec;
 		cv::Mat rmatrix;
 		bool valid;
+        bool hasTracking;
 		int refineThreshold;
 		std::vector<cv::Point2f> goodImagePoints;
 
@@ -84,7 +88,7 @@ class svlCCCalibrationGrid
 		bool isHighDefinition();
 	
 		////////// Parameters //////////
-		const static bool debug = false;
+		bool debug;
 		cv::Point2f calibrationGridOrigin;
 		cv::Point2f imageOrigin;
 		int homographyInlierLevel;

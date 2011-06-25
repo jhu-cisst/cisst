@@ -1,18 +1,21 @@
-#ifndef _ccalHandEyeCalibration_h
-#define _ccalHandEyeCalibration_h
-#include <string>
-#include "ccalCalibrationGrid.h"
-static const double pi = 3.14159265358979323846;
+#ifndef _svlCCHandEyeCalibration_h
+#define _svlCCHandEyeCalibration_h
 
-class ccalHandEyeCalibration
+#ifndef _cv_h
+#include <cv.h>
+#endif
+#include <cisstCommon/cmnGetChar.h>
+#include <cisstStereoVision/svlCCCalibrationGrid.h>
+
+class svlCCHandEyeCalibration
 {
 	public:
-		enum handEyeMethodEnum { DUAL_QUATERNION};
-		ccalHandEyeCalibration(std::vector<ccalCalibrationGrid*> calibrationGrids);
-		void calibrate();
+		enum handEyeMethodEnum {DUAL_QUATERNION};
+		svlCCHandEyeCalibration(std::vector<svlCCCalibrationGrid*> calibrationGrids);
+		bool calibrate();
 
 	private:
-		std::vector<ccalCalibrationGrid*> calibrationGrids;
+		std::vector<svlCCCalibrationGrid*> calibrationGrids;
 		float dualQuaternionMethod();
 		void getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* qPrime);
 		void getDualQuaternionST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index);
@@ -23,7 +26,7 @@ class ccalHandEyeCalibration
 		void printCvMatDouble(CvMat* matrix);
 
 		//parameters
-		const static bool debug = false;
+		bool debug;
 		int handEyeMethodFlag;
 		std::vector<CvMat*> cameraMatrix;
 		std::vector<CvMat*> worldToTCPMatrix;
