@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cv.h>
 #include <limits>
 
 using namespace std;
@@ -47,7 +48,7 @@ int main(int argc, char** argv)
 
     // Creating SVL objects
     svlStreamManager stream(2); // number of threads per stream
-    svlFilterSourceDummy* source = new svlFilterSourceDummy();
+    svlFilterSourceDummy source;
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
     svlFilterSplitter splitter;
@@ -56,15 +57,9 @@ int main(int argc, char** argv)
     svlFilterImageRectifier* rectifier;
     svlCCCameraCalibration* svlCCObject = new svlCCCameraCalibration();
     rectifier = svlCCObject->getRectifier();
-    svlFilterImageFileWriter imagewriter;
-
-    // Setup File Writer
-    int result = imagewriter.SetFilePath("image_", "png");
-    imagewriter.EnableCaptureSequence();
-    imagewriter.Pause();
 
     // Setup dummy video source
-    source->SetTargetFrequency(30.0);
+    source.SetTargetFrequency(30.0);
 
     // Setup image resizer
     // (Tip: enable OpenCV in CMake for higher performance)
@@ -81,7 +76,7 @@ int main(int argc, char** argv)
     filtering.SetRadius(3);
 
     bool ok = false;
-    bool runHandEye = false;
+    bool runHandEye = true;
     int ch;
     int index = 1;
 
@@ -126,7 +121,7 @@ int main(int argc, char** argv)
     cout << startIndex << " " << stopIndex << " " << boardWidth << " " << boardHeight << endl;
 
     //SD arguments
-    //./Images/SD/ image .png 0 9 18 16
+    //./Images/SD/ image png 0 9 18 16
     //HD arguments
     //D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image
 
@@ -135,7 +130,7 @@ int main(int argc, char** argv)
     if(ok && svlCCObject->images.size() > 0)
     {
         svlCCObject->printCalibrationParameters();
-        source->SetImageOverwrite(svlCCObject->images.front());
+        source.SetImageOverwrite(svlCCObject->images.front());
     }else
         goto labError;
 
@@ -146,20 +141,16 @@ int main(int argc, char** argv)
     splitter.AddOutput("output2");
 
     printf("Using rectification\n");
-    stream.SetSourceFilter(source);
-    source->GetOutput()->Connect(splitter.GetInput());
+    stream.SetSourceFilter(&source);
+    source.GetOutput()->Connect(splitter.GetInput());
     splitter.GetOutput()->Connect(filtering.GetInput());
     filtering.GetOutput()->Connect(rectifier->GetInput());
-    rectifier->GetOutput()->Connect(imagewriter.GetInput());
-    imagewriter.GetOutput()->Connect(window.GetInput());
+    rectifier->GetOutput()->Connect(window.GetInput());
 
     splitter.GetOutput("output2")->Connect(window2.GetInput());
-    cout << "imagewriter ok?: " << result << endl;
+
     cout << "Streaming is just about to start." << endl;
     cout << "Press any key to toggle images..." << endl;
-    cout << "Press 'r' to recalibrate + additional image..." << endl;
-    cout << "Press 'd' to  recalibrate - current image..." << endl;
-    cout << "Press 's' to record image..." << endl;
     cout << "Press 'q' to stop stream..." << endl;
     cout << "Showing Image# " << index << endl;
 
@@ -167,59 +158,20 @@ int main(int argc, char** argv)
     if (stream.Play() != SVL_OK) goto labError;
 
     // hand-eye calibration
-    if(ok & runHandEye)
+    if(ok && runHandEye)
     {
-    	svlCCObject->runHandEyeCalibration();
+        svlCCObject->runHandEyeCalibration();
     }
-
+    
     // Wait for user input
     do
     {
         ch = cmnGetChar();
-        if (ch == 's')
-        {
-            cout << "Record image! "<< endl;
-            imagewriter.Record(1);
-        }
-        else if(ch == 'r')
-        {
-            ok = false;
-            bool validImage = false;
-            validImage = svlCCObject->processImage(imageDirectory,imagePrefix,imageType,index);
-            ok = ok || validImage;
-            validImage = svlCCObject->processImage(imageDirectory,imagePrefix,imageType,index+2);
-            ok = ok || validImage;
-            if (ok)
-                ok = svlCCObject->runCameraCalibration();
-            if(ok && svlCCObject->images.size() > 0)
-            {
-                svlCCObject->printCalibrationParameters();
-                //source.SetImageOverwrite(svlCCObject->images.front());
-                svlCCObject->setBufferSample(source,0);
-                cout << "Process Images return: " << ok << " images total: " << svlCCObject->images.size() << endl; 
-            }
-        }
-        else if(ch == 'd')
-        {
-            ok = svlCCObject->setImageVisibility(index,0);
-            ok = svlCCObject->runCameraCalibration();
-            if(ok && svlCCObject->images.size() > 0)
-            {
-                svlCCObject->printCalibrationParameters();
-                //source.SetImageOverwrite(svlCCObject->images.front());
-                svlCCObject->setBufferSample(source,0);
-                cout << "Process Images return: " << ok << " images total: " << svlCCObject->images.size() << endl; 
-            }
-        }
-        else
-        {
-            //source.SetImageOverwrite(svlCCObject->images.at(index));
-            svlCCObject->setBufferSample(source,index);
-            index++;
-            cout << "Showing Image# " << index << endl;
-            if(index > svlCCObject->images.size()-1)
-                index = 0;
-        }
+        source.SetImageOverwrite(svlCCObject->images.at(index));
+        index++;
+        cout << "Showing Image# " << index << endl;
+        if(index > svlCCObject->images.size()-1)
+            index = 0;
     }while (ch != 'q');
 
     // Safely stopping and deconstructing stream before de-allocation

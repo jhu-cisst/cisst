@@ -6,6 +6,7 @@
 #endif
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
+#include <limits>
 
 class svlCCHandEyeCalibration
 {
@@ -17,8 +18,8 @@ class svlCCHandEyeCalibration
 	private:
 		std::vector<svlCCCalibrationGrid*> calibrationGrids;
 		float dualQuaternionMethod();
-		void getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* qPrime);
-		void getDualQuaternionST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index);
+		bool getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* qPrime);
+		void populateComplexMatrixST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index);
 		void quaternionMul(CvMat* q1, CvMat* q2, CvMat* result);
 		void quaternionToRMatrix(CvMat* rMatrix, CvMat* quaternion);
 		void solveQuadratic(double a, double b, double c, CvMat* roots);
