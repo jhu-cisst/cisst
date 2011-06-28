@@ -44,6 +44,8 @@ http://www.cisst.org/cisst/license.txt.
 
 svlWidgetQt4OpenGL::svlWidgetQt4OpenGL(QWidget* parent) :
     QGLWidget(parent),
+    Manager(0),
+    WinID(0),
     ImageBuffer(0),
     LatestImage(0),
     WindowWidth(0),
@@ -57,7 +59,7 @@ svlWidgetQt4OpenGL::~svlWidgetQt4OpenGL()
     Destroy();
 }
 
-bool svlWidgetQt4OpenGL::Create(svlBufferImage *imagebuffer)
+bool svlWidgetQt4OpenGL::Create(svlBufferImage *imagebuffer, svlWindowManagerQt4OpenGL* manager, unsigned int winid)
 {
     if (!imagebuffer) return false;
 
@@ -70,6 +72,11 @@ bool svlWidgetQt4OpenGL::Create(svlBufferImage *imagebuffer)
     ImageBuffer = imagebuffer;
 
     this->resize(WindowWidth, WindowHeight);
+    this->setMouseTracking(true);
+    this->setFocusPolicy(Qt::StrongFocus);
+
+    Manager = manager;
+    WinID = winid;
 
     return true;
 }
@@ -149,22 +156,23 @@ void svlWidgetQt4OpenGL::resizeGL(int width, int height)
 
 void svlWidgetQt4OpenGL::mousePressEvent(QMouseEvent* event)
 {
-//    LastPosition = event->pos();
+    QMetaObject::invokeMethod(Manager, "QSlotMousePress", Qt::AutoConnection,
+                              Q_ARG(QMouseEvent*, event),
+                              Q_ARG(unsigned int, WinID));
 }
 
 void svlWidgetQt4OpenGL::mouseMoveEvent(QMouseEvent* event)
 {
-/*
-    int dx = event->x() - LastPosition.x();
-    int dy = event->y() - LastPosition.y();
+    QMetaObject::invokeMethod(Manager, "QSlotMouseMove", Qt::AutoConnection,
+                              Q_ARG(QMouseEvent*, event),
+                              Q_ARG(unsigned int, WinID));
+}
 
-    if (event->buttons() & Qt::LeftButton) {
-    }
-    else if (event->buttons() & Qt::RightButton) {
-    }
-
-    LastPosition = event->pos();
-*/
+void svlWidgetQt4OpenGL::keyPressEvent(QKeyEvent* event)
+{
+    QMetaObject::invokeMethod(Manager, "QSlotKeyPress", Qt::AutoConnection,
+                              Q_ARG(QKeyEvent*, event),
+                              Q_ARG(unsigned int, WinID));
 }
 
 void svlWidgetQt4OpenGL::CheckGLError(const std::string & functionName)
@@ -321,11 +329,10 @@ void svlWindowManagerQt4OpenGL::QSlotCreateWindows()
         Qt::WindowFlags style = Qt::Window;
         if (argFullscreen) style = Qt::FramelessWindowHint|Qt::WindowSystemMenuHint;
         ParentWidgets[i] = new svlParentWidgetQt4(style);
-
         ParentWidgets[i]->setWindowTitle(QString::fromStdString(Title));
 
         Windows[i] = new svlWidgetQt4OpenGL(ParentWidgets[i]);
-        Windows[i]->Create(ImageBuffers[i]);
+        Windows[i]->Create(ImageBuffers[i], this, i);
         Windows[i]->show();
 
         if (PosX == 0 || PosY == 0) {
@@ -371,130 +378,96 @@ void svlWindowManagerQt4OpenGL::QSlotShow()
     }
 }
 
-/*
-int svlWindowManagerQt4OpenGL::FilterMessage(unsigned int winid, MSG* msg)
+void svlWindowManagerQt4OpenGL::QSlotMousePress(QMouseEvent* event, unsigned int winid)
 {
-	PAINTSTRUCT ps;
-    unsigned int code;
-	HDC hdc;
+    int event_id;
+         if (event->button() == Qt::LeftButton)  event_id = winInput_LBUTTONDOWN;
+    else if (event->button() == Qt::RightButton) event_id = winInput_RBUTTONDOWN;
+    else return;
 
-    switch (msg->message) {
-	    case WM_PAINT:
-	    case WM_USER_PAINT:
-            // Critical section: starts
-//            csImage.Enter();
-
-		        hdc = BeginPaint(msg->hwnd, &ps);
-                if (ImageBuffers[winid]) {
-                    SetDIBitsToDevice(hdc,
-                                      0, 0,
-                                      Width[winid], Height[winid],
-                                      0, 0,
-                                      0, Height[winid],
-                                      ImageBuffers[winid],
-                                      &(BitmapInfos[winid]),
-                                      DIB_RGB_COLORS);
-                }
-    		    EndPaint(msg->hwnd, &ps);
-
-//            csImage.Leave();
-            // Critical section: ends
-		break;
-
-        case WM_MOUSEMOVE:
-            SetMousePos(static_cast<short>(LOWORD(msg->lParam)), static_cast<short>(HIWORD(msg->lParam)));
-            OnUserEvent(winid, false, winInput_MOUSEMOVE);
-        break;
-
-        case WM_LBUTTONDOWN:
-            if (!LButtonDown && !RButtonDown) {
-                LButtonDown = true;
-                SetCapture(msg->hwnd);
-            }
-            OnUserEvent(winid, false, winInput_LBUTTONDOWN);
-        break;
-
-        case WM_LBUTTONUP:
-            OnUserEvent(winid, false, winInput_LBUTTONUP);
-            if (LButtonDown && !RButtonDown) {
-                LButtonDown = false;
-                ReleaseCapture();
-            }
-        break;
-
-        case WM_RBUTTONDOWN:
-            if (!LButtonDown && !RButtonDown) {
-                RButtonDown = true;
-                SetCapture(msg->hwnd);
-            }
-            OnUserEvent(winid, false, winInput_RBUTTONDOWN);
-        break;
-
-        case WM_RBUTTONUP:
-            OnUserEvent(winid, false, winInput_RBUTTONUP);
-            if (!LButtonDown && RButtonDown) {
-                RButtonDown = false;
-                ReleaseCapture();
-            }
-        break;
-
-	    case WM_KEYDOWN:
-            code = static_cast<unsigned int>(msg->wParam);
-            if (code >= 48 && code <= 57) { // ascii numbers
-                OnUserEvent(winid, true, code);
-                break;
-            }
-            if (code >= 65 && code <= 90) { // ascii letters
-                OnUserEvent(winid, true, code + 32);
-                break;
-            }
-            if (code == 13 ||
-                code == 32) { // special characters with correct ascii code
-                OnUserEvent(winid, true, code);
-                break;
-            }
-            if (code >= 112 && code <= 123) { // F1-F12
-                OnUserEvent(winid, false, code);
-                break;
-            }
-            if ((msg->lParam | 0x800000) == 0) {
-                return 0; // yet to be processed
-            }
-            else {
-                // Virtual keys
-		        switch (msg->wParam) {
-		            case winInput_KEY_PAGEUP:
-		            case winInput_KEY_PAGEDOWN:
-		            case winInput_KEY_HOME:
-		            case winInput_KEY_END:
-		            case winInput_KEY_INSERT:
-		            case winInput_KEY_DELETE:
-		            case winInput_KEY_LEFT:
-		            case winInput_KEY_RIGHT:
-		            case winInput_KEY_UP:
-		            case winInput_KEY_DOWN:
-                        OnUserEvent(winid, false, static_cast<unsigned int>(msg->wParam));
-		            break;
-
-		            default:
-			            return 0; // yet to be processed
-		        }
-            }
-	    break;
-
-        case WM_USER_DESTROY:
-            // Critical section: starts
-            csImage.Enter();
-
-                Destroy();
-
-            csImage.Leave();
-            // Critical section: ends
-        break;
-
-        default:
-            return 0; // yet to be processed
-    }
-    return 1; // already processed
+    SetMousePos(event->x(), event->y());
+    OnUserEvent(winid, false, event_id);
 }
-*/
+
+void svlWindowManagerQt4OpenGL::QSlotMouseMove(QMouseEvent* event, unsigned int winid)
+{
+    SetMousePos(event->x(), event->y());
+    OnUserEvent(winid, false, winInput_MOUSEMOVE);
+}
+
+void svlWindowManagerQt4OpenGL::QSlotKeyPress(QKeyEvent* event, unsigned int winid)
+{
+    std::string str = event->text().toStdString();
+
+    unsigned int code;
+
+    if (str.empty()) {
+    // Special keys
+
+        code = event->key();
+        if (code >= Qt::Key_F1 && code <= Qt::Key_F12) { // F1-F12
+            OnUserEvent(winid, false, winInput_KEY_F1 + (code - Qt::Key_F1));
+            return;
+        }
+        switch (code) {
+            case Qt::Key_PageUp:
+                OnUserEvent(winid, false, winInput_KEY_PAGEUP);
+            break;
+
+            case Qt::Key_PageDown:
+                OnUserEvent(winid, false, winInput_KEY_PAGEDOWN);
+            break;
+
+            case Qt::Key_Home:
+                OnUserEvent(winid, false, winInput_KEY_HOME);
+            break;
+
+            case Qt::Key_End:
+                OnUserEvent(winid, false, winInput_KEY_END);
+            break;
+
+            case Qt::Key_Insert:
+                OnUserEvent(winid, false, winInput_KEY_INSERT);
+            break;
+
+            case Qt::Key_Delete:
+                OnUserEvent(winid, false, winInput_KEY_DELETE);
+            break;
+
+            case Qt::Key_Left:
+                OnUserEvent(winid, false, winInput_KEY_LEFT);
+            break;
+
+            case Qt::Key_Right:
+                OnUserEvent(winid, false, winInput_KEY_RIGHT);
+            break;
+
+            case Qt::Key_Up:
+                OnUserEvent(winid, false, winInput_KEY_UP);
+            break;
+
+            case Qt::Key_Down:
+                OnUserEvent(winid, false, winInput_KEY_DOWN);
+            break;
+        }
+    }
+    else {
+    // ASCII codes
+
+        code = str.c_str()[0];
+        if (code >= 48 && code <= 57) { // ascii numbers
+            OnUserEvent(winid, true, code);
+            return;
+        }
+        if (code >= 97 && code <= 122) { // ascii letters
+            OnUserEvent(winid, true, code);
+            return;
+        }
+        if (code == 13 ||
+            code == 32) { // special characters with correct ascii code
+            OnUserEvent(winid, true, code);
+            return;
+        }
+    }
+}
+

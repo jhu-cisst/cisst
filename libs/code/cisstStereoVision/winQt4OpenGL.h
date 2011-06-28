@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 // Forward declarations
 class svlBufferImage;
 class osaThreadSignal;
+class svlWindowManagerQt4OpenGL;
 
 
 class svlWidgetQt4OpenGL : public QGLWidget
@@ -44,7 +45,7 @@ public:
     virtual ~svlWidgetQt4OpenGL();
 
 public:
-    bool Create(svlBufferImage* imagebuffer);
+    bool Create(svlBufferImage* imagebuffer, svlWindowManagerQt4OpenGL* manager, unsigned int winid);
     void Destroy();
     void UpdateImage();
 
@@ -55,17 +56,19 @@ protected:
 
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
+    void keyPressEvent(QKeyEvent* event);
 
     void CheckGLError(const std::string & functionName);
 
 private:
+    svlWindowManagerQt4OpenGL* Manager;
+    unsigned int WinID;
+
     svlBufferImage* ImageBuffer;
     svlImageRGB* LatestImage;
 
     int WindowWidth;
     int WindowHeight;
-
-    QPoint LastPosition;
 
 signals:
     void QSignalUpdateGL();
@@ -107,6 +110,9 @@ protected slots:
     void QSlotCreateWindows();
     void QSlotDestroyWindows();
     void QSlotShow();
+    void QSlotMousePress(QMouseEvent* event, unsigned int winid);
+    void QSlotMouseMove(QMouseEvent* event, unsigned int winid);
+    void QSlotKeyPress(QKeyEvent* event, unsigned int winid);
 
 private:
     bool argShow;

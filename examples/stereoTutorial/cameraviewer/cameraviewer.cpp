@@ -100,7 +100,7 @@ public:
                 case '9':
                     if (Gamma) {
                         Gamma->GetGamma(gamma);
-                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        cout << " >>> Gamma: " << gamma - 5.0 << endl;
                         Gamma->SetGamma(gamma - 5.0);
                     }
                 break;
@@ -108,7 +108,7 @@ public:
                 case '0':
                     if (Gamma) {
                         Gamma->GetGamma(gamma);
-                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        cout << " >>> Gamma: " << gamma + 5.0 << endl;
                         Gamma->SetGamma(gamma + 5.0);
                     }
                 break;
