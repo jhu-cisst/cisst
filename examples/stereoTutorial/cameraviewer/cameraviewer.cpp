@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
         #include <cisstStereoVision/svlFilterImageWindowQt.h>
     #endif
     // Qt dialogs are disabled by default
-//    #define _USE_QT_
+    #define _USE_QT_    0
 #endif
 
 
