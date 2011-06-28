@@ -27,7 +27,6 @@ svlCCCameraCalibration::svlCCCameraCalibration()
     minCornerThreshold = 5;
     maxCalibrationIteration = 10;
     maxNumberOfGrids = 25;
-    rectifier = (svlFilterImageRectifier *)new svlFilterImageRectifier();
     debug = false;
     groundTruthTest = false;
     visibility = new int[maxNumberOfGrids];
@@ -47,14 +46,8 @@ bool svlCCCameraCalibration::runCameraCalibration()
     pointsCount = 0;
 
     // Calibrate
-    bool ok = calibration(groundTruthTest);
+    return calibration(groundTruthTest);
 
-    // Set Rectifier
-    int setRectifierResult = SVL_FAIL;
-    if(ok)
-        setRectifierResult = setRectifier();
-
-    return setRectifierResult == SVL_OK;
 }
 
 void svlCCCameraCalibration::reset()
@@ -544,7 +537,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     path << imageDirectory;
     path << imagePrefix;
     path.fill('0');
-    path << std::setw(3) << index << std::setw(1);
+    path << std::setw(4) << index << std::setw(1);
     path << "." << imageType;
     
     if(debug)
@@ -571,7 +564,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     path << imageDirectory;
     path << imagePrefix;
     path.fill('0');
-    path << std::setw(3) << index << std::setw(1);
+    path << std::setw(4) << index << std::setw(1);
     path << ".coords";
     currentFileName = path.str();
 
@@ -596,7 +589,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
         path << imageDirectory;
         path << "shot";
         path.fill('0');
-        path << std::setw(3) << index << std::setw(1);
+        path << std::setw(4) << index << std::setw(1);
         path << ".pts";
         currentFileName = path.str();
         if(debug)
@@ -677,10 +670,10 @@ bool svlCCCameraCalibration::process(std::string imageDirectory, std::string ima
     }
 }
 
-int svlCCCameraCalibration::setRectifier()
+int svlCCCameraCalibration::setRectifier(svlFilterImageRectifier *rectifier)
 {
     //if(debug)
-    std::cout << "==========SetRectifier==============" << std::endl;
+    std::cout << "==========setRectifier==============" << std::endl;
 
     vct3x3 R = vct3x3::Eye();
 
@@ -712,7 +705,7 @@ int svlCCCameraCalibration::setRectifier()
 
 }
 
-int svlCCCameraCalibration::setBufferSample(svlFilterSourceDummy* source, int index)
+int svlCCCameraCalibration::setFilterSourceDummy(svlFilterSourceDummy* source, int index)
 {
     if(index > images.size()-1)
         return SVL_FAIL;

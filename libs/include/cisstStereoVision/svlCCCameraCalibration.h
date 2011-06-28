@@ -59,13 +59,13 @@ class CISST_EXPORT svlCCCameraCalibration
 public:
     svlCCCameraCalibration();
     bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
-    svlFilterImageRectifier* getRectifier(){return rectifier;};
-    int setBufferSample(svlFilterSourceDummy* source, int index);
+    int setRectifier(svlFilterImageRectifier* rectifier);
     bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
     bool runCameraCalibration();
     bool runHandEyeCalibration();
     int setImageVisibility(int index, int visible);
     std::vector<svlCCCalibrationGrid*> getCalibrationGrids(){return calibrationGrids;};
+    int setFilterSourceDummy(svlFilterSourceDummy* source, int index);
     void printCalibrationParameters();
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
@@ -84,7 +84,6 @@ private:
     void refineGrids(int localThreshold);
     void optimizeCalibration();
     bool calibration(bool groundTruthTest);
-    int setRectifier();
     void reset();
     vct2 getFocii(){ return f;};
     vct2 getCameraCenter(){ return c;};
@@ -117,7 +116,6 @@ private:
     svlCCOriginDetector* calOriginDetector;
     svlCCCornerDetector* calCornerDetector;
     svlCCHandEyeCalibration* calHandEye;
-    svlFilterImageRectifier *rectifier;
 
     //vector of track point files (.coords)
     std::vector<svlCCPointsFileIO*> pointFiles;
