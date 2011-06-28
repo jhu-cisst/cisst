@@ -155,6 +155,11 @@ svlSampleCameraGeometry::svlSampleCameraGeometry(const std::string & calibration
     LoadCalibration(calibration_file_path);
 }
 
+unsigned int svlSampleCameraGeometry::GetCameraCount() const
+{
+    return IntrinsicVector.size();
+}
+
 int svlSampleCameraGeometry::LoadCalibration(const std::string & filepath)
 {
     // Currently, only stereo calibration files created

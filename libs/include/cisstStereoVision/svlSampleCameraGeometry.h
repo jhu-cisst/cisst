@@ -78,6 +78,8 @@ public:
 
     svlSampleCameraGeometry(const std::string & calibration_filepath);
 
+    unsigned int GetCameraCount() const;
+
     int LoadCalibration(const std::string & filepath);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);

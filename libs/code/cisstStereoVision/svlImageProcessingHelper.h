@@ -106,9 +106,7 @@ namespace svlImageProcessingHelper
         RectificationInternals();
         virtual ~RectificationInternals();
 
-        bool Generate(unsigned int width, unsigned int height,
-                      const svlSampleCameraGeometry::Intrinsics & intrinsics,
-                      const svlSampleCameraGeometry::Extrinsics & extrinsics);
+        bool Generate(unsigned int width, unsigned int height,const svlSampleCameraGeometry & geometry, unsigned int cam_id = SVL_LEFT);
         bool Load(const std::string &filepath, int exponentlen = 3);
 
         unsigned int Width;

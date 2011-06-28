@@ -99,16 +99,12 @@ int svlFilterImageRectifier::Process(svlProcInfo* procInfo, svlSample* syncInput
         svlSampleCameraGeometry* camgeo = dynamic_cast<svlSampleCameraGeometry*>(GetInput("calibration")->PullSample(false));
         if (camgeo) {
             for (idx = 0; idx < videochannels; idx ++) {
-                const svlSampleCameraGeometry::Intrinsics* intrinsics = camgeo->GetIntrinsicsPtr(idx);
-                const svlSampleCameraGeometry::Extrinsics* extrinsics = camgeo->GetExtrinsicsPtr(idx);
-                if (intrinsics && extrinsics) {
-                    table = new svlImageProcessingHelper::RectificationInternals;
-                    if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *intrinsics, *extrinsics)) {
-                        delete table;
-                        continue;
-                    }
-                    Tables[idx].Set(table);
+                table = new svlImageProcessingHelper::RectificationInternals;
+                if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {
+                    delete table;
+                    continue;
                 }
+                Tables[idx].Set(table);
             }
         }
     }
