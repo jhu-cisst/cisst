@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: $
   
   Author(s):  Balazs Vagvolgyi
-  Created on: 2008
+  Created on: 2011
 
-  (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,29 +20,30 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlFilterImageWindow_h
-#define _svlFilterImageWindow_h
+#ifndef _svlFilterImageWindowQt_h
+#define _svlFilterImageWindowQt_h
 
 #include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
+
 // Forward declarations
-class svlWindowManagerBase;
+class svlWindowManagerQt4OpenGL;
 class svlWindowEventHandlerBase;
 class svlWindowManagerThreadProc;
 
 
-class CISST_EXPORT svlFilterImageWindow : public svlFilterBase
+class CISST_EXPORT svlFilterImageWindowQt : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class svlWindowManagerThreadProc;
 
 public:
-    svlFilterImageWindow();
-    virtual ~svlFilterImageWindow();
+    svlFilterImageWindowQt();
+    virtual ~svlFilterImageWindowQt();
 
     virtual int SetPosition(const int x, const int y, const unsigned int videoch = SVL_LEFT);
     virtual int GetPosition(int & x, int & y, unsigned int videoch = SVL_LEFT) const;
@@ -67,7 +68,7 @@ private:
     svlWindowManagerThreadProc* ThreadProc;
     bool StopThread;
 
-    svlWindowManagerBase* WindowManager;
+    svlWindowManagerQt4OpenGL* WindowManager;
     svlWindowEventHandlerBase* EventHandler;
 
 protected:
@@ -78,7 +79,7 @@ protected:
     virtual void GetPositionRCommand(vctInt2 & position) const;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageWindow)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageWindowQt)
 
-#endif // _svlFilterImageWindow_h
+#endif // _svlFilterImageWindowQt_h
 

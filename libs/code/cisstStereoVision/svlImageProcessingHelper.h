@@ -23,9 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlImageProcessingHelper_h
 #define _svlImageProcessingHelper_h
 
-#include <string>
+#include <cisstStereoVision/svlTypes.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
+#include <string>
 
 
 class svlImageProcessingInternals
@@ -105,6 +106,9 @@ namespace svlImageProcessingHelper
         RectificationInternals();
         virtual ~RectificationInternals();
 
+        bool Generate(unsigned int width, unsigned int height,
+                      const svlSampleCameraGeometry::Intrinsics & intrinsics,
+                      const svlSampleCameraGeometry::Extrinsics & extrinsics);
         bool Load(const std::string &filepath, int exponentlen = 3);
 
         unsigned int Width;

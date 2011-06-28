@@ -23,9 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 
 
-/******************************/
-/*** svlSample class **********/
-/******************************/
+/***********************/
+/*** svlSample class ***/
+/***********************/
 
 svlSample::svlSample() :
     mtsGenericObject(),
@@ -96,6 +96,7 @@ svlSample* svlSample::GetNewFromType(svlStreamType type)
         case svlTypeTransform3D:       return new svlSampleTransform3D;       break;
         case svlTypeTargets:           return new svlSampleTargets;           break;
         case svlTypeText:              return new svlSampleText;              break;
+        case svlTypeCameraGeometry:    return new svlSampleCameraGeometry;    break;
         case svlTypeBlobs:             return new svlSampleBlobs;             break;
     }
     return 0;

@@ -163,6 +163,7 @@ struct CISST_EXPORT svlBlob
 #include <cisstStereoVision/svlSampleTransform3D.h>
 #include <cisstStereoVision/svlSampleTargets.h>
 #include <cisstStereoVision/svlSampleText.h>
+#include <cisstStereoVision/svlSampleCameraGeometry.h>
 #include <cisstStereoVision/svlSampleBlobs.h>
 
 // Always include last!

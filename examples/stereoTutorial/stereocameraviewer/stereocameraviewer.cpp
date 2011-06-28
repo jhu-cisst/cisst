@@ -402,6 +402,10 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     // release stream
     stream.Release();
 
+    if (save == true) {
+        splitter.GetOutput("output2")->Disconnect(); // Workaround: to avoid crash
+    }
+
 labError:
     return 0;
 }
@@ -442,9 +446,9 @@ int ParseNumber(char* string, unsigned int maxlen)
 
 int main(int argc, char** argv)
 {
-    cerr << endl << "stereoTutorialStereoCameraViewer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << endl << "svlExStereoCameraViewer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl;
-    cerr << "Enter 'stereoTutorialStereoCameraViewer -?' for help." << endl;
+    cerr << "Enter 'svlExStereoCameraViewer -?' for help." << endl;
 
     //////////////////////////////
     // parsing arguments
@@ -465,7 +469,7 @@ int main(int argc, char** argv)
         switch (argv[i][1]) {
             case '?':
                 cerr << "Command line format:" << endl;
-                cerr << "     stereoTutorialStereoCameraViewer [options]" << endl;
+                cerr << "     svlExStereoCameraViewer [options]" << endl;
                 cerr << "Options:" << endl;
                 cerr << "     -v        Save video files" << endl;
                 cerr << "     -i        Interpolation ON [default: OFF]" << endl;
@@ -478,8 +482,8 @@ int main(int argc, char** argv)
 				cerr << "                  2 - interlaced" << endl;
                 cerr << "     -x#       Horizontal window position [used only with -f]" << endl;
                 cerr << "Examples:" << endl;
-                cerr << "     stereoTutorialStereoCameraViewer" << endl;
-                cerr << "     stereoTutorialStereoCameraViewer -v -i -w800 -h600" << endl;
+                cerr << "     svlExStereoCameraViewer" << endl;
+                cerr << "     svlExStereoCameraViewer -v -i -w800 -h600" << endl;
                 return 1;
             break;
 

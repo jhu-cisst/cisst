@@ -199,6 +199,8 @@ int main()
     // Safely stopping and deconstructing stream before de-allocation
     stream.Release();
 
+    splitter.GetOutput("output2")->Disconnect(); // Workaround: to avoid crash
+
     cout << "Success... Quitting." << endl;
     return 1;
 

@@ -41,6 +41,7 @@ void CMyEventHandler2::OnUserEvent(unsigned int winid, bool ascii, unsigned int 
                     std::stringstream sstr;
                     sstr << "(" << x << ", " << y << ")";
                     TextBox->SetText(sstr.str());
+                    TextBox->SetRect(svlRect(x, y, x + 80, y + 16));
                 }
             break;
         }

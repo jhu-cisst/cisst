@@ -116,6 +116,7 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
             return true;
 

@@ -208,6 +208,7 @@ enum svlStreamType
     ,svlTypeTransform3D       // 3D transformation
     ,svlTypeTargets           // Vector of N dimensional points
     ,svlTypeText              // Textual data
+    ,svlTypeCameraGeometry    // Geometry of a single or multiple camera rig
     ,svlTypeBlobs             // Image blobs
 };
 

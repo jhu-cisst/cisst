@@ -241,8 +241,9 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeCameraGeometry:
             case svlTypeBlobs:
-            return SVL_FAIL;
+                return SVL_FAIL;
         }
     }
 

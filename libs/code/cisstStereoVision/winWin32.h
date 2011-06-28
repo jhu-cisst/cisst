@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _winWin32_h
 #define _winWin32_h
 
-#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlWindowManagerBase.h>
 
 #include <windows.h>
 

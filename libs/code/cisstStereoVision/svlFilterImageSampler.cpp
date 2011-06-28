@@ -273,6 +273,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
             return SVL_INVALID_INPUT_TYPE;
     }
@@ -363,6 +364,7 @@ int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeCameraGeometry:
             case svlTypeBlobs:
                 return SVL_INVALID_INPUT_TYPE;
         }

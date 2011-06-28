@@ -146,6 +146,7 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeCameraGeometry:
             case svlTypeBlobs:
             break;
         }

@@ -21,7 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlQtWidgetVideoEncoder.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstStereoVision/svlQtObjectFactory.h>
+#include <cisstStereoVision/svlQtDialog.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -43,37 +44,38 @@ svlQtWidgetVideoEncoder::svlQtWidgetVideoEncoder() :
     VideoEncoder("RequiresVideoEncoder", this),
     ExternalCodec(0)
 {
-    QCoreApplication* qapp = QApplication::instance();
-    if (qapp) {
-        moveToThread(QApplication::instance()->thread());
-    }
-    else {
-        CMN_LOG_CLASS_INIT_ERROR << "Constructor - failed to find QApplication instance" << std::endl;
-    }
 }
 
-svlQtWidgetVideoEncoder::svlQtWidgetVideoEncoder(const std::string & filename) :
+svlQtWidgetVideoEncoder::svlQtWidgetVideoEncoder(const svlQtWidgetVideoEncoder& CMN_UNUSED(other)) :
     QObject(),
     mtsComponent(),
-    Dialog(0),
-    VideoEncoder("RequiresVideoEncoder", this),
-    ExternalCodec(0)
+    VideoEncoder("RequiresVideoEncoder", this)
 {
-    QCoreApplication* qapp = QApplication::instance();
-    if (qapp) {
-        moveToThread(QApplication::instance()->thread());
-        Create(filename);
-    }
-    else {
-        CMN_LOG_CLASS_INIT_ERROR << "Constructor - failed to find QApplication instance" << std::endl;
-    }
+    // Public copy constructor is here only to override the private QObject copy constructor
 }
 
 svlQtWidgetVideoEncoder::~svlQtWidgetVideoEncoder()
 {
-    Destroy();
+    QSlotDestroy();
 
     this->RemoveInterfaceRequired("RequiresVideoEncoder");
+}
+
+svlQtWidgetVideoEncoder* svlQtWidgetVideoEncoder::New()
+{
+    return dynamic_cast<svlQtWidgetVideoEncoder*>(svlQtObjectFactory::Create("svlQtWidgetVideoEncoder"));
+}
+
+svlQtWidgetVideoEncoder* svlQtWidgetVideoEncoder::New(const std::string & filename)
+{
+    svlQtWidgetVideoEncoder* instance = dynamic_cast<svlQtWidgetVideoEncoder*>(svlQtObjectFactory::Create("svlQtWidgetVideoEncoder"));
+    if (instance) instance->Create(filename);
+    return instance;
+}
+
+void svlQtWidgetVideoEncoder::Delete()
+{
+    svlQtObjectFactory::Delete(this);
 }
 
 bool svlQtWidgetVideoEncoder::WaitForClose()
@@ -268,7 +270,7 @@ void svlQtWidgetVideoEncoder::QSlotConnect()
     CMN_ASSERT(UIWidget);
     UIWidget->setupUi(Dialog);
 
-    QObject::connect(UIWidget->TQSlider, SIGNAL(sliderMoved(int)), this, SLOT(QSlotOnSliderMove(int)));
+    QObject::connect(UIWidget->TQSlider, SIGNAL(valueChanged(int)), this, SLOT(QSlotOnSliderMove(int)));
     QObject::connect(UIWidget->QualityBasedCB, SIGNAL(stateChanged(int)), this, SLOT(QSlotOnQualityBasedCBStateChanged(int)));
 
     std::stringstream strstr;

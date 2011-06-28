@@ -20,7 +20,7 @@ int main()
                                                                     //
     source.SetDevice(0);                                            // Select first available capture device
                                                                     //
-    splitter.AddOutput("asyncbranch", 2, 3);                        // Add second output (async) to splitter
+    splitter.AddOutput("asyncbranch", 7, 3);                        // Add second output (async) to splitter
                                                                     //
     window1.SetTitle("Main branch");                                // Assign title text to window filter #1
     window2.SetTitle("Side branch");                                // Assign title text to window filter #2

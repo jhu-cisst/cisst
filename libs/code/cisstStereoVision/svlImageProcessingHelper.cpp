@@ -1441,6 +1441,13 @@ svlImageProcessingHelper::RectificationInternals::~RectificationInternals()
     Release();
 }
 
+bool svlImageProcessingHelper::RectificationInternals::Generate(unsigned int width, unsigned int height,
+                                                                const svlSampleCameraGeometry::Intrinsics & intrinsics,
+                                                                const svlSampleCameraGeometry::Extrinsics & extrinsics)
+{
+    return false;
+}
+
 bool svlImageProcessingHelper::RectificationInternals::Load(const std::string &filepath, int explen)
 {
     Release();

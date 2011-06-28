@@ -27,6 +27,7 @@ int CMyFilter2::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* 
     unsigned int pixelcount = image->GetWidth() * image->GetHeight();       // Get number of pixels in image
     unsigned int i, res;                                                    //
                                                                             //
+    // for (i = 0; i < pixelcount; i ++)
     _ParallelLoop(procInfo, i, pixelcount)                                  //
     {                                                                       //
         res  = pixel[i].r;                                                  // process data

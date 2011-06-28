@@ -168,6 +168,7 @@ int Converter(svlStreamType intype, svlStreamType outtype, unsigned char* inputb
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
             return SVL_FAIL;
     }

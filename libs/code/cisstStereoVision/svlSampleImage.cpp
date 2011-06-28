@@ -272,6 +272,7 @@ int svlSampleImage::ImportMatrix(const svlSampleMatrix* matrix, const int param,
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }

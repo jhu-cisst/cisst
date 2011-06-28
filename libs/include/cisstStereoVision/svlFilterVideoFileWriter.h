@@ -53,8 +53,11 @@ public:
     int SaveCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT) const;
     int LoadCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT);
 
+    std::string GetFilePath(unsigned int videoch = SVL_LEFT) const;
     int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
+    std::string GetCodecName(unsigned int videoch = SVL_LEFT) const;
     int GetCodecName(std::string &name, unsigned int videoch = SVL_LEFT) const;
+    svlVideoIO::Compression* GetCodecParams(unsigned int videoch = SVL_LEFT) const;
     int GetCodecParams(svlVideoIO::Compression **compression, unsigned int videoch = SVL_LEFT) const;
 
     int OpenFile(unsigned int videoch = SVL_LEFT);

@@ -153,7 +153,7 @@ labError:
 
 int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 {
-    cerr << endl << "computestereo - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << endl << "svlExComputeStereo - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
 
     //ComputeStereo("venus_l",  "venus_r",  0, 20, 80, 1, false, true);

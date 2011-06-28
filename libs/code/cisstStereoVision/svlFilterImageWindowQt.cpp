@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: $
 
   Author(s):  Balazs Vagvolgyi
-  Created on: 2008
+  Created on: 2011
 
-  (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,20 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstStereoVision/svlFilterImageWindow.h>
-#include <cisstStereoVision/svlWindowManagerBase.h>
+#include <cisstStereoVision/svlFilterImageWindowQt.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
-#ifdef _WIN32
-    #include "winWin32.h"
-#else
-    #if CISST_SVL_HAS_X11
-        #include "winX11.h"
-    #endif // CISST_SVL_HAS_X11
-#endif // _WIN32
+#include "winQt4OpenGL.h"
 
 
 /****************************************/
@@ -43,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 class svlWindowManagerThreadProc
 {
 public:
-    void* Proc(svlFilterImageWindow* obj)
+    void* Proc(svlFilterImageWindowQt* obj)
     {
         bool fullscreen;
         obj->GetFullScreen(fullscreen);
@@ -53,13 +46,13 @@ public:
 };
 
 
-/**********************************/
-/*** svlFilterImageWindow class ***/
-/**********************************/
+/************************************/
+/*** svlFilterImageWindowQt class ***/
+/************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageWindow)
+CMN_IMPLEMENT_SERVICES(svlFilterImageWindowQt)
 
-svlFilterImageWindow::svlFilterImageWindow() :
+svlFilterImageWindowQt::svlFilterImageWindowQt() :
     svlFilterBase(),
     FullScreenFlag(false),
     PositionSetFlag(false),
@@ -78,12 +71,12 @@ svlFilterImageWindow::svlFilterImageWindow() :
     SetAutomaticOutputType(true);
 }
 
-svlFilterImageWindow::~svlFilterImageWindow()
+svlFilterImageWindowQt::~svlFilterImageWindowQt()
 {
     Release();
 }
 
-int svlFilterImageWindow::SetPosition(const int x, const int y, const unsigned int videoch)
+int svlFilterImageWindowQt::SetPosition(const int x, const int y, const unsigned int videoch)
 {
     if (videoch > 1) return SVL_FAIL;
 
@@ -100,7 +93,7 @@ int svlFilterImageWindow::SetPosition(const int x, const int y, const unsigned i
     return SVL_OK;
 }
 
-int svlFilterImageWindow::GetPosition(int & x, int & y, unsigned int videoch) const
+int svlFilterImageWindowQt::GetPosition(int & x, int & y, unsigned int videoch) const
 {
     if (videoch > 1 || !PositionSetFlag) return SVL_FAIL;
 
@@ -110,48 +103,41 @@ int svlFilterImageWindow::GetPosition(int & x, int & y, unsigned int videoch) co
     return SVL_OK;
 }
 
-void svlFilterImageWindow::SetEventHandler(svlWindowEventHandlerBase* handler)
+void svlFilterImageWindowQt::SetEventHandler(svlWindowEventHandlerBase* handler)
 {
     EventHandler = handler;
 }
 
-void svlFilterImageWindow::SetFullScreen(const bool & fullscreen)
+void svlFilterImageWindowQt::SetFullScreen(const bool & fullscreen)
 {
     FullScreenFlag = fullscreen;
 }
 
-void svlFilterImageWindow::SetTitle(const std::string & title)
+void svlFilterImageWindowQt::SetTitle(const std::string & title)
 {
     Title = title;
 }
 
-void svlFilterImageWindow::GetFullScreen(bool & fullscreen) const
+void svlFilterImageWindowQt::GetFullScreen(bool & fullscreen) const
 {
     fullscreen = FullScreenFlag;
 }
 
-void svlFilterImageWindow::GetTitle(std::string & title) const
+void svlFilterImageWindowQt::GetTitle(std::string & title) const
 {
     title = Title;
 }
 
-int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutput)
+int svlFilterImageWindowQt::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
 
     if (GetInput()->GetType() == svlTypeImageRGB) {
         svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(syncInput);
 
-#ifdef _WIN32
-        WindowManager = new svlWindowManagerWin32(1);
-#else
-    #if CISST_SVL_HAS_X11
-        WindowManager = new svlWindowManagerX11(1);
-    #endif // CISST_SVL_HAS_X11
-#endif // _WIN32
-
+        WindowManager = svlWindowManagerQt4OpenGL::New(1);
         if (WindowManager == 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to find supported window manager (Win32 or X11)" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to find supported window manager (Qt4 with OpenGL)" << std::endl;
             return SVL_FAIL;
         }
         WindowManager->SetClientSize(img->GetWidth(), img->GetHeight(), 0);
@@ -162,16 +148,9 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     else {
         svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(syncInput);
 
-#ifdef _WIN32
-        WindowManager = new svlWindowManagerWin32(2);
-#else
-    #if CISST_SVL_HAS_X11
-        WindowManager = new svlWindowManagerX11(2);
-    #endif // CISST_SVL_HAS_X11
-#endif // _WIN32
-
+        WindowManager = svlWindowManagerQt4OpenGL::New(2);
         if (WindowManager == 0) {
-            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to find supported window manager (Win32 or X11)" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to find supported window manager (Qt4 with OpenGL)" << std::endl;
             return SVL_FAIL;
         }
         WindowManager->SetClientSize(stimg->GetWidth(SVL_LEFT), stimg->GetHeight(SVL_LEFT), 0);
@@ -190,9 +169,9 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     Thread = new osaThread;
     StopThread = false;
     WindowManager->ResetInitEvent();
-    Thread->Create<svlWindowManagerThreadProc, svlFilterImageWindow*>(ThreadProc,
-                                                                      &svlWindowManagerThreadProc::Proc,
-                                                                      this);
+    Thread->Create<svlWindowManagerThreadProc, svlFilterImageWindowQt*>(ThreadProc,
+                                                                        &svlWindowManagerThreadProc::Proc,
+                                                                        this);
     WindowManager->WaitForInitEvent();
 
     syncOutput = syncInput;
@@ -200,7 +179,7 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     return SVL_OK;
 }
 
-int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
+int svlFilterImageWindowQt::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
 //    _SkipIfAlreadyProcessed(syncInput, syncOutput);
@@ -234,7 +213,7 @@ int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, s
     return SVL_OK;
 }
 
-int svlFilterImageWindow::Release()
+int svlFilterImageWindowQt::Release()
 {
     if (Thread) {
         WindowManager->DestroyThreadSafe();
@@ -247,41 +226,41 @@ int svlFilterImageWindow::Release()
         ThreadProc = 0;
     }
     if (WindowManager) {
-        delete WindowManager;
+        WindowManager->Delete();
         WindowManager = 0;
     }
     return SVL_OK;
 }
 
-void svlFilterImageWindow::CreateInterfaces()
+void svlFilterImageWindowQt::CreateInterfaces()
 {
     // Add NON-QUEUED provided interface for configuration management
     mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     if (provided) {
-        provided->AddCommandWrite(&svlFilterImageWindow::SetFullScreen,       this, "SetFullScreen");
-        provided->AddCommandWrite(&svlFilterImageWindow::SetTitle,            this, "SetTitle");
-        provided->AddCommandWrite(&svlFilterImageWindow::SetPositionLCommand, this, "SetPosition");
-        provided->AddCommandWrite(&svlFilterImageWindow::SetPositionLCommand, this, "SetLeftPosition");
-        provided->AddCommandWrite(&svlFilterImageWindow::SetPositionRCommand, this, "SetRightPosition");
-        provided->AddCommandRead (&svlFilterImageWindow::GetFullScreen,       this, "GetFullScreen");
-        provided->AddCommandRead (&svlFilterImageWindow::GetTitle,            this, "GetTitle");
-        provided->AddCommandRead (&svlFilterImageWindow::GetPositionLCommand, this, "GetPosition");
-        provided->AddCommandRead (&svlFilterImageWindow::GetPositionLCommand, this, "GetLeftPosition");
-        provided->AddCommandRead (&svlFilterImageWindow::GetPositionRCommand, this, "GetRightPosition");
+        provided->AddCommandWrite(&svlFilterImageWindowQt::SetFullScreen,       this, "SetFullScreen");
+        provided->AddCommandWrite(&svlFilterImageWindowQt::SetTitle,            this, "SetTitle");
+        provided->AddCommandWrite(&svlFilterImageWindowQt::SetPositionLCommand, this, "SetPosition");
+        provided->AddCommandWrite(&svlFilterImageWindowQt::SetPositionLCommand, this, "SetLeftPosition");
+        provided->AddCommandWrite(&svlFilterImageWindowQt::SetPositionRCommand, this, "SetRightPosition");
+        provided->AddCommandRead (&svlFilterImageWindowQt::GetFullScreen,       this, "GetFullScreen");
+        provided->AddCommandRead (&svlFilterImageWindowQt::GetTitle,            this, "GetTitle");
+        provided->AddCommandRead (&svlFilterImageWindowQt::GetPositionLCommand, this, "GetPosition");
+        provided->AddCommandRead (&svlFilterImageWindowQt::GetPositionLCommand, this, "GetLeftPosition");
+        provided->AddCommandRead (&svlFilterImageWindowQt::GetPositionRCommand, this, "GetRightPosition");
     }
 }
 
-void svlFilterImageWindow::SetPositionLCommand(const vctInt2 & position)
+void svlFilterImageWindowQt::SetPositionLCommand(const vctInt2 & position)
 {
     SetPosition(position[0], position[1], SVL_LEFT);
 }
 
-void svlFilterImageWindow::SetPositionRCommand(const vctInt2 & position)
+void svlFilterImageWindowQt::SetPositionRCommand(const vctInt2 & position)
 {
     SetPosition(position[0], position[1], SVL_RIGHT);
 }
 
-void svlFilterImageWindow::GetPositionLCommand(vctInt2 & position) const
+void svlFilterImageWindowQt::GetPositionLCommand(vctInt2 & position) const
 {
     if (!PositionSetFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "GetPositionLCommand: failed to get position; position has not yet been initialized" << std::endl;
@@ -290,7 +269,7 @@ void svlFilterImageWindow::GetPositionLCommand(vctInt2 & position) const
     GetPosition(position[0], position[1], SVL_LEFT);
 }
 
-void svlFilterImageWindow::GetPositionRCommand(vctInt2 & position) const
+void svlFilterImageWindowQt::GetPositionRCommand(vctInt2 & position) const
 {
     if (!PositionSetFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "GetPositionRCommand: failed to get position; position has not yet been initialized" << std::endl;

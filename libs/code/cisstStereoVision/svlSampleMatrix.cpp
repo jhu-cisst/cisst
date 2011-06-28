@@ -74,6 +74,7 @@ int svlSampleMatrix::ImportData(_TypeIn *input, const unsigned int size)
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }
@@ -120,6 +121,7 @@ int svlSampleMatrix::ImportMatrix(const svlSampleMatrix* matrix)
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }
@@ -185,6 +187,7 @@ int svlSampleMatrix::ImportImage(const svlSampleImage* image)
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }

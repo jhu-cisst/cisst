@@ -100,14 +100,12 @@ public:
 
 int VideoPlayer(std::string pathname)
 {
-//    pathname = "/Users/vagvoba/MediaSamples/training.avi";
-
     bool quit = false;
 
     svlInitialize();
 
     // instantiating SVL stream and filters
-    svlStreamManager stream(1);
+    svlStreamManager stream(4);
     svlFilterSourceVideoFile source(1);
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
@@ -204,12 +202,12 @@ int ParseNumber(char* string, unsigned int maxlen)
 
 int main(int argc, char** argv)
 {
-    cerr << endl << "stereoTutorialVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << endl << "svlExVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
     cerr << "Command line format:" << endl;
-    cerr << "     stereoTutorialVideoPlayer [pathname-optional]" << endl;
+    cerr << "     svlExVideoPlayer [pathname-optional]" << endl;
     cerr << "Example:" << endl;
-    cerr << "     stereoTutorialVideoPlayer video.cvi" << endl;
+    cerr << "     svlExVideoPlayer video.cvi" << endl;
 
     if (argc > 1) VideoPlayer(argv[1]);
     else VideoPlayer("");

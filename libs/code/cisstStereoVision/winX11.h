@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _winX11_h
 #define _winX11_h
 
-#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlWindowManagerBase.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

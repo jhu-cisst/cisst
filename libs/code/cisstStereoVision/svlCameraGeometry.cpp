@@ -25,9 +25,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <sstream>
 
 
-/*************************************/
-/*** svlCameraGeometry class *********/
-/*************************************/
+/*******************************/
+/*** svlCameraGeometry class ***/
+/*******************************/
 
 void svlCameraGeometry::SetIntrinsics(const svlCameraGeometry::Intrinsics & intrinsics, const unsigned int cam_id)
 {

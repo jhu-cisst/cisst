@@ -150,14 +150,14 @@ int main(int argc, char** argv)
     if (argc >= 3) destination = argv[2];
     if (argc >= 2) source = argv[1];
     else {
-        cerr << endl << "stereoTutorialVideoConverter - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+        cerr << endl << "svlExVideoConverter - cisstStereoVision example by Balazs Vagvolgyi" << endl;
         cerr << "See http://www.cisst.org/cisst for details." << endl;
         cerr << "Command line format:" << endl;
-        cerr << "     stereoTutorialVideoConverter [source_pathname [destination_pathname]]" << endl;
+        cerr << "     svlExVideoConverter [source_pathname [destination_pathname]]" << endl;
         cerr << "Examples:" << endl;
-        cerr << "     stereoTutorialVideoConverter" << endl;
-        cerr << "     stereoTutorialVideoConverter src.cvi" << endl;
-        cerr << "     stereoTutorialVideoConverter src.avi dest.cvi" << endl << endl;
+        cerr << "     svlExVideoConverter" << endl;
+        cerr << "     svlExVideoConverter src.cvi" << endl;
+        cerr << "     svlExVideoConverter src.avi dest.cvi" << endl << endl;
     }
 
     VideoConverter(source, destination, false);

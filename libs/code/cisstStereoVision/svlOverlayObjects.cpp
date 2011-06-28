@@ -159,6 +159,12 @@ void svlOverlayImage::SetPosition(vctInt2 pos)
     Pos = pos;
 }
 
+void svlOverlayImage::SetPosition(int x, int y)
+{
+    Pos[0] = x;
+    Pos[1] = y;
+}
+
 void svlOverlayImage::SetAlpha(unsigned char alpha)
 {
     Alpha = alpha;
@@ -534,6 +540,12 @@ void svlOverlayStaticImage::SetImage(const svlSampleImageRGBStereo & image, unsi
 void svlOverlayStaticImage::SetPosition(vctInt2 pos)
 {
     Pos = pos;
+}
+
+void svlOverlayStaticImage::SetPosition(int x, int y)
+{
+    Pos[0] = x;
+    Pos[1] = y;
 }
 
 void svlOverlayStaticImage::SetAlpha(unsigned char alpha)
