@@ -243,27 +243,30 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
     CPPUNIT_ASSERT(min == 1.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
+	min = max = 0;
     /****** TEST ComputeDataRangeX() , sorted = false******/
     trace->ComputeDataRangeX(min, max, false);
     CPPUNIT_ASSERT(min == 1.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
+	min = max = 0;
     /****** TEST ComputeDataRangeY() ******/
     trace->ComputeDataRangeY(min, max);
     CPPUNIT_ASSERT(min == 1.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
+	min = max = 0;
     /****** TEST ComputeDataRangeX(), by overflowing buffer ******/
     trace->AppendPoint(vctDouble2(0, 0));
     trace->ComputeDataRangeX(min, max, false);
     CPPUNIT_ASSERT(min == 0.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
+	min = max = 0;
     /****** TEST ComputeDataRangeY(), by overflowing buffer ******/
     trace->ComputeDataRangeY(min, max);
     CPPUNIT_ASSERT(min == 0.0) ;
     CPPUNIT_ASSERT(max == dataElements);
-
     // I have to use static to declare
     vctDouble2 minXY, maxXY;
     trace->AppendPoint(vctDouble2(dataElements + 1, dataElements + 1));
