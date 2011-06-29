@@ -161,6 +161,13 @@ void svlWidgetQt4OpenGL::mousePressEvent(QMouseEvent* event)
                               Q_ARG(unsigned int, WinID));
 }
 
+void svlWidgetQt4OpenGL::mouseReleaseEvent(QMouseEvent* event)
+{
+    QMetaObject::invokeMethod(Manager, "QSlotMouseRelease", Qt::AutoConnection,
+                              Q_ARG(QMouseEvent*, event),
+                              Q_ARG(unsigned int, WinID));
+}
+
 void svlWidgetQt4OpenGL::mouseMoveEvent(QMouseEvent* event)
 {
     QMetaObject::invokeMethod(Manager, "QSlotMouseMove", Qt::AutoConnection,
@@ -380,13 +387,30 @@ void svlWindowManagerQt4OpenGL::QSlotShow()
 
 void svlWindowManagerQt4OpenGL::QSlotMousePress(QMouseEvent* event, unsigned int winid)
 {
-    int event_id;
-         if (event->button() == Qt::LeftButton)  event_id = winInput_LBUTTONDOWN;
-    else if (event->button() == Qt::RightButton) event_id = winInput_RBUTTONDOWN;
-    else return;
-
     SetMousePos(event->x(), event->y());
-    OnUserEvent(winid, false, event_id);
+
+    if (event->buttons() & Qt::LeftButton) {
+        LButtonDown = true;
+        OnUserEvent(winid, false, winInput_LBUTTONDOWN);
+    }
+    if (event->buttons() & Qt::RightButton) {
+        RButtonDown = true;
+        OnUserEvent(winid, false, winInput_RBUTTONDOWN);
+    }
+}
+
+void svlWindowManagerQt4OpenGL::QSlotMouseRelease(QMouseEvent* event, unsigned int winid)
+{
+    SetMousePos(event->x(), event->y());
+
+    if (LButtonDown && ~(event->buttons() & Qt::LeftButton)) {
+        LButtonDown = false;
+        OnUserEvent(winid, false, winInput_LBUTTONUP);
+    }
+    if (RButtonDown && ~(event->buttons() & Qt::RightButton)) {
+        RButtonDown = false;
+        OnUserEvent(winid, false, winInput_RBUTTONUP);
+    }
 }
 
 void svlWindowManagerQt4OpenGL::QSlotMouseMove(QMouseEvent* event, unsigned int winid)

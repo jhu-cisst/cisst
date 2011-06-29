@@ -55,6 +55,7 @@ protected:
     void resizeGL(int width, int height);
 
     void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
     void keyPressEvent(QKeyEvent* event);
 
@@ -111,6 +112,7 @@ protected slots:
     void QSlotDestroyWindows();
     void QSlotShow();
     void QSlotMousePress(QMouseEvent* event, unsigned int winid);
+    void QSlotMouseRelease(QMouseEvent* event, unsigned int winid);
     void QSlotMouseMove(QMouseEvent* event, unsigned int winid);
     void QSlotKeyPress(QKeyEvent* event, unsigned int winid);
 
