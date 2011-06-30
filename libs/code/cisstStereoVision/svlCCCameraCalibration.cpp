@@ -537,7 +537,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     path << imageDirectory;
     path << imagePrefix;
     path.fill('0');
-    path << std::setw(4) << index << std::setw(1);
+    path << std::setw(3) << index << std::setw(1);
     path << "." << imageType;
     
     if(debug)
@@ -564,7 +564,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     path << imageDirectory;
     path << imagePrefix;
     path.fill('0');
-    path << std::setw(4) << index << std::setw(1);
+    path << std::setw(3) << index << std::setw(1);
     path << ".coords";
     currentFileName = path.str();
 
@@ -589,7 +589,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
         path << imageDirectory;
         path << "shot";
         path.fill('0');
-        path << std::setw(4) << index << std::setw(1);
+        path << std::setw(3) << index << std::setw(1);
         path << ".pts";
         currentFileName = path.str();
         if(debug)

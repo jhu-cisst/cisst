@@ -435,7 +435,7 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 		printCvMatDouble(tMatrix);
 	}
 
-	std::cout <<"===============tcp to camera===============" << std::endl;
+        std::cout <<"===============TCP_T_Camera===============" << std::endl;
 	printCvMatDouble(cameraToTCP);
 
 

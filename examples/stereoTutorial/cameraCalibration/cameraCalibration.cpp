@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     filtering.SetRadius(3);
 
     bool ok = false;
-    bool runHandEye = false;
+    bool runHandEye = true;
     int ch;
     int index = 1;
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
         cout << endl << "svlExCameraCalibration - cisstStereoVision example by Wen P. Liu" << endl;
         cout << "Command line format:" << endl;
         cout << "     svlExCameraCalibration imageDirectory imagePrefix imageType" << endl;
-        cout << "     images should be in format image000X.png" << endl;
+        cout << "     images should be in format image00X.png" << endl;
         cout << "     OPTIONAL [startIndex stopIndex boardSizeWidth boardSizeHeight]" << endl;
         cout << "     (defaults [0 9 png 18 16])" << endl;
         cout << "Examples:" << endl;
