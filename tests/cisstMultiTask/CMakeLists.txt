@@ -36,6 +36,7 @@ set (SOURCE_FILES
      mtsSerializationTest.cpp
      # mtsManagerGlobalTest.cpp
      mtsManagerLocalTest.cpp
+     mtsTimingTest.cpp
      )
 
 # all header files
@@ -54,6 +55,7 @@ set (HEADER_FILES
      mtsTestComponents.h
      # mtsManagerGlobalTest.h
      mtsManagerLocalTest.h
+     mtsTimingTest.h
     )
 
 # add ICE related tests
