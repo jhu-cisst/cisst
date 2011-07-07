@@ -165,7 +165,7 @@ void mtsCollectorStateTest::TestDevice_int(void) {
 template <class _elementType>
 void mtsCollectorStateTest::TestPeriodic(void)
 {
-    mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>;
+    mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>(1.0 * cmn_ms);
     const double serverExecutionDelay = 0.1 * cmn_s;
     TestExecution(server, serverExecutionDelay);
     delete server;

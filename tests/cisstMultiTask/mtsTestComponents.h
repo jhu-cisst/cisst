@@ -219,6 +219,80 @@ public:
     }
 };
 
+
+class mtsTestTiming
+{
+public:
+    typedef enum {
+        NoComputation,
+        SumOfSine, // loop to compute a sum
+        FunctionSleep, // uses global function osaSleep
+        ThreadSleep // uses thread sleep
+    } ComputationType;
+
+    mtsTestTiming(mtsTask * task):
+        Task(task),
+        Done(false),
+        NumberOfIterations(0),
+        TotalNumberOfIterations(1),
+        Period(1.0 * cmn_ms),
+        LoadRatio(0.0),
+        Computation(NoComputation)
+    {}
+
+    inline bool IsDone(void) const {
+        return this->Done;
+    }
+    // parameters for computation
+    inline void SetRunComputation(const ComputationType & computation) {
+        this->Computation = computation;
+    }
+    // desired period
+    inline void SetPeriod(const double periodInSeconds) {
+        this->Period = periodInSeconds;
+    }
+    // desired load ratio, i.e. time spent in computation
+    inline void SetLoadRatio(const double & loadRatio) {
+        this->LoadRatio = loadRatio;
+    }
+    // set number of iterations before being done
+    inline void SetTotalNumberOfIterations(const size_t & iterations) {
+        this->TotalNumberOfIterations = iterations;
+    }
+
+    // computation to be performed
+    inline void Run(void) {
+        this->NumberOfIterations++;
+        if (this->NumberOfIterations >= this->TotalNumberOfIterations) {
+            this->Done = true;
+        }
+        switch (this->Computation) {
+        case NoComputation:
+            break;
+        case SumOfSine:
+            break;
+        case FunctionSleep:
+            osaSleep(this->Period * this->LoadRatio);
+            break;
+        case ThreadSleep:
+            this->Task->Sleep(this->Period * this->LoadRatio);
+            break;
+        default:
+            break;
+        }
+    }
+
+private:
+    mtsTask * Task;
+    bool Done;
+    size_t NumberOfIterations;
+    size_t TotalNumberOfIterations;
+    double Period;
+    double LoadRatio;
+    ComputationType Computation;
+};
+
+
 //-----------------------------------------------------------------------------
 //  Periodic1: (P1:Periodic1:r1 - P2:Continuous1:p1), (P1:Periodic1:r2 - P2:Continuous1:p2)
 //  - provided interface: none
@@ -231,11 +305,14 @@ public:
     typedef _elementType value_type;
     mtsTestInterfaceProvided<value_type> InterfaceProvided1;
     mtsTestInterfaceRequired<value_type> InterfaceRequired1, InterfaceRequired2;
+    mtsTestTiming * TestTiming;
 
-    mtsTestPeriodic1(const std::string & name = "mtsTestPeriodic1",
+    mtsTestPeriodic1(double periodInSeconds,
+                     const std::string & name = "mtsTestPeriodic1",
                      double executionDelay = 0.0):
-        mtsTaskPeriodic(name, 1.0 * cmn_ms),
-        InterfaceProvided1(executionDelay)
+        mtsTaskPeriodic(name, periodInSeconds),
+        InterfaceProvided1(executionDelay),
+        TestTiming(0)
     {
         UseSeparateLogFile(name + "-log.txt");
 
@@ -259,9 +336,16 @@ public:
         }
     }
 
+    void AddTestTiming(void) {
+        this->TestTiming = new mtsTestTiming(this);
+    }
+
     void Run(void) {
         ProcessQueuedCommands();
         ProcessQueuedEvents();
+        if (this->TestTiming) {
+            this->TestTiming->Run();
+        }
     }
 };
 
@@ -313,12 +397,14 @@ public:
     typedef _elementType value_type;
     mtsTestInterfaceProvided<value_type> InterfaceProvided1, InterfaceProvided2;
     mtsTestInterfaceRequired<value_type> InterfaceRequired1;
+    mtsTestTiming * TestTiming;
 
     mtsTestContinuous1(const std::string & name = "mtsTestContinuous1",
                        double executionDelay = 0.0):
         mtsTaskContinuous(name),
         InterfaceProvided1(executionDelay),
-        InterfaceProvided2(executionDelay)
+        InterfaceProvided2(executionDelay),
+        TestTiming(0)
     {
         UseSeparateLogFile(name + "-log.txt");
 
@@ -343,10 +429,16 @@ public:
         }
     }
 
+    void AddTestTiming(void) {
+        this->TestTiming = new mtsTestTiming(this);
+    }
+
     void Run(void) {
-        osaSleep(1.0 * cmn_ms);
         ProcessQueuedCommands();
         ProcessQueuedEvents();
+        if (this->TestTiming) {
+            this->TestTiming->Run();
+        }
     }
 };
 

@@ -46,7 +46,7 @@ void mtsComponentStateTest::TestTransitions(void)
 {
     const double maxTimeToChangeState = 3.0 * cmn_s; // this is an upper limit across OSs, raise it if needed
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
+    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>(1.0 * cmn_ms);
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
     mtsTestFromCallback1<mtsInt> * fromCallback1 = new mtsTestFromCallback1<mtsInt>;
     mtsTestCallbackTrigger * callbackTrigger = new mtsTestCallbackTrigger(fromCallback1);

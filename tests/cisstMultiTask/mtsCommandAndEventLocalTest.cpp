@@ -324,8 +324,8 @@ void mtsCommandAndEventLocalTest::TestDeviceDevice_int(void) {
 template <class _elementType>
 void mtsCommandAndEventLocalTest::TestPeriodicPeriodic(void)
 {
-    mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
-    mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Server");
+    mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>(1.0 * cmn_ms, "mtsTestPeriodic1Client");
+    mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>(1.0 * cmn_ms, "mtsTestPeriodic1Server");
     // these delays are OS dependent, we might need to increase them later
     const double clientExecutionDelay = 0.1 * cmn_s;
     const double serverExecutionDelay = 0.1 * cmn_s;
@@ -411,8 +411,8 @@ template <class _elementType>
 void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking(void)
 {
     const double blockingDelay = 0.25 * cmn_s;
-    mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
-    mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Server", blockingDelay);
+    mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>(1.0 * cmn_ms, "mtsTestPeriodic1Client");
+    mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>(1.0 * cmn_ms, "mtsTestPeriodic1Server", blockingDelay);
     // these delays are OS dependent, we might need to increase them later
     const double clientExecutionDelay = 0.1 * cmn_s;
     const double serverExecutionDelay = 0.1 * cmn_s;

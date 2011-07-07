@@ -194,7 +194,7 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
 
     // Test with mtsComponent type components
     mtsManagerLocal localManager2;
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
+    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>(1.0 * cmn_ms);
     const std::string componentName2 = periodic1->GetName();
 
     CPPUNIT_ASSERT(localManager2.AddComponent(periodic1));
@@ -202,7 +202,7 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(localManager2.RemoveComponent(componentName2));
     CPPUNIT_ASSERT(!localManager2.FindComponent(componentName2));
 
-    periodic1 = new mtsTestPeriodic1<mtsInt>;
+    periodic1 = new mtsTestPeriodic1<mtsInt>(1.0 * cmn_ms);
     CPPUNIT_ASSERT(localManager2.AddComponent(periodic1));
     CPPUNIT_ASSERT(localManager2.FindComponent(componentName2));
     CPPUNIT_ASSERT(localManager2.RemoveComponent(periodic1));
@@ -309,7 +309,7 @@ void mtsManagerLocalTest::TestGetNamesOfTasks(void)
     mtsManagerLocal localManager;
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
+    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>(1.0 * cmn_ms);
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
 
     CPPUNIT_ASSERT(localManager.AddComponent(device1));
@@ -338,7 +338,7 @@ void mtsManagerLocalTest::TestGetNamesOfDevices(void)
     mtsManagerLocal localManager;
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
+    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>(1.0 * cmn_ms);
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
 
     CPPUNIT_ASSERT(localManager.AddComponent(device1));
@@ -379,7 +379,7 @@ void mtsManagerLocalTest::TestConnectDisconnect(void)
 {
     // Local connection test
     mtsManagerLocal localManager;
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
+    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>(1.0 * cmn_ms);
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
     mtsTestFromCallback1<mtsInt> * fromCallback1 = new mtsTestFromCallback1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;

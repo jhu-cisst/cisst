@@ -38,11 +38,11 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \ingroup cisstMultiTask
-   
-   Calculate the statistics (avg,std,min,max) on the vector of data that is added one sample at time. 
-   AddSample checks if the statistics need to be recalculated after a given period elapses (eg 1sec).
-   
- */
+
+  Calculate the statistics (avg,std,min,max) on the vector of data that is added one sample at time.
+  AddSample checks if the statistics need to be recalculated after a given period elapses (eg 1sec).
+
+*/
 class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
 
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -55,38 +55,39 @@ class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
     typedef mtsGenericObject BaseType;
 
     /*! The measured sample average. */
-    double GetAvg(void) {
-            return Avg;
+    double GetAvg(void) const {
+        return Avg;
     }
+
     /*! The measured minimum period of the task */
-    double GetStdDev(void) {
-            return StdDev;
+    double GetStdDev(void) const {
+        return StdDev;
     }
-    
+
     /*! The measured maximum period of the task */
-    double GetMax(void) {
-            return Max;
+    double GetMax(void) const {
+        return Max;
     }
-    
+
     /*! The measured task period (difference between current Tic and
-        previous Tic). */
-    double GetMin(void) {
-            return Min;
+      previous Tic). */
+    double GetMin(void) const {
+        return Min;
     }
 
     /*! Time period between period statistics calculations */
-    inline void SetStatisticsUpdatePeriod(const double &time){
+    inline void SetStatisticsUpdatePeriod(const double & time){
         StatisticsUpdatePeriod = time;
     }
     /*! Get time period between period statistics calculations */
-    inline double GetStatisticsUpdatePeriod(void){
+    inline double GetStatisticsUpdatePeriod(void) const {
         return StatisticsUpdatePeriod;
     }
 
-    void AddSample(const double &sample);
+    void AddSample(const double & sample);
 
  private:
-    
+
     /*! Internal variables for statistics calculations*/
     double          Sum;   //name clash with original SumOfPeriods
     double          SumOfSquares;
@@ -103,10 +104,10 @@ class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
     double         StdDev;
     double         Max;
     double         Min;
-    double         StatisticsUpdatePeriod; 
+    double         StatisticsUpdatePeriod;
 
 
-public:
+ public:
 
     mtsIntervalStatistics();
     ~mtsIntervalStatistics() { };
