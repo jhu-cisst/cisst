@@ -169,7 +169,8 @@ svlTarget2D::svlTarget2D() :
     used(false),
     visible(false),
     conf(0),
-    pos(0, 0)
+    pos(0, 0),
+    feature_quality(-1)
 {
 }
 
@@ -179,6 +180,7 @@ svlTarget2D::svlTarget2D(bool used, bool visible, unsigned char conf, int x, int
     svlTarget2D::visible = visible;
     svlTarget2D::conf    = conf;
     pos.Assign(x, y);
+    feature_quality      = -1;
 }
 
 svlTarget2D::svlTarget2D(bool used, bool visible, unsigned char conf, svlPoint2D & pos)
@@ -187,14 +189,16 @@ svlTarget2D::svlTarget2D(bool used, bool visible, unsigned char conf, svlPoint2D
     svlTarget2D::visible = visible;
     svlTarget2D::conf    = conf;
     svlTarget2D::pos     = pos;
+    feature_quality      = -1;
 }
 
 svlTarget2D::svlTarget2D(int x, int y)
 {
-    used    = true;
-    visible = true;
-    conf    = 255;
+    used             = true;
+    visible          = true;
+    conf             = 255;
     pos.Assign(x, y);
+    feature_quality  = -1;
 }
 
 svlTarget2D::svlTarget2D(svlPoint2D & pos)
@@ -203,14 +207,18 @@ svlTarget2D::svlTarget2D(svlPoint2D & pos)
     visible          = true;
     conf             = 255;
     svlTarget2D::pos = pos;
+    feature_quality  = -1;
 }
 
 void svlTarget2D::Assign(const svlTarget2D & target)
 {
-    used    = target.used;
-    visible = target.visible;
-    conf    = target.conf;
-    pos     = target.pos;
+    used            = target.used;
+    visible         = target.visible;
+    conf            = target.conf;
+    pos             = target.pos;
+    feature_quality = target.feature_quality;
+    feature_data.SetSize(target.feature_data.size());
+    memcpy(feature_data.Pointer(), target.feature_data.Pointer(), feature_data.size());
 }
 
 void svlTarget2D::Assign(bool used, bool visible, unsigned char conf, int x, int y)
@@ -327,7 +335,7 @@ void svlRGBA::Assign(unsigned char r_, unsigned char g_, unsigned char b_, unsig
 /*************************/
 
 svlBlob::svlBlob() :
-    id(0),
+    ID(0),
     used(false),
     left(0),
     right(0),
@@ -343,7 +351,7 @@ svlBlob::svlBlob() :
 
 void svlBlob::Assign(const svlBlob & blob)
 {
-    id            = blob.id;
+    ID            = blob.ID;
     used          = blob.used;
     left          = blob.left;
     right         = blob.right;

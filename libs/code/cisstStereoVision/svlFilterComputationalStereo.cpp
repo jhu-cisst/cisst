@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterComputationalStereo class ****/
 /*******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterComputationalStereo)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterComputationalStereo, svlFilterBase)
 
 
 svlFilterComputationalStereo::svlFilterComputationalStereo() :
@@ -205,7 +205,7 @@ int svlFilterComputationalStereo::Process(svlProcInfo* procInfo, svlSample* sync
     svlSampleImage* stimg = dynamic_cast<svlSampleImage*>(syncInput);
 
     // Process data
-    if (procInfo->count == 1 || procInfo->id == 1) {
+    if (procInfo->count == 1 || procInfo->ID == 1) {
         if (XCheckEnabled) {
             svlStreamType inputtype = GetInput()->GetType();
 
@@ -245,14 +245,14 @@ int svlFilterComputationalStereo::Process(svlProcInfo* procInfo, svlSample* sync
             // Stereo: computing disparity map
             XCheckStereoAlgorithm->Process(XCheckImage, XCheckDisparityBuffer.Pointer());
 
-            if (procInfo->id == 1) {
+            if (procInfo->ID == 1) {
                 _SynchronizeThreads(procInfo);
                 return SVL_OK;
             }
         }
     }
 
-    if (procInfo->id == 0) {
+    if (procInfo->ID == 0) {
 
         // Stereo: computing disparity map
         StereoAlgorithm->Process(stimg, DisparityBuffer.Pointer());

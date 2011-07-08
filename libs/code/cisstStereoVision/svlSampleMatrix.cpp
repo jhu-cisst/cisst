@@ -71,9 +71,21 @@ int svlSampleMatrix::ImportData(_TypeIn *input, const unsigned int size)
         case svlTypeImageMono32:
         case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }
@@ -117,9 +129,21 @@ int svlSampleMatrix::ImportMatrix(const svlSampleMatrix* matrix)
         case svlTypeImageMono32:
         case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }
@@ -182,9 +206,21 @@ int svlSampleMatrix::ImportImage(const svlSampleImage* image)
         case svlTypeMatrixUInt64:
         case svlTypeMatrixFloat:
         case svlTypeMatrixDouble:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }

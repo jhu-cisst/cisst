@@ -70,6 +70,7 @@ protected:
     typedef struct {
         // Dynamic component management
         mtsFunctionWrite ComponentCreate;
+        mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
@@ -82,6 +83,7 @@ protected:
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
         mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
         mtsFunctionRead          GetListOfConnections;
+        mtsFunctionQualifiedRead GetListOfComponentClasses;
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } InterfaceLCMFunctionType;
@@ -106,7 +108,8 @@ protected:
     } GeneralInterface;
 
     /*! Create new component and add it to LCM */
-    bool CreateAndAddNewComponent(const std::string & className, const std::string & componentName);
+    bool CreateAndAddNewComponent(const std::string & className, const std::string & componentName,
+                                  const std::string & constructorArgSerialized);
 
     /*! \brief Connect two local interfaces.
         \param clientComponentName Name of client component
@@ -151,6 +154,7 @@ public:
 
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
@@ -163,12 +167,15 @@ public:
     void InterfaceLCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface &intfc,
                                                 InterfaceRequiredDescription & description) const;
     void InterfaceLCMCommands_LoadLibrary(const std::string &fileName, bool &result) const;
+    void InterfaceLCMCommands_GetListOfComponentClasses(
+                              std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
 
     /*! Event generators for InterfaceLCM's provided interface */
     mtsFunctionWrite InterfaceLCMEvents_ChangeState;
 
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
@@ -182,6 +189,8 @@ public:
                                                          std::vector<std::string> & names) const;
     void InterfaceComponentCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
+    void InterfaceComponentCommands_GetListOfComponentClasses(const std::string &processName,
+                                                              std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const;
     void InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, 
                                                                     InterfaceProvidedDescription & description) const;
     void InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, 

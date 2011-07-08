@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageExposureCorrection class ***/
 /**********************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageExposureCorrection)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageExposureCorrection, svlFilterBase)
 
 svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
     svlFilterBase(),

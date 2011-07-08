@@ -1,35 +1,17 @@
 #include <cisstDevices/robotcomponents/osg/devOSGManipulator.h>
-#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
+#include <cisstDevices/robotcomponents/trajectories/devLinearRn.h>
+#include <cisstDevices/robotcomponents/trajectories/devSetPoints.h>
+
 #include <cisstCommon/cmnGetChar.h>
 
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsTaskManager.h>
-
-// This is an example of a simple trajectory
-class Trajectory : public devRobotComponent{
-private:
-  RnIO* output;
-  vctDynamicVector<double> q;
-public:
-  Trajectory() :
-    devRobotComponent( "trajectory", 0.1, Trajectory::ENABLED, OSA_CPU1 ),
-    q( 7, 0.0 ){    
-    output = RequireOutputRn( "Output", Trajectory::POSITION, 7 );
-  }
-  void Configure( const std::string& CMN_UNUSED( argv ) = "" ){}
-  void Startup(){}
-  void Run(){
-    ProcessQueuedCommands();
-    for( size_t i=0; i<7; i++ ) q[i] += 0.01;
-    output->SetPosition( q );
-  }
-  void Cleanup(){}
-};
-
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -49,6 +31,25 @@ int main(){
   // Add the camera component
   taskManager->AddComponent( camera );
   
+  vctDynamicVector<double> qinit(7, 0.0), qfinal( 7, 1.0 ), qdmax( 7, 0.1 );
+  std::vector< vctDynamicVector<double> > Q;
+  Q.push_back( qfinal );
+  Q.push_back( qinit );
+
+  devSetPoints setpoints( "setpoints", Q );
+  taskManager->AddComponent( &setpoints );
+
+  devLinearRn trajectory( "trajectory",
+			  0.01,
+			  devTrajectory::ENABLED,
+			  OSA_CPU1,
+			  devTrajectory::QUEUE,
+			  devTrajectory::POSITION,
+			  qinit,
+			  qdmax );
+  taskManager->AddComponent( &trajectory );
+
+
   // WAM stuff
   std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
@@ -60,9 +61,8 @@ int main(){
   models.push_back( path+"l6.obj" );
   models.push_back( path+"l7.obj" );
 
-  vctDynamicVector<double> qinit(7, 0.0);
   devOSGManipulator* WAM = new devOSGManipulator( "WAM",
-						  0.1,
+						  0.01,
 						  devManipulator::ENABLED,
 						  OSA_CPU1,
 						  world,
@@ -73,19 +73,18 @@ int main(){
 						  path+"l0.obj" );
   taskManager->AddComponent( WAM );
 
-  // Trajectory
-  Trajectory trajectory;
-  taskManager->AddComponent( &trajectory );
-
   // Connect trajectory to robot
-  taskManager->Connect( trajectory.GetName(), "Output",
-			WAM->GetName(),       devOSGManipulator::Input );
+  taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
+			trajectory.GetName(), devLinearRn::Input );
 
+  taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
+			WAM->GetName(),       devOSGManipulator::Input );
 
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
 
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
 
   taskManager->KillAll();

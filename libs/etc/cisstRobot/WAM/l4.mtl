@@ -1,12 +1,16 @@
-# Blender3D MTL File: 
-# Material Count: 1
-newmtl (null).005
-Ns 86.274510
-Ka 0.000000 0.000000 0.000000
-Kd 0.327680 0.327680 0.327680
-Ks 0.062500 0.062500 0.062500
-Ni 1.000000
-d 1.000000
-illum 2
+#
+# Wavefront material file: e:\download\barrett\solidworks\l4.mtl
+#
+# Converted by the PolyTrans geometry converter from Okino Computer Graphics, Inc.
+# Date/time of export: 05/12/2011 00:39:32
+#
+# Bounding box of geometry = (-0.0445,-0.052998,-0.05575) to (0.0979955,0.277662,0.05575).
 
+newmtl default
+	Ns 32
+	d 1
+	illum 2
+	Kd 0.4 0.4 0.4
+	Ks 0.7 0.7 0.7
+	Ka 0.3 0.3 0.3
 

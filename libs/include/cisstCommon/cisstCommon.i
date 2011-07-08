@@ -80,17 +80,22 @@ http://www.cisst.org/cisst/license.txt.
 // feature whatsoever.
 %typemap(out) cmnGenericObject * {
     if (result != NULL) {
-        // create a string with a trailing "*" to retrieve the SWIG pointer type info
-        std::string className = result->Services()->GetName() + " *";
-        swig_type_info* typeInfo = SWIG_TypeQuery(className.c_str());
+
+        const cmnClassServicesBase *curServices = result->Services();
+        swig_type_info *typeInfo = 0;
+        // Loop through class hierarchy until SWIG type info is found
+        for (; curServices && !typeInfo; curServices = curServices->GetParentServices()) {
+            // create a string with a trailing "*" to retrieve the SWIG pointer type info
+            std::string className = curServices->GetName() + " *";
+            typeInfo = SWIG_TypeQuery(className.c_str());
+        }
         // if the type info exists, i.e. this class has been wrapped, convert pointer
-        if (typeInfo != NULL) {
+        if (typeInfo)
             resultobj = SWIG_NewPointerObj((void*)(result), typeInfo, $owner | %newpointer_flags);
-        } else {
-            // fail, maybe a better fall back would be to return the base type, but this is really useless
+        else {  // failed
             char buffer[256];
             sprintf(buffer, "cisstCommonPython.i: sorry, can't create a python object of type %s.  Make sure the python module which defines this type has been imported",
-            className.c_str());
+                result->Services()->GetName().c_str());
             PyErr_SetString(PyExc_TypeError, buffer);
             SWIG_fail;
         }
@@ -177,13 +182,14 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %template(cmnLODMultiplexerStreambufChar) cmnLODMultiplexerStreambuf<char>;
 %include "cisstCommon/cmnCallbackStreambuf.h"
 %template(cmnCallbackStreambufChar) cmnCallbackStreambuf<char>;
+%include "cisstCommon/cmnLogLoD.h"
 %include "cisstCommon/cmnLogger.h"
 
 // Wrap cmnPath
 %include "cisstCommon/cmnPath.h"
 
 #if CISST_HAS_XML
-    %include "cisstCommon/cmnXMLPath.h"
+#    %include "cisstCommon/cmnXMLPath.h"
 #endif  // CISST_HAS_XML
 
 // Wrap and instantiate useful type traits

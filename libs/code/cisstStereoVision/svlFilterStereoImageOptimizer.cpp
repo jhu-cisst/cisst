@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterStereoImageOptimizer class ****/
 /********************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterStereoImageOptimizer)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterStereoImageOptimizer, svlFilterBase)
 
 svlFilterStereoImageOptimizer::svlFilterStereoImageOptimizer() :
     svlFilterBase(),

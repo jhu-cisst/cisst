@@ -28,6 +28,7 @@ SET(SOURCE_FILES
     svlTypes.cpp
     svlClassServices.cpp
     svlSampleBlobs.cpp
+    svlSampleCameraGeometry.cpp
     svlSampleText.cpp
     svlSampleTargets.cpp
     svlSampleTransform3D.cpp
@@ -66,6 +67,7 @@ SET(SOURCE_FILES
   # Filter API
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
+    svlFilterImageBorder.cpp
     svlFilterImageBlobDetector.cpp
     svlFilterImageBlobTracker.cpp
     svlFilterImageCenterFinder.cpp
@@ -88,7 +90,10 @@ SET(SOURCE_FILES
     svlFilterImageTracker.cpp
     svlFilterImageTranslation.cpp
     svlFilterImageUnsharpMask.cpp
+    svlFilterImageWindow.cpp
+    svlFilterImageWindowTargetSelect.cpp
     svlFilterLightSourceBuddy.cpp
+    svlFilterSampler.cpp
     svlFilterSourceBuffer.cpp
     svlFilterSourceDummy.cpp
     svlFilterSourceImageFile.cpp
@@ -102,6 +107,7 @@ SET(SOURCE_FILES
     svlFilterStreamTypeConverter.cpp
     svlFilterVideoExposureManager.cpp
     svlFilterVideoFileWriter.cpp
+    svlWindowManagerBase.cpp
     svlRequiredInterfaces.cpp
 	svlFilterCallback.cpp
     svlFilterBuffer.cpp
@@ -129,6 +135,7 @@ SET(HEADER_FILES
     svlTypes.h
     svlTypeCheckers.h
     svlSampleBlobs.h
+    svlSampleCameraGeometry.h
     svlSampleText.h
     svlSampleTargets.h
     svlSampleTransform3D.h
@@ -166,6 +173,7 @@ SET(HEADER_FILES
   # Filter API
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
+    svlFilterImageBorder.h
     svlFilterImageBlobDetector.h
     svlFilterImageBlobTracker.h
     svlFilterImageCenterFinder.h
@@ -188,7 +196,10 @@ SET(HEADER_FILES
     svlFilterImageTracker.h
     svlFilterImageTranslation.h
     svlFilterImageUnsharpMask.h
+    svlFilterImageWindow.h
+    svlFilterImageWindowTargetSelect.h
     svlFilterLightSourceBuddy.h
+    svlFilterSampler.h
     svlFilterSourceBuffer.h
     svlFilterSourceDummy.h
     svlFilterSourceImageFile.h
@@ -202,6 +213,7 @@ SET(HEADER_FILES
     svlFilterStreamTypeConverter.h
     svlFilterVideoExposureManager.h
     svlFilterVideoFileWriter.h
+    svlWindowManagerBase.h
     svlRequiredInterfaces.h
 	svlFilterCallback.h
     svlFilterBuffer.h
@@ -289,9 +301,9 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
-            svlVideoCodecOpenCV.h       # private header
-            svlVideoCodecOpenCV.cpp
-            svlTrackerOCVMeanShift.cpp		
+            #svlVideoCodecOpenCV.h       # private header
+            #svlVideoCodecOpenCV.cpp
+            svlTrackerOCVMeanShift.cpp
             )
         IF(NOT WIN32)
             SET(SOURCE_FILES
@@ -304,7 +316,7 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             ${HEADER_FILES}
             svlFilterImageZoom.h
             svlFilterToolTracker.h
-            svlTrackerOCVMeanShift.h		
+            svlTrackerOCVMeanShift.h
             )
         MESSAGE(STATUS "OpenCV 2.2+ found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)
@@ -438,8 +450,8 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
-            svlVideoCodecOpenCV.h       # private header
-            svlVideoCodecOpenCV.cpp
+            #svlVideoCodecOpenCV.h       # private header
+            #svlVideoCodecOpenCV.cpp
             svlTrackerOCVMeanShift.cpp
 			svlCCCalibrationGrid.cpp
 			svlCCCameraCalibration.cpp
@@ -577,6 +589,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
             svlVideoCodecCVI.cpp
             svlVideoCodecTCPStream.h        # private header
             svlVideoCodecTCPStream.cpp
+            svlVideoCodecUDPStream.h        # private header
+            svlVideoCodecUDPStream.cpp
             )
         MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)
@@ -671,6 +685,128 @@ ELSE(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
 ENDIF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
 
 
+IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
+    SET(FFMPEG_OPTIONS
+        FFMPEG_avcodec_INCLUDE_DIR
+        FFMPEG_avformat_INCLUDE_DIR
+        FFMPEG_avutil_INCLUDE_DIR
+        FFMPEG_swscale_INCLUDE_DIR
+        FFMPEG_avcodec_LIBRARY
+        FFMPEG_avformat_LIBRARY
+        FFMPEG_avutil_LIBRARY
+        FFMPEG_swscale_LIBRARY
+        CACHE INTERNAL "List of FFMPEG options"
+        )
+
+    SET(FFMPEG_FOUND "NO")
+    FIND_PATH(FFMPEG_avcodec_INCLUDE_DIR avcodec.h
+              PATHS
+                "/usr/include/libavcodec"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libavcodec"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where avcodec.h can be found"
+              )
+    FIND_PATH(FFMPEG_avformat_INCLUDE_DIR avformat.h
+              PATHS
+                "/usr/include/libavformat"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libavformat"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where avformat.h can be found"
+              )
+    FIND_PATH(FFMPEG_avutil_INCLUDE_DIR avutil.h
+              PATHS
+                "/usr/include/libavutil"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libavutil"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where avutil.h can be found"
+              )
+    FIND_PATH(FFMPEG_swscale_INCLUDE_DIR swscale.h
+              PATHS
+                "/usr/include/libswscale"
+                "/usr/include/ffmpeg"
+                "/usr/include"
+                "/opt/local/include/libswscale"
+                "/opt/local/include/ffmpeg"
+                "/opt/local/include"
+              DOC "What is the path where swscale.h can be found"
+              )
+    FIND_LIBRARY(FFMPEG_avcodec_LIBRARY avcodec
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG avcodec library be found"
+                 )
+    FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG avformat library be found"
+                 )
+    FIND_LIBRARY(FFMPEG_avutil_LIBRARY avutil
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG avutil library be found"
+                 )
+    FIND_LIBRARY(FFMPEG_swscale_LIBRARY swscale
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the FFMPEG swscale library be found"
+                 )
+    IF(FFMPEG_avcodec_INCLUDE_DIR AND FFMPEG_avformat_INCLUDE_DIR AND FFMPEG_avutil_INCLUDE_DIR AND FFMPEG_swscale_INCLUDE_DIR)
+        IF(FFMPEG_avcodec_LIBRARY AND FFMPEG_avformat_LIBRARY AND FFMPEG_avutil_LIBRARY AND FFMPEG_swscale_LIBRARY)
+            SET(FFMPEG_FOUND "YES")
+        ENDIF(FFMPEG_avcodec_LIBRARY AND FFMPEG_avformat_LIBRARY AND FFMPEG_avutil_LIBRARY AND FFMPEG_swscale_LIBRARY)
+    ENDIF(FFMPEG_avcodec_INCLUDE_DIR AND FFMPEG_avformat_INCLUDE_DIR AND FFMPEG_avutil_INCLUDE_DIR AND FFMPEG_swscale_INCLUDE_DIR)
+
+    IF(FFMPEG_FOUND)
+        MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
+
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${FFMPEG_avcodec_INCLUDE_DIR}"
+            "${FFMPEG_avformat_INCLUDE_DIR}"
+            "${FFMPEG_avutil_INCLUDE_DIR}"
+            "${FFMPEG_swscale_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${FFMPEG_avcodec_LIBRARY}"
+            "${FFMPEG_avformat_LIBRARY}"
+            "${FFMPEG_avutil_LIBRARY}"
+            "${FFMPEG_swscale_LIBRARY}"
+            )
+
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlVideoCodecFFMPEG.h     # private header
+            svlVideoCodecFFMPEG.cpp
+            )
+        MESSAGE(STATUS "FFMPEG found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" ON)
+
+    ELSE(FFMPEG_FOUND)
+        IF(CISST_SVL_HAS_FFMPEG)
+            MARK_AS_ADVANCED(CLEAR ${FFMPEG_OPTIONS})
+            MESSAGE(FATAL_ERROR "FFMPEG required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_FFMPEG)
+            MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
+            OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" OFF)
+        ENDIF(CISST_SVL_HAS_FFMPEG)
+    ENDIF(FFMPEG_FOUND)
+
+ELSE(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
+    OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" OFF)
+ENDIF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
+
+
 # Matrox Imaging Library
 IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
     SET(MIL_OPTIONS
@@ -742,13 +878,6 @@ IF(WIN32)
         winWin32.cpp
         svlVideoCodecVfW32.h    # private header
         svlVideoCodecVfW32.cpp
-        svlFilterImageWindow.cpp
-        svlFilterImageWindowTargetSelect.cpp
-        )
-    SET(HEADER_FILES
-        ${HEADER_FILES}
-        svlFilterImageWindow.h
-        svlFilterImageWindowTargetSelect.h
         )
     SET(SVL_ADDITIONAL_LIBRARIES
         "${SVL_ADDITIONAL_LIBRARIES}"
@@ -891,7 +1020,7 @@ IF(WIN32)
         OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" OFF)
     ENDIF(CISST_SVL_HAS_SVS OR NOT SVS_OPTIONS)
 
-    # ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
+    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 
 ELSE(WIN32)
 
@@ -975,7 +1104,7 @@ IF(UNIX)
             IF(CMAKE_SYSTEM_NAME MATCHES Darwin)
                 OPTION(CISST_SVL_DC1394_ENABLE_800Mbps "Enable IEEE1394B (800Mbps)" OFF)
             ELSE(CMAKE_SYSTEM_NAME MATCHES Darwin)
-                SET(CISST_SVL_DC1394_ENABLE_800Mbps "ON" CACHE INTERNAL "Enable IEEE1394B (800Mbps)")
+                OPTION(CISST_SVL_DC1394_ENABLE_800Mbps "Enable IEEE1394B (800Mbps)" ON)
             ENDIF(CMAKE_SYSTEM_NAME MATCHES Darwin)
 
         ELSE(DC1394_FOUND)
@@ -1011,13 +1140,6 @@ IF(UNIX)
                 ${SOURCE_FILES}
                 winX11.h                 # private header
                 winX11.cpp
-                svlFilterImageWindow.cpp
-                svlFilterImageWindowTargetSelect.cpp
-                )
-            SET(HEADER_FILES
-                ${HEADER_FILES}
-                svlFilterImageWindow.h
-                svlFilterImageWindowTargetSelect.h
                 )
             MESSAGE(STATUS "X11 found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" ON)
@@ -1067,6 +1189,94 @@ ELSE(UNIX)
 
 ENDIF(UNIX)
 
+#----------------------------------------------------------
+#   Module  : CUDA support for cisstStereoVision library
+#   Author  : Min Yang Jung & Balazs Vagvolgyi
+#   Created : June 24, 2010
+#----------------------------------------------------------
+
+MACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
+    CUDA_ADD_CUDA_INCLUDE_ONCE()
+    CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+    CUDA_BUILD_SHARED_LIBRARY(_cuda_shared_flag ${ARGN})
+    CUDA_WRAP_SRCS(${cuda_target} OBJ _generated_files ${_sources} ${_cmake_options} ${_cuda_shared_flag} OPTIONS ${_options})
+    ADD_LIBRARY(${cuda_target} ${_cmake_options} ${_generated_files} ${_sources})
+    TARGET_LINK_LIBRARIES(${cuda_target} ${CUDA_LIBRARIES} )
+    SET_TARGET_PROPERTIES(${cuda_target} PROPERTIES LINKER_LANGUAGE ${CUDA_C_OR_CXX})
+    SET(${generated_files} ${_generated_files})
+ENDMACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
+
+IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+    SET(CUDA_OPTIONS
+        CUDA_SDK_ROOT_DIR
+        CUDA_INCLUDE_DIRS
+        CUDA_LIBRARIES
+        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
+        CUDA_BUILD_CUBIN
+        CUDA_BUILD_EMULATION
+        CUDA_TOOLKIT_ROOT_DIR
+        CUDA_VERBOSE_BUILD
+        CACHE INTERNAL "List of CUDA options"
+        )
+
+    FIND_PACKAGE(CUDA)
+    IF(CUDA_FOUND)
+        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc")
+        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
+        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
+                             cisstStereoVisionCUDA
+                             svlCUDACommon.cu
+                             STATIC
+                             OPTIONS ""#-DSTUFF=aaa"
+                             RELEASE --use_fast_math -DNDEBUG
+                             DEBUG -g -DDEBUG
+                             )
+        # Add a special target to clean 'nvcc' generated files.
+        CUDA_BUILD_CLEAN_TARGET()
+
+        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+        
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${CUDA_SDK_ROOT_DIR}/common/inc"
+            "${CUDA_INCLUDE_DIRS}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            ${CUDA_LIBRARIES}
+#            ${CUDA_GENERATED_LIBRARIES}
+            )
+        SET(HEADER_FILES
+            ${HEADER_FILES}
+            svlSampleCUDAImageTypes.h
+            svlSampleCUDAImageCustom.h
+            svlSampleCUDAImage.h
+            svlFilterCUDATest.h
+            )
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlSampleCUDAImageTypes.cpp
+            svlSampleCUDAImage.cpp
+            svlFilterCUDATest.cpp
+            )
+        MESSAGE(STATUS "CUDA found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" ON)
+
+    ELSE(CUDA_FOUND)
+        IF(CISST_SVL_HAS_CUDA)
+            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
+            MESSAGE(FATAL_ERROR "CUDA required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_CUDA)
+            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+            OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
+        ENDIF(CISST_SVL_HAS_CUDA)
+    ENDIF(CUDA_FOUND)
+
+ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+    OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
+ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+
 # Options for BlackMagic DeckLink SDK
 option (CISST_SVL_HAS_BM_DECKLINK "Compile BlackMagic(BM) DeckLink extensions" OFF)
 if (CISST_SVL_HAS_BM_DECKLINK)
@@ -1083,7 +1293,7 @@ if (CISST_SVL_HAS_BM_DECKLINK)
   endif (DeckLink_FOUND)
 endif (CISST_SVL_HAS_BM_DECKLINK)
             
-            
+
 # Set SVL options to 'advanced' to hide them from beginner user
 #MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_OPENCV)
@@ -1096,11 +1306,13 @@ MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DIRECTSHOW)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_SVS)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_VIDEO4LINUX2)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DC1394)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_FFMPEG)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_X11)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_XV)
-IF(CMAKE_SYSTEM_NAME MATCHES Darwin)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_CUDA)
+IF(UNIX)
     MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
-ENDIF(CMAKE_SYSTEM_NAME MATCHES Darwin)
+ENDIF(UNIX)
 
 # Exporting settings to applications that link against cisst
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES SVL_ADDITIONAL_INCLUDE_DIRECTORIES)
@@ -1122,6 +1334,18 @@ SET(SOURCE_FILES
 SET(HEADER_FILES
     ${HEADER_FILES}
     svlInitializer.h)
+
+# Add svlFilterImageOpenGL is OpenGL is used
+if (CISST_HAS_OPENGL)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       svlFilterImageOpenGL.cpp
+       )
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       svlFilterImageOpenGL.h
+       )
+endif (CISST_HAS_OPENGL)
 
 # Create the config file
 SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
@@ -1145,6 +1369,7 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
+
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
   cisst_add_swig_module(MODULE cisstStereoVision
@@ -1154,25 +1379,90 @@ if (CISST_HAS_SWIG_PYTHON)
 endif (CISST_HAS_SWIG_PYTHON)
 
 
+# Link `cisstStereoVision` against CUDA generated libraries
+IF(CISST_SVL_HAS_CUDA)
+    TARGET_LINK_LIBRARIES(cisstStereoVision ${CUDA_GENERATED_LIBRARIES})
+ENDIF(CISST_SVL_HAS_CUDA)
+
+
 # Qt widgets
-if (CISST_HAS_OPENGL AND CISST_HAS_QT)
+IF(CISST_HAS_QT)
+    SET(SVL_QT_HEADER_FILES
+        svlQtObjectFactory.h
+        svlQtDialog.h
+        svlQtWidgetFileOpen.h
+        svlQtWidgetFramerate.h
+        svlQtWidgetVideoEncoder.h
+        svlQtWidgetVidCapSrcImageProperties.h
+        )
+    SET(SVL_QT_SOURCE_FILES
+        svlQtObjectFactory.cpp
+        svlQtDialog.cpp
+        svlQtWidgetFileOpen.cpp
+        svlQtWidgetFramerate.cpp
+        svlQtWidgetVideoEncoder.cpp
+        svlQtWidgetVidCapSrcImageProperties.cpp
+        )
+    SET(SVL_QT_UI_FILES
+        svlQtWidgetFramerate.ui
+        svlQtWidgetVideoEncoder.ui
+        svlQtWidgetVidCapSrcImageProperties.ui
+        )
 
-  # to include Qt generated files
-  include_directories (${CMAKE_CURRENT_BINARY_DIR})
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../../include/cisstStereoVision/svlFilterImageQtWidget.h)
+    IF(CISST_HAS_OPENGL)
+        SET(SVL_QT_HEADER_FILES
+            ${SVL_QT_HEADER_FILES}
+            svlFilterImageWindowQt.h
+            svlFilterImageOpenGLQtWidget.h
+            )
+        SET(SVL_QT_SOURCE_FILES
+            ${SVL_QT_SOURCE_FILES}
+            winQt4OpenGL.h          # private header
+            winQt4OpenGL.cpp
+            svlFilterImageWindowQt.cpp
+            svlFilterImageOpenGLQtWidget.cpp
+            )
+        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP
+                     winQt4OpenGL.h
+                     )
+    ENDIF(CISST_HAS_OPENGL)
 
-  cisst_add_library (
-    LIBRARY cisstStereoVisionQt
-    LIBRARY_DIR cisstStereoVision
-    DEPENDENCIES cisstCommon
-                 cisstVector
-                 cisstStereoVision
-    SOURCE_FILES svlFilterImageQtWidget.cpp
-    HEADER_FILES svlFilterImageQtWidget.h
-                 svlExportQt.h
-    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+    # Include Qt generated files
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-  target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+    FOREACH(HEADER ${SVL_QT_HEADER_FILES})
+        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP_TEMP
+                     ../../include/cisstStereoVision/${HEADER}
+                     )
+        SET(SVL_QT_WRAPPED_CPP
+            ${SVL_QT_WRAPPED_CPP}
+            ${SVL_QT_WRAPPED_CPP_TEMP}
+            )
+    ENDFOREACH(HEADER)
 
-endif (CISST_HAS_OPENGL AND CISST_HAS_QT)
+    FOREACH(UI ${SVL_QT_UI_FILES})
+        QT4_WRAP_UI(SVL_QT_WRAPPED_UI
+                    ${UI}
+                    )
+        SET(SVL_QT_WRAPPED_UI
+            ${SVL_QT_WRAPPED_UI}
+            ${SVL_QT_WRAPPED_UI_TEMP}
+            )
+    ENDFOREACH(UI)
+
+    CISST_ADD_LIBRARY(LIBRARY cisstStereoVisionQt
+                      LIBRARY_DIR cisstStereoVision
+                      DEPENDENCIES cisstCommon
+                                   cisstVector
+                                   cisstStereoVision
+                      SOURCE_FILES ${SVL_QT_SOURCE_FILES}
+                      HEADER_FILES ${SVL_QT_HEADER_FILES}
+                                   svlExportQt.h
+                      ADDITIONAL_SOURCE_FILES ${SVL_QT_WRAPPED_CPP}
+                                              ${SVL_QT_WRAPPED_UI}
+                      )
+
+    TARGET_LINK_LIBRARIES(cisstStereoVisionQt ${QT_LIBRARIES})
+
+ENDIF(CISST_HAS_QT)
+

@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageZoom class **********/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageZoom)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageZoom, svlFilterBase)
 
 svlFilterImageZoom::svlFilterImageZoom() :
     svlFilterBase(),

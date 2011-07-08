@@ -26,9 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterOutput.h>
 
 
-/*******************************************/
-/*** svlFilterStreamTypeConverter class ****/
-/*******************************************/
+/******************************************/
+/*** svlFilterStreamTypeConverter class ***/
+/******************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterStreamTypeConverter)
 
@@ -149,6 +149,45 @@ int svlFilterStreamTypeConverter::SetType(svlStreamType inputtype, svlStreamType
             return SVL_OK;
         }
 
+#if CISST_SVL_HAS_CUDA
+    ///////////////////////////////////////////////////////////////////
+    // CUDA image mappings:
+        if ((inputtype == svlTypeImageRGB          && outputtype == svlTypeCUDAImageRGB)          ||
+            (inputtype == svlTypeImageRGBA         && outputtype == svlTypeCUDAImageRGBA)         ||
+            (inputtype == svlTypeImageMono8        && outputtype == svlTypeCUDAImageMono8)        ||
+            (inputtype == svlTypeImageMono16       && outputtype == svlTypeCUDAImageMono16)       ||
+            (inputtype == svlTypeImageMono32       && outputtype == svlTypeCUDAImageMono32)       ||
+            (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeCUDAImageRGBStereo)    ||
+            (inputtype == svlTypeImageRGBAStereo   && outputtype == svlTypeCUDAImageRGBAStereo)   ||
+            (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeCUDAImageMono8Stereo)  ||
+            (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeCUDAImageMono16Stereo) ||
+            (inputtype == svlTypeImageMono32Stereo && outputtype == svlTypeCUDAImageMono32Stereo) ||
+            (inputtype == svlTypeCUDAImageRGB          && outputtype == svlTypeImageRGB)          ||
+            (inputtype == svlTypeCUDAImageRGBA         && outputtype == svlTypeImageRGBA)         ||
+            (inputtype == svlTypeCUDAImageMono8        && outputtype == svlTypeImageMono8)        ||
+            (inputtype == svlTypeCUDAImageMono16       && outputtype == svlTypeImageMono16)       ||
+            (inputtype == svlTypeCUDAImageMono32       && outputtype == svlTypeImageMono32)       ||
+            (inputtype == svlTypeCUDAImageRGBStereo    && outputtype == svlTypeImageRGBStereo)    ||
+            (inputtype == svlTypeCUDAImageRGBAStereo   && outputtype == svlTypeImageRGBAStereo)   ||
+            (inputtype == svlTypeCUDAImageMono8Stereo  && outputtype == svlTypeImageMono8Stereo)  ||
+            (inputtype == svlTypeCUDAImageMono16Stereo && outputtype == svlTypeImageMono16Stereo) ||
+            (inputtype == svlTypeCUDAImageMono32Stereo && outputtype == svlTypeImageMono32Stereo)) {
+
+            // mapping input type to output type
+            AddInput("input", true);
+            AddInputType("input", inputtype);
+
+            AddOutput("output", true);
+            SetAutomaticOutputType(false);
+            GetOutput()->SetType(outputtype);
+
+            // initializing output sample
+            OutputSample = svlSample::GetNewFromType(outputtype);
+
+            return SVL_OK;
+        }
+#endif // CISST_SVL_HAS_CUDA
+
         // Otherwise, the filter will fail to initialize.
     }
 
@@ -170,6 +209,20 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
     syncOutput = OutputSample;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
+#if CISST_SVL_HAS_CUDA
+    svlSampleCUDAImage* cudaimg = 0;
+    cudaimg = dynamic_cast<svlSampleCUDAImage*>(OutputSample);
+    if (cudaimg) {
+        cudaimg->CopyOf(syncInput);
+        return SVL_OK;
+    }
+    cudaimg = dynamic_cast<svlSampleCUDAImage*>(syncInput);
+    if (cudaimg) {
+        cudaimg->CopyTo(OutputSample);
+        return SVL_OK;
+    }
+#endif // CISST_SVL_HAS_CUDA
+
     svlSampleImage* inimg  = dynamic_cast<svlSampleImage*>(syncInput);
     svlSampleImage* outimg = dynamic_cast<svlSampleImage*>(OutputSample);
     svlSampleMatrix* inmtrx  = dynamic_cast<svlSampleMatrix*>(syncInput);
@@ -178,7 +231,7 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
     if (outimg) {
         svlStreamType inputtype = GetInput()->GetType();
         int param = 0;
-        
+
         if (inimg) {
         //////////////////////////////////////////////////////////
         // Both the input and the output are images
@@ -193,7 +246,7 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
             svlConverter::ConvertImage(dynamic_cast<svlSampleImage*>(syncInput),
                                        dynamic_cast<svlSampleImage*>(OutputSample),
                                        param,
-                                       procInfo->count, procInfo->id);
+                                       procInfo->count, procInfo->ID);
 
             return SVL_OK;
         }

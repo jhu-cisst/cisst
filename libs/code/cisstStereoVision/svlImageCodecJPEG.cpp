@@ -23,10 +23,18 @@ http://www.cisst.org/cisst/license.txt.
 #include "svlImageCodecJPEG.h"
 #include <cisstStereoVision/svlTypes.h>
 #include <setjmp.h>
-#include "jpeglib.h"
 
+#if (CISST_OS == CISST_DARWIN) && CISST_SVL_HAS_OPENCV
+    // Macports bug; revisit it later
+    #include <../lib/jpeg6b/include/jpeglib.h>
+#else // CISST_DARWIN && CISST_SVL_HAS_OPENCV
+    #include "jpeglib.h"
+#endif // CISST_DARWIN && CISST_SVL_HAS_OPENCV
+
+#define __JPEG_ERROR_VERBOSE__
 
 const static int JPEG_DEFAULT_QUALITY = 85;
+
 
 /***********************************/
 /*** Callback for error handling ***/
@@ -41,7 +49,9 @@ typedef JPEG_custom_error_mgr * JPEG_error_ptr;
 void JPEG_error_exit_proc(j_common_ptr cinfo)
 {
     JPEG_error_ptr errptr = (JPEG_error_ptr)cinfo->err;
-//    (*cinfo->err->output_message)(cinfo);
+#ifdef __JPEG_ERROR_VERBOSE__
+    (*cinfo->err->output_message)(cinfo);
+#endif // __JPEG_ERROR_VERBOSE__
     longjmp(errptr->setjmp_buffer, 1);
 }
 
@@ -179,11 +189,10 @@ void JPEG_term_destination_proc(j_compress_ptr CMN_UNUSED(cinfo))
 /*** svlImageCodecJPEG class *********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlImageCodecJPEG)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlImageCodecJPEG, svlImageCodecBase)
 
 svlImageCodecJPEG::svlImageCodecJPEG() :
     svlImageCodecBase(),
-    cmnGenericObject(),
     jpegBuffer(0),
     jpegRowBuffer(0),
     jpegBufferSize(0),

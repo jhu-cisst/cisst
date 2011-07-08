@@ -29,7 +29,7 @@ CMN_IMPLEMENT_SERVICES(cdpPlayerBase);
 
 cdpPlayerBase::cdpPlayerBase(const std::string & name, double period):
     mtsTaskPeriodic(name,period),
-    Sync(true),
+    Sync(false),
     State(STOP),
     Time(0),
     PlayStartTime(0),
@@ -54,10 +54,10 @@ cdpPlayerBase::cdpPlayerBase(const std::string & name, double period):
         provided->AddCommandReadState(StateTable, Sync,         "IsSyncing");
         provided->AddCommandReadState(StateTable, State,        "GetState");
         provided->AddCommandReadState(StateTable, Time,         "GetTime");
+        provided->AddCommandWrite(&cdpPlayerBase::SetTime, this, "WriteTime", mtsDouble());
         provided->AddCommandReadState(StateTable, PlayStartTime,   "GetPlayStartTime");
         provided->AddCommandReadState(StateTable, PlayerDataInfo,   "GetPlayerDataInfo");
         provided->AddCommandReadState(StateTable, PlayUntilTime,   "GetPlayUntilTime");
-
     }
 
     mtsInterfaceRequired *reqMan = AddInterfaceRequired("RequiresPlayerManager",MTS_OPTIONAL);
@@ -76,6 +76,19 @@ cdpPlayerBase::cdpPlayerBase(const std::string & name, double period):
 
     }
 
+    // add Requred interface which point back to our own state table
+    // The reason is we may use those interfaces in the QT thread
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("GetStatus", MTS_OPTIONAL);
+    if (interfaceRequired) {
+        interfaceRequired->AddFunction("IsSyncing", BaseAccess.IsSyncing);
+        interfaceRequired->AddFunction("GetState", BaseAccess.GetState);
+        interfaceRequired->AddFunction("GetTime", BaseAccess.GetTime);
+        interfaceRequired->AddFunction("WriteTime", BaseAccess.WriteTime);
+        interfaceRequired->AddFunction("GetPlayStartTime", BaseAccess.GetPlayStartTime);
+        interfaceRequired->AddFunction("GetPlayerDataInfo", BaseAccess.GetPlayerDataInfo);
+        interfaceRequired->AddFunction("GetPlayUntilTime", BaseAccess.GetPlayUntilTime);
+    }
+
     TimeServer = mtsTaskManager::GetInstance()->GetTimeServer();
 
 
@@ -89,7 +102,7 @@ void cdpPlayerBase::ErrorMessage(const std::string &msg){
 
     //    ErrorMessageDialog->showMessage(tr(msg.c_str()));
 
-    int ret = QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()),tr(msg.c_str()));
+    QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()),tr(msg.c_str()));
 }
 
 
@@ -119,4 +132,8 @@ bool cdpPlayerBase::SetInRange(double &time) {
         return true;
     else
         return false;
+}
+
+void cdpPlayerBase::SetTime(const mtsDouble &time){
+    Time = time;
 }

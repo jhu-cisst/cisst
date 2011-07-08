@@ -34,12 +34,17 @@
 #if CISST_SVL_HAS_ZLIB
 #include "svlVideoCodecCVI.h"
 #include "svlVideoCodecTCPStream.h"
+#include "svlVideoCodecUDPStream.h"
 #endif // CISST_SVL_HAS_ZLIB
 
+#if CISST_SVL_HAS_FFMPEG
+#include "svlVideoCodecFFMPEG.h"
+#endif // CISST_SVL_HAS_FFMPEG
+/*
 #if CISST_SVL_HAS_OPENCV
 #include "svlVideoCodecOpenCV.h"
 #endif // CISST_SVL_HAS_OPENCV
-
+*/
 
 void svlInitializeVideoCodecs()
 {
@@ -54,11 +59,20 @@ void svlInitializeVideoCodecs()
 #ifdef _svlVideoCodecTCPStream_h
     SVL_INITIALIZE(svlVideoCodecTCPStream);
 #endif // _svlVideoCodecTCPStream_h
-    
+
+#ifdef _svlVideoCodecUDPStream_h
+    SVL_INITIALIZE(svlVideoCodecUDPStream);
+#endif // _svlVideoCodecUDPStream_h
+
+#if CISST_SVL_HAS_FFMPEG
+    SVL_INITIALIZE(svlVideoCodecFFMPEG);
+#endif // CISST_SVL_HAS_FFMPEG
+/*
 #ifdef _svlVideoCodecOpenCV_h
     SVL_INITIALIZE(svlVideoCodecOpenCV);
 #endif // _svlVideoCodecOpenCV_h
-
+*/
     // Create svlVideoIO singleton object
     svlVideoIO::GetInstance();
 }
+

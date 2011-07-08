@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstCommon/cmnUnits.h>
 
-CMN_IMPLEMENT_SERVICES(mtsManagerComponentClient);
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
 mtsManagerComponentClient::mtsManagerComponentClient(const std::string & componentName)
     : mtsManagerComponentBase(componentName),
@@ -56,12 +56,13 @@ void mtsManagerComponentClient::Cleanup(void)
 {
 }
 
-bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & className, const std::string & componentName)
+bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & className, const std::string & componentName,
+                                                         const std::string & constructorArgSerialized)
 {
     // Try to create component as requested
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
-    mtsComponent * newComponent = LCM->CreateComponentDynamically(className, componentName);
+    mtsComponent * newComponent = LCM->CreateComponentDynamically(className, componentName, constructorArgSerialized);
     if (!newComponent) {
         CMN_LOG_CLASS_RUN_ERROR << "CreateAndAddNewComponent: failed to create component: " 
             << "\"" << componentName << "\" of type \"" << className << "\"" << std::endl;
@@ -460,6 +461,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
 
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate,
                               this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure,
+                              this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect,
@@ -480,6 +483,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetListOfComponentClasses,
+                              this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription,
                                       this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription,
@@ -520,6 +525,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
     }
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                           InterfaceLCMFunction.ComponentCreate);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
+                          InterfaceLCMFunction.ComponentConfigure);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           InterfaceLCMFunction.ComponentConnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
@@ -542,6 +549,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetNamesOfInterfaces);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                           InterfaceLCMFunction.GetListOfConnections);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
+                          InterfaceLCMFunction.GetListOfComponentClasses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription,
                           InterfaceLCMFunction.GetInterfaceProvidedDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
@@ -566,6 +575,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
     }
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate,
                              this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure,
+                             this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect,
@@ -584,6 +595,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary,
                              this, mtsManagerComponentBase::CommandNames::LoadLibrary);
+    provided->AddCommandRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses,
+                             this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddEventWrite(this->InterfaceLCMEvents_ChangeState, 
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceLCM: successfully added \"LCM\" interfaces" << std::endl;
@@ -684,6 +697,25 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const
         }
         //InterfaceLCMFunction.ComponentCreate.ExecuteBlocking(arg);
         InterfaceLCMFunction.ComponentCreate(arg);
+    }
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string nameOfThisLCM = LCM->GetProcessName();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE || 
+        nameOfThisLCM == arg.ProcessName) 
+    {
+        InterfaceLCMCommands_ComponentConfigure(arg);
+        return;
+    } else {
+        if (!InterfaceLCMFunction.ComponentConfigure.IsValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConfigure: failed to execute \"Component Configure\"" << std::endl;
+            return;
+        }
+        //InterfaceLCMFunction.ComponentConfigure.ExecuteBlocking(arg);
+        InterfaceLCMFunction.ComponentConfigure(arg);
     }
 }
 
@@ -876,6 +908,17 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections(
     InterfaceLCMFunction.GetListOfConnections(listOfConnections);
 }
 
+void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfComponentClasses(const std::string &processName,
+                                std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const
+{
+    if (!InterfaceLCMFunction.GetListOfComponentClasses.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetListOfComponentClasses: failed to execute \"GetListOfComponentClasses\"" << std::endl;
+        return;
+    }
+
+    InterfaceLCMFunction.GetListOfComponentClasses(processName, listOfComponentClasses);
+}
+
 void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
                                  InterfaceProvidedDescription & description) const
 {
@@ -934,12 +977,26 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDe
     //    InterfaceInternal's provided interface.
     // 5. Connect InterfaceInternal's interfaces to InterfaceComponent's
     //    interfaces.
-    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName)) {
+    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName, arg.ConstructorArgSerialized)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << arg << std::endl;
         return;
     }
 
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentCreate: successfully created new component: " << arg << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsComponent * component = LCM->GetComponent(arg.ComponentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConfigure - no component found: "
+            << arg.ComponentName << std::endl;
+        return;
+    }
+
+    // For now, using ConstructorArgSerialized field.
+    component->Configure(arg.ConstructorArgSerialized);
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg)
@@ -1168,6 +1225,36 @@ void mtsManagerComponentClient::InterfaceLCMCommands_LoadLibrary(const std::stri
 {
     osaDynamicLoader dl;
     result = dl.Load(fileName.c_str());
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses(
+                                std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const
+{
+    // Loop through the class register, looking for components that can be created with one argument
+    // or derived from mtsComponent (and have dynamic creation enabled).
+    cmnClassRegister::const_iterator it = cmnClassRegister::begin();
+    while (it != cmnClassRegister::end()) {
+        if (it->second->OneArgConstructorAvailable()) {
+            // CMN_DYNAMIC_CREATION_ONEARG or CMN_DYNAMIC_CREATION_SETNAME
+            mtsDescriptionComponentClass classInfo;
+            classInfo.ClassName = it->first;
+            const cmnClassServicesBase *argServices = it->second->GetConstructorArgServices();
+            if (argServices) {
+                classInfo.ArgType = argServices->GetName();
+                classInfo.ArgTypeId = argServices->TypeInfoPointer()->name();
+            }
+            listOfComponentClasses.push_back(classInfo);
+        }
+        else if (it->second->HasDynamicCreation() && it->second->IsDerivedFrom<mtsComponent>()) {
+            // Backward compatibility (CMN_DYNAMIC_CREATION)
+            mtsDescriptionComponentClass classInfo;
+            classInfo.ClassName = it->first;
+            classInfo.ArgType = "std::string";
+            classInfo.ArgTypeId = typeid(std::string).name();
+            listOfComponentClasses.push_back(classInfo);
+        }
+        it++;
+    }
 }
 
 void mtsManagerComponentClient::HandleAddComponentEvent(const mtsDescriptionComponent &component)

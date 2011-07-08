@@ -7,15 +7,12 @@
 #include <cisstCommon/cmnGetChar.h>
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 
 #include <cisstDevices/devConfig.h>
 #if CISST_DEV_HAS_OPENCV22
 #include <opencv2/core/core.hpp>
 #endif
-
-#include <cisstCommon/cmnGetChar.h>
 
 class Rotate : public mtsTaskPeriodic {
 private:
@@ -27,7 +24,7 @@ public:
     mtsInterfaceProvided* pinterface = AddInterfaceProvided( "Transformation");
     StateTable.AddData( Rt, "Transformation" );
     pinterface->AddCommandReadState( StateTable, Rt, "Transform" );
-  }
+   }
 
   void Configure( const std::string& = "" ){}
   void Startup(){}
@@ -44,6 +41,10 @@ public:
 
 
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -100,13 +101,15 @@ int main(){
 
   Rotate rotate;
   taskManager->AddComponent( &rotate );
-
-  taskManager->Connect( "hubble", "Transformation","Rotate", "Transformation" );
+  
+  taskManager->Connect( hubble->GetName(), "Transformation",
+			rotate.GetName(), "Transformation" );
   
   // Start the cameras
   taskManager->CreateAll();
   taskManager->StartAll();
 
+  std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();
 
   // Kill everything

@@ -152,8 +152,8 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     mtsExecutionResult Execute(const __argumentType & argument, __resultType & result) const {
         return Command ?
             ConditionalWrap<__argumentType, __resultType,
-                            cmnIsDerivedFrom<__argumentType, mtsGenericObject>::YES,
-                            cmnIsDerivedFrom<__resultType, mtsGenericObject>::YES
+                            cmnIsDerivedFrom<__argumentType, mtsGenericObject>::IS_DERIVED,
+                            cmnIsDerivedFrom<__resultType, mtsGenericObject>::IS_DERIVED
                            >::Call(this, Command, argument, result)
             : mtsExecutionResult::FUNCTION_NOT_BOUND;
     }

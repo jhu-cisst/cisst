@@ -20,9 +20,10 @@ set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 if (BUILD_LIBS_cisstMultiTask)
   add_subdirectory (cisstComponentGenerator)
   add_subdirectory (cisstDataGenerator)
+  add_subdirectory (cisstComponentManager)
 
   if (CISST_HAS_QT AND BUILD_LIBS_cisstStereoVision)
-    add_subdirectory (cisstDataPlayer)
+#    add_subdirectory (cisstDataPlayer)
   else (CISST_HAS_QT  AND BUILD_LIBS_cisstStereoVision)
     message (WARNING " utility cisstDataPlayer will not be compiled since it requires CISST_HAS_QT and cisstStereoVision")
   endif (CISST_HAS_QT AND BUILD_LIBS_cisstStereoVision)
@@ -49,3 +50,15 @@ if (BUILD_LIBS_cisstMultiTask)
 else (BUILD_LIBS_cisstMultiTask)
   message (WARNING " utilities cisstComponentGenerator, cisstDataGenerator, cisstDataPlayer, multiTaskGlobalComponentManager, multiTaskGlobalComponentManagerFLTK, and cisstIREComponent will not be compiled since they require BUILD_LIBS_cisstMultiTask")
 endif (BUILD_LIBS_cisstMultiTask)
+
+if( BUILD_LIBS_cisstRobot AND
+    BUILD_LIBS_cisstNumerical AND 
+    CISST_HAS_CISSTNETLIB )
+
+  add_subdirectory( cisstRobot )
+      
+
+endif( BUILD_LIBS_cisstRobot AND
+  BUILD_LIBS_cisstNumerical AND 
+  CISST_HAS_CISSTNETLIB )
+

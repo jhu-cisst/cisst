@@ -282,6 +282,12 @@ int svlWindowManagerX11::DoModal(bool show, bool fullscreen)
 #if CISST_SVL_HAS_XV
         // create image in shared memory
         xvImg[i] = XvShmCreateImage(xDisplay, xvPort[i], 0x32595559/*YUV2*/, 0, Width[i], Height[i], &(xvShmInfo[i]));
+        if (xvImg[i]->width < static_cast<int>(Width[i]) || xvImg[i]->height < static_cast<int>(Height[i])) {
+            CMN_LOG_INIT_ERROR << "DoModal - image too large for XV to display (requested="
+                               << Width[i] << "x" << Height[i] << "; allowed="
+                               << xvImg[i]->width << "x" << xvImg[i]->height << ")" << std::endl;
+            goto labError;
+        }
         xvShmInfo[i].shmid = shmget(IPC_PRIVATE, xvImg[i]->data_size, IPC_CREAT | 0777);
         xvShmInfo[i].shmaddr = xvImg[i]->data = reinterpret_cast<char*>(shmat(xvShmInfo[i].shmid, 0, 0));
         xvShmInfo[i].readOnly = False;
@@ -304,12 +310,11 @@ int svlWindowManagerX11::DoModal(bool show, bool fullscreen)
     unsigned int winid;
 
     while (1) {
-#if CISST_SVL_HAS_XV
         osaSleep(0.001);
+#if CISST_SVL_HAS_XV
         if (!xvupdateimage) {
             while (XPending(xDisplay)) {
 #else // CISST_SVL_HAS_XV
-        osaSleep(0.001);
         if (XPending(xDisplay)) {
 #endif // CISST_SVL_HAS_XV
                 XNextEvent(xDisplay, &event);

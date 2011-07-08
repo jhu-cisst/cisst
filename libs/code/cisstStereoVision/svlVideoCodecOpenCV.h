@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 
 
-class svlVideoCodecOpenCV : public svlVideoCodecBase, public cmnGenericObject
+class svlVideoCodecOpenCV : public svlVideoCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

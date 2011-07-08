@@ -28,7 +28,7 @@
 /*** svlFilterImageErosion class *****/
 /**************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageErosion)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageErosion, svlFilterBase)
 
 svlFilterImageErosion::svlFilterImageErosion() :
     svlFilterBase(),

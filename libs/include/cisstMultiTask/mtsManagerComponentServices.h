@@ -40,6 +40,7 @@ protected:
     // Dynamic component management
     struct ManagementStruct {
         mtsFunctionWrite Create;
+        mtsFunctionWrite Configure;
         mtsFunctionWrite Connect;
         mtsFunctionWrite Disconnect;
         mtsFunctionWrite Start;
@@ -55,6 +56,7 @@ protected:
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
         mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
         mtsFunctionRead          GetListOfConnections;
+        mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } ServiceGetters;
@@ -114,6 +116,14 @@ public:
     bool ComponentCreate(
         const std::string& processName, const std::string & className, const std::string & componentName) const;
 
+    bool ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const;
+    bool ComponentCreate(
+        const std::string& processName, const std::string & className, const mtsGenericObject & constructorArg) const;
+
+    bool ComponentConfigure(const std::string & componentName, const std::string & configString) const;
+    bool ComponentConfigure(
+        const std::string& processName, const std::string & componentName, const std::string & configString) const;
+
     bool Connect(
         const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
@@ -135,19 +145,30 @@ public:
     bool Disconnect(const mtsDescriptionConnection & connection) const;
     bool Disconnect(ConnectionIDType connectionID) const;
 
-    bool ComponentStart(const std::string & componentName, const double delayInSecond = 0.0) const;
+    bool ComponentStart(const std::string & componentName, const double delayInSecond) const;
+    bool ComponentStart(const std::string & componentName) const
+         { return ComponentStart(componentName, 0.0); }
     bool ComponentStart(const std::string& processName, const std::string & componentName,
-                        const double delayInSecond = 0.0) const;
+                        const double delayInSecond) const;
+    bool ComponentStart(const std::string& processName, const std::string & componentName) const
+         { return ComponentStart(processName, componentName, 0.0); }
 
-    bool ComponentStop(const std::string & componentName, const double delayInSecond = 0.0) const;
+
+    bool ComponentStop(const std::string & componentName, const double delayInSecond) const;
+    bool ComponentStop(const std::string & componentName) const
+         { return ComponentStop(componentName, 0.0); }
     bool ComponentStop(const std::string& processName, const std::string & componentName,
-                       const double delayInSecond = 0.0) const;
+                       const double delayInSecond) const;
+    bool ComponentStop(const std::string& processName, const std::string & componentName) const
+         { return ComponentStop(processName, componentName, 0.0); }
 
     bool ComponentResume(const std::string & componentName, const double delayInSecond = 0.0) const;
     bool ComponentResume(const std::string& processName, const std::string & componentName,
                          const double delayInSecond = 0.0) const;
 
     mtsComponentState ComponentGetState(const mtsDescriptionComponent &component) const;
+    std::string ComponentGetState(const std::string componentName) const;
+    std::string ComponentGetState(const std::string & processName, const std::string componentName) const;
 
     std::vector<std::string> GetNamesOfProcesses(void) const;
     std::vector<std::string> GetNamesOfComponents(const std::string & processName) const;
@@ -157,6 +178,9 @@ public:
                               std::vector<std::string> & namesOfInterfacesProvided) const;
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
+
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(void) const;
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string &processName) const;
 
     InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
                                  const std::string & componentName, const std::string &interfaceName) const;

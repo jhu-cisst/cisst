@@ -25,9 +25,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <cisstMultiTask.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSleep.h>
+
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsTaskFromCallback.h>
+#include <cisstMultiTask/mtsTaskFromSignal.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 // overall constant, assumes this a maximum delay to transition from
 // one state to another

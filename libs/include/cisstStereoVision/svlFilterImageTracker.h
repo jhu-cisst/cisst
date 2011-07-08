@@ -62,8 +62,9 @@ protected:
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
-    virtual void ReconstructRigidBody();
+    virtual void ReconstructRigidBody(unsigned int videoch);
     virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
+    virtual int UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height);
 
 private:
     svlSampleTargets OutputTargets;
@@ -95,6 +96,8 @@ private:
     vctDynamicVector<double> WarpedRigidBodyScale;
     svlSampleImage* WarpedImage;
     vctDynamicVector<svlDraw::Internals> WarpInternals;
+
+    svlSampleImage* Mosaic;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)
@@ -118,6 +121,7 @@ public:
     virtual void ResetTargets();
     virtual int PreProcessImage(svlSampleImage & image, unsigned int videoch = SVL_LEFT);
 	virtual int Track(svlSampleImage & image, unsigned int videoch = SVL_LEFT) = 0;
+	virtual int Track(svlProcInfo* procInfo, svlSampleImage & image, unsigned int videoch = SVL_LEFT);
     virtual void Release();
 
 protected:

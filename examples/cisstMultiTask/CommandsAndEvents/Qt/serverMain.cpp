@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask.h>
+#include <cisstMultiTask/mtsTaskManager.h>
 
 #include <QApplication>
 

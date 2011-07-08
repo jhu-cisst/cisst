@@ -130,3 +130,22 @@ void cmnTokenizer::GetArgvTokens(std::vector<const char *> & argvTokens) const
     std::copy( &(Tokens[0]), &(Tokens[0]) + numTokens, &(argvTokens[1]) );
 }
 
+
+const char * cmnTokenizer::GetToken(size_type num) const
+{
+    if (num < Tokens.size()) {
+        return Tokens[num];
+    } else {
+        return 0;
+    }
+}
+
+
+const char * const * cmnTokenizer::GetTokensArray(void) const
+{
+    if (Tokens.empty()) {
+        return 0;
+    }
+    return &(Tokens[0]);
+}
+

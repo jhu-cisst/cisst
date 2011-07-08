@@ -32,28 +32,7 @@ void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, 
     pipe.Write(s, s.length());
 }
 
-CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
-
-// Default constructor needed for dynamic creation
-mtsComponentViewer::mtsComponentViewer() :
-    mtsTaskFromSignal("DEFAULT"),
-    UDrawPipeConnected(false),
-    UDrawResponse(""),
-    ShowProxies(false),
-    ConnectionStarted(false),
-    WaitingForResponse(false)
-{
-    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
-    mtsInterfaceRequired * required = EnableDynamicComponentManagement();
-    if (required) {
-        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
-        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeStateHandler, this);
-        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnectionHandler, this);
-        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnectionHandler, this);
-    } else {
-        cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to enable dynamic component composition"));
-    }
-}
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
 mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     mtsTaskFromSignal(name),
@@ -157,9 +136,11 @@ void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &co
                             !mtsManagerGlobal::IsProxyComponent(connection.Server.ComponentName)))
 #endif
         {
-            std::string buffer = GetConnectionInUDrawGraphFormat(connection);
-            CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
-            WriteString(UDrawPipe, buffer);
+            if (connection.Server.InterfaceName != mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
+                std::string buffer = GetConnectionInUDrawGraphFormat(connection);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
+                WriteString(UDrawPipe, buffer);
+            }
         }
     }
 }

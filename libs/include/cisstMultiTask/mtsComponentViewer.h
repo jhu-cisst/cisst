@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsComponentViewer : public mtsTaskFromSignal
 {
-   CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+   CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
 private:
 
@@ -90,7 +90,6 @@ protected:
 
 public:
 
-    mtsComponentViewer();
     mtsComponentViewer(const std::string & name);
 
     virtual ~mtsComponentViewer();

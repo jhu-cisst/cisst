@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageBlobDetector class ***/
 /****************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageBlobDetector)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageBlobDetector, svlFilterBase)
 
 svlFilterImageBlobDetector::svlFilterImageBlobDetector() :
     svlFilterBase(),
@@ -274,7 +274,7 @@ void svlFilterImageBlobDetector::ComputeBlobStats(unsigned int maxblobid, svlSam
 
     blob = blobs;
     for (k = 0; k < maxblobid; k ++) {
-        blob->id            = k + 1;
+        blob->ID            = k + 1;
         blob->used          = true;
         blob->left          = 100000;
         blob->right         = -1;

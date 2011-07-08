@@ -22,9 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _SignalGenerator_h
 #define _SignalGenerator_h
 
-// include for the whole cisstMultiTask library
-#include <cisstMultiTask.h>
-#include <cisstParameterTypes.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 class SignalGenerator: public mtsTaskPeriodic {
 

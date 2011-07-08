@@ -59,6 +59,7 @@ class CISST_EXPORT cmnClassServicesBase
     */
     cmnClassServicesBase(const std::string & className,
                          const std::type_info * typeInfo,
+                         const cmnClassServicesBase *parentServices,
                          cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT);
 
 
@@ -97,6 +98,9 @@ class CISST_EXPORT cmnClassServicesBase
     */
     virtual cmnGenericObject * Create(const cmnGenericObject & other) const = 0;
 
+    /*! Create with argument */
+    virtual cmnGenericObject * CreateWithArg(const cmnGenericObject & arg) const = 0;
+
     /*! Placement new using copy constructor */
     virtual bool Create(cmnGenericObject * existing, const cmnGenericObject & other) const = 0;
 
@@ -124,6 +128,18 @@ class CISST_EXPORT cmnClassServicesBase
 
     /*! Get the size of the class */
     virtual size_t GetSize(void) const = 0;
+
+    /*! Returns whether dynamic creation is available */
+    virtual bool HasDynamicCreation(void) const = 0;
+
+    /*! returns information about what types of constructors are available */
+    virtual bool DefaultConstructorAvailable(void) const = 0;
+    virtual bool CopyConstructorAvailable(void) const = 0;
+    virtual bool OneArgConstructorAvailable(void) const = 0;
+
+    /*! return class services for constructor argument (0 if no class services
+      or does not exist) */
+    virtual const cmnClassServicesBase *GetConstructorArgServices(void) const = 0;
 
     /*! Get the name associated with the class.
 
@@ -160,12 +176,25 @@ class CISST_EXPORT cmnClassServicesBase
         SetLogMask(mask);
     }
 
+    const cmnClassServicesBase *GetParentServices(void) const {
+        return ParentServices;
+    }
+
+    bool IsDerivedFrom(const cmnClassServicesBase *parentServices) const;
+
+    template <class _Parent>
+    bool IsDerivedFrom(void) const {
+        return IsDerivedFrom(_Parent::ClassServices());
+    }
 
 private:
     /*! The name of the class. */
     const std::string * NameMember;
 
     const std::type_info * TypeInfoMember;
+
+    /*! Class services of parent class (0 if no parent, or not known) */
+    const cmnClassServicesBase *ParentServices;
 
     /*! The log Level of Detail. */
     cmnLogMask LogMask;

@@ -32,10 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT devBH8_280 : public devManipulator {
 
-private:
-
+ public:
   enum Errno{ ESUCCESS, EFAILURE };
 
+ private:
   // BH8_280 specific members
   //
 
@@ -45,8 +45,6 @@ private:
   //! A pointer to a CAN device
   devCAN* candev;
 
-  vctDynamicVector<double> qinit;
-  
   //! A vector of all the pucks
   std::vector<devPuck>   pucks;
  
@@ -56,8 +54,8 @@ private:
   //! Matrix used to convert motors positions to joints positions
   /**
      When given a vector of motors positions, this matrix us used to transform
-     the motors positions to joints positions. For the BH8_280, this is essentially
-     a block diagonal matrix.
+     the motors positions to joints positions. For the BH8_280, this is 
+     essentially a block diagonal matrix.
      \sa MotorsPos2JointsPos
   */
   vctDynamicMatrix<double> mpos2jpos;
@@ -65,8 +63,8 @@ private:
   //! Matrix used to convert joints positions to motors positions
   /**
      When given a vector of joints positions, this matrix us used to transform
-     the joints positions to motors positions. For the BH8_280, this is essentially 
-     a block diagonal matrix.
+     the joints positions to motors positions. For the BH8_280, this is 
+     essentially a block diagonal matrix.
      \sa JointsPos2MotorsPos
   */
   vctDynamicMatrix<double> jpos2mpos;
@@ -74,7 +72,7 @@ private:
   //! Matrix used to convert joints torques to motors torques
   /**
      When given a vector of joints torques, this matrix us used to transform
-     the joints torques to motors torques. For the BH8_280, this is essentially  
+     the joints torques to motors torques. For the BH8_280, this is essentially 
      a block diagonal matrix.
      \sa JointsTrq2MotorsTrq
   */
@@ -220,12 +218,14 @@ private:
   */
   devBH8_280::Errno SetTorqueFault( devProperty::Value torquefault );
   
-  devBH8_280::Errno SetPucksStatus( devProperty::Value puckstatus, bool ver=false );
+  devBH8_280::Errno SetPucksStatus( devProperty::Value puckstatus, 
+				    bool ver=false );
 
   //! Enable the motors
   /**
-     This enables the motors of the BH8_280. This is the equivalent of "activating"
-     the BH8_280 with the display pendant. So be careful. Things can move after.
+     This enables the motors of the BH8_280. This is the equivalent of 
+     "activating" the BH8_280 with the display pendant. So be careful. Things 
+     can move after.
   */
 
 public:
@@ -243,39 +243,19 @@ public:
   */
   devBH8_280( const std::string& taskname, 
 	      double period, 
-	      osaCPUMask mask,
-	      devCAN* candev,
-	      const vctDynamicVector<double>& qinit );
+	      osaCPUMask cpumask,
+	      devCAN* candev );
   ~devBH8_280(){}
 
   void Configure( const std::string& filename = "" );
   void Cleanup();
 
+  void Hi();
+  void Open();
+  void Close();
+  void Home();
+  void Default();
+
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

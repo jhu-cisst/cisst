@@ -52,9 +52,6 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 
-#include <cisstCommon/cmnClassRegisterMacros.h>
-
-
 // Doxygen fake code, special values
 #ifdef DOXYGEN
 

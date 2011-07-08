@@ -1,15 +1,8 @@
-
-#include <cisstDevices/devKeyboard.h>
-
 #include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 #include <cisstDevices/robotcomponents/osg/devOSGMono.h>
 #include <cisstDevices/robotcomponents/osg/devOSGWorld.h>
 
 #include <cisstVector/vctMatrixRotation3.h>
-#include <cisstCommon/cmnGetChar.h>
-
-#include <cisstMultiTask/mtsTaskManager.h>
-
 #include <cisstCommon/cmnGetChar.h>
 
 #include <cisstDevices/devConfig.h>
@@ -18,6 +11,10 @@
 #endif
 
 int main(){
+
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -33,8 +30,8 @@ int main(){
 			   world,
 			   x, y, width, height,
 			   55.0, ((double)width)/((double)height),
-			   Znear, Zfar );
-  // Add the camera component
+			   Znear, Zfar,
+			   "", true, false );
   taskManager->AddComponent( camera );
 
   // Create objects
@@ -46,6 +43,7 @@ int main(){
   vctFrame4x4<double> eye;
   osg::ref_ptr<devOSGBody> background;
   hubble = new devOSGBody( "hubble", Rt, path+"hst.3ds", world );
+
   background = new devOSGBody( "background", 
 			       eye, 
 			       path+"background.3ds", 
@@ -100,7 +98,6 @@ int main(){
     }
     std::cout << std::endl;
   }
-
 
 #endif
 

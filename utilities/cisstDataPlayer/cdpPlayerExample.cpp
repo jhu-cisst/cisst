@@ -1,3 +1,6 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
 /*
   $Id$
   
@@ -233,8 +236,12 @@ void cdpPlayerExample::QSlotStopClicked(void)
 
 void cdpPlayerExample::LoadData(void)
 {
-    PlayerDataInfo.DataStart() = 1297723451.415;
-    PlayerDataInfo.DataEnd() = 1297723900.022;
+    //PlayerDataInfo.DataStart() = 1297723451.415;
+    //PlayerDataInfo.DataEnd() = 1297723900.022;
+
+    PlayerDataInfo.DataStart() = 4;
+    PlayerDataInfo.DataEnd() = 100;
+
 
     if (Time < PlayerDataInfo.DataStart()) {
         Time = PlayerDataInfo.DataStart();
@@ -256,7 +263,7 @@ void cdpPlayerExample::QSlotSetSaveStartClicked(void)
 {
     ExWidget.SaveStartSpin->setValue(Time.Data);
 }
-
+ 
 
 void cdpPlayerExample::QSlotSetSaveEndClicked(void)
 {

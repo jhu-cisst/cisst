@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceTextFile class ***/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceTextFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceTextFile, svlFilterSourceBase)
 
 svlFilterSourceTextFile::svlFilterSourceTextFile() :
     svlFilterSourceBase(false),  // manual timestamp management
@@ -121,7 +121,7 @@ int svlFilterSourceTextFile::Initialize(svlSample* &syncOutput)
     OutputMatrix.SetSize(Columns, file_count);
     OutputMatrix.GetDynamicMatrixRef().SetAll(ErrorValue);
 
-    LineBuffer.SetSize(8192); // should be enough
+    LineBuffer.SetSize(MAX_DIMENSION); // should be enough
 
     FirstTimestamps.SetSize(file_count);
     FirstTimestamps.SetAll(-1.0);
@@ -226,6 +226,7 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
 
         if (!anydata) {
             if (ResetPosition) return SVL_FAIL;
+            if (!GetLoop()) return SVL_STOP_REQUEST;
 
             // restart reading files from beginning
             ResetPosition = true;

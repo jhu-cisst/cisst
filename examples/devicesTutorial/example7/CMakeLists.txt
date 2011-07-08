@@ -34,10 +34,13 @@ add_executable(devicesTutorialExample7
                main.cpp
                )
 
-target_link_libraries(devicesTutorialExample7
-                      ${QT_LIBRARIES}
-                      )
+target_link_libraries (devicesTutorialExample7
+                       ${QT_LIBRARIES}
+                       )
 
-cisst_requires(devicesTutorialExample7
-               "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstDevices"
-               )
+cisst_target_link_libraries (devicesTutorialExample7
+                             cisstCommon cisstCommonXML
+                             cisstOSAbstraction
+                             cisstMultiTask
+                             cisstStereoVision
+                             cisstDevices)

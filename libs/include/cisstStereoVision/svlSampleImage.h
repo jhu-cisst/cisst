@@ -32,12 +32,16 @@ http://www.cisst.org/cisst/license.txt.
 class svlSampleMatrix;
 struct svlProcInfo;
 
+
 class CISST_EXPORT svlSampleImage : public svlSample
 {
 public:
     svlSampleImage();
     svlSampleImage(const svlSampleImage & other);
     virtual ~svlSampleImage();
+
+    virtual svlPixelType GetPixelType() const;
+    virtual int GetAlphaChannel() const;
 
     virtual svlSample* GetNewInstance() const = 0;
     virtual svlStreamType GetType() const = 0;
@@ -52,7 +56,6 @@ public:
     virtual void SerializeRaw(std::ostream & outputStream) const = 0;
     virtual void DeSerializeRaw(std::istream & inputStream) = 0;
 
-    virtual svlPixelType GetPixelType() const = 0;
     virtual IplImage* IplImageRef(const unsigned int videochannel = 0) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel) = 0;
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel) const = 0;
@@ -65,7 +68,6 @@ public:
     virtual unsigned int GetVideoChannels() const = 0;
     virtual unsigned int GetDataChannels() const = 0;
     virtual unsigned int GetBPP() const = 0;
-    virtual int GetAlphaChannel() const = 0;
     virtual unsigned int GetWidth(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetHeight(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetRowStride(const unsigned int videochannel = 0) const = 0;

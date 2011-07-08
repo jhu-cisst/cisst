@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstDevices/devExport.h>
 
-struct devODEContact{
+struct CISST_EXPORT devODEContact{
   
   devODEBody* body1;
   devODEBody* body2;
@@ -114,7 +114,7 @@ class CISST_EXPORT devODEWorld :
      while too few gives bad results (100 contacts points is actually quite 
      large)
   */
-  static const size_t NUM_CONTACTS = 20;
+  static const size_t NUM_CONTACTS = 50;
 
   void CleanContacts();
 

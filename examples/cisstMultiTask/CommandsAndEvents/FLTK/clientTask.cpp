@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "clientTask.h"
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskDouble);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskmtsDouble);
@@ -43,8 +44,8 @@ clientTask<_dataType>::clientTask(const std::string & taskName, double period):
         required->AddFunction("QualifiedRead", this->QualifiedRead);
         required->AddFunction("VoidSlow", this->VoidSlow);
         required->AddFunction("WriteSlow", this->WriteSlow);
-        required->AddFunction("VoidReturn", this->VoidReturn);
-        required->AddFunction("WriteReturn", this->WriteReturn);
+        // required->AddFunction("VoidReturn", this->VoidReturn);
+        // required->AddFunction("WriteReturn", this->WriteReturn);
         required->AddEventHandlerVoid(&clientTask<_dataType>::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask<_dataType>::EventWriteHandler, this, "EventWrite");
     }

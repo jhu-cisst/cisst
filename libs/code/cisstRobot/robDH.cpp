@@ -52,10 +52,10 @@ vctFrame4x4<double> robDH::ForwardKinematics( double q ) const {
   // Add the position offset to the joint value
   switch( GetType() ){
   case robJoint::HINGE:
-    theta = PositionOffset() + q; // add the joint offset to the joint angle
+    theta = theta + PositionOffset() + q;// add the joint offset to the joint angle
     break;
   case robJoint::SLIDER:
-    d = PositionOffset() + q;     // add the joint offset to the joint length
+    d = d + PositionOffset() + q;   // add the joint offset to the joint length
     break;
   default:
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -95,8 +95,8 @@ void robDH::ReadParameters( std::istream& is ) {
 
 void robDH::WriteParameters( std::ostream& os ) const {
   os << std::setw(10) << "STANDARD DH"
-     << std::setw(10) << alpha 
-     << std::setw(10) << a 
-     << std::setw(10) << theta
-     << std::setw(10) << d;
+     << std::setw(13) << alpha 
+     << std::setw(13) << a 
+     << std::setw(13) << theta
+     << std::setw(13) << d;
 }

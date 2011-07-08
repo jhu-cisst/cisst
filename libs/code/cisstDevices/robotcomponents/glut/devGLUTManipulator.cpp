@@ -27,7 +27,8 @@ devGLUTManipulator::devGLUTManipulator( const std::string& devname,
 					const vctFrame4x4<double>& Rtw0,
 					const vctDynamicVector<double>& qinit,
 					const std::vector<std::string>& geomsfn,
-					const std::string& basefn ) :
+					const std::string& basefn,
+					bool rotateX90 ) :
 
   devManipulator( devname, period, state, mask, devManipulator::POSITION ),
   robManipulator( robotfn, Rtw0 ),
@@ -43,13 +44,13 @@ devGLUTManipulator::devGLUTManipulator( const std::string& devname,
   
   if( !basefn.empty() ){
     base = new devMeshTriangular();
-    base->LoadOBJ( basefn );
+    base->LoadOBJ( basefn, rotateX90 );
     devGLUT::Register( base );
   }
 
   for( size_t i=0; i<links.size(); i++ ){
     devMeshTriangular* mesh = new devMeshTriangular();
-    mesh->LoadOBJ( geomsfn[i] );
+    mesh->LoadOBJ( geomsfn[i], rotateX90 );
     devGLUT::Register( mesh );
     meshes.push_back( mesh );
    }

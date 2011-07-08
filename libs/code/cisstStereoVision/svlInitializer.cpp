@@ -65,11 +65,20 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_WINDOWS
 
 
+#if CISST_SVL_HAS_CUDA
+    extern "C" bool cisst_cudaInitialize();
+#endif // CISST_SVL_HAS_CUDA
+
+
 void svlInitialize()
 {
 #if (CISST_OS == CISST_WINDOWS)
     static svlOleInit OleInstance;
 #endif // CISST_WINDOWS
+
+#if CISST_SVL_HAS_CUDA
+    cisst_cudaInitialize();
+#endif // CISST_SVL_HAS_CUDA
 
     svlInitializeImageCodecs();
     svlInitializeVideoCodecs();
@@ -239,9 +248,24 @@ void svlInitialize()
     SVL_INITIALIZE(svlFilterVideoExposureManager);
 #endif // _svlFilterVideoExposureManager_h
 
+#ifdef _svlFilterImageConvolution_h
+    SVL_INITIALIZE(svlFilterImageConvolution);
+#endif // _svlFilterImageConvolution_h
+
+#ifdef _svlFilterImageBorder_h
+    SVL_INITIALIZE(svlFilterImageBorder);
+#endif // _svlFilterImageBorder_h
+
+#ifdef _svlFilterSampler_h
+    SVL_INITIALIZE(svlFilterSampler);
+#endif // _svlFilterSampler_h
+
+#ifdef _svlFilterCUDATest_h
+    SVL_INITIALIZE(svlFilterCUDATest);
+#endif // _svlFilterCUDATest_h
+
 #ifdef _svlStreamManager_h
     SVL_INITIALIZE(svlStreamManager);
 #endif // _svlStreamManager_h
-
 }
 

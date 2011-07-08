@@ -18,6 +18,7 @@
 # set the library name
 set (LIBRARY cisstDevices)
 set (LIBRARY_INCLUDE_DIR ${cisstLibs_SOURCE_DIR}/include/${LIBRARY})
+set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot cisstStereoVision)
 
 # make sure all options are set for all devices to OFF
 option (CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
@@ -133,6 +134,7 @@ endif (CISST_DEV_HAS_NOVINTHDL)
 if (CISST_HAS_XML)
   list (APPEND SOURCE_FILES devNDISerial.cpp)
   list (APPEND HEADER_FILES devNDISerial.h)
+  set (DEPENDENCIES ${DEPENDENCIES} cisstCommonXML)
 
   if (CISST_DEV_HAS_MICRONTRACKER)
     find_path (MicronTracker_INCLUDE_DIR
@@ -233,7 +235,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstDevicesBuild.cmake.in
 
 # Finally create the library
 cisst_add_library (LIBRARY cisstDevices
-                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot cisstStereoVision
+                   DEPENDENCIES ${DEPENDENCIES}
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}

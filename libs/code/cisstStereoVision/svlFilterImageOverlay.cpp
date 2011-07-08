@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageOverlay class *******/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageOverlay)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageOverlay, svlFilterBase)
 
 svlFilterImageOverlay::svlFilterImageOverlay() :
     svlFilterBase(),

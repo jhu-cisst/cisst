@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageDilation class *****/
 /**************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageDilation)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageDilation, svlFilterBase)
 
 svlFilterImageDilation::svlFilterImageDilation() :
     svlFilterBase(),

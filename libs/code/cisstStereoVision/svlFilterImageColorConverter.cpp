@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageColorConverter class ****/
 /*******************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageColorConverter)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageColorConverter, svlFilterBase)
 
 svlFilterImageColorConverter::svlFilterImageColorConverter() :
     svlFilterBase()

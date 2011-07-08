@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterImageFileWriter class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterImageFileWriter)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageFileWriter, svlFilterBase)
 
 svlFilterImageFileWriter::svlFilterImageFileWriter() :
     svlFilterBase(),

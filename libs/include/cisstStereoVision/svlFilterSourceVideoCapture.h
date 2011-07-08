@@ -54,7 +54,7 @@ public:
     };
 
     typedef struct _DeviceInfo {
-	    int id;
+	    int ID;
 	    char name[SVL_VCS_STRING_LENGTH];
         PlatformType platform;
 	    int inputcount;
@@ -270,10 +270,11 @@ protected:
 };
 
 
-class CISST_EXPORT svlVidCapSrcBase
+class CISST_EXPORT svlVidCapSrcBase : public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    svlVidCapSrcBase() {}
+    svlVidCapSrcBase() : cmnGenericObject() {}
     virtual ~svlVidCapSrcBase() {}
 
     virtual svlFilterSourceVideoCapture::PlatformType GetPlatformType() = 0;
@@ -330,6 +331,7 @@ typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ExternalTrigger> svlF
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Trigger);
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlVidCapSrcBase)
 
 
 CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config & objref);
@@ -342,4 +344,3 @@ CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterS
 
 
 #endif // _svlFilterSourceVideoCapture_h
-

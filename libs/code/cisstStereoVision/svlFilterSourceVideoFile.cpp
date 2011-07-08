@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceVideoFile class ****/
 /***************************************/
 
-CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoFile)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoFile, svlFilterSourceBase)
 
 svlFilterSourceVideoFile::svlFilterSourceVideoFile() :
     svlFilterSourceBase(false),  // manual timestamp management
@@ -102,6 +102,8 @@ int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
     FilePath.SetSize(channelcount);
     Length.SetSize(channelcount);
     Position.SetSize(channelcount);
+    UseRange.SetSize(channelcount);
+    UseRange.SetAll(false);
     Range.SetSize(channelcount);
     Range.SetAll(vctInt2(-1, -1));
 
@@ -141,8 +143,11 @@ int svlFilterSourceVideoFile::Initialize(svlSample* &syncOutput)
 
         Length[i] = Codec[i]->GetEndPos() + 1;
         Position[i] = Codec[i]->GetPos();
-        if (Range[i][0] < 0) Range[i][0] = 0;
-        if (Range[i][1] < 0) Range[i][1] = Length[i];
+
+        if (UseRange[i]) {
+            if (Range[i][0] < 0) Range[i][0] = 0;
+            if (Range[i][1] < 0) Range[i][1] = Length[i];
+        }
 
         // Create image sample of matching dimensions
         OutputImage->SetSize(i, width, height);
@@ -174,59 +179,165 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
     double timestamp, timespan;
     int pos, ret = SVL_OK;
 
-    _ParallelLoop(procInfo, idx, videochannels)
-    {
-        if (Codec[idx]) {
+    // TO DO: add a little more sophisticated logic here
+    if (Codec[0]->IsMultithreaded()) {
+        // Codecs are multithreaded, so it's worth
+        // splitting work between all threads
 
-            pos = Codec[idx]->GetPos();
-            Position[idx] = pos;
+        for (idx = 0; idx < videochannels; idx ++) {
 
-            if (Range[idx][0] >= 0 &&
-                Range[idx][0] <= Range[idx][1]) {
-                // Check if position is outside of the playback segment
-                if (pos < Range[idx][0] ||
-                    pos > Range[idx][1]) {
-                    Codec[idx]->SetPos(Range[idx][0]);
-                    ResetTimer = true;
-                }
-            }
+            if (Codec[idx]) {
 
-            ret = Codec[idx]->Read(0, *OutputImage, idx, true);
-            if (ret == SVL_VID_END_REACHED) {
-                if (!GetLoop()) ret = SVL_STOP_REQUEST;
-                else {
-                    // Loop around
-                    ret = Codec[idx]->Read(0, *OutputImage, idx, true);
-                }
-            }
-            if (ret != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
-                break;
-            }
+                // Seek (if needed) to frame that needs to be extracted
+                _OnSingleThread(procInfo)
+                {
+                    pos = Codec[idx]->GetPos();
+                    Position[idx] = pos;
 
-            if (idx == 0) {
-
-                // Get timestamp stored in the video file
-                timestamp = Codec[idx]->GetTimestamp();
-                if (timestamp > 0.0) {
-
-                    if (!IsTargetTimerRunning()) {
-
-                        // Try to keep orignal frame intervals
-                        if (ResetTimer || Codec[idx]->GetPos() == 1) {
-                            FirstTimestamp = timestamp;
-                            Timer.Reset();
-                            Timer.Start();
-                            ResetTimer = false;
+                    if (UseRange[idx]) {
+                        // Check if position is outside of the playback segment
+                        if (pos < Range[idx][0]) {
+                            Codec[idx]->SetPos(Range[idx][0]);
+                            ResetTimer = true;
                         }
-                        else {
-                            timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
-                            if (timespan > 0.0) osaSleep(timespan);
+                        else if (pos > Range[idx][1]) {
+                            if (!GetLoop()) {
+                                ret = SVL_STOP_REQUEST;
+                                break;
+                            }
+                            else {
+                                Codec[idx]->SetPos(Range[idx][0]);
+                                ResetTimer = true;
+                            }
                         }
                     }
                 }
 
-                OutputImage->SetTimestamp(timestamp);
+                _SynchronizeThreads(procInfo);
+
+                // Extract frame
+                ret = Codec[idx]->Read(procInfo, *OutputImage, idx, true);
+
+                if (ret == SVL_VID_END_REACHED && !GetLoop()) {
+                    ret = SVL_STOP_REQUEST;
+                    break;
+                }
+
+                // Manage looped playback and frame timing
+                _OnSingleThread(procInfo)
+                {
+                    if (ret == SVL_VID_END_REACHED) {
+                        // Loop around
+                        ret = Codec[idx]->Read(0, *OutputImage, idx, true);
+                    }
+                    if (ret != SVL_OK) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
+                        break;
+                    }
+
+                    // Run timer based in the first video channel
+                    if (idx == 0) {
+
+                        // Get timestamp stored in the video file
+                        timestamp = Codec[idx]->GetTimestamp();
+                        if (timestamp > 0.0) {
+
+                            if (!IsTargetTimerRunning()) {
+
+                                // Try to keep orignal frame intervals
+                                if (ResetTimer || Codec[idx]->GetPos() == 1) {
+                                    FirstTimestamp = timestamp;
+                                    Timer.Reset();
+                                    Timer.Start();
+                                    ResetTimer = false;
+                                }
+                                else {
+                                    timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
+                                    if (timespan > 0.0) osaSleep(timespan);
+                                }
+                            }
+                        }
+
+                        OutputImage->SetTimestamp(timestamp);
+                    }
+                }
+            }
+        }
+    }
+    else {
+        // Codecs are not multithreaded, so assigning
+        // each video channel to a single thread
+
+        _ParallelLoop(procInfo, idx, videochannels)
+        {
+            if (Codec[idx]) {
+
+                // Seek (if needed) to frame that needs to be extracted
+                pos = Codec[idx]->GetPos();
+                Position[idx] = pos;
+
+                if (UseRange[idx]) {
+                    // Check if position is outside of the playback segment
+                    if (pos < Range[idx][0]) {
+                        Codec[idx]->SetPos(Range[idx][0]);
+                        ResetTimer = true;
+                    }
+                    else if (pos > Range[idx][1]) {
+                        if (!GetLoop()) {
+                            ret = SVL_STOP_REQUEST;
+                            break;
+                        }
+                        else {
+                            Codec[idx]->SetPos(Range[idx][0]);
+                            ResetTimer = true;
+                        }
+                    }
+                }
+
+                // Extract frame
+                ret = Codec[idx]->Read(0, *OutputImage, idx, true);
+
+                // Manage looped playback and errors
+                if (ret == SVL_VID_END_REACHED) {
+                    if (!GetLoop()) {
+                        ret = SVL_STOP_REQUEST;
+                        break;
+                    }
+                    else {
+                        // Loop around
+                        ret = Codec[idx]->Read(0, *OutputImage, idx, true);
+                    }
+                }
+                if (ret != SVL_OK) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
+                    break;
+                }
+
+                // Run timer based in the first video channel
+                if (idx == 0) {
+
+                    // Get timestamp stored in the video file
+                    timestamp = Codec[idx]->GetTimestamp();
+                    if (timestamp > 0.0) {
+
+                        if (!IsTargetTimerRunning()) {
+
+                            // Try to keep orignal frame intervals
+                            if (ResetTimer || Codec[idx]->GetPos() == 1) {
+                                FirstTimestamp = timestamp;
+                                Timer.Reset();
+                                Timer.Start();
+                                ResetTimer = false;
+                            }
+                            else {
+                                timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
+                                if (timespan > 0.0) osaSleep(timespan);
+                            }
+                        }
+                    }
+
+                    OutputImage->SetTimestamp(timestamp);
+                }
             }
         }
     }
@@ -327,6 +438,13 @@ int svlFilterSourceVideoFile::GetPosition(unsigned int videoch) const
     return Codec[videoch]->GetPos();
 }
 
+int svlFilterSourceVideoFile::SetRange(const int from, const int to, unsigned int videoch)
+{
+    vctInt2 range;
+    range.Assign(from, to);
+    return SetRange(range, videoch);
+}
+
 int svlFilterSourceVideoFile::SetRange(const vctInt2 range, unsigned int videoch)
 {
     if (Codec.size() <= videoch) {
@@ -334,6 +452,7 @@ int svlFilterSourceVideoFile::SetRange(const vctInt2 range, unsigned int videoch
         return SVL_FAIL;
     }
     Range[videoch] = range;
+    UseRange[videoch] = true;
     return SVL_OK;
 }
 
@@ -341,6 +460,10 @@ int svlFilterSourceVideoFile::GetRange(vctInt2& range, unsigned int videoch) con
 {
     if (Codec.size() <= videoch) {
         CMN_LOG_CLASS_INIT_ERROR << "GetRange: video channel out of range: " << videoch << std::endl;
+        return SVL_FAIL;
+    }
+    if (!UseRange[videoch]) {
+        CMN_LOG_CLASS_INIT_WARNING << "GetRange: range is not set for video channel: " << videoch << std::endl;
         return SVL_FAIL;
     }
     range = Range[videoch];

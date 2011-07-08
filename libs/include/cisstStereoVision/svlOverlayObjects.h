@@ -108,6 +108,7 @@ public:
 
     void SetInputChannel(unsigned int inputch);
     void SetPosition(vctInt2 pos);
+    void SetPosition(int x, int y);
     void SetAlpha(unsigned char alpha);
 
     unsigned int GetInputChannel() const;
@@ -207,6 +208,7 @@ public:
     void SetImage(const svlSampleImageRGB & image);
     void SetImage(const svlSampleImageRGBStereo & image, unsigned int imagech);
     void SetPosition(vctInt2 pos);
+    void SetPosition(int x, int y);
     void SetAlpha(unsigned char alpha);
 
     vctInt2 GetPosition() const;
@@ -468,16 +470,24 @@ public:
     svlOverlayStaticPoly(unsigned int videoch,
                          bool visible,
                          const TypeRef poly,
+                         svlRGB color);
+    svlOverlayStaticPoly(unsigned int videoch,
+                         bool visible,
+                         const TypeRef poly,
                          svlRGB color,
-                         unsigned int start = 0);
+                         unsigned int thickness,
+                         unsigned int start);
     virtual ~svlOverlayStaticPoly();
 
     void SetPoints(const TypeRef points);
+    void SetPoints(const TypeRef points, unsigned int start);
     void SetColor(svlRGB color);
+    void SetThickness(unsigned int thickness);
     void SetStart(unsigned int start);
 
     TypeRef GetPoints();
     svlRGB GetColor() const;
+    unsigned int GetThickness() const;
     unsigned int GetStart() const;
 
     unsigned int AddPoint(svlPoint2D point);
@@ -495,6 +505,7 @@ protected:
 private:
     Type Poly;
     svlRGB Color;
+    unsigned int Thickness;
     unsigned int Start;
     osaCriticalSection CS;
 };
@@ -545,6 +556,9 @@ public:
     svlRGB GetBackgroundColor() const;
     unsigned int GetBorderWidth() const;
     svlRGB GetBorderColor() const;
+
+    int GetValueInImagePos(double value, int & imagepos) const;
+    int GetImagePosInValue(int imagepos, double & value) const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);

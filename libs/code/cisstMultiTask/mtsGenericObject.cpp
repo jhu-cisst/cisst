@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 
+#include <iostream>
+#include <iomanip>
 
 bool mtsGenericObject::SetTimestampIfAutomatic(double timestamp) {
     if (this->AutomaticTimestampMember) {
@@ -35,11 +37,19 @@ bool mtsGenericObject::SetTimestampIfAutomatic(double timestamp) {
 void mtsGenericObject::ToStream(std::ostream & outputStream) const {
     outputStream << "Timestamp (";
     if (this->AutomaticTimestamp()) {
-        outputStream << "automatic";
+        outputStream << "auto";
     } else {
         outputStream << "manual";
     }
-    outputStream << "): " << this->Timestamp();
+    outputStream << "): ";
+
+    std::ios_base::fmtflags flags = outputStream.flags();       // Save old flags
+    outputStream.setf(std::ios::fixed | std::ios::showpoint);
+    outputStream.precision(5);
+
+    outputStream  << this->Timestamp();
+    outputStream.flags(flags);                             // Restore old flags
+
     if (this->Valid()) {
         outputStream << " (valid)";
     } else {
@@ -61,6 +71,25 @@ void mtsGenericObject::ToStreamRaw(std::ostream & outputStream, const char delim
     }
 }
 
+
+bool mtsGenericObject::FromStreamRaw(std::istream & inputStream, const char delimiter)
+{
+    // For now, only deal with space delimiters
+    if (!isspace(delimiter)) {
+        inputStream.setstate(std::ios::failbit | std::ios::badbit);
+        return false;
+    }
+    inputStream >> TimestampMember;
+    if (inputStream.fail())
+        return false;
+    inputStream >> AutomaticTimestampMember;
+    if (inputStream.fail())
+        return false;
+    inputStream >> ValidMember;
+    if (inputStream.fail())
+        return false;
+    return (typeid(this) == typeid(mtsGenericObject));
+}
 
 void mtsGenericObject::SerializeRaw(std::ostream & outputStream) const {
     cmnSerializeRaw(outputStream, this->Timestamp());

@@ -113,7 +113,7 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     template <class _userType>
     mtsExecutionResult Execute(_userType & result) const {
         return Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(this, Command, result)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(this, Command, result)
             : mtsExecutionResult::FUNCTION_NOT_BOUND;
     }
 #endif

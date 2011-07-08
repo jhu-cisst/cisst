@@ -24,23 +24,33 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlDefinitions_h
 
 
+#ifndef SETUP_QT_ENVIRONMENT
+    // Do nothing if Qt is not available
+    #define SETUP_QT_ENVIRONMENT(F) \
+        int main(int argc, char** argv) \
+        { \
+            return F(argc, argv); \
+        }
+#endif // SETUP_QT_ENVIRONMENT
+
+
 ///////////////////////////////////
 // Thread synchronization macros //
 ///////////////////////////////////
 
 #define _OnSingleThread(_info) \
-            if((_info)->id==0)
+            if((_info)->ID==0)
 #define _ParallelLoop(_info, _idx, _count) \
-            _idx=(_info)->id*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
-            for(const unsigned int _end=std::min((_count),((_info)->id+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
+            _idx=(_info)->ID*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
+            for(const unsigned int _end=std::min((_count),((_info)->ID+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
 #define _ParallelInterleavedLoop(_info, _idx, _count) \
-            _idx=(_info)->id;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
+            _idx=(_info)->ID;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
 #define _GetParallelSubRange(_info, _count, _from, _to) \
-            _to=(_count)/(_info)->count+1;_from=(_info)->id*_to;_to+=_from;if(_to>(_count)){_to=(_count);}
+            _to=(_count)/(_info)->count+1;_from=(_info)->ID*_to;_to+=_from;if(_to>(_count)){_to=(_count);}
 #define _SynchronizeThreads(_info) \
-            if((_info)->count>1){if((_info)->sync->Sync((_info)->id)!=SVL_SYNC_OK){return SVL_FAIL;}}
+            if((_info)->count>1){if((_info)->sync->Sync((_info)->ID)!=SVL_SYNC_OK){return SVL_FAIL;}}
 #define _CriticalSection(_info) \
-            if((_info)->count>1){(_info)->cs->Enter();}for(bool _incs=true;_incs&&((_info)->count>1);_incs=false,(_info)->cs->Leave())
+            if((_info)->count>1){(_info)->cs->Enter();}for(bool _incs=true;_incs;_incs=false,((_info)->count>1)?(_info)->cs->Leave():void())
 
 
 ///////////////////
@@ -166,7 +176,7 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_VCS_ARRAY_LENGTH                   50
 #define SVL_VCS_STRING_LENGTH                 128
 #define ST_DP_TEMP_BUFF_SIZE                 2048
-#define MAX_DIMENISION                       8192
+#define MAX_DIMENSION                       65536
 #define MAX_UI16_VAL                       0xFFFF
 #define MAX_I32_VAL                    0x7FFFFFFF
 #define BIG_I32_VAL                     100000000
@@ -181,34 +191,46 @@ http://www.cisst.org/cisst/license.txt.
 
 enum svlStreamType
 {
-     svlTypeInvalid           // Default in base class
-    ,svlTypeStreamSource      // Capture sources have an input connector of this type
-    ,svlTypeStreamSink        // Render filters may have an output connector of this type
-    ,svlTypeImageRGB          // Single RGB image
-    ,svlTypeImageRGBA         // Single RGBA image
-    ,svlTypeImageRGBStereo    // Dual RGB image
-    ,svlTypeImageRGBAStereo   // Dual RGBA image
-    ,svlTypeImageMono8        // Single Grayscale image (8bpp)
-    ,svlTypeImageMono8Stereo  // Dual Grayscale image (8bpp)
-    ,svlTypeImageMono16       // Single Grayscale image (16bpp)
-    ,svlTypeImageMono16Stereo // Dual Grayscale image (16bpp)
-    ,svlTypeImageMono32       // Single Grayscale image (32bpp)
-    ,svlTypeImageMono32Stereo // Dual Grayscale image (32bpp)
-    ,svlTypeImage3DMap        // Three floats per pixel for storing 3D coordinates
-    ,svlTypeMatrixInt8        // Matrix of type 'char'
-    ,svlTypeMatrixInt16       // Matrix of type 'short'
-    ,svlTypeMatrixInt32       // Matrix of type 'int'
-    ,svlTypeMatrixInt64       // Matrix of type 'long long int'
-    ,svlTypeMatrixUInt8       // Matrix of type 'unsigned char'
-    ,svlTypeMatrixUInt16      // Matrix of type 'unsigned short'
-    ,svlTypeMatrixUInt32      // Matrix of type 'unsigned int'
-    ,svlTypeMatrixUInt64      // Matrix of type 'unsigned long long int'
-    ,svlTypeMatrixFloat       // Matrix of type 'float'
-    ,svlTypeMatrixDouble      // Matrix of type 'double'
-    ,svlTypeTransform3D       // 3D transformation
-    ,svlTypeTargets           // Vector of N dimensional points
-    ,svlTypeText              // Textual data
-    ,svlTypeBlobs             // Image blobs
+     svlTypeInvalid               // Default in base class
+    ,svlTypeStreamSource          // Capture sources have an input connector of this type
+    ,svlTypeStreamSink            // Render filters may have an output connector of this type
+    ,svlTypeImageRGB              // Single RGB image
+    ,svlTypeImageRGBA             // Single RGBA image
+    ,svlTypeImageRGBStereo        // Dual RGB image
+    ,svlTypeImageRGBAStereo       // Dual RGBA image
+    ,svlTypeImageMono8            // Single Grayscale image (8bpp)
+    ,svlTypeImageMono8Stereo      // Dual Grayscale image (8bpp)
+    ,svlTypeImageMono16           // Single Grayscale image (16bpp)
+    ,svlTypeImageMono16Stereo     // Dual Grayscale image (16bpp)
+    ,svlTypeImageMono32           // Single Grayscale image (32bpp)
+    ,svlTypeImageMono32Stereo     // Dual Grayscale image (32bpp)
+    ,svlTypeImage3DMap            // Three floats per pixel for storing 3D coordinates
+    ,svlTypeCUDAImageRGB          // Single RGB image (CUDA)
+    ,svlTypeCUDAImageRGBA         // Single RGBA image (CUDA)
+    ,svlTypeCUDAImageRGBStereo    // Dual RGB image (CUDA)
+    ,svlTypeCUDAImageRGBAStereo   // Dual RGBA image (CUDA)
+    ,svlTypeCUDAImageMono8        // Single Grayscale image (8bpp) (CUDA)
+    ,svlTypeCUDAImageMono8Stereo  // Dual Grayscale image (8bpp) (CUDA)
+    ,svlTypeCUDAImageMono16       // Single Grayscale image (16bpp) (CUDA)
+    ,svlTypeCUDAImageMono16Stereo // Dual Grayscale image (16bpp) (CUDA)
+    ,svlTypeCUDAImageMono32       // Single Grayscale image (32bpp) (CUDA)
+    ,svlTypeCUDAImageMono32Stereo // Dual Grayscale image (32bpp) (CUDA)
+    ,svlTypeCUDAImage3DMap        // Three floats per pixel for storing 3D coordinates (CUDA)
+    ,svlTypeMatrixInt8            // Matrix of type 'char'
+    ,svlTypeMatrixInt16           // Matrix of type 'short'
+    ,svlTypeMatrixInt32           // Matrix of type 'int'
+    ,svlTypeMatrixInt64           // Matrix of type 'long long int'
+    ,svlTypeMatrixUInt8           // Matrix of type 'unsigned char'
+    ,svlTypeMatrixUInt16          // Matrix of type 'unsigned short'
+    ,svlTypeMatrixUInt32          // Matrix of type 'unsigned int'
+    ,svlTypeMatrixUInt64          // Matrix of type 'unsigned long long int'
+    ,svlTypeMatrixFloat           // Matrix of type 'float'
+    ,svlTypeMatrixDouble          // Matrix of type 'double'
+    ,svlTypeTransform3D           // 3D transformation
+    ,svlTypeTargets               // Vector of N dimensional points
+    ,svlTypeText                  // Textual data
+    ,svlTypeCameraGeometry        // Geometry of a single or multiple camera rig
+    ,svlTypeBlobs                 // Image blobs
 };
 
 

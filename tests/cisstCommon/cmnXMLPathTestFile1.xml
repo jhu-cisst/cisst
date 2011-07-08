@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<data-1>
+
+  <data-1-1 intAttribute = "5"
+            boolAttribute = "false"
+            doubleAttribute = "1.234"
+            doubleAttributeInf = "INF"
+            doubleAttributeMinusInf = "-INF"
+            stringAttribute = "Hello!"/>
+
+  <data-1-2>
+    <data-1-2-x intAttribute = "1">
+      <data-1-2-x-y stringAttribute = "value-1"/>
+    </data-1-2-x>
+
+    <data-1-2-x intAttribute = "3">
+      <data-1-2-x-y stringAttribute = "value-3"/>
+    </data-1-2-x>
+
+    <data-1-2-x intAttribute = "2">
+      <data-1-2-x-y stringAttribute = "value-2"/>
+    </data-1-2-x>
+
+  </data-1-2>
+
+</data-1>

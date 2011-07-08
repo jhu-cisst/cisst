@@ -32,38 +32,75 @@ class CISST_EXPORT devOSGManipulator :
   public robManipulator,
   public osg::Group {
 
+ private:
+
+  //! Store the current joints values
+  vctDynamicVector<double> q;
+
+  //! Store the previous joints values
+  vctDynamicVector<double> qold;
+
+  
+  //! Store the current joints velocities
+  vctDynamicVector<double> qd;
+
+  //! Store the previous joints velocities
+  vctDynamicVector<double> qdold;
+
  protected:
 
-  RnIO* input;                            // input of N joints
-  RnIO* output;                           // output of N joints
+  //! Input of N joints
+  RnIO* input;
+  //! Output of N joints
+  RnIO* output;
 
-  vctDynamicVector<double> q;             // N joints
-  std::vector< mtsDoubleFrm4x4 > mtsRtw;  // N+1 SE3 (N joints + base)
+  devOSGBody* base;
 
-  void UpdateKinematics();
-
-  devOSGBody* CreateLink( const std::string& name, 
-			  const vctFrame4x4<double>& Rt,
-			  const std::string& model,
-			  devOSGWorld* world );
+  //! Read the state of the manipulator
+  virtual void Read();
   
- public: 
+  //! Write the state of the manipulator
+  virtual void Write();
 
+  //! OSG Manipulator protected constructor
+  /**
+     This constructor initializes an OSG manipulator with the kinematics and 
+     dynamics contained in a file. Plus it initializes the OSG elements of the
+     manipulators (bodies and joints) for the engine.
+     \param devname   The name of the task
+     \param period    The period of the task
+     \param state     The initial state of the manipulator
+     \param mask      The CPU to host this task
+     \param inputmode The input mode
+  */
   devOSGManipulator( const std::string& devname,
 		     double period,
 		     devManipulator::State state,
 		     osaCPUMask mask,
-		     devManipulator::Mode mode,
+		     devManipulator::Mode inputmode );
+
+  //! OSG Manipulator generic constructor
+  /**
+     This constructor initializes an OSG manipulator with the kinematics and 
+     dynamics contained in a file. Plus it initializes the OSG elements of the
+     manipulators (bodies and joints) for the engine.
+     \param devname The name of the task
+     \param period The period of the task
+     \param state  The initial state of the manipulator
+     \param mask   The CPU to host this task
+     \param inputmode The input mode
+     \param robotfile The file with the kinematics and dynamics parameters
+     \param Rtw0 The offset transformation of the robot base
+  */
+  devOSGManipulator( const std::string& devname,
+		     double period,
+		     devManipulator::State state,
+		     osaCPUMask mask,
+		     devManipulator::Mode inputmode,
 		     const std::string& robotfile,
 		     const vctFrame4x4<double>& Rtw0 );
 
-  devOSGManipulator( const std::string& devname,
-		     double period,
-		     devManipulator::State state,
-		     osaCPUMask mask,
-		     devManipulator::Mode mode );
-
-
+ public: 
 
   //! OSG Manipulator generic constructor
   /**
@@ -84,7 +121,7 @@ class CISST_EXPORT devOSGManipulator :
   devOSGManipulator( const std::string& devname,
 		     double period,
 		     devManipulator::State state,
-		     osaCPUMask mask,
+		     osaCPUMask cpumask,
 		     devOSGWorld* world,
 		     const std::string& robotfn,
 		     const vctFrame4x4<double>& Rtw0,
@@ -94,10 +131,53 @@ class CISST_EXPORT devOSGManipulator :
 
   ~devOSGManipulator();
 
- protected:
 
-  void Read();
-  void Write();
+  //! Return the joints positions
+  /**
+     Query each ODE joint and return the joint positions
+     \return A vector of joints positions
+  */
+  virtual vctDynamicVector<double> GetJointsPositions() const ;
+
+  //! Return the joints velocities
+  /**
+     Query each ODE joint and return the joint velocities
+     \return A vector of joints velocities
+  */
+  virtual vctDynamicVector<double> GetJointsVelocities() const ;
+
+  //! Set the joint position
+  /**
+     This sets the position command of ODE (internal) servo motors. This does not
+     instantly changes the position. The position values are used to set the 
+     velocity of the ODE servo motors.
+     \param qs A vector of joint positions
+  */
+  virtual 
+    devOSGManipulator::Errno 
+    SetPositions( const vctDynamicVector<double>& qs );
+
+  //! Set the joint velocity
+  /**
+     This sets the velocity command of ODE (internal) servo motors. This does not
+     instantly changes the velocity. The velocity values are used to set the 
+     velocity of the ODE servo motors.
+     \param qsd A vector of joint velocities
+  */
+  virtual 
+    devOSGManipulator::Errno 
+    SetVelocities( const vctDynamicVector<double>& qsd );
+
+  //! Set the joint forces or torques
+  /**
+     This sets the force/torque value of each joint. This method does NOT apply 
+     the FT right away. The FT will be applied at the next iteration of the 
+     world.
+     \param ft A vector of joint forces/torques
+  */
+  virtual
+    devOSGManipulator::Errno 
+    SetForcesTorques( const vctDynamicVector<double>& ft);
 
 };
 

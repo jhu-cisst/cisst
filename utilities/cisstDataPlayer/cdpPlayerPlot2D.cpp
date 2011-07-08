@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cdpPlayerExample.cpp 2308 2011-02-15 22:01:00Z adeguet1 $
+  $Id$
 
   Author(s): Marcin Balicki
   Created on: 2011-02-10
@@ -21,12 +21,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cdpPlayerPlot2D.h"
 
+
 #include <math.h>
 #include <QMenu>
 #include <QFileDialog>
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <cisstOSAbstraction/osaGetTime.h>
+
 
 #include <iostream>
 #include <sstream>
@@ -36,17 +38,19 @@ CMN_IMPLEMENT_SERVICES(cdpPlayerPlot2D);
 cdpPlayerPlot2D::cdpPlayerPlot2D(const std::string & name, double period):
     cdpPlayerBase(name, period)
 {
+
     // create the user interface
     ExWidget.setupUi(&Widget);
     mainWidget = new QWidget();
     ScaleZoom = new QDoubleSpinBox(mainWidget);
     ScaleZoom->setValue(1);
     ZoomInOut = new QLabel(mainWidget);
-    ZoomInOut->setText("Set Scale");
+    ZoomInOut->setText("Set Visualization Scale");
+    ScaleZoom->setMaximum(9999);
 
     // create the user interface
     Plot = new vctPlot2DOpenGLQtWidget(mainWidget);
-    Plot->SetNumberOfPoints(100000);
+    Plot->SetNumberOfPoints(100);
     TracePointer = Plot->AddTrace("Data");
     VerticalLinePointer = Plot->AddVerticalLine("X");
 
@@ -61,13 +65,40 @@ cdpPlayerPlot2D::cdpPlayerPlot2D(const std::string & name, double period):
 
     CentralLayout->addWidget(this->GetWidget(),2,0,4,4);
     mainWidget->resize(300,500);
-    ZoomScale = 1;
-    VectorIndex = 0;
+
+    // Add elements to state table
+    StateTable.AddData(ZoomScaleValue,  "ZoomScale");
+    StateTable.AddData(VectorIndex,  "VectorIndex");
+
+    mtsInterfaceProvided * provided = AddInterfaceProvided("Provides2DPlot");
+    if (provided) {
+        provided->AddCommandReadState(StateTable, ZoomScaleValue,         "GetZoomScale");
+        provided->AddCommandReadState(StateTable, VectorIndex,        "GetVectorIndex");
+        provided->AddCommandWrite(&cdpPlayerPlot2D::SetVectorIndex, this, "SetVectorIndex", mtsInt() );
+    }
+    // Connect to ourself, for Qt Thread
+
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Get2DPlotStatus");
+    if (interfaceRequired) {        
+        interfaceRequired->AddFunction("GetZoomScale", Plot2DAccess.GetZoomScale);        
+        interfaceRequired->AddFunction("GetVectorIndex", Plot2DAccess.GetVectorIndex);
+        interfaceRequired->AddFunction("SetVectorIndex",  Plot2DAccess.WriteVectorIndex);        
+    }
+
+    ZoomScaleValue = 1;
+
+
+    //// Add Parser Thread
+    //taskManager = mtsTaskManager::GetInstance();
+    //taskManager->AddComponent(&Parser);
 }
 
 
 cdpPlayerPlot2D::~cdpPlayerPlot2D()
 {
+    // cleanup
+    //taskManager->KillAll();
+    //taskManager->Cleanup();
 }
 
 
@@ -106,6 +137,9 @@ void cdpPlayerPlot2D::Configure(const std::string & CMN_UNUSED(filename))
     Widget.show();
     mainWidget->show();
     ResetPlayer();
+    // Start Parser Thread
+    //taskManager->CreateAll();
+    //taskManager->StartAll();
 }
 
 
@@ -120,48 +154,52 @@ void cdpPlayerPlot2D::Run(void)
 {
     ProcessQueuedEvents();
     ProcessQueuedCommands();
-
+    
+    CS.Enter();
     //update the model (load data) etc.
     if (State == PLAY) {
 
         double currentTime = TimeServer.GetAbsoluteTimeInSeconds();
         Time = currentTime - PlayStartTime.Timestamp() + PlayStartTime.Data;
-        if (Time > PlayUntilTime)  {
+
+        if (Time.Data > PlayUntilTime.Data)  {
             Time = PlayUntilTime;
             State = STOP;
         }
         else {
-            //Load and Prep current data
+            if((ZoomScaleValue)  > (TimeBoundary-Time )*(0.8) && TimeBoundary <  PlayUntilTime.Data){
+                Parser.LoadDataFromFile(TracePointer, Time, ZoomScaleValue, false);
+                //Parser.TriggerLoadDataFromFile(TracePointer, Time, ZoomScaleValue, false);
+                Parser.GetBoundary(TracePointer, TopBoundary, LowBoundary);
+                TimeBoundary  =TopBoundary;
+            }
             // update plot
-            if (Data.size() != 0) {
-                UpdatePlot();
-	    }
+            UpdatePlot();
         }
     }
     //make sure we are at the correct seek position.
     else if (State == SEEK) {
-        if (TimeStamps.size() != 0) {
-            size_t i = 0;
-            //seek to where it really is
-            for (i = 0; i < TimeStamps.size()-1;i++) {
-                if (TimeStamps.at(i) <=Time.Data && TimeStamps.at(i+1) >= Time.Data) {
-                    break;
-		}
-            }
-            if (TimeStamps.at(0) >= Time.Data) {
-                VectorIndex = 0;
-            } else {
-                VectorIndex = i;
-	    }
+        //// Everything here should be moved to Qt thread since we have to re-alloc a new Plot object
+        //size_t i = 0;
+        if(LastTime.Data != Time.Data ){          
+            LastTime = Time;
             PlayStartTime = Time;
-            State = STOP;
+            Parser.LoadDataFromFile(TracePointer, Time, ZoomScaleValue, true);
+            //Parser.TriggerLoadDataFromFile(TracePointer, Time, ZoomScaleValue, true);
+            Parser.GetBoundary(TracePointer, TopBoundary, LowBoundary);
+            TimeBoundary  =TopBoundary;
+            // update plot
             UpdatePlot();
         }
     }
     else if (State == STOP) {
         //do Nothing
-    }
 
+        //// update plot
+        //UpdatePlot();
+    }
+    
+    CS.Leave();
     //now display updated data in the qt thread space.
     if (Widget.isVisible()) {
         emit QSignalUpdateQT();
@@ -171,68 +209,49 @@ void cdpPlayerPlot2D::Run(void)
 
 void cdpPlayerPlot2D::UpdatePlot(void)
 {
-    double dataToPlot = 0.0;
     double timeStamp = 0.0;
+    double ScaleValue = 0.0; 
+    mtsInt index;
 
-     // if no data, do nothing
-    if (VectorIndex >= TimeStamps.size()) {
-        return;
-    }
+    Plot2DAccess.GetVectorIndex(index);       
+    Plot2DAccess.GetZoomScale(ScaleValue);
 
-    // find out current timeStamps & data
-    timeStamp = TimeStamps.at(VectorIndex);
-    // set vertical line position
-
-    while (VectorIndex < TimeStamps.size() && Time.Data >= timeStamp) {
-        dataToPlot = Data.at(VectorIndex);
-        timeStamp = TimeStamps.at(VectorIndex);
-        VectorIndex++;
-    }
-
-/*
-    // Calculate Scale
-    // This section will "forze" graph while it is at starting point or end point
-    double minShow, maxShow;
-
-    minShow = ((Time.Data-ZoomScale) < PlayerDataInfo.DataStart()) ? PlayerDataInfo.DataStart(): (Time.Data-ZoomScale);
-    maxShow =((Time.Data+ZoomScale) > PlayerDataInfo.DataEnd()) ?  PlayerDataInfo.DataEnd(): (Time.Data+ZoomScale);
-
-    if (maxShow - minShow < ZoomScale*2 && minShow ==  PlayerDataInfo.DataStart()) {
-        maxShow = PlayerDataInfo.DataStart() +ZoomScale*2;
-    } else if (maxShow - minShow < ZoomScale*2  && maxShow ==  PlayerDataInfo.DataEnd()) {
-         minShow = PlayerDataInfo.DataEnd() -ZoomScale*2;
-    }
-*/
-
-    Plot->SetContinuousFitX(false);
-    Plot->FitX(Time.Data-ZoomScale ,  Time.Data+ZoomScale, 0);
-    VerticalLinePointer->SetX(Time.Data);
+    Plot->SetContinuousFitX(false);    
+    Plot->FitX(Time.Data-ScaleValue-PlayerDataInfo.DataStart() ,  Time.Data+ScaleValue-PlayerDataInfo.DataStart(), 0);
+    VerticalLinePointer->SetX(Time.Data-PlayerDataInfo.DataStart());
     // UpdateGL should be called at Qt thread
 }
 
 //in QT thread space
 void cdpPlayerPlot2D::UpdateQT(void)
 {
+    mtsDouble timevalue;
+    CS.Enter();
+    //BaseAccess.GetTime(timevalue);
+    timevalue = Time;
     if (State == PLAY) {
         //Display the last datasample before Time.
-        ExWidget.TimeSlider->setValue((int)Time.Data);
-    }
-    //Make sure we are at the correct seek location.
+        ExWidget.TimeSlider->setValue((int)timevalue.Data);
+        //update Plot in Qt Thread
+        if(Plot)
+            Plot->updateGL();
+    }    
     else if (State == STOP) {
         //Optional: Test if the data needs to be updated:
-        ExWidget.TimeSlider->setValue((int)Time.Data);
+        ExWidget.TimeSlider->setValue((int)timevalue.Data);
+        //update Plot in Qt Thread
+        if(Plot)
+            Plot->updateGL();
     }
-
-    else if (State == SEEK) {
+    else if (State == SEEK) {     
         //Optional: Test if the data needs to be updated:
-        ExWidget.TimeSlider->setValue((int)Time.Data);
-    }
-
-    //update Plot in Qt Thread
-    if (Plot) {
-        Plot->updateGL();
-    }
-    ExWidget.TimeLabel->setText(QString::number(Time.Data,'f', 3));
+        ExWidget.TimeSlider->setValue((int)timevalue.Data);
+        //update Plot in Qt Thread
+        if(Plot)
+            Plot->updateGL();
+    }   
+    CS.Leave();
+    ExWidget.TimeLabel->setText(QString::number(timevalue.Data,'f', 3));
 }
 
 
@@ -258,12 +277,16 @@ void cdpPlayerPlot2D::Stop(const mtsDouble & time)
 
 void cdpPlayerPlot2D::Seek(const mtsDouble & time)
 {
-    if (Sync) {
+    static mtsDouble lasttime =0 ;
+    if (Sync && lasttime.Data != time.Data) {
         CMN_LOG_CLASS_RUN_DEBUG << "Seek " << time << std::endl;
 
         State = SEEK;
         PlayUntilTime = PlayerDataInfo.DataEnd();
+        // this will cause state table write command overflow
+        //BaseAccess.WriteTime(time);
         Time = time;
+        lasttime = time;
     }
 }
 
@@ -285,7 +308,8 @@ void cdpPlayerPlot2D::Quit(void)
 
 void cdpPlayerPlot2D::QSlotPlayClicked(void)
 {
-    mtsDouble playTime = Time; //this should be read from the state table!!!
+    mtsDouble playTime;
+    BaseAccess.GetTime(playTime);    
     playTime.Timestamp() = TimeServer.GetAbsoluteTimeInSeconds();
 
     if (Sync) {
@@ -302,13 +326,17 @@ void cdpPlayerPlot2D::QSlotPlayClicked(void)
 void cdpPlayerPlot2D::QSlotSeekSliderMoved(int c)
 {
     mtsDouble t = c;
+    static mtsDouble lasttime;
+    if(lasttime.Data == t.Data)
+        return; 
+    else
+        lasttime = t;
 
     if (Sync) {
-        SeekRequest(t);
-    } else {
-        State = SEEK;
-        Time = t;
-    }
+        SeekRequest(t);       
+    }         
+    State = SEEK;      
+    Time = t ;
     PlayUntilTime = PlayerDataInfo.DataEnd();
 }
 
@@ -336,36 +364,36 @@ void cdpPlayerPlot2D::LoadData(void)
     //PlayerDataInfo.DataStart() = 1297723451.415;
     //PlayerDataInfo.DataEnd() = 1297723900.022;
 
-    if (Data.size() == 0) {
-        PlayerDataInfo.DataStart() = 0;
-        PlayerDataInfo.DataEnd() = 1;
-    }
 
-    if (Time < PlayerDataInfo.DataStart()) {
+    if (Time.Data < PlayerDataInfo.DataStart()) {
         Time = PlayerDataInfo.DataStart();
     }
 
-    if (Time > PlayerDataInfo.DataEnd()) {
+    if (Time.Data > PlayerDataInfo.DataEnd()) {
         Time = PlayerDataInfo.DataEnd();
     }
 
     //This is the standard.
     PlayUntilTime = PlayerDataInfo.DataEnd();
+    Time =  PlayerDataInfo.DataStart();
 
     UpdatePlayerInfo(PlayerDataInfo);
-    UpdateLimits();
 }
 
 
 void cdpPlayerPlot2D::QSlotSetSaveStartClicked(void)
 {
-    ExWidget.SaveStartSpin->setValue(Time.Data);
+    mtsDouble timevalue;
+    BaseAccess.GetTime(timevalue);
+    ExWidget.SaveStartSpin->setValue(timevalue.Data);
 }
 
 
 void cdpPlayerPlot2D::QSlotSetSaveEndClicked(void)
 {
-    ExWidget.SaveEndSpin->setValue(Time.Data);
+    mtsDouble timevalue;
+    BaseAccess.GetTime(timevalue);
+    ExWidget.SaveEndSpin->setValue(timevalue.Data);
 }
 
 
@@ -378,13 +406,11 @@ void cdpPlayerPlot2D::QSlotOpenFileClicked(void)
 }
 
 
+// Executed in Qt Thread
 void cdpPlayerPlot2D::QSlotSpinBoxValueChanged(double value)
 {
-    if (value*2 > (PlayerDataInfo.DataEnd() - PlayerDataInfo.DataStart())) {
-        value = (PlayerDataInfo.DataEnd() - PlayerDataInfo.DataStart())/2;
-        ScaleZoom->setValue(value);
-    }
-    ZoomScale = value;
+    ZoomScaleValue = value;
+    ScaleZoom->setValue(ZoomScaleValue);    
     UpdatePlot();
 }
 
@@ -394,31 +420,19 @@ void cdpPlayerPlot2D::OpenFile(void)
 {
    QString result;
 
-    // clear Data and TimeStamps
-    Data.clear();
-    TimeStamps.clear();
 
-    result = QFileDialog::getOpenFileName(mainWidget, "Open File", 0, 0);
+    result = QFileDialog::getOpenFileName(mainWidget, "Open File", tr("./"), tr("Desc (*.desc)"));
     if (!result.isNull()) {
         size_t i = 0;
-        TimeStamps.empty();
-        Data.empty();
 
         // read Data from file
-	ExtractDataFromStateTableCSVFile(result);
+	    ExtractDataFromStateTableCSVFile(result);
 
-        // reinitial plot widget
-        Plot = new vctPlot2DOpenGLQtWidget(mainWidget);
-        Plot->SetNumberOfPoints(Data.size());
-        TracePointer = Plot->AddTrace("Data");
-        VerticalLinePointer = Plot->AddVerticalLine("X");
-        for(i = 0 ; i < Data.size(); i++)
-            TracePointer->AddPoint(vctDouble2(TimeStamps.at(i), Data.at(i)));
-        CentralLayout->addWidget(Plot, 0, 0, 1, 2);
-
-        // create the user interface
+        Parser.GetBoundary(TracePointer,TopBoundary,LowBoundary);
+        TimeBoundary = TopBoundary;
         ResetPlayer();
         UpdatePlot();
+        BaseAccess.WriteTime(LowBoundary);
     }
 }
 
@@ -435,57 +449,42 @@ void cdpPlayerPlot2D::UpdateLimits()
 }
 
 
-// Only extract time and data field
-bool cdpPlayerPlot2D::ExtractDataFromStateTableCSVFile(QString & path)
-{
-    char charPeeked;
-    char DoubleNumber[100];
-    char TimeStamp[100];
-    std::ifstream inf(path.toAscii());
+bool cdpPlayerPlot2D::ExtractDataFromStateTableCSVFile(QString & path){
 
-     // clear Data and TimeStamps
-    Data.clear();
-    TimeStamps.clear();
+    const std::string TimeFieldName("TimeStamp");
+    const std::string DataFieldName("TipForceNorm_Nm");
+    std::string Path(path.toStdString());
 
-    // no file exists
-    if (! inf.is_open()) {
-        return false;
-    }
+    // open header file
+    Parser.ParseHeader(Path);
+    Parser.GenerateIndex();
+    // we sould name the file Path - .desc + .idx
+    Parser.WriteIndexToFile("Parser.idx");
+    Parser.SetDataFieldForSearch(DataFieldName);
+    Parser.SetTimeFieldForSearch(TimeFieldName);
+    Parser.LoadDataFromFile(TracePointer, 0.0, ZoomScaleValue,  false);
+    //Parser.TriggerLoadDataFromFile(TracePointer, 0.0, ZoomScaleValue,  false);
 
-    do {
-        charPeeked = inf.peek();
-        if (charPeeked != '#') {
-            break;
-	}
-    } while (!inf.getline(DoubleNumber, 100).eof());
+    Parser.GetBoundary(TracePointer,TopBoundary,LowBoundary);
 
-    while (!inf.getline(DoubleNumber, 100, ',').eof()) {
-        // get last number as value
-        inf.getline(TimeStamp,100, ',');
-        double timeFromFile =strtod(TimeStamp, NULL);
-        TimeStamps.push_back(timeFromFile);
-
-        inf.ignore(100, ',');
-        inf.ignore(100, ',');
-        inf.getline(DoubleNumber, 100);
-
-        double dataFromFile =strtod(DoubleNumber, NULL);
-        Data.push_back(dataFromFile);
-    }
-
-    PlayerDataInfo.DataStart() = TimeStamps[0];
-    PlayerDataInfo.DataEnd() = TimeStamps.back();
+    Parser.GetBeginEndTime(PlayerDataInfo.DataStart(), PlayerDataInfo.DataEnd());    
+//    Data = &DataPool1;
+//    TimeStamps =&TimeStampsPool1;
 
     return true;
 }
 
-
 // reset player to initial state
 //! TODO: make this function thread safe
 void cdpPlayerPlot2D::ResetPlayer(void)
-{
-    ZoomScale = (PlayerDataInfo.DataStart() != 0) ? ((PlayerDataInfo.DataEnd()-PlayerDataInfo.DataStart())/2.0) :  1.0 ;
-    ScaleZoom->setValue(ZoomScale);
-    VectorIndex = 0;
-    Time = 0;
+{    
+    // set to maximun period we read
+    //ZoomScaleValue = (PlayerDataInfo.DataStart() != 0) ? ((PlayerDataInfo.DataEnd() - PlayerDataInfo.DataStart()) / 2.0) : 1.0 ;    
+    //if(TimeStamps->size() != 0)
+    //    ZoomScaleValue = (TimeStamps->at(TimeStamps->size()-1) - TimeStamps->at(0))/2.0;   
+
+    ScaleZoom->setValue(ZoomScaleValue);    
+    BaseAccess.WriteTime(0.0);
+    Plot2DAccess.WriteVectorIndex(0); 
 }
+

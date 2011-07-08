@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,14 +11,14 @@
 #
 # --- end cisst license ---
 
-add_executable(devicesTutorialExample6
-               main.cpp
-               )
+add_executable (devicesTutorialExample6
+                main.cpp
+                )
 
-target_link_libraries(devicesTutorialExample6
-                      ${QT_LIBRARIES}
-                      )
+target_link_libraries (devicesTutorialExample6
+                       ${QT_LIBRARIES}
+                       )
 
-cisst_requires(devicesTutorialExample6
-               "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstDevices"
-               )
+cisst_target_link_libraries (devicesTutorialExample6
+                             cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstDevices
+                             )

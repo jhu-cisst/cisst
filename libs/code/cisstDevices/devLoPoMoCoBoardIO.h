@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devLoPoMoCoBoardIO_h
 #define _devLoPoMoCoBoardIO_h
 #include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaSleep.h> 
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <conio.h>
@@ -223,7 +224,7 @@ class devLoPoMoCoBoardIO {
 				devInt = (inw (BaseAddress + STATUS_REGISTER) & 0x0002)?true:false;
 				if (devInt) return true;
 				if (timeCount > timeout) return false;
-				usleep (1);
+				osaSleep(1 * cmn_us);
 				timeCount++;
 			}
 	}

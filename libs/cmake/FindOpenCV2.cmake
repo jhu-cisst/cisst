@@ -12,6 +12,8 @@
 #  
 # Balazs [2011-01-18]:
 # - Created from scratch for the reorganized OpenCV 2 structure introduced at version 2.2
+# Jbohren [2011-06-10]:
+# - Added OpenCV_ROOT_DIR for UNIX platforms & additional opencv include dir
 #
 # This file should be removed when CMake will provide an equivalent
 
@@ -29,6 +31,7 @@ IF(WIN32)
         )
 ELSE(WIN32)
     SET(OpenCV2_POSSIBLE_ROOT_DIRS
+        "$ENV{OpenCV_ROOT_DIR}"                         # *NIX: custom install location (like ROS)
         /usr/local                                      # Linux: default dir by CMake
         /usr                                            # Linux
         /opt/local                                      # OS X: default MacPorts location
@@ -148,6 +151,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 SET(OpenCV2_INCLUDE_DIRS
+    ${OpenCV2_ROOT_DIR}/include
     ${OpenCV2_ROOT_DIR}/include/opencv2
     ${OpenCV2_CORE_INCLUDE_DIR}
     ${OpenCV2_IMGPROC_INCLUDE_DIR}

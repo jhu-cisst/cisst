@@ -77,6 +77,9 @@ http://www.cisst.org/cisst/license.txt.
 // Image structure definitions //
 /////////////////////////////////
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
 struct CISST_EXPORT svlBMPFileHeader
 {
     unsigned short bfType;
@@ -133,7 +136,7 @@ struct CISST_EXPORT svlBlob
     svlBlob();
     void Assign(const svlBlob & blob);
 
-    unsigned int id;
+    unsigned int ID;
     bool         used;
     int          left;
     int          right;
@@ -146,6 +149,7 @@ struct CISST_EXPORT svlBlob
     unsigned int label;
 };
 
+
 #pragma pack()
 
 
@@ -153,12 +157,18 @@ struct CISST_EXPORT svlBlob
 #include <cisstStereoVision/svlSampleImage.h>
 #include <cisstStereoVision/svlSampleImageCustom.h>
 #include <cisstStereoVision/svlSampleImageTypes.h>
+#if CISST_SVL_HAS_CUDA
+#include <cisstStereoVision/svlSampleCUDAImage.h>
+#include <cisstStereoVision/svlSampleCUDAImageCustom.h>
+#include <cisstStereoVision/svlSampleCUDAImageTypes.h>
+#endif // CISST_SVL_HAS_CUDA
 #include <cisstStereoVision/svlSampleMatrix.h>
 #include <cisstStereoVision/svlSampleMatrixCustom.h>
 #include <cisstStereoVision/svlSampleMatrixTypes.h>
 #include <cisstStereoVision/svlSampleTransform3D.h>
 #include <cisstStereoVision/svlSampleTargets.h>
 #include <cisstStereoVision/svlSampleText.h>
+#include <cisstStereoVision/svlSampleCameraGeometry.h>
 #include <cisstStereoVision/svlSampleBlobs.h>
 
 // Always include last!
@@ -218,7 +228,7 @@ struct CISST_EXPORT svlPoint2D
     svlPoint2D(int x, int y);
     void Assign(const svlPoint2D & point);
     void Assign(int x, int y);
-    
+
     int x;
     int y;
 };
@@ -235,11 +245,13 @@ struct CISST_EXPORT svlTarget2D
     void Assign(bool used, bool visible, unsigned char conf, svlPoint2D & pos);
     void Assign(int x, int y);
     void Assign(svlPoint2D & pos);
-    
+
     bool          used;
     bool          visible;
     unsigned char conf;
     svlPoint2D    pos;
+    int           feature_quality;
+    vctDynamicVector<unsigned char> feature_data;
 };
 
 #pragma pack()

@@ -37,21 +37,18 @@ http://www.cisst.org/cisst/license.txt.
 template <class _elementType> class mtsGenericObjectProxyBase;
 template <class _elementType> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
+template<typename T> class mtsGenericTypes;
 
+#ifndef SWIG
 // Class services specialization for proxy objects.  We assume that we always want dynamic creation.
 // The specialization is that if the dynamic_cast to the Proxy type fails, we also try to dynamic_cast
 // to the ProxyRef type.
 template <typename _elementType>
-class cmnConditionalObjectFactory<CMN_DYNAMIC_CREATION, mtsGenericObjectProxy<_elementType> > {
+class cmnConditionalObjectFactoryCopy<true, mtsGenericObjectProxy<_elementType> > {
 public:
     typedef mtsGenericObjectProxy<_elementType> value_type;
     typedef mtsGenericObjectProxyRef<_elementType> value_reftype;
     typedef value_type * pointer;
-    typedef cmnGenericObject * generic_pointer;
-
-    inline static cmnGenericObject * Create(void) {
-        return new value_type;
-    }
 
     inline static cmnGenericObject * Create(const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
@@ -77,10 +74,6 @@ public:
         return false;
     }
 
-    inline static cmnGenericObject * CreateArray(size_t size) {
-        return new value_type[size];
-    }
-    
     inline static cmnGenericObject * CreateArray(size_t size, const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         pointer data, dummy;
@@ -103,6 +96,75 @@ public:
         return 0;
     }
 
+    inline static bool CopyConstructorAvailable(void) { return true; }
+};
+
+template<typename _class, typename _elementType>
+class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_ONEARG, _class, mtsGenericObjectProxy<_elementType> >
+{
+public:
+    typedef _class value_type;
+    typedef mtsGenericObjectProxy<_elementType> argTypeWrapped;
+
+    /*! Specialization of create when dynamic create is enabled. */
+    inline static _class * Create(const cmnGenericObject & arg) {
+        const mtsGenericObject *mts = dynamic_cast<const mtsGenericObject *>(&arg);
+        if (mts) return new value_type(*mtsGenericTypes<_elementType>::CastArg(*mts));
+        CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg::Create for proxy could not create object" << std::endl;
+        return 0;
+    }
+
+    inline static bool OneArgConstructorAvailable(void) { return true; }
+
+    inline static const cmnClassServicesBase *GetConstructorArgServices(void) {
+        return argTypeWrapped::ClassServices();
+    }
+};
+
+/*!  Specialization of cmnConditionalObjectFactoryOneArg with enabled
+     dynamic creation. Requires default constructor and SetName method.
+     This emulates a constructor with an std::string parameter and is provided
+     for backward compatibility. Here _elementType should be std::string.
+*/
+template<typename _class, typename _elementType>
+class cmnConditionalObjectFactoryOneArg<CMN_DYNAMIC_CREATION_SETNAME, _class, mtsGenericObjectProxy<_elementType> >
+{
+public:
+    typedef _class value_type;
+    typedef mtsGenericObjectProxy<_elementType> argTypeWrapped;
+
+    /*! Specialization of create when dynamic creation is enabled. */
+    inline static _class * Create(const cmnGenericObject & arg) {
+        const mtsGenericObject *mts = dynamic_cast<const mtsGenericObject *>(&arg);
+        if (mts) {
+            const _elementType *name = mtsGenericTypes<_elementType>::CastArg(*mts);
+            if (name) {
+                _class *obj = new value_type;
+                obj->SetName(*name);
+                return obj;
+            }
+            CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg::Create for string proxy could not get string" << std::endl;
+            return 0;
+        }
+        CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg::Create for string proxy could not create object" << std::endl;
+        return 0;
+    }
+
+    inline static bool OneArgConstructorAvailable(void) { return true; }
+
+    inline static const cmnClassServicesBase *GetConstructorArgServices(void) {
+        return argTypeWrapped::ClassServices();
+    }
+};
+
+template<typename _elementType>
+class cmnConditionalObjectDestructor<true, mtsGenericObjectProxy<_elementType> >
+{
+    typedef mtsGenericObjectProxy<_elementType> value_type;
+    typedef mtsGenericObjectProxyRef<_elementType> value_reftype;
+    typedef value_type * pointer;
+    typedef cmnGenericObject * generic_pointer;
+public:
     inline static bool DeleteArray(generic_pointer & data, size_t & size) {
         pointer typedData = dynamic_cast<pointer>(data);
         if (typedData) {
@@ -132,6 +194,7 @@ public:
         return false;
     }
 };
+#endif  // !SWIG
 
 /*!  Proxy class used to create a simple mtsGenericObject, i.e. data
   object with a registered type, dynamic creation, serialization and
@@ -533,11 +596,11 @@ public:
 template<typename T>
 class mtsGenericTypes
 {
-    typedef mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES> impl;
+    typedef mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED> impl;
 public:
-    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalBaseType FinalBaseType;
-    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalType     FinalType;
-    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalRefType  FinalRefType;
+    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED>::FinalBaseType FinalBaseType;
+    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED>::FinalType     FinalType;
+    typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::IS_DERIVED>::FinalRefType  FinalRefType;
     static FinalRefType *ConditionalWrap(T &obj) { return impl::ConditionalWrap(obj); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return impl::IsEqual(obj1, obj2); }
     static void ConditionalFree(const FinalRefType *obj) { impl::ConditionalFree(obj); }
@@ -577,13 +640,21 @@ public:
 template<typename T>
 class mtsGenericTypesUnwrap
 {
-    typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES> impl;
+    typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::IS_DERIVED> impl;
 public:
-    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::RefType RefType;
-    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::BaseType BaseType;
+    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::IS_DERIVED>::RefType RefType;
+    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::IS_DERIVED>::BaseType BaseType;
 };
 
+// Some macros for creating class services
 
+#define CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(className, parentName, argType) \
+            CMN_IS_DERIVED_FROM_ASSERT(className, parentName) \
+            CMN_IMPLEMENT_SERVICES_INTERNAL(className, parentName::ClassServices(), mtsGenericTypes<argType>::FinalType)
+
+#define CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(className, parentName, argType) \
+            CMN_IS_DERIVED_FROM_ASSERT(className, parentName) \
+            CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, parentName::ClassServices(), mtsGenericTypes<argType>::FinalType)
 #endif
 
 /* Some basic types defined here for now, could move somewhere else. */

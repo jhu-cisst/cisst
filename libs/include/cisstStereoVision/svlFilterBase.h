@@ -39,6 +39,8 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT svlFilterBase : public mtsComponent
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+
     friend class svlFilterInput;
     friend class svlFilterOutput;
     friend class svlStreamManager;
@@ -50,7 +52,6 @@ public:
 
     bool IsInitialized(void) const;
     bool IsRunning(void) const;
-
     unsigned int GetFrameCounter(void) const;
 
     svlFilterInput  * GetInput(void) const;
@@ -93,6 +94,8 @@ private:
     bool   AutoType;
     double PrevInputTimestamp;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterBase)
 
 #endif // _svlFilterBase_h
 

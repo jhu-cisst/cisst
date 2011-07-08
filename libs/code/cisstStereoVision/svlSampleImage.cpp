@@ -24,9 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlConverters.h>
 
 
-/*****************************/
-/*** svlSampleImage class ****/
-/*****************************/
+/****************************/
+/*** svlSampleImage class ***/
+/****************************/
 
 svlSampleImage::svlSampleImage() :
     svlSample()
@@ -44,6 +44,123 @@ svlSampleImage::~svlSampleImage()
 {
 }
 
+svlPixelType svlSampleImage::GetPixelType() const
+{
+    switch (GetType()) {
+        case svlTypeImageRGB:
+        case svlTypeImageRGBStereo:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBStereo:
+            return svlPixelRGB;
+        break;
+
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBAStereo:
+            return svlPixelRGBA;
+        break;
+
+        case svlTypeImageMono8:
+        case svlTypeImageMono8Stereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+            return svlPixelMono8;
+        break;
+
+        case svlTypeImageMono16:
+        case svlTypeImageMono16Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+            return svlPixelMono16;
+        break;
+
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+            return svlPixelMono32;
+        break;
+
+        case svlTypeImage3DMap:
+        case svlTypeCUDAImage3DMap:
+            return svlPixel3DFloat;
+        break;
+
+        case svlTypeMatrixInt8:
+        case svlTypeMatrixInt16:
+        case svlTypeMatrixInt32:
+        case svlTypeMatrixInt64:
+        case svlTypeMatrixUInt8:
+        case svlTypeMatrixUInt16:
+        case svlTypeMatrixUInt32:
+        case svlTypeMatrixUInt64:
+        case svlTypeMatrixFloat:
+        case svlTypeMatrixDouble:
+        case svlTypeInvalid:
+        case svlTypeStreamSource:
+        case svlTypeStreamSink:
+        case svlTypeTransform3D:
+        case svlTypeTargets:
+        case svlTypeText:
+        case svlTypeCameraGeometry:
+        case svlTypeBlobs:
+        break;
+    }
+    return svlPixelUnknown;
+}
+
+int svlSampleImage::GetAlphaChannel() const
+{
+    switch (GetType()) {
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBAStereo:
+            return 3;
+        break;
+
+        case svlTypeImageMono8:
+        case svlTypeImageMono8Stereo:
+        case svlTypeImageMono16:
+        case svlTypeImageMono16Stereo:
+        case svlTypeImageMono32:
+        case svlTypeImageMono32Stereo:
+        case svlTypeImage3DMap:
+        case svlTypeImageRGB:
+        case svlTypeImageRGBStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeMatrixInt8:
+        case svlTypeMatrixInt16:
+        case svlTypeMatrixInt32:
+        case svlTypeMatrixInt64:
+        case svlTypeMatrixUInt8:
+        case svlTypeMatrixUInt16:
+        case svlTypeMatrixUInt32:
+        case svlTypeMatrixUInt64:
+        case svlTypeMatrixFloat:
+        case svlTypeMatrixDouble:
+        case svlTypeInvalid:
+        case svlTypeStreamSource:
+        case svlTypeStreamSink:
+        case svlTypeTransform3D:
+        case svlTypeTargets:
+        case svlTypeText:
+        case svlTypeCameraGeometry:
+        case svlTypeBlobs:
+        break;
+    }
+    return SVL_FAIL;
+}
+
 int svlSampleImage::ImportData(unsigned char *input, const unsigned int size, const int CMN_UNUSED(param), const unsigned int videoch)
 {
     if (!input || size == 0 || videoch >= GetVideoChannels()) return SVL_FAIL;
@@ -56,7 +173,7 @@ int svlSampleImage::ImportData(unsigned char *input, const unsigned int size, co
 
     if (datachannels == 3) {
     // RGB
-        svlConverter::Gray8toRGB24 (input, GetUCharPointer(videoch), size);
+        svlConverter::Gray8toRGB24(input, GetUCharPointer(videoch), size);
         return SVL_OK;
     }
     else if (datachannels == 4) {
@@ -92,7 +209,7 @@ int svlSampleImage::ImportData(unsigned short* input, const unsigned int size, c
 
     if (datachannels == 3) {
         // RGB
-        svlConverter::Gray16toRGB24 (input, GetUCharPointer(videoch), size, param);
+        svlConverter::Gray16toRGB24(input, GetUCharPointer(videoch), size, param);
         return SVL_OK;
     }
     else if (datachannels == 4) {
@@ -128,7 +245,7 @@ int svlSampleImage::ImportData(unsigned int* input, const unsigned int size, con
 
     if (datachannels == 3) {
         // RGB
-        svlConverter::Gray32toRGB24 (input, GetUCharPointer(videoch), size, param);
+        svlConverter::Gray32toRGB24(input, GetUCharPointer(videoch), size, param);
         return SVL_OK;
     }
     else if (datachannels == 4) {
@@ -165,7 +282,7 @@ int svlSampleImage::ImportData(float* input, const unsigned int size, const int 
 
     if (datachannels == 3) {
         // RGB
-        svlConverter::float32toRGB24 (input, GetUCharPointer(videoch), size, fparam);
+        svlConverter::float32toRGB24(input, GetUCharPointer(videoch), size, fparam);
         return SVL_OK;
     }
     else if (datachannels == 4) {
@@ -269,9 +386,21 @@ int svlSampleImage::ImportMatrix(const svlSampleMatrix* matrix, const int param,
         case svlTypeImageMono32:
         case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
         break;
     }

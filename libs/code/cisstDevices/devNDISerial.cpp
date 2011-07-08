@@ -495,6 +495,9 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
         if (tool->Interface) {
             StateTable.AddData(tool->TooltipPosition, name + "Position");
             tool->Interface->AddCommandReadState(StateTable, tool->TooltipPosition, "GetPositionCartesian");
+            // Zihan Chen 04-27-2011 Add an interface to provide GetMarkerCartesian 
+            StateTable.AddData(tool->MarkerPosition, name + "Marker");
+            tool->Interface->AddCommandReadState(StateTable, tool->MarkerPosition, "GetMarkerCartesian");
         }
     }
     return tool;
@@ -765,10 +768,11 @@ void devNDISerial::Track(void)
             toolPosition.Divide(100.0);
             tooltipPosition.Translation() = toolPosition;
             tool->ErrorRMS /= 10000.0;
-            tool->MarkerPosition.Position() = tooltipPosition;
+            tool->MarkerPosition.Position() = tooltipPosition; // Tool Frame Position = Orientation + Frame Origin
+			tool->MarkerPosition.SetValid(true);
 
             tooltipPosition.Translation() += tooltipPosition.Rotation() * tool->TooltipOffset;  // apply tooltip offset
-            tool->TooltipPosition.Position() = tooltipPosition;
+            tool->TooltipPosition.Position() = tooltipPosition;  // Tool Tip Position = Orientation + Tooltip
             tool->TooltipPosition.SetValid(true);
 
             CMN_LOG_CLASS_RUN_DEBUG << "Track: " << tool->Name << " is at:\n" << tooltipPosition << std::endl;

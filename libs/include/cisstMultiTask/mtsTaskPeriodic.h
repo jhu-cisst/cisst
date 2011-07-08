@@ -36,6 +36,39 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+class CISST_EXPORT mtsTaskPeriodicConstructorArg : public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+public:
+    enum { STATE_TABLE_DEFAULT_SIZE = 256 };
+    std::string Name;
+    double Period;
+    bool IsHardRealTime;
+    unsigned int StateTableSize;
+
+    mtsTaskPeriodicConstructorArg() : mtsGenericObject() {}
+    mtsTaskPeriodicConstructorArg(const std::string &name, double period, bool isHardRealTime = false,
+                                  unsigned int sizeStateTable = STATE_TABLE_DEFAULT_SIZE) : 
+        mtsGenericObject(), Name(name), Period(period), IsHardRealTime(isHardRealTime), StateTableSize(sizeStateTable) {}
+    mtsTaskPeriodicConstructorArg(const mtsTaskPeriodicConstructorArg &other) : mtsGenericObject(),
+        Name(other.Name), Period(other.Period), IsHardRealTime(other.IsHardRealTime), StateTableSize(other.StateTableSize) {}
+    ~mtsTaskPeriodicConstructorArg() {}
+
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+
+    void ToStream(std::ostream & outputStream) const;
+
+    /*! Raw text output to stream */
+    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskPeriodicConstructorArg);
 
 /*!
   \ingroup cisstMultiTask
@@ -45,7 +78,7 @@ http://www.cisst.org/cisst/license.txt.
   period. It also has a mechanism to make the task hard real time,
   assuming that the underlying operating system provides that capability.
 */
-class CISST_EXPORT mtsTaskPeriodic: public mtsTaskContinuous
+class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -114,6 +147,8 @@ class CISST_EXPORT mtsTaskPeriodic: public mtsTaskContinuous
                     bool isHardRealTime = false,
                     unsigned int sizeStateTable = 256,
                     bool newThread = true);
+
+    mtsTaskPeriodic(const mtsTaskPeriodicConstructorArg &arg);
 
 	/*! Default Destructor. */
 	virtual ~mtsTaskPeriodic();

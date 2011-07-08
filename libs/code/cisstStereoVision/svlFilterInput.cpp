@@ -41,6 +41,7 @@ svlFilterInput::svlFilterInput(svlFilterBase* filter, bool trunk, const std::str
 
 svlFilterInput::~svlFilterInput()
 {
+    if (Connection) Connection->Disconnect();
     if (Buffer) delete Buffer;
 }
 

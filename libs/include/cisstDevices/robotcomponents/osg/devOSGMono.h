@@ -7,11 +7,6 @@
 #include <cisstDevices/robotcomponents/osg/devOSGCamera.h>
 #include <cisstDevices/devExport.h>
 
-class A{
-
-public:
-  A(){}
-};
 
 class CISST_EXPORT devOSGMono : public devOSGCamera {
 
@@ -53,7 +48,8 @@ class CISST_EXPORT devOSGMono : public devOSGCamera {
 	      double fovy, double aspectRatio,
 	      double zNear, double zFar,
 	      const std::string& fnname = "",
-	      bool trackball = true );
+	      bool trackball = true,
+	      bool offscreenrendering = false );
 
   ~devOSGMono();
 

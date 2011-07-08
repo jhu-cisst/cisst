@@ -655,7 +655,8 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
                     // Remove the proxy components from LCM
                     if (peerProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM) {
                         if (!LocalManager->RemoveComponent(proxyComponentName, false)) {
-                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from LCM_with_GCM: "
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveProcess: failed to remove component from "
+                                << mtsManagerLocal::ProcessNameOfLCMWithGCM << ": "
                                 << "\"" << peerProcessName << ":" << proxyComponentName << "\""
                                 << std::endl;
                             ret = false;
@@ -1749,7 +1750,6 @@ void mtsManagerGlobal::DisconnectInternal(void)
             // When removing connection between (InterfaceComponentRequired, InterfaceInternalProvided),
             // clean up required interface "InterfaceComponentRequiredFor(UserComponent)" of
             // manager component "LCM_MCC" together.
-
             const std::string nameOfLCM_MCC = // LCM_MCC
                 mtsManagerComponentBase::GetNameOfManagerComponentClientFor(mtsManagerLocal::ProcessNameOfLCMDefault);
             if ((serverComponentName != nameOfLCM_MCC) && (clientComponentName == nameOfLCM_MCC) &&
@@ -1867,6 +1867,14 @@ void mtsManagerGlobal::DisconnectInternal(void)
                         << "\"" << std::endl;
                 }
             }
+
+            // Naming rule for provided interface instances does not apply to the MCS in the GCM
+            if (serverProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM &&
+                serverComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) 
+            {
+                serverInterfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided;
+            }
+
             if (FindInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceName)) {
                 if (!RemoveConnectionOfInterfaceProvidedOrOutput(
                         serverProcessName, serverComponentName, serverInterfaceName, connectionID))

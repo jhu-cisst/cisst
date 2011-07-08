@@ -69,7 +69,8 @@ public:
      \param filename The file name of the file to load
      \return SUCCESS if the file was loaded properly. ERROR otherwise.
   */
-  virtual devGeometry::Errno LoadOBJ( const std::string& filename ) = 0;
+  virtual devGeometry::Errno LoadOBJ( const std::string& filename,
+				      bool rotateX90 = false ) = 0;
   
   //! Render the geometry
   /**

@@ -156,11 +156,11 @@ public:
 class SomeUnknownClass;
 
 void cmnTypeTraitsTest::TestIsDerivedFrom(void) {
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, Base>::YES));
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<Base, Derived>::NO));
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, SomeUnknownClass>::NO));
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<int, Base>::NO));
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<int, SomeUnknownClass>::NO));
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<Base, int>::NO));
-    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, int>::NO));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, Base>::IS_DERIVED));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Base, Derived>::IS_NOT_DERIVED));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, SomeUnknownClass>::IS_NOT_DERIVED));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<int, Base>::IS_NOT_DERIVED));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<int, SomeUnknownClass>::IS_NOT_DERIVED));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Base, int>::IS_NOT_DERIVED));
+    CPPUNIT_ASSERT((cmnIsDerivedFrom<Derived, int>::IS_NOT_DERIVED));
 }

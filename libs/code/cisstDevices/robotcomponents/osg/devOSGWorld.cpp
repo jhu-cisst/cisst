@@ -106,7 +106,6 @@ devOSGWorld::devOSGWorld(){
   geode->addDrawable( Zgeom );
   
   addChild( geode );
-
-  */
+*/
 }
 

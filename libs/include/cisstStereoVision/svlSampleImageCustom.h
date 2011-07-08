@@ -263,7 +263,7 @@ public:
         std::string codec;
         int compression;
         GetEncoder(codec, compression);
-        cmnSerializeRaw(outputStream, GetType());
+        cmnSerializeRaw(outputStream, static_cast<int>(GetType()));
         cmnSerializeRaw(outputStream, GetTimestamp());
         cmnSerializeRaw(outputStream, codec);
 
@@ -316,60 +316,6 @@ public:
     ///////////////////////////////////
     // Inherited from svlSampleImage //
     ///////////////////////////////////
-
-    virtual svlPixelType GetPixelType() const
-    {
-        switch (GetType()) {
-            case svlTypeImageRGB:
-            case svlTypeImageRGBStereo:
-                return svlPixelRGB;
-            break;
-
-            case svlTypeImageRGBA:
-            case svlTypeImageRGBAStereo:
-                return svlPixelRGBA;
-            break;
-
-            case svlTypeImageMono8:
-            case svlTypeImageMono8Stereo:
-                return svlPixelMono8;
-            break;
-
-            case svlTypeImageMono16:
-            case svlTypeImageMono16Stereo:
-                return svlPixelMono16;
-            break;
-
-            case svlTypeImageMono32:
-            case svlTypeImageMono32Stereo:
-                return svlPixelMono32;
-            break;
-
-            case svlTypeImage3DMap:
-                return svlPixel3DFloat;
-            break;
-
-            case svlTypeMatrixInt8:
-            case svlTypeMatrixInt16:
-            case svlTypeMatrixInt32:
-            case svlTypeMatrixInt64:
-            case svlTypeMatrixUInt8:
-            case svlTypeMatrixUInt16:
-            case svlTypeMatrixUInt32:
-            case svlTypeMatrixUInt64:
-            case svlTypeMatrixFloat:
-            case svlTypeMatrixDouble:
-            case svlTypeInvalid:
-            case svlTypeStreamSource:
-            case svlTypeStreamSink:
-            case svlTypeTransform3D:
-            case svlTypeTargets:
-            case svlTypeText:
-            case svlTypeBlobs:
-            break;
-        }
-        return svlPixelUnknown;
-    }
 
 #if CISST_SVL_HAS_OPENCV
     IplImage* IplImageRef(const unsigned int videochannel = 0) const
@@ -480,45 +426,6 @@ public:
         return (sizeof(_ValueType) * _DataChannels);
     }
 
-    int GetAlphaChannel() const
-    {
-        switch (GetType()) {
-            case svlTypeImageRGBA:
-            case svlTypeImageRGBAStereo:
-                return 3;
-            break;
-
-            case svlTypeImageMono8:
-            case svlTypeImageMono8Stereo:
-            case svlTypeImageMono16:
-            case svlTypeImageMono16Stereo:
-            case svlTypeImageMono32:
-            case svlTypeImageMono32Stereo:
-            case svlTypeImage3DMap:
-            case svlTypeImageRGB:
-            case svlTypeImageRGBStereo:
-            case svlTypeMatrixInt8:
-            case svlTypeMatrixInt16:
-            case svlTypeMatrixInt32:
-            case svlTypeMatrixInt64:
-            case svlTypeMatrixUInt8:
-            case svlTypeMatrixUInt16:
-            case svlTypeMatrixUInt32:
-            case svlTypeMatrixUInt64:
-            case svlTypeMatrixFloat:
-            case svlTypeMatrixDouble:
-            case svlTypeInvalid:
-            case svlTypeStreamSource:
-            case svlTypeStreamSink:
-            case svlTypeTransform3D:
-            case svlTypeTargets:
-            case svlTypeText:
-            case svlTypeBlobs:
-            break;
-        }
-        return SVL_FAIL;
-    }
-
     unsigned int GetWidth(const unsigned int videochannel = 0) const
     {
         if (videochannel < _VideoChannels) return (Image[videochannel].width() / _DataChannels);
@@ -552,7 +459,7 @@ public:
             const unsigned int width = GetWidth(videochannel);
 
             // Create sub-matrix reference
-            vctDynamicMatrixRef<_ValueType> subref(Image[videochannel], top, 0, height, width);
+            vctDynamicMatrixRef<_ValueType> subref(Image[videochannel], top, 0, height, width * _DataChannels);
 
             // Create sub-sample image
             svlSampleImageCustom<_ValueType, _DataChannels, 1>* subimage = new svlSampleImageCustom<_ValueType, _DataChannels, 1>(false);

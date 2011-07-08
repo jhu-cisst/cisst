@@ -102,6 +102,18 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeImageMono32Stereo:
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
+        case svlTypeImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeMatrixInt8:
         case svlTypeMatrixInt16:
         case svlTypeMatrixInt32:
@@ -112,10 +124,10 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeMatrixUInt64:
         case svlTypeMatrixFloat:
         case svlTypeMatrixDouble:
-        case svlTypeImage3DMap:
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
             return true;
 

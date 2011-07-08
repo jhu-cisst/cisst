@@ -24,14 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _winWin32_h
 #define _winWin32_h
 
-#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlWindowManagerBase.h>
 
 #include <windows.h>
 
 class svlWindowWin32
 {
 public:
-    svlWindowWin32(unsigned int id);
+    svlWindowWin32(unsigned int _id);
     virtual ~svlWindowWin32();
 
     virtual int Create(unsigned int width, unsigned int height, bool show,

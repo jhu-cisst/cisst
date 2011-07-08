@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageWindowTargetSelect_h
 
 #include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlWindowManagerBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>

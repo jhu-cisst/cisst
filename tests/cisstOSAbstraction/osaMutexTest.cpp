@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2008-01-30
-  
+
   (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -27,16 +27,60 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "osaMutexTest.h"
 
+#include <cisstOSAbstraction/osaMutex.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
+
 #include <string.h>
+
+// abstract class to test either a mutex or a critical section
+class osaTestMutexOrCriticalSection
+{
+public:
+    virtual void LockOrEnter(void) = 0;
+    virtual void UnlockOrLeave(void) = 0;
+};
+
+// abstract class derived for mutex
+class osaTestMutex: public osaTestMutexOrCriticalSection
+{
+    osaMutex Mutex;
+public:
+    inline void LockOrEnter(void) {
+        Mutex.Lock();
+    }
+    inline void UnlockOrLeave(void) {
+        Mutex.Unlock();
+    }
+};
+
+// abstract class derived for criticalsection
+class osaTestCriticalSection: public osaTestMutexOrCriticalSection
+{
+    osaCriticalSection CriticalSection;
+public:
+    inline void LockOrEnter(void) {
+        CriticalSection.Enter();
+    }
+    inline void UnlockOrLeave(void) {
+        CriticalSection.Leave();
+    }
+};
+
+
 
 void osaMutexTest::TestMutexInternalsSize(void) {
     CPPUNIT_ASSERT(osaMutex::INTERNALS_SIZE >= osaMutex::SizeOfInternals());
 }
 
 
+void osaMutexTest::TestCriticalSectionInternalsSize(void) {
+    CPPUNIT_ASSERT(osaCriticalSection::INTERNALS_SIZE >= osaCriticalSection::SizeOfInternals());
+}
+
+
 class MethodArguments {
 public:
-    osaMutex * Mutex;
+    osaTestMutexOrCriticalSection * MutexOrCriticalSection;
     osaStopwatch TimerWait;
     osaStopwatch TimerBlock;
     unsigned int NumberOfIterations;
@@ -57,21 +101,22 @@ public:
              index < argument->NumberOfIterations;
              index++) {
             argument->TimerWait.Start();
-            argument->Mutex->Lock();
+            argument->MutexOrCriticalSection->LockOrEnter();
             argument->TimerWait.Stop();
             argument->TimerBlock.Start();
             osaSleep(argument->DelayToUnlock);
             argument->TimerBlock.Stop();
-            argument->Mutex->Unlock();
+            argument->MutexOrCriticalSection->UnlockOrLeave();
             osaSleep(argument->DelayToLock);
         }
         return 0;
-    } 
+    }
 };
 
-void osaMutexTest::TestLockBlocks(void) {
+
+void osaMutexTestTestLockBlocks(osaTestMutexOrCriticalSection & objectTested)
+{
     // all time intervals are in milli seconds!
-    osaMutex mutexTested;
     osaStopwatch overallTimer;
     overallTimer.Reset();
     overallTimer.Start();
@@ -81,7 +126,7 @@ void osaMutexTest::TestLockBlocks(void) {
     osaThread thread1;
     MethodHolder methodHolder1;
     MethodArguments arguments1;
-    arguments1.Mutex = &mutexTested;
+    arguments1.MutexOrCriticalSection = &objectTested;
     arguments1.TimerWait.Reset();
     arguments1.TimerBlock.Reset();
     arguments1.NumberOfIterations = nbIterations;
@@ -93,7 +138,7 @@ void osaMutexTest::TestLockBlocks(void) {
     osaThread thread2;
     MethodHolder methodHolder2;
     MethodArguments arguments2;
-    arguments2.Mutex = &mutexTested;
+    arguments2.MutexOrCriticalSection = &objectTested;
     arguments2.TimerWait.Reset();
     arguments2.TimerBlock.Reset();
     arguments2.NumberOfIterations = nbIterations;
@@ -105,7 +150,7 @@ void osaMutexTest::TestLockBlocks(void) {
     osaThread thread3;
     MethodHolder methodHolder3;
     MethodArguments arguments3;
-    arguments3.Mutex = &mutexTested;
+    arguments3.MutexOrCriticalSection = &objectTested;
     arguments3.TimerWait.Reset();
     arguments3.TimerBlock.Reset();
     arguments3.NumberOfIterations = nbIterations;
@@ -139,6 +184,21 @@ void osaMutexTest::TestLockBlocks(void) {
     double timeSpent3 = arguments3.TimerWait.GetElapsedTime() + arguments3.TimerBlock.GetElapsedTime();
     CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent3, totalTimeMeasured, margeOfError);
 }
+
+
+void osaMutexTest::TestMutexLockBlocks(void) {
+    // all time intervals are in milli seconds!
+    osaTestMutex mutex;
+    osaMutexTestTestLockBlocks(mutex);
+}
+
+
+void osaMutexTest::TestCriticalSectionLockBlocks(void) {
+    // all time intervals are in milli seconds!
+    osaTestCriticalSection criticalSection;
+    osaMutexTestTestLockBlocks(criticalSection);
+}
+
 
 CPPUNIT_TEST_SUITE_REGISTRATION(osaMutexTest);
 

@@ -21,30 +21,33 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/robotcomponents/osg/devOSGManipulator.h>
 #include <cisstVector/vctQuaternionRotation3.h>
 
-#include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+devOSGManipulator::devOSGManipulator( const std::string& devname,
+				      double period,
+				      devManipulator::State state,
+				      osaCPUMask cpumask,
+				      devManipulator::Mode inputmode ) :
+  devManipulator( devname, period, state, cpumask, inputmode ),
+  robManipulator(),
+  input( NULL ),
+  output( NULL ){}
+
 
 devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      double period,
 				      devManipulator::State state,
-				      osaCPUMask mask,
-				      devManipulator::Mode mode ):
-  devManipulator( devname, period, state, mask, mode ){}
-
-devOSGManipulator::devOSGManipulator( const std::string& devname,
-				      double period,
-				      devManipulator::State state,
-				      osaCPUMask mask,
-				      devManipulator::Mode mode,
+				      osaCPUMask cpumask,
+				      devManipulator::Mode inputmode,
 				      const std::string& robotfile,
 				      const vctFrame4x4<double>& Rtw0 ) :
-  devManipulator( devname, period, state, mask, mode ),
-  robManipulator( robotfile, Rtw0 ) {}
+  devManipulator( devname, period, state, cpumask, inputmode ),
+  robManipulator( robotfile, Rtw0 ),
+  input( NULL ),
+  output( NULL ){}
 
 devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      double period,
 				      devManipulator::State state,
-				      osaCPUMask mask,
+				      osaCPUMask cpumask,
 				      devOSGWorld* world,
 				      const std::string& robotfile,
 				      const vctFrame4x4<double>& Rtw0,
@@ -52,11 +55,12 @@ devOSGManipulator::devOSGManipulator( const std::string& devname,
 				      const std::vector<std::string>& models,
 				      const std::string& basemodel ) :
 
-  devManipulator( devname, period, state, mask, devManipulator::POSITION ),
+  devManipulator( devname, period, state, cpumask, devManipulator::POSITION ),
   robManipulator( robotfile, Rtw0 ),
+  q( qinit ),
   input( NULL ),
-  output( NULL ),
-  q( qinit ){
+  output( NULL ){
+
 
   // Create a Rn position input
   input = ProvideInputRn( devManipulator::Input,
@@ -68,78 +72,49 @@ devOSGManipulator::devOSGManipulator( const std::string& devname,
 			    devRobotComponent::POSITION,
 			    qinit.size() );
 
-  // MTS transformations. One per link
-  mtsRtw.resize( this->links.size() + 1 );
 
-  // We need to add ourselves since we'll connect the links
-  mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
-  taskManager->AddComponent( this );
-
-  // Create a transformation interface to communicate with the links
-  mtsInterfaceProvided* provided;
-  provided = AddInterfaceProvided( "Transformation" );
-
-  devOSGBody* link = NULL;
-
-  if( provided != NULL ){
+  // If the base is not empty, add a body called "link0"
+  if( !basemodel.empty() ){
 
     std::ostringstream linkname;           // name of the link component
-    std::ostringstream dataname;           // name of the state table data
-    std::ostringstream cmndname;           // name of the command
     linkname << devname << "link" << 0;    // name of link 0
-    dataname << "Rtw" << 0;                // name of link 0 transformation
-    cmndname << "GetRtw" << 0;             // name of link 0 command
 
-    // Create the MTS stuff
-    StateTable.AddData( mtsRtw[0], dataname.str() );
-    provided->AddCommandReadState( StateTable, mtsRtw[0], cmndname.str() );
+    // Add the base to the group
+    vctFrame4x4<double> Rtw0 = ForwardKinematics( qinit, 0 );
 
-    // Create the link for the base
-    link=new devOSGBody(linkname.str(), Rtw0, basemodel, world, cmndname.str());
-    // Add the base
-    taskManager->AddComponent( link );
-    // Add the base to the OSG group
-    addChild( link );
+    // add the body as a child to the group
+    try{ 
+      devOSGBody* body = new devOSGBody( linkname.str(), Rtw0, basemodel );
+      addChild( body );
+    }
+    catch( std::bad_exception& ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< "Failed to allocate body " << linkname.str()
+			<< std::endl;
+    }
+    
+  }
 
-    // connect the manipulator to the base
-    taskManager->Connect( link->GetName(), "Transformation",
-    			  this->GetName(), "Transformation" );
+  // Add the remaining links called "linki"
+  for( size_t i=1; i<=links.size(); i++ ){
 
-    // Add the remaining links
-    for( size_t i=1; i<=links.size(); i++ ){
+    std::ostringstream linkname;           // name of the link component
+    linkname << devname << "link" << i;    // name of link i
 
-      linkname.clear();      linkname.str("");  // clear the string streams
-      dataname.clear();      dataname.str("");
-      cmndname.clear();      cmndname.str("");
-
-      linkname << devname << "link" << i;       // name of link i
-      dataname << "Rtw" << i;                   // name of link i transformation
-      cmndname << "GetRtw" << i;                // name of link i command
-      
-      // Create the MTS stuff
-      StateTable.AddData( mtsRtw[i], dataname.str() );
-      provided->AddCommandReadState( StateTable, mtsRtw[i], cmndname.str() );
-
-      // Create the link
-      link = new devOSGBody( linkname.str(), mtsRtw[i], models[i-1], 
-			     world, cmndname.str() );
-      // Add the link
-      taskManager->AddComponent( link );      
-
-      // Add the body to the OSG group
-      addChild( link );
-
-      // connect the manipulator to the link
-      taskManager->Connect( link->GetName(), "Transformation",
-			    this->GetName(), "Transformation" );
-
+    // Add the body to the OSG group
+    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
+    try{ 
+      devOSGBody* body = new devOSGBody( linkname.str(), Rtwi, models[i-1] );
+      addChild( body );
+    }
+    catch( std::bad_exception& ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< "Failed to allocate body " << linkname.str()
+			<< std::endl;
     }
 
   }
   
-  // Update the transformations
-  UpdateKinematics();
-
   // Add this manipulator to the world
   world->addChild( this );
 
@@ -150,17 +125,90 @@ devOSGManipulator::~devOSGManipulator(){
   if( output != NULL ) delete output;
 }
 
-void devOSGManipulator::Read()
-{ output->SetPosition( q ); }
+void devOSGManipulator::Read(){
+  CMN_ASSERT( output );
+  output->SetPosition( this->q );
+}
+
+vctDynamicVector<double> devOSGManipulator::GetJointsPositions() const
+{ return this->q; }
+
+vctDynamicVector<double> devOSGManipulator::GetJointsVelocities() const
+{ return this->qd; }
 
 void devOSGManipulator::Write(){
-  double t;
-  // Fetch the joint positions
-  input->GetPosition( q, t );
-  UpdateKinematics();
-} 
 
-void devOSGManipulator::UpdateKinematics(){
-  for( size_t i=0; i<getNumChildren(); i++ )
-    { mtsRtw[i] = ForwardKinematics( q , i ); }
+  switch( GetInputMode() ){
+
+  case devManipulator::POSITION: 
+    {
+      double t;
+      CMN_ASSERT( input );
+      input->GetPosition( this->q, t ); 
+      if( SetPositions( this->q ) != devOSGManipulator::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to set the joint positions q: "
+			  << this->q << std::endl;
+      }
+    }
+    break;
+
+  case devManipulator::VELOCITY: 
+    break;
+
+  case devManipulator::FORCETORQUE:
+    break;
+
+  default: 
+    break;
+
+  }
+
 }
+
+
+devOSGManipulator::Errno 
+devOSGManipulator::SetPositions
+( const vctDynamicVector<double>& qs ){
+
+  // Ensure one joint value per link
+  if( qs.size() == links.size() ){
+
+    // this is to skip the base if no model for the base is used in OSG
+    int startlink = 0;       // assume that the base has a model
+    if( links.size() == getNumChildren() )
+      { startlink = 1; }     // no, base means the first child is link 1
+    
+    // For each children
+    for( unsigned int i=0; i<getNumChildren(); i++ ){ 
+      
+      // Compute the forward kinematics for that children
+      devOSGBody* body = dynamic_cast<devOSGBody*>( getChild( i ) );
+      if( body != NULL )
+	{ body->SetTransform( ForwardKinematics( q , i+startlink ) ); }
+
+      else{
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << "Failed to cast child as devOSGBody."
+			  << std::endl;
+	return devOSGManipulator::EFAILURE;
+      }
+
+    }
+    
+    return devOSGManipulator::ESUCCESS;
+  }
+
+  return devOSGManipulator::EFAILURE;
+
+}
+
+devOSGManipulator::Errno 
+devOSGManipulator::SetVelocities
+( const vctDynamicVector<double>& CMN_UNUSED( qds ) )
+{ return devOSGManipulator::EFAILURE; }
+
+devOSGManipulator::Errno 
+devOSGManipulator::SetForcesTorques
+( const vctDynamicVector<double>& CMN_UNUSED( ft ) )
+{ return devOSGManipulator::EFAILURE; }

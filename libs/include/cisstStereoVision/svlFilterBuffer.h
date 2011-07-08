@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterBuffer_h
 #define _svlFilterBuffer_h
 
+#include <cisstVector/vctDynamicNArray.h>
 #include <cisstStereoVision.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 

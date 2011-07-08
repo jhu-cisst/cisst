@@ -21,10 +21,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlTypes.h>
 
 #if (CISST_OS == CISST_WINDOWS)
+    #include <windows.h>
     #include "commdlg.h"
 #endif // CISST_WINDOWS
 
@@ -47,12 +50,12 @@ svlVideoIO::svlVideoIO()
 
     // Go through all registered classes
     for (cmnClassRegister::const_iterator iter = cmnClassRegister::begin(); iter != cmnClassRegister::end(); iter ++) {
-        if ((*iter).second && handlers < 256) {
+        if ((*iter).second && (handlers < 256) && (*iter).second->IsDerivedFrom<svlVideoCodecBase>()) {
             go = (*iter).second->Create();
             ft = dynamic_cast<svlVideoCodecBase*>(go);
             if (ft) {
                 Codecs[handlers]     = (*iter).second;
-                Names[handlers]      = ft->GetName();
+                Names[handlers]      = ft->GetEncoderName();
                 Extensions[handlers] = ft->GetExtensions();
                 handlers ++;
             }
@@ -116,6 +119,7 @@ int svlVideoIO::DialogCodec(const std::string &filename, Compression **compressi
 
         std::cout << "Enter file extension: ";
         std::cin >> path;
+        std::cin.ignore();
         if (path[0] != '.') path.insert(0, ".");
     }
 
@@ -128,7 +132,7 @@ int svlVideoIO::DialogCodec(const std::string &filename, Compression **compressi
 
     int ret = SVL_OK;
 
-    if (codec->DialogCompression() == SVL_OK) {
+    if (codec->DialogCompression(filename) == SVL_OK) {
         compression[0] = codec->GetCompression();
         if (!(compression[0])) ret = SVL_FAIL;
     }
@@ -214,6 +218,7 @@ int svlVideoIO::DialogFilePath(bool save, const std::string &title, std::string 
 
     std::cout << title << ": ";
     std::cin >> filename;
+    std::cin.ignore();
 
     return SVL_OK;
 
@@ -327,8 +332,7 @@ int svlVideoIO::GetWindowsExtensionFilter(std::string &filter)
     return SVL_OK;
 }
 
-int svlVideoIO::GetExtension(const std::string &filename,
-                             std::string &extension)
+int svlVideoIO::GetExtension(const std::string &filename, std::string &extension)
 {
     size_t dotpos = filename.find_last_of('.');
     // If no '.' is found, then take the whole string as extension
@@ -339,6 +343,7 @@ int svlVideoIO::GetExtension(const std::string &filename,
         extension = filename;
     }
 
+    // Convert upper-case characters to lower-case
     char ch;
     const int offset = 'a' - 'A';
     const unsigned int len = extension.size();
@@ -462,11 +467,16 @@ int svlVideoIO::ReleaseCompression(svlVideoIO::Compression *compression)
 /*** svlVideoCodecBase class ******/
 /**********************************/
 
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecBase, mtsComponent)
+
 svlVideoCodecBase::svlVideoCodecBase() :
+    mtsComponent(),
     Codec(0),
     Multithreaded(false),
-    VariableFramerate(false)
+    VariableFramerate(false),
+    ComponentAddedtoLCM(false)
 {
+    CreateInterfaces();
 }
 
 svlVideoCodecBase::~svlVideoCodecBase()
@@ -474,9 +484,9 @@ svlVideoCodecBase::~svlVideoCodecBase()
     svlVideoIO::ReleaseCompression(Codec);
 }
 
-const std::string& svlVideoCodecBase::GetName() const
+const std::string& svlVideoCodecBase::GetEncoderName() const
 {
-    return Name;
+    return EncoderName;
 }
 
 const std::string& svlVideoCodecBase::GetExtensions() const
@@ -534,6 +544,15 @@ int svlVideoCodecBase::DialogCompression()
     return SVL_FAIL;
 }
 
+int svlVideoCodecBase::DialogCompression(const std::string &filename)
+{
+    if (!filename.empty()) {
+        CMN_LOG_INIT_WARNING << "svlVideoCodecBase::DialogCompression - This codec (" << GetEncoderName()
+                             << ") ignores filename argument (" << filename << ")" << std::endl;
+    }
+    return DialogCompression();
+}
+
 int svlVideoCodecBase::SetTimestamp(const double CMN_UNUSED(timestamp))
 {
     return SVL_FAIL;
@@ -541,7 +560,7 @@ int svlVideoCodecBase::SetTimestamp(const double CMN_UNUSED(timestamp))
 
 void svlVideoCodecBase::SetName(const std::string &name)
 {
-    Name = name;
+    EncoderName = name;
 }
 
 void svlVideoCodecBase::SetExtensionList(const std::string &list)
@@ -557,5 +576,32 @@ void svlVideoCodecBase::SetMultithreaded(bool multithreaded)
 void svlVideoCodecBase::SetVariableFramerate(bool variableframerate)
 {
     VariableFramerate = variableframerate;
+}
+
+void svlVideoCodecBase::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("ProvidesVideoEncoder", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlVideoCodecBase::SetExtension,              this, "SetExtension");
+        provided->AddCommandWrite(&svlVideoCodecBase::SetEncoderID,              this, "SetEncoderID");
+        provided->AddCommandWrite(&svlVideoCodecBase::SetCompressionLevel,       this, "SetCompressionLevel");
+        provided->AddCommandWrite(&svlVideoCodecBase::SetQualityBased,           this, "SetQualityBased");
+        provided->AddCommandWrite(&svlVideoCodecBase::SetTargetQuantizer,        this, "SetTargetQuantizer");
+        provided->AddCommandWrite(&svlVideoCodecBase::SetDatarate,               this, "SetDatarate");
+        provided->AddCommandWrite(&svlVideoCodecBase::SetKeyFrameEvery,          this, "SetKeyFrameEvery");
+        provided->AddCommandRead (&svlVideoCodecBase::IsCompressionLevelEnabled, this, "IsCompressionLevelEnabled");
+        provided->AddCommandRead (&svlVideoCodecBase::IsEncoderListEnabled,      this, "IsEncoderListEnabled");
+        provided->AddCommandRead (&svlVideoCodecBase::IsTargetQuantizerEnabled,  this, "IsTargetQuantizerEnabled");
+        provided->AddCommandRead (&svlVideoCodecBase::IsDatarateEnabled,         this, "IsDatarateEnabled");
+        provided->AddCommandRead (&svlVideoCodecBase::IsKeyFrameEveryEnabled,    this, "IsKeyFrameEveryEnabled");
+        provided->AddCommandRead (&svlVideoCodecBase::GetCompressionLevel,       this, "GetCompressionLevel");
+        provided->AddCommandRead (&svlVideoCodecBase::GetEncoderList,            this, "GetEncoderList");
+        provided->AddCommandRead (&svlVideoCodecBase::GetEncoderID,              this, "GetEncoderID");
+        provided->AddCommandRead (&svlVideoCodecBase::GetQualityBased,           this, "GetQualityBased");
+        provided->AddCommandRead (&svlVideoCodecBase::GetTargetQuantizer,        this, "GetTargetQuantizer");
+        provided->AddCommandRead (&svlVideoCodecBase::GetDatarate,               this, "GetDatarate");
+        provided->AddCommandRead (&svlVideoCodecBase::GetKeyFrameEvery,          this, "GetKeyFrameEvery");
+    }
 }
 

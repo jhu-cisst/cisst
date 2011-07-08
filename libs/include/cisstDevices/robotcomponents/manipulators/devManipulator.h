@@ -21,33 +21,50 @@ class CISST_EXPORT devManipulator : public devRobotComponent {
  private:
 
   //! MTS int set/get the mode of the trajectory
-  mtsInt mtsMode;
+  mtsInt mtsInputMode;
 
+  //! Set the input mode
+  void SetInputModeCommand( const int& inputmode );
+
+  //! Set the manipulator in position mode
+  void SetPositionInputMode();
+
+  //! Set the manipulator in position mode
+  void SetVelocityInputMode();
+
+  //! Set the manipulator in force/torque mode
+  void SetForceTorqueInputMode();
+  
  protected:
 
-  //! Return the mode of the trajectory
-  devManipulator::Mode GetMode();
-  void SetPositionMode() { mtsMode = POSITION; }
-  void SetForceTorqueMode() { mtsMode = FORCETORQUE; }
-  
-  void RunComponent();
+  //! Return the mode of the manipulator
+  devManipulator::Mode GetInputMode();
 
+  //! Implement devRobotComponent::RunComponent()
+  virtual void RunComponent();
+
+  //! Read the state of the manipulator
   virtual void Read() = 0;
+
+  //! Write the state of the manipulator
   virtual void Write() = 0;
 
  public:
 
+  //! Default constructor
   devManipulator( const std::string& taskname, 
 		  double period, 
 		  devManipulator::State state,
 		  osaCPUMask cpumask,
-		  devManipulator::Mode mode );
+		  devManipulator::Mode inputmode );
+
+  //! Default destructor
   ~devManipulator(){}
   
   static const std::string Input;
   static const std::string Output;
 
-  static const std::string SetMode;
+  static const std::string SetInputMode;
 
 };
 

@@ -21,196 +21,36 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlWindowManagerBase.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #ifdef _WIN32
-#include "winWin32.h"
+    #include "winWin32.h"
 #else
-#if CISST_SVL_HAS_X11
-#include "winX11.h"
-#endif // CISST_SVL_HAS_X11
+    #if CISST_SVL_HAS_X11
+        #include "winX11.h"
+    #endif // CISST_SVL_HAS_X11
 #endif // _WIN32
-
-#ifdef _MSC_VER
-    // Quick fix for Visual Studio Intellisense:
-    // The Intellisense parser can't handle the CMN_UNUSED macro
-    // correctly if defined in cmnPortability.h, thus
-    // we should redefine it here for it.
-    // Removing this part of the code will not effect compilation
-    // in any way, on any platforms.
-    #undef CMN_UNUSED
-    #define CMN_UNUSED(argument) argument
-#endif
-
-
-/***************************************/
-/*** svlWindowEventHandlerBase class ***/
-/***************************************/
-
-
-svlWindowEventHandlerBase::~svlWindowEventHandlerBase()
-{
-}
-
-void svlWindowEventHandlerBase::OnNewFrame(unsigned int CMN_UNUSED(frameid))
-{
-}
-
-void svlWindowEventHandlerBase::OnUserEvent(unsigned int CMN_UNUSED(winid), bool CMN_UNUSED(ascii), unsigned int CMN_UNUSED(eventid))
-{
-}
-
-void svlWindowEventHandlerBase::GetMousePos(int & x, int & y)
-{
-    x = MouseX;
-    y = MouseY;
-}
-
-void svlWindowEventHandlerBase::SetMousePos(int x, int y)
-{
-    MouseX = x;
-    MouseY = y;
-}
-
-
-/**********************************/
-/*** svlWindowManagerBase class ***/
-/**********************************/
-
-svlWindowManagerBase::svlWindowManagerBase(unsigned int numofwins) :
-    Timestamp(-1.0),
-    NumOfWins(numofwins),
-    Width(0),
-    Height(0),
-    PosX(0),
-    PosY(0),
-    EventHandler(0),
-    InitReadySignal(0)
-{
-}
-
-svlWindowManagerBase::~svlWindowManagerBase()
-{
-    if (Width) delete [] Width;
-    if (Height) delete [] Height;
-    if (PosX) delete [] PosX;
-    if (PosY) delete [] PosY;
-    if (InitReadySignal) delete InitReadySignal;
-}
-
-void svlWindowManagerBase::SetEventHandler(svlWindowEventHandlerBase* handler)
-{
-    EventHandler = handler;
-}
-
-void svlWindowManagerBase::SetTitleText(const std::string title)
-{
-    Title = title;
-}
-
-void svlWindowManagerBase::SetTimestamp(double timestamp)
-{
-    Timestamp = timestamp;
-}
-
-int svlWindowManagerBase::SetClientSize(unsigned int width, unsigned int height, unsigned int winid)
-{
-    if (winid >= NumOfWins) return -2;
-
-    // initialize on first call
-    if (Width == 0 || Height == 0) {
-        Width = new unsigned int[NumOfWins];
-        Height = new unsigned int[NumOfWins];
-        for (unsigned int i = 0; i < NumOfWins; i ++) {
-            Width[i] = width;
-            Height[i] = height;
-        }
-    }
-    else {
-        Width[winid] = width;
-        Height[winid] = height;
-    }
-
-    return 0;
-}
-
-int svlWindowManagerBase::SetWindowPosition(int x, int y, unsigned int winid)
-{
-    if (winid >= NumOfWins) return -2;
-
-    // initialize on first call
-    if (PosX == 0 || PosY == 0) {
-        PosX = new int[NumOfWins];
-        PosY = new int[NumOfWins];
-        for (unsigned int i = 0; i < NumOfWins; i ++) {
-            PosX[i] = x + 25 * i;
-            PosY[i] = y + 25 * i;
-        }
-    }
-    else {
-        PosX[winid] = x;
-        PosY[winid] = y;
-    }
-
-    return 0;
-}
-
-void svlWindowManagerBase::ResetInitEvent()
-{
-    if (InitReadySignal != 0) delete InitReadySignal;
-    InitReadySignal = new osaThreadSignal;
-}
-
-int svlWindowManagerBase::WaitForInitEvent()
-{
-    if (InitReadySignal == 0) return -1;
-    if (!InitReadySignal->Wait(1.0)) return -2;
-    return 0;
-}
-
-void svlWindowManagerBase::LockBuffers()
-{
-}
-
-void svlWindowManagerBase::UnlockBuffers()
-{
-}
-
-void svlWindowManagerBase::OnNewFrame(unsigned int frameid)
-{
-    if (EventHandler) EventHandler->OnNewFrame(frameid);
-}
-
-void svlWindowManagerBase::OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid)
-{
-    if (EventHandler) EventHandler->OnUserEvent(winid, ascii, eventid);
-}
-
-void svlWindowManagerBase::GetMousePos(int& x, int& y)
-{
-    if (EventHandler) EventHandler->GetMousePos(x, y);
-}
-
-void svlWindowManagerBase::SetMousePos(int x, int y)
-{
-    if (EventHandler) EventHandler->SetMousePos(x, y);
-}
 
 
 /****************************************/
 /*** svlWindowManagerThreadProc class ***/
 /****************************************/
 
-void* svlWindowManagerThreadProc::Proc(svlFilterImageWindow* obj)
+class svlWindowManagerThreadProc
 {
-    bool fullscreen;
-    obj->GetFullScreen(fullscreen);
-    obj->WindowManager->DoModal(true, fullscreen);
-	return this;
-}
+public:
+    void* Proc(svlFilterImageWindow* obj)
+    {
+        bool fullscreen;
+        obj->GetFullScreen(fullscreen);
+        obj->WindowManager->DoModal(true, fullscreen);
+        return this;
+    }
+};
 
 
 /**********************************/
@@ -305,12 +145,15 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 #ifdef _WIN32
         WindowManager = new svlWindowManagerWin32(1);
 #else
-#if CISST_SVL_HAS_X11
+    #if CISST_SVL_HAS_X11
         WindowManager = new svlWindowManagerX11(1);
-#endif // CISST_SVL_HAS_X11
+    #endif // CISST_SVL_HAS_X11
 #endif // _WIN32
 
-        if (WindowManager == 0) return SVL_FAIL;
+        if (WindowManager == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to find supported window manager (Win32 or X11)" << std::endl;
+            return SVL_FAIL;
+        }
         WindowManager->SetClientSize(img->GetWidth(), img->GetHeight(), 0);
         if (PositionSetFlag) {
             WindowManager->SetWindowPosition(PosX[SVL_LEFT], PosY[SVL_LEFT], SVL_LEFT);
@@ -322,12 +165,15 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 #ifdef _WIN32
         WindowManager = new svlWindowManagerWin32(2);
 #else
-#if CISST_SVL_HAS_X11
+    #if CISST_SVL_HAS_X11
         WindowManager = new svlWindowManagerX11(2);
-#endif // CISST_SVL_HAS_X11
+    #endif // CISST_SVL_HAS_X11
 #endif // _WIN32
 
-        if (WindowManager == 0) return SVL_FAIL;
+        if (WindowManager == 0) {
+            CMN_LOG_CLASS_INIT_ERROR << "Initialize: failed to find supported window manager (Win32 or X11)" << std::endl;
+            return SVL_FAIL;
+        }
         WindowManager->SetClientSize(stimg->GetWidth(SVL_LEFT), stimg->GetHeight(SVL_LEFT), 0);
         WindowManager->SetClientSize(stimg->GetWidth(SVL_RIGHT), stimg->GetHeight(SVL_RIGHT), 1);
         if (PositionSetFlag) {
@@ -345,8 +191,8 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     StopThread = false;
     WindowManager->ResetInitEvent();
     Thread->Create<svlWindowManagerThreadProc, svlFilterImageWindow*>(ThreadProc,
-                                                                    &svlWindowManagerThreadProc::Proc,
-                                                                    this);
+                                                                      &svlWindowManagerThreadProc::Proc,
+                                                                      this);
     WindowManager->WaitForInitEvent();
 
     syncOutput = syncInput;
@@ -357,7 +203,7 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
-    _SkipIfAlreadyProcessed(syncInput, syncOutput);
+//    _SkipIfAlreadyProcessed(syncInput, syncOutput);
     _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);

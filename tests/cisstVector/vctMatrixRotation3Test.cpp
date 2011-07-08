@@ -210,6 +210,30 @@ void vctMatrixRotation3Test::TestConversionRodriguezFloat(void) {
     TestConversionRodriguez<float>();
 }
 
+template <class _elementType, vctEulerRotation3Order::OrderType order>
+void vctMatrixRotation3Test::TestConversionEuler(void) {
+    vctMatrixRotation3<_elementType> matrixRotation;
+    vctEulerRotation3<order> eulerRotation;
+    vctRandom(matrixRotation);
+    vctGenericRotationTest::TestConversion(matrixRotation, eulerRotation);
+}
+
+void vctMatrixRotation3Test::TestConversionEulerZYZDouble(void) {
+    TestConversionEuler<double, vctEulerRotation3Order::ZYZ>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerZYZFloat(void) {
+    TestConversionEuler<float, vctEulerRotation3Order::ZYZ>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerZYXDouble(void) {
+    TestConversionEuler<double, vctEulerRotation3Order::ZYX>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerZYXFloat(void) {
+    TestConversionEuler<float, vctEulerRotation3Order::ZYX>();
+}
+
 
 template <class _elementType>
 void vctMatrixRotation3Test::TestFromSignaturesQuaternion(void) {

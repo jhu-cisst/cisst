@@ -27,11 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlImageCodecBMP class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(svlImageCodecBMP)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlImageCodecBMP, svlImageCodecBase)
 
 svlImageCodecBMP::svlImageCodecBMP() :
-    svlImageCodecBase(),
-    cmnGenericObject()
+    svlImageCodecBase()
 {
     SetExtensionList(".bmp;");
 }
@@ -103,8 +102,8 @@ int svlImageCodecBMP::Read(svlSampleImage &image, const unsigned int videoch, st
         height = -height;
         upsidedown = false;
     }
-    if (width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+    if (width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (static_cast<unsigned int>(width)  != image.GetWidth(videoch) ||
         static_cast<unsigned int>(height) != image.GetHeight(videoch)) {
@@ -170,8 +169,8 @@ int svlImageCodecBMP::Read(svlSampleImage &image, const unsigned int videoch, co
         height = -height;
         upsidedown = false;
     }
-    if (width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+    if (width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     if (static_cast<unsigned int>(width)  != image.GetWidth(videoch) ||
         static_cast<unsigned int>(height) != image.GetHeight(videoch)) {
@@ -229,8 +228,8 @@ int svlImageCodecBMP::Write(const svlSampleImage &image, const unsigned int vide
     height = image.GetHeight(videoch);
 
     if (image.GetBPP() != 3 ||
-        width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+        width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     linesize = width * 3;
     padding = (4 - (linesize % 4)) % 4;
@@ -289,8 +288,8 @@ int svlImageCodecBMP::Write(const svlSampleImage &image, const unsigned int vide
     height = image.GetHeight(videoch);
 
     if (image.GetBPP() != 3 ||
-        width  < 1 || width  > MAX_DIMENISION ||
-        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+        width  < 1 || width  > MAX_DIMENSION ||
+        height < 1 || height > MAX_DIMENSION) return SVL_FAIL;
 
     linesize = width * 3;
     padding = (4 - (linesize % 4)) % 4;

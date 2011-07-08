@@ -443,3 +443,43 @@ IReqFilterImageWindow::~IReqFilterImageWindow()
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }
 
+
+/******************************/
+/*** IReqVideoEncoder class ***/
+/******************************/
+
+IReqVideoEncoder::IReqVideoEncoder(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
+        if (required) {
+            required->AddFunction("SetExtension",              SetExtension);
+            required->AddFunction("SetEncoderID",              SetEncoderID);
+            required->AddFunction("SetCompressionLevel",       SetCompressionLevel);
+            required->AddFunction("SetQualityBased",           SetQualityBased);
+            required->AddFunction("SetTargetQuantizer",        SetTargetQuantizer);
+            required->AddFunction("SetDatarate",               SetDatarate);
+            required->AddFunction("SetKeyFrameEvery",          SetKeyFrameEvery);
+            required->AddFunction("IsCompressionLevelEnabled", IsCompressionLevelEnabled);
+            required->AddFunction("IsEncoderListEnabled",      IsEncoderListEnabled);
+            required->AddFunction("IsTargetQuantizerEnabled",  IsTargetQuantizerEnabled);
+            required->AddFunction("IsDatarateEnabled",         IsDatarateEnabled);
+            required->AddFunction("IsKeyFrameEveryEnabled",    IsKeyFrameEveryEnabled);
+            required->AddFunction("GetCompressionLevel",       GetCompressionLevel);
+            required->AddFunction("GetEncoderList",            GetEncoderList);
+            required->AddFunction("GetEncoderID",              GetEncoderID);
+            required->AddFunction("GetQualityBased",           GetQualityBased);
+            required->AddFunction("GetTargetQuantizer",        GetTargetQuantizer);
+            required->AddFunction("GetDatarate",               GetDatarate);
+            required->AddFunction("GetKeyFrameEvery",          GetKeyFrameEvery);
+        }
+    }
+}
+
+IReqVideoEncoder::~IReqVideoEncoder()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+

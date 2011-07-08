@@ -159,6 +159,12 @@ void svlOverlayImage::SetPosition(vctInt2 pos)
     Pos = pos;
 }
 
+void svlOverlayImage::SetPosition(int x, int y)
+{
+    Pos[0] = x;
+    Pos[1] = y;
+}
+
 void svlOverlayImage::SetAlpha(unsigned char alpha)
 {
     Alpha = alpha;
@@ -534,6 +540,12 @@ void svlOverlayStaticImage::SetImage(const svlSampleImageRGBStereo & image, unsi
 void svlOverlayStaticImage::SetPosition(vctInt2 pos)
 {
     Pos = pos;
+}
+
+void svlOverlayStaticImage::SetPosition(int x, int y)
+{
+    Pos[0] = x;
+    Pos[1] = y;
 }
 
 void svlOverlayStaticImage::SetAlpha(unsigned char alpha)
@@ -1201,6 +1213,19 @@ void svlOverlayStaticTriangle::DrawInternal(svlSampleImage* bgimage, svlSample* 
 svlOverlayStaticPoly::svlOverlayStaticPoly() :
     svlOverlay(),
     Color(255, 255, 255),
+    Thickness(1),
+    Start(0)
+{
+}
+
+svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
+                                           bool visible,
+                                           const TypeRef poly,
+                                           svlRGB color) :
+    svlOverlay(videoch, visible),
+    Poly(poly),
+    Color(color),
+    Thickness(1),
     Start(0)
 {
 }
@@ -1209,10 +1234,12 @@ svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
                                            bool visible,
                                            const TypeRef poly,
                                            svlRGB color,
+                                           unsigned int thickness,
                                            unsigned int start) :
     svlOverlay(videoch, visible),
     Poly(poly),
     Color(color),
+    Thickness(thickness),
     Start(start)
 {
 }
@@ -1228,9 +1255,22 @@ void svlOverlayStaticPoly::SetPoints(const TypeRef points)
     CS.Leave();
 }
 
+void svlOverlayStaticPoly::SetPoints(const TypeRef points, unsigned int start)
+{
+    CS.Enter();
+        Poly = points;
+        Start = start;
+    CS.Leave();
+}
+
 void svlOverlayStaticPoly::SetColor(svlRGB color)
 {
     Color = color;
+}
+
+void svlOverlayStaticPoly::SetThickness(unsigned int thickness)
+{
+    Thickness = thickness;
 }
 
 void svlOverlayStaticPoly::SetStart(unsigned int start)
@@ -1246,6 +1286,11 @@ svlOverlayStaticPoly::TypeRef svlOverlayStaticPoly::GetPoints()
 svlRGB svlOverlayStaticPoly::GetColor() const
 {
     return Color;
+}
+
+unsigned int svlOverlayStaticPoly::GetThickness() const
+{
+    return Thickness;
 }
 
 unsigned int svlOverlayStaticPoly::GetStart() const
@@ -1323,7 +1368,7 @@ int svlOverlayStaticPoly::GetPoint(unsigned int idx, int & x, int & y) const
 void svlOverlayStaticPoly::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
     CS.Enter();
-        svlDraw::Poly(bgimage, VideoCh, Poly, Color, Start);
+        svlDraw::Poly(bgimage, VideoCh, Poly, Color, Thickness, Start);
     CS.Leave();
 }
 
@@ -1497,6 +1542,48 @@ unsigned int svlOverlayStaticBar::GetBorderWidth() const
 svlRGB svlOverlayStaticBar::GetBorderColor() const
 {
     return BorderColor;
+}
+
+int svlOverlayStaticBar::GetValueInImagePos(double value, int & imagepos) const
+{
+    int ret = SVL_OK;
+
+    double range;
+    if (Range[0] != Range[1]) range = Range[1] - Range[0];
+    else range = 100.0;
+    double position = (value - Range[0]) / range;
+    if (position < 0.0 || position > 1.0) ret = SVL_FAIL;
+
+    if (Vertical) {
+        imagepos = Rect.bottom - static_cast<int>(static_cast<double>(Rect.bottom - Rect.top) * position);
+    }
+    else {
+        imagepos = Rect.left + static_cast<int>(static_cast<double>(Rect.right - Rect.left) * position);
+    }
+
+    return ret;
+}
+
+int svlOverlayStaticBar::GetImagePosInValue(int imagepos, double & value) const
+{
+    int ret = SVL_OK;
+
+    double range;
+    if (Range[0] != Range[1]) range = Range[1] - Range[0];
+    else range = 100.0;
+
+    if (Vertical) {
+        if (imagepos < static_cast<int>(Rect.top) || imagepos > static_cast<int>(Rect.bottom)) ret = SVL_FAIL;
+
+        value = range * static_cast<double>(Rect.bottom - imagepos) / (Rect.bottom - Rect.top);
+    }
+    else {
+        if (imagepos < static_cast<int>(Rect.left) || imagepos > static_cast<int>(Rect.right)) ret = SVL_FAIL;
+
+        value = range * static_cast<double>(imagepos - Rect.left) / (Rect.right - Rect.left);
+    }
+
+    return ret;
 }
 
 void svlOverlayStaticBar::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))

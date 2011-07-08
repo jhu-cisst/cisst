@@ -21,8 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstDevices/devKeyboard.h>
+#include <cisstCommon/cmnGetChar.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstParameterTypes/prmEventButton.h>
+
 
 CMN_IMPLEMENT_SERVICES(devKeyboard);
 

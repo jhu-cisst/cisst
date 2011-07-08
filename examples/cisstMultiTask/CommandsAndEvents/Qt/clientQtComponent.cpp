@@ -19,12 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "clientQtComponent.h"
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 CMN_IMPLEMENT_SERVICES(clientQtComponent);
 
 
-clientQtComponent::clientQtComponent(const std::string & taskName) :
-    mtsDevice(taskName),
+clientQtComponent::clientQtComponent(const std::string & componentName):
+    mtsComponent(componentName),
     EventCounter(0)
 {
     // create the cisstMultiTask interface with commands and events
@@ -41,7 +42,7 @@ clientQtComponent::clientQtComponent(const std::string & taskName) :
     // create the user interface
     ClientWidget.setupUi(&CentralWidget);
     MainWindow.setCentralWidget(&CentralWidget);
-    MainWindow.setWindowTitle(QString::fromStdString(taskName));
+    MainWindow.setWindowTitle(QString::fromStdString(componentName));
     MainWindow.show();
 
     // trigger void command

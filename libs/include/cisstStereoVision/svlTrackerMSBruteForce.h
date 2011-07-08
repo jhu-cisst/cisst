@@ -36,18 +36,28 @@ public:
     svlTrackerMSBruteForce();
     virtual ~svlTrackerMSBruteForce();
 
-    virtual void SetParameters(svlErrorMetric metric,
-                               unsigned int  templateradius,
-                               unsigned int  windowradius,
-                               unsigned int  scales,
-                               unsigned char tmplupdweight,
-                               double        trajfilter);
+    void SetErrorMetric(svlErrorMetric metric);
+    void SetScales(unsigned int  scales);
+    void SetTemplateRadius(unsigned int radius);
+    void SetSearchRadius(unsigned int radius);
+    void SetTemplateUpdateWeight(double weight);
+    void SetConfidenceThreshold(double threshold);
+
+    svlErrorMetric GetErrorMetric() const;
+    unsigned int GetScales() const;
+    unsigned int GetTemplateRadius() const;
+    unsigned int GetSearchRadius() const;
+    double GetTemplateUpdateWeight() const;
+    double GetConfidenceThreshold() const;
+
+    int GetFeatureRef(unsigned int targetid, vctDynamicVectorRef<unsigned char> & feature);
 
     virtual int SetTarget(unsigned int targetid, const svlTarget2D & target);
     virtual int Initialize();
     virtual void ResetTargets();
     virtual int PreProcessImage(svlSampleImage & image, unsigned int videoch = SVL_LEFT);
 	virtual int Track(svlSampleImage & image, unsigned int videoch = SVL_LEFT);
+    virtual int Track(svlProcInfo* procInfo, svlSampleImage & image, unsigned int videoch = SVL_LEFT);
     virtual void Release();
 
 protected:
@@ -55,23 +65,18 @@ protected:
 
     bool TargetsAdded;
     unsigned int TemplateRadiusRequested;
-    unsigned int WindowRadiusRequested;
+    unsigned int SearchRadiusRequested;
     unsigned int TemplateRadius;
-    unsigned int WindowRadius;
-    vctDynamicVector<unsigned char*> Templates;
+    unsigned int SearchRadius;
     vctDynamicVector<unsigned char*> OrigTemplates;
-    vctDynamicVector<unsigned char> OrigTemplateConf;
     vctDynamicMatrix<int> MatchMap;
 
     svlErrorMetric Metric;
     unsigned int Scale;
-    unsigned char OrigTmpltWeight;
+    unsigned char TemplateUpdateWeight;
+    unsigned char ConfidenceThreshold;
     svlTrackerMSBruteForce* LowerScale;
     svlSampleImageRGB* LowerScaleImage;
-
-    unsigned int TrajectoryModelOrder;
-    double TrajectoryFilter;
-    double TrajectoryFilterInv;
 
     virtual void CopyTemplate(unsigned char* img, unsigned char* tmp, unsigned int left, unsigned int top);
     virtual void UpdateTemplate(unsigned char* img, unsigned char* origtmp, unsigned char* tmp, unsigned int left, unsigned int top);

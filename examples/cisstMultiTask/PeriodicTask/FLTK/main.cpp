@@ -19,17 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
-
 #include <components/sineTask.h>
 #include <components/clockComponent.h>
 
-#include "displayTask.h"
+#include <cisstOSAbstraction/osaSleep.h>
+
 #include "displayUI.h"
 
-int main(void)
+int main(int argc, char ** argv)
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
@@ -42,18 +39,15 @@ int main(void)
 
     // create our two tasks
     const double PeriodSine = 5.0 * cmn_ms; // in milliseconds
-    const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
     sineTask * sineIntance = new sineTask("Sine", PeriodSine);
     clockComponent * clockInstance = new clockComponent("Clock");
-    displayTask * displayInstance = new displayTask("Display", PeriodDisplay);
-
-    displayInstance->Configure();
+    displayUI * uiInstance = new displayUI("Display");
 
     // add the tasks to the component manager
     componentManager->AddComponent(sineIntance);
     componentManager->AddComponent(clockInstance);
-    componentManager->AddComponent(displayInstance);
+    componentManager->AddComponent(uiInstance);
 
     // connect the components, task.RequiresInterface -> task.ProvidesInterface
     componentManager->Connect("Display", "DataGenerator", "Sine", "MainInterface");
@@ -61,26 +55,29 @@ int main(void)
 
     // create the components, i.e. find the commands
     componentManager->CreateAll();
-    componentManager->WaitForStateAll(mtsComponentState::READY);
+    uiInstance->DoCallback();
+    componentManager->WaitForStateAll(mtsComponentState::READY, 2.0 * cmn_s);
 
     // start the periodic Run
     componentManager->StartAll();
-    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
+    uiInstance->DoCallback();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE, 2.0 * cmn_s);
 
-    // wait until the close button of the UI is pressed
-    while (!displayInstance->IsTerminated()) {
-        displayInstance->UpdateUI(); // this has to be done by main thread
-        osaSleep(5.0 * cmn_ms); // sleep to save CPU
-    }
+    // FLTK
+    uiInstance->show(argc, argv);
+    Fl::add_idle(displayUI::IdleCallback, uiInstance);
+    Fl::run();
+    Fl::remove_idle(displayUI::IdleCallback, uiInstance);
+
     // cleanup
     componentManager->KillAll();
+    uiInstance->DoCallback();
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
-
     componentManager->Cleanup();
 
+    delete uiInstance;
     delete clockInstance;
     delete sineIntance;
-    delete displayInstance;
 
     return 0;
 }

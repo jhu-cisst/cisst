@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 
+#include <cisstVector/vctTransformationTypes.h>
+
 #include <cisstRobot/robLink.h>
 #include <cisstRobot/robExport.h>
 
@@ -52,7 +54,7 @@ class CISST_EXPORT robManipulator{
      The (geometric) spatial Jacobian in column major
   */
   double** Js;
-  
+
   //! A vector of links
   std::vector<robLink> links;
 
@@ -112,11 +114,12 @@ class CISST_EXPORT robManipulator{
      Compute the linear and angular accelerations of the last link. This is 
      akin to compute the forward recursion of the RNE.
   */
+  /*
   vctFixedSizeVector<double,6> 
   Acceleration( const vctDynamicVector<double>& q,
 		const vctDynamicVector<double>& qd,
 		const vctDynamicVector<double>& qdd ) const ;
-  
+  */
   //! Compute the bias acceleration
   /**
      The bias acceleration is the 6D vector Jdqd that is used to evaluate the
@@ -144,6 +147,14 @@ class CISST_EXPORT robManipulator{
      \param[output] The 6x6 manipulator inertia matrix in operation space
   */
   void OSinertia(double Ac[6][6], const vctDynamicVector<double>& q) const;
+
+  vctFixedSizeMatrix<double,4,4>
+    SE3Difference( const vctFrame4x4<double>& Rt1,
+		   const vctFrame4x4<double>& Rt2 ) const;
+  
+  void 
+    AddIdentificationColumn( vctDynamicMatrix<double>& J,
+			     vctFixedSizeMatrix<double,4,4>& delRt ) const;
     
 public:
 
@@ -190,6 +201,14 @@ public:
 		       double tolerance=1e-12, 
 		       size_t Niteration=1000 );
   
+
+  virtual 
+    robManipulator::Errno 
+    InverseKinematics( vctDynamicVector<double>& q, 
+		       const vctFrm3& Rts, 
+		       double tolerance=1e-12, 
+		       size_t Niteration=1000 );
+  
   //! Inverse dynamics in joint space
   /**
      Compute and return the inverse dynamics of the manipulator in joint space.
@@ -226,7 +245,13 @@ public:
 		     const vctDynamicVector<double>& qd,
 		     const vctFixedSizeVector<double,6>& vdwd ) const;
   
-  void Print() const ;
+
+  virtual 
+    vctDynamicMatrix<double> 
+    JacobianKinematicsIdentification( const vctDynamicVector<double>& q,
+				      double epsilon = 1e-6 ) const ;
+
+  void PrintKinematics( std::ostream& os ) const ;
 
   //! Attach a tool
   virtual void Attach( robManipulator* tool );

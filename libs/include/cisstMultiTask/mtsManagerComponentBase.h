@@ -128,6 +128,7 @@ public:
     public:
         // Dynamic component management
         const static std::string ComponentCreate;
+        const static std::string ComponentConfigure;
         const static std::string ComponentConnect;
         const static std::string ComponentDisconnect;
         const static std::string ComponentStart;
@@ -140,6 +141,7 @@ public:
         const static std::string GetNamesOfComponents;
         const static std::string GetNamesOfInterfaces;
         const static std::string GetListOfConnections;
+        const static std::string GetListOfComponentClasses;
         const static std::string GetInterfaceProvidedDescription;
         const static std::string GetInterfaceRequiredDescription;
         // Establishing connections
