@@ -1173,6 +1173,95 @@ ELSE(UNIX)
 
 ENDIF(UNIX)
 
+#----------------------------------------------------------
+#   Module  : CUDA support for cisstStereoVision library
+#   Author  : Min Yang Jung & Balazs Vagvolgyi
+#   Created : June 24, 2010
+#----------------------------------------------------------
+
+MACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
+    CUDA_ADD_CUDA_INCLUDE_ONCE()
+    CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+    CUDA_BUILD_SHARED_LIBRARY(_cuda_shared_flag ${ARGN})
+    CUDA_WRAP_SRCS(${cuda_target} OBJ _generated_files ${_sources} ${_cmake_options} ${_cuda_shared_flag} OPTIONS ${_options})
+    ADD_LIBRARY(${cuda_target} ${_cmake_options} ${_generated_files} ${_sources})
+    TARGET_LINK_LIBRARIES(${cuda_target} ${CUDA_LIBRARIES} )
+    SET_TARGET_PROPERTIES(${cuda_target} PROPERTIES LINKER_LANGUAGE ${CUDA_C_OR_CXX})
+    SET(${generated_files} ${_generated_files})
+ENDMACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
+
+IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+    SET(CUDA_OPTIONS
+        CUDA_SDK_ROOT_DIR
+        CUDA_INCLUDE_DIRS
+        CUDA_LIBRARIES
+        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
+        CUDA_BUILD_CUBIN
+        CUDA_BUILD_EMULATION
+        CUDA_TOOLKIT_ROOT_DIR
+        CUDA_VERBOSE_BUILD
+        CACHE INTERNAL "List of CUDA options"
+        )
+
+    FIND_PACKAGE(CUDA)
+    IF(CUDA_FOUND)
+        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc")
+        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
+        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
+                             cisstStereoVisionCUDA
+                             svlCUDACommon.cu
+                             STATIC
+                             OPTIONS ""#-DSTUFF=aaa"
+                             RELEASE --use_fast_math -DNDEBUG
+                             DEBUG -g -DDEBUG
+                             )
+        # Add a special target to clean 'nvcc' generated files.
+        CUDA_BUILD_CLEAN_TARGET()
+
+        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+        
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${CUDA_SDK_ROOT_DIR}/common/inc"
+            "${CUDA_INCLUDE_DIRS}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            ${CUDA_LIBRARIES}
+#            ${CUDA_GENERATED_LIBRARIES}
+            )
+        SET(HEADER_FILES
+            ${HEADER_FILES}
+            svlSampleCUDAImageTypes.h
+            svlSampleCUDAImageCustom.h
+            svlSampleCUDAImage.h
+            svlFilterCUDATest.h
+            )
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlSampleCUDAImageTypes.cpp
+            svlSampleCUDAImage.cpp
+            svlFilterCUDATest.cpp
+            )
+        MESSAGE(STATUS "CUDA found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" ON)
+
+    ELSE(CUDA_FOUND)
+        IF(CISST_SVL_HAS_CUDA)
+            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
+            MESSAGE(FATAL_ERROR "CUDA required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_CUDA)
+            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+            OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
+        ENDIF(CISST_SVL_HAS_CUDA)
+    ENDIF(CUDA_FOUND)
+
+ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+    OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
+ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+
+
 # Set SVL options to 'advanced' to hide them from beginner user
 #MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_OPENCV)
@@ -1188,6 +1277,7 @@ MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DC1394)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_FFMPEG)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_X11)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_XV)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_CUDA)
 IF(UNIX)
     MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
 ENDIF(UNIX)
@@ -1247,6 +1337,7 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
+
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
   cisst_add_swig_module(MODULE cisstStereoVision
@@ -1254,6 +1345,12 @@ if (CISST_HAS_SWIG_PYTHON)
 			CISST_LIBRARIES cisstStereoVision
                                         ${DEPENDENCIES})
 endif (CISST_HAS_SWIG_PYTHON)
+
+
+# Link `cisstStereoVision` against CUDA generated libraries
+IF(CISST_SVL_HAS_CUDA)
+    TARGET_LINK_LIBRARIES(cisstStereoVision ${CUDA_GENERATED_LIBRARIES})
+ENDIF(CISST_SVL_HAS_CUDA)
 
 
 # Qt widgets

@@ -31,25 +31,29 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExportQt.h>
 
 
-// Forward declaration
-void* __app_funct();
-
-//    int ac=1;
-//    char av[]="";
-//    QApplication app(ac,reinterpret_cast<char**>(&av));
-
-#define START_QT_ENVIRONMENT \
-    QApplication app(argc,argv);\
-    app.setQuitOnLastWindowClosed(false);\
-    svlQtObjectFactory::Init();\
-    osaThread thread;\
-    thread.Create(__app_funct);\
-    app.exec();\
-    return 0;\
-    }void* __app_funct(){{
-
-#define STOP_QT_ENVIRONMENT \
-    }QApplication::instance()->exit(0);
+#undef SETUP_QT_ENVIRONMENT
+#define SETUP_QT_ENVIRONMENT(F) \
+    int (*_cisst_qt_main_funct_)(int argc, char** argv); \
+    int _cisst_qt_main_funct_argc_; \
+    char** _cisst_qt_main_funct_argv_; \
+    void* _cisst_qt_main_thread_proc_() { \
+        _cisst_qt_main_funct_(_cisst_qt_main_funct_argc_, _cisst_qt_main_funct_argv_); \
+        QApplication::instance()->exit(0); \
+        return 0; \
+    } \
+    int main(int argc, char** argv) \
+    { \
+        QApplication app(argc, argv); \
+        app.setQuitOnLastWindowClosed(false); \
+        svlQtObjectFactory::Init(); \
+        _cisst_qt_main_funct_ = F; \
+        _cisst_qt_main_funct_argc_ = argc; \
+        _cisst_qt_main_funct_argv_ = argv; \
+        osaThread thread; \
+        thread.Create(_cisst_qt_main_thread_proc_); \
+        app.exec(); \
+        return 0; \
+    }
 
 
 // Forward declarations

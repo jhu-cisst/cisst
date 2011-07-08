@@ -152,6 +152,19 @@ int Converter(svlStreamType intype, svlStreamType outtype, unsigned char* inputb
             else return SVL_FAIL;
         break;
 
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
+            // TO DO: Implement them in the future
+
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:

@@ -43,11 +43,6 @@ http://www.cisst.org/cisst/license.txt.
 
 using namespace std;
 
-bool interpolation = false;
-bool save = false;
-int  width = -1;
-int  height = -1;
-
 
 ////////////////////////////////////////
 //     Window event handler class     //
@@ -131,12 +126,8 @@ public:
 //  CameraViewer  //
 ////////////////////
 
-int CameraViewer(int argc, char** argv)
+int CameraViewer(bool interpolation, bool save, int width, int height)
 {
-#if _USE_QT_
-    START_QT_ENVIRONMENT
-#endif // _USE_QT_
-
     mtsComponentViewer *componentViewer = 0;
 
     svlInitialize();
@@ -399,10 +390,6 @@ int CameraViewer(int argc, char** argv)
 
     cerr << "Stream released" << endl;
 
-#if _USE_QT_
-    STOP_QT_ENVIRONMENT
-#endif // _USE_QT_
-
     return 0;
 }
 
@@ -440,16 +427,20 @@ int ParseNumber(char* string, unsigned int maxlen)
     return ivalue;
 }
 
-
-int main(int argc, char** argv)
+int my_main(int argc, char** argv)
 {
-    cerr << endl << "svlExCameraViewer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << "svlExCameraViewer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl;
     cerr << "Enter 'svlExCameraViewer -?' for help." << endl;
 
     //////////////////////////////
     // parsing arguments
     int j, options, ivalue;
+
+    bool interpolation = false;
+    bool save = false;
+    int  width = -1;
+    int  height = -1;
 
     options = argc - 1;
 
@@ -498,9 +489,11 @@ int main(int argc, char** argv)
     //////////////////////////////
     // starting viewer
 
-    CameraViewer(argc, argv);
+    CameraViewer(interpolation, save, width, height);
 
     cerr << "Quit" << endl;
     return 1;
 }
+
+SETUP_QT_ENVIRONMENT(my_main)
 

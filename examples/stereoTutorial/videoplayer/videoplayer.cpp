@@ -25,6 +25,20 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
+#if CISST_HAS_QT
+    #include <cisstStereoVision/svlQtObjectFactory.h>
+    #include <cisstStereoVision/svlQtWidgetFileOpen.h>
+    #if CISST_HAS_OPENGL
+        #include <cisstStereoVision/svlFilterImageWindowQt.h>
+    #endif
+    // Qt dialogs are disabled by default
+    #define _USE_QT_        1
+    #define _NO_CONSOLE_    1
+#else
+    #define _USE_QT_        0
+    #define _NO_CONSOLE_    0
+#endif
+
 using namespace std;
 
 
@@ -108,7 +122,11 @@ int VideoPlayer(std::string pathname)
     svlStreamManager stream(4);
     svlFilterSourceVideoFile source(1);
     svlFilterImageOverlay overlay;
+#if _USE_QT_ && CISST_HAS_OPENGL
+    svlFilterImageWindowQt window;
+#else // _USE_QT_ && CISST_HAS_OPENGL
     svlFilterImageWindow window;
+#endif // _USE_QT_ && CISST_HAS_OPENGL
     CViewerEventHandler window_cb;
 
     // setup overlay
@@ -121,16 +139,25 @@ int VideoPlayer(std::string pathname)
                                    15.0, svlRGB(255, 200, 200), svlRGB(32, 32, 32));
     overlay.AddOverlay(ts_overlay);
 
-    // setup source
+     // setup source
+#if _NO_CONSOLE_
+    svlQtWidgetFileOpen* widget_fileopen = svlQtWidgetFileOpen::New("Video Files", "avi;mpg;cvi;ncvi;njpg;");
+    if (widget_fileopen->WaitForClose()) {
+        source.SetFilePath(widget_fileopen->GetFilePath());
+    }
+    else return 0;
+    widget_fileopen->Delete();
+#else // _NO_CONSOLE_
     if (pathname.empty()) {
         source.DialogFilePath();
     }
     else {
         if (source.SetFilePath(pathname) != SVL_OK) {
             cerr << endl << "Wrong file name... " << endl;
-            goto labError;
+            return 0;
         }
     }
+#endif // _NO_CONSOLE_
 
     // setup image window
     window.SetTitle("Video Player");
@@ -152,7 +179,7 @@ int VideoPlayer(std::string pathname)
     cerr << "    'q'   - Quit" << endl << endl;
 
     // initialize and start stream
-    if (stream.Play() != SVL_OK) goto labError;
+    if (stream.Play() != SVL_OK) return 0;
 
     // wait for quit command
     while (!quit) osaSleep(0.1);
@@ -162,7 +189,6 @@ int VideoPlayer(std::string pathname)
     // stop and release stream
     stream.Release();
 
-labError:
     return 0;
 }
 
@@ -200,9 +226,9 @@ int ParseNumber(char* string, unsigned int maxlen)
     return ivalue;
 }
 
-int main(int argc, char** argv)
+int my_main(int argc, char** argv)
 {
-    cerr << endl << "svlExVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << "svlExVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
     cerr << "Command line format:" << endl;
     cerr << "     svlExVideoPlayer [pathname-optional]" << endl;
@@ -215,4 +241,6 @@ int main(int argc, char** argv)
     cerr << "Quit" << endl << endl;
     return 1;
 }
+
+SETUP_QT_ENVIRONMENT(my_main)
 
