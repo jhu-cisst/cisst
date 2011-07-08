@@ -35,6 +35,11 @@ robLink::~robLink(){
   }
 }
 
+robKinematics* robLink::GetKinematics() const
+{ return kinematics; }
+robMass        robLink::GetMass() const
+{ return mass; }
+
 robLink::Errno robLink::Read( std::istream& is ){ 
   if( kinematics != NULL ) { kinematics->Read( is ); }
   mass.ReadMass( is );

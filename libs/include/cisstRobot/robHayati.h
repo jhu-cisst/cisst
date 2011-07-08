@@ -34,10 +34,10 @@ class CISST_EXPORT robHayati : public robKinematics {
  private:
   
   //! Hayati parameters
-  double alpha;
-  double  beta;         // x components
-  double theta;
-  double     d;         // z components
+  double alpha;         // rotation x
+  double  beta;         // rotation y
+  double theta;         // rotation z
+  double     d;         // translation x or z (depends on joint type)
 
  protected:
   
@@ -110,6 +110,18 @@ class CISST_EXPORT robHayati : public robKinematics {
   //! Clone
   robKinematics* Clone() const;
 
+  double GetRotationX()    const { return alpha; }
+  double GetRotationY()    const { return beta;  }
+  double GetRotationZ()    const { return theta; }
+  double GetTranslationX() const { return d; }
+  double GetTranslationZ() const { return d; }
+  
+  void SetRotationX( double x )    { alpha = x; }
+  void SetRotationY( double x )    { beta = x;  }
+  void SetRotationZ( double x )    { theta = x; }
+  void SetTranslationX( double x ) { d = x; }
+  void SetTranslationZ( double x ) { d = x; }
+  
 };
 
 #endif

@@ -52,10 +52,10 @@ vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const {
   // Add the position offset to the joint value
   switch( GetType() ){
   case robJoint::HINGE:
-    theta = PositionOffset() + q; // add the joint offset to the joint angle
+    theta = theta + PositionOffset() + q; // add the joint offset to the joint angle
     break;
   case robJoint::SLIDER:
-    d = PositionOffset() + q;     // add the joint offset to the joint length
+    d = d + PositionOffset() + q;     // add the joint offset to the joint length
     break;
   default:
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -72,6 +72,7 @@ vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const {
 				st*ca,  ct*ca, -sa,
 				st*sa,  ct*sa,  ca );
   vctFixedSizeVector<double,3> t( a, -sa*d, ca*d );
+
   return vctFrame4x4<double>( R, t );
 
 }

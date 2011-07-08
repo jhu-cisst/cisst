@@ -87,6 +87,9 @@ class CISST_EXPORT robLink {
   vctFixedSizeVector<double,3> PStar() const;
   vctMatrixRotation3<double> Orientation( double q ) const;
 
+  robKinematics* GetKinematics() const;
+  robMass        GetMass() const;
+
   robKinematics::Convention GetConvention() const;
 
   robJoint::Type GetType() const;

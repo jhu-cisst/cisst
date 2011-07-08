@@ -106,6 +106,16 @@ class CISST_EXPORT robDH : public robKinematics {
   //! Clone
   robKinematics* Clone() const;
 
+  double GetRotationX()    const { return alpha; }
+  double GetRotationZ()    const { return theta; }
+  double GetTranslationX() const { return a; }
+  double GetTranslationZ() const { return d; }
+  
+  void SetRotationX( double x )    { alpha = x; }
+  void SetRotationZ( double x )    { theta = x; }
+  void SetTranslationX( double x ) { a = x; }
+  void SetTranslationZ( double x ) { d = x; }
+  
 };
 
 #endif

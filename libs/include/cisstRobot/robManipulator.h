@@ -54,7 +54,7 @@ class CISST_EXPORT robManipulator{
      The (geometric) spatial Jacobian in column major
   */
   double** Js;
-  
+
   //! A vector of links
   std::vector<robLink> links;
 
@@ -147,6 +147,14 @@ class CISST_EXPORT robManipulator{
      \param[output] The 6x6 manipulator inertia matrix in operation space
   */
   void OSinertia(double Ac[6][6], const vctDynamicVector<double>& q) const;
+
+  vctFixedSizeMatrix<double,4,4>
+    SE3Difference( const vctFrame4x4<double>& Rt1,
+		   const vctFrame4x4<double>& Rt2 ) const;
+  
+  void 
+    AddIdentificationColumn( vctDynamicMatrix<double>& J,
+			     vctFixedSizeMatrix<double,4,4>& delRt ) const;
     
 public:
 
@@ -237,7 +245,13 @@ public:
 		     const vctDynamicVector<double>& qd,
 		     const vctFixedSizeVector<double,6>& vdwd ) const;
   
-  void Print() const ;
+
+  virtual 
+    vctDynamicMatrix<double> 
+    JacobianKinematicsIdentification( const vctDynamicVector<double>& q,
+				      double epsilon = 1e-6 ) const ;
+
+  void PrintKinematics( std::ostream& os ) const ;
 
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
