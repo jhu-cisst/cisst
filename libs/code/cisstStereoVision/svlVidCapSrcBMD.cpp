@@ -28,11 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVidCapSrcBMD class *****/
 /*******************************/
 
-CMN_IMPLEMENT_SERVICES(svlVidCapSrcBMD)
+CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcBMD, svlVidCapSrcBase)
 
 svlVidCapSrcBMD::svlVidCapSrcBMD() :
 svlVidCapSrcBase(),
-cmnGenericObject(),
 NumOfStreams(0),
 Running(false),
 Initialized(false),
@@ -239,7 +238,7 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             deviceinfo[0][i].platform = svlFilterSourceVideoCapture::BlackMagicDeckLink;
 
             // id
-            deviceinfo[0][i].id = i;
+            deviceinfo[0][i].ID = i;
 
             memset(deviceinfo[0][i].name, 0, SVL_VCS_STRING_LENGTH);
             memcpy(deviceinfo[0][i].name,

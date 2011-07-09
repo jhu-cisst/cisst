@@ -7,14 +7,14 @@ svlCCHandEyeCalibration::svlCCHandEyeCalibration(std::vector<svlCCCalibrationGri
 	handEyeMethodFlag = DUAL_QUATERNION;
 	this->calibrationGrids = calibrationGrids;
 	cameraToTCP = cvCreateMat(4,4,CV_64FC1);
-    debug = false;
+	debug = false;
 }
 
 bool svlCCHandEyeCalibration::calibrate()
 {
 
-    std::cout << std::endl << "Starting hand eye calibration" << std::endl;
-    std::cout << "==========================================" << std::endl;
+	std::cout << std::endl << "Starting hand eye calibration" << std::endl;
+	std::cout << "==========================================" << std::endl;
 
 	//process calibration grid images
 	cv::Mat rmatrix, tvec;
@@ -22,53 +22,39 @@ bool svlCCHandEyeCalibration::calibrate()
 	CvMat *cmatrix, *tcpMatrix, *tcpMatrixTemp;
 	for(int i=0;i<calibrationGrids.size();i++)
 	{
- 		if(calibrationGrids.at(i)->hasTracking &&
-            ((!debug && calibrationGrids.at(i)->valid)||(debug && std::abs(calibrationGrids.at(i)->groundTruthCameraTransformation->data.fl[0]) > 5e-5)))
-        {
-            if(debug)
-                std::cout << "Processing Grid# " << i <<std::endl;
+		if(calibrationGrids.at(i)->hasTracking &&
+			((!debug && calibrationGrids.at(i)->valid)||(debug && calibrationGrids.at(i)->validGroundTruth)))
+		{
+			if(debug)
+				std::cout << "Processing Grid# " << i <<std::endl;
 			cmatrix = cvCreateMat(4,4,CV_64FC1);
 			//camera to grid transformation
 			if(debug)
 			{
-				tcpMatrixTemp = calibrationGrids.at(i)->groundTruthCameraTransformation;
-				cmatrix->data.db[0] = tcpMatrixTemp->data.fl[0];
-				cmatrix->data.db[1] = tcpMatrixTemp->data.fl[1];
-				cmatrix->data.db[2] = tcpMatrixTemp->data.fl[2];
-				cmatrix->data.db[3] = tcpMatrixTemp->data.fl[3];
-				cmatrix->data.db[4] = tcpMatrixTemp->data.fl[4];
-				cmatrix->data.db[5] = tcpMatrixTemp->data.fl[5];
-				cmatrix->data.db[6] = tcpMatrixTemp->data.fl[6];
-				cmatrix->data.db[7] = tcpMatrixTemp->data.fl[7];
-				cmatrix->data.db[8] = tcpMatrixTemp->data.fl[8];
-				cmatrix->data.db[9] = tcpMatrixTemp->data.fl[9];
-				cmatrix->data.db[10] = tcpMatrixTemp->data.fl[10];
-				cmatrix->data.db[11] = tcpMatrixTemp->data.fl[11];
-				cmatrix->data.db[12] = 0;
-				cmatrix->data.db[13] = 0;
-				cmatrix->data.db[14] = 0;
-				cmatrix->data.db[15] = 1;
+                rmatrix = calibrationGrids.at(i)->groundTruthRmatrix;
+                tvec = calibrationGrids.at(i)->groundTruthTvec;
 			}else
 			{
 				rmatrix = calibrationGrids.at(i)->rmatrix;
 				tvec = calibrationGrids.at(i)->tvec;
-				cmatrix->data.db[0] = rmatrix.at<double>(0,0);
-				cmatrix->data.db[1] = rmatrix.at<double>(0,1);
-				cmatrix->data.db[2] = rmatrix.at<double>(0,2);
-				cmatrix->data.db[3] = tvec.at<double>(0,0);
-				cmatrix->data.db[4] = rmatrix.at<double>(1,0);
-				cmatrix->data.db[5] = rmatrix.at<double>(1,1);
-				cmatrix->data.db[6] = rmatrix.at<double>(1,2);
-				cmatrix->data.db[7] = tvec.at<double>(0,1);
-				cmatrix->data.db[8] = rmatrix.at<double>(2,0);
-				cmatrix->data.db[9] = rmatrix.at<double>(2,1);
-				cmatrix->data.db[10] = rmatrix.at<double>(2,2);
-				cmatrix->data.db[11] = tvec.at<double>(0,2);
-				cmatrix->data.db[12] = 0;
-				cmatrix->data.db[13] = 0;
-				cmatrix->data.db[14] = 0;
-				cmatrix->data.db[15] = 1;
-			}
+            }
+			cmatrix->data.db[0] = rmatrix.at<double>(0,0);
+			cmatrix->data.db[1] = rmatrix.at<double>(0,1);
+			cmatrix->data.db[2] = rmatrix.at<double>(0,2);
+			cmatrix->data.db[3] = tvec.at<double>(0,0);
+			cmatrix->data.db[4] = rmatrix.at<double>(1,0);
+			cmatrix->data.db[5] = rmatrix.at<double>(1,1);
+			cmatrix->data.db[6] = rmatrix.at<double>(1,2);
+			cmatrix->data.db[7] = tvec.at<double>(0,1);
+			cmatrix->data.db[8] = rmatrix.at<double>(2,0);
+			cmatrix->data.db[9] = rmatrix.at<double>(2,1);
+			cmatrix->data.db[10] = rmatrix.at<double>(2,2);
+			cmatrix->data.db[11] = tvec.at<double>(0,2);
+			cmatrix->data.db[12] = 0;
+			cmatrix->data.db[13] = 0;
+			cmatrix->data.db[14] = 0;
+			cmatrix->data.db[15] = 1;
+
 			cameraMatrix.push_back(cmatrix);
 
 			//world to tcp
@@ -113,8 +99,8 @@ bool svlCCHandEyeCalibration::calibrate()
 
 	//backproject
 
-	if(debug)
-		printData();
+	//if(debug)
+	//	printData();
 
 	// Free memory
 	rmatrix.~Mat();
@@ -122,10 +108,8 @@ bool svlCCHandEyeCalibration::calibrate()
 	cvReleaseMat(&worldToTCP);
 	cvReleaseMat(&cmatrix);
 	cvReleaseMat(&tcpMatrix);
-    if(debug)
-    	cvReleaseMat(&tcpMatrixTemp);
 
-    return true;
+	return true;
 }
 
 /**************************************************************************************************
@@ -187,7 +171,7 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	}
 
 	//The dual quaternion is (Q.q + epsilon*Q.prime)
-    //a = Qa.q, a' = Qa.prime  idem for b
+	//a = Qa.q, a' = Qa.prime  idem for b
 	if(aQ.size()>0)
 		T = cvCreateMat(6*aQ.size(),8,CV_64FC1);
 	else
@@ -218,7 +202,8 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	CvMat* V  = cvCreateMat(T->cols,T->cols,CV_64FC1);
 	CvMat* vTranspose = cvCreateMat(T->cols,T->cols,CV_64FC1);
 	//The flags cause U and V to be returned transposed (does not work well without the transpose flags).
-	cvSVD(T, D, uTranspose, vTranspose, CV_SVD_U_T|CV_SVD_V_T); // A = U D V^T
+    //cvSVD(T, D, U, V); // A = U D V^T
+    cvSVD(T, D, uTranspose, vTranspose, CV_SVD_U_T|CV_SVD_V_T); // A = U D V^T
 	cvTranspose(uTranspose,U);
 	cvTranspose(vTranspose,V);
 
@@ -296,7 +281,7 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	cvMatMul(u2Transpose,u2,temp0Mul1x1);
 	cvAdd(temp2Mul1x1,temp0Mul1x1,val1);
 
-	if(val0>val1)
+	if(val0->data.db[0]>val1->data.db[0])
 	{
 		root = roots->data.db[0];
 		val = val0->data.db[0];
@@ -379,6 +364,10 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	cvSetReal2D(invCameraToTCP,3,3,1);
 
 	cvInvert(invCameraToTCP,cameraToTCP);
+    tcp_T_camera = vct4x4(cameraToTCP->data.db[0],cameraToTCP->data.db[1],cameraToTCP->data.db[2],cameraToTCP->data.db[3],
+                        cameraToTCP->data.db[4],cameraToTCP->data.db[5],cameraToTCP->data.db[6],cameraToTCP->data.db[7],
+                        cameraToTCP->data.db[8],cameraToTCP->data.db[9],cameraToTCP->data.db[10],cameraToTCP->data.db[11],
+                        cameraToTCP->data.db[12],cameraToTCP->data.db[13],cameraToTCP->data.db[14],cameraToTCP->data.db[15]);
 
 	if(debug)
 	{
@@ -420,6 +409,10 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 		printCvMatDouble(val0);
 		std::cout <<"===============val2===============" << std::endl;
 		printCvMatDouble(val1);
+		std::cout <<"===============s===============" << std::endl;
+        std::cout << root << std::endl;
+		std::cout <<"===============val===============" << std::endl;
+        std::cout << val << std::endl;
 		std::cout <<"===============lambda1, lambda 2===============" << std::endl;
 		std::cout << lambda0 << std::endl;
 		std::cout << lambda1 << std::endl;
@@ -435,9 +428,8 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 		printCvMatDouble(tMatrix);
 	}
 
-        std::cout <<"===============TCP_T_Camera===============" << std::endl;
+	std::cout <<"===============TCP_T_Camera===============" << std::endl;
 	printCvMatDouble(cameraToTCP);
-
 
 	//free memory
 	//CvMat *A, *B, *temp0, *temp1, *mulResult, *invResult, *q, *qPrime, *sTemp, *a3x1, *b3x1, *aPrime3x1, *bPrime3x1, *T;
@@ -445,10 +437,10 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	cvReleaseMat(&B);
 
 	// oddly releasing temp0,temp1,mulResult,invResult causes errors
-    //cvReleaseMat(&temp0);
-    //cvReleaseMat(&temp1);
-    //cvReleaseMat(&mulResult);
-    //cvReleaseMat(&invResult);
+	//cvReleaseMat(&temp0);
+	//cvReleaseMat(&temp1);
+	//cvReleaseMat(&mulResult);
+	//cvReleaseMat(&invResult);
 
 	cvReleaseMat(&q);
 	cvReleaseMat(&qPrime);
@@ -459,36 +451,36 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	cvReleaseMat(&bPrime3x1);
 	cvReleaseMat(&T);
 
-    cvReleaseMat(&U);
-    cvReleaseMat(&uTranspose);
-    cvReleaseMat(&D);
-    cvReleaseMat(&V);
-    cvReleaseMat(&vTranspose);	
+	cvReleaseMat(&U);
+	cvReleaseMat(&uTranspose);
+	cvReleaseMat(&D);
+	cvReleaseMat(&V);
+	cvReleaseMat(&vTranspose);	
 
 	//CvMat *aTemp, *bTemp, *cTemp, *poly, *roots, *temp0Mul1x1, *temp1Mul1x1, *temp2Mul1x1, *val0, *val1;
 	//CvMat *qFinal, *qConj, *rMatrix, *tMatrix;
-    cvReleaseMat(&aTemp);
-    cvReleaseMat(&bTemp);
-    cvReleaseMat(&cTemp);
-    cvReleaseMat(&poly);
-    cvReleaseMat(&roots);	
-    cvReleaseMat(&temp0Mul1x1);
-    cvReleaseMat(&temp1Mul1x1);
-    cvReleaseMat(&temp2Mul1x1);
-    cvReleaseMat(&val0);
-    cvReleaseMat(&val1);	
-    cvReleaseMat(&qFinal);
-    cvReleaseMat(&qConj);
-    cvReleaseMat(&rMatrix);
-    cvReleaseMat(&tMatrix);	
+	cvReleaseMat(&aTemp);
+	cvReleaseMat(&bTemp);
+	cvReleaseMat(&cTemp);
+	cvReleaseMat(&poly);
+	cvReleaseMat(&roots);	
+	cvReleaseMat(&temp0Mul1x1);
+	cvReleaseMat(&temp1Mul1x1);
+	cvReleaseMat(&temp2Mul1x1);
+	cvReleaseMat(&val0);
+	cvReleaseMat(&val1);	
+	cvReleaseMat(&qFinal);
+	cvReleaseMat(&qConj);
+	cvReleaseMat(&rMatrix);
+	cvReleaseMat(&tMatrix);	
 
 	//CvMat *tMatrix3x1, *rMatrixNeg, *invCameraToTCP, *tempMul3x1;
-    cvReleaseMat(&tMatrix3x1);
-    cvReleaseMat(&rMatrixNeg);
-    cvReleaseMat(&invCameraToTCP);
-    cvReleaseMat(&tempMul3x1);
+	cvReleaseMat(&tMatrix3x1);
+	cvReleaseMat(&rMatrixNeg);
+	cvReleaseMat(&invCameraToTCP);
+	cvReleaseMat(&tempMul3x1);
 
-    //WLIU TODO: Calculate backprojection error
+	//WLIU TODO: Calculate backprojection error
 	return error;
 }
 
@@ -523,13 +515,13 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
 	tvec->data.db[1] = matrix->data.db[7];
 	tvec->data.db[2] = matrix->data.db[11];
 
-    //r = rodrigues(R);
+	//r = rodrigues(R);
 	cvRodrigues2(rmatrix,rvec);
-    //theta = norm(r);
+	//theta = norm(r);
 	rvecNormDouble = cv::norm(rvec);
 	cvAddS(rvecNorm,cvScalar(rvecNormDouble),rvecNorm);
 
-    //l = r/norm(theta);
+	//l = r/norm(theta);
 	cvDiv(rvec,rvecNorm,l);
 
 	//d = l'*t;   
@@ -578,18 +570,18 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
 	//free memory
 	//*rvec, *tvec, *rmatrix, *rvecNorm, *l, *transpose, *tempArith1x1, *tempArith3x1, *tempMul3x1, *c;
 	cvReleaseMat(&rvec);
-    cvReleaseMat(&tvec);
+	cvReleaseMat(&tvec);
 	cvReleaseMat(&rmatrix);
-    cvReleaseMat(&rvecNorm);
+	cvReleaseMat(&rvecNorm);
 	cvReleaseMat(&l);
-    cvReleaseMat(&transpose);
+	cvReleaseMat(&transpose);
 	cvReleaseMat(&tempArith1x1);
-    cvReleaseMat(&tempArith3x1);
+	cvReleaseMat(&tempArith3x1);
 	cvReleaseMat(&tempMul3x1);
 	cvReleaseMat(&c);
 
-    //WLIU TODO: Check for bad dual quaternion creation
-    return true;
+	//WLIU TODO: Check for bad dual quaternion creation
+	return true;
 }
 
 void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index)
@@ -597,7 +589,7 @@ void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat*
 	CvMat* tempArith3x1 = cvCreateMat(3,1,CV_64FC1);
 
 	//S(:,:,i) = [Qa(i).q(1:3)-Qb(i).q(1:3)   crossprod(Qa(i).q(1:3)+Qb(i).q(1:3)) zeros(3,1) zeros(3,3);...
-    //            Qa(i).qprime(1:3)-Qb(i).qprime(1:3)   crossprod(Qa(i).qprime(1:3)+Qb(i).qprime(1:3)) Qa(i).q(1:3)-Qb(i).q(1:3)   crossprod(Qa(i).q(1:3)+Qb(i).q(1:3))];                                
+	//            Qa(i).qprime(1:3)-Qb(i).qprime(1:3)   crossprod(Qa(i).qprime(1:3)+Qb(i).qprime(1:3)) Qa(i).q(1:3)-Qb(i).q(1:3)   crossprod(Qa(i).q(1:3)+Qb(i).q(1:3))];                                
 
 	cvSub(a,b,tempArith3x1);
 	s->data.db[0] = tempArith3x1->data.db[0];

@@ -44,6 +44,7 @@ class svlCCCalibrationGrid
 		std::vector<cv::Point3f> getGoodCalibrationGridPoints3D();
 		std::vector<cv::Point2f> getGoodProjectedImagePoints();
 		void optimizeCalibration();
+        void setGroundTruthTransformation(CvMat* groundTruthCameraTransformation);
 		void compareGroundTruth();
 		void printCalibrationParameters();
 
@@ -56,19 +57,20 @@ class svlCCCalibrationGrid
 		float gridSizePixel;
 		std::vector<cv::Point2f> groundTruthImagePoints;
 		std::vector<cv::Point3f> groundTruthCalibrationGridPoints;
-		std::vector<cv::Point2f> intersectionImagePoints;
-		std::vector<cv::Point3f> intersectionCalibrationGridPoints;
 		cv::Mat cameraMatrix;
-		CvMat* groundTruthCameraTransformation;
+		cv::Mat groundTruthRvec;
+        CvMat* groundTruthRmatrix;
+		cv::Mat groundTruthTvec;
 		CvMat* worldToTCP;
 		cv::Mat distCoeffs;
 		cv::Mat rvec;
 		cv::Mat tvec;
 		cv::Mat rmatrix;
 		bool valid;
+        bool validGroundTruth;
         bool hasTracking;
 		int refineThreshold;
-		std::vector<cv::Point2f> goodImagePoints;
+		int minGridPoints;
 
 	private:
 		int findGridPointIndex(cv::Point3f point);
@@ -103,7 +105,6 @@ class svlCCCalibrationGrid
 		std::vector<cv::Point2f> projectedImagePoints;
 		double projectedImagePointsCalibrationError;
 		int originColorModeFlag;
-		int minGridPoints;
 
 };
 

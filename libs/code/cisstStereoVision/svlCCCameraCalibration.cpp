@@ -30,6 +30,9 @@ svlCCCameraCalibration::svlCCCameraCalibration()
     debug = false;
     groundTruthTest = false;
     visibility = new int[maxNumberOfGrids];
+    groundTruthCameraMatrix = cv::Mat::eye(3, 3, CV_64F);
+    groundTruthDistCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
+    cameraGeometry = new svlSampleCameraGeometry();
 }
 
 bool svlCCCameraCalibration::runCameraCalibration()
@@ -46,7 +49,7 @@ bool svlCCCameraCalibration::runCameraCalibration()
     pointsCount = 0;
 
     // Calibrate
-    return calibration(groundTruthTest);
+    return calibration();
 
 }
 
@@ -80,7 +83,7 @@ void svlCCCameraCalibration::printCalibrationParameters()
 
     //for(int i=0;i<rvecs.size();i++)
     //{
-    //	cout << "rvect: " << i << ": " << rvecs.at(i).at<double>(0,0) <<","<< rvecs.at(i).at<double>(0,1) <<","<< rvecs.at(i).at<double>(0,2) <<","<< endl;
+    //    std::cout << "rvect: " << i << ": " << rvecs.at(i).at<double>(0,0) <<","<< rvecs.at(i).at<double>(0,1) <<","<< rvecs.at(i).at<double>(0,2) <<","<< std::endl;
     //    std::cout << "tvect: " << i << ": " << tvecs.at(i).at<double>(0,0) <<","<< tvecs.at(i).at<double>(0,1) <<","<< tvecs.at(i).at<double>(0,2) <<","<< std::endl;
     //}
 }
@@ -153,9 +156,9 @@ void svlCCCameraCalibration::updateCalibrationGrids()
     for(int i=0;i<(int)calibrationGrids.size();i++)
     {
         if(visibility[i]){
-            //cout << "Updating grid " << i << " with parameters " << validIndex <<endl;
-            //cout << "rvect: " << i << ": " << rvecs.at(validIndex).at<double>(0,0) <<","<< rvecs.at(validIndex).at<double>(0,1) <<","<< rvecs.at(validIndex).at<double>(0,2) <<","<< endl;
-            //cout << "tvect: " << i << ": " << tvecs.at(validIndex).at<double>(0,0) <<","<< tvecs.at(validIndex).at<double>(0,1) <<","<< tvecs.at(validIndex).at<double>(0,2) <<","<< endl;
+            //std::cout << "Updating grid " << i << " with parameters " << validIndex <<std::endl;
+            //std::cout << "rvect: " << i << ": " << rvecs.at(validIndex).at<double>(0,0) <<","<< rvecs.at(validIndex).at<double>(0,1) <<","<< rvecs.at(validIndex).at<double>(0,2) <<","<< std::endl;
+            //std::cout << "tvect: " << i << ": " << tvecs.at(validIndex).at<double>(0,0) <<","<< tvecs.at(validIndex).at<double>(0,1) <<","<< tvecs.at(validIndex).at<double>(0,2) <<","<< std::endl;
             calibrationGrids.at(i)->cameraMatrix = cameraMatrix;
             calibrationGrids.at(i)->distCoeffs = distCoeffs;
             calibrationGrids.at(i)->rvec = rvecs[validIndex];
@@ -223,18 +226,18 @@ bool svlCCCameraCalibration::checkCalibration(bool projected)
     bool ok = false;
     std::vector<float> reprojErrs;
     ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
-    double totalAvgErr;
+    double avgErr;
 
     if(projected)
     {
-        totalAvgErr = computeReprojectionErrors(projectedObjectPoints, projectedImagePoints,
+        avgErr = computeReprojectionErrors(projectedObjectPoints, projectedImagePoints,
             rvecs, tvecs, cameraMatrix, distCoeffs, reprojErrs, projected);
     }else
     {
-        totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints,
+        avgErr = computeReprojectionErrors(objectPoints, imagePoints,
             rvecs, tvecs, cameraMatrix, distCoeffs, reprojErrs, projected);
     }
-    std::cout << "Range check " << ok << " Total Avg error: " << totalAvgErr <<std::endl;
+    std::cout << "Range check " << ok << ", average L1 Norm error: " << avgErr <<std::endl;
 
     if(ok && debug)
     {
@@ -257,12 +260,14 @@ bool svlCCCameraCalibration::checkCalibration(bool projected)
 *	void 					
 *
 ***********************************************************************************************************/
-double svlCCCameraCalibration::calibrate(bool projected)
+double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
 {
     // empty points vectors
     imagePoints.clear();
     objectPoints.clear();
     pointsCount = 0;
+    std::vector<cv::Point2f> points2D;
+    std::vector<cv::Point3f> points3D;
 
     if(!projected)
     {
@@ -273,13 +278,28 @@ double svlCCCameraCalibration::calibrate(bool projected)
         //get Points
         for(int i=0;i<(int)calibrationGrids.size();i++)
         {
-            if(calibrationGrids.at(i)->valid){
+            if((!groundTruthTest && calibrationGrids.at(i)->valid)|| (groundTruthTest && calibrationGrids.at(i)->validGroundTruth)){
                 visibility[i] = 1;
-                std::vector<cv::Point2f> gPoints = calibrationGrids.at(i)->getGoodImagePoints();
-                std::cout << "image " << i << " using " << gPoints.size() <<" points." << std::endl;
-                imagePoints.push_back(calibrationGrids.at(i)->getGoodImagePoints());
-                objectPoints.push_back(calibrationGrids.at(i)->getGoodCalibrationGridPoints3D());
-                pointsCount += calibrationGrids.at(i)->goodImagePoints.size();
+                points2D.clear();
+                points3D.clear();
+                if(groundTruthTest)
+                {
+                    points2D = calibrationGrids.at(i)->groundTruthImagePoints;
+                    points3D = calibrationGrids.at(i)->groundTruthCalibrationGridPoints;
+                }
+                else
+                {
+                    points2D = calibrationGrids.at(i)->getGoodImagePoints();
+                    points3D = calibrationGrids.at(i)->getGoodCalibrationGridPoints3D();
+                }
+
+                if (points2D.size() > calibrationGrids.at(i)->minGridPoints && points3D.size() > calibrationGrids.at(i)->minGridPoints && points2D.size() == points3D.size())
+                {
+                    std::cout << "image " << i << " using " << points2D.size() <<" points." << std::endl;
+                    imagePoints.push_back(points2D);
+                    objectPoints.push_back(points3D);
+                    pointsCount += points2D.size();
+                }
             }else
                 visibility[i] = 0;
         }
@@ -378,7 +398,7 @@ void svlCCCameraCalibration::optimizeCalibration()
     }
 
     //refine
-    rms = calibrate(false);
+    rms = calibrate(false,false);
     prevCameraMatrix = cameraMatrix;
     prevDistCoeffs = distCoeffs;
     prevRvecs = rvecs;
@@ -448,7 +468,7 @@ void svlCCCameraCalibration::optimizeCalibration()
             //updateCalibrationGrids();
             maxPointsCount = std::max(pointsCount,maxPointsCount);
             refineGrids(refineThreshold);
-            rms = calibrate(false);
+            rms = calibrate(false,false);
 
         }else
         {
@@ -478,7 +498,7 @@ void svlCCCameraCalibration::optimizeCalibration()
             visibility[i] = pPrevVisibility[i];
         }
         refineGrids(refineThreshold);
-        rms = calibrate(false);
+        rms = calibrate(false, false);
     }else{
         //No iteration, set calibration grids back to original
         for(int i=0;i<(int)calibrationGrids.size();i++)
@@ -491,12 +511,12 @@ void svlCCCameraCalibration::optimizeCalibration()
 
         if(debug)
             printCalibrationParameters();
-        rms = calibrate(false);
+        rms = calibrate(false, false);
     }
 
 }
 
-bool svlCCCameraCalibration::calibration(bool groundTruthTest)
+bool svlCCCameraCalibration::calibration()
 {
     double rms;
 
@@ -504,24 +524,18 @@ bool svlCCCameraCalibration::calibration(bool groundTruthTest)
     optimizeCalibration();
 
     ///////////////////////projected
-    rms = calibrate(true);
+    rms = calibrate(true, false);
     updateCalibrationGrids();
     //refineGrids(refineThreshold);
 
-    //////////////////////compare to ground truth
-    if(groundTruthTest)
+    ///////////////////////update camera geometry
+    if(rms < std::numeric_limits<double>::max( ))
     {
-        projectedObjectPoints.clear();
-        projectedImagePoints.clear();
-
-        for(int i=0;i<(int)calibrationGrids.size();i++)
-        {
-            if(calibrationGrids.at(i)->valid)
-                calibrationGrids.at(i)->compareGroundTruth();
-        }
+        updateCameraGeometry();
+        return true;
     }
 
-    return rms < std::numeric_limits<double>::max( );
+    return false;
 }
 
 bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index)
@@ -589,7 +603,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
         path << imageDirectory;
         path << "shot";
         path.fill('0');
-        path << std::setw(3) << index << std::setw(1);
+        path << std::setw(1) << index << std::setw(1);
         path << ".pts";
         currentFileName = path.str();
         if(debug)
@@ -599,11 +613,14 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
         pointsFileIO.parseFile();
         pointsFileIO.repackData(image.IplImageRef());
 
-        //save for calibration grid
+        //save ground truth
         calibrationGrid->groundTruthImagePoints = pointsFileIO.imagePoints;
         calibrationGrid->groundTruthCalibrationGridPoints = pointsFileIO.calibrationGridPoints;
-        if(dlrFileIO->cameraMatrix.size() > index)
-            calibrationGrid->groundTruthCameraTransformation = dlrFileIO->cameraMatrix[index];
+        calibrationGrid->setGroundTruthTransformation(dlrFileIO->cameraMatrices[index]);
+        if(dlrFileIO->cameraMatrices.size() < index || (dlrFileIO->cameraMatrices[index]->data.fl[0] <= -1999))
+            calibrationGrid->validGroundTruth = false;
+        else
+            calibrationGrid->validGroundTruth = true;
     }
 
     //save images and calibration grids
@@ -651,7 +668,9 @@ bool svlCCCameraCalibration::process(std::string imageDirectory, std::string ima
 
         dlrFileIO = new svlCCDLRCalibrationFileIO(currentFileName.c_str());
         dlrFileIO->parseFile();
-        dlrFileIO->repackData(10);
+        dlrFileIO->repackData(stopIndex-startIndex+1);
+        this->groundTruthCameraMatrix = dlrFileIO->cameraMatrix;
+        this->groundTruthDistCoeffs = dlrFileIO->distCoeffs;
     }
 
     for(int i=startIndex;i<stopIndex+1;i++){
@@ -661,13 +680,27 @@ bool svlCCCameraCalibration::process(std::string imageDirectory, std::string ima
 
     if (valid)
     {
-        return runCameraCalibration();
+        valid = runCameraCalibration();
     }
     else
     {
         std::cout << "svlCCCameraCalibration.process() - NO VALID IMAGES! Please acquire more images and try again! " << currentFileName << std::endl;
-        return valid;
     }
+
+    if(groundTruthTest)
+        runTest();
+
+    return valid;
+}
+
+void svlCCCameraCalibration::updateCameraGeometry()
+{
+    double alpha = 0.0;//assumed to be square pixels
+    f = vct2(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
+    c = vct2(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));
+    k = vctFixedSizeVector<double,7>(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),distCoeffs.at<double>(4,0),0.0,0.0);//-0.36,0.1234,0.0,0,0);//
+    //cameraGeometry = new svlSampleCameraGeometry();
+    cameraGeometry->SetIntrinsics(f,c,alpha,k);
 }
 
 int svlCCCameraCalibration::setRectifier(svlFilterImageRectifier *rectifier)
@@ -675,34 +708,12 @@ int svlCCCameraCalibration::setRectifier(svlFilterImageRectifier *rectifier)
     //if(debug)
     std::cout << "==========setRectifier==============" << std::endl;
 
-    vct3x3 R = vct3x3::Eye();
+    //int result = rectifier->GetInput("calibration")->PushSample(cameraGeometry);
 
-    f = vct2(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
-    c = vct2(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));
-    k = vctFixedSizeVector<double,7>(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),distCoeffs.at<double>(4,0),0.0,0.0);//-0.36,0.1234,0.0,0,0);//
+    int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, vct3x3::Eye(),f,c,k,0,0);
 
-    double alpha = 0.0;//assumed to be square pixels
-    vct3x3 KK_new = vct3x3::Eye();
-    unsigned int videoch = 0;
-
-    KK_new.at(0,0) = cameraMatrix.at<double>(0,0);
-    KK_new.at(0,1) = 0;
-    KK_new.at(0,2) = cameraMatrix.at<double>(0,2);
-    KK_new.at(1,0) = 0;
-    KK_new.at(1,1) = cameraMatrix.at<double>(1,1);
-    KK_new.at(1,2) = cameraMatrix.at<double>(1,2);
-    KK_new.at(2,0) = 0;
-    KK_new.at(2,1) = 0;
-    KK_new.at(2,2) = 1;
-
-    //unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,5> k, double alpha, vct3x3 KK_new,unsigned int videoch)
-    int result = rectifier->SetTableFromCameraCalibrationOverwrite(imageSize.height,imageSize.width, R,f,c,k,alpha,KK_new,videoch);
-
-    //if (debug)
-    printf("svlFilterImageRectifier.SetTableFromCameraCalibrationOverwrite() returns: %d\n", result);
-
+    printf("rectifier returns: %d\n", result);
     return result;
-
 }
 
 int svlCCCameraCalibration::setFilterSourceDummy(svlFilterSourceDummy* source, int index)
@@ -724,8 +735,64 @@ int svlCCCameraCalibration::setImageVisibility(int index, int visible)
     return SVL_OK;
 }
 
-bool svlCCCameraCalibration::runHandEyeCalibration()
+vct4x4 svlCCCameraCalibration::runHandEyeCalibration()
 {
     calHandEye = new svlCCHandEyeCalibration(calibrationGrids);
-    return calHandEye->calibrate();
+    calHandEye->calibrate();
+    return calHandEye->tcp_T_camera;
+}
+
+void svlCCCameraCalibration::runTest()
+{
+    std::cout << std::endl;
+    std::cout << "=============Test==============" << std::endl;
+    //////////////////////compare to ground truth
+    if(groundTruthTest)
+    {
+        projectedObjectPoints.clear();
+        projectedImagePoints.clear();
+
+        for(int i=0;i<(int)calibrationGrids.size();i++)
+        {
+            if(calibrationGrids.at(i)->valid && calibrationGrids.at(i)->validGroundTruth)
+            {    
+                std::cout << "Compare ground truth for grid: " <<i<< std::endl;
+                calibrationGrids.at(i)->compareGroundTruth();
+            }
+        }
+    }
+
+    calibrate(false, true);
+
+    std::vector<std::vector<cv::Point3f> > testObjectPoints;
+    std::vector<std::vector<cv::Point2f> > testImagePoints;
+    std::vector<cv::Mat> testRvecs, testTvecs;
+    cv::Mat testCameraMatrix, testDistCoeffs;
+    bool projected = false;
+    std::vector<float> reprojErrs;
+    double avgErr = std::numeric_limits<double>::max( );
+    testCameraMatrix = cv::Mat::eye(3, 3, CV_64F);
+    testDistCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
+    testCameraMatrix = this->groundTruthCameraMatrix;
+    testDistCoeffs = this->groundTruthDistCoeffs;
+
+    for(int i=0;i<(int)calibrationGrids.size();i++)
+    {
+        if(calibrationGrids.at(i)->validGroundTruth && calibrationGrids.at(i)->groundTruthCalibrationGridPoints.size() > 5)
+        {
+            testObjectPoints.push_back(calibrationGrids.at(i)->groundTruthCalibrationGridPoints);
+            testImagePoints.push_back(calibrationGrids.at(i)->groundTruthImagePoints);
+            testRvecs.push_back(calibrationGrids.at(i)->groundTruthRvec);
+            testTvecs.push_back(calibrationGrids.at(i)->groundTruthTvec);
+        }
+    }
+
+    if(testObjectPoints.size() > 0)
+        avgErr = computeReprojectionErrors(testObjectPoints, testImagePoints,
+                 testRvecs, testTvecs, testCameraMatrix, testDistCoeffs, reprojErrs, projected);  
+
+    std::cout << "GroundTruth's average L1 Norm error: " << avgErr <<std::endl;
+
+    std::cout << std::endl;
+
 }

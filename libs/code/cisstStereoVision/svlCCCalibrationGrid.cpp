@@ -28,9 +28,8 @@ svlCCCalibrationGrid::svlCCCalibrationGrid(IplImage* iplImage, cv::Size boardSiz
 	this->valid = false;
 	this->cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
 	this->distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
-        this->rvec = cv::Mat::zeros(3,1,CV_64F);
-        this->tvec = cv::Mat::zeros(3,1,CV_64F);
-	this->groundTruthCameraTransformation = cvCreateMat(3,4,CV_64F);
+    this->rvec = cv::Mat::zeros(3,1,CV_64F);
+    this->tvec = cv::Mat::zeros(3,1,CV_64F);
 	this->calibrationError = std::numeric_limits<double>::max( );;
 	this->minGridPoints = 10;
 	this->refineThreshold = 2;
@@ -208,7 +207,8 @@ void svlCCCalibrationGrid::compareGroundTruth()
 	float distance, averageDistance = 0, maxDistance = -1;
 	cv::Point3f maxPoint;
 	int count = 0;
-
+	std::vector<cv::Point2f> intersectionImagePoints;
+	std::vector<cv::Point3f> intersectionCalibrationGridPoints;
 	std::vector<cv::Point3f> grid = getGoodCalibrationGridPoints3D();
 	std::vector<cv::Point2f> image = getGoodImagePoints();
 
@@ -239,22 +239,35 @@ void svlCCCalibrationGrid::compareGroundTruth()
 	}
 	averageDistance /= count;
 	std::cout << "Comparing ground truth max distance " << maxDistance <<  " Point (" << maxPoint.x << "," << maxPoint.y << ")" << std::endl;
-	std::cout <<	" avg distance: " << averageDistance << " from " << count << " out of " << grid.size() << std::endl << std::endl; 
+	std::cout <<	" avg distance: " << averageDistance << " from " << count << " out of " << grid.size() << std::endl;
 
-	std::cout << "rmatrix: " << rmatrix.at<double>(0,0) <<","<< rmatrix.at<double>(0,1)<<","<< rmatrix.at<double>(0,2) <<","<< std::endl;
-	std::cout << "rmatrix: " << rmatrix.at<double>(1,0) <<","<< rmatrix.at<double>(1,1)<<","<< rmatrix.at<double>(1,2) <<","<< std::endl;
-	std::cout << "rmatrix: " << rmatrix.at<double>(2,0) <<","<< rmatrix.at<double>(2,1)<<","<< rmatrix.at<double>(2,2) <<","<< std::endl;
+    std::cout << "groundTruthRvec: " << groundTruthRvec.at<double>(0,0) <<","<< groundTruthRvec.at<double>(0,1) <<","<< groundTruthRvec.at<double>(0,2) <<","<< std::endl;
+    std::cout << "rvect: " << rvec.at<double>(0,0) <<","<< rvec.at<double>(0,1) <<","<< rvec.at<double>(0,2) <<","<< std::endl;
+    std::cout << "groundTruthTvec: " << groundTruthTvec.at<double>(0,0) <<","<< groundTruthTvec.at<double>(0,1) <<","<< groundTruthTvec.at<double>(0,2) <<","<< std::endl;
 	std::cout << "tvect: " << tvec.at<double>(0,0) <<","<< tvec.at<double>(0,1) <<","<< tvec.at<double>(0,2) <<","<< std::endl;
-
-	std::cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[0]-rmatrix.at<double>(0,0) <<","<< groundTruthCameraTransformation->data.fl[1]-rmatrix.at<double>(0,1)<<","<< groundTruthCameraTransformation->data.fl[2]-rmatrix.at<double>(0,2) <<","<< std::endl;
-	std::cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[4]-rmatrix.at<double>(1,0) <<","<< groundTruthCameraTransformation->data.fl[5]-rmatrix.at<double>(1,1)<<","<< groundTruthCameraTransformation->data.fl[6]-rmatrix.at<double>(1,2) <<","<< std::endl;
-	std::cout << "delta rmatrix: " << groundTruthCameraTransformation->data.fl[8]-rmatrix.at<double>(2,0) <<","<< groundTruthCameraTransformation->data.fl[9]-rmatrix.at<double>(2,1)<<","<< groundTruthCameraTransformation->data.fl[10]-rmatrix.at<double>(1,2) <<","<< std::endl;
-	std::cout << "delta tvect: " << groundTruthCameraTransformation->data.fl[3]-tvec.at<double>(0,0) <<","<< groundTruthCameraTransformation->data.fl[7]-tvec.at<double>(0,1)<<","<< groundTruthCameraTransformation->data.fl[11]-tvec.at<double>(0,2) <<","<< std::endl;
 	
-	std::cout << "worldToTCP: " << worldToTCP->data.fl[0] <<","<< worldToTCP->data.fl[1]<<","<< worldToTCP->data.fl[2] <<","<< worldToTCP->data.fl[3] << std::endl;
-	std::cout << "worldToTCP: " << worldToTCP->data.fl[4] <<","<< worldToTCP->data.fl[5]<<","<< worldToTCP->data.fl[6] <<","<< worldToTCP->data.fl[7] << std::endl;
-	std::cout << "worldToTCP: " << worldToTCP->data.fl[8] <<","<< worldToTCP->data.fl[9]<<","<< worldToTCP->data.fl[10] <<","<< worldToTCP->data.fl[11] <<std::endl;
-	std::cout << "worldToTCP: " << worldToTCP->data.fl[12] <<","<< worldToTCP->data.fl[13]<<","<< worldToTCP->data.fl[14] <<","<< worldToTCP->data.fl[15] <<std::endl;
+	std::cout << "world_T_TCP: " << worldToTCP->data.fl[0] <<","<< worldToTCP->data.fl[1]<<","<< worldToTCP->data.fl[2] <<","<< worldToTCP->data.fl[3] << std::endl;
+	std::cout << "world_T_TCP: " << worldToTCP->data.fl[4] <<","<< worldToTCP->data.fl[5]<<","<< worldToTCP->data.fl[6] <<","<< worldToTCP->data.fl[7] << std::endl;
+	std::cout << "world_T_TCP: " << worldToTCP->data.fl[8] <<","<< worldToTCP->data.fl[9]<<","<< worldToTCP->data.fl[10] <<","<< worldToTCP->data.fl[11] <<std::endl;
+	std::cout << "world_T_TCP: " << worldToTCP->data.fl[12] <<","<< worldToTCP->data.fl[13]<<","<< worldToTCP->data.fl[14] <<","<< worldToTCP->data.fl[15] <<std::endl;
+}
+
+void svlCCCalibrationGrid::setGroundTruthTransformation(CvMat* groundTruthCameraTransformation)
+{
+	groundTruthRmatrix = cvCreateMat(3,3,CV_64FC1);
+	groundTruthRmatrix->data.db[0] = groundTruthCameraTransformation->data.fl[0];
+	groundTruthRmatrix->data.db[1] = groundTruthCameraTransformation->data.fl[1];
+	groundTruthRmatrix->data.db[2] = groundTruthCameraTransformation->data.fl[2];
+	groundTruthRmatrix->data.db[3] = groundTruthCameraTransformation->data.fl[4];
+	groundTruthRmatrix->data.db[4] = groundTruthCameraTransformation->data.fl[5];
+	groundTruthRmatrix->data.db[5] = groundTruthCameraTransformation->data.fl[6];
+	groundTruthRmatrix->data.db[6] = groundTruthCameraTransformation->data.fl[8];
+	groundTruthRmatrix->data.db[7] = groundTruthCameraTransformation->data.fl[9];
+	groundTruthRmatrix->data.db[8] = groundTruthCameraTransformation->data.fl[10];
+	CvMat* rodriguesRvec = cvCreateMat(3,1,CV_64FC1);
+	cvRodrigues2(groundTruthRmatrix,rodriguesRvec);
+    this->groundTruthRvec = (cv::Mat_<double>(3,1) << rodriguesRvec->data.db[0],rodriguesRvec->data.db[1],rodriguesRvec->data.db[2]);
+    this->groundTruthTvec = (cv::Mat_<double>(3,1) << groundTruthCameraTransformation->data.fl[3],groundTruthCameraTransformation->data.fl[7],groundTruthCameraTransformation->data.fl[11]);
 }
 
 /**************************************************************************************************
@@ -1021,7 +1034,6 @@ std::vector<cv::Point2f> svlCCCalibrationGrid::getGoodProjectedImagePoints()
 				}
 			}
 	}
-	goodImagePoints = goodProjectedImagePoints;
 	return goodProjectedImagePoints;
 }
 

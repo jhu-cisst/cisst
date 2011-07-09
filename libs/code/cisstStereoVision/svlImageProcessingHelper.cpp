@@ -1453,11 +1453,11 @@ bool svlImageProcessingHelper::RectificationInternals::Generate(unsigned int wid
     // `intrinsics.fc` is of type `vct2`
     // `intrinsics.cc` is of type `vct2`
     // `intrinsics.a`  is of type `double`
-    // `intrinsics.kc` is of type `vct5`
+    // `intrinsics.kc` is of type `vct7`
 
     if (cam_count == 1) {
     // Single camera
-
+        return SetFromCameraCalibration(height,width,vct3x3::Eye(),intrinsics.fc, intrinsics.cc, intrinsics.kc, intrinsics.a, 0);
         // TO DO
     }
     else if (cam_count == 2) {
@@ -1698,7 +1698,7 @@ labError:
 *
 * Last Change, S. Schafer, 2011/05/17, added Thin Prism Distortion
 ***********************************************************************************************************/
-bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch)
 {
 
 	//==============Setup, Variables==============//
@@ -1709,6 +1709,17 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
     const unsigned int maxheight = 1200;
     const unsigned int size = maxwidth * maxheight;
     int valcnt, i;
+	vct3x3 KK_new = vct3x3::Eye();
+
+	KK_new.at(0,0) = f(0);
+	KK_new.at(0,1) = 0;
+	KK_new.at(0,2) = c(0);
+	KK_new.at(1,0) = 0;
+	KK_new.at(1,1) = f(1);
+	KK_new.at(1,2) = c(1);
+	KK_new.at(2,0) = 0;
+	KK_new.at(2,1) = 0;
+	KK_new.at(2,2) = 1;
 
 	vctDynamicMatrixRef<double> mx,my,KK_new_inv,R_ref;
 	vctDynamicVectorRef<double> rays1,rays2,rays3,rows,cols,x1,x2;

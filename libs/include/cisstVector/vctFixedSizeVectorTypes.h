@@ -60,6 +60,11 @@ typedef vctFixedSizeVector<double, 5> vct5;
 typedef vctFixedSizeVector<double, 6> vctDouble6;
 typedef vctFixedSizeVector<double, 6> vct6;
 //@}
+/*! Define a fixed size vector of size 7 containing doubles. */
+//@{
+typedef vctFixedSizeVector<double, 7> vctDouble7;
+typedef vctFixedSizeVector<double, 7> vct7;
+
 
 
 /*! Define a fixed size vector of size 1 containing floats. */

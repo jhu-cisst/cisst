@@ -164,14 +164,14 @@ int svlFilterImageRectifier::LoadTable(const std::string &filepath, unsigned int
 *
 * Last Change, S. Schafer, 2011/05/17, changed "vctFixedSizeVector<double,5> k", to "vctFixedSizeVector<double,7> k"
 ***********************************************************************************************************/
-int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch)
+int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch)
 {
 
-    if (IsInitialized() == true) return SVL_ALREADY_INITIALIZED;
+    //if (IsInitialized() == true) return SVL_ALREADY_INITIALIZED;
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
 
     svlImageProcessingHelper::RectificationInternals* table = new svlImageProcessingHelper::RectificationInternals;
-    if (!table->SetFromCameraCalibration(height,width,R, f, c, k, alpha, KK_new, videoch)) {
+    if (!table->SetFromCameraCalibration(height,width,R, f, c, k, alpha, videoch)) {
         delete table;
         return SVL_FAIL;
 	}
@@ -181,24 +181,6 @@ int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,u
     return SVL_OK;
 
 }
-
-int svlFilterImageRectifier::SetTableFromCameraCalibrationOverwrite(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch)
-{
-
-    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
-
-    svlImageProcessingHelper::RectificationInternals* table = new svlImageProcessingHelper::RectificationInternals;
-    if (!table->SetFromCameraCalibration(height,width,R, f, c, k, alpha, KK_new, videoch)) {
-        delete table;
-        return SVL_FAIL;
-        }
-
-    Tables[videoch].Set(table);
-
-    return SVL_OK;
-
-}
-
 
 void svlFilterImageRectifier::EnableInterpolation(bool enable)
 {

@@ -28,13 +28,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstStereoVision/svlBufferImage.h>
 #include <cisstOSAbstraction/osaMutex.h>
-#include <cisstStereoVision.h>
 
 #include "DeckLinkAPI.h"
 
 class svlBufferImage;
 
-class svlVidCapSrcBMD : public svlVidCapSrcBase, public cmnGenericObject
+class svlVidCapSrcBMD : public svlVidCapSrcBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

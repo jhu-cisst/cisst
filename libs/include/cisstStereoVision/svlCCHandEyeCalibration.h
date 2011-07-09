@@ -5,6 +5,7 @@
 #include <cv.h>
 #endif
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstStereoVision/svlTypes.h>
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
 #include <limits>
 
@@ -14,6 +15,7 @@ class svlCCHandEyeCalibration
 		enum handEyeMethodEnum {DUAL_QUATERNION};
 		svlCCHandEyeCalibration(std::vector<svlCCCalibrationGrid*> calibrationGrids);
 		bool calibrate();
+        vct4x4 tcp_T_camera;
 
 	private:
 		std::vector<svlCCCalibrationGrid*> calibrationGrids;

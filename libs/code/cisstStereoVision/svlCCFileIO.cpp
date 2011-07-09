@@ -187,13 +187,13 @@ void svlCCDLRCalibrationFileIO::repackData(int numImages)
 	focalLength = cv::Point2f(data[5][0],data[5][1]);
 	principalPoint = cv::Point2f(data[8][0],data[8][1]);
 	alpha = data[11][0];
-	double distortionParameters[5][1] = {data[14][0],data[14][1],data[14][2], 0.0 , 0.0};
-	double tcpToCamera1[3][4] = {{data[20][0], data[20][1],data[20][2], data[20][3]},{data[21][0], data[21][1],data[21][2], data[21][3]},{data[22][0], data[22][1],data[22][2], data[22][3]}};
-	distCoeffs = cv::Mat(5,1,CV_64F, distortionParameters);
-	tcpToCamera = cv::Mat(3,4,CV_64F, tcpToCamera1);
+	distCoeffs = (cv::Mat_<double>(5,1) << data[14][0],data[14][1],data[14][2], 0.0,0.0);
+	tcpToCamera = (cv::Mat_<double>(3,3) << data[20][0], data[20][1],data[20][2], data[20][3],data[21][0], data[21][1],data[21][2], data[21][3],data[22][0], data[22][1],data[22][2], data[22][3]);
+    cameraMatrix = (cv::Mat_<double>(3,3) << data[5][0], 0.0, data[8][0],0.0, data[5][1],data[8][1],0.0,0.0,1);
+
 	this->numImages = numImages;	
 
-	//cameraMatrix;
+	//cameraMatrices;
 	std::cout<<"focal length: " << focalLength.x<<","<<focalLength.y << std::endl;
 	std::cout<<"pricipal point: " << principalPoint.x<<","<<principalPoint.y << std::endl;
 	std::cout<<"alpha " << alpha << std::endl;
@@ -227,7 +227,7 @@ void svlCCDLRCalibrationFileIO::repackData(int numImages)
 		myCameraMatrix->data.fl[11] = cameraParameters[2][3];
 
 
-		cameraMatrix.push_back(myCameraMatrix);
+		cameraMatrices.push_back(myCameraMatrix);
 
 		index+=5;
 	}
@@ -240,7 +240,7 @@ void svlCCDLRCalibrationFileIO::printCameraMatrix()
 {
 	for(int i=0;i<numImages;i++)
 	{
-		CvMat* m = (CvMat*) cameraMatrix[i];
+		CvMat* m = (CvMat*) cameraMatrices[i];
 		std::cout<<"CameraMatrix # " << i << " " << m->data.fl[0]<<","<< m->data.fl[1] <<","<< m->data.fl[2] <<","<< m->data.fl[3]<< std::endl;
 		std::cout<<"CameraMatrix # " << i << " " << m->data.fl[4]<<","<< m->data.fl[5] <<","<< m->data.fl[6] <<","<< m->data.fl[7]<< std::endl;
 		std::cout<<"CameraMatrix # " << i << " " << m->data.fl[8]<<","<< m->data.fl[9] <<","<< m->data.fl[10] <<","<< m->data.fl[11]<<std::endl<<std::endl;

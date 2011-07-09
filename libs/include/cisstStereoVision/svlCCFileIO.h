@@ -155,12 +155,11 @@ public:
     svlCCDLRCalibrationFileIO(const char* filename);
     void repackData(int numImages);
 
-    cv::Mat tcpToCamera;
-    std::vector<CvMat*> cameraMatrix;
+    cv::Mat tcpToCamera, cameraMatrix,distCoeffs;
+    std::vector<CvMat*> cameraMatrices;
     cv::Point2f focalLength;
     cv::Point2f principalPoint;
     float alpha;
-    cv::Mat distCoeffs;
     int numImages;
 
 

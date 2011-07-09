@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterImageRectifier.h>
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
 #include <cisstStereoVision/svlCCOriginDetector.h>
@@ -39,13 +40,10 @@ http://www.cisst.org/cisst/license.txt.
 #define  CV_MIN(a, b)   ((a) <= (b) ? (a) : (b)) 
 #define  CV_MAX(a, b)   ((a) >= (b) ? (a) : (b))
 
-typedef vctDynamicNArrayRef<unsigned char,3> NumpyNArrayType;
-typedef NumpyNArrayType::nsize_type SizeType;
-typedef NumpyNArrayType::nindex_type IndexType;
-typedef NumpyNArrayType::nstride_type StrideType;
-
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
+
+typedef vctDynamicNArrayRef<double,1> NumpyNVctType;
 
 //there aren't directives in OpenCV v.5, but they exist in OpenCV v.4
 #undef CV_MIN
@@ -62,13 +60,14 @@ public:
     int setRectifier(svlFilterImageRectifier* rectifier);
     bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
     bool runCameraCalibration();
-    bool runHandEyeCalibration();
+    vct4x4 runHandEyeCalibration();
     int setImageVisibility(int index, int visible);
     std::vector<svlCCCalibrationGrid*> getCalibrationGrids(){return calibrationGrids;};
     int setFilterSourceDummy(svlFilterSourceDummy* source, int index);
     void printCalibrationParameters();
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
+    svlSampleCameraGeometry* cameraGeometry;
 
 private:
     double computeReprojectionErrors(
@@ -80,11 +79,13 @@ private:
     void updateCalibrationGrids();
     double runOpenCVCalibration(bool projected);
     bool checkCalibration(bool projected);
-    double calibrate(bool projected);
+    double calibrate(bool projected, bool groundTruthTest);
     void refineGrids(int localThreshold);
     void optimizeCalibration();
-    bool calibration(bool groundTruthTest);
+    bool calibration();
+    void updateCameraGeometry();
     void reset();
+    void runTest();
     vct2 getFocii(){ return f;};
     vct2 getCameraCenter(){ return c;};
     vctFixedSizeVector<double,7> getDistortionCoefficients(){return k;};
@@ -92,6 +93,7 @@ private:
     ////////// Parameters //////////
     //camera parameters
     cv::Mat cameraMatrix, distCoeffs;
+    cv::Mat groundTruthCameraMatrix, groundTruthDistCoeffs;
     vct2 f;
     vct2 c;
     vctFixedSizeVector<double,7> k;

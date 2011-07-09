@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlImageProcessingHelper_h
 
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstStereoVision/svlTypes.h>
 #include <cisstVector/vctFixedSizeMatrixTypes.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
@@ -110,7 +111,7 @@ namespace svlImageProcessingHelper
         bool Generate(unsigned int width, unsigned int height,const svlSampleCameraGeometry & geometry, unsigned int cam_id = SVL_LEFT);
         bool Load(const std::string &filepath, int exponentlen = 3);
 		//changed to <double,7> from <double, 5> -SS
-		bool SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, vct3x3 KK_new,unsigned int videoch);
+		bool SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch=0);
 		void TransposeLUTArray2(unsigned int* index, unsigned int size, unsigned int width, unsigned int height);
 
         unsigned int Width;

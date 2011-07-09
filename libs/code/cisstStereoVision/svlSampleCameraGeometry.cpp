@@ -171,7 +171,7 @@ int svlSampleCameraGeometry::LoadCalibration(const std::string & filepath)
     int success = SVL_OK;
     vctDouble2 fc, cc;
     double a;
-    vctDouble5 kc;
+    vctDouble7 kc;
     vctDouble3 om, T;
 
     int pos;
@@ -304,7 +304,7 @@ void svlSampleCameraGeometry::SetIntrinsics(const svlSampleCameraGeometry::Intri
     SetIntrinsics(intrinsics.fc, intrinsics.cc, intrinsics.a, intrinsics.kc, cam_id);
 }
 
-void svlSampleCameraGeometry::SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble5 kc, const unsigned int cam_id)
+void svlSampleCameraGeometry::SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble7 kc, const unsigned int cam_id)
 {
     SetIntrinsics(fc[0], fc[1], cc[0], cc[1], a, kc[0], kc[1], kc[2], kc[3], kc[4], cam_id);
 }

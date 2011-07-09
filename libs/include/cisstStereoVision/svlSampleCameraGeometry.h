@@ -44,7 +44,7 @@ public:
         vctDouble2 fc;
         vctDouble2 cc;
         double     a;
-        vctDouble5 kc;
+        vctDouble7 kc;
     };
 
     struct Extrinsics
@@ -83,7 +83,7 @@ public:
     int LoadCalibration(const std::string & filepath);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
-    void SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble5 kc, const unsigned int cam_id = 0);
+    void SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble7 kc, const unsigned int cam_id = 0);
     void SetIntrinsics(const double fcx, const double fcy,
                        const double ccx, const double ccy,
                        const double a,
