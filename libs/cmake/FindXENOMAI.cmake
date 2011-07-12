@@ -12,7 +12,7 @@
 if( UNIX )
 
   # set the search path
-  set( XENOMAI_SEARCH_PATH /usr/local/xenomai /usr/xenomai )
+  set( XENOMAI_SEARCH_PATH /usr/local/xenomai /usr/xenomai /usr )
   
   # find xeno-config.h
   find_path( XENOMAI_DIR include/xeno_config.h ${XENOMAI_SEARCH_PATH} )
@@ -21,8 +21,16 @@ if( UNIX )
   if( XENOMAI_DIR ) 
     
     # set the include directory
-    set( XENOMAI_INCLUDE_DIR ${XENOMAI_DIR}/include )
-    set( XENOMAI_INCLUDE_POSIX_DIR ${XENOMAI_DIR}/include/posix )
+    if( XENOMAI_DIR STREQUAL "/usr/include/xenomai" )
+      # on ubuntu linux 
+      set( XENOMAI_INCLUDE_DIR ${XENOMAI_DIR} )
+      set( XENOMAI_INCLUDE_POSIX_DIR ${XENOMAI_DIR}/posix )
+    else( XENOMAI_DIR STREQUAL "/usr/include/xenomai")
+      # elsewhere
+      set( XENOMAI_INCLUDE_DIR ${XENOMAI_DIR}/include )
+      set( XENOMAI_INCLUDE_POSIX_DIR ${XENOMAI_DIR}/include/posix )
+    endif( XENOMAI_DIR STREQUAL "/usr/include/xenomai")
+    
 
     # find the xenomai pthread library
     find_library( XENOMAI_LIBRARY_NATIVE  native  ${XENOMAI_DIR}/lib )
