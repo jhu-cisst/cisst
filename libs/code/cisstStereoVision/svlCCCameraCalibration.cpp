@@ -542,7 +542,6 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
 {
     std::stringstream path;
     std::string currentFileName;
-    cv::Mat matImage;
     float squareSize = 2.f;
     svlCCCalibrationGrid* calibrationGrid;
     bool ok = false;
@@ -553,13 +552,24 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     path.fill('0');
     path << std::setw(3) << index << std::setw(1);
     path << "." << imageType;
-    
+
     if(debug)
         std::cout << "Attempting to load image, " << path.str() << std::endl;
-    if(!(matImage=cv::imread(path.str(), 1)).data)
-        return false;
 
-    svlImageIO::Read(image, 0, path.str());
+    ok = svlImageIO::Read(image, 0, path.str());
+    if(ok != SVL_OK)
+    {
+        std::cout << "ERROR: svl Failed to load image, " << path.str() << std::endl;
+        return false;
+    }
+    //cv::Mat matImage;
+    //matImage=cv::imread(path.str(), 1);
+    cv::Mat matImage(image.IplImageRef());
+    if(!(matImage.data))
+    {
+        std::cout << "ERROR: cv::Mat Failed to convert image, " << path.str() << std::endl;
+        return false;
+    }
 
     imageSize =  matImage.size();
 
