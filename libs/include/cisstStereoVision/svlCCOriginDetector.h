@@ -20,15 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCOriginDetector_h
 #define _svlCCOriginDetector_h
-#ifndef _highgui_h
-#include <highgui.h>
-#endif
-#ifndef _cv_h
-#include <cv.h>
-#endif
+
 #include <math.h>
 #include <iostream>
 
+#include <cisstStereoVision/svlTypes.h>
 class svlCCOriginDetector
 {
 	public:

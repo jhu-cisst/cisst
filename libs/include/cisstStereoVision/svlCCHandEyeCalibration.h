@@ -1,9 +1,7 @@
 #ifndef _svlCCHandEyeCalibration_h
 #define _svlCCHandEyeCalibration_h
 
-#ifndef _cv_h
-#include <cv.h>
-#endif
+#include <cisstStereoVision/svlTypes.h>
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstStereoVision/svlTypes.h>
 #include <cisstStereoVision/svlCCCalibrationGrid.h>

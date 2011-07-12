@@ -19,12 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifdef _CH_ 
-#pragma package <opencv> 
-#endif 
-
-#include "cv.h" 
-#include "highgui.h" 
 
 #include <math.h> 
 #include <string.h> 

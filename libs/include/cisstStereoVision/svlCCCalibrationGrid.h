@@ -20,17 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCCalibrationGrid_h
 #define _svlCCCalibrationGrid_h
-#ifndef _highgui_h
-#include <highgui.h>
-#endif
-#ifndef _cv_h
-#include <cv.h>
-#endif
+
 #include <math.h>
 #include <iostream>
 #include <limits>
+#include <cisstStereoVision/svlTypes.h>
 #include <cisstStereoVision/svlCCOriginDetector.h>
 #include <cisstStereoVision/svlCCCornerDetector.h>
+
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 

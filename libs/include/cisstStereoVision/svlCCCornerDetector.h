@@ -20,14 +20,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCCornerDetector_h
 #define _svlCCCornerDetector_h
-#ifndef _highgui_h
-#include <highgui.h>
-#endif
-#ifndef _cl_h
-#include <cv.h>
-#endif
+
 #include <math.h>
 #include <iostream>
+#include <cisstStereoVision/svlTypes.h>
 
 class svlCCCornerDetector
 {

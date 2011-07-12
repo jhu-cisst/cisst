@@ -304,6 +304,12 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             #svlVideoCodecOpenCV.h       # private header
             #svlVideoCodecOpenCV.cpp
             svlTrackerOCVMeanShift.cpp
+			svlCCCalibrationGrid.cpp
+			svlCCCameraCalibration.cpp
+			svlCCCornerDetector.cpp
+			svlCCOriginDetector.cpp
+			svlCCHandEyeCalibration.cpp			
+			svlCCFileIO.cpp	
             )
         IF(NOT WIN32)
             SET(SOURCE_FILES
@@ -317,6 +323,12 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             svlFilterImageZoom.h
             svlFilterToolTracker.h
             svlTrackerOCVMeanShift.h
+			svlCCCalibrationGrid.h
+			svlCCCameraCalibration.h
+			svlCCCornerDetector.h
+			svlCCOriginDetector.h
+			svlCCHandEyeCalibration.h			
+			svlCCFileIO.h
             )
         MESSAGE(STATUS "OpenCV 2.2+ found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)

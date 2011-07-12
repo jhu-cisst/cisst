@@ -575,6 +575,7 @@ int svlImageCodecPNG::Write(const svlSampleImage &image, const unsigned int vide
     png_write_image(png_ptr, pngRows);
     if (targetinfo.error) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
+        std::cout << "svlImageCodecPNG.Write() failed on png_write_image()"<< std::endl;
         return SVL_FAIL;
     }
 

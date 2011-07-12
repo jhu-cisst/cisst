@@ -20,10 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifndef _svlCCCameraCalibration_h
 #define _svlCCCameraCalibration_h
-#ifndef _cv_h
-#include <cv.h>
-#endif
+
 #include <cisstStereoVision.h>
+#include <cisstStereoVision/svlTypes.h>
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterImageRectifier.h>
@@ -32,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlCCCornerDetector.h>
 #include <cisstStereoVision/svlCCHandEyeCalibration.h>
 #include <cisstStereoVision/svlCCFileIO.h>
+
 #include <limits>
 
 //there aren't directives in OpenCV v.5, but they exist in OpenCV v.4

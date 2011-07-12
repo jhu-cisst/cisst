@@ -1,8 +1,6 @@
 #ifndef _svlCCFileIO_h
 #define _svlCCFileIO_h
-#ifndef _cv_h
-#include <cv.h>
-#endif
+#include <cisstStereoVision/svlTypes.h>
 
 class svlCCFileIO
 {
