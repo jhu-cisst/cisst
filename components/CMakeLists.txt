@@ -18,13 +18,11 @@ project (cisstComponents)
 set (LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set (EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
-# cisstSphinx4, wrapper for CMU Sphinx 4 to generate commands from speech
-if (BUILD_LIBS_cisstMultiTask)
-  option (CISST_BUILD_COMP_cisstSphinx4 "Build component cisstSphinx4 (requires JNI and CMU Sphinx 4)" OFF)
-  if (CISST_BUILD_COMP_cisstSphinx4)
-    add_subdirectory (cisstSphinx4)
-  endif (CISST_BUILD_COMP_cisstSphinx4)
-endif (BUILD_LIBS_cisstMultiTask)
+# cisstNDISerial, wrappers for serial port based trackers from NDI, i.e. Polaris, Aurora, Vicra, ...
+option (CISST_BUILD_COMP_cisstNDISerial "Build component cisstNDISerial" OFF)
+if (CISST_BUILD_COMP_cisstNDISerial)
+  add_subdirectory (cisstNDISerial)
+endif (CISST_BUILD_COMP_cisstNDISerial)
 
 # cisstOpenNI, wrappers for OpenNI Kinect
 option (CISST_BUILD_COMP_cisstOpenNI "Build component cisstOpenNI (requires OpenNI)" OFF)
@@ -32,3 +30,10 @@ if (CISST_BUILD_COMP_cisstOpenNI)
   add_subdirectory (cisstOpenNI)
 endif (CISST_BUILD_COMP_cisstOpenNI)
 
+# cisstSphinx4, wrapper for CMU Sphinx 4 to generate commands from speech
+if (BUILD_LIBS_cisstMultiTask)
+  option (CISST_BUILD_COMP_cisstSphinx4 "Build component cisstSphinx4 (requires JNI and CMU Sphinx 4)" OFF)
+  if (CISST_BUILD_COMP_cisstSphinx4)
+    add_subdirectory (cisstSphinx4)
+  endif (CISST_BUILD_COMP_cisstSphinx4)
+endif (BUILD_LIBS_cisstMultiTask)

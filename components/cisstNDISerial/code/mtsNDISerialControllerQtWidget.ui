@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>devNDISerialControllerQWidget</class>
+ <widget class="QWidget" name="devNDISerialControllerQWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>287</width>
+    <height>351</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="2">
+    <spacer name="SpacerTop">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="0" rowspan="6">
+    <spacer name="SpacerLeftTop">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="1" colspan="3">
+    <widget class="QGroupBox" name="BoxBeep">
+     <property name="title">
+      <string>Beep</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="ButtonBeep">
+        <property name="text">
+         <string>Beep</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="NumberOfBeeps">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9</number>
+        </property>
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="4" rowspan="6">
+    <spacer name="SpacerRightTop">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="3" column="1" colspan="3">
+    <widget class="QGroupBox" name="BoxCalibration">
+     <property name="title">
+      <string>Calibration</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="ButtonCalibratePivot">
+        <property name="toolTip">
+         <string>Calibrate the selected tool (starts after 5 seconds, collecting 500 points)</string>
+        </property>
+        <property name="text">
+         <string>Calibrate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="BoxTools"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="ButtonTrack">
+     <property name="text">
+      <string>Track</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="ButtonRecord">
+     <property name="text">
+      <string>Record</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <spacer name="SpacerLeftBottom">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="1" colspan="3">
+    <layout class="QVBoxLayout" name="LayoutTools"/>
+   </item>
+   <item row="8" column="2">
+    <spacer name="SpacerBottom">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="4">
+    <spacer name="SpacerRightBottom">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="ButtonInitialize">
+     <property name="text">
+      <string>Initialize</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
