@@ -19,15 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstDevices/devNDISerialToolQDevice.h>
+#include <cisstNDISerial/mtsNDISerialToolQtComponent.h>
 
 #include <QDir>
 #include <QString>
 
-CMN_IMPLEMENT_SERVICES(devNDISerialToolQDevice);
+CMN_IMPLEMENT_SERVICES(mtsNDISerialToolQtComponent);
 
 
-devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
+mtsNDISerialToolQtComponent::mtsNDISerialToolQtComponent(const std::string & taskName) :
     mtsComponent(taskName)
 {
     ToolWidget.setupUi(&CentralWidget);
@@ -47,7 +47,7 @@ devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
 }
 
 
-void devNDISerialToolQDevice::timerEvent(QTimerEvent * CMN_UNUSED(event))
+void mtsNDISerialToolQtComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
 {
     NDI.GetPositionCartesian(NDI.PositionCartesian);
     if (NDI.PositionCartesian.Valid()) {
@@ -62,7 +62,7 @@ void devNDISerialToolQDevice::timerEvent(QTimerEvent * CMN_UNUSED(event))
 }
 
 
-void devNDISerialToolQDevice::RecordQSlot(void)
+void mtsNDISerialToolQtComponent::RecordQSlot(void)
 {
     QString path = QDir::currentPath() + "/CollectedPoints.csv";
     std::ofstream file;

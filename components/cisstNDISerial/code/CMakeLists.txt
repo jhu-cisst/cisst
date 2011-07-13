@@ -13,14 +13,10 @@
 # --- end cisst license ---
 
 # Core library
-set (HEADER_FILES
-     ../cisstNDISerialExport.h
-     ../mtsNDISerial.h)
-
-set (SOURCE_FILES
-     mtsNDISerial.cpp)
-
-add_library (cisstNDISerial ${HEADER_FILES} ${SOURCE_FILES})
+add_library (cisstNDISerial
+             ../cisstNDISerialExport.h
+             mtsNDISerial.cpp
+             ../mtsNDISerial.h)
 
 cisst_target_link_libraries (cisstNDISerial
                              cisstCommon
@@ -34,14 +30,14 @@ cisst_target_link_libraries (cisstNDISerial
 if (CISST_HAS_QT)
 
 # this needs to be moved to cisstMacros.cmake
-MACRO (CISST_QT4_WRAP_UI outfiles )
+MACRO (CISST_QT4_WRAP_UI outfiles)
   QT4_EXTRACT_OPTIONS (ui_files ui_options ${ARGN})
 
   FOREACH (it ${ui_files})
     GET_FILENAME_COMPONENT (outfile ${it} NAME_WE)
     GET_FILENAME_COMPONENT (infile ${it} ABSOLUTE)
 # the only thing we modified ...
-    SET (outfile ${cisst_BINARY_DIR}/libs/include/cisstDevices/${outfile}.h)
+    SET (outfile ${cisst_BINARY_DIR}/components/cisstNDISerial/${outfile}.h)
     ADD_CUSTOM_COMMAND (OUTPUT ${outfile}
                         COMMAND ${QT_UIC_EXECUTABLE}
                         ARGS ${ui_options} -o ${outfile} ${infile}
@@ -56,26 +52,18 @@ ENDMACRO (CISST_QT4_WRAP_UI)
                 ../mtsNDISerialControllerQtComponent.h
                 ../mtsNDISerialToolQtComponent.h
                 )
-
-  set (CISST_DEV_NDISERIAL_QT_WIDGETS_UI
-       mtsNDISerialControllerQtWidget.ui
-       mtsNDISerialToolQtWidget.ui)
-
   cisst_qt4_wrap_ui (CISST_NDISERIAL_QT_WIDGETS_GENERATED
-                     ${CISST_NDISERIAL_QT_WIDGETS_UI}
-                     )
-  set (SOURCE_FILES
-       ${CISST_NDISERIAL_QT_COMPONENTS_GENERATED}
-       ${CISST_NDISERIAL_QT_WIDGETS_GENERATED}
-       mtsNDISerialControllerQtComponent.cpp
-       mtsNDISerialToolQtComponent.cpp)
-  set (HEADER_FILES
-       ../mtsNDISerialControllerQtComponent.h
-       ../mtsNDISerialToolQtComponent.h)
+                     mtsNDISerialControllerQtWidget.ui
+                     mtsNDISerialToolQtWidget.ui)
 
   add_library (cisstNDISerialQt
-               ${SOURCE_FILES}
-               ${HEADER_FILES})
+               ${CISST_NDISERIAL_QT_COMPONENTS_GENERATED}
+               ${CISST_NDISERIAL_QT_WIDGETS_GENERATED}
+               ../cisstNDISerialExportQt.h
+               mtsNDISerialControllerQtComponent.cpp
+               ../mtsNDISerialControllerQtComponent.h
+               mtsNDISerialToolQtComponent.cpp
+               ../mtsNDISerialToolQtComponent.h)
 
   cisst_target_link_libraries (cisstNDISerialQt
                                cisstCommon
@@ -89,8 +77,8 @@ endif (CISST_HAS_QT)
 
 
 
-set (cisstNDISerial_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}")
-set (cisstNDISerial_LIBRARY_DIR ${LIBRARY_OUTPUT_PATH})
+set (cisstNDISerial_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}" "${cisst_BINARY_DIR}/components")
+set (cisstNDISerial_LIBRARY_DIR "${LIBRARY_OUTPUT_PATH}")
 set (cisstNDISerial_LIBRARIES cisstNDISerial)
 
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstNDISerialConfig.cmake.in"

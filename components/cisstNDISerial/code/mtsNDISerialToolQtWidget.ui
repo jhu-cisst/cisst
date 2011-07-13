@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>devNDISerialToolQWidget</class>
- <widget class="QWidget" name="devNDISerialToolQWidget">
+ <class>mtsNDISerialToolQtWidget</class>
+ <widget class="QWidget" name="mtsNDISerialToolQtWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>232</width>
-    <height>118</height>
+    <width>250</width>
+    <height>138</height>
    </rect>
   </property>
   <property name="windowTitle">

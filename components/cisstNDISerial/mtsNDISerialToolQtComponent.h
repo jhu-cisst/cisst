@@ -18,25 +18,25 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devNDISerialToolQDevice_h
-#define _devNDISerialToolQDevice_h
+#ifndef _mtsToolQtComponent_h
+#define _mtsNDISerialToolQtComponent_h
 
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
-#include <cisstDevices/devNDISerialToolQWidget.h>
-#include <cisstDevices/devExport.h>  // always include last
+#include <cisstNDISerial/mtsNDISerialToolQtWidget.h>
+#include <cisstNDISerial/cisstNDISerialExportQt.h>  // always include last
 
 
-class CISST_EXPORT devNDISerialToolQDevice : public QObject, public mtsComponent
+class CISST_EXPORT mtsNDISerialToolQtComponent : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    devNDISerialToolQDevice(const std::string & taskName);
-    ~devNDISerialToolQDevice(void) {};
+    mtsNDISerialToolQtComponent(const std::string & taskName);
+    ~mtsNDISerialToolQtComponent(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
@@ -45,7 +45,7 @@ class CISST_EXPORT devNDISerialToolQDevice : public QObject, public mtsComponent
     }
 
  protected:
-    Ui::devNDISerialToolQWidget ToolWidget;
+    Ui::mtsNDISerialToolQtWidget ToolWidget;
     QWidget CentralWidget;
 
     struct {
@@ -58,6 +58,6 @@ class CISST_EXPORT devNDISerialToolQDevice : public QObject, public mtsComponent
     void RecordQSlot(void);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialToolQDevice);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsNDISerialToolQtComponent);
 
-#endif  // _devNDISerialToolQDevice_h
+#endif  // _mtsNDISerialToolQtComponent_h

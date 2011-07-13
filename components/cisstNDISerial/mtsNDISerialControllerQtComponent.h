@@ -18,25 +18,25 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devNDISerialControllerQDevice_h
-#define _devNDISerialControllerQDevice_h
+#ifndef _mtsNDISerialControllerQtComponent_h
+#define _mtsNDISerialControllerQtComponent_h
 
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstDevices/devNDISerialControllerQWidget.h>
-#include <cisstDevices/devExport.h>  // always include last
+#include <cisstNDISerial/mtsNDISerialControllerQtWidget.h>
+#include <cisstNDISerial/cisstNDISerialExportQt.h>  // always include last
 
 
-class CISST_EXPORT devNDISerialControllerQDevice : public QObject, public mtsComponent
+class CISST_EXPORT mtsNDISerialControllerQtComponent : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    devNDISerialControllerQDevice(const std::string & taskName);
-    ~devNDISerialControllerQDevice(void) {};
+    mtsNDISerialControllerQtComponent(const std::string & taskName);
+    ~mtsNDISerialControllerQtComponent(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
@@ -47,7 +47,7 @@ class CISST_EXPORT devNDISerialControllerQDevice : public QObject, public mtsCom
     }
 
  protected:
-    Ui::devNDISerialControllerQWidget ControllerWidget;
+    Ui::mtsNDISerialControllerQtWidget ControllerWidget;
     QWidget CentralWidget;
 
     struct {
@@ -72,6 +72,6 @@ class CISST_EXPORT devNDISerialControllerQDevice : public QObject, public mtsCom
     void RecordQSlot(bool toggled);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialControllerQDevice);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsNDISerialControllerQtComponent);
 
-#endif  // _devNDISerialControllerQDevice_h
+#endif  // _mtsNDISerialControllerQtComponent_h

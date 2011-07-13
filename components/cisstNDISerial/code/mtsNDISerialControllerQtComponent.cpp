@@ -19,12 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstDevices/devNDISerialControllerQDevice.h>
+#include <cisstNDISerial/mtsNDISerialControllerQtComponent.h>
 
-CMN_IMPLEMENT_SERVICES(devNDISerialControllerQDevice);
+CMN_IMPLEMENT_SERVICES(mtsNDISerialControllerQtComponent);
 
 
-devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string & taskName) :
+mtsNDISerialControllerQtComponent::mtsNDISerialControllerQtComponent(const std::string & taskName) :
     mtsComponent(taskName)
 {
     ControllerWidget.setupUi(&CentralWidget);
@@ -60,21 +60,21 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
 }
 
 
-void devNDISerialControllerQDevice::AddToolWidget(QWidget * toolWidget)
+void mtsNDISerialControllerQtComponent::AddToolWidget(QWidget * toolWidget)
 {
     ControllerWidget.LayoutTools->addWidget(toolWidget);
     ControllerWidget.BoxTools->addItem(toolWidget->windowTitle());
 }
 
 
-void devNDISerialControllerQDevice::NDIBeepQSlot(void)
+void mtsNDISerialControllerQtComponent::NDIBeepQSlot(void)
 {
     mtsInt numberOfBeeps = ControllerWidget.NumberOfBeeps->value();
     NDI.Beep(numberOfBeeps);
 }
 
 
-void devNDISerialControllerQDevice::NDIInitializeQSlot(void)
+void mtsNDISerialControllerQtComponent::NDIInitializeQSlot(void)
 {
     NDI.Initialize();
     NDI.Query();
@@ -83,21 +83,21 @@ void devNDISerialControllerQDevice::NDIInitializeQSlot(void)
 }
 
 
-void devNDISerialControllerQDevice::NDICalibratePivotQSlot(void)
+void mtsNDISerialControllerQtComponent::NDICalibratePivotQSlot(void)
 {
     mtsStdString toolName = ControllerWidget.BoxTools->currentText().toStdString();
     NDI.CalibratePivot(toolName);
 }
 
 
-void devNDISerialControllerQDevice::NDITrackQSlot(bool toggled)
+void mtsNDISerialControllerQtComponent::NDITrackQSlot(bool toggled)
 {
     NDI.Track(mtsBool(toggled));
     qApp->beep();
 }
 
 
-void devNDISerialControllerQDevice::RecordQSlot(bool toggled)
+void mtsNDISerialControllerQtComponent::RecordQSlot(bool toggled)
 {
     if (toggled) {
         CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: starting data collection" << std::endl;
