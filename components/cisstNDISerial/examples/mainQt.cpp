@@ -41,10 +41,11 @@ int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS | CMN_LOG_ALLOW_WARNINGS);
 
     // add a log per thread
-    osaThreadedLogFile threadedLog("example6-");
+    osaThreadedLogFile threadedLog("mtsNDISerialQtExample-");
     cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
 
     // set the log level of detail on select components
@@ -96,7 +97,9 @@ int main(int argc, char *argv[])
 
     // create and start all components
     componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY, 2.0 * cmn_s);
     componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE, 2.0 * cmn_s);
 
     // create a main window to hold QWidgets
     QMainWindow * mainWindow = new QMainWindow();
@@ -110,6 +113,7 @@ int main(int argc, char *argv[])
 
     // kill all components and perform cleanup
     componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
     componentManager->Cleanup();
 
     return 0;
