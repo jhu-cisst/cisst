@@ -1232,8 +1232,8 @@ IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
             )
         SET(SVL_ADDITIONAL_LIBRARIES
             "${SVL_ADDITIONAL_LIBRARIES}"
-            ${CUDA_LIBRARIES}
-#            ${CUDA_GENERATED_LIBRARIES}
+            "${CUDA_LIBRARIES}"
+#            "${CUDA_GENERATED_LIBRARIES}"
             )
         SET(HEADER_FILES
             ${HEADER_FILES}

@@ -61,7 +61,9 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyScaleHigh(100.0),
     Iterations(1),
     WarpedImage(0),
-    Mosaic(0)
+    Mosaic(0),
+    MosaicWidth(1000),
+    MosaicHeight(1000)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -173,6 +175,14 @@ int svlFilterImageTracker::GetROI(svlRect & rect, unsigned int videoch) const
     return SVL_OK;
 }
 
+int svlFilterImageTracker::SetMosaicSize(unsigned int width, unsigned int height)
+{
+    if (width < 100 || height < 100) return SVL_FAIL;
+    MosaicWidth = width;
+    MosaicHeight = height;
+    return SVL_OK;
+}
+
 int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
@@ -202,7 +212,7 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
 
         Mosaic = new svlSampleImageRGB;
         if (!Mosaic) return SVL_FAIL;
-        Mosaic->SetSize(1600, 1600);
+        Mosaic->SetSize(MosaicWidth, MosaicHeight);
         Mosaic->SetTimestamp(syncInput->GetTimestamp());
         GetOutput("mosaicimage")->SetupSample(Mosaic);
     }
@@ -294,15 +304,17 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                     target_buffer ++;
                 }
             }
-/*
+
             RigidBodyAngle.SetAll(0.0);
             RigidBodyScale.SetAll(1.0);
             WarpedRigidBodyAngle.SetAll(0.0);
             WarpedRigidBodyScale.SetAll(1.0);
-*/
+
             ResetFlag = false;
         }
     }
+
+    _SynchronizeThreads(procInfo);
 
     _ParallelLoop(procInfo, vch, VideoChannels)
     {
@@ -509,15 +521,15 @@ void svlFilterImageTracker::ReconstructRigidBody(unsigned int videoch)
     RigidBodyScale[videoch] = scale / sum_conf;
     RigidBodyAngle[videoch] = atan2(sin_an, cos_an);
 
-    // Checking rigid body transformation constraints
-    if (RigidBodyScale[videoch] < RigidBodyScaleLow) RigidBodyScale[videoch] = RigidBodyScaleLow;
-    else if (RigidBodyScale[videoch] > RigidBodyScaleHigh) RigidBodyScale[videoch] = RigidBodyScaleHigh;
-    if (RigidBodyAngle[videoch] < RigidBodyAngleLow) RigidBodyAngle[videoch] = RigidBodyAngleLow;
-    else if (RigidBodyAngle[videoch] >RigidBodyAngleHigh) RigidBodyAngle[videoch] = RigidBodyAngleHigh;
-
     // Reconstruct rigid body based on prototype
     WarpedRigidBodyAngle[videoch] -= RigidBodyAngle[videoch];
     WarpedRigidBodyScale[videoch] /= RigidBodyScale[videoch];
+
+    // Checking rigid body transformation constraints
+    if (WarpedRigidBodyScale[videoch] < RigidBodyScaleLow) WarpedRigidBodyScale[videoch] = RigidBodyScaleLow;
+    else if (WarpedRigidBodyScale[videoch] > RigidBodyScaleHigh) WarpedRigidBodyScale[videoch] = RigidBodyScaleHigh;
+    if (WarpedRigidBodyAngle[videoch] < RigidBodyAngleLow) WarpedRigidBodyAngle[videoch] = RigidBodyAngleLow;
+    else if (WarpedRigidBodyAngle[videoch] >RigidBodyAngleHigh) WarpedRigidBodyAngle[videoch] = RigidBodyAngleHigh;
 
     scale = 1.0 / WarpedRigidBodyScale[videoch];
     angle = -WarpedRigidBodyAngle[videoch];
