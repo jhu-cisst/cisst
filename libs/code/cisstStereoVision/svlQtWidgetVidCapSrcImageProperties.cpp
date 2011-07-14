@@ -434,27 +434,35 @@ void* svlQtWidgetVidCapSrcImagePropertiesThreadProc(svlQtWidgetVidCapSrcImagePro
             QMetaObject::invokeMethod(obj->UIWidget->ShutterAutoCB,
                                       "setChecked",
                                       Qt::BlockingQueuedConnection,
-                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propShutter)));
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propShutter) ? false : true));
             QMetaObject::invokeMethod(obj->UIWidget->ShutterSlider,
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
                                       Q_ARG(int, filt_properties.shutter));
+            QMetaObject::invokeMethod(obj->UIWidget->ShutterText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.shutter)));
 
             // Gain
             QMetaObject::invokeMethod(obj->UIWidget->GainAutoCB,
                                       "setChecked",
                                       Qt::BlockingQueuedConnection,
-                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propGain)));
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propGain) ? false : true));
             QMetaObject::invokeMethod(obj->UIWidget->GainSlider,
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
                                       Q_ARG(int, filt_properties.gain));
+            QMetaObject::invokeMethod(obj->UIWidget->GainText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.gain)));
 
             // ColorBalance
             QMetaObject::invokeMethod(obj->UIWidget->ColorAutoCB,
                                       "setChecked",
                                       Qt::BlockingQueuedConnection,
-                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propWhiteBalance)));
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propWhiteBalance) ? false : true));
             QMetaObject::invokeMethod(obj->UIWidget->ColorUSlider,
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
@@ -463,49 +471,69 @@ void* svlQtWidgetVidCapSrcImagePropertiesThreadProc(svlQtWidgetVidCapSrcImagePro
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
                                       Q_ARG(int, filt_properties.wb_v_r));
+            QMetaObject::invokeMethod(obj->UIWidget->ColorUText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.wb_u_b)));
+            QMetaObject::invokeMethod(obj->UIWidget->ColorVText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.wb_v_r)));
 
             // Brightness
             QMetaObject::invokeMethod(obj->UIWidget->BrightnessAutoCB,
                                       "setChecked",
                                       Qt::BlockingQueuedConnection,
-                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propBrightness)));
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propBrightness) ? false : true));
             QMetaObject::invokeMethod(obj->UIWidget->BrightnessSlider,
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
                                       Q_ARG(int, filt_properties.brightness));
+            QMetaObject::invokeMethod(obj->UIWidget->BrightnessText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.brightness)));
 
             // Gamma
             QMetaObject::invokeMethod(obj->UIWidget->GammaAutoCB,
                                       "setChecked",
                                       Qt::BlockingQueuedConnection,
-                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propGamma)));
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propGamma) ? false : true));
             QMetaObject::invokeMethod(obj->UIWidget->GammaSlider,
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
                                       Q_ARG(int, filt_properties.gamma));
+            QMetaObject::invokeMethod(obj->UIWidget->GammaText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.gamma)));
 
             // Saturation
             QMetaObject::invokeMethod(obj->UIWidget->SaturationAutoCB,
                                       "setChecked",
                                       Qt::BlockingQueuedConnection,
-                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propSaturation)));
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propSaturation) ? false : true));
             QMetaObject::invokeMethod(obj->UIWidget->SaturationSlider,
                                       "setValue",
                                       Qt::BlockingQueuedConnection,
                                       Q_ARG(int, filt_properties.saturation));
+            QMetaObject::invokeMethod(obj->UIWidget->SaturationText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.saturation)));
         }
 
-        osaSleep(0.1);
+        osaSleep(0.2);
 
         // Check for changes in GUI state
         memset(&gui_properties, 0, sizeof(svlFilterSourceVideoCapture::ImageProperties));
         gui_properties.mask = -1; // Enable all settings
-        gui_properties.manual += obj->UIWidget->ShutterAutoCB->isChecked()    ? svlFilterSourceVideoCapture::propShutter      : 0;
-        gui_properties.manual += obj->UIWidget->GainAutoCB->isChecked()       ? svlFilterSourceVideoCapture::propGain         : 0;
-        gui_properties.manual += obj->UIWidget->ColorAutoCB->isChecked()      ? svlFilterSourceVideoCapture::propWhiteBalance : 0;
-        gui_properties.manual += obj->UIWidget->BrightnessAutoCB->isChecked() ? svlFilterSourceVideoCapture::propBrightness   : 0;
-        gui_properties.manual += obj->UIWidget->GammaAutoCB->isChecked()      ? svlFilterSourceVideoCapture::propGamma        : 0;
-        gui_properties.manual += obj->UIWidget->SaturationAutoCB->isChecked() ? svlFilterSourceVideoCapture::propSaturation   : 0;
+        gui_properties.manual += obj->UIWidget->ShutterAutoCB->isChecked()    ? 0 : svlFilterSourceVideoCapture::propShutter;
+        gui_properties.manual += obj->UIWidget->GainAutoCB->isChecked()       ? 0 : svlFilterSourceVideoCapture::propGain;
+        gui_properties.manual += obj->UIWidget->ColorAutoCB->isChecked()      ? 0 : svlFilterSourceVideoCapture::propWhiteBalance;
+        gui_properties.manual += obj->UIWidget->BrightnessAutoCB->isChecked() ? 0 : svlFilterSourceVideoCapture::propBrightness;
+        gui_properties.manual += obj->UIWidget->GammaAutoCB->isChecked()      ? 0 : svlFilterSourceVideoCapture::propGamma;
+        gui_properties.manual += obj->UIWidget->SaturationAutoCB->isChecked() ? 0 : svlFilterSourceVideoCapture::propSaturation;
         gui_properties.shutter    = obj->UIWidget->ShutterSlider->value();
         gui_properties.gain       = obj->UIWidget->GainSlider->value();
         gui_properties.wb_u_b     = obj->UIWidget->ColorUSlider->value();
