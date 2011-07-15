@@ -37,3 +37,10 @@ if (BUILD_LIBS_cisstMultiTask)
     add_subdirectory (cisstSphinx4)
   endif (CISST_BUILD_COMP_cisstSphinx4)
 endif (BUILD_LIBS_cisstMultiTask)
+
+# cisstStealthlink, wrappers for Medtronic StealthLink
+option (CISST_BUILD_COMP_cisstStealthlink "Build component cisstStealthlink (requires Stealthlink from Medtronic)" OFF)
+if (CISST_BUILD_COMP_cisstStealthlink)
+  add_subdirectory (cisstStealthlink)
+endif (CISST_BUILD_COMP_cisstStealthlink)
+
