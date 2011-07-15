@@ -1,0 +1,76 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id$
+
+  Author(s): Anton Deguet
+  Created on: 2009-01-27
+
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#ifndef _svlConfig_h
+#define _svlConfig_h
+
+#include <cisstConfig.h>
+
+// Using OpenCV for optimized image processing
+#cmakedefine01 CISST_SVL_HAS_OPENCV2
+#if CISST_SVL_HAS_OPENCV2
+    #define CISST_SVL_HAS_OPENCV 1
+#else // CISST_SVL_HAS_OPENCV2
+    #cmakedefine01 CISST_SVL_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV2
+
+// Using ZLIB for optimized image processing
+#cmakedefine01 CISST_SVL_HAS_ZLIB
+
+// Support for Videre Design SVS
+#cmakedefine01 CISST_SVL_HAS_SVS
+
+// Support for DirectShow
+#cmakedefine01 CISST_SVL_HAS_DIRECTSHOW
+
+// Support for libDC1394
+#cmakedefine01 CISST_SVL_HAS_DC1394
+
+// Support for IEEE1394B switch on Darwin
+#cmakedefine01 CISST_SVL_DC1394_ENABLE_800Mbps
+
+// Support for FFMPEG
+#cmakedefine01 CISST_SVL_HAS_FFMPEG
+
+// Support for video4linux2
+#cmakedefine01 CISST_SVL_HAS_VIDEO4LINUX2
+
+// Support for video4linux2
+#cmakedefine01 CISST_SVL_HAS_MIL
+
+// Support for X11
+#cmakedefine01 CISST_SVL_HAS_X11
+
+// Support for Xvideo
+#cmakedefine01 CISST_SVL_HAS_XV
+
+// Support for JPEG
+#cmakedefine01 CISST_SVL_HAS_JPEG
+
+// Support for PNG
+#cmakedefine01 CISST_SVL_HAS_PNG
+
+// Support for CUDA
+#cmakedefine01 CISST_SVL_HAS_CUDA
+
+#endif // _svlConfig_h
+

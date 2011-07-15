@@ -1,0 +1,99 @@
+#
+# Component Interface - Proxy Client Property Settings
+#
+# Author(s):  Min Yang Jung
+# Created on: 2010-01-30
+#
+# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+#
+
+#
+# Select logger (property string is case-sensitive)
+# Cisst = Use cisst internal logger (CMN_LOG and CMN_LOG_CLASS)
+# Windows = Use OutputDebugString() API for logging. Works only on Windows
+#
+Logger = Cisst
+#Logger = Windows
+
+#
+# MJ: Please do not modify these property settings since these configurations 
+# directly affect the way a proxy of type mtsComponentInterfaceProxyClient operates.
+#
+
+#------------------------------------------------------------------------------
+# Common Settings for Client and Server
+#------------------------------------------------------------------------------
+#
+# Set Implicit context for connection id
+# There are two different modes of using implicit context: Shared vs. PerThread
+# (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Adv_server.33.12.html)
+#
+Ice.ImplicitContext = Shared
+
+#
+# Warn about connection exceptions
+#
+Ice.Warn.Connections = 0
+
+#
+# Network Tracing
+# 0 = no network tracing
+# 1 = trace connection establishment and closure
+# 2 = like 1, but more detailed
+# 3 = like 2, but also trace data transfer
+#
+Ice.Trace.Network = 0
+
+#
+# Timeout in msec
+#
+Ice.Override.Timeout = 10000
+Ice.Override.ConnectTimeout = 3000
+# Message size in KB (eg 50MB 51200)
+Ice.MessageSizeMax = 300000
+
+#------------------------------------------------------------------------------
+# Client-specific Properties
+#------------------------------------------------------------------------------
+#
+# Thread pool size configuration for nested invocations
+# (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Adv_server.33.10.html
+#  and http://www.zeroc.com/doc/Ice-3.3.1/manual/PropRef.50.7.html)
+#
+Ice.ThreadPool.Client.Size = 8
+Ice.ThreadPool.Client.SizeMax = 8
+
+#
+# Disable Active Connection Management (ACM)
+# (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Connections.38.4.html)
+#
+Ice.ACM.Client = 0
+# Outgoing connection is closed if it has not been used for sixty seconds
+#Ice.ACM.Client = 60
+
+#
+# Retry interval
+# -1 = no retry
+# 0  = retry once immediately (default)
+# 0 100 500 = retry immediately after the first failure, again after waiting 
+#             100ms after the second failure, and again after waiting 500ms 
+#             after the third failure
+#
+#Ice.RetryIntervals = 0 100 200 500
+
+#
+# Retry trace level
+# 0 = No request retry trace (default)
+# 1 = Trace Ice operation call retries
+# 2 = Also trace Ice endpoint usage.
+#
+#Ice.Trace.Retry=2

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="data-1">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="data-1-1"/>
+        <xs:element ref="data-1-2"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-1-1">
+    <xs:complexType>
+      <xs:attribute name="boolAttribute" use="required" type="xs:boolean"/>
+      <xs:attribute name="doubleAttribute" use="required" type="xs:decimal"/>
+      <xs:attribute name="doubleAttributeInf" use="required" type="xs:double"/>
+      <xs:attribute name="doubleAttributeMinusInf" use="required" type="xs:double"/>
+      <xs:attribute name="intAttribute" use="required" type="xs:integer"/>
+      <xs:attribute name="stringAttribute" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-1-2">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="data-1-2-x"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-1-2-x">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="data-1-2-x-y"/>
+      </xs:sequence>
+      <xs:attribute name="intAttribute" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-1-2-x-y">
+    <xs:complexType>
+      <xs:attribute name="stringAttribute" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

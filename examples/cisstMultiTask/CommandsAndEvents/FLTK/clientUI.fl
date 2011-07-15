@@ -1,0 +1,130 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0
+header_name {.h} 
+code_name {.cxx}
+class clientUI {open
+} {
+  Function {clientUI()} {open
+  } {
+    Fl_Window ClientWindow {
+      label Client open
+      xywh {466 199 628 258} type Double visible
+    } {
+      Fl_Return_Button Close {
+        label Close
+        callback {ClientWindow->hide();  Opened = false;}
+        xywh {510 215 105 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+      }
+      Fl_Value_Slider WriteValue {
+        xywh {15 65 190 30} type {Horz Knob} box PLASTIC_DOWN_BOX align 4 maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Value_Output ReadValue {
+        xywh {15 102 191 28} box PLASTIC_DOWN_BOX
+      }
+      Fl_Value_Output QualifiedReadValue {
+        xywh {15 137 191 28} box PLASTIC_DOWN_BOX
+      }
+      Fl_Value_Output EventValue {
+        label {Events   }
+        tooltip {Event counter, a write event sends a value added to the counter, a void event resets the counter.} xywh {210 177 170 28} box PLASTIC_DOWN_BOX
+      }
+      Fl_Slider HeartBeat {
+        tooltip {Heart beat, shows that the task is still running} xywh {15 215 190 30} type Horizontal box PLASTIC_DOWN_BOX maximum 100 step 1 deactivate
+      }
+      Fl_Group {} {
+        label {Commands (no return)} open
+        xywh {210 25 170 145} box PLASTIC_DOWN_FRAME
+      } {
+        Fl_Button VoidButton {
+          label Void
+          callback {this->VoidRequested = true;}
+          tooltip {Triggers a "Void" command sent to the server.} xywh {235 30 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Button WriteButton {
+          label Write
+          callback {this->WriteRequested = true;}
+          tooltip {Triggers a "Write" command sent to the server.  The value on the left will be sent along.} xywh {235 65 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Button ReadButton {
+          label Read
+          callback {this->ReadRequested = true;}
+          tooltip {Triggers a read command.  The user defined value on the server side should be read.} xywh {235 100 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Button QualifiedReadButton {
+          label {Qualified Read}
+          callback {this->QualifiedReadRequested = true;}
+          tooltip {Triggers a qualified read, i.e. sends the value above and the server returns a sum of (read+write)} xywh {235 135 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+      }
+      Fl_Group {} {
+        label {Blocking commands (no return)} open
+        xywh {385 25 230 75} box PLASTIC_DOWN_FRAME
+      } {
+        Fl_Check_Button VoidSlowBlocking {
+          label Blocking selected
+          tooltip {Make the "VoidSlow" command blocking, i.e. wait until the server is done.} xywh {520 30 80 30} down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Check_Button WriteSlowBlocking {
+          label Blocking
+          tooltip {Make the "WriteSlow" command blocking, i.e. wait until the server is done.} xywh {520 65 80 30} down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Button VoidSlowButton {
+          label {Void (slow)}
+          callback {this->VoidSlowRequested = true;}
+          tooltip {Triggers a slow "Void" command sent to the server.  This command takes 3 seconds to be completed.} xywh {395 30 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Button WriteSlowButton {
+          label {Write (slow)}
+          callback {this->WriteSlowRequested = true;}
+          tooltip {Triggers a slow "Write" command sent to the server.  The value on the left will be sent along.  This command takes 3 seconds to be completed.} xywh {395 65 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+      }
+      Fl_Group {} {
+        label {Blocking commands (return)} open
+        xywh {385 130 230 75} box PLASTIC_DOWN_FRAME
+      } {
+        Fl_Button VoidReturnButton {
+          label Void
+          callback {this->VoidReturnRequested = true;}
+          tooltip {Triggers a "Void with return" command sent to the server.  This command takes 3 seconds to be completed.} xywh {440 135 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+        Fl_Button WriteReturnButton {
+          label Write
+          callback {this->WriteReturnRequested = true;}
+          tooltip {Triggers a slow "Write" command sent to the server.  The value on the left will be sent along.  This command takes 3 seconds to be completed.} xywh {440 170 120 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+        }
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {ClientWindow->show();} {}
+    code {Opened = true;} {}
+    code {VoidRequested = false;} {}
+    code {WriteRequested = false;} {}
+    code {ReadRequested = false;} {}
+    code {QualifiedReadRequested = false;} {}
+    code {VoidSlowRequested = false;} {}
+    code {WriteSlowRequested = false;} {}
+    code {VoidReturnRequested = false;} {}
+    code {WriteReturnRequested = false;} {}
+  }
+  decl {bool VoidRequested;} {public
+  }
+  decl {bool WriteRequested;} {public
+  }
+  decl {bool ReadRequested;} {public
+  }
+  decl {bool QualifiedReadRequested;} {public
+  }
+  decl {bool VoidSlowRequested;} {public
+  }
+  decl {bool WriteSlowRequested;} {public
+  }
+  decl {bool VoidReturnRequested;} {public
+  }
+  decl {bool WriteReturnRequested;} {public
+  }
+  decl {bool Opened;} {public
+  }
+} 

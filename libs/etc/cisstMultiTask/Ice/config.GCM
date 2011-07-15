@@ -1,0 +1,83 @@
+#
+# Global Component Manager - Proxy Server Property Settings
+#
+# Author(s):  Min Yang Jung
+# Created on: 2010-02-10
+#
+# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+#
+
+#
+# Select logger (property string is case-sensitive)
+# Cisst = Use cisst internal logger (CMN_LOG and CMN_LOG_CLASS)
+# Windows = Use OutputDebugString() API for logging. Works only on Windows
+#
+Logger = Cisst
+#Logger = Windows
+
+#
+# MJ: Please do not modify these property settings since these configurations 
+# directly affect the way a proxy of type mtsManagerProxyServer operates.
+#
+
+#------------------------------------------------------------------------------
+# Common Settings for Client and Server
+#------------------------------------------------------------------------------
+#
+# Set Implicit context for connection id
+# There are two different modes of using implicit context: Shared vs. PerThread
+# (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Adv_server.33.12.html)
+#
+Ice.ImplicitContext = Shared
+
+#
+# Warn about connection exceptions
+#
+Ice.Warn.Connections = 1
+
+#
+# Network Tracing
+# 0 = no network tracing
+# 1 = trace connection establishment and closure
+# 2 = like 1, but more detailed
+# 3 = like 2, but also trace data transfer
+#
+Ice.Trace.Network = 1
+
+#
+# Timeout in msec
+#
+Ice.Override.Timeout = 10000
+Ice.Override.ConnectTimeout = 3000
+# Message size in KB (eg 50MB 51200)
+Ice.MessageSizeMax = 300000
+
+#------------------------------------------------------------------------------
+# Server-specific Properties
+#------------------------------------------------------------------------------
+#
+# Thread pool size configuration for nested invocations
+# (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Adv_server.33.10.html
+#  and http://www.zeroc.com/doc/Ice-3.3.1/manual/PropRef.50.7.html)
+#
+Ice.ThreadPool.Server.Size = 8
+Ice.ThreadPool.Server.SizeMax = 8
+
+
+#
+# Default port number that the global component manager uses
+# 
+# This default port number is chosen considering the port number allocation table
+# from the IANA (Internet Assigned Numbers Authority).
+# (See http://www.iana.org/assignments/port-numbers for further details)
+#
+GCM.Port = 10705

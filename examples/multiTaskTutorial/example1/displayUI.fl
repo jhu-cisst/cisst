@@ -1,0 +1,36 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0
+header_name {.h} 
+code_name {.cxx}
+class displayUI {open
+} {
+  Function {displayUI()} {open
+  } {
+    Fl_Window DisplayWindow {
+      label DisplayWindow open
+      xywh {1030 335 220 180} type Double visible
+    } {
+      Fl_Value_Output Data {
+        label {Data:}
+        xywh {25 125 75 25} box THIN_DOWN_BOX align 5
+      }
+      Fl_Return_Button Close {
+        label Close
+        callback {DisplayWindow->hide();}
+        xywh {120 125 75 25} box THIN_UP_BOX
+      }
+      Fl_Dial Amplitude {
+        label {Amplitude:}
+        callback {AmplitudeChanged = true;}
+        xywh {25 25 75 75} box OSHADOW_BOX color 1 align 1
+      }
+    }
+    code {AmplitudeChanged = false;} {}
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {DisplayWindow->show();} {}
+  }
+  decl {bool AmplitudeChanged;} {public
+  }
+} 

@@ -1,0 +1,92 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0
+header_name {.h} 
+code_name {.cxx}
+class serverUI {open
+} {
+  Function {serverUI()} {open
+  } {
+    Fl_Window ServerWindow {
+      label Server open
+      xywh {-639 413 276 451} type Double visible
+    } {
+      Fl_Check_Button VoidValue1 {
+        label {Void 1}
+        xywh {57 6 35 26} down_box THIN_DOWN_BOX align 4
+      }
+      Fl_Value_Output WriteValue1 {
+        label {Write 1}
+        xywh {57 44 195 27}
+      }
+      Fl_Button VoidEventButton1 {
+        label {Void Event 1}
+        callback {this->VoidEventRequested1 = true;}
+        xywh {17 122 115 30}
+      }
+      Fl_Button WriteEventButton1 {
+        label {Write Event 1}
+        callback {this->WriteEventRequested1 = true;}
+        xywh {147 122 115 30}
+      }
+      Fl_Value_Slider ReadValue1 {
+        label {Read 1}
+        xywh {57 82 195 25} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Check_Button VoidValue2 {
+        label {Void 2}
+        xywh {57 171 35 26} down_box THIN_DOWN_BOX align 4
+      }
+      Fl_Value_Output WriteValue2 {
+        label {Write 2}
+        xywh {57 209 195 27}
+      }
+      Fl_Button VoidEventButton2 {
+        label {Void Event 2}
+        callback {this->VoidEventRequested2 = true;}
+        xywh {17 287 115 30}
+      }
+      Fl_Button WriteEventButton2 {
+        label {Write Event 2}
+        callback {this->WriteEventRequested2 = true;}
+        xywh {147 287 115 30}
+      }
+      Fl_Value_Slider ReadValue2 {
+        label {Read 2}
+        xywh {57 247 195 25} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Return_Button Close {
+        label Close
+        callback {ServerWindow->hide();  Opened = false;}
+        xywh {15 332 250 30} box THIN_UP_BOX
+      }
+      Fl_Return_Button DisconnectButton {
+        label {Disconnect GCM}
+        callback {this->Disconnect = true;}
+        xywh {15 370 250 30} box THIN_UP_BOX
+      }
+      Fl_Return_Button ReconnectButton {
+        label {Reconnect to GCM}
+        callback {this->Reconnect = true;} selected
+        xywh {15 410 250 30} box THIN_UP_BOX
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {ServerWindow->show();} {}
+  }
+  decl {bool VoidEventRequested1;} {public
+  }
+  decl {bool WriteEventRequested1;} {public
+  }
+  decl {bool VoidEventRequested2;} {public
+  }
+  decl {bool WriteEventRequested2;} {public
+  }
+  decl {bool Disconnect;} {public
+  }
+  decl {bool Reconnect;} {public
+  }
+  decl {bool Opened;} {public
+  }
+} 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<config>
+
+  <device port="COM3"
+          definition="" />
+
+  <tools>
+
+    <tool name="Pointer"
+          enabled="true"
+          serial="34802401"
+          definition="C:\\Program Files (x86)\\Northern Digital Inc\\Tool Definition Files\\8700340.rom"
+          description="">
+      <calibration x="-20.4072"
+                   y="-0.172478"
+                   z="-158.267" />
+    </tool>
+
+    <tool name="Patient"
+          enabled="false"
+          serial="34801403"
+          definition="C:\\Program Files (x86)\\Northern Digital Inc\\Tool Definition Files\\8700339.rom"
+          description="">
+      <calibration x="0.0"
+                   y="0.0"
+                   z="0.0" />
+    </tool>
+  </tools>
+</config>

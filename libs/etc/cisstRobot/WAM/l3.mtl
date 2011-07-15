@@ -1,0 +1,16 @@
+#
+# Wavefront material file: e:\download\barrett\solidworks\l3.mtl
+#
+# Converted by the PolyTrans geometry converter from Okino Computer Graphics, Inc.
+# Date/time of export: 05/12/2011 00:37:14
+#
+# Bounding box of geometry = (-0.0895,-0.0481,-0.550505) to (0.04,0.0481,0.0394949).
+
+newmtl default
+	Ns 32
+	d 1
+	illum 2
+	Kd 0.4 0.4 0.4
+	Ks 0.7 0.7 0.7
+	Ka 0.3 0.3 0.3
+
