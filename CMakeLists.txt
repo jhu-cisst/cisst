@@ -16,39 +16,85 @@
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
 project (cisst)
+set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
+
 
 option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake" OFF)
 mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 
-# Function to expend a list without repetitions, forces the list to be internal
-FUNCTION(CISST_ADD_TO_INTERNAL list newElements)
-  # Make sure the variable is defined (test also for NOT-FOUND)
-  IF(${newElements})
-    # Create the new list
-    SET(TEMP_${list} ${${list}} ${${newElements}})
-    # Remove duplicates
-    IF(TEMP_${list})
-      LIST(REMOVE_DUPLICATES TEMP_${list})
-    ENDIF(TEMP_${list})
-    SET(${list} ${TEMP_${list}} CACHE INTERNAL "CISST Internal variable")
-  ENDIF(${newElements})
-ENDFUNCTION(CISST_ADD_TO_INTERNAL)
 
-# The cisst Internal values/cache tend to accumulate junk, option to clean them
-option(CISST_CLEAR_INTERNALS "Clear cisst cache" OFF)
-mark_as_advanced(FORCE CISST_CLEAR_INTERNALS)
-if(CISST_CLEAR_INTERNALS)
-  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES        "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_LIBRARIES                  "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_LIBRARIES_DEBUG            "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_LIBRARIES_OPTIMIZED        "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_LINK_DIRECTORIES           "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_LINK_DIRECTORIES_DEBUG     "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_LINK_DIRECTORIES_OPTIMIZED "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_PACKAGES                   "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_ADDITIONAL_CMAKE_FILES                "" CACHE INTERNAL "CISST Internal variable")
-  set(CISST_CLEAR_INTERNALS OFF CACHE BOOL "Clear cisst cache" FORCE)
-endif(CISST_CLEAR_INTERNALS)
+# Function to expend a list without repetitions, forces the list to be internal
+function (CISST_ADD_TO_INTERNAL list newElements)
+  message (SEND_ERROR "cisst_add_to_internal is now deprecated, use cisst_set_package_settings instead")
+endfunction (CISST_ADD_TO_INTERNAL)
+
+
+
+# List all keywords allowed for cisst additional settings
+set (CISST_PACKAGE_KEYWORDS INCLUDE_DIRECTORIES LIBRARIES LINK_DIRECTORIES PACKAGES CMAKE_FILES)
+
+# Add dependency information for a given package used by cisst
+# Usage example: cisst_set_package_settings (cisstCommon FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
+function (cisst_set_package_settings whoRequires package variable value)
+  # todo, do not replicate lib debug/optimized (used for path?)
+  # todo, can we check whoRequires to be a valid library?
+
+  # make sure the variable is allowed
+  list (FIND CISST_PACKAGE_KEYWORDS ${variable} VARIABLE_IS_A_KEYWORD)
+  if (NOT ${VARIABLE_IS_A_KEYWORD} GREATER -1)
+    message (SEND_ERROR "cisst_set_package_settings: third argument (${variable}) should be one of: ${CISST_PACKAGE_KEYWORDS}")
+  endif (NOT ${VARIABLE_IS_A_KEYWORD} GREATER -1)
+  # make sure a value has been provided
+  if (${value})
+    # Add to list of all external dependencies
+    set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} ${package})
+    list (REMOVE_DUPLICATES CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+    set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} CACHE INTERNAL "CISST Internal variable")
+    # Full variable name
+    set (FULL_VARIABLE_NAME CISST_${variable}_FOR_${whoRequires}_FOR_${package})
+    # Keep previous value to compare if there is anything new
+    set (OLD_VALUE ${${FULL_VARIABLE_NAME}})
+    set (${FULL_VARIABLE_NAME} "${${value}}" CACHE INTERNAL "CISST Internal variable")
+    # Save to file if needed
+    if (NOT "${OLD_VALUE}" STREQUAL "${${FULL_VARIABLE_NAME}}")
+      set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}${package}.cmake")
+      file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
+      file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
+      # dump all in a config file, over and over
+      foreach (keyword ${CISST_PACKAGE_KEYWORDS})
+        set (FULL_VARIABLE_NAME CISST_${keyword}_FOR_${whoRequires}_FOR_${package})
+        if (${FULL_VARIABLE_NAME})
+	  file (APPEND ${FILENAME} "set (${FULL_VARIABLE_NAME} \"${${FULL_VARIABLE_NAME}}\")\n\n")
+        endif (${FULL_VARIABLE_NAME})
+      endforeach (keyword ${CISST_PACKAGE_KEYWORDS})
+    endif (NOT "${OLD_VALUE}" STREQUAL "${${FULL_VARIABLE_NAME}}")
+    # Also update the list of external packages for the given library
+    set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}External.cmake") 
+    file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
+    file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
+    file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
+  else (${value})
+    message (SEND_ERROR "cisst_set_package_settings: value for variable ${variable} provided for package ${package} used by library ${whoRequires} is not properly defined")
+  endif (${value})
+endfunction (cisst_set_package_settings)
+
+
+function (cisst_unset_all_package_settings whoRequires package)
+  if (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+    list (REMOVE_ITEM CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${package})
+    set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} CACHE INTERNAL "CISST Internal variable")
+    set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}External.cmake") 
+    if (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+      file (REMOVE ${FILENAME})
+      file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
+      file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
+      file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
+    else (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+      file (REMOVE ${FILENAME})
+    endif (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+  endif (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+endfunction (cisst_unset_all_package_settings)
+
 
 # Output directories.
 set (LIBRARY_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/lib)
@@ -118,13 +164,13 @@ if (CISST_HAS_SWIG_PYTHON)
     endif (NOT PYTHON_DEBUG_LIBRARIES)
     find_package (PythonInterp REQUIRED)
     include_directories (${PYTHON_INCLUDE_PATH})
-    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
+    cisst_set_package_settings (cisstCommon Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
     # We also need numpy if we have cisstVector
     if (BUILD_LIBS_cisstVector)
 	find_package (Numpy REQUIRED)
 	if (PYTHON_NUMPY_FOUND)
 	    include_directories (${PYTHON_NUMPY_INCLUDE_DIR})
-	    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
+	    cisst_set_package_settings (cisstVector NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
 	    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
 	endif (PYTHON_NUMPY_FOUND)
     endif (BUILD_LIBS_cisstVector)
@@ -142,8 +188,12 @@ endif (OPENGL_FOUND)
 
 if (CISST_HAS_OPENGL)
   find_package (OpenGL REQUIRED)
-  cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES OPENGL_LIBRARIES)
+  if (OPENGL_INCLUDE_DIR)
+    cisst_set_package_settings (cisstVector OpenGL INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
+  endif (OPENGL_INCLUDE_DIR)
+  cisst_set_package_settings (cisstVector OpenGL LIBRARIES OPENGL_LIBRARIES)
+else (CISST_HAS_OPENGL)
+  cisst_unset_all_package_settings (cisstVector OpenGL)
 endif (CISST_HAS_OPENGL)
 
 # Support for QT
@@ -171,9 +221,11 @@ if (CISST_HAS_QT)
   include (${QT_USE_FILE})
   set (CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
   mark_as_advanced (CISST_QT_PACKAGE)
-  cisst_add_to_internal (CISST_ADDITIONAL_PACKAGES CISST_QT_PACKAGE)
-  cisst_add_to_internal (CISST_ADDITIONAL_CMAKE_FILES QT_USE_FILE)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES QT_LIBRARIES)
+  cisst_set_package_settings (cisstCommon Qt PACKAGES    CISST_QT_PACKAGE)
+  cisst_set_package_settings (cisstCommon Qt CMAKE_FILES QT_USE_FILE)
+  cisst_set_package_settings (cisstCommon Qt LIBRARIES   QT_LIBRARIES)
+else (CISST_HAS_QT)
+  cisst_unset_all_package_settings (cisstCommon Qt)
 endif (CISST_HAS_QT)
 
 # Support for FLTK
@@ -191,11 +243,15 @@ if (CISST_HAS_FLTK)
   mark_as_advanced (CISST_HAS_OPENGL)
   # FLTK is now required
   find_package(FLTK REQUIRED)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES FLTK_LIBRARIES)
-  # If FLTK was built using CMake (i.e., there is an FLTKConfig.cmake), the FLTK_LIBRARIES (above) does not include the path,
-  # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES FLTK_LIBRARY_DIRS)
+  cisst_set_package_settings (cisstCommon FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
+  cisst_set_package_settings (cisstCommon FLTK LIBRARIES           FLTK_LIBRARIES)
+  if (FLTK_LIBRARY_DIRS)
+    # If FLTK was built using CMake (i.e., there is an FLTKConfig.cmake), the FLTK_LIBRARIES (above) does not include the path,
+    # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
+    cisst_set_package_settings (cisstCommon FLTK LINK_DIRECTORIES  FLTK_LIBRARY_DIRS)
+  endif (FLTK_LIBRARY_DIRS)
+else (CISST_HAS_FLTK)
+  cisst_unset_all_package_settings (cisstCommon FLTK)
 endif (CISST_HAS_FLTK)
 
 # Use XML or not, using libxml2 over
@@ -209,7 +265,9 @@ mark_as_advanced (CISST_HAS_LIBXML2_XML)
 
 if (CISST_HAS_LIBXML2_XML)
   find_package (LibXml2 REQUIRED)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES LIBXML2_LIBRARIES)
+  cisst_set_package_settings (cisstCommonXML Libxml2 LIBRARIES LIBXML2_LIBRARIES)
+else (CISST_HAS_LIBXML2_XML)
+  cisst_unset_all_package_settings (cisstCommonXML libxml2)
 endif (CISST_HAS_LIBXML2_XML)
 
 # Safety check
@@ -305,10 +363,10 @@ if (BUILD_COMPONENTS)
                          ${cisst_BINARY_DIR}/components
                          ${cisst_SOURCE_DIR}/components)
 endif (BUILD_COMPONENTS)
-include_directories (${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
+include_directories (${CISST_INCLUDE_DIR}) # ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 # Additional link directories
-link_directories (${CISST_ADDITIONAL_LINK_DIRECTORIES})
+# link_directories (${CISST_ADDITIONAL_LINK_DIRECTORIES})
 
 
 # To allow mixing static and dynamic libraries
@@ -331,7 +389,9 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 # Find native threads
 if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   find_package (Threads REQUIRED)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CMAKE_THREAD_LIBS_INIT)
+  if (CMAKE_THREAD_LIBS_INIT)
+    cisst_set_package_settings (cisstCommon Threads LIBRARIES CMAKE_THREAD_LIBS_INIT)
+  endif (CMAKE_THREAD_LIBS_INIT)
 endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Which libraries to build
@@ -380,7 +440,10 @@ endforeach (lib)
 
 # If OS abstraction is compiled, require dynamic loading libraries
 if (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CMAKE_DL_LIBS)
+  if (CMAKE_DL_LIBS)
+    cisst_set_package_settings (cisstOSAbstraction DL LIBRARIES CMAKE_DL_LIBS)
+    cisst_set_package_settings (cisstInteractive DL LIBRARIES CMAKE_DL_LIBS)
+  endif (CMAKE_DL_LIBS)
 endif (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
 
 # If cisstInteractive in turned on, also force SWIG for Python and shared libraries
@@ -398,13 +461,18 @@ if (BUILD_LIBS_cisstNumerical)
   mark_as_advanced (CISST_HAS_CISSTNETLIB)
   if (CISST_HAS_CISSTNETLIB)
     find_package (CisstNetlib)
-    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
+    cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
+    cisst_set_package_settings (cisstNumerical cisstNetlib LIBRARIES           CISSTNETLIB_LIBRARIES)
+  else (CISST_HAS_CISSTNETLIB)
+    cisst_unset_all_package_settings (cisstNumerical cisstNetlib)
   endif (CISST_HAS_CISSTNETLIB)
 endif (BUILD_LIBS_cisstNumerical)
 
 # Once all variables have been defined, use cisstMacros
 include (cisstMacros)
+
+# Set some paths
+cisst_include_link_directories (${CISST_LIBS})
 
 # Finally, create lib targets
 add_subdirectory (libs)
@@ -510,7 +578,6 @@ install_files (/share/cisst/cmake
 
 # Configuration file
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
 configure_file (${cisst_SOURCE_DIR}/libs/include/cisstConfig.h.in
                 ${cisst_BINARY_DIR}/libs/include/cisstConfig.h)
 install_files (/include

@@ -117,7 +117,7 @@ cisst_add_library (
 if (WIN32)
     set (CISST_WSOCK_LIBRARY WSOCK32)
     target_link_libraries (cisstOSAbstraction ${CISST_WSOCK_LIBRARY})
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_WSOCK_LIBRARY)
+    cisst_set_package_settings (cisstOSAbstraction WinSock LIBRARIES CISST_WSOCK_LIBRARY)
 endif (WIN32)
 
 
