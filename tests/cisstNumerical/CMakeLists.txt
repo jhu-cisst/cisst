@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical tests
 #
-# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,6 +14,8 @@
 #
 # --- end cisst license ---
 
+# paths for headers/libraries
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical)
 
 # all source files
 set (SOURCE_FILES

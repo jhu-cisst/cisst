@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -16,6 +16,7 @@
 project (pythonEmbedded)
 
 # Create myDerivedClass as a shared library
+cisst_set_directories (cisstCommon cisstVector)
 add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
 cisst_target_link_libraries (myDerivedClass cisstCommon cisstVector)
 

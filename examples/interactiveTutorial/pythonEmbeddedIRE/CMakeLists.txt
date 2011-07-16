@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -15,9 +15,17 @@
 
 project (pythonEmbeddedIRE)
 
+if (BUILD_LIBS_cisstMultiTask)
+  set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstVector cisstMultiTask)
+else (BUILD_LIBS_cisstMultiTask)
+  set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction)
+endif (BUILD_LIBS_cisstMultiTask)
+
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 # Create SineGenerator as a shared library
 add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
-cisst_target_link_libraries (SineGenerator cisstCommon)
+cisst_target_link_libraries (SineGenerator cisstCommon cisstVector)
 
 # If OS Abstraction is compiled, offer a choice
 if (BUILD_LIBS_cisstOSAbstraction)

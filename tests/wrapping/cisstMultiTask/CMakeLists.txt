@@ -2,7 +2,7 @@
 # $Id$
 #
 
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # --- begin cisst license - do not edit ---
@@ -14,6 +14,10 @@
 # --- end cisst license ---
 
 # CMakeLists.txt for cisstMultiTask wrapping tests
+
+# List of cisst libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 # Keep a list all tests for ctest/Dart
 set (DART_TEST_FILE ${CMAKE_CURRENT_BINARY_DIR}/DartTestfile-cisstMultiTaskPython.txt)
@@ -27,7 +31,7 @@ include_directories (${CISST_SWIG_INCLUDE_DIR})
 # We are using C++ code that needs to be wrapped
 add_library (cisstMultiTaskPythonTest SHARED
              mtsPeriodicTaskTest.h mtsPeriodicTaskTest.cpp)
-cisst_target_link_libraries (cisstMultiTaskPythonTest  cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+cisst_target_link_libraries (cisstMultiTaskPythonTest ${CISST_LIBRARIES_NEEDED})
 
 # Python wrappers
 set (PROXY_TESTS cisstMultiTaskPythonTest)

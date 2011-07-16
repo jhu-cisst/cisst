@@ -1,4 +1,22 @@
-#include <cisstVector.h>
+/*
+  $Id: $
+
+  Author(s):  Simon Leonard
+  Created on: 2010
+
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+  --- begin cisst license - do not edit ---
+
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
+
+  --- end cisst license ---
+
+*/
+
 #include <cisstRobot/robManipulator.h>
 #include <cisstRobot/robDH.h>
 #include <cisstRobot/robModifiedDH.h>
@@ -37,18 +55,18 @@ void AugmentMeasurements( vctDynamicVector<double>& vw,
 }
 
 extern "C" {
-  void dgelss_( CISSTNETLIB_INTEGER* M, 
+  void dgelss_( CISSTNETLIB_INTEGER* M,
 		CISSTNETLIB_INTEGER* N,
 		CISSTNETLIB_INTEGER* NRHS,
-		CISSTNETLIB_DOUBLE* A, 
+		CISSTNETLIB_DOUBLE* A,
 		CISSTNETLIB_INTEGER* LDA,
 		CISSTNETLIB_DOUBLE* B,
 		CISSTNETLIB_INTEGER* LDB,
-		CISSTNETLIB_DOUBLE* S, 
-		CISSTNETLIB_DOUBLE* RCOND, 
+		CISSTNETLIB_DOUBLE* S,
+		CISSTNETLIB_DOUBLE* RCOND,
 		CISSTNETLIB_INTEGER* RANK,
-		CISSTNETLIB_DOUBLE* WORK, 
-		CISSTNETLIB_INTEGER* LWORK, 
+		CISSTNETLIB_DOUBLE* WORK,
+		CISSTNETLIB_INTEGER* LWORK,
 		CISSTNETLIB_INTEGER* INFO );
 }
 
@@ -67,19 +85,19 @@ vctDynamicVector<double> SolveLSMinNorm( const vctDynamicMatrix<double>& a,
   CISSTNETLIB_DOUBLE* B=NULL;
   CISSTNETLIB_INTEGER LDB;
   if( N < M )    { B = new double[M]; LDB = M; }
-  else           { B = new double[N]; LDB = N; }    
+  else           { B = new double[N]; LDB = N; }
   for( int i=0; i<N; i++ )    { B[i] = 0.0; }
   for( int i=0; i<M; i++ )    { B[i] = b[i]; }
 
   CISSTNETLIB_DOUBLE* S = new double[M];
   CISSTNETLIB_DOUBLE RCOND = 1e-6;       // drop singular values threshold
   CISSTNETLIB_INTEGER RANK;
-  
-  CISSTNETLIB_DOUBLE  WORK[512];         // fudged size. 
+
+  CISSTNETLIB_DOUBLE  WORK[512];         // fudged size.
   CISSTNETLIB_INTEGER LWORK = 512;       // fudged size
 
   CISSTNETLIB_INTEGER INFO;
- 
+
   dgelss_( &M, &N, &NRHS,       // 6xN matrix
 	   A, &LDA,             // Jacobian matrix
 	   B, &LDB,             // error vector
@@ -94,7 +112,7 @@ vctDynamicVector<double> SolveLSMinNorm( const vctDynamicMatrix<double>& a,
   vctDynamicVector<double> solution( N, 0.0 );
   for( int i=0; i<N; i++ )
     { solution[i] = B[i]; }
-  
+
   delete[] S;
   delete[] B;
 
@@ -150,7 +168,7 @@ int main( int argc, char** argv ){
   }
 
   if( Q.size() != RT.size() ){
-    std::cerr << argv[0] << ": Got " 
+    std::cerr << argv[0] << ": Got "
 	      << Q.size() << " joint vectors and "
 	      << RT.size() << " measurement"
 	      << std::endl;
@@ -167,7 +185,7 @@ int main( int argc, char** argv ){
     // these must be column major
     vctDynamicMatrix<double> J(0,0,VCT_COL_MAJOR);
     vctDynamicVector<double> vw;
-    
+
     for( size_t i=0; i<Q.size(); i++ ){
 
       // Add the equations
@@ -187,12 +205,12 @@ int main( int argc, char** argv ){
 	  dT[r][c] = Rt_[r][c] - Rt[r][c];
 	}
       }
-      
+
       Rt.InverseSelf();
-      
+
       // Add the measurements
       AugmentMeasurements( vw, Rt * dT );
-      
+
     }
 
     // solve the system
@@ -246,7 +264,7 @@ int main( int argc, char** argv ){
 	      h->SetTranslationZ( h->GetTranslationZ() + dx[cnt++] );
 	    } // case robJoint::SLIDER:
 	    break;
-	    
+
 	  default:
 	    break;
 

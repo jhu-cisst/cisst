@@ -13,18 +13,22 @@
 # --- end cisst license ---
 
 # Core library
+set (CISST_LIBRARIES_NEEDED cisstCommon
+                            cisstCommonXML
+                            cisstVector
+                            cisstNumerical
+                            cisstOSAbstraction
+                            cisstMultiTask
+                            cisstParameterTypes
+                            cisstRobot)
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 add_library (cisstNDISerial
              ../cisstNDISerialExport.h
              mtsNDISerial.cpp
              ../mtsNDISerial.h)
 
-cisst_target_link_libraries (cisstNDISerial
-                             cisstCommon
-                             cisstVector
-                             cisstOSAbstraction
-                             cisstMultiTask
-                             cisstParameterTypes
-                             cisstRobot)
+cisst_target_link_libraries (cisstNDISerial ${CISST_LIBRARIES_NEEDED})
 
 # Qt widgets
 if (CISST_HAS_QT)
@@ -65,13 +69,7 @@ ENDMACRO (CISST_QT4_WRAP_UI)
                mtsNDISerialToolQtComponent.cpp
                ../mtsNDISerialToolQtComponent.h)
 
-  cisst_target_link_libraries (cisstNDISerialQt
-                               cisstCommon
-                               cisstVector
-                               cisstOSAbstraction
-                               cisstMultiTask
-                               cisstParameterTypes
-                               cisstRobot)
+  cisst_target_link_libraries (cisstNDISerialQt ${CISST_LIBRARIES_NEEDED})
 
 endif (CISST_HAS_QT)
 

@@ -11,9 +11,10 @@
 #
 # --- end cisst license ---
 
-add_executable (cisstNDISerialQtExample
-                mainQt.cpp
-                )
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot)
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
+add_executable (cisstNDISerialQtExample mainQt.cpp)
 
 target_link_libraries (cisstNDISerialQtExample
                        cisstNDISerial
@@ -21,6 +22,4 @@ target_link_libraries (cisstNDISerialQtExample
                        ${QT_LIBRARIES}
                        )
 
-cisst_target_link_libraries (cisstNDISerialQtExample
-                             cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot
-                             )
+cisst_target_link_libraries (cisstNDISerialQtExample ${CISST_LIBRARIES_NEEDED})

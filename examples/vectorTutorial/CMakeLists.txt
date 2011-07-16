@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,6 +14,7 @@
 
 if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
+  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
   add_executable (vectorTutorial
                   main.cpp
                   ExampleFrame.h
@@ -27,7 +28,6 @@ if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
                   ExampleNumerical.h
                   ExampleSTL.h
                  )
-
   cisst_target_link_libraries (vectorTutorial cisstCommon cisstVector cisstNumerical)
 
 else (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)

@@ -65,7 +65,7 @@ set (HEADER_FILES
 if (CISST_HAS_LINUX_RTAI)
   # Check for existence of query_module, which was removed in kernel
   # versions 2.6+ (and possibly some earlier ones).
-  include (CheckIncludeFiles) 
+  include (CheckIncludeFiles)
   check_include_files ("linux/module.h" CMAKE_HAVE_MODULE_H)
   set (CISST_OSA_HAS_MODULE_H ${CMAKE_HAVE_MODULE_H})
   if (CMAKE_HAVE_MODULE_H)
@@ -80,12 +80,12 @@ endif (CISST_HAS_LINUX_RTAI)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   # QNX requires socket library
   set (CISST_SOCKET_LIBRARY socket)
-  cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_SOCKET_LIBRARY)
+  cisst_set_package_settings (cisstOSAbstraction Socket LIBRARIES CISST_SOCKET_LIBRARY)
 else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   if (UNIX AND NOT APPLE)
     # clock_gettime requires linking with librt
     set (CISST_RT_LIBRARY rt)
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_RT_LIBRARY)
+    cisst_set_package_settings (cisstOSAbstraction rt LIBRARIES CISST_RT_LIBRARY)
   endif (UNIX AND NOT APPLE)
 endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 

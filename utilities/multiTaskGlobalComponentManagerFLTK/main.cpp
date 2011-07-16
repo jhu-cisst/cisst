@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-02-25
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,9 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
+
+#include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnLogger.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 #include "GCMUITask.h"
 

@@ -1,3 +1,22 @@
+/*
+  $Id: $
+
+  Author(s):  Simon Leonard
+  Created on: 2010
+
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+  --- begin cisst license - do not edit ---
+
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
+
+  --- end cisst license ---
+
+*/
+
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstRobot/robManipulator.h>
 
@@ -21,9 +40,9 @@ int main( int argc, char** argv ){
   robManipulator manipulator( argv[1] );
 
   // parsing from stream
-  if( argc == 2 ){ 
+  if( argc == 2 ){
     bool eof = false;
-    
+
     while( !eof ){
 
       vctDynamicVector<double> q( manipulator.links.size(), 0.0 );
@@ -43,7 +62,7 @@ int main( int argc, char** argv ){
   else{
 
     int cnt=2;
-    
+
     while( cnt<argc ){
 
       vctDynamicVector<double> q( manipulator.links.size(), 0.0 );

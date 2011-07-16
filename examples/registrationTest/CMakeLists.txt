@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,6 +13,8 @@
 # --- end cisst license ---
 
 if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+
+  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
 
   add_executable (accuracy Accuracy.cpp DataSet.cpp DataSet.h)
   cisst_target_link_libraries (accuracy cisstCommon cisstVector cisstNumerical)

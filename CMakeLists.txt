@@ -57,7 +57,7 @@ function (cisst_set_package_settings whoRequires package variable value)
     set (${FULL_VARIABLE_NAME} "${${value}}" CACHE INTERNAL "CISST Internal variable")
     # Save to file if needed
     if (NOT "${OLD_VALUE}" STREQUAL "${${FULL_VARIABLE_NAME}}")
-      set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}${package}.cmake")
+      set (FILENAME "${cisst_BINARY_DIR}/cisst-dependencies/${whoRequires}${package}.cmake")
       file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
       file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
       # dump all in a config file, over and over
@@ -69,7 +69,7 @@ function (cisst_set_package_settings whoRequires package variable value)
       endforeach (keyword ${CISST_PACKAGE_KEYWORDS})
     endif (NOT "${OLD_VALUE}" STREQUAL "${${FULL_VARIABLE_NAME}}")
     # Also update the list of external packages for the given library
-    set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}External.cmake") 
+    set (FILENAME "${cisst_BINARY_DIR}/cisst-dependencies/${whoRequires}External.cmake")
     file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
     file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
     file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
@@ -83,7 +83,7 @@ function (cisst_unset_all_package_settings whoRequires package)
   if (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
     list (REMOVE_ITEM CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${package})
     set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} CACHE INTERNAL "CISST Internal variable")
-    set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}External.cmake") 
+    set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}External.cmake")
     if (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
       file (REMOVE ${FILENAME})
       file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
@@ -365,9 +365,6 @@ if (BUILD_COMPONENTS)
 endif (BUILD_COMPONENTS)
 
 include_directories (${CISST_INCLUDE_DIR}) # ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
-# Additional link directories
-# link_directories (${CISST_ADDITIONAL_LINK_DIRECTORIES})
-
 
 # To allow mixing static and dynamic libraries
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -470,9 +467,6 @@ endif (BUILD_LIBS_cisstNumerical)
 
 # Once all variables have been defined, use cisstMacros
 include (cisstMacros)
-
-# Set some paths
-cisst_include_link_directories (${CISST_LIBS})
 
 # Finally, create lib targets
 add_subdirectory (libs)

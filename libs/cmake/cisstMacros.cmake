@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -31,12 +31,12 @@ function (cisst_load_package_setting ...)
   # Set all variables based on dependencies
   foreach (lib ${ARGV})
     # External dependency file
-    set (SETTINGS_FILE "${CISST_BINARY_DIR}/${required}External.cmake")
+    set (SETTINGS_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${required}External.cmake")
     if (EXISTS ${SETTINGS_FILE})
       include (${SETTINGS_FILE})
       set (EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
       foreach (package ${EXTERNAL_PACKAGES})
-        set (PACKAGE_FILE "${CISST_BINARY_DIR}/${required}${package}.cmake")
+        set (PACKAGE_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${required}${package}.cmake")
         if (EXISTS ${PACKAGE_FILE})
           include (${PACKAGE_FILE})
         else (EXISTS ${PACKAGE_FILE})
@@ -81,10 +81,10 @@ endfunction (cisst_link_directories)
 
 
 # helper function to set all directories
-function (cisst_include_link_directories ...)
+function (cisst_set_directories ...)
   cisst_include_directories (${ARGV})
   cisst_link_directories (${ARGV})
-endfunction (cisst_include_link_directories)
+endfunction (cisst_set_directories)
 
 
 # The function adds a library to a CISST-related project by processing the
@@ -172,6 +172,9 @@ function (cisst_add_library ...)
 
   # Add the main header to the library, for IDEs
   set (HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
+
+  # Set paths
+  cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
 
   # Add the library
   cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCES} ${HEADERS}")
@@ -266,27 +269,9 @@ function (cisst_target_link_libraries TARGET ...)
     endif ("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
   endforeach (existing)
 
-  # Include extra packages as needed
-#  foreach (package ${CISST_ADDITIONAL_PACKAGES})
-#    find_package (${package} REQUIRED)
-#  endforeach (package)
-
-  # Include extra cmake files as needed
-#  foreach (fileCMake ${CISST_ADDITIONAL_CMAKE_FILES})
-#    include (${fileCMake})
-#  endforeach (fileCMake)
-
   # Finally, link with the required libraries
   target_link_libraries (${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
   cisst_target_link_package_libraries (${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
-
-#   # Optimized/Debug libraries
-#   foreach (lib ${CISST_ADDITIONAL_LIBRARIES_OPTIMIZED})
-#     target_link_libraries (${WHO_REQUIRES} optimized ${lib})
-#   endforeach (lib)
-#   foreach (lib ${CISST_ADDITIONAL_LIBRARIES_DEBUG})
-#     target_link_libraries (${WHO_REQUIRES} debug ${lib})
-#   endforeach (lib)
 
 endfunction (cisst_target_link_libraries)
 
@@ -558,9 +543,6 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
   # Add the main header to the library, for IDEs
   SET(HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
 
-  # Use the additional include path
-  # INCLUDE_DIRECTORIES(${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
-
   # Add the library
   ADD_LIBRARY(${LIBRARY}
               ${IS_SHARED}
@@ -584,9 +566,6 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
     SET(${LIBRARY}_DEPENDENCIES "${DEPENDENCIES}" CACHE STRING "Required libraries for ${LIBRARY}" FORCE)
     MARK_AS_ADVANCED(${LIBRARY}_DEPENDENCIES)
   ENDIF(DEPENDENCIES)
-
-  # Link to cisst additional libraries
-  # TARGET_LINK_LIBRARIES(${LIBRARY} ${CISST_ADDITIONAL_LIBRARIES})
 
   # Install all header files
   INSTALL_FILES(/include/${LIBRARY}
@@ -627,26 +606,8 @@ MACRO(CISST_REQUIRES WHO_REQUIRES REQUIRED_CISST_LIBRARIES)
      ENDIF("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
    ENDFOREACH(existing)
 
-   # Include extra packages as needed
-#    FOREACH(package ${CISST_ADDITIONAL_PACKAGES})
-#      FIND_PACKAGE(${package} REQUIRED)
-#    ENDFOREACH(package)
-
-#    # Include extra cmake files as needed
-#    FOREACH(fileCMake ${CISST_ADDITIONAL_CMAKE_FILES})
-#      INCLUDE(${fileCMake})
-#    ENDFOREACH(fileCMake)
-
    # Finally, link with the required libraries
-   TARGET_LINK_LIBRARIES(${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE}) #  ${CISST_ADDITIONAL_LIBRARIES})
-
-   # Optimized/Debug libraries
-#    FOREACH(lib ${CISST_ADDITIONAL_LIBRARIES_OPTIMIZED})
-#      TARGET_LINK_LIBRARIES(${WHO_REQUIRES} optimized ${lib})
-#    ENDFOREACH(lib)
-#    FOREACH(lib ${CISST_ADDITIONAL_LIBRARIES_DEBUG})
-#      TARGET_LINK_LIBRARIES(${WHO_REQUIRES} debug ${lib})
-#    ENDFOREACH(lib)
+   TARGET_LINK_LIBRARIES(${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
 
 ENDMACRO(CISST_REQUIRES)
 

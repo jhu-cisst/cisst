@@ -542,7 +542,7 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
         MARK_AS_ADVANCED(FORCE ${ZLIB_OPTIONS})
 
         cisst_set_package_settings (cisstStereoVision ZLIB INCLUDE_DIRECTORIES ZLIB_INCLUDE_DIR)
-        cisst_set_package_settings (cisstStereoVision ZLIB LIBRARIES ZLIB_LIBRARY)
+        cisst_set_package_settings (cisstStereoVision ZLIB LIBRARIES           ZLIB_LIBRARY)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlVideoCodecCVI.h              # private header
@@ -723,7 +723,7 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
         MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
 
 	set (CISST_SVL_ALL_FFMPEG_INCLUDE "${FFMPEG_avcodec_INCLUDE_DIR}"
-                                          "${FFMPEG_avformat_INCLUDE_DIR}" 
+                                          "${FFMPEG_avformat_INCLUDE_DIR}"
                                           "${FFMPEG_avutil_INCLUDE_DIR}"
                                           "${FFMPEG_swscale_INCLUDE_DIR}")
         cisst_set_package_settings (cisstStereoVision FFMPEG INCLUDE_DIRECTORIES CISST_SVL_ALL_FFMPEG_INCLUDE)
@@ -1222,11 +1222,6 @@ MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_CUDA)
 IF(UNIX)
     MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
 ENDIF(UNIX)
-
-# Exporting settings to applications that link against cisst
-# cisst_set_package_settings (cisstStereoVision SVL INCLUDE_DIRECTORIES SVL_ADDITIONAL_INCLUDE_DIRECTORIES)
-# cisst_set_package_settings (cisstStereoVision SVL CISST_ADDITIONAL_LINK_DIRECTORIES SVL_ADDITIONAL_LINK_DIRECTORIES)
-# CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES SVL_ADDITIONAL_LIBRARIES)
 
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER_FLAGS}")
 

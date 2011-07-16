@@ -1,19 +1,23 @@
 #
 # $Id$
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # name of project and executable
 project(devicesTutorialExample2)
+
+# list of cisst libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstDevices)
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 # magic CMake command, generate .cxx and .h from .fl files
 # then compile them and link them with the executable
@@ -31,4 +35,4 @@ add_executable(devicesTutorialExample2
 	       )
 
 # link with the cisst libraries
-cisst_requires("devicesTutorialExample2" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
+cisst_target_link_libraries (devicesTutorialExample2 ${CISST_LIBRARIES_NEEDED})

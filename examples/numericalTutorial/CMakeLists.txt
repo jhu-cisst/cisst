@@ -12,6 +12,8 @@
 #
 # --- end cisst license ---
 if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+
+  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
   add_executable (numericalTutorial
                   main.cpp
                   ExampleSVDUserOutputWorkspace.h

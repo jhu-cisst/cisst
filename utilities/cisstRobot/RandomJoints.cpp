@@ -1,3 +1,22 @@
+/*
+  $Id: $
+
+  Author(s):  Simon Leonard
+  Created on: 2010
+
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+  --- begin cisst license - do not edit ---
+
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
+
+  --- end cisst license ---
+
+*/
+
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstRobot/robManipulator.h>
 
@@ -20,7 +39,7 @@ int main( int argc, char** argv ){
   }
 
   int nsamples = 1;
-  if( argc == 3 || argc == 4 ){ 
+  if( argc == 3 || argc == 4 ){
     if( sscanf( argv[2], "%d", &nsamples ) != 1 ){
       std::cerr << usage.str() << std::endl;
       return -1;
@@ -32,7 +51,7 @@ int main( int argc, char** argv ){
   }
 
   cmnRandomSequence::SeedType seed = 0;
-  if( argc == 4 ){ 
+  if( argc == 4 ){
     if( sscanf( argv[3], "%d", &seed ) != 1 ){
       std::cerr << usage.str() << std::endl;
       return -1;
@@ -41,7 +60,7 @@ int main( int argc, char** argv ){
 
   cmnRandomSequence& rs = cmnRandomSequence::GetInstance();
   rs.SetSeed( seed );
-  
+
   robManipulator manipulator( argv[1] );
 
   for( int i=0; i<nsamples; i++ ){
