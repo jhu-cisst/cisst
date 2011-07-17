@@ -56,7 +56,7 @@ class CISST_EXPORT svlCCCameraCalibration
 
 public:
     svlCCCameraCalibration();
-    bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag);
+    bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight,  float squareSize, int originDetectorColorModeFlag);
     int setRectifier(svlFilterImageRectifier* rectifier);
     bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
     bool runCameraCalibration();
@@ -107,6 +107,9 @@ private:
     int flags;
     //size of calibration grid
     cv::Size boardSize;
+    //size of squares in mm
+    float squareSize;
+
     //vector of 3D calibration grid points
     std::vector<std::vector<cv::Point3f> > objectPoints;
     //vector of projected calibration grid points

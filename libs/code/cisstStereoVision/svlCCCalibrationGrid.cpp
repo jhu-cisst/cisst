@@ -984,9 +984,9 @@ std::vector<cv::Point3f> svlCCCalibrationGrid::getGoodCalibrationGridPoints3D()
 		{
 			if(visibility[i][j])
 			{
-				point =  cv::Point2f((i-boardSize.width/2)*20,(j-boardSize.height/2)*20);
+				point =  cv::Point2f((i-boardSize.width/2)*gridSize,(j-boardSize.height/2)*gridSize);
 				//goodCalibrationGridPoints.push_back(cv::Point3f(point.x,point.y,0));
-				goodCalibrationGridPoints.push_back(cv::Point3f((i-boardSize.width/2)*20,(j-boardSize.height/2)*20,0));
+				goodCalibrationGridPoints.push_back(cv::Point3f((i-boardSize.width/2)*gridSize,(j-boardSize.height/2)*gridSize,0));
 				if(debug)
 				{
 					std::cout << "getGoodCalibrationGridPoints3D: at " << i << "," << j << " (" << point.x<< ",";
@@ -1011,7 +1011,7 @@ std::vector<cv::Point3f> svlCCCalibrationGrid::getAllCalibrationGridPoints3D()
 	for( int j = 0; j < (boardSize.height); j++ )
 		for( int i = 0; i < (boardSize.width); i++ )	
 		{
-			allCalibrationGridPoints.push_back(cv::Point3f((i-boardSize.width/2)*20,(j-boardSize.height/2)*20,0));
+			allCalibrationGridPoints.push_back(cv::Point3f((i-boardSize.width/2)*gridSize,(j-boardSize.height/2)*gridSize,0));
 		}
 	
 	return allCalibrationGridPoints;

@@ -364,6 +364,10 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 	cvSetReal2D(invCameraToTCP,3,3,1);
 
 	cvInvert(invCameraToTCP,cameraToTCP);
+    cameraToTCP->data.db[12] = 0.0;
+    cameraToTCP->data.db[13] = 0.0;
+    cameraToTCP->data.db[14] = 0.0;
+    cameraToTCP->data.db[15] = 1.0;
     tcp_T_camera = vct4x4(cameraToTCP->data.db[0],cameraToTCP->data.db[1],cameraToTCP->data.db[2],cameraToTCP->data.db[3],
                         cameraToTCP->data.db[4],cameraToTCP->data.db[5],cameraToTCP->data.db[6],cameraToTCP->data.db[7],
                         cameraToTCP->data.db[8],cameraToTCP->data.db[9],cameraToTCP->data.db[10],cameraToTCP->data.db[11],

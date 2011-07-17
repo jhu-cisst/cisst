@@ -86,6 +86,7 @@ int main(int argc, char** argv)
     int stopIndex = 9;
     int boardWidth = 18;
     int boardHeight = 16;
+    float squareSize = 2.0;
     int originDetectorColorModeFlag = svlCCOriginDetector::RGY;
 
     if (argc == 3)
@@ -112,8 +113,8 @@ int main(int argc, char** argv)
         cout << "     OPTIONAL [startIndex stopIndex boardSizeWidth boardSizeHeight]" << endl;
         cout << "     (defaults [0 9 png 18 16])" << endl;
         cout << "Examples:" << endl;
-        cout << "     svlExExposureCorrection ./Images/SD/ image " << endl;
-        cout << "     svlExExposureCorrection ./Images/SD/ image png 0 9 18 16" << endl;
+        cout << "     svlExCameraCalibration ./Images/SD/ image " << endl;
+        cout << "     svlExCameraCalibration ./Images/SD/ image png 0 9 18 16" << endl;
         goto labError;
     }
 
@@ -125,7 +126,7 @@ int main(int argc, char** argv)
     //HD arguments
     //D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image
 
-    ok = svlCCObject->process(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,originDetectorColorModeFlag);
+    ok = svlCCObject->process(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,squareSize,originDetectorColorModeFlag);
 
     if(ok && svlCCObject->images.size() > 0)
     {

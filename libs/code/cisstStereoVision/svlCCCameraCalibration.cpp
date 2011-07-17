@@ -542,7 +542,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
 {
     std::stringstream path;
     std::string currentFileName;
-    float squareSize = 2.f;
+
     svlCCCalibrationGrid* calibrationGrid;
     bool ok = false;
 
@@ -650,18 +650,20 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
 *	startIndex			int							- Image index to start
 *	stopIndex			int							- Image index to end
 *	boardSize			cv::Size					- Size of chessboard
+*   squareSize          int                         - Size of square in mm
 *	colorModeFlag		int							- Color blobs for origin/orientation detection
 *
 * Output:
 *	bool											- Success indicator						
 *
 ***********************************************************************************************************/
-bool svlCCCameraCalibration::process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, int originDetectorColorModeFlag)
+bool svlCCCameraCalibration::process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, float squareSize, int originDetectorColorModeFlag)
 {
     reset();
     bool validImage = false;
     bool valid = false;
     boardSize = cv::Size(boardWidth,boardHeight);
+    this->squareSize = squareSize;
     std::string currentFileName;
     std::string currentImagePrefix;
     calCornerDetector = new svlCCCornerDetector(boardSize.width,boardSize.height);
