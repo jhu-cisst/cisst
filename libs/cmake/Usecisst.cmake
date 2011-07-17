@@ -23,3 +23,6 @@ include (cisstMacros)
 # Add the include and lib paths for cisst
 include_directories (${CISST_INCLUDE_DIR})
 link_directories (${CISST_LIBRARY_DIR})
+
+# Load all settings for external dependencies
+cisst_load_package_setting (${CISST_LIBRARIES})
