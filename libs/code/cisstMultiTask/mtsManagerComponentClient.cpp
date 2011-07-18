@@ -505,7 +505,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
     // Create an end user interface for internal invocations (via GeneralInterface). These internal invocations
     // are made by methods of this class, so we cannot assume that there is only one thread. Thus, to achieve thread-safety
     // we need to use osaMutex.
-    mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("Self");
+#if 0  // PK TEMP 7/18/2011
+    mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("Self", MTS_OPTIONAL);
     interfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                    GeneralInterface.ComponentConnect);
     mtsInterfaceProvided * interfaceProvidedToSelf = provided->GetEndUserInterface("Self");
@@ -515,6 +516,13 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
             return false;
         }
     }
+#else
+    mtsInterfaceProvided *interfaceProvidedToSelf = provided->GetEndUserInterface("Self");
+    if (interfaceProvidedToSelf) {
+        GeneralInterface.ComponentConnect.Bind(interfaceProvidedToSelf->GetCommandWrite(
+                                               mtsManagerComponentBase::CommandNames::ComponentConnect));
+    }
+#endif
 
     return true;
 }
