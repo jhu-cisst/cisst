@@ -60,15 +60,28 @@ devODEJoint::devODEJoint( dWorldID world,
   if( type == dJointTypeSlider ){
 
     jointid = dJointCreateSlider(world, 0);    // create the joint
-    dJointAttach(jointid, body2, body1);       // attach the joint
+    dJointAttach(JointID(), body2, body1);       // attach the joint
 
     // set the axis
-    dJointSetSliderAxis(jointid, axis[0], axis[1], axis[2]);
+    dJointSetSliderAxis(JointID(), axis[0], axis[1], axis[2]);
 
-    dJointSetSliderParam(jointid, dParamLoStop, qmin );
-    dJointSetSliderParam(jointid, dParamHiStop, qmax );
-    dJointSetSliderParam(jointid, dParamBounce, 0.2);
-    dJointSetSliderParam(jointid, dParamCFM, 0.001);
+    dJointSetSliderParam(JointID(), dParamLoStop, qmin );
+    dJointSetSliderParam(JointID(), dParamHiStop, qmax );
+    dJointSetSliderParam(JointID(), dParamBounce, 0.2);
+    dJointSetSliderParam(JointID(), dParamCFM, 0.001);
+
+    frictionid = dJointCreateLMotor( world, 0 );        // create the friction
+    dJointAttach( FrictionID(), body1, body2 );           // attach the joint
+    dJointSetLMotorNumAxes( FrictionID(), 1 );
+
+    // set the axis
+    dJointSetLMotorAxis( FrictionID(), 0, 2, axis[0], axis[1], axis[2] );
+
+    // set the friction parameters
+    // set a "0" velocity
+    dJointSetLMotorParam( FrictionID(), dParamVel,  0 );
+    // by applying no more than "x" torque
+    dJointSetLMotorParam( FrictionID(), dParamFMax, 0.01 );
 
   }
 }
@@ -127,15 +140,21 @@ void devODEJoint::SetForceTorque(double newft)
 {  ft = newft; }
 
 void devODEJoint::ApplyForceTorque(){ 
-  
+
   switch( dJointGetType( JointID() ) ){
 
   case dJointTypeHinge:
     dJointAddHingeTorque( JointID(), GetForceTorque() );
+    dJointSetAMotorParam( FrictionID(), dParamVel,  0.00 );
+    dJointSetAMotorParam( FrictionID(), dParamFMax, 0.01 );
+
     break;
 
   case dJointTypeSlider:
     dJointAddSliderForce( JointID(), GetForceTorque() );
+    dJointSetLMotorParam( FrictionID(), dParamVel,  0.00 );
+    dJointSetLMotorParam( FrictionID(), dParamFMax, 0.01 );
+
     break;
 
   default:

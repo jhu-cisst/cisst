@@ -466,11 +466,26 @@ devOSGCamera::devOSGCamera( const std::string& name,
 					     osg::Vec3d( 0,1,0 ) );
     home();
 
-    // add a bit more light
+    osg::StateSet* state = world->getOrCreateStateSet();
+    state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
+    state->setMode( GL_LIGHT0, osg::StateAttribute::ON );
+    state->setMode( GL_LIGHT1, osg::StateAttribute::ON );
+    
+    // Create the Light and set its properties.
     osg::ref_ptr<osg::Light> light = new osg::Light;
-    light->setAmbient( osg::Vec4( .9, .9, .9, 1 ) );
-    light->setSpecular( osg::Vec4( .9, .9, .9, 1 ) );
-    setLight( light );
+    light->setAmbient( osg::Vec4( .8, .8, .8, 1.0 ) );
+    
+    osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
+    osg::Matrix m;
+    m.makeTranslate( osg::Vec3( 0.0, 0.0, 2.0 ) );
+    mt->setMatrix( m );
+
+    // Add the Light to a LightSource. Add the LightSource and
+    // MatrixTransform to the scene graph.
+    osg::ref_ptr<osg::LightSource> ls = new osg::LightSource;
+    world->addChild( mt.get() );
+    mt->addChild( ls.get() );
+    ls->setLight( light.get() );    
   }
 
 }
@@ -510,5 +525,29 @@ vctFrm3 devOSGCamera::GetOrientationPosition() const {
   vctFixedSizeVector<double,3> t( Rt(3, 0), Rt(3, 1), Rt(3, 2) );
 
   return vctFrm3( R, t );
+}
+
+void devOSGCamera::SetOrientationPosition( const vctFrame4x4<double>& Rt ) {
+
+  osg::Matrixd Rtosg;// = 
+  Rtosg(0,0) = Rt[0][0];  Rtosg(0,1) = Rt[0][1];  Rtosg(0,2) = Rt[0][2];
+  Rtosg(1,0) = Rt[1][0];  Rtosg(1,1) = Rt[1][1];  Rtosg(1,2) = Rt[1][2];
+  Rtosg(2,0) = Rt[2][0];  Rtosg(2,1) = Rt[2][1];  Rtosg(2,2) = Rt[2][2];
+  Rtosg(3,0) = 0.0;       Rtosg(3,1) = 0.0;       Rtosg(3,2) = 0.0;
+
+  Rtosg(0,3) = Rt[0][3]; 
+  Rtosg(1,3) = Rt[1][3]; 
+  Rtosg(2,3) = Rt[2][3]; 
+  Rtosg(3,3) = 1.0;
+
+  getCameraManipulator()->setHomePosition( osg::Vec3d( 0.0, 1.0, 1.0 ),
+					   osg::Vec3d( 0.0, 0.0, 0.0 ),
+					   osg::Vec3d( 0.0, 1.0, 0.0 ) );
+
+}
+
+void devOSGCamera::SetOrientationPosition( const vctFrm3& Rt ) {
+  SetOrientationPosition( vctFrame4x4<double>( Rt.Rotation(), 
+					       Rt.Translation() ) );
 }
 

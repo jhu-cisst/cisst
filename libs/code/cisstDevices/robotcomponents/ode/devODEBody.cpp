@@ -437,8 +437,8 @@ void devODEBody::Disable(){
   dBodySetAngularVel( GetBodyID(), 0, 0, 0);
 }
 
-// This is different from the devOSGBody::Update since it gets the position/orientation
-// from ODE world and not from MTS
+// This is different from the devOSGBody::Update since it gets the 
+// position/orientation from ODE world and not from MTS
 void devODEBody::Transform(){
   vctMatrixRotation3<double> R = GetOrientation();
   vctFixedSizeVector<double,3> t = GetPosition();

@@ -32,6 +32,7 @@
   #include <cisstDevices/robotcomponents/trajectories/devSetPoints.h>
   #include <cisstDevices/robotcomponents/trajectories/devTrajectory.h>
   #include <cisstDevices/robotcomponents/trajectories/devLinearRn.h>
+  #include <cisstDevices/robotcomponents/trajectories/devInverseKinematics.h>
 
 %}
 
@@ -44,6 +45,7 @@
 %include "cisstDevices/robotcomponents/trajectories/devSetPoints.h"
 %include "cisstDevices/robotcomponents/trajectories/devTrajectory.h"
 %include "cisstDevices/robotcomponents/trajectories/devLinearRn.h"
+%include "cisstDevices/robotcomponents/trajectories/devInverseKinematics.h"
 
 
 #if CISST_DEV_HAS_OSG 

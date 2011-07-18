@@ -24,6 +24,8 @@ set( HEADER_FILES
   robotcomponents/trajectories/devOMNItoWAM.h
   robotcomponents/trajectories/devOMNItoBH.h
 
+  robotcomponents/trajectories/devInverseKinematics.h
+
   robotcomponents/manipulators/devManipulator.h
 
   )
@@ -50,6 +52,8 @@ set( SOURCE_FILES
   robotcomponents/trajectories/devOMNItoWAM.cpp
   robotcomponents/trajectories/devOMNItoBH.cpp
      
+  robotcomponents/trajectories/devInverseKinematics.cpp
+
   robotcomponents/manipulators/devManipulator.cpp
   
   )
@@ -80,7 +84,7 @@ if( CISST_DEV_HAS_RTSOCKETCAN )
 
 endif( CISST_DEV_HAS_RTSOCKETCAN )
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
 
 if( OPENSCENEGRAPH_FOUND )
 
@@ -94,6 +98,8 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGMono.h
     robotcomponents/osg/devOSGPick.h
     robotcomponents/osg/devOSGStereo.h
+#    robotcomponents/osg/devOSGText.h
+#    robotcomponents/osg/devOSGVolume.h
     robotcomponents/osg/devOSGWorld.h
     )
 
@@ -106,6 +112,8 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGMono.cpp
     robotcomponents/osg/devOSGPick.cpp
     robotcomponents/osg/devOSGStereo.cpp
+#    robotcomponents/osg/devOSGText.cpp
+#    robotcomponents/osg/devOSGVolume.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
 
