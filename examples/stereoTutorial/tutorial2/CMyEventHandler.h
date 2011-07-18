@@ -4,7 +4,7 @@
 #ifndef _CMyEventHandler_h
 #define _CMyEventHandler_h
 
-#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision.h>
 
 
 class CMyEventHandler : public svlWindowEventHandlerBase
