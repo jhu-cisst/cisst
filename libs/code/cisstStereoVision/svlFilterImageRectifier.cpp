@@ -97,9 +97,9 @@ int svlFilterImageRectifier::Process(svlProcInfo* procInfo, svlSample* syncInput
 
     _OnSingleThread(procInfo)
     {
-        svlSampleCameraGeometry* camgeo = dynamic_cast<svlSampleCameraGeometry*>(GetInput("calibration")->PullSample(false));
+        svlSampleCameraGeometry* camgeo = dynamic_cast<svlSampleCameraGeometry*>(GetInput("calibration")->PullSample(true, 0.0));
         if (camgeo) {
-            std::cout << *camgeo;
+            //std::cout << *camgeo;
             for (idx = 0; idx < videochannels; idx ++) {
                 table = new svlImageProcessingHelper::RectificationInternals;
                 if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {

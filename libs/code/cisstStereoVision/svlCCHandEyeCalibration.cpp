@@ -100,7 +100,7 @@ bool svlCCHandEyeCalibration::calibrate()
 	//backproject
 
 	//if(debug)
-	//	printData();
+		printData();
 
 	// Free memory
 	rmatrix.~Mat();
@@ -148,12 +148,14 @@ float svlCCHandEyeCalibration::dualQuaternionMethod()
 		temp1 = worldToTCPMatrix[i+1];
 		cvInvert(temp1, invResult, CV_LU);
 		cvMatMul(invResult, temp0, A);
+        aMatrix.push_back(A);
 	
 		//B = Hgrid2cam(:,:,i+1)*inv(Hgrid2cam(:,:,i));
 		temp0 = cameraMatrix[i];
 		temp1 = cameraMatrix[i+1];
 		cvInvert(temp0,invResult,CV_LU);
 		cvMatMul(temp1,invResult,B);
+        bMatrix.push_back(B);
 
 		//[q,qprime] = getDualQuaternion(A(1:3,1:3),A(1:3,4)); 
 		q = cvCreateMat(4,1,CV_64FC1);
@@ -717,6 +719,12 @@ void svlCCHandEyeCalibration::printData()
 		std::cout << "==============WorldToTCP "<<i<<" =============="<<std::endl;
 		printCvMatDouble(worldToTCPMatrix[i]);
 	}
+
+    for(int i=0;i<std::min(aMatrix.size(),bMatrix.size());i++)
+	{
+		std::cout << "==============AXXB Check "<<i<<" =============="<<std::endl;
+		printCvMatDouble(checkAXXB(aMatrix[i],bMatrix[i]));
+	}
 }
 
 
@@ -731,4 +739,18 @@ void svlCCHandEyeCalibration::printCvMatDouble(CvMat* matrix)
 			std::cout << ", ";
 	}
 	std::cout << std::endl;
+}
+
+CvMat* svlCCHandEyeCalibration::checkAXXB(CvMat* A, CvMat* B)
+{
+    CvMat *ax, *xb, *xbInv, *axxb; 
+    ax = cvCreateMat(4,4,CV_64FC1);
+    xb = cvCreateMat(4,4,CV_64FC1);
+    xbInv = cvCreateMat(4,4,CV_64FC1);
+    axxb = cvCreateMat(4,4,CV_64FC1);
+    cvMatMul(A,cameraToTCP,ax);
+    cvMatMul(cameraToTCP,B,xb);
+    cvInvert(xb,xbInv,CV_LU);
+    cvMatMul(xbInv,ax,axxb);
+    return axxb;
 }

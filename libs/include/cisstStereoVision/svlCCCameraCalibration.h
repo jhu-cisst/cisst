@@ -55,8 +55,8 @@ class CISST_EXPORT svlCCCameraCalibration
 {
 
 public:
-    svlCCCameraCalibration();
-    bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight,  float squareSize, int originDetectorColorModeFlag);
+    svlCCCameraCalibration(int boardWidth, int boardHeight, float squareSize, int originDetectorColorModeFlag);
+    bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
     int setRectifier(svlFilterImageRectifier* rectifier);
     bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
     bool runCameraCalibration();
@@ -134,6 +134,8 @@ private:
     int refineThreshold;
     //number of points used  for calibration during optimization
     int pointsCount;
+    int maxPointsCount;
+    double avgErr;
     svlSampleImageRGB image;
 
     bool debug;

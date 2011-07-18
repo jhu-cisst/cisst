@@ -25,6 +25,7 @@ class svlCCHandEyeCalibration
 		void solveQuadratic(double a, double b, double c, CvMat* roots);
 		void printData();
 		void printCvMatDouble(CvMat* matrix);
+        CvMat* checkAXXB(CvMat* A, CvMat* B);
 
 		//parameters
 		bool debug;
@@ -32,6 +33,8 @@ class svlCCHandEyeCalibration
 		std::vector<CvMat*> cameraMatrix;
 		std::vector<CvMat*> worldToTCPMatrix;
 		std::vector<CvMat*> tcpToWorldMatrix;
+		std::vector<CvMat*> aMatrix;
+		std::vector<CvMat*> bMatrix;
 		CvMat* cameraToTCP;
 };
 

@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlCCCameraCalibration.h>
 #include <sstream>
 
-svlCCCameraCalibration::svlCCCameraCalibration()
+svlCCCameraCalibration::svlCCCameraCalibration(int boardWidth, int boardHeight, float squareSize, int originDetectorColorModeFlag)
 {
     minCornerThreshold = 5;
     maxCalibrationIteration = 10;
@@ -32,6 +32,10 @@ svlCCCameraCalibration::svlCCCameraCalibration()
     visibility = new int[maxNumberOfGrids];
     groundTruthCameraMatrix = cv::Mat::eye(3, 3, CV_64F);
     groundTruthDistCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
+    this->boardSize = cv::Size(boardWidth,boardHeight);
+    this->squareSize = squareSize;
+    calCornerDetector = new svlCCCornerDetector(boardSize.width,boardSize.height);
+    calOriginDetector = new svlCCOriginDetector(originDetectorColorModeFlag);
     cameraGeometry = new svlSampleCameraGeometry();
 }
 
@@ -47,6 +51,8 @@ bool svlCCCameraCalibration::runCameraCalibration()
     rootMeanSquaredThreshold = 1;
     refineThreshold = 2;
     pointsCount = 0;
+    maxPointsCount = 0;
+    avgErr = std::numeric_limits<double>::max( );
 
     // Calibrate
     return calibration();
@@ -192,13 +198,13 @@ double svlCCCameraCalibration::runOpenCVCalibration(bool projected)
     {
         printf("============calibrateCamera: running projected============\n");
         rms = calibrateCamera(projectedObjectPoints, projectedImagePoints, imageSize, cameraMatrix,
-            distCoeffs, rvecs, tvecs, flags);//|cv::CALIB_FIX_K1|cv::CALIB_FIX_K2|cv::CALIB_FIX_K3);
+            distCoeffs, rvecs, tvecs, flags);//cv::CALIB_FIX_K1|cv::CALIB_FIX_K2|cv::CALIB_FIX_K3);
     }
     else
     {
         printf("============calibrateCamera: running standard============\n");
         rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-            distCoeffs, rvecs, tvecs, flags);//|cv::CALIB_FIX_K1|cv::CALIB_FIX_K2|cv::CALIB_FIX_K3);
+            distCoeffs, rvecs, tvecs, flags);//cv::CALIB_FIX_K1|cv::CALIB_FIX_K2|cv::CALIB_FIX_K3);
     }
     //if(debug)
     printf("RMS error reported by calibrateCamera: %g\n", rms);
@@ -226,7 +232,6 @@ bool svlCCCameraCalibration::checkCalibration(bool projected)
     bool ok = false;
     std::vector<float> reprojErrs;
     ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
-    double avgErr;
 
     if(projected)
     {
@@ -321,6 +326,7 @@ double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
 
     if(!projected)
         std::cout << "Calibrating using " << pointsCount <<" points." << std::endl;
+   
     rms = runOpenCVCalibration(projected);
     check = checkCalibration(projected);
 
@@ -360,6 +366,7 @@ void svlCCCameraCalibration::optimizeCalibration()
 {
     double rms;
     double prevRMS = std::numeric_limits<double>::max( );
+    int prevPointsCount = 0;
     int iteration = 0;
     cv::Mat pPrevCameraMatrix;
     cv::Mat pPrevDistCoeffs;
@@ -409,6 +416,7 @@ void svlCCCameraCalibration::optimizeCalibration()
     pPrevRvecs = prevRvecs;
     pPrevTvecs = prevTvecs;
     pPrevThreshold = prevThreshold;
+
     for(int i=0;i<(int)calibrationGrids.size();i++)
     {
         if(debug)
@@ -430,6 +438,7 @@ void svlCCCameraCalibration::optimizeCalibration()
 
     while((rms < std::numeric_limits<double>::max( )) && (rms > rootMeanSquaredThreshold)&& (iteration < maxCalibrationIteration))
     {
+ 
         // Lower threshold for higher iteration of optimization
         if(iteration > 1)
             refineThreshold = 2;
@@ -441,6 +450,7 @@ void svlCCCameraCalibration::optimizeCalibration()
         }
 
         if(rms < prevRMS || (pointsCount > (maxPointsCount + pointIncreaseIteration*minCornerThreshold*calibrationGrids.size())))
+        //if((pointsCount > prevPointsCount) && avgErr < 1.0)
         {
             std::cout << "Iteration: " << iteration << " rms delta: " << prevRMS-rms << " count delta: " <<  pointsCount-maxPointsCount << " pointIteration " << pointIncreaseIteration <<std::endl;
             pPrevCameraMatrix = prevCameraMatrix;
@@ -453,6 +463,7 @@ void svlCCCameraCalibration::optimizeCalibration()
             prevRvecs = rvecs;
             prevTvecs = tvecs;
             prevRMS = rms;
+            prevPointsCount = pointsCount;
             prevThreshold = refineThreshold;
             for(int i=0;i<(int)calibrationGrids.size();i++)
             {
@@ -522,10 +533,11 @@ bool svlCCCameraCalibration::calibration()
 
     ///////////////////////optimize
     optimizeCalibration();
+    updateCalibrationGrids();
 
     ///////////////////////projected
-    rms = calibrate(true, false);
-    updateCalibrationGrids();
+    //rms = calibrate(true, false);
+    //updateCalibrationGrids();
     //refineGrids(refineThreshold);
 
     ///////////////////////update camera geometry
@@ -649,25 +661,18 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
 *	imageType			string						- Commen appendix for images
 *	startIndex			int							- Image index to start
 *	stopIndex			int							- Image index to end
-*	boardSize			cv::Size					- Size of chessboard
-*   squareSize          int                         - Size of square in mm
-*	colorModeFlag		int							- Color blobs for origin/orientation detection
 *
 * Output:
 *	bool											- Success indicator						
 *
 ***********************************************************************************************************/
-bool svlCCCameraCalibration::process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, int boardWidth, int boardHeight, float squareSize, int originDetectorColorModeFlag)
+bool svlCCCameraCalibration::process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex)
 {
     reset();
     bool validImage = false;
     bool valid = false;
-    boardSize = cv::Size(boardWidth,boardHeight);
-    this->squareSize = squareSize;
     std::string currentFileName;
     std::string currentImagePrefix;
-    calCornerDetector = new svlCCCornerDetector(boardSize.width,boardSize.height);
-    calOriginDetector = new svlCCOriginDetector(originDetectorColorModeFlag);
 
     // DLR calibration
     if(groundTruthTest)
@@ -782,7 +787,6 @@ void svlCCCameraCalibration::runTest()
     cv::Mat testCameraMatrix, testDistCoeffs;
     bool projected = false;
     std::vector<float> reprojErrs;
-    double avgErr = std::numeric_limits<double>::max( );
     testCameraMatrix = cv::Mat::eye(3, 3, CV_64F);
     testDistCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
     testCameraMatrix = this->groundTruthCameraMatrix;
