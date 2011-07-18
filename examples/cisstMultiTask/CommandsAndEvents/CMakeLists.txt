@@ -16,7 +16,7 @@
 # FLTK examples
 if (CISST_HAS_FLTK)
   add_subdirectory (FLTK)
-else (CISST_HAS_FLTK AND BUILD_LIBS_cisstMultiTask)
+else (CISST_HAS_FLTK AND CISST_BUILD_LIBS_cisstMultiTask)
   message (WARNING " cisstMultiTask example CommandsAndEvents/FLTK will not be compiled since it requires CISST_HAS_FLTK")
 endif (CISST_HAS_FLTK)
 

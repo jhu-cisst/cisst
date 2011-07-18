@@ -12,9 +12,9 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstMultiTask)
+if (CISST_BUILD_LIBS_cisstMultiTask)
   add_subdirectory (PeriodicTask)
   add_subdirectory (CommandsAndEvents)
-else (BUILD_LIBS_cisstMultiTask)
-  message (WARNING " cisstMultiTask examples will not be compiled since they require BUILD_LIBS_cisstMultiTask")
-endif (BUILD_LIBS_cisstMultiTask)
+else (CISST_BUILD_LIBS_cisstMultiTask)
+  message (WARNING " cisstMultiTask examples will not be compiled since they require CISST_BUILD_LIBS_cisstMultiTask")
+endif (CISST_BUILD_LIBS_cisstMultiTask)

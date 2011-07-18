@@ -18,11 +18,11 @@ set(SOURCE_FILES ireFramework.cpp)
 set(HEADER_FILES ireExport.h ireFramework.h)
 set(DEPENDENCIES cisstCommon)
 
-if(BUILD_LIBS_cisstMultiTask)
+if(CISST_BUILD_LIBS_cisstMultiTask)
    set(SOURCE_FILES ${SOURCE_FILES} ireTask.cpp)
    set(HEADER_FILES ${HEADER_FILES} ireTask.h)
    set(DEPENDENCIES ${DEPENDENCIES} cisstOSAbstraction cisstMultiTask)
-endif(BUILD_LIBS_cisstMultiTask)
+endif(CISST_BUILD_LIBS_cisstMultiTask)
 
 cisst_add_library (LIBRARY cisstInteractive
                    DEPENDENCIES ${DEPENDENCIES}

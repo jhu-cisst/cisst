@@ -115,13 +115,13 @@ else (CMAKE_CL_64)
 endif (CMAKE_CL_64)
 
 # Options
-option (BUILD_UTILITIES "Build utility programs built using cisst." ON)
-option (BUILD_TESTS "Build tests." OFF)
-option (BUILD_EXAMPLES "Build examples." OFF)
-option (BUILD_COMPONENTS "Build components." OFF)
+option (CISST_BUILD_UTILITIES "Build utility programs built using cisst." ON)
+option (CISST_BUILD_TESTS "Build tests." OFF)
+option (CISST_BUILD_EXAMPLES "Build examples." OFF)
+option (CISST_BUILD_COMPONENTS "Build components." OFF)
 
 if (UNIX)
-  option (BUILD_DOC "Build the documentation." OFF)
+  option (CISST_BUILD_DOC "Build the documentation." OFF)
 endif (UNIX)
 
 # Build static or dynamic libraries
@@ -153,8 +153,8 @@ if (CISST_HAS_SWIG_PYTHON)
     endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
 
     # Force to use exceptions
-    set (CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
-    set (CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
+    set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
+    set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
 
     # Find Python
     find_package (PythonLibs REQUIRED)
@@ -166,14 +166,14 @@ if (CISST_HAS_SWIG_PYTHON)
     include_directories (${PYTHON_INCLUDE_PATH})
     cisst_set_package_settings (cisstCommon Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
     # We also need numpy if we have cisstVector
-    if (BUILD_LIBS_cisstVector)
+    if (CISST_BUILD_LIBS_cisstVector)
 	find_package (Numpy REQUIRED)
 	if (PYTHON_NUMPY_FOUND)
 	    include_directories (${PYTHON_NUMPY_INCLUDE_DIR})
 	    cisst_set_package_settings (cisstVector NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
 	    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
 	endif (PYTHON_NUMPY_FOUND)
-    endif (BUILD_LIBS_cisstVector)
+    endif (CISST_BUILD_LIBS_cisstVector)
 endif (CISST_HAS_SWIG_PYTHON)
 
 
@@ -221,11 +221,11 @@ if (CISST_HAS_QT)
   include (${QT_USE_FILE})
   set (CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
   mark_as_advanced (CISST_QT_PACKAGE)
-  cisst_set_package_settings (cisstCommon Qt PACKAGES    CISST_QT_PACKAGE)
-  cisst_set_package_settings (cisstCommon Qt CMAKE_FILES QT_USE_FILE)
-  cisst_set_package_settings (cisstCommon Qt LIBRARIES   QT_LIBRARIES)
+  cisst_set_package_settings (cisstCommonQt Qt PACKAGES    CISST_QT_PACKAGE)
+  cisst_set_package_settings (cisstCommonQt Qt CMAKE_FILES QT_USE_FILE)
+  cisst_set_package_settings (cisstCommonQt Qt LIBRARIES   QT_LIBRARIES)
 else (CISST_HAS_QT)
-  cisst_unset_all_package_settings (cisstCommon Qt)
+  cisst_unset_all_package_settings (cisstCommonQt Qt)
 endif (CISST_HAS_QT)
 
 # Support for FLTK
@@ -323,25 +323,25 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Determine if cmnThrow uses "throw" or "abort"
-option (CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
-mark_as_advanced (CMN_THROW_DOES_ABORT)
-if (CMN_THROW_DOES_ABORT)
-  add_definitions (-DCMN_THROW_DOES_ABORT)
-endif (CMN_THROW_DOES_ABORT)
+option (CISST_CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
+mark_as_advanced (CISST_CMN_THROW_DOES_ABORT)
+if (CISST_CMN_THROW_DOES_ABORT)
+  add_definitions (-DCISST_CMN_THROW_DOES_ABORT)
+endif (CISST_CMN_THROW_DOES_ABORT)
 
 # Determine if CMN_ASSERT should be disabled
-option (CMN_ASSERT_DISABLED "CMN_ASSERT is disabled, i.e. does not assert (for release mode)" OFF)
-mark_as_advanced (CMN_ASSERT_DISABLED)
-if (CMN_ASSERT_DISABLED)
-  add_definitions (-DCMN_ASSERT_DISABLED)
-endif (CMN_ASSERT_DISABLED)
+option (CISST_CMN_ASSERT_DISABLED "CMN_ASSERT is disabled, i.e. does not assert (for release mode)" OFF)
+mark_as_advanced (CISST_CMN_ASSERT_DISABLED)
+if (CISST_CMN_ASSERT_DISABLED)
+  add_definitions (-DCISST_CMN_ASSERT_DISABLED)
+endif (CISST_CMN_ASSERT_DISABLED)
 
 # Determine if CMN_ASSERT should throw an exception instead of abort
-option (CMN_ASSERT_THROWS_EXCEPTION "CMN_ASSERT throws an exception instead of abort" OFF)
-mark_as_advanced (CMN_ASSERT_THROWS_EXCEPTION)
-if (CMN_ASSERT_THROWS_EXCEPTION)
-  add_definitions (-DCMN_ASSERT_THROWS_EXCEPTION)
-endif (CMN_ASSERT_THROWS_EXCEPTION)
+option (CISST_CMN_ASSERT_THROWS_EXCEPTION "CMN_ASSERT throws an exception instead of abort" OFF)
+mark_as_advanced (CISST_CMN_ASSERT_THROWS_EXCEPTION)
+if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
+  add_definitions (-DCISST_CMN_ASSERT_THROWS_EXCEPTION)
+endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
 # Put "." in the rpath of all CISST shared libraries.
@@ -358,11 +358,11 @@ endif (UNIX)
 set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/libs/include
      ${cisst_SOURCE_DIR}/libs/include)
-if (BUILD_COMPONENTS)
+if (CISST_BUILD_COMPONENTS)
   set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR}
                          ${cisst_BINARY_DIR}/components
                          ${cisst_SOURCE_DIR}/components)
-endif (BUILD_COMPONENTS)
+endif (CISST_BUILD_COMPONENTS)
 
 include_directories (${CISST_INCLUDE_DIR}) # ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
@@ -428,31 +428,31 @@ set (CISST_LIBS_WITH_FLTK
 
 # Build by default
 foreach (lib ${CISST_LIBS_STABLE})
-  option (BUILD_LIBS_${lib} "Build ${lib}." ON)
+  option (CISST_BUILD_LIBS_${lib} "Build ${lib}." ON)
 endforeach (lib)
 
 foreach (lib ${CISST_LIBS_UNSTABLE})
-  option (BUILD_LIBS_${lib} "Build ${lib}." OFF)
+  option (CISST_BUILD_LIBS_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 
 # If OS abstraction is compiled, require dynamic loading libraries
-if (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
+if (CISST_BUILD_LIBS_cisstOSAbstraction OR CISST_BUILD_LIBS_cisstInteractive)
   if (CMAKE_DL_LIBS)
     cisst_set_package_settings (cisstOSAbstraction DL LIBRARIES CMAKE_DL_LIBS)
     cisst_set_package_settings (cisstInteractive DL LIBRARIES CMAKE_DL_LIBS)
   endif (CMAKE_DL_LIBS)
-endif (BUILD_LIBS_cisstOSAbstraction OR BUILD_LIBS_cisstInteractive)
+endif (CISST_BUILD_LIBS_cisstOSAbstraction OR CISST_BUILD_LIBS_cisstInteractive)
 
 # If cisstInteractive in turned on, also force SWIG for Python and shared libraries
-if (BUILD_LIBS_cisstInteractive)
+if (CISST_BUILD_LIBS_cisstInteractive)
   set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
-endif (BUILD_LIBS_cisstInteractive)
+endif (CISST_BUILD_LIBS_cisstInteractive)
 if (CISST_HAS_SWIG_PYTHON)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (CISST_HAS_SWIG_PYTHON)
 
 # If cisstNumerical is ON, turn CISST_HAS_CISSTNETLIB ON as well
-if (BUILD_LIBS_cisstNumerical)
+if (CISST_BUILD_LIBS_cisstNumerical)
   # Use Fortran NETLIB by default
   option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." ON)
   mark_as_advanced (CISST_HAS_CISSTNETLIB)
@@ -463,26 +463,20 @@ if (BUILD_LIBS_cisstNumerical)
   else (CISST_HAS_CISSTNETLIB)
     cisst_unset_all_package_settings (cisstNumerical cisstNetlib)
   endif (CISST_HAS_CISSTNETLIB)
-endif (BUILD_LIBS_cisstNumerical)
-
-# Once all variables have been defined, use cisstMacros
-include (cisstMacros)
-
-# Finally, create lib targets
-add_subdirectory (libs)
+endif (CISST_BUILD_LIBS_cisstNumerical)
 
 # List of libraries to be built
 foreach (lib ${CISST_LIBS})
-  if (BUILD_LIBS_${lib})
+  if (CISST_BUILD_LIBS_${lib})
     set (CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
     # Add libraries with Qt
     if (CISST_HAS_QT)
       list (FIND CISST_LIBS_WITH_QT ${lib} ${lib}_HAS_QT)
       if (${${lib}_HAS_QT} GREATER -1)
 	set (CISST_LIBRARIES ${lib}Qt ${CISST_LIBRARIES})
-	set (CISST_BUILD_${lib}Qt ON)
+	set (CISST_BUILD_LIBS_${lib}Qt ON)
       else (${${lib}_HAS_QT} GREATER -1)
-	set (CISST_BUILD_${lib}Qt OFF)
+	set (CISST_BUILD_LIBS_${lib}Qt OFF)
       endif (${${lib}_HAS_QT} GREATER -1)
     endif (CISST_HAS_QT)
     # Add libraries with FLTK
@@ -490,53 +484,58 @@ foreach (lib ${CISST_LIBS})
       list (FIND CISST_LIBS_WITH_FLTK ${lib} ${lib}_HAS_FLTK)
       if (${${lib}_HAS_FLTK} GREATER -1)
 	set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
-	set (CISST_BUILD_${lib}FLTK ON)
+	set (CISST_BUILD_LIBS_${lib}FLTK ON)
       else (${${lib}_HAS_FLTK} GREATER -1)
-	set (CISST_BUILD_${lib}FLTK OFF)
+	set (CISST_BUILD_LIBS_${lib}FLTK OFF)
       endif (${${lib}_HAS_FLTK} GREATER -1)
     endif (CISST_HAS_FLTK)
-  endif (BUILD_LIBS_${lib})
+  endif (CISST_BUILD_LIBS_${lib})
 endforeach (lib)
 
 # Add cisstCommonXML if needed
-if (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
-  set (BUILD_LIBS_cisstCommonXML ON CACHE BOOL "Build cisstCommonXML" FORCE)
+if (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+  set (CISST_BUILD_LIBS_cisstCommonXML ON CACHE BOOL "Build cisstCommonXML" FORCE)
   set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
-else (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
-  set (BUILD_LIBS_cisstCommonXML OFF CACHE BOOL "Build cisstCommonXML" FORCE)
-endif (BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+else (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+  set (CISST_BUILD_LIBS_cisstCommonXML OFF CACHE BOOL "Build cisstCommonXML" FORCE)
+endif (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
 
+# Once all variables have been defined, use cisstMacros
+include (cisstMacros)
+
+# Finally, create lib targets
+add_subdirectory (libs)
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 
 # Conditional builds
-if (BUILD_UTILITIES)
+if (CISST_BUILD_UTILITIES)
   add_subdirectory (utilities)
-endif (BUILD_UTILITIES)
+endif (CISST_BUILD_UTILITIES)
 
-if (BUILD_TESTS)
+if (CISST_BUILD_TESTS)
   # Settings for CTest
   enable_testing ()
-  mark_as_advanced (BUILD_TESTING)
+  mark_as_advanced (BUILD_TESTING) # CMake variable for CTest
   include (Dart)
   mark_as_advanced (DART_ROOT)
   # cisst Tests
   add_subdirectory (tests)
-endif (BUILD_TESTS)
+endif (CISST_BUILD_TESTS)
 
-if (BUILD_EXAMPLES)
+if (CISST_BUILD_EXAMPLES)
   add_subdirectory (examples)
-endif (BUILD_EXAMPLES)
+endif (CISST_BUILD_EXAMPLES)
 
-if (BUILD_COMPONENTS)
+if (CISST_BUILD_COMPONENTS)
   add_subdirectory (components)
-endif (BUILD_COMPONENTS)
+endif (CISST_BUILD_COMPONENTS)
 
-if (BUILD_DOC)
+if (CISST_BUILD_DOC)
   add_subdirectory (doc)
-endif (BUILD_DOC)
+endif (CISST_BUILD_DOC)
 
 # create equivalent for cisstInteractive
-set (CISST_HAS_IRE ${BUILD_LIBS_cisstInteractive})
+set (CISST_HAS_IRE ${CISST_BUILD_LIBS_cisstInteractive})
 
 # Create misc. config files
 set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})
@@ -628,7 +627,7 @@ IF(WIN32)
           "${LIBRARY_OUTPUT_PATH}" "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
 
       # To find tests programs and libraries
-      IF(BUILD_TESTS)
+      IF(CISST_BUILD_TESTS)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/tests/lib/${CISST_PATH_CONFIGURATION}"
@@ -637,10 +636,10 @@ IF(WIN32)
             ${CISST_PYTHONPATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/tests/lib" "${cisst_BINARY_DIR}/tests/lib/${CISST_PATH_CONFIGURATION}"
             "${cisst_BINARY_DIR}/tests/bin" "${cisst_BINARY_DIR}/tests/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(BUILD_TESTS)
+      ENDIF(CISST_BUILD_TESTS)
 
       # To find examples programs and libraries
-      IF(BUILD_EXAMPLES)
+      IF(CISST_BUILD_EXAMPLES)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/examples/lib/${CISST_PATH_CONFIGURATION}"
@@ -649,10 +648,10 @@ IF(WIN32)
             ${CISST_PYTHONPATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/examples/lib" "${cisst_BINARY_DIR}/examples/lib/${CISST_PATH_CONFIGURATION}"
             "${cisst_BINARY_DIR}/examples/bin" "${cisst_BINARY_DIR}/examples/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(BUILD_EXAMPLES)
+      ENDIF(CISST_BUILD_EXAMPLES)
 
       # To find utilities programs and libraries
-      IF(BUILD_UTILITIES)
+      IF(CISST_BUILD_UTILITIES)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/utilities/lib/${CISST_PATH_CONFIGURATION}"
@@ -661,7 +660,7 @@ IF(WIN32)
             ${CISST_PYTHONPATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/utilities/lib" "${cisst_BINARY_DIR}/utilities/lib/${CISST_PATH_CONFIGURATION}"
             "${cisst_BINARY_DIR}/utilities/bin" "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(BUILD_UTILITIES)
+      ENDIF(CISST_BUILD_UTILITIES)
 
       # Convert to native format to be able to compare
       FILE(TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)

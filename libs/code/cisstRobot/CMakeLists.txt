@@ -19,7 +19,7 @@ SET( DEPENDENCIES cisstCommon cisstVector )
 SET( SOURCE_FILES  robCollaborativeControlForce.cpp )
 SET( HEADER_FILES  robCollaborativeControlForce.h )
 
-if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+if( CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
   SET(DEPENDENCIES ${DEPENDENCIES} cisstNumerical)
   SET(SOURCE_FILES
@@ -107,7 +107,7 @@ if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
     )
 
-endif( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+endif( CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
 # use for findblas and findlapack
 #enable_language( Fortran )

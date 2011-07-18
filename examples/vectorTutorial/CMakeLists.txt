@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
   cisst_set_directories (cisstCommon cisstVector cisstNumerical)
   add_executable (vectorTutorial
@@ -30,6 +30,6 @@ if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
                  )
   cisst_target_link_libraries (vectorTutorial cisstCommon cisstVector cisstNumerical)
 
-else (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  message (WARNING " vectorTutorial examples will not be compiled since they require BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
-endif (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+else (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+  message (WARNING " vectorTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
+endif (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)

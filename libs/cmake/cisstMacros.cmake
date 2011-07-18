@@ -194,9 +194,9 @@ function (cisst_add_library ...)
     # Check that dependencies are build
     set (BUILD_DEPENDENCIES "")
     foreach (dependency ${DEPENDENCIES})
-      set (BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} BUILD_LIBS_${dependency})
+      set (BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} CISST_BUILD_LIBS_${dependency})
     endforeach (dependency)
-    variable_requires (BUILD_LIBS_${LIBRARY} BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
+    variable_requires (CISST_BUILD_LIBS_${LIBRARY} CISST_BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
     cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
@@ -384,7 +384,7 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
       # if the target exists, use its destination
       get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
     else (TARGET cisstComponentGenerator)
-      message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator, turn BUILD_UTILITIES ON first and then BUILD_UTILITIES_cisstComponentGenerator")
+      message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator, turn CISST_BUILD_UTILITIES ON first and then CISST_BUILD_UTILITIES_cisstComponentGenerator")
     endif (TARGET cisstComponentGenerator)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
@@ -441,7 +441,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
       # if the target exists, use its destination
       get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
     else (TARGET cisstDataGenerator)
-      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator, turn BUILD_UTILITIES ON first and then BUILD_UTILITIES_cisstDataGenerator")
+      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator, turn CISST_BUILD_UTILITIES ON first and then CISST_BUILD_UTILITIES_cisstDataGenerator")
     endif (TARGET cisstDataGenerator)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
@@ -504,7 +504,7 @@ endfunction (cisst_data_generator)
 MACRO(CISST_ADD_LIBRARY_TO_PROJECT PROJECT_NAME)
 
 # Make sure this lib should be compiled
-IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
+IF(CISST_BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
 
   # Build source list with full path
   FOREACH(file ${SOURCE_FILES})
@@ -557,9 +557,9 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
   IF(DEPENDENCIES)
     # Check that dependencies are build
     FOREACH(dependency ${DEPENDENCIES})
-      SET(BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} BUILD_LIBS_${dependency})
+      SET(BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} CISST_BUILD_LIBS_${dependency})
     ENDFOREACH(dependency)
-    VARIABLE_REQUIRES(BUILD_LIBS_${LIBRARY} BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
+    VARIABLE_REQUIRES(CISST_BUILD_LIBS_${LIBRARY} CISST_BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
     # Set the link flags
     TARGET_LINK_LIBRARIES(${LIBRARY} ${DEPENDENCIES})
     # Keep a trace of dependencies for main CMake level
@@ -575,7 +575,7 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
                 ".h"
                 ${LIBRARY_MAIN_HEADER})
 
-ENDIF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
+ENDIF(CISST_BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
 
 ENDMACRO(CISST_ADD_LIBRARY_TO_PROJECT)
 

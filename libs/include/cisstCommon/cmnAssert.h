@@ -91,7 +91,7 @@ http://www.cisst.org/cisst/license.txt.
   \li The error message is log using #CMN_LOG (level of detail 1).
 
   \li CMN_ASSERT behavior can be modified using the defined variables
-  CMN_ASSERT_DISABLED and CMN_ASSERT_THROWS_EXCEPTION.  The first
+  CISST_CMN_ASSERT_DISABLED and CISST_CMN_ASSERT_THROWS_EXCEPTION.  The first
   variable allows to not compile the assertion.  It is similar to the
   \c NDEBUG for the standard \c assert .<br>The second variable allows
   to throw an exception (of type \c std::logic_error) instead of using
@@ -111,11 +111,11 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa cmnThrow
 */
-#ifdef CMN_ASSERT_DISABLED
+#ifdef CISST_CMN_ASSERT_DISABLED
     #define CMN_ASSERT(expr)
-#else // CMN_ASSERT_DISABLED
+#else // CISST_CMN_ASSERT_DISABLED
 
-#ifdef CMN_ASSERT_THROWS_EXCEPTION
+#ifdef CISST_CMN_ASSERT_THROWS_EXCEPTION
 
 #define CMN_ASSERT(expr) \
 	if (!(expr)) { \
@@ -126,7 +126,7 @@ http://www.cisst.org/cisst/license.txt.
 		cmnThrow(std::logic_error(messageBuffer.str())); \
 	}
 
-#else // CMN_ASSERT_THROWS_EXCEPTION
+#else // CISST_CMN_ASSERT_THROWS_EXCEPTION
 
 #define CMN_ASSERT(expr) \
 	if (!(expr)) { \
@@ -139,9 +139,9 @@ http://www.cisst.org/cisst/license.txt.
 		abort(); \
 	}
 
-#endif // CMN_ASSERT_THROWS_EXCEPTION
+#endif // CISST_CMN_ASSERT_THROWS_EXCEPTION
 
-#endif // CMN_ASSERT_DISABLED
+#endif // CISST_CMN_ASSERT_DISABLED
 
 
 #endif // _cmnAssert_h

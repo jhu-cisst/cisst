@@ -84,13 +84,16 @@ cisst_add_library (
 
 # XML Library
 if (CISST_HAS_XML)
+  set (DEPENDENCIES cisstCommon)
   if (CISST_HAS_LIBXML2_XML)
     include_directories (${LIBXML2_INCLUDE_DIR})
+  else (CISST_HAS_LIBXML2_XML)
+     set (DEPENDENCIES ${DEPENDENCIES} cisstCommonQt)
   endif (CISST_HAS_LIBXML2_XML)
   cisst_add_library (
     LIBRARY cisstCommonXML
     LIBRARY_DIR cisstCommon
-    DEPENDENCIES cisstCommon
+    DEPENDENCIES ${DEPENDENCIES}
     SOURCE_FILES cmnXMLPath.cpp
     HEADER_FILES cmnExportXML.h
                  cmnXMLPath.h

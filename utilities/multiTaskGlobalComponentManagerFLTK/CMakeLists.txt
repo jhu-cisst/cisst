@@ -42,7 +42,7 @@ add_executable (multiTaskGlobalComponentManagerFLTK
 # link with the cisst libraries
 cisst_target_link_libraries (multiTaskGlobalComponentManagerFLTK ${CISST_LIBRARIES_NEEDED})
 
-if (BUILD_LIBS_cisstParameterTypes)
+if (CISST_BUILD_LIBS_cisstParameterTypes)
   # set all libraries needed
   set (CISST_LIBRARIES_NEEDED ${CISST_LIBRARIES_NEEDED} cisstParameterTypes)
 
@@ -60,4 +60,4 @@ if (BUILD_LIBS_cisstParameterTypes)
 
   # link with the cisst libraries
   cisst_target_link_libraries (TestSignalGenerator ${CISST_LIBRARIES_NEEDED})
-endif (BUILD_LIBS_cisstParameterTypes)
+endif (CISST_BUILD_LIBS_cisstParameterTypes)

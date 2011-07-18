@@ -52,45 +52,45 @@ if (CMAKE_BUILD_TYPE)
 endif (CMAKE_BUILD_TYPE)
 
 # Tells which libraries have been compiled and assumed tests have been as well
-if (BUILD_LIBS_cisstCommon)
+if (CISST_BUILD_LIBS_cisstCommon)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Co)
-endif (BUILD_LIBS_cisstCommon)
+endif (CISST_BUILD_LIBS_cisstCommon)
 
-if (BUILD_LIBS_cisstVector)
+if (CISST_BUILD_LIBS_cisstVector)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Ve)
-endif (BUILD_LIBS_cisstVector)
+endif (CISST_BUILD_LIBS_cisstVector)
 
-if (BUILD_LIBS_cisstNumerical)
+if (CISST_BUILD_LIBS_cisstNumerical)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Nu)
-endif (BUILD_LIBS_cisstNumerical)
+endif (CISST_BUILD_LIBS_cisstNumerical)
 
-if (BUILD_LIBS_cisstInteractive)
+if (CISST_BUILD_LIBS_cisstInteractive)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}In)
-endif (BUILD_LIBS_cisstInteractive)
+endif (CISST_BUILD_LIBS_cisstInteractive)
 
-if (BUILD_LIBS_cisstOSAbstraction)
+if (CISST_BUILD_LIBS_cisstOSAbstraction)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Os)
-endif (BUILD_LIBS_cisstOSAbstraction)
+endif (CISST_BUILD_LIBS_cisstOSAbstraction)
 
-if (BUILD_LIBS_cisstRobot)
+if (CISST_BUILD_LIBS_cisstRobot)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Ro)
-endif (BUILD_LIBS_cisstRobot)
+endif (CISST_BUILD_LIBS_cisstRobot)
 
-if (BUILD_LIBS_cisstParameterTypes)
+if (CISST_BUILD_LIBS_cisstParameterTypes)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Pt)
-endif (BUILD_LIBS_cisstParameterTypes)
+endif (CISST_BUILD_LIBS_cisstParameterTypes)
 
-if (BUILD_LIBS_cisstMultiTask)
+if (CISST_BUILD_LIBS_cisstMultiTask)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Mt)
-endif (BUILD_LIBS_cisstMultiTask)
+endif (CISST_BUILD_LIBS_cisstMultiTask)
 
-if (BUILD_LIBS_cisstStereoVision)
+if (CISST_BUILD_LIBS_cisstStereoVision)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Sv)
-endif (BUILD_LIBS_cisstStereoVision)
+endif (CISST_BUILD_LIBS_cisstStereoVision)
 
-if (BUILD_LIBS_cisstDevices)
+if (CISST_BUILD_LIBS_cisstDevices)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Dv)
-endif (BUILD_LIBS_cisstDevices)
+endif (CISST_BUILD_LIBS_cisstDevices)
 
 # Tells if Python was used
 if (CISST_HAS_SWIG_PYTHON)

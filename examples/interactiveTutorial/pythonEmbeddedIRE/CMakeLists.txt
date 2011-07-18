@@ -15,11 +15,11 @@
 
 project (pythonEmbeddedIRE)
 
-if (BUILD_LIBS_cisstMultiTask)
+if (CISST_BUILD_LIBS_cisstMultiTask)
   set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstVector cisstMultiTask)
-else (BUILD_LIBS_cisstMultiTask)
+else (CISST_BUILD_LIBS_cisstMultiTask)
   set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction)
-endif (BUILD_LIBS_cisstMultiTask)
+endif (CISST_BUILD_LIBS_cisstMultiTask)
 
 cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
@@ -28,10 +28,10 @@ add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
 cisst_target_link_libraries (SineGenerator cisstCommon cisstVector)
 
 # If OS Abstraction is compiled, offer a choice
-if (BUILD_LIBS_cisstOSAbstraction)
+if (CISST_BUILD_LIBS_cisstOSAbstraction)
   option (EXAMPLE_IRE_USE_OSATHREAD "Use osaThread in pythonEmbeddedIRE example." OFF)
   mark_as_advanced (EXAMPLE_IRE_USE_OSATHREAD)
-endif (BUILD_LIBS_cisstOSAbstraction)
+endif (CISST_BUILD_LIBS_cisstOSAbstraction)
 
 
 # Allow generated c++ code to find header files

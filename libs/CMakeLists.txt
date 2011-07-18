@@ -5,11 +5,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
@@ -22,12 +22,12 @@ SET(EXECUTABLE_OUTPUT_PATH ${cisstLibs_BINARY_DIR}/bin)
 
 
 # Interactive Research Environment meaningless without Python wrapping
-VARIABLE_REQUIRES(BUILD_LIBS_cisstInteractive REQUIREMENT_MET CISST_HAS_SWIG_PYTHON)
+VARIABLE_REQUIRES(CISST_BUILD_LIBS_cisstInteractive REQUIREMENT_MET CISST_HAS_SWIG_PYTHON)
 
 
 # Build everything
 FOREACH(lib ${CISST_LIBS})
-  IF(BUILD_LIBS_${lib})
+  IF(CISST_BUILD_LIBS_${lib})
     ADD_SUBDIRECTORY(code/${lib})
-  ENDIF(BUILD_LIBS_${lib})
+  ENDIF(CISST_BUILD_LIBS_${lib})
 ENDFOREACH(lib)

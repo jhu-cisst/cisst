@@ -35,13 +35,13 @@ set (CISST_EXAMPLES
 # Which examples to build
 foreach (example ${CISST_EXAMPLES})
   # Build by default
-  option (BUILD_EXAMPLES_${example} "Build ${example}." ON)
-  mark_as_advanced (BUILD_EXAMPLES_${example})
+  option (CISST_BUILD_EXAMPLES_${example} "Build ${example}." ON)
+  mark_as_advanced (CISST_BUILD_EXAMPLES_${example})
 endforeach (example)
 
 # Create targets for each example
 foreach (example ${CISST_EXAMPLES})
-  if (BUILD_EXAMPLES_${example})
+  if (CISST_BUILD_EXAMPLES_${example})
     add_subdirectory (${example})
-  endif (BUILD_EXAMPLES_${example})
+  endif (CISST_BUILD_EXAMPLES_${example})
 endforeach (example)

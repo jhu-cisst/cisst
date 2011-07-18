@@ -15,7 +15,7 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstMultiTask cisstParameterTypes cisstRobot)
 
-if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+if( CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
 # all source files
 set (SOURCE_FILES
@@ -41,4 +41,4 @@ cisst_target_link_libraries (cisstRobotTests cisstCommon cisstVector cisstOSAbst
 # To generate a CTest list of tests
 cisst_add_test (cisstRobotTests ITERATIONS 10 INSTANCES 2)
 
-endif( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+endif( CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
