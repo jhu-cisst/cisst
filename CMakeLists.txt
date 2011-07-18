@@ -295,29 +295,34 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   option (CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
   if (CISST_HAS_LINUX_RTAI)
     find_package (RTAI)
-    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES RTAI_LIBRARIES)
+    cisst_set_package_settings (cisstCommon RTAI INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
+    cisst_set_package_settings (cisstCommon RTAI LIBRARIES RTAI_LIBRARIES)
+  else (CISST_HAS_LINUX_RTAI)
+    cisst_unset_all_package_settings (cisstCommon RTAI)
   endif (CISST_HAS_LINUX_RTAI)
 
   # Check for Xenomai
   option (CISST_HAS_LINUX_XENOMAI "Use the Xenomai real time extensions for Linux." OFF)
   if (CISST_HAS_LINUX_XENOMAI)
     find_package(XENOMAI)
-    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_DIR)
     # add /usr/xenomai/include/posix. This is a *must* since we want to
     # to use xenomai/include/posix/pthread.h
-    cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_POSIX_DIR)
+    set (CISST_XENOMAI_INCLUDE_DIRECTORIES ${XENOMAI_INCLUDE_DIR} ${XENOMAI_INCLUDE_POSIX_DIR})
+    cisst_set_package_settings (cisstCommon Xenomai INCLUDE_DIRECTORIES CISST_XENOMAI_INCLUDE_DIRECTORIES)
     # add libnative libxenomai librtdm libpthread_rt
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_NATIVE)
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_PTHREAD_RT)
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_RTDM)
-    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_XENOMAI)
+    set (CISST_XENOMAI_LIBRARIES ${XENOMAI_LIBRARY_NATIVE}
+                                 ${XENOMAI_LIBRARY_PTHREAD_RT}
+				 ${XENOMAI_LIBRARY_RTDM}
+				 ${XENOMAI_LIBRARY_XENOMAI})
+    cisst_set_package_settings (cisstCommon Xenomai LIBRARIES CISST_XENOMAI_LIBRARIES)
     # add -D_GNU_SOURCE -D_REENTRANT -D__XENO__ -pipe
     add_definitions ("${XENOMAI_DEFINITIONS}")
     # add Xenomai wrappers for pthread
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
     set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
 
+  else (CISST_HAS_LINUX_XENOMAI)
+    cisst_unset_all_package_settings (cisstCommon Xenomai)
   endif (CISST_HAS_LINUX_XENOMAI)
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
