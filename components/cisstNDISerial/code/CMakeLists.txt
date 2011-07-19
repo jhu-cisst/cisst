@@ -20,6 +20,7 @@ add_library (cisstNDISerial
 
 cisst_target_link_libraries (cisstNDISerial
                              cisstCommon
+                             cisstCommonXML
                              cisstVector
                              cisstOSAbstraction
                              cisstMultiTask
@@ -67,6 +68,7 @@ ENDMACRO (CISST_QT4_WRAP_UI)
 
   cisst_target_link_libraries (cisstNDISerialQt
                                cisstCommon
+                               cisstCommonXML
                                cisstVector
                                cisstOSAbstraction
                                cisstMultiTask
