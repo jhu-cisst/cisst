@@ -28,6 +28,7 @@ SET(SOURCE_FILES
     svlTypes.cpp
     svlClassServices.cpp
     svlSampleBlobs.cpp
+    svlSampleCameraGeometry.cpp
     svlSampleText.cpp
     svlSampleTargets.cpp
     svlSampleTransform3D.cpp
@@ -66,6 +67,7 @@ SET(SOURCE_FILES
   # Filter API
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
+    svlFilterImageBorder.cpp
     svlFilterImageBlobDetector.cpp
     svlFilterImageBlobTracker.cpp
     svlFilterImageCenterFinder.cpp
@@ -88,7 +90,10 @@ SET(SOURCE_FILES
     svlFilterImageTracker.cpp
     svlFilterImageTranslation.cpp
     svlFilterImageUnsharpMask.cpp
+    svlFilterImageWindow.cpp
+    svlFilterImageWindowTargetSelect.cpp
     svlFilterLightSourceBuddy.cpp
+    svlFilterSampler.cpp
     svlFilterSourceBuffer.cpp
     svlFilterSourceDummy.cpp
     svlFilterSourceImageFile.cpp
@@ -102,6 +107,7 @@ SET(SOURCE_FILES
     svlFilterStreamTypeConverter.cpp
     svlFilterVideoExposureManager.cpp
     svlFilterVideoFileWriter.cpp
+    svlWindowManagerBase.cpp
     svlRequiredInterfaces.cpp
 
   # Private System API
@@ -127,6 +133,7 @@ SET(HEADER_FILES
     svlTypes.h
     svlTypeCheckers.h
     svlSampleBlobs.h
+    svlSampleCameraGeometry.h
     svlSampleText.h
     svlSampleTargets.h
     svlSampleTransform3D.h
@@ -164,6 +171,7 @@ SET(HEADER_FILES
   # Filter API
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
+    svlFilterImageBorder.h
     svlFilterImageBlobDetector.h
     svlFilterImageBlobTracker.h
     svlFilterImageCenterFinder.h
@@ -186,7 +194,10 @@ SET(HEADER_FILES
     svlFilterImageTracker.h
     svlFilterImageTranslation.h
     svlFilterImageUnsharpMask.h
+    svlFilterImageWindow.h
+    svlFilterImageWindowTargetSelect.h
     svlFilterLightSourceBuddy.h
+    svlFilterSampler.h
     svlFilterSourceBuffer.h
     svlFilterSourceDummy.h
     svlFilterSourceImageFile.h
@@ -200,6 +211,7 @@ SET(HEADER_FILES
     svlFilterStreamTypeConverter.h
     svlFilterVideoExposureManager.h
     svlFilterVideoFileWriter.h
+    svlWindowManagerBase.h
     svlRequiredInterfaces.h
 
   # Trackers
@@ -850,13 +862,6 @@ IF(WIN32)
         winWin32.cpp
         svlVideoCodecVfW32.h    # private header
         svlVideoCodecVfW32.cpp
-        svlFilterImageWindow.cpp
-        svlFilterImageWindowTargetSelect.cpp
-        )
-    SET(HEADER_FILES
-        ${HEADER_FILES}
-        svlFilterImageWindow.h
-        svlFilterImageWindowTargetSelect.h
         )
     SET(SVL_ADDITIONAL_LIBRARIES
         "${SVL_ADDITIONAL_LIBRARIES}"
@@ -1119,13 +1124,6 @@ IF(UNIX)
                 ${SOURCE_FILES}
                 winX11.h                 # private header
                 winX11.cpp
-                svlFilterImageWindow.cpp
-                svlFilterImageWindowTargetSelect.cpp
-                )
-            SET(HEADER_FILES
-                ${HEADER_FILES}
-                svlFilterImageWindow.h
-                svlFilterImageWindowTargetSelect.h
                 )
             MESSAGE(STATUS "X11 found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" ON)
@@ -1175,6 +1173,100 @@ ELSE(UNIX)
 
 ENDIF(UNIX)
 
+#----------------------------------------------------------
+#   Module  : CUDA support for cisstStereoVision library
+#   Author  : Min Yang Jung & Balazs Vagvolgyi
+#   Created : June 24, 2010
+#----------------------------------------------------------
+
+MACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
+    CUDA_ADD_CUDA_INCLUDE_ONCE()
+    CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+    CUDA_BUILD_SHARED_LIBRARY(_cuda_shared_flag ${ARGN})
+    CUDA_WRAP_SRCS(${cuda_target} OBJ _generated_files "${_sources}" ${_cmake_options} ${_cuda_shared_flag} OPTIONS ${_options})
+    ADD_LIBRARY(${cuda_target} ${_cmake_options} ${_generated_files} ${_sources})
+    TARGET_LINK_LIBRARIES(${cuda_target} ${CUDA_LIBRARIES} )
+    SET_TARGET_PROPERTIES(${cuda_target} PROPERTIES LINKER_LANGUAGE ${CUDA_C_OR_CXX})
+    SET(${generated_files} ${_generated_files})
+ENDMACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
+
+IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+    SET(CUDA_OPTIONS
+        CUDA_SDK_ROOT_DIR
+        CUDA_INCLUDE_DIRS
+        CUDA_LIBRARIES
+        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
+        CUDA_BUILD_CUBIN
+        CUDA_BUILD_EMULATION
+        CUDA_TOOLKIT_ROOT_DIR
+        CUDA_VERBOSE_BUILD
+        CACHE INTERNAL "List of CUDA options"
+        )
+
+    FIND_PACKAGE(CUDA)
+    IF(CUDA_FOUND)
+        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
+                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
+        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
+        SET(CUDA_SOURCES
+            cuda/svlCUDACommon.cu
+            )
+        # Add a special target to clean 'nvcc' generated files.
+        CUDA_BUILD_CLEAN_TARGET()
+        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
+                             cisstStereoVisionCUDA
+                             "${CUDA_SOURCES}"
+                             STATIC
+                             OPTIONS ""#-DSTUFF=aaa"
+                             RELEASE --use_fast_math -DNDEBUG
+                             DEBUG -g -DDEBUG
+                             )
+
+        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${CUDA_SDK_ROOT_DIR}/common/inc"
+            "${CUDA_SDK_ROOT_DIR}/../shared/inc"
+            "${CUDA_INCLUDE_DIRS}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${CUDA_LIBRARIES}"
+#            "${CUDA_GENERATED_LIBRARIES}"
+            )
+        SET(HEADER_FILES
+            ${HEADER_FILES}
+            svlSampleCUDAImageTypes.h
+            svlSampleCUDAImageCustom.h
+            svlSampleCUDAImage.h
+            svlFilterCUDATest.h
+            )
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlSampleCUDAImageTypes.cpp
+            svlSampleCUDAImage.cpp
+            svlFilterCUDATest.cpp
+            )
+        MESSAGE(STATUS "CUDA found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" ON)
+
+    ELSE(CUDA_FOUND)
+        IF(CISST_SVL_HAS_CUDA)
+            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
+            MESSAGE(FATAL_ERROR "CUDA required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_CUDA)
+            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+            OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
+        ENDIF(CISST_SVL_HAS_CUDA)
+    ENDIF(CUDA_FOUND)
+
+ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+    OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
+ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
+
+
 # Set SVL options to 'advanced' to hide them from beginner user
 #MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_OPENCV)
@@ -1190,6 +1282,7 @@ MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_DC1394)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_FFMPEG)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_X11)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_XV)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_CUDA)
 IF(UNIX)
     MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
 ENDIF(UNIX)
@@ -1249,6 +1342,7 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
+
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
   cisst_add_swig_module(MODULE cisstStereoVision
@@ -1258,21 +1352,32 @@ if (CISST_HAS_SWIG_PYTHON)
 endif (CISST_HAS_SWIG_PYTHON)
 
 
+# Link `cisstStereoVision` against CUDA generated libraries
+IF(CISST_SVL_HAS_CUDA)
+    TARGET_LINK_LIBRARIES(cisstStereoVision ${CUDA_GENERATED_LIBRARIES})
+ENDIF(CISST_SVL_HAS_CUDA)
+
+
 # Qt widgets
 IF(CISST_HAS_QT)
     SET(SVL_QT_HEADER_FILES
-        svlQtWorkThread.h
+        svlQtObjectFactory.h
         svlQtDialog.h
+        svlQtWidgetFileOpen.h
+        svlQtWidgetFramerate.h
         svlQtWidgetVideoEncoder.h
         svlQtWidgetVidCapSrcImageProperties.h
         )
     SET(SVL_QT_SOURCE_FILES
-        svlQtWorkThread.cpp
+        svlQtObjectFactory.cpp
         svlQtDialog.cpp
+        svlQtWidgetFileOpen.cpp
+        svlQtWidgetFramerate.cpp
         svlQtWidgetVideoEncoder.cpp
         svlQtWidgetVidCapSrcImageProperties.cpp
         )
     SET(SVL_QT_UI_FILES
+        svlQtWidgetFramerate.ui
         svlQtWidgetVideoEncoder.ui
         svlQtWidgetVidCapSrcImageProperties.ui
         )
@@ -1280,27 +1385,42 @@ IF(CISST_HAS_QT)
     IF(CISST_HAS_OPENGL)
         SET(SVL_QT_HEADER_FILES
             ${SVL_QT_HEADER_FILES}
+            svlFilterImageWindowQt.h
             svlFilterImageOpenGLQtWidget.h
             )
         SET(SVL_QT_SOURCE_FILES
             ${SVL_QT_SOURCE_FILES}
+            winQt4OpenGL.h          # private header
+            winQt4OpenGL.cpp
+            svlFilterImageWindowQt.cpp
             svlFilterImageOpenGLQtWidget.cpp
             )
+        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP
+                     winQt4OpenGL.h
+                     )
     ENDIF(CISST_HAS_OPENGL)
 
     # Include Qt generated files
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
     FOREACH(HEADER ${SVL_QT_HEADER_FILES})
-        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP
+        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP_TEMP
                      ../../include/cisstStereoVision/${HEADER}
                      )
+        SET(SVL_QT_WRAPPED_CPP
+            ${SVL_QT_WRAPPED_CPP}
+            ${SVL_QT_WRAPPED_CPP_TEMP}
+            )
     ENDFOREACH(HEADER)
 
     FOREACH(UI ${SVL_QT_UI_FILES})
         QT4_WRAP_UI(SVL_QT_WRAPPED_UI
                     ${UI}
                     )
+        SET(SVL_QT_WRAPPED_UI
+            ${SVL_QT_WRAPPED_UI}
+            ${SVL_QT_WRAPPED_UI_TEMP}
+            )
     ENDFOREACH(UI)
 
     CISST_ADD_LIBRARY(LIBRARY cisstStereoVisionQt

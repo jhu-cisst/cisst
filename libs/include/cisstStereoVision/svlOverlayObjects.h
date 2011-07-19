@@ -108,6 +108,7 @@ public:
 
     void SetInputChannel(unsigned int inputch);
     void SetPosition(vctInt2 pos);
+    void SetPosition(int x, int y);
     void SetAlpha(unsigned char alpha);
 
     unsigned int GetInputChannel() const;
@@ -207,6 +208,7 @@ public:
     void SetImage(const svlSampleImageRGB & image);
     void SetImage(const svlSampleImageRGBStereo & image, unsigned int imagech);
     void SetPosition(vctInt2 pos);
+    void SetPosition(int x, int y);
     void SetAlpha(unsigned char alpha);
 
     vctInt2 GetPosition() const;

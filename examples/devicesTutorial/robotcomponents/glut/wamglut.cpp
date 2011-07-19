@@ -19,11 +19,10 @@ int main( int argc, char** argv ){
 
   vctDynamicVector<double> qinit( 7, 0.0 );
   vctDynamicVector<double> qfinal( 7, 1.0 );
-  std::vector< vctDynamicVector<double> > Q;
-  Q.push_back( qinit );
-  Q.push_back( qfinal );
-  Q.push_back( qinit );
-  devSetPoints setpoints( "setpoints", Q );
+
+  devSetPoints setpoints( "setpoints", 7 );
+  setpoints.Insert( qfinal );
+  setpoints.Insert( qinit );
   taskManager->AddComponent(&setpoints);
   
   vctDynamicVector<double> qdmax( 7, 0.1 );
@@ -75,7 +74,7 @@ int main( int argc, char** argv ){
 
 
   if (!taskManager->Connect( trajectory.GetName(), devTrajectory::Input,
-                             setpoints.GetName(),  devSetPoints::Output ) )
+                             setpoints.GetName(),  devSetPoints::OutputRn ) )
     {
       std::cerr << "Connect failed: " 
 		<< trajectory.GetName() << ":" << devTrajectory::Input

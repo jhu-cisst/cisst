@@ -56,6 +56,8 @@ public:
     int SetROI(int left, int top, int right, int bottom, unsigned int videoch = SVL_LEFT);
     int GetROI(svlRect & rect, unsigned int videoch = SVL_LEFT) const;
 
+    int SetMosaicSize(unsigned int width, unsigned int height);
+
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int OnStart(unsigned int procCount);
@@ -98,6 +100,8 @@ private:
     vctDynamicVector<svlDraw::Internals> WarpInternals;
 
     svlSampleImage* Mosaic;
+    unsigned int MosaicWidth;
+    unsigned int MosaicHeight;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)

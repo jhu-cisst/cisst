@@ -98,8 +98,19 @@ int svlFilterSourceDummy::SetType(svlStreamType type)
 
 int svlFilterSourceDummy::SetImage(const svlSampleImage & image)
 {
-    if (IsInitialized() == true)
-        return SVL_ALREADY_INITIALIZED;
+    if (IsInitialized() == true) {
+        if (OutputSample->GetType() != image.GetType()) return SVL_FAIL;
+
+        svlSampleImage* outimg = dynamic_cast<svlSampleImage*>(OutputSample);
+        for (unsigned int i = 0; i < outimg->GetVideoChannels(); i ++) {
+            if (outimg->GetWidth(i)  != image.GetWidth(i) ||
+                outimg->GetHeight(i) != image.GetHeight(i)) return SVL_FAIL;
+        }
+
+        OutputSample->CopyOf(image);
+
+        return SVL_OK;
+    }
 
     svlStreamType type = image.GetType();
 

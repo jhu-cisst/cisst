@@ -2,17 +2,9 @@
 
 #add_subdirectory( trajectories )
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
-if( OPENSCENEGRAPH_FOUND )
 
-  add_subdirectory( osg )
-
-  find_package( ODE )
-  if( ODE_FOUND )
-    add_subdirectory( ode )
-  endif( ODE_FOUND )
-
-endif( OPENSCENEGRAPH_FOUND )
+add_subdirectory( osg )
+add_subdirectory( ode )
 
 if( CISST_DEV_HAS_GLUT )
   add_subdirectory( glut )

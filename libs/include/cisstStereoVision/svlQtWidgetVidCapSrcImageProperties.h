@@ -23,76 +23,85 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlQtWidgetVidCapSrcImageProperties_h
 #define _svlQtWidgetVidCapSrcImageProperties_h
 
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstStereoVision/svlRequiredInterfaces.h>
-#include <cisstStereoVision/svlVideoIO.h>
-#include <cisstStereoVision/svlQtWorkThread.h>
-#include <cisstStereoVision/svlQtDialog.h>
-#include <cisstMultiTask/mtsComponent.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
+
+#include <QObject>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>
 
 // Forward declarations
-class Ui_WidgetVideoEncoder;
+class osaThread;
+class QTimer;
+class svlQtDialog;
+class Ui_WidgetVidCapSrcImageProperties;
 
 
 class CISST_EXPORT svlQtWidgetVidCapSrcImageProperties: public QObject, public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+friend void* svlQtWidgetVidCapSrcImagePropertiesThreadProc(svlQtWidgetVidCapSrcImageProperties* obj);
+
     Q_OBJECT
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
 
 public:
     svlQtWidgetVidCapSrcImageProperties();
-    svlQtWidgetVidCapSrcImageProperties(const std::string & filename);
+    svlQtWidgetVidCapSrcImageProperties(const svlQtWidgetVidCapSrcImageProperties& other);
     ~svlQtWidgetVidCapSrcImageProperties();
+
+    static svlQtWidgetVidCapSrcImageProperties* New();
+    static svlQtWidgetVidCapSrcImageProperties* New(svlFilterSourceVideoCapture *filter, unsigned int videoch = SVL_LEFT);
+    void Delete();
 
     bool WaitForClose();
 
-    bool Create(const std::string & filename);
-    svlVideoIO::Compression* GetCodecParams();
+    bool Create(svlFilterSourceVideoCapture *filter, unsigned int videoch = SVL_LEFT);
     bool Destroy();
 
-    bool Connect(svlVideoCodecBase *codec, const std::string & filename);
-    bool Connect(const std::string & component_name, const std::string & filename);
-    bool Connect(const std::string & process_name, const std::string & component_name, const std::string & filename);
+    bool Connect(const std::string & component_name, unsigned int videoch = SVL_LEFT);
+    bool Connect(const std::string & process_name, const std::string & component_name, unsigned int videoch = SVL_LEFT);
     bool Disconnect();
 
-    bool UpdateData();
-
 protected:
+    bool StopThread;
+    osaThread *Thread;
+
     svlQtDialog *Dialog;
-    Ui_WidgetVideoEncoder *UIWidget;
+    Ui_WidgetVidCapSrcImageProperties *UIWidget;
 
 protected slots:
-    void QSlotOnSliderMove(int value);
-    void QSlotOnQualityBasedCBStateChanged(int value);
+    void QSlotOnShutterSliderMove(int value);
+    void QSlotOnGainSliderMove(int value);
+    void QSlotOnColorUSliderMove(int value);
+    void QSlotOnColorVSliderMove(int value);
+    void QSlotOnBrightnessSliderMove(int value);
+    void QSlotOnGammaSliderMove(int value);
+    void QSlotOnSaturationSliderMove(int value);
+
+    void QSlotOnShutterAutoCBStateChanged(int value);
+    void QSlotOnGainAutoCBStateChanged(int value);
+    void QSlotOnColorAutoCBStateChanged(int value);
+    void QSlotOnBrightnessAutoCBStateChanged(int value);
+    void QSlotOnGammaAutoCBStateChanged(int value);
+    void QSlotOnSaturationAutoCBStateChanged(int value);
 
     void QSlotCreate();
-    void QSlotGetCodecParams();
     void QSlotDestroy();
     void QSlotConnect();
     void QSlotConnect2();
-    void QSlotConnect3();
     void QSlotDisconnect();
-    void QSlotUpdateData();
 
 public:
-    IReqVideoEncoder VideoEncoder;
+    IReqFilterSourceVideoCapture VideoCaptureSettings;
 
 private:
-    vctDynamicVector<int> EncoderIDs;
-    vctDynamicVector<QListWidgetItem*> EncoderItems;
-    svlVideoCodecBase* ExternalCodec;
-    std::string ExternalCodecName;
+    svlFilterSourceVideoCapture* argFilter;
+    unsigned int                 argVideoCh;
+    std::string                  argProcessName;
+    std::string                  argComponentName;
 
-    svlVideoCodecBase* argCodec;
-    std::string        argFileName;
-    std::string        argProcessName;
-    std::string        argComponentName;
-
-    bool                     retSuccess;
-    svlVideoIO::Compression* retCodecParams;
+    bool                         retSuccess;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(svlQtWidgetVidCapSrcImageProperties)

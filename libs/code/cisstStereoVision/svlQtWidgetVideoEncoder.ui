@@ -151,6 +151,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="inputMethodHints">
+      <set>Qt::ImhFormattedNumbersOnly</set>
+     </property>
     </widget>
     <widget class="QLineEdit" name="DatarateText">
      <property name="geometry">
@@ -166,6 +169,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="inputMethodHints">
+      <set>Qt::ImhFormattedNumbersOnly</set>
      </property>
     </widget>
     <widget class="QLabel" name="DatarateSuffix">

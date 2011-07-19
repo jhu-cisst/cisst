@@ -21,13 +21,17 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlQtWidgetVidCapSrcImageProperties.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstStereoVision/svlQtObjectFactory.h>
+#include <cisstStereoVision/svlQtDialog.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <ui_svlQtWidgetVideoEncoder.h>
+#include <ui_svlQtWidgetVidCapSrcImageProperties.h>
 
-#include <iomanip>
+#include <QString>
+
+// Forward declarations
+void* svlQtWidgetVidCapSrcImagePropertiesThreadProc(svlQtWidgetVidCapSrcImageProperties* obj);
 
 
 /*************************************************/
@@ -39,41 +43,51 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlQtWidgetVidCapSrcImageProperties, mtsComponent
 svlQtWidgetVidCapSrcImageProperties::svlQtWidgetVidCapSrcImageProperties() :
     QObject(),
     mtsComponent(),
+    Thread(0),
     Dialog(0),
-    VideoEncoder("RequiresVideoEncoder", this),
-    ExternalCodec(0)
+    UIWidget(0),
+    VideoCaptureSettings("RequiresVideoCaptureSettings", this),
+    argFilter(0),
+    retSuccess(false)
 {
-    QCoreApplication* qapp = QApplication::instance();
-    if (qapp) {
-        moveToThread(QApplication::instance()->thread());
-    }
-    else {
-        CMN_LOG_CLASS_INIT_ERROR << "Constructor - failed to find QApplication instance" << std::endl;
-    }
 }
 
-svlQtWidgetVidCapSrcImageProperties::svlQtWidgetVidCapSrcImageProperties(const std::string & filename) :
+svlQtWidgetVidCapSrcImageProperties::svlQtWidgetVidCapSrcImageProperties(const svlQtWidgetVidCapSrcImageProperties& CMN_UNUSED(other)) :
     QObject(),
     mtsComponent(),
+    Thread(0),
     Dialog(0),
-    VideoEncoder("RequiresVideoEncoder", this),
-    ExternalCodec(0)
+    UIWidget(0),
+    VideoCaptureSettings("RequiresVideoCaptureSettings", this),
+    argFilter(0),
+    retSuccess(false)
 {
-    QCoreApplication* qapp = QApplication::instance();
-    if (qapp) {
-        moveToThread(QApplication::instance()->thread());
-        Create(filename);
-    }
-    else {
-        CMN_LOG_CLASS_INIT_ERROR << "Constructor - failed to find QApplication instance" << std::endl;
-    }
+    // Public copy constructor is here only to override the private QObject copy constructor
 }
 
 svlQtWidgetVidCapSrcImageProperties::~svlQtWidgetVidCapSrcImageProperties()
 {
-    Destroy();
+    QSlotDestroy();
 
-    this->RemoveInterfaceRequired("RequiresVideoEncoder");
+    this->RemoveInterfaceRequired("RequiresVideoCaptureSettings");
+}
+
+svlQtWidgetVidCapSrcImageProperties* svlQtWidgetVidCapSrcImageProperties::New()
+{
+    svlQtWidgetVidCapSrcImageProperties* instance = dynamic_cast<svlQtWidgetVidCapSrcImageProperties*>(svlQtObjectFactory::Create("svlQtWidgetVidCapSrcImageProperties"));
+    return instance;
+}
+
+svlQtWidgetVidCapSrcImageProperties* svlQtWidgetVidCapSrcImageProperties::New(svlFilterSourceVideoCapture *filter, unsigned int videoch)
+{
+    svlQtWidgetVidCapSrcImageProperties* instance = dynamic_cast<svlQtWidgetVidCapSrcImageProperties*>(svlQtObjectFactory::Create("svlQtWidgetVidCapSrcImageProperties"));
+    if (instance) instance->Create(filter, videoch);
+    return instance;
+}
+
+void svlQtWidgetVidCapSrcImageProperties::Delete()
+{
+    svlQtObjectFactory::Delete(this);
 }
 
 bool svlQtWidgetVidCapSrcImageProperties::WaitForClose()
@@ -85,47 +99,35 @@ bool svlQtWidgetVidCapSrcImageProperties::WaitForClose()
     return false;
 }
 
-bool svlQtWidgetVidCapSrcImageProperties::Create(const std::string & filename)
+bool svlQtWidgetVidCapSrcImageProperties::Create(svlFilterSourceVideoCapture *filter, unsigned int videoch)
 {
-    argFileName = filename;
+    argFilter  = filter;
+    argVideoCh = videoch;
     QMetaObject::invokeMethod(this, "QSlotCreate", Qt::BlockingQueuedConnection);
     return retSuccess;
 }
 
-svlVideoIO::Compression* svlQtWidgetVidCapSrcImageProperties::GetCodecParams()
-{
-    QMetaObject::invokeMethod(this, "QSlotGetCodecParams", Qt::BlockingQueuedConnection);
-    return retCodecParams;
-}
-
 bool svlQtWidgetVidCapSrcImageProperties::Destroy()
 {
+    if (!Dialog) return false;
     QMetaObject::invokeMethod(this, "QSlotDestroy", Qt::BlockingQueuedConnection);
     return retSuccess;
 }
 
-bool svlQtWidgetVidCapSrcImageProperties::Connect(svlVideoCodecBase *codec, const std::string & filename)
+bool svlQtWidgetVidCapSrcImageProperties::Connect(const std::string & component_name, unsigned int videoch)
 {
-    argCodec    = codec;
-    argFileName = filename;
+    argComponentName = component_name;
+    argVideoCh       = videoch;
     QMetaObject::invokeMethod(this, "QSlotConnect", Qt::BlockingQueuedConnection);
     return retSuccess;
 }
 
-bool svlQtWidgetVidCapSrcImageProperties::Connect(const std::string & component_name, const std::string & filename)
-{
-    argComponentName = component_name;
-    argFileName      = filename;
-    QMetaObject::invokeMethod(this, "QSlotConnect2", Qt::BlockingQueuedConnection);
-    return retSuccess;
-}
-
-bool svlQtWidgetVidCapSrcImageProperties::Connect(const std::string & process_name, const std::string & component_name, const std::string & filename)
+bool svlQtWidgetVidCapSrcImageProperties::Connect(const std::string & process_name, const std::string & component_name, unsigned int videoch)
 {
     argProcessName   = process_name;
     argComponentName = component_name;
-    argFileName      = filename;
-    QMetaObject::invokeMethod(this, "QSlotConnect3", Qt::BlockingQueuedConnection);
+    argVideoCh       = videoch;
+    QMetaObject::invokeMethod(this, "QSlotConnect2", Qt::BlockingQueuedConnection);
     return retSuccess;
 }
 
@@ -135,158 +137,169 @@ bool svlQtWidgetVidCapSrcImageProperties::Disconnect()
     return retSuccess;
 }
 
-bool svlQtWidgetVidCapSrcImageProperties::UpdateData()
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnShutterSliderMove(int value)
 {
-    QMetaObject::invokeMethod(this, "QSlotUpdateData", Qt::BlockingQueuedConnection);
-    return retSuccess;
+    UIWidget->ShutterText->setText(QString::number(value));
 }
 
-void svlQtWidgetVidCapSrcImageProperties::QSlotOnSliderMove(int value)
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnGainSliderMove(int value)
 {
-    std::stringstream strstr;
-    strstr << std::fixed << std::setprecision(2) << (0.1 * value);
-    UIWidget->TQText->setText(strstr.str().c_str());
+    UIWidget->GainText->setText(QString::number(value));
 }
 
-void svlQtWidgetVidCapSrcImageProperties::QSlotOnQualityBasedCBStateChanged(int value)
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnColorUSliderMove(int value)
 {
-    if (value == Qt::Checked) {
-        UIWidget->TQText->setDisabled(false);
-        UIWidget->TQSlider->setDisabled(false);
-        UIWidget->TQLabel->setDisabled(false);
-        UIWidget->DatarateText->setDisabled(true);
-        UIWidget->DatarateLabel->setDisabled(true);
-        UIWidget->DatarateSuffix->setDisabled(true);
-        UIWidget->KeyframeText->setDisabled(true);
-        UIWidget->KeyframeLabel->setDisabled(true);
+    UIWidget->ColorUText->setText(QString::number(value));
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnColorVSliderMove(int value)
+{
+    UIWidget->ColorVText->setText(QString::number(value));
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnBrightnessSliderMove(int value)
+{
+    UIWidget->BrightnessText->setText(QString::number(value));
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnGammaSliderMove(int value)
+{
+    UIWidget->GammaText->setText(QString::number(value));
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnSaturationSliderMove(int value)
+{
+    UIWidget->SaturationText->setText(QString::number(value));
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnShutterAutoCBStateChanged(int value)
+{
+    if (value != Qt::Checked) {
+        UIWidget->ShutterSlider->setDisabled(false);
+        UIWidget->ShutterSlider->setFocus(Qt::OtherFocusReason);
     }
     else {
-        UIWidget->TQText->setDisabled(true);
-        UIWidget->TQSlider->setDisabled(true);
-        UIWidget->TQLabel->setDisabled(true);
-        UIWidget->DatarateText->setDisabled(false);
-        UIWidget->DatarateLabel->setDisabled(false);
-        UIWidget->DatarateSuffix->setDisabled(false);
-        UIWidget->KeyframeText->setDisabled(false);
-        UIWidget->KeyframeLabel->setDisabled(false);
+        UIWidget->ShutterSlider->setDisabled(true);
+    }
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnGainAutoCBStateChanged(int value)
+{
+    if (value != Qt::Checked) {
+        UIWidget->GainSlider->setDisabled(false);
+        UIWidget->GainSlider->setFocus(Qt::OtherFocusReason);
+    }
+    else {
+        UIWidget->GainSlider->setDisabled(true);
+    }
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnColorAutoCBStateChanged(int value)
+{
+    if (value != Qt::Checked) {
+        UIWidget->ColorUSlider->setDisabled(false);
+        UIWidget->ColorVSlider->setDisabled(false);
+        UIWidget->ColorUSlider->setFocus(Qt::OtherFocusReason);
+    }
+    else {
+        UIWidget->ColorUSlider->setDisabled(true);
+        UIWidget->ColorVSlider->setDisabled(true);
+    }
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnBrightnessAutoCBStateChanged(int value)
+{
+    if (value != Qt::Checked) {
+        UIWidget->BrightnessSlider->setDisabled(false);
+        UIWidget->BrightnessSlider->setFocus(Qt::OtherFocusReason);
+    }
+    else {
+        UIWidget->BrightnessSlider->setDisabled(true);
+    }
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnGammaAutoCBStateChanged(int value)
+{
+    if (value != Qt::Checked) {
+        UIWidget->GammaSlider->setDisabled(false);
+        UIWidget->GammaSlider->setFocus(Qt::OtherFocusReason);
+    }
+    else {
+        UIWidget->GammaSlider->setDisabled(true);
+    }
+}
+
+void svlQtWidgetVidCapSrcImageProperties::QSlotOnSaturationAutoCBStateChanged(int value)
+{
+    if (value != Qt::Checked) {
+        UIWidget->SaturationSlider->setDisabled(false);
+        UIWidget->SaturationSlider->setFocus(Qt::OtherFocusReason);
+    }
+    else {
+        UIWidget->SaturationSlider->setDisabled(true);
     }
 }
 
 void svlQtWidgetVidCapSrcImageProperties::QSlotCreate()
 {
-    retSuccess = false;
+    Dialog = new svlQtDialog;
+    CMN_ASSERT(Dialog);
 
-    if (ExternalCodec) return;
+    UIWidget = new Ui_WidgetVidCapSrcImageProperties;
+    CMN_ASSERT(UIWidget);
+    UIWidget->setupUi(Dialog);
 
-    argCodec = svlVideoIO::GetCodec(argFileName);
-    if (!argCodec) return;
+    QObject::connect(UIWidget->ShutterSlider,    SIGNAL(valueChanged(int)), this, SLOT(QSlotOnShutterSliderMove(int)));
+    QObject::connect(UIWidget->GainSlider,       SIGNAL(valueChanged(int)), this, SLOT(QSlotOnGainSliderMove(int)));
+    QObject::connect(UIWidget->ColorUSlider,     SIGNAL(valueChanged(int)), this, SLOT(QSlotOnColorUSliderMove(int)));
+    QObject::connect(UIWidget->ColorVSlider,     SIGNAL(valueChanged(int)), this, SLOT(QSlotOnColorVSliderMove(int)));
+    QObject::connect(UIWidget->BrightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(QSlotOnBrightnessSliderMove(int)));
+    QObject::connect(UIWidget->GammaSlider,      SIGNAL(valueChanged(int)), this, SLOT(QSlotOnGammaSliderMove(int)));
+    QObject::connect(UIWidget->SaturationSlider, SIGNAL(valueChanged(int)), this, SLOT(QSlotOnSaturationSliderMove(int)));
+    QObject::connect(UIWidget->ShutterAutoCB,    SIGNAL(stateChanged(int)), this, SLOT(QSlotOnShutterAutoCBStateChanged(int)));
+    QObject::connect(UIWidget->GainAutoCB,       SIGNAL(stateChanged(int)), this, SLOT(QSlotOnGainAutoCBStateChanged(int)));
+    QObject::connect(UIWidget->ColorAutoCB,      SIGNAL(stateChanged(int)), this, SLOT(QSlotOnColorAutoCBStateChanged(int)));
+    QObject::connect(UIWidget->BrightnessAutoCB, SIGNAL(stateChanged(int)), this, SLOT(QSlotOnBrightnessAutoCBStateChanged(int)));
+    QObject::connect(UIWidget->GammaAutoCB,      SIGNAL(stateChanged(int)), this, SLOT(QSlotOnGammaAutoCBStateChanged(int)));
+    QObject::connect(UIWidget->SaturationAutoCB, SIGNAL(stateChanged(int)), this, SLOT(QSlotOnSaturationAutoCBStateChanged(int)));
 
-    QSlotConnect();
-    if (!retSuccess) {
-        svlVideoIO::ReleaseCodec(argCodec);
-        argCodec = 0;
-    }
-}
+    Dialog->setWindowTitle(tr("Video Capture Image Properties"));
 
-void svlQtWidgetVidCapSrcImageProperties::QSlotGetCodecParams()
-{
-    if (ExternalCodec) {
-        retCodecParams = ExternalCodec->GetCompression();
-    }
-    else {
-        retCodecParams = 0;
-    }
+    Thread = new osaThread;
+    StopThread = false;
+    Thread->Create(svlQtWidgetVidCapSrcImagePropertiesThreadProc, this);
+
+    Dialog->show();
+    Dialog->raise();
+    Dialog->activateWindow();
+
+    retSuccess = true;
 }
 
 void svlQtWidgetVidCapSrcImageProperties::QSlotDestroy()
 {
-    retSuccess = false;
-
-    if (!ExternalCodec) return;
-
-    svlVideoCodecBase* codec = ExternalCodec;
-
-    QSlotDisconnect();
-
-    svlVideoIO::ReleaseCodec(codec);
+    if (Thread) {
+        StopThread = true;
+        Thread->Wait();
+        delete Thread;
+        Thread = 0;
+    }
+    if (Dialog) {
+        Dialog->close();
+        delete Dialog;
+        Dialog = 0;
+    }
+    if (UIWidget) {
+        delete UIWidget;
+        UIWidget = 0;
+    }
 
     retSuccess = true;
 }
 
 void svlQtWidgetVidCapSrcImageProperties::QSlotConnect()
 {
-    retSuccess = false;
-
-    if (ExternalCodec || !ExternalCodecName.empty() || !argCodec) return;
-
-    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
-
-    if (LCM->FindComponent(this->GetName()) == false) {
-        CMN_LOG_CLASS_INIT_DEBUG << "Connect - adding dialog component (\"" << this->GetName() << "\") to LCM" << std::endl;
-
-        if (LCM->AddComponent(this) == false) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect - failed to add dialog component (\"" << this->GetName() << "\") to LCM" << std::endl;
-            return;
-        }
-
-        osaSleep(0.25); // BV TEMP (remove when AddComponent is a blocking command)
-    }
-
-    if (LCM->FindComponent(argCodec->GetName()) == false) {
-        CMN_LOG_CLASS_INIT_DEBUG << "Connect - adding codec component (\"" << argCodec->GetName() << "\") to LCM" << std::endl;
-
-        if (LCM->AddComponent(argCodec) == false) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect - failed to add codec component (\"" << argCodec->GetName() << "\") to LCM" << std::endl;
-            return;
-        }
-
-        osaSleep(0.25); // BV TEMP (remove when AddComponent is a blocking command)
-    }
-
-    if (LCM->Connect(this->GetName(), "RequiresVideoEncoder", argCodec->GetName(), "ProvidesVideoEncoder") == false) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect - failed to connect dialog component (\"" << this->GetName()
-                                 << "\") to codec component (\"" << argCodec->GetName() << "\")" << std::endl;
-        return;
-    }
-
-    osaSleep(1.0); // BV TEMP (remove when Connect is a blocking command)
-
-    std::string extension;
-    svlVideoIO::GetExtension(argFileName, extension);
-    VideoEncoder.SetExtension(extension);
-    osaSleep(0.25); // BV TEMP (remove when command blocks)
-
-    ExternalCodec = argCodec;
-
-    ///////////////////
-    // Create widget
-
-    Dialog = new svlQtDialog;
-    CMN_ASSERT(Dialog);
-
-    UIWidget = new Ui_WidgetVideoEncoder;
-    CMN_ASSERT(UIWidget);
-    UIWidget->setupUi(Dialog);
-
-    QObject::connect(UIWidget->TQSlider, SIGNAL(sliderMoved(int)), this, SLOT(QSlotOnSliderMove(int)));
-    QObject::connect(UIWidget->QualityBasedCB, SIGNAL(stateChanged(int)), this, SLOT(QSlotOnQualityBasedCBStateChanged(int)));
-
-    std::stringstream strstr;
-    strstr << std::fixed << std::setprecision(2) << (0.1 * UIWidget->TQSlider->value());
-    UIWidget->TQText->setText(strstr.str().c_str());
-
-    Dialog->setWindowTitle(tr("Video Encoder Settings"));
-
-    QSlotUpdateData();
-    if (retSuccess) {
-        Dialog->show();
-        Dialog->raise();
-        Dialog->activateWindow();
-    }
-}
-
-void svlQtWidgetVidCapSrcImageProperties::QSlotConnect2()
-{
+/*
     retSuccess = false;
 
     if (ExternalCodec || !ExternalCodecName.empty()) return;
@@ -344,17 +357,20 @@ void svlQtWidgetVidCapSrcImageProperties::QSlotConnect2()
         Dialog->raise();
         Dialog->activateWindow();
     }
+*/
 }
 
-void svlQtWidgetVidCapSrcImageProperties::QSlotConnect3()
+void svlQtWidgetVidCapSrcImageProperties::QSlotConnect2()
 {
+/*
     retSuccess = false;
     CMN_LOG_CLASS_INIT_ERROR << "Connect(process_name, ...) - not yet implemented" << std::endl;
-    return;
+*/
 }
 
 void svlQtWidgetVidCapSrcImageProperties::QSlotDisconnect()
 {
+/*
     retSuccess = false;
 
     if (!ExternalCodec &&  ExternalCodecName.empty()) return;
@@ -383,160 +399,162 @@ void svlQtWidgetVidCapSrcImageProperties::QSlotDisconnect()
     UIWidget = 0;
 
     retSuccess = true;
+*/
 }
 
-void svlQtWidgetVidCapSrcImageProperties::QSlotUpdateData()
+void* svlQtWidgetVidCapSrcImagePropertiesThreadProc(svlQtWidgetVidCapSrcImageProperties* obj)
 {
-    retSuccess = false;
+    if (!obj || !obj->UIWidget || !obj->argFilter) return 0;
 
-    // TO DO: check if connected
+    svlFilterSourceVideoCapture::ImageProperties gui_properties, filt_properties;
+    bool update_gui;
 
-    bool compression_level_enabled = false;
-    bool encoder_list_enabled      = false;
-    bool target_quantizer_enabled  = false;
-    bool datarate_enabled          = false;
-    bool keyframe_every_enabled    = false;
-    int compression_level          = -1;
-    std::string encoder_list;
-    int encoder_id                 = -1;
-    bool quality_based             = false;
-    double target_quantizer        = -1.0;
-    int datarate                   = -1;
-    int keyframe_every             = -1;
+    memset(&gui_properties, 0, sizeof(svlFilterSourceVideoCapture::ImageProperties));
 
-    // Get features supported by the encoder
-    VideoEncoder.IsCompressionLevelEnabled(compression_level_enabled);
-    //std::cerr << "Compression level enabled=" << compression_level_enabled << std::endl;
-    VideoEncoder.IsEncoderListEnabled(encoder_list_enabled);
-    //std::cerr << "Encoder list enabled=" << encoder_list_enabled << std::endl;
-    VideoEncoder.IsTargetQuantizerEnabled(target_quantizer_enabled);
-    //std::cerr << "Target quantizer enabled=" << target_quantizer_enabled << std::endl;
-    VideoEncoder.IsDatarateEnabled(datarate_enabled);
-    //std::cerr << "Datarate enabled=" << datarate_enabled << std::endl;
-    VideoEncoder.IsKeyFrameEveryEnabled(keyframe_every_enabled);
-    //std::cerr << "Keyframe every enabled=" << keyframe_every_enabled << std::endl;
+    while (!obj->StopThread) {
 
-    // Get current encoder settings
-    if (compression_level_enabled) {
-        VideoEncoder.GetCompressionLevel(compression_level);
-        //std::cerr << "Compression level: " << compression_level << std::endl;
-    }
-    if (encoder_list_enabled) {
-        VideoEncoder.GetEncoderList(encoder_list);
-        //std::cerr << "Encoder list: " << encoder_list << std::endl;
-        VideoEncoder.GetEncoderID(encoder_id);
-        //std::cerr << "Encoder ID: " << encoder_id << std::endl;
-    }
-    VideoEncoder.GetQualityBased(quality_based);
-    //std::cerr << "Quality based: " << quality_based << std::endl;
-    VideoEncoder.GetTargetQuantizer(target_quantizer);
-    //std::cerr << "Target quantizer: " << target_quantizer << std::endl;
-    VideoEncoder.GetDatarate(datarate);
-    //std::cerr << "Datarate: " << datarate << std::endl;
-    VideoEncoder.GetKeyFrameEvery(keyframe_every);
-    //std::cerr << "Key frame every: " << keyframe_every << std::endl;
-
-    EncoderIDs.SetSize(0);
-    EncoderItems.SetSize(0);
-
-    int count = 0, encoder_list_id;
-    std::string encoder_info, encoder_name;
-    size_t begpos = 0, pos = encoder_list.find("\n"), pos2;
-    while (pos != std::string::npos) {
-
-        while (1) {
-            if (begpos >= pos) break;
-
-            // Extract encoder info string
-            encoder_info = encoder_list.substr(begpos, pos - begpos);
-
-            // Extract encoder id from info string
-            pos2 = encoder_info.find(':');
-            if (pos == std::string::npos || pos2 <= 0) break;
-
-            encoder_list_id = atoi(encoder_info.substr(0, pos2).c_str());
-            if (encoder_list_id < 0 || encoder_list_id > 1000) break;
-
-            begpos += pos2 + 1;
-            if (begpos >= pos) break;
-
-            // Extract encoder name from info string
-            encoder_name = encoder_info.substr(pos2 + 1, pos - begpos);
-
-            EncoderIDs.resize(count + 1);
-            EncoderItems.resize(count + 1);
-
-            EncoderItems[count] = new QListWidgetItem(encoder_name.c_str());
-            UIWidget->EncoderList->addItem(EncoderItems[count]);
-
-            EncoderIDs[count] = encoder_list_id;
-
-            count ++;
-
-            break;
+        // Check for changes on Capture Filter
+        update_gui = false;
+        if (obj->argFilter->GetImageProperties(filt_properties, obj->argVideoCh) == SVL_OK) {
+            if (gui_properties.manual     != filt_properties.manual     ||
+                gui_properties.shutter    != filt_properties.shutter    ||
+                gui_properties.gain       != filt_properties.gain       ||
+                gui_properties.wb_u_b     != filt_properties.wb_u_b     ||
+                gui_properties.wb_v_r     != filt_properties.wb_v_r     ||
+                gui_properties.brightness != filt_properties.brightness ||
+                gui_properties.gamma      != filt_properties.gamma      ||
+                gui_properties.saturation != filt_properties.saturation) {
+                update_gui = true;
+            }
         }
 
-        begpos = pos + 1;
-        pos = encoder_list.find("\n", begpos);
+        // Update GUI state
+        if (update_gui) {
+            // Shutter
+            QMetaObject::invokeMethod(obj->UIWidget->ShutterAutoCB,
+                                      "setChecked",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propShutter) ? false : true));
+            QMetaObject::invokeMethod(obj->UIWidget->ShutterSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.shutter));
+            QMetaObject::invokeMethod(obj->UIWidget->ShutterText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.shutter)));
+
+            // Gain
+            QMetaObject::invokeMethod(obj->UIWidget->GainAutoCB,
+                                      "setChecked",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propGain) ? false : true));
+            QMetaObject::invokeMethod(obj->UIWidget->GainSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.gain));
+            QMetaObject::invokeMethod(obj->UIWidget->GainText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.gain)));
+
+            // ColorBalance
+            QMetaObject::invokeMethod(obj->UIWidget->ColorAutoCB,
+                                      "setChecked",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propWhiteBalance) ? false : true));
+            QMetaObject::invokeMethod(obj->UIWidget->ColorUSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.wb_u_b));
+            QMetaObject::invokeMethod(obj->UIWidget->ColorVSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.wb_v_r));
+            QMetaObject::invokeMethod(obj->UIWidget->ColorUText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.wb_u_b)));
+            QMetaObject::invokeMethod(obj->UIWidget->ColorVText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.wb_v_r)));
+
+            // Brightness
+            QMetaObject::invokeMethod(obj->UIWidget->BrightnessAutoCB,
+                                      "setChecked",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propBrightness) ? false : true));
+            QMetaObject::invokeMethod(obj->UIWidget->BrightnessSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.brightness));
+            QMetaObject::invokeMethod(obj->UIWidget->BrightnessText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.brightness)));
+
+            // Gamma
+            QMetaObject::invokeMethod(obj->UIWidget->GammaAutoCB,
+                                      "setChecked",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propGamma) ? false : true));
+            QMetaObject::invokeMethod(obj->UIWidget->GammaSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.gamma));
+            QMetaObject::invokeMethod(obj->UIWidget->GammaText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.gamma)));
+
+            // Saturation
+            QMetaObject::invokeMethod(obj->UIWidget->SaturationAutoCB,
+                                      "setChecked",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(bool, (filt_properties.manual & svlFilterSourceVideoCapture::propSaturation) ? false : true));
+            QMetaObject::invokeMethod(obj->UIWidget->SaturationSlider,
+                                      "setValue",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(int, filt_properties.saturation));
+            QMetaObject::invokeMethod(obj->UIWidget->SaturationText,
+                                      "setText",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_ARG(QString, QString::number(filt_properties.saturation)));
+        }
+
+        osaSleep(0.2);
+
+        // Check for changes in GUI state
+        memset(&gui_properties, 0, sizeof(svlFilterSourceVideoCapture::ImageProperties));
+        gui_properties.mask = -1; // Enable all settings
+        gui_properties.manual += obj->UIWidget->ShutterAutoCB->isChecked()    ? 0 : svlFilterSourceVideoCapture::propShutter;
+        gui_properties.manual += obj->UIWidget->GainAutoCB->isChecked()       ? 0 : svlFilterSourceVideoCapture::propGain;
+        gui_properties.manual += obj->UIWidget->ColorAutoCB->isChecked()      ? 0 : svlFilterSourceVideoCapture::propWhiteBalance;
+        gui_properties.manual += obj->UIWidget->BrightnessAutoCB->isChecked() ? 0 : svlFilterSourceVideoCapture::propBrightness;
+        gui_properties.manual += obj->UIWidget->GammaAutoCB->isChecked()      ? 0 : svlFilterSourceVideoCapture::propGamma;
+        gui_properties.manual += obj->UIWidget->SaturationAutoCB->isChecked() ? 0 : svlFilterSourceVideoCapture::propSaturation;
+        gui_properties.shutter    = obj->UIWidget->ShutterSlider->value();
+        gui_properties.gain       = obj->UIWidget->GainSlider->value();
+        gui_properties.wb_u_b     = obj->UIWidget->ColorUSlider->value();
+        gui_properties.wb_v_r     = obj->UIWidget->ColorVSlider->value();
+        gui_properties.brightness = obj->UIWidget->BrightnessSlider->value();
+        gui_properties.gamma      = obj->UIWidget->GammaSlider->value();
+        gui_properties.saturation = obj->UIWidget->SaturationSlider->value();
+
+        if (gui_properties.manual     != filt_properties.manual     ||
+            gui_properties.shutter    != filt_properties.shutter    ||
+            gui_properties.gain       != filt_properties.gain       ||
+            gui_properties.wb_u_b     != filt_properties.wb_u_b     ||
+            gui_properties.wb_v_r     != filt_properties.wb_v_r     ||
+            gui_properties.brightness != filt_properties.brightness ||
+            gui_properties.gamma      != filt_properties.gamma      ||
+            gui_properties.saturation != filt_properties.saturation) {
+
+            obj->argFilter->SetImageProperties(gui_properties, obj->argVideoCh);
+        }
     }
-    if (EncoderIDs.size() > 0) {
-        UIWidget->EncoderList->setDisabled(false);
 
-        // Find encoder_id in the list
-        int found_id = EncoderIDs.size() - 1;
-        while (found_id >= 0 && EncoderIDs[found_id] != encoder_id) found_id --;
-        if (found_id < 0) found_id = 0;
-
-        UIWidget->EncoderList->setCurrentItem(EncoderItems[found_id]);
-    }
-    else {
-        // No encoder in the list
-        UIWidget->EncoderList->setDisabled(true);
-    }
-
-    // TO DO: finish this up
-    UIWidget->AllEncodersCB->setDisabled(true);
-
-    std::stringstream strstr;
-    strstr << std::fixed << std::setprecision(2) << target_quantizer;
-    UIWidget->TQText->setText(strstr.str().c_str());
-    UIWidget->TQSlider->setValue(static_cast<int>(target_quantizer * 10.0));
-
-    UIWidget->DatarateText->setText(QString::number(datarate));
-
-    UIWidget->KeyframeText->setText(QString::number(keyframe_every));
-
-    if (quality_based) {
-        UIWidget->QualityBasedCB->setCheckState(Qt::Checked);
-        UIWidget->TQText->setDisabled(false);
-        UIWidget->TQSlider->setDisabled(false);
-        UIWidget->TQLabel->setDisabled(false);
-        UIWidget->DatarateText->setDisabled(true);
-        UIWidget->DatarateLabel->setDisabled(true);
-        UIWidget->DatarateSuffix->setDisabled(true);
-        UIWidget->KeyframeText->setDisabled(true);
-        UIWidget->KeyframeLabel->setDisabled(true);
-    }
-    else {
-        UIWidget->QualityBasedCB->setCheckState(Qt::Unchecked);
-        UIWidget->TQText->setDisabled(true);
-        UIWidget->TQSlider->setDisabled(true);
-        UIWidget->TQLabel->setDisabled(true);
-        UIWidget->DatarateText->setDisabled(false);
-        UIWidget->DatarateLabel->setDisabled(false);
-        UIWidget->DatarateSuffix->setDisabled(false);
-        UIWidget->KeyframeText->setDisabled(false);
-        UIWidget->KeyframeLabel->setDisabled(false);
-    }
-
-    if (!target_quantizer_enabled ||
-        (!datarate_enabled && !keyframe_every_enabled)) {
-        UIWidget->QualityBasedCB->setDisabled(true);
-    }
-    else {
-        UIWidget->QualityBasedCB->setDisabled(false);
-    }
-
-    retSuccess = true;
+    return 0;
 }
 

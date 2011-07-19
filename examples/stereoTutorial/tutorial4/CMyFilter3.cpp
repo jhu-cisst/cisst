@@ -2,6 +2,8 @@
 
 
 #include "CMyFilter3.h"
+#include <cisstStereoVision/svlImageProcessing.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 
 CMyFilter3::CMyFilter3() :
@@ -29,6 +31,8 @@ int CMyFilter3::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* 
                                                                             //
     _OnSingleThread(procInfo)                                               // Execute the following block on one thread only
     {                                                                       //
+        osaSleep(1.0);
+        
         MaxVal = 0;                                                         // Find highest intensity pixel
         for (i = 0; i < pixelcount; i ++) {                                 //
             val = (unsigned int)pixel[i].r + pixel[i].g + pixel[i].b;       //
@@ -40,20 +44,20 @@ int CMyFilter3::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* 
     _SynchronizeThreads(procInfo);                                          // All threads wait until finished
                                                                             //
     if (MaxVal > 0) {                                                       //
-        _ParallelLoop(procInfo, i, pixelcount)                              // Parallelized loop, executed on all threads
-        {                                                                   //
-            val = 255 * pixel[i].r / MaxVal;                                // Normalize image intensity to 255,
-            if (val > 255) val = 255;                                       //   saturate color component if needed
-            pixel[i].r = val;                                               //
-                                                                            //
-            val = 255 * pixel[i].g / MaxVal;                                //
-            if (val > 255) val = 255;                                       //
-            pixel[i].g = val;                                               //
-                                                                            //
-            val = 255 * pixel[i].b / MaxVal;                                //
-            if (val > 255) val = 255;                                       //
-            pixel[i].b = val;                                               //
-        }                                                                   //
+
+        svlSampleImage* subimage = image->GetSubImage(procInfo);
+        
+        _CriticalSection(procInfo)
+        {
+            std::cerr << procInfo->ID << ", "
+                      << subimage->GetWidth() << ", " << subimage->GetHeight() << ", "
+                      << subimage->GetDataChannels() << ", " << subimage->GetBPP()
+                      << std::endl;
+        }
+        
+        svlImageProcessing::Deinterlace(subimage, 0, svlImageProcessing::DI_Blending);
+        
+        delete subimage;
     }                                                                       //
                                                                             //
     syncOutput = syncInput;                                                 // Pass the modified sample forward to the output

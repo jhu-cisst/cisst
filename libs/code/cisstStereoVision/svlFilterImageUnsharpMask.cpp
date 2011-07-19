@@ -74,6 +74,17 @@ int svlFilterImageUnsharpMask::Initialize(svlSample* syncInput, svlSample* &sync
         case svlTypeImageMono32:
         case svlTypeImageMono32Stereo:
         case svlTypeImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeMatrixInt8:
         case svlTypeMatrixInt16:
         case svlTypeMatrixInt32:
@@ -87,6 +98,7 @@ int svlFilterImageUnsharpMask::Initialize(svlSample* syncInput, svlSample* &sync
         case svlTypeTransform3D:
         case svlTypeTargets:
         case svlTypeText:
+        case svlTypeCameraGeometry:
         case svlTypeBlobs:
             return SVL_INVALID_INPUT_TYPE;
     }

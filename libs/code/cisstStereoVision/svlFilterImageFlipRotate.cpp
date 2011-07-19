@@ -224,6 +224,18 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
 
             case svlTypeImageRGBA:
             case svlTypeImageRGBAStereo:
+            case svlTypeImage3DMap:
+            case svlTypeCUDAImageRGB:
+            case svlTypeCUDAImageRGBA:
+            case svlTypeCUDAImageRGBStereo:
+            case svlTypeCUDAImageRGBAStereo:
+            case svlTypeCUDAImageMono8:
+            case svlTypeCUDAImageMono8Stereo:
+            case svlTypeCUDAImageMono16:
+            case svlTypeCUDAImageMono16Stereo:
+            case svlTypeCUDAImageMono32:
+            case svlTypeCUDAImageMono32Stereo:
+            case svlTypeCUDAImage3DMap:
             case svlTypeMatrixInt8:
             case svlTypeMatrixInt16:
             case svlTypeMatrixInt32:
@@ -234,15 +246,15 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
             case svlTypeMatrixUInt64:
             case svlTypeMatrixFloat:
             case svlTypeMatrixDouble:
-            case svlTypeImage3DMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeCameraGeometry:
             case svlTypeBlobs:
-            return SVL_FAIL;
+                return SVL_FAIL;
         }
     }
 

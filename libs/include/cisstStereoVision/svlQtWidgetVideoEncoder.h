@@ -25,27 +25,33 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlRequiredInterfaces.h>
 #include <cisstStereoVision/svlVideoIO.h>
-#include <cisstStereoVision/svlQtWorkThread.h>
-#include <cisstStereoVision/svlQtDialog.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
+
+#include <QObject>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>
 
 // Forward declarations
+class svlQtDialog;
+class QListWidgetItem;
 class Ui_WidgetVideoEncoder;
 
 
 class CISST_EXPORT svlQtWidgetVideoEncoder: public QObject, public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
     Q_OBJECT
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
 
 public:
     svlQtWidgetVideoEncoder();
-    svlQtWidgetVideoEncoder(const std::string & filename);
+    svlQtWidgetVideoEncoder(const svlQtWidgetVideoEncoder& other);
     ~svlQtWidgetVideoEncoder();
+
+    static svlQtWidgetVideoEncoder* New();
+    static svlQtWidgetVideoEncoder* New(const std::string & filename);
+    void Delete();
 
     bool WaitForClose();
 

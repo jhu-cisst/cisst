@@ -54,8 +54,8 @@ vctFrame4x4<double> robHayati::ForwardKinematics( double q ) const {
 
   case robJoint::HINGE:
     {
-      theta = PositionOffset() + q; // add the joint offset to the joint angle
-
+      theta = theta + PositionOffset() + q;
+ 
       double ca = cos(this->alpha); double sa = sin(this->alpha);	
       double cb = cos(this->beta);  double sb = sin(this->beta);	
       double ct = cos(theta);       double st = sin(theta);
@@ -83,7 +83,8 @@ vctFrame4x4<double> robHayati::ForwardKinematics( double q ) const {
 
   case robJoint::SLIDER:
     {
-      d = PositionOffset() + q;     // add the joint offset to the joint length
+      d = d + PositionOffset() + q;
+
       double ca = cos(this->alpha); double sa = sin(this->alpha);	
       double cb = cos(this->beta);  double sb = sin(this->beta);	
     
@@ -132,7 +133,7 @@ void robHayati::ReadParameters( std::istream& is ) {
 }
 
 void robHayati::WriteParameters( std::ostream& os ) const {
-  os << std::setw(15) << "HAYATI"
+  os << std::setw(10) << "HAYATI"
      << std::setw(10) << alpha 
      << std::setw(10) << beta
      << std::setw(10) << theta

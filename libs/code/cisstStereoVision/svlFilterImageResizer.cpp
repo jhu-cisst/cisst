@@ -129,6 +129,18 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
             case svlTypeImageMono32Stereo:  // To be added
 
                 // Other types may be added in the future
+            case svlTypeImage3DMap:
+            case svlTypeCUDAImageRGB:
+            case svlTypeCUDAImageRGBA:
+            case svlTypeCUDAImageRGBStereo:
+            case svlTypeCUDAImageRGBAStereo:
+            case svlTypeCUDAImageMono8:
+            case svlTypeCUDAImageMono8Stereo:
+            case svlTypeCUDAImageMono16:
+            case svlTypeCUDAImageMono16Stereo:
+            case svlTypeCUDAImageMono32:
+            case svlTypeCUDAImageMono32Stereo:
+            case svlTypeCUDAImage3DMap:
             case svlTypeMatrixInt8:
             case svlTypeMatrixInt16:
             case svlTypeMatrixInt32:
@@ -139,13 +151,13 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
             case svlTypeMatrixUInt64:
             case svlTypeMatrixFloat:
             case svlTypeMatrixDouble:
-            case svlTypeImage3DMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:
             case svlTypeTransform3D:
             case svlTypeTargets:
             case svlTypeText:
+            case svlTypeCameraGeometry:
             case svlTypeBlobs:
             break;
         }

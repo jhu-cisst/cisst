@@ -37,9 +37,32 @@ def TrajectoryJoints( name, qinit, qdmax, period = 0.01 ):
     return trajectory
 
 
-def SetPoints( name, qinit ):
+def TrajectoryInverseKinematics( name,      # task name
+                                 qinit,     # initial joint positions
+                                 robfile,   # file with kinematics
+                                 Rtw0,      # base transformation
+                                 period = 0.01 ):
+
+    trajectory = devInverseKinematics( name,
+                                       period,
+                                       devTrajectory.ENABLED,
+                                       OSA_CPUANY,
+                                       devTrajectory.QUEUE,
+                                       qinit,
+                                       0.1,       # linear velocity
+                                       0.1,       # angular velocity
+                                       robfile,
+                                       Rtw0 )
+
+    # Get the task manager
+    taskManager = mtsManagerLocal.GetInstance()
+    # Add he camera task
+    taskManager.AddComponent( trajectory )
+    return trajectory
+
+def SetPoints( name, dim ):
     # Create setpoints
-    setpoints = devSetPoints( name, qinit )
+    setpoints = devSetPoints( name, dim )
     # Get the task manager
     taskManager = mtsManagerLocal.GetInstance()
     # Add he camera task

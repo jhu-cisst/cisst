@@ -128,7 +128,7 @@ int svlFilterVideoExposureManager::Process(svlProcInfo* procInfo, svlSample* syn
                 // Compute size of saturated area
                 GetSaturationRatio(img, SVL_LEFT, area, maxval);
                 if (area < Tolerance) change = (255 - maxval) / 8;
-                else change = static_cast<int>((Tolerance - area) * 5);
+                else change = std::min(50, static_cast<int>((Tolerance - area) * 25));
 
                 // Get exposure parameters from the capture filter
                 svlFilterSourceVideoCapture::ImageProperties properties;

@@ -63,11 +63,11 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlTrackerMSBruteForce trackeralgo;
     trackeralgo.SetErrorMetric(svlNCC);
     trackeralgo.SetScales(2);
-    trackeralgo.SetTemplateRadius(15);
+    trackeralgo.SetTemplateRadius(45);
     trackeralgo.SetSearchRadius(30);
 
     // setup tracker
-    tracker.SetMovingAverageSmoothing(0.0);
+    tracker.SetMovingAverageSmoothing(1.0);
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
     tracker.SetTracker(trackeralgo);

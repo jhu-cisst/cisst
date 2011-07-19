@@ -28,73 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-
 // Forward declarations
 class svlWindowManagerBase;
-class osaThread;
-class osaThreadSignal;
-
-
-class CISST_EXPORT svlWindowEventHandlerBase
-{
-friend class svlWindowManagerBase;
-friend class svlFilterImageWindow;
-
-public:
-    virtual ~svlWindowEventHandlerBase();
-
-protected:
-    virtual void OnNewFrame(unsigned int frameid);
-    virtual void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid);
-    void GetMousePos(int & x, int & y);
-
-private:
-    int MouseX;
-    int MouseY;
-
-    // called by the Window Manager
-    void SetMousePos(int x, int y);
-};
-
-class CISST_EXPORT svlWindowManagerBase
-{
-public:
-    svlWindowManagerBase(unsigned int numofwins);
-    virtual ~svlWindowManagerBase();
-    void SetEventHandler(svlWindowEventHandlerBase* handler);
-    void SetTitleText(const std::string title);
-    void SetTimestamp(double timestamp);
-    int SetClientSize(unsigned int width, unsigned int height, unsigned int winid);
-    int SetWindowPosition(int x, int y, unsigned int winid);
-    void ResetInitEvent();
-    int WaitForInitEvent();
-
-    // methods to overwrite
-    virtual int DoModal(bool show, bool fullscreen) = 0;
-    virtual void Show(bool show, int winid) = 0;
-    virtual void LockBuffers();
-    virtual void UnlockBuffers();
-    virtual void SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid) = 0;
-    virtual void DrawImages() = 0;
-    virtual void Destroy() = 0;
-    virtual void DestroyThreadSafe() = 0;
-
-protected:
-    std::string Title;
-    double Timestamp;
-    unsigned int NumOfWins;
-    unsigned int *Width, *Height;
-    int *PosX, *PosY;
-    svlWindowEventHandlerBase* EventHandler;
-    osaThreadSignal *InitReadySignal;
-
-    void OnNewFrame(unsigned int frameid);
-    void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid);
-    void GetMousePos(int& x, int& y);
-    void SetMousePos(int x, int y);
-};
-
-
+class svlWindowEventHandlerBase;
 class svlWindowManagerThreadProc;
 
 
@@ -140,15 +76,6 @@ protected:
     virtual void SetPositionRCommand(const vctInt2 & position);
     virtual void GetPositionLCommand(vctInt2 & position) const;
     virtual void GetPositionRCommand(vctInt2 & position) const;
-};
-
-
-class CISST_EXPORT svlWindowManagerThreadProc
-{
-public:
-    svlWindowManagerThreadProc() {}
-    ~svlWindowManagerThreadProc() {}
-    void* Proc(svlFilterImageWindow* obj);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageWindow)

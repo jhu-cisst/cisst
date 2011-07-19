@@ -244,7 +244,9 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 				   const vctFrm3& Rts,
 				   double tolerance, 
 				   size_t Niterations ){
-  vctFrame4x4<double> Rts4x4( Rts.Rotation(), Rts.Translation() );
+  vctFrm3 Rtsn( Rts );
+  Rtsn.Rotation().NormalizedSelf();
+  vctFrame4x4<double> Rts4x4( Rtsn.Rotation(), Rtsn.Translation());
   return InverseKinematics( q, Rts4x4, tolerance, Niterations );
 }
 
@@ -299,7 +301,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   for( i=0; i<Niterations && tolerance<ndq; i++ ){
 
     // Evaluate the forward kinematics
-    vctFrame4x4<double,VCT_ROW_MAJOR> Rt = ForwardKinematics( q );
+    vctFrame4x4<double,VCT_ROW_MAJOR> Rt( ForwardKinematics( q ) );
     // Evaluate the spatial Jacobian (also evaluate the forward kin)
     JacobianSpatial( q );
 
@@ -915,40 +917,281 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
   return trq;
 }
 
-void robManipulator::Print() const {
-  //for(size_t i=0; i<links.size(); i++){
-  //std::cout << "Link " << i << ": " << std::endl << links[i].WriteLink() << std::endl;
-  //}
-}
+#include <cisstRobot/robDH.h>
+#include <cisstRobot/robModifiedDH.h>
+#include <cisstRobot/robHayati.h>
 
-/*
-robManipulator::Errno robManipulator::JointPosition( const vctDynamicVector<double>& q ){
+vctFixedSizeMatrix<double,4,4>
+robManipulator::SE3Difference( const vctFrame4x4<double>& Rt1,
+			       const vctFrame4x4<double>& Rt2 ) const {
   
-  if( q.size() == links.size() ){
-    for(size_t i=0; i<links.size(); i++)
-      joints[i].Position( q[i] );
-    ForwardKinematics();
-    return robManipulator::ESUCCESS;;
-  }
-  else{
-    std::cout << "robManipulator::JointPosition: Got " << q.size() 
-	 << " joints, expected " << links.size() << std::endl;
-    return robManipulator::EFAILURE;
-  }
-}
-*/
-/*
-vctDynamicVector<double>       robManipulator::JointPosition( ) {
-  vctDynamicVector<double> q(q.size(), 0.0);
-  for(size_t i=0; i<links.size(); i++)
-    q[i] = joints[i].Position();
-  return q;
-}
-*/
-/*
-robManipulator::Errno JointForceTorque( const vctDynamicVector<double>& q );
-vctDynamicVector<double>       JointForceTorque( ) const;
+  vctFixedSizeMatrix<double,4,4> dRt(0.0);
 
-robManipulator::Errno ActuatorForceTorque( const vctDynamicVector<double>& q );
-vctDynamicVector<double>       ActuatorForceTorque( ) const;
+  for( size_t r=0; r<4; r++ ){
+    for( size_t c=0; c<4; c++ ){
+      dRt[r][c] = Rt1[r][c] - Rt2[r][c];
+    }
+  }
+  return dRt;
+}
+
+void 
+robManipulator::AddIdentificationColumn
+( vctDynamicMatrix<double>& J, 
+  vctFixedSizeMatrix<double,4,4>& delRt ) const{
+
+  size_t c = J.cols();
+  J.resize( 6, c+1 );
+  J[0][c] = delRt[0][3];   // dx
+  J[1][c] = delRt[1][3];   // dy
+  J[2][c] = delRt[2][3];   // dz
+
+  J[3][c] = (delRt[2][1] - delRt[1][2])/2.0;  // average wx
+  J[4][c] = (delRt[0][2] - delRt[2][0])/2.0;  // average wy
+  J[5][c] = (delRt[1][0] - delRt[0][1])/2.0;  // average wz
+  
+}
+
+vctDynamicMatrix<double> 
+robManipulator::JacobianKinematicsIdentification
+( const vctDynamicVector<double>& q, double epsilon ) const {
+
+  // the identification jacobian
+  vctDynamicMatrix<double> J(0,0,VCT_COL_MAJOR);
+
+  // the forward kinematics at q
+  vctFrame4x4<double> Rt = ForwardKinematics( q );
+  vctFrame4x4<double> Rt4x4i( Rt );
+  Rt4x4i.InverseSelf();
+
+  // We need a 4x4 matrix because we will mutiply with twists matrices
+  vctFixedSizeMatrix<double,4,4> Rti( Rt4x4i );
+
+  // for each link
+  for( size_t i=0; i<links.size(); i++ ){
+
+    // get the kinematics parameters
+    robKinematics* ki = links[i].GetKinematics();
+
+    // for each parameter
+    switch( ki->GetConvention() ){
+      
+    case robKinematics::STANDARD_DH:
+      {
+	robDH* dh = dynamic_cast<robDH*>( ki );
+
+	{
+	  double old = dh->GetRotationX();
+	  dh->SetRotationX( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  dh->SetRotationX( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+	{
+	  double old = dh->GetTranslationX();
+	  dh->SetTranslationX( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  dh->SetTranslationX( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+	{
+	  double old = dh->GetRotationZ();
+	  dh->SetRotationZ( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  dh->SetRotationZ( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+	{
+	  double old = dh->GetTranslationZ();
+	  dh->SetTranslationZ( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  dh->SetTranslationZ( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+	
+      }
+      break;
+      
+    case robKinematics::MODIFIED_DH:
+      {
+	robModifiedDH* mdh = dynamic_cast<robModifiedDH*>( ki );
+
+	{
+	  double old = mdh->GetRotationX();
+	  mdh->SetRotationX( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  mdh->SetRotationX( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+	{
+	  double old = mdh->GetTranslationX();
+	  mdh->SetTranslationX( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  mdh->SetTranslationX( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+	{
+	  double old = mdh->GetRotationZ();
+	  mdh->SetRotationZ( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  mdh->SetRotationZ( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+	{
+	  double old = mdh->GetTranslationZ();
+	  mdh->SetTranslationZ( old + epsilon );
+	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	  mdh->SetTranslationZ( old );
+	  vctFixedSizeMatrix<double,4,4> delRt;
+	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	  AddIdentificationColumn( J, delRt );
+	}
+
+      }
+      break;
+      
+    case robKinematics::HAYATI:
+      {
+	robHayati* h = dynamic_cast<robHayati*>( ki );
+
+	switch( h->GetType() ){
+	case robJoint::HINGE:
+	  {
+
+	    {
+	      double old = h->GetRotationX();
+	      h->SetRotationX( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetRotationX( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_,Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+
+	    {
+	      double old = h->GetRotationY();
+	      h->SetRotationY( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetRotationY( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+
+	    {
+	      double old = h->GetRotationZ();
+	      h->SetRotationZ( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetRotationZ( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+	    
+	    {
+	      double old = h->GetTranslationX();
+	      h->SetTranslationX( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetTranslationX( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+
+	  }
+	  break;
+
+	case robJoint::SLIDER:
+	  {
+
+	    {
+	      double old = h->GetRotationX();
+	      h->SetRotationX( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetRotationX( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+
+	    {
+	      double old = h->GetRotationY();
+	      h->SetRotationY( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetRotationY( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+
+	    {
+	      double old = h->GetTranslationZ();
+	      h->SetTranslationZ( old + epsilon );
+	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+	      h->SetTranslationZ( old );
+	      vctFixedSizeMatrix<double,4,4> delRt;
+	      delRt = Rti*SE3Difference( Rt_,Rt )/epsilon;
+	      AddIdentificationColumn( J, delRt );
+	    }
+
+	  }
+	  break;
+
+	default:
+	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			    << "Unsupported Hayati joint." << std::endl;
+	}
+
+      }
+      break;
+
+    default:
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< "Unsupported kinematic convention." << std::endl;
+
+    }
+
+  }
+
+  return J;
+}
+
+
+void robManipulator::PrintKinematics( std::ostream& os ) const {
+
+  for( size_t i=0; i<links.size(); i++ ){ 
+    links[i].GetKinematics()->Write( os ); 
+    os << std::endl;
+  }
+
+}
+
+
+
+
+
+
+
+/*
+      
 */

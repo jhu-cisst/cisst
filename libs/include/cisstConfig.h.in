@@ -67,5 +67,8 @@ http://www.cisst.org/cisst/license.txt.
 // Using Qt or not
 #cmakedefine01 CISST_HAS_QT
 
+// Using OpenGL or not
+#cmakedefine01 CISST_HAS_OPENGL
+
 
 #endif // _cisstConfig_h

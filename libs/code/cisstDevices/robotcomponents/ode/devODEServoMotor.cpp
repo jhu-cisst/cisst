@@ -18,7 +18,6 @@ devODEServoMotor::devODEServoMotor( dWorldID world,
     dJointSetAMotorAxis( MotorID(), 0, 2, axis[0], axis[1], axis[2] );
 
     SetVelocity( 0.0 );    // idle the motor
-
   }
 
   if( motortype == dJointTypeSlider ){
@@ -28,7 +27,6 @@ devODEServoMotor::devODEServoMotor( dWorldID world,
     dJointSetLMotorAxis( MotorID(), 0, 2, axis[0], axis[1], axis[2] );
 
     SetVelocity( 0.0 );    // idle the motor
-
   }
   
 }
@@ -49,7 +47,6 @@ void devODEServoMotor::SetPosition( double qs, double q, double dt ){
   
 }
 
-
 void devODEServoMotor::SetVelocity( double qd ){
   
   if( dJointGetType( MotorID() ) == dJointTypeAMotor ){
@@ -58,7 +55,7 @@ void devODEServoMotor::SetVelocity( double qd ){
   }
 
   if( dJointGetType( MotorID() ) == dJointTypeLMotor ){
-    dJointSetLMotorParam( MotorID(), dParamVel,  qd );
+    dJointSetLMotorParam( MotorID(), dParamVel,  qd/1000.0 );
     dJointSetLMotorParam( MotorID(), dParamFMax, ftmax );
   }
   

@@ -310,7 +310,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
 
     // if the buffer is full, just scan all elements otherwise scan up to last index
     if (this->IndexLast < this->IndexFirst) {
-        indexLast = this->Data.size();
+        indexLast = this->Data.size()-1;
     } else {
         indexLast = this->IndexLast;
     }
@@ -318,8 +318,10 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
 
     // iterate
     double value;
+	max.X() = min.X() = currentPointer->X();
+	max.Y() = min.Y() = currentPointer->Y();
     for (;
-         currentPointer != lastPointer;
+         currentPointer <= lastPointer;
          currentPointer += stridePointer) {
         value = currentPointer->X();
         if (value < min.X()) {
@@ -360,16 +362,17 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max,  bool a
 
     // if the buffer is full, just scan all elements otherwise scan up to last index
     if (this->IndexLast < this->IndexFirst) {
-        indexLast = this->Data.size();
+        indexLast = this->Data.size()-1;
     } else {
-        indexLast = ((this->IndexLast+1) >= this->Data.size()) ? this->Data.size()-1: this->IndexLast+1;
+        indexLast = this->IndexLast;
     }
     const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
 
     // iterate
     double value;
+	max = min = currentPointer->X();
     for (;
-         currentPointer != lastPointer;
+         currentPointer <= lastPointer;
          currentPointer += stridePointer) {
         value = currentPointer->X();
         if (value < min) {
@@ -390,7 +393,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max) const
 
     // if the buffer is full, just scan all elements otherwise scan up to last index
     if (this->IndexLast < this->IndexFirst) {
-        indexLast = this->Data.size();
+        indexLast = this->Data.size()-1;
     } else {
         indexLast = this->IndexLast;
     }
@@ -398,8 +401,9 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max) const
 
     // iterate
     double value;
+	min = max = currentPointer->Y();
     for (;
-         currentPointer != lastPointer;
+         currentPointer <= lastPointer;
          currentPointer += stridePointer) {
         value = currentPointer->Y();
         if (value < min) {

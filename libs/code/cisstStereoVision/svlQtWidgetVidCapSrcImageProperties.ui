@@ -68,6 +68,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -94,6 +97,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -113,6 +119,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -125,6 +134,9 @@
        <width>21</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
      </property>
      <property name="text">
       <string/>
@@ -139,14 +151,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -161,14 +176,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -212,14 +230,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -240,6 +261,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -252,6 +276,9 @@
        <width>21</width>
        <height>51</height>
       </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
      </property>
      <property name="text">
       <string/>
@@ -266,14 +293,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -306,6 +336,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
      </property>
      <property name="readOnly">
       <bool>true</bool>
@@ -349,14 +382,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -376,6 +412,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
      </property>
      <property name="readOnly">
       <bool>true</bool>
@@ -416,6 +455,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -435,6 +477,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -447,6 +492,9 @@
        <width>21</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
      </property>
      <property name="text">
       <string/>
@@ -461,14 +509,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -483,14 +534,17 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="minimum">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>4096</number>
      </property>
      <property name="value">
-      <number>10</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -504,6 +558,9 @@
        <width>21</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
      </property>
      <property name="text">
       <string/>
@@ -524,6 +581,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -533,24 +593,17 @@
  </widget>
  <tabstops>
   <tabstop>ShutterSlider</tabstop>
-  <tabstop>ShutterText</tabstop>
-  <tabstop>ShutterAutoCB</tabstop>
   <tabstop>GainSlider</tabstop>
-  <tabstop>GainText</tabstop>
-  <tabstop>GainAutoCB</tabstop>
   <tabstop>ColorUSlider</tabstop>
-  <tabstop>ColorUText</tabstop>
-  <tabstop>ColorAutoCB</tabstop>
   <tabstop>ColorVSlider</tabstop>
-  <tabstop>ColorVText</tabstop>
   <tabstop>BrightnessSlider</tabstop>
-  <tabstop>BrightnessText</tabstop>
-  <tabstop>BrightnessAutoCB</tabstop>
   <tabstop>GammaSlider</tabstop>
-  <tabstop>GammaText</tabstop>
-  <tabstop>GammaAutoCB</tabstop>
   <tabstop>SaturationSlider</tabstop>
-  <tabstop>SaturationText</tabstop>
+  <tabstop>ShutterAutoCB</tabstop>
+  <tabstop>GainAutoCB</tabstop>
+  <tabstop>ColorAutoCB</tabstop>
+  <tabstop>BrightnessAutoCB</tabstop>
+  <tabstop>GammaAutoCB</tabstop>
   <tabstop>SaturationAutoCB</tabstop>
  </tabstops>
  <resources/>

@@ -1441,6 +1441,49 @@ svlImageProcessingHelper::RectificationInternals::~RectificationInternals()
     Release();
 }
 
+bool svlImageProcessingHelper::RectificationInternals::Generate(unsigned int width, unsigned int height,
+                                                                const svlSampleCameraGeometry & geometry,
+                                                                unsigned int cam_id)
+{
+    const unsigned int cam_count = geometry.GetCameraCount();
+    if (cam_id >= cam_count) return false;
+
+    const svlSampleCameraGeometry::Intrinsics & intrinsics = geometry.GetIntrinsics(cam_id);
+
+    // `intrinsics.fc` is of type `vct2`
+    // `intrinsics.cc` is of type `vct2`
+    // `intrinsics.a`  is of type `double`
+    // `intrinsics.kc` is of type `vct5`
+
+    if (cam_count == 1) {
+    // Single camera
+
+        // TO DO
+    }
+    else if (cam_count == 2) {
+    // Stereo camera rig
+
+        // The extrinsic parameters in the Camera Calibration Toolbox (CCT) format are
+        // only specified once, for the right camera. The left camera extrinsics
+        // are assumed to be all zero (i.e. the left camera frame is the world frame).
+        // Therefore, the variable `extrinsics_orig` will be zero and `extrinsics` will
+        // contain the extrinsics from the CCT file format.
+        const svlSampleCameraGeometry::Extrinsics & extrinsics_orig = geometry.GetExtrinsics(SVL_LEFT);
+        const svlSampleCameraGeometry::Extrinsics & extrinsics      = geometry.GetExtrinsics(SVL_RIGHT);
+
+        // `extrinsics.om` is of type `vctRodRot3`
+        // `extrinsics.T`  is of type `vct3`
+
+        // TO DO
+    }
+    else {
+        // Higher number of cameras are not supported yet
+        return false;
+    }
+
+    return false;
+}
+
 bool svlImageProcessingHelper::RectificationInternals::Load(const std::string &filepath, int explen)
 {
     Release();

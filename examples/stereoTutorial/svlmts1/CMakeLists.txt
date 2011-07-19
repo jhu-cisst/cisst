@@ -12,20 +12,7 @@
 # 
 # --- end cisst license ---
 
-# name of project and executable
-PROJECT(svlExMultitask1)
 
-# add include paths
-INCLUDE_DIRECTORIES(${svlExMultitask1_SOURCE_DIR})
+ADD_EXECUTABLE(svlExMultitask1 exampleFilter.cpp exampleComponent.cpp main.cpp exampleFilter.h exampleComponent.h)
 
-# name the main executable and specifies with source files to use
-ADD_EXECUTABLE(svlExMultitask1
-               exampleFilter.cpp
-               exampleComponent.cpp
-               main.cpp
-               exampleFilter.h
-               exampleComponent.h
-	       )
-
-# link with the cisst libraries
-CISST_REQUIRES("svlExMultitask1" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstStereoVision")
+CISST_REQUIRES("svlExMultitask1" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision")

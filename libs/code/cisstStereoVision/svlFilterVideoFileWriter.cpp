@@ -411,48 +411,67 @@ int svlFilterVideoFileWriter::LoadCodec(const std::string &filepath, unsigned in
     return SVL_FAIL;
 }
 
-int svlFilterVideoFileWriter::GetFilePath(std::string &filepath, unsigned int videoch) const
+std::string svlFilterVideoFileWriter::GetFilePath(unsigned int videoch) const
 {
     if (FilePath.size() <= videoch) {
         CMN_LOG_CLASS_INIT_ERROR << "GetFilePath: video channel out of range: " << videoch << std::endl;
-        return SVL_FAIL;
+        return "";
     }
-    filepath = FilePath[videoch];
+    return FilePath[videoch];
+}
+
+int svlFilterVideoFileWriter::GetFilePath(std::string &filepath, unsigned int videoch) const
+{
+    filepath = GetFilePath(videoch);
+    if (filepath.empty()) return SVL_FAIL;
     return SVL_OK;
 }
 
-int svlFilterVideoFileWriter::GetCodecName(std::string &encoder, unsigned int videoch) const
+std::string svlFilterVideoFileWriter::GetCodecName(unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
         CMN_LOG_CLASS_INIT_ERROR << "GetCodecName: video channel out of range: " << videoch << std::endl;
-        return SVL_FAIL;
+        return "";
     }
     if (!CodecParam[videoch] ||
         CodecParam[videoch]->size < sizeof(svlVideoIO::Compression)) {
         CMN_LOG_CLASS_INIT_ERROR << "SaveCodec: invalid compression structure" << std::endl;
-        return SVL_FAIL;
+        return "";
     }
 
-    encoder.assign(CodecParam[videoch]->name);
+    return CodecParam[videoch]->name;
+}
 
+int svlFilterVideoFileWriter::GetCodecName(std::string &encoder, unsigned int videoch) const
+{
+    encoder = GetCodecName(videoch);
+    if (encoder.empty()) return SVL_FAIL;
     return SVL_OK;
 }
 
-int svlFilterVideoFileWriter::GetCodecParams(svlVideoIO::Compression **compression, unsigned int videoch) const
+svlVideoIO::Compression* svlFilterVideoFileWriter::GetCodecParams(unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
         CMN_LOG_CLASS_INIT_ERROR << "GetCodec: video channel out of range: " << videoch << std::endl;
-        return SVL_FAIL;
+        return 0;
     }
     if (!CodecParam[videoch] ||
         CodecParam[videoch]->size < sizeof(svlVideoIO::Compression)) {
         CMN_LOG_CLASS_INIT_ERROR << "GetCodec: invalid compression structure" << std::endl;
-        return SVL_FAIL;
+        return 0;
     }
 
-    compression[0] = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[CodecParam[videoch]->size]);
-    memcpy(compression[0], CodecParam[videoch], CodecParam[videoch]->size);
+    svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[CodecParam[videoch]->size]);
+    memcpy(compression, CodecParam[videoch], CodecParam[videoch]->size);
 
+    return compression;
+}
+
+int svlFilterVideoFileWriter::GetCodecParams(svlVideoIO::Compression **compression, unsigned int videoch) const
+{
+    if (!compression) return SVL_FAIL;
+    compression[0] = GetCodecParams(videoch);
+    if (compression[0] == 0) return SVL_FAIL;
     return SVL_OK;
 }
 

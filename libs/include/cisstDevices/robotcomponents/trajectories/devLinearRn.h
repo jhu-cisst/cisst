@@ -38,6 +38,8 @@ class CISST_EXPORT devLinearRn : public devTrajectory {
 	       const vctDynamicVector<double>& qdmax );
   ~devLinearRn(){}
 
+  void Reset( const vctDynamicVector<double>& q );
+
 };
 
 #endif

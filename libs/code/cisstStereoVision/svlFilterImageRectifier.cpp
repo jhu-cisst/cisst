@@ -21,12 +21,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageRectifier.h>
+#include <cisstStereoVision/svlFilterInput.h>
 #include "svlImageProcessingHelper.h"
 
 
-/******************************************/
-/*** svlFilterImageRectifier class ********/
-/******************************************/
+/*************************************/
+/*** svlFilterImageRectifier class ***/
+/*************************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageRectifier, svlFilterBase)
 
@@ -38,6 +39,9 @@ svlFilterImageRectifier::svlFilterImageRectifier() :
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
+
+    AddInput("calibration", false);
+    AddInputType("calibration", svlTypeCameraGeometry);
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
@@ -85,20 +89,37 @@ int svlFilterImageRectifier::Process(svlProcInfo* procInfo, svlSample* syncInput
     syncOutput = OutputImage;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
-    svlSampleImage* id = dynamic_cast<svlSampleImage*>(syncInput);
-    unsigned int videochannels = id->GetVideoChannels();
+    svlSampleImage* inimg = dynamic_cast<svlSampleImage*>(syncInput);
+    unsigned int videochannels = inimg->GetVideoChannels();
     svlImageProcessingHelper::RectificationInternals* table;
     unsigned int idx;
+
+    _OnSingleThread(procInfo)
+    {
+        svlSampleCameraGeometry* camgeo = dynamic_cast<svlSampleCameraGeometry*>(GetInput("calibration")->PullSample(false));
+        if (camgeo) {
+            for (idx = 0; idx < videochannels; idx ++) {
+                table = new svlImageProcessingHelper::RectificationInternals;
+                if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {
+                    delete table;
+                    continue;
+                }
+                Tables[idx].Set(table);
+            }
+        }
+    }
+
+    _SynchronizeThreads(procInfo);
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
         // Processing
         table = dynamic_cast<svlImageProcessingHelper::RectificationInternals*>(Tables[idx].Get());
         if (table) {
-            svlImageProcessing::Rectify(id, idx, OutputImage, idx, InterpolationEnabled, Tables[idx]);
+            svlImageProcessing::Rectify(inimg, idx, OutputImage, idx, InterpolationEnabled, Tables[idx]);
         }
         else {
-            memcpy(OutputImage->GetUCharPointer(idx), id->GetUCharPointer(idx), id->GetDataSize(idx));
+            memcpy(OutputImage->GetUCharPointer(idx), inimg->GetUCharPointer(idx), inimg->GetDataSize(idx));
         }
     }
 

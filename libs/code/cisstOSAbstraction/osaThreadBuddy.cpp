@@ -39,6 +39,8 @@ http://www.cisst.org/cisst/license.txt.
     const char __lock_filepath[] = "/var/lock/subsys/rtai";
     const char __lock_filename[] = "/var/lock/subsys/rtai/rtai.lock";
     char __lock_file[256];
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+#include <string.h>
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #elif (CISST_OS == CISST_QNX)

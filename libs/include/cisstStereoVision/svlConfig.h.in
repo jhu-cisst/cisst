@@ -69,5 +69,8 @@ http://www.cisst.org/cisst/license.txt.
 // Support for PNG
 #cmakedefine01 CISST_SVL_HAS_PNG
 
+// Support for CUDA
+#cmakedefine01 CISST_SVL_HAS_CUDA
+
 #endif // _svlConfig_h
 

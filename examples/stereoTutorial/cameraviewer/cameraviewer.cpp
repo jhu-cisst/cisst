@@ -27,19 +27,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-//#define USE_QT_DIALOGS
-
-#ifdef USE_QT_DIALOGS
+#if CISST_HAS_QT
+    #include <cisstStereoVision/svlQtObjectFactory.h>
+    #include <cisstStereoVision/svlQtWidgetFileOpen.h>
+    #include <cisstStereoVision/svlQtWidgetFramerate.h>
     #include <cisstStereoVision/svlQtWidgetVideoEncoder.h>
+    #include <cisstStereoVision/svlQtWidgetVidCapSrcImageProperties.h>
+    #if CISST_HAS_OPENGL
+        #include <cisstStereoVision/svlFilterImageWindowQt.h>
+    #endif
+    // Qt dialogs are disabled by default
+    #define _USE_QT_    0
 #endif
 
 
 using namespace std;
-
-bool interpolation = false;
-bool save = false;
-int  width = -1;
-int  height = -1;
 
 
 ////////////////////////////////////////
@@ -93,7 +95,7 @@ public:
                 case '9':
                     if (Gamma) {
                         Gamma->GetGamma(gamma);
-                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        cout << " >>> Gamma: " << gamma - 5.0 << endl;
                         Gamma->SetGamma(gamma - 5.0);
                     }
                 break;
@@ -101,7 +103,7 @@ public:
                 case '0':
                     if (Gamma) {
                         Gamma->GetGamma(gamma);
-                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        cout << " >>> Gamma: " << gamma + 5.0 << endl;
                         Gamma->SetGamma(gamma + 5.0);
                     }
                 break;
@@ -124,27 +126,24 @@ public:
 //  CameraViewer  //
 ////////////////////
 
-void CameraViewer()
+int CameraViewer(bool interpolation, bool save, int width, int height)
 {
-#ifdef USE_QT_DIALOGS
-    START_QT_ENVIRONMENT
-#endif
-
     mtsComponentViewer *componentViewer = 0;
 
     svlInitialize();
 
     // instantiating SVL stream and filters
-    svlStreamManager stream(1);
+    svlStreamManager stream(8);
     svlFilterSourceVideoCapture source(1);
     svlFilterVideoExposureManager exposure;
     svlFilterImageExposureCorrection gamma;
-#if (CISST_OS == CISST_WINDOWS)
-    svlFilterImageChannelSwapper rgb_swapper;
-#endif // (CISST_OS == CISST_WINDOWS)
     svlFilterSplitter splitter;
     svlFilterImageResizer resizer;
+#if _USE_QT_ && CISST_HAS_OPENGL
+    svlFilterImageWindowQt window;
+#else // _USE_QT_ && CISST_HAS_OPENGL
     svlFilterImageWindow window;
+#endif // _USE_QT_ && CISST_HAS_OPENGL
     svlFilterImageOverlay overlay;
     CViewerEventHandler window_eh;
     svlFilterVideoFileWriter videowriter;
@@ -172,28 +171,42 @@ void CameraViewer()
     svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup writer
-    if (save == true) {
+    while (save == true) {
 
-#ifdef USE_QT_DIALOGS
-        std::string extension, filename = "video.avi";
-        svlVideoIO::GetExtension(filename, extension);
+#if _USE_QT_
+        svlQtWidgetFileOpen* widget_fileopen = svlQtWidgetFileOpen::New("Video Files", "avi;mpg;cvi;ncvi;njpg;", true);
+        if (widget_fileopen->WaitForClose()) {
+            videowriter.SetFilePath(widget_fileopen->GetFilePath());
+        }
+        else {
+            cerr << "! Error: no file was selected" << endl;
+            save = false;
+            break;
+        }
+        widget_fileopen->Delete();
 
-        videowriter.SetFilePath(filename);
-        videowriter.DialogFramerate();
+        svlQtWidgetFramerate* widget_framerate = svlQtWidgetFramerate::New();
+        if (widget_framerate->WaitForClose()) {
+            videowriter.SetFramerate(widget_framerate->GetFramerate());
+        }
+        widget_framerate->Delete();
 
-        svlQtWidgetVideoEncoder widget(filename);
-        if (widget.WaitForClose()) {
-            svlVideoIO::Compression* codec_params = widget.GetCodecParams();
+        svlQtWidgetVideoEncoder* widget_encoder = svlQtWidgetVideoEncoder::New(videowriter.GetFilePath());
+        if (widget_encoder->WaitForClose()) {
+            svlVideoIO::Compression* codec_params = widget_encoder->GetCodecParams();
             videowriter.SetCodecParams(codec_params);
             svlVideoIO::ReleaseCompression(codec_params);
         }
+        widget_encoder->Delete();
 
         videowriter.OpenFile();
-        videowriter.Pause();
-#else
+
+#else // _USE_QT_
         videowriter.DialogOpenFile();
+#endif // _USE_QT_
+
         videowriter.Pause();
-#endif
+        break;
     }
 
     // setup image writer
@@ -246,10 +259,11 @@ void CameraViewer()
     stream.SetSourceFilter(&source);
         output = source.GetOutput();
 
-#if (CISST_OS == CISST_WINDOWS)
+#if 0
+    svlFilterImageChannelSwapper rgb_swapper;
     output->Connect(rgb_swapper.GetInput());
         output = rgb_swapper.GetOutput();
-#endif // (CISST_OS == CISST_WINDOWS)
+#endif
 
     // Add exposure correction
     output->Connect(exposure.GetInput());
@@ -270,9 +284,10 @@ void CameraViewer()
         output = splitter.GetOutput();
 
     if (save == true) {
-        // If saving enabled, then add video writer on separate branch
+        // If saving is enabled add video writer on separate branch
         splitteroutput->SetBlock(true);
-        splitteroutput->Connect(videowriter.GetInput());
+        output->Connect(videowriter.GetInput());
+            output = videowriter.GetOutput();
     }
 
     // Add image file writer
@@ -290,7 +305,7 @@ void CameraViewer()
     cerr << "Starting stream... ";
 
     // initialize and start stream
-    if (stream.Play() != SVL_OK) return;
+    if (stream.Play() != SVL_OK) return 0;
 
     cerr << "Done" << endl;
 
@@ -327,9 +342,17 @@ void CameraViewer()
 
             case 'i':
                 // Adjust image properties
+#if _USE_QT_
+                {
+                svlQtWidgetVidCapSrcImageProperties* widget_improp = svlQtWidgetVidCapSrcImageProperties::New(&source);
+                widget_improp->WaitForClose();
+                widget_improp->Delete();
+                }
+#else // _USE_QT_
                 cerr << endl << endl;
                 source.DialogImageProperties();
                 cerr << endl << endl;
+#endif // _USE_QT_
             break;
 
             case 'c':
@@ -361,11 +384,13 @@ void CameraViewer()
     // release stream
     stream.Release();
 
+    if (save == true) {
+        splitter.GetOutput("output2")->Disconnect(); // Workaround: to avoid crash
+    }
+
     cerr << "Stream released" << endl;
 
-#ifdef USE_QT_DIALOGS
-    STOP_QT_ENVIRONMENT
-#endif
+    return 0;
 }
 
 
@@ -402,16 +427,20 @@ int ParseNumber(char* string, unsigned int maxlen)
     return ivalue;
 }
 
-
-int main(int argc, char** argv)
+int my_main(int argc, char** argv)
 {
-    cerr << endl << "stereoTutorialCameraViewer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << "svlExCameraViewer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl;
-    cerr << "Enter 'stereoTutorialCameraViewer -?' for help." << endl;
+    cerr << "Enter 'svlExCameraViewer -?' for help." << endl;
 
     //////////////////////////////
     // parsing arguments
     int j, options, ivalue;
+
+    bool interpolation = false;
+    bool save = false;
+    int  width = -1;
+    int  height = -1;
 
     options = argc - 1;
 
@@ -421,15 +450,15 @@ int main(int argc, char** argv)
         switch (argv[j][1]) {
             case '?':
                 cerr << "Command line format:" << endl;
-                cerr << "     stereoTutorialCameraViewer [options]" << endl;
+                cerr << "     svlExCameraViewer [options]" << endl;
                 cerr << "Options:" << endl;
                 cerr << "     -v        Save video file" << endl;
                 cerr << "     -i        Interpolation ON [default: OFF]" << endl;
                 cerr << "     -w#       Displayed image width" << endl;
                 cerr << "     -h#       Displayed image height" << endl;
                 cerr << "Examples:" << endl;
-                cerr << "     stereoTutorialCameraViewer" << endl;
-                cerr << "     stereoTutorialCameraViewer -v -i -w1024 -h768" << endl;
+                cerr << "     svlExCameraViewer" << endl;
+                cerr << "     svlExCameraViewer -v -i -w1024 -h768" << endl;
                 return 1;
             break;
 
@@ -460,9 +489,11 @@ int main(int argc, char** argv)
     //////////////////////////////
     // starting viewer
 
-    CameraViewer();
+    CameraViewer(interpolation, save, width, height);
 
     cerr << "Quit" << endl;
     return 1;
 }
+
+SETUP_QT_ENVIRONMENT(my_main)
 

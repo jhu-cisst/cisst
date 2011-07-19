@@ -30,7 +30,7 @@ int main()
     // Ellipse overlay
     svlOverlayStaticEllipse ellipse_overlay(0,                    // video channel
                                             true,                 // visible
-                                            svlPoint2D(440, 327), // rectangle size and position
+                                            svlPoint2D(440, 327), // center position
                                             48,                   // radius horizontally
                                             32,                   // radius vertically
                                             60.0,                 // angle

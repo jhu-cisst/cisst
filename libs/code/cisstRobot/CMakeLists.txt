@@ -81,6 +81,7 @@ if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
     robCubicSO3.h
     #  robCSCSO3.h
     
+    robExport.h
     robMass.h
     robJoint.h
     
