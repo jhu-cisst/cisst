@@ -27,6 +27,11 @@ mtsCommandWriteReturn::mtsCommandWriteReturn(void)
 {}
 
 
+mtsCommandWriteReturn::mtsCommandWriteReturn(const std::string & name):
+    BaseType(name)
+{}
+
+
 mtsCommandWriteReturn::mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable,
                                              const std::string & name,
                                              const mtsGenericObject * argumentPrototype,

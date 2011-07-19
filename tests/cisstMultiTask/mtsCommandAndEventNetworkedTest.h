@@ -83,13 +83,13 @@ public:
     bool SendAndReceive(osaPipeExec & pipe,
                         const std::string & send,
                         std::string & received,
-                        const double & timeOut = 10.0 * cmn_s);
+                        const double & timeOut = 20.0 * cmn_s);
 
     // send message and test for time out as well as expected answer
     void SendAndVerify(osaPipeExec & pipe,
                        const std::string & send,
                        const std::string & expected,
-                       const double & timeOut = 10.0 * cmn_s);
+                       const double & timeOut = 20.0 * cmn_s);
 
     // start all components
     void StartAllComponents(void);

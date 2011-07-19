@@ -77,9 +77,8 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
 #endif
 
  public:
-    /*! Default constructor.  Does nothing, use Instantiate before
-      using. */
-    mtsFunctionVoidReturn(void);
+    /*! Default constructor.  Does nothing, use Bind before using. */
+    mtsFunctionVoidReturn(const bool isProxy = false);
 
     /*! Destructor. */
     ~mtsFunctionVoidReturn();
@@ -102,7 +101,7 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     mtsExecutionResult operator()(mtsGenericObject & result) const
     { return Execute(result); }
 
-    mtsExecutionResult Execute(mtsGenericObject & result) const;
+    virtual mtsExecutionResult Execute(mtsGenericObject & result) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */

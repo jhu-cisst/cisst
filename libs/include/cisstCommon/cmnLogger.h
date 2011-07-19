@@ -86,11 +86,11 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! Macros defined to use #CMN_LOG_CLASS_INSTANCE for a given level of detail. */
 //@{
-#define CMN_LOG_CLASS_INSTANCE_INIT_ERROR(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_INIT_ERROR)
+#define CMN_LOG_CLASS_INSTANCE_INIT_ERROR(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_INIT_ERROR) << CMN_LOG_DETAILS << " "
 #define CMN_LOG_CLASS_INSTANCE_INIT_WARNING(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_INIT_WARNING)
 #define CMN_LOG_CLASS_INSTANCE_INIT_VERBOSE(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_INIT_VERBOSE)
 #define CMN_LOG_CLASS_INSTANCE_INIT_DEBUG(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_INIT_DEBUG)
-#define CMN_LOG_CLASS_INSTANCE_RUN_ERROR(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_RUN_ERROR)
+#define CMN_LOG_CLASS_INSTANCE_RUN_ERROR(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_RUN_ERROR) << CMN_LOG_DETAILS << " "
 #define CMN_LOG_CLASS_INSTANCE_RUN_WARNING(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_RUN_WARNING)
 #define CMN_LOG_CLASS_INSTANCE_RUN_VERBOSE(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_RUN_VERBOSE)
 #define CMN_LOG_CLASS_INSTANCE_RUN_DEBUG(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LEVEL_RUN_DEBUG)
@@ -99,11 +99,11 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! Macros defined to use #CMN_LOG_CLASS for a given level of detail. */
 //@{
-#define CMN_LOG_CLASS_INIT_ERROR   CMN_LOG_CLASS(CMN_LOG_LEVEL_INIT_ERROR)
+#define CMN_LOG_CLASS_INIT_ERROR   CMN_LOG_CLASS(CMN_LOG_LEVEL_INIT_ERROR) << CMN_LOG_DETAILS << " "
 #define CMN_LOG_CLASS_INIT_WARNING CMN_LOG_CLASS(CMN_LOG_LEVEL_INIT_WARNING)
 #define CMN_LOG_CLASS_INIT_VERBOSE CMN_LOG_CLASS(CMN_LOG_LEVEL_INIT_VERBOSE)
 #define CMN_LOG_CLASS_INIT_DEBUG   CMN_LOG_CLASS(CMN_LOG_LEVEL_INIT_DEBUG)
-#define CMN_LOG_CLASS_RUN_ERROR    CMN_LOG_CLASS(CMN_LOG_LEVEL_RUN_ERROR)
+#define CMN_LOG_CLASS_RUN_ERROR    CMN_LOG_CLASS(CMN_LOG_LEVEL_RUN_ERROR) << CMN_LOG_DETAILS << " "
 #define CMN_LOG_CLASS_RUN_WARNING  CMN_LOG_CLASS(CMN_LOG_LEVEL_RUN_WARNING)
 #define CMN_LOG_CLASS_RUN_VERBOSE  CMN_LOG_CLASS(CMN_LOG_LEVEL_RUN_VERBOSE)
 #define CMN_LOG_CLASS_RUN_DEBUG    CMN_LOG_CLASS(CMN_LOG_LEVEL_RUN_DEBUG)
@@ -141,11 +141,11 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! Macros defined to use #CMN_LOG for a given level of detail. */
 //@{
-#define CMN_LOG_INIT_ERROR   CMN_LOG(CMN_LOG_LEVEL_INIT_ERROR)
+#define CMN_LOG_INIT_ERROR   CMN_LOG(CMN_LOG_LEVEL_INIT_ERROR) << CMN_LOG_DETAILS << " "
 #define CMN_LOG_INIT_WARNING CMN_LOG(CMN_LOG_LEVEL_INIT_WARNING)
 #define CMN_LOG_INIT_VERBOSE CMN_LOG(CMN_LOG_LEVEL_INIT_VERBOSE)
 #define CMN_LOG_INIT_DEBUG   CMN_LOG(CMN_LOG_LEVEL_INIT_DEBUG)
-#define CMN_LOG_RUN_ERROR    CMN_LOG(CMN_LOG_LEVEL_RUN_ERROR)
+#define CMN_LOG_RUN_ERROR    CMN_LOG(CMN_LOG_LEVEL_RUN_ERROR) << CMN_LOG_DETAILS << " "
 #define CMN_LOG_RUN_WARNING  CMN_LOG(CMN_LOG_LEVEL_RUN_WARNING)
 #define CMN_LOG_RUN_VERBOSE  CMN_LOG(CMN_LOG_LEVEL_RUN_VERBOSE)
 #define CMN_LOG_RUN_DEBUG    CMN_LOG(CMN_LOG_LEVEL_RUN_DEBUG)
@@ -236,7 +236,7 @@ class CISST_EXPORT cmnLogger {
       - CMN_LOG_LEVEL_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
       - CMN_LOG_LEVEL_RUN_WARNING: Warnings during normal operations.
       - CMN_LOG_LEVEL_RUN_VERBOSE and CMN_LOG_LEVEL_RUN_DEBUG: Extra messages during normal operations.
-      
+
       Users can define their log mask combining the different log
       levels (e.g. CMN_LOG_LEVEL_RUN_ERROR | CMN_LOG_LEVEL_INIT_ERROR)
       or use existing masks defined in cmnLogLoD.h
@@ -380,7 +380,7 @@ class CISST_EXPORT cmnLogger {
     */
     static bool SetMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask);
 
-    
+
     /*! Returns the cmnLODMultiplexerStreambuf directly. This allows
       manipulation of the streambuffer for operations such as adding or
       deleting channels for the stream..

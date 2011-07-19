@@ -32,8 +32,6 @@ void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, 
     pipe.Write(s, s.length());
 }
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
-
 mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     mtsTaskFromSignal(name),
     UDrawPipeConnected(false),

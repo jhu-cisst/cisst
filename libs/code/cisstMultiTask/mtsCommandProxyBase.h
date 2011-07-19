@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 class mtsCommandProxyBase {
 protected:
     /*! Pointer to mtsFunctionXXX object at the peer's memory space */
-    CommandIDType CommandID;
+    mtsCommandIDType CommandID;
 
     /*! Client ID */
     mtsComponentInterfaceProxyServer::ClientIDType ClientID;
@@ -61,12 +61,12 @@ public:
     }
 
     /*! Set command id */
-    virtual void SetCommandID(const CommandIDType & commandID) {
+    virtual void SetCommandID(const mtsCommandIDType & commandID) {
         CommandID = commandID;
     }
 
     /*! Generate human readable description of this object */
-    void ToStreamBase(const std::string & className, const std::string & commandName, const CommandIDType & commandID, const bool enabled, std::ostream & outputStream) const {
+    void ToStreamBase(const std::string & className, const std::string & commandName, const mtsCommandIDType & commandID, const bool enabled, std::ostream & outputStream) const {
         outputStream << className << ": " << commandName << ", " << commandID << " with ";
         if (NetworkProxyServer) {
             outputStream << NetworkProxyServer->ClassServices()->GetName();

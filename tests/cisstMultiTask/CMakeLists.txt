@@ -15,11 +15,15 @@
 # --- end cisst license ---
 
 # test library
-add_library (cisstMultiTasksTestsLib
+add_library (cisstMultiTaskTestsLib
+             ${IS_SHARED}
+             mtsTestExport.h
              mtsMacrosTestClasses.h
-             mtsMacrosTestClasses.cpp)
+             mtsMacrosTestClasses.cpp
+             mtsTestComponents.h
+             mtsTestComponents.cpp)
 
-cisst_target_link_libraries (cisstMultiTasksTestsLib cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+cisst_target_link_libraries (cisstMultiTaskTestsLib cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
 # all source files
 set (SOURCE_FILES
@@ -51,7 +55,6 @@ set (HEADER_FILES
      mtsMacrosTest.h
      mtsMatrixTest.h
      mtsSerializationTest.h
-     mtsTestComponents.h
      # mtsManagerGlobalTest.h
      mtsManagerLocalTest.h
     )
@@ -73,7 +76,7 @@ add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 
 # add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstMultiTaskTests cisstTestsMain cisstMultiTasksTestsLib)
+target_link_libraries (cisstMultiTaskTests cisstTestsMain cisstMultiTaskTestsLib)
 cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
 

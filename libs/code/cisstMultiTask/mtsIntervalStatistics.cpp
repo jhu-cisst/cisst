@@ -127,7 +127,7 @@ void mtsIntervalStatistics::AddSample(const double &sample) {
 
         //std = sqrt(     sum(Xi^2) /N  - avg^2 )  : see std dev wiki
         StdDev = sqrt((SumOfSquares / (double)NumberOfSamples) - (Avg*Avg) );
-        CMN_LOG_CLASS_RUN_DEBUG<<*this<<std::endl;
+        // CMN_LOG_CLASS_RUN_DEBUG << *this<<std::endl;
 
         //reset
         NumberOfSamples = 0;

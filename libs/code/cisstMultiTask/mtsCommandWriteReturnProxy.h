@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-04-29
 
   (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -21,24 +21,24 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command proxy class with one argument
+  \brief Defines a command proxy class with result.
 */
 
-#ifndef _mtsCommandReadProxy_h
-#define _mtsCommandReadProxy_h
+#ifndef _mtsCommandWriteReturnProxy_h
+#define _mtsCommandWriteReturnProxy_h
 
-#include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsCommandWriteReturn.h>
 #include "mtsCommandProxyBase.h"
 #include "mtsProxySerializer.h"
 
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandReadProxy is a proxy for mtsCommandRead. When Execute()
-  method is called, the command id with payload is sent to the connected peer
-  interface across a network.
+  mtsCommandWriteReturnProxy is a proxy for mtsCommandWriteReturn.
+  When Execute() method is called, the command id with two payloads is sent to
+  the connected peer interface across a network.
 */
-class mtsCommandReadProxy: public mtsCommandRead, public mtsCommandProxyBase
+class mtsCommandWriteReturnProxy: public mtsCommandWriteReturn, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
 
@@ -48,21 +48,21 @@ protected:
 
 public:
     /*! Typedef for base type */
-    typedef mtsCommandRead BaseType;
+    typedef mtsCommandWriteReturn BaseType;
 
     /*! Constructor. Command proxy is disabled by default and is enabled when
-        command id and network proxy are set. */
-    mtsCommandReadProxy(const std::string & commandName) : BaseType(commandName) {
+      command id and network proxy are set. */
+    mtsCommandWriteReturnProxy(const std::string & commandName): BaseType(commandName) {
         Disable();
     }
-    ~mtsCommandReadProxy() {
-        if (ArgumentPrototype) {
-            delete ArgumentPrototype;
+    ~mtsCommandWriteReturnProxy() {
+        if (ResultPrototype) {
+            delete ResultPrototype;
         }
     }
 
     /*! Set command id and register serializer to network proxy. This method
-        should be called after SetNetworkProxy() is called. */
+      should be called after SetNetworkProxy() is called. */
     void SetCommandID(const mtsCommandIDType & commandID) {
         mtsCommandProxyBase::SetCommandID(commandID);
 
@@ -73,27 +73,35 @@ public:
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
+        this->ArgumentPrototype = argumentPrototype;
+    }
+
+    /*! Set result prototype */
+    void SetResultPrototype(mtsGenericObject * resultPrototype) {
+        this->ResultPrototype = resultPrototype;
     }
 
     /*! The execute method. */
-    virtual mtsExecutionResult Execute(mtsGenericObject & placeHolder) {
+    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsGenericObject & result) {
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
-        mtsExecutionResult result;
+        mtsExecutionResult executionResult;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandReadSerialized(ClientID, CommandID, result, placeHolder)) {
+            if (!NetworkProxyServer->SendExecuteCommandWriteReturnSerialized(ClientID, CommandID,
+                                                                             executionResult,
+                                                                             argument,
+                                                                             result)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
-        return result;
+        return executionResult;
     }
 
     /*! Generate human readable description of this object */
     void ToStream(std::ostream & outputStream) const {
-        ToStreamBase("mtsCommandReadProxy", Name, CommandID, IsEnabled(), outputStream);
+        ToStreamBase("mtsCommandWriteReturnProxy", Name, CommandID, IsEnabled(), outputStream);
     }
 };
 
-#endif // _mtsCommandReadProxy_h
+#endif // _mtsCommandWriteReturnProxy_h

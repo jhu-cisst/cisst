@@ -47,7 +47,7 @@ class mtsEventHandlerList;
 /*!
   \file
   \brief Declaration of mtsInterfaceRequired
- */
+*/
 
 
 /*!
@@ -57,16 +57,16 @@ class mtsEventHandlerList;
   (mtsComponent, mtsTask, ...).  The required interface gets populated
   with pointers to command objects, which have four signatures:
 
-     Void:           no parameters
-     Read:           one non-const parameter
-     Write:          one const parameter
-     QualifiedRead:  one non-const (read) and one const (write) parameter
+  Void:           no parameters
+  Read:           one non-const parameter
+  Write:          one const parameter
+  QualifiedRead:  one non-const (read) and one const (write) parameter
 
   The required interface may also have command object pointers for the
   following types of event handlers:
 
-     Void:           no parameters
-     Write:          one const parameter
+  Void:           no parameters
+  Write:          one const parameter
 
   When the required interface of this component is connected to the
   provided interface of another component, the command object pointers
@@ -81,7 +81,7 @@ class mtsEventHandlerList;
   it may be useful to have a required interface connect to multiple
   provided interfaces (e.g., running a robot simulation in parallel
   with a real robot), at this time it is not worth the trouble.
- */
+*/
 
 class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
 {
@@ -94,7 +94,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     friend class mtsEventReceiverBase;
     friend class mtsManagerComponentClient;
 
-protected:
+ protected:
 
     /*! Mailbox (if supported). */
     mtsMailBox * MailBox;
@@ -228,6 +228,7 @@ protected:
 
  private:
     void BlockingCommandExecutedHandler(void);
+    void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
     bool DetachCommands(void);
@@ -246,11 +247,11 @@ protected:
     /*! Send a human readable description of the interface. */
     void ToStream(std::ostream & outputStream) const;
 
-protected:
+ protected:
  public: // adeguet1 todo fix -- this has been added for ostream << operator
 #ifndef SWIG  // SWIG cannot deal with this
     template <class _PointerType>
-    class FunctionOrReceiverInfo
+        class FunctionOrReceiverInfo
     {
         // For GCM UI
         friend class mtsManagerLocal;
@@ -337,7 +338,7 @@ protected:
     /*! Get description of this interface (with serialized argument information) */
     void GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription);
 
-public:
+ public:
 
     bool AddFunction(const std::string & functionName, mtsFunctionVoid & function, mtsRequiredType required = MTS_REQUIRED);
 
@@ -359,10 +360,10 @@ public:
                                          const std::string & eventName,
                                          mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
     template <class __classType>
-    inline mtsCommandVoid * AddEventHandlerVoid(void (__classType::*method)(void),
-                                                __classType * classInstantiation,
-                                                const std::string & eventName,
-                                                mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
+        inline mtsCommandVoid * AddEventHandlerVoid(void (__classType::*method)(void),
+                                                    __classType * classInstantiation,
+                                                    const std::string & eventName,
+                                                    mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
         mtsCallableVoidBase * callable = new mtsCallableVoidMethod<__classType>(method, classInstantiation);
         return this->AddEventHandlerVoid(callable, eventName, queueingPolicy);
     }
@@ -375,17 +376,17 @@ public:
     }
 
     template <class __classType, class __argumentType>
-    inline mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*method)(const __argumentType &),
-                                                      __classType * classInstantiation,
-                                                      const std::string & eventName,
-                                                      mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
+        inline mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*method)(const __argumentType &),
+                                                          __classType * classInstantiation,
+                                                          const std::string & eventName,
+                                                          mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
     // PK: Can we get rid of this?
     template <class __classType>
-    inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
-                                                             __classType * classInstantiation,
-                                                             const std::string & eventName,
-                                                             mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
+        inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
+                                                                 __classType * classInstantiation,
+                                                                 const std::string & eventName,
+                                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
     bool RemoveEventHandlerVoid(const std::string & eventName);
     bool RemoveEventHandlerWrite(const std::string & eventName);
@@ -453,4 +454,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsInterfaceRequired)
 
 
 #endif // _mtsInterfaceRequired_h
-

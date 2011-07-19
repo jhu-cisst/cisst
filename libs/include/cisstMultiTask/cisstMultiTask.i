@@ -82,6 +82,8 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsCommandWriteBase.h"
 %include "cisstMultiTask/mtsCommandWriteReturn.h"
 %include "cisstMultiTask/mtsCommandQualifiedRead.h"
+%include "cisstMultiTask/mtsCommandVoidReturn.h"
+
 // Wrap event receivers
 %include "cisstMultiTask/mtsEventReceiver.h"
 
@@ -236,6 +238,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsFunctionWrite.h"
 %include "cisstMultiTask/mtsFunctionWriteReturn.h"
 %include "cisstMultiTask/mtsFunctionQualifiedRead.h"
+%include "cisstMultiTask/mtsFunctionVoidReturn.h"
 
 // Extend mtsFunctionVoid
 %extend mtsFunctionVoid {
@@ -447,7 +450,7 @@ http://www.cisst.org/cisst/license.txt.
                 interfaceRequired.AddFunction(command.Name, func)
                 func.thisown = 0
             return interfaceRequired
-            
+
         # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
         # or ('component', 'interfaceProvided')
         def AddInterfaceRequiredAndConnect(self, otherComponentInterface):

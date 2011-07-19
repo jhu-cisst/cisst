@@ -59,8 +59,7 @@ protected:
     clientUI UI;
 
 public:
-    // see sineTask.h documentation
-    clientTask(const std::string & taskName, double period);
+    clientTask(const std::string & taskName);
     ~clientTask() {};
     void Configure(const std::string & CMN_UNUSED(filename) = "");
     void Startup(void);

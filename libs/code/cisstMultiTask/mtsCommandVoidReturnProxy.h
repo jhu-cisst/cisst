@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-04-29
 
   (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
@@ -21,24 +21,24 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command proxy class with one argument
+  \brief Defines a command proxy class with result.
 */
 
-#ifndef _mtsCommandReadProxy_h
-#define _mtsCommandReadProxy_h
+#ifndef _mtsCommandVoidReturnProxy_h
+#define _mtsCommandVoidReturnProxy_h
 
-#include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsCommandVoidReturn.h>
 #include "mtsCommandProxyBase.h"
 #include "mtsProxySerializer.h"
 
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandReadProxy is a proxy for mtsCommandRead. When Execute()
-  method is called, the command id with payload is sent to the connected peer
-  interface across a network.
+  mtsCommandVoidReturnProxy is a proxy for mtsCommandVoidReturn.
+  When Execute() method is called, the command id with two payloads is sent to
+  the connected peer interface across a network.
 */
-class mtsCommandReadProxy: public mtsCommandRead, public mtsCommandProxyBase
+class mtsCommandVoidReturnProxy: public mtsCommandVoidReturn, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
 
@@ -48,21 +48,21 @@ protected:
 
 public:
     /*! Typedef for base type */
-    typedef mtsCommandRead BaseType;
+    typedef mtsCommandVoidReturn BaseType;
 
     /*! Constructor. Command proxy is disabled by default and is enabled when
-        command id and network proxy are set. */
-    mtsCommandReadProxy(const std::string & commandName) : BaseType(commandName) {
+      command id and network proxy are set. */
+    mtsCommandVoidReturnProxy(const std::string & commandName): BaseType(commandName) {
         Disable();
     }
-    ~mtsCommandReadProxy() {
-        if (ArgumentPrototype) {
-            delete ArgumentPrototype;
+    ~mtsCommandVoidReturnProxy() {
+        if (ResultPrototype) {
+            delete ResultPrototype;
         }
     }
 
     /*! Set command id and register serializer to network proxy. This method
-        should be called after SetNetworkProxy() is called. */
+      should be called after SetNetworkProxy() is called. */
     void SetCommandID(const mtsCommandIDType & commandID) {
         mtsCommandProxyBase::SetCommandID(commandID);
 
@@ -71,29 +71,30 @@ public:
         }
     }
 
-    /*! Set an argument prototype */
-    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
+    /*! Set result prototype */
+    void SetResultPrototype(mtsGenericObject * resultPrototype) {
+        ResultPrototype = resultPrototype;
     }
 
     /*! The execute method. */
-    virtual mtsExecutionResult Execute(mtsGenericObject & placeHolder) {
+    mtsExecutionResult Execute(mtsGenericObject & result) {
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
-        mtsExecutionResult result;
+        mtsExecutionResult executionResult;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandReadSerialized(ClientID, CommandID, result, placeHolder)) {
+            if (!NetworkProxyServer->SendExecuteCommandVoidReturnSerialized(ClientID, CommandID,
+                                                                            executionResult, result)) {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }
-        return result;
+        return executionResult;
     }
 
     /*! Generate human readable description of this object */
     void ToStream(std::ostream & outputStream) const {
-        ToStreamBase("mtsCommandReadProxy", Name, CommandID, IsEnabled(), outputStream);
+        ToStreamBase("mtsCommandVoidReturnProxy", Name, CommandID, IsEnabled(), outputStream);
     }
 };
 
-#endif // _mtsCommandReadProxy_h
+#endif // _mtsCommandVoidReturnProxy_h
