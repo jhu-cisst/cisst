@@ -98,8 +98,8 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGMono.h
     robotcomponents/osg/devOSGPick.h
     robotcomponents/osg/devOSGStereo.h
-#    robotcomponents/osg/devOSGText.h
-#    robotcomponents/osg/devOSGVolume.h
+    robotcomponents/osg/devOSGText.h
+    robotcomponents/osg/devOSGVolume.h
     robotcomponents/osg/devOSGWorld.h
     )
 
@@ -112,8 +112,8 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGMono.cpp
     robotcomponents/osg/devOSGPick.cpp
     robotcomponents/osg/devOSGStereo.cpp
-#    robotcomponents/osg/devOSGText.cpp
-#    robotcomponents/osg/devOSGVolume.cpp
+    robotcomponents/osg/devOSGText.cpp
+    robotcomponents/osg/devOSGVolume.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
 

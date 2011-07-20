@@ -92,7 +92,7 @@ void devOSGVolume::ReadVolume( const std::string& directory ){
     cp->addProperty(tp);
     sp->addProperty(cp);
   }
-  /*  
+
   {
     // Light
     osgVolume::CompositeProperty* cp = new osgVolume::CompositeProperty;
@@ -121,7 +121,7 @@ void devOSGVolume::ReadVolume( const std::string& directory ){
     cp->addProperty(new osgVolume::MaximumIntensityProjectionProperty);
     sp->addProperty(cp);
   }
-  */    
+
   sp->setActiveProperty(0);
 
   layer->addProperty(sp);
