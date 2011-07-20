@@ -27,7 +27,6 @@ target_link_libraries (myReDerivedClass myDerivedClass)
 
 # Allow generated c++ code to find header files
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
-include_directories (${CISST_SWIG_INCLUDE_DIR})
 
 # To link with build libraries
 link_directories (${CMAKE_CURRENT_BINARY_DIR})

@@ -16,13 +16,18 @@
 # --- end cisst license ---
 #
 
-# Extend CMake Module Path to find cisst defined Macros
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIR})
-include (cisstMacros)
+# Test if this file has been included within the cisst project itself
+if (NOT CURRENT_PROJECT_IS_CISST)
 
-# Add the include and lib paths for cisst
-include_directories (${CISST_INCLUDE_DIR})
-link_directories (${CISST_LIBRARY_DIR})
+  # Extend CMake Module Path to find cisst defined Macros
+  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIR})
+  include (cisstMacros)
 
-# Load all settings for external dependencies
-cisst_load_package_setting (${CISST_LIBRARIES})
+  # Add the include and lib paths for cisst
+  include_directories (${CISST_INCLUDE_DIR})
+  link_directories (${CISST_LIBRARY_DIR})
+
+  # Load all settings for external dependencies
+  cisst_load_package_setting (${CISST_LIBRARIES})
+
+endif (NOT CURRENT_PROJECT_IS_CISST)

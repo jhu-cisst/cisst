@@ -80,10 +80,44 @@ function (cisst_link_directories ...)
 endfunction (cisst_link_directories)
 
 
+# function to find packages based on external settings
+function (cisst_find_packages ...)
+  foreach (lib ${ARGV})
+    set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
+    if (${PACKAGES})
+      foreach (package ${${PACKAGES}})
+        set (VARIABLE_NAME CISST_PACKAGES_FOR_${lib}_FOR_${package})
+        if (${VARIABLE_NAME})
+          find_package (${${VARIABLE_NAME}} REQUIRED)
+        endif (${VARIABLE_NAME})
+      endforeach (package)
+    endif (${PACKAGES})
+  endforeach (lib)
+endfunction (cisst_find_packages)
+
+
+# function to include CMake files based on external settings
+function (cisst_include_files ...)
+  foreach (lib ${ARGV})
+    set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
+    if (${PACKAGES})
+      foreach (package ${${PACKAGES}})
+        set (VARIABLE_NAME CISST_CMAKE_FILES_FOR_${lib}_FOR_${package})
+        if (${VARIABLE_NAME})
+          include (${${VARIABLE_NAME}} REQUIRED)
+        endif (${VARIABLE_NAME})
+      endforeach (package)
+    endif (${PACKAGES})
+  endforeach (lib)
+endfunction (cisst_include_files)
+
+
 # helper function to set all directories
 function (cisst_set_directories ...)
   cisst_include_directories (${ARGV})
   cisst_link_directories (${ARGV})
+  cisst_find_packages (${ARGV})
+  cisst_include_files (${ARGV})
 endfunction (cisst_set_directories)
 
 
