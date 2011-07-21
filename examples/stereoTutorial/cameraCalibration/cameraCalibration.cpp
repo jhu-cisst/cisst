@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     svlFilterImageUnsharpMask filtering;
     svlFilterImageWindow window2;
     svlFilterImageRectifier* rectifier = new svlFilterImageRectifier();
-    svlCCCameraCalibration* svlCCObject = new svlCCCameraCalibration();;
+    svlCCCameraCalibration* svlCCObject;
 
     // Setup dummy video source
     source.SetTargetFrequency(30.0);
@@ -94,30 +94,29 @@ int main(int argc, char** argv)
         imageDirectory = argv[1];
         imagePrefix = argv[2];
     }
-    else if(argc == 8)
+    else if(argc == 6)
     {
         imageDirectory = argv[1];
         imagePrefix = argv[2];
         imageType = argv[3];
         startIndex = atoi(argv[4]);
         stopIndex = atoi(argv[5]);
-        boardWidth = atoi(argv[6]);
-        boardHeight = atoi(argv[7]);
     }
     else 
     {
         cout << endl << "svlExCameraCalibration - cisstStereoVision example by Wen P. Liu" << endl;
         cout << "Command line format:" << endl;
-        cout << "     svlExCameraCalibration imageDirectory imagePrefix imageType" << endl;
-        cout << "     images should be in format image00X.png" << endl;
-        cout << "     OPTIONAL [startIndex stopIndex boardSizeWidth boardSizeHeight]" << endl;
-        cout << "     (defaults [0 9 png 18 16])" << endl;
+        cout << "     svlExCameraCalibration imageDirectory imagePrefix " << endl;
+        cout << "     ex: images should be in format image00X.png" << endl;
+        cout << "     OPTIONAL [imageType startIndex stopIndex]" << endl;
+        cout << "     (defaults [png 0 9])" << endl;
         cout << "Examples:" << endl;
         cout << "     svlExCameraCalibration ./Images/SD/ image " << endl;
-        cout << "     svlExCameraCalibration ./Images/SD/ image png 0 9 18 16" << endl;
+        cout << "     svlExCameraCalibration ./Images/SD/ image png 0 9 " << endl;
         goto labError;
     }
 
+    svlCCObject = new svlCCCameraCalibration(boardWidth,boardHeight,squareSize,originDetectorColorModeFlag);
     cout << "Calling svlExCameraCalibration " << imageDirectory << " "<< imagePrefix << " " << imageType << " ";
     cout << startIndex << " " << stopIndex << " " << boardWidth << " " << boardHeight << endl;
 
@@ -126,10 +125,11 @@ int main(int argc, char** argv)
     //HD arguments
     //D:/Users/Wen/JohnsHopkins/Images/CameraCalibration/Calibration_20110508/HD/run0/png/ image
 
-    ok = svlCCObject->process(imageDirectory,imagePrefix,imageType,startIndex,stopIndex,boardWidth,boardHeight,squareSize,originDetectorColorModeFlag);
+    ok = svlCCObject->process(imageDirectory,imagePrefix,imageType,startIndex,stopIndex);
 
     if(ok && svlCCObject->images.size() > 0)
     {
+        svlCCObject->runCameraCalibration(runHandEye);
         svlCCObject->printCalibrationParameters();
         svlCCObject->setRectifier(rectifier);
         source.SetImageOverwrite(svlCCObject->images.front());
@@ -158,17 +158,23 @@ int main(int argc, char** argv)
 
     // Initialize and start stream
     if (stream.Play() != SVL_OK) goto labError;
-
-    // hand-eye calibration
-    if(ok && runHandEye)
-    {
-        svlCCObject->runHandEyeCalibration();
-    }
     
     // Wait for user input
     do
     {
         ch = cmnGetChar();
+        //options 'r' to add more images and recalibrate
+        //if(ch == 'r')
+        //{
+        //    ok = svlCCObject->processImage(imageDirectory,imagePrefix,imageType,index+1);
+        //    ok = svlCCObject->runCameraCalibration(runHandEye);
+        //    if(ok && svlCCObject->images.size() > 0)
+        //    {
+        //        svlCCObject->printCalibrationParameters();
+        //        svlCCObject->setRectifier(rectifier);
+        //        source.SetImageOverwrite(svlCCObject->images.front());
+        //    }
+        //}
         source.SetImageOverwrite(svlCCObject->images.at(index));
         index++;
         cout << "Showing Image# " << index << endl;

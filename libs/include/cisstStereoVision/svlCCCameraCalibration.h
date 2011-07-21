@@ -59,8 +59,8 @@ public:
     bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
     int setRectifier(svlFilterImageRectifier* rectifier);
     bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
-    bool runCameraCalibration();
-    vct4x4 runHandEyeCalibration();
+    bool runCameraCalibration(bool runHandEye);
+    vct4x4 getTcpTCamera(){return tcpTCamera;};
     int setImageVisibility(int index, int visible);
     std::vector<svlCCCalibrationGrid*> getCalibrationGrids(){return calibrationGrids;};
     int setFilterSourceDummy(svlFilterSourceDummy* source, int index);
@@ -141,6 +141,9 @@ private:
     bool debug;
     //compare with DLR
     bool groundTruthTest;
+    bool runHandEye;
+    double minHandEyeAvgError;
+    vct4x4 tcpTCamera;
 };
 
 #endif

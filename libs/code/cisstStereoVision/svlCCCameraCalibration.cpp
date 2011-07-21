@@ -37,9 +37,10 @@ svlCCCameraCalibration::svlCCCameraCalibration(int boardWidth, int boardHeight, 
     calCornerDetector = new svlCCCornerDetector(boardSize.width,boardSize.height);
     calOriginDetector = new svlCCOriginDetector(originDetectorColorModeFlag);
     cameraGeometry = new svlSampleCameraGeometry();
+    minHandEyeAvgError = std::numeric_limits<double>::max( );
 }
 
-bool svlCCCameraCalibration::runCameraCalibration()
+bool svlCCCameraCalibration::runCameraCalibration(bool runHandEye)
 {
     cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
     distCoeffs  = cv::Mat::zeros(5, 1, CV_64F);
@@ -53,7 +54,8 @@ bool svlCCCameraCalibration::runCameraCalibration()
     pointsCount = 0;
     maxPointsCount = 0;
     avgErr = std::numeric_limits<double>::max( );
-
+    this->runHandEye = runHandEye;
+    calHandEye = new svlCCHandEyeCalibration(calibrationGrids);
     // Calibrate
     return calibration();
 
@@ -87,6 +89,8 @@ void svlCCCameraCalibration::printCalibrationParameters()
         }
     }
 
+    std::cout << "Handeye error: "<< minHandEyeAvgError<<std::endl;
+    std::cout << tcpTCamera << std::endl;
     //for(int i=0;i<rvecs.size();i++)
     //{
     //    std::cout << "rvect: " << i << ": " << rvecs.at(i).at<double>(0,0) <<","<< rvecs.at(i).at<double>(0,1) <<","<< rvecs.at(i).at<double>(0,2) <<","<< std::endl;
@@ -312,6 +316,7 @@ double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
 
     double rms = std::numeric_limits<double>::max( );
     bool check = false;
+    double handEyeAvgError = std::numeric_limits<double>::max( );
 
     if(projected)
     {
@@ -329,11 +334,26 @@ double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
    
     rms = runOpenCVCalibration(projected);
     check = checkCalibration(projected);
+    updateCalibrationGrids();
+    if(this->runHandEye)
+    {
+        handEyeAvgError = calHandEye->calibrate();
+        if(handEyeAvgError < minHandEyeAvgError)
+        {
+            minHandEyeAvgError = handEyeAvgError;
+            tcpTCamera = calHandEye->tcp_T_camera;
+        }
+    }
 
     if(!check)
         return std::numeric_limits<double>::max( );
     else
-        return rms;
+    {
+        //if(this->runHandEye)
+        //    return handEyeAvgError;
+        //else
+            return rms;
+    }
 }
 
 void svlCCCameraCalibration::refineGrids(int localThreshold)
@@ -366,6 +386,8 @@ void svlCCCameraCalibration::optimizeCalibration()
 {
     double rms;
     double prevRMS = std::numeric_limits<double>::max( );
+    double handEyeAvgError;
+    double prevHandEyeAvgError = std::numeric_limits<double>::max( );
     int prevPointsCount = 0;
     int iteration = 0;
     cv::Mat pPrevCameraMatrix;
@@ -450,7 +472,6 @@ void svlCCCameraCalibration::optimizeCalibration()
         }
 
         if(rms < prevRMS || (pointsCount > (maxPointsCount + pointIncreaseIteration*minCornerThreshold*calibrationGrids.size())))
-        //if((pointsCount > prevPointsCount) && avgErr < 1.0)
         {
             std::cout << "Iteration: " << iteration << " rms delta: " << prevRMS-rms << " count delta: " <<  pointsCount-maxPointsCount << " pointIteration " << pointIncreaseIteration <<std::endl;
             pPrevCameraMatrix = prevCameraMatrix;
@@ -476,7 +497,6 @@ void svlCCCameraCalibration::optimizeCalibration()
                     visibility[i] = 0;
                 prevVisibility[i] = visibility[i];
             }
-            //updateCalibrationGrids();
             maxPointsCount = std::max(pointsCount,maxPointsCount);
             refineGrids(refineThreshold);
             rms = calibrate(false,false);
@@ -533,7 +553,7 @@ bool svlCCCameraCalibration::calibration()
 
     ///////////////////////optimize
     optimizeCalibration();
-    updateCalibrationGrids();
+    //updateCalibrationGrids();
 
     ///////////////////////projected
     //rms = calibrate(true, false);
@@ -648,6 +668,10 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     //save images and calibration grids
     images.push_back(image);
     calibrationGrids.push_back(calibrationGrid);
+    if (!calibrationGrids.back()->valid)
+    {
+        std::cout << "svlCCCameraCalibration.processImage() - IMAGE " << currentFileName << " NOT VALID!"<< std::endl;
+    }
     return calibrationGrids.back()->valid;
 }
 
@@ -695,17 +719,10 @@ bool svlCCCameraCalibration::process(std::string imageDirectory, std::string ima
         valid = validImage || valid;
     }
 
-    if (valid)
-    {
-        valid = runCameraCalibration();
-    }
-    else
+    if (!valid)
     {
         std::cout << "svlCCCameraCalibration.process() - NO VALID IMAGES! Please acquire more images and try again! " << currentFileName << std::endl;
     }
-
-    if(groundTruthTest)
-        runTest();
 
     return valid;
 }
@@ -750,13 +767,6 @@ int svlCCCameraCalibration::setImageVisibility(int index, int visible)
 
     calibrationGrids.at(index)->valid = (visible == 1);
     return SVL_OK;
-}
-
-vct4x4 svlCCCameraCalibration::runHandEyeCalibration()
-{
-    calHandEye = new svlCCHandEyeCalibration(calibrationGrids);
-    calHandEye->calibrate();
-    return calHandEye->tcp_T_camera;
 }
 
 void svlCCCameraCalibration::runTest()

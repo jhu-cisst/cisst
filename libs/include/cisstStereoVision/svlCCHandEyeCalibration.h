@@ -12,12 +12,12 @@ class svlCCHandEyeCalibration
 	public:
 		enum handEyeMethodEnum {DUAL_QUATERNION};
 		svlCCHandEyeCalibration(std::vector<svlCCCalibrationGrid*> calibrationGrids);
-		bool calibrate();
+		double calibrate();
         vct4x4 tcp_T_camera;
 
 	private:
 		std::vector<svlCCCalibrationGrid*> calibrationGrids;
-		float dualQuaternionMethod();
+		double dualQuaternionMethod();
 		bool getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* qPrime);
 		void populateComplexMatrixST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index);
 		void quaternionMul(CvMat* q1, CvMat* q2, CvMat* result);
@@ -32,10 +32,10 @@ class svlCCHandEyeCalibration
 		int handEyeMethodFlag;
 		std::vector<CvMat*> cameraMatrix;
 		std::vector<CvMat*> worldToTCPMatrix;
-		std::vector<CvMat*> tcpToWorldMatrix;
 		std::vector<CvMat*> aMatrix;
 		std::vector<CvMat*> bMatrix;
 		CvMat* cameraToTCP;
+        double handEyeAvgError;
 };
 
 #endif
