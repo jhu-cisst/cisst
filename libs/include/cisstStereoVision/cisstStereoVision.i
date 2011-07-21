@@ -286,3 +286,21 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 %include "cisstStereoVision/svlFilterSplitter.h"
 
 %include "cisstStereoVision/svlBufferSample.h"
+
+%include "cisstStereoVision/svlDefinitions.h"
+%include "cisstStereoVision/svlSample.h"
+%include "cisstStereoVision/svlSampleImageCustom.h"
+%include "cisstStereoVision/svlSampleImageTypes.h"
+
+%ignore svlSampleImageCustom<unsigned char,  3, 1>::GetMatrixRef;
+%template(svlSampleImageRGB) svlSampleImageCustom<unsigned char,  3, 1>;
+
+%extend svlSampleImageCustom<unsigned char,  3, 1> {
+    int SetMatrix(vctDynamicMatrixRef<unsigned char> matrix){
+        return $self->SetMatrix(matrix,0);
+    }
+
+    svlSample * GetsvlSample() {  //This is a workaround need to figure out how to get the inheritance right with SWIG
+        return $self;
+    }
+}
