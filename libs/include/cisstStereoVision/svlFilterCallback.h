@@ -38,6 +38,8 @@ typedef int (*CALLBACK_FUNC)(void * imageData, void * callbackData);
 
 class CISST_EXPORT svlFilterCallback : public svlFilterBase
 {
+    //CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
 public:
     /*!
      Constructor
@@ -52,17 +54,20 @@ public:
     unsigned int GetWidth(unsigned int videoch = 0);
     unsigned int GetHeight(unsigned int videoch = 0);
 
-	int SetCallback(CALLBACK_FUNC callback_in,void * callbackData_in);
+    int SetCallback(CALLBACK_FUNC callback_in,void * callbackData_in);
+
+protected:
+
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
+
 
 private:
-    //int StreamID;
-    //ui3BehaviorBase* ParentBehavior;
-	CALLBACK_FUNC myCallback;
-	void * myCallbackData;
+    CALLBACK_FUNC myCallback;
+    void * myCallbackData;
     svlSample* OutputData;
 
-    int Initialize(svlSample* inputdata);
-    int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+
 };
 
 #endif // _svlFilterCallback_h

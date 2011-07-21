@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstVector/vctDynamicNArrayRef.h>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -34,6 +35,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
+typedef vctDynamicNArrayRef<unsigned char,3> NArrayImageType;
+typedef NArrayImageType::nsize_type SizeType;
+typedef NArrayImageType::nindex_type IndexType;
+typedef NArrayImageType::nstride_type StrideType;
 
 class CISST_EXPORT svlBufferImage
 {
@@ -49,6 +54,9 @@ public:
     unsigned char* GetPushBuffer(unsigned int& size);
     void Push();
     bool Push(const unsigned char* buffer, unsigned int size, bool topdown);
+	bool Push_vctNarray(NArrayImageType image_in){
+		return Push(image_in.Pointer(),image_in.size(),false);
+	}
 #if CISST_SVL_HAS_OPENCV
     bool PushIplImage(IplImage* image);
 #endif // CISST_SVL_HAS_OPENCV

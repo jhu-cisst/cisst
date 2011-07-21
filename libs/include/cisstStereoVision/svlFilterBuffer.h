@@ -81,21 +81,6 @@ private:
     virtual int Initialize(svlSample* inputdata, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* inputdata, svlSample* &syncOutput);
 
-    //Warning: These are quick subs
-    virtual int  UpdateTypes(svlFilterInput &input, svlStreamType type){
-        return SVL_OK;
-    };
-    /*virtual int  Initialize(svlSample* syncInput, svlSample* &syncOutput){
-        return Initialize(syncInput);
-    };*/
-    virtual int  OnStart(unsigned int procCount){
-        return SVL_OK;}
-    /*virtual  int  Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput){
-        return ProcessFrame(procInfo,syncInput);
-    }*/
-    virtual void OnStop(void){}
-    virtual int  Release(void){return SVL_OK;}
-
 };
 
 #endif // _svlFilterCallback_h

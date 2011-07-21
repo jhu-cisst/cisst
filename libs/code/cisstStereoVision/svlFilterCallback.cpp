@@ -40,20 +40,25 @@ svlFilterCallback::~svlFilterCallback()
 {
 }
 
-int svlFilterCallback::Initialize(svlSample* inputdata)
+int svlFilterCallback::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    OutputData = inputdata;
+    OutputData = syncInput;
+
+    syncOutput = OutputData;
+
     return SVL_OK;
 }
 
-int svlFilterCallback::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterCallback::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
 	//The callback call should be single threaded just in case
-	svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
+        svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(syncInput);
         vctDynamicMatrixRef<unsigned char> imageData = img->GetMatrixRef();
 
+        syncOutput = OutputData;
+
     _OnSingleThread(procInfo) {
-		if(myCallback){
+                if(myCallback && IsRunning()){
 			if((*myCallback)(&imageData,myCallbackData) != SVL_OK){
 				return SVL_FAIL;
 			}

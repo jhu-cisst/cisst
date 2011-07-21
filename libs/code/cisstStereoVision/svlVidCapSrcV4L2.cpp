@@ -235,6 +235,7 @@ int svlVidCapSrcV4L2::Open()
     v4l2_capability devprops;
     v4l2_std_id standard;
     v4l2_format format;
+    memset(&format,0,sizeof(v4l2_format));
 //    v4l2_requestbuffers reqbuff;
 //    v4l2_buffer buffer;
     char tempname[64];
@@ -755,6 +756,7 @@ int svlVidCapSrcV4L2::GetDeviceInputs(int fd, svlFilterSourceVideoCapture::Devic
     if (fd < 0 || deviceinfo == 0) return SVL_FAIL;
 
     v4l2_input input;
+    memset(&input,0,sizeof(v4l2_input));
     int i;
 
     for (i = 0; i < SVL_VCS_ARRAY_LENGTH; i ++) {
