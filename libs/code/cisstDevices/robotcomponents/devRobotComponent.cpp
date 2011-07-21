@@ -216,44 +216,48 @@ void devRobotComponent::RnIO::CreateForceTorqueIO( size_t N ){
   
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetPosition
 ( const vctDynamicVector<double>& q ){ 
   mtsq = q;
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWritePosition( mtsq ); }
   mtsq.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetVelocity
 ( const vctDynamicVector<double>& qd ){ 
   mtsqd = qd; 
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWriteVelocity( mtsqd ); }
   mtsqd.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetAcceleration
 ( const vctDynamicVector<double>& qdd ){ 
   mtsqdd = qdd;
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWriteAcceleration( mtsqdd ); }
   mtsqdd.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetForceTorque
 ( const vctDynamicVector<double>& ft ){
   mtsft = ft; 
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWriteForceTorque( mtsft ); }
   mtsft.SetValid( true );
+  return IO::ESUCCESS;
 }
 
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetPosition
 ( vctDynamicVector<double>& q, double& t ){
 
@@ -266,11 +270,12 @@ devRobotComponent::RnIO::GetPosition
   if( valid ){
     q = vctDynamicVector<double>( mtsq );
     t = mtsq.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetVelocity
 ( vctDynamicVector<double>& qd, double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -282,11 +287,12 @@ devRobotComponent::RnIO::GetVelocity
   if( valid ){
     qd = vctDynamicVector<double>( mtsqd );
     t = mtsqd.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetAcceleration
 ( vctDynamicVector<double>& qdd,double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -298,11 +304,12 @@ devRobotComponent::RnIO::GetAcceleration
   if( valid ){
     qdd = vctDynamicVector<double>( mtsqdd );
     t = mtsqdd.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void
+devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetForceTorque
 ( vctDynamicVector<double>& ft, double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -314,8 +321,9 @@ devRobotComponent::RnIO::GetForceTorque
   if( valid ){
     ft = vctDynamicVector<double>( mtsft );
     t = mtsft.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
 
@@ -492,44 +500,48 @@ void devRobotComponent::R3IO::CreateForceIO(){
   
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetPosition
 ( const vctFixedSizeVector<double,3>& p ){ 
   mtsp = vctDynamicVector<double>( 3, p[0], p[1], p[2] );
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWritePosition( mtsp ); }
   mtsp.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetVelocity
 ( const vctFixedSizeVector<double,3>& v ){ 
   mtsv = vctDynamicVector<double>( 3, v[0], v[1], v[2] );
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWriteVelocity( mtsv ); }
   mtsv.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetAcceleration
 ( const vctFixedSizeVector<double,3>& vd ){ 
   mtsvd = vctDynamicVector<double>( 3, vd[0], vd[1], vd[2] );
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWriteAcceleration( mtsvd ); }
   mtsvd.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetForce
 ( const vctFixedSizeVector<double,3>& f ){
   mtsf = vctDynamicVector<double>( 3, f[0], f[1], f[2] );
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWriteForceTorque( mtsf ); }
   mtsf.SetValid( true );
+  return IO::ESUCCESS;
 }
 
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetPosition
 ( vctFixedSizeVector<double,3>& p, double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -541,11 +553,12 @@ devRobotComponent::R3IO::GetPosition
   if( valid ){
     p = vctFixedSizeVector<double,3>( mtsp[0], mtsp[1], mtsp[2] );
     t = mtsp.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetVelocity
 ( vctFixedSizeVector<double,3>& v, double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -557,11 +570,12 @@ devRobotComponent::R3IO::GetVelocity
   if( valid ){
     v = vctFixedSizeVector<double,3>( mtsv[0], mtsv[1], mtsv[2] );
     t = mtsv.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetAcceleration
 ( vctFixedSizeVector<double,3>& vd, double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -573,11 +587,12 @@ devRobotComponent::R3IO::GetAcceleration
   if( valid ){
     vd = vctFixedSizeVector<double,3>( mtsvd[0], mtsvd[1], mtsvd[2] );
     t = mtsvd.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void
+devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetForce
 ( vctFixedSizeVector<double,3>& f, double& t ){
   if( IOType() == IO::REQUIRE_INPUT )
@@ -589,8 +604,9 @@ devRobotComponent::R3IO::GetForce
   if( valid ){
     f = vctFixedSizeVector<double,3>( mtsf[0], mtsf[1], mtsf[2] );
     t = mtsf.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
 
@@ -765,35 +781,39 @@ void devRobotComponent::SO3IO::CreateTorqueIO( ){
   
 }
 
-void devRobotComponent::SO3IO::SetRotation
+devRobotComponent::IO::Errno
+devRobotComponent::SO3IO::SetRotation
 ( const vctQuaternionRotation3<double>& q ){ 
   mtsq = q;
   if( IOType() == IO::REQUIRE_OUTPUT )
     { mtsFnWritePosition( mtsq ); }
   mtsq.SetValid( true );
+  return IO::ESUCCESS;
 }
 
-void devRobotComponent::SO3IO::SetVelocity
+devRobotComponent::IO::Errno
+devRobotComponent::SO3IO::SetVelocity
 ( const vctFixedSizeVector<double,3>& w ){ 
 
   if( mtsw.size() != 3 )               { mtsw.SetSize( 3 ); }
   for( size_t i=0; i<3; i++ )          { mtsw[i] = w[i]; }
   if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteVelocity( mtsw ); }
   mtsw.SetValid( true );
-
+  return IO::ESUCCESS;
 }
 
-void devRobotComponent::SO3IO::SetAcceleration
+devRobotComponent::IO::Errno
+devRobotComponent::SO3IO::SetAcceleration
 ( const vctFixedSizeVector<double,3>& wd ){ 
 
   if( mtswd.size() != 3 )              { mtswd.SetSize( 3 ); }
   for( size_t i=0; i<3; i++ )          { mtswd[i] = wd[i]; }
   if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteAcceleration( mtswd ); }
   mtswd.SetValid( true );
-
+  return IO::ESUCCESS;
 }
 
-void 
+devRobotComponent::IO::Errno 
 devRobotComponent::SO3IO::SetTorque
 ( const vctFixedSizeVector<double,3>& tau ){
 
@@ -801,11 +821,11 @@ devRobotComponent::SO3IO::SetTorque
   for( size_t i=0; i<3; i++ )          { mtstau[i] = tau[i]; }
   if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteForceTorque( mtstau ); }
   mtstau.SetValid( true );
-
+  return IO::ESUCCESS;
 }
 
 
-void 
+devRobotComponent::IO::Errno 
 devRobotComponent::SO3IO::GetRotation
 ( vctQuaternionRotation3<double>& q, double& t ){
 
@@ -817,11 +837,12 @@ devRobotComponent::SO3IO::GetRotation
   if( valid ){
     q = vctQuaternionRotation3<double>( mtsq );
     t = mtsq.Timestamp();
+    return IO::ESUCCESS;
   }
-
+  return IO::EFAILURE;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::GetVelocity
 ( vctFixedSizeVector<double,3>& w, double& t ){
 
@@ -839,11 +860,12 @@ devRobotComponent::SO3IO::GetVelocity
     for( size_t i=0; i<3 && i<mtsw.size(); i++ )
       { w[i] = mtsw[i]; }
     t = mtsw.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;
 }
 
-void
+devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::GetAcceleration
 ( vctFixedSizeVector<double,3>& wd, double& t ){
 
@@ -861,11 +883,12 @@ devRobotComponent::SO3IO::GetAcceleration
     for( size_t i=0; i<3 && i<mtswd.size(); i++ )
       { wd[i] = mtswd[i]; }
     t = mtswd.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;    
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::GetTorque
 ( vctFixedSizeVector<double,3>& tau, double& t ){
 
@@ -883,8 +906,9 @@ devRobotComponent::SO3IO::GetTorque
     for( size_t i=0; i<3 && i<mtstau.size(); i++ )
       { tau[i] = mtstau[i]; }
     t = mtstau.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;    
 }
 
 
@@ -1055,7 +1079,7 @@ void devRobotComponent::SE3IO::CreateForceTorqueIO( ){
   
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::SetPosition
 ( const vctFrame4x4<double>& Rt ){ 
   mtsRt = Rt;
@@ -1064,9 +1088,10 @@ devRobotComponent::SE3IO::SetPosition
     { mtsFnWritePosition( mtsRt ); }
 
   mtsRt.SetValid( true );
+  return IO::ESUCCESS;    
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::SetVelocity
 ( const vctFixedSizeVector<double,6>& vw ){ 
 
@@ -1075,9 +1100,10 @@ devRobotComponent::SE3IO::SetVelocity
   if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteVelocity( mtsvw ); }
 
   mtsvw.SetValid( true );
+  return IO::ESUCCESS;    
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::SetAcceleration
 ( const vctFixedSizeVector<double,6>& vdwd ){ 
 
@@ -1086,9 +1112,10 @@ devRobotComponent::SE3IO::SetAcceleration
   if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteAcceleration( mtsvdwd ); }
 
   mtsvdwd.SetValid( true );
+  return IO::ESUCCESS;    
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::SetForceTorque
 ( const vctFixedSizeVector<double,6>& ft ){
 
@@ -1100,7 +1127,7 @@ devRobotComponent::SE3IO::SetForceTorque
 }
 
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetPosition
 ( vctFrame4x4<double>& Rt, double& t ){
 
@@ -1112,11 +1139,12 @@ devRobotComponent::SE3IO::GetPosition
   if( valid ){
     Rt = vctFrame4x4<double>( mtsRt );
     t = mtsRt.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetVelocity
 ( vctFixedSizeVector<double,6>& vw, double& t ){
 
@@ -1134,11 +1162,12 @@ devRobotComponent::SE3IO::GetVelocity
     for( size_t i=0; i<6 && i<mtsvw.size(); i++ )
       { vw[i] = mtsvw[i]; }
     t = mtsvw.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;    
 }
 
-void
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetAcceleration
 ( vctFixedSizeVector<double,6>& vdwd, double& t ){
 
@@ -1156,11 +1185,12 @@ devRobotComponent::SE3IO::GetAcceleration
     for( size_t i=0; i<6 && i<mtsvdwd.size(); i++ )
       { vdwd[i] = mtsvdwd[i]; }
     t = mtsvdwd.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;    
 }
 
-void 
+devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetForceTorque
 ( vctFixedSizeVector<double,6>& ft, double& t ){
 
@@ -1178,8 +1208,9 @@ devRobotComponent::SE3IO::GetForceTorque
     for( size_t i=0; i<6 && i<mtsft.size(); i++ )
       { ft[i] = mtsft[i]; }
     t = mtsft.Timestamp();
+    return IO::ESUCCESS;    
   }
-
+  return IO::EFAILURE;    
 }
 
 

@@ -64,19 +64,19 @@ void devGLUTManipulator::Read(){}
 void devGLUTManipulator::Write(){
   vctDynamicVector<double> q;
   double t;
-  input->GetPosition( q, t );
-  Write( q );
+  if( input->GetPosition( q, t ) == RnIO::ESUCCESS )
+    { Write( q ); }
+  else
+    { Write( this->q ); }
+
 } 
 
 void devGLUTManipulator::Write( const vctDynamicVector<double>& q ){ 
-
-  //if( q.size() == meshes.size() ){
+    this->q = q;
     for( size_t i=0; i<meshes.size(); i++ ){
       vctFrame4x4<double> Rtwi = ForwardKinematics( q, i+1 );
       meshes[i]->SetPositionOrientation( Rtwi );
     }
-    //}
-  //std::cout << "size( meshes ) = " << meshes.size()
-  //	    << " size( q ) = " << q.size() << std::endl;
+
 }
 
