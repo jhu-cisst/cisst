@@ -220,9 +220,11 @@ devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetPosition
 ( const vctDynamicVector<double>& q ){ 
   mtsq = q;
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWritePosition( mtsq ); }
-  mtsq.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWritePosition( mtsq );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -230,9 +232,11 @@ devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetVelocity
 ( const vctDynamicVector<double>& qd ){ 
   mtsqd = qd; 
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWriteVelocity( mtsqd ); }
-  mtsqd.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWriteVelocity( mtsqd );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -240,9 +244,11 @@ devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetAcceleration
 ( const vctDynamicVector<double>& qdd ){ 
   mtsqdd = qdd;
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWriteAcceleration( mtsqdd ); }
-  mtsqdd.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWriteAcceleration( mtsqdd ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -250,9 +256,11 @@ devRobotComponent::IO::Errno
 devRobotComponent::RnIO::SetForceTorque
 ( const vctDynamicVector<double>& ft ){
   mtsft = ft; 
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWriteForceTorque( mtsft ); }
-  mtsft.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWriteForceTorque( mtsft ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -261,69 +269,60 @@ devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetPosition
 ( vctDynamicVector<double>& q, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadPosition( mtsq ); }
-
-  bool valid = false;
-  mtsq.GetValid( valid );
-
-  if( valid ){
-    q = vctDynamicVector<double>( mtsq );
-    t = mtsq.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){
+    mtsExecutionResult result = mtsFnReadPosition( mtsq );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  q = vctDynamicVector<double>( mtsq );
+  t = mtsq.Timestamp();
+  return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetVelocity
 ( vctDynamicVector<double>& qd, double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadVelocity( mtsqd ); }
 
-  bool valid = false;
-  mtsqd.GetValid( valid );
-
-  if( valid ){
-    qd = vctDynamicVector<double>( mtsqd );
-    t = mtsqd.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){
+    mtsExecutionResult result = mtsFnReadVelocity( mtsqd );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  qd = vctDynamicVector<double>( mtsqd );
+  t = mtsqd.Timestamp();
+  return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetAcceleration
 ( vctDynamicVector<double>& qdd,double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadAcceleration( mtsqdd ); }
 
-  bool valid = false;
-  mtsqdd.GetValid( valid );
-
-  if( valid ){
-    qdd = vctDynamicVector<double>( mtsqdd );
-    t = mtsqdd.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadAcceleration( mtsqdd );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  qdd = vctDynamicVector<double>( mtsqdd );
+  t = mtsqdd.Timestamp();
+  return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::RnIO::GetForceTorque
 ( vctDynamicVector<double>& ft, double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadForceTorque( mtsft ); }
 
-  bool valid = false;
-  mtsft.GetValid( valid );
-
-  if( valid ){
-    ft = vctDynamicVector<double>( mtsft );
-    t = mtsft.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadForceTorque( mtsft ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  ft = vctDynamicVector<double>( mtsft );
+  t = mtsft.Timestamp();
+  return IO::ESUCCESS;
 }
 
 
@@ -503,110 +502,118 @@ void devRobotComponent::R3IO::CreateForceIO(){
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetPosition
 ( const vctFixedSizeVector<double,3>& p ){ 
+
   mtsp = vctDynamicVector<double>( 3, p[0], p[1], p[2] );
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWritePosition( mtsp ); }
-  mtsp.SetValid( true );
+
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWritePosition( mtsp ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetVelocity
 ( const vctFixedSizeVector<double,3>& v ){ 
+
   mtsv = vctDynamicVector<double>( 3, v[0], v[1], v[2] );
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWriteVelocity( mtsv ); }
-  mtsv.SetValid( true );
+
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWriteVelocity( mtsv ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetAcceleration
 ( const vctFixedSizeVector<double,3>& vd ){ 
+
   mtsvd = vctDynamicVector<double>( 3, vd[0], vd[1], vd[2] );
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWriteAcceleration( mtsvd ); }
-  mtsvd.SetValid( true );
+
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWriteAcceleration( mtsvd ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::SetForce
 ( const vctFixedSizeVector<double,3>& f ){
+
   mtsf = vctDynamicVector<double>( 3, f[0], f[1], f[2] );
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWriteForceTorque( mtsf ); }
-  mtsf.SetValid( true );
+  
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWriteForceTorque( mtsf ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
-
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetPosition
 ( vctFixedSizeVector<double,3>& p, double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadPosition( mtsp ); }
 
-  bool valid = false;
-  mtsp.GetValid( valid );
-
-  if( valid ){
-    p = vctFixedSizeVector<double,3>( mtsp[0], mtsp[1], mtsp[2] );
-    t = mtsp.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadPosition( mtsp ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  p = vctFixedSizeVector<double,3>( mtsp[0], mtsp[1], mtsp[2] );
+  t = mtsp.Timestamp();
+  return IO::ESUCCESS;
+
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetVelocity
 ( vctFixedSizeVector<double,3>& v, double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadVelocity( mtsv ); }
 
-  bool valid = false;
-  mtsv.GetValid( valid );
-
-  if( valid ){
-    v = vctFixedSizeVector<double,3>( mtsv[0], mtsv[1], mtsv[2] );
-    t = mtsv.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){
+    mtsExecutionResult result = mtsFnReadVelocity( mtsv ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  v = vctFixedSizeVector<double,3>( mtsv[0], mtsv[1], mtsv[2] );
+  t = mtsv.Timestamp();
+  return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetAcceleration
 ( vctFixedSizeVector<double,3>& vd, double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadAcceleration( mtsvd ); }
 
-  bool valid = false;
-  mtsvd.GetValid( valid );
-
-  if( valid ){
-    vd = vctFixedSizeVector<double,3>( mtsvd[0], mtsvd[1], mtsvd[2] );
-    t = mtsvd.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadAcceleration( mtsvd ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  vd = vctFixedSizeVector<double,3>( mtsvd[0], mtsvd[1], mtsvd[2] );
+  t = mtsvd.Timestamp();
+  return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::R3IO::GetForce
 ( vctFixedSizeVector<double,3>& f, double& t ){
-  if( IOType() == IO::REQUIRE_INPUT )
-    { mtsFnReadForceTorque( mtsf ); }
 
-  bool valid = false;
-  mtsf.GetValid( valid );
-
-  if( valid ){
-    f = vctFixedSizeVector<double,3>( mtsf[0], mtsf[1], mtsf[2] );
-    t = mtsf.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadForceTorque( mtsf );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  f = vctFixedSizeVector<double,3>( mtsf[0], mtsf[1], mtsf[2] );
+  t = mtsf.Timestamp();
+  return IO::ESUCCESS;
 }
 
 
@@ -781,13 +788,16 @@ void devRobotComponent::SO3IO::CreateTorqueIO( ){
   
 }
 
+
 devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::SetRotation
 ( const vctQuaternionRotation3<double>& q ){ 
   mtsq = q;
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWritePosition( mtsq ); }
-  mtsq.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWritePosition( mtsq );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -797,8 +807,12 @@ devRobotComponent::SO3IO::SetVelocity
 
   if( mtsw.size() != 3 )               { mtsw.SetSize( 3 ); }
   for( size_t i=0; i<3; i++ )          { mtsw[i] = w[i]; }
-  if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteVelocity( mtsw ); }
-  mtsw.SetValid( true );
+
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWriteVelocity( mtsw );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -808,8 +822,12 @@ devRobotComponent::SO3IO::SetAcceleration
 
   if( mtswd.size() != 3 )              { mtswd.SetSize( 3 ); }
   for( size_t i=0; i<3; i++ )          { mtswd[i] = wd[i]; }
-  if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteAcceleration( mtswd ); }
-  mtswd.SetValid( true );
+
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWriteAcceleration( mtswd ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
 
@@ -819,96 +837,100 @@ devRobotComponent::SO3IO::SetTorque
 
   if( mtstau.size() != 3 )             { mtstau.SetSize( 3 ); }
   for( size_t i=0; i<3; i++ )          { mtstau[i] = tau[i]; }
-  if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteForceTorque( mtstau ); }
-  mtstau.SetValid( true );
+
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWriteForceTorque( mtstau ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;
 }
-
 
 devRobotComponent::IO::Errno 
 devRobotComponent::SO3IO::GetRotation
 ( vctQuaternionRotation3<double>& q, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadPosition( mtsq ); }
-
-  bool valid = false;
-  mtsq.GetValid( valid );
-
-  if( valid ){
-    q = vctQuaternionRotation3<double>( mtsq );
-    t = mtsq.Timestamp();
-    return IO::ESUCCESS;
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadPosition( mtsq ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  q = vctQuaternionRotation3<double>( mtsq );
+  t = mtsq.Timestamp();
+  return IO::ESUCCESS;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::GetVelocity
 ( vctFixedSizeVector<double,3>& w, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadVelocity( mtsw ); }
+  if( IOType() == IO::REQUIRE_INPUT ){
+    mtsExecutionResult result = mtsFnReadVelocity( mtsw ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
+  }
+
   if( mtsw.size() != 3 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected sizeof(mtsw) = 3. Got " << mtsw.size()
 		      << std::endl;
+    return IO::EFAILURE;
   }
 
-  bool valid = false;
-  mtsw.GetValid( valid );
+  for( size_t i=0; i<3 && i<mtsw.size(); i++ )
+    { w[i] = mtsw[i]; }
+  t = mtsw.Timestamp();
+  return IO::ESUCCESS;    
 
-  if( valid ){
-    for( size_t i=0; i<3 && i<mtsw.size(); i++ )
-      { w[i] = mtsw[i]; }
-    t = mtsw.Timestamp();
-    return IO::ESUCCESS;    
-  }
-  return IO::EFAILURE;
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::GetAcceleration
 ( vctFixedSizeVector<double,3>& wd, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadAcceleration( mtswd ); }
+  if( IOType() == IO::REQUIRE_INPUT ){
+    mtsExecutionResult result = mtsFnReadAcceleration( mtswd ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
+  }
+
   if( mtswd.size() != 3 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected sizeof(mtswd) = 3. Got " <<mtswd.size()
+		      << ": Expected sizeof(mtswd) = 3. Got " << mtswd.size()
 		      << std::endl;
+    return IO::EFAILURE;
   }
 
-  bool valid = false;
-  mtswd.GetValid( valid );
+  for( size_t i=0; i<3 && i<mtswd.size(); i++ )
+    { wd[i] = mtswd[i]; }
+  t = mtswd.Timestamp();
+  return IO::ESUCCESS;    
 
-  if( valid ){
-    for( size_t i=0; i<3 && i<mtswd.size(); i++ )
-      { wd[i] = mtswd[i]; }
-    t = mtswd.Timestamp();
-    return IO::ESUCCESS;    
-  }
-  return IO::EFAILURE;    
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::SO3IO::GetTorque
 ( vctFixedSizeVector<double,3>& tau, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadForceTorque( mtstau ); }
+  if( IOType() == IO::REQUIRE_INPUT ){
+    mtsExecutionResult result = mtsFnReadForceTorque( mtstau ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
+  }
+
   if( mtstau.size() != 3 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected sizeof(mtstau) = 3. Got " << mtstau.size()
 		      << std::endl;
+    return IO::EFAILURE;
   }
 
-  bool valid = false;
-  mtstau.GetValid( valid );
+  for( size_t i=0; i<3 && i<mtstau.size(); i++ )
+    { tau[i] = mtstau[i]; }
+  t = mtstau.Timestamp();
+  return IO::ESUCCESS;    
 
-  if( valid ){
-    for( size_t i=0; i<3 && i<mtstau.size(); i++ )
-      { tau[i] = mtstau[i]; }
-    t = mtstau.Timestamp();
-    return IO::ESUCCESS;    
-  }
-  return IO::EFAILURE;    
 }
 
 
@@ -1079,15 +1101,17 @@ void devRobotComponent::SE3IO::CreateForceTorqueIO( ){
   
 }
 
+
 devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::SetPosition
 ( const vctFrame4x4<double>& Rt ){ 
   mtsRt = Rt;
     
-  if( IOType() == IO::REQUIRE_OUTPUT )
-    { mtsFnWritePosition( mtsRt ); }
-
-  mtsRt.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWritePosition( mtsRt ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;    
 }
 
@@ -1097,9 +1121,12 @@ devRobotComponent::SE3IO::SetVelocity
 
   if( mtsvw.size() != 6 )              { mtsvw.SetSize( 6 ); }
   for( size_t i=0; i<6; i++ )          { mtsvw[i] = vw[i]; }
-  if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteVelocity( mtsvw ); }
 
-  mtsvw.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWriteVelocity( mtsvw );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
   return IO::ESUCCESS;    
 }
 
@@ -1109,9 +1136,13 @@ devRobotComponent::SE3IO::SetAcceleration
 
   if( mtsvdwd.size() != 6 )            { mtsvdwd.SetSize( 6 ); }
   for( size_t i=0; i<6; i++ )          { mtsvdwd[i] = vdwd[i]; }
-  if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteAcceleration( mtsvdwd ); }
 
-  mtsvdwd.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){
+    mtsExecutionResult result = mtsFnWriteAcceleration( mtsvdwd );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
+
   return IO::ESUCCESS;    
 }
 
@@ -1121,97 +1152,102 @@ devRobotComponent::SE3IO::SetForceTorque
 
   if( mtsft.size() != 6 )              { mtsft.SetSize( 6 ); }
   for( size_t i=0; i<6; i++ )          { mtsft[i] = ft[i]; }
-  if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteForceTorque( mtsft ); }
 
-  mtsft.SetValid( true );
+  if( IOType() == IO::REQUIRE_OUTPUT ){ 
+    mtsExecutionResult result = mtsFnWriteForceTorque( mtsft ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_QUEUED )
+      { return IO::EFAILURE; }
+  }
+
   return IO::ESUCCESS;
 }
-
 
 devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetPosition
 ( vctFrame4x4<double>& Rt, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadPosition( mtsRt ); }
-
-  bool valid = false;
-  mtsRt.GetValid( valid );
-
-  if( valid ){
-    Rt = vctFrame4x4<double>( mtsRt );
-    t = mtsRt.Timestamp();
-    return IO::ESUCCESS;    
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadPosition( mtsRt );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
   }
-  return IO::EFAILURE;
+
+  Rt = vctFrame4x4<double>( mtsRt );
+  t = mtsRt.Timestamp();
+  return IO::ESUCCESS;    
+
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetVelocity
 ( vctFixedSizeVector<double,6>& vw, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadVelocity( mtsvw ); }
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadVelocity( mtsvw ); 
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
+  }
+
   if( mtsvw.size() != 6 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected sizeof(mtsvw) = 6. Got " << mtsvw.size()
 		      << std::endl;
+    return IO::EFAILURE;
   }
 
-  bool valid = false;
-  mtsvw.GetValid( valid );
+  for( size_t i=0; i<6 && i<mtsvw.size(); i++ )
+    { vw[i] = mtsvw[i]; }
+  t = mtsvw.Timestamp();
+  return IO::ESUCCESS;    
 
-  if( valid ){
-    for( size_t i=0; i<6 && i<mtsvw.size(); i++ )
-      { vw[i] = mtsvw[i]; }
-    t = mtsvw.Timestamp();
-    return IO::ESUCCESS;    
-  }
-  return IO::EFAILURE;    
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetAcceleration
 ( vctFixedSizeVector<double,6>& vdwd, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadAcceleration( mtsvdwd ); }
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadAcceleration( mtsvdwd );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
+  }
+
   if( mtsvdwd.size() != 6 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected sizeof(mtsvdwd) = 6. Got " <<mtsvdwd.size()
 		      << std::endl;
+    return IO::EFAILURE;
   }
 
-  bool valid = false;
-  mtsvdwd.GetValid( valid );
+  for( size_t i=0; i<6 && i<mtsvdwd.size(); i++ )
+    { vdwd[i] = mtsvdwd[i]; }
+  t = mtsvdwd.Timestamp();
+  return IO::ESUCCESS;    
 
-  if( valid ){
-    for( size_t i=0; i<6 && i<mtsvdwd.size(); i++ )
-      { vdwd[i] = mtsvdwd[i]; }
-    t = mtsvdwd.Timestamp();
-    return IO::ESUCCESS;    
-  }
-  return IO::EFAILURE;    
 }
 
 devRobotComponent::IO::Errno
 devRobotComponent::SE3IO::GetForceTorque
 ( vctFixedSizeVector<double,6>& ft, double& t ){
 
-  if( IOType() == IO::REQUIRE_INPUT )  { mtsFnReadForceTorque( mtsft ); }
+  if( IOType() == IO::REQUIRE_INPUT ){ 
+    mtsExecutionResult result = mtsFnReadForceTorque( mtsft );
+    if( result.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED )
+      { return IO::EFAILURE; }
+  }
+
   if( mtsft.size() != 6 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected sizeof(mtsft) = 6. Got " << mtsft.size()
 		      << std::endl;
+    return IO::EFAILURE;
   }
 
-  bool valid = false;
-  mtsvdwd.GetValid( valid );
+  for( size_t i=0; i<6 && i<mtsft.size(); i++ )
+    { ft[i] = mtsft[i]; }
+  t = mtsft.Timestamp();
+  return IO::ESUCCESS;    
 
-  if( valid ){
-    for( size_t i=0; i<6 && i<mtsft.size(); i++ )
-      { ft[i] = mtsft[i]; }
-    t = mtsft.Timestamp();
-    return IO::ESUCCESS;    
-  }
-  return IO::EFAILURE;    
 }
 
 
