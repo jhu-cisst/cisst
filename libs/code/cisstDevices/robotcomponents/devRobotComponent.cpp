@@ -1124,6 +1124,7 @@ devRobotComponent::SE3IO::SetForceTorque
   if( IOType() == IO::REQUIRE_OUTPUT ) { mtsFnWriteForceTorque( mtsft ); }
 
   mtsft.SetValid( true );
+  return IO::ESUCCESS;
 }
 
 
