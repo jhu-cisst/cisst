@@ -103,7 +103,6 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/osg/devOSGMono.h
       robotcomponents/osg/devOSGPick.h
       robotcomponents/osg/devOSGStereo.h
-      robotcomponents/osg/devOSGText.h
       robotcomponents/osg/devOSGWorld.h
       )
     
@@ -116,13 +115,20 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/osg/devOSGMono.cpp
       robotcomponents/osg/devOSGPick.cpp
       robotcomponents/osg/devOSGStereo.cpp
-      robotcomponents/osg/devOSGText.cpp
       robotcomponents/osg/devOSGWorld.cpp
       )
     
     if( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
-      SET( HEADER_FILES ${HEADER_FILES} robotcomponents/osg/devOSGVolume.h )
-      SET( SOURCE_FILES ${SOURCE_FILES} robotcomponents/osg/devOSGVolume.cpp )
+      SET( 
+	HEADER_FILES ${HEADER_FILES} 
+	robotcomponents/osg/devOSGText.h 
+	robotcomponents/osg/devOSGVolume.h 
+	)
+      SET( 
+	SOURCE_FILES ${SOURCE_FILES} 
+	robotcomponents/osg/devOSGText.cpp
+	robotcomponents/osg/devOSGVolume.cpp 
+	)
     endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
 
     cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)

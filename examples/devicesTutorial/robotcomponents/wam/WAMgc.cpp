@@ -10,14 +10,21 @@
 
 int main(){
 
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
+
+
+
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   devKeyboard kb;
   kb.SetQuitKey( 'q' );
-  kb.AddKeyWriteFunction('G', "ctrlenable", devController::EnableCommand, true);
+  kb.AddKeyVoidFunction('G', "ctrlenable", devController::Enable );
+  kb.AddKeyVoidFunction('g', "ctrldisable", devController::Disable );
   taskManager->AddComponent( &kb );
 
-  devRTSocketCAN can( "rtcan0", devCAN::RATE_1000 );
+  devRTSocketCAN can( "rtcan1", devCAN::RATE_1000 );
 
   vctDynamicVector<double> qinit(7, 0.0);
   qinit[1] = -cmnPI_2;
@@ -27,13 +34,13 @@ int main(){
   wam.Configure();
   taskManager->AddComponent( &wam );
 
-  std::string path("libs/etc/cisstRobot/WAM/");
+  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   vctMatrixRotation3<double> Rw0(  0.0,  0.0, -1.0, 
 				   0.0,  1.0,  0.0, 
 				   1.0,  0.0,  0.0 );
   vctFixedSizeVector<double,3> tw0(0.0);
   vctFrame4x4<double> Rtw0( Rw0, tw0 );
-  devGravityCompensation gc( "controller", 
+  devGravityCompensation gc( "gc", 
 			     0.002,
 			     devController::DISABLED,
 			     OSA_CPU2,
@@ -43,7 +50,10 @@ int main(){
 
   taskManager->Connect( kb.GetName(), "ctrlenable",
                         gc.GetName(), devController::Control );
-
+  
+  taskManager->Connect( kb.GetName(), "ctrldisable",
+                        gc.GetName(), devController::Control );
+  
   taskManager->Connect( gc.GetName(), devController::Output,
 			wam.GetName(),devManipulator::Input );
 
@@ -53,7 +63,11 @@ int main(){
   taskManager->CreateAll();
   taskManager->StartAll();
 
-  getchar();
+  pause();
+
+  taskManager->KillAll();
+  taskManager->Cleanup();
+
 
   return 0;
 }
