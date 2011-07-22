@@ -84,93 +84,103 @@ if( CISST_DEV_HAS_RTSOCKETCAN )
 
 endif( CISST_DEV_HAS_RTSOCKETCAN )
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
+find_package( OpenSceneGraph 
+  COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
 
 if( OPENSCENEGRAPH_FOUND )
 
-  set( CISST_DEV_HAS_OSG ON PARENT_SCOPE )
-  SET( 
-    HEADER_FILES 
-    ${HEADER_FILES} 
-    robotcomponents/osg/devOSGBody.h
-    robotcomponents/osg/devOSGCamera.h
-    robotcomponents/osg/devOSGManipulator.h
-    robotcomponents/osg/devOSGMono.h
-    robotcomponents/osg/devOSGPick.h
-    robotcomponents/osg/devOSGStereo.h
-    robotcomponents/osg/devOSGText.h
-    robotcomponents/osg/devOSGVolume.h
-    robotcomponents/osg/devOSGWorld.h
-    )
+  option( CISST_DEV_OPENSCENEGRAPH "Use support for OSG." ON )
 
-  SET(
-    SOURCE_FILES
-    ${SOURCE_FILES} 
-    robotcomponents/osg/devOSGBody.cpp
-    robotcomponents/osg/devOSGCamera.cpp
-    robotcomponents/osg/devOSGManipulator.cpp
-    robotcomponents/osg/devOSGMono.cpp
-    robotcomponents/osg/devOSGPick.cpp
-    robotcomponents/osg/devOSGStereo.cpp
-    robotcomponents/osg/devOSGText.cpp
-    robotcomponents/osg/devOSGVolume.cpp
-    robotcomponents/osg/devOSGWorld.cpp
-    )
+  if( CISST_DEV_OPENSCENEGRAPH )
 
-  cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)
-  cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENSCENEGRAPH_INCLUDE_DIRS)
-
-  find_package( ODE )
-  if( ODE_FOUND )
-
-    set( CISST_DEV_HAS_ODE ON PARENT_SCOPE )
-    set( CMAKE_CXX_FLAGS 
-      "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
-      PARENT_SCOPE )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARY )
-    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
-    
-    SET( HEADER_FILES 
-      
-      ${HEADER_FILES} 
-      
-      robotcomponents/ode/devODEBody.h
-      robotcomponents/ode/devODEJoint.h
-      robotcomponents/ode/devODEServoMotor.h
-      robotcomponents/ode/devODEManipulator.h
-      
-      robotcomponents/ode/devODEBH.h
-      robotcomponents/ode/devODEGripper.h
-      
-      )
-
+    set( CISST_DEV_HAS_OSG ON PARENT_SCOPE )
     SET( 
-      SOURCE_FILES
-      
-      ${SOURCE_FILES} 
-      
-      robotcomponents/ode/devODEBody.cpp
-      robotcomponents/ode/devODEJoint.cpp
-      robotcomponents/ode/devODEServoMotor.cpp
-      robotcomponents/ode/devODEManipulator.cpp
-      
-      robotcomponents/ode/devODEBH.cpp
-      robotcomponents/ode/devODEGripper.cpp
-      
-      robotcomponents/ode/devODEWorld.cpp 
-      
+      HEADER_FILES 
+      ${HEADER_FILES} 
+      robotcomponents/osg/devOSGBody.h
+      robotcomponents/osg/devOSGCamera.h
+      robotcomponents/osg/devOSGManipulator.h
+      robotcomponents/osg/devOSGMono.h
+      robotcomponents/osg/devOSGPick.h
+      robotcomponents/osg/devOSGStereo.h
+      robotcomponents/osg/devOSGText.h
+      robotcomponents/osg/devOSGWorld.h
       )
     
-  endif( ODE_FOUND )
+    SET(
+      SOURCE_FILES
+      ${SOURCE_FILES} 
+      robotcomponents/osg/devOSGBody.cpp
+      robotcomponents/osg/devOSGCamera.cpp
+      robotcomponents/osg/devOSGManipulator.cpp
+      robotcomponents/osg/devOSGMono.cpp
+      robotcomponents/osg/devOSGPick.cpp
+      robotcomponents/osg/devOSGStereo.cpp
+      robotcomponents/osg/devOSGText.cpp
+      robotcomponents/osg/devOSGWorld.cpp
+      )
+    
+    if( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
+      SET( HEADER_FILES ${HEADER_FILES} robotcomponents/osg/devOSGVolume.h )
+      SET( SOURCE_FILES ${SOURCE_FILES} robotcomponents/osg/devOSGVolume.cpp )
+    endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
 
-  find_package( OpenCV2 )
-  if( OpenCV2_FOUND )
-    set( CISST_DEV_HAS_OPENCV22 ON PARENT_SCOPE )
-    MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
-    cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OpenCV2_LIBRARIES)
-    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
-  endif( OpenCV2_FOUND )
-  
+    cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)
+    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENSCENEGRAPH_INCLUDE_DIRS)
+    
+    find_package( ODE )
+    if( ODE_FOUND )
+      
+      set( CISST_DEV_HAS_ODE ON PARENT_SCOPE )
+      set( CMAKE_CXX_FLAGS 
+	"${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
+	PARENT_SCOPE )
+      cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARY )
+      cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
+      
+      SET( HEADER_FILES 
+	
+	${HEADER_FILES} 
+	
+	robotcomponents/ode/devODEBody.h
+	robotcomponents/ode/devODEJoint.h
+	robotcomponents/ode/devODEServoMotor.h
+	robotcomponents/ode/devODEManipulator.h
+	
+	robotcomponents/ode/devODEBH.h
+	robotcomponents/ode/devODEGripper.h
+	
+	)
+      
+      SET( 
+	SOURCE_FILES
+	
+	${SOURCE_FILES} 
+	
+	robotcomponents/ode/devODEBody.cpp
+	robotcomponents/ode/devODEJoint.cpp
+	robotcomponents/ode/devODEServoMotor.cpp
+	robotcomponents/ode/devODEManipulator.cpp
+	
+	robotcomponents/ode/devODEBH.cpp
+	robotcomponents/ode/devODEGripper.cpp
+	
+	robotcomponents/ode/devODEWorld.cpp 
+	
+	)
+      
+    endif( ODE_FOUND )
+    
+    find_package( OpenCV2 )
+    if( OpenCV2_FOUND )
+      set( CISST_DEV_HAS_OPENCV22 ON PARENT_SCOPE )
+      MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+      cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OpenCV2_LIBRARIES)
+      cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+    endif( OpenCV2_FOUND )
+    
+  endif( CISST_DEV_OPENSCENEGRAPH )
+    
 endif( OPENSCENEGRAPH_FOUND )
 
 # Check for GLUT

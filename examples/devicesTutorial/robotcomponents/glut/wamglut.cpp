@@ -8,6 +8,10 @@
 
 int main( int argc, char** argv ){
 
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
+
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   devGLUT glut(argc, argv);
@@ -38,7 +42,7 @@ int main( int argc, char** argv ){
 		       qddmax );
   taskManager->AddComponent(&trajectory);
 
-  std::string path("libs/etc/cisstRobot/WAM/");
+  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector<std::string> links;
   links.push_back( path + "l1.obj" );
   links.push_back( path + "l2.obj" );

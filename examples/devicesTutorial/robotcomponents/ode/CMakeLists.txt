@@ -13,8 +13,9 @@
 # --- end cisst license ---
 
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer )
-if( OPENSCENEGRAPH_FOUND )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
+
+if( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )
 
   find_package( ODE )
   if( ODE_FOUND )
@@ -52,4 +53,4 @@ if( OPENSCENEGRAPH_FOUND )
     
   endif( ODE_FOUND )
 
-endif( OPENSCENEGRAPH_FOUND )
+endif( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )

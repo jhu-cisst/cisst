@@ -13,9 +13,9 @@
 # --- end cisst license ---
 
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
 
-if( OPENSCENEGRAPH_FOUND )
+if( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )
 
   project( osg )
 
@@ -26,11 +26,9 @@ if( OPENSCENEGRAPH_FOUND )
   add_executable( OSGstereox2 OSGstereox2.cpp )
   add_executable( OSGwam OSGwam.cpp )
   add_executable( OSGlwr OSGlwr.cpp )
-  add_executable( OSGvolume OSGvolume.cpp )
   add_executable( OSGtext OSGtext.cpp )
 
   cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )  
-  cisst_target_link_libraries( OSGvolume cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )  
   cisst_target_link_libraries( OSGviewer cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
   cisst_target_link_libraries( OSGPick cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
   cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
@@ -39,6 +37,13 @@ if( OPENSCENEGRAPH_FOUND )
   cisst_target_link_libraries( OSGlwr cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
   cisst_target_link_libraries( OSGtext cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+
+  if( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
+    add_executable( OSGvolume OSGvolume.cpp )
+    cisst_target_link_libraries( OSGvolume cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )  
+  endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
+    
+
 
 #  find_package( OpenCV2 )
 
@@ -55,5 +60,5 @@ if( OPENSCENEGRAPH_FOUND )
 #  endif( OpenCV2_FOUND )
 
 
-endif( OPENSCENEGRAPH_FOUND )
+endif( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )
 
