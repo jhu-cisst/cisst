@@ -2310,6 +2310,10 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
             stream << " [Matrox Imaging device]";
         break;
 
+        case svlFilterSourceVideoCapture::BlackMagicDeckLink:
+            stream << " [BlackMagic DeckLink device]";
+        break;
+
         case svlFilterSourceVideoCapture::NumberOfPlatformTypes:
             stream << " [Unknown device type]";
         default:
