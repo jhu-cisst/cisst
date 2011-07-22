@@ -145,12 +145,14 @@ PyObject* convert_vctDynamicNArrayRef_to_PyObject(vctDynamicNArrayRef<__ValueTyp
     }
 
     int type = vctPythonType<__ValueType>();
-    PyObject* result = PyArray_SimpleNew(sz, shape, type);
+    //PyObject* result = PyArray_SimpleNew(sz, shape, type); //This allocation was causing a memory leak.
+    PyObject* result = PyArray_SimpleNewFromData(sz, shape, type,narray_in.Pointer());  //This numpy wrap seems to be safe.
 
     /*****************************************************************************
      COPY THE DATA FROM THE vctDynamicNArrayRef TO THE PYARRAY
     *****************************************************************************/
 
+    /*
     // Create a temporary vctDynamicNArrayRef container
     // `sizes' defined above, don't need to redefine it
     vctFixedSizeVector<vct::stride_type, _dimension> strides(narray_in.strides());
@@ -160,7 +162,7 @@ PyObject* convert_vctDynamicNArrayRef_to_PyObject(vctDynamicNArrayRef<__ValueTyp
 
     // Copy the data from the vctDynamicNArrayRef to the temporary container
     tempContainer.Assign(narray_in);
-
+    */
 
     return result;
 }
@@ -192,9 +194,7 @@ static int PythonCallBack(void * imgdata, void *callbackdata)
 	   func = (PyObject *) callbackdata;             // Get Python function
 
            state = PyGILState_Ensure();
-	   arglist = Py_BuildValue("(O)",pythonImage);             // Build argument list
-
-	   //arglist = Py_BuildValue("i",1);
+           arglist = Py_BuildValue("(O)",pythonImage);             // Build argument list
 
 	   if(func && arglist){
                    result = PyEval_CallObjectWithKeywords(func, arglist, (PyObject *)NULL);     // Call Python CallObjectWithKeywords does type check in python
