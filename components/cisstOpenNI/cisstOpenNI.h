@@ -10,6 +10,7 @@
 #define WAIT_ANY_UPDATE_ONE         2
 #define WAIT_NONE_UPDATE_ALL        3
 
+
 /*! 
 \todo move ctor code to Configure method
 \todo move all use of OpenNI symbols to .cpp file, i.e. do not include Xn files in cisstOpenNI.h
@@ -35,12 +36,14 @@ private:
     std::string name;
 
     std::vector<cisstOpenNISkeleton*> skeletons;
+    
+    int users;
 
 
 public:
 
     //! Default Constructor
-    cisstOpenNI();
+    cisstOpenNI(int numUsers);
 
     //! Default DeConstructor
     ~cisstOpenNI();

@@ -2,10 +2,11 @@
 #include "cisstOpenNIData.h"
 
 
-cisstOpenNI::cisstOpenNI(){
+cisstOpenNI::cisstOpenNI(int numUsers){
 
     this->Data = new cisstOpenNIData;
-    this->skeletons.resize(6);
+    this->Data->SetStates();
+    this->users = numUsers;
 
 }
 
@@ -104,9 +105,10 @@ void cisstOpenNI::Update(int type){
 void cisstOpenNI::InitSkeletons(){
 
     cisstOpenNISkeleton* skeleton;
-    for(int i = 0; i<6; i++){
+    for(int i = 0; i<this->users; i++){
         skeleton = new cisstOpenNISkeleton(this);
         skeletons.push_back(skeleton);
+        std::cout<<skeletons.size()<<std::endl;
     }
 
 }
@@ -229,13 +231,13 @@ vctDynamicNArray<unsigned char,3> cisstOpenNI::GetRGBPlanarImage(){
 std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
 
     // Initialize Users
-    XnUserID aUsers[6];
-    XnUInt16 nUsers = 6;
+    XnUserID aUsers[this->users];
+    XnUInt16 nUsers = this->users;
     Data->usergenerator.GetUsers(aUsers, nUsers);
 
-    if(nUsers > 6) printf("More users than max allowance\n");
+    if(nUsers > this->users) printf("More users than max allowance\n");
 
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < this->users; ++i)
     {
         if (Data->usergenerator.GetSkeletonCap().IsTracking(aUsers[i]))
         {
@@ -251,17 +253,19 @@ std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
 void cisstOpenNI::UpdateUserSkeletons(){
     
     // Initialize Users
-    XnUserID aUsers[6];
-    XnUInt16 nUsers = 6;
+    XnUserID aUsers[this->users];
+    XnUInt16 nUsers = this->users;
     Data->usergenerator.GetUsers(aUsers, nUsers);
     
-    if(nUsers > 6) printf("More users than max allowance\n");
+    if(nUsers > this->users) printf("More users than max allowance\n");
     
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < this->users; ++i)
     {
         if (Data->usergenerator.GetSkeletonCap().IsTracking(aUsers[i]))
         {
             this->skeletons[i]->Update(aUsers[i]);
+            this->skeletons[i]->usrState = Data->usrState;
+            this->skeletons[i]->calState = Data->usrCalState;
         }else{
             this->skeletons[i]->SetExists(false);
         }

@@ -5,6 +5,17 @@
 #include <XnCppWrapper.h>
 #include <XnOS.h>
 
+#define CNI_USR_NEW         0
+#define CNI_USR_LOST        1
+#define CNI_USR_POSE        2
+#define CNI_USR_CAL_START   3
+#define CNI_USR_CAL_END     4
+#define CNI_USR_SUCCESS     5
+#define CNI_USR_FAIL        6
+#define CNI_USR_WAIT        7
+#define CNI_USR_IDLE        -1
+
+
 class cisstOpenNIData
 {
 
@@ -24,6 +35,12 @@ public:
 
     //! User Pose State
     XnBool needPose;
+    
+    //! User State
+    int usrState;
+    
+    //! User Calibration State
+    int usrCalState;
 
     //! Pose Callback String
     XnChar strPose[20];
@@ -48,6 +65,13 @@ public:
     void UserCalibrationEndCallback(xn::SkeletonCapability& capability,
                                     XnBool bSuccess,  
                                     XnUserID nId);
+    void SetStates(){
+        
+        usrState = CNI_USR_IDLE;
+        usrCalState = CNI_USR_IDLE;
+        
+    };
+    
 
 };
 

@@ -9,22 +9,21 @@ class CISST_EXPORT cisstOpenNISkeleton {
 
 private:
 
-	//! 3D Joint Coordinates
-    std::vector<vct3> points3D;
-
-	//! 2D Projective Coorinates
-	std::vector<vctInt2> points2D;
-
-	//! Joint Existance Confidence
-	std::vector<bool> confidence;
-
-	//! Skeleton has been populated coorectly
-	bool exists;
-
     cisstOpenNI* OpenNI;
 
 
 public:
+    //! 3D Joint Coordinates
+    std::vector<vct3> points3D;
+    
+	//! 2D Projective Coorinates
+	std::vector<vctInt2> points2D;
+    
+	//! Joint Existance Confidence
+	std::vector<bool> confidence;
+    
+	//! Skeleton has been populated coorectly
+	bool exists;
 
 	//! Default Constructor
 	cisstOpenNISkeleton( cisstOpenNI * openNI);
@@ -36,6 +35,9 @@ public:
 	void Update(int id);
 
 	void SetExists(bool val);
+    
+    int usrState;
+    int calState;
 
 };
 
