@@ -28,33 +28,8 @@ class mtsTimingTest: public CppUnit::TestFixture
 private:
     CPPUNIT_TEST_SUITE(mtsTimingTest);
     {
-		// Test continuous
-		CPPUNIT_TEST(TestContinuousPriorityLowAffinity0);
-		CPPUNIT_TEST(TestContinuousPriorityLowAffinity1);
-		CPPUNIT_TEST(TestContinuousPriorityMedAffinity0);
-		CPPUNIT_TEST(TestContinuousPriorityMedAffinity1);
-		CPPUNIT_TEST(TestContinuousPriorityHighAffinity0);
-		CPPUNIT_TEST(TestContinuousPriorityHighAffinity1);
-
-		// Test periodic
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunDummy);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunOsaSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunDummy);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunOsaSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityMedAffinity0RunDummy);
-		CPPUNIT_TEST(TestPeriodicPriorityMedAffinity0RunOsaSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityMedAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityMedAffinity1RunDummy);
-		CPPUNIT_TEST(TestPeriodicPriorityMedAffinity1RunOsaSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityMedAffinity1RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunDummy);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunOsaSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunDummy);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunOsaSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunOsaThreadSleep);
+		CPPUNIT_TEST(TestContinuous);
+		CPPUNIT_TEST(TestPeriodic);
     }
     CPPUNIT_TEST_SUITE_END();
 
