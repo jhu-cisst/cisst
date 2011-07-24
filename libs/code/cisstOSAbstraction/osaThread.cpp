@@ -243,7 +243,7 @@ void osaThread::SetPriority(PriorityType priority)
     pthread_setschedparam(INTERNALS(Thread), Policy, &param);
     Priority = priority;
 #elif (CISST_OS == CISST_WINDOWS)
-    // Not yet implemented.
+    SetThreadPriority(INTERNALS(thread), priority);
 #endif // CISST_WINDOWS
 }
 

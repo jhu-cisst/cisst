@@ -19,79 +19,98 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <fstream>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsIntervalStatistics.h>
-#include <cisstMultiTask/mtsStateTable.h>
+#include <cmnPath.h>
+#include <mtsIntervalStatistics.h>
+#include <mtsStateTable.h>
 #include "mtsTimingTest.h"
-#include "mtsTestComponents.h"
-
+#include "mtsTestTimingComponents.h"
 
 mtsTimingTest::mtsTimingTest(void)
 {
     Manager = mtsManagerLocal::GetInstance();
 }
 
-
 mtsTimingTest::~mtsTimingTest(void)
 {
 }
-
 
 template <class _componentType>
 void mtsTimingTest::TestExecution(_componentType * component)
 {
     Manager->AddComponent(component);
     Manager->CreateAll();
-    CPPUNIT_ASSERT(Manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
     Manager->StartAll();
-    CPPUNIT_ASSERT(Manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
-    while (!component->TestTiming->IsDone()) {
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
+    while (!component->Done()) {
         osaSleep(15 * cmn_ms);
     }
     Manager->KillAll();
-    CPPUNIT_ASSERT(Manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
-    Manager->RemoveComponent(component);
-    // Manager->Cleanup();
-    std::cerr << "Finished test" << std::endl;
+    CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
+    Manager->Remove(component);
+    Manager->Cleanup();
 
-    // collect results, do some asserts
-    const mtsStateTable * stateTable = component->GetDefaultStateTable();
-    const mtsIntervalStatistics * statistics = &(stateTable->PeriodStats);
-    std::cerr << "Component type: " << component->ClassServices()->GetName() << std::endl;
-    std::cerr << "Average: " << statistics->GetAvg() << std::endl;
-    std::cerr << "Stdev: " << statistics->GetStdDev() << std::endl;
-    std::cerr << "Max: " << statistics->GetMax() << std::endl;
-    std::cerr << "Min: " << statistics->GetMin() << std::endl;
+    // Save run results
+    const mtsStateTable * stateTable = component.GetDefaultStateTable();
+    mtsIntervalStatistics statistics = stateTable.periodStats();
 
-    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
-    Manager->RemoveComponent("LCM_MCC");
-    Manager->RemoveComponent("MCS");
+    double average = statistics.getAvg();
+    double stdDev = statistics.getStdDev();
+    double min = statistics.getMin();
+    double max = statistics.getMax();
+    std::ofstream resultsFile("TimingTestResults.txt");
+    resultsFile << cmnPrintf("Average: %.4f\n") << average;
+    resultsFile << cmnPrintf("Stdev: %.4f\n") << stdDev;
+    resultsFile << cmnPrintf("Min: %.4f\n") << min;
+    resultsFile << cmnPrintf("Max: %.4f\n") << max;
+    resultsFile.close();
+
+    // Asserts for testing
+    double period = component->GetPeriod();
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    double stdDevThreshold = 5 * cmn_ms;
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    double stdDevThreshold = 1 * cmn_ms;
+#elif (CISST_OS == CISST_WINDOWS)
+    double stdDevThreshold = 20 * cmn_ms;
+#endif
+    double rangeThreshold = 2 * stdDevThreshold;
+    CPP_UNIT_ASSERT(stdDev <= stdDevThreshold);
+    CPP_UNIT_ASSERT(max - min <= rangeThreshold);
 }
 
-
-void mtsTimingTest::TestContinuous(void)
+void mtsTimingTest::TestContinuous(const PriorityType & threadPriority,
+                                   const osaCPUMask & CPUAffinity)
 {
-    mtsTestContinuous1<int> * task = new mtsTestContinuous1<int>();
-    task->AddTestTiming();
-    task->TestTiming->SetTotalNumberOfIterations(1000);
-    task->TestTiming->SetPeriod(1.0 * cmn_ms);
-    task->TestTiming->SetLoadRatio(0.5);
-    task->TestTiming->SetRunComputation(mtsTestTiming::FunctionSleep);
-    TestExecution(task);
-    // delete task;
+    mtsTestTimingContinuous * task = new mtsTestTimingContinuous();
+
+    task->SetIterations(1000);
+    task->SetThreadPriority(threadPriority);
+    task->SetCPUAffinity(CPUAffinity);
+
+    TestExecution<mtsTestTimingContinuous>(task);
+    delete task;
 }
 
-
-void mtsTimingTest::TestPeriodic(void)
+void mtsTimingTest::TestPeriodic(double period,
+                                 double load,
+                                 const PriorityType & threadPriority,
+                                 const osaCPUMask & CPUAffinity,
+                                 const RunBehavior & runBehavior)
 {
-    mtsTestPeriodic1<int> * task = new mtsTestPeriodic1<int>(1.0 * cmn_ms);
-    task->AddTestTiming();
-    task->TestTiming->SetTotalNumberOfIterations(1000);
-    task->TestTiming->SetPeriod(1.0 * cmn_ms);
-    task->TestTiming->SetLoadRatio(0.5);
-    task->TestTiming->SetRunComputation(mtsTestTiming::FunctionSleep);
-    // task->SetThreadPriority(0);
-    // task->SetCPUAffinity(0);
-    TestExecution(task);
-    // delete task;
+    mtsTestTimingPeriodic * task = new mtsTestTimingPeriodic();
+
+    task->SetIterations(1000);
+    task->SetPeriod(period);
+    task->SetLoad(load);
+    task->SetThreadPriority(threadPriority);
+    task->SetCPUAffinity(CPUAffinity);
+    task->SetRunBehavior(runBehavior);
+
+    TestExecution<mtsTestTimingPeriodic>(task);
+    delete task;
 }
+
+

@@ -44,12 +44,23 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \brief PriorityType and SchedulingPolicyType.
 
-  For now these are just typedefs to integers. I would like to have a
-  common return value for all OS. Maybe an enum, but the problem is
-  that the granularity in any linux flavor is much much larger than
-  windows.
+    An enum to represent thread priorities
 */
-typedef int PriorityType;
+enum PriorityType {
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    PRIORITY_VERY_LOW = 4,
+    PRIORITY_LOW = 2,
+    PRIORITY_NORMAL = 0,
+    PRIORITY_HIGH = -2,
+    PRIORITY_VERY_HIGH = -4
+#elif (CISST_OS == CISST_WINDOWS)
+    PRIORITY_VERY_LOW = THREAD_PRIORITY_LOWEST,
+    PRIORITY_LOW = THREAD_PRIORITY_BELOW_NORMAL,
+    PRIORITY_NORMAL = THREAD_PRIORITY_NORMAL,
+    PRIORITY_HIGH = THREAD_PRIORITY_ABOVE_NORMAL,
+    PRIORITY_VERY_HIGH = THREAD_PRIORITY_HIGHEST
+#endif
+};
 
 
 /*!
