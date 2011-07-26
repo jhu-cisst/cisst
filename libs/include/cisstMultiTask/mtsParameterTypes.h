@@ -266,7 +266,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateChange);
 
 class CISST_EXPORT mtsEndUserInterfaceArg : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     std::string UserName;
@@ -291,7 +291,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArg);
 
 class CISST_EXPORT mtsEventHandlerList: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 #ifndef SWIG
     template <class _commandType>

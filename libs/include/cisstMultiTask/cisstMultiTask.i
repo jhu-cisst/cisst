@@ -470,11 +470,14 @@ http://www.cisst.org/cisst/license.txt.
                         print 'Could not get manager component services'
                         return
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    if not interfaceDescription.InterfaceProvidedName:
+                        print 'No provided interface (empty string)'
+                        return
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
                     if interfaceRequired:
                         manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
                         # PK TEMP: need time.sleep until blocking commands supported over network
-                        time.sleep(1.0)
+                        time.sleep(2.0)
                         interfaceRequired.UpdateFromC()
                     else:
                         print 'Unable to add required interface for ', interfaceName
