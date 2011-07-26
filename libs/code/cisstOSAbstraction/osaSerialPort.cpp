@@ -712,7 +712,7 @@ bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
 bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
 {
 #if (CISST_OS == LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
