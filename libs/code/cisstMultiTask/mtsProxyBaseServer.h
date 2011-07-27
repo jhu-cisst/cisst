@@ -337,12 +337,11 @@ bool mtsProxyBaseServerType::AddProxyClient(const std::string & clientName, cons
     client.ClientProxy = clientProxy;
 
     ClientIDMapChange.Lock();
-    ClientIDMap.insert(std::make_pair(clientID, client));
-    ClientIDMapChange.Unlock();
-
     ConnectionIDMapChange.Lock();
-    IceConnectionIDMap.insert(std::make_pair(iceConnectionID, client));
+        ClientIDMap.insert(std::make_pair(clientID, client));
+        IceConnectionIDMap.insert(std::make_pair(iceConnectionID, client));
     ConnectionIDMapChange.Unlock();
+    ClientIDMapChange.Unlock();
 
     return ((FindClientByClientID(clientID) && FindClientByConnectionID(iceConnectionID)));
 }
@@ -359,12 +358,11 @@ bool mtsProxyBaseServerType::RemoveClientByConnectionID(const IceConnectionIDTyp
         return false;
     }
 
-    ConnectionIDMapChange.Lock();
-    IceConnectionIDMap.erase(it1);
-    ConnectionIDMapChange.Unlock();
-
     ClientIDMapChange.Lock();
-    ClientIDMap.erase(it2);
+    ConnectionIDMapChange.Lock();
+        ClientIDMap.erase(it2);
+        IceConnectionIDMap.erase(it1);
+    ConnectionIDMapChange.Unlock();
     ClientIDMapChange.Unlock();
 
     return true;
@@ -383,12 +381,11 @@ bool mtsProxyBaseServerType::RemoveClientByClientID(const ClientIDType & clientI
     }
 
     ClientIDMapChange.Lock();
-    ClientIDMap.erase(it1);
-    ClientIDMapChange.Unlock();
-
     ConnectionIDMapChange.Lock();
-    IceConnectionIDMap.erase(it2);
+        ClientIDMap.erase(it1);
+        IceConnectionIDMap.erase(it2);
     ConnectionIDMapChange.Unlock();
+    ClientIDMapChange.Unlock();
 
     return true;
 }
@@ -432,7 +429,7 @@ void mtsProxyBaseServerType::Monitor(void)
 
             OnClientDisconnect(it->second.ClientID);
 
-            // Reset iterator (OnClientDisconnect() may invalidated it)
+            // Reset iterator (iterator may get invalidated by OnClientDisconnect())
             it = IceConnectionIDMap.begin();
         }
     }

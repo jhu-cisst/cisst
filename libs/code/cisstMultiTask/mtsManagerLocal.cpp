@@ -1874,7 +1874,7 @@ bool mtsManagerLocal::Connect(const std::string & clientProcessName,
         if (connectionID == InvalidConnectionID) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: Waiting for connection to be established.... Retrying "
                                      << count++ << "/" << retryCount << std::endl;
-            osaSleep(10.0 * cmn_s);
+            osaSleep(1.0 * cmn_s);
         } else {
             break;
         }
