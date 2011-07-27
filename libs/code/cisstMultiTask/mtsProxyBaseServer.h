@@ -419,7 +419,7 @@ void mtsProxyBaseServerType::Monitor(void)
 
     typename IceConnectionIDMapType::iterator it = IceConnectionIDMap.begin();
     while (it != IceConnectionIDMap.end()) {
-        if (IceConnectionIDMap.size() == 0) return;
+        if (IceConnectionIDMap.size() == 0) return; // MJ TEMP: shouldn't be outside while loop?
         try {
             it->second.ClientProxy->ice_ping();
             ++it;
