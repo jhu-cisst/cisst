@@ -132,7 +132,11 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     // If process ip is not specified (""), the first ip address detected is used as primary ip
     if (ProcessIP == "") {
         std::vector<std::string> ipAddresses;
-        osaSocket::GetLocalhostIP(ipAddresses);
+        int ret = osaSocket::GetLocalhostIP(ipAddresses);
+        if (ret == 0) {
+             CMN_LOG_CLASS_INIT_ERROR << "Failed to get local host ip address.  Check network interface status." << std::endl;
+             return false;
+        }
         ProcessIP = ipAddresses[0];
 
         CMN_LOG_CLASS_INIT_VERBOSE << "Ip of this process was not specified. First ip detected ("
@@ -2481,7 +2485,11 @@ void mtsManagerLocal::SetIPAddress(void)
 {
     // Fetch all ip addresses available on this machine.
     std::vector<std::string> ipAddresses;
-    osaSocket::GetLocalhostIP(ipAddresses);
+    int ret = osaSocket::GetLocalhostIP(ipAddresses);
+    if (ret == 0) {
+        CMN_LOG_CLASS_INIT_WARNING << "Failed to get local host ip address" << std::endl;
+        return;
+    }
 
     for (size_t i = 0; i < ipAddresses.size(); ++i) {
         CMN_LOG_CLASS_INIT_VERBOSE << "IP detected: (" << i + 1 << ") " << ipAddresses[i] << std::endl;
