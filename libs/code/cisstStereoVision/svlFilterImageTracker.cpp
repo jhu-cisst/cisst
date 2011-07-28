@@ -42,9 +42,9 @@ http://www.cisst.org/cisst/license.txt.
 #define __2PI   6.2831853071795
 
 
-/******************************************/
-/*** svlFilterImageTracker class **********/
-/******************************************/
+/***********************************/
+/*** svlFilterImageTracker class ***/
+/***********************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageTracker, svlFilterBase)
 
@@ -54,7 +54,8 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBody(false),
     ResetFlag(false),
     FramesToSkip(0),
-    MovingAverageWeight(0.0),
+    TargetTrajectorySmoothingWeight(0.0),
+    RigidBodyTransformSmoothingWeight(0.0),
     RigidBodyAngleLow(- __PI),
     RigidBodyAngleHigh(__PI),
     RigidBodyScaleLow(0.01),
@@ -107,10 +108,10 @@ int svlFilterImageTracker::SetTracker(svlImageTracker & tracker, unsigned int vi
     return SVL_OK;
 }
 
-void svlFilterImageTracker::SetMovingAverageSmoothing(double weight)
+void svlFilterImageTracker::SetTargetTrajectorySmoothing(double weight)
 {
-    if (weight < 0.0) MovingAverageWeight = 0.0;
-    else MovingAverageWeight = weight;
+    if (weight < 0.0) TargetTrajectorySmoothingWeight = 0.0;
+    else TargetTrajectorySmoothingWeight = weight;
 }
 
 void svlFilterImageTracker::SetFrameSkip(unsigned int skipcount)
@@ -130,6 +131,12 @@ void svlFilterImageTracker::ResetTargets()
     ResetFlag = true;
 }
 
+void svlFilterImageTracker::SetRigidBodyTransformSmoothing(double weight)
+{
+    if (weight < 0.0) RigidBodyTransformSmoothingWeight = 0.0;
+    else RigidBodyTransformSmoothingWeight = weight;
+}
+
 int svlFilterImageTracker::SetRigidBody(bool enable)
 {
     if (IsInitialized()) return SVL_FAIL;
@@ -143,6 +150,11 @@ void svlFilterImageTracker::SetRigidBodyConstraints(double angle_low, double ang
     RigidBodyAngleHigh = angle_high;
     RigidBodyScaleLow = scale_low;
     RigidBodyScaleHigh = scale_high;
+}
+
+vct3x3 svlFilterImageTracker::GetRigidBodyTransform(unsigned int videoch)
+{
+    return RigidBodyTransform[videoch];
 }
 
 int svlFilterImageTracker::SetROI(const svlRect & rect, unsigned int videoch)
@@ -175,6 +187,18 @@ int svlFilterImageTracker::GetROI(svlRect & rect, unsigned int videoch) const
     return SVL_OK;
 }
 
+int svlFilterImageTracker::SetCenter(int x, int y, int rx, int ry, unsigned int videoch)
+{
+    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
+
+    ROI[videoch].left   = x - rx;
+    ROI[videoch].top    = y - ry;
+    ROI[videoch].right  = x + rx;
+    ROI[videoch].bottom = y + ry;
+
+    return SVL_OK;
+}
+
 int svlFilterImageTracker::SetMosaicSize(unsigned int width, unsigned int height)
 {
     if (width < 100 || height < 100) return SVL_FAIL;
@@ -197,6 +221,7 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
         RigidBodyAngle.SetAll(0.0);
         RigidBodyScale.SetSize(VideoChannels);
         RigidBodyScale.SetAll(1.0);
+        RigidBodyTransform.SetSize(VideoChannels);
 
         WarpedRigidBodyAngle.SetSize(VideoChannels);
         WarpedRigidBodyAngle.SetAll(0.0);
@@ -218,6 +243,7 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
     }
 
     syncOutput = syncInput;
+    OutputTargets.SetTimestamp(syncInput->GetTimestamp());
     GetOutput("targets")->SetupSample(&OutputTargets);
 
     return SVL_OK;
@@ -239,7 +265,10 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     // Skipping frames (if requested)
     if (FrameCount < FramesToSkip) {
         _SynchronizeThreads(procInfo);
-        _OnSingleThread(procInfo) FrameCount ++;
+        _OnSingleThread(procInfo) {
+            PushSamplesToAsyncOutputs(syncInput->GetTimestamp());
+            FrameCount ++;
+        }
         return SVL_OK;
     }
 
@@ -249,7 +278,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     vctDynamicVectorRef<int> confidence;
     vctDynamicMatrixRef<int> position;
 
-    const int weight = static_cast<int>(1000.0 * MovingAverageWeight);
+    const int weight = static_cast<int>(1000.0 * TargetTrajectorySmoothingWeight);
     const int weightsum = weight + 1000;
     unsigned int vch, i, targetcount = 0;
 
@@ -402,27 +431,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             }
         }
 
-        // Pushing samples to async outputs
-        svlFilterOutput* output;
-        double ts = syncInput->GetTimestamp();
-
-        output = GetOutput("targets");
-        if (output) {
-            OutputTargets.SetTimestamp(ts);
-            output->PushSample(&OutputTargets);
-        }
-        if (RigidBody) {
-            output = GetOutput("warpedimage");
-            if (output) {
-                WarpedImage->SetTimestamp(ts);
-                output->PushSample(WarpedImage);
-            }
-            output = GetOutput("mosaicimage");
-            if (output) {
-                Mosaic->SetTimestamp(ts);
-                output->PushSample(Mosaic);
-            }
-        }
+        PushSamplesToAsyncOutputs(syncInput->GetTimestamp());
     }
 
     return SVL_OK;
@@ -460,7 +469,6 @@ void svlFilterImageTracker::ReconstructRigidBody(unsigned int videoch)
     double proto_ax, proto_ay, proto_vx, proto_vy, proto_dist;
     vctDynamicMatrixRef<int> proto_pos;
     svlTarget2D *target;
-
     unsigned int i;
     int conf;
 
@@ -521,9 +529,17 @@ void svlFilterImageTracker::ReconstructRigidBody(unsigned int videoch)
     RigidBodyScale[videoch] = scale / sum_conf;
     RigidBodyAngle[videoch] = atan2(sin_an, cos_an);
 
+    double prevangle = WarpedRigidBodyAngle[videoch];
+    double prevscale = WarpedRigidBodyScale[videoch];
+
     // Reconstruct rigid body based on prototype
     WarpedRigidBodyAngle[videoch] -= RigidBodyAngle[videoch];
     WarpedRigidBodyScale[videoch] /= RigidBodyScale[videoch];
+
+    WarpedRigidBodyAngle[videoch] = (WarpedRigidBodyAngle[videoch] + prevangle * RigidBodyTransformSmoothingWeight) /
+                                    (1.0 + RigidBodyTransformSmoothingWeight);
+    WarpedRigidBodyScale[videoch] = (WarpedRigidBodyScale[videoch] + prevscale * RigidBodyTransformSmoothingWeight) /
+                                    (1.0 + RigidBodyTransformSmoothingWeight);
 
     // Checking rigid body transformation constraints
     if (WarpedRigidBodyScale[videoch] < RigidBodyScaleLow) WarpedRigidBodyScale[videoch] = RigidBodyScaleLow;
@@ -557,6 +573,17 @@ void svlFilterImageTracker::ReconstructRigidBody(unsigned int videoch)
             target->pos.y = static_cast<int>(ry + scale * (vx * sin_an + vy * cos_an));
         }
     }
+
+    // Storing rigid body transformation
+    vx = ax - proto_ax;
+    vy = ay - proto_ay;
+    RigidBodyTransform[videoch] = vct3x3::Eye();
+    RigidBodyTransform[videoch].Element(0, 0) = cos_an * scale;
+    RigidBodyTransform[videoch].Element(0, 1) = -sin_an * scale;
+    RigidBodyTransform[videoch].Element(1, 0) = sin_an * scale;
+    RigidBodyTransform[videoch].Element(1, 1) = cos_an * scale;
+    RigidBodyTransform[videoch].Element(0, 2) = rx + scale * (vx * cos_an - vy * sin_an);
+    RigidBodyTransform[videoch].Element(1, 2) = ry + scale * (vx * sin_an + vy * cos_an);
 }
 
 void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch, int threadid)
@@ -690,6 +717,29 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     }
     
     return SVL_OK;
+}
+
+void svlFilterImageTracker::PushSamplesToAsyncOutputs(double timestamp)
+{
+    svlFilterOutput* output;
+
+    output = GetOutput("targets");
+    if (output) {
+        OutputTargets.SetTimestamp(timestamp);
+        output->PushSample(&OutputTargets);
+    }
+    if (RigidBody) {
+        output = GetOutput("warpedimage");
+        if (output) {
+            WarpedImage->SetTimestamp(timestamp);
+            output->PushSample(WarpedImage);
+        }
+        output = GetOutput("mosaicimage");
+        if (output) {
+            Mosaic->SetTimestamp(timestamp);
+            output->PushSample(Mosaic);
+        }
+    }
 }
 
 

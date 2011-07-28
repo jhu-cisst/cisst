@@ -67,7 +67,7 @@ int svlStreamBranchSource::Initialize(svlSample* &syncOutput)
     Release();
 
     // Pass unused but initialized sample downstream
-    syncOutput = SampleQueue.Peek();
+    syncOutput = SampleQueue.Pull(0.0);
 
     return SVL_OK;
 }
@@ -141,7 +141,7 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
 
 void svlStreamBranchSource::SetInput(svlSample* inputsample)
 {
-    SampleQueue.PreAllocate(inputsample);
+    SampleQueue.Push(inputsample);
 }
 
 void svlStreamBranchSource::PushSample(const svlSample* inputsample)

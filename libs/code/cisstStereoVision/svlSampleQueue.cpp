@@ -23,11 +23,116 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlSampleQueue.h>
 
 
-/********************************/
-/*** svlSampleQueue class *******/
-/********************************/
+/****************************/
+/*** svlSampleQueue class ***/
+/****************************/
 
-svlSampleQueue::svlSampleQueue(svlStreamType type, int length) :
+svlSampleQueue::svlSampleQueue(svlStreamType type, unsigned int size) :
+    Type(type),
+    Size(std::max(size, 1u)),
+    DroppedSamples(0),
+    UnusedItems(Size, 0)
+{
+    PullItem = svlSample::GetNewFromType(type);
+    for (std::list<svlSample*>::iterator it = UnusedItems.begin();
+         it != UnusedItems.end();
+         ++ it) {
+        *it = svlSample::GetNewFromType(type);
+    }
+}
+
+svlSampleQueue::~svlSampleQueue()
+{
+    delete PullItem;
+    for (std::list<svlSample*>::iterator it = UnusedItems.begin();
+         it != UnusedItems.end();
+         ++ it) {
+        delete *it;
+    }
+}
+
+bool svlSampleQueue::Push(const svlSample* sample)
+{
+    if (sample->GetType() != Type) return false;
+
+    svlSample* push_item;
+
+    CS.Enter();
+        if (UnusedItems.empty()) {
+            push_item = BufferedItems.back();
+            BufferedItems.pop_back();
+            DroppedSamples ++;
+        }
+        else {
+            push_item = UnusedItems.front();
+            UnusedItems.pop_front();
+        }
+    CS.Leave();
+
+    push_item->CopyOf(sample);
+
+    CS.Enter();
+        BufferedItems.push_front(push_item);
+        if (BufferedItems.size() == 1) NewSampleEvent.Raise();
+    CS.Leave();
+
+    return true;
+}
+
+svlSample* svlSampleQueue::Pull(double timeout)
+{
+    bool is_event_reset = false;
+
+    if (BufferedItems.empty()) {
+        if (NewSampleEvent.Wait(timeout) == false) return 0;
+        // A successful wait automatically resets the event
+        is_event_reset = true;
+    }
+
+    CS.Enter();
+        UnusedItems.push_front(PullItem);
+        PullItem = BufferedItems.back();
+        BufferedItems.pop_back();
+
+        // Reset event when buffer is empty
+        if (BufferedItems.empty() && !is_event_reset) NewSampleEvent.Wait(0.0);
+    CS.Leave();
+
+    return PullItem;
+}
+
+svlStreamType svlSampleQueue::GetType()
+{
+    return Type;
+}
+
+unsigned int svlSampleQueue::GetLength()
+{
+    return Size;
+}
+
+unsigned int svlSampleQueue::GetUsage()
+{
+    return Size - UnusedItems.size();
+}
+
+double svlSampleQueue::GetUsageRatio()
+{
+    return static_cast<double>(GetUsage()) / GetLength();
+}
+
+unsigned int svlSampleQueue::GetDroppedSampleCount()
+{
+    return DroppedSamples;
+}
+
+svlSample* svlSampleQueue::Peek()
+{
+    return PullItem;
+}
+
+/*
+svlSampleQueu2::svlSampleQueu2(svlStreamType type, int length) :
     Type(type),
     Length(std::max(3, length)), // buffer size is greater or equal to 3
     Tail(0),
@@ -44,13 +149,13 @@ svlSampleQueue::svlSampleQueue(svlStreamType type, int length) :
     }
 }
 
-svlSampleQueue::svlSampleQueue() :
+svlSampleQueu2::svlSampleQueu2() :
     Type(svlTypeInvalid),
     Length(0)
 {
 }
 
-svlSampleQueue::~svlSampleQueue()
+svlSampleQueu2::~svlSampleQueu2()
 {
     for (int i = 0; i < Length; i ++) {
         if (Buffer[i]) delete Buffer[i];
@@ -58,32 +163,32 @@ svlSampleQueue::~svlSampleQueue()
     if (ReadBuffer) delete ReadBuffer;
 }
 
-svlStreamType svlSampleQueue::GetType()
+svlStreamType svlSampleQueu2::GetType()
 {
     return Type;
 }
 
-int svlSampleQueue::GetLength()
+int svlSampleQueu2::GetLength()
 {
     return Length;
 }
 
-int svlSampleQueue::GetUsage()
+int svlSampleQueu2::GetUsage()
 {
     return BufferUsage;
 }
 
-double svlSampleQueue::GetUsageRatio()
+double svlSampleQueu2::GetUsageRatio()
 {
     return static_cast<double>(BufferUsage) / (Length - 1);
 }
 
-int svlSampleQueue::GetDroppedSampleCount()
+int svlSampleQueu2::GetDroppedSampleCount()
 {
     return DroppedSamples;
 }
 
-bool svlSampleQueue::PreAllocate(const svlSample* sample)
+bool svlSampleQueu2::PreAllocate(const svlSample* sample)
 {
     if (ReadBuffer->SetSize(sample) != SVL_OK) return false;
     for (int i = 0; i < Length; i ++) {
@@ -92,7 +197,7 @@ bool svlSampleQueue::PreAllocate(const svlSample* sample)
     return true;
 }
 
-bool svlSampleQueue::Push(const svlSample* sample)
+bool svlSampleQueu2::Push(const svlSample* sample)
 {
     CS.Enter();
 
@@ -113,12 +218,13 @@ bool svlSampleQueue::Push(const svlSample* sample)
 
     CS.Leave();
 
+std::cerr << "svlSampleQueu2::Push: " << std::fixed << sample->GetTimestamp() << std::endl;
     if (Buffer[Head]->CopyOf(sample) != SVL_OK) return false;
 
     return true;
 }
 
-svlSample* svlSampleQueue::Pull(double timeout)
+svlSample* svlSampleQueu2::Pull(double timeout)
 {
     CS.Enter();
 
@@ -139,11 +245,13 @@ svlSample* svlSampleQueue::Pull(double timeout)
 
     CS.Leave();
 
+std::cerr << "svlSampleQueu2::Pull: " << std::fixed << ReadBuffer->GetTimestamp() << std::endl;
     return ReadBuffer;
 }
 
-svlSample* svlSampleQueue::Peek()
+svlSample* svlSampleQueu2::Peek()
 {
     return ReadBuffer;
 }
+*/
 

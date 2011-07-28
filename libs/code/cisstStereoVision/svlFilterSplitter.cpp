@@ -50,6 +50,17 @@ svlFilterSplitter::svlFilterSplitter() :
     AddInputType("input", svlTypeImageMono32);
     AddInputType("input", svlTypeImageMono32Stereo);
     AddInputType("input", svlTypeImage3DMap);
+    AddInputType("input", svlTypeCUDAImageRGB);
+    AddInputType("input", svlTypeCUDAImageRGBA);
+    AddInputType("input", svlTypeCUDAImageRGBStereo);
+    AddInputType("input", svlTypeCUDAImageRGBAStereo);
+    AddInputType("input", svlTypeCUDAImageMono8);
+    AddInputType("input", svlTypeCUDAImageMono8Stereo);
+    AddInputType("input", svlTypeCUDAImageMono16);
+    AddInputType("input", svlTypeCUDAImageMono16Stereo);
+    AddInputType("input", svlTypeCUDAImageMono32);
+    AddInputType("input", svlTypeCUDAImageMono32Stereo);
+    AddInputType("input", svlTypeCUDAImage3DMap);
     AddInputType("input", svlTypeMatrixInt8);
     AddInputType("input", svlTypeMatrixInt16);
     AddInputType("input", svlTypeMatrixInt32);

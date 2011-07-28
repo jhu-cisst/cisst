@@ -33,6 +33,8 @@ http://www.cisst.org/cisst/license.txt.
 svlOverlay::svlOverlay() :
     VideoCh(0),
     Visible(true),
+    Transform(vct3x3::Eye()),
+    Transformed(false),
     Next(0),
     Prev(0),
     Used(false)
@@ -43,6 +45,8 @@ svlOverlay::svlOverlay(unsigned int videoch,
                        bool visible) :
     VideoCh(videoch),
     Visible(visible),
+    Transform(vct3x3::Eye()),
+    Transformed(false),
     Next(0),
     Prev(0),
     Used(false)
@@ -78,6 +82,13 @@ bool svlOverlay::IsUsed() const
     return Used;
 }
 
+void svlOverlay::SetTransform(const vct3x3 & transform)
+{
+    Transform.Assign(transform);
+    if (Transform != vct3x3::Eye()) Transformed = true;
+    else Transformed = false;
+}
+
 void svlOverlay::Draw(svlSampleImage* bgimage, svlSample* input)
 {
     if (bgimage && VideoCh < bgimage->GetVideoChannels() && Visible) {
@@ -98,6 +109,7 @@ svlOverlayInput::svlOverlayInput() :
 
 svlOverlayInput::svlOverlayInput(const std::string & inputname) :
     InputName(inputname),
+    InputSynchronized(false),
     Input(0),
     SampleCache(0)
 {
@@ -115,6 +127,16 @@ void svlOverlayInput::SetInputName(const std::string & inputname)
 const std::string& svlOverlayInput::GetInputName() const
 {
     return InputName;
+}
+
+void svlOverlayInput::SetInputSynchronized(bool inputsynchronized)
+{
+    InputSynchronized = inputsynchronized;
+}
+
+bool svlOverlayInput::GetInputSynchronized() const
+{
+    return InputSynchronized;
 }
 
 
@@ -272,12 +294,12 @@ svlOverlayTargets::svlOverlayTargets() :
 }
 
 svlOverlayTargets::svlOverlayTargets(unsigned int videoch,
-                                 bool visible,
-                                 const std::string & inputname,
-                                 unsigned int inputch,
-                                 bool confcoloring,
-                                 bool crosshair,
-                                 unsigned int size) :
+                                     bool visible,
+                                     const std::string & inputname,
+                                     unsigned int inputch,
+                                     bool confcoloring,
+                                     bool crosshair,
+                                     unsigned int size) :
     svlOverlay(videoch, visible),
     svlOverlayInput(inputname),
     InputCh(inputch),
@@ -349,6 +371,7 @@ void svlOverlayTargets::DrawInternal(svlSampleImage* bgimage, svlSample* input)
     unsigned char r, g, b;
     unsigned int j;
     int conf, x, y;
+    vct3 pos, pos_xf;
 
     confidence.SetRef(maxtargets, ovrltargets->GetConfidencePointer(InputCh));
     position.SetRef(2, maxtargets, ovrltargets->GetPositionPointer(InputCh));
@@ -367,6 +390,15 @@ void svlOverlayTargets::DrawInternal(svlSampleImage* bgimage, svlSample* input)
 
             x = position.Element(0, j);
             y = position.Element(1, j);
+
+            if (Transformed) {
+                pos[0] = x;
+                pos[1] = y;
+                pos[2] = 1.0;
+                pos_xf.ProductOf(Transform, pos);
+                x = pos_xf[0];
+                y = pos_xf[1];
+            }
 
             if (Crosshair) {
                 svlDraw::Crosshair(bgimage, VideoCh, x, y, r, g, b, TargetSize);
@@ -455,6 +487,154 @@ void svlOverlayBlobs::DrawInternal(svlSampleImage* bgimage, svlSample* input)
                                false);
         }
         blob ++;
+    }
+}
+
+
+/***********************************/
+/*** svlOverlayToolTips class ******/
+/***********************************/
+
+svlOverlayToolTips::svlOverlayToolTips() :
+    svlOverlay(),
+    svlOverlayInput(),
+    InputCh(0),
+    Thickness(10),
+    Length(100),
+    Color(255, 255, 255)
+{
+}
+
+svlOverlayToolTips::svlOverlayToolTips(unsigned int videoch,
+                                       bool visible,
+                                       const std::string & inputname,
+                                       unsigned int inputch,
+                                       unsigned int thickness,
+                                       unsigned int length,
+                                       svlRGB color) :
+    svlOverlay(videoch, visible),
+    svlOverlayInput(inputname),
+    InputCh(inputch),
+    Thickness(thickness),
+    Length(length),
+    Color(color)
+{
+}
+
+svlOverlayToolTips::~svlOverlayToolTips()
+{
+}
+
+void svlOverlayToolTips::SetInputChannel(unsigned int inputch)
+{
+    InputCh = inputch;
+}
+
+void svlOverlayToolTips::SetThickness(unsigned int thickness)
+{
+    Thickness = thickness;
+}
+
+void svlOverlayToolTips::SetLength(unsigned int length)
+{
+    Length = length;
+}
+
+void svlOverlayToolTips::SetColor(svlRGB color)
+{
+    Color = color;
+}
+
+unsigned int svlOverlayToolTips::GetInputChannel() const
+{
+    return InputCh;
+}
+
+unsigned int svlOverlayToolTips::GetThickness() const
+{
+    return Thickness;
+}
+
+unsigned int svlOverlayToolTips::GetLength() const
+{
+    return Length;
+}
+
+svlRGB svlOverlayToolTips::GetColor() const
+{
+    return Color;
+}
+
+bool svlOverlayToolTips::IsInputTypeValid(svlStreamType inputtype)
+{
+    if (inputtype == svlTypeMatrixDouble) return true;
+    return false;
+}
+
+void svlOverlayToolTips::DrawInternal(svlSampleImage* bgimage, svlSample* input)
+{
+    // Get sample from input
+    svlSampleMatrixDouble* matrix_smpl = dynamic_cast<svlSampleMatrixDouble*>(input);
+    if (!matrix_smpl) return;
+
+    // Tool tracking results format:
+    //  - each result is a 3x3 matrix
+    //  - video channels are placed side-by-side horizontally
+    //  - different tools stacked vertically
+    // Example (stereo video and 3 tools):
+    //    [Tool_1_left][Tool_1_right]
+    //    [Tool_2_left][Tool_2_right]
+    //    [Tool_3_left][Tool_3_right]
+
+    vctDynamicMatrix<double>& matrix = matrix_smpl->GetDynamicMatrixRef();
+    const unsigned int tool_count = matrix.rows() / 3;
+    const unsigned int vch_count  = matrix.cols() / 3;
+    if (tool_count < 1 || InputCh >= vch_count) return;
+
+    vctFixedSizeMatrix<double, 3, 4> vertices, xf_vertices;
+    vctDynamicMatrixRef<double> sub_matrix;
+    const double radius = 0.5 * Thickness;
+    unsigned int i, j;
+    vct3x3 frm;
+
+    vertices.Column(0).Assign(Length, -radius, 1.0);
+    vertices.Column(1).Assign(0, -radius, 1.0);
+    vertices.Column(2).Assign(0, radius, 1.0);
+    vertices.Column(3).Assign(Length, radius, 1.0);
+
+    for (i = 0; i < tool_count; i ++) {
+        // Extract tool transformation from input matrix
+        sub_matrix.SetRef(matrix, i * 3, InputCh * 3, 3, 3);
+        frm.Assign(sub_matrix);
+
+        // Transform vertices from tool coordinates to image coordinates
+        xf_vertices.ProductOf(frm, vertices);
+
+        if (Transformed) {
+            // Transform vertices if overlay transform is available
+            vertices.ProductOf(Transform, xf_vertices);
+
+            // Draw poly line
+            for (j = 1; j < vertices.cols(); j ++) {
+                svlDraw::Line(bgimage, VideoCh,
+                              vertices.Element(0, j - 1),
+                              vertices.Element(1, j - 1),
+                              vertices.Element(0, j),
+                              vertices.Element(1, j),
+                              Color.r, Color.g, Color.b);
+            }
+        }
+        else {
+            // Draw poly line
+            for (j = 1; j < vertices.cols(); j ++) {
+                svlDraw::Line(bgimage, VideoCh,
+                              xf_vertices.Element(0, j - 1),
+                              xf_vertices.Element(1, j - 1),
+                              xf_vertices.Element(0, j),
+                              xf_vertices.Element(1, j),
+                              Color.r, Color.g, Color.b);
+            }
+        }
     }
 }
 
@@ -1220,6 +1400,27 @@ svlOverlayStaticPoly::svlOverlayStaticPoly() :
 
 svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
                                            bool visible,
+                                           svlRGB color) :
+    svlOverlay(videoch, visible),
+    Color(color),
+    Thickness(1),
+    Start(0)
+{
+}
+
+svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
+                                           bool visible,
+                                           svlRGB color,
+                                           unsigned int thickness) :
+    svlOverlay(videoch, visible),
+    Color(color),
+    Thickness(thickness),
+    Start(0)
+{
+}
+
+svlOverlayStaticPoly::svlOverlayStaticPoly(unsigned int videoch,
+                                           bool visible,
                                            const TypeRef poly,
                                            svlRGB color) :
     svlOverlay(videoch, visible),
@@ -1367,9 +1568,29 @@ int svlOverlayStaticPoly::GetPoint(unsigned int idx, int & x, int & y) const
 
 void svlOverlayStaticPoly::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
-    CS.Enter();
-        svlDraw::Poly(bgimage, VideoCh, Poly, Color, Thickness, Start);
-    CS.Leave();
+    if (Transformed) {
+        CS.Enter();
+            const unsigned int length = Poly.size();
+            if (PolyXF.size() != length) PolyXF.SetSize(length);
+
+            vct3 pos, pos_xf;
+            for (unsigned int i = 0; i < length; i ++) {
+                pos[0] = Poly[i].x;
+                pos[1] = Poly[i].y;
+                pos[2] = 1.0;
+                pos_xf.ProductOf(Transform, pos);
+                PolyXF[i].x = pos_xf[0];
+                PolyXF[i].y = pos_xf[1];
+            }
+        CS.Leave();
+
+        svlDraw::Poly(bgimage, VideoCh, PolyXF, Color, Thickness, Start);
+    }
+    else {
+        CS.Enter();
+            svlDraw::Poly(bgimage, VideoCh, Poly, Color, Thickness, Start);
+        CS.Leave();
+    }
 }
 
 

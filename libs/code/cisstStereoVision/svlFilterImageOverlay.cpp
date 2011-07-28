@@ -35,11 +35,13 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
     FirstOverlay(0),
     LastOverlay(0),
     ImageInputsToAddUsed(0),
+    MatrixInputsToAddUsed(0),
     TargetInputsToAddUsed(0),
     BlobInputsToAddUsed(0),
     TextInputsToAddUsed(0),
     OverlaysToAddUsed(0),
     ImageInputsToAdd(10),
+    MatrixInputsToAdd(10),
     TargetInputsToAdd(10),
     BlobInputsToAdd(10),
     TextInputsToAdd(10),
@@ -74,6 +76,28 @@ int svlFilterImageOverlay::AddInputImage(const std::string &name)
         ImageInputsToAddUsed ++;
         if (ImageInputsToAddUsed > size) ImageInputsToAdd.resize(size + 10);
         ImageInputsToAdd[ImageInputsToAddUsed - 1] = name;
+
+        break;
+    }
+
+    CS.Leave();
+
+    return SVL_OK;
+}
+
+int svlFilterImageOverlay::AddInputMatrix(const std::string &name)
+{
+    if (GetInput(name)) return SVL_FAIL;
+
+    CS.Enter();
+
+    while (1) {
+        if (IsInputAlreadyQueued(name)) break;
+
+        unsigned int size = MatrixInputsToAdd.size();
+        MatrixInputsToAddUsed ++;
+        if (MatrixInputsToAddUsed > size) MatrixInputsToAdd.resize(size + 10);
+        MatrixInputsToAdd[MatrixInputsToAddUsed - 1] = name;
 
         break;
     }
@@ -183,6 +207,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     _OnSingleThread(procInfo) {
         // Add queued inputs and overlays in a thread safe manner
         if (ImageInputsToAddUsed  ||
+            MatrixInputsToAddUsed ||
             TargetInputsToAddUsed ||
             BlobInputsToAddUsed   ||
             TextInputsToAddUsed   ||
@@ -194,6 +219,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         svlFilterInput* input = 0;
         svlOverlay* overlay = FirstOverlay;
         svlSample* ovrlsample = 0;
+        double current_time = syncInput->GetTimestamp();
 
         while (overlay) {
             // Cross casting to the input base class
@@ -209,7 +235,23 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                         ovrlsample = input->PullSample(true, 0.0);
                         if (ovrlsample) itersample->second = ovrlsample;
                         else ovrlsample = itersample->second;
-                        if (ovrlsample) overlay->Draw(src_image, ovrlsample);
+                        if (ovrlsample) {
+                            if (overlayinput->GetInputSynchronized()) {
+                                if (ovrlsample->GetTimestamp() >= current_time) {
+                                // Sample is most recent
+                                    overlay->Draw(src_image, ovrlsample);
+                                }
+                                else {
+                                // Sample is not recent
+                                    do { ovrlsample = input->PullSample(true, 0.1); }
+                                    while (IsRunning() && (!ovrlsample || ovrlsample->GetTimestamp() < current_time));
+                                    if (IsRunning()) overlay->Draw(src_image, ovrlsample);
+                                }
+                            }
+                            else {
+                                overlay->Draw(src_image, ovrlsample);
+                            }
+                        }
                     }
                 }
             }
@@ -229,6 +271,7 @@ bool svlFilterImageOverlay::IsInputAlreadyQueued(const std::string &name)
 {
     unsigned int i;
     for (i = 0; i < ImageInputsToAddUsed;  i ++) if (ImageInputsToAdd[i]  == name) return true;
+    for (i = 0; i < MatrixInputsToAddUsed; i ++) if (MatrixInputsToAdd[i] == name) return true;
     for (i = 0; i < TargetInputsToAddUsed; i ++) if (TargetInputsToAdd[i] == name) return true;
     for (i = 0; i < BlobInputsToAddUsed;   i ++) if (BlobInputsToAdd[i]   == name) return true;
     for (i = 0; i < TextInputsToAddUsed;   i ++) if (TextInputsToAdd[i]   == name) return true;
@@ -246,6 +289,22 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
         if (!input) continue;
         input->AddType(svlTypeImageRGB);
         input->AddType(svlTypeImageRGBStereo);
+        SampleCache[input] = 0;
+    }
+
+    for (i = 0; i < MatrixInputsToAddUsed; i ++) {
+        svlFilterInput* input = AddInput(MatrixInputsToAdd[i], false);
+        if (!input) continue;
+        input->AddType(svlTypeMatrixInt8);
+        input->AddType(svlTypeMatrixInt16);
+        input->AddType(svlTypeMatrixInt32);
+        input->AddType(svlTypeMatrixInt64);
+        input->AddType(svlTypeMatrixUInt8);
+        input->AddType(svlTypeMatrixUInt16);
+        input->AddType(svlTypeMatrixUInt32);
+        input->AddType(svlTypeMatrixUInt64);
+        input->AddType(svlTypeMatrixFloat);
+        input->AddType(svlTypeMatrixDouble);
         SampleCache[input] = 0;
     }
 
@@ -285,6 +344,7 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
     }
 
     ImageInputsToAddUsed  = 0;
+    MatrixInputsToAddUsed = 0;
     TargetInputsToAddUsed = 0;
     BlobInputsToAddUsed   = 0;
     TextInputsToAddUsed   = 0;

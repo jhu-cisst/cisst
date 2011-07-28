@@ -53,6 +53,8 @@ public:
     bool GetVisible() const;
     bool IsUsed() const;
 
+    void SetTransform(const vct3x3 & transform);
+
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input) = 0;
 
@@ -62,6 +64,8 @@ private:
 protected:
     unsigned int VideoCh;
     bool Visible;
+    vct3x3 Transform;
+    bool Transformed;
 
 private:
     svlOverlay* Next;
@@ -81,12 +85,15 @@ public:
 
     void SetInputName(const std::string & inputname);
     const std::string& GetInputName() const;
+    void SetInputSynchronized(bool inputsynchronized);
+    bool GetInputSynchronized() const;
 
 protected:
     virtual bool IsInputTypeValid(svlStreamType inputtype) = 0;
 
 protected:
-    std::string   InputName;
+    std::string InputName;
+    bool InputSynchronized;
 
 private:
     svlFilterInput* Input;
@@ -185,6 +192,41 @@ protected:
 private:
     unsigned int InputCh;
     bool DrawID;
+};
+
+
+class CISST_EXPORT svlOverlayToolTips : public svlOverlay, public svlOverlayInput
+{
+public:
+    svlOverlayToolTips();
+    svlOverlayToolTips(unsigned int videoch,
+                       bool visible,
+                       const std::string & inputname,
+                       unsigned int inputch,
+                       unsigned int thickness,
+                       unsigned int length,
+                       svlRGB color);
+    virtual ~svlOverlayToolTips();
+
+    void SetInputChannel(unsigned int inputch);
+    void SetThickness(unsigned int thickness);
+    void SetLength(unsigned int length);
+    void SetColor(svlRGB color);
+
+    unsigned int GetInputChannel() const;
+    unsigned int GetThickness() const;
+    unsigned int GetLength() const;
+    svlRGB GetColor() const;
+
+protected:
+    virtual bool IsInputTypeValid(svlStreamType inputtype);
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    unsigned int InputCh;
+    unsigned int Thickness;
+    unsigned int Length;
+    svlRGB Color;
 };
 
 
@@ -469,6 +511,13 @@ public:
     svlOverlayStaticPoly();
     svlOverlayStaticPoly(unsigned int videoch,
                          bool visible,
+                         svlRGB color);
+    svlOverlayStaticPoly(unsigned int videoch,
+                         bool visible,
+                         svlRGB color,
+                         unsigned int thickness);
+    svlOverlayStaticPoly(unsigned int videoch,
+                         bool visible,
                          const TypeRef poly,
                          svlRGB color);
     svlOverlayStaticPoly(unsigned int videoch,
@@ -504,6 +553,7 @@ protected:
 
 private:
     Type Poly;
+    Type PolyXF;
     svlRGB Color;
     unsigned int Thickness;
     unsigned int Start;
