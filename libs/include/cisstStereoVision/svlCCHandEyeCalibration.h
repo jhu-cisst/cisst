@@ -17,7 +17,9 @@ class svlCCHandEyeCalibration
 
 	private:
 		std::vector<svlCCCalibrationGrid*> calibrationGrids;
-		double dualQuaternionMethod();
+        double optimizeDualQuaternionMethod();
+        double getAvgHandEyeError(std::vector<CvMat*> aMatrix, std::vector<CvMat*> bMatrix);
+		double dualQuaternionMethod(int* indicies);
 		bool getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* qPrime);
 		void populateComplexMatrixST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index);
 		void quaternionMul(CvMat* q1, CvMat* q2, CvMat* result);
@@ -25,17 +27,17 @@ class svlCCHandEyeCalibration
 		void solveQuadratic(double a, double b, double c, CvMat* roots);
 		void printData();
 		void printCvMatDouble(CvMat* matrix);
-        CvMat* checkAXXB(CvMat* A, CvMat* B);
+        double checkAXXB(CvMat* A, CvMat* B);
 
 		//parameters
 		bool debug;
 		int handEyeMethodFlag;
 		std::vector<CvMat*> cameraMatrix;
 		std::vector<CvMat*> worldToTCPMatrix;
-		std::vector<CvMat*> aMatrix;
-		std::vector<CvMat*> bMatrix;
 		CvMat* cameraToTCP;
         double handEyeAvgError;
+        int** valid;
+        int validPairCount;
 };
 
 #endif

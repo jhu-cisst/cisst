@@ -37,7 +37,6 @@ svlCCCameraCalibration::svlCCCameraCalibration(int boardWidth, int boardHeight, 
     calCornerDetector = new svlCCCornerDetector(boardSize.width,boardSize.height);
     calOriginDetector = new svlCCOriginDetector(originDetectorColorModeFlag);
     cameraGeometry = new svlSampleCameraGeometry();
-    minHandEyeAvgError = std::numeric_limits<double>::max( );
 }
 
 bool svlCCCameraCalibration::runCameraCalibration(bool runHandEye)
@@ -68,7 +67,7 @@ void svlCCCameraCalibration::reset()
     rvecs.clear();
     tvecs.clear();
     svlFilterImageRectifier *rectifier;
-
+    minHandEyeAvgError = std::numeric_limits<double>::max( );
 }
 
 void svlCCCameraCalibration::printCalibrationParameters()
@@ -338,7 +337,7 @@ double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
     if(this->runHandEye)
     {
         handEyeAvgError = calHandEye->calibrate();
-        if(handEyeAvgError < minHandEyeAvgError)
+        if(handEyeAvgError > 0 && handEyeAvgError < minHandEyeAvgError)
         {
             minHandEyeAvgError = handEyeAvgError;
             tcpTCamera = calHandEye->tcp_T_camera;
@@ -348,12 +347,7 @@ double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
     if(!check)
         return std::numeric_limits<double>::max( );
     else
-    {
-        //if(this->runHandEye)
-        //    return handEyeAvgError;
-        //else
-            return rms;
-    }
+        return rms;
 }
 
 void svlCCCameraCalibration::refineGrids(int localThreshold)
@@ -364,9 +358,9 @@ void svlCCCameraCalibration::refineGrids(int localThreshold)
     {
         if(visibility[i])
         {
-            //cout << "refining grid " << i << " with parameters " << validIndex <<endl;
-            //cout << "rvect: " << i << ": " << rvecs.at(validIndex).at<double>(0,0) <<","<< rvecs.at(validIndex).at<double>(0,1) <<","<< rvecs.at(validIndex).at<double>(0,2) <<","<< endl;
-            //cout << "tvect: " << i << ": " << tvecs.at(validIndex).at<double>(0,0) <<","<< tvecs.at(validIndex).at<double>(0,1) <<","<< tvecs.at(validIndex).at<double>(0,2) <<","<< endl;
+            //std::cout << "refining grid " << i << " with parameters " << validIndex <<std::endl;
+            //std::cout << "rvect: " << i << ": " << rvecs.at(validIndex).at<double>(0,0) <<","<< rvecs.at(validIndex).at<double>(0,1) <<","<< rvecs.at(validIndex).at<double>(0,2) <<","<< std::endl;
+            //std::cout << "tvect: " << i << ": " << tvecs.at(validIndex).at<double>(0,0) <<","<< tvecs.at(validIndex).at<double>(0,1) <<","<< tvecs.at(validIndex).at<double>(0,2) <<","<< std::endl;
             //calibrationGrids.at(i)->refine(rvecs[validIndex],tvecs[validIndex],cameraMatrix,distCoeffs,threshold,true,false);
             calibrationGrids.at(i)->refine(rvecs[validIndex],tvecs[validIndex],cameraMatrix,distCoeffs,localThreshold,false,true);
             validIndex++;
@@ -460,8 +454,7 @@ void svlCCCameraCalibration::optimizeCalibration()
 
     while((rms < std::numeric_limits<double>::max( )) && (rms > rootMeanSquaredThreshold)&& (iteration < maxCalibrationIteration))
     {
- 
-        // Lower threshold for higher iteration of optimization
+         // Lower threshold for higher iteration of optimization
         if(iteration > 1)
             refineThreshold = 2;
 
@@ -668,10 +661,7 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
     //save images and calibration grids
     images.push_back(image);
     calibrationGrids.push_back(calibrationGrid);
-    if (!calibrationGrids.back()->valid)
-    {
-        std::cout << "svlCCCameraCalibration.processImage() - IMAGE " << currentFileName << " NOT VALID!"<< std::endl;
-    }
+
     return calibrationGrids.back()->valid;
 }
 
@@ -742,7 +732,7 @@ int svlCCCameraCalibration::setRectifier(svlFilterImageRectifier *rectifier)
     //if(debug)
     std::cout << "==========setRectifier==============" << std::endl;
 
-    //int result = rectifier->GetInput("calibration")->PushSample(cameraGeometry);
+    //int result= rectifier->GetInput("calibration")->PushSample(cameraGeometry);
 
     int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, vct3x3::Eye(),f,c,k,0,0);
 
