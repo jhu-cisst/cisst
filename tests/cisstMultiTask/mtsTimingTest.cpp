@@ -113,4 +113,164 @@ void mtsTimingTest::TestPeriodic(double period,
     delete task;
 }
 
+void mtsTimingTest::TestContinuousPriorityVeryLowAffinity0(void)
+{
+     TestContinuous(PRIORITY_VERY_LOW, 0);
+}
+void mtsTimingTest::TestContinuousPriorityVeryLowAffinity1(void)
+{
+     TestContinuous(PRIORITY_VERY_LOW, 1);
+}
+void mtsTimingTest::TestContinuousPriorityLowAffinity0(void)
+{
+     TestContinuous(PRIORITY_LOW, 0);
+}
+void mtsTimingTest::TestContinuousPriorityLowAffinity1(void)
+{
+     TestContinuous(PRIORITY_LOW, 1);
+}
+void mtsTimingTest::TestContinuousPriorityNormalAffinity0(void)
+{
+     TestContinuous(PRIORITY_NORMAL, 0);
+}
+void mtsTimingTest::TestContinuousPriorityNormalAffinity1(void)
+{
+     TestContinuous(PRIORITY_NORMAL, 1);
+}
+void mtsTimingTest::TestContinuousPriorityHighAffinity0(void)
+{
+     TestContinuous(PRIORITY_HIGH, 0);
+}
+void mtsTimingTest::TestContinuousPriorityHighAffinity1(void)
+{
+     TestContinuous(PRIORITY_HIGH, 1);
+}
+void mtsTimingTest::TestContinuousPriorityVeryHighAffinity0(void)
+{
+     TestContinuous(PRIORITY_VERY_HIGH, 0);
+}
+void mtsTimingTest::TestContinuousPriorityVeryHighAffinity1(void)
+{
+     TestContinuous(PRIORITY_VERY_HIGH, 1);
+}
 
+void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity0RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_VERY_LOW, 0, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity0RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_LOW, 0, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity0RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_LOW, 0, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity1RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_VERY_LOW, 1, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity1RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_LOW, 1, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity1RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_LOW, 1, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityLowAffinity0RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_LOW, 0, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityLowAffinity0RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_LOW, 0, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityLowAffinity0RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_LOW, 0, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityLowAffinity1RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_LOW, 1, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityLowAffinity1RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_LOW, 1, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityLowAffinity1RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_LOW, 1, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityNormalAffinity0RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_NORMAL, 0, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityNormalAffinity0RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_NORMAL, 0, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityNormalAffinity0RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_NORMAL, 0, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityNormalAffinity1RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_NORMAL, 1, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityNormalAffinity1RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_NORMAL, 1, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityNormalAffinity1RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_NORMAL, 1, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityHighAffinity0RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_HIGH, 0, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityHighAffinity0RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_HIGH, 0, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityHighAffinity0RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_HIGH, 0, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityHighAffinity1RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_HIGH, 1, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityHighAffinity1RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_HIGH, 1, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityHighAffinity1RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_HIGH, 1, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity0RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_VERY_HIGH, 0, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity0RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_HIGH, 0, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity0RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_HIGH, 0, osaThreadSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity1RundummyComputation(void)
+{
+    TestPeriodic(PRIORITY_VERY_HIGH, 1, dummyComputation);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity1RunosaSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_HIGH, 1, osaSleep);
+}
+void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity1RunosaThreadSleep(void)
+{
+    TestPeriodic(PRIORITY_VERY_HIGH, 1, osaThreadSleep);
+}
