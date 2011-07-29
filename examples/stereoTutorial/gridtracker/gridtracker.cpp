@@ -156,7 +156,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     trackeralgo.SetConfidenceThreshold(0.35);
 
     // setup tracker
-    tracker.SetMovingAverageSmoothing(0.0);
+    tracker.SetRigidBodyTransformSmoothing(2.0);
     tracker.SetIterations(1);
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
