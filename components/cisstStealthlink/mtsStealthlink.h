@@ -31,14 +31,14 @@ http://www.cisst.org/cisst/license.txt.
 
 // forward declarations of Stealthlink types
 class AsCL_Client;
-class AsCL_Utils;
+class mtsStealthlink_AsCL_Utils;
 
 class mtsStealthlink: public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     AsCL_Client * Client;
-    AsCL_Utils * Utils;
+    mtsStealthlink_AsCL_Utils * Utils;
 
     // State data
     mtsStealthTool ToolData;

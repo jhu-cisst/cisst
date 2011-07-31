@@ -74,6 +74,10 @@ mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & peri
 	}
 }
 
+// Windows defines a SetPort macro
+#ifdef SetPort
+#undef SetPort
+#endif
 
 void mtsStealthlink::Configure(const std::string &filename)
 {
@@ -149,6 +153,7 @@ void mtsStealthlink::Run(void)
 		}
 	}
 	ProcessQueuedCommands();
+    this->Utils->CheckCallbacks();
 }
 
 
