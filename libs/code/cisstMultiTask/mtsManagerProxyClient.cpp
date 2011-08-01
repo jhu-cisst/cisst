@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 unsigned int mtsManagerProxyClient::InstanceCounter = 0;
 
@@ -181,17 +182,28 @@ void mtsManagerProxyClient::StopProxy()
 
 void mtsManagerProxyClient::OnServerDisconnect(const Ice::Exception & ex)
 {
-    if (!IsActiveProxy()) {
+    // Multiple proxy threads can detect server disconnect
+    static osaCriticalSection cs;
+
+    cs.Enter();
+
+    if (!IsActiveProxy() || !ProxyOwner->IsGCMActive()) {
+        cs.Leave();
         return; // already detected disconnection
     }
 
     // Ice - ConnectionLostException - forceful closure by peer
     // Ice - ForcedCloseConnectionException - after forceful closure by peer
     CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
-    CMN_LOG_CLASS_RUN_ERROR << "LCM - Proxy \"" << ProxyName << "\" detected GLOBAL COMPONENT MANAGER DISCONNECTION "
-                            << "(" << EndpointInfo << ")" << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "Process \"" << ProxyOwner->GetProcessName() 
+        << "\" detected GLOBAL COMPONENT MANAGER DISCONNECTION" << std::endl;
 
     StopProxy();
+
+    // GCM has been disconnected
+    ProxyOwner->SetGCMConnected(false);
+
+    cs.Leave();
 }
 
 //-------------------------------------------------------------------------

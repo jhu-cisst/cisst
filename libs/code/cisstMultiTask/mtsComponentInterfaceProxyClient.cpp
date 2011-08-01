@@ -182,11 +182,14 @@ void mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception &
         return; // already detected disconnection
     }
 
-    // Ice - ConnectionLostException - forceful closure by peer
-    // Ice - ForcedCloseConnectionException - after forceful closure by peer
-    CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
-    CMN_LOG_CLASS_RUN_WARNING << "Component interface proxy \"" << ProxyName << "\" detected SERVER COMPONENT DISCONNECTION "
-        << "(connection id: \"" << ConnectionID << "\")" << std::endl;
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (LCM->IsGCMActive()) {
+        // Ice - ConnectionLostException - forceful closure by peer
+        // Ice - ForcedCloseConnectionException - after forceful closure by peer
+        CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "Component interface proxy \"" << ProxyName << "\" detected SERVER COMPONENT DISCONNECTION "
+            << "(connection id: \"" << ConnectionID << "\")" << std::endl;
+    }
 
     StopProxy();
 }

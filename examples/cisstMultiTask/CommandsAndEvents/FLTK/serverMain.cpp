@@ -91,14 +91,22 @@ int main(int argc, char * argv[])
     componentManager->StartAll();
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
-    while (server->UIOpened()) {
+    bool GCMActive = true;
+    while (server->UIOpened() && GCMActive) {
         Fl::lock();
         {
             Fl::check();
         }
         Fl::unlock();
         Fl::awake();
+
+        GCMActive = componentManager->IsGCMActive();
+
         osaSleep(5.0 * cmn_ms);
+    }
+
+    if (!GCMActive) {
+        CMN_LOG_RUN_ERROR << "Global Component Manager is disconnected" << std::endl;
     }
 
     // cleanup

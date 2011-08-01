@@ -98,7 +98,7 @@ bool mtsManagerProxyServer::StartProxy(mtsManagerGlobal * proxyOwner)
 
     // Register this proxy to the owner
     if (!proxyOwner->AddProcessObject(this, true)) {
-        LogError(mtsManagerProxyServer, "failed to register proxy server to the global component manager");
+        LogError(mtsManagerProxyServer, "failed to register proxy server to Global Component Manager");
         return false;
     }
 

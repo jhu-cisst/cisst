@@ -71,17 +71,19 @@ mtsManagerLocal::mtsManagerLocal(void)
 
     // Register process name to the global component manager
     if (!globalManager->AddProcess(ProcessName)) {
-        cmnThrow(std::runtime_error("Failed to register process name to the global component manager"));
+        cmnThrow(std::runtime_error("Failed to register process name to Global Component Manager"));
     }
 
     // Register process object to the global component manager
     if (!globalManager->AddProcessObject(this)) {
-        cmnThrow(std::runtime_error("Failed to register process object to the global component manager"));
+        cmnThrow(std::runtime_error("Failed to register process object to Global Component Manager"));
     }
 
     ManagerGlobal = globalManager;
 
     Configuration = LCM_CONFIG_STANDALONE;
+
+    SetGCMConnected(true); // Always true in case of standalone configuration
 }
 
 #if CISST_MTS_HAS_ICE
@@ -95,11 +97,14 @@ mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager) : Co
 
     // Register process object to the global component manager
     if (!globalComponentManager.AddProcessObject(this)) {
-        cmnThrow(std::runtime_error("Failed to register process object to the global component manager"));
+        cmnThrow(std::runtime_error("Failed to register process object to Global Component Manager"));
     }
+
     ManagerGlobal = &globalComponentManager;
 
     Configuration = LCM_CONFIG_NETWORKED_WITH_GCM;
+
+    SetGCMConnected(true); // Always true because LCM and GCM run in the same process in this configuration
 }
 
 mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
@@ -114,11 +119,15 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
 
     // Create network proxies
     if (!ConnectToGlobalComponentManager()) {
-        cmnThrow(std::runtime_error("Failed to initialize global component manager proxy"));
+        std::string s("Failed to connect to Global Component Manager: ");
+        s += globalComponentManagerIP;
+        cmnThrow(std::runtime_error(s));
     }
 
     // Give proxies some time to start up
-    osaSleep(2.0 * cmn_s);
+    osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+
+    SetGCMConnected(true);
 
     // Set this machine's IP
     SetIPAddress();
@@ -162,17 +171,19 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 
     // Run Ice proxy and connect to the global component manager
     if (!globalComponentManagerProxy->StartProxy(this)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to initialize global component manager proxy" << std::endl;
+        std::string s("Failed to connect to Global Component Manager: ");
+        s += GlobalComponentManagerIP;
+        CMN_LOG_CLASS_INIT_ERROR << s << std::endl;
         delete globalComponentManagerProxy;
         return false;
     }
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
-    osaSleep(1.0 * cmn_s);
+    osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
 
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to register process name to the global component manager" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to register process name to Global Component Manager" << std::endl;
         delete globalComponentManagerProxy;
         return false;
     }
@@ -211,6 +222,8 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Server = 0;
 
     TimeServer.SetTimeOrigin();
+
+    SetGCMConnected(false);
 }
 
 void mtsManagerLocal::Cleanup(void)
@@ -479,7 +492,7 @@ bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const
     else {
         mtsManagerGlobal * gcm = dynamic_cast<mtsManagerGlobal *>(ManagerGlobal);
         if (!gcm) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of global component manager" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of Global Component Manager" << std::endl;
             return false;
         }
         mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(gcm);
@@ -931,7 +944,8 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const b
     // Notify the global component manager of the removal of this component
     if (notifyGCM) {
         if (!ManagerGlobal->RemoveComponent(ProcessName, componentName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component at global component manager: " << componentName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove \"" << componentName << "\""
+                << "from component Global Component Manager" << std::endl;
             return false;
         }
     }
@@ -1759,7 +1773,7 @@ ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientCompone
                                ProcessName, clientComponentName, clientInterfaceRequiredName,
                                ProcessName, serverComponentName, serverInterfaceProvidedName);
     if (connectionID == InvalidConnectionID) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from the Global Component Manager: "
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from Global Component Manager: "
                                  << clientComponentName << ":" << clientInterfaceRequiredName << " - "
                                  << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
     } else {
@@ -1947,11 +1961,18 @@ bool mtsManagerLocal::Connect(const std::string & clientProcessName,
 
 bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 {
-    bool success = ManagerGlobal->Disconnect(connectionID);
+    // If GCM is not connected, don't reqeust disconnection
+    if (!IsGCMActive()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: GCM disconnected -- Disconnection request ignored (connection id [ " << connectionID << " ])" << std::endl;
+        return true;
+    }
 
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection request failed: connection id [ " << connectionID << " ]" << std::endl;
-        return false;
+    bool success = ManagerGlobal->Disconnect(connectionID);
+    if (IsGCMActive()) { // Connection to GCM can be disconnected while executing the line above
+        if (!success) {
+            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: disconnection request failed: connection id [ " << connectionID << " ]" << std::endl;
+            return false;
+        }
     }
 
     return true;
@@ -1961,17 +1982,28 @@ bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
-    bool success = ManagerGlobal->Disconnect(
-        ProcessName, clientComponentName, clientInterfaceRequiredName,
-        ProcessName, serverComponentName, serverInterfaceProvidedName);
-
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection request failed: \""
+    if (!IsGCMActive()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: GCM disconnected -- disconnection request ignored: \""
             << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceRequiredName)
             << " - "
             << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceProvidedName)
             << std::endl;
-        return false;
+        return true;
+    }
+
+    bool success = ManagerGlobal->Disconnect(
+        ProcessName, clientComponentName, clientInterfaceRequiredName,
+        ProcessName, serverComponentName, serverInterfaceProvidedName);
+
+    if (IsGCMActive()) { // Connection to GCM can be disconnected while executing the line above
+        if (!success) {
+            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: disconnection request failed: \""
+                << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceRequiredName)
+                << " - "
+                << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceProvidedName)
+                << std::endl;
+            return false;
+        }
     }
 
     return true;
@@ -2293,7 +2325,7 @@ bool mtsManagerLocal::CreateInterfaceProvidedProxy(
     // Inform the global component manager of the creation of provided interface proxy
     if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, serverComponentProxyName, interfaceProvidedName)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: "
-                                 << "failed to add provided interface proxy to global component manager: "
+                                 << "failed to add provided interface proxy to Global Component Manager: "
                                  << ProcessName << ":" << serverComponentProxyName << ":" << interfaceProvidedName << std::endl;
         return false;
     }
@@ -2338,7 +2370,7 @@ bool mtsManagerLocal::CreateInterfaceRequiredProxy(
     // Inform the global component manager of the creation of provided interface proxy
     if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, clientComponentProxyName, requiredInterfaceName)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: "
-                                 << "failed to add required interface proxy to global component manager: "
+                                 << "failed to add required interface proxy to Global Component Manager: "
                                  << ProcessName << ":" << clientComponentProxyName << ":" << requiredInterfaceName << std::endl;
         return false;
     }
@@ -2787,7 +2819,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to notify GCM of this connection" << std::endl;
         goto ConnectClientSideInterfaceError;
     }
-    CMN_LOG_CLASS_INIT_VERBOSE << "ConnectClientSideInterface: successfully informed global component manager of this connection: connection id = "
+    CMN_LOG_CLASS_INIT_VERBOSE << "ConnectClientSideInterface: successfully informed Global Component Manager of this connection: connection id = "
                                << connectionID << std::endl;
 
     // Register this connection information to a provided interface proxy
