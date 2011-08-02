@@ -47,7 +47,8 @@ bool cmnStreamRawParser::Parse(std::istream & inputStream)
             inputStream.ignore(256, '\n');  // ignore rest of line
             continue;
         }
-        it = KeyList.find(&EntryBase(inputKey));
+        EntryBase eb(inputKey); // MJ: support for gcc 4.6 compilation (not to have -fpermissive)
+        it = KeyList.find(&eb);
         if (it == KeyList.end()) {
             CMN_LOG_INIT_WARNING << "cmnStreamRawParser: unknown keyword '" << inputKey << "'" << std::endl;
             inputStream.ignore(256, '\n');  // skip rest of this line, attempt to continue
@@ -70,7 +71,8 @@ bool cmnStreamRawParser::Parse(std::istream & inputStream)
 bool cmnStreamRawParser::IsValid(const std::string &name) const
 {
     KeyListType::const_iterator it;
-    it = KeyList.find(&EntryBase(name));
+    EntryBase eb(name); // MJ: support for gcc 4.6 compilation (not to have -fpermissive)
+    it = KeyList.find(&eb);
     if (it == KeyList.end())
         return false;
     return (*it)->isValid();
