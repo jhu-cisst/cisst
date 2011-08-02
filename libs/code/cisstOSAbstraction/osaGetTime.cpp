@@ -100,3 +100,15 @@ void osaGetDateTimeString(std::string & str)
             now->tm_sec);
     str = buffer;
 }
+
+void osaGetTimeString(std::string & str)
+{
+    time_t tim = time(0);
+    tm * now = localtime(&tim);
+    char buffer[50];
+    sprintf(buffer, "%02d%s%02d%s%02d",
+            now->tm_hour, ":",
+            now->tm_min, ":",
+            now->tm_sec);
+    str = buffer;
+}

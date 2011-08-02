@@ -51,4 +51,7 @@ void CISST_EXPORT osaGetAbsoluteTime(osaAbsoluteTime & now);
 /*! Retrieve the current local date and time. */
 void CISST_EXPORT osaGetDateTimeString(std::string & str);
 
+/*! Retrieve the current local time. */
+void CISST_EXPORT osaGetTimeString(std::string & str);
+
 #endif // _osaGetTime_h
