@@ -91,7 +91,7 @@ class PyTextCtrlHook {
     static PyObject* PythonWindow;       // the window that will handle the event
     static PyMethodDef Methods[];
     static cmnCallbackStreambuf<char> *Streambuf;
-    static cmnLogLevel LoD;
+    static cmnLogMask Mask;
 
 public:
     // Specify the Python callback function
@@ -99,10 +99,10 @@ public:
     // Remove the Python callback function
     static PyObject* ClearTextOutput(PyObject* self, PyObject* args);
 
-    // Get the channel level of detail
-    static PyObject* GetLoD(PyObject* self, PyObject* args);
-    // Set the channel level of detail
-    static PyObject* SetLoD(PyObject* self, PyObject* args);
+    // Get the channel log mask
+    static PyObject* GetMask(PyObject* self, PyObject* args);
+    // Set the channel log mask
+    static PyObject* SetMask(PyObject* self, PyObject* args);
 
     // The C++ callback function that is passed to cmnCallbackStreambuf
     static void PrintLog(const char * str, int len);
@@ -118,7 +118,7 @@ PyObject* PyTextCtrlHook::PythonFunc = 0;
 PyObject* PyTextCtrlHook::PythonEventClass = 0;
 PyObject* PyTextCtrlHook::PythonWindow = 0;
 cmnCallbackStreambuf<char> *PyTextCtrlHook::Streambuf = 0;
-cmnLogLevel PyTextCtrlHook::LoD = CMN_LOG_DEFAULT_LOD;
+cmnLogMask PyTextCtrlHook::Mask = CMN_LOG_ALLOW_DEFAULT;
 
 // Specify the Python callback function.
 PyObject* PyTextCtrlHook::SetTextOutput(PyObject* CMN_UNUSED(self), PyObject* args)
@@ -126,8 +126,8 @@ PyObject* PyTextCtrlHook::SetTextOutput(PyObject* CMN_UNUSED(self), PyObject* ar
     PyObject* func;
     PyObject* evtclass;    // event class
     PyObject* handler;     // handler for GUI window
-    int iLoD = (int)LoD;
-    if (PyArg_ParseTuple(args,"OOO|i",&func,&evtclass,&handler,&iLoD)) {
+    int iMask = (int)Mask;
+    if (PyArg_ParseTuple(args,"OOO|i",&func,&evtclass,&handler,&iMask)) {
         if (!PyCallable_Check(func)) {
             PyErr_SetString(PyExc_TypeError, "expected a callable for parameter 1.");
             return NULL;
@@ -145,10 +145,10 @@ PyObject* PyTextCtrlHook::SetTextOutput(PyObject* CMN_UNUSED(self), PyObject* ar
         Py_XINCREF(handler);           // Save reference to handler
         Py_XDECREF(PythonWindow);      // Release any previous handler
         PythonWindow = handler;
-        LoD = static_cast<cmnLogLevel>(iLoD);
+        Mask = static_cast<cmnLogMask>(iMask);
         if (!Streambuf)
             Streambuf = new cmnCallbackStreambuf<char>(PrintLog);
-        cmnLogger::GetMultiplexer()->AddChannel(Streambuf, LoD);
+        cmnLogger::GetMultiplexer()->AddChannel(Streambuf, Mask);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -163,28 +163,28 @@ PyObject* PyTextCtrlHook::ClearTextOutput(PyObject* CMN_UNUSED(self), PyObject* 
     return Py_None;
 }
 
-// Get the channel level of detail
-PyObject* PyTextCtrlHook::GetLoD(PyObject* CMN_UNUSED(self), PyObject* CMN_UNUSED(args))
+// Get the channel log mask
+PyObject* PyTextCtrlHook::GetMask(PyObject* CMN_UNUSED(self), PyObject* CMN_UNUSED(args))
 {
-    // If the channel is active, get the LOD from the multiplexer,
+    // If the channel is active, get the log mask from the multiplexer,
     // just in case it was changed from within the C++ code (very unlikely).
     if (Streambuf) {
-        cmnLogger::GetMultiplexer()->GetChannelMask(Streambuf, LoD);
+        cmnLogger::GetMultiplexer()->GetChannelMask(Streambuf, Mask);
     }
-    return Py_BuildValue("i", (int)LoD);
+    return Py_BuildValue("i", (int)Mask);
 }
 
-// Set the channel level of detail
-PyObject* PyTextCtrlHook::SetLoD(PyObject* CMN_UNUSED(self), PyObject* args)
+// Set the channel log mask
+PyObject* PyTextCtrlHook::SetMask(PyObject* CMN_UNUSED(self), PyObject* args)
 {
-    int iLoD;
-    if (!PyArg_ParseTuple(args,"i",&iLoD)) {
+    int iMask;
+    if (!PyArg_ParseTuple(args,"i",&iMask)) {
         PyErr_SetString(PyExc_TypeError, "integer type expected");
         return NULL;
     }
-    LoD = static_cast<cmnLogLevel>(iLoD);
+    Mask = static_cast<cmnLogMask>(iMask);
     if (Streambuf) {
-        cmnLogger::GetMultiplexer()->SetChannelMask(Streambuf, LoD);
+        cmnLogger::GetMultiplexer()->SetChannelMask(Streambuf, Mask);
     }
     Py_INCREF(Py_None);
     return Py_None;
@@ -278,14 +278,14 @@ PyObject* SetActiveFlagWrap(PyObject* CMN_UNUSED(self), PyObject* args)
 }
 
 PyMethodDef PyTextCtrlHook::Methods[] = {
-    { "SetTextOutput", SetTextOutput, METH_VARARGS,"SetTextOutput(func, evtclass, window, LoD=current-lod)\n\n"
+    { "SetTextOutput", SetTextOutput, METH_VARARGS,"SetTextOutput(func, evtclass, window, mask=current-mask)\n\n"
           "   Set callback function (func) for logging text.\n"
           "   Function should accept a window id and an event object (new instance of evtclass).\n"
-          "   LoD is channel level of detail (defaults to current setting)."
+          "   mask is channel log mask (defaults to current setting)."
  },
     { "ClearTextOutput", ClearTextOutput, METH_NOARGS, "Clear callback function for logging text."},
-    { "GetLoD", GetLoD, METH_NOARGS, "Get the channel level of detail."},
-    { "SetLoD", SetLoD, METH_VARARGS, "Set the channel level of detail."},
+    { "GetMask", GetMask, METH_NOARGS, "Get the channel log mask."},
+    { "SetMask", SetMask, METH_VARARGS, "Set the channel log mask."},
     { "SetActiveFlag", SetActiveFlagWrap, METH_VARARGS, "Set flag indicating whether IRE is initialized and active."},
     { NULL, NULL, 0, NULL }
 };

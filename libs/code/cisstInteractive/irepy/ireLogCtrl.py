@@ -22,7 +22,7 @@
 #  Currently, it contains a header and a text control (wx.TextCtrl)
 #  for the log output.  The header includes a checkbox to enable/disable
 #  the logger and an IntCtrl box to allow the user to change the
-#  channel level of detail (LoD).
+#  channel log mask.
 #
 #  Currently, if the IRE is not embedded (i.e., not called from a
 #  C++ program), the logger functionality is disabled because the
@@ -40,6 +40,9 @@
 """ ireLogCtrl
 
 """
+
+from cisstCommonPython import *
+
 import wx
 import wx.lib.intctrl as intctrl
 
@@ -74,34 +77,33 @@ class ireLogCtrl(wx.Panel):
         self.EnableBox = wx.CheckBox(self, -1, 'Enabled')
         self.EnableBox.SetForegroundColour(wx.WHITE)
         self.EnableBox.SetFont(Font)
-        self.ChannelLoDText = wx.StaticText(self, -1, 'Channel LoD: ')
-        self.ChannelLoDText.SetForegroundColour(wx.WHITE)
-        self.ChannelLoDText.SetFont(Font)
+        self.ChannelMaskText = wx.StaticText(self, -1, 'Channel Mask: ')
+        self.ChannelMaskText.SetForegroundColour(wx.WHITE)
+        self.ChannelMaskText.SetFont(Font)
 
         self.Bind(EVT_UPDATE_LOG, self.OnUpdateLog)
 
-        LoD = 5
+        Mask = CMN_LOG_ALLOW_ALL
         if ireEmbedded:
-            LoD = ireLogger.GetLoD()
+            Mask = ireLogger.GetMask()
 
-        # use the IntCtrl control to get the LoD.  Another option would be to use
-        # wx.SpinCtrl, which would give nice up/down arrows, but does not prevent
-        # the user from entering non-numeric data using the keyboard.
-        # For now, we arbitrarily set the maximum LoD to 99.
-        self.ChannelLoD = intctrl.IntCtrl(self, -1, LoD, min=0, max=99, limited=True)
+        # use the IntCtrl control to get the log mask.  Since this is now a mask,
+        # rather than a log level, it would make more sense to have a different
+        # interface (e.g., check boxes to enable/disable each type of log message).
+        self.ChannelMask= intctrl.IntCtrl(self, -1, Mask, min=CMN_LOG_ALLOW_NONE, max=CMN_LOG_ALLOW_ALL, limited=True)
 
         if not ireEmbedded:
             self.EnableBox.Enable(False)
-            self.ChannelLoDText.Enable(False)
-            self.ChannelLoD.Enable(False)
+            self.ChannelMaskText.Enable(False)
+            self.ChannelMask.Enable(False)
 
         self.HeaderSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.HeaderSizer.Add(self.Text, 0, wx.ALIGN_LEFT)
         self.HeaderSizer.Add((0,0),3)   # Add a stretchable space
         self.HeaderSizer.Add(self.EnableBox, 0, wx.ALIGN_LEFT)
         self.HeaderSizer.Add((0,0),3)   # Add a stretchable space
-        self.HeaderSizer.Add(self.ChannelLoDText, 0, wx.ALIGN_RIGHT)
-        self.HeaderSizer.Add(self.ChannelLoD, 0, wx.ALIGN_LEFT)
+        self.HeaderSizer.Add(self.ChannelMaskText, 0, wx.ALIGN_RIGHT)
+        self.HeaderSizer.Add(self.ChannelMask, 0, wx.ALIGN_LEFT)
         self.HeaderSizer.Add((0,0),1)   # Add a smaller stretchable space
 
         self.logText = wx.TextCtrl(self, -1, style=style)
@@ -112,7 +114,7 @@ class ireLogCtrl(wx.Panel):
         self.SetSizer(self.LogSizer)
 
         self.Bind(wx.EVT_CHECKBOX, self.OnEnableBox, self.EnableBox)
-        self.Bind(intctrl.EVT_INT, self.OnChannelLoD, self.ChannelLoD)
+        self.Bind(intctrl.EVT_INT, self.OnChannelMask, self.ChannelMask)
 
     def EnableLogger(self):
         global ireEmbedded
@@ -146,9 +148,9 @@ class ireLogCtrl(wx.Panel):
         else:
             self.DisableLogger()
 
-    def OnChannelLoD(self, event):
+    def OnChannelMask(self, event):
         if ireEmbedded:
-            ireLogger.SetLoD(event.GetValue())
+            ireLogger.SetMask(event.GetValue())
 
     def OnUpdateLog(self, evt):
         self.logText.AppendText(evt.msg)
