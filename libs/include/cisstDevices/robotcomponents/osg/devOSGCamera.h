@@ -238,6 +238,8 @@ class CISST_EXPORT devOSGCamera :
   void setCullMask( osg::Node::NodeMask mask )
   { getCamera()->setCullMask( mask ); }
 
+  virtual void SetOrientationPosition( const vctFrm3& Rt );
+  virtual void SetOrientationPosition( const vctFrame4x4<double>& Rt );
   vctFrm3 GetOrientationPosition() const;  
 
   void Configure( const std::string& = "" ){}

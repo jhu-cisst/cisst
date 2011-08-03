@@ -14,9 +14,10 @@ class CISST_EXPORT devLinearSE3 : public devTrajectory {
   SE3IO* input;
   SE3IO* output;
 
-  vctFrame4x4<double> Rtold;
   double vmax;
   double wmax;
+
+  vctFrame4x4<double> oldinput;
 
   vctFrame4x4<double> GetInput();
 
@@ -25,7 +26,7 @@ class CISST_EXPORT devLinearSE3 : public devTrajectory {
   // Declare a pure virtual method 
   //! Create a new function that will be added to the list of functions
   robFunction* Queue( double t, robFunction* function );
-  robFunction* Track( double, robFunction*  );
+  robFunction* Track( double t, robFunction* function  );
 
   void Evaluate( double t, robFunction* function );
   bool IsInputNew();
@@ -41,6 +42,7 @@ class CISST_EXPORT devLinearSE3 : public devTrajectory {
 		const vctFrame4x4<double>& Rtinit , 
 		double vmax,
 		double wmax );
+
   ~devLinearSE3(){}
 
 };

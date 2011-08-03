@@ -274,7 +274,8 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
 
     if(aMatrix.size() < 1)
     {
-        std::cout << std::endl << "Cannot process hand eye calibration, valid pairs images total: "<< aMatrix.size() << std::endl ;
+        if(debug)
+            std::cout << std::endl << "Cannot process hand eye calibration, valid pairs images total: "<< aMatrix.size() << std::endl ;
         return std::numeric_limits<double>::max( );
     }
 

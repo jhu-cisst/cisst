@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
-#include <cisstStereoVision/svlExport.h>
+#include <cisstStereoVision/svlExportQt.h>
 
 
 // Forward declarations

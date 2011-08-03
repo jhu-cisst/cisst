@@ -161,6 +161,14 @@ protected:
         mtsManagerComponentServer * Server;
     } ManagerComponent;
 
+    /*! If connection to GCM is active */
+    bool GCMConnected;
+
+    /*! Change GCM connection state */
+    inline void SetGCMConnected(const bool connected) {
+        GCMConnected = connected;
+    }
+
     /*! Protected constructor (singleton) */
     mtsManagerLocal(void);
 
@@ -465,6 +473,11 @@ public:
     /*! Returns the current configuration of this local component manager */
     ConfigurationType GetConfiguration(void) const {
         return Configuration;
+    }
+
+    /*! Check if connection to GCM is active */
+    inline bool IsGCMActive(void) const {
+        return GCMConnected;
     }
 
 #if CISST_MTS_HAS_ICE

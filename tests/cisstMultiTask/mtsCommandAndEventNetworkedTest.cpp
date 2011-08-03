@@ -39,8 +39,8 @@ CMN_IMPLEMENT_SERVICES(mtsCommandAndEventNetworkedTest);
 
 mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest():
     PipeComponentManager("component_manager"),
-    PipeProcessServer("server"),
-    PipeProcessClient("client"),
+    PipeProcessServer("server_process"),
+    PipeProcessClient("client_process"),
     PipeConfigurationManager("configuration_manager")
 {
 }
@@ -60,15 +60,24 @@ bool mtsCommandAndEventNetworkedTest::SendAndReceive(osaPipeExec & pipe,
     const osaTimeServer & timeServer = mtsComponentManager::GetInstance()->GetTimeServer();
     const double endTime = timeServer.GetRelativeTime() + timeOut;
     bool timeExpired = false;
-    while ((charRead != '\n')
-           && (!timeExpired)) {
+    do {
         byteRead = pipe.Read(&charRead, 1);
+        CMN_ASSERT(byteRead < 2);
         if ((byteRead == 1)
+            && (charRead != '\r')
             && (charRead != '\n')) {
             received = received + charRead;
         }
         timeExpired = (timeServer.GetRelativeTime() > endTime);
+    } while ((charRead != '\r')
+             && (charRead != '\n')
+             && (!timeExpired));
+
+    // for windows, we need to read the \n after \r
+    if (charRead == '\r') {
+        byteRead = pipe.Read(&charRead, 1);
     }
+
     if (timeExpired) {
         CMN_LOG_CLASS_RUN_ERROR << "SendAndReceive: timed out while sending \"" << send
                                 << "\" on pipe \"" << pipe.GetName() << "\", allowed time was "
@@ -92,7 +101,7 @@ void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
         CPPUNIT_FAIL(message);
         return;
     }
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(pipeName, expected, answer);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(pipeName, std::string(expected), std::string(answer));
 }
 
 
@@ -100,9 +109,9 @@ void mtsCommandAndEventNetworkedTest::StartAllComponents(void)
 {
     SendAndVerify(PipeComponentManager, "connect", "component_manager connected");
     SendAndVerify(PipeComponentManager, "start", "start succeeded");
-    SendAndVerify(PipeProcessServer, "connect", "server connected");
+    SendAndVerify(PipeProcessServer, "connect", "server_process connected");
     SendAndVerify(PipeProcessServer, "start", "start succeeded");
-    SendAndVerify(PipeProcessClient, "connect", "client connected");
+    SendAndVerify(PipeProcessClient, "connect", "client_process connected");
     SendAndVerify(PipeProcessClient, "start", "start succeeded");
     SendAndVerify(PipeConfigurationManager, "connect", "configuration_manager connected");
     SendAndVerify(PipeConfigurationManager, "start", "start succeeded");
@@ -129,8 +138,8 @@ void mtsCommandAndEventNetworkedTest::PingAllComponents(void)
 
 void mtsCommandAndEventNetworkedTest::VerifyProcesses(void)
 {
-    SendAndVerify(PipeComponentManager, "has_process client", "client found");
-    SendAndVerify(PipeComponentManager, "has_process server", "server found");
+    SendAndVerify(PipeComponentManager, "has_process client_process", "client_process found");
+    SendAndVerify(PipeComponentManager, "has_process server_process", "server_process found");
     SendAndVerify(PipeComponentManager, "has_process configuration_manager", "configuration_manager found");
     SendAndVerify(PipeComponentManager, "has_process whatever_that_should_not_exist", "whatever_that_should_not_exist not found");
 }
@@ -154,13 +163,13 @@ void mtsCommandAndEventNetworkedTest::setUp(void)
     // start server process
     executable = executablePath + std::string("cisstMultiTaskTestsProcess");
     arguments.resize(1);
-    arguments[0] = std::string("server");
+    arguments[0] = std::string("server_process");
 	if (!PipeProcessServer.Open(executable, arguments, "rw")) {
         std::cout << "Error occurred while starting server process" << std::endl;
     }
 
     // start client process
-    arguments[0] = std::string("client");
+    arguments[0] = std::string("client_process");
 	if (!PipeProcessClient.Open(executable, arguments, "rw")) {
         std::cout << "Error occurred while starting client process" << std::endl;
     }
@@ -375,8 +384,25 @@ void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 {
     StartAllComponents();
     PingAllComponents();
+
     VerifyProcesses();
-    SendAndVerify(PipeConfigurationManager, "createComponent server mtsTestDevice1 server", "component created");
+
+    // create server component
+    SendAndVerify(PipeConfigurationManager, "dynamic_load server_process cisstMultiTaskTestsLib", "cisstMultiTaskTestsLib loaded on server_process");
+    SendAndVerify(PipeConfigurationManager, "create_component server_process mtsTestDevice1_mtsInt server", "component created");
+    SendAndVerify(PipeProcessServer, "has_component server", "server found");
+    PingAllComponents();
+
+    // create client component
+    SendAndVerify(PipeConfigurationManager, "dynamic_load client_process cisstMultiTaskTestsLib", "cisstMultiTaskTestsLib loaded on client_process");
+    SendAndVerify(PipeConfigurationManager, "create_component client_process mtsTestDevice1_mtsInt client", "component created");
+    SendAndVerify(PipeProcessClient, "has_component client", "client found");
+    PingAllComponents();
+
+    SendAndVerify(PipeConfigurationManager,
+                  "connect client_process client r1 server_process server p1",
+                  "connection succeeded");
+
     StopAllComponents();
 
     /*

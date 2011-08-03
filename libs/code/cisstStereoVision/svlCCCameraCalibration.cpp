@@ -732,9 +732,9 @@ int svlCCCameraCalibration::setRectifier(svlFilterImageRectifier *rectifier)
     //if(debug)
     std::cout << "==========setRectifier==============" << std::endl;
 
-    //int result= rectifier->GetInput("calibration")->PushSample(cameraGeometry);
+    int result= rectifier->GetInput("calibration")->PushSample(cameraGeometry);
 
-    int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, vct3x3::Eye(),f,c,k,0,0);
+    //int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, vct3x3::Eye(),f,c,k,0,0);
 
     printf("rectifier returns: %d\n", result);
     return result;

@@ -35,9 +35,10 @@ int main( int argc, char** argv ){
   taskManager->AddComponent( camera );
 
   // Create objects
+  for( int i=1; i<argc; i++ ){
   osg::ref_ptr<devOSGBody> object;
-  object = new devOSGBody( "object", vctFrame4x4<double>(), argv[1], world );
-
+    object = new devOSGBody( "object", vctFrame4x4<double>(), argv[i], world );
+  }
   // Start the camera
   taskManager->CreateAll();
   taskManager->StartAll();

@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaThread.h>
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
 //PK: Probably some of these include files are not needed
 #include <pthread.h>
 #include <sched.h>
@@ -36,6 +36,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <semaphore.h>
 #endif // USE_POSIX_SEMAPHORES
 #endif // CISST_LINUX_RTAI || CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_QNX
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <native/task.h>
+#include <native/mutex.h>
+#include <native/cond.h>
+#include <native/timer.h>
+#include <sys/time.h>
+#endif
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -217,11 +225,21 @@ struct osaThreadSignalInternals
     HANDLE hEvent;
 #endif
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     pthread_mutex_t gnuMutex;
     pthread_cond_t gnuCondition;
     int Condition_State;
 #endif
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    //RT_MUTEX mutex;
+    //RT_COND condition;
+    //int state;
+    pthread_mutex_t gnuMutex;
+    pthread_cond_t gnuCondition;
+    int Condition_State;
+#endif
+
 };
 
 #define INTERNALS(A) (reinterpret_cast<osaThreadSignalInternals*>(Internals)->A)
@@ -244,7 +262,7 @@ osaThreadSignal::osaThreadSignal()
 	INTERNALS(hEvent) = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     int retval = pthread_mutex_init(&INTERNALS(gnuMutex), 0);
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -261,6 +279,53 @@ osaThreadSignal::osaThreadSignal()
     }
     INTERNALS(Condition_State) = 0;
 #endif
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    /*
+    std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_create( &INTERNALS( mutex ), NULL );
+        if( retval != 0 ){
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_mutex_create failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+
+        retval = rt_cond_create( &INTERNALS( condition ), NULL );
+        if( retval != 0 ){
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_cond_create failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+
+        INTERNALS( state ) = 0;
+    }   
+    else{
+    */
+        int retval = pthread_mutex_init(&INTERNALS(gnuMutex), 0);
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_mutex_init failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        retval = pthread_cond_init(&INTERNALS(gnuCondition), 0);
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_cond_init failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        INTERNALS(Condition_State) = 0;
+        //}
+        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+
+#endif
+
 }
 
 osaThreadSignal::~osaThreadSignal()
@@ -269,7 +334,7 @@ osaThreadSignal::~osaThreadSignal()
 	CloseHandle(INTERNALS(hEvent));
 #endif
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     int retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -285,6 +350,49 @@ osaThreadSignal::~osaThreadSignal()
                            << std::endl;
     }
 #endif
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    /*
+    std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_delete( &INTERNALS( mutex ) );
+        if( retval != 0 ){
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_mutex_delete failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        
+        retval = rt_cond_delete( &INTERNALS( condition ) );
+        if( retval != 0 ){
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_cond_delete failed. "
+                           << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+    }
+    else{
+    */
+        int retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_cond_destroy failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        retval = pthread_mutex_destroy(&INTERNALS(gnuMutex));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_mutex_destroy failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        //}
+        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+#endif
+
 }
 
 unsigned int osaThreadSignal::SizeOfInternals(void) {
@@ -297,7 +405,7 @@ void osaThreadSignal::Raise()
     ::SetEvent(INTERNALS(hEvent));
 #endif
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -320,6 +428,65 @@ void osaThreadSignal::Raise()
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
+#endif
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+    /*
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_acquire( &INTERNALS( mutex ), TM_INFINITE );
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_mutex_acquire failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        
+        retval = rt_cond_broadcast( &INTERNALS( condition ) );
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_cond_broadcast failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        INTERNALS( state ) = 1;
+        
+        retval = rt_mutex_release( &INTERNALS( mutex ) );
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_mutex_release failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+    }
+    else{
+    */
+        int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_mutex_lock failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        retval = pthread_cond_broadcast(&INTERNALS(gnuCondition));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_cond_broadcast failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        INTERNALS(Condition_State) = 1;
+        retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_mutex_unlock failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        //}
+        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+
 #endif
 }
 
@@ -375,7 +542,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     }
 #endif
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -387,7 +554,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     // If the condition state is triggered, then release the thread.
     if (INTERNALS(Condition_State) == 0) {
         // getting absolute time timeout
-#if (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_QNX)
         unsigned long ret, sec, nsec;
         timespec now, timeout;
         if (clock_gettime(CLOCK_REALTIME, &now) == -1) {
@@ -459,6 +626,137 @@ bool osaThreadSignal::Wait(double timeoutInSec)
 
 #endif
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    /*
+    std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_acquire( &INTERNALS( mutex ), TM_INFINITE );
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_mutex_acquire failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        
+        // If the condition state is triggered, then release the thread.                                                                           
+        if( INTERNALS( state ) == 0 ) {
+            RTIME timeout = RTIME( timeoutInSec * 1000000000 );
+            retval = rt_cond_wait( &INTERNALS( condition ), 
+                                   &INTERNALS( mutex ), timeout );
+            if( retval == -ETIMEDOUT ){
+                retval = rt_mutex_release( &INTERNALS( mutex ) );
+                if( retval != 0 ) {
+                    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                                       << "rt_mutex_release failed. "
+                                       << strerror(retval) << ": " << retval
+                                       << std::endl;
+                }
+    if (do_callback) PostCallback();
+                return false;
+            }
+        }
+        
+        // AUTOMATIC RESET:
+        // condition is not referenced to anymore so it is safe to release it
+        retval = rt_cond_delete( &INTERNALS( condition ) );
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_cond_delete failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        
+        retval = rt_cond_create( &INTERNALS( condition ), NULL );
+        if( retval != 0 ){
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_cond_create failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        INTERNALS( state ) = 0;
+        
+        retval = rt_mutex_release( &INTERNALS( mutex ) );
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "rt_mutex_release failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+    }
+    else{
+    */
+        int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_mutex_lock failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        
+        // If the condition state is triggered, then release the thread.
+        if (INTERNALS(Condition_State) == 0) {
+            // getting absolute time timeout
+            int ret, sec, usec;
+            timeval now;
+            timespec timeout;
+            gettimeofday(&now, 0);
+            sec = now.tv_sec + millisec / 1000;
+            usec = now.tv_usec + (millisec % 1000) * 1000;
+            while (usec >= 1000000) {
+                sec ++;
+                usec -= 1000000;
+            }
+            timeout.tv_sec = sec;
+            timeout.tv_nsec = usec * 1000;
+
+            ret = pthread_cond_timedwait(&INTERNALS(gnuCondition), &INTERNALS(gnuMutex), &timeout);
+            
+            if (ret == ETIMEDOUT) {
+                retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
+                if( retval != 0 ) {
+                    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                                       << "pthread_mutex_unlock failed. "
+                                       << strerror(retval) << ": " << retval
+                                       << std::endl;
+                }
+                if (do_callback) PostCallback();
+                return false;
+            }
+        }
+        
+        // AUTOMATIC RESET:
+        // condition is not referenced to anymore so it is safe to release it
+        retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_cond_destroy failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        // reinitializing condition = resetting state
+        retval = pthread_cond_init(&INTERNALS(gnuCondition), 0);
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_cond_init failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+        INTERNALS(Condition_State) = 0;
+        
+        retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
+        if( retval != 0 ) {
+            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                               << "pthread_mutex_unlock failed. "
+                               << strerror(retval) << ": " << retval
+                               << std::endl;
+        }
+
+        //}
+        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+#endif
+
     if (do_callback) PostCallback();
     return true;
 }
@@ -470,7 +768,10 @@ void osaThreadSignal::ToStream(std::ostream & outputStream) const
 #if (CISST_OS == CISST_WINDOWS)
     outputStream << "handle = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->hEvent;
 #endif
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+    outputStream << "condition_state = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->Condition_State;
+#endif
+#if (CISST_OS == CISST_LINUX_XENOMAI)
     outputStream << "condition_state = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->Condition_State;
 #endif
 }

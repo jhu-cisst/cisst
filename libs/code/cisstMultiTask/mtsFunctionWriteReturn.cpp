@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
 
 
-mtsFunctionWriteReturn::mtsFunctionWriteReturn(void):
-    mtsFunctionBase(false),
+mtsFunctionWriteReturn::mtsFunctionWriteReturn(const bool isProxy):
+    mtsFunctionBase(isProxy),
     Command(0)
 {}
 

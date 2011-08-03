@@ -57,24 +57,21 @@ int main(int argc, char **argv)
     }
 
     // create our two tasks
-    const double PeriodClient = 10 * cmn_ms; // in milliseconds
-    const double PeriodServer = 10 * cmn_ms; // in milliseconds
-
     serverTaskBase * server;
     if (serverGeneric) {
-        server = new serverTask<mtsDouble>("Server", PeriodServer);
+        server = new serverTask<mtsDouble>("Server");
     } else {
-        server = new serverTask<double>("Server", PeriodServer);
+        server = new serverTask<double>("Server");
     }
 
     clientTaskBase * client1;
     clientTaskBase * client2;
     if (clientGeneric) {
-        client1 = new clientTask<mtsDouble>("Client1", PeriodClient);
-        client2 = new clientTask<mtsDouble>("Client2", PeriodClient);
+        client1 = new clientTask<mtsDouble>("Client1");
+        client2 = new clientTask<mtsDouble>("Client2");
     } else {
-        client1 = new clientTask<double>("Client1", PeriodClient);
-        client2 = new clientTask<double>("Client2", PeriodClient);
+        client1 = new clientTask<double>("Client1");
+        client2 = new clientTask<double>("Client2");
     }
 
     server->Configure();

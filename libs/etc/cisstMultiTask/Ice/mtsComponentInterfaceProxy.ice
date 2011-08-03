@@ -54,6 +54,17 @@ module mtsComponentInterfaceProxy
         string Argument2PrototypeSerialized;
 	};
 
+	struct CommandVoidReturnInfo {
+		string Name;
+        string ResultPrototypeSerialized;
+	};
+
+	struct CommandWriteReturnInfo {
+		string Name;
+        string ArgumentPrototypeSerialized;
+        string ResultPrototypeSerialized;
+	};
+
 	struct EventVoidInfo {
 		string Name;
 	};
@@ -67,6 +78,8 @@ module mtsComponentInterfaceProxy
 	sequence<CommandWriteInfo>         CommandWriteSequence;
 	sequence<CommandReadInfo>          CommandReadSequence;
 	sequence<CommandQualifiedReadInfo> CommandQualifiedReadSequence;
+	sequence<CommandVoidReturnInfo>    CommandVoidReturnSequence;
+	sequence<CommandWriteReturnInfo>   CommandWriteReturnSequence;
     sequence<EventVoidInfo>            EventVoidSequence;
     sequence<EventWriteInfo>           EventWriteSequence;
 
@@ -95,6 +108,8 @@ module mtsComponentInterfaceProxy
         FunctionProxySequence FunctionWriteProxies;
         FunctionProxySequence FunctionReadProxies;
         FunctionProxySequence FunctionQualifiedReadProxies;
+        FunctionProxySequence FunctionVoidReturnProxies;
+        FunctionProxySequence FunctionWriteReturnProxies;
     };
 
     //
@@ -102,7 +117,7 @@ module mtsComponentInterfaceProxy
     //
     struct EventGeneratorProxyElement {
         string Name;
-        // This ID is set as a pointer to a event generator proxy poninter at client side.
+        // This ID is set as a pointer to a event generator proxy pointer at client side.
         // Note that type 'long' in slice is converted to ::Ice::Long which is
         // big enough to handle 64-bit numbers.
         long EventGeneratorProxyId;
@@ -132,6 +147,8 @@ module mtsComponentInterfaceProxy
         void ExecuteCommandWriteSerialized(long commandID, string argument, bool blocking, out byte executionResult);
         void ExecuteCommandReadSerialized(long commandID, out string argument, out byte executionResult);
         void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut, out byte executionResult);
+        void ExecuteCommandVoidReturnSerialized(long commandID, long resultAddress, out string result, out byte executionResult);
+        void ExecuteCommandWriteReturnSerialized(long commandID, string argumentIn, long resultAddress, out string result, out byte executionResult);
 	};
 
 	//-----------------------------------------------------------------------------
@@ -162,6 +179,7 @@ module mtsComponentInterfaceProxy
         /*! Execute events across a network */
         void ExecuteEventVoid(long CommandID);
         void ExecuteEventWriteSerialized(long CommandID, string argument);
+        void ExecuteEventReturnSerialized(long CommandID, long resultAddress, string result);
 	};
 };
 

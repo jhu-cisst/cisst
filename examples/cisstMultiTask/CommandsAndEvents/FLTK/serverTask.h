@@ -57,10 +57,8 @@ protected:
     serverUI UI;
 
 public:
-    // provide a name for the task and define the frequency (time
-    // interval between calls to the periodic Run).  Also used to
-    // populate the interface(s)
-    serverTask(const std::string & taskName, double period);
+    // provide a name for the task and populate the interface(s)
+    serverTask(const std::string & taskName);
     ~serverTask() {}
     // all four methods are pure virtual in mtsTask
     void Configure(const std::string & CMN_UNUSED(filename));

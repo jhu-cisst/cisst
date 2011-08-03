@@ -63,6 +63,7 @@ public:
 protected:
     std::string ScaleName;
 
+    unsigned int FrameCounter;
     bool TargetsAdded;
     unsigned int TemplateRadiusRequested;
     unsigned int SearchRadiusRequested;
@@ -77,6 +78,7 @@ protected:
     unsigned char ConfidenceThreshold;
     svlTrackerMSBruteForce* LowerScale;
     svlSampleImageRGB* LowerScaleImage;
+    svlSampleImageRGB* PreviousImage;
 
     virtual void CopyTemplate(unsigned char* img, unsigned char* tmp, unsigned int left, unsigned int top);
     virtual void UpdateTemplate(unsigned char* img, unsigned char* origtmp, unsigned char* tmp, unsigned int left, unsigned int top);

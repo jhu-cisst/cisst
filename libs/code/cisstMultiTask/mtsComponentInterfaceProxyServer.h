@@ -42,14 +42,14 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
     /*! Typedef for base type */
     typedef mtsProxyBaseServer<mtsComponentProxy, ComponentInterfaceClientProxyType, unsigned int> BaseServerType;
 
-protected:
+ protected:
     /*! Callback thread for bi-directional communication with server */
     class ComponentInterfaceServerI;
     typedef IceUtil::Handle<ComponentInterfaceServerI> ComponentInterfaceServerIPtr;
     ComponentInterfaceServerIPtr Sender;
 
     /*! Per-command argument serializer */
-    typedef std::map<CommandIDType, mtsProxySerializer *> PerCommandSerializerMapType;
+    typedef std::map<mtsCommandIDType, mtsProxySerializer *> PerCommandSerializerMapType;
     PerCommandSerializerMapType PerCommandSerializerMap;
 
     /*! Map to retrieve connection information by client id.
@@ -117,11 +117,14 @@ protected:
                                                  const std::string & requiredInterfaceName,
                                                  mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
-    void ReceiveExecuteEventVoid(const CommandIDType commandID);
+    void ReceiveExecuteEventVoid(const mtsCommandIDType commandID);
 
-    void ReceiveExecuteEventWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument);
+    void ReceiveExecuteEventWriteSerialized(const mtsCommandIDType commandID, const std::string & serializedArgument);
 
-public:
+    void ReceiveExecuteEventReturnSerialized(const mtsCommandIDType commandID, const mtsObjectIDType resultAddress,
+                                             const std::string & result);
+
+ public:
     /*! Constructor and destructor */
     mtsComponentInterfaceProxyServer(const std::string & adapterName, const std::string & communicatorID);
     ~mtsComponentInterfaceProxyServer();
@@ -133,7 +136,7 @@ public:
     void StopProxy(void);
 
     /*! Register per-command (de)serializer */
-    bool AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
+    bool AddPerCommandSerializer(const mtsCommandIDType commandID, mtsProxySerializer * serializer);
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy disconnection is detected. */
@@ -147,25 +150,31 @@ public:
 
     /*! Fetch function proxy pointers from the connected required interface
         proxy at server process. */
-    bool SendFetchFunctionProxyPointers(
-        const ClientIDType clientID, const std::string & requiredInterfaceName,
+    bool SendFetchFunctionProxyPointers(const ClientIDType clientID, const std::string & requiredInterfaceName,
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers);
 
     /*! Execute commands and events. This will call function proxies in the required
         interface proxy at the server process.
         clientID designates which network proxy client should execute a command
         and commandID represents which function proxy object should be called. */
-    bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandVoid(const ClientIDType clientID, const mtsCommandIDType commandID,
                                 const mtsBlockingType blocking, mtsExecutionResult & executionResult);
-    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                            const mtsBlockingType blocking, mtsExecutionResult & executionResult,
                                            const mtsGenericObject & argument);
-    bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                           mtsExecutionResult & executionResult,
                                           mtsGenericObject & argument);
-    bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID,
+    bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
                                                    mtsExecutionResult & executionResult,
                                                    const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut);
+    bool SendExecuteCommandVoidReturnSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
+                                                mtsExecutionResult & executionResult,
+                                                mtsGenericObject & result);
+    bool SendExecuteCommandWriteReturnSerialized(const ClientIDType clientID, const mtsCommandIDType commandID,
+                                                 mtsExecutionResult & executionResult,
+                                                 const mtsGenericObject & argument,
+                                                 mtsGenericObject & result);
 
     //-------------------------------------------------------------------------
     //  Getters
@@ -183,7 +192,7 @@ public:
     //-------------------------------------------------------------------------
     //  Interface Implementation (refer to mtsComponentInterfaceProxy.ice)
     //-------------------------------------------------------------------------
-protected:
+ protected:
     class ComponentInterfaceServerI :
         public mtsComponentInterfaceProxy::ComponentInterfaceServer, public IceUtil::Monitor<IceUtil::Mutex>
     {
@@ -197,8 +206,7 @@ protected:
         mtsComponentInterfaceProxyServer * ComponentInterfaceProxyServer;
 
     public:
-        ComponentInterfaceServerI(
-            const Ice::CommunicatorPtr& communicator,
+        ComponentInterfaceServerI(const Ice::CommunicatorPtr& communicator,
             const Ice::LoggerPtr& logger,
             mtsComponentInterfaceProxyServer * componentInterfaceProxyServer);
         ~ComponentInterfaceServerI();
@@ -228,14 +236,14 @@ protected:
 
         /*! Fetch pointers of event generator proxies from a provided interface
             proxy at server side. */
-        bool FetchEventGeneratorProxyPointers(
-            const std::string & clientComponentName, const std::string & requiredInterfaceName,
+        bool FetchEventGeneratorProxyPointers(const std::string & clientComponentName, const std::string & requiredInterfaceName,
             mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers,
             const ::Ice::Current & current) const;
 
         /*! Execute events */
         void ExecuteEventVoid(::Ice::Long, const ::Ice::Current&);
         void ExecuteEventWriteSerialized(::Ice::Long, const ::std::string &, const ::Ice::Current&);
+        void ExecuteEventReturnSerialized(::Ice::Long commandId, ::Ice::Long resultAddress, const ::std::string & result, const ::Ice::Current&);
     };
 };
 

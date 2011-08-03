@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,7 +42,7 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-protected:
+ protected:
     typedef mtsTaskContinuous BaseType;
 
     /*! The member function that is passed as 'start routine' argument for
@@ -56,7 +56,7 @@ protected:
     /*! Callable created around the PostCommandQueuedMethod. */
     mtsCallableVoidBase * PostCommandQueuedCallable;
 
-public:
+ public:
     /*! Create a task with name 'name' and set the state table size.
 
         \param name The name of the task
@@ -76,11 +76,14 @@ public:
     /* documented in base class */
 	void Kill(void);
 
+    /* documented in base class */
     mtsInterfaceRequired * AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
                                                                           mtsRequiredType required = MTS_REQUIRED);
 
+    /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
-                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
+                                                                   bool isProxy = false);
 
 };
 
@@ -89,4 +92,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskFromSignal)
 
 
 #endif // _mtsTaskFromSignal_h
-

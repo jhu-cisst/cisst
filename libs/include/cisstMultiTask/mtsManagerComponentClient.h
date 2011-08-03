@@ -69,7 +69,7 @@ protected:
     /*! Functions for InterfaceLCM's required interface */
     typedef struct {
         // Dynamic component management
-        mtsFunctionWrite ComponentCreate;
+        mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
@@ -153,9 +153,9 @@ public:
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     /*! Commands for InterfaceLCM's provided interface */
-    void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
@@ -174,9 +174,9 @@ public:
     mtsFunctionWrite InterfaceLCMEvents_ChangeState;
 
     /*! Commands for InterfaceComponent's provided interface */
-    void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);

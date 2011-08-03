@@ -675,11 +675,11 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
             // Delete sub-image reference
             delete subimage;
         }
-/*
-        _CriticalSection(procInfo) {
-            std::cerr << "(" << procInfo->ID << ", " << size * 3 << ", " << comprsize << ") ";
-        }
-*/
+
+//        _CriticalSection(procInfo) {
+//            std::cerr << "(" << procInfo->ID << ", " << size * 3 << ", " << comprsize << ") ";
+//        }
+
         ComprPartSize[procid] = comprsize;
 
         break;

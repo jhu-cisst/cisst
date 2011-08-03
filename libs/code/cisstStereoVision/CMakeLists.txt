@@ -1211,7 +1211,7 @@ MACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
     CUDA_ADD_CUDA_INCLUDE_ONCE()
     CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
     CUDA_BUILD_SHARED_LIBRARY(_cuda_shared_flag ${ARGN})
-    CUDA_WRAP_SRCS(${cuda_target} OBJ _generated_files ${_sources} ${_cmake_options} ${_cuda_shared_flag} OPTIONS ${_options})
+    CUDA_WRAP_SRCS(${cuda_target} OBJ _generated_files "${_sources}" ${_cmake_options} ${_cuda_shared_flag} OPTIONS ${_options})
     ADD_LIBRARY(${cuda_target} ${_cmake_options} ${_generated_files} ${_sources})
     TARGET_LINK_LIBRARIES(${cuda_target} ${CUDA_LIBRARIES} )
     SET_TARGET_PROPERTIES(${cuda_target} PROPERTIES LINKER_LANGUAGE ${CUDA_C_OR_CXX})
@@ -1233,30 +1233,35 @@ IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 
     FIND_PACKAGE(CUDA)
     IF(CUDA_FOUND)
-        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc")
+        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
+                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
         SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
+        SET(CUDA_SOURCES
+            cuda/svlCUDACommon.cu
+            )
+        # Add a special target to clean 'nvcc' generated files.
+        CUDA_BUILD_CLEAN_TARGET()
         SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
                              cisstStereoVisionCUDA
-                             svlCUDACommon.cu
+                             "${CUDA_SOURCES}"
                              STATIC
                              OPTIONS ""#-DSTUFF=aaa"
                              RELEASE --use_fast_math -DNDEBUG
                              DEBUG -g -DDEBUG
                              )
-        # Add a special target to clean 'nvcc' generated files.
-        CUDA_BUILD_CLEAN_TARGET()
 
         MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
-        
+
         SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
             "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
             "${CUDA_SDK_ROOT_DIR}/common/inc"
+            "${CUDA_SDK_ROOT_DIR}/../shared/inc"
             "${CUDA_INCLUDE_DIRS}"
             )
         SET(SVL_ADDITIONAL_LIBRARIES
             "${SVL_ADDITIONAL_LIBRARIES}"
-            ${CUDA_LIBRARIES}
-#            ${CUDA_GENERATED_LIBRARIES}
+            "${CUDA_LIBRARIES}"
+#            "${CUDA_GENERATED_LIBRARIES}"
             )
         SET(HEADER_FILES
             ${HEADER_FILES}
@@ -1305,6 +1310,7 @@ if (CISST_SVL_HAS_BM_DECKLINK)
   endif (DeckLink_FOUND)
 endif (CISST_SVL_HAS_BM_DECKLINK)
             
+
 
 # Set SVL options to 'advanced' to hide them from beginner user
 #MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)

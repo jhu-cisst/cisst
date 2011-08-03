@@ -43,7 +43,7 @@ public:
 public:
     svlFilterSplitter();
 
-    int AddOutput(const std::string &name, const unsigned int threadcount = 1, const unsigned int buffersize = 3);
+    int AddOutput(const std::string &name, const unsigned int threadcount = 1, const unsigned int buffersize = 1);
 
 protected:
     virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);

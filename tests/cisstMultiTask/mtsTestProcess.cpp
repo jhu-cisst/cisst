@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include <fstream>
 #include "mtsTestComponents.h"
 
 int main(int argc, char * argv[])
@@ -36,6 +37,15 @@ int main(int argc, char * argv[])
         std::cerr << "Usage: " << argv[0] << " <process_name>" << std::endl;
         return 1;
     }
+
+    // configure log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::HaltDefaultLog();
+    std::string logFileName = processName + "-log.txt";
+    std::ofstream logFile(logFileName.c_str());
+    cmnLogger::AddChannel(logFile, CMN_LOG_ALLOW_ALL);
 
     std::string command;
 
@@ -50,7 +60,7 @@ int main(int argc, char * argv[])
             return 1;
         }
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"connect\" first" << std::endl;
         return 1;
     }
     // send message to acknowledge connection
@@ -75,18 +85,29 @@ int main(int argc, char * argv[])
         // send message to confirm everything seems fine
         std::cout << "start succeeded" << std::endl;
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"start\" first" << std::endl;
         return 1;
     }
 
     // normal operations
     bool stop = false;
+    std::string componentName;
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
             stop = true;
+
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
+
+        } else if (command == std::string("has_component")) {
+            std::cin >> componentName;
+            mtsComponent * component = componentManager->GetComponent(componentName);
+            if (component) {
+                std::cout << component->GetName() << " found" << std::endl;
+        } else {
+                std::cout << componentName << " not found" << std::endl;
+            }
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
@@ -107,6 +128,10 @@ int main(int argc, char * argv[])
     while (true) {
         osaSleep(1.0 * cmn_hour);
     }
+
+    // stop log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
+    logFile.close();
 
     return 0;
 }

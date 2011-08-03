@@ -47,7 +47,7 @@ class mtsEventHandlerList;
 /*!
   \file
   \brief Declaration of mtsInterfaceRequired
- */
+*/
 
 
 /*!
@@ -81,7 +81,7 @@ class mtsEventHandlerList;
   it may be useful to have a required interface connect to multiple
   provided interfaces (e.g., running a robot simulation in parallel
   with a real robot), at this time it is not worth the trouble.
- */
+*/
 
 class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
 {
@@ -94,7 +94,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     friend class mtsEventReceiverBase;
     friend class mtsManagerComponentClient;
 
-protected:
+ protected:
 
     /*! Mailbox (if supported). */
     mtsMailBox * MailBox;
@@ -228,6 +228,7 @@ protected:
 
  private:
     void BlockingCommandExecutedHandler(void);
+    void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
     bool DetachCommands(void);
@@ -246,7 +247,7 @@ protected:
     /*! Send a human readable description of the interface. */
     void ToStream(std::ostream & outputStream) const;
 
-protected:
+ protected:
  public: // adeguet1 todo fix -- this has been added for ostream << operator
 #ifndef SWIG  // SWIG cannot deal with this
     template <class _PointerType>
@@ -337,7 +338,7 @@ protected:
     /*! Get description of this interface (with serialized argument information) */
     void GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription);
 
-public:
+ public:
 
     bool AddFunction(const std::string & functionName, mtsFunctionVoid & function, mtsRequiredType required = MTS_REQUIRED);
 
@@ -453,4 +454,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsInterfaceRequired)
 
 
 #endif // _mtsInterfaceRequired_h
-

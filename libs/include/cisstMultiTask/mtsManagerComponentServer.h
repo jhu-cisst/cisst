@@ -62,7 +62,7 @@ protected:
         function objects using named map with (key = process name, 
         value = function object set instance) */
     typedef struct {
-        mtsFunctionWrite ComponentCreate;
+        mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
@@ -97,9 +97,9 @@ public:
     bool AddNewClientProcess(const std::string & clientProcessName);
 
     /*! Commands */
-    void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);

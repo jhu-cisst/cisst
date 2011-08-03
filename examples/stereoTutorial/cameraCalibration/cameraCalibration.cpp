@@ -164,17 +164,17 @@ int main(int argc, char** argv)
     {
         ch = cmnGetChar();
         //options 'r' to add more images and recalibrate
-        //if(ch == 'r')
-        //{
-        //    ok = svlCCObject->processImage(imageDirectory,imagePrefix,imageType,index+1);
-        //    ok = svlCCObject->runCameraCalibration(runHandEye);
-        //    if(ok && svlCCObject->images.size() > 0)
-        //    {
-        //        svlCCObject->printCalibrationParameters();
-        //        svlCCObject->setRectifier(rectifier);
-        //        source.SetImageOverwrite(svlCCObject->images.front());
-        //    }
-        //}
+        if(ch == 'r')
+        {
+            ok = svlCCObject->processImage(imageDirectory,imagePrefix,imageType,index+1);
+            ok = svlCCObject->runCameraCalibration(runHandEye);
+            if(ok && svlCCObject->images.size() > 0)
+            {
+                svlCCObject->printCalibrationParameters();
+                svlCCObject->setRectifier(rectifier);
+                source.SetImageOverwrite(svlCCObject->images.front());
+            }
+        }
         source.SetImageOverwrite(svlCCObject->images.at(index));
         index++;
         cout << "Showing Image# " << index << endl;

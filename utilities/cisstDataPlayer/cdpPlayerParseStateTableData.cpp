@@ -44,9 +44,19 @@ void cdpPlayerParseStateTableData::ParseHeader(std::string Path) {
     std::cerr<<Path<<"\n";
     // get FilePath    
     std::getline(inf, Header.FilePath);   
+	if(Header.FilePath.find("\r")!=std::string::npos)
+		Header.FilePath.erase(Header.FilePath.size()-1, 1);
+    
     std::getline(inf, Header.Date);      
+
     std::getline(inf, Header.FileFormat);   
-    std::getline(inf, Header.Delimiter);   
+	if(Header.FileFormat.find("\r")!=std::string::npos)
+		Header.FileFormat.erase(Header.FileFormat.size()-1,1);
+
+    std::getline(inf, Header.Delimiter);
+	if(Header.Delimiter.find("\r")!=std::string::npos)
+		Header.Delimiter.erase(Header.Delimiter.size()-1,1);
+
     std::getline(inf, Temp);    
     Header.NumberOfTotalFields =atoi(Temp.c_str());
     std::getline(inf, Temp);

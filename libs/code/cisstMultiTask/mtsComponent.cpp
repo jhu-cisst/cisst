@@ -190,17 +190,18 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvided(const std::string & in
 
 
 mtsInterfaceProvided * mtsComponent::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                                             mtsInterfaceQueueingPolicy queueingPolicy)
+                                                                             mtsInterfaceQueueingPolicy queueingPolicy,
+                                                                             bool isProxy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED)) {
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_BE_QUEUED to component \""
                                    << this->GetName() << "\", make sure you call ProcessQueuedCommands to empty the queues" << std::endl;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
         if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LEVEL_INIT_ERROR)) {
@@ -782,7 +783,7 @@ cmnLogger::StreamBufType * mtsComponent::GetLogMultiplexer(void) const
 bool mtsComponent::IsRunning(void) const
 {
     return (this->State == mtsComponentState::ACTIVE);
- }
+}
 
 
 bool mtsComponent::IsStarted(void) const

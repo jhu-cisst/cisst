@@ -37,11 +37,8 @@ int main(){
   vctDynamicVector<double> LWRqinit(7, 0.0);       // initial point
   vctDynamicVector<double> LWRqfinal( 7, 1.0 );    // final point
   vctDynamicVector<double> LWRqdmax( 7, 0.01 );    // velocity
-  std::vector< vctDynamicVector<double> > LWRQ;    // queue of setpoints
-  LWRQ.push_back( LWRqfinal );
-  LWRQ.push_back( LWRqinit );
 
-  devSetPoints LWRsetpoints( "LWRsetpoints", LWRQ ); // setpoints generator
+  devSetPoints LWRsetpoints( "LWRsetpoints", 7 ); // setpoints generator
   taskManager->AddComponent( &LWRsetpoints );
 
   devLinearRn LWRtrajectory( "LWRtrajectory",        // trajectory generator
@@ -81,10 +78,8 @@ int main(){
   vctDynamicVector<double> gripperqinit( 1, 0.0 );    // initial point
   vctDynamicVector<double> gripperqfinal( 1, 1.04 );  // final point
   vctDynamicVector<double> gripperqdmax( 1, 0.001 );  // velocity
-  std::vector< vctDynamicVector<double> > gripperQ;   // setpoints
-  gripperQ.push_back( gripperqfinal );
 
-  devSetPoints grippersetpoints( "grippersetpoints", gripperQ );
+  devSetPoints grippersetpoints( "grippersetpoints", 1 );
   taskManager->AddComponent( &grippersetpoints );
 
   devLinearRn grippertrajectory( "grippertrajectory",
@@ -115,13 +110,13 @@ int main(){
   LWR->Attach( gripper );
 
   // Connect trajectory to robot
-  taskManager->Connect( LWRsetpoints.GetName(),  devSetPoints::Output,
+  taskManager->Connect( LWRsetpoints.GetName(),  devSetPoints::OutputRn,
 			LWRtrajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( LWRtrajectory.GetName(), devLinearRn::Output,
 			LWR->GetName(),          devOSGManipulator::Input );
 
-  taskManager->Connect( grippersetpoints.GetName(),  devSetPoints::Output,
+  taskManager->Connect( grippersetpoints.GetName(),  devSetPoints::OutputRn,
 			grippertrajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( grippertrajectory.GetName(), devLinearRn::Output,
@@ -130,6 +125,13 @@ int main(){
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
+
+  std::cout << "ENTER to move." << std::endl;
+  cmnGetChar();
+  LWRsetpoints.Insert( LWRqfinal );
+  LWRsetpoints.Latch();
+  grippersetpoints.Insert( gripperqfinal );
+  grippersetpoints.Latch();
 
   std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();

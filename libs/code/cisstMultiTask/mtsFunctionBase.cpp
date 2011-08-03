@@ -43,6 +43,9 @@ void mtsFunctionBase::SetThreadSignal(osaThreadSignal * threadSignal)
 
 void mtsFunctionBase::ThreadSignalWait(void) const
 {
-    CMN_ASSERT(this->ThreadSignal);
+    if (this->ThreadSignal) {
     this->ThreadSignal->Wait();
+    } else {
+        std::cerr << "mtsFunctionBase::ThreadSignalWait: no thread signal available, function will not block!" << std::endl; 
+    }
 }

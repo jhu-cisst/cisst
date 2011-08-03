@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 %include <std_string.i>
 %include <std_except.i>
+%include <std_vector.i>
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"

@@ -46,9 +46,9 @@ devODEBH::devODEBH( const std::string& devname,
   modelsf1f2.push_back( intermediatemodel );
 
   vctFrame4x4<double> Rtbf1( vctMatrixRotation3<double>(),
-			     vctFixedSizeVector<double,3>( 0.0,  0.026,-0.0105));
+			     vctFixedSizeVector<double,3>( 0.0,  0.026,-0.01) );
   vctFrame4x4<double> Rtbf2( vctMatrixRotation3<double>(),
-			     vctFixedSizeVector<double,3>( 0.0, -0.026,-0.0105));
+			     vctFixedSizeVector<double,3>( 0.0, -0.026,-0.01) );
 
   f1 = new devODEManipulator( devname + "F1",
 			      period,
@@ -80,7 +80,7 @@ devODEBH::devODEBH( const std::string& devname,
   vctFrame4x4<double> Rtbf3( vctMatrixRotation3<double>( 1.0, 0.0, 0.0,
 							 0.0, 0.0,-1.0,
 							 0.0, 1.0, 0.0 ),
-			     vctFixedSizeVector<double,3>( 0.05, 0.0,-0.0105));
+			     vctFixedSizeVector<double,3>( 0.05, 0.0,0.0 ) );
 
   f3 = new devODEManipulator( devname + "F3",
 			      period,
@@ -143,9 +143,9 @@ devODEBH::devODEBH( const std::string& devname,
   modelsf1f2.push_back( intermediatemodel );
 
   vctFrame4x4<double> Rtbf1( vctMatrixRotation3<double>(),
-			     vctFixedSizeVector<double,3>( 0.0,  0.026,-0.0105));
+			     vctFixedSizeVector<double,3>( 0.0,  0.026,-0.01) );
   vctFrame4x4<double> Rtbf2( vctMatrixRotation3<double>(),
-			     vctFixedSizeVector<double,3>( 0.0, -0.026,-0.0105));
+			     vctFixedSizeVector<double,3>( 0.0, -0.026,-0.01) );
 
   f1 = new devODEManipulator( devname + "F1",
 			      period,
@@ -177,7 +177,7 @@ devODEBH::devODEBH( const std::string& devname,
   vctFrame4x4<double> Rtbf3( vctMatrixRotation3<double>( 1.0, 0.0, 0.0,
 							 0.0, 0.0,-1.0,
 							 0.0, 1.0, 0.0 ),
-			     vctFixedSizeVector<double,3>( 0.05, 0.0,-0.0105));
+			     vctFixedSizeVector<double,3>( 0.05, 0.0, 0.0 ) );
 
   f3 = new devODEManipulator( devname + "F3",
 			      period,

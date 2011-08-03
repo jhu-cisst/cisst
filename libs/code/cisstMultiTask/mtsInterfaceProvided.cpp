@@ -37,12 +37,15 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                                            mtsInterfaceQueueingPolicy queueingPolicy,
-                                           mtsCallableVoidBase * postCommandQueuedCallable):
+                                           mtsCallableVoidBase * postCommandQueuedCallable,
+                                           bool isProxy):
     BaseType(name, component),
+    IsProxy(isProxy),
     MailBox(0),
     QueueingPolicy(queueingPolicy),
     ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
     BlockingCommandExecuted(0),
+    BlockingCommandReturnExecuted(0),
     OriginalInterface(0),
     EndUserInterface(false),
     UserName("OriginalInterface"),
@@ -50,6 +53,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     CommandsVoid("CommandsVoid", true),
     CommandsVoidReturn("CommandsVoidReturn", true),
     CommandsWrite("CommandsWrite", true),
+    CommandsWriteReturn("CommandsWriteReturn", true),
     CommandsRead("CommandsRead", true),
     CommandsQualifiedRead("CommandsQualifiedRead", true),
     EventVoidGenerators("EventVoidGenerators", true),
@@ -80,6 +84,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     CommandsVoid.SetOwner(*this);
     CommandsVoidReturn.SetOwner(*this);
     CommandsWrite.SetOwner(*this);
+    CommandsWriteReturn.SetOwner(*this);
     CommandsRead.SetOwner(*this);
     CommandsQualifiedRead.SetOwner(*this);
     EventVoidGenerators.SetOwner(*this);
@@ -99,6 +104,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     MailBoxSize(mailBoxSize),
     ArgumentQueuesSize(argumentQueuesSize),
     BlockingCommandExecuted(0),
+    BlockingCommandReturnExecuted(0),
     OriginalInterface(originalInterface),
     EndUserInterface(true),
     UserName(userName),
@@ -106,6 +112,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     CommandsVoid("CommandsVoid", true),
     CommandsVoidReturn("CommandsVoidReturn", true),
     CommandsWrite("CommandsWrite", true),
+    CommandsWriteReturn("CommandsWriteReturn", true),
     CommandsRead("CommandsRead", true),
     CommandsQualifiedRead("CommandsQualifiedRead", true),
     EventVoidGenerators("EventVoidGenerators", true),
@@ -117,6 +124,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     CommandsVoid.SetOwner(*this);
     CommandsVoidReturn.SetOwner(*this);
     CommandsWrite.SetOwner(*this);
+    CommandsWriteReturn.SetOwner(*this);
     CommandsRead.SetOwner(*this);
     CommandsQualifiedRead.SetOwner(*this);
     EventVoidGenerators.SetOwner(*this);
@@ -149,7 +157,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             }
             CommandsVoid.AddItem(iterVoid->first, commandVoid, CMN_LOG_LEVEL_INIT_ERROR);
-            
+
         }
         // clone void return commands
         CommandVoidReturnMapType::const_iterator iterVoidReturn = originalInterface->CommandsVoidReturn.begin();
@@ -170,7 +178,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             }
             CommandsVoidReturn.AddItem(iterVoidReturn->first, commandVoidReturn, CMN_LOG_LEVEL_INIT_ERROR);
-            
+
         }
         // clone write commands
         CommandWriteMapType::const_iterator iterWrite = originalInterface->CommandsWrite.begin();
@@ -202,7 +210,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
              iterWriteReturn++) {
             commandQueuedWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(iterWriteReturn->second);
             if (commandQueuedWriteReturn) {
-                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox);
+                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox); // no argument queue size, since this is a blocking command there can only be one call 
                 CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued write return command \"" << iterWriteReturn->first
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             } else {
@@ -546,6 +554,22 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
 }
 
 
+mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCommandWriteReturn * command)
+{
+    // check that the input is valid
+    if (command) {
+        if (!CommandsWriteReturn.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+        return command;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: attempt to add undefined command (null command pointer) to interface \""
+                             << this->GetFullName() << "\"" << std::endl;
+    return 0;
+}
+
+
 mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * callable,
                                                       const std::string & name,
                                                       mtsGenericObject * argumentPrototype)
@@ -687,7 +711,9 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
     // finally, add system events
+    if (!this->IsProxy) {
     interfaceProvided->AddSystemEvents();
+    }
 
     return interfaceProvided;
 }
@@ -872,6 +898,19 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
         CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: can not set mailbox post dequeued command for blocking commands for interface \""
                                    << this->GetFullName() << "\"" << std::endl;
     }
+
+    this->BlockingCommandReturnExecuted = AddEventVoid("BlockingCommandReturnExecuted");
+    if (!(this->BlockingCommandReturnExecuted)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddSystemEvents: unable to add void event \"BlockingCommandReturnExecuted\" to interface \""
+                                 << this->GetFullName() << "\"" << std::endl;
+        return false;
+    }
+    if (this->MailBox) {
+        MailBox->SetPostCommandReturnDequeuedCommand(this->BlockingCommandReturnExecuted);
+    } else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: can not set mailbox post dequeued command for blocking return commands for interface \""
+                                   << this->GetFullName() << "\"" << std::endl;
+    }
     return true;
 }
 
@@ -879,18 +918,24 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const
 {
     std::vector<std::string> commands = GetNamesOfCommandsVoid();
-    std::vector<std::string> tmp = GetNamesOfCommandsVoidReturn();
+    std::vector<std::string> tmp;
+
+    tmp = GetNamesOfCommandsVoidReturn();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsWrite();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsWriteReturn();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsRead();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     tmp.clear();
+
     tmp = GetNamesOfCommandsQualifiedRead();
     commands.insert(commands.begin(), tmp.begin(), tmp.end());
     return commands;
@@ -941,7 +986,7 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(v
 
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsVoid(void) const
 {
-    // should also get names of events defined in the end-user interfaceg
+    // should also get names of events defined in the end-user interface
     if (this->OriginalInterface) {
         return this->OriginalInterface->EventVoidGenerators.GetNames();
     }
@@ -1267,7 +1312,49 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
     }
 
-    // MJ TODO: Add support for CommandsVoidReturn and CommandsWriteReturn
+    // Extract void return commands
+    mtsCommandVoidReturn * voidReturnCommand;
+    CommandVoidReturnElement elementCommandVoidReturn;
+    const std::vector<std::string> namesOfVoidReturnCommand = GetNamesOfCommandsVoidReturn();
+    for (size_t i = 0; i < namesOfVoidReturnCommand.size(); ++i) {
+        voidReturnCommand = CommandsVoidReturn.GetItem(namesOfVoidReturnCommand[i]);
+        if (!voidReturnCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null void return command: " << namesOfVoidReturnCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandVoidReturn.Name = voidReturnCommand->GetName();
+        // serialize result
+        streamBuffer.str("");
+        serializer.Serialize(*(voidReturnCommand->GetResultPrototype()));
+        elementCommandVoidReturn.ResultPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsVoidReturn.push_back(elementCommandVoidReturn);
+    }
+
+    // Extract write return commands
+    mtsCommandWriteReturn * writeReturnCommand;
+    CommandWriteReturnElement elementCommandWriteReturn;
+    const std::vector<std::string> namesOfWriteReturnCommand = GetNamesOfCommandsWriteReturn();
+    for (size_t i = 0; i < namesOfWriteReturnCommand.size(); ++i) {
+        writeReturnCommand = CommandsWriteReturn.GetItem(namesOfWriteReturnCommand[i]);
+        if (!writeReturnCommand) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetDescription: null write return command: " << namesOfWriteReturnCommand[i] << std::endl;
+            success = false;
+            continue;
+        }
+
+        elementCommandWriteReturn.Name = writeReturnCommand->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(writeReturnCommand->GetArgumentPrototype()));
+        elementCommandWriteReturn.ArgumentPrototypeSerialized = streamBuffer.str();
+        // serialize result
+        streamBuffer.str("");
+        serializer.Serialize(*(writeReturnCommand->GetResultPrototype()));
+        elementCommandWriteReturn.ResultPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsWriteReturn.push_back(elementCommandWriteReturn);
+    }
 
     // Extract void events
     mtsMulticastCommandVoid * voidEvent;

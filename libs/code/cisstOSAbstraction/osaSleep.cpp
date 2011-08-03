@@ -28,11 +28,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     #include <sys/time.h>
     #include <unistd.h>
 #elif (CISST_OS == CISST_LINUX_RTAI)
     #include <rtai_lxrt.h>
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+#include <native/task.h>
+#include <native/timer.h>
+
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #elif (CISST_OS == CISST_QNX)
@@ -44,7 +49,7 @@ const long nSecInSec =  1000.0 * 1000.0 * 1000.0;
 
 void osaSleep(double timeInSeconds) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
 
     struct timespec ts;
     ts.tv_sec = static_cast<long> (timeInSeconds);
@@ -56,6 +61,26 @@ void osaSleep(double timeInSeconds)
     if (rt_is_hard_real_time(rt_buddy())) {
         rt_sleep(nano2count(static_cast<long> (timeInSeconds * nSecInSec)));
     } else {
+        struct timespec ts;
+        ts.tv_sec = static_cast<long> (timeInSeconds);
+        ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
+        nanosleep(&ts, NULL);
+    }
+
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    if( rt_task_self() != NULL ){
+        RTIME ns = RTIME( timeInSeconds * 1000000000 );
+        int retval = 0;
+        retval = rt_task_sleep( rt_timer_ns2ticks( ns ) );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "rt_task_sleep failed. "
+                              << strerror(retval) << ": " << retval
+                              << std::endl;
+        }
+    }
+    else{
         struct timespec ts;
         ts.tv_sec = static_cast<long> (timeInSeconds);
         ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );

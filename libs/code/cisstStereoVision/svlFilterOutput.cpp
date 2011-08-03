@@ -122,7 +122,7 @@ int svlFilterOutput::SetBufferSize(unsigned int buffersize)
     if (!Filter || Filter->Initialized) return SVL_FAIL;
 
     // There is no buffering on the trunk
-    if (Trunk || buffersize < 3) return SVL_FAIL;
+    if (Trunk || buffersize < 1) return SVL_FAIL;
     BufferSize = buffersize;
     return SVL_OK;
 }

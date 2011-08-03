@@ -10,6 +10,8 @@ cisstOpenNISkeleton::cisstOpenNISkeleton(cisstOpenNI * openNI)
     confidence.resize(25);
 
     this->OpenNI = openNI;
+    usrState = CNI_USR_IDLE;
+    calState = CNI_USR_IDLE;
 
 
 }

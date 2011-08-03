@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 unsigned int mtsManagerProxyClient::InstanceCounter = 0;
 
@@ -174,23 +175,35 @@ void mtsManagerProxyClient::StopProxy()
     }
 
     IceGUID = "";
-
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "Stopped manager proxy client");
+#endif
 }
 
 void mtsManagerProxyClient::OnServerDisconnect(const Ice::Exception & ex)
 {
-    if (!IsActiveProxy()) {
+    // Multiple proxy threads can detect server disconnect
+    static osaCriticalSection cs;
+
+    cs.Enter();
+
+    if (!IsActiveProxy() || !ProxyOwner->IsGCMActive()) {
+        cs.Leave();
         return; // already detected disconnection
     }
 
     // Ice - ConnectionLostException - forceful closure by peer
     // Ice - ForcedCloseConnectionException - after forceful closure by peer
     CMN_LOG_CLASS_RUN_WARNING << ex << std::endl;
-    CMN_LOG_CLASS_RUN_ERROR << "LCM - Proxy \"" << ProxyName << "\" detected GLOBAL COMPONENT MANAGER DISCONNECTION "
-                            << "(" << EndpointInfo << ")" << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "Process \"" << ProxyOwner->GetProcessName() 
+        << "\" detected GLOBAL COMPONENT MANAGER DISCONNECTION" << std::endl;
 
     StopProxy();
+
+    // GCM has been disconnected
+    ProxyOwner->SetGCMConnected(false);
+
+    cs.Leave();
 }
 
 //-------------------------------------------------------------------------
@@ -982,7 +995,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
+            LogError(mtsManagerProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
             if (ManagerProxyClient) {
                 ManagerProxyClient->OnServerDisconnect(ex);
             }
@@ -990,7 +1003,9 @@ void mtsManagerProxyClient::ManagerClientI::Run()
     }
 #endif
 
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "mtsManagerProxyClient::ManagerClientI - terminated");
+#endif
 }
 
 void mtsManagerProxyClient::ManagerClientI::Stop()
@@ -1012,8 +1027,9 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
         SenderThreadPtr = 0;
     }
     callbackSenderThread->getThreadControl().join();
-
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ManagerClientI, "Stopped and destroyed callback thread to communicate with server");
+#endif
 }
 
 bool mtsManagerProxyClient::ManagerClientI::IsActiveProxy() const

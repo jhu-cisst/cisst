@@ -61,11 +61,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
+#include <cisstMultiTask/mtsFunctionVoidReturn.h>
+#include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include "mtsCommandVoidProxy.h"
 #include "mtsCommandWriteProxy.h"
 #include "mtsCommandReadProxy.h"
 #include "mtsCommandQualifiedReadProxy.h"
-#include <cisstMultiTask/mtsMulticastCommandVoid.h>
+#include "mtsCommandVoidReturnProxy.h"
+#include "mtsCommandWriteReturnProxy.h"
+#include "mtsMulticastCommandVoidProxy.h"
 #include "mtsMulticastCommandWriteProxy.h"
 
 #include <cisstMultiTask/mtsInterfaceCommon.h>
@@ -78,7 +82,7 @@ class CISST_EXPORT mtsComponentProxy : public mtsComponent
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-protected:
+ protected:
     /*! Typedef to manage provided interface proxies of which type is
         mtsComponentInterfaceProxyServer. */
     typedef cmnNamedMap<mtsComponentInterfaceProxyServer> InterfaceProvidedNetworkProxyMapType;
@@ -102,6 +106,8 @@ protected:
     typedef cmnNamedMap<mtsFunctionWrite>         FunctionWriteProxyMapType;
     typedef cmnNamedMap<mtsFunctionRead>          FunctionReadProxyMapType;
     typedef cmnNamedMap<mtsFunctionQualifiedRead> FunctionQualifiedReadProxyMapType;
+    typedef cmnNamedMap<mtsFunctionVoidReturn>    FunctionVoidReturnProxyMapType;
+    typedef cmnNamedMap<mtsFunctionWriteReturn>   FunctionWriteReturnProxyMapType;
 
     /*! Typedef for event generator proxies */
     typedef cmnNamedMap<mtsFunctionVoid>  EventGeneratorVoidProxyMapType;
@@ -113,6 +119,8 @@ protected:
         FunctionWriteProxyMapType         FunctionWriteProxyMap;
         FunctionReadProxyMapType          FunctionReadProxyMap;
         FunctionQualifiedReadProxyMapType FunctionQualifiedReadProxyMap;
+        FunctionVoidReturnProxyMapType    FunctionVoidReturnProxyMap;
+        FunctionWriteReturnProxyMapType   FunctionWriteReturnProxyMap;
         EventGeneratorVoidProxyMapType    EventGeneratorVoidProxyMap;
         EventGeneratorWriteProxyMapType   EventGeneratorWriteProxyMap;
 
@@ -126,12 +134,16 @@ protected:
     typedef cmnNamedMap<FunctionProxyAndEventHandlerProxyMapElement> FunctionProxyAndEventHandlerProxyMapType;
     FunctionProxyAndEventHandlerProxyMapType FunctionProxyAndEventHandlerProxyMap;
 
-public:
+ public:
     /*! Constructor and destructors */
     mtsComponentProxy(const std::string & componentProxyName);
     virtual ~mtsComponentProxy();
 
     inline void Configure(const std::string & CMN_UNUSED(componentProxyName)) {};
+
+    mtsInterfaceRequired *
+        AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                       mtsRequiredType isRequired = MTS_REQUIRED);
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
@@ -165,15 +177,14 @@ public:
     bool CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription);
     bool RemoveInterfaceRequiredProxy(const std::string & requiredInterfaceProxyName);
 
-    /*! \brief Get name of provided interface instance for new connection, 
-               which should be unique wihtin a component 
+    /*! \brief Get name of provided interface instance for new connection,
+      which should be unique wihtin a component
         \param originalProvidedInterfaceName name of original provided interface
         \param connectionID connection id
      */
     // MJ: can use separate file that collects string-based naming rules defined for
     // identifying cisst-internal objects (e.g., MCC, MCS, proxy objects)
-    static const std::string GetNameOfProvidedInterfaceInstance(
-        const std::string & originalProvidedInterfaceName, const ConnectionIDType connectionID);
+    static const std::string GetNameOfProvidedInterfaceInstance(const std::string & originalProvidedInterfaceName, const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Network Proxy
@@ -239,8 +250,7 @@ public:
                side
         \note This method is called only by a server process
         \return True if success, false otherwise */
-    bool UpdateEventHandlerProxyID(
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName);
+    bool UpdateEventHandlerProxyID(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName);
 
     //-------------------------------------------------------------------------
     //  Getters
@@ -253,15 +263,13 @@ public:
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers);
 
     /*! Extract event generator proxy pointers */
-    bool GetEventGeneratorProxyPointer(
-        const std::string & clientComponentName, const std::string & requiredInterfaceName,
+    bool GetEventGeneratorProxyPointer(const std::string & clientComponentName, const std::string & requiredInterfaceName,
         mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
     /*! \brief Get name of provided interface user
         \param processName Name of user process
         \param componentName Name of user component */
-    static std::string GetInterfaceProvidedUserName(
-        const std::string & processName, const std::string & componentName);
+    static std::string GetInterfaceProvidedUserName(const std::string & processName, const std::string & componentName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentProxy)

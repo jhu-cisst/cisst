@@ -35,7 +35,8 @@ mtsMailBox::mtsMailBox(const std::string & name,
     CommandQueue(size, 0),
     Name(name),
     PostCommandQueuedCallable(postCommandQueuedCallable),
-    PostCommandDequeuedCommand(0)
+    PostCommandDequeuedCommand(0),
+    PostCommandReturnDequeuedCommand(0)
 {}
 
 
@@ -77,8 +78,8 @@ bool mtsMailBox::ExecuteNext(void)
    mtsCommandQueuedWriteReturn * commandWriteReturn;
 
    bool isBlocking = false;
+   bool isBlockingReturn = false;
    try {
-
        if (!(*command)->Returns()) {
            switch ((*command)->NumberOfArguments()) {
            case 0:
@@ -122,13 +123,13 @@ bool mtsMailBox::ExecuteNext(void)
            case 0:
                commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(*command);
                CMN_ASSERT(commandVoidReturn);
-               isBlocking = true;
+               isBlockingReturn = true;
                commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
                break;
            case 1:
                commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
                CMN_ASSERT(commandWriteReturn);
-               isBlocking = true;
+               isBlockingReturn = true;
                commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
                                                            *(commandWriteReturn->GetResultPointer()) );
                break;
@@ -141,27 +142,32 @@ bool mtsMailBox::ExecuteNext(void)
    catch (std::exception & exceptionCaught) {
        CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
                            << "\" caught exception \"" << exceptionCaught.what() << "\"" << std::endl;
-       if (isBlocking && this->PostCommandQueuedCallable) {
-           this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
-       }
+       this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
        CommandQueue.Get();  // Remove command from mailbox queue
        throw;
    }
    catch (...) {
        CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
                            << "\" caught exception, blocking = " << isBlocking << std::endl;
-       if (isBlocking && this->PostCommandDequeuedCommand) {
-           this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
-       }
+       this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
        CommandQueue.Get();  // Remove command from mailbox queue
        throw;
    }
-   
-   if (isBlocking && this->PostCommandDequeuedCommand) {
-       this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
-   }
+   this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
    CommandQueue.Get();  // Remove command from mailbox queue
    return true;
+}
+
+
+void mtsMailBox::TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlockingReturn)
+{
+   if (isBlocking && this->PostCommandDequeuedCommand) {
+       this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+   } else {
+       if (isBlockingReturn && this->PostCommandReturnDequeuedCommand) {
+           this->PostCommandReturnDequeuedCommand->Execute(MTS_NOT_BLOCKING);
+   }
+   }
 }
 
 
@@ -182,4 +188,10 @@ bool mtsMailBox::IsEmpty(void) const
 void mtsMailBox::SetPostCommandDequeuedCommand(mtsCommandVoid * command)
 {
     this->PostCommandDequeuedCommand = command;
+}
+
+
+void mtsMailBox::SetPostCommandReturnDequeuedCommand(mtsCommandVoid * command)
+{
+    this->PostCommandReturnDequeuedCommand = command;
 }

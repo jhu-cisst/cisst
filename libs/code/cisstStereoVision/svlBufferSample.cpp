@@ -116,7 +116,6 @@ svlSample* svlBufferSample::GetPushBuffer()
 
 void svlBufferSample::Push()
 {
-
     // Atomic exchange of values
 #if (CISST_OS == CISST_WINDOWS)
     Next = InterlockedExchange(&Latest, Next);

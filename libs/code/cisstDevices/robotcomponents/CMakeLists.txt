@@ -24,6 +24,8 @@ set( HEADER_FILES
   robotcomponents/trajectories/devOMNItoWAM.h
   robotcomponents/trajectories/devOMNItoBH.h
 
+  robotcomponents/trajectories/devInverseKinematics.h
+
   robotcomponents/manipulators/devManipulator.h
 
   )
@@ -50,6 +52,8 @@ set( SOURCE_FILES
   robotcomponents/trajectories/devOMNItoWAM.cpp
   robotcomponents/trajectories/devOMNItoBH.cpp
      
+  robotcomponents/trajectories/devInverseKinematics.cpp
+
   robotcomponents/manipulators/devManipulator.cpp
   
   )
@@ -80,9 +84,14 @@ if( CISST_DEV_HAS_RTSOCKETCAN )
 
 endif( CISST_DEV_HAS_RTSOCKETCAN )
 
-find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil )
+find_package( OpenSceneGraph 
+  COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
 
 if( OPENSCENEGRAPH_FOUND )
+
+  option( CISST_DEV_OPENSCENEGRAPH "Use support for OSG." ON )
+
+  if( CISST_DEV_OPENSCENEGRAPH )
 
   set( CISST_DEV_HAS_OSG ON PARENT_SCOPE )
   SET( 
@@ -96,7 +105,7 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGStereo.h
     robotcomponents/osg/devOSGWorld.h
     )
-
+    
   SET(
     SOURCE_FILES
     ${SOURCE_FILES} 
@@ -108,13 +117,26 @@ if( OPENSCENEGRAPH_FOUND )
     robotcomponents/osg/devOSGStereo.cpp
     robotcomponents/osg/devOSGWorld.cpp
     )
+    
+    if( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
+      SET( 
+	HEADER_FILES ${HEADER_FILES} 
+	robotcomponents/osg/devOSGText.h 
+	robotcomponents/osg/devOSGVolume.h 
+	)
+      SET( 
+	SOURCE_FILES ${SOURCE_FILES} 
+	robotcomponents/osg/devOSGText.cpp
+	robotcomponents/osg/devOSGVolume.cpp 
+	)
+    endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
 
   cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)
   cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENSCENEGRAPH_INCLUDE_DIRS)
-
+    
   find_package( ODE )
   if( ODE_FOUND )
-
+      
     set( CISST_DEV_HAS_ODE ON PARENT_SCOPE )
     set( CMAKE_CXX_FLAGS 
       "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
@@ -135,7 +157,7 @@ if( OPENSCENEGRAPH_FOUND )
       robotcomponents/ode/devODEGripper.h
       
       )
-
+      
     SET( 
       SOURCE_FILES
       
@@ -154,7 +176,7 @@ if( OPENSCENEGRAPH_FOUND )
       )
     
   endif( ODE_FOUND )
-
+    
   find_package( OpenCV2 )
   if( OpenCV2_FOUND )
     set( CISST_DEV_HAS_OPENCV22 ON PARENT_SCOPE )
@@ -163,6 +185,8 @@ if( OPENSCENEGRAPH_FOUND )
     cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
   endif( OpenCV2_FOUND )
   
+  endif( CISST_DEV_OPENSCENEGRAPH )
+    
 endif( OPENSCENEGRAPH_FOUND )
 
 # Check for GLUT

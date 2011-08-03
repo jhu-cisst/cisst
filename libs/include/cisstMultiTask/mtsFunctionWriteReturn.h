@@ -113,9 +113,8 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
 #endif
 
  public:
-    /*! Default constructor.  Does nothing, use Instantiate before
-      using. */
-    mtsFunctionWriteReturn(void);
+    /*! Default constructor.  Does nothing, use Bind before using. */
+    mtsFunctionWriteReturn(const bool isProxy = false);
 
     /*! Destructor. */
     ~mtsFunctionWriteReturn();

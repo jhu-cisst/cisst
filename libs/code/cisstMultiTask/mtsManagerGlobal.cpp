@@ -64,6 +64,8 @@ mtsManagerGlobal::~mtsManagerGlobal()
 //-------------------------------------------------------------------------
 void mtsManagerGlobal::Cleanup(void)
 {
+    // MJ TEMP
+#if 0
     // Disconnect all connections
     ConnectionMapType::const_iterator it1 = ConnectionMap.begin();
     const ConnectionMapType::const_iterator itEnd1 = ConnectionMap.end();
@@ -71,7 +73,7 @@ void mtsManagerGlobal::Cleanup(void)
         Disconnect(it1->second.GetConnectionID());
     }
 
-    osaSleep(1 * cmn_s);
+    osaSleep(1 * cmn_s); // MJ TEMP: better handling without sleep?
 
     // Remove all processes
     ProcessMapType::iterator it2 = ProcessMap.begin();
@@ -79,6 +81,7 @@ void mtsManagerGlobal::Cleanup(void)
         RemoveProcess(it2->first);
         it2 = ProcessMap.begin();
     }
+#endif
 
     // Stop internal thread
     ThreadDisconnectRunning = false;
@@ -634,8 +637,8 @@ bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
 
     ComponentMapType * componentMap = ProcessMap.GetItem(processName);
 
-    // If disconnection event comes from the network layer, we should remove
-    // component proxies and internal interfaces that the process involved in.
+    // If network layer generates an event of process disconnect, all component proxies and
+    // internal interface proxies of the process should be removed.
     if (componentMap) {
 #if CISST_MTS_HAS_ICE
         if (networkDisconnect) {
@@ -2343,7 +2346,7 @@ bool mtsManagerGlobal::StartServer(void)
         return false;
     }
 
-    ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global component manager started.");
+    ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global Component Manager started.");
 
     // Register an instance of mtsComponentInterfaceProxyServer
     LocalManagerConnected = ProxyServer;
@@ -2366,7 +2369,7 @@ bool mtsManagerGlobal::StopServer(void)
     LocalManagerConnected = 0;
 
     // Stop proxy server
-    ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global component manager stopped.");
+    ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global Component Manager stopped.");
     ProxyServer->StopProxy();
 
     delete ProxyServer;

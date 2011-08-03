@@ -49,7 +49,7 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \file
   \brief Declaration of mtsComponent
- */
+*/
 
 
 /*!
@@ -68,7 +68,7 @@ http://www.cisst.org/cisst/license.txt.
   thread safety mechanism.  The component class doesn't maintain a state
   as it relies on the underlying device to do so.  It is basically a
   pass-thru or wrapper.
- */
+*/
 class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -177,7 +177,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       safety. */
     virtual mtsInterfaceProvided *
         AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
+                                                bool isProxy = false);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
@@ -275,12 +276,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsManagerComponentServices *GetManagerComponentServices(void)
     { return this->ManagerComponentServices; }
 
-#if 0
-    /*! Connect a required interface, used by mtsTaskManager */
-    bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
-                                         mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
-#endif
-
     /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName);
 
@@ -357,16 +352,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Default log file used for this component logging */
     std::ofstream * LogFile;
-
-    /*! Thread Id counter.  Used to count how many "user" tasks are
-      connected from a single thread.  In most cases the count
-      should be one. */
-    //@{
-#if 0
-    typedef std::pair<osaThreadId, unsigned int> ThreadIdCounterPairType;
-    typedef std::vector<ThreadIdCounterPairType> ThreadIdCountersType;
-    ThreadIdCountersType ThreadIdCounters;
-#endif
     //@}
 
     /*! Map of provided and output interfaces.  Used to store pointers

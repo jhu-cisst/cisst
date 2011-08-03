@@ -24,12 +24,12 @@ tw0[2] = 1.0;
 # create the trajectory + setpoint generator
 wamqinit = array( [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00] )
 wamqdmax = array( [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01] )
-wamsetpoints = SetPoints( 'WAMsetpoints', wamqinit );
+wamsetpoints = SetPoints( 'WAMsetpoints', 7);
 wamtrajectory = TrajectoryJoints( 'WAMtrajectory', wamqinit, wamqdmax )
 
 taskManager = mtsManagerLocal.GetInstance();
 
-taskManager.Connect( wamsetpoints.GetName(),  devSetPoints.Output,
+taskManager.Connect( wamsetpoints.GetName(),  devSetPoints.OutputRn,
                      wamtrajectory.GetName(), devTrajectory.Input );
 taskManager.Connect( wamtrajectory.GetName(), devTrajectory.Output,
                      wam.GetName(),           devManipulator.Input );
@@ -37,12 +37,12 @@ taskManager.Connect( wamtrajectory.GetName(), devTrajectory.Output,
 # create the trajectory + setpoint generator
 bhqinit = array( [0.00, 0.00, 0.00, 0.00 ] )
 bhqdmax = array( [0.10, 0.10, 0.10, 0.10 ] )
-bhsetpoints = SetPoints( 'BHsetpoints', bhqinit );
+bhsetpoints = SetPoints( 'BHsetpoints', 4 );
 bhtrajectory = TrajectoryJoints( 'BHtrajectory', bhqinit, bhqdmax )
 
 taskManager = mtsManagerLocal.GetInstance();
 
-taskManager.Connect( bhsetpoints.GetName(),  devSetPoints.Output,
+taskManager.Connect( bhsetpoints.GetName(),  devSetPoints.OutputRn,
                      bhtrajectory.GetName(), devTrajectory.Input );
 taskManager.Connect( bhtrajectory.GetName(), devTrajectory.Output,
                      bh.GetName(),           devManipulator.Input );

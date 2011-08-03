@@ -24,19 +24,27 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
+#ifdef _WIN32
+#define SAMPLE_CONFIG_PATH "C:/dev/OpenNI/data/SamplesConfig.xml"
+#endif
+#ifdef __APPLE__ 
+#define SAMPLE_CONFIG_PATH "/Developer-old/Kinect/SensorKinect/avin2-SensorKinect-28738dc/OpenNI/Data/SamplesConfig.xml"
+#endif
+
 int main(){
   
 	cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
 	cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
 	cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
-	cisstOpenNI kinect;
-    kinect.Configure( "C:/dev/OpenNI/data/SamplesConfig.xml" );
-
+	cisstOpenNI kinect(1);
+    kinect.Configure(SAMPLE_CONFIG_PATH);
+    kinect.InitSkeletons();
 	while(true){
         
         // Wait and Update All
-        kinect.Update(WAIT_NONE_UPDATE_ALL);
+        kinect.Update(WAIT_AND_UPDATE_ALL);
+        kinect.UpdateUserSkeletons();
 		//vctDynamicMatrix<double> depth = kinect.GetDepthImage8bit();
 		vctDynamicMatrix<unsigned char> rgb = kinect.GetRGBImage();
 		vctDynamicMatrix<double> range = kinect.GetRangeData();

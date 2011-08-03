@@ -49,7 +49,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             std::cout << "component_manager connected" << std::endl;
         }
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"connect\" first" << std::endl;
         return 1;
     }
 
@@ -72,7 +72,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         // send message to confirm everything seems fine
         std::cout << "start succeeded" << std::endl;
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"start\" first" << std::endl;
         return 1;
     }
 
