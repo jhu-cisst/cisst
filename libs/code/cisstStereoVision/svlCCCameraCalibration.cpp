@@ -723,7 +723,6 @@ void svlCCCameraCalibration::updateCameraGeometry()
     f = vct2(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
     c = vct2(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));
     k = vctFixedSizeVector<double,7>(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),distCoeffs.at<double>(4,0),0.0,0.0);//-0.36,0.1234,0.0,0,0);//
-    //cameraGeometry = new svlSampleCameraGeometry();
     cameraGeometry->SetIntrinsics(f,c,alpha,k);
 }
 
@@ -734,6 +733,7 @@ int svlCCCameraCalibration::setRectifier(svlFilterImageRectifier *rectifier)
 
     int result= rectifier->GetInput("calibration")->PushSample(cameraGeometry);
 
+    //SHOULD NOT BE USING SetTableFromCameraCalibration() DIRECTLY
     //int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, vct3x3::Eye(),f,c,k,0,0);
 
     printf("rectifier returns: %d\n", result);

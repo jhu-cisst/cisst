@@ -226,7 +226,7 @@ int svlSampleCameraGeometry::LoadCalibration(const std::string & filepath)
         pos = str.find("kc_left = [ ");
         if (pos >= 0) {
             strstrm.seekg(pos + 12);
-            strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
+            strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4] >> kc[5] >> kc[6];
         }
         else success = SVL_FAIL;
 
@@ -263,7 +263,7 @@ int svlSampleCameraGeometry::LoadCalibration(const std::string & filepath)
         pos = str.find("kc_right = [ ");
         if (pos >= 0) {
             strstrm.seekg(pos + 13);
-            strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
+            strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4] >> kc[5] >> kc[6];
         }
         else success = SVL_FAIL;
 
@@ -306,13 +306,13 @@ void svlSampleCameraGeometry::SetIntrinsics(const svlSampleCameraGeometry::Intri
 
 void svlSampleCameraGeometry::SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble7 kc, const unsigned int cam_id)
 {
-    SetIntrinsics(fc[0], fc[1], cc[0], cc[1], a, kc[0], kc[1], kc[2], kc[3], kc[4], cam_id);
+    SetIntrinsics(fc[0], fc[1], cc[0], cc[1], a, kc[0], kc[1], kc[2], kc[3], kc[4], kc[5], kc[6], cam_id);
 }
 
 void svlSampleCameraGeometry::SetIntrinsics(const double fcx, const double fcy,
                                             const double ccx, const double ccy,
                                             const double a,
-                                            const double kc0, const double kc1, const double kc2, const double kc3, const double kc4,
+                                            const double kc0, const double kc1, const double kc2, const double kc3, const double kc4, const double kc5, const double kc6,
                                             const unsigned int cam_id)
 {
     if (cam_id >= IntrinsicVector.size()) IntrinsicVector.resize(cam_id + 1);
@@ -326,6 +326,8 @@ void svlSampleCameraGeometry::SetIntrinsics(const double fcx, const double fcy,
     IntrinsicVector[cam_id].kc[2] = kc2;
     IntrinsicVector[cam_id].kc[3] = kc3;
     IntrinsicVector[cam_id].kc[4] = kc4;
+    IntrinsicVector[cam_id].kc[5] = kc5;
+    IntrinsicVector[cam_id].kc[6] = kc6;
     if (cam_id >= ExtrinsicVector.size()) SetExtrinsics(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, cam_id);
 }
 
@@ -378,7 +380,7 @@ const svlSampleCameraGeometry::Intrinsics* svlSampleCameraGeometry::GetIntrinsic
 int svlSampleCameraGeometry::GetIntrinsics(double& fcx, double& fcy,
                                            double& ccx, double& ccy,
                                            double& a,
-                                           double& kc0, double& kc1, double& kc2, double& kc3, double& kc4,
+                                           double& kc0, double& kc1, double& kc2, double& kc3, double& kc4, double& kc5, double& kc6,
                                            const unsigned int cam_id)
 {
     if (cam_id >= IntrinsicVector.size()) return SVL_FAIL;
@@ -393,7 +395,9 @@ int svlSampleCameraGeometry::GetIntrinsics(double& fcx, double& fcy,
     kc2 = IntrinsicVector[cam_id].kc[2];
     kc3 = IntrinsicVector[cam_id].kc[3];
     kc4 = IntrinsicVector[cam_id].kc[4];
-
+    kc5 = IntrinsicVector[cam_id].kc[5];
+    kc6 = IntrinsicVector[cam_id].kc[6];
+    
     return SVL_OK;
 }
 
@@ -436,7 +440,7 @@ int svlSampleCameraGeometry::GetExtrinsics(double& om0, double& om1, double& om2
 
 void svlSampleCameraGeometry::SetPerspective(const double focallength, const unsigned int width, const unsigned int height, const unsigned int cam_id)
 {
-    SetIntrinsics(focallength, focallength, width / 2, height / 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, cam_id);
+    SetIntrinsics(focallength, focallength, width / 2, height / 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, cam_id);
 }
 
 int svlSampleCameraGeometry::GetPosition(vctDouble3 & position, const unsigned int cam_id) const
@@ -494,7 +498,9 @@ int svlSampleCameraGeometry::IsCameraPerspective(const unsigned int cam_id) cons
         IntrinsicVector[cam_id].kc[1] == 0.0 &&
         IntrinsicVector[cam_id].kc[2] == 0.0 &&
         IntrinsicVector[cam_id].kc[3] == 0.0 &&
-        IntrinsicVector[cam_id].kc[4] == 0.0) return SVL_YES;
+        IntrinsicVector[cam_id].kc[4] == 0.0 &&
+        IntrinsicVector[cam_id].kc[5] == 0.0 &&
+        IntrinsicVector[cam_id].kc[6] == 0.0) return SVL_YES;
     return SVL_NO;
 }
 
@@ -709,7 +715,7 @@ std::ostream & operator << (std::ostream & stream, const svlSampleCameraGeometry
     stream.flags(std::ios::showpos | std::ios::fixed | std::ios::right);
     stream.width(7);
     stream << "Skew:            alpha_c = [ " << objref.a  << " ]" << std::endl
-           << "Distortion:           kc = [ " << objref.kc[0] << "  " << objref.kc[1] << "  " << objref.kc[2] << "  " << objref.kc[3] << "  " << objref.kc[4] << " |" << std::endl;
+           << "Distortion:           kc = [ " << objref.kc[0] << "  " << objref.kc[1] << "  " << objref.kc[2] << "  " << objref.kc[3] << "  " << objref.kc[4] << "  " << objref.kc[5] << "  " << objref.kc[6] <<" |" << std::endl;
     return stream;
 }
 

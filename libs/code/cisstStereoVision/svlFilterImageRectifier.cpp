@@ -168,7 +168,7 @@ int svlFilterImageRectifier::LoadTable(const std::string &filepath, unsigned int
 int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch)
 {
 
-    //if (IsInitialized() == true) return SVL_ALREADY_INITIALIZED;
+    if (IsInitialized() == true) return SVL_ALREADY_INITIALIZED;
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
 
     svlImageProcessingHelper::RectificationInternals* table = new svlImageProcessingHelper::RectificationInternals;
