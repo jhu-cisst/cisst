@@ -65,7 +65,7 @@ devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::
     QObject::connect(ControllerWidget.ButtonScreenshot, SIGNAL(clicked()),
                      this, SLOT(ScreenshotQSlot()));
 
-    ControllerWidget.ButtonCaptureFrameLeft->toggle();
+//    ControllerWidget.ButtonCaptureFrameLeft->toggle();
 
     startTimer(20);
 }

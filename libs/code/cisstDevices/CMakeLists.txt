@@ -18,7 +18,7 @@
 # set the library name
 set (LIBRARY cisstDevices)
 set (LIBRARY_INCLUDE_DIR ${cisstLibs_SOURCE_DIR}/include/${LIBRARY})
-set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot cisstStereoVision)
+set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot)
 
 # make sure all options are set for all devices to OFF
 option (CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
@@ -137,6 +137,7 @@ if (CISST_HAS_XML)
   set (DEPENDENCIES ${DEPENDENCIES} cisstCommonXML)
 
   if (CISST_DEV_HAS_MICRONTRACKER)
+    list (APPEND DEPENDENCIES cisstStereoVision)
     find_path (MicronTracker_INCLUDE_DIR
                NAMES MTC.h
                PATHS "C:/Program Files/Claron Technology/MicronTracker/Dist"
@@ -153,9 +154,21 @@ if (CISST_HAS_XML)
                     HINTS ${MicronTracker_INCLUDE_DIR})
       find_library (raw1394_LIBRARY
                     NAMES raw1394)
+      find_library (vnl_LIBRARY
+	            NAMES vnl)
+      find_library (vnl_algo_LIBRARY
+	            NAMES vnl_algo)
+      find_library (vcl_LIBRARY
+	            NAMES vcl)
+      find_library (v3p_netlib_LIBRARY
+	            NAMES v3p_netlib)
       list (APPEND MicronTracker_LIBRARIES
             ${MicronTracker_dc1394_LIBRARY}
-            ${raw1394_LIBRARY})
+            ${raw1394_LIBRARY}
+            ${vnl_LIBRARY}
+            ${vnl_algo_LIBRARY}
+            ${vcl_LIBRARY}
+            ${v3p_netlib_LIBRARY})
     endif (UNIX)
     list (APPEND SOURCE_FILES devMicronTracker.cpp)
     list (APPEND HEADER_FILES devMicronTracker.h)
