@@ -235,6 +235,11 @@ public:
         if (Matrix && (GetCols() != cols || GetRows() != rows)) Matrix->SetSize(rows, cols);
     }
 
+    void Resize(const unsigned int cols, const unsigned int rows)
+    {
+        if (Matrix && (GetCols() != cols || GetRows() != rows)) Matrix->resize(rows, cols);
+    }
+
     unsigned int GetCols() const
     {
         if (Matrix) return Matrix->cols();

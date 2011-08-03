@@ -64,12 +64,15 @@ public:
     int SetMosaicSize(unsigned int width, unsigned int height);
 
 protected:
+    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int OnStart(unsigned int procCount);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
-    virtual void ReconstructRigidBody(unsigned int videoch);
+    virtual void LinkChannelsVertically();
+    virtual int ReconstructRigidBody();
+    virtual void BackprojectRigidBody();
     virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
     virtual int UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height);
     virtual void PushSamplesToAsyncOutputs(double timestamp);
@@ -108,8 +111,19 @@ private:
     vctDynamicVector<svlDraw::Internals> WarpInternals;
 
     svlSampleImage* Mosaic;
+    vctDynamicVector< vctDynamicVector<unsigned short> > MosaicAccuBuffer;
+    vctDynamicVector< vctDynamicVector<unsigned char> > MosaicAccuCount;
     unsigned int MosaicWidth;
     unsigned int MosaicHeight;
+
+    // Work variables
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_ax;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_ay;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_proto_ax;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_proto_ay;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_cos_an;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_sin_an;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_scale;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)

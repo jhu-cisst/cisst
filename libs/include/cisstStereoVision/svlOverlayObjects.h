@@ -502,6 +502,38 @@ private:
 };
 
 
+class CISST_EXPORT svlOverlayPoly : public svlOverlay, public svlOverlayInput
+{
+public:
+    svlOverlayPoly();
+    svlOverlayPoly(unsigned int videoch,
+                   bool visible,
+                   const std::string & inputname,
+                   svlRGB color);
+    svlOverlayPoly(unsigned int videoch,
+                   bool visible,
+                   const std::string & inputname,
+                   svlRGB color,
+                   unsigned int thickness);
+    virtual ~svlOverlayPoly();
+
+    void SetColor(svlRGB color);
+    void SetThickness(unsigned int thickness);
+
+    svlRGB GetColor() const;
+    unsigned int GetThickness() const;
+
+protected:
+    virtual bool IsInputTypeValid(svlStreamType inputtype);
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    vctDynamicVector<svlPoint2D> Poly;
+    svlRGB Color;
+    unsigned int Thickness;
+};
+
+
 class CISST_EXPORT svlOverlayStaticPoly : public svlOverlay
 {
 public:

@@ -82,6 +82,7 @@ inline unsigned int sqrt_uint32(unsigned int value)
 svlTrackerMSBruteForce::svlTrackerMSBruteForce() :
     svlImageTracker(),
     TargetsAdded(false),
+    OverwriteTemplates(false),
     TemplateRadiusRequested(3),
     SearchRadiusRequested(6),
     Metric(svlNCC),
@@ -133,6 +134,11 @@ void svlTrackerMSBruteForce::SetSearchRadius(unsigned int radius)
     if (Initialized && LowerScale) LowerScale->SetSearchRadius(radius / 2);
 }
 
+void svlTrackerMSBruteForce::SetOverwriteTemplates(bool enable)
+{
+    OverwriteTemplates = enable;
+}
+
 void svlTrackerMSBruteForce::SetTemplateUpdateWeight(double weight)
 {
     int ival = static_cast<unsigned int>(weight * 255);
@@ -171,6 +177,11 @@ unsigned int svlTrackerMSBruteForce::GetTemplateRadius() const
 unsigned int svlTrackerMSBruteForce::GetSearchRadius() const
 {
     return SearchRadiusRequested;
+}
+
+bool svlTrackerMSBruteForce::GetOverwriteTemplates() const
+{
+    return OverwriteTemplates;
 }
 
 double svlTrackerMSBruteForce::GetTemplateUpdateWeight() const
@@ -322,7 +333,7 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
     unsigned int i;
 
 
-    if (FrameCounter > 0) p_img = PreviousImage->GetUCharPointer(videoch);
+    if (FrameCounter > 0) p_img = PreviousImage->GetUCharPointer();
     else p_img = image.GetUCharPointer(videoch);
 
     for (i = 0, ptgt = Targets.Pointer(); i < targetcount; i ++, ptgt ++) {
@@ -362,8 +373,8 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
             ptgt->conf            = 255;
             ptgt->feature_quality = 256;
         }
-        else {
-            // update templates with new tracking results
+        else if (OverwriteTemplates) {
+            // Overwrite template based on updated position
             UpdateTemplate(p_img,
                            OrigTemplates[i],
                            ptgt->feature_data.Pointer(),
@@ -377,7 +388,7 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
 
         // Call lower scales recursively
         LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
-        LowerScale->Track(*LowerScaleImage, videoch);
+        LowerScale->Track(*LowerScaleImage);
 
         // Scale up the tracking results from the
         // lower scale and use that as new position
@@ -468,17 +479,19 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         cvShowImage(ScaleName.c_str(), image.IplImageRef(videoch));
         cvWaitKey(1);
 #endif
-
-        // update templates with new tracking results
-        UpdateTemplate(image.GetUCharPointer(videoch),
-                       OrigTemplates[i],
-                       ptgt->feature_data.Pointer(),
-                       ptgt->pos.x - TemplateRadius,
-                       ptgt->pos.y - TemplateRadius);
+        if (!OverwriteTemplates) {
+            // Update template temporarily based on updated position
+            UpdateTemplate(image.GetUCharPointer(videoch),
+                           OrigTemplates[i],
+                           ptgt->feature_data.Pointer(),
+                           ptgt->pos.x - TemplateRadius,
+                           ptgt->pos.y - TemplateRadius);
+       }
     }
 
     FrameCounter ++;
-    PreviousImage->CopyOf(image);
+
+    memcpy(PreviousImage->GetUCharPointer(), image.GetUCharPointer(videoch), PreviousImage->GetDataSize());
 
     return SVL_OK;
 }
@@ -504,7 +517,7 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
     unsigned int i;
 
 
-    if (FrameCounter > 0) p_img = PreviousImage->GetUCharPointer(videoch);
+    if (FrameCounter > 0) p_img = PreviousImage->GetUCharPointer();
     else p_img = image.GetUCharPointer(videoch);
 
     for (i = target_from, ptgt = Targets.Pointer() + target_from;
@@ -547,8 +560,8 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
             ptgt->conf            = 255;
             ptgt->feature_quality = 256;
         }
-        else {
-            // update templates with new tracking results
+        else if (OverwriteTemplates) {
+            // Overwrite template based on updated position
             UpdateTemplate(p_img,
                            OrigTemplates[i],
                            ptgt->feature_data.Pointer(),
@@ -563,7 +576,7 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
 
         // Call lower scales recursively
         LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
-        LowerScale->Track(procInfo, *LowerScaleImage, videoch);
+        LowerScale->Track(procInfo, *LowerScaleImage);
 
         // Scale up the tracking results from the
         // lower scale and use that as new position
@@ -659,19 +672,20 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         cvShowImage(ScaleName.c_str(), image.IplImageRef(videoch));
         cvWaitKey(1);
 #endif
-/*
-        // update templates with new tracking results
-        UpdateTemplate(image.GetUCharPointer(videoch),
-                       OrigTemplates[i],
-                       ptgt->feature_data.Pointer(),
-                       ptgt->pos.x - TemplateRadius,
-                       ptgt->pos.y - TemplateRadius);
-*/
+
+        if (!OverwriteTemplates) {
+            // Update template temporarily based on updated position
+            UpdateTemplate(image.GetUCharPointer(videoch),
+                           OrigTemplates[i],
+                           ptgt->feature_data.Pointer(),
+                           ptgt->pos.x - TemplateRadius,
+                           ptgt->pos.y - TemplateRadius);
+        }
     }
 
     _OnSingleThread(procInfo) {
         FrameCounter ++;
-        PreviousImage->CopyOf(image);
+        memcpy(PreviousImage->GetUCharPointer(), image.GetUCharPointer(videoch), PreviousImage->GetDataSize());
     }
 
     return SVL_OK;
