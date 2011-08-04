@@ -292,6 +292,7 @@ void svlTrackerMSBruteForce::ResetTargets()
     const unsigned int targetcount = Targets.size();
     for (unsigned int i = 0; i < targetcount; i ++) {
         Targets[i].feature_quality = -1;
+        Targets[i].feature_data.SetAll(0);
     }
     TargetsAdded = false;
     FrameCounter = 0;

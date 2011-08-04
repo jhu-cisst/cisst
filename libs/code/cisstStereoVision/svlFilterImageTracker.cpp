@@ -528,7 +528,7 @@ void svlFilterImageTracker::LinkChannelsVertically()
 int svlFilterImageTracker::ReconstructRigidBody()
 {
     const unsigned int targetcount = Targets.cols();
-    double dconf, sum_conf, ax, ay, rx, ry, vx, vy, angle, cos_an, sin_an, scale;
+    double dconf, sum_conf = 0.0, ax, ay, rx, ry, vx, vy, angle, cos_an, sin_an, scale;
     double proto_ax, proto_ay, proto_vx, proto_vy, proto_dist;
     double avrg_scale, avrg_angle, avrg_conf;
     vctDynamicMatrixRef<int> proto_pos;
@@ -822,13 +822,12 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     vctInt2 pos;
 
 
-    memset(MosaicAccuBuffer[videoch].Pointer(), 0, MosaicAccuBuffer[videoch].size() * sizeof(unsigned short));
-    memset(MosaicAccuCount[videoch].Pointer(), 0, MosaicAccuCount[videoch].size());
-
     accu_buffer = MosaicAccuBuffer[videoch].Pointer();
     count_buffer = MosaicAccuCount[videoch].Pointer();
     out_mos_buffer = Mosaic->GetUCharPointer(videoch);
 
+    memset(accu_buffer, 0, MosaicAccuBuffer[videoch].size() * sizeof(unsigned short));
+    memset(count_buffer, 0, MosaicAccuCount[videoch].size());
 
     for (i = 0; i < targetcount; i ++) {
         target = Targets.Pointer(videoch, i);
@@ -886,6 +885,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     for (i = 0; i < mosaic_size; i ++) {
         k = *count_buffer;
         if (k) *out_mos_buffer = (*accu_buffer) / k;
+        else *out_mos_buffer = 0;
         accu_buffer ++;
         count_buffer ++;
         out_mos_buffer ++;
