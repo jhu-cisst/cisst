@@ -33,8 +33,10 @@ public:
 
 	//! Build Skeleton Using XN Context for a given user
 	void Update(int id);
-
-	void SetExists(bool val);
+    void SetExists(bool val);
+    void PrintUserState(void);
+    void UpdateUserStates(void);
+    std::vector<vct3> GetPoints3D(void);
     
     int usrState;
     int calState;

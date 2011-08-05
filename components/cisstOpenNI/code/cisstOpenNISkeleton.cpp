@@ -57,6 +57,41 @@ void cisstOpenNISkeleton::Update(int id)
 
 }
 
-void cisstOpenNISkeleton::SetExists(bool val){
+void cisstOpenNISkeleton::SetExists(bool val)
+{
     exists = val;
+}
+
+std::vector<vct3> cisstOpenNISkeleton::GetPoints3D()
+{
+    return points3D;
+}
+
+void cisstOpenNISkeleton::PrintUserState(void)
+{
+    UpdateUserStates();
+    if(this->usrState == CNI_USR_NEW)
+        std::cout<<"New User"<<std::endl;
+    else if(this->usrState == CNI_USR_LOST)
+        std::cout<<"User Lost"<<std::endl;
+    else if(this->usrState == CNI_USR_POSE)
+        std::cout<<"User Pose Detected"<<std::endl;
+    else if(this->usrState == CNI_USR_CAL_START)
+        std::cout<<"User Calibration Started"<<std::endl;
+    else if(this->usrState == CNI_USR_CAL_END)
+        std::cout<<"User Calibration Ended"<<std::endl;
+    else if(this->usrState == CNI_USR_WAIT)
+        std::cout<<"User Waiting"<<std::endl;
+    
+    if(this->calState == CNI_USR_SUCCESS)
+        std::cout<<"Calibration Success"<<std::endl;
+    else if(this->calState == CNI_USR_SUCCESS)
+        std::cout<<"Calibration Failure"<<std::endl;
+    
+}
+
+void cisstOpenNISkeleton::UpdateUserStates(void)
+{
+    this->usrState = this->OpenNI->Data->usrState;
+    this->calState = this->OpenNI->Data->usrCalState;
 }
