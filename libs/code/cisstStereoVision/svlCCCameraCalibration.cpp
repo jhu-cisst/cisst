@@ -27,6 +27,7 @@ svlCCCameraCalibration::svlCCCameraCalibration(int boardWidth, int boardHeight, 
     minCornerThreshold = 5;
     maxCalibrationIteration = 10;
     maxNumberOfGrids = 25;
+    minHandEyeAvgError = std::numeric_limits<double>::max( );
     debug = false;
     groundTruthTest = false;
     visibility = new int[maxNumberOfGrids];
@@ -37,6 +38,17 @@ svlCCCameraCalibration::svlCCCameraCalibration(int boardWidth, int boardHeight, 
     calCornerDetector = new svlCCCornerDetector(boardSize.width,boardSize.height);
     calOriginDetector = new svlCCOriginDetector(originDetectorColorModeFlag);
     cameraGeometry = new svlSampleCameraGeometry();
+    f = vct2(0.0,0.0);
+    c = vct2(0.0,0.0);
+    k = vctFixedSizeVector<double,7>(0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+}
+
+void svlCCCameraCalibration::setCameraGeometry(vct2 f, vct2 c, double alpha, vctFixedSizeVector<double,7> k)
+{
+    this->f = f;
+    this->c = c;
+    this->k = k;
+    cameraGeometry->SetIntrinsics(f,c,alpha,k);
 }
 
 bool svlCCCameraCalibration::runCameraCalibration(bool runHandEye)
@@ -54,8 +66,11 @@ bool svlCCCameraCalibration::runCameraCalibration(bool runHandEye)
     maxPointsCount = 0;
     avgErr = std::numeric_limits<double>::max( );
     this->runHandEye = runHandEye;
-    calHandEye = new svlCCHandEyeCalibration(calibrationGrids);
-    // Calibrate
+    if(runHandEye)
+    {
+         minHandEyeAvgError = std::numeric_limits<double>::max( );
+        calHandEye = new svlCCHandEyeCalibration(calibrationGrids);
+    }
     return calibration();
 
 }
@@ -66,8 +81,8 @@ void svlCCCameraCalibration::reset()
     calibrationGrids.clear();
     rvecs.clear();
     tvecs.clear();
-    svlFilterImageRectifier *rectifier;
     minHandEyeAvgError = std::numeric_limits<double>::max( );
+    cameraGeometry->Empty();
 }
 
 void svlCCCameraCalibration::printCalibrationParameters()
@@ -337,6 +352,7 @@ double svlCCCameraCalibration::calibrate(bool projected, bool groundTruthTest)
     if(this->runHandEye)
     {
         handEyeAvgError = calHandEye->calibrate();
+        std::cout << "Returned HandEyeError " << handEyeAvgError <<" min so far " << minHandEyeAvgError << std::endl;
         if(handEyeAvgError > 0 && handEyeAvgError < minHandEyeAvgError)
         {
             minHandEyeAvgError = handEyeAvgError;
@@ -660,9 +676,13 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
 
     //save images and calibration grids
     images.push_back(image);
-    calibrationGrids.push_back(calibrationGrid);
-
-    return calibrationGrids.back()->valid;
+    if(calibrationGrid->valid)
+    {
+        calibrationGrids.push_back(calibrationGrid);
+        return true;
+    }
+    else
+        return false;
 }
 
 /**************************************************************************************************
@@ -682,7 +702,6 @@ bool svlCCCameraCalibration::processImage(std::string imageDirectory, std::strin
 ***********************************************************************************************************/
 bool svlCCCameraCalibration::process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex)
 {
-    reset();
     bool validImage = false;
     bool valid = false;
     std::string currentFileName;
@@ -722,7 +741,7 @@ void svlCCCameraCalibration::updateCameraGeometry()
     double alpha = 0.0;//assumed to be square pixels
     f = vct2(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
     c = vct2(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));
-    k = vctFixedSizeVector<double,7>(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),distCoeffs.at<double>(4,0),0.0,0.0);//-0.36,0.1234,0.0,0,0);//
+    k = vctFixedSizeVector<double,7>(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),distCoeffs.at<double>(4,0),0.0,0.0);
     cameraGeometry->SetIntrinsics(f,c,alpha,k);
 }
 

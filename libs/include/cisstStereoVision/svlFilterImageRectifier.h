@@ -42,7 +42,6 @@ public:
 	//changed from "vctFixedSizeVector<double,5> k", to "vctFixedSizeVector<double,7> k"
 	int SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch);
 	vctFixedSizeVector<svlImageProcessing::Internals, SVL_MAX_CHANNELS> GetTables(){return Tables;};
-
     void EnableInterpolation(bool enable = true);
 
 protected:

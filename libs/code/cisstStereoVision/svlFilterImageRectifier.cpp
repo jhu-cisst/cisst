@@ -101,12 +101,19 @@ int svlFilterImageRectifier::Process(svlProcInfo* procInfo, svlSample* syncInput
         if (camgeo) {
             //std::cout << *camgeo;
             for (idx = 0; idx < videochannels; idx ++) {
-                table = new svlImageProcessingHelper::RectificationInternals;
-                if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {
-                    delete table;
-                    continue;
+                if(camgeo->IsInitialized())
+                {
+                    table = new svlImageProcessingHelper::RectificationInternals;
+                    if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {
+                        delete table;
+                        continue;
+                    }
+                    Tables[idx].Set(table);
                 }
-                Tables[idx].Set(table);
+                else
+                {
+                    Tables[idx].Release();
+                }
             }
         }
     }
@@ -187,3 +194,4 @@ void svlFilterImageRectifier::EnableInterpolation(bool enable)
 {
     InterpolationEnabled = enable;
 }
+

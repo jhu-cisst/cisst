@@ -56,6 +56,8 @@ class CISST_EXPORT svlCCCameraCalibration
 
 public:
     svlCCCameraCalibration(int boardWidth, int boardHeight, float squareSize, int originDetectorColorModeFlag);
+    void reset();
+    void setCameraGeometry(vct2 f, vct2 c, double alpha, vctFixedSizeVector<double,7> k);
     bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
     int setRectifier(svlFilterImageRectifier* rectifier);
     bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
@@ -68,6 +70,11 @@ public:
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
     svlSampleCameraGeometry* cameraGeometry;
+    vct2 getFocii(){ return f;};
+    vct2 getCameraCenter(){ return c;};
+    vctFixedSizeVector<double,7> getDistortionCoefficients(){return k;};
+    double getCameraCalibrationReprojectionError() {return avgErr;};
+    double getHandEyeCalibrationError() {return minHandEyeAvgError;};
 
 private:
     double computeReprojectionErrors(
@@ -84,11 +91,7 @@ private:
     void optimizeCalibration();
     bool calibration();
     void updateCameraGeometry();
-    void reset();
     void runTest();
-    vct2 getFocii(){ return f;};
-    vct2 getCameraCenter(){ return c;};
-    vctFixedSizeVector<double,7> getDistortionCoefficients(){return k;};
 
     ////////// Parameters //////////
     //camera parameters
