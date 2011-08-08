@@ -93,6 +93,7 @@ double svlCCHandEyeCalibration::calibrate()
                 ((!debug && calibrationGrids.at(i)->valid && calibrationGrids.at(j)->valid)||
                 (debug && calibrationGrids.at(i)->validGroundTruth && calibrationGrids.at(j)->validGroundTruth)))
             {
+                //if(i<=7 && j <=7)
                 valid[i][j] = 1;
             }
             else
@@ -130,56 +131,78 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
 {
     double minHandEyeAvgError = std::numeric_limits<double>::max( );
     double handEyeError = std::numeric_limits<double>::max( );
+    double initialHandEyeError;
     vct4x4 minTcpTCamera;
     int* myIndicies = new int[cameraMatrix.size()];
-    for(int i=0;i<cameraMatrix.size();i++)
-        myIndicies[i] = i;
-    int iteration = 0;
-    int maxIteration = cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size();
-    double threshold = 2.0;
+    for(int j=0;j<cameraMatrix.size();j++)
+        myIndicies[j] = j;
 
-    for(int i=cameraMatrix.size();i>(cameraMatrix.size()-1)/2;i--)
+    int* myPermutationIndicies = new int[cameraMatrix.size()];
+    for(int j=0;j<cameraMatrix.size();j++)
+        myPermutationIndicies[j] = j;
+
+    int setIteration = 0;
+    int totalIteration = 0;
+    double maxThreshold = 0.3;
+    double minThreshold = 0.2;
+
+    int maxIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)10000);
+    int maxSetIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)1000);
+    if(cameraMatrix.size() < 10)
+        maxThreshold = 1.0;
+
+    for(int i=cameraMatrix.size();i>std::max(cameraMatrix.size()/2,(cameraMatrix.size()-5));i--)
     {
-        //run permutation
+        //combinations
         do
         {
-            handEyeError = dualQuaternionMethod(myIndicies,i,false);
-
-            //save min
-            if(handEyeError < minHandEyeAvgError)
+            initialHandEyeError = dualQuaternionMethod(myIndicies,i,false)*cameraMatrix.size()/i;
+            if(initialHandEyeError > maxThreshold)
+                continue;
+            if(debug)
             {
-                if(debug)
-                    std::cout << "Iteration: " << iteration << " HandEye Avg Error: " << handEyeError << " permutation using "<<i << std::endl;
-                minHandEyeAvgError = handEyeError;
-                minTcpTCamera = tcp_T_camera;
+                std::cout << "   ||" << cameraMatrix.size() << " choose " << i << "||";            
+                for(int k=0;k<i;k++)
+                    std::cout << myIndicies[k];
+                std::cout<< "||";
+                std::cout << "initialHandEyeError - " << initialHandEyeError << "||"  << std::endl;
             }
+            for(int j=0;j<i;j++)
+                myPermutationIndicies[j] = myIndicies[j]; 
+            setIteration = 0;
+            maxSetIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)1000);
 
-            if(minHandEyeAvgError > threshold)
-                break;
-            iteration++;
-
-        } while (std::next_permutation(myIndicies,myIndicies+calibrationGrids.size()) && iteration < maxIteration/2 &&!debug);
-
-        //run combination
-        do
-        {
-            handEyeError = dualQuaternionMethod(myIndicies,i,true)*cameraMatrix.size()/i*cameraMatrix.size()/i;
-
-            //save min
-            if(handEyeError < minHandEyeAvgError)
+            //permutations
+            do
             {
-                if(debug)
-                    std::cout << "Iteration: " << iteration << " HandEye Avg Error: " << handEyeError << " combination using: " <<i<< std::endl;
-                minHandEyeAvgError = handEyeError;
-                minTcpTCamera = tcp_T_camera;
-            }
+                handEyeError = dualQuaternionMethod(myPermutationIndicies,i,false)*cameraMatrix.size()/i;
+                if(handEyeError < minHandEyeAvgError)
+                {
 
-            if(minHandEyeAvgError > threshold)
-                iteration = maxIteration;
-            iteration++;
+                    minHandEyeAvgError = handEyeError;
+                    minTcpTCamera = tcp_T_camera;
 
-        } while (next_combination(myIndicies,myIndicies+i,myIndicies+calibrationGrids.size()) && iteration < maxIteration && !debug);
+                    if(debug)
+                    {
+                        std::cout << "      Iteration: " << totalIteration << " of " <<maxIteration << " perm: " << handEyeError << " using "<<i ;
+                        std::cout << " Indicies: ";
+                        for(int k=0;k<i;k++)
+                            std::cout << myPermutationIndicies[k];
+                        std::cout << std::endl;
+                    }
+
+                    if(minHandEyeAvgError < minThreshold)
+                        maxSetIteration = maxIteration;
+                }
+                setIteration++;
+                totalIteration++;
+            } while (std::next_permutation(myPermutationIndicies,myPermutationIndicies+i) && setIteration < maxSetIteration && totalIteration <maxIteration);
+            if(debug)
+                std::cout << "   set ends at iteration " << totalIteration << " of max set " << maxSetIteration << "||" << std::endl;
+        } while (next_combination(myIndicies,myIndicies+i,myIndicies+calibrationGrids.size())&& totalIteration <maxIteration);
     }
+    if(debug)
+        std::cout << "call ends at iteration " << totalIteration << " of max " << maxIteration << "||" << std::endl;
 
     handEyeAvgError = minHandEyeAvgError;
     tcp_T_camera = minTcpTCamera;
@@ -613,8 +636,8 @@ double svlCCHandEyeCalibration::getAvgHandEyeError(std::vector<CvMat*> aMatrix, 
     double avgError = 0;
     double error = 0;
     double totalError = 0;
-    int k=0;
-
+    int aIndex, bIndex;
+    int k;
     for(k=0;k<aMatrix.size();k++)
     {
         error = checkAXXB(aMatrix.at(k),bMatrix.at(k));

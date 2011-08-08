@@ -85,33 +85,6 @@ void svlCCCameraCalibration::reset()
     cameraGeometry->Empty();
 }
 
-void svlCCCameraCalibration::printCalibrationParameters()
-{
-    for(int i=0;i<cameraMatrix.rows;i++)
-    {
-        for(int j=0;j<cameraMatrix.cols;j++)
-        {
-            std::cout << "Camera matrix: " << cameraMatrix.at<double>(i,j) << std::endl;
-        }
-    }
-
-    for(int i=0;i<distCoeffs.rows;i++)
-    {
-        for(int j=0;j<distCoeffs.cols;j++)
-        {
-            std::cout << "Distortion _coefficients: " << distCoeffs.at<double>(i,j) << std::endl;
-        }
-    }
-
-    std::cout << "Handeye error: "<< minHandEyeAvgError<<std::endl;
-    std::cout << tcpTCamera << std::endl;
-    //for(int i=0;i<rvecs.size();i++)
-    //{
-    //    std::cout << "rvect: " << i << ": " << rvecs.at(i).at<double>(0,0) <<","<< rvecs.at(i).at<double>(0,1) <<","<< rvecs.at(i).at<double>(0,2) <<","<< std::endl;
-    //    std::cout << "tvect: " << i << ": " << tvecs.at(i).at<double>(0,0) <<","<< tvecs.at(i).at<double>(0,1) <<","<< tvecs.at(i).at<double>(0,2) <<","<< std::endl;
-    //}
-}
-
 /**************************************************************************************************
 * computeReprojectionErrors()					
 *	Compute the average L1 reprojection error
@@ -830,4 +803,57 @@ void svlCCCameraCalibration::runTest()
 
     std::cout << std::endl;
 
+}
+
+void svlCCCameraCalibration::printCalibrationParameters()
+{
+    for(int i=0;i<cameraMatrix.rows;i++)
+    {
+        for(int j=0;j<cameraMatrix.cols;j++)
+        {
+            std::cout << "Camera matrix: " << cameraMatrix.at<double>(i,j) << std::endl;
+        }
+    }
+
+    for(int i=0;i<distCoeffs.rows;i++)
+    {
+        for(int j=0;j<distCoeffs.cols;j++)
+        {
+            std::cout << "Distortion _coefficients: " << distCoeffs.at<double>(i,j) << std::endl;
+        }
+    }
+
+    std::cout << "Handeye error: "<< minHandEyeAvgError<<std::endl;
+    std::cout << tcpTCamera << std::endl;
+    //for(int i=0;i<rvecs.size();i++)
+    //{
+    //    std::cout << "rvect: " << i << ": " << rvecs.at(i).at<double>(0,0) <<","<< rvecs.at(i).at<double>(0,1) <<","<< rvecs.at(i).at<double>(0,2) <<","<< std::endl;
+    //    std::cout << "tvect: " << i << ": " << tvecs.at(i).at<double>(0,0) <<","<< tvecs.at(i).at<double>(0,1) <<","<< tvecs.at(i).at<double>(0,2) <<","<< std::endl;
+    //}
+}
+
+void svlCCCameraCalibration::writeToFileCalibrationParameters(std::string directory)
+{
+    std::stringstream path;
+    path << directory;
+    path << "calibration.dat";
+
+    std::ofstream outputStream(path.str().c_str(), std::ofstream::binary);
+    cmnSerializer serialization(outputStream);
+    //outputStream << *cameraGeometry;
+
+    //intrinsics
+    outputStream << "<intrinsics size='" << imageSize.width << ", " << imageSize.height << "'\n";
+    outputStream << "            f='" << f(0) << ", " << f(1) << "'\n";
+    outputStream << "            c='" << c(0) << ", " << c(1) << "'\n";
+    outputStream << "            k='" << k(0) << ", " << k(1) << ", " << k(2) << ", " << k(3) << ", " << k(4) << ", " << k(5) << ", " << k(6) << "' />\n";
+
+    //extrinsics
+    outputStream << "<extrinsics rotation='" << tcpTCamera(0,0) << ", " << tcpTCamera(0,1) << ", " << tcpTCamera(0,2) << ", ";
+    outputStream << tcpTCamera(1,0) << ", " << tcpTCamera(1,1) << ", " << tcpTCamera(1,2) << ", ";
+    outputStream << tcpTCamera(2,0) << ", " << tcpTCamera(2,1) << ", " << tcpTCamera(2,2) << "'\n";
+    outputStream << "            translation='" << tcpTCamera(0,3) << ", " << tcpTCamera(1,3) << ", " << tcpTCamera(2,3) << "' />\n";
+
+    // close the stream
+    outputStream.close();
 }

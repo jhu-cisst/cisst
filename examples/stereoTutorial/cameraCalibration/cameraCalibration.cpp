@@ -131,6 +131,7 @@ int main(int argc, char** argv)
     {
         svlCCObject->runCameraCalibration(runHandEye);
         svlCCObject->printCalibrationParameters();
+        svlCCObject->writeToFileCalibrationParameters(imageDirectory);
         svlCCObject->setRectifier(rectifier);
         source.SetImageOverwrite(svlCCObject->images.front());
     }else
@@ -171,6 +172,7 @@ int main(int argc, char** argv)
             if(ok && svlCCObject->images.size() > 0)
             {
                 svlCCObject->printCalibrationParameters();
+                svlCCObject->writeToFileCalibrationParameters(imageDirectory);
                 svlCCObject->setRectifier(rectifier);
                 source.SetImageOverwrite(svlCCObject->images.front());
             }

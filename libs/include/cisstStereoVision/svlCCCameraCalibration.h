@@ -66,7 +66,6 @@ public:
     int setImageVisibility(int index, int visible);
     std::vector<svlCCCalibrationGrid*> getCalibrationGrids(){return calibrationGrids;};
     int setFilterSourceDummy(svlFilterSourceDummy* source, int index);
-    void printCalibrationParameters();
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
     svlSampleCameraGeometry* cameraGeometry;
@@ -75,6 +74,8 @@ public:
     vctFixedSizeVector<double,7> getDistortionCoefficients(){return k;};
     double getCameraCalibrationReprojectionError() {return avgErr;};
     double getHandEyeCalibrationError() {return minHandEyeAvgError;};
+    void printCalibrationParameters();
+    void writeToFileCalibrationParameters(std::string directory);
 
 private:
     double computeReprojectionErrors(
