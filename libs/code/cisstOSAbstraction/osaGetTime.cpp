@@ -86,18 +86,29 @@ double osaGetTime(void)
 #endif
 }
 
-void osaGetDateTimeString(std::string & str)
+void osaGetDateTimeString(std::string & str, const char delimiter)
 {
     time_t tim = time(0);
     tm * now = localtime(&tim);
     char buffer[50];
-    sprintf(buffer, "%d%s%02d%s%02d%s%02d%s%02d%s%02d",
-            now->tm_year + 1900, "-",
-            now->tm_mon + 1, "-",
-            now->tm_mday, "_",
-            now->tm_hour, "-",
-            now->tm_min, "-",
-            now->tm_sec);
+
+    if (delimiter == ':') {
+        sprintf(buffer, "%d-%02d-%02d %02d:%02d:%02d",
+                now->tm_year + 1900,
+                now->tm_mon + 1,
+                now->tm_mday,
+                now->tm_hour,
+                now->tm_min,
+                now->tm_sec);
+    } else {
+        sprintf(buffer, "%d-%02d-%02d_%02d-%02d-%02d",
+                now->tm_year + 1900,
+                now->tm_mon + 1,
+                now->tm_mday,
+                now->tm_hour,
+                now->tm_min,
+                now->tm_sec);
+    }
     str = buffer;
 }
 
