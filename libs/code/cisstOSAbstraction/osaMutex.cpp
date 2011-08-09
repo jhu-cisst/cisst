@@ -74,7 +74,7 @@ struct osaMutexInternals {
 //}
 //#endif // CISST_LINUX_RTAI
 
-osaMutex::osaMutex(void)
+osaMutex::osaMutex(void) : Locked(false)
 {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
@@ -162,6 +162,10 @@ unsigned int osaMutex::SizeOfInternals(void) {
 
 void osaMutex::Lock(void) 
 {
+    // Remember locker id
+    LockerId = osaGetCurrentThreadId();
+    Locked = true;
+
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_lock(&INTERNALS(Mutex));
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
@@ -217,6 +221,9 @@ void osaMutex::Lock(void)
 
 void osaMutex::Unlock(void) 
 {
+    // Reset locker id.  LockerId gets invalidated.
+    Locked = false;
+
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_unlock(&INTERNALS(Mutex));
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
@@ -252,6 +259,13 @@ void osaMutex::Unlock(void)
 #elif (CISST_OS == CISST_WINDOWS)
     ReleaseMutex(INTERNALS(Mutex));
 #endif
+}
+
+bool osaMutex::IsLocker(void) const
+{
+    if (!Locked) return false;
+
+    return (osaGetCurrentThreadId().Equal(LockerId));
 }
 
 #if 0
