@@ -59,7 +59,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
@@ -117,14 +116,14 @@ private:
     static mtsManagerLocal * InstanceReconfiguration;
     static mtsManagerLocal * GetSafeInstance(void);
 
-protected:
     /*! Typedef for component map: key is component name, value is component
         object */
     typedef cmnNamedMap<mtsComponent> ComponentMapType;
     ComponentMapType ComponentMap;
 
     /*! Time server used by all tasks. */
-    osaTimeServer TimeServer;
+    // MJ: Move this to mtsManagerLocal.cpp (for system-wide logging)
+    //osaTimeServer TimeServer;
 
     /*! Process name of this local component manager. Should be globally unique
         across the whole system. */
@@ -164,11 +163,30 @@ protected:
     /*! If connection to GCM is active */
     bool GCMConnected;
 
-    /*! Change GCM connection state */
-    inline void SetGCMConnected(const bool connected) {
-        GCMConnected = connected;
-    }
+    /*! Internal thread to buffer log messages */
+    osaThread       LogThead;
+    osaThreadSignal LogTheadFinished;
+    bool            LogThreadFinishWaiting;
+    void*           LogDispatchThread(void * arg);
+ 
+    /*! Set up system logger that allows collecting system-wide logs across network */
+    void SetupSystemLogger(void);
 
+    /*! If Manager Component Client (MCC) is ready to forward logs to 
+        Manager Component Server (MCS) */
+    bool MCCReadyForLogForwarding(void) const;
+
+public:    
+    /*! Callback function for system-wide thread-safe logging */
+    static void LogDispatcher(const char * str, int len);
+
+    /*! Enable or disable system-wide thread-safe logging */
+    static void SetLogForwarding(bool activate);
+
+    /*! Is system-wide thread-safe logging enabled? */
+    bool IsLogForwardingEnabled(void) const;
+
+protected:    
     /*! Protected constructor (singleton) */
     mtsManagerLocal(void);
 
@@ -304,6 +322,11 @@ protected:
         const std::string & componentName,
         const std::string & requiredInterfaceName,
         InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+
+    /*! Change GCM connection state */
+    inline void SetGCMConnected(const bool connected) {
+        GCMConnected = connected;
+    }
 
 public:
     //-------------------------------------------------------------------------
@@ -461,10 +484,13 @@ public:
     void CISST_DEPRECATED GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
 
     /*! Return a reference to the time server. */
+#if 0
     inline const osaTimeServer & GetTimeServer(void) const {
         return TimeServer;
     }
-
+#endif
+    const osaTimeServer & GetTimeServer(void) const;
+    
     /*! Returns name of this local component manager */
     inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const {
         return ProcessName;
@@ -560,6 +586,9 @@ public:
     inline const std::string GetName(void) const {
         return GetProcessName();
     }
+
+    /*! Set endpoint access information */
+    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
 #endif
 
     /*! For debugging. Dumps to stream the maps maintained by the manager. */
@@ -568,15 +597,6 @@ public:
     /*! Create a dot file to be used by graphviz to generate a nice
       graph of connections between tasks/interfaces. */
     void /*CISST_DEPRECATED*/ ToStreamDot(std::ostream & outputStream) const;
-
-    //-------------------------------------------------------------------------
-    //  Networking
-    //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
-public:
-    /*! Set endpoint access information */
-    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
-#endif
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocal)

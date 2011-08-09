@@ -48,6 +48,7 @@ protected:
         mtsFunctionWrite Resume;
         mtsFunctionQualifiedRead GetState;     // in: process, component, out: state
         mtsFunctionQualifiedRead LoadLibrary;  // in: process, library name, out: result (bool)
+        mtsFunctionWrite PrintLog;
     } ServiceComponentManagement;
 
     // Getters

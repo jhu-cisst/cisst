@@ -136,6 +136,7 @@ public:
         const static std::string ComponentResume;
         const static std::string ComponentGetState;
         const static std::string LoadLibrary;  // dynamic loading
+        const static std::string PrintLog;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
@@ -159,6 +160,7 @@ public:
         const static std::string AddConnection;
         const static std::string RemoveConnection;
         const static std::string ChangeState;
+        const static std::string MCSReady;
     };
 
     mtsManagerComponentBase(const std::string & componentName);

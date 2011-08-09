@@ -29,17 +29,31 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstCommon/cmnUnits.h>
 
+//#define SYSTEM_LOG_TEST_MCC
+#ifdef SYSTEM_LOG_TEST_MCC
+#include <iostream>
+#include <fstream>
+std::ofstream logfileMCC;
+#endif
+
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
 mtsManagerComponentClient::mtsManagerComponentClient(const std::string & componentName)
     : mtsManagerComponentBase(componentName),
+      MCSReady(false),
       InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
+#ifdef SYSTEM_LOG_TEST_MCC
+    logfileMCC.open("MCC.txt");
+#endif
     InterfaceComponentFunctionMap.SetOwner(*this);
 }
 
 mtsManagerComponentClient::~mtsManagerComponentClient()
 {
+#ifdef SYSTEM_LOG_TEST_MCC
+    logfileMCC.close();
+#endif
 }
 
 void mtsManagerComponentClient::Startup(void)
@@ -555,6 +569,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.ComponentGetState);
     required->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
                           InterfaceLCMFunction.LoadLibrary);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog,
+                          InterfaceLCMFunction.PrintLog);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                           InterfaceLCMFunction.GetNamesOfProcesses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
@@ -579,6 +595,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                                    mtsManagerComponentBase::EventNames::AddConnection, MTS_EVENT_NOT_QUEUED);
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleRemoveConnectionEvent, this,
                                    mtsManagerComponentBase::EventNames::RemoveConnection, MTS_EVENT_NOT_QUEUED);
+    required->AddEventHandlerVoid(&mtsManagerComponentClient::HandleMCSReadyEvent, this,
+                                   mtsManagerComponentBase::EventNames::MCSReady, MTS_EVENT_NOT_QUEUED);
 
     // Add provided interface
     interfaceName = mtsManagerComponentBase::GetNameOfInterfaceLCMProvided();
@@ -667,6 +685,26 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
     return true;
 }
 
+bool mtsManagerComponentClient::CanForwardLog(void) const
+{
+    return (InterfaceLCMFunction.PrintLog.IsValid() && MCSReady);
+}
+
+bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
+{
+    mtsExecutionResult ret = InterfaceLCMFunction.PrintLog(log);
+    if ((ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED))// && 
+         //(ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED) )
+    {
+        return false;
+    }
+    
+#ifdef SYSTEM_LOG_TEST_MCC
+    logfileMCC << std::string(log.Message, log.Length);
+#endif
+
+    return true;
+}
 
 bool mtsManagerComponentClient::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
@@ -1336,4 +1374,10 @@ void mtsManagerComponentClient::HandleChangeStateFromComponent(const mtsComponen
     CMN_LOG_CLASS_INIT_VERBOSE << "MCC ChangeState event, component = " << componentStateChange.ComponentName << std::endl;
     // Generate event to connected components
     InterfaceLCMEvents_ChangeState(componentStateChange);
+}
+
+void mtsManagerComponentClient::HandleMCSReadyEvent(void)
+{
+    //CMN_LOG_CLASS_INIT_VERBOSE << "MCS ready event" << std::endl;
+    //MCSReady = true;
 }

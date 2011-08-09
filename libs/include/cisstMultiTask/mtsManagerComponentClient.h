@@ -49,6 +49,9 @@ protected:
     /*! Get a list of all processes running in the system */
     mtsFunctionRead GetNamesOfProcesses;
 
+    /*! If MCS is ready */
+    bool MCSReady;
+
     /*! Functions for InterfaceComponent's required interface.  Since one 
         manager component client needs to be able to handle multiple user 
         components, we keep a list of function objects using named map with 
@@ -78,6 +81,7 @@ protected:
         mtsFunctionWrite ComponentResume;
         mtsFunctionQualifiedRead ComponentGetState;
         mtsFunctionQualifiedRead LoadLibrary;
+        mtsFunctionWrite PrintLog;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -95,6 +99,7 @@ protected:
     void HandleChangeStateEvent(const mtsComponentStateChange &componentStateChange);
     void HandleAddConnectionEvent(const mtsDescriptionConnection &connection);
     void HandleRemoveConnectionEvent(const mtsDescriptionConnection &connection);
+    void HandleMCSReadyEvent(void);
 
     // Event handlers for InterfaceComponent's required interface (handle events from Component)
     void HandleChangeStateFromComponent(const mtsComponentStateChange & componentStateChange);
@@ -147,6 +152,13 @@ public:
         InterfaceComponent's required interface to this component, and connect 
         it to InterfaceInternal's provided interface */
     bool AddNewClientComponent(const std::string & clientComponentName);
+
+    /*! If MCC can forward log messages to MCS.  This returns false until
+        MCC gets connected to MCS. */
+    bool CanForwardLog(void) const;
+
+    /*! Support for system-wide thread-safe logging. Forward logs to MCS. */
+    bool ForwardLog(const mtsLogMessage & log) const;
 
     // Called from LCM
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,

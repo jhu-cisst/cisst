@@ -178,6 +178,8 @@ CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
 
 CMN_IMPLEMENT_SERVICES(mtsDescriptionLoadLibrary);
 
+CMN_IMPLEMENT_SERVICES(mtsLogMessage);
+
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 

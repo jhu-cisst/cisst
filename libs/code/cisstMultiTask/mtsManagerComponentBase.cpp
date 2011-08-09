@@ -56,12 +56,14 @@ const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddO
 const std::string mtsManagerComponentBase::CommandNames::RemoveEndUserInterface = "RemoveEndUserInterface";
 const std::string mtsManagerComponentBase::CommandNames::RemoveObserverList = "RemoveObserverList";
 const std::string mtsManagerComponentBase::CommandNames::LoadLibrary = "LoadLibrary";
+const std::string mtsManagerComponentBase::CommandNames::PrintLog = "PrintLog";
 
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";
 const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";
+const std::string mtsManagerComponentBase::EventNames::MCSReady      = "MCSReady";
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentBase, mtsTaskFromSignal);
 
