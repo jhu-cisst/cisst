@@ -61,7 +61,8 @@ protected:
     PerThreadChannelType * GetThreadChannel(const osaThreadId& threadId);
 
 public:
-    ~mtsLODMultiplexerStreambuf();
+   mtsLODMultiplexerStreambuf();
+   ~mtsLODMultiplexerStreambuf();
 };
 
 

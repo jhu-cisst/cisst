@@ -26,6 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <map>
 #include <iostream>
 
+mtsLODMultiplexerStreambuf::mtsLODMultiplexerStreambuf(){}
+
 mtsLODMultiplexerStreambuf::~mtsLODMultiplexerStreambuf()
 {
     PerThreadChannelMapType::const_iterator it = PerThreadChannelMap.begin();
