@@ -35,6 +35,8 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided 
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceLCMRequired       = "InterfaceLCMRequired";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided       = "InterfaceGCMProvided";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired       = "InterfaceGCMRequired";
+const std::string mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided = "InterfaceSystemLoggerProvided";
+const std::string mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired = "InterfaceSystemLoggerRequired";
 // Names of commands
 const std::string mtsManagerComponentBase::CommandNames::ComponentCreate  = "ComponentCreate";
 const std::string mtsManagerComponentBase::CommandNames::ComponentConfigure  = "ComponentConfigure";

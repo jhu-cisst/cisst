@@ -113,6 +113,7 @@ public:
     /*! Interface name definitions */
     class CISST_EXPORT InterfaceNames {
     public:
+        // Internal interfaces for dynamic component services
         const static std::string InterfaceInternalProvided;
         const static std::string InterfaceInternalRequired;
         const static std::string InterfaceComponentProvided;
@@ -121,6 +122,9 @@ public:
         const static std::string InterfaceLCMRequired;
         const static std::string InterfaceGCMProvided;
         const static std::string InterfaceGCMRequired;
+        // Interface for system-wide thread-safe logging
+        const static std::string InterfaceSystemLoggerProvided;
+        const static std::string InterfaceSystemLoggerRequired;
     };
 
     /*! Command name definitions */

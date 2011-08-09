@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
-#define SYSTEM_LOG_TEST_MCS
+//#define SYSTEM_LOG_TEST_MCS
 #ifdef SYSTEM_LOG_TEST_MCS
 #include <iostream>
 #include <fstream>
@@ -49,10 +49,11 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     gcm->SetMCS(this);
     InterfaceGCMFunctionMap.SetOwner(*this);
 
-    // For logging
-    mtsInterfaceRequired * required = AddInterfaceRequired("SystemLogger", MTS_OPTIONAL);
+    // For system-wide thread-safe logging
+    mtsInterfaceRequired * required = AddInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired, MTS_OPTIONAL);
     if (required) {
-        required->AddFunction("PrintLog", PrintLog);
+        required->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, PrintLog);
     }
 }
 
