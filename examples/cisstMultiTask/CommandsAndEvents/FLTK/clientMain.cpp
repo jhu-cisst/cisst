@@ -23,6 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #include "clientTask.h"
 #include <cisstOSAbstraction/osaSleep.h>
 
+// Enable or disable system-wide thread-safe logging
+//#define MTS_LOGGING
+
 int main(int argc, char * argv[])
 {
     // log configuration
@@ -34,6 +37,10 @@ int main(int argc, char * argv[])
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("clientTask", CMN_LOG_ALLOW_ALL);
+    // enable system-wide thread-safe logging
+#ifdef MTS_LOGGING
+    mtsManagerLocal::SetLogForwarding(true);
+#endif
 
     std::string globalComponentManagerIP;
     bool useGeneric;
@@ -128,11 +135,11 @@ int main(int argc, char * argv[])
     componentManager->KillAll();
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
 
-    componentManager->Cleanup();
-
     // delete components
     delete client1;
     delete client2;
+
+    componentManager->Cleanup();
 
     return 0;
 }
