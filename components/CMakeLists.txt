@@ -44,3 +44,9 @@ if (CISST_BUILD_COMP_cisstStealthlink)
   add_subdirectory (cisstStealthlink)
 endif (CISST_BUILD_COMP_cisstStealthlink)
 
+# cisstCAN wrappers for various CAN devices
+option(CISST_BUILD_COMP_cisstCAN "Build CAN support" OFF)
+if( CISST_BUILD_COMP_cisstCAN )
+  add_subdirectory( cisstCAN )
+endif( CISST_BUILD_COMP_cisstCAN )
+
