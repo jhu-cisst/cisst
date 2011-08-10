@@ -52,7 +52,7 @@ protected:
     std::streamsize xsputn(const char *s, std::streamsize n);
 
     IntType overflow(IntType c, cmnLogLevel level);
-    IntType overflow(IntType c = TraitType::eof());
+    IntType overflow(IntType c = mtsLODMultiplexerStreambuf::TraitType::eof());
 
     int sync(void);
 
