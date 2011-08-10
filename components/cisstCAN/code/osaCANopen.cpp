@@ -1,5 +1,5 @@
 
-#include <cisstDevices/can/devCANopen.h>
+#include <cisstCAN/osaCANopen.h>
 
 #include <cisstCommon.h>
 #include <cisstOSAbstraction/osaGetTime.h>
@@ -7,93 +7,93 @@
 
 #include <fcntl.h>
 
-devCANopen::devCANopen( devCAN* candevice ) : 
+osaCANopen::osaCANopen( osaCAN* candevice ) : 
   candevice( candevice ), 
   deviceopened( false ){}
 
-devCANopen::~devCANopen()
+osaCANopen::~osaCANopen()
 { Close(); }
 
-devCANopen::Errno devCANopen::Open(void){
+osaCANopen::Errno osaCANopen::Open(void){
 
   if( candevice == NULL ){
     CMN_LOG_RUN_ERROR << "Failed to open CAN device." << std::endl;
-    return devCANopen::EFAILURE;
+    return osaCANopen::EFAILURE;
   }
   
-  if( candevice->Open() != devCAN::ESUCCESS ){
+  if( candevice->Open() != osaCAN::ESUCCESS ){
     CMN_LOG_RUN_ERROR << "Failed to open CAN device." << std::endl;
-    return devCANopen::EFAILURE;
+    return osaCANopen::EFAILURE;
   }
   
   deviceopened = true;
-  return devCANopen::ESUCCESS;
+  return osaCANopen::ESUCCESS;
 }
 
-devCANopen::Errno devCANopen::Close(void){
+osaCANopen::Errno osaCANopen::Close(void){
   if( candevice == NULL ){
     CMN_LOG_INIT_ERROR << "Failed to close CAN device." << std::endl;
-    return devCANopen::EFAILURE;
+    return osaCANopen::EFAILURE;
   }
   
-  if( candevice->Close() != devCAN::ESUCCESS ){
+  if( candevice->Close() != osaCAN::ESUCCESS ){
     CMN_LOG_INIT_ERROR << "Failed to close CAN device." << std::endl;
-    return devCANopen::EFAILURE;
+    return osaCANopen::EFAILURE;
   }
   
   deviceopened = false;
-  return devCANopen::ESUCCESS;
+  return osaCANopen::ESUCCESS;
 }
 
-devCANopen::Errno devCANopen::Read( CiA301::COBID& cobid,
+osaCANopen::Errno osaCANopen::Read( CiA301::COBID& cobid,
 				    CiA301::Object& object ){
    
    
   if( candevice == NULL ){
     CMN_LOG_INIT_ERROR << "Failed to read CAN frame." << std::endl;
-    return devCANopen::EFAILURE;
+    return osaCANopen::EFAILURE;
   }
 
-  devCAN::Frame frame;
-  if( candevice->Recv( frame ) != devCAN::ESUCCESS ){
+  osaCAN::Frame frame;
+  if( candevice->Recv( frame ) != osaCAN::ESUCCESS ){
     CMN_LOG_INIT_ERROR << "Failed to read CAN frame." << std::endl;
-    return devCANopen::EFAILURE;
+    return osaCANopen::EFAILURE;
   }
 
   Unpack( frame, cobid, object );
    
-  return devCANopen::ESUCCESS;
+  return osaCANopen::ESUCCESS;
 }
 
-devCANopen::Errno devCANopen::Write( CiA301::COBID cobid,
+osaCANopen::Errno osaCANopen::Write( CiA301::COBID cobid,
 				     const CiA301::Object& object ){
    
    if( candevice == NULL ){
       CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
-     return devCANopen::EFAILURE;
+     return osaCANopen::EFAILURE;
    }
 
-   if( candevice->Send( Pack( cobid, object ) ) != devCAN::ESUCCESS ){
+   if( candevice->Send( Pack( cobid, object ) ) != osaCAN::ESUCCESS ){
      CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
-     return devCANopen::EFAILURE;
+     return osaCANopen::EFAILURE;
    }
 
-   return devCANopen::ESUCCESS;
+   return osaCANopen::ESUCCESS;
 }
 
 // Pack
 // 
-devCAN::Frame devCANopen::Pack( CiA301::COBID cobid,
+osaCAN::Frame osaCANopen::Pack( CiA301::COBID cobid,
 				const CiA301::Object& object )
-{ return devCAN::Frame( cobid, object.data ); }
+{ return osaCAN::Frame( cobid, object.data ); }
 
 // Unpack
 // 
-void devCANopen::Unpack( const devCAN::Frame& frame,
+void osaCANopen::Unpack( const osaCAN::Frame& frame,
 			 CiA301::COBID& cobid,
 			 CiA301::Object& object ){
 
-   const devCAN::Frame::Data* src = frame.GetData();
+   const osaCAN::Frame::Data* src = frame.GetData();
    CiA301::Object::DataField dest( frame.GetLength() );
   
   for( size_t i=0; i<frame.GetLength(); i++ )

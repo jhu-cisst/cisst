@@ -16,8 +16,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#ifndef _cisstRTSocketCAN_h
-#define _cisstRTSocketCAN_h
+#ifndef _osaRTSocketCAN_h
+#define _osaRTSocketCAN_h
 
 #include <cisstCAN/cisstCAN.h>       // the CAN base class
 #include <rtdm/rtcan.h>            // Defines for the RT CAN socket
@@ -31,17 +31,19 @@ http://www.cisst.org/cisst/license.txt.
    exception except for the socket CAN module. SocketCAN implements a CAN stack
    and extend the BSD sockets just like you have a ethernet stack and sockets. 
    RT SocketCAN is the "real time" version for the Xenomai framework.
-   To use cisstRTSocketCAN, you must have a Xenomai patched Linux kernel with 
+   To use osaRTSocketCAN, you must have a Xenomai patched Linux kernel with 
    the RT CAN module enabled
 */
 
-class CISST_EXPORT cisstRTSocketCAN : public cisstCAN {
+class CISST_EXPORT osaRTSocketCAN : public cisstCAN {
 
-private:
-
+  CMN_DECLARE_SERVICES( CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR );
+  
+ private:
+  
   //! The name of the CAN device (rtcan0, rtcan1, ...)
   std::string devicename;
-
+  
   //! The file descriptor of the socket
   int canfd;
 
@@ -65,12 +67,12 @@ public:
      \param devicename The name of the device (rtcan0, rtcan1, ...)
      \param rate The CAN rate (RATE_150, RATE_300, RATE_1000)
   */
-  cisstRTSocketCAN( const std::string& devicename, 
+  osaRTSocketCAN( const std::string& devicename, 
 		    cisstCAN::Rate rate,
 		    cisstCAN::Loopback loopback = cisstCAN::LOOPBACK_OFF );
   
   //! Destructor
-  ~cisstRTSocketCAN();
+  ~osaRTSocketCAN();
 
   //! Open and configure the CAN socket
   /**
@@ -86,7 +88,7 @@ public:
      Call this method to send a CAN frame on the bus.
      \param frame[in] The CAN frame to send on the bus
      \param flags Block the device until the operation is completed. This
-                  parameter is irrelevant for cisstRTSocketCAN.
+                  parameter is irrelevant for osaRTSocketCAN.
   */
   cisstCAN::Errno Send( const cisstCANFrame& frame, 
 			cisstCAN::Flags flags = cisstCAN::MSG_NOFLAG );
@@ -96,7 +98,7 @@ public:
      Call this method to receive a CAN frame.
      \param frame[out] The CAN frame received from the bus
      \param flags Block the device until a CAN frame is received. This
-                  parameter is irrelevant for cisstRTSocketCAN.
+                  parameter is irrelevant for osaRTSocketCAN.
   */
   cisstCAN::Errno Recv( cisstCANFrame& frame, 
 			cisstCAN::Flags flags = cisstCAN::MSG_NOFLAG );
@@ -105,5 +107,7 @@ public:
   cisstCAN::Errno AddFilter( const cisstCAN::Filter& filter );
 
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION( osaRTSocketCAN )
 
 #endif

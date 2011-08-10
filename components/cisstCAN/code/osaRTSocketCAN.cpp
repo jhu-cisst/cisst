@@ -16,12 +16,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstCAN/cisstRTSocketCAN.h>
+#include <cisstCAN/osaRTSocketCAN.h>
 #include <cisstCommon/cmnLogger.h>
 
-cisstRTSocketCAN::cisstRTSocketCAN( const std::string& devicename, 
-				    cisstCAN::Rate rate,
-				    cisstCAN::Loopback loopback ) : 
+CMN_IMPLEMENT_SERVICES( osaRTSocketCAN );
+
+osaRTSocketCAN::osaRTSocketCAN( const std::string& devicename, 
+				cisstCAN::Rate rate,
+				cisstCAN::Loopback loopback ) : 
   cisstCAN( rate, loopback ),
   devicename( devicename ),
   filterscnt( 0 ) {
@@ -32,13 +34,15 @@ cisstRTSocketCAN::cisstRTSocketCAN( const std::string& devicename,
 
 }
 
-cisstRTSocketCAN::~cisstRTSocketCAN(){}
+osaRTSocketCAN::~osaRTSocketCAN(){}
 
-cisstCAN::Errno cisstRTSocketCAN::Open(){
-
-  struct ifreq ifr;
+cisstCAN::Errno osaRTSocketCAN::Open(){
 
   int errno;
+
+#if (CISST_OS == CISST_LINUX_XENOMAI )
+
+  struct ifreq ifr;
 
   // create a CAN socket
   canfd = rt_dev_socket( PF_CAN, SOCK_RAW, CAN_RAW );
@@ -103,31 +107,39 @@ cisstCAN::Errno cisstRTSocketCAN::Open(){
 
   nanosecs_rel_t timeout = 0;
   if (rt_dev_ioctl(canfd, RTCAN_RTIOC_SND_TIMEOUT, &timeout) ){
-    perror("cisstRTSocketCAN::open: Couldn't set the send timeout: ");
+    perror("osaRTSocketCAN::open: Couldn't set the send timeout: ");
     return EFAILURE;
   }
   
   if( rt_dev_ioctl(canfd, RTCAN_RTIOC_RCV_TIMEOUT, &timeout) ){
-    perror("cisstRTSocketCAN::open: Couldn't set the recv timeout: ");
+    perror("osaRTSocketCAN::open: Couldn't set the recv timeout: ");
     return EFAILURE;
   }
+
+#endif
 
   return ESUCCESS;
 }
 
-cisstCAN::Errno cisstRTSocketCAN::Close(){
+cisstCAN::Errno osaRTSocketCAN::Close(){
   // close the socket
+#if (CISST_OS == CISST_LINUX_XENOMAI )
+
   if( rt_dev_close( canfd ) ){
     CMN_LOG_RUN_ERROR << "Couldn't close the socket." << std::endl;
     return EFAILURE;
   }
+#endif
+
   return ESUCCESS;
 }
 
 // Send a can frame
 // Note that block is useless for Socket CAN
-cisstCAN::Errno cisstRTSocketCAN::Send( const cisstCANFrame& canframe, 
-					cisstCAN::Flags ){
+cisstCAN::Errno osaRTSocketCAN::Send( const cisstCANFrame& canframe, 
+				      cisstCAN::Flags ){
+  
+#if (CISST_OS == CISST_LINUX_XENOMAI )
 
   // copy the data in to a RTSocket CAN frame
   // can_frame_t is defined in xenomai/include/rtdm/rtcan.h
@@ -146,17 +158,18 @@ cisstCAN::Errno cisstRTSocketCAN::Send( const cisstCANFrame& canframe,
 			   0 );
 
   if( error < 0 ){
-    perror( "cisstRTSocketCAN::Send" );
     CMN_LOG_RUN_ERROR << "Failed to send CAN frame " << error << std::endl;
     return EFAILURE;
   }
+#endif
   
   return ESUCCESS;
 }
 
 // Receive a CAN frame
-cisstCAN::Errno cisstRTSocketCAN::Recv( cisstCANFrame& canframe, 
-				    cisstCAN::Flags ){
+cisstCAN::Errno osaRTSocketCAN::Recv( cisstCANFrame& canframe, cisstCAN::Flags ){
+
+#if (CISST_OS == CISST_LINUX_XENOMAI )
 
   struct can_frame frame;            // the RT Socket CAN frame
   memset(&frame, 0, sizeof(frame));  // clear the frame
@@ -167,7 +180,6 @@ cisstCAN::Errno cisstRTSocketCAN::Recv( cisstCANFrame& canframe,
 			    0 );
 
   if( error < 0 ){
-    perror( "cisstRTSocketCAN::Recv" );
     CMN_LOG_RUN_ERROR << "Failed to receive the frame. Error: " << error 
 		      << std::endl;
     return EFAILURE;
@@ -175,12 +187,17 @@ cisstCAN::Errno cisstRTSocketCAN::Recv( cisstCANFrame& canframe,
 
   // create a cisstCANFrame
   canframe = cisstCANFrame( frame.can_id, frame.data, frame.can_dlc );
+
+#endif
+
   return ESUCCESS;
 }
 
-cisstCAN::Errno cisstRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
+cisstCAN::Errno osaRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
 
-  if( filterscnt < cisstRTSocketCAN::MAX_NUM_FILTERS ){
+#if (CISST_OS == CISST_LINUX_XENOMAI )
+
+  if( filterscnt < osaRTSocketCAN::MAX_NUM_FILTERS ){
 
     filters[filterscnt].can_mask = filter.mask;
     filters[filterscnt].can_id   = filter.id;
@@ -203,6 +220,8 @@ cisstCAN::Errno cisstRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
     CMN_LOG_RUN_ERROR << "Reached maximum number of filters." << std::endl;
     return cisstCAN::EFAILURE;
   }
+
+#endif
 
 }
 

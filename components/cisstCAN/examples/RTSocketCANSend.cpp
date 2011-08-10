@@ -1,5 +1,5 @@
 
-#include <cisstCAN/cisstRTSocketCAN.h>
+#include <cisstCAN/osaRTSocketCAN.h>
 #include <native/task.h>
 #include <sys/mman.h>
 
@@ -18,10 +18,10 @@ int main( int argc, char** argv ){
     return -1;
   }
 
-  cisstRTSocketCAN can( argv[1], 
-			cisstCAN::RATE_1000,
-			cisstCAN::LOOPBACK_ON );
-
+  osaRTSocketCAN can( argv[1], 
+		      cisstCAN::RATE_1000,
+		      cisstCAN::LOOPBACK_ON );
+  
   if( can.Open() != cisstCAN::ESUCCESS ){
     std::cerr << argv[0] << ": Failed to open device " << argv[1] << std::endl;
     return -1;

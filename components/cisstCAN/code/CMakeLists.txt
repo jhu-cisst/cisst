@@ -16,12 +16,12 @@ if( RTSocketCANFound )
   set( 
     HEADER_FILES 
     ${HEADER_FILES} 
-    ../cisstRTSocketCAN.h )
+    ../osaRTSocketCAN.h )
 
   set( 
     SOURCE_FILES 
     ${SOURCE_FILES} 
-    cisstRTSocketCAN.cpp )
+    osaRTSocketCAN.cpp )
 
   add_definitions( "${RTDM_DEFINITIONS}" )
   include_directories( ${RTDM_INCLUDE_DIR} )
@@ -37,14 +37,14 @@ if( BitCtrlFound )
     ${HEADER_FILES} 
     ../CiA301.h
     ../CiA402.h
-    ../cisstCANopen.h   
-    ../cisstBitCtrl.h )
+    ../osaCANopen.h   
+    ../osaBitCtrl.h )
 
   set( 
     SOURCE_FILES 
     ${SOURCE_FILES} 
-    ../cisstCANopen.cpp 
-    ../cisstBitCtrl.cpp )
+    ../osaCANopen.cpp 
+    ../osaBitCtrl.cpp )
 
   include_directories( ${BITCTRL_INCLUDE_DIR} )
 
