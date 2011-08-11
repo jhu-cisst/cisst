@@ -22,6 +22,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
+//#define SYSTEM_LOG_TEST_MCS
+#ifdef SYSTEM_LOG_TEST_MCS
+#include <iostream>
+#include <fstream>
+std::ofstream logfileMCS;
+#endif
+
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentServer, mtsManagerComponentBase);
 
 mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
@@ -29,6 +36,10 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
+#ifdef SYSTEM_LOG_TEST_MCS
+    logfileMCS.open("MCS.txt");
+#endif
+
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
     static int instanceCount = 0;
@@ -37,10 +48,21 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     }
     gcm->SetMCS(this);
     InterfaceGCMFunctionMap.SetOwner(*this);
+
+    // For system-wide thread-safe logging
+    mtsInterfaceRequired * required = AddInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired, MTS_OPTIONAL);
+    if (required) {
+        required->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, PrintLog);
+    }
 }
 
 mtsManagerComponentServer::~mtsManagerComponentServer()
 {
+#ifdef SYSTEM_LOG_TEST_MCS
+    logfileMCS.close();
+#endif
+
     InterfaceGCMFunctionMapType::iterator it = InterfaceGCMFunctionMap.begin();
     const InterfaceGCMFunctionMapType::iterator itEnd = InterfaceGCMFunctionMap.end();
     for (; it != itEnd; ++it) {
@@ -115,6 +137,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_LoadLibrary,
                               this, mtsManagerComponentBase::CommandNames::LoadLibrary);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_PrintLog,
+                              this, mtsManagerComponentBase::CommandNames::PrintLog, MTS_COMMAND_NOT_QUEUED);
 
     provided->AddEventWrite(this->InterfaceGCMEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
@@ -127,6 +151,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                             mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
     provided->AddEventWrite(this->InterfaceGCMEvents_ChangeState,
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
+    provided->AddEventVoid(this->InterfaceGCMEvents_MCSReady,
+                           mtsManagerComponentBase::EventNames::MCSReady);
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceGCM: successfully added \"GCM\" interfaces" << std::endl;
 
@@ -573,6 +599,35 @@ void mtsManagerComponentServer::InterfaceGCMCommands_LoadLibrary(const mtsDescri
     }
 
     functionSet->LoadLibrary(lib.LibraryName, result);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessage & log)
+{
+    static osaTimeServer timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
+
+    std::stringstream ss;
+
+    // Get absolute timestamp
+    double timestamp = log.Timestamp();
+    // Convert absolute to relative timestamp
+    struct osaAbsoluteTime s;
+    s.FromSeconds(timestamp);
+    timeServer.AbsoluteToRelative(s);
+
+    std::string now;
+    osaGetDateTimeString(now, ':');
+
+    std::string msg(log.Message, log.Length);
+    ss << "|" << now << " " << log.ProcessName << "| " << msg;
+
+    if (!PrintLog.IsValid()) {
+#ifdef SYSTEM_LOG_TEST_MCS
+        logfileMCS << ss.str();
+#endif
+        return;
+    }
+    
+    PrintLog(ss.str());
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,

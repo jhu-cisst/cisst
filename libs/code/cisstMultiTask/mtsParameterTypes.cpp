@@ -398,3 +398,56 @@ void mtsDescriptionLoadLibrary::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ProcessName);
     cmnDeSerializeRaw(inputStream, this->LibraryName);
 }
+
+//-----------------------------------------------------------------------------
+//  System-wide Thread-safe Logging
+//
+mtsLogMessage::mtsLogMessage()
+{
+    this->Length = 0;
+    memset(this->Message, 0, MAX_LOG_SIZE);
+    ProcessName = ""; // MJ: This should be set my LCM when log gets dispatched.
+}
+
+mtsLogMessage::mtsLogMessage(const mtsLogMessage & other): mtsGenericObject(other)
+{
+    this->Length = other.Length;
+    memcpy(this->Message, other.Message, this->Length);
+    this->ProcessName = other.ProcessName;
+}
+
+mtsLogMessage::mtsLogMessage(const char * log, size_t len)
+{
+    memset(this->Message, 0, MAX_LOG_SIZE);
+
+    this->Length = len;
+    memcpy(this->Message, log, this->Length);
+    ProcessName = ""; // MJ: This should be set my LCM when log gets dispatched.
+}
+
+void mtsLogMessage::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", Message: \"" << std::string(this->Message, this->Length)
+                 << "\", Length: " << Length
+                 << ", Process: \"" << ProcessName << "\"";
+}
+
+void mtsLogMessage::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->Length);
+    cmnSerializeRaw(outputStream, this->Message);
+    cmnSerializeRaw(outputStream, this->ProcessName);
+}
+
+void mtsLogMessage::DeSerializeRaw(std::istream & inputStream)
+{
+    memset(this->Message, 0, MAX_LOG_SIZE);
+
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->Length);
+    cmnDeSerializeRaw(inputStream, this->Message);
+    cmnDeSerializeRaw(inputStream, this->ProcessName);
+}
+

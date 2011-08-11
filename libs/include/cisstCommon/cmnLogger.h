@@ -78,7 +78,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
     (void*)0:\
-    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - Class " << objectPointer->Services()->GetName() << ": ")
+    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
 
 #define CMN_LOG_CLASS(lod) CMN_LOG_CLASS_INSTANCE(this, lod)

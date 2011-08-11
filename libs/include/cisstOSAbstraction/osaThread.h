@@ -109,6 +109,9 @@ public:
     }
 
     /*! Method to compare two thread Ids, used to sort in std::map. */
+    bool operator () (const osaThreadId & lhs, const osaThreadId & rhs) const;
+
+    /*! Method to compare two thread Ids, used to sort in std::map. */
     // bool Lesser(const osaThreadId & other) const;
 
     /*! Operator to compare two thread Ids, used to sort in std::map. */

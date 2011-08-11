@@ -38,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #endif
 
-#if (CISST_OS == CISST_LINUX) ||(CISST_OS == CISST_LINUX_RTAI) ||(CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <sys/socket.h>
@@ -126,7 +126,7 @@ osaSocket::~osaSocket(void)
 
 std::string osaSocket::GetLocalhostIP(void)
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
     
     struct ifaddrs *ifaddr;
     
@@ -171,7 +171,7 @@ std::string osaSocket::GetLocalhostIP(void)
     char hostname[256] = { 0 };
     gethostname(hostname, 255);
     CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
-
+    strcpy(  hostname, "robodoc" );
     struct hostent * he = gethostbyname(hostname);
     if (!he) {
         CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
@@ -192,7 +192,7 @@ std::string osaSocket::GetLocalhostIP(void)
 
 int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
 {    
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
     
     struct ifaddrs *ifaddr, *ifa;
     char host[255];
@@ -247,7 +247,7 @@ int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
     }
 
     CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
-
+   std::cout <<  "GetLocalhostIP: hostname is " << hostname << std::endl;
     struct hostent * he = gethostbyname(hostname);
     if (!he) {
         CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;

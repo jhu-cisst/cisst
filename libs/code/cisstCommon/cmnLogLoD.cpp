@@ -50,6 +50,7 @@ cmnLogLevel cmnIndexToLogLevel(const size_t & index)
 const std::string & cmnLogIndexToString(const size_t & index)
 {
     static const std::string strings[] = {
+#if 0 // MJ: To standardize log format and reduce log size
         "No log",
         "Error (init)",
         "Warning (init)",
@@ -59,6 +60,16 @@ const std::string & cmnLogIndexToString(const size_t & index)
         "Warning (run)",
         "Message (run)",
         "Debug (run)"
+#endif
+        "  ",
+        "E-", // Error (init)
+        "!-", // Warning (init)
+        "M-", // Message (init)
+        "D-", // Debug (init)
+        "-E", // Error (run)
+        "-!", // Warning (run)
+        "-M", // Message (run)
+        "-D"  // Debug (run)
     };
     size_t validIndex = index;
     if (validIndex > 8) {

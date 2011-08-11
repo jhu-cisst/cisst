@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -36,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
+#include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 
 #if CISST_MTS_HAS_ICE
 #include "mtsComponentProxy.h"
@@ -43,9 +45,12 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsManagerProxyServer.h"
 #endif
 
-// Static variable definition
-mtsManagerLocal * mtsManagerLocal::Instance;
-mtsManagerLocal * mtsManagerLocal::InstanceReconfiguration;
+// Time server used by all tasks
+osaTimeServer TimeServer;
+bool TimeServerOriginSet = false;
+
+mtsManagerLocal * mtsManagerLocal::Instance = 0;
+mtsManagerLocal * mtsManagerLocal::InstanceReconfiguration = 0;
 osaMutex mtsManagerLocal::ConfigurationChange;
 
 bool mtsManagerLocal::UnitTestEnabled = false;
@@ -54,6 +59,19 @@ bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
 std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
+// System-wide logging: Define logger-related variables here so that
+// the logger doesn't have to call GetInstance() everytime it receives
+// log messages. {{
+mtsLODMultiplexerStreambuf * SystemLogMultiplexer = 0;
+bool           LogForwardEnabled = false;
+osaMutex       LogMutex;
+
+typedef std::list<mtsLogMessage> LogQueueType;
+LogQueueType   LogQueue;
+
+std::string    ThisProcessName;
+// }}
+
 mtsManagerLocal::mtsManagerLocal(void)
 {
     Initialize();
@@ -61,6 +79,7 @@ mtsManagerLocal::mtsManagerLocal(void)
     // In standalone mode, process name is set as ProcessNameOfLCMDefault by
     // default since there is only one instance of local task manager.
     ProcessName = ProcessNameOfLCMDefault;
+    ThisProcessName = ProcessName;
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: STANDALONE mode" << std::endl;
 
@@ -92,6 +111,7 @@ mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager) : Co
     Initialize();
 
     ProcessName = ProcessNameOfLCMWithGCM;
+    ThisProcessName = ProcessName;
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: NETWORK mode with GCM" << std::endl;
 
@@ -116,6 +136,7 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
                                    ProcessIP(thisProcessIP)
 {
     Initialize();
+    ThisProcessName = ProcessName;
 
     // Create network proxies
     if (!ConnectToGlobalComponentManager()) {
@@ -203,6 +224,7 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 
 mtsManagerLocal::~mtsManagerLocal()
 {
+    /*
     // If ManagerGlobal is not NULL, it means Cleanup() has not been called
     // before. Thus, it needs to be called here for safe and clean termination.
     if (ManagerGlobal) {
@@ -210,6 +232,8 @@ mtsManagerLocal::~mtsManagerLocal()
             Cleanup();
         //}
     }
+    */
+    Cleanup();
 }
 
 void mtsManagerLocal::Initialize(void)
@@ -221,18 +245,170 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Client = 0;
     ManagerComponent.Server = 0;
 
-    TimeServer.SetTimeOrigin();
-
     SetGCMConnected(false);
+
+    SetupSystemLogger();
 }
 
 void mtsManagerLocal::Cleanup(void)
 {
+    LogThreadFinishWaiting = true;
+    LogTheadFinished.Wait();
+
     if (ManagerGlobal) {
         delete ManagerGlobal;
         ManagerGlobal = 0;
     }
+
+    if (ManagerComponent.Client) {
+        delete ManagerComponent.Client;
+        ManagerComponent.Client = 0;
+    }
+
+    if (ManagerComponent.Server) {
+        delete ManagerComponent.Server;
+        ManagerComponent.Server = 0;
+    }
+
+    if (SystemLogMultiplexer) {
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
+    }
+
     __os_exit();
+}
+
+const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
+{
+    return TimeServer;
+}
+
+void mtsManagerLocal::SetupSystemLogger(void)
+{
+    LogThreadFinishWaiting = false;
+    LogThead.Create<mtsManagerLocal, void *>(this, &mtsManagerLocal::LogDispatchThread);
+
+    SystemLogMultiplexer = new mtsLODMultiplexerStreambuf();
+    if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
+        CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
+    }
+}
+
+bool mtsManagerLocal::IsLogForwardingEnabled(void) const {
+    return LogForwardEnabled;
+}
+
+void mtsManagerLocal::SetLogForwarding(bool activate) 
+{
+    // Initialize time server once
+    if (!TimeServerOriginSet) {
+        TimeServer.SetTimeOrigin();
+        TimeServerOriginSet = true;
+    }
+
+    LogForwardEnabled = activate;
+}
+
+bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 
+{
+    if (!Instance) return false;
+
+    if (!Instance->ManagerComponent.Client ||
+        !Instance->ManagerComponent.Client->CanForwardLog())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void mtsManagerLocal::LogDispatcher(const char * str, int len)
+{
+    if (!LogForwardEnabled) return;
+
+    bool deadlockAvoidance = false;
+    if (Instance) {
+        if (LogMutex.IsLocker() && Instance->MCCReadyForLogForwarding()) {
+            deadlockAvoidance = true;
+        }
+    }
+
+    if (!deadlockAvoidance) {
+        LogMutex.Lock();
+    }
+
+    if (len == 1 && str[0] == '\n') {
+        if (!deadlockAvoidance) {
+            LogMutex.Unlock();
+        }
+        return;
+    }
+
+    // MJ TODO: Deal with cases that len > 1000
+    mtsLogMessage log(str, len);
+    // Timestamping (as early as possible)
+    if (TimeServerOriginSet) {
+        log.SetTimestamp(TimeServer.GetAbsoluteTimeInSeconds());
+        log.SetValid(true);
+    } else {
+        log.SetTimestamp(0);
+        log.SetValid(false);
+    }
+    log.ProcessName = ThisProcessName;
+
+    if (!deadlockAvoidance) {
+        // Queue log message and return immediately
+        LogQueue.push_back(log);
+    } else {
+        // If current thread locked this mutex earlier, forward the log immediately
+        // to avoid deadlock.  Note that all validity checks are already done
+        // in the log dispatch thread in this case.
+        if (Instance->MCCReadyForLogForwarding()) {
+            Instance->ManagerComponent.Client->ForwardLog(log);
+        }
+    }
+    
+    if (!deadlockAvoidance) {
+        LogMutex.Unlock();
+    }
+}
+
+void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
+{
+    int count = 0;
+
+    while (!LogThreadFinishWaiting) {
+        // MJ: Note that this sleep introduces a bit of delay in forwarding 
+        // log messages.
+        osaSleep(1 * cmn_ms);
+
+        if (LogQueue.size() == 0) {
+            continue;
+        }
+
+        // Don't forward queued logs until everything is ready.
+        if (!MCCReadyForLogForwarding()) continue;
+
+        LogMutex.Lock();
+        count = 0;
+        for (LogQueueType::iterator it = LogQueue.begin(); it != LogQueue.end(); ) {
+            if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
+                ++it;
+                LogQueue.pop_front(); // FIFO
+            }
+
+            // release the lock not to block other threads too long
+            if (++count == 30) { // MJ TEMP: 30 is arbitrary for now
+                break;
+            }
+        }
+        LogMutex.Unlock();
+    }
+
+    LogTheadFinished.Raise();
+
+    return 0;
 }
 
 mtsManagerLocal * mtsManagerLocal::GetSafeInstance(void)
@@ -268,14 +444,14 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         // If no argument is specified, standalone configuration is set by default.
         if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
             Instance = new mtsManagerLocal;
-            CMN_LOG_INIT_WARNING << "Class mtsManagerLocal: Reconfiguration: Inter-process communication support is disabled" << std::endl;
+            CMN_LOG_INIT_WARNING << "WARNING: Inter-process communication support is disabled" << std::endl;
         } else {
             Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
         }
 
         // Create manager components
         if (!Instance->CreateManagerComponents()) {
-            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+            CMN_LOG_INIT_ERROR << "GetInstance: Failed to add internal manager components" << std::endl;
         }
 
         return Instance;
@@ -1602,6 +1778,8 @@ bool mtsManagerLocal::CreateManagerComponents(void)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Successfully created manager components" << std::endl;
 
+    ManagerComponent.Client->MCSReady = true;
+    
     return true;
 }
 
@@ -2510,9 +2688,7 @@ bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
 
     return true;
 }
-#endif
 
-#if CISST_MTS_HAS_ICE
 void mtsManagerLocal::SetIPAddress(void)
 {
     // Fetch all ip addresses available on this machine.

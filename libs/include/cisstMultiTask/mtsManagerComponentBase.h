@@ -103,7 +103,7 @@ class CISST_EXPORT mtsManagerComponentBase : public mtsTaskFromSignal
 
 public:
     /*! Component name definitions */
-    class ComponentNames {
+    class CISST_EXPORT ComponentNames {
     public:
         /*! Name of manager component server.  Should be globally unique */
         const static std::string ManagerComponentServer;
@@ -113,6 +113,7 @@ public:
     /*! Interface name definitions */
     class CISST_EXPORT InterfaceNames {
     public:
+        // Internal interfaces for dynamic component services
         const static std::string InterfaceInternalProvided;
         const static std::string InterfaceInternalRequired;
         const static std::string InterfaceComponentProvided;
@@ -121,6 +122,9 @@ public:
         const static std::string InterfaceLCMRequired;
         const static std::string InterfaceGCMProvided;
         const static std::string InterfaceGCMRequired;
+        // Interface for system-wide thread-safe logging
+        const static std::string InterfaceSystemLoggerProvided;
+        const static std::string InterfaceSystemLoggerRequired;
     };
 
     /*! Command name definitions */
@@ -136,6 +140,7 @@ public:
         const static std::string ComponentResume;
         const static std::string ComponentGetState;
         const static std::string LoadLibrary;  // dynamic loading
+        const static std::string PrintLog;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
@@ -159,6 +164,7 @@ public:
         const static std::string AddConnection;
         const static std::string RemoveConnection;
         const static std::string ChangeState;
+        const static std::string MCSReady;
     };
 
     mtsManagerComponentBase(const std::string & componentName);
