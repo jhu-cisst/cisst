@@ -21,5 +21,5 @@ target_link_libraries (cisstStealthlinkExample
                        )
 
 cisst_target_link_libraries (cisstStealthlinkExample
-                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                             cisstCommon cisstCommonXML cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes
                              )

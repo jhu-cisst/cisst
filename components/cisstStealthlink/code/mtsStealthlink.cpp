@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStealthlink/mtsStealthlink.h>
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstCommon/cmnXMLPath.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #ifdef CISST_HAS_STEALTHLINK
@@ -36,17 +36,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <AsCL/AsCL_Client.h>
 #include "mtsStealthlink_AsCL_Stuff.h"
 
-CMN_IMPLEMENT_SERVICES(mtsStealthlink);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsStealthlink, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
 
-// For classes defined in stealthTypes.h
+// For classes defined in mtsStealthlinkTypes.h
 CMN_IMPLEMENT_SERVICES(mtsStealthTool);
 CMN_IMPLEMENT_SERVICES(mtsStealthFrame);
 CMN_IMPLEMENT_SERVICES(mtsStealthRegistration);
 CMN_IMPLEMENT_SERVICES(mtsStealthProbeCal);
 
-mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & periodInSeconds):
-	mtsTaskPeriodic(taskName, periodInSeconds, false, 1000),
-    StealthlinkPresent(false)
+void mtsStealthlink::Init(void)
 {
     // create Stealthlink objects
     this->Client = new AsCL_Client;
@@ -63,15 +61,36 @@ mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & peri
     // Stealth Tool Calibration
     StateTable.AddData(ProbeCal, "ProbeCalibration");
 
-    mtsInterfaceProvided * provided = AddInterfaceProvided("MainInterface");
+    mtsInterfaceProvided * provided = AddInterfaceProvided("Controller");
     if (provided) {
-        provided->AddCommandReadState(StateTable, ToolData, "GetToolData");
-        provided->AddCommandReadState(StateTable, FrameData, "GetFrameData");
-        provided->AddCommandReadState(StateTable, RegistrationData, "GetRegistrationData");
+        provided->AddCommandReadState(StateTable, ToolData, "GetTool");
+        provided->AddCommandReadState(StateTable, FrameData, "GetFrame");
+        provided->AddCommandReadState(StateTable, RegistrationData, "GetRegistration");
         provided->AddCommandReadState(StateTable, ProbeCal, "GetProbeCalibration");
         provided->AddCommandVoid(&mtsStealthlink::RequestSurgicalPlan, this, "RequestSurgicalPlan");
         provided->AddCommandRead(&mtsStealthlink::GetSurgicalPlan, this, "GetSurgicalPlan", SurgicalPlan);
-	}
+    }
+}
+
+mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & periodInSeconds) :
+    mtsTaskPeriodic(taskName, periodInSeconds, false, 1000),
+    StealthlinkPresent(false),
+    CurrentTool(0)
+{
+    Init();
+}
+
+mtsStealthlink::mtsStealthlink(const mtsTaskPeriodicConstructorArg &arg) :
+    mtsTaskPeriodic(arg),
+    StealthlinkPresent(false),
+    CurrentTool(0)
+{
+    Init();
+}
+
+mtsStealthlink::~mtsStealthlink()
+{
+    Cleanup();
 }
 
 // Windows defines a SetPort macro
@@ -81,84 +100,177 @@ mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & peri
 
 void mtsStealthlink::Configure(const std::string &filename)
 {
-	// Configure Stealthlink interface
-	AsCL_SetVerboseLevel(0);
-	this->Client->SetPort(GRI_PORT_NUMBER);
-	// Set StealthLink server IP address
-	this->Client->SetHostName("192.168.0.1");
-	CMN_LOG_CLASS_INIT_VERBOSE << "Initializing Stealthlink" << std::endl;
-	StealthlinkPresent = this->Client->Initialize(*(this->Utils)) ? true : false;
-	if (!StealthlinkPresent) {
-		CMN_LOG_CLASS_RUN_WARNING << "Configure: could not Initialize StealthLink" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: using " << filename << std::endl;
+
+    cmnXMLPath config;
+    config.SetInputSource(filename);
+
+    // initialize serial port
+    std::string ipAddress;
+    if (!config.GetXMLValue("/tracker/controller", "@ip", ipAddress, "192.168.0.1"))
+        CMN_LOG_CLASS_INIT_WARNING << "IP address not found, using default: " << ipAddress << std::endl;
+
+    // Configure Stealthlink interface
+    AsCL_SetVerboseLevel(0);
+    this->Client->SetPort(GRI_PORT_NUMBER);
+
+    // Set StealthLink server IP address
+    CMN_LOG_CLASS_INIT_VERBOSE << "Setting Stealthink IP address = " << ipAddress << std::endl;
+    this->Client->SetHostName(const_cast<char *>(ipAddress.c_str()));
+
+    // add pre-defined tools (up to 100)
+    for (int i = 0; i < 100; i++) {
+        std::stringstream context;
+        std::string stealthName, name;
+        context << "/tracker/tools/tool[" << i+1 << "]";
+        config.GetXMLValue(context.str().c_str(), "@stealthName", stealthName, "");
+        config.GetXMLValue(context.str().c_str(), "@name", name, "");
+        if (stealthName.empty() && name.empty())
+            break;
+        if (stealthName.empty())
+            AddTool(name, name);
+        else if (name.empty())
+            AddTool(stealthName, stealthName);
+        else
+            AddTool(stealthName, name);
     }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "Initializing Stealthlink" << std::endl;
+    StealthlinkPresent = this->Client->Initialize(*(this->Utils)) ? true : false;
+    if (!StealthlinkPresent)
+        CMN_LOG_CLASS_RUN_WARNING << "Configure: could not Initialize StealthLink" << std::endl;
+
+}
+
+void mtsStealthlink::ResetAllTools(void)
+{
+    std::vector<Tool*>::iterator it;
+    for (it = Tools.begin(); it != Tools.end(); it++) {
+        (*it)->MarkerPosition.SetValid(false);
+        (*it)->TooltipPosition.SetValid(false);
+    }
+}
+
+mtsStealthlink::Tool *mtsStealthlink::FindTool(const std::string &stealthName) const
+{
+    std::vector<Tool*>::const_iterator it;
+    for (it = Tools.begin(); it != Tools.end(); it++)
+        if ((*it)->GetStealthName() == stealthName) return *it;
+    return 0;
+}
+
+mtsStealthlink::Tool *mtsStealthlink::AddTool(const std::string &stealthName, const std::string &interfaceName)
+{
+    // First, check if tool has already been added
+    Tool *tool = FindTool(stealthName);
+    if (tool) {
+        if (tool->GetInterfaceName() == interfaceName) {
+            CMN_LOG_CLASS_RUN_WARNING << "AddTool: tool " << stealthName << " already exists with interface " 
+                                      << interfaceName << std::endl;
+            return tool;
+        }
+        // We could support having the same tool in multiple interfaces, but we would need to maintain
+        // an array of CurrentTools, or loop through the entire Tools list in the Run method (to assign the
+        // MarkerPosition and TooltipPosition).
+        CMN_LOG_CLASS_RUN_ERROR << "AddTool: tool " << stealthName << " already exists in interface "
+                                << tool->GetInterfaceName() << ", could not create new interface " 
+                                <<interfaceName << std::endl;
+        return 0;
+    }
+    // Next, check if interface has already been added
+    mtsInterfaceProvided *provided = GetInterfaceProvided(interfaceName);
+    if (provided) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddTool: interface " << interfaceName << " already exists." << std::endl;
+        return 0;
+    }
+    tool = new Tool(stealthName, interfaceName);
+    Tools.push_back(tool);
+    CMN_LOG_CLASS_RUN_VERBOSE << "AddTool: adding " << stealthName << " to interface " << interfaceName << std::endl;
+    provided = AddInterfaceProvided(interfaceName);
+    if (provided) {
+        StateTable.AddData(tool->TooltipPosition, interfaceName + "Position");
+        provided->AddCommandReadState(StateTable, tool->TooltipPosition, "GetPositionCartesian");
+        StateTable.AddData(tool->MarkerPosition, interfaceName + "Marker");
+        provided->AddCommandReadState(StateTable, tool->MarkerPosition, "GetMarkerCartesian");
+    }
+    return tool;
 }
 
 
 void mtsStealthlink::RequestSurgicalPlan(void)
 {
-	if (StealthlinkPresent) {
-		surg_plan the_surg_plan;
-		this->Client->GetDataForCode(GET_SURGICAL_PLAN, (void*)&the_surg_plan);
-		SurgicalPlan[0] = the_surg_plan.entry[0];
-		SurgicalPlan[1] = the_surg_plan.entry[1];
-		SurgicalPlan[2] = the_surg_plan.entry[2];
-		SurgicalPlan[3] = the_surg_plan.target[0];
-		SurgicalPlan[4] = the_surg_plan.target[1];
-		SurgicalPlan[5] = the_surg_plan.target[2];
-	}
+    if (StealthlinkPresent) {
+        surg_plan the_surg_plan;
+        this->Client->GetDataForCode(GET_SURGICAL_PLAN, (void*)&the_surg_plan);
+        SurgicalPlan[0] = the_surg_plan.entry[0];
+        SurgicalPlan[1] = the_surg_plan.entry[1];
+        SurgicalPlan[2] = the_surg_plan.entry[2];
+        SurgicalPlan[3] = the_surg_plan.target[0];
+        SurgicalPlan[4] = the_surg_plan.target[1];
+        SurgicalPlan[5] = the_surg_plan.target[2];
+    }
 }
 
 
 void mtsStealthlink::GetSurgicalPlan(mtsDoubleVec & plan) const
 {
-	plan = SurgicalPlan;
+    plan = SurgicalPlan;
 }
 
 
 void mtsStealthlink::Run(void)
 {
-	if (StealthlinkPresent) {
-		// Get the data from Stealthlink.
-		all_info info;
+    ResetAllTools();  // Set all tools invalid
+    if (StealthlinkPresent) {
+        // Get the data from Stealthlink.
+        all_info info;
+        this->Client->GetDataForCode(GET_ALL, (void*)&info);
 
-		/*
-		// T: timing analisys
-		// Get timing information
-		mtsTaskManager * manager = mtsTaskManager::GetInstance();
-		double measTime1 = manager->GetTimeServer().GetRelativeTime();
-		*/
-		this->Client->GetDataForCode(GET_ALL, (void*)&info);
+        ToolData = info.Tool;
+        FrameData = info.Frame;
+        RegistrationData = info.Reg;
 
-		/*
-		//T: timing analisys cont.
-		double measTime2 = manager->GetTimeServer().GetRelativeTime(); //T: timing
-		double avgPeriod = GetAveragePeriod();
-
-		if (countt%50 == 0)
-		CMN_LOG_RUN_VERBOSE << "StartPoll" << measTime1 << " STOP Poll" << measTime2 << " Average cycle" <<  avgPeriod << std::endl;
-		countt++;
-		*/
-
-		ToolData = info.Tool;
-		FrameData = info.Frame;
-		RegistrationData = info.Reg;
-
-		if (ToolData.Valid() && FrameData.Valid()) {
-			//get tool tip calibration if it is invalid or has changed
-			if ((strcmp(ToolData.GetName(), ProbeCal.GetName()) != 0) || !ProbeCal.Valid()) {
-				probe_calibration probe_cal;
-				this->Client->GetDataForCode(GET_PROBE_CALIBRATION, (void*)&probe_cal);
-				ProbeCal = probe_cal;
-			}
-		}
-	}
-	ProcessQueuedCommands();
+        if (ToolData.Valid()) {
+            if (!CurrentTool || (CurrentTool->GetStealthName() != ToolData.GetName())) {
+                CurrentTool = FindTool(ToolData.GetName());
+                if (!CurrentTool) {
+                    CMN_LOG_CLASS_INIT_VERBOSE << "Adding new tool: " << ToolData.GetName() << std::endl;
+                    CurrentTool = AddTool(ToolData.GetName(), ToolData.GetName());
+                }
+            }
+            if (CurrentTool) {
+                CurrentTool->MarkerPosition.Position() = ToolData.GetFrame();
+                CurrentTool->MarkerPosition.SetValid(true);
+            }
+            //get tool tip calibration if it is invalid or has changed
+            if ((strcmp(ToolData.GetName(), ProbeCal.GetName()) != 0) || !ProbeCal.Valid()) {
+                probe_calibration probe_cal;
+                this->Client->GetDataForCode(GET_PROBE_CALIBRATION, (void*)&probe_cal);
+                ProbeCal = probe_cal;
+            }
+            // If we have valid data, then store the result
+            if (CurrentTool && ProbeCal.Valid() &&
+                (strcmp(ToolData.GetName(), ProbeCal.GetName()) == 0)) {
+                CurrentTool->TooltipPosition.Position() = vctFrm3(ToolData.GetFrame().Rotation(),
+                                                                  ToolData.GetFrame()*ProbeCal.GetTip());
+                CurrentTool->TooltipPosition.SetValid(true);
+            }
+                    
+        }
+    }
+    ProcessQueuedCommands();
     this->Utils->CheckCallbacks();
 }
 
 
 void mtsStealthlink::Cleanup(void)
 {
+    std::vector<Tool*>::iterator it;
+    for (it = Tools.begin(); it != Tools.end(); it++) {
+        delete (*it);
+        *it = 0;
+    }
+    Tools.clear();
     if (this->Client) {
         delete this->Client;
         this->Client = 0;
@@ -167,5 +279,5 @@ void mtsStealthlink::Cleanup(void)
         delete this->Utils;
         this->Utils = 0;
     }
-	CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS << "...Finished." << std::endl;
+    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS << "...Finished." << std::endl;
 }

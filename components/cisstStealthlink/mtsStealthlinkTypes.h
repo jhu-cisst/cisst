@@ -123,6 +123,7 @@ public:
     ~mtsStealthFrame() {};
     virtual const vctFrm3& GetFrame() { return XForm; }
     virtual double GetGeometryError() { return GeometryError; }
+    virtual const char *GetName() const { return Name; }
     void Assign(const mtsStealthFrame &that) {
         this->XForm = that.XForm;
         this->GeometryError = that.GeometryError;

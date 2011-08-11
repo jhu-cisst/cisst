@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<tracker>
+
+  <controller ip="192.168.0.1" />
+
+  <tools>
+
+    <tool name="Pointer" stealthName="Passive Planar, Blunt" />
+    <tool name="Frame"   stealthName="Passive Spine Frame" />
+    <tool name="Robot"   stealthName="JHURobot" />
+
+  </tools>
+
+</tracker>

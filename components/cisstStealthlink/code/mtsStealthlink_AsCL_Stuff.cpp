@@ -96,8 +96,10 @@ int mtsStealthlink_AsCL_Timeout::AddTimeout(int tmo_val, void * func, void * obj
 {
     if (Callback)
         CMN_LOG_INIT_WARNING << "Stealthlink AddTimeout: callback was already specified" << std::endl;
+#if 0
     else
         CMN_LOG_INIT_VERBOSE << "Stealthlink AddTimeout called for timeout = " << tmo_val << std::endl;
+#endif
 
     Timeout = tmo_val / 1000.0;
     Callback = (Timeout_Callback) func;
@@ -124,7 +126,9 @@ void mtsStealthlink_AsCL_Timeout::CheckTimeout(void)
     if (Callback && (StealthlinkTimer->GetElapsedTime() >= Timeout)) {
         StealthlinkTimer->Reset();
         int rc = Callback(DataObj);
+#if 0
         CMN_LOG_RUN_VERBOSE << "Stealthlink Timeout callback returned " << rc << std::endl;
+#endif
         if (rc)  // reschedule
             StealthlinkTimer->Start();
         else
