@@ -89,7 +89,8 @@ bool osaThreadId::Equal(const osaThreadId & other) const
 }
 
 
-//bool osaThreadId::osaThreadIdComp::operator()(const osaThreadId & lhs, const osaThreadId & rhs) const
+// MJ: Don't use this comparator on Mac and Xenomai
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
 bool osaThreadId::operator()(const osaThreadId & lhs, const osaThreadId & rhs) const
 {
     osaThreadId * _lhs = const_cast<osaThreadId *>(&lhs);
@@ -98,31 +99,19 @@ bool osaThreadId::operator()(const osaThreadId & lhs, const osaThreadId & rhs) c
     osaThreadIdInternals * _lhsInternal = reinterpret_cast<osaThreadIdInternals*>(_lhs->Internals);
     osaThreadIdInternals * _rhsInternal = reinterpret_cast<osaThreadIdInternals*>(_rhs->Internals);
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     // MJ TODO: FIX THIS LATER
     // We cannot directly compare pthread_t that should be handled as an opaque type.
     // As a temporary solution, however, use unsigned int assuming pthread_t can be 
     // converted to unsigned int.  Other software packages (such as OpenSSL and ZeroC Ice)
     // are doing this:
     // http://www.zeroc.com/forums/bug-reports/44-freebsd-compilation-problem-pthread_t-not-unsigned-long.html
-    return ((unsigned int) _lhsInternal->ThreadId < (unsigned int) _rhsInternal->ThreadId);
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-    // MJ TODO: FIX THIS LATER
-    return false;
-    /*
-    RT_TASK* t1 = reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->Task;
-    RT_TASK* t2 = reinterpret_cast<osaThreadIdInternals*>(nonConstOther->Internals)->Task;
-
-    if( t1 != NULL && t2 != NULL ){
-        int same = rt_task_same( t1, t2 );
-        return (same != 0) ? true : false;
-    }
-    else return false;
-    */
-#elif (CISST_OS == CISST_WINDOWS)
+#if (CISST_OS == CISST_WINDOWS)
     return (_lhsInternal->ThreadId < _rhsInternal->ThreadId);
+#else
+    return ((unsigned int) _lhsInternal->ThreadId < (unsigned int) _rhsInternal->ThreadId);
 #endif
 }
+#endif
 
 
 void osaThreadId::ToStream(std::ostream & outputStream) const

@@ -28,7 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaMutex.h>
 
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
 #include <map>
+#elif (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_XENOMAI)
+#include <vector>
+#endif
 
 class mtsLODMultiplexerStreambuf : public cmnLODMultiplexerStreambuf<char>
 {
@@ -39,10 +43,20 @@ public:
     typedef BaseType::int_type IntType;
 
 protected:
+    // MJ: Use std::vector instead of std::map on Mac and Xenomai
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
     // Map (osaThread, PerThreadBufferType)
     typedef std::map<osaThreadId, PerThreadChannelType*, osaThreadId> PerThreadChannelMapType;
     typedef std::pair<PerThreadChannelMapType::iterator, bool> PerThreadChannelMapPairType;
     PerThreadChannelMapType PerThreadChannelMap;
+#elif (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_XENOMAI)
+    typedef struct {
+        osaThreadId ThreadId;
+        PerThreadChannelType * PerThreadChannel;
+    } PerThreadChannelElementType;
+    typedef std::vector<PerThreadChannelElementType> PerThreadChannelContainerType;
+    PerThreadChannelContainerType PerThreadChannelContainer;
+#endif
 
     /*! To access internal container thread-safely */
     osaMutex PerThreadChannelMapSync;
@@ -64,6 +78,5 @@ public:
    mtsLODMultiplexerStreambuf();
    ~mtsLODMultiplexerStreambuf();
 };
-
 
 #endif

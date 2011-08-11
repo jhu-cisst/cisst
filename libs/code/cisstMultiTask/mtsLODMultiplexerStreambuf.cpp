@@ -23,13 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
-#include <map>
 #include <iostream>
 
 mtsLODMultiplexerStreambuf::mtsLODMultiplexerStreambuf(){}
 
 mtsLODMultiplexerStreambuf::~mtsLODMultiplexerStreambuf()
 {
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
     PerThreadChannelMapType::const_iterator it = PerThreadChannelMap.begin();
     const PerThreadChannelMapType::const_iterator itEnd = PerThreadChannelMap.end();
     for (; it != itEnd; ++it) {
@@ -38,22 +38,45 @@ mtsLODMultiplexerStreambuf::~mtsLODMultiplexerStreambuf()
             delete it->second;
         }
     }
+#elif (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_XENOMAI)
+    PerThreadChannelType * channel;
+    for (size_t i = 0; i < PerThreadChannelContainer.size(); ++i) {
+        channel = PerThreadChannelContainer[i].PerThreadChannel;
+        if (channel) {
+            cmnLogger::GetMultiplexer()->RemoveChannel(channel);
+            delete channel;
+        }
+    }
+#endif
 }
 
 mtsLODMultiplexerStreambuf::PerThreadChannelType * mtsLODMultiplexerStreambuf::GetThreadChannel(const osaThreadId& threadId)
 {
+    // if already registered thread, return registered channel
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
     PerThreadChannelMapType::const_iterator it = PerThreadChannelMap.find(threadId);
-    // already registered thread
     if (it != PerThreadChannelMap.end()) {
         return it->second;
     }
 
     PerThreadChannelMapSync.Lock();
 
+#elif (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_XENOMAI)
+    // MJ: Vector iteration may take longer than map.
+    PerThreadChannelMapSync.Lock();
+
+    for (size_t i = 0; i < PerThreadChannelContainer.size(); ++i) {
+        if (PerThreadChannelContainer[i].ThreadId.Equal(threadId)) {
+            PerThreadChannelMapSync.Unlock();
+            return PerThreadChannelContainer[i].PerThreadChannel;
+        }
+    }
+#endif
+
     // create new log channel for new thread if not registered yet
-    std::map<osaThreadId, PerThreadChannelType*, osaThreadId> PerThreadChannelMapType;
     PerThreadChannelType * perThreadChannel = new cmnCallbackStreambuf<char>(mtsManagerLocal::LogDispatcher);
 
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
     PerThreadChannelMapPairType ret =  PerThreadChannelMap.insert(std::make_pair(threadId, perThreadChannel));
     if (!ret.second) { // already registered thread
         delete perThreadChannel;
@@ -64,6 +87,12 @@ mtsLODMultiplexerStreambuf::PerThreadChannelType * mtsLODMultiplexerStreambuf::G
 
         return it->second;
     }
+#elif (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_XENOMAI)
+    PerThreadChannelElementType element;
+    element.ThreadId = threadId;
+    element.PerThreadChannel = perThreadChannel;
+    PerThreadChannelContainer.push_back(element);
+#endif
 
     this->AddChannel(perThreadChannel, CMN_LOG_ALLOW_ALL);
 
@@ -72,7 +101,7 @@ mtsLODMultiplexerStreambuf::PerThreadChannelType * mtsLODMultiplexerStreambuf::G
     return perThreadChannel;
 }
 
-std::streamsize mtsLODMultiplexerStreambuf::xsputn(const char * s, std::streamsize n, cmnLogLevel level)
+std::streamsize mtsLODMultiplexerStreambuf::xsputn(const char * s, std::streamsize n, cmnLogLevel CMN_UNUSED(level))
 {
     PerThreadChannelType * perThreadChannel = GetThreadChannel(osaGetCurrentThreadId());
     CMN_ASSERT(perThreadChannel);
@@ -102,7 +131,7 @@ int mtsLODMultiplexerStreambuf::sync(void)
     return 0;
 }
 
-mtsLODMultiplexerStreambuf::IntType mtsLODMultiplexerStreambuf::overflow(mtsLODMultiplexerStreambuf::IntType c, cmnLogLevel level)
+mtsLODMultiplexerStreambuf::IntType mtsLODMultiplexerStreambuf::overflow(mtsLODMultiplexerStreambuf::IntType c, cmnLogLevel CMN_UNUSED(level))
 {
     // follow the basic_streambuf standard
     if (TraitType::eq_int_type(TraitType::eof(), c)) {
