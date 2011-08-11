@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+// Stealthlink definitions
+#include <GRI_Protocol/GRI.h>
+
 #include <cisstStealthlink/mtsStealthlink.h>
 
 #include <cisstCommon/cmnPortability.h>
@@ -37,12 +40,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsStealthlink_AsCL_Stuff.h"
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsStealthlink, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
-
-// For classes defined in mtsStealthlinkTypes.h
-CMN_IMPLEMENT_SERVICES(mtsStealthTool);
-CMN_IMPLEMENT_SERVICES(mtsStealthFrame);
-CMN_IMPLEMENT_SERVICES(mtsStealthRegistration);
-CMN_IMPLEMENT_SERVICES(mtsStealthProbeCal);
 
 void mtsStealthlink::Init(void)
 {

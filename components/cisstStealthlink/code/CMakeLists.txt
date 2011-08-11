@@ -17,6 +17,7 @@ add_library (cisstStealthlink ${IS_SHARED}
              mtsStealthlink.cpp
              ../mtsStealthlink.h
              ../mtsStealthlinkTypes.h
+             mtsStealthlinkTypes.cpp
              mtsStealthlink_AsCL_Stuff.cpp
              mtsStealthlink_AsCL_Stuff.h
              )
