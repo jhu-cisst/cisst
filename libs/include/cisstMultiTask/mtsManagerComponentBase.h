@@ -103,7 +103,7 @@ class CISST_EXPORT mtsManagerComponentBase : public mtsTaskFromSignal
 
 public:
     /*! Component name definitions */
-    class ComponentNames {
+    class CISST_EXPORT ComponentNames {
     public:
         /*! Name of manager component server.  Should be globally unique */
         const static std::string ManagerComponentServer;
