@@ -63,11 +63,11 @@ const std::string & cmnLogIndexToString(const size_t & index)
 #endif
         "  ",
         "E-", // Error (init)
-        "!-", // Warning (init)
+        "W-", // Warning (init)
         "M-", // Message (init)
         "D-", // Debug (init)
         "-E", // Error (run)
-        "-!", // Warning (run)
+        "-W", // Warning (run)
         "-M", // Message (run)
         "-D"  // Debug (run)
     };
