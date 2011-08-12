@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
-#define SYSTEM_LOG_TEST_MCS
+//#define SYSTEM_LOG_TEST_MCS
 #ifdef SYSTEM_LOG_TEST_MCS
 #include <iostream>
 #include <fstream>
