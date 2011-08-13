@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 // Enable or disable system-wide thread-safe logging
-//#define MTS_LOGGING
+#define MTS_LOGGING
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {

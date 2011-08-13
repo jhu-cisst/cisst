@@ -605,8 +605,6 @@ void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessag
 {
     static osaTimeServer timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
 
-    std::stringstream ss;
-
     // Get absolute timestamp
     double timestamp = log.Timestamp();
     // Convert absolute to relative timestamp
@@ -618,7 +616,11 @@ void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessag
     osaGetDateTimeString(now, ':');
 
     std::string msg(log.Message, log.Length);
+    std::stringstream ss;
     ss << "|" << now << " " << log.ProcessName << "| " << msg;
+
+    mtsLogMessage _log(ss.str().c_str(), ss.str().size());
+    _log.ProcessName = log.ProcessName;
 
     if (!PrintLog.IsValid()) {
 #ifdef SYSTEM_LOG_TEST_MCS
@@ -627,7 +629,12 @@ void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessag
         return;
     }
     
-    PrintLog(ss.str());
+    mtsExecutionResult ret = PrintLog(_log);
+#ifdef SYSTEM_LOG_TEST_MCS
+    if ((ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED)) {
+        logfileMCS << "Logger forwarding error: (" << ret << ") " << ss.str();
+    }
+#endif
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,
