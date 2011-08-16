@@ -11,6 +11,7 @@
 #
 # --- end cisst license ---
 
+# you can remove this if not compiling as a part of cisst
 if (NOT CURRENT_PROJECT_IS_CISST)
   find_package (cisst REQUIRED)
   find_package (cisstNDISerial REQUIRED)
@@ -19,7 +20,9 @@ endif (NOT CURRENT_PROJECT_IS_CISST)
 if (cisst_FOUND)
   # cisst configuration
   include (${CISST_USE_FILE})
-  set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonQt cisstCommonXML cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot)
+  set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonQt cisstCommonXML
+                              cisstVector cisstOSAbstraction cisstNumerical
+                              cisstMultiTask cisstParameterTypes cisstRobot)
   cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
   # cisstNDISerial configuration
