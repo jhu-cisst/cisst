@@ -247,6 +247,9 @@ void mtsManagerLocal::Initialize(void)
 
     SetGCMConnected(false);
 
+    TimeServer.SetTimeOrigin();
+    TimeServerOriginSet = true;
+
     SetupSystemLogger();
 }
 
@@ -301,12 +304,6 @@ bool mtsManagerLocal::IsLogForwardingEnabled(void) const {
 
 void mtsManagerLocal::SetLogForwarding(bool activate) 
 {
-    // Initialize time server once
-    if (!TimeServerOriginSet) {
-        TimeServer.SetTimeOrigin();
-        TimeServerOriginSet = true;
-    }
-
     LogForwardEnabled = activate;
 }
 
