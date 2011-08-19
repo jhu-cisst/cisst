@@ -34,7 +34,7 @@ struct frame;
 struct registration;
 struct probe_calibration;
 
-class mtsStealthTool : public mtsGenericObject {
+class mtsStealthTool: public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 private:
     vctFrm3 XForm;
@@ -43,26 +43,27 @@ private:
 public:
     mtsStealthTool():XForm(), GeometryError(0) {}
     ~mtsStealthTool() {}
-    virtual const vctFrm3& GetFrame() { return XForm; }
-    virtual const char *GetName() const { return Name; }
-    virtual double GetGeometryError() { return GeometryError; }
+    virtual const vctFrm3 & GetFrame(void) const { return XForm; }
+    virtual const char * GetName(void) const { return Name; }
+    virtual double GetGeometryError(void) const { return GeometryError; }
 
-    void Assign(const mtsStealthTool &that);
-    mtsStealthTool & operator= (const mtsStealthTool &that) { this->Assign(that); return *this; }
-    void Assign (const struct tool &griTool);
+    void Assign(const mtsStealthTool & that);
+    mtsStealthTool & operator= (const mtsStealthTool & that) { this->Assign(that); return *this; }
+    void Assign(const struct tool & griTool);
     mtsStealthTool & operator= (const tool & griTool) { this->Assign(griTool); return *this; }
 
-    void Assign (const prmPositionCartesianGet &that);
-    mtsStealthTool & operator= (const prmPositionCartesianGet &that) {this->Assign(that); return *this;}
+    void Assign(const prmPositionCartesianGet & that);
+    mtsStealthTool & operator= (const prmPositionCartesianGet & that) {this->Assign(that); return *this;}
 
     std::string ToString(void) const;
-    virtual void ToStream(std::ostream &out) const;
+    virtual void ToStream(std::ostream & outputStream) const;
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
     virtual void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStealthTool);
+
 
 class mtsStealthFrame : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -73,23 +74,24 @@ private:
 public:
     mtsStealthFrame():XForm(), GeometryError(0) {};
     ~mtsStealthFrame() {};
-    virtual const vctFrm3& GetFrame() { return XForm; }
-    virtual double GetGeometryError() { return GeometryError; }
-    virtual const char *GetName() const { return Name; }
-    void Assign(const mtsStealthFrame &that);
-    mtsStealthFrame & operator= (const mtsStealthFrame &that) { this->Assign(that); return *this; }
-    void Assign (const struct frame &griFrame);
-    mtsStealthFrame & operator= (const frame &griFrame) { this->Assign(griFrame); return *this; }
+    virtual const vctFrm3 & GetFrame(void) const { return XForm; }
+    virtual double GetGeometryError(void) const { return GeometryError; }
+    virtual const char * GetName(void) const { return Name; }
+    void Assign(const mtsStealthFrame & that);
+    mtsStealthFrame & operator= (const mtsStealthFrame & that) { this->Assign(that); return *this; }
+    void Assign(const struct frame & griFrame);
+    mtsStealthFrame & operator= (const frame & griFrame) { this->Assign(griFrame); return *this; }
 
-    void Assign (const prmPositionCartesianGet &that);
-    mtsStealthFrame & operator= (const prmPositionCartesianGet &that) {this->Assign(that); return *this;}
+    void Assign(const prmPositionCartesianGet & that);
+    mtsStealthFrame & operator= (const prmPositionCartesianGet & that) {this->Assign(that); return *this;}
 
     std::string ToString(void) const;
-    virtual void ToStream(std::ostream &out) const;
+    virtual void ToStream(std::ostream & outputStream) const;
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStealthFrame);
+
 
 class mtsStealthRegistration : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -99,20 +101,21 @@ private:
 public:
     mtsStealthRegistration():XForm(), predictedAccuracy(0) {};
     ~mtsStealthRegistration() {};
-    virtual const vctFrm3& GetFrame() { return XForm; }
-    void Assign(const mtsStealthRegistration &that);
-    mtsStealthRegistration & operator= (const mtsStealthRegistration &that) { this->Assign(that); return *this; }
-    void Assign (const struct registration &griRegistration);
-    mtsStealthRegistration & operator= (const registration &griRegistration) { this->Assign(griRegistration); return *this; }
+    virtual const vctFrm3 & GetFrame(void) const { return XForm; }
+    void Assign(const mtsStealthRegistration & that);
+    mtsStealthRegistration & operator= (const mtsStealthRegistration & that) { this->Assign(that); return *this; }
+    void Assign(const struct registration & griRegistration);
+    mtsStealthRegistration & operator= (const registration & griRegistration) { this->Assign(griRegistration); return *this; }
 
-    void Assign(const vctFrm3 &tmpFrm, const double &tmpAccuracy, const bool &tmpValid);
+    void Assign(const vctFrm3 & tmpFrm, const double & tmpAccuracy, const bool & tmpValid);
 
     std::string ToString(void) const;
-    virtual void ToStream(std::ostream &out) const;
+    virtual void ToStream(std::ostream & outputStream) const;
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStealthRegistration);
+
 
 class mtsStealthProbeCal : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -124,15 +127,15 @@ public:
 
     mtsStealthProbeCal() { Name[0] = 0; };
     ~mtsStealthProbeCal() {};
-    virtual const char *GetName() const { return Name; }
-    virtual const vct3& GetTip() { return Tip; }
-    virtual const vct3& GetHind() { return Hind; }
-    void Assign(const mtsStealthProbeCal &that);
-    mtsStealthProbeCal & operator= (const mtsStealthProbeCal &that) { this->Assign(that); return *this; }
-    void Assign (const struct probe_calibration &griProbeCal);
-    mtsStealthProbeCal & operator= (const struct probe_calibration &griProbeCal) { this->Assign(griProbeCal); return *this; }
+    virtual const char * GetName(void) const { return Name; }
+    virtual const vct3 & GetTip(void) const { return Tip; }
+    virtual const vct3 & GetHind(void) const { return Hind; }
+    void Assign(const mtsStealthProbeCal & that);
+    mtsStealthProbeCal & operator= (const mtsStealthProbeCal & that) { this->Assign(that); return *this; }
+    void Assign (const struct probe_calibration & griProbeCal);
+    mtsStealthProbeCal & operator= (const struct probe_calibration & griProbeCal) { this->Assign(griProbeCal); return *this; }
     std::string ToString(void) const;
-    virtual void ToStream(std::ostream &out) const;
+    virtual void ToStream(std::ostream & outputStream) const;
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
 };

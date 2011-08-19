@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStealthlink/mtsStealthlinkTypes.h>
 
+// for conversion method
+#include <cisstStealthlink/mtsStealthlink.h>
+
 // Stealthlink definitions
 #include <GRI_Protocol/GRI.h>
 
@@ -27,45 +30,73 @@ CMN_IMPLEMENT_SERVICES(mtsStealthFrame);
 CMN_IMPLEMENT_SERVICES(mtsStealthRegistration);
 CMN_IMPLEMENT_SERVICES(mtsStealthProbeCal);
 
-void mtsStealthTool::Assign(const mtsStealthTool &that) {
+
+typedef float floatArray44[4][4];
+
+void frameConversion(vctFrm3 & result, const floatArray44 & input) {
+    size_t row, col;
+    for (row = 0; row < 3; row++) {
+        for (col = 0; col < 3; col++) {
+            result.Rotation().at(row, col) =  input[row][col];
+        }
+        result.Translation().at(row) = input[row][3];
+    }
+}
+
+void mtsStealthTool::Assign(const mtsStealthTool & that)
+{
     this->XForm = that.XForm;
     this->GeometryError = that.GeometryError;
-    for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = that.Name[k];
+    for (int k = 0; k < NAME_LENGTH; k++) {
+        this->Name[k] = that.Name[k];
+    }
     this->Valid() = that.Valid();
 }
 
-void mtsStealthTool::Assign (const struct tool &griTool) {
+void mtsStealthTool::Assign(const struct tool & griTool)
+{
+    frameConversion(this->XForm, griTool.xform);
+#if 0
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             XForm.Rotation().at(i, j) =  griTool.xform[i][j];
         }
         XForm.Translation().at(i) = griTool.xform[i][3];
     }
+#endif
     GeometryError = griTool.geometry_error;
-    for (int k = 0; k < NAME_LENGTH; k++) Name[k] = griTool.name[k];
+    for (int k = 0; k < NAME_LENGTH; k++) {
+        Name[k] = griTool.name[k];
+    }
     this->SetValid(griTool.valid);
 }
 
-void mtsStealthTool::Assign (const prmPositionCartesianGet &that) {
+void mtsStealthTool::Assign(const prmPositionCartesianGet & that)
+{
     this->XForm = that.Position();
     this->GeometryError = 0;
-    for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = 'n';
+    for (int k = 0; k < NAME_LENGTH; k++) {
+        this->Name[k] = 'n';
+    }
     this->Name[NAME_LENGTH-1] = '\0';
     this->Valid() = that.Valid();
 }
 
-std::string mtsStealthTool::ToString(void) const {
+std::string mtsStealthTool::ToString(void) const
+{
     std::stringstream outputStream;
     ToStream(outputStream);
     return outputStream.str();
 }
 
-void mtsStealthTool::ToStream(std::ostream &out) const {
-    out << Name << ", " << XForm << ", " << GeometryError << std::endl;
+void mtsStealthTool::ToStream(std::ostream & outputStream) const
+{
+    outputStream << Name << ", " << XForm << ", " << GeometryError << std::endl;
 }
 
 void mtsStealthTool::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                                 bool headerOnly, const std::string & headerPrefix) const {
+                                 bool headerOnly, const std::string & headerPrefix) const
+{
     if (headerOnly) {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter << headerPrefix << "-Name";
@@ -83,7 +114,8 @@ void mtsStealthTool::ToStreamRaw(std::ostream & outputStream, const char delimit
    }
 }
 
-void mtsStealthTool::SerializeRaw(std::ostream & outputStream) const {
+void mtsStealthTool::SerializeRaw(std::ostream & outputStream) const
+{
     mtsGenericObject::SerializeRaw(outputStream);
     //cmnSerializeRaw(outputStream, this->Name);
     this->XForm.SerializeRaw(outputStream);
@@ -98,26 +130,32 @@ void mtsStealthTool::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->GeometryError);
 }
 
-void mtsStealthFrame::Assign(const mtsStealthFrame &that) {
+void mtsStealthFrame::Assign(const mtsStealthFrame & that)
+{
     this->XForm = that.XForm;
     this->GeometryError = that.GeometryError;
     for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = that.Name[k];
     this->Valid() = that.Valid();
 }
 
-void mtsStealthFrame::Assign (const struct frame &griFrame) {
+void mtsStealthFrame::Assign (const struct frame & griFrame)
+{
+    frameConversion(this->XForm, griFrame.xform);
+#if 0
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             XForm.Rotation().at(i, j) =  griFrame.xform[i][j];
         }
         XForm.Translation().at(i) = griFrame.xform[i][3];
     }
+#endif
     GeometryError = griFrame.geometry_error;
     for (int k = 0; k < NAME_LENGTH; k++) Name[k] = griFrame.name[k];
     this->SetValid(griFrame.valid);
 }
 
-void mtsStealthFrame::Assign(const prmPositionCartesianGet &that) {
+void mtsStealthFrame::Assign(const prmPositionCartesianGet & that)
+{
     this->XForm = that.Position();
     this->GeometryError = 0;
     for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = 'n';
@@ -125,16 +163,21 @@ void mtsStealthFrame::Assign(const prmPositionCartesianGet &that) {
     this->Valid() = that.Valid();
 }
 
-std::string mtsStealthFrame::ToString(void) const {
+std::string mtsStealthFrame::ToString(void) const
+{
     std::stringstream outputStream;
     ToStream(outputStream);
     return outputStream.str();
 }
-void mtsStealthFrame::ToStream(std::ostream &out) const {
-    out << Name << ", " << XForm << ", " << GeometryError << std::endl;
+
+void mtsStealthFrame::ToStream(std::ostream & outputStream) const
+{
+    outputStream << Name << ", " << XForm << ", " << GeometryError << std::endl;
 }
+
 void mtsStealthFrame::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                                  bool headerOnly, const std::string & headerPrefix) const {
+                                  bool headerOnly, const std::string & headerPrefix) const
+{
     if (headerOnly) {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter << headerPrefix << "-Name";
@@ -151,25 +194,31 @@ void mtsStealthFrame::ToStreamRaw(std::ostream & outputStream, const char delimi
     }
 }
 
-void mtsStealthRegistration::Assign(const mtsStealthRegistration &that) {
+void mtsStealthRegistration::Assign(const mtsStealthRegistration & that)
+{
     this->XForm = that.XForm;
     this->predictedAccuracy = that.predictedAccuracy;
     this->Valid() = that.Valid();
 }
 
-void mtsStealthRegistration::Assign (const struct registration &griRegistration) {
+void mtsStealthRegistration::Assign (const struct registration & griRegistration)
+{
+    frameConversion(this->XForm, griRegistration.xform);
+#if 0
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             XForm.Rotation().at(i, j) =  griRegistration.xform[i][j];
         }
         XForm.Translation().at(i) = griRegistration.xform[i][3];
     }
+#endif
     predictedAccuracy = griRegistration.predicted_accuracy;
     this->SetValid(griRegistration.valid);
 }
 
-void mtsStealthRegistration::Assign(const vctFrm3 &tmpFrm, const double &tmpAccuracy,
-                                    const bool &tmpValid){
+void mtsStealthRegistration::Assign(const vctFrm3 & tmpFrm, const double & tmpAccuracy,
+                                    const bool & tmpValid)
+{
     XForm = tmpFrm;
     predictedAccuracy = tmpAccuracy;
     this->SetValid(tmpValid);
@@ -181,11 +230,14 @@ std::string mtsStealthRegistration::ToString(void) const {
     return outputStream.str();
 }
 
-void mtsStealthRegistration::ToStream(std::ostream &out) const {
-    out << XForm << ", " << predictedAccuracy << std::endl;
+void mtsStealthRegistration::ToStream(std::ostream & outputStream) const
+{
+    outputStream << XForm << ", " << predictedAccuracy << std::endl;
 }
+
 void mtsStealthRegistration::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                             bool headerOnly, const std::string & headerPrefix) const {
+                             bool headerOnly, const std::string & headerPrefix) const
+{
     if (headerOnly) {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter;
@@ -200,31 +252,37 @@ void mtsStealthRegistration::ToStreamRaw(std::ostream & outputStream, const char
      }
 }
 
-void mtsStealthProbeCal::Assign(const mtsStealthProbeCal &that) {
+void mtsStealthProbeCal::Assign(const mtsStealthProbeCal & that)
+{
     for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = that.Name[k];
     this->Valid() = that.Valid();
     this->Tip = that.Tip;
     this->Hind = that.Hind;
 }
 
-void mtsStealthProbeCal::Assign (const struct probe_calibration &griProbeCal) {
+void mtsStealthProbeCal::Assign (const struct probe_calibration & griProbeCal)
+{
     for (int k = 0; k < NAME_LENGTH; k++) Name[k] = griProbeCal.probe_name[k];
     this->SetValid(griProbeCal.valid);
     Tip = vct3(griProbeCal.tip[0],griProbeCal.tip[1],griProbeCal.tip[2]);
     Hind = vct3(griProbeCal.hind[0],griProbeCal.hind[1],griProbeCal.hind[2]);
 }
 
-std::string mtsStealthProbeCal::ToString(void) const {
+std::string mtsStealthProbeCal::ToString(void) const
+{
     std::stringstream outputStream;
     ToStream(outputStream);
     return outputStream.str();
 }
 
-void mtsStealthProbeCal::ToStream(std::ostream &out) const {
-    out << Name << ", " << Valid() << ", " << Tip << ", " << Hind << std::endl;
+void mtsStealthProbeCal::ToStream(std::ostream & outputStream) const
+{
+    outputStream << Name << ", " << Valid() << ", " << Tip << ", " << Hind << std::endl;
 }
+
 void mtsStealthProbeCal::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                         bool headerOnly, const std::string & headerPrefix) const {
+                         bool headerOnly, const std::string & headerPrefix) const
+{
     if (headerOnly) {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter << headerPrefix << "-Name";
@@ -241,4 +299,3 @@ void mtsStealthProbeCal::ToStreamRaw(std::ostream & outputStream, const char del
         Hind.ToStreamRaw(outputStream, delimiter);
     }
 }
-
