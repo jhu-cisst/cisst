@@ -2,12 +2,16 @@
 set( 
   HEADER_FILES 
   ../cisstCAN.h 
-  ../cisstCANFrame.h )
+  ../cisstCANFrame.h
+  ../mtsCAN.h
+  ../mtsCANFrame.h )
+
 set( 
   SOURCE_FILES 
   cisstCAN.cpp
-  cisstCANFrame.cpp )
-
+  cisstCANFrame.cpp
+  mtsCAN.cpp
+  mtsCANFrame.cpp )
 
 # Check for RT Socket CAN
 find_package( RTSocketCAN )
@@ -16,7 +20,9 @@ if( RTSocketCANFound )
   set( 
     HEADER_FILES 
     ${HEADER_FILES} 
-    ../osaRTSocketCAN.h )
+    ../osaRTSocketCAN.h
+    ../mtsRTSocketCAN.h )
+
 
   set( 
     SOURCE_FILES 

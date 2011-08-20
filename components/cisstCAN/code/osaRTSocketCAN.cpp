@@ -38,9 +38,10 @@ osaRTSocketCAN::~osaRTSocketCAN(){}
 
 cisstCAN::Errno osaRTSocketCAN::Open(){
 
-  int errno;
 
 #if (CISST_OS == CISST_LINUX_XENOMAI )
+
+  int errno;
 
   struct ifreq ifr;
 
@@ -138,7 +139,7 @@ cisstCAN::Errno osaRTSocketCAN::Close(){
 // Note that block is useless for Socket CAN
 cisstCAN::Errno osaRTSocketCAN::Send( const cisstCANFrame& canframe, 
 				      cisstCAN::Flags ){
-  
+
 #if (CISST_OS == CISST_LINUX_XENOMAI )
 
   // copy the data in to a RTSocket CAN frame
@@ -167,7 +168,7 @@ cisstCAN::Errno osaRTSocketCAN::Send( const cisstCANFrame& canframe,
 }
 
 // Receive a CAN frame
-cisstCAN::Errno osaRTSocketCAN::Recv( cisstCANFrame& canframe, cisstCAN::Flags ){
+cisstCAN::Errno osaRTSocketCAN::Recv(cisstCANFrame& canframe, cisstCAN::Flags){
 
 #if (CISST_OS == CISST_LINUX_XENOMAI )
 
@@ -222,6 +223,8 @@ cisstCAN::Errno osaRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
   }
 
 #endif
+
+  return cisstCAN::EFAILURE;
 
 }
 

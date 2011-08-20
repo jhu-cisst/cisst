@@ -68,8 +68,8 @@ public:
      \param rate The CAN rate (RATE_150, RATE_300, RATE_1000)
   */
   osaRTSocketCAN( const std::string& devicename, 
-		    cisstCAN::Rate rate,
-		    cisstCAN::Loopback loopback = cisstCAN::LOOPBACK_OFF );
+		  cisstCAN::Rate rate,
+		  cisstCAN::Loopback loopback = cisstCAN::LOOPBACK_OFF );
   
   //! Destructor
   ~osaRTSocketCAN();
