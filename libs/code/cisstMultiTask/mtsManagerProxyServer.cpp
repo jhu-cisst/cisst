@@ -98,7 +98,7 @@ bool mtsManagerProxyServer::StartProxy(mtsManagerGlobal * proxyOwner)
 
     // Register this proxy to the owner
     if (!proxyOwner->AddProcessObject(this, true)) {
-        LogError(mtsManagerProxyServer, "failed to register proxy server to the global component manager");
+        LogError(mtsManagerProxyServer, "failed to register proxy server to Global Component Manager");
         return false;
     }
 
@@ -186,7 +186,9 @@ void mtsManagerProxyServer::StopProxy(void)
 
     IceGUID = "";
 
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer, "Stopped manager proxy server");
+#endif
 }
 
 bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
@@ -226,7 +228,9 @@ bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
     }
     //*/
 
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed disconnected process: \"" << processName << "\"");
+#endif
 
     return true;
 }
@@ -262,6 +266,8 @@ void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
     dest.CommandsWrite.clear();
     dest.CommandsRead.clear();
     dest.CommandsQualifiedRead.clear();
+    dest.CommandsVoidReturn.clear();
+    dest.CommandsWriteReturn.clear();
     dest.EventsVoid.clear();
     dest.EventsWrite.clear();
 
@@ -308,6 +314,27 @@ void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
         dest.CommandsQualifiedRead.push_back(commandQualifiedRead);
     }
 
+    // Conversion of command void return vector
+    mtsInterfaceCommon::CommandVoidReturnElement commandVoidReturn;
+    ::mtsManagerProxy::CommandVoidReturnSequence::const_iterator itVoidReturn = src.CommandsVoidReturn.begin();
+    const ::mtsManagerProxy::CommandVoidReturnSequence::const_iterator itVoidReturnEnd = src.CommandsVoidReturn.end();
+    for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
+        commandVoidReturn.Name = itVoidReturn->Name;
+        commandVoidReturn.ResultPrototypeSerialized = itVoidReturn->ResultPrototypeSerialized;
+        dest.CommandsVoidReturn.push_back(commandVoidReturn);
+    }
+
+    // Conversion of command write return vector
+    mtsInterfaceCommon::CommandWriteReturnElement commandWriteReturn;
+    ::mtsManagerProxy::CommandWriteReturnSequence::const_iterator itWriteReturn = src.CommandsWriteReturn.begin();
+    const ::mtsManagerProxy::CommandWriteReturnSequence::const_iterator itWriteReturnEnd = src.CommandsWriteReturn.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        commandWriteReturn.Name = itWriteReturn->Name;
+        commandWriteReturn.ArgumentPrototypeSerialized = itWriteReturn->ArgumentPrototypeSerialized;
+        commandWriteReturn.ResultPrototypeSerialized = itWriteReturn->ResultPrototypeSerialized;
+        dest.CommandsWriteReturn.push_back(commandWriteReturn);
+    }
+
     // Conversion of event void generator vector
     mtsInterfaceCommon::EventVoidElement eventVoid;
     ::mtsManagerProxy::EventVoidSequence::const_iterator itEventVoid = src.EventsVoid.begin();
@@ -336,6 +363,8 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
     dest.FunctionWriteNames.clear();
     dest.FunctionReadNames.clear();
     dest.FunctionQualifiedReadNames.clear();
+    dest.FunctionVoidReturnNames.clear();
+    dest.FunctionWriteReturnNames.clear();
     dest.EventHandlersVoid.clear();
     dest.EventHandlersWrite.clear();
 
@@ -356,6 +385,12 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
 
     // Conversion of function qualified read vector
     dest.FunctionQualifiedReadNames.insert(dest.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.end());
+
+    // Conversion of function void return vector
+    dest.FunctionVoidReturnNames.insert(dest.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.end());
+
+    // Conversion of function write return vector
+    dest.FunctionWriteReturnNames.insert(dest.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.end());
 
     // Conversion of event void handler vector
     mtsInterfaceCommon::CommandVoidElement eventVoidHandler;
@@ -421,6 +456,8 @@ void mtsManagerProxyServer::ConstructInterfaceProvidedDescriptionFrom(
     dest.CommandsWrite.clear();
     dest.CommandsRead.clear();
     dest.CommandsQualifiedRead.clear();
+    dest.CommandsVoidReturn.clear();
+    dest.CommandsWriteReturn.clear();
     dest.EventsVoid.clear();
     dest.EventsWrite.clear();
 
@@ -467,6 +504,27 @@ void mtsManagerProxyServer::ConstructInterfaceProvidedDescriptionFrom(
         dest.CommandsQualifiedRead.push_back(commandQualifiedRead);
     }
 
+    // Construct command VoidReturn vector
+    ::mtsManagerProxy::CommandVoidReturnElement commandVoidReturn;
+    CommandVoidReturnVector::const_iterator itVoidReturn = src.CommandsVoidReturn.begin();
+    const CommandVoidReturnVector::const_iterator itVoidReturnEnd = src.CommandsVoidReturn.end();
+    for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
+        commandVoidReturn.Name = itVoidReturn->Name;
+        commandVoidReturn.ResultPrototypeSerialized = itVoidReturn->ResultPrototypeSerialized;
+        dest.CommandsVoidReturn.push_back(commandVoidReturn);
+    }
+
+    // Construct command WriteReturn vector
+    ::mtsManagerProxy::CommandWriteReturnElement commandWriteReturn;
+    CommandWriteReturnVector::const_iterator itWriteReturn = src.CommandsWriteReturn.begin();
+    const CommandWriteReturnVector::const_iterator itWriteReturnEnd = src.CommandsWriteReturn.end();
+    for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
+        commandWriteReturn.Name = itWriteReturn->Name;
+        commandWriteReturn.ArgumentPrototypeSerialized = itWriteReturn->ArgumentPrototypeSerialized;
+        commandWriteReturn.ResultPrototypeSerialized = itWriteReturn->ResultPrototypeSerialized;
+        dest.CommandsWriteReturn.push_back(commandWriteReturn);
+    }
+
     // Construct event void generator vector
     ::mtsManagerProxy::EventVoidElement eventVoidGenerator;
     EventVoidVector::const_iterator itEventVoid = src.EventsVoid.begin();
@@ -495,6 +553,8 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
     dest.FunctionWriteNames.clear();
     dest.FunctionReadNames.clear();
     dest.FunctionQualifiedReadNames.clear();
+    dest.FunctionVoidReturnNames.clear();
+    dest.FunctionWriteReturnNames.clear();
     dest.EventHandlersVoid.clear();
     dest.EventHandlersWrite.clear();
 
@@ -515,6 +575,12 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
 
     // Construct function qualified read vector
     dest.FunctionQualifiedReadNames.insert(dest.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.begin(), src.FunctionQualifiedReadNames.end());
+
+    // Construct function void return vector
+    dest.FunctionVoidReturnNames.insert(dest.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.begin(), src.FunctionVoidReturnNames.end());
+
+    // Construct function write return vector
+    dest.FunctionWriteReturnNames.insert(dest.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.begin(), src.FunctionWriteReturnNames.end());
 
     // Construct event void handler vector
     ::mtsManagerProxy::CommandVoidElement eventVoidHandler;
@@ -1439,7 +1505,7 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         try {
             ManagerProxyServer->MonitorConnections();
         } catch (const Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected: " << ex.what());
+            LogError(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected: " << ex.what());
         }
     }
 #endif
@@ -1465,8 +1531,10 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
+#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer::ManagerServerI,
         "Stopped and destroyed callback thread to communicate with clients");
+#endif
 }
 
  bool mtsManagerProxyServer::ManagerServerI::IsActiveProxy() const

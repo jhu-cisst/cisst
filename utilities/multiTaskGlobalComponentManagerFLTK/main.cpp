@@ -37,6 +37,8 @@ int main(void)
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("GCMUITask", CMN_LOG_ALLOW_ALL);
+    // Enable system-wide thread-safe logging
+    mtsManagerLocal::SetLogForwarding(true);
 
     // Create and start global component manager that serves local component
     // managers running across networks.

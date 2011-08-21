@@ -21,8 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <string.h>
 #include <fstream>
 
+#include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnClassRegister.h>
 
@@ -121,4 +123,15 @@ bool cmnLogger::SetMaskClassAll(cmnLogMask mask)
 bool cmnLogger::SetMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask)
 {
     return cmnClassRegister::SetLogMaskClassMatching(stringToMatch, mask);
+}
+
+const char *cmnLogger::ExtractFileName(const char *file)
+{ 
+    const char *p1 = strrchr(file, '/');
+#if (CISST_OS == CISST_WINDOWS)
+    const char *p2 = strrchr(file, '\\');
+    if (p2 > p1) return p2+1;
+#endif
+    if (p1) return p1+1;
+    else return file;
 }

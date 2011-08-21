@@ -294,8 +294,8 @@ public:
     inline ~mtsGenericObjectProxyBase(void) {}
 
     /*! Return pointer to data */
-    virtual value_type& GetData(void) = 0;
-    virtual const value_type& GetData(void) const = 0;
+    virtual value_type & GetData(void) = 0;
+    virtual const value_type & GetData(void) const = 0;
 
     /*! Conversion assignment. */
     ThisType & operator=(const ThisType &data) {

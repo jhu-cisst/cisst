@@ -97,9 +97,13 @@ devOSGBody::devOSGBody(	const std::string& name,
 			const std::string& transformfn,
 			const std::string& switchfn ) : 
   mtsComponent( name ),
-  Rt_body( Rt.Rotation(), Rt.Translation() ),
   switch_body( true ){
-  
+
+  // Hack to avoid non-normalized rotations!
+  const vctMatrixRotation3<double>& R = Rt.Rotation();
+  vctQuaternionRotation3<double> q( R, VCT_NORMALIZE );
+  Rt_body = vctFrame4x4<double>( q, Rt.Translation() );
+
   setDataVariance( osg::Object::DYNAMIC );
   
   // Setup the user data for this body. This can be used to recover the body
@@ -125,7 +129,7 @@ devOSGBody::devOSGBody(	const std::string& name,
 
   CreateInterface( transformfn, switchfn );
 
-  SetMatrix( vctFrame4x4<double>( Rt.Rotation(), Rt.Translation() ) );
+  SetMatrix( Rt_body );
 
 }
 
@@ -329,10 +333,13 @@ void devOSGBody::Switch(){
 void devOSGBody::SetTransform( const vctFrame4x4<double>& Rt )
 { this->Rt_body = Rt; }
 
-void devOSGBody::SetTransform( const vctFrm3& Rt )
-{ SetTransform( vctFrame4x4<double>( vctMatrixRotation3<double>( Rt.Rotation(),
-								 VCT_NORMALIZE),
-				     Rt.Translation() ) ); }
+void devOSGBody::SetTransform( const vctFrm3& Rt ){
+  // Hack to avoid non-normalized rotations!
+  const vctMatrixRotation3<double>& R = Rt.Rotation();
+  vctQuaternionRotation3<double> q( R, VCT_NORMALIZE );
+  
+  SetTransform( vctFrame4x4<double>( q, Rt.Translation() ) );
+}
 
 //! Set the switch of the body
 void devOSGBody::SetSwitch( bool onoff )

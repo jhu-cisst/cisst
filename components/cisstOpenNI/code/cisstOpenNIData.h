@@ -24,6 +24,12 @@ public:
 
     //! User Pose State
     XnBool needPose;
+    
+    //! User State
+    int usrState;
+    
+    //! User Calibration State
+    int usrCalState;
 
     //! Pose Callback String
     XnChar strPose[20];
@@ -48,6 +54,13 @@ public:
     void UserCalibrationEndCallback(xn::SkeletonCapability& capability,
                                     XnBool bSuccess,  
                                     XnUserID nId);
+    void SetStates(){
+        
+        usrState = CNI_USR_IDLE;
+        usrCalState = CNI_USR_IDLE;
+        
+    };
+    
 
 };
 

@@ -24,14 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 
-// check if this module is build as a DLL
-#ifdef cisstMultiTasksTestsLib_EXPORTS
-#define CISST_THIS_LIBRARY_AS_DLL
-#endif
-#include <cisstCommon/cmnExportMacros.h>
-
-// avoid impact on other modules
-#undef CISST_THIS_LIBRARY_AS_DLL
+// Always include last
+#include "mtsTestExport.h"
 
 class CISST_EXPORT mtsMacrosTestClassA: public mtsGenericObject
 {

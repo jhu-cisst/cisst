@@ -29,7 +29,13 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_OS == CISST_LINUX_RTAI)
     #include <rtai_sem.h>
     #include <rtai_types.h>
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+#include <native/mutex.h>
+#include <native/task.h>
+#include <pthread.h>
+
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     #include <pthread.h>
     #include <errno.h>
     #include <string.h>
@@ -43,8 +49,13 @@ struct osaMutexInternals {
 //#if (CISST_OS == CISST_LINUX_RTAI)
 //	SEM* Mutex;
 //#endif // CISST_LINUX_RTAI
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_t Mutex;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    //RT_MUTEX RTMutex;
+    pthread_mutex_t POSIXMutex;
+    
 #elif (CISST_OS == CISST_WINDOWS)
 	HANDLE Mutex;
 #endif
@@ -63,13 +74,39 @@ struct osaMutexInternals {
 //}
 //#endif // CISST_LINUX_RTAI
 
-osaMutex::osaMutex(void)
+osaMutex::osaMutex(void) : Locked(false)
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     if (pthread_mutex_init(&INTERNALS(Mutex), 0) != 0) {
         CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
     }
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    
+    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+    /*
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_create( &INTERNALS(RTMutex), NULL );
+        std::cout<< "rt_mutex_create"  << Internals << std::endl;
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to create mutex. "
+                              << strerror(retval) << ": " << retval << ". "
+                              << std::endl;
+        }
+    }
+    */
+    //else{
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+    //  std::cout<< "pthread_mutex_init"  << Internals << std::endl;
+        if( pthread_mutex_init( &INTERNALS(POSIXMutex), 0 ) != 0 ) {
+            CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" 
+                               << strerror(errno) << "\"" << std::endl;
+        }
+        //  std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+        //}
+
 #elif (CISST_OS == CISST_WINDOWS)
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     INTERNALS(Mutex) = CreateMutex(NULL, FALSE, NULL);
@@ -84,8 +121,27 @@ osaMutex::osaMutex(void)
 
 osaMutex::~osaMutex() 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_destroy(&INTERNALS(Mutex));
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    /*
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_delete( &INTERNALS(RTMutex) );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to delete mutex. "
+                              << strerror(retval) << ": " << retval << ". "
+                              << std::endl;
+        }
+    }
+    else{
+    */
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl; 
+            pthread_mutex_destroy( &INTERNALS(POSIXMutex) ); 
+            //      std::cout << __FILE__ << ": " << __LINE__ << std::endl; 
+            //}
+
 #elif (CISST_OS == CISST_WINDOWS)
     if (INTERNALS(Mutex)) {
         CloseHandle(INTERNALS(Mutex));
@@ -106,8 +162,52 @@ unsigned int osaMutex::SizeOfInternals(void) {
 
 void osaMutex::Lock(void) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    // Remember locker id
+    LockerId = osaGetCurrentThreadId();
+    Locked = true;
+
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_lock(&INTERNALS(Mutex));
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    /*
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        std::cout << "rt_mutex_acquire: " << Internals << std::endl;
+        retval = rt_mutex_acquire( &INTERNALS( RTMutex ), TM_INFINITE );
+        if( retval != 0 ){
+            std::string errstr;
+            switch( -retval ){
+            case EINVAL:
+                errstr = "EINVAL";
+                break;
+            case EIDRM:
+                errstr = "EIDRM";
+                break;
+            case EWOULDBLOCK:
+                errstr = "EWOULDBLOCK";
+                break;
+            case EINTR:
+                errstr = "EINTR";
+                break;
+            case ETIMEDOUT:
+                errstr = "ETIMEDOUT";
+                break;
+            case EPERM:
+                errstr = "EPERM";
+                break;
+            }
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to acquire mutex: "
+                              << errstr << std::endl;
+        }
+    }
+    else { 
+    */
+    //            std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+            pthread_mutex_lock( &INTERNALS( POSIXMutex ) ); 
+            //      std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+            //  }
+
 #elif (CISST_OS == CISST_WINDOWS)
     WaitForSingleObject(INTERNALS(Mutex), INFINITE);
 #endif
@@ -121,11 +221,51 @@ void osaMutex::Lock(void)
 
 void osaMutex::Unlock(void) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    // Reset locker id.  LockerId gets invalidated.
+    Locked = false;
+
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_unlock(&INTERNALS(Mutex));
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    /*
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_mutex_release( &INTERNALS(RTMutex) );
+        if( retval != 0 ){
+            std::string errstr;
+            switch( -retval ){
+            case EINVAL:
+                errstr = "EINVAL";
+                break;
+            case EIDRM:
+                errstr = "EIDRM";
+                break;
+            case EPERM:
+                errstr = "EPERM";
+                break;
+            }
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to release mutex: " 
+                              << errstr << std::endl;
+        }
+    }
+    else  { 
+    */
+    //            std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+            pthread_mutex_unlock( &INTERNALS( POSIXMutex ) ); 
+            //      std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+            //}
+
 #elif (CISST_OS == CISST_WINDOWS)
     ReleaseMutex(INTERNALS(Mutex));
 #endif
+}
+
+bool osaMutex::IsLocker(void) const
+{
+    if (!Locked) return false;
+
+    return (osaGetCurrentThreadId().Equal(LockerId));
 }
 
 #if 0

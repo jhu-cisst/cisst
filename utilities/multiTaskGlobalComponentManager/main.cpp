@@ -22,22 +22,30 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstCommon/cmnGetChar.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+
+// Enable or disable system-wide thread-safe logging
+#define MTS_LOGGING
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
-    cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    // enable system-wide thread-safe logging
+#ifdef MTS_LOGGING
+    mtsManagerLocal::SetLogForwarding(true);
+#endif
 
     // Create and start global component manager
-    mtsManagerGlobal globalComponentManager;
-    if (!globalComponentManager.StartServer()) {
+    mtsManagerGlobal * globalComponentManager = new mtsManagerGlobal;
+    if (!globalComponentManager->StartServer()) {
         CMN_LOG_INIT_ERROR << "Failed to start global component manager." << std::endl;
         return 1;
     }
@@ -46,7 +54,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // Get local component manager instance
     mtsManagerLocal * localManager;
     try {
-        localManager = mtsManagerLocal::GetInstance(globalComponentManager);
+        localManager = mtsManagerLocal::GetInstance(*globalComponentManager);
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
@@ -54,12 +62,23 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // create the tasks, i.e. find the commands
     localManager->CreateAll();
+    localManager->WaitForStateAll(mtsComponentState::READY);
+
     // start the periodic Run
     localManager->StartAll();
+    localManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
-    while (1) {
-        osaSleep(100 * cmn_ms);
+    // loop until 'q' is pressed
+    int key = ' ';
+    std::cout << "Press 'q' to quit" << std::endl;
+    while (key != 'q') {
+        key = cmnGetChar();
     }
+    std::cout << "Quitting ..." << std::endl;
+    // cleanup
+    localManager->KillAll();
+    localManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
+    localManager->Cleanup();
 
     return 0;
 }

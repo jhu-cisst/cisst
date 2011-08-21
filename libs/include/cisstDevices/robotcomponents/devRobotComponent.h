@@ -34,6 +34,8 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 
   public:
     
+    enum Errno { ESUCCESS, EFAILURE };
+    
     enum Type
       {
 	PROVIDE_INPUT,
@@ -118,15 +120,15 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 	     devRobotComponent::Variables variables,
 	     size_t N );
     
-    void SetPosition    ( const vctDynamicVector<double>& q   );
-    void SetVelocity    ( const vctDynamicVector<double>& qd  );
-    void SetAcceleration( const vctDynamicVector<double>& qdd );
-    void SetForceTorque ( const vctDynamicVector<double>& ft  );
+    Errno SetPosition    ( const vctDynamicVector<double>& q   );
+    Errno SetVelocity    ( const vctDynamicVector<double>& qd  );
+    Errno SetAcceleration( const vctDynamicVector<double>& qdd );
+    Errno SetForceTorque ( const vctDynamicVector<double>& ft  );
         
-    void GetPosition    ( vctDynamicVector<double>& q,   double& t );
-    void GetVelocity    ( vctDynamicVector<double>& qd,  double& t );
-    void GetAcceleration( vctDynamicVector<double>& qdd, double& t );
-    void GetForceTorque ( vctDynamicVector<double>& ft,  double& t );
+    Errno GetPosition    ( vctDynamicVector<double>& q,   double& t );
+    Errno GetVelocity    ( vctDynamicVector<double>& qd,  double& t );
+    Errno GetAcceleration( vctDynamicVector<double>& qdd, double& t );
+    Errno GetForceTorque ( vctDynamicVector<double>& ft,  double& t );
 
   };  // RnIO
 
@@ -153,15 +155,15 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 	  devRobotComponent::IO::Type type,
 	  devRobotComponent::Variables variables );
     
-    void SetPosition    ( const vctFixedSizeVector<double,3>& p  );
-    void SetVelocity    ( const vctFixedSizeVector<double,3>& v  );
-    void SetAcceleration( const vctFixedSizeVector<double,3>& vd );
-    void SetForce       ( const vctFixedSizeVector<double,3>& f  );
+    Errno SetPosition    ( const vctFixedSizeVector<double,3>& p  );
+    Errno SetVelocity    ( const vctFixedSizeVector<double,3>& v  );
+    Errno SetAcceleration( const vctFixedSizeVector<double,3>& vd );
+    Errno SetForce       ( const vctFixedSizeVector<double,3>& f  );
         
-    void GetPosition    ( vctFixedSizeVector<double,3>& p,  double& t );
-    void GetVelocity    ( vctFixedSizeVector<double,3>& v,  double& t );
-    void GetAcceleration( vctFixedSizeVector<double,3>& vd, double& t );
-    void GetForce       ( vctFixedSizeVector<double,3>& f,  double& t );
+    Errno GetPosition    ( vctFixedSizeVector<double,3>& p,  double& t );
+    Errno GetVelocity    ( vctFixedSizeVector<double,3>& v,  double& t );
+    Errno GetAcceleration( vctFixedSizeVector<double,3>& vd, double& t );
+    Errno GetForce       ( vctFixedSizeVector<double,3>& f,  double& t );
 
   };  // R3IO
 
@@ -188,15 +190,15 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 	   devRobotComponent::IO::Type type,
 	   devRobotComponent::Variables variables );
 
-    void SetPosition    ( const vctFrame4x4<double>& Rt            );
-    void SetVelocity    ( const vctFixedSizeVector<double,6>& vw   );
-    void SetAcceleration( const vctFixedSizeVector<double,6>& vdwd );
-    void SetForceTorque ( const vctFixedSizeVector<double,6>& ft   );
+    Errno SetPosition    ( const vctFrame4x4<double>& Rt            );
+    Errno SetVelocity    ( const vctFixedSizeVector<double,6>& vw   );
+    Errno SetAcceleration( const vctFixedSizeVector<double,6>& vdwd );
+    Errno SetForceTorque ( const vctFixedSizeVector<double,6>& ft   );
 
-    void GetPosition    ( vctFrame4x4<double>& Rt,            double& t );
-    void GetVelocity    ( vctFixedSizeVector<double,6>& vw,   double& t );
-    void GetAcceleration( vctFixedSizeVector<double,6>& vdwd, double& t );
-    void GetForceTorque ( vctFixedSizeVector<double,6>& ft ,  double& t );    
+    Errno GetPosition    ( vctFrame4x4<double>& Rt,            double& t );
+    Errno GetVelocity    ( vctFixedSizeVector<double,6>& vw,   double& t );
+    Errno GetAcceleration( vctFixedSizeVector<double,6>& vdwd, double& t );
+    Errno GetForceTorque ( vctFixedSizeVector<double,6>& ft ,  double& t );    
 
   }; // End SE3iO
 
@@ -222,15 +224,15 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 	   devRobotComponent::IO::Type type,
 	   devRobotComponent::Variables variables );
     
-    void SetRotation    ( const vctQuaternionRotation3<double>& q );
-    void SetVelocity    ( const vctFixedSizeVector<double,3>& w   );
-    void SetAcceleration( const vctFixedSizeVector<double,3>& wd  );
-    void SetTorque      ( const vctFixedSizeVector<double,3>& tau );
+    Errno SetRotation    ( const vctQuaternionRotation3<double>& q );
+    Errno SetVelocity    ( const vctFixedSizeVector<double,3>& w   );
+    Errno SetAcceleration( const vctFixedSizeVector<double,3>& wd  );
+    Errno SetTorque      ( const vctFixedSizeVector<double,3>& tau );
 
-    void GetRotation    ( vctQuaternionRotation3<double>& q, double& t );
-    void GetVelocity    ( vctFixedSizeVector<double,3>& w,   double& t );
-    void GetAcceleration( vctFixedSizeVector<double,3>& wd,  double& t );
-    void GetTorque      ( vctFixedSizeVector<double,3>& tau, double& t );    
+    Errno GetRotation    ( vctQuaternionRotation3<double>& q, double& t );
+    Errno GetVelocity    ( vctFixedSizeVector<double,3>& w,   double& t );
+    Errno GetAcceleration( vctFixedSizeVector<double,3>& wd,  double& t );
+    Errno GetTorque      ( vctFixedSizeVector<double,3>& tau, double& t );    
 
   }; // End SO3IO
 

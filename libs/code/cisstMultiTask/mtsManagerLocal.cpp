@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -36,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
+#include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 
 #if CISST_MTS_HAS_ICE
 #include "mtsComponentProxy.h"
@@ -43,9 +45,12 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsManagerProxyServer.h"
 #endif
 
-// Static variable definition
-mtsManagerLocal * mtsManagerLocal::Instance;
-mtsManagerLocal * mtsManagerLocal::InstanceReconfiguration;
+// Time server used by all tasks
+osaTimeServer TimeServer;
+bool TimeServerOriginSet = false;
+
+mtsManagerLocal * mtsManagerLocal::Instance = 0;
+mtsManagerLocal * mtsManagerLocal::InstanceReconfiguration = 0;
 osaMutex mtsManagerLocal::ConfigurationChange;
 
 bool mtsManagerLocal::UnitTestEnabled = false;
@@ -54,6 +59,19 @@ bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
 std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
+// System-wide logging: Define logger-related variables here so that
+// the logger doesn't have to call GetInstance() everytime it receives
+// log messages. {{
+mtsLODMultiplexerStreambuf * SystemLogMultiplexer = 0;
+bool           LogForwardEnabled = false;
+osaMutex       LogMutex;
+
+typedef std::list<mtsLogMessage> LogQueueType;
+LogQueueType   LogQueue;
+
+std::string    ThisProcessName;
+// }}
+
 mtsManagerLocal::mtsManagerLocal(void)
 {
     Initialize();
@@ -61,6 +79,7 @@ mtsManagerLocal::mtsManagerLocal(void)
     // In standalone mode, process name is set as ProcessNameOfLCMDefault by
     // default since there is only one instance of local task manager.
     ProcessName = ProcessNameOfLCMDefault;
+    ThisProcessName = ProcessName;
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: STANDALONE mode" << std::endl;
 
@@ -71,17 +90,19 @@ mtsManagerLocal::mtsManagerLocal(void)
 
     // Register process name to the global component manager
     if (!globalManager->AddProcess(ProcessName)) {
-        cmnThrow(std::runtime_error("Failed to register process name to the global component manager"));
+        cmnThrow(std::runtime_error("Failed to register process name to Global Component Manager"));
     }
 
     // Register process object to the global component manager
     if (!globalManager->AddProcessObject(this)) {
-        cmnThrow(std::runtime_error("Failed to register process object to the global component manager"));
+        cmnThrow(std::runtime_error("Failed to register process object to Global Component Manager"));
     }
 
     ManagerGlobal = globalManager;
 
     Configuration = LCM_CONFIG_STANDALONE;
+
+    SetGCMConnected(true); // Always true in case of standalone configuration
 }
 
 #if CISST_MTS_HAS_ICE
@@ -90,16 +111,20 @@ mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager) : Co
     Initialize();
 
     ProcessName = ProcessNameOfLCMWithGCM;
+    ThisProcessName = ProcessName;
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: NETWORK mode with GCM" << std::endl;
 
     // Register process object to the global component manager
     if (!globalComponentManager.AddProcessObject(this)) {
-        cmnThrow(std::runtime_error("Failed to register process object to the global component manager"));
+        cmnThrow(std::runtime_error("Failed to register process object to Global Component Manager"));
     }
+
     ManagerGlobal = &globalComponentManager;
 
     Configuration = LCM_CONFIG_NETWORKED_WITH_GCM;
+
+    SetGCMConnected(true); // Always true because LCM and GCM run in the same process in this configuration
 }
 
 mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
@@ -111,14 +136,19 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
                                    ProcessIP(thisProcessIP)
 {
     Initialize();
+    ThisProcessName = ProcessName;
 
     // Create network proxies
     if (!ConnectToGlobalComponentManager()) {
-        cmnThrow(std::runtime_error("Failed to initialize global component manager proxy"));
+        std::string s("Failed to connect to Global Component Manager: ");
+        s += globalComponentManagerIP;
+        cmnThrow(std::runtime_error(s));
     }
 
     // Give proxies some time to start up
-    osaSleep(2.0 * cmn_s);
+    osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+
+    SetGCMConnected(true);
 
     // Set this machine's IP
     SetIPAddress();
@@ -132,7 +162,11 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     // If process ip is not specified (""), the first ip address detected is used as primary ip
     if (ProcessIP == "") {
         std::vector<std::string> ipAddresses;
-        osaSocket::GetLocalhostIP(ipAddresses);
+        int ret = osaSocket::GetLocalhostIP(ipAddresses);
+        if (ret == 0) {
+             CMN_LOG_CLASS_INIT_ERROR << "Failed to get local host ip address.  Check network interface status." << std::endl;
+             return false;
+        }
         ProcessIP = ipAddresses[0];
 
         CMN_LOG_CLASS_INIT_VERBOSE << "Ip of this process was not specified. First ip detected ("
@@ -158,17 +192,19 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 
     // Run Ice proxy and connect to the global component manager
     if (!globalComponentManagerProxy->StartProxy(this)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to initialize global component manager proxy" << std::endl;
+        std::string s("Failed to connect to Global Component Manager: ");
+        s += GlobalComponentManagerIP;
+        CMN_LOG_CLASS_INIT_ERROR << s << std::endl;
         delete globalComponentManagerProxy;
         return false;
     }
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
-    osaSleep(1 * cmn_s);
+    osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
 
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to register process name to the global component manager" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to register process name to Global Component Manager" << std::endl;
         delete globalComponentManagerProxy;
         return false;
     }
@@ -177,10 +213,10 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     // to the global component manager.
     ManagerGlobal = globalComponentManagerProxy;
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager     : NETWORK mode" << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "Global component manager IP : " << GlobalComponentManagerIP << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "This process name           : " << ProcessName << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "This process IP             : " << ProcessIP << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager     : NETWORK mode" << std::endl
+                               << "Global component manager IP : " << GlobalComponentManagerIP << std::endl
+                               << "This process name           : " << ProcessName << std::endl
+                               << "This process IP             : " << ProcessIP << std::endl;
 
     return true;
 }
@@ -188,6 +224,7 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 
 mtsManagerLocal::~mtsManagerLocal()
 {
+    /*
     // If ManagerGlobal is not NULL, it means Cleanup() has not been called
     // before. Thus, it needs to be called here for safe and clean termination.
     if (ManagerGlobal) {
@@ -195,6 +232,8 @@ mtsManagerLocal::~mtsManagerLocal()
             Cleanup();
         //}
     }
+    */
+    Cleanup();
 }
 
 void mtsManagerLocal::Initialize(void)
@@ -206,19 +245,170 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Client = 0;
     ManagerComponent.Server = 0;
 
-    TimeServer.SetTimeOrigin();
+    SetGCMConnected(false);
+
+    SetupSystemLogger();
 }
 
 void mtsManagerLocal::Cleanup(void)
 {
+    LogThreadFinishWaiting = true;
+    LogTheadFinished.Wait();
+
     if (ManagerGlobal) {
         delete ManagerGlobal;
         ManagerGlobal = 0;
     }
 
-    ComponentMap.DeleteAll();
+    if (ManagerComponent.Client) {
+        delete ManagerComponent.Client;
+        ManagerComponent.Client = 0;
+    }
+
+    if (ManagerComponent.Server) {
+        delete ManagerComponent.Server;
+        ManagerComponent.Server = 0;
+    }
+
+    if (SystemLogMultiplexer) {
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
+    }
 
     __os_exit();
+}
+
+const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
+{
+    return TimeServer;
+}
+
+void mtsManagerLocal::SetupSystemLogger(void)
+{
+    LogThreadFinishWaiting = false;
+    LogThead.Create<mtsManagerLocal, void *>(this, &mtsManagerLocal::LogDispatchThread);
+
+    SystemLogMultiplexer = new mtsLODMultiplexerStreambuf();
+    if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
+        CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
+    }
+}
+
+bool mtsManagerLocal::IsLogForwardingEnabled(void) const {
+    return LogForwardEnabled;
+}
+
+void mtsManagerLocal::SetLogForwarding(bool activate) 
+{
+    // Initialize time server once
+    if (!TimeServerOriginSet) {
+        TimeServer.SetTimeOrigin();
+        TimeServerOriginSet = true;
+    }
+
+    LogForwardEnabled = activate;
+}
+
+bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 
+{
+    if (!Instance) return false;
+
+    if (!Instance->ManagerComponent.Client ||
+        !Instance->ManagerComponent.Client->CanForwardLog())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void mtsManagerLocal::LogDispatcher(const char * str, int len)
+{
+    if (!LogForwardEnabled) return;
+
+    bool deadlockAvoidance = false;
+    if (Instance) {
+        if (LogMutex.IsLocker() && Instance->MCCReadyForLogForwarding()) {
+            deadlockAvoidance = true;
+        }
+    }
+
+    if (!deadlockAvoidance) {
+        LogMutex.Lock();
+    }
+
+    if (len == 1 && str[0] == '\n') {
+        if (!deadlockAvoidance) {
+            LogMutex.Unlock();
+        }
+        return;
+    }
+
+    // MJ TODO: Deal with cases that len > 1000
+    mtsLogMessage log(str, len);
+    // Timestamping (as early as possible)
+    if (TimeServerOriginSet) {
+        log.SetTimestamp(TimeServer.GetAbsoluteTimeInSeconds());
+        log.SetValid(true);
+    } else {
+        log.SetTimestamp(0);
+        log.SetValid(false);
+    }
+    log.ProcessName = ThisProcessName;
+
+    if (!deadlockAvoidance) {
+        // Queue log message and return immediately
+        LogQueue.push_back(log);
+    } else {
+        // If current thread locked this mutex earlier, forward the log immediately
+        // to avoid deadlock.  Note that all validity checks are already done
+        // in the log dispatch thread in this case.
+        if (Instance->MCCReadyForLogForwarding()) {
+            Instance->ManagerComponent.Client->ForwardLog(log);
+        }
+    }
+    
+    if (!deadlockAvoidance) {
+        LogMutex.Unlock();
+    }
+}
+
+void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
+{
+    int count = 0;
+
+    while (!LogThreadFinishWaiting) {
+        // MJ: Note that this sleep introduces a bit of delay in forwarding 
+        // log messages.
+        osaSleep(1 * cmn_ms);
+
+        if (LogQueue.size() == 0) {
+            continue;
+        }
+
+        // Don't forward queued logs until everything is ready.
+        if (!MCCReadyForLogForwarding()) continue;
+
+        LogMutex.Lock();
+        count = 0;
+        for (LogQueueType::iterator it = LogQueue.begin(); it != LogQueue.end(); ) {
+            if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
+                ++it;
+                LogQueue.pop_front(); // FIFO
+            }
+
+            // release the lock not to block other threads too long
+            if (++count == 30) { // MJ TEMP: 30 is arbitrary for now
+                break;
+            }
+        }
+        LogMutex.Unlock();
+    }
+
+    LogTheadFinished.Raise();
+
+    return 0;
 }
 
 mtsManagerLocal * mtsManagerLocal::GetSafeInstance(void)
@@ -254,14 +444,14 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         // If no argument is specified, standalone configuration is set by default.
         if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
             Instance = new mtsManagerLocal;
-            CMN_LOG_INIT_WARNING << "Class mtsManagerLocal: Reconfiguration: Inter-process communication support is disabled" << std::endl;
+            CMN_LOG_INIT_WARNING << "WARNING: Inter-process communication support is disabled" << std::endl;
         } else {
             Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
         }
 
         // Create manager components
         if (!Instance->CreateManagerComponents()) {
-            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+            CMN_LOG_INIT_ERROR << "GetInstance: Failed to add internal manager components" << std::endl;
         }
 
         return Instance;
@@ -478,7 +668,7 @@ bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const
     else {
         mtsManagerGlobal * gcm = dynamic_cast<mtsManagerGlobal *>(ManagerGlobal);
         if (!gcm) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of global component manager" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of Global Component Manager" << std::endl;
             return false;
         }
         mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(gcm);
@@ -498,6 +688,7 @@ bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const
     return true;
 }
 
+
 bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
 {
     switch (Configuration) {
@@ -514,13 +705,14 @@ bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
             if (!Connect(ManagerComponent.Client->GetName(),
                          mtsManagerComponentBase::GetNameOfInterfaceLCMRequired(),
                          mtsManagerComponentBase::GetNameOfManagerComponentServer(),
-                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()))
+                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided())
+                )
             {
                 CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: failed to connect: "
-                    << ManagerComponent.Client->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceLCMRequired()
-                    << " - "
-                    << mtsManagerComponentBase::GetNameOfManagerComponentServer() << ":" << mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()
-                    << std::endl;
+                                         << ManagerComponent.Client->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceLCMRequired()
+                                         << " - "
+                                         << mtsManagerComponentBase::GetNameOfManagerComponentServer() << ":" << mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()
+                                         << std::endl;
                 return false;
             }
             break;
@@ -555,14 +747,14 @@ bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
                          mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()))
             {
                 CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: failed to connect: "
-                    << mtsManagerGlobal::GetInterfaceUID(this->ProcessName,
-                                                         ManagerComponent.Client->GetName(),
-                                                         mtsManagerComponentBase::GetNameOfInterfaceLCMRequired())
-                    << " - "
-                    << mtsManagerGlobal::GetInterfaceUID(ProcessNameOfLCMWithGCM,
-                                                         mtsManagerComponentBase::GetNameOfManagerComponentServer(),
-                                                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided())
-                    << std::endl;
+                                         << mtsManagerGlobal::GetInterfaceUID(this->ProcessName,
+                                                                              ManagerComponent.Client->GetName(),
+                                                                              mtsManagerComponentBase::GetNameOfInterfaceLCMRequired())
+                                         << " - "
+                                         << mtsManagerGlobal::GetInterfaceUID(ProcessNameOfLCMWithGCM,
+                                                                              mtsManagerComponentBase::GetNameOfManagerComponentServer(),
+                                                                              mtsManagerComponentBase::GetNameOfInterfaceGCMProvided())
+                                         << std::endl;
                 return false;
             }
             break;
@@ -572,6 +764,7 @@ bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
 
     return true;
 }
+
 
 bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & componentName)
 {
@@ -593,13 +786,12 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     const std::string nameOfinterfaceComponentRequired
         = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
     if (!Connect(managerComponent->GetName(), nameOfinterfaceComponentRequired,
-            componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()))
-    {
+                 componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: failed to connect: "
-            << managerComponent->GetName() << ":" << nameOfinterfaceComponentRequired
-            << " - "
-            << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()
-            << std::endl;
+                                 << managerComponent->GetName() << ":" << nameOfinterfaceComponentRequired
+                                 << " - "
+                                 << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()
+                                 << std::endl;
         return false;
     }
 
@@ -608,13 +800,12 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     // provided interface.
     if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
         if (!Connect(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-            managerComponent->GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()))
-        {
+                     managerComponent->GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: failed to connect: "
-                << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
-                << " - "
-                << managerComponent->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
-                << std::endl;
+                                     << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
+                                     << " - "
+                                     << managerComponent->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
+                                     << std::endl;
             return false;
         }
     }
@@ -622,15 +813,16 @@ bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & compon
     return true;
 }
 
+
 mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName,
                                                            const std::string & constructorArgSerialized)
 {
-    cmnGenericObject *baseObject = 0;
-    mtsComponent *newComponent = 0;
-    const cmnClassServicesBase *services = cmnClassRegister::FindClassServices(className);
+    cmnGenericObject * baseObject = 0;
+    mtsComponent * newComponent = 0;
+    const cmnClassServicesBase * services = cmnClassRegister::FindClassServices(className);
     if (!services) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: unable to create component of type \""
-                                 << className << "\" -- no services" << std::endl;
+                                 << className << "\" -- no services (make sure the macros CMN_DECLARE_SERVICES and CMN_IMPLEMENT_SERVICES have been used)" << std::endl;
         return 0;
     }
     bool isComponent = services->IsDerivedFrom<mtsComponent>();
@@ -676,7 +868,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                     std::stringstream ss;
                     tempRef.ToStreamRaw(ss);
                     if (!tempArg->FromStreamRaw(ss)) {
-                        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: Could not parse \"" 
+                        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: Could not parse \""
                                                  << componentName << "\" for constructor of "
                                                  << className << std::endl;
                     }
@@ -928,7 +1120,8 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const b
     // Notify the global component manager of the removal of this component
     if (notifyGCM) {
         if (!ManagerGlobal->RemoveComponent(ProcessName, componentName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component at global component manager: " << componentName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove \"" << componentName << "\""
+                << "from component Global Component Manager" << std::endl;
             return false;
         }
     }
@@ -1062,6 +1255,16 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
         name += desc.CommandsQualifiedRead[i].Name;
         namesOfCommands.push_back(name);
     }
+    for (size_t i = 0; i < desc.CommandsVoidReturn.size(); ++i) {
+        name = "v) ";
+        name += desc.CommandsVoidReturn[i].Name;
+        namesOfCommands.push_back(name);
+    }
+    for (size_t i = 0; i < desc.CommandsWriteReturn.size(); ++i) {
+        name = "w) ";
+        name += desc.CommandsWriteReturn[i].Name;
+        namesOfCommands.push_back(name);
+    }
 }
 
 void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
@@ -1118,6 +1321,16 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunct
     for (size_t i = 0; i < desc.FunctionQualifiedReadNames.size(); ++i) {
         name = "Q) ";
         name += desc.FunctionQualifiedReadNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (size_t i = 0; i < desc.FunctionVoidReturnNames.size(); ++i) {
+        name = "v) ";
+        name += desc.FunctionVoidReturnNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (size_t i = 0; i < desc.FunctionWriteReturnNames.size(); ++i) {
+        name = "w) ";
+        name += desc.FunctionWriteReturnNames[i];
         namesOfFunctions.push_back(name);
     }
 }
@@ -1211,6 +1424,7 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             }
             break;
         default:
+            CMN_LOG_CLASS_INIT_ERROR << "GetDescriptionOfCommand: type of command not handled for command \"" << commandName << "\"" << std::endl;
             description = "Failed to get command description";
             return;
     }
@@ -1339,6 +1553,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
             }
             break;
         default:
+            CMN_LOG_CLASS_INIT_ERROR << "GetDescriptionOfFunction: type of function not handled for command \"" << functionName << "\"" << std::endl;
             description = "Failed to get function description";
             return;
     }
@@ -1563,6 +1778,8 @@ bool mtsManagerLocal::CreateManagerComponents(void)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Successfully created manager components" << std::endl;
 
+    ManagerComponent.Client->MCSReady = true;
+    
     return true;
 }
 
@@ -1734,7 +1951,7 @@ ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientCompone
                                ProcessName, clientComponentName, clientInterfaceRequiredName,
                                ProcessName, serverComponentName, serverInterfaceProvidedName);
     if (connectionID == InvalidConnectionID) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from the Global Component Manager: "
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from Global Component Manager: "
                                  << clientComponentName << ":" << clientInterfaceRequiredName << " - "
                                  << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
     } else {
@@ -1788,10 +2005,11 @@ void mtsManagerLocal::GetIPAddressList(std::vector<std::string> & ipAddresses)
     osaSocket::GetLocalhostIP(ipAddresses);
 }
 
-bool mtsManagerLocal::Connect(
-    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-    const unsigned int retryCount)
+bool mtsManagerLocal::Connect(const std::string & clientProcessName,
+                              const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                              const std::string & serverProcessName,
+                              const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+                              const unsigned int retryCount)
 {
     // Prevent this method from being used to connect two local interfaces
     if (clientProcessName == serverProcessName) {
@@ -1851,8 +2069,8 @@ bool mtsManagerLocal::Connect(
             serverProcessName, serverComponentName, serverInterfaceProvidedName);
         if (connectionID == InvalidConnectionID) {
             CMN_LOG_CLASS_INIT_ERROR << "Connect: Waiting for connection to be established.... Retrying "
-                << count++ << "/" << retryCount << std::endl;
-            osaSleep(1 * cmn_s);
+                                     << count++ << "/" << retryCount << std::endl;
+            osaSleep(1.0 * cmn_s);
         } else {
             break;
         }
@@ -1921,11 +2139,18 @@ bool mtsManagerLocal::Connect(
 
 bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 {
-    bool success = ManagerGlobal->Disconnect(connectionID);
+    // If GCM is not connected, don't reqeust disconnection
+    if (!IsGCMActive()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: GCM disconnected -- Disconnection request ignored (connection id [ " << connectionID << " ])" << std::endl;
+        return true;
+    }
 
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection request failed: connection id [ " << connectionID << " ]" << std::endl;
-        return false;
+    bool success = ManagerGlobal->Disconnect(connectionID);
+    if (IsGCMActive()) { // Connection to GCM can be disconnected while executing the line above
+        if (!success) {
+            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: disconnection request failed: connection id [ " << connectionID << " ]" << std::endl;
+            return false;
+        }
     }
 
     return true;
@@ -1935,17 +2160,28 @@ bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
 {
-    bool success = ManagerGlobal->Disconnect(
-        ProcessName, clientComponentName, clientInterfaceRequiredName,
-        ProcessName, serverComponentName, serverInterfaceProvidedName);
-
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: disconnection request failed: \""
+    if (!IsGCMActive()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: GCM disconnected -- disconnection request ignored: \""
             << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceRequiredName)
             << " - "
             << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceProvidedName)
             << std::endl;
-        return false;
+        return true;
+    }
+
+    bool success = ManagerGlobal->Disconnect(
+        ProcessName, clientComponentName, clientInterfaceRequiredName,
+        ProcessName, serverComponentName, serverInterfaceProvidedName);
+
+    if (IsGCMActive()) { // Connection to GCM can be disconnected while executing the line above
+        if (!success) {
+            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: disconnection request failed: \""
+                << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceRequiredName)
+                << " - "
+                << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceProvidedName)
+                << std::endl;
+            return false;
+        }
     }
 
     return true;
@@ -2267,7 +2503,7 @@ bool mtsManagerLocal::CreateInterfaceProvidedProxy(
     // Inform the global component manager of the creation of provided interface proxy
     if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, serverComponentProxyName, interfaceProvidedName)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: "
-                                 << "failed to add provided interface proxy to global component manager: "
+                                 << "failed to add provided interface proxy to Global Component Manager: "
                                  << ProcessName << ":" << serverComponentProxyName << ":" << interfaceProvidedName << std::endl;
         return false;
     }
@@ -2312,7 +2548,7 @@ bool mtsManagerLocal::CreateInterfaceRequiredProxy(
     // Inform the global component manager of the creation of provided interface proxy
     if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, clientComponentProxyName, requiredInterfaceName)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: "
-                                 << "failed to add required interface proxy to global component manager: "
+                                 << "failed to add required interface proxy to Global Component Manager: "
                                  << ProcessName << ":" << clientComponentProxyName << ":" << requiredInterfaceName << std::endl;
         return false;
     }
@@ -2452,14 +2688,16 @@ bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
 
     return true;
 }
-#endif
 
-#if CISST_MTS_HAS_ICE
 void mtsManagerLocal::SetIPAddress(void)
 {
     // Fetch all ip addresses available on this machine.
     std::vector<std::string> ipAddresses;
-    osaSocket::GetLocalhostIP(ipAddresses);
+    int ret = osaSocket::GetLocalhostIP(ipAddresses);
+    if (ret == 0) {
+        CMN_LOG_CLASS_INIT_WARNING << "Failed to get local host ip address" << std::endl;
+        return;
+    }
 
     for (size_t i = 0; i < ipAddresses.size(); ++i) {
         CMN_LOG_CLASS_INIT_VERBOSE << "IP detected: (" << i + 1 << ") " << ipAddresses[i] << std::endl;
@@ -2632,7 +2870,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     const ConnectionIDType connectionID           = description.ConnectionID;
     const std::string serverProcessName           = description.Server.ProcessName;
     const std::string serverComponentName         = description.Server.ComponentName;
-    const std::string serverInterfaceProvidedName = //description.Server.InterfaceName; 
+    const std::string serverInterfaceProvidedName = //description.Server.InterfaceName;
         mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
             description.Server.InterfaceName, connectionID);
     const std::string clientProcessName           = description.Client.ProcessName;
@@ -2696,8 +2934,8 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
     // If server proxy is already running, fetch the access information
     else {
         // MJ: this should not be reached because each connection has its own provided interface instance
-        CMN_ASSERT(false); 
-        
+        CMN_ASSERT(false);
+
         if (!ManagerGlobal->GetInterfaceProvidedProxyAccessInfo(clientProcessName,
                 serverProcessName, serverComponentName, serverInterfaceProvidedName, endpointAccessInfo))
         {
@@ -2757,7 +2995,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
         CMN_LOG_CLASS_INIT_ERROR << "ConnectClientSideInterface: failed to notify GCM of this connection" << std::endl;
         goto ConnectClientSideInterfaceError;
     }
-    CMN_LOG_CLASS_INIT_VERBOSE << "ConnectClientSideInterface: successfully informed global component manager of this connection: connection id = "
+    CMN_LOG_CLASS_INIT_VERBOSE << "ConnectClientSideInterface: successfully informed Global Component Manager of this connection: connection id = "
                                << connectionID << std::endl;
 
     // Register this connection information to a provided interface proxy

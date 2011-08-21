@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <cisstCommon/cmnUnits.h>
+#include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
@@ -33,6 +34,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+
+// Always include last
+#include "mtsTestExport.h"
 
 // overall constant, assumes this a maximum delay to transition from
 // one state to another
@@ -237,7 +241,7 @@ public:
         mtsTaskPeriodic(name, 1.0 * cmn_ms),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault();
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -266,8 +270,9 @@ public:
 };
 
 template <class _elementType>
-class mtsTestDevice1: public mtsComponent
+class CISST_EXPORT mtsTestDevice1: public mtsComponent
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
     typedef _elementType value_type;
     mtsTestInterfaceProvided<value_type> InterfaceProvided1;
@@ -278,7 +283,7 @@ public:
         mtsComponent(name),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -301,6 +306,12 @@ public:
     void Configure(const std::string & CMN_UNUSED(filename) = "") {}
 };
 
+typedef mtsTestDevice1<int> mtsTestDevice1_int;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_int);
+
+typedef mtsTestDevice1<mtsInt> mtsTestDevice1_mtsInt;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_mtsInt);
+
 //-----------------------------------------------------------------------------
 //  Continuous1: (P1:Continuous1:r1 - P2:Continuous1:p2)
 //  - provided interface: p1, p2
@@ -320,7 +331,7 @@ public:
         InterfaceProvided1(executionDelay),
         InterfaceProvided2(executionDelay)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -365,7 +376,7 @@ public:
         InterfaceProvided1(executionDelay),
         InterfaceProvided2(executionDelay)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -411,7 +422,7 @@ public:
         InterfaceProvided1(executionDelay),
         CounterCreateCall(0)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -483,7 +494,7 @@ public:
         mtsComponent(name),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -516,7 +527,7 @@ public:
         mtsTaskFromSignal(name),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFile(name + "-log.txt");
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -586,7 +597,7 @@ public:
         CollectionRunning(false),
         SamplesCollected(0)
     {
-        UseSeparateLogFileDefault();
+        UseSeparateLogFileDefault(false);
 
         mtsInterfaceRequired * required;
         required = AddInterfaceRequired("TestComponent");

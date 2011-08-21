@@ -34,8 +34,37 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT svlSampleQueue
 {
 public:
-    svlSampleQueue(svlStreamType type, int length);
+    svlSampleQueue(svlStreamType type, unsigned int size);
     ~svlSampleQueue();
+
+    bool Push(const svlSample* sample);
+    svlSample* Pull(double timeout = 5.0);
+
+    svlStreamType GetType();
+    unsigned int GetLength();
+    unsigned int GetUsage();
+    double GetUsageRatio();
+    unsigned int GetDroppedSampleCount();
+    svlSample* Peek();
+
+private:
+    svlStreamType Type;
+    unsigned int Size;
+    unsigned int DroppedSamples;
+    std::list<svlSample*> UnusedItems;
+    std::list<svlSample*> BufferedItems;
+    svlSample* PullItem;
+
+    osaCriticalSection CS;
+    osaThreadSignal NewSampleEvent;
+};
+
+/*
+class CISST_EXPORT svlSampleQueu2
+{
+public:
+    svlSampleQueu2(svlStreamType type, int length);
+    ~svlSampleQueu2();
 
     svlStreamType GetType();
     int GetLength();
@@ -50,7 +79,7 @@ public:
     svlSample* Peek();
 
 private:
-    svlSampleQueue();
+    svlSampleQueu2();
 
     svlStreamType Type;
     const int Length;
@@ -63,6 +92,7 @@ private:
     osaCriticalSection CS;
     osaThreadSignal NewSampleEvent;
 };
+*/
 
 #endif // _svlSampleQueue_h
 

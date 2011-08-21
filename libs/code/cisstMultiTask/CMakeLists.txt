@@ -61,6 +61,8 @@ set (SOURCE_FILES
      mtsInterfaceRequiredOrInput.cpp
      mtsIntervalStatistics.cpp
 
+     mtsLODMultiplexerStreambuf.cpp
+
      mtsMailBox.cpp
      mtsManagerLocal.cpp
      mtsManagerGlobal.cpp
@@ -155,6 +157,8 @@ set (HEADER_FILES
      mtsInterfaceRequired.h
      mtsInterfaceRequiredOrInput.h
 
+     mtsLODMultiplexerStreambuf.h
+
      mtsMacros.h
      mtsMailBox.h
      mtsManagerComponentBase.h
@@ -205,6 +209,7 @@ endif (ICE_FOUND)
 if (CISST_MTS_HAS_ICE)
 
   set (SOURCE_FILES ${SOURCE_FILES}
+       mtsInterfaceRequiredProxy.cpp
        mtsComponentInterfaceProxyServer.cpp
        mtsComponentInterfaceProxyClient.cpp
        mtsManagerProxyServer.cpp
@@ -223,6 +228,7 @@ if (CISST_MTS_HAS_ICE)
        mtsProxyBaseServer.h
        mtsProxySerializer.h
 
+       mtsInterfaceRequiredProxy.h
        mtsComponentInterfaceProxyServer.h
        mtsComponentInterfaceProxyClient.h
        mtsManagerProxyServer.h
@@ -230,12 +236,19 @@ if (CISST_MTS_HAS_ICE)
 
        mtsCommandProxyBase.h
        mtsCommandVoidProxy.h
+       mtsCommandVoidProxyForReturnEvent.h
+       mtsCommandVoidReturnProxy.h
        mtsCommandWriteProxy.h
+       mtsCommandWriteReturnProxy.h
        mtsCommandReadProxy.h
        mtsCommandQualifiedReadProxy.h
+
        mtsFunctionReadProxy.h
        mtsFunctionWriteProxy.h
-       mtsFunctionQualifiedReadProxy.h
+       mtsFunctionReturnProxyBase.h
+       mtsFunctionVoidReturnProxy.h
+       mtsFunctionWriteReturnProxy.h
+       mtsMulticastCommandVoidProxy.h
        mtsMulticastCommandWriteProxy.h
        mtsEventWriteGeneratorProxy.h
        )

@@ -145,7 +145,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       performs a wakeup (signal) on the task's thread. */
     mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                          mtsInterfaceQueueingPolicy queueingPolicy,
-                         mtsCallableVoidBase * postCommandQueuedCallable = 0);
+                         mtsCallableVoidBase * postCommandQueuedCallable = 0,
+                         bool isProxy = false);
 
     /*! Default Destructor. */
     virtual ~mtsInterfaceProvided();
@@ -567,10 +568,11 @@ protected: // PK TEMP
 
     /*! types and containers to store interfaces cloned for thread safety */
     typedef std::pair<unsigned int, ThisType *> InterfaceProvidedCreatedPairType;
-    //typedef std::vector<InterfaceProvidedCreatedPairType> InterfaceProvidedCreatedVectorType;
     typedef std::list<InterfaceProvidedCreatedPairType> InterfaceProvidedCreatedListType;
-    //InterfaceProvidedCreatedVectorType InterfacesProvidedCreated;
     InterfaceProvidedCreatedListType InterfacesProvidedCreated;
+
+    /*! Indicates if this interface is used to generate a proxy */
+    bool IsProxy;
 
     /*! Mailbox (if supported).  Mailboxes should only be provided for
       end user provided interfaces (if needed).  Factory interfaces
@@ -589,6 +591,10 @@ protected: // PK TEMP
 
     /*! Command to trigger void event for blocking commands. */
     mtsCommandVoid * BlockingCommandExecuted;
+
+    /*! Command to trigger void event for blocking commands with a
+      return value. */
+    mtsCommandVoid * BlockingCommandReturnExecuted;
 
     /*! If this interface was created using an existing one, keep a
       pointer on the original one. */
@@ -666,6 +672,7 @@ protected:
     //@{
     mtsCommandVoid * AddCommandVoid(mtsCommandVoid * command);
     mtsCommandVoidReturn * AddCommandVoidReturn(mtsCommandVoidReturn * command);
+    mtsCommandWriteReturn * AddCommandWriteReturn(mtsCommandWriteReturn * command);
     mtsCommandRead * AddCommandRead(mtsCommandRead * command);
     mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCommandQualifiedRead * command);
     //@}

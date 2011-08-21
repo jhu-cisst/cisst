@@ -32,8 +32,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskmtsDouble);
 #define FLTK_CRITICAL_SECTION_TEMPORARY_RELEASE Fl::unlock(); Fl::awake(); for (bool _firstRun = true; _firstRun; _firstRun = false, Fl::lock())
 
 template <class _dataType>
-clientTask<_dataType>::clientTask(const std::string & taskName, double period):
-    clientTaskBase(taskName, period)
+clientTask<_dataType>::clientTask(const std::string & taskName):
+    clientTaskBase(taskName, 50.0 * cmn_ms)
 {
     // to communicate with the interface of the resource
     mtsInterfaceRequired * required = AddInterfaceRequired("Required");
@@ -44,8 +44,8 @@ clientTask<_dataType>::clientTask(const std::string & taskName, double period):
         required->AddFunction("QualifiedRead", this->QualifiedRead);
         required->AddFunction("VoidSlow", this->VoidSlow);
         required->AddFunction("WriteSlow", this->WriteSlow);
-        // required->AddFunction("VoidReturn", this->VoidReturn);
-        // required->AddFunction("WriteReturn", this->WriteReturn);
+        required->AddFunction("VoidReturn", this->VoidReturn);
+        required->AddFunction("WriteReturn", this->WriteReturn);
         required->AddEventHandlerVoid(&clientTask<_dataType>::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask<_dataType>::EventWriteHandler, this, "EventWrite");
     }
@@ -97,6 +97,7 @@ void clientTask<_dataType>::Run(void)
 {
     double valueToWrite;
     _dataType valueToRead;
+    valueToRead = 3.14;
 
     if (this->UIOpened()) {
         ProcessQueuedEvents();
@@ -186,7 +187,7 @@ void clientTask<_dataType>::Run(void)
                 UI.WriteReturnRequested = false;
             }
 
-            UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 100.0));
+            UI.HeartBeat->value(50.0 + 50.0 * sin(static_cast<double>(this->GetTick()) / 20.0));
         } // end of FLTK critical section
     }
 }

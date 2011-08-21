@@ -8,6 +8,10 @@
 
 int main( int argc, char** argv ){
 
+  cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
+  cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
+
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   devGLUT glut(argc, argv);
@@ -19,11 +23,10 @@ int main( int argc, char** argv ){
 
   vctDynamicVector<double> qinit( 7, 0.0 );
   vctDynamicVector<double> qfinal( 7, 1.0 );
-  std::vector< vctDynamicVector<double> > Q;
-  Q.push_back( qinit );
-  Q.push_back( qfinal );
-  Q.push_back( qinit );
-  devSetPoints setpoints( "setpoints", Q );
+
+  devSetPoints setpoints( "setpoints", 7 );
+  setpoints.Insert( qfinal );
+  setpoints.Insert( qinit );
   taskManager->AddComponent(&setpoints);
   
   vctDynamicVector<double> qdmax( 7, 0.1 );
@@ -39,7 +42,7 @@ int main( int argc, char** argv ){
 		       qddmax );
   taskManager->AddComponent(&trajectory);
 
-  std::string path("libs/etc/cisstRobot/WAM/");
+  std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector<std::string> links;
   links.push_back( path + "l1.obj" );
   links.push_back( path + "l2.obj" );
@@ -75,7 +78,7 @@ int main( int argc, char** argv ){
 
 
   if (!taskManager->Connect( trajectory.GetName(), devTrajectory::Input,
-                             setpoints.GetName(),  devSetPoints::Output ) )
+                             setpoints.GetName(),  devSetPoints::OutputRn ) )
     {
       std::cerr << "Connect failed: " 
 		<< trajectory.GetName() << ":" << devTrajectory::Input

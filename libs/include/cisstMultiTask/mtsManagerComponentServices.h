@@ -39,7 +39,7 @@ protected:
     /*! Internal functions to use services provided by manager component client */
     // Dynamic component management
     struct ManagementStruct {
-        mtsFunctionWrite Create;
+        mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
         mtsFunctionWrite Connect;
         mtsFunctionWrite Disconnect;
@@ -48,6 +48,7 @@ protected:
         mtsFunctionWrite Resume;
         mtsFunctionQualifiedRead GetState;     // in: process, component, out: state
         mtsFunctionQualifiedRead LoadLibrary;  // in: process, library name, out: result (bool)
+        mtsFunctionWrite PrintLog;
     } ServiceComponentManagement;
 
     // Getters
@@ -113,8 +114,8 @@ public:
     /*! Wrappers for internal function objects */
     //@{
     bool ComponentCreate(const std::string & className, const std::string & componentName) const;
-    bool ComponentCreate(
-        const std::string& processName, const std::string & className, const std::string & componentName) const;
+    bool ComponentCreate(const std::string & processName, const std::string & className,
+                         const std::string & componentName) const;
 
     bool ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const;
     bool ComponentCreate(
@@ -124,14 +125,12 @@ public:
     bool ComponentConfigure(
         const std::string& processName, const std::string & componentName, const std::string & configString) const;
 
-    bool Connect(
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
-    bool Connect(
-        const std::string & clientProcessName,
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+    bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+    bool Connect(const std::string & clientProcessName,
+                 const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & serverProcessName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
     bool Connect(const mtsDescriptionConnection & connection) const;
 
     bool Disconnect(

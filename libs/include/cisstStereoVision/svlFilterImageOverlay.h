@@ -43,6 +43,7 @@ public:
     ~svlFilterImageOverlay();
 
     int AddInputImage(const std::string &name);
+    int AddInputMatrix(const std::string &name);
     int AddInputTargets(const std::string &name);
     int AddInputBlobs(const std::string &name);
     int AddInputText(const std::string &name);
@@ -61,11 +62,13 @@ private:
     osaCriticalSection CS;
 
     unsigned int ImageInputsToAddUsed;
+    unsigned int MatrixInputsToAddUsed;
     unsigned int TargetInputsToAddUsed;
     unsigned int BlobInputsToAddUsed;
     unsigned int TextInputsToAddUsed;
     unsigned int OverlaysToAddUsed;
     vctDynamicVector<std::string> ImageInputsToAdd;
+    vctDynamicVector<std::string> MatrixInputsToAdd;
     vctDynamicVector<std::string> TargetInputsToAdd;
     vctDynamicVector<std::string> BlobInputsToAdd;
     vctDynamicVector<std::string> TextInputsToAdd;

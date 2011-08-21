@@ -62,7 +62,7 @@ protected:
         function objects using named map with (key = process name, 
         value = function object set instance) */
     typedef struct {
-        mtsFunctionWrite ComponentCreate;
+        mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
@@ -73,11 +73,15 @@ protected:
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
         mtsFunctionQualifiedRead LoadLibrary;
+        mtsFunctionWrite PrintLog;
         mtsFunctionRead GetListOfComponentClasses;
     } InterfaceGCMFunctionType;
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
     InterfaceGCMFunctionMapType InterfaceGCMFunctionMap;
+    
+    /*! System-wide thread-safe logger */
+    mtsFunctionWrite PrintLog;
 
     /*! Protected constructor to prevent users from createing this component */
     mtsManagerComponentServer(mtsManagerGlobal * gcm);
@@ -97,9 +101,9 @@ public:
     bool AddNewClientProcess(const std::string & clientProcessName);
 
     /*! Commands */
-    void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
@@ -113,6 +117,7 @@ public:
     void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, InterfaceProvidedDescription & description) const;
     void InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, InterfaceRequiredDescription & description) const;
     void InterfaceGCMCommands_LoadLibrary(const mtsDescriptionLoadLibrary & lib, bool & result) const;
+    void InterfaceGCMCommands_PrintLog(const mtsLogMessage & log);
     void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName, 
                                                         std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
 
@@ -121,6 +126,7 @@ public:
     mtsFunctionWrite InterfaceGCMEvents_AddConnection;
     mtsFunctionWrite InterfaceGCMEvents_RemoveConnection;
     mtsFunctionWrite InterfaceGCMEvents_ChangeState;
+    mtsFunctionVoid InterfaceGCMEvents_MCSReady;
 
     /*! Methods for global component manager (GCM) */
     void AddComponentEvent(const mtsDescriptionComponent &component);

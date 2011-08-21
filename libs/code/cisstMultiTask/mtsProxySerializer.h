@@ -59,7 +59,7 @@ public:
         delete DeSerializer;
     }
 
-    void Serialize(const mtsGenericObject & originalObject, std::string & serializedObject) {
+    bool Serialize(const mtsGenericObject & originalObject, std::string & serializedObject) {
         try {
             SerializationBuffer.str("");
             Serializer->Serialize(originalObject);
@@ -68,10 +68,12 @@ public:
             CMN_LOG_RUN_ERROR << "Serialization failed: " << originalObject.ToString() << std::endl;
             CMN_LOG_RUN_ERROR << e.what() << std::endl;
             serializedObject = "";
+            return false;
         }
+        return true;
     }
 
-    void DeSerialize(const std::string & serializedObject, mtsGenericObject & originalObject) {
+    bool DeSerialize(const std::string & serializedObject, mtsGenericObject & originalObject) {
         try {
             DeSerializationBuffer.str("");
             DeSerializationBuffer << serializedObject;
@@ -79,7 +81,9 @@ public:
         }  catch (std::runtime_error e) {
             originalObject.SetValid(false);
             CMN_LOG_RUN_ERROR << "DeSerialization failed: " << e.what() << std::endl;
+            return false;
         }
+        return true;
     }
 
     // MJ: This method internally allocates memory. Caller should deallocate it.

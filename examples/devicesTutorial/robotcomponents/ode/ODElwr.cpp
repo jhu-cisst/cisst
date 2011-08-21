@@ -33,10 +33,8 @@ int main(){
   taskManager->AddComponent( camera );
   
   vctDynamicVector<double> qinit(7, 0.0), qfinal(7, 1.0), qdmax( 7, 0.1 );
-  std::vector< vctDynamicVector<double> > Q;
-  Q.push_back( qfinal );
 
-  devSetPoints setpoints( "setpoints", Q );
+  devSetPoints setpoints( "setpoints", 7 );
   taskManager->AddComponent( &setpoints );
 
   devLinearRn trajectory( "trajectory",
@@ -74,7 +72,7 @@ int main(){
   taskManager->AddComponent( LWR );
 
   // Connect trajectory to robot
-  taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
+  taskManager->Connect( setpoints.GetName(),  devSetPoints::OutputRn,
 			trajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
@@ -83,6 +81,11 @@ int main(){
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
+
+  std::cout << "ENTER to move." << std::endl;
+  cmnGetChar();
+  setpoints.Insert( qfinal );
+  setpoints.Latch();
 
   std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();

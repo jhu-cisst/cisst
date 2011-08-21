@@ -30,13 +30,12 @@ int main(){
 			   Znear, Zfar );
   // Add the camera component
   taskManager->AddComponent( camera );
-  
-  vctDynamicVector<double> qinit(7, 0.0), qfinal( 7, 1.0 ), qdmax( 7, 0.1 );
-  std::vector< vctDynamicVector<double> > Q;
-  Q.push_back( qfinal );
-  Q.push_back( qinit );
 
-  devSetPoints setpoints( "setpoints", Q );
+  vctDynamicVector<double> qinit(7, 0.0);
+  vctDynamicVector<double> qfinal(7,  -1.0, -0.5, -1.5, 2.2, 0.6, -1.1,  0.54 );
+  vctDynamicVector<double> qdmax(7, 0.25 );
+
+  devSetPoints setpoints( "setpoints", 7 );
   taskManager->AddComponent( &setpoints );
 
   devLinearRn trajectory( "trajectory",
@@ -49,7 +48,6 @@ int main(){
 			  qdmax );
   taskManager->AddComponent( &trajectory );
 
-
   // WAM stuff
   std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
   std::vector< std::string > models;
@@ -61,20 +59,26 @@ int main(){
   models.push_back( path+"l6.obj" );
   models.push_back( path+"l7.obj" );
 
+  vctFrame4x4<double> Rtw0( vctMatrixRotation3<double>( 0.0, 0.0, -1.0,
+							  0.0, 1.0, 0.0,
+							  1.0, 0.0, 0.0 ),
+			    vctFixedSizeVector<double,3>( 0.0 ) );
+
+
   devOSGManipulator* WAM = new devOSGManipulator( "WAM",
 						  0.01,
 						  devManipulator::ENABLED,
 						  OSA_CPU1,
 						  world,
 						  path+"wam7.rob",
-						  vctFrame4x4<double>(),
+						  Rtw0,
 						  qinit,
 						  models,
 						  path+"l0.obj" );
   taskManager->AddComponent( WAM );
 
   // Connect trajectory to robot
-  taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
+  taskManager->Connect( setpoints.GetName(),  devSetPoints::OutputRn,
 			trajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
@@ -83,6 +87,12 @@ int main(){
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
+
+  std::cout << "ENTER to move." << std::endl;
+  cmnGetChar();
+
+  setpoints.Insert( qfinal );
+  setpoints.Latch();
 
   std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();

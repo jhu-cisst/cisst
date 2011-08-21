@@ -23,59 +23,68 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <AsCL/AsCL_Base_Stuff.h>
 
+class osaStopwatch;
+
 //------------------------------------------------------------------------------
 class mtsStealthlink_AsCL_IO_Watch: public AsCL_IO_Watch
 {
- public:
+public:
 
   mtsStealthlink_AsCL_IO_Watch();
   virtual ~mtsStealthlink_AsCL_IO_Watch();
 
   virtual int AddWatch(int, void *, void *);
-  virtual void RemoveWatch();
+  virtual void RemoveWatch(void);
+  void CheckWatch(void);
 
- private:
-  int _handler;
-  int fd;
+private:
 
   typedef void (*mtsStealthlink_CallBack)(int, void *);
-  typedef void (*GTK_CallBack)(void *);
-  static GTK_CallBack callback;
-  static void WatchCallback(int, void *);   // mtsStealthlink_CallBack
+  typedef void (*Watch_Callback)(void *);
+
+  int fd;
+  Watch_Callback Callback;
+  void *ClientPtr;
 };
 
 
 //------------------------------------------------------------------------------
 class mtsStealthlink_AsCL_Timeout: public AsCL_Timeout
 {
- public:
+public:
   mtsStealthlink_AsCL_Timeout();
   ~mtsStealthlink_AsCL_Timeout();
 
+  // Units of tmo_val?  This implementation assumes milliseconds.
   virtual int  AddTimeout(int tmo_val, void * func, void * obj);
   virtual void RemoveTimeout(void);
+  void CheckTimeout(void);
 
- private:
-  int _handler;
-  void * dataobj;
+private:
+  typedef int (*Timeout_Callback) (void * data);
 
-  typedef int (*StealthFunction) (void * data);
-  static StealthFunction callback;
-  static double timeout;
-  static void MyCallback(void * data);
+  osaStopwatch *StealthlinkTimer;
 
+  double Timeout;   // seconds
+  Timeout_Callback Callback;
+  void *DataObj;
 };
 
 
 //------------------------------------------------------------------------------
 class mtsStealthlink_AsCL_Utils: public AsCL_Utils
 {
- public:
+  mtsStealthlink_AsCL_IO_Watch *curWatch;
+  mtsStealthlink_AsCL_Timeout *curTimeout;
+
+public:
   mtsStealthlink_AsCL_Utils();
   virtual ~mtsStealthlink_AsCL_Utils();
 
   virtual AsCL_IO_Watch * new_IO_Watch(void);
   virtual AsCL_Timeout * new_Timeout(void);
+
+  void CheckCallbacks(void);
 };
 
 #endif // _mtsStealthlink_AsCL_Stuff_h

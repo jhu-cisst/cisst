@@ -12,16 +12,22 @@
 #
 # --- end cisst license ---
 
-add_library (cisstStealthlink
+add_library (cisstStealthlink ${IS_SHARED}
              ../cisstStealthlinkExport.h
              mtsStealthlink.cpp
              ../mtsStealthlink.h
              ../mtsStealthlinkTypes.h
+             mtsStealthlinkTypes.cpp
              mtsStealthlink_AsCL_Stuff.cpp
              mtsStealthlink_AsCL_Stuff.h
              )
 
 target_link_libraries (cisstStealthlink ${Stealthlink_LIBRARIES})
+
+if(WIN32)
+  target_link_libraries(cisstStealthlink ws2_32.lib)
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /NODEFAULTLIB:msvcprt.lib /NODEFAULTLIB:LIBCMT.lib")
+endif(WIN32)
 
 cisst_target_link_libraries (cisstStealthlink
                              cisstCommon

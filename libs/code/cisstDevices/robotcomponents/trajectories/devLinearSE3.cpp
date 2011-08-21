@@ -11,16 +11,16 @@ devLinearSE3::devLinearSE3( const std::string& TaskName,
 			    double vmax, 
 			    double wmax ) : 
   devTrajectory( TaskName, period, state, cpumask, mode ),
-  Rtold( Rtinit ),
   vmax( vmax ),
-  wmax( wmax ){
+  wmax( wmax ),
+  oldinput( Rtinit ){
 
   input  = RequireInputSE3( devTrajectory::Input, devRobotComponent::POSITION );
   output = RequireOutputSE3( devTrajectory::Output, variables );
   
   // Set the output in case the trajectory is started after other components
   vctFixedSizeVector<double,6> vw(0.0), vdwd(0.0);
-  output->SetPosition( Rtold );
+  output->SetPosition( oldinput );
   output->SetVelocity( vw );
   output->SetAcceleration( vdwd );
 
@@ -28,7 +28,7 @@ devLinearSE3::devLinearSE3( const std::string& TaskName,
 
 vctFrame4x4<double> devLinearSE3::GetInput(){
   double t;
-  vctFrame4x4<double> Rt( Rtold );
+  vctFrame4x4<double> Rt( oldinput );
 
   if( input != NULL )
     { input->GetPosition( Rt, t ); }
@@ -37,8 +37,8 @@ vctFrame4x4<double> devLinearSE3::GetInput(){
 }
 
 bool devLinearSE3::IsInputNew() {
-  if( GetInput() == Rtold )  { return false; }
-  else                       { return true; }
+  if( GetInput() == oldinput ) { return false; }
+  else                         { return true; }
 }
 
 void devLinearSE3::Evaluate( double t, robFunction* function ){
@@ -57,7 +57,7 @@ void devLinearSE3::Evaluate( double t, robFunction* function ){
   }
   else{
     vctFixedSizeVector<double,6> vw(0.0), vdwd(0.0);
-    output->SetPosition( Rtold );
+    output->SetPosition( oldinput );
     output->SetVelocity( vw );
     output->SetAcceleration( vdwd );
   }
@@ -71,9 +71,9 @@ robFunction* devLinearSE3::Queue( double t, robFunction* function ){
   robLinearSE3* next = NULL;
 
   // previous and next positions
-  vctFrame4x4<double> Rt1( Rtold );
+  vctFrame4x4<double> Rt1( oldinput );
   vctFrame4x4<double> Rt2 = GetInput();
-  Rtold = Rt2;
+  oldinput = Rt2;
 
   if( previous != NULL ){
     
@@ -108,9 +108,9 @@ robFunction* devLinearSE3::Track( double t, robFunction* function ){
   robLinearSE3* next = NULL;
 
   // previous and next positions
-  vctFrame4x4<double> Rt1( Rtold );
+  vctFrame4x4<double> Rt1( oldinput );
   vctFrame4x4<double> Rt2 = GetInput();
-  Rtold = Rt2;
+  oldinput = Rt2;
 
   if( previous != NULL ){
     

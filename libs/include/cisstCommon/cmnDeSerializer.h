@@ -145,7 +145,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
 template <class _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementType> & data)
     throw (std::runtime_error)
-{   
+{
     typename std::vector<_elementType>::size_type size = 0;
     cmnDeSerializeSizeRaw(inputStream, size);
     data.resize(size);

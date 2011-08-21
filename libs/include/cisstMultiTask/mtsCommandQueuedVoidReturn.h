@@ -49,7 +49,7 @@ public:
 protected:
     /*! Mailbox used to queue the commands */
     mtsMailBox * MailBox;
-    
+
 private:
     /*! Private copy constructor to prevent copies */
     mtsCommandQueuedVoidReturn(const ThisType & CMN_UNUSED(other));
@@ -64,7 +64,7 @@ public:
     virtual ~mtsCommandQueuedVoidReturn();
 
     mtsCommandQueuedVoidReturn * Clone(mtsMailBox * mailBox) const;
-    
+
     mtsExecutionResult Execute(mtsGenericObject & result);
 
     mtsGenericObject * GetResultPointer(void);

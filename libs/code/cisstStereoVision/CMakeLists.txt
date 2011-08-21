@@ -1202,6 +1202,22 @@ ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
     OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
 ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 
+# Options for BlackMagic DeckLink SDK
+option (CISST_SVL_HAS_BM_DECKLINK "Compile BlackMagic(BM) DeckLink extensions" OFF)
+if (CISST_SVL_HAS_BM_DECKLINK)
+  find_package (DeckLink REQUIRED)
+  if (DeckLink_FOUND)
+    include (${DeckLink_USE_FILE})
+    set (SOURCE_FILES
+         ${SOURCE_FILES}
+         svlVidCapSrcBMD.h      # private header
+         svlVidCapSrcBMD.cpp
+         )
+    set (SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${DeckLink_LIBRARIES})
+    mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_LIBRARIES)
+  endif (DeckLink_FOUND)
+endif (CISST_SVL_HAS_BM_DECKLINK)
+
 
 # Set SVL options to 'advanced' to hide them from beginner user
 #MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_WEBGUI)

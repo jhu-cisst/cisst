@@ -41,8 +41,8 @@ mtsCommandQueuedWriteReturn::~mtsCommandQueuedWriteReturn()
 mtsCommandQueuedWriteReturn * mtsCommandQueuedWriteReturn::Clone(mtsMailBox * mailBox) const
 {
     return new mtsCommandQueuedWriteReturn(this->Callable, this->Name,
-                                           this->ResultPrototype,
                                            this->ArgumentPrototype,
+                                           this->ResultPrototype,
                                            mailBox);
 }
 
@@ -74,13 +74,13 @@ mtsExecutionResult mtsCommandQueuedWriteReturn::Execute(const mtsGenericObject &
 
 const mtsGenericObject * mtsCommandQueuedWriteReturn::GetArgumentPointer(void)
 {
-    return ArgumentPointer;
+    return this->ArgumentPointer;
 }
 
 
 mtsGenericObject * mtsCommandQueuedWriteReturn::GetResultPointer(void)
 {
-    return ResultPointer;
+    return this->ResultPointer;
 }
 
 

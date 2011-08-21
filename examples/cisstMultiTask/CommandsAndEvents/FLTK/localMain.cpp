@@ -25,6 +25,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
+// Enable or disable system-wide thread-safe logging
+//#define MTS_LOGGING
+
 int main(int argc, char **argv)
 {
     // log configuration
@@ -37,6 +40,10 @@ int main(int argc, char **argv)
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("clientTask", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("serverTask", CMN_LOG_ALLOW_ALL);
+    // enable system-wide thread-safe logging
+#ifdef MTS_LOGGING
+    mtsManagerLocal::SetLogForwarding(true);
+#endif
 
     // Command line parameter:
     //    1 -- server uses mtsDouble, client uses double
@@ -57,24 +64,21 @@ int main(int argc, char **argv)
     }
 
     // create our two tasks
-    const double PeriodClient = 10 * cmn_ms; // in milliseconds
-    const double PeriodServer = 10 * cmn_ms; // in milliseconds
-
     serverTaskBase * server;
     if (serverGeneric) {
-        server = new serverTask<mtsDouble>("Server", PeriodServer);
+        server = new serverTask<mtsDouble>("Server");
     } else {
-        server = new serverTask<double>("Server", PeriodServer);
+        server = new serverTask<double>("Server");
     }
 
     clientTaskBase * client1;
     clientTaskBase * client2;
     if (clientGeneric) {
-        client1 = new clientTask<mtsDouble>("Client1", PeriodClient);
-        client2 = new clientTask<mtsDouble>("Client2", PeriodClient);
+        client1 = new clientTask<mtsDouble>("Client1");
+        client2 = new clientTask<mtsDouble>("Client2");
     } else {
-        client1 = new clientTask<double>("Client1", PeriodClient);
-        client2 = new clientTask<double>("Client2", PeriodClient);
+        client1 = new clientTask<double>("Client1");
+        client2 = new clientTask<double>("Client2");
     }
 
     server->Configure();
@@ -119,12 +123,12 @@ int main(int argc, char **argv)
     componentManager->KillAll();
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
 
-    componentManager->Cleanup();
-
     // delete components
     delete server;
     delete client1;
     delete client2;
+
+    componentManager->Cleanup();
 
     return 0;
 }

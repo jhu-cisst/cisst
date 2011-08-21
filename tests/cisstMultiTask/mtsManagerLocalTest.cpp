@@ -362,11 +362,6 @@ void mtsManagerLocalTest::TestGetNamesOfDevices(void)
     }
 }
 
-void mtsManagerLocalTest::TestGetTimeServer(void)
-{
-    mtsManagerLocal localManager;
-    CPPUNIT_ASSERT(&localManager.GetTimeServer() == &localManager.TimeServer);
-}
 
 void mtsManagerLocalTest::TestGetProcessName(void)
 {

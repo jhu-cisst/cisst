@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsManagerComponentServices.h>
 
 #include "mtsTestComponents.h"
 
@@ -37,13 +38,9 @@ public:
     mtsTestConfigurationManager(void):
         mtsComponent("configuration_manager")
     {
+        UseSeparateLogFileDefault(false);
         InterfaceToComponentManager = EnableDynamicComponentManagement();
     }
-
-    // ManagerComponentServices->RequestComponentCreate(processName, componentType, componentName)
-    // ManagerComponentServices->RequestComponentConnect(processName, componentName, interfaceRequiredName,
-    //                                                   processName, componentName, interfaceProvidedName))
-
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestConfigurationManager);
@@ -51,6 +48,14 @@ CMN_IMPLEMENT_SERVICES(mtsTestConfigurationManager);
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
+    // configure log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::HaltDefaultLog();
+    std::ofstream logFile("mtsTestConfigurationManager-log.txt");
+    cmnLogger::AddChannel(logFile, CMN_LOG_ALLOW_ALL);
+
     std::string command;
 
     // get local component manager instance
@@ -64,7 +69,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             return 1;
         }
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"connect\" first" << std::endl;
         return 1;
     }
     // send message to acknowledge connection
@@ -100,24 +105,67 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         // send message to confirm everything seems fine
         std::cout << "start succeeded" << std::endl;
     } else {
-        std::cout << "wrong command" << std::endl;
+        std::cout << "must use \"start\" first" << std::endl;
         return 1;
     }
 
     // normal operations
     bool stop = false;
-    std::string process1Name, process2Name, component1Name, component2Name, componentType;
+    std::string
+        process1Name, process2Name,
+        component1Name, component2Name,
+        requiredInterface, providedInterface,
+        libraryName, componentType;
+    mtsManagerComponentServices * services = configurationManager->GetManagerComponentServices();
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
             stop = true;
+
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
-        } else if (command == std::string("createComponent")) {
+
+        } else if (command == "dynamic_load") {
+            std::cin >> process1Name;
+            std::cin >> libraryName;
+#if CISST_BUILD_SHARED_LIBS
+            if (services->Load(process1Name, libraryName)) {
+                std::cout << libraryName << " loaded on " << process1Name << std::endl;
+            } else {
+                std::cout << "failed to load " << libraryName << " on " << process1Name << std::endl;
+            }
+#else
+            std::cout << libraryName << " loaded on " << process1Name << std::endl;
+#endif
+
+        } else if (command == std::string("create_component")) {
             std::cin >> process1Name;
             std::cin >> componentType;
             std::cin >> component1Name;
-            std::cout << "need to implement dynamic creation for " << process1Name << " " << componentType << " " << component1Name << std::endl;
+            if (services->ComponentCreate(process1Name, componentType, component1Name)) {
+                std::cout << "component created" << std::endl;
+            } else {
+                std::cout << "component creation failed" << std::endl;
+            }
+
+        } else if (command == std::string("connect")) {
+            std::cin >> process1Name;
+            std::cin >> component1Name;
+            std::cin >> requiredInterface;
+            std::cin >> process2Name;
+            std::cin >> component2Name;
+            std::cin >> providedInterface;
+            if (services->Connect(process1Name, component1Name, requiredInterface,
+                                  process2Name, component2Name, providedInterface)) {
+                std::cout << "connection succeeded" << std::endl;
+            } else {
+                std::cout << "connection failed for required "
+                          << process1Name << ":" << component1Name << ":" << requiredInterface
+                          << " to "
+                          << process2Name << ":" << component2Name << ":" << providedInterface
+                          << std::endl;
+            }
+
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
@@ -138,6 +186,10 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     while (true) {
         osaSleep(1.0 * cmn_hour);
     }
+
+    // stop log
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
+    logFile.close();
 
     return 0;
 }

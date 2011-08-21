@@ -174,8 +174,6 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
     if( mode == devManipulator::POSITION || mode == devManipulator::VELOCITY ){
       // for some all joints, save the first one must be inverted axis
       double sign = -1.0;
-      //if( base != NULL )
-      //sign = 1.0;
 
       Insert( new devODEServoMotor( world->GetWorldID(), 
 				    b1,             // the first body
@@ -279,7 +277,7 @@ void devODEManipulator::CreateManipulator(devODEWorld* world,
       double sign = -1.0;
       if( base == NULL && i == 0 )
 	sign = 1.0;
-
+      
       Insert( new devODEServoMotor( world->GetWorldID(), 
 				    b1,             // the first body
 				    b2,             // the second body
@@ -302,23 +300,6 @@ void devODEManipulator::Attach( robManipulator* tool ){
     dJointID jid = dJointCreateFixed( WorldID(), 0 );
     dJointAttach( jid, bodies.back()->GetBodyID(), odetool->GetBaseID() );
     dJointSetFixed( jid );
-    /*
-    vctDynamicVector<double> q = GetJointsPositions();
-    vctFrame4x4<double> Rt = robManipulator::ForwardKinematics( q );
-    vctFixedSizeVector<double,3> z(0.0, 0.0, 1.0);
-    vctFixedSizeVector<double,3> anchor = Rt.Translation();
-    vctFixedSizeVector<double,3> axis = Rt.Rotation() * z;
-
-    devODEJoint* joint = NULL;
-    joint =  new devODEJoint( worldid,
-			      bodies.back()->GetBodyID(),
-			      odetool->GetBaseID(),
-			      dJointTypeSlider,
-			      anchor,
-			      axis,
-			      -0.101,
-			       0.101 );
-    */
   }
 
   robManipulator::Attach( tool );

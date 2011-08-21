@@ -32,23 +32,45 @@ int main(){
   // Add the camera component
   taskManager->AddComponent( camera );
 
-  vctDynamicVector<double> qinit(7, 0.0), qfinal( 7, 1.0 ), qdmax( 7, 0.1 );
-  std::vector< vctDynamicVector<double> > Q;
-  Q.push_back( qfinal );
-  Q.push_back( qinit );
+  devODEBody* background = new devODEBody( "background",
+					   vctFrame4x4<double>(),
+					   CISST_SOURCE_ROOT"/libs/etc/cisstRobot/objects/background.3ds",
+					   world,
+					   world->GetSpaceID() );
 
-  devSetPoints setpoints( "setpoints", Q );
-  taskManager->AddComponent( &setpoints );
+  vctDynamicVector<double> qinitl(7, 0.0);
+  vctDynamicVector<double> qfinall(7,-0.3, -1.3, 1.5, 1.0, -0.1, -1.4, 0.1);
+  vctDynamicVector<double> qdmaxl(7, 0.1 );
 
-  devLinearRn trajectory( "trajectory",
+  devSetPoints setpointsl( "setpointsl", 7 );
+  taskManager->AddComponent( &setpointsl );
+
+  vctDynamicVector<double> qinitr(7, 0.0);
+  vctDynamicVector<double> qfinalr(7, 0.3, -1.3, -1.5, 1.0, 0.1, -1.4, -0.1);
+  vctDynamicVector<double> qdmaxr(7, 0.1 );
+
+  devSetPoints setpointsr( "setpointsr", 7 );
+  taskManager->AddComponent( &setpointsr );
+
+  devLinearRn trajectoryl( "trajectoryl",
 			  0.01,
 			  devTrajectory::ENABLED,
 			  OSA_CPU1,
 			  devTrajectory::QUEUE,
 			  devTrajectory::POSITION,
-			  qinit,
-			  qdmax );
-  taskManager->AddComponent( &trajectory );
+			  qinitl,
+			  qdmaxl );
+  taskManager->AddComponent( &trajectoryl );
+
+  devLinearRn trajectoryr( "trajectoryr",
+			   0.01,
+			   devTrajectory::ENABLED,
+			   OSA_CPU1,
+			   devTrajectory::QUEUE,
+			   devTrajectory::POSITION,
+			   qinitr,
+			   qdmaxr );
+  taskManager->AddComponent( &trajectoryr );
 
   // WAM stuff
   std::string path(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/");
@@ -61,36 +83,66 @@ int main(){
   models.push_back( path+"l6.obj" );
   models.push_back( path+"l7.obj" );
 
-  vctMatrixRotation3<double> Rw0( 0.0, 0.0, -1.0,
-				  0.0, 1.0,  0.0,
-				  1.0, 0.0,  0.0 );
-  vctFixedSizeVector<double,3> tw0( 0.0, 0.0, 1.0 );
-  vctFrame4x4<double> Rtw0( Rw0, tw0 );
-  
-  devODEManipulator* WAM = new devODEManipulator( "WAM",
-						  0.001,
-						  devManipulator::ENABLED,
-						  OSA_CPU1,
-						  world,
-						  devManipulator::POSITION,
-						  path+"wam7.rob",
-						  Rtw0,
-						  qinit,
-						  models,
-						  //"" );
-						  path+"l0.obj" );
-  taskManager->AddComponent( WAM );
+  vctFrame4x4<double> Rtw0l( vctMatrixRotation3<double>( 0.0, 0.0, -1.0,
+							 0.0, 1.0, 0.0,
+							 1.0, 0.0, 0.0 ),
+			     vctFixedSizeVector<double,3>( 0.5,-0.5, 0.8 ) );
+
+  devODEManipulator* WAMl = new devODEManipulator( "WAMl",
+						   0.001,
+						   devManipulator::ENABLED,
+						   OSA_CPU1,
+						   world,
+						   devManipulator::POSITION,
+						   path+"wam7.rob",
+						   Rtw0l,
+						   qinitl,
+						   models,
+						   path+"l0.obj" );
+  taskManager->AddComponent( WAMl );
+
+  vctFrame4x4<double> Rtw0r( vctMatrixRotation3<double>( 0.0, 0.0, -1.0,
+							 0.0, 1.0, 0.0,
+							 1.0, 0.0, 0.0 ),
+			     vctFixedSizeVector<double,3>( 0.5, 0.5, 0.8 ) );
+
+  devODEManipulator* WAMr = new devODEManipulator( "WAMr",
+						   0.001,
+						   devManipulator::ENABLED,
+						   OSA_CPU1,
+						   world,
+						   devManipulator::POSITION,
+						   path+"wam7.rob",
+						   Rtw0r,
+						   qinitr,
+						   models,
+						   path+"l0.obj" );
+  taskManager->AddComponent( WAMr );
 
   // Connect trajectory to robot
-  taskManager->Connect( setpoints.GetName(),  devSetPoints::Output,
-			trajectory.GetName(), devLinearRn::Input );
+  taskManager->Connect( setpointsl.GetName(),  devSetPoints::OutputRn,
+			trajectoryl.GetName(), devLinearRn::Input );
 
-  taskManager->Connect( trajectory.GetName(), devLinearRn::Output,
-			WAM->GetName(),       devManipulator::Input );
+  taskManager->Connect( trajectoryl.GetName(), devLinearRn::Output,
+			WAMl->GetName(),       devManipulator::Input );
+
+
+  taskManager->Connect( setpointsr.GetName(),  devSetPoints::OutputRn,
+			trajectoryr.GetName(), devLinearRn::Input );
+
+  taskManager->Connect( trajectoryr.GetName(), devLinearRn::Output,
+			WAMr->GetName(),       devManipulator::Input );
 
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
+
+  std::cout << "ENTER to move." << std::endl;
+  cmnGetChar();
+  setpointsr.Insert( qfinalr );
+  setpointsr.Latch();
+  setpointsl.Insert( qfinall );
+  setpointsl.Latch();
 
   std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();

@@ -110,7 +110,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 {
     friend class cmnMultiplexerStreambufProxy<_element, _trait>;
 
-    public:
+public:
 
     typedef cmnLODMultiplexerStreambuf<_element, _trait> ThisType;
     typedef std::basic_streambuf<_element, _trait> BaseClassType;
@@ -232,7 +232,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     // This part is declared 'protected' following the declarations of
     // basic_streambuf. See basic_streambuf documentation for more
     // details.
-    protected:
+protected:
     typedef typename std::basic_streambuf<_element, _trait>::int_type int_type;
 
     /*!
@@ -262,7 +262,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
      */
     virtual int_type overflow(int_type c = _trait::eof());
 
-private:
+//private:
     /*! The actual container that stores channel addresses.
      */
     ChannelContainerType Channels;

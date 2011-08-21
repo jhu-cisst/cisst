@@ -37,11 +37,8 @@ int main(){
   vctDynamicVector<double> WAMqinit(7, 0.0);       // initial point
   vctDynamicVector<double> WAMqfinal( 7, 1.0 );    // final point
   vctDynamicVector<double> WAMqdmax( 7, 0.01 );     // velocity
-  std::vector< vctDynamicVector<double> > WAMQ;    // queue of setpoints
-  WAMQ.push_back( WAMqfinal );
-  WAMQ.push_back( WAMqinit );
 
-  devSetPoints WAMsetpoints( "WAMsetpoints", WAMQ ); // setpoints generator
+  devSetPoints WAMsetpoints( "WAMsetpoints", 7 ); // setpoints generator
   taskManager->AddComponent( &WAMsetpoints );
 
   devLinearRn WAMtrajectory( "WAMtrajectory",        // trajectory generator
@@ -87,11 +84,8 @@ int main(){
   vctDynamicVector<double> BHqinit(4, 0.0);      // initial point
   vctDynamicVector<double> BHqfinal( 4, 2.0 );   // final point
   vctDynamicVector<double> BHqdmax( 4, 0.1 );    // velocity
-  std::vector< vctDynamicVector<double> > BHQ;   // setpoints
-  BHQ.push_back( BHqfinal );
-  BHQ.push_back( BHqinit );
 
-  devSetPoints BHsetpoints( "BHsetpoints", BHQ );// setpoints generator
+  devSetPoints BHsetpoints( "BHsetpoints", 4 );// setpoints generator
   taskManager->AddComponent( &BHsetpoints );
 
   devLinearRn BHtrajectory( "BHtrajectory",      // trajectory generator
@@ -124,13 +118,13 @@ int main(){
   WAM->Attach( BH );
 
   // Connect trajectory to robot
-  taskManager->Connect( WAMsetpoints.GetName(),  devSetPoints::Output,
+  taskManager->Connect( WAMsetpoints.GetName(),  devSetPoints::OutputRn,
 			WAMtrajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( WAMtrajectory.GetName(), devLinearRn::Output,
 			WAM->GetName(),          devOSGManipulator::Input );
 
-  taskManager->Connect( BHsetpoints.GetName(),  devSetPoints::Output,
+  taskManager->Connect( BHsetpoints.GetName(),  devSetPoints::OutputRn,
 			BHtrajectory.GetName(), devLinearRn::Input );
 
   taskManager->Connect( BHtrajectory.GetName(), devLinearRn::Output,
@@ -140,6 +134,13 @@ int main(){
   // Start everything
   taskManager->CreateAll();
   taskManager->StartAll();
+
+  std::cout << "ENTER to move." << std::endl;
+  cmnGetChar();
+  WAMsetpoints.Insert( WAMqfinal );
+  WAMsetpoints.Latch();
+  BHsetpoints.Insert( BHqfinal );
+  BHsetpoints.Latch();
 
   std::cout << "ENTER to exit." << std::endl;
   cmnGetChar();

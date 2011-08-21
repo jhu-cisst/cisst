@@ -22,23 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
-//-----------------------------------------------------------------------------
-//  Component state (mtsComponentState)
-//
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
-
-//-----------------------------------------------------------------------------
-//  InterfaceProvidedDescription (defined in mtsInterfaceCommon.h)
-//  InterfaceRequiredDescription (defined in mtsInterfaceCommon.h)
-//
-CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceProvidedDescriptionProxy);
-CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
-
-//-----------------------------------------------------------------------------
-//  Component Description
-//
-CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
-
 mtsDescriptionComponent::mtsDescriptionComponent(const mtsDescriptionComponent & other):
     mtsGenericObject(other)
 {
@@ -88,8 +71,6 @@ void mtsDescriptionComponent::DeSerializeRaw(std::istream & inputStream)
 //-----------------------------------------------------------------------------
 //  Component Class Description
 //
-CMN_IMPLEMENT_SERVICES(mtsDescriptionComponentClass);
-
 mtsDescriptionComponentClass::mtsDescriptionComponentClass(const mtsDescriptionComponentClass & other):
     mtsGenericObject(other)
 {
@@ -122,13 +103,10 @@ void mtsDescriptionComponentClass::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ArgTypeId);
 }
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassVecProxy);
 
 //-----------------------------------------------------------------------------
 //  Interface Description
 //
-CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
-
 mtsDescriptionInterface::mtsDescriptionInterface(const mtsDescriptionInterface & other):
     mtsGenericObject(other)
 {
@@ -178,8 +156,6 @@ void mtsDescriptionInterface::DeSerializeRaw(std::istream & inputStream)
 //-----------------------------------------------------------------------------
 //  Connection Description
 //
-CMN_IMPLEMENT_SERVICES(mtsDescriptionConnection);
-
 mtsDescriptionConnection::mtsDescriptionConnection(const mtsDescriptionConnection & other):
     mtsGenericObject(other)
 {
@@ -252,13 +228,10 @@ void mtsDescriptionConnection::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ConnectionID);
 }
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
 
 //-----------------------------------------------------------------------------
 //  Component Status Control
 //
-CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
-
 mtsComponentStatusControl::mtsComponentStatusControl(const mtsComponentStatusControl & other):
     mtsGenericObject(other)
 {
@@ -307,8 +280,6 @@ void mtsComponentStatusControl::DeSerializeRaw(std::istream & inputStream)
 //-----------------------------------------------------------------------------
 //  Component State Change Event
 //
-CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
-
 mtsComponentStateChange::mtsComponentStateChange(const mtsComponentStateChange & other):
     mtsGenericObject(other)
 {
@@ -344,9 +315,6 @@ void mtsComponentStateChange::DeSerializeRaw(std::istream & inputStream)
 //-----------------------------------------------------------------------------
 // GetEndUserInterface (provided interface)
 //
-
-CMN_IMPLEMENT_SERVICES(mtsEndUserInterfaceArg);
-
 void mtsEndUserInterfaceArg::ToStream(std::ostream & outputStream) const
 {
     outputStream << "EndUserInterface to "
@@ -373,12 +341,7 @@ void mtsEndUserInterfaceArg::DeSerializeRaw(std::istream & inputStream)
 
 //-----------------------------------------------------------------------------
 // AddObserverList
-//
-
-CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
-
 // Shouldn't need to serialize or deserialize this class, or even print it out
-
 void mtsEventHandlerList::ToStream(std::ostream & outputStream) const
 {
     outputStream << "EventHandlerList (ToStream not implemented)" << std::endl;
@@ -401,8 +364,6 @@ void mtsEventHandlerList::DeSerializeRaw(std::istream & inputStream)
 //-----------------------------------------------------------------------------
 //  LoadLibrary
 //
-CMN_IMPLEMENT_SERVICES(mtsDescriptionLoadLibrary);
-
 mtsDescriptionLoadLibrary::mtsDescriptionLoadLibrary(const mtsDescriptionLoadLibrary & other):
     mtsGenericObject(other)
 {
@@ -437,3 +398,56 @@ void mtsDescriptionLoadLibrary::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->ProcessName);
     cmnDeSerializeRaw(inputStream, this->LibraryName);
 }
+
+//-----------------------------------------------------------------------------
+//  System-wide Thread-safe Logging
+//
+mtsLogMessage::mtsLogMessage()
+{
+    this->Length = 0;
+    memset(this->Message, 0, MAX_LOG_SIZE);
+    ProcessName = ""; // MJ: This should be set my LCM when log gets dispatched.
+}
+
+mtsLogMessage::mtsLogMessage(const mtsLogMessage & other): mtsGenericObject(other)
+{
+    this->Length = other.Length;
+    memcpy(this->Message, other.Message, this->Length);
+    this->ProcessName = other.ProcessName;
+}
+
+mtsLogMessage::mtsLogMessage(const char * log, size_t len)
+{
+    memset(this->Message, 0, MAX_LOG_SIZE);
+
+    this->Length = len;
+    memcpy(this->Message, log, this->Length);
+    ProcessName = ""; // MJ: This should be set my LCM when log gets dispatched.
+}
+
+void mtsLogMessage::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", Message: \"" << std::string(this->Message, this->Length)
+                 << "\", Length: " << Length
+                 << ", Process: \"" << ProcessName << "\"";
+}
+
+void mtsLogMessage::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->Length);
+    cmnSerializeRaw(outputStream, this->Message);
+    cmnSerializeRaw(outputStream, this->ProcessName);
+}
+
+void mtsLogMessage::DeSerializeRaw(std::istream & inputStream)
+{
+    memset(this->Message, 0, MAX_LOG_SIZE);
+
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->Length);
+    cmnDeSerializeRaw(inputStream, this->Message);
+    cmnDeSerializeRaw(inputStream, this->ProcessName);
+}
+

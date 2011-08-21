@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsStealthlink_h
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 // data types used for wrapper
 #include <cisstStealthlink/mtsStealthlinkTypes.h>
@@ -31,14 +32,16 @@ http://www.cisst.org/cisst/license.txt.
 
 // forward declarations of Stealthlink types
 class AsCL_Client;
-class AsCL_Utils;
+class mtsStealthlink_AsCL_Utils;
 
 class mtsStealthlink: public mtsTaskPeriodic
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
+
+protected:
 
     AsCL_Client * Client;
-    AsCL_Utils * Utils;
+    mtsStealthlink_AsCL_Utils * Utils;
 
     // State data
     mtsStealthTool ToolData;
@@ -50,17 +53,48 @@ class mtsStealthlink: public mtsTaskPeriodic
     mtsDoubleVec SurgicalPlan;  // entry point + target point
     bool StealthlinkPresent;
 
-protected:
+    class Tool
+    {
+        std::string StealthName;
+        std::string InterfaceName;
+    public:
+        Tool(const std::string &stealthName, const std::string &interfaceName) :
+            StealthName(stealthName), InterfaceName(interfaceName) {}
+        ~Tool(void) {}
+        const std::string & GetStealthName(void) const { return StealthName; }
+        const std::string & GetInterfaceName(void) const { return InterfaceName; }
+        prmPositionCartesianGet TooltipPosition;
+        prmPositionCartesianGet MarkerPosition;
+    };
+
+    std::vector<Tool*> Tools;
+    Tool* CurrentTool;
+
     void RequestSurgicalPlan(void);
     void GetSurgicalPlan(mtsDoubleVec & plan) const;
-    int countt;
+
+    /*! Mark all tool data as invalid */
+    void ResetAllTools(void);
+    Tool* FindTool(const std::string &stealthName) const;
+    Tool* AddTool(const std::string &stealthName, const std::string &interfaceName);
+
+    void Init(void);
 
 public:
     mtsStealthlink(const std::string & taskName, const double & periodInSeconds);
-    ~mtsStealthlink() {};
+    mtsStealthlink(const mtsTaskPeriodicConstructorArg &arg);
+    ~mtsStealthlink();
 
     void Startup(void) {}
+
+    /*! Configure the Stealthlink interface using an XML file. If the XML file is not
+        found, the system uses a default IP address (192.168.0.1) and does not predefine
+        any provided interfaces for the tools. Note that if a tool is not pre-defined via
+        the XML file, it can still be discovered at runtime and a provided interface 
+        will be dynamically added.
+    */
     void Configure(const std::string & filename = "");
+
     void Run(void);
     void Cleanup(void);
 };

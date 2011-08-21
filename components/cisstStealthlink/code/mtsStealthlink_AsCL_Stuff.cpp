@@ -19,11 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <iostream>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include "mtsStealthlink_AsCL_Stuff.h"
 
 //------------------------------------------------------------------------------
-mtsStealthlink_AsCL_IO_Watch::mtsStealthlink_AsCL_IO_Watch(void) {
-    _handler  = 0;
+mtsStealthlink_AsCL_IO_Watch::mtsStealthlink_AsCL_IO_Watch(void) : Callback(0)
+{
 }
 
 
@@ -34,66 +35,79 @@ mtsStealthlink_AsCL_IO_Watch::~mtsStealthlink_AsCL_IO_Watch() {
 
 int mtsStealthlink_AsCL_IO_Watch::AddWatch(int sock, void * func, void * client_ptr)
 {
-    if (callback)
-        ;   // callback is already active -- what to do?
+    if (Callback)
+        CMN_LOG_INIT_WARNING << "Stealthlink AddWatch: callback was already specified" << std::endl;
+    else
+        CMN_LOG_INIT_VERBOSE << "Stealthlink AddWatch called for socket fd = " << sock << std::endl;
+
     fd = sock;
-    callback = (GTK_CallBack)func;
-    // Do we need to use a static wrapper for the callback?
-    // Maybe not.  GDK and Xt have different callback function signatures
-    // and Medtronic has no code to handle that, so maybe the callback
-    // function does not use its parameters.
-    // Fl::add_fd(fd, WatchCallback, client_ptr);
+    Callback = (Watch_Callback)func;
+    ClientPtr = client_ptr;
     return 1;
 }
 
 
 void mtsStealthlink_AsCL_IO_Watch::RemoveWatch(void)
 {
-    // Fl::remove_fd(fd);
-    callback = 0;
+    CMN_LOG_INIT_VERBOSE << "Stealthlink RemoveWatch called" << std::endl;
+    Callback = 0;
 }
 
-
-mtsStealthlink_AsCL_IO_Watch::GTK_CallBack mtsStealthlink_AsCL_IO_Watch::callback = 0;
-
-
-// This function is an mtsStealthlink-compatible callback because it accepts parameters
-// of int and void*.  It converts to a GTK-compatible callback by only
-// passing the void* parameter.
-void mtsStealthlink_AsCL_IO_Watch::WatchCallback(int fd, void * data)
+void mtsStealthlink_AsCL_IO_Watch::CheckWatch(void)
 {
-    if (callback) {
-        callback(data);
+    if (Callback) {
+        fd_set readfds;
+        FD_ZERO( &readfds);
+        FD_SET( fd, &readfds);
+        timeval timeout = { 0L , 0L };
+        int ret = select( fd+1, &readfds, NULL, NULL, &timeout);
+        if (ret < 0) {
+            CMN_LOG_RUN_ERROR << "Stealthlink CheckWatch: select failed, rc = " << ret << std::endl;
+            Callback = 0;
+        }
+        else if ((ret > 0) && FD_ISSET(fd, &readfds))
+            Callback(ClientPtr);
     }
 }
 
 
 //------------------------------------------------------------------------------
-mtsStealthlink_AsCL_Timeout::mtsStealthlink_AsCL_Timeout(void)
+//   NOTE: the NoGui_AsCL_Timeout class from Medtronic has no implementation
+//         (it was commented out), so probably this class is no longer needed.
+
+mtsStealthlink_AsCL_Timeout::mtsStealthlink_AsCL_Timeout(void) : Callback(0)
 {
-    _handler = 0;
+    StealthlinkTimer = new osaStopwatch;
+    StealthlinkTimer->Reset();
 }
 
 
 mtsStealthlink_AsCL_Timeout::~mtsStealthlink_AsCL_Timeout(void)
 {
     RemoveTimeout();
+    delete StealthlinkTimer;
 }
 
+// Units for tmo_val are not known.  FLTK implementation by PK assumed milliseconds.
+// NoGUI implementation from Medtronic has commented out the implementation, but
+// the commented-out code seems to assume microseconds.
 
 int mtsStealthlink_AsCL_Timeout::AddTimeout(int tmo_val, void * func, void * obj)
 {
-    if (callback) {
-        // callback is already active -- what to do?
-    }
+    if (Callback)
+        CMN_LOG_INIT_WARNING << "Stealthlink AddTimeout: callback was already specified" << std::endl;
+#if 0
+    else
+        CMN_LOG_INIT_VERBOSE << "Stealthlink AddTimeout called for timeout = " << tmo_val << std::endl;
+#endif
 
-    timeout = tmo_val / 1000.0;
-    callback = (StealthFunction) func;
-    dataobj = obj;
+    Timeout = tmo_val / 1000.0;
+    Callback = (Timeout_Callback) func;
+    DataObj = obj;
 
-    RemoveTimeout();
-
-    // Fl::add_timeout(timeout, MyCallback, dataobj );
+    // Start timer  
+    StealthlinkTimer->Reset();
+    StealthlinkTimer->Start();
 
     return 1;
 }
@@ -101,29 +115,30 @@ int mtsStealthlink_AsCL_Timeout::AddTimeout(int tmo_val, void * func, void * obj
 
 void mtsStealthlink_AsCL_Timeout::RemoveTimeout(void)
 {
-    // Fl::remove_timeout(MyCallback, dataobj);
-    callback = 0;
+    CMN_LOG_INIT_VERBOSE << "Stealthlink RemoveTimeout called" << std::endl;
+    Callback = 0;
+    StealthlinkTimer->Reset();
 }
 
-mtsStealthlink_AsCL_Timeout::StealthFunction mtsStealthlink_AsCL_Timeout::callback = 0;
-
-double mtsStealthlink_AsCL_Timeout::timeout = 0.0;
-
-
-void mtsStealthlink_AsCL_Timeout::MyCallback(void *data)
+void mtsStealthlink_AsCL_Timeout::CheckTimeout(void)
 {
     // if callback function returns non-zero (true), reschedule timeout.
-    if (callback) {
-        int rc = callback(data);
-        if (rc) {
-            // Fl::repeat_timeout(timeout, MyCallback, data);
-        }
+    if (Callback && (StealthlinkTimer->GetElapsedTime() >= Timeout)) {
+        StealthlinkTimer->Reset();
+        int rc = Callback(DataObj);
+#if 0
+        CMN_LOG_RUN_VERBOSE << "Stealthlink Timeout callback returned " << rc << std::endl;
+#endif
+        if (rc)  // reschedule
+            StealthlinkTimer->Start();
+        else
+            Callback = 0;
     }
 }
 
 
 //------------------------------------------------------------------------------
-mtsStealthlink_AsCL_Utils::mtsStealthlink_AsCL_Utils(void)
+mtsStealthlink_AsCL_Utils::mtsStealthlink_AsCL_Utils(void) : curWatch(0), curTimeout(0)
 {}
 
 
@@ -133,12 +148,27 @@ mtsStealthlink_AsCL_Utils::~mtsStealthlink_AsCL_Utils(void)
 
 AsCL_IO_Watch * mtsStealthlink_AsCL_Utils::new_IO_Watch(void)
 {
-    return new mtsStealthlink_AsCL_IO_Watch;
+    if (curWatch)
+        CMN_LOG_INIT_WARNING << "Stealthlink IO_Watch already allocated" << std::endl;
+
+    curWatch = new mtsStealthlink_AsCL_IO_Watch;
+    return curWatch;
 }
 
 
 AsCL_Timeout * mtsStealthlink_AsCL_Utils::new_Timeout(void)
 {
-    return new mtsStealthlink_AsCL_Timeout;
+    if (curTimeout)
+        CMN_LOG_INIT_WARNING << "Stealthlink Timeout already allocated" << std::endl;
+
+    curTimeout = new mtsStealthlink_AsCL_Timeout;
+    return curTimeout;
 }
 
+void mtsStealthlink_AsCL_Utils::CheckCallbacks(void)
+{
+    if (curWatch)
+        curWatch->CheckWatch();
+    if (curTimeout)
+        curTimeout->CheckTimeout();
+}

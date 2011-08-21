@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageTracker_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterImageCenterFinder.h>
 #include <cisstStereoVision/svlDraw.h>
 
 // Always include last!
@@ -34,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 class svlImageTracker;
 
 
-class CISST_EXPORT svlFilterImageTracker : public svlFilterBase
+class CISST_EXPORT svlFilterImageTracker : public svlFilterBase, public svlFilterImageCenterFinderInterface
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -44,29 +45,37 @@ public:
 
     int SetTracker(svlImageTracker & tracker, unsigned int videoch = SVL_LEFT);
 
-    void SetMovingAverageSmoothing(double weight);
+    void SetTargetTrajectorySmoothing(double weight);
     void SetFrameSkip(unsigned int skipcount);
     void SetIterations(unsigned int count);
     void ResetTargets();
 
+    void SetRigidBodyTransformSmoothing(double weight);
     int SetRigidBody(bool enable);
     void SetRigidBodyConstraints(double angle_low, double angle_high, double scale_low, double scale_high);
+    vct3x3 GetRigidBodyTransform(unsigned int videoch = SVL_LEFT);
 
     int SetROI(const svlRect & rect, unsigned int videoch = SVL_LEFT);
     int SetROI(int left, int top, int right, int bottom, unsigned int videoch = SVL_LEFT);
     int GetROI(svlRect & rect, unsigned int videoch = SVL_LEFT) const;
+    // Inherited from svlFilterImageCenterFinderInterface
+    int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT);
 
     int SetMosaicSize(unsigned int width, unsigned int height);
 
 protected:
+    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int OnStart(unsigned int procCount);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
-    virtual void ReconstructRigidBody(unsigned int videoch);
+    virtual void LinkChannelsVertically();
+    virtual int ReconstructRigidBody();
+    virtual void BackprojectRigidBody();
     virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
     virtual int UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height);
+    virtual void PushSamplesToAsyncOutputs(double timestamp);
 
 private:
     svlSampleTargets OutputTargets;
@@ -79,6 +88,7 @@ private:
     bool RigidBody;
     vctDynamicVector<double> RigidBodyAngle;
     vctDynamicVector<double> RigidBodyScale;
+    vctDynamicVector<vct3x3> RigidBodyTransform;
 
     bool ResetFlag;
     svlSampleTargets InitialTargets;
@@ -86,7 +96,8 @@ private:
 
     int FrameCount;
     int FramesToSkip;
-    double MovingAverageWeight;
+    double TargetTrajectorySmoothingWeight;
+    double RigidBodyTransformSmoothingWeight;
     double RigidBodyAngleLow;
     double RigidBodyAngleHigh;
     double RigidBodyScaleLow;
@@ -100,8 +111,19 @@ private:
     vctDynamicVector<svlDraw::Internals> WarpInternals;
 
     svlSampleImage* Mosaic;
+    vctDynamicVector< vctDynamicVector<unsigned short> > MosaicAccuBuffer;
+    vctDynamicVector< vctDynamicVector<unsigned char> > MosaicAccuCount;
     unsigned int MosaicWidth;
     unsigned int MosaicHeight;
+
+    // Work variables
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_ax;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_ay;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_proto_ax;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_proto_ay;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_cos_an;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_sin_an;
+    vctFixedSizeVector<double, SVL_MAX_CHANNELS> T_scale;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTracker)
