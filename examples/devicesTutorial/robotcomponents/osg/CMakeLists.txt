@@ -13,29 +13,52 @@
 # --- end cisst license ---
 
 
-project( osg )
+find_package( OpenSceneGraph COMPONENTS osgDB osgGA osgViewer osgUtil osgVolume osgText )
 
-add_executable( OSGtest OSGtest.cpp )
-add_executable( OSGviewer OSGviewer.cpp )
-add_executable( OSGPick OSGpick.cpp )
-add_executable( OSGstereo OSGstereo.cpp )
-add_executable( OSGstereox2 OSGstereox2.cpp )
-add_executable( OSGwam OSGwam.cpp )
-add_executable( OSGlwr OSGlwr.cpp )
+if( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )
+
+  project( osg )
+
+  add_executable( OSGtest OSGtest.cpp )
+  add_executable( OSGviewer OSGviewer.cpp )
+  add_executable( OSGPick OSGpick.cpp )
+  add_executable( OSGstereo OSGstereo.cpp )
+  add_executable( OSGstereox2 OSGstereox2.cpp )
+  add_executable( OSGwam OSGwam.cpp )
+  add_executable( OSGlwr OSGlwr.cpp )
+  add_executable( OSGtext OSGtext.cpp )
+
+  cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )  
+  cisst_target_link_libraries( OSGviewer cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGPick cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGstereox2 cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+  cisst_target_link_libraries( OSGlwr cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+
+  cisst_target_link_libraries( OSGtext cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+
+  if( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
+    add_executable( OSGvolume OSGvolume.cpp )
+    cisst_target_link_libraries( OSGvolume cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )  
+  endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
+    
 
 
-cisst_target_link_libraries( OSGtest cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+#  find_package( OpenCV2 )
 
-cisst_target_link_libraries( OSGviewer cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+#  if( OpenCV2_FOUND )
+#    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES OpenCV2_LIBRARIES )
+#    cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS )
+    
+#    add_executable( OSGcameracalibration OSGcameracalibration.cpp )
+#    cisst_target_link_libraries( OSGcameracalibration cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-cisst_target_link_libraries( OSGPick cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+#    add_executable( OSGEIH OSGEIH.cpp )
+#    cisst_target_link_libraries( OSGEIH cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-cisst_target_link_libraries( OSGstereo cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
+#  endif( OpenCV2_FOUND )
 
-cisst_target_link_libraries( OSGstereox2 cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
 
-cisst_target_link_libraries( OSGwam cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
-
-cisst_target_link_libraries( OSGlwr cisstCommon cisstVector cisstOSAbstraction cisstDevices cisstMultiTask )
-
+endif( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )
 

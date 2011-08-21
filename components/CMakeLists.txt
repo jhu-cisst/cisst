@@ -32,3 +32,9 @@ if (CISST_BUILD_COMP_cisstOpenNI)
   add_subdirectory (cisstOpenNI)
 endif (CISST_BUILD_COMP_cisstOpenNI)
 
+# cisstCAN wrappers for various CAN devices
+option(CISST_BUILD_COMP_cisstCAN "Build CAN support" OFF)
+if( CISST_BUILD_COMP_cisstCAN )
+  add_subdirectory( cisstCAN )
+endif( CISST_BUILD_COMP_cisstCAN )
+

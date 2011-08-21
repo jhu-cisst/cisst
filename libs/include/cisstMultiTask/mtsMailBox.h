@@ -52,6 +52,15 @@ class CISST_EXPORT mtsMailBox
       provide an event handler that is not queued. */
     mtsCommandVoid * PostCommandDequeuedCommand;
 
+    /*! Command executed after a command with return is de-queued.
+      This is used for blocking commands in order to trigger an event
+      sent back to the caller.  The caller's required interface needs
+      to provide an event handler that is not queued. */
+    mtsCommandVoid * PostCommandReturnDequeuedCommand;
+
+    /*! Method to determine which post queued command needs to be triggered. */
+    void TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlockingReturn);
+
 public:
     mtsMailBox(const std::string & name,
                size_t size,
@@ -83,6 +92,12 @@ public:
       event.  The event handler on the client site can then raise a
       thread signal. */
     void SetPostCommandDequeuedCommand(mtsCommandVoid * command);
+
+    /*! Set the command to be called after a blocking command with
+      return value is de-queued and executed.  This can be used to
+      call a trigger for event.  The event handler on the client site
+      can then raise a thread signal. */
+    void SetPostCommandReturnDequeuedCommand(mtsCommandVoid * command);
 
 };
 

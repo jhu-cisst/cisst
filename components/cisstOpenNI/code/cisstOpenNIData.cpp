@@ -11,10 +11,11 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator,
                                    void* pCookie)
 {
     printf("New User %d\n", nId);
-
+    
     cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
 
     openNIDataObject->NewUserCallback(generator,nId);
+    openNIDataObject->usrState = CNI_USR_NEW;
 }
 
 // Callback: An existing user was lost
@@ -25,6 +26,8 @@ void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator,
     printf("Lost user %d\n", nId);
 
     cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
+    openNIDataObject->usrState = CNI_USR_LOST;
+    openNIDataObject->usrCalState = CNI_USR_IDLE;
 }
 
 
@@ -39,6 +42,7 @@ void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capabil
     cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
 
     openNIDataObject->UserPoseDetectedCallback(capability,strPose,nId);
+    openNIDataObject->usrState = CNI_USR_POSE;
 }
 
 // Callback: Started calibration
@@ -47,6 +51,8 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& c
                                                        void* pCookie)
 {
     printf("Calibration started for user %d\n", nId);
+    cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
+    openNIDataObject->usrState = CNI_USR_CAL_START;
 }
 
 // Callback: Finished calibration
@@ -58,9 +64,10 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(xn::SkeletonCapability& cap
     cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
 
     openNIDataObject->UserCalibrationEndCallback(capability,bSuccess,nId);
+    openNIDataObject->usrState = CNI_USR_CAL_END;
 }
 
-/// Methods
+/// Methods ------------------------------------------------------------------------/
 
 void cisstOpenNIData::NewUserCallback(  xn::UserGenerator& generator, 
                                     XnUserID nId)
@@ -92,14 +99,17 @@ void cisstOpenNIData::UserCalibrationEndCallback(   xn::SkeletonCapability& capa
 		// Calibration succeeded
 		printf("Calibration complete, start tracking user %d\n", nId);
 		usergenerator.GetSkeletonCap().StartTracking(nId);
+        usrCalState = CNI_USR_SUCCESS;
 	}
 	else
 	{
 		// Calibration failed
 		printf("Calibration failed for user %d\n", nId);
+        usrCalState = CNI_USR_FAIL;
 		if (this->needPose)
 		{
 			usergenerator.GetPoseDetectionCap().StartPoseDetection(this->strPose, nId);
+            usrCalState = CNI_USR_WAIT;
 		}
 		else
 		{

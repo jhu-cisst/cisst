@@ -27,6 +27,11 @@ mtsCommandVoidReturn::mtsCommandVoidReturn(void)
 {}
 
 
+mtsCommandVoidReturn::mtsCommandVoidReturn(const std::string & name):
+    BaseType(name)
+{}
+
+
 mtsCommandVoidReturn::mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable,
                                            const std::string & name,
                                            const mtsGenericObject * resultPrototype):

@@ -23,18 +23,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     #include <pthread.h>
     #include <sched.h>
     #include <string.h>
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+#include <native/task.h>
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #endif
 
 struct osaThreadIdInternals {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     /*! OS dependent thread id. */
     pthread_t ThreadId;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    RT_TASK* Task;
 #elif (CISST_OS == CISST_WINDOWS)
     DWORD ThreadId;
 #endif // CISST_WINDOWS
@@ -64,9 +68,19 @@ bool osaThreadId::Equal(const osaThreadId & other) const
 {
     osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
     osaThreadId * nonConstOther = const_cast<osaThreadId *>(&other);
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     return (pthread_equal(reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId,
                           reinterpret_cast<osaThreadIdInternals*>(nonConstOther->Internals)->ThreadId) != 0 ? true : false); 
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    RT_TASK* t1 = reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->Task;
+    RT_TASK* t2 = reinterpret_cast<osaThreadIdInternals*>(nonConstOther->Internals)->Task;
+
+    if( t1 != NULL && t2 != NULL ){
+        int same = rt_task_same( t1, t2 );
+        return (same != 0) ? true : false;
+    }
+    else return false;
 #elif (CISST_OS == CISST_WINDOWS)
     return
         reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId
@@ -75,11 +89,38 @@ bool osaThreadId::Equal(const osaThreadId & other) const
 }
 
 
+// MJ: Don't use this comparator on Mac and Xenomai
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
+bool osaThreadId::operator()(const osaThreadId & lhs, const osaThreadId & rhs) const
+{
+    osaThreadId * _lhs = const_cast<osaThreadId *>(&lhs);
+    osaThreadId * _rhs = const_cast<osaThreadId *>(&rhs);
+
+    osaThreadIdInternals * _lhsInternal = reinterpret_cast<osaThreadIdInternals*>(_lhs->Internals);
+    osaThreadIdInternals * _rhsInternal = reinterpret_cast<osaThreadIdInternals*>(_rhs->Internals);
+
+    // MJ TODO: FIX THIS LATER
+    // We cannot directly compare pthread_t that should be handled as an opaque type.
+    // As a temporary solution, however, use unsigned int assuming pthread_t can be 
+    // converted to unsigned int.  Other software packages (such as OpenSSL and ZeroC Ice)
+    // are doing this:
+    // http://www.zeroc.com/forums/bug-reports/44-freebsd-compilation-problem-pthread_t-not-unsigned-long.html
+#if (CISST_OS == CISST_WINDOWS)
+    return (_lhsInternal->ThreadId < _rhsInternal->ThreadId);
+#else
+    return ((unsigned int) _lhsInternal->ThreadId < (unsigned int) _rhsInternal->ThreadId);
+#endif
+}
+#endif
+
+
 void osaThreadId::ToStream(std::ostream & outputStream) const
 {
     osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_WINDOWS) || (CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->Task;
 #elif (CISST_OS == CISST_DARWIN)
     outputStream << &(reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId);
 #endif
@@ -92,6 +133,8 @@ osaThreadId osaGetCurrentThreadId(void)
     osaThreadId result;
 #if (CISST_OS == CISST_WINDOWS)
     reinterpret_cast<osaThreadIdInternals*>(result.Internals)->ThreadId = GetCurrentThreadId();
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    reinterpret_cast<osaThreadIdInternals*>(result.Internals)->Task = rt_task_self();
 #else
     // RTAI can also use pthread_self(). If a thread buddy (task) is created,
     // one can call rt_buddy(). The rt_whoami() and rt_lxrt_whoami() can't
@@ -104,8 +147,10 @@ osaThreadId osaGetCurrentThreadId(void)
 
 struct osaThreadInternals {
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     pthread_t Thread;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    RT_TASK Task;
 #elif (CISST_OS == CISST_WINDOWS)
     HANDLE Thread;
 #endif
@@ -121,8 +166,19 @@ osaThread::osaThread() : Signal(), Valid(false)
 
     
 // Destructor. Does nothing.
-osaThread::~osaThread()
-{}
+osaThread::~osaThread(){
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    /* 
+       if( rt_task_self() != NULL )                                                                                                               
+       { rt_task_delete( rt_task_self() ); }                                                                                                  
+       else{                                                                                                                                      
+       CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS                                                                                                 
+    << "Calling thread is not a Xenomai task."                                                                         
+    << std::endl;                                                                                                      
+    }                                                                                                                                          
+    */
+#endif
+}
 
 
 unsigned int osaThread::SizeOfInternals(void) {
@@ -138,7 +194,7 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
                          << (newThread?" (new)":"") << std::endl;
     
     if (newThread) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
         pthread_attr_t new_attr;
         pthread_attr_init(&new_attr);
         /*
@@ -158,6 +214,25 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
         pthread_attr_destroy(&new_attr);
         // Set thread Id
         reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = INTERNALS(Thread);
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+        typedef void (*CB_FuncType)(void *);
+        int retval = 0;
+        retval = rt_task_spawn( &INTERNALS(Task),
+                                NULL,
+                                0,
+                                89,
+                                T_FPU | T_JOINABLE,
+                                (CB_FuncType)cb,
+                                (void*)userdata );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "rt_task_spawn failed. "
+                              << strerror(retval) << ": " << retval
+                              << std::endl;
+        }
+        // copy the address                                                                                                                    
+        reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->Task = &INTERNALS(Task);
 #elif (CISST_OS == CISST_WINDOWS)
         DWORD threadId;
         INTERNALS(Thread) = CreateThread(
@@ -191,7 +266,7 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
 void osaThread::Delete(void)
 {
     if (Valid) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
         int retval = pthread_cancel (INTERNALS(Thread));
         if( retval != 0 ){
             CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -199,6 +274,17 @@ void osaThread::Delete(void)
                               << strerror(retval) << ": " << retval 
                               << std::endl;
         }
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+        /*                                                                                                                                    
+        int retval = 0;                                                                                                                       
+        retval = rt_task_delete( &INTERNALS( Task ) );                                                                                        
+        if( retval != 0 ){                                                                                                                    
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS                                                                                              
+        << "rt_task_delete failed. "                                                                                     
+        << strerror(retval) << ": " << retval                                                                            
+        << std::endl;                                                                                                    
+        }                                                                                                                                     
+        */
 #elif (CISST_OS == CISST_WINDOWS)
         TerminateThread(INTERNALS(Thread), 0);
 #endif // CISST_WINDOWS
@@ -215,7 +301,7 @@ void osaThread::Delete(void)
 // what about Windows?
 void osaThread::Wait(void) 
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     // will return EDEADLK if called from current thread
     int retval = pthread_join(INTERNALS(Thread), NULL);
     if( retval != 0 ){
@@ -224,6 +310,17 @@ void osaThread::Wait(void)
                           << strerror(retval) << ": " << retval 
                           << std::endl;
     }
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    int retval = 0;
+    retval = rt_task_join( &INTERNALS( Task ) );
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "rt_task_join failed. "
+                          << strerror(retval) << ": " << retval
+                          << std::endl;
+    }
+
 #elif (CISST_OS == CISST_WINDOWS)
     WaitForSingleObject(INTERNALS(Thread), INFINITE);
 #endif // CISST_WINDOWS
@@ -237,11 +334,23 @@ PriorityType osaThread::GetPriority(void) const
 
 void osaThread::SetPriority(PriorityType priority) 
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     struct sched_param param;
     param.sched_priority = priority;
     pthread_setschedparam(INTERNALS(Thread), Policy, &param);
     Priority = priority;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    int retval = 0;
+    retval = rt_task_set_priority( &INTERNALS( Task ), priority );
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "rt_task_set_priority failed. "
+                          << strerror(retval) << ": " << retval
+                          << std::endl;
+    }
+    Priority = priority;
+
 #elif (CISST_OS == CISST_WINDOWS)
     SetThreadPriority(INTERNALS(thread), priority);
 #endif // CISST_WINDOWS
@@ -255,11 +364,12 @@ SchedulingPolicyType osaThread::GetSchedulingPolicy(void)
 
 void osaThread::SetSchedulingPolicy(SchedulingPolicyType policy) 
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     struct sched_param param;
     param.sched_priority = Priority;
     pthread_setschedparam(INTERNALS(Thread), policy, &param);
     Policy = policy;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
 #elif (CISST_OS == CISST_WINDOWS)
     // Not yet implemented.
 #endif // CISST_WINDOWS
@@ -280,10 +390,22 @@ void osaThread::Sleep(double timeInSeconds)
 
 void osaCurrentThreadYield(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     // Using sched_yield instead of pthread_yield because the former is in the POSIX standard
     // (pthread_yield was only in the draft of the standard).
     sched_yield();
+
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    int retval = 0;
+    retval = rt_task_yield();
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "rt_task_yield failed. "
+                          << strerror(retval) << ": " << retval
+                          << std::endl;
+    }
+
 #elif (CISST_OS == CISST_WINDOWS)
     // Other options are SleepEx(0,0) and Sleep(0)
     SwitchToThread();

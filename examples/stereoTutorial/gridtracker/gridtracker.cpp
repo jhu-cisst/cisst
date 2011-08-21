@@ -23,110 +23,28 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
-#define __CAMERA_SOURCE
-
-
-///////////////////////////////
-// CBackgroundTracker filter //
-///////////////////////////////
-
-class CBackgroundTracker : public svlFilterBase
-{
-public:
-    CBackgroundTracker() :
-        svlFilterBase(),
-        GridWidth(0),
-        GridHeight(0),
-        BgPoly(0)
-    {
-        AddInput("input");
-        AddInputType("input", svlTypeTargets);
-
-        AddOutput("output");
-        SetAutomaticOutputType(true);
-    }
-
-protected:
-    int Initialize(svlSample* syncInput, svlSample* &syncOutput)
-    {
-        syncOutput = syncInput;
-        return SVL_OK;
-    }
-
-    int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
-    {
-        syncOutput = syncInput;
-
-        _OnSingleThread(procInfo)
-        {
-            vctInt2 pos1, pos2, pos3, pos4;
-
-            unsigned int idx_ul = (GridHeight / 2 - 5) * GridWidth + ((GridWidth / 2) - 5);
-            unsigned int idx_ur = (GridHeight / 2 - 5) * GridWidth + ((GridWidth / 2) + 5);
-            unsigned int idx_lr = (GridHeight / 2 + 5) * GridWidth + ((GridWidth / 2) + 5);
-            unsigned int idx_ll = (GridHeight / 2 + 5) * GridWidth + ((GridWidth / 2) - 5);
-
-            svlSampleTargets* targets  = dynamic_cast<svlSampleTargets*>(syncInput);
-            if (targets) {
-                if (targets->GetPosition(idx_ul, pos1, 0) == SVL_OK &&
-                    targets->GetPosition(idx_ur, pos2, 0) == SVL_OK &&
-                    targets->GetPosition(idx_lr, pos3, 0) == SVL_OK &&
-                    targets->GetPosition(idx_ll, pos4, 0) == SVL_OK) {
-
-                    BgPoly->SetPoint(0, pos1);
-                    BgPoly->SetPoint(1, pos2);
-                    BgPoly->SetPoint(2, pos3);
-                    BgPoly->SetPoint(3, pos4);
-                    BgPoly->SetPoint(4, pos1);
-                }
-            }
-        }
-
-        return SVL_OK;
-    }
-
-public:
-    void SetBgPoly(svlOverlayStaticPoly* poly)
-    {
-        BgPoly = poly;
-    }
-
-    void SetGridSize(unsigned int width, unsigned int height)
-    {
-        GridWidth = width;
-        GridHeight = height;
-    }
-
-private:
-    unsigned int GridWidth;
-    unsigned int GridHeight;
-    svlOverlayStaticPoly* BgPoly;
-};
-
 
 //////////////////////////////////
 //             main             //
 //////////////////////////////////
 
-int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
+int main(int argc, char** argv)
 {
-    const bool showgrid = true;
-    const bool showrect = true;
-    const bool showwarpedimage = false;
-    const bool showmosaic = true;
-    const unsigned int width  = 1600;
-    const unsigned int height = 1200;
-    const int radius = 40;
+    if (argc < 2) {
+        std::cerr << "Error: no filename specified" << std::endl;
+        return 0;
+    }
+
+    std::string filepath(argv[1]);
+    const int radius = 20;
     const int distance = 32;
+    unsigned int width, height;
+    double framerate;
 
     svlInitialize();
 
     svlStreamManager stream(8);
-#ifdef __CAMERA_SOURCE
-    svlFilterSourceVideoCapture source(1);
-#else // __CAMERA_SOURCE
     svlFilterSourceVideoFile source(1);
-#endif // __CAMERA_SOURCE
     svlFilterImageTracker tracker;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window;
@@ -136,34 +54,41 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     svlFilterImageWindow window3;
 
     // setup source
-#ifdef __CAMERA_SOURCE
-    if (source.LoadSettings("gridtrackercam.dat") != SVL_OK) {
-        source.DialogSetup();
-        source.SaveSettings("gridtrackercam.dat");
+    if (filepath.empty()) {
+        source.DialogFilePath();
+        source.GetFilePath(filepath);
     }
-#else // __CAMERA_SOURCE
-    //    source.DialogFilePath();
-    source.SetFilePath("crop2.avi");
-#endif // __CAMERA_SOURCE
+    else {
+        source.SetFilePath(filepath);
+    }
+    // Get video dimensions
+    svlVideoCodecBase* codec = svlVideoIO::GetCodec(filepath);
+    if (!codec) return 0;
+    if (codec->Open(filepath, width, height, framerate) != SVL_OK) {
+        svlVideoIO::ReleaseCodec(codec);
+        return 0;
+    }
+    svlVideoIO::ReleaseCodec(codec);
 
     // setup tracker algorithm
     svlTrackerMSBruteForce trackeralgo;
     trackeralgo.SetErrorMetric(svlNCC);
     trackeralgo.SetScales(3);
-    trackeralgo.SetTemplateRadius(12);
-    trackeralgo.SetSearchRadius(50);
-    trackeralgo.SetTemplateUpdateWeight(0.0);
-    trackeralgo.SetConfidenceThreshold(0.35);
+    trackeralgo.SetTemplateRadius(16);
+    trackeralgo.SetSearchRadius(30);
+    trackeralgo.SetOverwriteTemplates(false);
+    trackeralgo.SetTemplateUpdateWeight(0.1);
+    trackeralgo.SetConfidenceThreshold(0.0);
 
     // setup tracker
-    tracker.SetMovingAverageSmoothing(0.0);
+    tracker.SetRigidBodyTransformSmoothing(10.0);
     tracker.SetIterations(1);
     tracker.SetRigidBody(true);
     tracker.SetRigidBodyConstraints(-1.5, 1.5, 0.5, 2.0);
     tracker.SetTracker(trackeralgo);
-    tracker.SetROI(width / 2 - width / 4, height / 2 - height / 4,
-                   width / 2 + width / 4, height / 2 + height / 4);
-    tracker.SetFrameSkip(10);
+    tracker.SetROI(width / 2 - width / 6, height / 2 - height / 6,
+                   width / 2 + width / 6, height / 2 + height / 6);
+    tracker.SetFrameSkip(3);
 
     const int targetcount = (radius * 2 + 1) * (radius * 2 + 1);
     svlSampleTargets targets;
@@ -192,19 +117,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
                                       true,      // confidence coloring
                                       false,     // draw crosshairs
                                       3);        // target size
-    if (showgrid) overlay.AddOverlay(targets_overlay);
-
-    svlOverlayStaticPoly::Type points(5, svlPoint2D(-1, -1));
-    svlOverlayStaticPoly poly_overlay(SVL_LEFT,              // background video channel
-                                      true,                  // visible
-                                      points,                // point list
-                                      svlRGB(255, 255, 255), // poly color
-                                      2,                     // thickness;
-                                      0);                    // start;
-    if (showrect) overlay.AddOverlay(poly_overlay);
-    CBackgroundTracker bgtracker;
-    bgtracker.SetBgPoly(&poly_overlay);
-    bgtracker.SetGridSize(radius * 2 + 1, radius * 2 + 1);
+    overlay.AddOverlay(targets_overlay);
 
     // Add framerate overlay
     svlOverlayFramerate bg_fps_overlay(SVL_LEFT,              // background video channel
@@ -222,21 +135,8 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     stream.SetSourceFilter(&source);
     source.GetOutput()->Connect(tracker.GetInput());
     tracker.GetOutput()->Connect(overlay.GetInput());
+    tracker.GetOutput("targets")->Connect(overlay.GetInput("targets"));
     overlay.GetOutput()->Connect(window.GetInput());
-    if (showwarpedimage) tracker.GetOutput("warpedimage")->Connect(window2.GetInput());
-    if (showmosaic) {
-        writer.SetFilePath("mosaic_", "bmp");
-        writer.Pause();
-        tracker.GetOutput("mosaicimage")->Connect(writer.GetInput());
-/*
-        writer.GetOutput()->Connect(resizer.GetInput());
-        resizer.SetOutputSize(1200, 1200);
-        resizer.GetOutput()->Connect(window3.GetInput());
-*/
-    }
-
-    tracker.GetOutput("targets")->Connect(bgtracker.GetInput());
-    bgtracker.GetOutput()->Connect(overlay.GetInput("targets"));
 
     // start stream
     stream.Play();
@@ -245,9 +145,9 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     while (ch != 'q') {
         ch = cmnGetChar();
         switch (ch) {
-            case 'm':
-                writer.Record(1);
-                std::cerr << "Mosaic saved" << std::endl;
+            case ' ':
+                tracker.GetInput("targets")->PushSample(&targets);
+                std::cerr << "Tracker reinitialized" << std::endl;
             break;
         }
     }
@@ -255,6 +155,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     // release pipeline
     stream.Release();
 
+    std::cerr << "Quit" << std::endl;
     return 1;
 }
 

@@ -122,17 +122,24 @@ int svlFilterInput::PushSample(const svlSample* sample)
     if (!sample || !Filter || Trunk || Connected) return SVL_FAIL;
 
     svlStreamType type = sample->GetType();
-    if (Type != svlTypeInvalid && Type != type) return SVL_FAIL;
 
-    if (Filter->AutoType) {
-        // Automatic setup
-        if (!IsTypeSupported(type)) return SVL_FAIL;
-        Type = type;
+    if (Type != svlTypeInvalid) {
+        if (Type != type) return SVL_FAIL;
     }
     else {
-        // Manual setup
-        Type = type;
-        if (Filter->OnConnectInput(*this, Type) != SVL_OK) return SVL_FAIL;
+        if (Filter->AutoType) {
+            // Automatic setup
+            if (!IsTypeSupported(type)) return SVL_FAIL;
+            Type = type;
+        }
+        else {
+            // Manual setup
+            Type = type;
+            if (Filter->OnConnectInput(*this, Type) != SVL_OK) {
+                Type = svlTypeInvalid;
+                return SVL_FAIL;
+            }
+        }
     }
 
     if (!Buffer) Buffer = new svlBufferSample(Type);

@@ -50,3 +50,15 @@ if (BUILD_LIBS_cisstMultiTask)
 else (BUILD_LIBS_cisstMultiTask)
   message (WARNING " utilities cisstComponentGenerator, cisstDataGenerator, cisstDataPlayer, multiTaskGlobalComponentManager, multiTaskGlobalComponentManagerFLTK, and cisstIREComponent will not be compiled since they require BUILD_LIBS_cisstMultiTask")
 endif (BUILD_LIBS_cisstMultiTask)
+
+if( BUILD_LIBS_cisstRobot AND
+    BUILD_LIBS_cisstNumerical AND 
+    CISST_HAS_CISSTNETLIB )
+
+  add_subdirectory( cisstRobot )
+      
+
+endif( BUILD_LIBS_cisstRobot AND
+  BUILD_LIBS_cisstNumerical AND 
+  CISST_HAS_CISSTNETLIB )
+

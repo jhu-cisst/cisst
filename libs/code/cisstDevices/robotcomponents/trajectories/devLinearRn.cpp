@@ -127,37 +127,7 @@ robFunction* devLinearRn::Track( double t, robFunction* function ){
   return next;
 }
 
-
-
-/*
-robFunction* devLinearRn::Track( double t, robFunction* function ){
-  
-  // previous and next functions
-  robLinearRn* previous = dynamic_cast<robLinearRn*>( function );
-  robLinearRn* next = NULL;
-
-  // previous and next positions
-  vctDynamicVector<double> q1( inputold );
-  vctDynamicVector<double> q2 = GetInput();
-  inputold = q2;
-
-  if( previous != NULL ){
-
-    // First things first. Set the stop time to now
-    previous->StopTime() = t;
-    
-    // Evaluate at time t
-    vctDynamicVector<double> q1d, q1dd;
-    previous->Evaluate( t, q1, q1d, q1dd );
-
-    next = new robLinearRn( q1, q2, qdmax );
-    previous->Blend( next, qdmax, qddmax );
-
-  }
-
-  else
-    { next = new robLinearRn( q1, q2, qdmax, t ); }
-
-  return next;
+void devLinearRn::Reset( const vctDynamicVector<double>& q ){ 
+  qold = q; 
+  output->SetPosition( qold );
 }
-*/

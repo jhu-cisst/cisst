@@ -31,7 +31,7 @@ namespace mtsProxyConfig
     // Otherwise, the GCM will invalidate the connection and send connection 
     // failure message to LCMs that are involved in the connection.
     // (See mtsManagerGlobal.h)
-    const double ConnectConfirmTimeOut = 5.0 * cmn_s;
+    const double ConnectConfirmTimeOut = 15.0 * cmn_s;
 
     // Connection refresh period (heart-beat period) for connections between the
     // GCM and LCM

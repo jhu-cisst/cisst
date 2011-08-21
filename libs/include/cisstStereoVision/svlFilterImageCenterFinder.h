@@ -39,15 +39,23 @@ class CISST_EXPORT svlFilterImageCenterFinder : public svlFilterBase
 public:
     svlFilterImageCenterFinder();
 
+    int GetCenter(int &x, int &y, unsigned int videoch = SVL_LEFT) const;
+    int GetRadius(int &x, int &y, unsigned int videoch = SVL_LEFT) const;
+
     void SetTrajectorySmoothing(double smoothing);
-    double GetTrajectorySmoothing();
-    void SetMask(bool enablemask);
-    bool GetMask();
     void SetThreshold(unsigned char thresholdlevel);
-    unsigned char GetThreshold();
     void SetMassRatio(unsigned int ratio);
-    int GetCenter(int &x, int &y, unsigned int videoch = SVL_LEFT);
-    int GetRadius(int &x, int &y, unsigned int videoch = SVL_LEFT);
+    void SetMask(bool enablemask);
+    void SetHorizontalLink(bool enable);
+    void SetVerticalLink(bool enable);
+
+    double GetTrajectorySmoothing() const;
+    unsigned char GetThreshold() const;
+    unsigned int GetMassRatio() const;
+    bool GetMask() const;
+    bool GetHorizontalLink() const;
+    bool GetVerticalLink() const;
+
     void AddReceiver(svlFilterImageCenterFinderInterface* receiver);
 
 protected:
@@ -55,18 +63,25 @@ protected:
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
 private:
-    vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionV;
-    vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionH;
+    double Smoothing;
+    unsigned int ThresholdLevel;
+    unsigned int MassRatio;
+    bool MaskEnabled;
+    bool LinkHorizontally;
+    bool LinkVertically;
+    vctDynamicVector<svlFilterImageCenterFinderInterface*> Receivers;
 
     vctDynamicVector<int> CenterX;
     vctDynamicVector<int> CenterY;
     vctDynamicVector<int> RadiusX;
     vctDynamicVector<int> RadiusY;
-    unsigned int MassRatio;
-    double Smoothing;
-    bool MaskEnabled;
-    unsigned int ThresholdLevel;
-    vctDynamicVector<svlFilterImageCenterFinderInterface*> Receivers;
+    vctDynamicVector<int> CenterXInternal;
+    vctDynamicVector<int> CenterYInternal;
+    vctDynamicVector<int> RadiusXInternal;
+    vctDynamicVector<int> RadiusYInternal;
+
+    vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionV;
+    vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionH;
 };
 
 class CISST_EXPORT svlFilterImageCenterFinderInterface

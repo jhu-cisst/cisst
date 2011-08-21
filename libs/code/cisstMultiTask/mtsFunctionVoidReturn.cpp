@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
 
 
-mtsFunctionVoidReturn::mtsFunctionVoidReturn(void):
-    mtsFunctionBase(false),
+mtsFunctionVoidReturn::mtsFunctionVoidReturn(const bool isProxy):
+    mtsFunctionBase(isProxy),
     Command(0)
 {}
 

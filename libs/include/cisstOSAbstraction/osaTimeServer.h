@@ -38,6 +38,10 @@ struct CISST_EXPORT osaAbsoluteTime {
     long sec;   // seconds
     long nsec;  // nano-seconds
 
+    osaAbsoluteTime() : sec(0L), nsec(0L) {}
+    osaAbsoluteTime(long seconds, long nanoseconds) : sec(seconds), nsec(nanoseconds) {}
+    ~osaAbsoluteTime() {}
+
     /*! Returns absolute time in seconds relative to Jan 1, 1970. */
     double ToSeconds(void) const;
 

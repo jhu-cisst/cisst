@@ -266,7 +266,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateChange);
 
 class CISST_EXPORT mtsEndUserInterfaceArg : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     std::string UserName;
@@ -291,7 +291,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArg);
 
 class CISST_EXPORT mtsEventHandlerList: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 #ifndef SWIG
     template <class _commandType>
@@ -355,5 +355,35 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionLoadLibrary);
+
+//-----------------------------------------------------------------------------
+//  System-wide Thread-safe Logging
+//
+class CISST_EXPORT mtsLogMessage: public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    enum { MAX_LOG_SIZE = 1024 };
+
+    size_t      Length;
+    char        Message[MAX_LOG_SIZE];
+    std::string ProcessName;
+
+    /*! Default constructor */
+    mtsLogMessage();
+    /*! Copy constructor */
+    mtsLogMessage(const mtsLogMessage & other);
+    /*! Constructor */
+    mtsLogMessage(const char * log, size_t len);
+    /*! Destructor */
+    ~mtsLogMessage() {}
+
+    void ToStream(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsLogMessage);
 
 #endif // _mtsParameterTypes_h

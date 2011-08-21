@@ -10,6 +10,17 @@
 #define WAIT_ANY_UPDATE_ONE         2
 #define WAIT_NONE_UPDATE_ALL        3
 
+#define CNI_USR_NEW         0
+#define CNI_USR_LOST        1
+#define CNI_USR_POSE        2
+#define CNI_USR_CAL_START   3
+#define CNI_USR_CAL_END     4
+#define CNI_USR_SUCCESS     5
+#define CNI_USR_FAIL        6
+#define CNI_USR_WAIT        7
+#define CNI_USR_IDLE        -1
+
+
 /*! 
 \todo move ctor code to Configure method
 \todo move all use of OpenNI symbols to .cpp file, i.e. do not include Xn files in cisstOpenNI.h
@@ -35,12 +46,14 @@ private:
     std::string name;
 
     std::vector<cisstOpenNISkeleton*> skeletons;
+    
+    int users;
 
 
 public:
 
     //! Default Constructor
-    cisstOpenNI();
+    cisstOpenNI(int numUsers);
 
     //! Default DeConstructor
     ~cisstOpenNI();

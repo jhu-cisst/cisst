@@ -22,6 +22,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
+//#define SYSTEM_LOG_TEST_MCS
+#ifdef SYSTEM_LOG_TEST_MCS
+#include <iostream>
+#include <fstream>
+std::ofstream logfileMCS;
+#endif
+
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentServer, mtsManagerComponentBase);
 
 mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
@@ -29,6 +36,10 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
+#ifdef SYSTEM_LOG_TEST_MCS
+    logfileMCS.open("MCS.txt");
+#endif
+
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
     static int instanceCount = 0;
@@ -37,10 +48,21 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     }
     gcm->SetMCS(this);
     InterfaceGCMFunctionMap.SetOwner(*this);
+
+    // For system-wide thread-safe logging
+    mtsInterfaceRequired * required = AddInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired, MTS_OPTIONAL);
+    if (required) {
+        required->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, PrintLog);
+    }
 }
 
 mtsManagerComponentServer::~mtsManagerComponentServer()
 {
+#ifdef SYSTEM_LOG_TEST_MCS
+    logfileMCS.close();
+#endif
+
     InterfaceGCMFunctionMapType::iterator it = InterfaceGCMFunctionMap.begin();
     const InterfaceGCMFunctionMapType::iterator itEnd = InterfaceGCMFunctionMap.end();
     for (; it != itEnd; ++it) {
@@ -83,8 +105,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
         return false;
     }
 
-    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate,
-                              this, mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
@@ -115,6 +137,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_LoadLibrary,
                               this, mtsManagerComponentBase::CommandNames::LoadLibrary);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_PrintLog,
+                              this, mtsManagerComponentBase::CommandNames::PrintLog, MTS_COMMAND_NOT_QUEUED);
 
     provided->AddEventWrite(this->InterfaceGCMEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
@@ -127,6 +151,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                             mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
     provided->AddEventWrite(this->InterfaceGCMEvents_ChangeState,
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
+    provided->AddEventVoid(this->InterfaceGCMEvents_MCSReady,
+                           mtsManagerComponentBase::EventNames::MCSReady);
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceGCM: successfully added \"GCM\" interfaces" << std::endl;
 
@@ -215,26 +241,35 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     return true;
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & arg)
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
     // Check if a new component with the name specified can be created
-    if (GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to create component: " << arg << std::endl
+    if (GCM->FindComponent(componentDescription.ProcessName,
+                           componentDescription.ComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to create component: " << componentDescription << std::endl
                                 << "InterfaceGCMCommands_ComponentCreate: component already exists" << std::endl;
+        result = false;
         return;
     }
 
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(arg.ProcessName);
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(componentDescription.ProcessName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to execute \"Component Create\": " << arg << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to execute \"Component Create\": " << componentDescription << std::endl;
+        result = false;
         return;
     }
 
-    //functionSet->ComponentCreate.ExecuteBlocking(arg);
-    functionSet->ComponentCreate(arg);
+    mtsExecutionResult executionResult = functionSet->ComponentCreate(componentDescription, result);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << componentDescription << std::endl
+                                << " error \"" << executionResult << "\"" << std::endl;
+        result = false;
+    }
 }
+
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
 {
@@ -261,7 +296,8 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mt
     functionSet->ComponentConfigure(arg);
 }
 
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & arg)
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/)
 {
     // We don't check argument validity with the GCM at this stage and rely on 
     // the current normal connection procedure (GCM allows connection at the 
@@ -271,15 +307,21 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(connectionDescription.Client.ProcessName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << arg << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << connectionDescription << std::endl;
+        // result = false;
         return;
     }
 
-    //functionSet->ComponentConnect.ExecuteBlocking(arg);
-    functionSet->ComponentConnect(arg);
+    mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription /*, result*/);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
+                                << " error \"" << executionResult << "\"" << std::endl;
+        // result = false;
+    }
 }
+
 
 // MJ: Another method that does the same thing but accepts a single parameter 
 // as connection id should be added.
@@ -557,6 +599,42 @@ void mtsManagerComponentServer::InterfaceGCMCommands_LoadLibrary(const mtsDescri
     }
 
     functionSet->LoadLibrary(lib.LibraryName, result);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessage & log)
+{
+    static osaTimeServer timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
+
+    // Get absolute timestamp
+    double timestamp = log.Timestamp();
+    // Convert absolute to relative timestamp
+    struct osaAbsoluteTime s;
+    s.FromSeconds(timestamp);
+    timeServer.AbsoluteToRelative(s);
+
+    std::string now;
+    osaGetDateTimeString(now, ':');
+
+    std::string msg(log.Message, log.Length);
+    std::stringstream ss;
+    ss << "|" << now << " " << log.ProcessName << "| " << msg;
+
+    mtsLogMessage _log(ss.str().c_str(), ss.str().size());
+    _log.ProcessName = log.ProcessName;
+
+    if (!PrintLog.IsValid()) {
+#ifdef SYSTEM_LOG_TEST_MCS
+        logfileMCS << ss.str();
+#endif
+        return;
+    }
+    
+    mtsExecutionResult ret = PrintLog(_log);
+#ifdef SYSTEM_LOG_TEST_MCS
+    if ((ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED)) {
+        logfileMCS << "Logger forwarding error: (" << ret << ") " << ss.str();
+    }
+#endif
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,

@@ -69,5 +69,12 @@ http://www.cisst.org/cisst/license.txt.
 // Support for PNG
 #cmakedefine01 CISST_SVL_HAS_PNG
 
+// Support for CUDA
+#cmakedefine01 CISST_SVL_HAS_CUDA
+
+// Support for BLACKMAGIC DECKLINK
+#cmakedefine01 CISST_SVL_HAS_BM_DECKLINK
+
 #endif // _svlConfig_h
+
 

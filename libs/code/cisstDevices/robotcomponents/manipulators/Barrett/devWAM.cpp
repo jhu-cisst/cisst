@@ -583,7 +583,7 @@ devWAM::Errno devWAM::RecvPositions( vctDynamicVector<double>& jq ){
 
 void devWAM::Write(){
 
-  switch( GetMode() ){
+  switch( GetInputMode() ){
    
   case devManipulator::FORCETORQUE:
     {

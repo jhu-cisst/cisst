@@ -55,6 +55,7 @@ public:
     virtual unsigned char* GetUCharPointer(const unsigned int col, const unsigned int row) = 0;
     virtual const unsigned char* GetUCharPointer(const unsigned int col, const unsigned int row) const = 0;
     virtual void SetSize(const unsigned int cols, const unsigned int rows) = 0;
+    virtual void Resize(const unsigned int cols, const unsigned int rows) = 0;
     virtual unsigned int GetCols() const = 0;
     virtual unsigned int GetRows() const = 0;
     virtual unsigned int GetColStride() const = 0;

@@ -30,7 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <unistd.h>
 #endif // CISST_LINUX_RTAI
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <native/timer.h>
+#endif
+
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
 #include <sys/time.h>
 #include <unistd.h>
 #endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
@@ -49,7 +53,11 @@ double osaGetTime(void)
 #if (CISST_OS == CISST_LINUX_RTAI)
     return rt_get_time_ns() * cmn_ns;
 
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    return rt_timer_read() * cmn_ns;
+
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     struct timeval currentTime;
     gettimeofday(&currentTime, NULL);
     return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) * cmn_us;
@@ -78,17 +86,40 @@ double osaGetTime(void)
 #endif
 }
 
-void osaGetDateTimeString(std::string & str)
+void osaGetDateTimeString(std::string & str, const char delimiter)
 {
     time_t tim = time(0);
     tm * now = localtime(&tim);
     char buffer[50];
-    sprintf(buffer, "%d%s%02d%s%02d%s%02d%s%02d%s%02d",
-            now->tm_year + 1900, "-",
-            now->tm_mon + 1, "-",
-            now->tm_mday, "_",
-            now->tm_hour, "-",
-            now->tm_min, "-",
+
+    if (delimiter == ':') {
+        sprintf(buffer, "%d-%02d-%02d %02d:%02d:%02d",
+                now->tm_year + 1900,
+                now->tm_mon + 1,
+                now->tm_mday,
+                now->tm_hour,
+                now->tm_min,
+                now->tm_sec);
+    } else {
+        sprintf(buffer, "%d-%02d-%02d_%02d-%02d-%02d",
+                now->tm_year + 1900,
+                now->tm_mon + 1,
+                now->tm_mday,
+                now->tm_hour,
+                now->tm_min,
+                now->tm_sec);
+    }
+    str = buffer;
+}
+
+void osaGetTimeString(std::string & str)
+{
+    time_t tim = time(0);
+    tm * now = localtime(&tim);
+    char buffer[50];
+    sprintf(buffer, "%02d%s%02d%s%02d",
+            now->tm_hour, ":",
+            now->tm_min, ":",
             now->tm_sec);
     str = buffer;
 }

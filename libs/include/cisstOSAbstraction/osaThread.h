@@ -120,6 +120,11 @@ public:
     }
 
     /*! Method to compare two thread Ids, used to sort in std::map. */
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
+    bool operator () (const osaThreadId & lhs, const osaThreadId & rhs) const;
+#endif
+
+    /*! Method to compare two thread Ids, used to sort in std::map. */
     // bool Lesser(const osaThreadId & other) const;
 
     /*! Operator to compare two thread Ids, used to sort in std::map. */

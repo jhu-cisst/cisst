@@ -39,6 +39,12 @@ http://www.cisst.org/cisst/license.txt.
     const char __lock_filepath[] = "/var/lock/subsys/rtai";
     const char __lock_filename[] = "/var/lock/subsys/rtai/rtai.lock";
     char __lock_file[256];
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+#include <native/task.h>
+#include <native/timer.h>
+#include <sys/mman.h> // for mlockall                                                                                                      
+
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #elif (CISST_OS == CISST_QNX)
@@ -235,7 +241,7 @@ struct osaThreadBuddyInternals {
     // A pointer to the thread buddy on RTAI.
     RT_TASK *RTTask;
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
-    // 
+    // not internals for xenomai
 #elif (CISST_OS == CISST_WINDOWS)
     // A pointer to void on all other operating systems
     HANDLE WaitTimer;
@@ -318,24 +324,22 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
     }
 
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
-    pthread_t tid = pthread_self();
-    if( tid != NULL ){
-        struct timespec tsperiod, tsnow;
-        tsperiod.tv_sec = tv.sec;
-        tsperiod.tv_nsec = tv.nsec;
-        clock_gettime( CLOCK_REALTIME, &tsnow );
-        tsnow.tv_sec++;
-        int retval = pthread_make_periodic_np( tid, &tsnow, &tsperiod );
+
+    RT_TASK* task = rt_task_self();
+    if( task != NULL ){
+        SRTIME ns = (SRTIME)(Period);
+        int retval = 0;
+        retval = rt_task_set_periodic( task, TM_NOW, ns );
         if( retval != 0 ){
             CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "Failed to make periodic. "
-                              << strerror(retval) << ": " << retval 
+                              << "rt_task_set_periodic failed. "
+                              << strerror(retval) << ": " << retval
                               << std::endl;
         }
     }
     else{
         CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-                            << "Calling thread is not a POSIX skin thread."
+                            << "Calling thread is not a Xenomai task."
                             << std::endl;
     }
 #elif (CISST_OS == CISST_WINDOWS)
@@ -396,6 +400,12 @@ void osaThreadBuddy::Delete()
     if (Data->RTTask) {
         rt_task_delete(Data->RTTask);
     }
+
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    // DO NOT DELETE THE TASK WHEN DELETING THE BUDDY                                                                                         
+    // DESTROY THE TASK IN THE THREAD DESCRUCTOR     
+                                                                                         
 #elif (CISST_OS == CISST_WINDOWS)
     if (Data->WaitTimer != NULL) {
         CloseHandle(Data->WaitTimer);
@@ -411,15 +421,31 @@ void osaThreadBuddy::WaitForPeriod(void)
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_wait_period();
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
-    unsigned long overruns;
-    int retval = pthread_wait_np( &overruns );
+
+    unsigned long overruns=0;
+    int retval = 0;
+    retval = rt_task_wait_period( &overruns );
     if( retval != 0 ){
+        std::string errstr;
+        switch( -retval ){
+        case EWOULDBLOCK:
+            errstr = "EWOULDBLOCK";
+            break;
+        case EINTR:
+            errstr = "EINTR";
+            break;
+        case ETIMEDOUT:
+            errstr = "ETIMEDOUT";
+        case EPERM:
+            errstr = "EPERM";
+            break;
+        }
         CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                          << "Failed to wait for next period. "
-                          << strerror(retval) << ": " << retval << ". "
-                          << "Overruns: " << overruns
+                          << "Failed to wait for next period: " << errstr
+                          << " Overruns: " << overruns
                           << std::endl;
     }
+
 #elif (CISST_OS == CISST_WINDOWS)
     // this might change in future when we introduce our own
     // scheduler/dispatcher but even then our sleep might be better
@@ -452,16 +478,33 @@ void osaThreadBuddy::WaitForRemainingPeriod(void)
         rt_task_wait_period();
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
     if( IsPeriodic() ){
-        unsigned long overruns;
-        int retval = pthread_wait_np( &overruns );
-        if( retval != 0 ){
+        unsigned long overruns=0;
+        int retval = 0;
+        retval = rt_task_wait_period( &overruns );
+
+        if( retval != 0 ){            
+            std::string errstr;
+            switch( -retval ){ 
+            case EWOULDBLOCK:
+                errstr = "EWOULDBLOCK";
+                break; 
+            case EINTR:
+                errstr = "EINTR";  
+                break;
+            case ETIMEDOUT:
+                errstr = "ETIMEDOUT";
+            case EPERM:
+                errstr = "EPERM"; 
+                break;
+            }
             CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "Failed to wait for next period. "
-                              << strerror(retval) << ": " << retval << ". "
-                              << "Overruns: " << overruns
+                              << "Failed to wait for next period: " << errstr
+                              << " Overruns: " << overruns
                               << std::endl;
         }
+        
     }
+
 #elif (CISST_OS == CISST_WINDOWS)
     if (!IsPeriodic())
         return;
@@ -572,6 +615,24 @@ void osaThreadBuddy::Resume(void)
 #if (CISST_OS == CISST_LINUX_RTAI)
     if (Data->IsSuspended)
         rt_task_resume(Data->RTTask);
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_task_resume( rt_task_self() );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to resume task. "
+                              << strerror(retval) << ": " << retval << ". "
+                              << std::endl;
+        }
+    }
+    else{
+        CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+                            << "Calling thread is not a Xenomai task."
+                            << std::endl;
+    }
+
 #endif
     Data->IsSuspended = false;
 }
@@ -581,13 +642,32 @@ void osaThreadBuddy::Suspend(void)
     Data->IsSuspended = true;
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_suspend(Data->RTTask);
+
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+
+    if( rt_task_self() != NULL ){
+        int retval = 0;
+        retval = rt_task_suspend( rt_task_self() );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to suspend task. "
+                              << strerror(retval) << ": " << retval << ". "
+                              << std::endl;
+        }
+    }
+    else{
+        CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+                            << "Calling thread is not a Xenomai task."
+                            << std::endl;
+    }
+
 #endif
 }
 
 // Lock stack growth
 void osaThreadBuddy::LockStack() 
 {
-#if (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
     mlockall( MCL_CURRENT | MCL_FUTURE );
 #endif
 }

@@ -101,6 +101,9 @@ public:
     /*! Traits used for all useful types and values related to the element type. */
     typedef cmnTypeTraits<value_type> TypeTraits;
 
+    // MJ: support for gcc 4.6 compilation (not to have -fpermissive)
+    vctMatrixRotation3Base() {}
+
     /*!
       \name Conversion from normalized input.
 

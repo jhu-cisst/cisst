@@ -78,7 +78,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
     (void*)0:\
-    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - Class " << objectPointer->Services()->GetName() << ": ")
+    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
 
 #define CMN_LOG_CLASS(lod) CMN_LOG_CLASS_INSTANCE(this, lod)
@@ -166,7 +166,7 @@ http://www.cisst.org/cisst/license.txt.
   to quickly find the origin of the message in the source code.
 */
 #define CMN_LOG_DETAILS \
-    "File: " << __FILE__ << " Line: " << __LINE__ << " - "
+    "File: " << cmnLogger::ExtractFileName(__FILE__) << " Line: " << __LINE__ << " - "
 
 
 
@@ -433,6 +433,7 @@ class CISST_EXPORT cmnLogger {
         Instance()->RemoveChannelInstance(outputStream);
     }
 
+    static const char *ExtractFileName(const char *file);
 };
 
 

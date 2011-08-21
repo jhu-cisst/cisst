@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _osaMutex_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaExport.h>
 
 
@@ -55,6 +56,11 @@ class CISST_EXPORT osaMutex {
     static unsigned int SizeOfInternals(void);
     friend class osaMutexTest;
 
+    /*! Locker thread id */
+    osaThreadId LockerId;
+
+    bool Locked;
+
 public:
 	/* Enum type representing a timeout period of infinity and no wait. */
 	enum TimeoutType {
@@ -70,6 +76,12 @@ public:
 		SUCCESS,     /*! The lock operation was successful */
 		TIMED_OUT	 /*! The lock operation timed out after waiting for specified time */
 	};  
+
+    /*! Enum type for current lock state */
+    enum LockStateType {
+        LOCKED,
+        UNLOCKED
+    };
     
 	/*! Default constructor.  Initialize the underlying mutex. */
 	osaMutex(void);
@@ -103,6 +115,12 @@ public:
     operation timed out or lock failed
     */
 	ReturnType TryLock(int timeout);
+
+    /*! Check if the current thread locked this mutex earlier */
+    bool IsLocker(void) const;
+
+    /*! Get current lock state */
+    LockStateType GetLockState(void) const;
 };
 
 

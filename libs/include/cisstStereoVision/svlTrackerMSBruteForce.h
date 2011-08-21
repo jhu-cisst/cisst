@@ -40,6 +40,7 @@ public:
     void SetScales(unsigned int  scales);
     void SetTemplateRadius(unsigned int radius);
     void SetSearchRadius(unsigned int radius);
+    void SetOverwriteTemplates(bool enable);
     void SetTemplateUpdateWeight(double weight);
     void SetConfidenceThreshold(double threshold);
 
@@ -47,6 +48,7 @@ public:
     unsigned int GetScales() const;
     unsigned int GetTemplateRadius() const;
     unsigned int GetSearchRadius() const;
+    bool GetOverwriteTemplates() const;
     double GetTemplateUpdateWeight() const;
     double GetConfidenceThreshold() const;
 
@@ -64,6 +66,8 @@ protected:
     std::string ScaleName;
 
     bool TargetsAdded;
+    bool OverwriteTemplates;
+    unsigned int FrameCounter;
     unsigned int TemplateRadiusRequested;
     unsigned int SearchRadiusRequested;
     unsigned int TemplateRadius;
@@ -77,6 +81,7 @@ protected:
     unsigned char ConfidenceThreshold;
     svlTrackerMSBruteForce* LowerScale;
     svlSampleImageRGB* LowerScaleImage;
+    svlSampleImageRGB* PreviousImage;
 
     virtual void CopyTemplate(unsigned char* img, unsigned char* tmp, unsigned int left, unsigned int top);
     virtual void UpdateTemplate(unsigned char* img, unsigned char* origtmp, unsigned char* tmp, unsigned int left, unsigned int top);

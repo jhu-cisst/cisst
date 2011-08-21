@@ -24,6 +24,16 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlDefinitions_h
 
 
+#ifndef SETUP_QT_ENVIRONMENT
+    // Do nothing if Qt is not available
+    #define SETUP_QT_ENVIRONMENT(F) \
+        int main(int argc, char** argv) \
+        { \
+            return F(argc, argv); \
+        }
+#endif // SETUP_QT_ENVIRONMENT
+
+
 ///////////////////////////////////
 // Thread synchronization macros //
 ///////////////////////////////////
@@ -181,35 +191,46 @@ http://www.cisst.org/cisst/license.txt.
 
 enum svlStreamType
 {
-     svlTypeInvalid           // Default in base class
-    ,svlTypeStreamSource      // Capture sources have an input connector of this type
-    ,svlTypeStreamSink        // Render filters may have an output connector of this type
-    ,svlTypeImageRGB          // Single RGB image
-    ,svlTypeImageRGBA         // Single RGBA image
-    ,svlTypeImageRGBStereo    // Dual RGB image
-    ,svlTypeImageRGBAStereo   // Dual RGBA image
-    ,svlTypeImageMono8        // Single Grayscale image (8bpp)
-    ,svlTypeImageMono8Stereo  // Dual Grayscale image (8bpp)
-    ,svlTypeImageMono16       // Single Grayscale image (16bpp)
-    ,svlTypeImageMono16Stereo // Dual Grayscale image (16bpp)
-    ,svlTypeImageMono32       // Single Grayscale image (32bpp)
-    ,svlTypeImageMono32Stereo // Dual Grayscale image (32bpp)
-    ,svlTypeImage3DMap        // Three floats per pixel for storing 3D coordinates
-    ,svlTypeMatrixInt8        // Matrix of type 'char'
-    ,svlTypeMatrixInt16       // Matrix of type 'short'
-    ,svlTypeMatrixInt32       // Matrix of type 'int'
-    ,svlTypeMatrixInt64       // Matrix of type 'long long int'
-    ,svlTypeMatrixUInt8       // Matrix of type 'unsigned char'
-    ,svlTypeMatrixUInt16      // Matrix of type 'unsigned short'
-    ,svlTypeMatrixUInt32      // Matrix of type 'unsigned int'
-    ,svlTypeMatrixUInt64      // Matrix of type 'unsigned long long int'
-    ,svlTypeMatrixFloat       // Matrix of type 'float'
-    ,svlTypeMatrixDouble      // Matrix of type 'double'
-    ,svlTypeTransform3D       // 3D transformation
-    ,svlTypeTargets           // Vector of N dimensional points
-    ,svlTypeText              // Textual data
-    ,svlTypeCameraGeometry    // Geometry of a single or multiple camera rig
-    ,svlTypeBlobs             // Image blobs
+     svlTypeInvalid               // Default in base class
+    ,svlTypeStreamSource          // Capture sources have an input connector of this type
+    ,svlTypeStreamSink            // Render filters may have an output connector of this type
+    ,svlTypeImageRGB              // Single RGB image
+    ,svlTypeImageRGBA             // Single RGBA image
+    ,svlTypeImageRGBStereo        // Dual RGB image
+    ,svlTypeImageRGBAStereo       // Dual RGBA image
+    ,svlTypeImageMono8            // Single Grayscale image (8bpp)
+    ,svlTypeImageMono8Stereo      // Dual Grayscale image (8bpp)
+    ,svlTypeImageMono16           // Single Grayscale image (16bpp)
+    ,svlTypeImageMono16Stereo     // Dual Grayscale image (16bpp)
+    ,svlTypeImageMono32           // Single Grayscale image (32bpp)
+    ,svlTypeImageMono32Stereo     // Dual Grayscale image (32bpp)
+    ,svlTypeImage3DMap            // Three floats per pixel for storing 3D coordinates
+    ,svlTypeCUDAImageRGB          // Single RGB image (CUDA)
+    ,svlTypeCUDAImageRGBA         // Single RGBA image (CUDA)
+    ,svlTypeCUDAImageRGBStereo    // Dual RGB image (CUDA)
+    ,svlTypeCUDAImageRGBAStereo   // Dual RGBA image (CUDA)
+    ,svlTypeCUDAImageMono8        // Single Grayscale image (8bpp) (CUDA)
+    ,svlTypeCUDAImageMono8Stereo  // Dual Grayscale image (8bpp) (CUDA)
+    ,svlTypeCUDAImageMono16       // Single Grayscale image (16bpp) (CUDA)
+    ,svlTypeCUDAImageMono16Stereo // Dual Grayscale image (16bpp) (CUDA)
+    ,svlTypeCUDAImageMono32       // Single Grayscale image (32bpp) (CUDA)
+    ,svlTypeCUDAImageMono32Stereo // Dual Grayscale image (32bpp) (CUDA)
+    ,svlTypeCUDAImage3DMap        // Three floats per pixel for storing 3D coordinates (CUDA)
+    ,svlTypeMatrixInt8            // Matrix of type 'char'
+    ,svlTypeMatrixInt16           // Matrix of type 'short'
+    ,svlTypeMatrixInt32           // Matrix of type 'int'
+    ,svlTypeMatrixInt64           // Matrix of type 'long long int'
+    ,svlTypeMatrixUInt8           // Matrix of type 'unsigned char'
+    ,svlTypeMatrixUInt16          // Matrix of type 'unsigned short'
+    ,svlTypeMatrixUInt32          // Matrix of type 'unsigned int'
+    ,svlTypeMatrixUInt64          // Matrix of type 'unsigned long long int'
+    ,svlTypeMatrixFloat           // Matrix of type 'float'
+    ,svlTypeMatrixDouble          // Matrix of type 'double'
+    ,svlTypeTransform3D           // 3D transformation
+    ,svlTypeTargets               // Vector of N dimensional points
+    ,svlTypeText                  // Textual data
+    ,svlTypeCameraGeometry        // Geometry of a single or multiple camera rig
+    ,svlTypeBlobs                 // Image blobs
 };
 
 

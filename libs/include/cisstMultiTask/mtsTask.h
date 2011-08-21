@@ -226,7 +226,8 @@ public:
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
-                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
+                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
+                                                                   bool isProxy = false);
 
     /********************* Methods for task synchronization ***************/
 

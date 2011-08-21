@@ -49,6 +49,9 @@ protected:
     /*! Get a list of all processes running in the system */
     mtsFunctionRead GetNamesOfProcesses;
 
+    /*! If MCS is ready */
+    bool MCSReady;
+
     /*! Functions for InterfaceComponent's required interface.  Since one 
         manager component client needs to be able to handle multiple user 
         components, we keep a list of function objects using named map with 
@@ -69,7 +72,7 @@ protected:
     /*! Functions for InterfaceLCM's required interface */
     typedef struct {
         // Dynamic component management
-        mtsFunctionWrite ComponentCreate;
+        mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWrite ComponentDisconnect;
@@ -78,6 +81,7 @@ protected:
         mtsFunctionWrite ComponentResume;
         mtsFunctionQualifiedRead ComponentGetState;
         mtsFunctionQualifiedRead LoadLibrary;
+        mtsFunctionWrite PrintLog;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -95,6 +99,7 @@ protected:
     void HandleChangeStateEvent(const mtsComponentStateChange &componentStateChange);
     void HandleAddConnectionEvent(const mtsDescriptionConnection &connection);
     void HandleRemoveConnectionEvent(const mtsDescriptionConnection &connection);
+    void HandleMCSReadyEvent(void);
 
     // Event handlers for InterfaceComponent's required interface (handle events from Component)
     void HandleChangeStateFromComponent(const mtsComponentStateChange & componentStateChange);
@@ -148,14 +153,21 @@ public:
         it to InterfaceInternal's provided interface */
     bool AddNewClientComponent(const std::string & clientComponentName);
 
+    /*! If MCC can forward log messages to MCS.  This returns false until
+        MCC gets connected to MCS. */
+    bool CanForwardLog(void) const;
+
+    /*! Support for system-wide thread-safe logging. Forward logs to MCS. */
+    bool ForwardLog(const mtsLogMessage & log) const;
+
     // Called from LCM
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     /*! Commands for InterfaceLCM's provided interface */
-    void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
@@ -174,9 +186,9 @@ public:
     mtsFunctionWrite InterfaceLCMEvents_ChangeState;
 
     /*! Commands for InterfaceComponent's provided interface */
-    void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & arg);
+    void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);

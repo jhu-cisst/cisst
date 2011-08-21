@@ -256,6 +256,18 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
             FileHeader[1]->bfSize = FileHeader[1]->bfOffBits + image->GetDataSize(SVL_RIGHT);
         break;
 
+        case svlTypeImage3DMap:
+        case svlTypeCUDAImageRGB:
+        case svlTypeCUDAImageRGBA:
+        case svlTypeCUDAImageRGBStereo:
+        case svlTypeCUDAImageRGBAStereo:
+        case svlTypeCUDAImageMono8:
+        case svlTypeCUDAImageMono8Stereo:
+        case svlTypeCUDAImageMono16:
+        case svlTypeCUDAImageMono16Stereo:
+        case svlTypeCUDAImageMono32:
+        case svlTypeCUDAImageMono32Stereo:
+        case svlTypeCUDAImage3DMap:
         case svlTypeMatrixInt8:
         case svlTypeMatrixInt16:
         case svlTypeMatrixInt32:
@@ -266,7 +278,6 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
         case svlTypeMatrixUInt64:
         case svlTypeMatrixFloat:
         case svlTypeMatrixDouble:
-        case svlTypeImage3DMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:
@@ -347,6 +358,18 @@ int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                 outimage = dynamic_cast<svlSampleImage*>(syncInput);
             break;
 
+            case svlTypeImage3DMap:
+            case svlTypeCUDAImageRGB:
+            case svlTypeCUDAImageRGBA:
+            case svlTypeCUDAImageRGBStereo:
+            case svlTypeCUDAImageRGBAStereo:
+            case svlTypeCUDAImageMono8:
+            case svlTypeCUDAImageMono8Stereo:
+            case svlTypeCUDAImageMono16:
+            case svlTypeCUDAImageMono16Stereo:
+            case svlTypeCUDAImageMono32:
+            case svlTypeCUDAImageMono32Stereo:
+            case svlTypeCUDAImage3DMap:
             case svlTypeMatrixInt8:
             case svlTypeMatrixInt16:
             case svlTypeMatrixInt32:
@@ -357,7 +380,6 @@ int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             case svlTypeMatrixUInt64:
             case svlTypeMatrixFloat:
             case svlTypeMatrixDouble:
-            case svlTypeImage3DMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:

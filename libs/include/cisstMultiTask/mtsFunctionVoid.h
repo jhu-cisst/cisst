@@ -43,8 +43,7 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
     CommandType * Command;
 
  public:
-    /*! Default constructor.  Does nothing, use Instantiate before
-      using. */
+    /*! Default constructor.  Does nothing, use Bind before using. */
     mtsFunctionVoid(const bool isProxy = false);
 
     /*! Destructor. */

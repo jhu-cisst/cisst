@@ -157,6 +157,11 @@ struct CISST_EXPORT svlBlob
 #include <cisstStereoVision/svlSampleImage.h>
 #include <cisstStereoVision/svlSampleImageCustom.h>
 #include <cisstStereoVision/svlSampleImageTypes.h>
+#if CISST_SVL_HAS_CUDA
+#include <cisstStereoVision/svlSampleCUDAImage.h>
+#include <cisstStereoVision/svlSampleCUDAImageCustom.h>
+#include <cisstStereoVision/svlSampleCUDAImageTypes.h>
+#endif // CISST_SVL_HAS_CUDA
 #include <cisstStereoVision/svlSampleMatrix.h>
 #include <cisstStereoVision/svlSampleMatrixCustom.h>
 #include <cisstStereoVision/svlSampleMatrixTypes.h>
