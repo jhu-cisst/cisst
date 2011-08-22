@@ -19,7 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _robGUI_h
 
 #include <stdlib.h>
+#include <cisstCommon/cmnPortability.h>
+#if (CISST_OS == CISST_DARWIN)
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include <vector>
 
 #include <cisstDevices/robotcomponents/glut/devGeometry.h>
