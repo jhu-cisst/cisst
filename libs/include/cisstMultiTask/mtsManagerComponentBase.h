@@ -165,6 +165,7 @@ public:
         const static std::string RemoveConnection;
         const static std::string ChangeState;
         const static std::string MCSReady;
+        const static std::string PrintLog;
     };
 
     mtsManagerComponentBase(const std::string & componentName);
