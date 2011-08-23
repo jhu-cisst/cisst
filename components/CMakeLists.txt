@@ -18,35 +18,41 @@ project (cisstComponents)
 set (LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set (EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
-# cisstNDISerial, wrappers for serial port based trackers from NDI, i.e. Polaris, Aurora, Vicra, ...
-option (CISST_BUILD_COMP_cisstNDISerial "Build component cisstNDISerial" OFF)
+# cisstCAN wrappers for various CAN devices
+option (CISST_BUILD_COMP_cisstCAN "Build CAN support" OFF)
+if (CISST_BUILD_COMP_cisstCAN)
+  add_subdirectory (cisstCAN)
+endif (CISST_BUILD_COMP_cisstCAN)
+
+# cisstISIAPI
+option (CISST_BUILD_COMP_cisstISIAPI "Wrappers for Intuitive Surgical ISI API (read only API for daVinci), requires isi-api binaries from ISI" OFF)
+if (CISST_BUILD_COMP_cisstISIAPI)
+  add_subdirectory (cisstISIAPI)
+endif (CISST_BUILD_COMP_cisstISIAPI)
+
+# cisstNDISerial
+option (CISST_BUILD_COMP_cisstNDISerial "Wrappers for serial port based trackers from NDI, i.e. Polaris, Aurora, Vicra ..." OFF)
 if (CISST_BUILD_COMP_cisstNDISerial)
   add_subdirectory (cisstNDISerial)
 endif (CISST_BUILD_COMP_cisstNDISerial)
 
-# cisstOpenNI, wrappers for OpenNI Kinect
-option (CISST_BUILD_COMP_cisstOpenNI "Build component cisstOpenNI (requires OpenNI)" OFF)
+# cisstOpenNI
+option (CISST_BUILD_COMP_cisstOpenNI "Wrappers for OpenNI Kinect, requires OpenNI" OFF)
 if (CISST_BUILD_COMP_cisstOpenNI)
   add_subdirectory (cisstOpenNI)
 endif (CISST_BUILD_COMP_cisstOpenNI)
 
-# cisstSphinx4, wrapper for CMU Sphinx 4 to generate commands from speech
+# cisstSphinx4
 if (BUILD_LIBS_cisstMultiTask)
-  option (CISST_BUILD_COMP_cisstSphinx4 "Build component cisstSphinx4 (requires JNI and CMU Sphinx 4)" OFF)
+  option (CISST_BUILD_COMP_cisstSphinx4 "Wrappers for CMU Sphinx 4 to generate commands from speech, requires JNI and CMU Sphinx 4" OFF)
   if (CISST_BUILD_COMP_cisstSphinx4)
     add_subdirectory (cisstSphinx4)
   endif (CISST_BUILD_COMP_cisstSphinx4)
 endif (BUILD_LIBS_cisstMultiTask)
 
-# cisstStealthlink, wrappers for Medtronic StealthLink
-option (CISST_BUILD_COMP_cisstStealthlink "Build component cisstStealthlink (requires Stealthlink from Medtronic)" OFF)
+# cisstStealthlink
+option (CISST_BUILD_COMP_cisstStealthlink "Wrappers for Medtronic StealthLink, requires binaries from Medtronic" OFF)
 if (CISST_BUILD_COMP_cisstStealthlink)
   add_subdirectory (cisstStealthlink)
 endif (CISST_BUILD_COMP_cisstStealthlink)
-
-# cisstCAN wrappers for various CAN devices
-option(CISST_BUILD_COMP_cisstCAN "Build CAN support" OFF)
-if( CISST_BUILD_COMP_cisstCAN )
-  add_subdirectory( cisstCAN )
-endif( CISST_BUILD_COMP_cisstCAN )
 
