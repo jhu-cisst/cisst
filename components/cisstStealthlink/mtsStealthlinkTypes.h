@@ -24,6 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 // Add support for prmPositionCartesianGet
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
+// Always include last
+#include <cisstStealthlink/cisstStealthlinkExport.h>
+
 #ifndef NAME_LENGTH
 #define NAME_LENGTH 64  // from GRI.h
 #endif
@@ -34,7 +37,7 @@ struct frame;
 struct registration;
 struct probe_calibration;
 
-class mtsStealthTool: public mtsGenericObject {
+class CISST_EXPORT mtsStealthTool: public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 private:
     vctFrm3 XForm;
@@ -65,7 +68,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStealthTool);
 
 
-class mtsStealthFrame : public mtsGenericObject {
+class CISST_EXPORT mtsStealthFrame : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 private:
     vctFrm3 XForm;
@@ -93,7 +96,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStealthFrame);
 
 
-class mtsStealthRegistration : public mtsGenericObject {
+class CISST_EXPORT mtsStealthRegistration : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 private:
     vctFrm3 XForm;
@@ -117,7 +120,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStealthRegistration);
 
 
-class mtsStealthProbeCal : public mtsGenericObject {
+class CISST_EXPORT mtsStealthProbeCal : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 private:
     char Name[NAME_LENGTH];
