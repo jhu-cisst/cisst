@@ -19,6 +19,7 @@ if( RTSocketCANFound AND XenomaiFound )
   add_executable( WAMTest     WAMTest.cpp )
 
   add_executable( mtsPuckTest mtsPuckTest.cpp )
+  add_executable( mtsWAMTest  mtsWAMTest.cpp )
 
   add_definitions( "${XENOMAI_DEFINITIONS}" )
   include_directories( ${RTDM_INCLUDE_DIR} )
@@ -49,6 +50,14 @@ if( RTSocketCANFound AND XenomaiFound )
 
   target_link_libraries( 
     mtsPuckTest
+    cisstBarrett
+    cisstCAN
+    ${XENOMAI_LIBRARY_RTDM} 
+    ${XENOMAI_LIBRARY_XENOMAI}
+    ${XENOMAI_LIBRARY_NATIVE} )
+
+  target_link_libraries( 
+    mtsWAMTest
     cisstBarrett
     cisstCAN
     ${XENOMAI_LIBRARY_RTDM} 

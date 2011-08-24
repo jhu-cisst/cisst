@@ -64,8 +64,7 @@ int main( int argc, char** argv ){
 
   // Xenomai stuff
   mlockall(MCL_CURRENT | MCL_FUTURE);
-  RT_TASK task;
-  rt_task_shadow( &task, "CANServer", 1, 0);
+  rt_task_shadow( NULL, "mtsPuckTest", 80, 0 );
 
   cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
@@ -104,6 +103,7 @@ int main( int argc, char** argv ){
   taskManager->WaitForStateAll(mtsComponentState::READY);
 
   taskManager->StartAll();
+  taskManager->WaitForStateAll( mtsComponentState::ACTIVE );
   
   // Wait to exit
   std::cout << "ENTER to exit." << std::endl;
@@ -111,6 +111,11 @@ int main( int argc, char** argv ){
 
   taskManager->KillAll();
   taskManager->Cleanup();
+
+  if( can.Close() != cisstCAN::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << argv[0] << "Failed to close " << argv[1] << std::endl;
+    return -1;
+  }
 
   return 0;
 }

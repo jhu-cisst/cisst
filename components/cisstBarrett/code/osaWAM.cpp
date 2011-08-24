@@ -207,7 +207,7 @@ osaWAM::Errno osaWAM::SetVelocityFault( Barrett::Value vf ){
 }
 
 osaWAM::Errno osaWAM::SetTorqueWarning( Barrett::Value tw ){
-
+  
   if( safetymodule.SetTorqueWarning( tw ) != osaSafetyModule::ESUCCESS ){
     CMN_LOG_RUN_ERROR << "Unable to set the torques warning" << std::endl;
     return osaWAM::EFAILURE;

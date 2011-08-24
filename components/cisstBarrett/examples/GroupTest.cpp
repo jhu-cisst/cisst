@@ -9,8 +9,7 @@
 int main( int argc, char** argv ){
 
   mlockall(MCL_CURRENT | MCL_FUTURE);
-  RT_TASK task;
-  rt_task_shadow( &task, "GroupTest", 99, 0 );
+  rt_task_shadow( NULL, "GroupTest", 80, 0 );
 
   cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
@@ -72,7 +71,7 @@ int main( int argc, char** argv ){
   double t1 = osaGetTime();
   size_t cnt=0;
 
-  while( 1 ){
+  for( size_t i=0; i<10000; i++ ){
 
     vctDynamicVector<double> q;
     upperpositions.GetPositions( q );
@@ -90,6 +89,11 @@ int main( int argc, char** argv ){
       cnt = 0;
     }
 
+  }
+
+  if( can.Close() != cisstCAN::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << argv[0] << "Failed to close " << argv[1] << std::endl;
+    return -1;
   }
 
   return 0;

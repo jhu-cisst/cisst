@@ -8,8 +8,7 @@
 int main( int argc, char** argv ){
 
   mlockall(MCL_CURRENT | MCL_FUTURE);
-  RT_TASK task;
-  rt_task_shadow( &task, "PuckConfigure", 1, 0);
+  rt_task_shadow( NULL, "PuckTest", 80, 0);
 
   cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
