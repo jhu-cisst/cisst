@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCAN/cisstCAN.h>
 #include <cisstCAN/mtsCANFrame.h>
-
 #include <cisstCAN/cisstCANExport.h>
 
 //! MTS interfaces for a cisstCAN device
@@ -51,16 +50,16 @@ class CISST_EXPORT mtsCAN : public mtsComponent{
   cisstCAN* can;
 
   //! Open the CAN device
-  void Open();
+  void mtsOpen();
 
   //! Close the CAN device
-  void Close();
+  void mtsClose();
 
   //! Read a CAN frame from the device
-  void Read( mtsCANFrame &frame ) const;
+  void mtsRead( mtsCANFrame &frame ) const;
 
   //! Write a CAN frame to the device
-  void Write( const mtsCANFrame &frame );
+  void mtsWrite( const mtsCANFrame &frame );
 
  protected:
 

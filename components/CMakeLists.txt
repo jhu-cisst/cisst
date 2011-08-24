@@ -56,3 +56,12 @@ if (CISST_BUILD_COMP_cisstStealthlink)
   add_subdirectory (cisstStealthlink)
 endif (CISST_BUILD_COMP_cisstStealthlink)
 
+# cisstBarrett wrappers for Barrett WAM and BH
+if(CISST_BUILD_COMP_cisstCAN)
+  option(CISST_BUILD_COMP_cisstBarrett "Build Barrett support" OFF)
+  if( CISST_BUILD_COMP_cisstBarrett )
+    add_subdirectory( cisstBarrett )
+  endif( CISST_BUILD_COMP_cisstBarrett )
+endif(CISST_BUILD_COMP_cisstCAN)
+  
+
