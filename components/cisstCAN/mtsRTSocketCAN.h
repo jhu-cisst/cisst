@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
    derives from both osaRTSocketCAN and mtsCAN
 */
 class CISST_EXPORT mtsRTSocketCAN : 
+
   public mtsCAN,                 // This adds the MTS CAN interface
   public osaRTSocketCAN{         // This adds the osaRTSocketCAN code
 

@@ -65,3 +65,10 @@ if(CISST_BUILD_COMP_cisstCAN)
 endif(CISST_BUILD_COMP_cisstCAN)
   
 
+
+# cisstOSG wrappers for various CAN devices
+option(CISST_BUILD_COMP_cisstOSG "Build OSG support" OFF)
+if( CISST_BUILD_COMP_cisstOSG )
+  add_subdirectory( cisstOSG )
+endif( CISST_BUILD_COMP_cisstOSG )
+
