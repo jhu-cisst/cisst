@@ -73,8 +73,7 @@ ENDMACRO (CISST_QT4_WRAP_UI)
 
 endif (CISST_HAS_QT)
 
-
-
+# create/configure file for find_package (cisstNDISerial)
 set (cisstNDISerial_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}" "${cisst_BINARY_DIR}/components")
 set (cisstNDISerial_LIBRARY_DIR "${LIBRARY_OUTPUT_PATH}")
 set (cisstNDISerial_LIBRARIES cisstNDISerial)

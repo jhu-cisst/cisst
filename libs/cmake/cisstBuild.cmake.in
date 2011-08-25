@@ -17,14 +17,14 @@
 #
 # --- end cisst license ---
 
-
 # Paths
-set (CISST_SOURCE_DIR "@cisst_SOURCE_DIR@")
-set (CISST_BINARY_DIR "@cisst_BINARY_DIR@")
+set (CISST_SOURCE_DIR "@CISST_SOURCE_DIR@")
+set (CISST_BINARY_DIR "@CISST_BINARY_DIR@")
 set (CISST_INCLUDE_DIR "@CISST_BUILD_INCLUDE_DIRECTORIES@")
 set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
 set (CISST_LIBRARY_DIR "@CISST_BUILD_LINK_DIRECTORIES@")
-set (CISST_CMAKE_DIR "@cisst_SOURCE_DIR@/libs/cmake")
+set (CISST_CMAKE_DIR "${CISST_SOURCE_DIR}/libs/cmake")
+set (CISST_USE_FILE "${CISST_CMAKE_DIR}/Usecisst.cmake")
 
 # On Windows, CMake uses a different compiler at configuration time
 set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
@@ -47,6 +47,3 @@ set (CISST_HAS_FLTK @CISST_HAS_FLTK@)
 
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
-
-# Define cisst_USE_FILE
-set (CISST_USE_FILE "${CISST_CMAKE_DIR}/Usecisst.cmake")

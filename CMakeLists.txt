@@ -19,14 +19,13 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst (Computer Integrated Surgical Systems and Technology)
 project (cisst)
 set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
+set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
 set (CURRENT_PROJECT_IS_CISST ON CACHE BOOL "Tells different macros that cisst itself is part of the project")
 mark_as_advanced (CURRENT_PROJECT_IS_CISST)
-set (cisst_FOUND ON CACHE BOOL "cisst has been found as we are compiling cisst")
-mark_as_advanced (cisst_FOUND)
-set (CISST_USE_FILE "${cisst_SOURCE_DIR}/libs/cmake/Usecisst.cmake" CACHE STRING "cisst use file")
-mark_as_advanced (CISST_USE_FILE)
+set (cisst_DIR ${CISST_BINARY_DIR} CACHE PATH "Set path so that find_package (cisst) works in this project")
+mark_as_advanced (cisst_DIR)
 
 # Option to make cisst CMake functions more verbose
 option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake" OFF)

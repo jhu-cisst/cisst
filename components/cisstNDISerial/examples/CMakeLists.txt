@@ -11,31 +11,36 @@
 #
 # --- end cisst license ---
 
-# you can remove this if not compiling as a part of cisst
-if (NOT CURRENT_PROJECT_IS_CISST)
-  find_package (cisst REQUIRED)
-  find_package (cisstNDISerial REQUIRED)
-endif (NOT CURRENT_PROJECT_IS_CISST)
+find_package (cisst REQUIRED)
 
 if (cisst_FOUND)
+
   # cisst configuration
   include (${CISST_USE_FILE})
-  set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonQt cisstCommonXML
-                              cisstVector cisstOSAbstraction cisstNumerical
-                              cisstMultiTask cisstParameterTypes cisstRobot)
-  cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
-  # cisstNDISerial configuration
-  include_directories (${cisstNDISerial_INCLUDE_DIR})
-  link_directories (${cisstNDISerial_LIBRARY_DIR})
+  # cisstNDISerial has been compiled within cisst, we should find it automatically
+  find_package (cisstNDISerial REQUIRED HINTS "${CISST_BINARY_DIR}/components")
 
-  add_executable (cisstNDISerialQtExample mainQt.cpp)
+  if (cisstNDISerial_FOUND)
 
-  target_link_libraries (cisstNDISerialQtExample
-                         cisstNDISerial
-                         cisstNDISerialQt
-                         ${QT_LIBRARIES}
+    set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonQt cisstCommonXML
+                                cisstVector cisstOSAbstraction cisstNumerical
+                                cisstMultiTask cisstParameterTypes cisstRobot)
+    cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
+    # cisstNDISerial configuration
+    include_directories (${cisstNDISerial_INCLUDE_DIR})
+    link_directories (${cisstNDISerial_LIBRARY_DIR})
+
+    add_executable (cisstNDISerialQtExample mainQt.cpp)
+
+    target_link_libraries (cisstNDISerialQtExample
+                           cisstNDISerial
+                           cisstNDISerialQt
+                           ${QT_LIBRARIES}
                          )
-  cisst_target_link_libraries (cisstNDISerialQtExample ${CISST_LIBRARIES_NEEDED})
+    cisst_target_link_libraries (cisstNDISerialQtExample ${CISST_LIBRARIES_NEEDED})
+
+  endif (cisstNDISerial_FOUND)
 
 endif (cisst_FOUND)
