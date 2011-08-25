@@ -31,7 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "DeckLinkAPI.h"
 
+
+// Forward declarations
 class svlBufferImage;
+class DeckLinkCaptureDelegate;
 
 class svlVidCapSrcBMD : public svlVidCapSrcBase
 {
@@ -71,6 +74,9 @@ private:
     int	BMDNumberOfDevices;
     int* DeviceID;
     svlBufferImage** ImageBuffer;
+    IDeckLink** deckLink;
+    IDeckLinkInput** deckLinkInput;
+    DeckLinkCaptureDelegate** Delegate;
 
     void SetWidthHeightByBMDDisplayMode();
     IDeckLinkIterator* GetIDeckLinkIterator();
@@ -83,7 +89,7 @@ public:
     DeckLinkCaptureDelegate(svlBufferImage* buffer);
     ~DeckLinkCaptureDelegate();
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, LPVOID *ppv) { return E_NOINTERFACE; }
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, LPVOID *ppv);
     virtual ULONG STDMETHODCALLTYPE AddRef(void);
     virtual ULONG STDMETHODCALLTYPE  Release(void);
     virtual HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents, IDeckLinkDisplayMode*, BMDDetectedVideoInputFormatFlags){return S_OK;}
