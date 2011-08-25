@@ -215,7 +215,7 @@ public:
 
     /*! Creates a new thread that will execute the specified function, with no parameters. */
     void Create(void * (*threadStart)(void),
-                const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
+                const char * name = 0, PriorityType priority = PRIORITY_NORMAL, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -226,7 +226,7 @@ public:
     template <class _userDataType>
     void Create(void * (*threadStart)(_userDataType),
                 _userDataType userData = _userDataType(),
-                const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
+                const char * name = 0, PriorityType priority = PRIORITY_NORMAL, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -239,7 +239,7 @@ public:
     template <class _entryType, class _userDataType>
     void Create(_entryType * obj, void * (_entryType::*threadStart)(_userDataType),
                 _userDataType userData = _userDataType(),
-                const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
+                const char * name = 0, PriorityType priority = PRIORITY_NORMAL, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -253,7 +253,7 @@ public:
 
     /*! Initialize the thread object so that it refers to the calling thread, rather than
         creating a new thread. This allows existing threads to intermix with newly created threads. */
-    void CreateFromCurrentThread(const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
+    void CreateFromCurrentThread(const char * name = 0, PriorityType priority = PRIORITY_NORMAL, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;

@@ -22,6 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstOSAbstraction/osaCPUAffinity.h>
+#include "mtsTestTimingComponents.h"
+
+const double StateTransitionMaximumDelay = 5.0 * cmn_s;
 
 class mtsTimingTest: public CppUnit::TestFixture
 {
@@ -41,34 +45,34 @@ private:
 		CPPUNIT_TEST(TestContinuousPriorityVeryHighAffinity1);
 
 		// Test periodic
-		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity0RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity0RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity0RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity1RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity1RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity1RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryLowAffinity1RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityLowAffinity1RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity0RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity0RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity0RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity1RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity1RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity1RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityNormalAffinity1RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityHighAffinity1RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity0RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity0RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity0RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity0RunOsaThreadSleep);
-		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity1RunDummy);
+		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity1RunDummyComputation);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity1RunOsaSleep);
 		CPPUNIT_TEST(TestPeriodicPriorityVeryHighAffinity1RunOsaThreadSleep);
     }
@@ -78,192 +82,61 @@ private:
 
 public:
     mtsTimingTest(void);
+
     ~mtsTimingTest(void);
 
     template <class _componentType> void TestExecution(_componentType * component);
-
     
-    void TestContinuous(const PriorityType & threadPriority,
-                        const osaCPUMask & CPUAffinity);
+    void TestContinuous(PriorityType threadPriority,
+                        osaCPUMask CPUAffinity);
 
-    void TestPeriodic(double period,
-                      double load,
-                      const PriorityType & threadPriority,
-                      const osaCPUMask & CPUAffinity,
-                      const RunBehavior & runBehavior);
+    void TestPeriodic(PriorityType threadPriority,
+                      osaCPUMask CPUAffinity,
+                      RunBehavior runBehavior,
+                      double period = 1.0,
+                      double load = 0.5);
 
+    void TestContinuousPriorityVeryLowAffinity0(void);
+    void TestContinuousPriorityVeryLowAffinity1(void);
+    void TestContinuousPriorityLowAffinity0(void);
+    void TestContinuousPriorityLowAffinity1(void);
+    void TestContinuousPriorityNormalAffinity0(void);
+    void TestContinuousPriorityNormalAffinity1(void);
+    void TestContinuousPriorityHighAffinity0(void);
+    void TestContinuousPriorityHighAffinity1(void);
+    void TestContinuousPriorityVeryHighAffinity0(void);
+    void TestContinuousPriorityVeryHighAffinity1(void);
 
-    void TestContinuousPriorityVeryLowAffinity0(const PriorityType & threadPriority,
-                                                const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityVeryLowAffinity1(const PriorityType & threadPriority,
-                                                const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityLowAffinity0(const PriorityType & threadPriority,
-                                            const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityLowAffinity1(const PriorityType & threadPriority,
-                                            const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityNormalAffinity0(const PriorityType & threadPriority,
-                                               const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityNormalAffinity1(const PriorityType & threadPriority,
-                                               const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityHighAffinity0(const PriorityType & threadPriority,
-                                             const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityHighAffinity1(const PriorityType & threadPriority,
-                                             const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityVeryHighAffinity0(const PriorityType & threadPriority,
-                                                 const osaCPUMask & CPUAffinity);
-    void TestContinuousPriorityVeryHighAffinity1(const PriorityType & threadPriority,
-                                                 const osaCPUMask & CPUAffinity);
-
-    void TestPeriodicPriorityVeryLowAffinity0RunDummy(double period,
-                                                      double load,
-                                                      const PriorityType & threadPriority,
-                                                      const osaCPUMask & CPUAffinity,
-                                                      const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryLowAffinity0RunOsaSleep(double period,
-                                                         double load,
-                                                         const PriorityType & threadPriority,
-                                                         const osaCPUMask & CPUAffinity,
-                                                         const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryLowAffinity0RunOsaThreadSleep(double period,
-                                                               double load,
-                                                               const PriorityType & threadPriority,
-                                                               const osaCPUMask & CPUAffinity,
-                                                               const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryLowAffinity1RunDummy(double period,
-                                                      double load,
-                                                      const PriorityType & threadPriority,
-                                                      const osaCPUMask & CPUAffinity,
-                                                      const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryLowAffinity1RunOsaSleep(double period,
-                                                         double load,
-                                                         const PriorityType & threadPriority,
-                                                         const osaCPUMask & CPUAffinity,
-                                                         const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryLowAffinity1RunOsaThreadSleep(double period,
-                                                               double load,
-                                                               const PriorityType & threadPriority,
-                                                               const osaCPUMask & CPUAffinity,
-                                                               const RunBehavior & runBehavior);
-    void TestPeriodicPriorityLowAffinity0RunDummy(double period,
-                                                  double load,
-                                                  const PriorityType & threadPriority,
-                                                  const osaCPUMask & CPUAffinity,
-                                                  const RunBehavior & runBehavior);
-    void TestPeriodicPriorityLowAffinity0RunOsaSleep(double period,
-                                                     double load,
-                                                     const PriorityType & threadPriority,
-                                                     const osaCPUMask & CPUAffinity,
-                                                     const RunBehavior & runBehavior);
-    void TestPeriodicPriorityLowAffinity0RunOsaThreadSleep(double period,
-                                                           double load,
-                                                           const PriorityType & threadPriority,
-                                                           const osaCPUMask & CPUAffinity,
-                                                           const RunBehavior & runBehavior);
-    void TestPeriodicPriorityLowAffinity1RunDummy(double period,
-                                                  double load,
-                                                  const PriorityType & threadPriority,
-                                                  const osaCPUMask & CPUAffinity,
-                                                  const RunBehavior & runBehavior);
-    void TestPeriodicPriorityLowAffinity1RunOsaSleep(double period,
-                                                     double load,
-                                                     const PriorityType & threadPriority,
-                                                     const osaCPUMask & CPUAffinity,
-                                                     const RunBehavior & runBehavior);
-    void TestPeriodicPriorityLowAffinity1RunOsaThreadSleep(double period,
-                                                           double load,
-                                                           const PriorityType & threadPriority,
-                                                           const osaCPUMask & CPUAffinity,
-                                                           const RunBehavior & runBehavior);
-    void TestPeriodicPriorityNormalAffinity0RunDummy(double period,
-                                                     double load,
-                                                     const PriorityType & threadPriority,
-                                                     const osaCPUMask & CPUAffinity,
-                                                     const RunBehavior & runBehavior);
-    void TestPeriodicPriorityNormalAffinity0RunOsaSleep(double period,
-                                                        double load,
-                                                        const PriorityType & threadPriority,
-                                                        const osaCPUMask & CPUAffinity,
-                                                        const RunBehavior & runBehavior);
-    void TestPeriodicPriorityNormalAffinity0RunOsaThreadSleep(double period,
-                                                              double load,
-                                                              const PriorityType & threadPriority,
-                                                              const osaCPUMask & CPUAffinity,
-                                                              const RunBehavior & runBehavior);
-    void TestPeriodicPriorityNormalAffinity1RunDummy(double period,
-                                                     double load,
-                                                     const PriorityType & threadPriority,
-                                                     const osaCPUMask & CPUAffinity,
-                                                     const RunBehavior & runBehavior);
-    void TestPeriodicPriorityNormalAffinity1RunOsaSleep(double period,
-                                                        double load,
-                                                        const PriorityType & threadPriority,
-                                                        const osaCPUMask & CPUAffinity,
-                                                        const RunBehavior & runBehavior);
-    void TestPeriodicPriorityNormalAffinity1RunOsaThreadSleep(double period,
-                                                              double load,
-                                                              const PriorityType & threadPriority,
-                                                              const osaCPUMask & CPUAffinity,
-                                                              const RunBehavior & runBehavior);
-    void TestPeriodicPriorityHighAffinity0RunDummy(double period,
-                                                   double load,
-                                                   const PriorityType & threadPriority,
-                                                   const osaCPUMask & CPUAffinity,
-                                                   const RunBehavior & runBehavior);
-    void TestPeriodicPriorityHighAffinity0RunOsaSleep(double period,
-                                                      double load,
-                                                      const PriorityType & threadPriority,
-                                                      const osaCPUMask & CPUAffinity,
-                                                      const RunBehavior & runBehavior);
-    void TestPeriodicPriorityHighAffinity0RunOsaThreadSleep(double period,
-                                                            double load,
-                                                            const PriorityType & threadPriority,
-                                                            const osaCPUMask & CPUAffinity,
-                                                            const RunBehavior & runBehavior);
-    void TestPeriodicPriorityHighAffinity1RunDummy(double period,
-                                                   double load,
-                                                   const PriorityType & threadPriority,
-                                                   const osaCPUMask & CPUAffinity,
-                                                   const RunBehavior & runBehavior);
-    void TestPeriodicPriorityHighAffinity1RunOsaSleep(double period,
-                                                      double load,
-                                                      const PriorityType & threadPriority,
-                                                      const osaCPUMask & CPUAffinity,
-                                                      const RunBehavior & runBehavior);
-    void TestPeriodicPriorityHighAffinity1RunOsaThreadSleep(double period,
-                                                            double load,
-                                                            const PriorityType & threadPriority,
-                                                            const osaCPUMask & CPUAffinity,
-                                                            const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryHighAffinity0RunDummy(double period,
-                                                       double load,
-                                                       const PriorityType & threadPriority,
-                                                       const osaCPUMask & CPUAffinity,
-                                                       const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryHighAffinity0RunOsaSleep(double period,
-                                                          double load,
-                                                          const PriorityType & threadPriority,
-                                                          const osaCPUMask & CPUAffinity,
-                                                          const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryHighAffinity0RunOsaThreadSleep(double period,
-                                                                double load,
-                                                                const PriorityType & threadPriority,
-                                                                const osaCPUMask & CPUAffinity,
-                                                                const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryHighAffinity1RunDummy(double period,
-                                                       double load,
-                                                       const PriorityType & threadPriority,
-                                                       const osaCPUMask & CPUAffinity,
-                                                       const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryHighAffinity1RunOsaSleep(double period,
-                                                          double load,
-                                                          const PriorityType & threadPriority,
-                                                          const osaCPUMask & CPUAffinity,
-                                                          const RunBehavior & runBehavior);
-    void TestPeriodicPriorityVeryHighAffinity1RunOsaThreadSleep(double period,
-                                                                double load,
-                                                                const PriorityType & threadPriority,
-                                                                const osaCPUMask & CPUAffinity,
-                                                                const RunBehavior & runBehavior);
+    void TestPeriodicPriorityVeryLowAffinity0RunDummyComputation(void);
+    void TestPeriodicPriorityVeryLowAffinity0RunOsaSleep(void);
+    void TestPeriodicPriorityVeryLowAffinity0RunOsaThreadSleep(void);
+    void TestPeriodicPriorityVeryLowAffinity1RunDummyComputation(void);
+    void TestPeriodicPriorityVeryLowAffinity1RunOsaSleep(void);
+    void TestPeriodicPriorityVeryLowAffinity1RunOsaThreadSleep(void);
+    void TestPeriodicPriorityLowAffinity0RunDummyComputation(void);
+    void TestPeriodicPriorityLowAffinity0RunOsaSleep(void);
+    void TestPeriodicPriorityLowAffinity0RunOsaThreadSleep(void);
+    void TestPeriodicPriorityLowAffinity1RunDummyComputation(void);
+    void TestPeriodicPriorityLowAffinity1RunOsaSleep(void);
+    void TestPeriodicPriorityLowAffinity1RunOsaThreadSleep(void);
+    void TestPeriodicPriorityNormalAffinity0RunDummyComputation(void);
+    void TestPeriodicPriorityNormalAffinity0RunOsaSleep(void);
+    void TestPeriodicPriorityNormalAffinity0RunOsaThreadSleep(void);
+    void TestPeriodicPriorityNormalAffinity1RunDummyComputation(void);
+    void TestPeriodicPriorityNormalAffinity1RunOsaSleep(void);
+    void TestPeriodicPriorityNormalAffinity1RunOsaThreadSleep(void);
+    void TestPeriodicPriorityHighAffinity0RunDummyComputation(void);
+    void TestPeriodicPriorityHighAffinity0RunOsaSleep(void);
+    void TestPeriodicPriorityHighAffinity0RunOsaThreadSleep(void);
+    void TestPeriodicPriorityHighAffinity1RunDummyComputation(void);
+    void TestPeriodicPriorityHighAffinity1RunOsaSleep(void);
+    void TestPeriodicPriorityHighAffinity1RunOsaThreadSleep(void);
+    void TestPeriodicPriorityVeryHighAffinity0RunDummyComputation(void);
+    void TestPeriodicPriorityVeryHighAffinity0RunOsaSleep(void);
+    void TestPeriodicPriorityVeryHighAffinity0RunOsaThreadSleep(void);
+    void TestPeriodicPriorityVeryHighAffinity1RunDummyComputation(void);
+    void TestPeriodicPriorityVeryHighAffinity1RunOsaSleep(void);
+    void TestPeriodicPriorityVeryHighAffinity1RunOsaThreadSleep(void);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(mtsTimingTest);
