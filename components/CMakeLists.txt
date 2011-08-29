@@ -19,7 +19,7 @@ set (LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set (EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
 # cisstCAN wrappers for various CAN devices
-option (CISST_BUILD_COMP_cisstCAN "Build CAN support" OFF)
+option (CISST_BUILD_COMP_cisstCAN "Build controller area network (CAN) support" OFF)
 if (CISST_BUILD_COMP_cisstCAN)
   add_subdirectory (cisstCAN)
 endif (CISST_BUILD_COMP_cisstCAN)
@@ -66,9 +66,16 @@ endif(CISST_BUILD_COMP_cisstCAN)
   
 
 
-# cisstOSG wrappers for various CAN devices
-option(CISST_BUILD_COMP_cisstOSG "Build OSG support" OFF)
+# cisstODE wrappers and mts component for osg
+option(CISST_BUILD_COMP_cisstOSG "Build OpenSceneGraph (OSG) support" OFF)
 if( CISST_BUILD_COMP_cisstOSG )
   add_subdirectory( cisstOSG )
 endif( CISST_BUILD_COMP_cisstOSG )
+
+
+# cisstODE wrappers and mts component for ode
+option(CISST_BUILD_COMP_cisstODE "Build Open Dynamic Engine (ODE) support" OFF)
+if( CISST_BUILD_COMP_cisstODE )
+  add_subdirectory( cisstODE )
+endif( CISST_BUILD_COMP_cisstODE )
 

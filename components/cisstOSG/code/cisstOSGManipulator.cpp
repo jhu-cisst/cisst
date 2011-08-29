@@ -23,32 +23,30 @@ cisstOSGManipulator::cisstOSGManipulator(const std::vector<std::string>& models,
 					 const std::string& robotfile,
 					 const std::string& basemodel ) :
   robManipulator( robotfile, Rtw0 ),
-  cisstOSGBody( basemodel, world, Rtw0 ){
+  base( NULL ) {
+
+  if( !basemodel.empty() ){ 
+    // create the base and add it to the manipulator
+    base =  new cisstOSGBody( basemodel, (cisstOSGWorld*)this, Rtw0 ); 
+  }
 
   // create a group for the links
   osglinks = new osg::Group();
 
-  // add the link group to the base transform
-  osgtransform->addChild( osglinks );
-
-  // Add the remaining links called "linki"
+  // create the links and add them to the link group
   for( size_t i=0; i<links.size(); i++ ){
-
-    try{ 
-      osg::ref_ptr<cisstOSGBody> li;
-      li = new cisstOSGBody( models[i], 
-			     (cisstOSGWorld*)(osglinks.get()), 
-			     vctFrame4x4<double>() );
-    }
-    catch( std::bad_exception& ){
-      CMN_LOG_RUN_ERROR << "Failed to allocate body " << models[i] << std::endl;
-    }
-
+    osg::ref_ptr<cisstOSGBody> li;
+    li = new cisstOSGBody( models[i], 
+			   (cisstOSGWorld*)(osglinks.get()), 
+			   vctFrame4x4<double>() );
   }
-  
-  // Add the base to the world
-  world->addChild( this );
 
+  // add the links to the manipulator
+  addChild( osglinks );
+
+  // add the manipulator to the world
+  world->addChild( this );
+  
 }
 
 cisstOSGManipulator::cisstOSGManipulator(const std::vector<std::string>& models,
@@ -58,30 +56,28 @@ cisstOSGManipulator::cisstOSGManipulator(const std::vector<std::string>& models,
 					 const std::string& basemodel ) :
   robManipulator( robotfile, 
 		  vctFrame4x4<double>( Rtw0.Rotation(), Rtw0.Translation() ) ),
-  cisstOSGBody( basemodel, world, Rtw0 ){
+  base( NULL ){
   
+  if( !basemodel.empty() ){ 
+    // create the base and add it to the manipulator
+    base =  new cisstOSGBody( basemodel, (cisstOSGWorld*)this, Rtw0 ); 
+  }
+
   // create a group for the links
   osglinks = new osg::Group();
-  
-  // add the link group to the base transform
-  osgtransform->addChild( osglinks );
-  
-  // Add the remaining links called "linki"
+
+  // create the links and add them to the link group
   for( size_t i=0; i<links.size(); i++ ){
-
-    try{ 
-      osg::ref_ptr<cisstOSGBody> li;
-      li = new cisstOSGBody( models[i], 
-			     (cisstOSGWorld*)(osglinks.get()), 
-			     vctFrame4x4<double>() );
-    }
-    catch( std::bad_exception& ){
-      CMN_LOG_RUN_ERROR << "Failed to allocate body " << models[i] << std::endl;
-    }
-
+    osg::ref_ptr<cisstOSGBody> li;
+    li = new cisstOSGBody( models[i], 
+			   (cisstOSGWorld*)(osglinks.get()),
+			   vctFrame4x4<double>() );
   }
-  
-  // Add the base to the world
+
+  // add the links to the manipulator
+  addChild( osglinks );
+
+  // add the manipulator to the world
   world->addChild( this );
 
 }
@@ -99,18 +95,14 @@ cisstOSGManipulator::SetPositions( const vctDynamicVector<double>& qs ){
   
   // Ensure one joint value per link
   if( qs.size() == links.size() ){
-
+    
     q = qs;
     
     // For each children
-    for( unsigned int i=0; i<osglinks->getNumChildren(); i++ ){ 
-      
-      // Compute the forward kinematics for that children
-      osg::ref_ptr<cisstOSGBody> li;
-      li = dynamic_cast<cisstOSGBody*>( osglinks->getChild(i) );
-      if( li.get() != NULL ){
-	li->SetTransform( ForwardKinematics( q , i+1 ) ); 
-      }
+    for( unsigned int i=0; i<GetNumLinks(); i++ ){
+      osg::ref_ptr<cisstOSGBody> li = GetLink( i );
+      if( li.get() != NULL )
+	{ li->SetTransform( ForwardKinematics( q , i+1 ) ); }
     }
 
     return cisstOSGManipulator::ESUCCESS;
@@ -119,8 +111,17 @@ cisstOSGManipulator::SetPositions( const vctDynamicVector<double>& qs ){
   CMN_LOG_RUN_ERROR << "Expected " << links.size() << " values. "
 		    << "size(qs)=" << qs.size()
 		    << std::endl;
-
+  
   return cisstOSGManipulator::EFAILURE;
+  
+}
 
+unsigned int cisstOSGManipulator::GetNumLinks()
+{ return osglinks->getNumChildren(); }
+
+cisstOSGBody* cisstOSGManipulator::GetLink( size_t i ){
+  if( i < GetNumLinks() )
+    { return dynamic_cast<cisstOSGBody*>( osglinks->getChild(i) ); }
+  return NULL;
 }
 

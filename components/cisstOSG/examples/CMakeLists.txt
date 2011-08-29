@@ -23,6 +23,7 @@ if( OPENSCENEGRAPH_FOUND )
   add_executable( OSGtest   OSGtest.cpp )
   add_executable( OSGstereo OSGstereo.cpp )
   add_executable( OSGwam    OSGwam.cpp )
+  add_executable( OSGbh     OSGbh.cpp )
 
   add_executable( mtsOSGTest mtsOSGTest.cpp )
   add_executable( mtsOSGstereo  mtsOSGstereo.cpp )
@@ -48,6 +49,16 @@ if( OPENSCENEGRAPH_FOUND )
 
   target_link_libraries( 
     OSGwam
+    cisstOSG
+    cisstCommon 
+    cisstVector 
+    cisstOSAbstraction
+    cisstRobot
+    cisstNumerical
+    ${OPENSCENEGRAPH_LIBRARIES} )  
+
+  target_link_libraries( 
+    OSGbh
     cisstOSG
     cisstCommon 
     cisstVector 
@@ -92,5 +103,5 @@ if( OPENSCENEGRAPH_FOUND )
     cisstParameterTypes
     ${OPENSCENEGRAPH_LIBRARIES} )  
 
-endif( OPENSCENEGRAPH_FOUND AND CISST_DEV_OPENSCENEGRAPH )
+endif( OPENSCENEGRAPH_FOUND )
 

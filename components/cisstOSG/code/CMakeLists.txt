@@ -7,6 +7,8 @@ if( OPENSCENEGRAPH_FOUND )
   SET( 
     HEADER_FILES 
     ${HEADER_FILES} 
+
+    ../cisstOSGBH.h
     ../cisstOSGBody.h
     ../cisstOSGCamera.h
     ../cisstOSGManipulator.h
@@ -24,6 +26,8 @@ if( OPENSCENEGRAPH_FOUND )
     SET(
       SOURCE_FILES
       ${SOURCE_FILES} 
+
+      cisstOSGBH.cpp
       cisstOSGBody.cpp
       cisstOSGCamera.cpp
       cisstOSGManipulator.cpp

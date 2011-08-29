@@ -52,6 +52,16 @@ void cisstOSGBody::SwitchCallback::operator()( osg::Node* node,
 
 
 cisstOSGBody::cisstOSGBody( const std::string& model, 
+			    const vctFrame4x4<double>& Rt ) :
+  transform( Rt ),
+  onoff( SWITCH_ON ){
+  
+  Initialize();
+  ReadModel( model );
+
+}
+
+cisstOSGBody::cisstOSGBody( const std::string& model, 
 			    cisstOSGWorld* world,
 			    const vctFrame4x4<double>& Rt ) :
   transform( Rt ),

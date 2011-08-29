@@ -104,6 +104,16 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
      Create a OSG body component. The body will add a required interface *if*
      a function name is passed.
      \param model The file name of a 3D model
+     \param Rt The initial transformation of the body
+  */
+  cisstOSGBody( const std::string& model,
+		const vctFrame4x4<double>& Rt );
+
+  //! OSG Body constructor
+  /**
+     Create a OSG body component. The body will add a required interface *if*
+     a function name is passed.
+     \param model The file name of a 3D model
      \param world The OSG world the body belongs to
      \param Rt The initial transformation of the body
   */
@@ -144,6 +154,8 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   void SetModeLine();
   void SetModePoint();
   void SetModeFill();
+
+
 };
 
 #endif

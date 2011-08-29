@@ -25,15 +25,31 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT cisstOSGManipulator : 
 
-  public robManipulator,
-  public cisstOSGBody{
+  public osg::Group,
+  public robManipulator{
 
- private:
+ protected:
 
   //! Store the current joints values
   vctDynamicVector<double> q;
 
+  osg::ref_ptr<cisstOSGBody> base;
+
   osg::ref_ptr<osg::Group> osglinks;
+
+
+  //!
+  cisstOSGManipulator( const vctFrame4x4<double>& Rtw0,
+		       const std::string& robotfile ) :
+    robManipulator( robotfile, Rtw0 ),
+    base( NULL ){}
+
+  //!
+  cisstOSGManipulator( const vctFrm3& Rtw0,
+		       const std::string& robotfile ) :
+    robManipulator( robotfile, vctFrame4x4<double>( Rtw0.Rotation(),
+						    Rtw0.Translation()  ) ),
+    base( NULL ){}
 
  public: 
 
@@ -94,6 +110,12 @@ class CISST_EXPORT cisstOSGManipulator :
   virtual 
     cisstOSGManipulator::Errno 
     SetPositions( const vctDynamicVector<double>& q );
+
+  unsigned int GetNumLinks();
+
+  cisstOSGBody* GetLink( size_t i );
+  cisstOSGBody* GetBase() 
+  { return base.get(); }
 
 };
 

@@ -460,6 +460,7 @@ cisstOSGCamera::cisstOSGCamera( cisstOSGWorld* world,
     home();
   }
 
+  /*
   osg::StateSet* state = world->getOrCreateStateSet();
   state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
   state->setMode( GL_LIGHT0, osg::StateAttribute::ON );
@@ -480,7 +481,7 @@ cisstOSGCamera::cisstOSGCamera( cisstOSGWorld* world,
   world->addChild( mt.get() );
   mt->addChild( ls.get() );
   ls->setLight( light.get() );    
-
+  */
 }
 
 cisstOSGCamera::~cisstOSGCamera(){}
