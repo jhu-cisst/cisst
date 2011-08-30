@@ -602,6 +602,18 @@ IF(WIN32)
             "${cisst_BINARY_DIR}/utilities/bin" "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
       ENDIF(BUILD_UTILITIES)
 
+      # To find components (libraries) and example programs
+      IF(BUILD_COMPONENTS)
+        SET(CISST_PATH_CMAKE_FORMAT
+            ${CISST_PATH_CMAKE_FORMAT}
+            "${cisst_BINARY_DIR}/components/lib/${CISST_PATH_CONFIGURATION}"
+            "${cisst_BINARY_DIR}/components/bin/${CISST_PATH_CONFIGURATION}")
+        SET(CISST_PYTHONPATH_CMAKE_FORMAT
+            ${CISST_PYTHONPATH_CMAKE_FORMAT}
+            "${cisst_BINARY_DIR}/components/lib/${CISST_PATH_CONFIGURATION}"
+            "${cisst_BINARY_DIR}/components/bin/${CISST_PATH_CONFIGURATION}")
+      ENDIF(BUILD_COMPONENTS)
+
       # Convert to native format to be able to compare
       FILE(TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)
       FILE(TO_NATIVE_PATH "${CISST_PYTHONPATH_CMAKE_FORMAT}" CISST_PYTHONPATH)
