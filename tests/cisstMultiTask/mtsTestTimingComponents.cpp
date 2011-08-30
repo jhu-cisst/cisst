@@ -22,117 +22,127 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaCPUAffinity.h>
 #include <math.h>
 #include "mtsTestTimingComponents.h"
 
-mtsTestTimingContinuous::mtsTestTimingContinuous(int iterations) :
-    mtsTestTimingBase(); // call base constructor
-    mtsTaskContinuous("mtsTestTimingContinuous"),
-    DoneRunning(false),
-    Iterations(iterations),
-    {
-    }
+void mtsTestTimingBase::Cleanup(void)
+{
+    delete CurrentThread;
+}
 
-bool mtsTestTimingContinuous::Done(void)
+mtsTestTimingBase::mtsTestTimingBase(const std::string & name) :
+    Name(name),
+    DoneRunning(false),
+    RunCount(0),
+    CurrentThread(new osaThread)
+{
+}
+
+mtsTestTimingBase::~mtsTestTimingBase(void)
+{
+    mtsTestTimingBase::Cleanup();
+}
+
+bool mtsTestTimingBase::Done(void)
 {
     return DoneRunning;
 }
 
-void mtsTestTimingContinuous::SetIterations(int iterations)
+std::string mtsTestTimingBase::GetName(void)
+{
+    return Name;
+}
+
+void mtsTestTimingBase::SetIterations(int iterations)
 {
     Iterations = iterations;
 }
 
+void mtsTestTimingBase::SetThreadPriority(PriorityType threadPriority)
+{
+    CurrentThread->SetPriority(threadPriority);
+}
+
+void mtsTestTimingBase::SetCPUAffinity(osaCPUMask CPUAffinity)
+{
+    osaCPUSetAffinity(CPUAffinity);
+}
+
+mtsTestTimingContinuous::mtsTestTimingContinuous(const std::string & name) :
+    mtsTestTimingBase(name), // call base constructor
+    mtsTaskContinuous("mtsTestTimingContinuous")
+{
+    SetIterations(1000);
+    SetThreadPriority(PRIORITY_NORMAL);
+    SetCPUAffinity(0);
+}
+
 void mtsTestTimingContinuous::Run(void)
 {
-    if (RunCount >= Iterations) {
+    if (RunCount == Iterations) {
         DoneRunning = true;
+        mtsTestTimingBase::Cleanup();
         return;
     }
     RunCount++;
 }
 
-mtsTestTimingPeriodic::mtsTestTimingPeriodic() :
+mtsTestTimingPeriodic::mtsTestTimingPeriodic(const std::string & name, int period) :
+    mtsTestTimingBase(name),
     mtsTaskPeriodic("mtsTestTimingPeriodic", period),
-    DoneRunning(false),
     DummyOperations(1000)
 {
-    CurrentThread = new osaThread;
-    CurrentThread.CreateFromCurrentThread();
+    CurrentThread->CreateFromCurrentThread();
     SetIterations(1000);
-    SetPeriod(1.0);
     SetLoad(0.5);
-    SetThreadPriority(0);
+    SetThreadPriority(PRIORITY_NORMAL);
     SetCPUAffinity(0);
-    SetRunBehavior(dummyComputation);
+    SetRunBehavior(DUMMY_COMPUTATION);
 }
 
-void mtsTestTimingPeridioc::Cleanup(void)
+double mtsTestTimingPeriodic::GetPeriod(void)
 {
-    delete CurrentThread;
+    return GetPeriodicity();
 }
 
-bool mtsTestTimingPeriodic::Done(void) {
-    return DoneRunning;
-}
-
-double mtsTestTimingPeriodic::SetIterations(void)
-{
-    return Period;
-}
-
-void mtsTestTimingPeriodic::SetIterations(int iterations)
-{
-    Iterations = iterations;
-}
-
-void mtsTestTimingPeriodic::SetPeriod(double period)
-{
-    Period = period;
-}
 void mtsTestTimingPeriodic::SetLoad(double load)
 {
     Load = load;
 }
-void mtsTestTimingPeriodic::SetThreadPriority(PriorityType threadPriority)
-{
-    CurrentThread->setPriority(threadPriority);
-}
-void mtsTestTimingPeriodic::SetCPUAffinity(osaCPUMask CPUAffinity)
-{
-    osaCPUSetAffinity(CPUAffinity);
-}
+
 void mtsTestTimingPeriodic::SetRunBehavior(RunBehavior runBehavior)
 {
     RunType = runBehavior;
 }
 
 void mtsTestTimingPeriodic::Run(void) {
-    if (RunCount >= Iterations) {
+    if (RunCount == Iterations) {
         DoneRunning = true;
-        Cleanup();
+        mtsTestTimingBase::Cleanup();
         return;
     }
     RunCount++;
 
-    switch (runBehavior) {
-        case dummyComputation:
-            const osaTimeServer & timeServer = mtsComponentManager::GetInstance()->GetTimeServer();
-            int sum = 0;
+    double timeElapsed;
+    int sum;
+    switch (RunType) {
+        case DUMMY_COMPUTATION:
+            sum = 0;
             for (int i = 0; i < DummyOperations; i++) {
                 sum += cos(i);
             }
-            double timeElapsed = timeServer.getRelativeTime();
+            timeElapsed = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
             // adjust operations to take load * period amount of time
             DummyOperations *= (Load * Period) / timeElapsed;
             break;
-        case osaSleep:
-            osaSleep(load * Period);
+        case OSA_SLEEP:
+            osaSleep(Load * Period);
             break;
-        case osaThreadSleep:
-            CurrentThread.Sleep(load * Period);
+        case OSA_THREAD_SLEEP:
+            CurrentThread->Sleep(Load * Period);
             break;
     }
 }

@@ -83,14 +83,14 @@ private:
 public:
     mtsTimingTest(void);
 
-    ~mtsTimingTest(void);
-
     template <class _componentType> void TestExecution(_componentType * component);
     
-    void TestContinuous(PriorityType threadPriority,
+    void TestContinuous(const std::string & name,
+                        PriorityType threadPriority,
                         osaCPUMask CPUAffinity);
 
-    void TestPeriodic(PriorityType threadPriority,
+    void TestPeriodic(const std::string & name,
+                      PriorityType threadPriority,
                       osaCPUMask CPUAffinity,
                       RunBehavior runBehavior,
                       double period = 1.0,

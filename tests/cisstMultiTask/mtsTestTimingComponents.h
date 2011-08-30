@@ -27,59 +27,52 @@ http://www.cisst.org/cisst/license.txt.
 
 enum RunBehavior
 {
-    dummyComputationBehavior,
-    osaSleepBehavior,
-    osaThreadSleepBehavior
+    DUMMY_COMPUTATION,
+    OSA_SLEEP,
+    OSA_THREAD_SLEEP
 };
 
 class mtsTestTimingBase
 {
+    protected:
+        std::string Name;
+        bool DoneRunning;
+        int Iterations;
+        int RunCount;
+        osaThread * CurrentThread;
+        void Cleanup(void);
+
     public:
+        mtsTestTimingBase(const std::string & name);
+        ~mtsTestTimingBase(void);
         bool Done(void);
+        std::string GetName(void);
         void SetIterations(int iterations);
         void SetThreadPriority(PriorityType threadPriority);
         void SetCPUAffinity(osaCPUMask CPUAffinity);
-        void Run(void);
 };
 
 class mtsTestTimingContinuous: public mtsTestTimingBase, public mtsTaskContinuous
 {
-private:
-    bool DoneRunning;
-    int RunCount;
-
-public:
-    mtsTestTimingContinuous();
-
-    bool Done(void);
-    void SetIterations(int iterations);
-    void Run(void);
+    public:
+        mtsTestTimingContinuous(const std::string & name);
+        void Run(void);
 };
 
 class mtsTestTimingPeriodic: public mtsTestTimingBase, public mtsTaskPeriodic
 {
-private:
-    bool DoneRunning;
-    int DummyOperations;
-    int Iterations;
-    double Period;
-    double Load;
-    RunBehavior RunType;
-    osaThread * currentThread;
-    int RunCount;
+    private:
+        int DummyOperations;
+        double Load;
+        RunBehavior RunType;
 
-    void Cleanup(void);
+    public:
+        mtsTestTimingPeriodic(const std::string & name, int period);
 
-public:
-    mtsTestTimingPeriodic();
-
-    bool Done(void);
-    double GetPeriod(void);
-    void SetIterations(int iterations);
-    void SetPeriod(double period);
-    void SetLoad(double load);
-    void SetRunBehavior(RunBehavior runBehavior);
-    void Run(void);
+        double GetPeriod(void);
+        void SetLoad(double load);
+        void SetRunBehavior(RunBehavior runBehavior);
+        void Run(void);
 };
 
 #endif // _mtsTestTimingComponents_h

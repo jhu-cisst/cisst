@@ -31,23 +31,25 @@ mtsTimingTest::mtsTimingTest(void)
     Manager = mtsManagerLocal::GetInstance();
 }
 
-mtsTimingTest::~mtsTimingTest(void)
-{
-}
-
 template <class _componentType>
 void mtsTimingTest::TestExecution(_componentType * component)
 {
     Manager->AddComponent(component);
     Manager->CreateAll();
+    std::cerr << "creating..." << std::endl;
     CPPUNIT_ASSERT(Manager->WaitForStateAll(mtsComponentState::READY, StateTransitionMaximumDelay));
+    std::cerr << "created" << std::endl;
     Manager->StartAll();
+    std::cerr << "starting..." << std::endl;
     CPPUNIT_ASSERT(Manager->WaitForStateAll(mtsComponentState::ACTIVE, StateTransitionMaximumDelay));
+    std::cerr << "started" << std::endl;
     while (!component->Done()) {
         osaSleep(15 * cmn_ms);
     }
     Manager->KillAll();
+    std::cerr << "done, killing..." << std::endl;
     CPPUNIT_ASSERT(Manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
+    std::cerr << "killed" << std::endl;
     Manager->Cleanup();
 
     // Save run results
@@ -59,6 +61,7 @@ void mtsTimingTest::TestExecution(_componentType * component)
     double min = statistics.GetMin();
     double max = statistics.GetMax();
     std::ofstream resultsFile("TimingTestResults.txt");
+    resultsFile << cmnPrintf("Test: %s\n") << component->mtsTestTimingBase::GetName();
     resultsFile << cmnPrintf("Average: %.4f\n") << average;
     resultsFile << cmnPrintf("Stdev: %.4f\n") << stdDev;
     resultsFile << cmnPrintf("Min: %.4f\n") << min;
@@ -78,10 +81,11 @@ void mtsTimingTest::TestExecution(_componentType * component)
     CPPUNIT_ASSERT(max - min <= rangeThreshold);
 }
 
-void mtsTimingTest::TestContinuous(PriorityType threadPriority,
+void mtsTimingTest::TestContinuous(const std::string & name,
+                                   PriorityType threadPriority,
                                    osaCPUMask CPUAffinity)
 {
-    mtsTestTimingContinuous * task = new mtsTestTimingContinuous();
+    mtsTestTimingContinuous * task = new mtsTestTimingContinuous(name);
 
     task->SetIterations(1000);
     task->SetThreadPriority(threadPriority);
@@ -91,16 +95,16 @@ void mtsTimingTest::TestContinuous(PriorityType threadPriority,
     delete task;
 }
 
-void mtsTimingTest::TestPeriodic(PriorityType threadPriority,
+void mtsTimingTest::TestPeriodic(const std::string & name,
+                                 PriorityType threadPriority,
                                  osaCPUMask CPUAffinity,
                                  RunBehavior runBehavior,
                                  double period,
                                  double load)
 {
-    mtsTestTimingPeriodic * task = new mtsTestTimingPeriodic();
+    mtsTestTimingPeriodic * task = new mtsTestTimingPeriodic(name, period);
 
     task->SetIterations(1000);
-    task->SetPeriod(period);
     task->SetLoad(load);
     task->SetThreadPriority(threadPriority);
     task->SetCPUAffinity(CPUAffinity);
@@ -112,162 +116,162 @@ void mtsTimingTest::TestPeriodic(PriorityType threadPriority,
 
 void mtsTimingTest::TestContinuousPriorityVeryLowAffinity0(void)
 {
-     TestContinuous(PRIORITY_VERY_LOW, 0);
+     TestContinuous("ContinuousPriorityVeryLowAffinity0", PRIORITY_VERY_LOW, 0);
 }
 void mtsTimingTest::TestContinuousPriorityVeryLowAffinity1(void)
 {
-     TestContinuous(PRIORITY_VERY_LOW, 1);
+     TestContinuous("ContinuousPriorityVeryLowAffinity1", PRIORITY_VERY_LOW, 1);
 }
 void mtsTimingTest::TestContinuousPriorityLowAffinity0(void)
 {
-     TestContinuous(PRIORITY_LOW, 0);
+     TestContinuous("ContinuousPriorityLowAffinity0", PRIORITY_LOW, 0);
 }
 void mtsTimingTest::TestContinuousPriorityLowAffinity1(void)
 {
-     TestContinuous(PRIORITY_LOW, 1);
+     TestContinuous("ContinuousPriorityLowAffinity1", PRIORITY_LOW, 1);
 }
 void mtsTimingTest::TestContinuousPriorityNormalAffinity0(void)
 {
-     TestContinuous(PRIORITY_NORMAL, 0);
+     TestContinuous("ContinuousPriorityNormalAffinity0", PRIORITY_NORMAL, 0);
 }
 void mtsTimingTest::TestContinuousPriorityNormalAffinity1(void)
 {
-     TestContinuous(PRIORITY_NORMAL, 1);
+     TestContinuous("ContinuousPriorityNormalAffinity1", PRIORITY_NORMAL, 1);
 }
 void mtsTimingTest::TestContinuousPriorityHighAffinity0(void)
 {
-     TestContinuous(PRIORITY_HIGH, 0);
+     TestContinuous("ContinuousPriorityHighAffinity0", PRIORITY_HIGH, 0);
 }
 void mtsTimingTest::TestContinuousPriorityHighAffinity1(void)
 {
-     TestContinuous(PRIORITY_HIGH, 1);
+     TestContinuous("ContinuousPriorityHighAffinity1", PRIORITY_HIGH, 1);
 }
 void mtsTimingTest::TestContinuousPriorityVeryHighAffinity0(void)
 {
-     TestContinuous(PRIORITY_VERY_HIGH, 0);
+     TestContinuous("ContinuousPriorityVeryHighAffinity0", PRIORITY_VERY_HIGH, 0);
 }
 void mtsTimingTest::TestContinuousPriorityVeryHighAffinity1(void)
 {
-     TestContinuous(PRIORITY_VERY_HIGH, 1);
+     TestContinuous("ContinuousPriorityVeryHighAffinity1", PRIORITY_VERY_HIGH, 1);
 }
 
 void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity0RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_VERY_LOW, 0, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityVeryLowAffinity0RunDummyComputation", PRIORITY_VERY_LOW, 0, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity0RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_LOW, 0, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryLowAffinity0RunOsaSleep", PRIORITY_VERY_LOW, 0, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity0RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_LOW, 0, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryLowAffinity0RunOsaThreadSleep", PRIORITY_VERY_LOW, 0, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity1RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_VERY_LOW, 1, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityVeryLowAffinity1RunDummyComputation", PRIORITY_VERY_LOW, 1, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity1RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_LOW, 1, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryLowAffinity1RunOsaSleep", PRIORITY_VERY_LOW, 1, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryLowAffinity1RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_LOW, 1, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryLowAffinity1RunOsaThreadSleep", PRIORITY_VERY_LOW, 1, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityLowAffinity0RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_LOW, 0, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityLowAffinity0RunDummyComputation", PRIORITY_LOW, 0, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityLowAffinity0RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_LOW, 0, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityLowAffinity0RunOsaSleep", PRIORITY_LOW, 0, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityLowAffinity0RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_LOW, 0, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityLowAffinity0RunOsaThreadSleep", PRIORITY_LOW, 0, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityLowAffinity1RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_LOW, 1, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityLowAffinity1RunDummyComputation", PRIORITY_LOW, 1, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityLowAffinity1RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_LOW, 1, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityLowAffinity1RunOsaSleep", PRIORITY_LOW, 1, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityLowAffinity1RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_LOW, 1, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityLowAffinity1RunOsaThreadSleep", PRIORITY_LOW, 1, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityNormalAffinity0RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_NORMAL, 0, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityNormalAffinity0RunDummyComputation", PRIORITY_NORMAL, 0, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityNormalAffinity0RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_NORMAL, 0, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityNormalAffinity0RunOsaSleep", PRIORITY_NORMAL, 0, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityNormalAffinity0RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_NORMAL, 0, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityNormalAffinity0RunOsaThreadSleep", PRIORITY_NORMAL, 0, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityNormalAffinity1RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_NORMAL, 1, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityNormalAffinity1RunDummyComputation", PRIORITY_NORMAL, 1, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityNormalAffinity1RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_NORMAL, 1, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityNormalAffinity1RunOsaSleep", PRIORITY_NORMAL, 1, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityNormalAffinity1RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_NORMAL, 1, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityNormalAffinity1RunOsaThreadSleep", PRIORITY_NORMAL, 1, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityHighAffinity0RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_HIGH, 0, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityHighAffinity0RunDummyComputation", PRIORITY_HIGH, 0, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityHighAffinity0RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_HIGH, 0, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityHighAffinity0RunOsaSleep", PRIORITY_HIGH, 0, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityHighAffinity0RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_HIGH, 0, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityHighAffinity0RunOsaThreadSleep", PRIORITY_HIGH, 0, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityHighAffinity1RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_HIGH, 1, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityHighAffinity1RunDummyComputation", PRIORITY_HIGH, 1, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityHighAffinity1RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_HIGH, 1, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityHighAffinity1RunOsaSleep", PRIORITY_HIGH, 1, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityHighAffinity1RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_HIGH, 1, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityHighAffinity1RunOsaThreadSleep", PRIORITY_HIGH, 1, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity0RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_VERY_HIGH, 0, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityVeryHighAffinity0RunDummyComputation", PRIORITY_VERY_HIGH, 0, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity0RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_HIGH, 0, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryHighAffinity0RunOsaSleep", PRIORITY_VERY_HIGH, 0, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity0RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_HIGH, 0, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryHighAffinity0RunOsaThreadSleep", PRIORITY_VERY_HIGH, 0, OSA_THREAD_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity1RunDummyComputation(void)
 {
-    TestPeriodic(PRIORITY_VERY_HIGH, 1, dummyComputationBehavior);
+    TestPeriodic("PeriodicPriorityVeryHighAffinity1RunDummyComputation", PRIORITY_VERY_HIGH, 1, DUMMY_COMPUTATION);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity1RunOsaSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_HIGH, 1, osaSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryHighAffinity1RunOsaSleep", PRIORITY_VERY_HIGH, 1, OSA_SLEEP);
 }
 void mtsTimingTest::TestPeriodicPriorityVeryHighAffinity1RunOsaThreadSleep(void)
 {
-    TestPeriodic(PRIORITY_VERY_HIGH, 1, osaThreadSleepBehavior);
+    TestPeriodic("PeriodicPriorityVeryHighAffinity1RunOsaThreadSleep", PRIORITY_VERY_HIGH, 1, OSA_THREAD_SLEEP);
 }
