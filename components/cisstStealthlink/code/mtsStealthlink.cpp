@@ -39,25 +39,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <AsCL/AsCL_Client.h>
 #include "mtsStealthlink_AsCL_Stuff.h"
 
+//#define STEALTH_SIM
+
+#ifdef STEALTH_SIM
+void AsCL_MSG(int verbose_level, char* msg, ...) {}
+#endif
+
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsStealthlink, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
-
-typedef float floatArray44[4][4];
-
-void mtsStealthlinkFrameToVctFrame(vctFrm3 & result, const floatArray44 & input) {
-    size_t row, col;
-    for (row = 0; row < 3; row++) {
-        for (col = 0; col < 3; col++) {
-            result.Rotation().at(row, col) =  input[row][col];
-        }
-        result.Translation().at(row) = input[row][3];
-    }
-}
-
 
 void mtsStealthlink::Init(void)
 {
     // create Stealthlink objects
+#ifdef STEALTH_SIM
+    this->Client = 0;
+#else
     this->Client = new AsCL_Client;
+#endif
     this->Utils = new mtsStealthlink_AsCL_Utils;
 
     SurgicalPlan.SetSize(6);
@@ -133,6 +130,7 @@ void mtsStealthlink::Configure(const std::string &filename)
     if (!config.GetXMLValue("/tracker/controller", "@ip", ipAddress, "192.168.0.1"))
         CMN_LOG_CLASS_INIT_WARNING << "IP address not found, using default: " << ipAddress << std::endl;
 
+#ifndef STEALTH_SIM
     // Configure Stealthlink interface
     AsCL_SetVerboseLevel(0);
     this->Client->SetPort(GRI_PORT_NUMBER);
@@ -140,6 +138,7 @@ void mtsStealthlink::Configure(const std::string &filename)
     // Set StealthLink server IP address
     CMN_LOG_CLASS_INIT_VERBOSE << "Setting Stealthink IP address = " << ipAddress << std::endl;
     this->Client->SetHostName(const_cast<char *>(ipAddress.c_str()));
+#endif
 
     // add pre-defined tools (up to 100)
     for (unsigned int i = 0; i < 100; i++) {
@@ -160,11 +159,16 @@ void mtsStealthlink::Configure(const std::string &filename)
         }
     }
 
+#ifdef STEALTH_SIM
+    CMN_LOG_CLASS_INIT_VERBOSE << "Using simulated Stealthstation" << std::endl;
+    StealthlinkPresent = true;
+#else
     CMN_LOG_CLASS_INIT_VERBOSE << "Initializing Stealthlink" << std::endl;
     StealthlinkPresent = this->Client->Initialize(*(this->Utils)) ? true : false;
     if (!StealthlinkPresent) {
         CMN_LOG_CLASS_RUN_WARNING << "Configure: could not Initialize StealthLink" << std::endl;
     }
+#endif
 }
 
 
@@ -237,8 +241,10 @@ void mtsStealthlink::RequestSurgicalPlan(void)
 {
     if (StealthlinkPresent) {
         surg_plan the_surg_plan;
+#ifndef STEALTH_SIM
         this->Client->GetDataForCode(GET_SURGICAL_PLAN,
                                      reinterpret_cast<void*>(&the_surg_plan));
+#endif
         SurgicalPlan[0] = the_surg_plan.entry[0];
         SurgicalPlan[1] = the_surg_plan.entry[1];
         SurgicalPlan[2] = the_surg_plan.entry[2];
@@ -259,6 +265,7 @@ void mtsStealthlink::Run(void)
 {
     ResetAllTools();  // Set all tools invalid
     if (StealthlinkPresent) {
+#ifndef STEALTH_SIM
         // Get the data from Stealthlink.
         all_info info;
         this->Client->GetDataForCode(GET_ALL, reinterpret_cast<void*>(&info));
@@ -268,6 +275,7 @@ void mtsStealthlink::Run(void)
         ToolData = info.Tool;
         FrameData = info.Frame;
         RegistrationData = info.Reg;
+#endif
 
         // update tool interfaces data
         if (ToolData.Valid()) {
@@ -285,10 +293,12 @@ void mtsStealthlink::Run(void)
             }
             // Get tool tip calibration if it is invalid or has changed
             if ((strcmp(ToolData.GetName(), ProbeCal.GetName()) != 0) || !ProbeCal.Valid()) {
+#ifndef STEALTH_SIM
                 probe_calibration probe_cal;
                 this->Client->GetDataForCode(GET_PROBE_CALIBRATION,
                                              reinterpret_cast<void*>(&probe_cal));
                 ProbeCal = probe_cal;
+#endif
             }
             // If we have valid data, then store the result
             if (CurrentTool && ProbeCal.Valid() &&
@@ -300,11 +310,10 @@ void mtsStealthlink::Run(void)
         }
         
         // update registration interface data
-        mtsStealthlinkFrameToVctFrame(this->RegistrationMember.Transformation,
-                                      info.Reg.xform);
-        this->RegistrationMember.Transformation.SetValid(info.Reg.valid);
-        this->RegistrationMember.PredictedAccuracy = info.Reg.predicted_accuracy;
-        this->RegistrationMember.PredictedAccuracy.SetValid(info.Reg.valid);
+        this->RegistrationMember.Transformation = RegistrationData.GetFrame();
+        this->RegistrationMember.Transformation.SetValid(RegistrationData.Valid());
+        this->RegistrationMember.PredictedAccuracy = RegistrationData.GetAccuracy();
+        this->RegistrationMember.PredictedAccuracy.SetValid(RegistrationData.Valid());
     }
     ProcessQueuedCommands();
     this->Utils->CheckCallbacks();

@@ -102,8 +102,10 @@ void mtsStealthlinkExampleComponent::Run(void)
     }
     if (Registration.GetTransformation.IsValid()) {
         Registration.GetTransformation(mtsFrm);
-        std::cout << "Registration: " << mtsFrm.Translation();
-        didOutput = true;
+        if (mtsFrm.Valid()) {
+            std::cout << "Registration: " << mtsFrm.Translation();
+            didOutput = true;
+        }
     }
     if (didOutput) {
         std::cout << std::endl;
