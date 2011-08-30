@@ -12,9 +12,24 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+cmake_minimum_required (VERSION 2.8)
 
-  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
+# create a list of libraries needed for this project
+set (CISST_LIBRARIES_REQUIRED cisstCommon cisstVector cisstNumerical)
+
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${CISST_LIBRARIES_REQUIRED})
+
+if (cisst_FOUND)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  # make sure cisstNumerical has been compiled with cisstNetlib
+  if (NOT CISST_HAS_CISSTNETLIB)
+    message (SEND_ERROR "cisstVector example needs cisstNetlib, make sure cisstNumerical is compiled with cisstNetlib")
+  endif (NOT CISST_HAS_CISSTNETLIB)
+
   add_executable (vectorTutorial
                   main.cpp
                   ExampleFrame.h
@@ -28,8 +43,7 @@ if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
                   ExampleNumerical.h
                   ExampleSTL.h
                  )
-  cisst_target_link_libraries (vectorTutorial cisstCommon cisstVector cisstNumerical)
+  # link against cisst libraries (and dependencies)
+  cisst_target_link_libraries (vectorTutorial ${CISST_LIBRARIES_REQUIRED})
 
-else (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  message (WARNING " vectorTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
-endif (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+endif (cisst_FOUND)

@@ -412,6 +412,7 @@ set (CISST_LIBS_STABLE
      cisstVector
      cisstOSAbstraction
      cisstMultiTask
+     cisstStereoVision
      )
 
 set (CISST_LIBS_UNSTABLE
@@ -420,7 +421,6 @@ set (CISST_LIBS_UNSTABLE
      cisstRobot
      cisstParameterTypes
      cisstDevices
-     cisstStereoVision
      cisst3DUserInterface
      )
 

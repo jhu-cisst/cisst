@@ -31,3 +31,6 @@ if (NOT CURRENT_PROJECT_IS_CISST)
   cisst_load_package_setting (${CISST_LIBRARIES})
 
 endif (NOT CURRENT_PROJECT_IS_CISST)
+
+# Add link and include directories based on required libraries
+cisst_set_directories (${CISST_LIBRARIES_REQUIRED_INTERNAL})
