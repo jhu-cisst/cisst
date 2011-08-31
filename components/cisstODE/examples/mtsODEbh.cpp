@@ -2,11 +2,11 @@
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-#include <cisstOSG/cisstOSGWorld.h>
+#include <cisstODE/cisstODEWorld.h>
 #include <cisstOSG/cisstOSGMono.h>
-#include <cisstOSG/mtsOSGManipulator.h>
+#include <cisstODE/mtsODEBH.h>
 
-class WAMMotion : public mtsTaskPeriodic {
+class BHMotion : public mtsTaskPeriodic {
 
 private:
   
@@ -17,9 +17,9 @@ private:
 
 public:
 
-  WAMMotion() : mtsTaskPeriodic( "WAMMotion", 0.01, true ){
+  BHMotion() : mtsTaskPeriodic( "BHMotion", 0.01, true ){
 
-    q.SetSize(7);
+    q.SetSize(4);
     q.SetAll(0.0);
 
     mtsInterfaceRequired* input = AddInterfaceRequired( "Input" );
@@ -39,7 +39,7 @@ public:
     GetPositions( qin );
     
     prmPositionJointSet qout;
-    qout.SetSize( 7 );
+    qout.SetSize( 4 );
     qout.Goal() = q;
     SetPositions( qout );
     
@@ -59,7 +59,7 @@ int main(){
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
-  osg::ref_ptr< cisstOSGWorld > world = new cisstOSGWorld;
+  osg::ref_ptr< cisstODEWorld > world = new cisstODEWorld(0.001);
   
   // Create a camera
   int x = 0, y = 0;
@@ -72,36 +72,30 @@ int main(){
 			     Znear, Zfar );
   camera->Initialize();
 
-  
-  std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/" );
+  std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/BH/" );
   vctFrame4x4<double> Rtw0;
-  
-  std::vector< std::string > models;
-  models.push_back( path + "l1.obj" );
-  models.push_back( path + "l2.obj" );
-  models.push_back( path + "l3.obj" );
-  models.push_back( path + "l4.obj" );
-  models.push_back( path + "l5.obj" );
-  models.push_back( path + "l6.obj" );
-  models.push_back( path + "l7.obj" );
+  Rtw0[2][3] = 0.1;
 
-  mtsOSGManipulator* WAM;
-  WAM = new mtsOSGManipulator( "WAM",
-			       0.01,
-			       OSA_CPU1,
-			       20,
-			       models,
-			       world,
-			       Rtw0,
-			       path + "wam7.rob",
-			       path + "l0.obj" );
-  taskManager->AddComponent( WAM );
+  mtsODEBH* BH;
+  BH = new mtsODEBH( "BH",
+		     0.01,
+		     OSA_CPU1,
+		     20,
+		     path + "l0.obj",
+		     path + "l1.obj",
+		     path + "l2.obj",
+		     path + "l3.obj",
+		     world,
+		     Rtw0,
+		     path + "f1f2.rob",
+		     path + "f3.rob" );
+  taskManager->AddComponent( BH );
   
-  WAMMotion motion;
+  BHMotion motion;
   taskManager->AddComponent( &motion );
 
-  taskManager->Connect( motion.GetName(), "Input",  WAM->GetName(), "Output" );
-  taskManager->Connect( motion.GetName(), "Output", WAM->GetName(), "Input" );
+  taskManager->Connect( motion.GetName(), "Input",  BH->GetName(), "Output" );
+  taskManager->Connect( motion.GetName(), "Output", BH->GetName(), "Input" );
 
   taskManager->CreateAll();
   taskManager->WaitForStateAll( mtsComponentState::READY );
@@ -110,8 +104,10 @@ int main(){
   taskManager->WaitForStateAll( mtsComponentState::ACTIVE );
 
   std::cout << "ESC to quit" << std::endl;
-  while( !camera->done() )
-    { camera->frame(); }
+  while( !camera->done() ){
+    world->Step();
+    camera->frame();
+  }
 
   taskManager->KillAll();
   taskManager->Cleanup();

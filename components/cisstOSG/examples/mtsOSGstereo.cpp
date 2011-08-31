@@ -99,7 +99,7 @@ int main(){
   int x = 0, y = 0;
   int width = 320, height = 240;
   double Znear = 0.1, Zfar = 10.0;
-  osg::ref_ptr< mtsOSGStereo > camera;
+  mtsOSGStereo* camera;
   camera = new mtsOSGStereo( "camera", 
 			     world,
 			     x, y, 
@@ -108,7 +108,7 @@ int main(){
 			     Znear, Zfar,
 			     0.1,
 			     false );
-  taskManager->AddComponent( camera.get() );
+  taskManager->AddComponent( camera );
 
   // create the camera motion
   CameraMotion cmotion;

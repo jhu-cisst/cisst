@@ -25,9 +25,10 @@ if( OPENSCENEGRAPH_FOUND )
   add_executable( OSGwam    OSGwam.cpp )
   add_executable( OSGbh     OSGbh.cpp )
 
-  add_executable( mtsOSGTest mtsOSGTest.cpp )
-  add_executable( mtsOSGstereo  mtsOSGstereo.cpp )
-  add_executable( mtsOSGwam  mtsOSGwam.cpp )
+  add_executable( mtsOSGTest   mtsOSGTest.cpp )
+  add_executable( mtsOSGstereo mtsOSGstereo.cpp )
+  add_executable( mtsOSGwam    mtsOSGwam.cpp )
+  add_executable( mtsOSGbh     mtsOSGbh.cpp )
 
   include_directories( ${OPENSCENEGRAPH_INCLUDE_DIRS} )
 
@@ -93,6 +94,18 @@ if( OPENSCENEGRAPH_FOUND )
 
   target_link_libraries( 
     mtsOSGwam
+    cisstOSG
+    cisstCommon 
+    cisstVector 
+    cisstOSAbstraction
+    cisstRobot
+    cisstNumerical
+    cisstMultiTask 
+    cisstParameterTypes
+    ${OPENSCENEGRAPH_LIBRARIES} )  
+
+  target_link_libraries( 
+    mtsOSGbh
     cisstOSG
     cisstCommon 
     cisstVector 

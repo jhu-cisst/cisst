@@ -104,6 +104,8 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
      large)
   */
   static const size_t NUM_CONTACTS = 50;
+
+ protected:
   
   //! Default gravity
   static const vctFixedSizeVector<double,3> GRAVITY;

@@ -14,6 +14,12 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
     ../cisstODEManipulator.h
     ../cisstODEServoMotor.h
     ../cisstODEWorld.h
+
+    ../mtsODEManipulatorTask.h
+    ../mtsODEWorld.h
+
+    ../mtsODEManipulator.h
+    ../mtsODEBH.h
     )
     
   SET(
@@ -24,6 +30,8 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
     cisstODEManipulator.cpp
     cisstODEServoMotor.cpp
     cisstODEWorld.cpp
+
+    mtsODEManipulatorTask.cpp
     )
 
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" )

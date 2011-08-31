@@ -25,11 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSG/cisstOSGCamera.h>
 #include <cisstOSG/cisstOSGExport.h>
 
-class CISST_EXPORT mtsOSGCamera : public mtsTaskContinuous{
+class CISST_EXPORT mtsOSGCameraTask : public mtsTaskContinuous{
   
  private:
 
-  cisstOSGCamera* cameraptr;
   osg::ref_ptr<cisstOSGCamera> camera;
 
   //! The input interface
@@ -46,12 +45,12 @@ class CISST_EXPORT mtsOSGCamera : public mtsTaskContinuous{
   class Data : public osg::Referenced {
   private:
     //! Pointer to a camera object
-    mtsOSGCamera* mtsCamera;
+    mtsOSGCameraTask* mtsCamera;
   public:
     //! Default constructor.
-    Data( mtsOSGCamera* camera ) : mtsCamera( camera ){}
+    Data( mtsOSGCameraTask* camera ) : mtsCamera( camera ){}
     //! Get the pointer to the camera
-    mtsOSGCamera* GetCamera() { return mtsCamera; }
+    mtsOSGCameraTask* GetCameraTask() { return mtsCamera; }
   };
 
 
@@ -76,9 +75,10 @@ class CISST_EXPORT mtsOSGCamera : public mtsTaskContinuous{
  public:
   
   // Main constructor
-  mtsOSGCamera( const std::string& name, cisstOSGCamera* camera );
+  mtsOSGCameraTask( const std::string& name, cisstOSGCamera* camera );
 
-  ~mtsOSGCamera(){}
+
+  ~mtsOSGCameraTask(){}
 
   void Startup();
   void Run();

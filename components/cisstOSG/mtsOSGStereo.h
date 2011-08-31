@@ -21,13 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstOSG/cisstOSGStereo.h>
-#include <cisstOSG/mtsOSGCamera.h>
+#include <cisstOSG/mtsOSGCameraTask.h>
 #include <cisstOSG/cisstOSGExport.h>
 
-class CISST_EXPORT mtsOSGStereo :
-
-  public mtsOSGCamera,
-  public cisstOSGStereo{
+class CISST_EXPORT mtsOSGStereo : public mtsOSGCameraTask {
   
  public:
   
@@ -41,14 +38,14 @@ class CISST_EXPORT mtsOSGStereo :
 		double zNear, double zFar,
 		double baseline,
 		bool trackball = true ) :
-    mtsOSGCamera( name, this ),
-    cisstOSGStereo( world,
-		    x, y, 
-		    width, height, 
-		    fovy, aspectRatio, 
-		    zNear, zFar,
-		    baseline,
-		    trackball ){}
+    mtsOSGCameraTask( name, 
+		      new cisstOSGStereo( world,
+					  x, y, 
+					  width, height, 
+					  fovy, aspectRatio, 
+					  zNear, zFar,
+					  baseline,
+					  trackball ) ){}
   
   ~mtsOSGStereo(){}
 

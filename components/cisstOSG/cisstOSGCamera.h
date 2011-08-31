@@ -35,8 +35,8 @@ class CISST_EXPORT cisstOSGCamera : public osgViewer::Viewer{
   virtual void UpdateTransform();
   osg::Matrixd osgtransform;
 
-  //! Allow mtsOSGCamera to update this transformation
-  friend class mtsOSGCamera;
+  //! Allow mtsOSGCameraTask to update this transformation
+  friend class mtsOSGCameraTask;
 
  protected:
 

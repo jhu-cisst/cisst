@@ -99,7 +99,7 @@ int main(){
   int x = 0, y = 0;
   int width = 320, height = 240;
   double Znear = 0.1, Zfar = 10.0;
-  osg::ref_ptr< mtsOSGMono > camera;
+  mtsOSGMono* camera;
   camera = new mtsOSGMono( "camera", 
 			   world,
 			   x, y, 
@@ -107,8 +107,8 @@ int main(){
 			   55.0, ((double)width)/((double)height),
 			   Znear, Zfar,
 			   false, false );
-  taskManager->AddComponent( camera.get() );
-
+  taskManager->AddComponent( camera );
+  
   // create the camera motion
   CameraMotion cmotion;
   taskManager->AddComponent( &cmotion );

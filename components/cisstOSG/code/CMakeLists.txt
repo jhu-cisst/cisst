@@ -17,10 +17,14 @@ if( OPENSCENEGRAPH_FOUND )
     ../cisstOSGWorld.h
     
     ../mtsOSGBody.h
-    ../mtsOSGCamera.h
+
+    ../mtsOSGCameraTask.h
     ../mtsOSGMono.h
     ../mtsOSGStereo.h
+
+    ../mtsOSGBH.h
     ../mtsOSGManipulator.h
+    ../mtsOSGManipulatorTask.h
     )
     
     SET(
@@ -36,8 +40,10 @@ if( OPENSCENEGRAPH_FOUND )
       cisstOSGWorld.cpp
 
       mtsOSGBody.cpp
-      mtsOSGCamera.cpp
-      mtsOSGManipulator.cpp
+
+      mtsOSGCameraTask.cpp
+
+      mtsOSGManipulatorTask.cpp
       )
     
     if( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )

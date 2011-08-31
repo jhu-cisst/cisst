@@ -16,28 +16,28 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstOSG/mtsOSGCamera.h>
+#include <cisstOSG/mtsOSGCameraTask.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstCommon/cmnLogger.h>
 
 // This operator is called during update traversal
-void mtsOSGCamera::UpdateCallback::operator()( osg::Node* node, 
-					       osg::NodeVisitor* nv ){
+void mtsOSGCameraTask::UpdateCallback::operator()( osg::Node* node, 
+						   osg::NodeVisitor* nv ){
 
-  mtsOSGCamera::Data* data = NULL;
-  data = dynamic_cast<mtsOSGCamera::Data*>( node->getUserData() );
+  mtsOSGCameraTask::Data* data = NULL;
+  data = dynamic_cast<mtsOSGCameraTask::Data*>( node->getUserData() );
 
   if( data != NULL )
-    { data->GetCamera()->UpdateTransform(); }
+    { data->GetCameraTask()->UpdateTransform(); }
 
   traverse( node, nv );
 
 }
 
 
-mtsOSGCamera::mtsOSGCamera( const std::string& name, cisstOSGCamera* camera ) : 
+mtsOSGCameraTask::mtsOSGCameraTask( const std::string& name, cisstOSGCamera* camera ) : 
   mtsTaskContinuous( name ),
-  cameraptr( camera ),
+  camera( camera ),
   input( NULL ){
 
   // Create the IO interface and add read/write commands
@@ -51,11 +51,7 @@ mtsOSGCamera::mtsOSGCamera( const std::string& name, cisstOSGCamera* camera ) :
 
 }
 
-void mtsOSGCamera::Startup(){ 
-  // delay setting the smart pointer to here
-  // this is because the camera pointer in the constructor can be a "this"
-  // (partially constructed object)
-  camera = cameraptr;
+void mtsOSGCameraTask::Startup(){ 
 
   // This must be done in the thread context
   camera->Initialize();
@@ -65,19 +61,19 @@ void mtsOSGCamera::Startup(){
   osgcb = camera->getCamera()->getUpdateCallback();
   camera->getCamera()->removeUpdateCallback( osgcb );
 
-  // Set the user data of the camera to point to an mtsOSGCamera instead of
+  // Set the user data of the camera to point to an mtsOSGCameraTask instead of
   // a cisstOSGCamera
-  camera->getCamera()->setUserData( new mtsOSGCamera::Data( this ) );
+  camera->getCamera()->setUserData( new mtsOSGCameraTask::Data( this ) );
     
   // Install a mtsOSGCamera update callback. This callback will fetch the 
   // data from MTS component
   osg::ref_ptr<osg::NodeCallback> mtscb;
-  mtscb = new mtsOSGCamera::UpdateCallback();
+  mtscb = new mtsOSGCameraTask::UpdateCallback();
   camera->getCamera()->setUpdateCallback( mtscb );
 
 }
 
-void mtsOSGCamera::Run(){
+void mtsOSGCameraTask::Run(){
   ProcessQueuedCommands();
 
   if( !camera->done() )
@@ -85,10 +81,10 @@ void mtsOSGCamera::Run(){
 
 }
 
-void mtsOSGCamera::Cleanup(){}
+void mtsOSGCameraTask::Cleanup(){}
 
-// This is called from the mtsOSGCamera::UpdateCallback
-void mtsOSGCamera::UpdateTransform(){
+// This is called from the mtsOSGCameraTask::UpdateCallback
+void mtsOSGCameraTask::UpdateTransform(){
 
   if( GetPosition.IsValid() ){
 

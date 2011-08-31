@@ -21,13 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstOSG/cisstOSGMono.h>
-#include <cisstOSG/mtsOSGCamera.h>
+#include <cisstOSG/mtsOSGCameraTask.h>
 #include <cisstOSG/cisstOSGExport.h>
 
-class CISST_EXPORT mtsOSGMono :
-
-  public mtsOSGCamera,
-  public cisstOSGMono{
+class CISST_EXPORT mtsOSGMono : public mtsOSGCameraTask {
   
  public:
   
@@ -39,14 +36,13 @@ class CISST_EXPORT mtsOSGMono :
 	      double zNear, double zFar,
 	      bool trackball = true,
 	      bool offscreenrendering = false ) : 
-    mtsOSGCamera( name, this ),
-    cisstOSGMono( world,
-		  x, y, 
-		  width, height, 
-		  fovy, aspectRatio, 
-		  zNear, zFar, 
-		  trackball, offscreenrendering ){}
-  
+    mtsOSGCameraTask( name, 
+		      new cisstOSGMono( world, 
+					x, y, 
+					width, height, 
+					fovy, aspectRatio,
+					zNear, zFar,
+					trackball, offscreenrendering ) ){}
   ~mtsOSGMono(){}
 
 };

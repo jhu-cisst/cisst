@@ -27,6 +27,10 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
   add_executable( ODEbh    ODEbh.cpp )
   add_executable( ODEwambh ODEwambh.cpp )
 
+  add_executable( mtsODEwam   mtsODEwam.cpp )
+  add_executable( mtsODEbh    mtsODEbh.cpp )
+  add_executable( mtsODEwambh mtsODEwambh.cpp )
+
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" )
 
   include_directories( ${OPENSCENEGRAPH_INCLUDE_DIRS} ${ODE_INCLUDE_DIR} )
@@ -60,6 +64,33 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
 
   target_link_libraries( 
     ODEwambh
+    cisstODE
+    cisstOSG
+    cisstCommon 
+    cisstVector 
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${ODE_LIBRARY} )  
+
+  target_link_libraries( 
+    mtsODEwam
+    cisstODE
+    cisstOSG
+    cisstCommon 
+    cisstVector 
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${ODE_LIBRARY} )  
+
+  target_link_libraries( 
+    mtsODEbh
+    cisstODE
+    cisstOSG
+    cisstCommon 
+    cisstVector 
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${ODE_LIBRARY} )  
+
+  target_link_libraries( 
+    mtsODEwambh
     cisstODE
     cisstOSG
     cisstCommon 

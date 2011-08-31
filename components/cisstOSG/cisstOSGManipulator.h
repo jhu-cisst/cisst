@@ -117,6 +117,8 @@ class CISST_EXPORT cisstOSGManipulator :
   cisstOSGBody* GetBase() 
   { return base.get(); }
 
+  virtual void Attach( cisstOSGManipulator* CMN_UNUSED(tool) ){}
+
 };
 
 #endif

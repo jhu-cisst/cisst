@@ -17,33 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsOSGManipulator_h
 #define _mtsOSGManipulator_h
 
-#include <cisstMultiTask/mtsTaskPeriodic.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
-
-#include <cisstOSAbstraction/osaCPUAffinity.h>
-
-#include <cisstParameterTypes/prmPositionJointGet.h>
-#include <cisstParameterTypes/prmPositionJointSet.h>
-
+#include <cisstOSG/mtsOSGManipulatorTask.h>
 #include <cisstOSG/cisstOSGManipulator.h>
 #include <cisstOSG/cisstOSGExport.h>
 
-class CISST_EXPORT mtsOSGManipulator : 
-
-  public mtsTaskPeriodic,
-  public cisstOSGManipulator {
-
- private:
-
-  prmPositionJointGet qout;
-  prmPositionJointSet qin;
-
-  mtsInterfaceProvided* input;
-  mtsInterfaceProvided* output;
-  mtsInterfaceProvided* ctl;
-
-  osaCPUMask cpumask;
-  int priority;
+class CISST_EXPORT mtsOSGManipulator : public mtsOSGManipulatorTask {
 
  public:
 
@@ -55,8 +33,12 @@ class CISST_EXPORT mtsOSGManipulator :
 		     cisstOSGWorld* world,
 		     const vctFrame4x4<double>& Rtw0,
 		     const std::string& robfilename,
-		     const std::string& basemodel = "" );		     
-
+		     const std::string& basemodel ):
+    mtsOSGManipulatorTask( name, period, 
+			   new cisstOSGManipulator(models,world,Rtw0,robfilename,basemodel),
+			   cpumask, priority ){}
+  
+  // main constructor
   mtsOSGManipulator( const std::string& name,
 		     double period,
 		     osaCPUMask cpumask,
@@ -65,14 +47,11 @@ class CISST_EXPORT mtsOSGManipulator :
 		     cisstOSGWorld* world,
 		     const vctFrm3& Rtw0,
 		     const std::string& robfilename,
-		     const std::string& basemodel = "" );		     
+		     const std::string& basemodel ):
 
-  void Configure( const std::string& CMN_UNUSED(argv) = "" ){}
-
-  void Startup();
-  void Run();
-  void Cleanup(){}
-
+    mtsOSGManipulatorTask( name, period, 
+			   new cisstOSGManipulator(models,world,Rtw0,robfilename,basemodel),
+			   cpumask, priority ){}
 };
 
 #endif

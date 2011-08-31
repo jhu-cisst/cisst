@@ -190,7 +190,7 @@ cisstODEManipulator::CreateManipulator( const std::vector<std::string>& models,
 				    b1,             // the first body
 				    b2,             // the second body
 				    axis*sign,      // the Z axis 
-				    10,             // fudged values
+				    1,             // fudged values
 				    links[i].ForceTorqueMax(),
 				    type ) );
 
@@ -273,7 +273,7 @@ cisstODEManipulator::CreateManipulator(const std::vector<std::string>& models){
 				    b1,             // the first body
 				    b2,             // the second body
 				    axis*sign,      // the Z axis 
-				    10,             // fudged values
+				    1,              // fudged values
 				    links[i].ForceTorqueMax(),
 				    type ) );
 
@@ -291,14 +291,10 @@ void cisstODEManipulator::Attach( cisstOSGManipulator* osgtool ){
   cisstODEBody* lastlink = dynamic_cast<cisstODEBody*>( GetLink( GetNumLinks()-1 ) );
 
   if( odebase != NULL && lastlink != NULL){
-    std::cout << "a" << std::endl;
     // Create a fix joint between the last link and the tool
     dJointID jid = dJointCreateFixed( GetWorldID(), 0 );
-    std::cout << "a" << std::endl;
     dJointAttach( jid, lastlink->GetBodyID(), odebase->GetBodyID() );
-    std::cout << "a" << std::endl;
     dJointSetFixed( jid );
-    std::cout << "a" << std::endl;
   }
 
   //robManipulator::Attach( odetool );

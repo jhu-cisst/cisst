@@ -1,10 +1,12 @@
+#include <cisstCommon/cmnGetChar.h>
+
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-#include <cisstOSG/cisstOSGWorld.h>
-#include <cisstOSG/cisstOSGMono.h>
-#include <cisstOSG/mtsOSGManipulator.h>
+#include <cisstOSG/mtsOSGMono.h>
+#include <cisstODE/mtsODEWorld.h>
+#include <cisstODE/mtsODEManipulator.h>
 
 class WAMMotion : public mtsTaskPeriodic {
 
@@ -42,7 +44,7 @@ public:
     qout.SetSize( 7 );
     qout.Goal() = q;
     SetPositions( qout );
-    
+
     for( size_t i=0; i<q.size(); i++ ) q[i] += 0.001;
 
   }
@@ -59,18 +61,20 @@ int main(){
   cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
   cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
 
-  osg::ref_ptr< cisstOSGWorld > world = new cisstOSGWorld;
-  
+  osg::ref_ptr< mtsODEWorld > world = new mtsODEWorld( "world", 0.001 );
+  taskManager->AddComponent( world.get() );
+
   // Create a camera
   int x = 0, y = 0;
   int width = 320, height = 240;
   double Znear = 0.1, Zfar = 10.0;
-  osg::ref_ptr< cisstOSGCamera > camera;
-  camera = new cisstOSGMono( world,
-			     x, y, width, height,
-			     55.0, ((double)width)/((double)height),
-			     Znear, Zfar );
-  camera->Initialize();
+  mtsOSGMono* camera;
+  camera = new mtsOSGMono( "camera",
+			   world,
+			   x, y, width, height,
+			   55.0, ((double)width)/((double)height),
+			   Znear, Zfar );
+  taskManager->AddComponent( camera );
 
   
   std::string path( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/" );
@@ -85,16 +89,17 @@ int main(){
   models.push_back( path + "l6.obj" );
   models.push_back( path + "l7.obj" );
 
-  mtsOSGManipulator* WAM;
-  WAM = new mtsOSGManipulator( "WAM",
-			       0.01,
+  mtsODEManipulator* WAM;
+  WAM = new mtsODEManipulator( "WAM",
+			       0.002,
 			       OSA_CPU1,
 			       20,
 			       models,
 			       world,
 			       Rtw0,
 			       path + "wam7.rob",
-			       path + "l0.obj" );
+			       path + "l0.obj",
+			       vctDynamicVector<double>( 7, 0.0 ) );
   taskManager->AddComponent( WAM );
   
   WAMMotion motion;
@@ -109,9 +114,8 @@ int main(){
   taskManager->StartAll();
   taskManager->WaitForStateAll( mtsComponentState::ACTIVE );
 
-  std::cout << "ESC to quit" << std::endl;
-  while( !camera->done() )
-    { camera->frame(); }
+  std::cout << "ENTER to quit" << std::endl;
+  cmnGetChar();
 
   taskManager->KillAll();
   taskManager->Cleanup();

@@ -261,7 +261,7 @@ class CISST_EXPORT cisstODEManipulator : public cisstOSGManipulator {
      rotation.
      \param tool A pointer to a robot tool
   */
-  void Attach( cisstOSGManipulator* osgtool );
+  virtual void Attach( cisstOSGManipulator* osgtool );
 
   //! Disable all the bodies of the manipulator
   void Disable();
