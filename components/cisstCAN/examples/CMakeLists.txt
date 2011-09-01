@@ -9,36 +9,45 @@ if( RTSocketCANFound AND XenomaiFound )
   add_executable( RTSocketCANSend RTSocketCANSend.cpp )
   add_executable( RTSocketCANRecv RTSocketCANRecv.cpp )
 
+  add_executable( mtsRTSocketCANTest mtsRTSocketCANTest.cpp )
+
   add_definitions( "${XENOMAI_DEFINITIONS}" )
   include_directories( ${RTDM_INCLUDE_DIR} )
 
   target_link_libraries( 
     RTSocketCANSend 
     cisstCAN 
+    cisstCommon
+    cisstVector 
+    cisstOSAbstraction 
+    cisstMultiTask
     ${XENOMAI_LIBRARY_RTDM} 
     ${XENOMAI_LIBRARY_XENOMAI}
     ${XENOMAI_LIBRARY_NATIVE} )
+
   target_link_libraries( 
     RTSocketCANRecv 
     cisstCAN 
+    cisstCommon
+    cisstVector 
+    cisstOSAbstraction 
+    cisstMultiTask
     ${XENOMAI_LIBRARY_RTDM}
     ${XENOMAI_LIBRARY_XENOMAI}
     ${XENOMAI_LIBRARY_NATIVE} )
 
-  cisst_target_link_libraries( 
-    RTSocketCANSend 
+  target_link_libraries( 
+    mtsRTSocketCANTest
+    cisstCAN 
     cisstCommon
     cisstVector 
     cisstOSAbstraction 
-    cisstMultiTask )
+    cisstMultiTask
+    ${XENOMAI_LIBRARY_RTDM}
+    ${XENOMAI_LIBRARY_XENOMAI}
+    ${XENOMAI_LIBRARY_NATIVE} )
 
-  cisst_target_link_libraries( 
-    RTSocketCANRecv
-    cisstCommon
-    cisstVector 
-    cisstOSAbstraction 
-    cisstMultiTask )
+endif( RTSocketCANFound AND XenomaiFound )
 
-endif( RTSocketCANFound )
 
 

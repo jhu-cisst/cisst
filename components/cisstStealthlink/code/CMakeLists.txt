@@ -31,9 +31,11 @@ endif(WIN32)
 
 cisst_target_link_libraries (cisstStealthlink
                              cisstCommon
+                             cisstCommonXML
                              cisstVector
                              cisstOSAbstraction
                              cisstMultiTask
+                             cisstParameterTypes
                              )
 
 set (cisstStealthlink_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}")

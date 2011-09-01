@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -12,6 +12,8 @@
 # --- end cisst license ---
 
 add_executable (cisstStealthlinkExample
+                mtsStealthlinkExampleComponent.h
+                mtsStealthlinkExampleComponent.cpp
                 main.cpp
                 )
 

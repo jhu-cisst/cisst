@@ -76,6 +76,7 @@ void svlFilterSourceTextFile::AddFile(const FileInfo & fileinfo)
     TimeColumns[size] = fileinfo.timestamp_column;
     TimeUnits.resize(size + 1);
     TimeUnits[size] = fileinfo.timestamp_unit;
+    TimestampOverflowValue = fileinfo.timestamp_overflow_value;
 }
 
 void svlFilterSourceTextFile::GetErrorValue(float & errorvalue) const
@@ -127,6 +128,10 @@ int svlFilterSourceTextFile::Initialize(svlSample* &syncOutput)
     FirstTimestamps.SetAll(-1.0);
     Timestamps.SetSize(file_count);
     Timestamps.SetAll(-1.0);
+    PrevTimestamps.SetSize(file_count);
+    PrevTimestamps.SetAll(-1.0);
+    TimestampOverflown.SetSize(file_count);
+    TimestampOverflown.SetAll(false);
 
     HoldLine.SetSize(file_count);
     HoldLine.SetAll(false);
@@ -194,7 +199,15 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
                     }
 
                     // If timestamp, store it after converting to seconds
-                    if (TimeColumns[r] == 0) Timestamps[r] = fval * TimeUnits[r];
+                    if (TimeColumns[r] == 0){
+                        if (ResetTimer) PrevTimestamps[r] = fval;
+                        if (!TimestampOverflown[r] && (fval - PrevTimestamps[r] < 0))
+                            TimestampOverflown[r] = true;
+                        if (TimestampOverflown[r])
+                            fval += TimestampOverflowValue;
+                        PrevTimestamps[r] = fval;
+                        Timestamps[r] = fval * TimeUnits[r];
+                    }
 
                     // Store value
                     WorkMatrix.Element(0, r) = fval;
@@ -212,7 +225,15 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
                     }
                     else {
                         // If timestamp, store it after converting to seconds
-                        if (TimeColumns[r] == static_cast<int>(c)) Timestamps[r] = fval * TimeUnits[r];
+                        if (TimeColumns[r] == static_cast<int>(c)){
+                            if (ResetTimer) PrevTimestamps[r] = fval;
+                            if (!TimestampOverflown[r] && (fval - PrevTimestamps[r] < 0))
+                                TimestampOverflown[r] = true;
+                            if (TimestampOverflown[r])
+                                fval += TimestampOverflowValue;
+                            PrevTimestamps[r] = fval;
+                            Timestamps[r] = fval * TimeUnits[r];
+                        }
 
                         // Store value
                         WorkMatrix.Element(c, r) = fval;
@@ -264,7 +285,7 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
 
             // Holding lines not having current samples
             for (r = 0; r < file_count; r ++) {
-                if ((Timestamps[r] - timestamp) > 0.01) HoldLine[r] = true;
+                if ((Timestamps[r] - timestamp) > (10.0 * TimeUnits[r])) HoldLine[r] = true;
                 else HoldLine[r] = false;
             }
 
@@ -344,20 +365,25 @@ svlFilterSourceTextFile::FileInfo::FileInfo() :
     timestamp_column(-1),
     timestamp_unit(1.0)
 {
+    timestamp_overflow_value = pow(2.0, 100);
 }
 
-svlFilterSourceTextFile::FileInfo::FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit) :
+svlFilterSourceTextFile::FileInfo::FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value) :
     filepath(_filepath),
     timestamp_column(_timestamp_column),
     timestamp_unit(_timestamp_unit)
 {
+    if (_timestamp_overflow_value < 0.0) timestamp_overflow_value = pow(2.0, 100);
+    else timestamp_overflow_value = _timestamp_overflow_value;
 }
 
-void svlFilterSourceTextFile::FileInfo::Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit)
+void svlFilterSourceTextFile::FileInfo::Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value)
 {
     filepath = _filepath;
     timestamp_column = _timestamp_column;
     timestamp_unit = _timestamp_unit;
+    if (_timestamp_overflow_value < 0.0) timestamp_overflow_value = pow(2.0, 100);
+    else timestamp_overflow_value = _timestamp_overflow_value;
 }
 
 
@@ -369,7 +395,8 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceTextFile
 {
     stream << "File path: " << objref.filepath << std::endl
            << "Timestamp column: " << objref.timestamp_column << std::endl
-           << "Timestamp unit: " << objref.timestamp_unit << std::endl;
+           << "Timestamp unit: " << objref.timestamp_unit << std::endl
+           << "Timestamp overflow value: " << objref.timestamp_overflow_value << std::endl;
 
     return stream;
 }

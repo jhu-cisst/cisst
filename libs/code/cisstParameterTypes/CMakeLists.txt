@@ -21,6 +21,7 @@ set (SOURCE_FILES
      prmPositionJointSet.cpp
      prmVelocityJointGet.cpp
      prmVelocityJointSet.cpp
+     prmForceTorqueJointSet.cpp
 
      prmPositionCartesianGet.cpp
      prmPositionCartesianSet.cpp
@@ -52,6 +53,7 @@ set (HEADER_FILES
      prmPositionJointSet.h
      prmVelocityJointGet.h
      prmVelocityJointSet.h
+     prmForceTorqueJointSet.h
 
      prmPositionCartesianGet.h
      prmPositionCartesianSet.h

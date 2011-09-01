@@ -16,7 +16,12 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <stdlib.h>
+#include <cisstCommon/cmnPortability.h>
+#if (CISST_OS == CISST_DARWIN)
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 #include <vector>
 #include <string.h>

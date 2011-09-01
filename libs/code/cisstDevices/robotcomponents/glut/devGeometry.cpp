@@ -1,5 +1,10 @@
 #include <stdlib.h>
+#include <cisstCommon/cmnPortability.h>
+#if (CISST_OS == CISST_DARWIN)
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include <cisstDevices/robotcomponents/glut/devGeometry.h>
 
 

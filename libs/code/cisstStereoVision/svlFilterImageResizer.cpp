@@ -195,7 +195,6 @@ int svlFilterImageResizer::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     }
 
     syncOutput = OutputImage;
-    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
     svlSampleImage* id = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = id->GetVideoChannels();

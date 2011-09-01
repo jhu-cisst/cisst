@@ -80,8 +80,8 @@ protected:
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
     InterfaceGCMFunctionMapType InterfaceGCMFunctionMap;
     
-    /*! System-wide thread-safe logger */
-    mtsFunctionWrite PrintLog;
+    /*! Event generator for system-wide thread-safe logging */
+    mtsFunctionWrite EventPrintLog;
 
     /*! Protected constructor to prevent users from createing this component */
     mtsManagerComponentServer(mtsManagerGlobal * gcm);

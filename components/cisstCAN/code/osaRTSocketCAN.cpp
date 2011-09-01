@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCAN/osaRTSocketCAN.h>
 #include <cisstCommon/cmnLogger.h>
 
-CMN_IMPLEMENT_SERVICES( osaRTSocketCAN );
-
 osaRTSocketCAN::osaRTSocketCAN( const std::string& devicename, 
 				cisstCAN::Rate rate,
 				cisstCAN::Loopback loopback ) : 
@@ -38,9 +36,10 @@ osaRTSocketCAN::~osaRTSocketCAN(){}
 
 cisstCAN::Errno osaRTSocketCAN::Open(){
 
-  int errno;
 
 #if (CISST_OS == CISST_LINUX_XENOMAI )
+
+  int errno;
 
   struct ifreq ifr;
 
@@ -138,7 +137,7 @@ cisstCAN::Errno osaRTSocketCAN::Close(){
 // Note that block is useless for Socket CAN
 cisstCAN::Errno osaRTSocketCAN::Send( const cisstCANFrame& canframe, 
 				      cisstCAN::Flags ){
-  
+
 #if (CISST_OS == CISST_LINUX_XENOMAI )
 
   // copy the data in to a RTSocket CAN frame
@@ -167,7 +166,7 @@ cisstCAN::Errno osaRTSocketCAN::Send( const cisstCANFrame& canframe,
 }
 
 // Receive a CAN frame
-cisstCAN::Errno osaRTSocketCAN::Recv( cisstCANFrame& canframe, cisstCAN::Flags ){
+cisstCAN::Errno osaRTSocketCAN::Recv(cisstCANFrame& canframe, cisstCAN::Flags){
 
 #if (CISST_OS == CISST_LINUX_XENOMAI )
 
@@ -199,6 +198,12 @@ cisstCAN::Errno osaRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
 
   if( filterscnt < osaRTSocketCAN::MAX_NUM_FILTERS ){
 
+    // Avoid duplicates
+    for( size_t i=0; i<filterscnt; i++ ){
+      if( filters[i].can_mask == filter.mask && filters[i].can_id == filter.id )
+	{ return cisstCAN::ESUCCESS; }
+    }
+
     filters[filterscnt].can_mask = filter.mask;
     filters[filterscnt].can_id   = filter.id;
     filterscnt++;
@@ -222,6 +227,8 @@ cisstCAN::Errno osaRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
   }
 
 #endif
+
+  return cisstCAN::EFAILURE;
 
 }
 

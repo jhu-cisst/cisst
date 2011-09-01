@@ -664,6 +664,9 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDouble);
 typedef mtsGenericObjectProxy<long> mtsLong;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsLong);
 
+typedef mtsGenericObjectProxy<long long> mtsLongLong;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsLongLong);
+
 typedef mtsGenericObjectProxy<unsigned long> mtsULong;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsULong);
 

@@ -24,24 +24,27 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlConverters.h>
 
 
-/*******************************/
-/*** svlVidCapSrcBMD class *****/
-/*******************************/
+/*****************************/
+/*** svlVidCapSrcBMD class ***/
+/*****************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlVidCapSrcBMD, svlVidCapSrcBase)
 
 svlVidCapSrcBMD::svlVidCapSrcBMD() :
-svlVidCapSrcBase(),
-NumOfStreams(0),
-Running(false),
-Initialized(false),
-ImageBuffer(0)
+    svlVidCapSrcBase(),
+    NumOfStreams(0),
+    Running(false),
+    Initialized(false),
+    ImageBuffer(0),
+    deckLink(0),
+    deckLinkInput(0),
+    Delegate(0)
 {
     BMDNumberOfDevices = 0;
     inputFlags = 0;
-    displayMode = bmdModeHD1080i5994;//bmdModeHD1080p30;
+    displayMode = bmdModeHD1080i5994; //bmdModeHD1080p30
     SetWidthHeightByBMDDisplayMode();
-    pixelFormat = bmdFormat8BitYUV;//bmdFormat8BitARGB;
+    pixelFormat = bmdFormat8BitYUV; //bmdFormat8BitARGB
     debug = false;
 }
 
@@ -50,6 +53,9 @@ svlVidCapSrcBMD::~svlVidCapSrcBMD()
     Close();
 
     if (ImageBuffer) delete [] ImageBuffer;
+    if (deckLink) delete [] deckLink;
+    if (deckLinkInput) delete [] deckLinkInput;
+    if (Delegate) delete [] Delegate;
 }
 
 void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
@@ -60,22 +66,37 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
     frameRate = 30;
 
     // width & height
-    if(displayMode == bmdModeNTSC||	displayMode == bmdModeNTSC2398|| displayMode == bmdModePAL|| displayMode == bmdModeNTSCp || displayMode == bmdModePALp)
-    {
+    if (displayMode == bmdModeNTSC ||
+        displayMode == bmdModeNTSC2398 ||
+        displayMode == bmdModePAL ||
+        displayMode == bmdModeNTSCp ||
+        displayMode == bmdModePALp) {
         width = 720;
         height = 480;
-    }else if(displayMode == bmdModeHD1080p2398 || displayMode ==bmdModeHD1080p24 || displayMode == bmdModeHD1080p25	|| displayMode == bmdModeHD1080p2997	
-	        || displayMode == bmdModeHD1080p30 || displayMode == bmdModeHD1080i50 || displayMode == bmdModeHD1080i5994 || displayMode == bmdModeHD1080i6000
-	        || displayMode == bmdModeHD1080p50 || displayMode == bmdModeHD1080p5994	|| displayMode == bmdModeHD1080p6000)
-    {
+    }
+    else if (displayMode == bmdModeHD1080p2398 ||
+             displayMode == bmdModeHD1080p24 ||
+             displayMode == bmdModeHD1080p25 ||
+             displayMode == bmdModeHD1080p2997 ||
+             displayMode == bmdModeHD1080p30 ||
+             displayMode == bmdModeHD1080i50 ||
+             displayMode == bmdModeHD1080i5994 ||
+             displayMode == bmdModeHD1080i6000 ||
+             displayMode == bmdModeHD1080p50 ||
+             displayMode == bmdModeHD1080p5994 ||
+             displayMode == bmdModeHD1080p6000) {
         width = 1920;
         height = 1080;
-    }else if(displayMode == bmdModeHD720p50	|| displayMode == bmdModeHD720p5994	|| displayMode == bmdModeHD720p60)
-    {
+    }
+    else if (displayMode == bmdModeHD720p50 ||
+             displayMode == bmdModeHD720p5994 ||
+             displayMode == bmdModeHD720p60) {
         width = 1920;
         height = 720;
-    }else if(displayMode == bmdMode2k2398 || displayMode == bmdMode2k24	|| displayMode == bmdMode2k25)
-    {
+    }
+    else if (displayMode == bmdMode2k2398 ||
+             displayMode == bmdMode2k24 ||
+             displayMode == bmdMode2k25) {
         width = 2048; 
         height = 1080;    
     }
@@ -83,45 +104,51 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
     // frame rate
     switch(displayMode)
     {
+        case bmdModeNTSC2398:
+        case bmdModeHD1080p2398:
+        case bmdMode2k2398:	
+            frameRate = 23.98;
+        break;
 
-    case bmdModeNTSC2398:
-    case bmdModeHD1080p2398:
-    case bmdMode2k2398:	
-        frameRate = 23.98;
+        case bmdModeHD1080p24:	
+        case bmdMode2k24:	
+            frameRate = 24.0;
         break;
-    case bmdModeHD1080p24:	
-    case bmdMode2k24:	
-        frameRate = 24.0;
+
+        case bmdModeHD1080p25:	
+        case bmdMode2k25:	
+            frameRate = 25.0;
         break;
-    case bmdModeHD1080p25:	
-    case bmdMode2k25:	
-        frameRate = 25.0;
+
+        case bmdModeHD1080p2997:	
+        case bmdModeNTSC:
+        case bmdModePAL:
+        case bmdModeNTSCp:
+        case bmdModePALp:	
+        case bmdModeHD1080p30:
+            frameRate = 30.0;
         break;
-    case bmdModeHD1080p2997:	
-    case bmdModeNTSC:
-    case bmdModePAL:
-    case bmdModeNTSCp:
-    case bmdModePALp:	
-    case bmdModeHD1080p30:
-        frameRate = 30.0;
+
+        case bmdModeHD1080i50:
+        case bmdModeHD1080p50:	
+        case bmdModeHD720p50:	
+            frameRate = 50.0;
         break;
-    case bmdModeHD1080i50:
-    case bmdModeHD1080p50:	
-    case bmdModeHD720p50:	
-        frameRate = 50.0;
+
+        case bmdModeHD1080i5994:
+        case bmdModeHD1080p5994:	
+        case bmdModeHD720p5994:
+            frameRate = 59.94;
         break;
-    case bmdModeHD1080i5994:
-    case bmdModeHD1080p5994:	
-    case bmdModeHD720p5994:
-        frameRate = 59.94;
+
+        case bmdModeHD1080i6000:
+        case bmdModeHD1080p6000:	
+        case bmdModeHD720p60:
+            frameRate = 60;
         break;
-    case bmdModeHD1080i6000:
-    case bmdModeHD1080p6000:	
-    case bmdModeHD720p60:
-        frameRate = 60;
-        break;
-    default:
-        printf("Unrecognized display mode: %d\n", displayMode);	
+
+        default:
+            printf("Unrecognized display mode: %d\n", displayMode);	
         break;
     }
 
@@ -132,15 +159,14 @@ IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
 
 IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
 {
-    IDeckLinkIterator*			deckLinkIterator;
+    IDeckLinkIterator* deckLinkIterator;
 #if (CISST_OS == CISST_WINDOWS)
-    HRESULT						result;
+    HRESULT	 result;
     // Create an IDeckLinkIterator object to enumerate all DeckLink cards in the system
-    result = CoCreateInstance(CLSID_CDeckLinkIterator, NULL, CLSCTX_ALL, IID_IDeckLinkIterator, (void**)&deckLinkIterator);
-    if (FAILED(result))
-    {
+    result = CoCreateInstance(CLSID_CDeckLinkIterator, 0, CLSCTX_ALL, IID_IDeckLinkIterator, (void**)&deckLinkIterator);
+    if (FAILED(result)) {
         fprintf(stderr, "A DeckLink iterator could not be created.  The DeckLink drivers may not be installed.\n");
-        return NULL;
+        return 0;
     }
 #else
     deckLinkIterator = CreateDeckLinkIteratorInstance();	
@@ -162,10 +188,16 @@ int svlVidCapSrcBMD::SetStreamCount(unsigned int numofstreams)
 
     DeviceID = new int[NumOfStreams];
     ImageBuffer = new svlBufferImage*[NumOfStreams];
+    deckLink = new IDeckLink*[NumOfStreams];
+    deckLinkInput = new IDeckLinkInput*[NumOfStreams];
+    Delegate = new DeckLinkCaptureDelegate*[NumOfStreams];
 
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
         DeviceID[i] = -1;
         ImageBuffer[i] = 0;
+        deckLink[i] = 0;
+        deckLinkInput[i] = 0;
+        Delegate[i] = 0;
     }
 
     return SVL_OK;
@@ -269,55 +301,58 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
 
 int svlVidCapSrcBMD::Open()
 {
-    if(debug)
-        printf("svlVidCapSrcBMD::Open() called\n");
+    if(debug) {
+        std::cerr << "svlVidCapSrcBMD::Open() called" << std::endl;
+    }
 
     if (NumOfStreams <= 0) return SVL_FAIL;
     if (Initialized) return SVL_OK;
 
     Close();
 
-    IDeckLinkIterator			*deckLinkIterator = GetIDeckLinkIterator();
-    IDeckLink*					deckLink;
-    IDeckLinkInput*				deckLinkInput;
-    DeckLinkCaptureDelegate 	*delegate;
-    HRESULT						result;
+    HRESULT result;
 
-    if (!deckLinkIterator)
-    {
-        fprintf(stderr, "This application requires the DeckLink drivers installed.\n");
+    IDeckLinkIterator* deckLinkIterator = GetIDeckLinkIterator();
+    if (!deckLinkIterator) {
+        std::cerr << "svlVidCapSrcBMD::Open - GetIDeckLinkIterator() returned error" << std::endl;
         goto labError;
     }
 
-    for (unsigned int i = 0; i < NumOfStreams; i ++) {		
-        /* Connect to a DeckLink instance */
-        result = deckLinkIterator->Next(&deckLink);
-        if (result != S_OK)
-        {
-            fprintf(stderr, "No DeckLink PCI cards found.\n");
+    for (unsigned int i = 0; i < NumOfStreams; i ++) {
+        // Connect to a DeckLink instance
+        result = deckLinkIterator->Next(&deckLink[i]);
+        if (result != S_OK) {
+            std::cerr << "svlVidCapSrcBMD::Open - deckLinkIterator->Next() returned error: " << result << std::endl;
             goto labError;
         }
 
-        if (deckLink->QueryInterface(IID_IDeckLinkInput, (void**)&deckLinkInput) != S_OK)
+        if (deckLink[i]->QueryInterface(IID_IDeckLinkInput, reinterpret_cast<void**>(&deckLinkInput[i])) != S_OK) {
+            std::cerr << "svlVidCapSrcBMD::Open - deckLinkIterator->QueryInterface() returned error" << std::endl;
             goto labError;
+        }
 
         // Set callback delgate
         // Allocate capture buffers
         ImageBuffer[i] = new svlBufferImage(width, height);
-        delegate = new DeckLinkCaptureDelegate(ImageBuffer[i]);
-        deckLinkInput->SetCallback(delegate);
+        Delegate[i] = new DeckLinkCaptureDelegate(ImageBuffer[i]);
+        deckLinkInput[i]->SetCallback(Delegate[i]);
 
         // Opening device
-        result = deckLinkInput->EnableVideoInput(displayMode, pixelFormat, inputFlags);
-        if(result != S_OK) goto labError;
+        result = deckLinkInput[i]->EnableVideoInput(displayMode, pixelFormat, inputFlags);
+        if(result != S_OK) {
+            std::cerr << "svlVidCapSrcBMD::Open - deckLinkInput[" << i << "]->EnableVideoInput() returned error: " << result << std::endl;
+            goto labError;
+        }
 
         // Starting Stream
-        result = deckLinkInput->StartStreams();
-        if(result != S_OK)
-        {
+        result = deckLinkInput[i]->StartStreams();
+        if (result != S_OK) {
+            std::cerr << "svlVidCapSrcBMD::Open - deckLinkInput[" << i << "]->StartStreams() returned error: " << result << std::endl;
             goto labError;
         }
     }
+
+    deckLinkIterator->Release();
 
     Initialized = true;
 
@@ -330,60 +365,38 @@ labError:
 
 void svlVidCapSrcBMD::Close()
 {
-    if(debug)
-        printf("svlVidCapSrcBMD::Close() called\n");
-
-    if (NumOfStreams <= 0) return;
+    if(debug) {
+        std::cerr << "svlVidCapSrcBMD::Close() called" << std::endl;
+    }
 
     Stop();
-    IDeckLink*					deckLink;
-    IDeckLinkInput*				deckLinkInput;
-    IDeckLinkIterator			*deckLinkIterator = GetIDeckLinkIterator();
-    HRESULT result;
-    if (!deckLinkIterator)
-    {
-        fprintf(stderr, "This application requires the DeckLink drivers installed.\n");
-    }
 
-    // Release capture buffers
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
-        result = deckLinkIterator->Next(&deckLink);
-        if (result != S_OK)
-        {
-            fprintf(stderr, "No DeckLink PCI cards found.\n");
-            goto labError;
+        if(deckLinkInput[i] != 0) {
+            deckLinkInput[i]->StopStreams();
+            deckLinkInput[i]->Release();
+            deckLinkInput[i] = 0;
         }
-
-        if (deckLink->QueryInterface(IID_IDeckLinkInput, (void**)&deckLinkInput) != S_OK)
-            goto labError;
-        // Closing device
-        if(deckLinkInput != NULL)
-        {
-            deckLinkInput->Release();
-            deckLinkInput = NULL;
+        if(deckLink[i] != 0) {
+            deckLink[i]->Release();
+            deckLink[i] = 0;
         }
-        if(deckLink != NULL)
-        {
-            deckLink->Release();
-            deckLink = NULL;
+        if(Delegate[i] != 0) {
+            delete Delegate[i];
+            Delegate[i] = 0;
+        }
+        if(ImageBuffer[i] != 0) {
+            delete ImageBuffer[i];
+            ImageBuffer[i] = 0;
         }
     }
-
-    if(deckLinkInput != NULL)
-        deckLinkInput->Release();
-    if(deckLink != NULL)
-        deckLink->Release();
-    if(deckLinkIterator != NULL)
-        deckLinkIterator->Release();
-
-labError:
-    return;
 }
 
 int svlVidCapSrcBMD::Start()
 {
-    if(debug)
-        printf("svlVidCapSrcBMD::Start() called\n");
+    if(debug) {
+        std::cerr << "svlVidCapSrcBMD::Start() called" << std::endl;
+    }
 
     if (!Initialized) return SVL_FAIL;
     Running = true;
@@ -393,19 +406,19 @@ int svlVidCapSrcBMD::Start()
 
 svlImageRGB* svlVidCapSrcBMD::GetLatestFrame(bool waitfornew, unsigned int videoch)
 {
-    if (videoch >= NumOfStreams || DeviceID[videoch] < 0) return 0;
-    // if(debug)
-    //   printf("Getting latest frame, channel %d \n",videoch);
+    if (videoch >= NumOfStreams || !ImageBuffer[videoch]) return 0;
     return ImageBuffer[videoch]->Pull(waitfornew);
 }
 
 int svlVidCapSrcBMD::Stop()
 {
-    if(debug)
-        printf("svlVidCapSrcBMD::Stop() called\n");
+    if(debug) {
+        std::cerr << "svlVidCapSrcBMD::Stop() called" << std::endl;
+    }
 
     if (!Running) return SVL_FAIL;
     Running = false;
+
     return SVL_OK;
 }
 
@@ -414,7 +427,7 @@ bool svlVidCapSrcBMD::IsRunning()
     return Running;
 }
 
-int svlVidCapSrcBMD::SetDevice(int devid, int inid, unsigned int videoch)
+int svlVidCapSrcBMD::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
     DeviceID[videoch] = devid;
@@ -434,7 +447,7 @@ int svlVidCapSrcBMD::GetHeight(unsigned int videoch)
     return ImageBuffer[videoch]->GetHeight();
 }
 
-int svlVidCapSrcBMD::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
+int svlVidCapSrcBMD::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
 
@@ -465,112 +478,96 @@ int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     return SVL_OK;
 }
 
-/**************************************/
-/*** DeckLinkCaptureDelegate class ******/
-/**************************************/
+/*************************************/
+/*** DeckLinkCaptureDelegate class ***/
+/*************************************/
 
-DeckLinkCaptureDelegate::DeckLinkCaptureDelegate(svlBufferImage* buffer) : m_refCount(0)
+DeckLinkCaptureDelegate::DeckLinkCaptureDelegate(svlBufferImage* buffer) :
+    IDeckLinkInputCallback(),
+    m_refCount(0)
 {
     m_mutex = new osaMutex();
-    g_timecodeFormat = (BMDTimecodeFormat)0;
+    g_timecodeFormat = static_cast<BMDTimecodeFormat>(0);
     m_buffer = buffer;
     debug = false;
 }
 
 DeckLinkCaptureDelegate::~DeckLinkCaptureDelegate()
 {
-    if(m_mutex)
-        m_mutex->~osaMutex();
-    return;
+    if (m_mutex) delete m_mutex;
+}
+
+HRESULT DeckLinkCaptureDelegate::QueryInterface(REFIID CMN_UNUSED(iid), LPVOID* CMN_UNUSED(ppv))
+{
+    return E_NOINTERFACE;
 }
 
 ULONG DeckLinkCaptureDelegate::AddRef(void)
 {
     m_mutex->Lock();
-    m_refCount++;
+    m_refCount ++;
     m_mutex->Unlock();
-    return (ULONG)m_refCount;
+    return static_cast<ULONG>(m_refCount);
 }
 
 ULONG DeckLinkCaptureDelegate::Release(void)
 {
     m_mutex->Lock();
-    m_refCount--;
+    m_refCount --;
     m_mutex->Unlock();
 
-    if(m_buffer)
-    {
-        delete m_buffer;
-        m_buffer = 0;
-    }
-    if (m_refCount == 0)
-    {
-        delete this;
-        return 0;
-    }
-
-    return (ULONG)m_refCount;
+    return static_cast<ULONG>(m_refCount);
 }
 
 HRESULT DeckLinkCaptureDelegate::VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioFrame)
 {
-    IDeckLinkVideoFrame*	                rightEyeFrame = NULL;
-    IDeckLinkVideoFrame3DExtensions*        threeDExtensions = NULL;
+    if (videoFrame) {
 
-    // Handle Video Frame
-    if(videoFrame)
-    {	
+        IDeckLinkVideoFrame* rightEyeFrame = 0;
+        IDeckLinkVideoFrame3DExtensions* threeDExtensions = 0;
+
         // If 3D mode is enabled we retreive the 3D extensions interface which gives.
         // us access to the right eye frame by calling GetFrameForRightEye() .
-        if ( (videoFrame->QueryInterface(IID_IDeckLinkVideoFrame3DExtensions, (void **) &threeDExtensions) != S_OK) ||
-            (threeDExtensions->GetFrameForRightEye(&rightEyeFrame) != S_OK))
-        {
-            rightEyeFrame = NULL;
+        if (videoFrame->QueryInterface(IID_IDeckLinkVideoFrame3DExtensions, reinterpret_cast<void**>(&threeDExtensions)) != S_OK ||
+            threeDExtensions->GetFrameForRightEye(&rightEyeFrame) != S_OK) {
+            rightEyeFrame = 0;
         }
 
-        if (threeDExtensions)
-            threeDExtensions->Release();
+        if (threeDExtensions) threeDExtensions->Release();
 
-        if (videoFrame->GetFlags() & bmdFrameHasNoInputSource)
-        {
-            fprintf(stderr, "Frame received (#%lu) - No input signal detected\n", frameCount);
+        if (videoFrame->GetFlags() & bmdFrameHasNoInputSource) {
+            std::cerr << "Frame received (" << frameCount << ") - No input signal detected" << std::endl;
         }
-        else
-            //process standard SDI input
-        {
-            //if(debug)
-            //   printf("Processing Video # %d \n",frameCount);
+        else {
             processVideoFrame(videoFrame);
 
         }
 
-        if (rightEyeFrame)
-            rightEyeFrame->Release();
+        if (rightEyeFrame) rightEyeFrame->Release();
 
-        frameCount++;
-
+        frameCount ++;
     }
 
-    // Audio Frame NOT HANDLED
-    //if (audioFrame)
-
+    if (audioFrame) {
+        // NOP
+    }
 
     return S_OK;
 }
 
 void DeckLinkCaptureDelegate::processVideoFrame(IDeckLinkVideoInputFrame* videoFrame)
 {
-    if(videoFrame)
-    {
-        void* source;;
-        unsigned char* dest = m_buffer->GetPushBuffer();
-
+    if (videoFrame) {
+        void* source = 0;
         videoFrame->GetBytes(&source);
 
-        svlConverter::UYVYtoRGB24(static_cast<unsigned char *>(source), dest,videoFrame->GetHeight()*videoFrame->GetWidth(),true,true,true);
+        unsigned char* dest = m_buffer->GetPushBuffer();
+        svlConverter::UYVYtoRGB24(reinterpret_cast<unsigned char*>(source),
+                                  dest,
+                                  videoFrame->GetWidth() * videoFrame->GetHeight(),
+                                  true, true, true);
         m_buffer->Push();
     }
 }
-
 
 

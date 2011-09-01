@@ -36,12 +36,13 @@ public:
     struct FileInfo
     {
         FileInfo();
-        FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit);
-        void Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit);
+        FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value = -1.0);
+        void Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value = -1.0);
 
         std::string filepath;
         int timestamp_column;
         double timestamp_unit;
+        double timestamp_overflow_value;
     };
 
 public:
@@ -76,6 +77,9 @@ private:
 
     vctDynamicVector<double> FirstTimestamps;
     vctDynamicVector<double> Timestamps;
+    vctDynamicVector<double> PrevTimestamps;
+    vctDynamicVector<bool> TimestampOverflown;
+    double TimestampOverflowValue;
     osaStopwatch Timer;
     float ErrorValue;
     bool ResetTimer;
