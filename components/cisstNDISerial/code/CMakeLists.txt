@@ -69,6 +69,7 @@ ENDMACRO (CISST_QT4_WRAP_UI)
                mtsNDISerialToolQtComponent.cpp
                ../mtsNDISerialToolQtComponent.h)
 
+  target_link_libraries (cisstNDISerialQt ${QT_LIBRARIES})
   cisst_target_link_libraries (cisstNDISerialQt ${CISST_LIBRARIES_NEEDED})
 
 endif (CISST_HAS_QT)
