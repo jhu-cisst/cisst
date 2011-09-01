@@ -37,8 +37,8 @@ if (cisst_FOUND)
 
     # link against non cisst libraries and cisst components
     target_link_libraries (cisstNDISerialQtExample
-                           cisstNDISerial
-                           cisstNDISerialQt
+                           ${cisstNDISerial_LIBRARIES}
+                           ${cisstNDISerialQt_LIBRARIES}
                            ${QT_LIBRARIES}
                          )
     # link against cisst libraries (and dependencies)

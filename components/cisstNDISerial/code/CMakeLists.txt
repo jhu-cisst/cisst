@@ -77,6 +77,7 @@ endif (CISST_HAS_QT)
 set (cisstNDISerial_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}" "${cisst_BINARY_DIR}/components")
 set (cisstNDISerial_LIBRARY_DIR "${LIBRARY_OUTPUT_PATH}")
 set (cisstNDISerial_LIBRARIES cisstNDISerial)
+set (cisstNDISerialQt_LIBRARIES cisstNDISerialQt)
 
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstNDISerialConfig.cmake.in"
                 "${cisstComponents_BINARY_DIR}/cisstNDISerialConfig.cmake"

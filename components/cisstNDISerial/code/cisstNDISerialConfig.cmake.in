@@ -14,3 +14,4 @@
 set (cisstNDISerial_INCLUDE_DIR "@cisstNDISerial_INCLUDE_DIR@")
 set (cisstNDISerial_LIBRARY_DIR "@cisstNDISerial_LIBRARY_DIR@")
 set (cisstNDISerial_LIBRARIES   "@cisstNDISerial_LIBRARIES@")
+set (cisstNDISerialQt_LIBRARIES "@cisstNDISerialQt_LIBRARIES@")
