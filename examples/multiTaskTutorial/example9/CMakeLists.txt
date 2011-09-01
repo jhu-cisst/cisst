@@ -15,6 +15,9 @@
 # name of project
 project (multiTaskTutorialExample9)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask)
+
 # add include paths
 include_directories (${multiTaskTutorialExample9_SOURCE_DIR})
 

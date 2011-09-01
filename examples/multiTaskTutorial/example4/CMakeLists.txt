@@ -15,6 +15,9 @@
 # name of project and executable
 PROJECT(multiTaskTutorialExample4)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask cisstInteractive)
+
 # add include paths
 INCLUDE_DIRECTORIES(${multiTaskTutorialExample4_SOURCE_DIR})
 
@@ -39,7 +42,7 @@ ADD_EXECUTABLE(multiTaskTutorialExample4
 	       )
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskTutorialExample4" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstInteractive")
+cisst_target_link_libraries(multiTaskTutorialExample4 cisstCommon cisstOSAbstraction cisstMultiTask cisstInteractive)
 
 IF(UNIX)
   IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

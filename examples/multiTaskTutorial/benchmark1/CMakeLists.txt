@@ -15,6 +15,9 @@
 # name of project
 PROJECT(multiTaskTutorialBenchmark1)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
+
 # name the main executable and specifies with source files to use
 ADD_EXECUTABLE(multiTaskTutorialBenchmark1Local
                clientTask.cpp
@@ -22,11 +25,11 @@ ADD_EXECUTABLE(multiTaskTutorialBenchmark1Local
                localMain.cpp
                clientTask.h
                serverTask.h
-	       configuration.h
+               configuration.h
                )
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskTutorialBenchmark1Local" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")
+cisst_target_link_libraries(multiTaskTutorialBenchmark1Local cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
 
 # compile network version if ICE is available
@@ -37,21 +40,21 @@ if (CISST_MTS_HAS_ICE)
                  serverTask.cpp
                  serverMain.cpp
                  serverTask.h
-		 configuration.h
-                 )	    
+                 configuration.h
+                 )          
 
   # link with the cisst libraries
-  CISST_REQUIRES("multiTaskTutorialBenchmark1Server" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")
+  cisst_target_link_libraries(multiTaskTutorialBenchmark1Server cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
   # name the main executable and specifies with source files to use
   ADD_EXECUTABLE(multiTaskTutorialBenchmark1Client
                  clientTask.cpp
                  clientMain.cpp
                  clientTask.h
-		 configuration.h
+                 configuration.h
                  )
 
   # link with the cisst libraries
-  CISST_REQUIRES("multiTaskTutorialBenchmark1Client" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")
+  cisst_target_link_libraries(multiTaskTutorialBenchmark1Client cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
 endif (CISST_MTS_HAS_ICE)

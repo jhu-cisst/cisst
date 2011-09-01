@@ -15,6 +15,9 @@
 # name of project
 PROJECT(multiTaskTestComplexConnections)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask)
+
 # add include paths
 INCLUDE_DIRECTORIES(${multiTaskTestComplexConnections_SOURCE_DIR})
 
@@ -37,7 +40,7 @@ ADD_EXECUTABLE(multiTaskTestComplexConnectionsServer
                )
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskTestComplexConnectionsServer" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+cisst_target_link_libraries(multiTaskTestComplexConnectionsServer cisstCommon cisstOSAbstraction cisstMultiTask)
 
 
 # CMake command, generate .cxx and .h from .fl files
@@ -59,4 +62,4 @@ ADD_EXECUTABLE(multiTaskTestComplexConnectionsClient
                )
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskTestComplexConnectionsClient" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+cisst_target_link_libraries(multiTaskTestComplexConnectionsClient cisstCommon cisstOSAbstraction cisstMultiTask)

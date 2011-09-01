@@ -15,13 +15,16 @@
 # name of project
 PROJECT(TestManagerComponent)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask)
+
 # name the main executable and specifies with source files to use
 ADD_EXECUTABLE(multiTaskTestManagerComponentLocal 
                mainControllerLocal.cpp
                ManagerComponentLocal.h ManagerComponentLocal.cpp
                CounterOddComponent.h CounterOddComponent.cpp
                CounterEvenComponent.h CounterEvenComponent.cpp)
-CISST_REQUIRES("multiTaskTestManagerComponentLocal" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+cisst_target_link_libraries(multiTaskTestManagerComponentLocal cisstCommon cisstOSAbstraction cisstMultiTask)
 
 # compile network version if ICE is available
 if (CISST_MTS_HAS_ICE)
@@ -30,12 +33,12 @@ if (CISST_MTS_HAS_ICE)
   ADD_EXECUTABLE(multiTaskTestManagerComponentController 
                  mainController.cpp
                  ManagerComponent.h ManagerComponent.cpp)
-  CISST_REQUIRES("multiTaskTestManagerComponentController" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+  cisst_target_link_libraries(multiTaskTestManagerComponentController cisstCommon cisstOSAbstraction cisstMultiTask)
 
   # name the main executable and specifies with source files to use
   ADD_EXECUTABLE(multiTaskTestManagerComponentCounter 
                  mainCounter.cpp
                  CounterOddComponent.h CounterOddComponent.cpp
                  CounterEvenComponent.h CounterEvenComponent.cpp)
-  CISST_REQUIRES("multiTaskTestManagerComponentCounter" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+  cisst_target_link_libraries(multiTaskTestManagerComponentCounter cisstCommon cisstOSAbstraction cisstMultiTask)
 endif (CISST_MTS_HAS_ICE)

@@ -15,6 +15,9 @@
 # name of project
 PROJECT(multiTaskTutorialBenchmark2)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
+
 # name the main executable and specifies with source files to use
 ADD_EXECUTABLE(multiTaskTutorialBenchmark2Local
                clientTask.cpp
@@ -26,7 +29,7 @@ ADD_EXECUTABLE(multiTaskTutorialBenchmark2Local
                )
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskTutorialBenchmark2Local" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")
+cisst_target_link_libraries(multiTaskTutorialBenchmark2Local cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
 
 # compile network version if ICE is available
@@ -41,7 +44,7 @@ if (CISST_MTS_HAS_ICE)
                  )	    
 
   # link with the cisst libraries
-  CISST_REQUIRES("multiTaskTutorialBenchmark2Server" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")
+  cisst_target_link_libraries(multiTaskTutorialBenchmark2Server cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
   # name the main executable and specifies with source files to use
   ADD_EXECUTABLE(multiTaskTutorialBenchmark2Client
@@ -52,6 +55,6 @@ if (CISST_MTS_HAS_ICE)
                  )
 
   # link with the cisst libraries
-  CISST_REQUIRES("multiTaskTutorialBenchmark2Client" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")
+  cisst_target_link_libraries(multiTaskTutorialBenchmark2Client cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
 endif (CISST_MTS_HAS_ICE)
