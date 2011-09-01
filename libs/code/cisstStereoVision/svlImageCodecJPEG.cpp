@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 #include <setjmp.h>
 
-#if (CISST_OS == CISST_DARWIN_XX) && CISST_SVL_HAS_OPENCV
+#if (CISST_OS == CISST_DARWIN) && CISST_SVL_HAS_OPENCV
     // Macports bug; revisit it later
     #include <../lib/jpeg6b/include/jpeglib.h>
 #else // CISST_DARWIN && CISST_SVL_HAS_OPENCV
