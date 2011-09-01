@@ -12,6 +12,15 @@
 #
 # --- end cisst license ---
 
+set (CISST_LIBRARIES_NEEDED cisstCommon
+                            cisstCommonXML
+                            cisstVector
+                            cisstOSAbstraction
+                            cisstMultiTask
+                            cisstParameterTypes)
+
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 add_library (cisstStealthlink ${IS_SHARED}
              ../cisstStealthlinkExport.h
              mtsStealthlink.cpp
@@ -29,14 +38,7 @@ if(WIN32)
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /NODEFAULTLIB:msvcprt.lib /NODEFAULTLIB:LIBCMT.lib")
 endif(WIN32)
 
-cisst_target_link_libraries (cisstStealthlink
-                             cisstCommon
-                             cisstCommonXML
-                             cisstVector
-                             cisstOSAbstraction
-                             cisstMultiTask
-                             cisstParameterTypes
-                             )
+cisst_target_link_libraries (cisstStealthlink ${CISST_LIBRARIES_NEEDED})
 
 set (cisstStealthlink_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}")
 set (cisstStealthlink_LIBRARY_DIR "${LIBRARY_OUTPUT_PATH}")
