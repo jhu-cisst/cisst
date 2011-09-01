@@ -22,8 +22,8 @@ set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
-set (CURRENT_PROJECT_IS_CISST ON CACHE BOOL "Tells different macros that cisst itself is part of the project")
-mark_as_advanced (CURRENT_PROJECT_IS_CISST)
+set (CURRENT_PROJECT_IS_CISST ON)
+
 set (cisst_DIR ${CISST_BINARY_DIR} CACHE PATH "Set path so that find_package (cisst) works in this project")
 mark_as_advanced (cisst_DIR)
 
