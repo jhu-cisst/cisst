@@ -220,7 +220,7 @@ SET(HEADER_FILES
 
 
 # cisstNumerical dependency
-IF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+IF(CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
     SET(DEPENDENCIES
         ${DEPENDENCIES}
         cisstNumerical
@@ -238,7 +238,7 @@ IF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
         ${HEADER_FILES}
         svlTrackerCisst.h
         )
-ENDIF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+ENDIF(CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
 
 ## WebGUI
@@ -285,14 +285,9 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
     IF(OpenCV2_FOUND)
         MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${OpenCV2_INCLUDE_DIRS}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${OpenCV2_LIBRARIES}"
-            )
+        cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+        cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV2_LIBRARIES)
+
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
@@ -433,15 +428,8 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
 
     IF(OpenCV_FOUND)
         MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
-
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${OpenCV_INCLUDE_DIRS}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${OpenCV_LIBRARIES}"
-            )
+        cisst_set_package_settings (cisstStereoVision OpenCV INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
+        cisst_set_package_settings (cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBRARIES)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
@@ -499,14 +487,8 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
     IF(JPEG_FOUND)
         MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${JPEG_INCLUDE_DIR}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${JPEG_LIBRARY}"
-            )
+        cisst_set_package_settings (cisstStereoVision JPEG INCLUDE_DIRECTORIES JPEG_INCLUDE_DIR)
+        cisst_set_package_settings (cisstStereoVision JPEG LIBRARIES           JPEG_LIBRARY)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlImageCodecJPEG.h           # private header
@@ -559,14 +541,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
     IF(ZLIB_FOUND)
         MARK_AS_ADVANCED(FORCE ${ZLIB_OPTIONS})
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${ZLIB_INCLUDE_DIR}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${ZLIB_LIBRARY}"
-            )
+        cisst_set_package_settings (cisstStereoVision ZLIB INCLUDE_DIRECTORIES ZLIB_INCLUDE_DIR)
+        cisst_set_package_settings (cisstStereoVision ZLIB LIBRARIES           ZLIB_LIBRARY)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlVideoCodecCVI.h              # private header
@@ -630,14 +606,8 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
             MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
 
             ADD_DEFINITIONS(${PNG_DEFINITIONS})
-            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-                "${PNG_PNG_INCLUDE_DIR}"
-                )
-            SET(SVL_ADDITIONAL_LIBRARIES
-                "${SVL_ADDITIONAL_LIBRARIES}"
-                "${PNG_LIBRARY}"
-                )
+            cisst_set_package_settings (cisstStereoVision PNG INCLUDE_DIRECTORIES PNG_PNG_INCLUDE_DIR)
+            cisst_set_package_settings (cisstStereoVision PNG LIBRARIES           PNG_LIBRARY)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
                 svlImageCodecPNG.h            # private header
@@ -752,20 +722,16 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
     IF(FFMPEG_FOUND)
         MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${FFMPEG_avcodec_INCLUDE_DIR}"
-            "${FFMPEG_avformat_INCLUDE_DIR}"
-            "${FFMPEG_avutil_INCLUDE_DIR}"
-            "${FFMPEG_swscale_INCLUDE_DIR}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${FFMPEG_avcodec_LIBRARY}"
-            "${FFMPEG_avformat_LIBRARY}"
-            "${FFMPEG_avutil_LIBRARY}"
-            "${FFMPEG_swscale_LIBRARY}"
-            )
+	set (CISST_SVL_ALL_FFMPEG_INCLUDE "${FFMPEG_avcodec_INCLUDE_DIR}"
+                                          "${FFMPEG_avformat_INCLUDE_DIR}"
+                                          "${FFMPEG_avutil_INCLUDE_DIR}"
+                                          "${FFMPEG_swscale_INCLUDE_DIR}")
+        cisst_set_package_settings (cisstStereoVision FFMPEG INCLUDE_DIRECTORIES CISST_SVL_ALL_FFMPEG_INCLUDE)
+        set (CISST_SVL_ALL_FFMPEG_LIBRARIES "${FFMPEG_avcodec_LIBRARY}"
+                                            "${FFMPEG_avformat_LIBRARY}"
+                                            "${FFMPEG_avutil_LIBRARY}"
+                                            "${FFMPEG_swscale_LIBRARY}")
+        cisst_set_package_settings (cisstStereoVision FFMPEG LIBRARIES CISST_SVL_ALL_FFMPEG_LIBRARIES)
 
         SET(SOURCE_FILES
             ${SOURCE_FILES}
@@ -821,14 +787,8 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
     IF(MIL_FOUND)
         MARK_AS_ADVANCED(FORCE ${MIL_OPTIONS})
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${MIL_INCLUDE_DIR}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${MIL_mil_LIBRARY}"
-            )
+        cisst_set_package_settings (cisstStereoVision MIL INCLUDE_DIRECTORIES MIL_INCLUDE_DIR)
+        cisst_set_package_settings (cisstStereoVision MIL LIBRARIES           MIL_mil_LIBRARY)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlVidCapSrcMIL.h      # private header
@@ -863,10 +823,8 @@ IF(WIN32)
         svlVideoCodecVfW32.h    # private header
         svlVideoCodecVfW32.cpp
         )
-    SET(SVL_ADDITIONAL_LIBRARIES
-        "${SVL_ADDITIONAL_LIBRARIES}"
-        vfw32
-        )
+    set (CISST_VFW32_LIBRARY vfw32)
+    cisst_set_package_settings (cisstStereoVision VideoForWindows LIBRARIES CISST_VFW32_LIBRARY)
 
     # set windows specific linker flags enabling C++ code compilation on .NET compilers
     SET(SVL_ADDITIONAL_EXE_LINKER_FLAGS
@@ -886,17 +844,14 @@ IF(WIN32)
         FIND_PACKAGE(DirectShow)
         IF(DIRECTSHOW_FOUND)
             MARK_AS_ADVANCED(FORCE ${DIRECTSHOW_OPTIONS})
-
-            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-                "${DIRECTSHOW_INCLUDE_DIR}"
-                "${DIRECTX_INCLUDE_DIR}"
-                )
-            SET(SVL_ADDITIONAL_LIBRARIES
-                "${SVL_ADDITIONAL_LIBRARIES}"
-                "${DIRECTSHOW_strmiids_LIBRARY}"
-                "${DIRECTSHOW_WinMM_LIBRARY}"
-                )
+            set (CISST_SVL_ALL_DIRECTSHOW_INCLUDE
+                 "${DIRECTSHOW_INCLUDE_DIR}"
+                 "${DIRECTX_INCLUDE_DIR}")
+            cisst_set_package_settings (cisstStereoVision DirectShow INCLUDE_DIRECTORIES CISST_SVL_ALL_DIRECTSHOW_INCLUDE)
+	    set (CISST_SVL_ALL_DIRECTSHOW_LIBRARIES
+                 "${DIRECTSHOW_strmiids_LIBRARY}"
+                 "${DIRECTSHOW_WinMM_LIBRARY}")
+            cisst_set_package_settings (cisstStereoVision DirectShow LIBRARIES CISST_SVL_ALL_DIRECTSHOW_LIBRARIES)
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
@@ -971,15 +926,11 @@ IF(WIN32)
         IF(SVS_FOUND)
             MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
 
-            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-                "${SVS_INCLUDE_DIR}"
-                )
-            SET(SVL_ADDITIONAL_LIBRARIES
-                "${SVL_ADDITIONAL_LIBRARIES}"
-                "${SVS_svs_LIBRARY}"
-                "${SVS_svsgrab_LIBRARY}"
-                )
+	    cisst_set_package_settings (cisstStereoVision SVS INCLUDE_DIRECTORIES SVS_INCLUDE_DIR)
+	    set (CISST_SVL_ALL_SVS_LIBRARIES
+                 "${SVS_svs_LIBRARY}"
+                 "${SVS_svsgrab_LIBRARY}")
+            cisst_set_package_settings (cisstStereoVision SVS LIBRARIES CISST_SVL_ALL_SVS_LIBRARIES)
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
@@ -1068,14 +1019,8 @@ IF(UNIX)
         IF(DC1394_FOUND)
             MARK_AS_ADVANCED(FORCE ${DC1394_OPTIONS})
 
-            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-                "${DC1394_INCLUDE_DIR}"
-                )
-            SET(SVL_ADDITIONAL_LIBRARIES
-                "${SVL_ADDITIONAL_LIBRARIES}"
-                "${DC1394_dc1394_LIBRARY}"
-                )
+            cisst_set_package_settings (cisstStereoVision dc1394 INCLUDE_DIRECTORIES DC1394_INCLUDE_DIR)
+            cisst_set_package_settings (cisstStereoVision dc1394 LIBRARIES           DC1394_dc1394_LIBRARY)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
                 svlVidCapSrcDC1394.h         # private header
@@ -1112,14 +1057,8 @@ IF(UNIX)
         IF(X11_FOUND)
             SET(SVL_X11_FOUND ${X11_FOUND})
 
-            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-                "${X11_INCLUDE_DIR}"
-                )
-            SET(SVL_ADDITIONAL_LIBRARIES
-                "${SVL_ADDITIONAL_LIBRARIES}"
-                "${X11_LIBRARIES}"
-                )
+            cisst_set_package_settings (cisstStereoVision X11 INCLUDE_DIRECTORIES X11_INCLUDE_DIR)
+            cisst_set_package_settings (cisstStereoVision X11 LIBRARIES           X11_LIBRARIES)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
                 winX11.h                 # private header
@@ -1132,11 +1071,8 @@ IF(UNIX)
                 # Xv video acceleration is not supported on Darwin (as of yet)
                 # Search for Xvideo extensions for fast image drawing
                 IF(X11_Xv_FOUND AND X11_Xext_FOUND)
-                    SET(SVL_ADDITIONAL_LIBRARIES
-                        "${SVL_ADDITIONAL_LIBRARIES}"
-                        "${X11_Xext_LIB}"
-                        "${X11_Xv_LIB}"
-                        )
+                    cisst_set_package_settings (cisstStereoVision Xext LIBRARIES X11_Xext_LIB)
+                    cisst_set_package_settings (cisstStereoVision Xv   LIBRARIES X11_Xv_LIB)
                     MESSAGE(STATUS "X11 libraries Xv and Xext were found")
                     OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" ON)
                 ELSE(X11_Xv_FOUND AND X11_Xext_FOUND)
@@ -1303,10 +1239,6 @@ IF(UNIX)
     MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
 ENDIF(UNIX)
 
-# Exporting settings to applications that link against cisst
-CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES SVL_ADDITIONAL_INCLUDE_DIRECTORIES)
-CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES SVL_ADDITIONAL_LINK_DIRECTORIES)
-CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES SVL_ADDITIONAL_LIBRARIES)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER_FLAGS}")
 
 SET(SOURCE_FILES

@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -272,8 +272,8 @@ if (CISST_MTS_HAS_ICE)
 
   find_package (Ice REQUIRED)
 
-  CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_INCLUDE_DIRECTORIES ICE_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LINK_DIRECTORIES ICE_LIBRARY_DIR)
+  cisst_set_package_settings (cisstMultiTask ZeroCIce INCLUDE_DIRECTORIES ICE_INCLUDE_DIR)
+  cisst_set_package_settings (cisstMultiTask ZeroCIce LINK_DIRECTORIES ICE_LIBRARY_DIR)
 
   # create a list of include directories for slice
   foreach (ice_include_dir ${ICE_INCLUDE_DIR})
@@ -306,7 +306,10 @@ if (CISST_MTS_HAS_ICE)
 
   set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
 
+else (CISST_MTS_HAS_ICE)
+  cisst_unset_all_package_settings (cisstMultiTask ZeroCIce)
 endif (CISST_MTS_HAS_ICE)
+
 
 
 # Create the config file
@@ -341,21 +344,17 @@ cisst_add_library(
 # Add linking to external libraries
 if (CISST_MTS_HAS_ICE)
   if (WIN32)
-    set (ICE_LIBRARIES_OPTIMIZED Ice IceUtil)
-    set (ICE_LIBRARIES_DEBUG Iced IceUtild)
+    set (ICE_LIBRARIES_ALL optimized Ice  optimized IceUtil
+                           debug     Iced debug     IceUtild)
     target_link_libraries (cisstMultiTask
-                           optimized Ice
-                           debug Iced
-                           optimized IceUtil
-                           debug IceUtild)
-    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES_DEBUG ICE_LIBRARIES_DEBUG)
-    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES_OPTIMIZED ICE_LIBRARIES_OPTIMIZED)
+                           ${ICE_LIBRARIES_ALL})
+    cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES_ALL)
   else (WIN32)
     set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
     target_link_libraries (cisstMultiTask
                            ${ICE_LIBRARIES})
     link_directories(${ICE_LIBRARY_DIR})
-    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
+    cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES)
   endif (WIN32)
 
 endif (CISST_MTS_HAS_ICE)
@@ -391,7 +390,7 @@ endif (CISST_HAS_QT)
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstMultiTask
-                        INTERFACE_DIRECTORY ../../include/cisstMultiTask
-			CISST_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon)
+  cisst_add_swig_module (MODULE cisstMultiTask
+                         INTERFACE_DIRECTORY ../../include/cisstMultiTask
+			 CISST_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon)
 endif (CISST_HAS_SWIG_PYTHON)

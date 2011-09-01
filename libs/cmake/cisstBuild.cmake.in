@@ -6,7 +6,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2003-07-31
 #
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -17,15 +17,14 @@
 #
 # --- end cisst license ---
 
-
 # Paths
-set (CISST_SOURCE_DIR "@cisst_SOURCE_DIR@")
-set (CISST_BINARY_DIR "@cisst_BINARY_DIR@")
+set (CISST_SOURCE_DIR "@CISST_SOURCE_DIR@")
+set (CISST_BINARY_DIR "@CISST_BINARY_DIR@")
 set (CISST_INCLUDE_DIR "@CISST_BUILD_INCLUDE_DIRECTORIES@")
 set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
 set (CISST_LIBRARY_DIR "@CISST_BUILD_LINK_DIRECTORIES@")
-set (CISST_CMAKE_DIR "@cisst_SOURCE_DIR@/libs/cmake")
-set (CISST_SWIG_INCLUDE_DIR "@CISST_SWIG_INCLUDE_DIR@")
+set (CISST_CMAKE_DIR "${CISST_SOURCE_DIR}/libs/cmake")
+set (CISST_USE_FILE "${CISST_CMAKE_DIR}/Usecisst.cmake")
 
 # On Windows, CMake uses a different compiler at configuration time
 set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
@@ -36,53 +35,39 @@ set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
 
 # Which flags have been set and include path/libs
 set (CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@)
-set (CISSTNETLIB_INCLUDE_DIR "@CISSTNETLIB_INCLUDE_DIR@")
-set (CISSTNETLIB_LIBRARIES "@CISST_BUILD_CISSTNETLIB_LIBRARIES@")
-
 set (CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@)
-set (RTAI_INCLUDE_DIR "@RTAI_INCLUDE_DIR@")
-set (RTAI_LIBRARIES "@RTAI_LIBRARIES@")
-
 set (CISST_HAS_SWIG_PYTHON @CISST_HAS_SWIG_PYTHON@)
-set (PYTHON_INCLUDE_PATH "@PYTHON_INCLUDE_PATH@")
-set (PYTHON_LIBRARIES "@PYTHON_LIBRARIES@")
-set (PYTHON_DEBUG_LIBRARIES "@PYTHON_DEBUG_LIBRARIES@")
-
 set (CISST_HAS_XML @CISST_HAS_XML@)
-
 set (CISST_HAS_OPENGL @CISST_HAS_OPENGL@)
-
 set (CISST_HAS_QT @CISST_HAS_QT@)
 set (QT_USE_QTOPENGL @QT_USE_QTOPENGL@)
-
+set (QT_USE_QTXML @QT_USE_QTXML@)
+set (QT_USE_QTXMLPATTERNS @QT_USE_QTXMLPATTERNS@)
 set (CISST_HAS_FLTK @CISST_HAS_FLTK@)
-
-
-# Export all additional includes and libraries
-set (CISST_ADDITIONAL_INCLUDE_DIRECTORIES "@CISST_ADDITIONAL_INCLUDE_DIRECTORIES@")
-set (CISST_ADDITIONAL_LINK_DIRECTORIES "@CISST_ADDITIONAL_LINK_DIRECTORIES@")
-set (CISST_ADDITIONAL_LIBRARIES "@CISST_ADDITIONAL_LIBRARIES@")
-set (CISST_ADDITIONAL_LIBRARIES_DEBUG "@CISST_ADDITIONAL_LIBRARIES_DEBUG@")
-set (CISST_ADDITIONAL_LIBRARIES_OPTIMIZED "@CISST_ADDITIONAL_LIBRARIES_OPTIMIZED@")
-set (CISST_ADDITIONAL_PACKAGES "@CISST_ADDITIONAL_PACKAGES@")
-set (CISST_ADDITIONAL_CMAKE_FILES "@CISST_ADDITIONAL_CMAKE_FILES@")
-
-# Include settings per library
-foreach (lib ${CISST_LIBRARIES})
-  set (ADDITIONAL_BUILD_CMAKE ${CISST_BINARY_DIR}/${lib}Build.cmake)
-  if (EXISTS ${ADDITIONAL_BUILD_CMAKE})
-    include (${ADDITIONAL_BUILD_CMAKE})
-  endif (EXISTS ${ADDITIONAL_BUILD_CMAKE})
-endforeach (lib ${CISST_LIBRARIES})
-
-# Compound all include directories
-set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
-
-# Compound all link directories
-set (CISST_LIBRARY_DIR ${CISST_LIBRARY_DIR} ${CISST_ADDITIONAL_LINK_DIRECTORIES})
 
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 
-# Define cisst_USE_FILE
-set (CISST_USE_FILE "${CISST_CMAKE_DIR}/Usecisst.cmake")
+# Checks
+set (cisst_FOUND 1)
+# Check against componenents required
+if (cisst_FIND_COMPONENTS)
+  # First test that all libraries should have been compiled
+  foreach (required ${cisst_FIND_COMPONENTS})
+    if ("${CISST_LIBRARIES}" MATCHES ${required})
+      # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))
+      set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES_REQUIRED_INTERNAL} ${required})
+      list (REMOVE_DUPLICATES CISST_LIBRARIES_REQUIRED_INTERNAL)
+      set (${required}_FOUND 1)
+    else ("${CISST_LIBRARIES}" MATCHES ${required})
+      # inform user and set variables to not-found/false
+      message (SEND_ERROR "cisst library ${required} doesn't exist or hasn't been compiled.  Available libraries are: ${CISST_LIBRARIES}")
+      set (cisst_FOUND 0)
+      set (${required}_FOUND 0)
+    endif ("${CISST_LIBRARIES}" MATCHES ${required})
+  endforeach (required)
+
+else (cisst_FIND_COMPONENTS)
+  # otherwise, assumes user needs all available libraries
+  set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES})
+endif (cisst_FIND_COMPONENTS)

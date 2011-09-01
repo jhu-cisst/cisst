@@ -22,22 +22,21 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cdpPlayerParseStateTableData_h
 #define _cdpPlayerParseStateTableData_h
 
+#include <cisstOSAbstraction/osaCriticalSection.h>
+#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
-#include <cisstOSAbstraction.h>
 
-#include <cisstMultiTask.h>
-#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 // Always include last
 #include "cdpExport.h"
 
 class CISST_EXPORT cdpPlayerParseStateTableData: public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-public:  
+public:
     cdpPlayerParseStateTableData(const std::string & name="FileParser");
     ~cdpPlayerParseStateTableData();
 
@@ -62,7 +61,7 @@ public:
     // Compare TimeStampForSearch with TimeField which is set from user and load data & time to Data,Time respectively
     void GetBoundary(double TimeStampForSearch, double &TopBoundary, double &LowBoundary);
     void GetBoundary(vctPlot2DBase::Trace *  TraceHandle, double &TopBoundary, double &LowBoundary);
-    //void LoadDataFromFile(double TimeStampForSearch, std::vector <double> &Data, std::vector <double> &Time ); 
+    //void LoadDataFromFile(double TimeStampForSearch, std::vector <double> &Data, std::vector <double> &Time );
     //void LoadDataFromFile(vctPlot2DBase::Trace *  TraceHandle ,double TimeStampForSearch, bool ResetTraceBuffer);
     void LoadDataFromFile(vctPlot2DBase::Trace *  TraceHandle ,double TimeStampForSearch, double VisualRange=0.0,  bool ResetTraceBuffer=false);
     void TriggerLoadDataFromFile(vctPlot2DBase::Trace *  TraceHandle ,double TimeStampForSearch, double VisualRange=0.0,  bool ResetTraceBuffer=false);
@@ -76,7 +75,7 @@ public:
 private:
     typedef vctDynamicVector<double> TimeField;
     typedef vctDynamicVector<double> DataField;
-    
+
     std::string DataFieldForSearch;
     std::string TimeFieldForSearch;
     unsigned int IndexOfTimeField;
@@ -115,8 +114,7 @@ private:
     bool ResetBuffer;
     bool StartRun;
     double TimeBaseOffset;
-    osaCriticalSection CS; 
-
+    osaCriticalSection CS;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdpPlayerParseStateTableData);

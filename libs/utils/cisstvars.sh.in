@@ -21,10 +21,10 @@
 
 
 CISST_DIR="@cisst_BINARY_DIR@"
-BUILD_TESTS=@BUILD_TESTS@
-BUILD_EXAMPLES=@BUILD_EXAMPLES@
-BUILD_UTILITIES=@BUILD_UTILITIES@
-BUILD_COMPONENTS=@BUILD_COMPONENTS@
+CISST_BUILD_TESTS=@CISST_BUILD_TESTS@
+CISST_BUILD_EXAMPLES=@CISST_BUILD_EXAMPLES@
+CISST_BUILD_UTILITIES=@CISST_BUILD_UTILITIES@
+CISST_BUILD_COMPONENTS=@CISST_BUILD_COMPONENTS@
 
 OS=`uname`
 
@@ -57,7 +57,7 @@ fi
 
 
 # Add path to test code
-if [ "${BUILD_TESTS}" == "ON" ]
+if [ "${CISST_BUILD_TESTS}" == "ON" ]
 then
     PATH="${CISST_DIR}/tests/bin:${PATH}"
     LIBRARY_PATH="${CISST_DIR}/tests/lib:${LIBRARY_PATH}"
@@ -66,7 +66,7 @@ fi
 
 
 # Add path to example code
-if [ "${BUILD_EXAMPLES}" == "ON" ]
+if [ "${CISST_BUILD_EXAMPLES}" == "ON" ]
 then
     PATH="${CISST_DIR}/examples/bin:${PATH}"
     LIBRARY_PATH="${CISST_DIR}/examples/lib:${LIBRARY_PATH}"
@@ -75,7 +75,7 @@ fi
 
 
 # Add path to utility code
-if [ "${BUILD_UTILITIES}" == "ON" ]
+if [ "${CISST_BUILD_UTILITIES}" == "ON" ]
 then
     PATH="${CISST_DIR}/utilities/bin:${PATH}"
     LIBRARY_PATH="${CISST_DIR}/utilities/lib:${LIBRARY_PATH}"
@@ -83,7 +83,7 @@ then
 fi
 
 # Add path to components code
-if [ "${BUILD_COMPONENTS}" == "ON" ]
+if [ "${CISST_BUILD_COMPONENTS}" == "ON" ]
 then
     PATH="${CISST_DIR}/components/bin:${PATH}"
     LIBRARY_PATH="${CISST_DIR}/components/lib:${LIBRARY_PATH}"

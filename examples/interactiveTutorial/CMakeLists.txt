@@ -12,9 +12,9 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstInteractive)
+if (CISST_BUILD_LIBS_cisstInteractive)
   add_subdirectory (pythonEmbedded)
   add_subdirectory (pythonEmbeddedIRE)
-else (BUILD_LIBS_cisstInteractive)
-  message (WARNING " interactiveTutorial examples will not be compiled since they require BUILD_LIBS_cisstInteractive")
-endif (BUILD_LIBS_cisstInteractive)
+else (CISST_BUILD_LIBS_cisstInteractive)
+  message (WARNING " interactiveTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstInteractive")
+endif (CISST_BUILD_LIBS_cisstInteractive)

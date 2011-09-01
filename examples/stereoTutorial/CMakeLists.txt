@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstStereoVision)
+if (CISST_BUILD_LIBS_cisstStereoVision)
 
 add_subdirectory (simple)
 add_subdirectory (cameraviewer)
@@ -27,6 +27,6 @@ add_subdirectory (exposurecorrection)
 add_subdirectory (svlmts1)
 #ADD_SUBDIRECTORY(webgui)
 
-else (BUILD_LIBS_cisstStereoVision)
-  message (WARNING " stereoTutorial examples will not be compiled since they require BUILD_LIBS_cisstStereoVision")
-endif (BUILD_LIBS_cisstStereoVision)
+else (CISST_BUILD_LIBS_cisstStereoVision)
+  message (WARNING " stereoTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstStereoVision")
+endif (CISST_BUILD_LIBS_cisstStereoVision)

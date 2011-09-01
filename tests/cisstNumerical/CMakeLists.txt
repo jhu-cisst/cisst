@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical tests
 #
-# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,6 +14,8 @@
 #
 # --- end cisst license ---
 
+# paths for headers/libraries
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical)
 
 # all source files
 set (SOURCE_FILES
@@ -101,14 +103,14 @@ target_link_libraries (cisstNumericalTests cisstTestsMain)
 
 # If cisstOSAbstraction is compiled, compile multithreaded tests
 # and link differently
-if (BUILD_LIBS_cisstOSAbstraction)
+if (CISST_BUILD_LIBS_cisstOSAbstraction)
   add_definitions (-DBUILD_MULTITHREADED_TESTS)
   cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction)
   target_link_libraries (cisstNumericalTests
                          ${CMAKE_THREAD_LIBS_INIT})
-else (BUILD_LIBS_cisstOSAbstraction)
+else (CISST_BUILD_LIBS_cisstOSAbstraction)
   cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical)
-endif (BUILD_LIBS_cisstOSAbstraction)
+endif (CISST_BUILD_LIBS_cisstOSAbstraction)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstNumericalTests ITERATIONS 10 INSTANCES 2)

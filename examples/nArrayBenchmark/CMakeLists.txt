@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)
+if (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)
 
   # This project is designed to be built outside the Insight source tree.
   # Find ITK.
@@ -43,6 +43,6 @@ if (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)
   add_executable (optimizedEngines optimizedEngines.cpp)
   cisst_target_link_libraries (optimizedEngines cisstCommon cisstVector cisstOSAbstraction)
 
-else (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)
-  message (WARNING " nArrayBenchmark examples will not be compiled since they require BUILD_LIBS_cisstVector and BUILD_LIBS_cisstOSAbstraction")
-endif (BUILD_LIBS_cisstVector AND BUILD_LIBS_cisstOSAbstraction)
+else (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)
+  message (WARNING " nArrayBenchmark examples will not be compiled since they require CISST_BUILD_LIBS_cisstVector and CISST_BUILD_LIBS_cisstOSAbstraction")
+endif (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)

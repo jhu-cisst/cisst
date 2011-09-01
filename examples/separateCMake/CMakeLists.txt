@@ -10,6 +10,9 @@ if (cisst_FOUND)
   # Modify CMake configuration to use cisst
   include (${CISST_USE_FILE})
 
+  # Set include and link directories
+  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
+
   # Add a new library
   add_library (newLibrary newLibrary.h newLibrary.cpp)
 

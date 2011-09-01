@@ -131,8 +131,8 @@ if( OPENSCENEGRAPH_FOUND )
 	)
     endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
 
-    cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OPENSCENEGRAPH_LIBRARIES)
-    cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENSCENEGRAPH_INCLUDE_DIRS)
+    cisst_set_package_settings(cisstDevices OpenSceneGraph LIBRARIES           OPENSCENEGRAPH_LIBRARIES)
+    cisst_set_package_settings(cisstDevices OpenSceneGraph INCLUDE_DIRECTORIES OPENSCENEGRAPH_INCLUDE_DIRS)
     
     find_package( ODE )
     if( ODE_FOUND )
@@ -141,8 +141,8 @@ if( OPENSCENEGRAPH_FOUND )
       set( CMAKE_CXX_FLAGS 
 	"${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" 
 	PARENT_SCOPE )
-      cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARY )
-      cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
+      cisst_set_package_settings(cisstDevices ODE LIBRARIES           ODE_LIBRARY )
+      cisst_set_package_settings(cisstDevices ODE INCLUDE_DIRECTORIES ODE_INCLUDE_DIR)
       
       SET( HEADER_FILES 
 	
@@ -175,16 +175,22 @@ if( OPENSCENEGRAPH_FOUND )
 	
 	)
       
+    else( ODE_FOUND )
+      cisst_unset_all_package_settings(cisstDevices ODE)
     endif( ODE_FOUND )
     
     find_package( OpenCV2 )
     if( OpenCV2_FOUND )
       set( CISST_DEV_HAS_OPENCV22 ON PARENT_SCOPE )
       MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
-      cisst_add_to_internal(CISST_ADDITIONAL_LIBRARIES OpenCV2_LIBRARIES)
-      cisst_add_to_internal(CISST_ADDITIONAL_INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+      cisst_set_package_settings(cisstDevices OpenCV2 LIBRARIES           OpenCV2_LIBRARIES)
+      cisst_set_package_settings(cisstDevices OpenCV2 INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+    else( OpenCV2_FOUND )
+      cisst_unset_all_package_settings(cisstDevices OpenCV2)
     endif( OpenCV2_FOUND )
     
+  else( CISST_DEV_OPENSCENEGRAPH )
+    cisst_unset_all_package_settings(cisstDevices OpenSceneGraph)
   endif( CISST_DEV_OPENSCENEGRAPH )
     
 endif( OPENSCENEGRAPH_FOUND )
@@ -194,12 +200,16 @@ if( CISST_DEV_HAS_GLUT )
 
   include( FindOpenGL )
   if( OPENGL_FOUND )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES OPENGL_LIBRARIES )
+    cisst_set_package_settings(cisstDevices OpenGL LIBRARIES OPENGL_LIBRARIES )
+  else( OPENGL_FOUND )
+    cisst_unset_all_package_settings(cisstDevices OpenGL)
   endif( OPENGL_FOUND )
 
   include( FindGLUT )
   if( GLUT_FOUND )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES GLUT_LIBRARIES )
+    cisst_set_package_settings(cisstDevices GLUT LIBRARIES GLUT_LIBRARIES )
+  else( GLUT_FOUND )
+    cisst_unset_all_package_settings(cisstDevices GLUT)
   endif( GLUT_FOUND )
 
   SET( HEADER_FILES

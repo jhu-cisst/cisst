@@ -5,13 +5,13 @@
 #
 # (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # all source files
@@ -69,27 +69,13 @@ if (VTK_FOUND)
     if (VTK_USE_RENDERING)
         include (${VTK_USE_FILE})
 
-        set (UI3_ADDITIONAL_INCLUDE_DIRECTORIES
-             "${UI3_ADDITIONAL_INCLUDE_DIRECTORIES}"
-             "${VTK_INCLUDE_DIRS}"
-             )
-        set (UI3_ADDITIONAL_LINK_DIRECTORIES
-             "${UI3_ADDITIONAL_LINK_DIRECTORIES}"
-             "${VTK_LIBRARY_DIRS}"
-             )
-        set (UI3_ADDITIONAL_LIBRARIES
-             "${UI3_ADDITIONAL_LIBRARIES}"
-             vtkRendering
-             vtkHybrid
-             )
-        set (UI3_ADDITIONAL_PACKAGES
-             "${UI3_ADDITIONAL_PACKAGES}"
-             VTK
-             )
-        set (UI3_ADDITIONAL_CMAKE_FILES
-             "${UI3_ADDITIONAL_CMAKE_FILES}"
-             ${VTK_USE_FILE}
-             )
+        cisst_set_package_settings (cisst3DUserInterface VTK INCLUDE_DIRECTORIES VTK_INCLUDE_DIRS)
+        cisst_set_package_settings (cisst3DUserInterface VTK LINK_DIRECTORIES    VTK_LIBRARY_DIRS)
+        set (VTK_LIBRARY_USED vtkRendering vtkHybrid)
+        cisst_set_package_settings (cisst3DUserInterface VTK LIBRARIES           VTK_LIBRARY_USED)
+        set (VTK_PACKAGE_NAME VTK)
+        cisst_set_package_settings (cisst3DUserInterface VTK PACKAGES            VTK_PACKAGE_NAME)
+        cisst_set_package_settings (cisst3DUserInterface VTK CMAKE_FILES         VTK_USE_FILE)
         message (STATUS "VTK found - Switch to advanced view for details")
 
     else (VTK_USE_RENDERING)
@@ -98,15 +84,8 @@ if (VTK_FOUND)
 else (VTK_FOUND)
     mark_as_advanced (CLEAR VTK_DIR)
     message (FATAL_ERROR "${LIBRARY} requires VTK.")
+    cisst_unset_all_package_settings (cisst3DUserInterface VTK)
 endif (VTK_FOUND)
-
-
-# Exporting settings to applications that link against cisst
-cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES UI3_ADDITIONAL_INCLUDE_DIRECTORIES)
-cisst_add_to_internal (CISST_ADDITIONAL_LINK_DIRECTORIES UI3_ADDITIONAL_LINK_DIRECTORIES)
-cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES UI3_ADDITIONAL_LIBRARIES)
-cisst_add_to_internal (CISST_ADDITIONAL_PACKAGES UI3_ADDITIONAL_PACKAGES)
-cisst_add_to_internal (CISST_ADDITIONAL_CMAKE_FILES UI3_ADDITIONAL_CMAKE_FILES)
 
 
 cisst_add_library (LIBRARY cisst3DUserInterface

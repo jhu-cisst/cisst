@@ -11,7 +11,11 @@
 #
 # --- end cisst license ---
 
-include_directories(${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
+include_directories (${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 qt4_wrap_cpp (QT_WRAPPED_CPP
               cdpPlayerBase.h
@@ -47,29 +51,17 @@ add_library (cisstDataPlayerComponents
              cdpPlayerParseStateTableData.cpp
              )
 
-cisst_target_link_libraries (cisstDataPlayerComponents
-                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
-
-target_link_libraries (cisstDataPlayerComponents
-                       ${QT_LIBRARIES})
+cisst_target_link_libraries (cisstDataPlayerComponents ${CISST_LIBRARIES_NEEDED})
+target_link_libraries (cisstDataPlayerComponents ${QT_LIBRARIES})
 
 add_executable (cisstDataPlayer
                 main.cpp)
 
-target_link_libraries (cisstDataPlayer
-                       cisstDataPlayerComponents
-                       ${QT_LIBRARIES})
+target_link_libraries (cisstDataPlayer cisstDataPlayerComponents ${QT_LIBRARIES})
+cisst_target_link_libraries (cisstDataPlayer ${CISST_LIBRARIES_NEEDED})
 
-cisst_target_link_libraries (cisstDataPlayer
-                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
-
-
-add_executable (qtVideoPlayer
+add_executable (cisstQtVideoPlayer
                 qtVideoPlayer.cpp)
 
-target_link_libraries (qtVideoPlayer
-                       cisstDataPlayerComponents
-                       ${QT_LIBRARIES})
-
-cisst_target_link_libraries (qtVideoPlayer
-                             cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+target_link_libraries (cisstQtVideoPlayer cisstDataPlayerComponents ${QT_LIBRARIES})
+cisst_target_link_libraries (cisstQtVideoPlayer ${CISST_LIBRARIES_NEEDED})

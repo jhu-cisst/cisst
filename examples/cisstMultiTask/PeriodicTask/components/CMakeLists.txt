@@ -12,6 +12,10 @@
 #
 # --- end cisst license ---
 
+# List of cisst libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstMultiTask)
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 # create initialization code using the component generator, generated
 # files are available using
 # ${cisstMultiTaskPeriodicTaskComponents_CISST_CG_SRCS}
@@ -32,4 +36,4 @@ add_library (cisstMultiTaskPeriodicTaskComponents
              )
 
 # link with the cisst libraries
-cisst_target_link_libraries (cisstMultiTaskPeriodicTaskComponents cisstCommon cisstOSAbstraction cisstMultiTask)
+cisst_target_link_libraries (cisstMultiTaskPeriodicTaskComponents ${CISST_LIBRARIES_NEEDED})

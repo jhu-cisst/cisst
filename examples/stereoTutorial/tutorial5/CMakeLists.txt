@@ -11,13 +11,17 @@ IF(cisst_FOUND)
 
     INCLUDE(${CISST_USE_FILE})
 
+    SET(LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
+
+    CISST_SET_DIRECTORIES(${LIBRARIES_NEEDED})
+
     ADD_EXECUTABLE(${PROJECT_NAME}
                    CMyEventHandler2.h
                    CMyEventHandler2.cpp
                    main.cpp
                    )
 
-    CISST_TARGET_LINK_LIBRARIES(${PROJECT_NAME} cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
+    CISST_TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES_NEEDED})
 
     # Copy media files to the build directory
     CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/wall.bmp ${CMAKE_BINARY_DIR}/wall.bmp COPYONLY)

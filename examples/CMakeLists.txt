@@ -16,6 +16,7 @@
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
+
 # Lists all examples (one per subdirectory)
 set (CISST_EXAMPLES
      cisst3DUserInterface
@@ -29,19 +30,30 @@ set (CISST_EXAMPLES
      osAbstractionTutorial
      registrationTest
      stereoTutorial
-     vectorTutorial
     )
 
 # Which examples to build
 foreach (example ${CISST_EXAMPLES})
   # Build by default
-  option (BUILD_EXAMPLES_${example} "Build ${example}." ON)
-  mark_as_advanced (BUILD_EXAMPLES_${example})
+  option (CISST_BUILD_EXAMPLES_${example} "Build ${example}." ON)
+  mark_as_advanced (CISST_BUILD_EXAMPLES_${example})
 endforeach (example)
 
 # Create targets for each example
 foreach (example ${CISST_EXAMPLES})
-  if (BUILD_EXAMPLES_${example})
+  if (CISST_BUILD_EXAMPLES_${example})
     add_subdirectory (${example})
-  endif (BUILD_EXAMPLES_${example})
+  endif (CISST_BUILD_EXAMPLES_${example})
 endforeach (example)
+
+
+# cisstVector tutorial requires cisstVector, cisstNumerical and cisstNetlib
+if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+  option (CISST_BUILD_EXAMPLES_cisstVector "Build examples for cisstVector." ON)
+  mark_as_advanced (CISST_BUILD_EXAMPLES_cisstVector)
+  if (CISST_BUILD_EXAMPLES_cisstVector)
+    add_subdirectory (vectorTutorial)
+  endif (CISST_BUILD_EXAMPLES_cisstVector)
+else (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+  message (WARNING " cisstVector examples will not be compiled since they require CISST_BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
+endif (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)

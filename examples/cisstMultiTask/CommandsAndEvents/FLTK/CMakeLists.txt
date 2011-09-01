@@ -12,6 +12,15 @@
 #
 # --- end cisst license ---
 
+# List cisst libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon
+                            cisstVector
+                            cisstOSAbstraction
+                            cisstMultiTask)
+
+# Set include/link directories
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 # add include paths
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -29,8 +38,7 @@ add_executable (cisstMultiTaskCommandsAndEventsFLTKLocal
                 )
 
 # link with the cisst libraries
-cisst_target_link_libraries(cisstMultiTaskCommandsAndEventsFLTKLocal
-                            cisstCommon cisstOSAbstraction cisstMultiTask)
+cisst_target_link_libraries(cisstMultiTaskCommandsAndEventsFLTKLocal ${CISST_LIBRARIES_NEEDED})
 
 
 # compile network version if ICE is available
@@ -47,9 +55,7 @@ if (CISST_MTS_HAS_ICE)
                   ${cisstMultiTaskCommandsAndEventsFLTKServer_FLTK_UI_SRCS}
                   )
   # link with the cisst libraries
-  cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsFLTKServer
-                               cisstCommon cisstOSAbstraction cisstMultiTask)
-
+  cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsFLTKServer ${CISST_LIBRARIES_NEEDED})
 
   # CMake command, generate .cxx and .h from .fl files
   fltk_wrap_ui (cisstMultiTaskCommandsAndEventsFLTKClient clientUI.fl)
@@ -62,8 +68,7 @@ if (CISST_MTS_HAS_ICE)
                   ${cisstMultiTaskCommandsAndEventsFLTKClient_FLTK_UI_SRCS}
                   )
   # link with the cisst libraries
-  cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsFLTKClient
-                               cisstCommon cisstOSAbstraction cisstMultiTask)
+  cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsFLTKClient ${CISST_LIBRARIES_NEEDED})
 
 else (CISST_MTS_HAS_ICE)
   message (WARNING " cisstMultiTask example CommandsAndEventsFLTK will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")

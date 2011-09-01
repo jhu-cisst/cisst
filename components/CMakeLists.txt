@@ -43,12 +43,12 @@ if (CISST_BUILD_COMP_cisstOpenNI)
 endif (CISST_BUILD_COMP_cisstOpenNI)
 
 # cisstSphinx4
-if (BUILD_LIBS_cisstMultiTask)
+if (CISST_BUILD_LIBS_cisstMultiTask)
   option (CISST_BUILD_COMP_cisstSphinx4 "Wrappers for CMU Sphinx 4 to generate commands from speech, requires JNI and CMU Sphinx 4" OFF)
   if (CISST_BUILD_COMP_cisstSphinx4)
     add_subdirectory (cisstSphinx4)
   endif (CISST_BUILD_COMP_cisstSphinx4)
-endif (BUILD_LIBS_cisstMultiTask)
+endif (CISST_BUILD_LIBS_cisstMultiTask)
 
 # cisstStealthlink
 option (CISST_BUILD_COMP_cisstStealthlink "Wrappers for Medtronic StealthLink, requires binaries from Medtronic" OFF)

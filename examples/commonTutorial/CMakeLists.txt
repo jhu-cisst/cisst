@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstCommon)
+if (CISST_BUILD_LIBS_cisstCommon)
   add_subdirectory (getChar)
   add_subdirectory (portability)
   add_subdirectory (serialization)
@@ -24,6 +24,6 @@ if (BUILD_LIBS_cisstCommon)
     message (WARNING " commonTutorial example LoggerQt will not be compiled since it requires CISST_HAS_QT")
   endif (CISST_HAS_QT)
 
-else (BUILD_LIBS_cisstCommon)
-  message (WARNING " commonTutorial examples will not be compiled since they require BUILD_LIBS_cisstCommon")
-endif (BUILD_LIBS_cisstCommon)
+else (CISST_BUILD_LIBS_cisstCommon)
+  message (WARNING " commonTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstCommon")
+endif (CISST_BUILD_LIBS_cisstCommon)

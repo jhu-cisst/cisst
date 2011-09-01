@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstOSAbstraction tests
 #
-# (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,6 +14,8 @@
 #
 # --- end cisst license ---
 
+# paths for headers/libraries
+cisst_set_directories (cisstCommon cisstOSAbstraction)
 
 # all source files
 set (SOURCE_FILES

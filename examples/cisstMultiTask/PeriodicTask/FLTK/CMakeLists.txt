@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -11,6 +11,16 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
+
+# List cisst libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon
+                            cisstVector
+                            cisstVectorFLTK
+                            cisstOSAbstraction
+                            cisstMultiTask)
+
+# Set include/link directories
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 # CMake command, generate .cxx and .h from .fl files
 fltk_wrap_ui (cisstMultiTaskPeriodicTaskFLTK displayUI.fl)
@@ -27,9 +37,4 @@ add_executable (cisstMultiTaskPeriodicTaskFLTK
 target_link_libraries (cisstMultiTaskPeriodicTaskFLTK cisstMultiTaskPeriodicTaskComponents)
 
 # link with the cisst libraries
-cisst_target_link_libraries (cisstMultiTaskPeriodicTaskFLTK
-                             cisstCommon
-                             cisstVector
-                             cisstVectorFLTK
-                             cisstOSAbstraction
-                             cisstMultiTask)
+cisst_target_link_libraries (cisstMultiTaskPeriodicTaskFLTK ${CISST_LIBRARIES_NEEDED})
