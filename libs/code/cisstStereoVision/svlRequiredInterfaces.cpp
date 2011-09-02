@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlRequiredInterfaces.h>
 
 
+#if 0  // Following now in mtsClassServices.cpp
 /*********************************/
 /*** SVL-MTS type declarations ***/
 /*********************************/
@@ -34,6 +35,7 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble2)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble3)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble3x3)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlInt2)
+#endif
 
 
 /*******************************/

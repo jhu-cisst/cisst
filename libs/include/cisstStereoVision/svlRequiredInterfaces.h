@@ -41,6 +41,7 @@ class mtsComponent;
 /*** SVL-MTS type declarations ***/
 /*********************************/
 
+#if 0   // Now defined in mtsGenericObjectProxy.h
 typedef mtsGenericObjectProxy<float> svlFloat;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFloat);
 typedef mtsGenericObjectProxy<vct2> svlDouble2;
@@ -51,7 +52,7 @@ typedef mtsGenericObjectProxy<vct3x3> svlDouble3x3;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlDouble3x3);
 typedef mtsGenericObjectProxy<vctInt2> svlInt2;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlInt2);
-
+#endif
 
 /*******************************/
 /*** IReqStreamManager class ***/
