@@ -44,7 +44,22 @@ macro (cisst_setup_swig_python)
      set(SWIG_EXECUTABLE ${CISST_SWIG_EXECUTABLE})
      find_package(SWIG REQUIRED)
      include(${SWIG_USE_FILE})
+   else (CISST_HAS_SWIG_PYTHON)
+     message(SEND_ERROR "cisst_setup_swig_python requires CISST_HAS_SWIG_PYTHON")
    endif (CISST_HAS_SWIG_PYTHON)
 endmacro (cisst_setup_swig_python)
+
+# This macro should be called from external projects that want to
+# use the same version of FLTK that cisst was compiled with.
+# This assumes that FindFLTK.cmake will work properly if just
+# FLTK_INCLUDE_DIR is set (this is the case for CMake 2.6 and 2.8)
+macro (cisst_setup_fltk)
+   if (CISST_HAS_FLTK)
+     set(FLTK_INCLUDE_DIR ${CISST_FLTK_DIR})
+     find_package(FLTK REQUIRED)
+   else (CISST_HAS_FLTK)
+     message(SEND_ERROR "cisst_setup_fltk requires CISST_HAS_FLTK")
+   endif (CISST_HAS_FLTK)
+endmacro (cisst_setup_fltk)
 
 
