@@ -37,6 +37,10 @@ function (CISST_ADD_TO_INTERNAL list newElements)
   message (SEND_ERROR "cisst_add_to_internal is now deprecated, use cisst_set_package_settings instead")
 endfunction (CISST_ADD_TO_INTERNAL)
 
+# Where to find cisst defined CMake Macros/Modules
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisst_SOURCE_DIR}/libs/cmake)
+
+include (cisstMacros)
 
 # List all keywords allowed for cisst additional settings
 set (CISST_PACKAGE_KEYWORDS INCLUDE_DIRECTORIES LIBRARIES LINK_DIRECTORIES PACKAGES CMAKE_FILES)
@@ -54,15 +58,16 @@ function (cisst_set_package_settings whoRequires package variable value)
   endif (NOT ${VARIABLE_IS_A_KEYWORD} GREATER -1)
   # make sure a value has been provided
   if (${value})
+
+    cisst_load_package_setting (${whoRequires})
     # Add to list of all external dependencies
     set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} ${package})
     list (REMOVE_DUPLICATES CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
-    set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} CACHE INTERNAL "cisst internal variable")
     # Full variable name
     set (FULL_VARIABLE_NAME CISST_${variable}_FOR_${whoRequires}_USING_${package})
     # Keep previous value to compare if there is anything new
     set (OLD_VALUE ${${FULL_VARIABLE_NAME}})
-    set (${FULL_VARIABLE_NAME} "${${value}}" CACHE INTERNAL "cisst internal variable")
+    set (${FULL_VARIABLE_NAME} "${${value}}")
     # Save to file if needed
     if (NOT "${OLD_VALUE}" STREQUAL "${${FULL_VARIABLE_NAME}}")
       set (FILENAME "${cisst_BINARY_DIR}/cisst-dependencies/${whoRequires}${package}.cmake")
@@ -72,8 +77,7 @@ function (cisst_set_package_settings whoRequires package variable value)
       foreach (keyword ${CISST_PACKAGE_KEYWORDS})
         set (FULL_VARIABLE_NAME CISST_${keyword}_FOR_${whoRequires}_USING_${package})
         if (${FULL_VARIABLE_NAME})
-	  file (APPEND ${FILENAME} "set (${FULL_VARIABLE_NAME} \"${${FULL_VARIABLE_NAME}}\" CACHE STRING \"cisst internal variable\")\n")
-          file (APPEND ${FILENAME} "mark_as_advanced (${FULL_VARIABLE_NAME})\n\n")
+          file (APPEND ${FILENAME} "set (${FULL_VARIABLE_NAME} \"${${FULL_VARIABLE_NAME}}\")\n")
         endif (${FULL_VARIABLE_NAME})
       endforeach (keyword ${CISST_PACKAGE_KEYWORDS})
     endif (NOT "${OLD_VALUE}" STREQUAL "${${FULL_VARIABLE_NAME}}")
@@ -81,8 +85,7 @@ function (cisst_set_package_settings whoRequires package variable value)
     set (FILENAME "${cisst_BINARY_DIR}/cisst-dependencies/${whoRequires}External.cmake")
     file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
     file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
-    file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\" CACHE STRING \"cisst internal variable\")\n")
-    file (APPEND ${FILENAME} "mark_as_advanced (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})\n")
+    file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
   else (${value})
     message (SEND_ERROR "cisst_set_package_settings: value for variable ${variable} provided for package ${package} used by library ${whoRequires} is not properly defined")
   endif (${value})
@@ -90,17 +93,17 @@ endfunction (cisst_set_package_settings)
 
 
 function (cisst_unset_all_package_settings whoRequires package)
+  cisst_load_package_setting (${whoRequires})
   if (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
+    set (PACKAGE_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${whoRequires}${package}.cmake")
+    file (REMOVE ${PACKAGE_FILE})
     list (REMOVE_ITEM CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${package})
-    set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} ${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}} CACHE INTERNAL "cisst internal variable")
-    set (FILENAME "${cisst_BINARY_DIR}/${whoRequires}External.cmake")
+    set (FILENAME "${cisst_BINARY_DIR}/cisst-dependencies/${whoRequires}External.cmake")
+    file (REMOVE ${FILENAME})
     if (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
-      file (REMOVE ${FILENAME})
       file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
       file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
       file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
-    else (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
-      file (REMOVE ${FILENAME})
     endif (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
   endif (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires})
 endfunction (cisst_unset_all_package_settings)
@@ -113,9 +116,6 @@ set (EXECUTABLE_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/bin)
 # Where to find afterwards
 set (cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
 set (cisst_EXECUTABLE_PATH "${EXECUTABLE_OUTPUT_PATH}")
-
-# Where to find cisst defined CMake Macros/Modules
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisst_SOURCE_DIR}/libs/cmake)
 
 # On Windows, CMake uses a different compiler at configuration time
 if (CMAKE_CL_64)
@@ -161,6 +161,8 @@ if (CISST_HAS_SWIG_PYTHON)
     else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
         include (${SWIG_USE_FILE})
     endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+    # Note that SWIG_EXECUTABLE is saved in cisst-config.cmake (cisstBuild.cmake.in) for use
+    # by external projects (see Usecisst.cmake).
 
     # Force to use exceptions
     set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
@@ -170,7 +172,7 @@ if (CISST_HAS_SWIG_PYTHON)
     find_package (PythonLibs REQUIRED)
     # Some older CMake don't define the debug library
     if (NOT PYTHON_DEBUG_LIBRARIES)
-	set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
+        set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
     endif (NOT PYTHON_DEBUG_LIBRARIES)
     find_package (PythonInterp REQUIRED)
     include_directories (${PYTHON_INCLUDE_PATH})
@@ -178,14 +180,14 @@ if (CISST_HAS_SWIG_PYTHON)
     cisst_set_package_settings (cisstCommon Python LIBRARIES PYTHON_LIBRARIES)
     # We also need numpy if we have cisstVector
     if (CISST_BUILD_LIBS_cisstVector)
-	find_package (Numpy REQUIRED)
-	if (PYTHON_NUMPY_FOUND)
-	    include_directories (${PYTHON_NUMPY_INCLUDE_DIR})
+        find_package (Numpy REQUIRED)
+        if (PYTHON_NUMPY_FOUND)
+            include_directories (${PYTHON_NUMPY_INCLUDE_DIR})
 	    cisst_set_package_settings (cisstVector NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
-	    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
-	else (PYTHON_NUMPY_FOUND)
+            mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
+        else (PYTHON_NUMPY_FOUND)
             cisst_unset_all_package_settings (cisstVector NumPy)
-	endif (PYTHON_NUMPY_FOUND)
+        endif (PYTHON_NUMPY_FOUND)
     endif (CISST_BUILD_LIBS_cisstVector)
 else (CISST_HAS_SWIG_PYTHON)
     cisst_unset_all_package_settings (cisstCommon Python)
@@ -304,7 +306,7 @@ if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
 endif (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
 
-# Check on Linus only
+# Check on Linux only
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
   # Check for RTAI
@@ -328,8 +330,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # add libnative libxenomai librtdm libpthread_rt
     set (CISST_XENOMAI_LIBRARIES ${XENOMAI_LIBRARY_NATIVE}
                                  ${XENOMAI_LIBRARY_PTHREAD_RT}
-				 ${XENOMAI_LIBRARY_RTDM}
-				 ${XENOMAI_LIBRARY_XENOMAI})
+                                 ${XENOMAI_LIBRARY_RTDM}
+                                 ${XENOMAI_LIBRARY_XENOMAI})
     cisst_set_package_settings (cisstCommon Xenomai LIBRARIES CISST_XENOMAI_LIBRARIES)
     # add -D_GNU_SOURCE -D_REENTRANT -D__XENO__ -pipe
     add_definitions ("${XENOMAI_DEFINITIONS}")
@@ -494,20 +496,20 @@ foreach (lib ${CISST_LIBS})
     if (CISST_HAS_QT)
       list (FIND CISST_LIBS_WITH_QT ${lib} ${lib}_HAS_QT)
       if (${${lib}_HAS_QT} GREATER -1)
-	set (CISST_LIBRARIES ${lib}Qt ${CISST_LIBRARIES})
-	set (CISST_BUILD_LIBS_${lib}Qt ON)
+        set (CISST_LIBRARIES ${lib}Qt ${CISST_LIBRARIES})
+        set (CISST_BUILD_LIBS_${lib}Qt ON)
       else (${${lib}_HAS_QT} GREATER -1)
-	set (CISST_BUILD_LIBS_${lib}Qt OFF)
+        set (CISST_BUILD_LIBS_${lib}Qt OFF)
       endif (${${lib}_HAS_QT} GREATER -1)
     endif (CISST_HAS_QT)
     # Add libraries with FLTK
     if (CISST_HAS_FLTK)
       list (FIND CISST_LIBS_WITH_FLTK ${lib} ${lib}_HAS_FLTK)
       if (${${lib}_HAS_FLTK} GREATER -1)
-	set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
-	set (CISST_BUILD_LIBS_${lib}FLTK ON)
+        set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
+        set (CISST_BUILD_LIBS_${lib}FLTK ON)
       else (${${lib}_HAS_FLTK} GREATER -1)
-	set (CISST_BUILD_LIBS_${lib}FLTK OFF)
+        set (CISST_BUILD_LIBS_${lib}FLTK OFF)
       endif (${${lib}_HAS_FLTK} GREATER -1)
     endif (CISST_HAS_FLTK)
   endif (CISST_BUILD_LIBS_${lib})
@@ -522,7 +524,7 @@ else (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
 endif (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
 
 # Once all variables have been defined, use cisstMacros
-include (cisstMacros)
+#include (cisstMacros)
 
 # Finally, create lib targets
 add_subdirectory (libs)

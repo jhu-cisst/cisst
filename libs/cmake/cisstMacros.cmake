@@ -25,9 +25,9 @@ function (cisst_cmake_debug ...)
 endfunction (cisst_cmake_debug)
 
 
-# function to load settings set for external packages
+# macro to load settings set for external packages
 # usage: cisst_load_package_setting (cisstCommon cisstVector) or cisst_load_package_setting (${CISST_LIBRARIES})
-function (cisst_load_package_setting ...)
+macro (cisst_load_package_setting ...)
   # Set all variables based on dependencies
   foreach (lib ${ARGV})
     # External dependency file
@@ -40,16 +40,16 @@ function (cisst_load_package_setting ...)
         if (EXISTS ${PACKAGE_FILE})
           include (${PACKAGE_FILE})
         else (EXISTS ${PACKAGE_FILE})
-          message (SEND_ERROR "Based on ${EXTERNAL_DEPENDENCIES_FILE}, there should be a file named ${PACKAGE_FILE}, you might need to start from an empty build tree")
+          message (SEND_ERROR "Based on ${EXTERNAL_PACKAGES}, there should be a file named ${PACKAGE_FILE}, you might need to start from an empty build tree")
         endif (EXISTS ${PACKAGE_FILE})
       endforeach (package)
     endif (EXISTS ${SETTINGS_FILE})
   endforeach (lib)
-endfunction (cisst_load_package_setting)
+endmacro (cisst_load_package_setting)
 
 
-# function to set the include directory based on external settings
-function (cisst_include_directories ...)
+# macro to set the include directory based on external settings
+macro (cisst_include_directories ...)
   foreach (lib ${ARGV})
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
@@ -61,11 +61,11 @@ function (cisst_include_directories ...)
       endforeach (package)
     endif (${PACKAGES})
   endforeach (lib)
-endfunction (cisst_include_directories)
+endmacro (cisst_include_directories)
 
 
-# function to set the link directories based on external settings
-function (cisst_link_directories ...)
+# macro to set the link directories based on external settings
+macro (cisst_link_directories ...)
   foreach (lib ${ARGV})
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
@@ -77,11 +77,11 @@ function (cisst_link_directories ...)
       endforeach (package)
     endif (${PACKAGES})
   endforeach (lib)
-endfunction (cisst_link_directories)
+endmacro (cisst_link_directories)
 
 
-# function to find packages based on external settings
-function (cisst_find_and_use_packages ...)
+# macro to find packages based on external settings
+macro (cisst_find_and_use_packages ...)
   foreach (lib ${ARGV})
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
@@ -91,7 +91,7 @@ function (cisst_find_and_use_packages ...)
         if (${VARIABLE_NAME})
           find_package (${${VARIABLE_NAME}} REQUIRED)
         endif (${VARIABLE_NAME})
-	# use package
+        # use package
         set (VARIABLE_NAME CISST_CMAKE_FILES_FOR_${lib}_USING_${package})
         if (${VARIABLE_NAME})
           include (${${VARIABLE_NAME}} REQUIRED)
@@ -99,18 +99,20 @@ function (cisst_find_and_use_packages ...)
       endforeach (package)
     endif (${PACKAGES})
   endforeach (lib)
-endfunction (cisst_find_and_use_packages)
+endmacro (cisst_find_and_use_packages)
 
 
-# helper function to set all directories
-function (cisst_set_directories ...)
+# helper macro to set all directories
+# Use macro instead of function due to scope issues
+macro (cisst_set_directories ...)
+  cisst_load_package_setting (${ARGV})
   cisst_include_directories (${ARGV})
   cisst_link_directories (${ARGV})
   cisst_find_and_use_packages (${ARGV})
-endfunction (cisst_set_directories)
+endmacro (cisst_set_directories)
 
 
-# The function adds a library to a CISST-related project by processing the
+# The macro adds a library to a CISST-related project by processing the
 # following parameters
 #
 # - PROJECT (cisstLibs by default)
@@ -122,14 +124,14 @@ endfunction (cisst_set_directories)
 # - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)
 # - ADDITIONAL_HEADER_FILES is a list of header files with a full path (e.g. configured/generated header)
 #
-# The function performs the following:
+# The macro performs the following:
 # -- create the source and header lists of files with the right path
 # -- check the dependencies
 # -- add the link options based on the dependencies
 # -- add the library
 # -- create the install targets for the headers as well as the library
 
-function (cisst_add_library ...)
+macro (cisst_add_library ...)
   # debug
   cisst_cmake_debug ("cisst_add_library called with: ${ARGV}")
 
@@ -223,9 +225,6 @@ function (cisst_add_library ...)
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
     cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
-    # Keep a trace of dependencies for main CMake level
-    set (${LIBRARY}_DEPENDENCIES "${DEPENDENCIES}" CACHE STRING "Required libraries for ${LIBRARY}" FORCE)
-    mark_as_advanced (${LIBRARY}_DEPENDENCIES)
   endif (DEPENDENCIES)
 
   # Link to cisst additional libraries
@@ -239,10 +238,11 @@ function (cisst_add_library ...)
                  ".h"
                  ${LIBRARY_MAIN_HEADER})
 
-endfunction (cisst_add_library)
+endmacro (cisst_add_library)
 
 
-function (cisst_target_link_package_libraries target ...)
+macro (cisst_target_link_package_libraries target ...)
+  cisst_load_package_setting(${ARGV})
   foreach (lib ${ARGV})
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
@@ -255,13 +255,13 @@ function (cisst_target_link_package_libraries target ...)
       endforeach (package)
     endif (${PACKAGES})
   endforeach (lib)
-endfunction (cisst_target_link_package_libraries)
+endmacro (cisst_target_link_package_libraries)
 
 
-# Function used to compare required libraries for a given target with
+# Macro used to compare required libraries for a given target with
 # libraries actually compiled.  This macro adds the required link
 # options.
-function (cisst_target_link_libraries TARGET ...)
+macro (cisst_target_link_libraries TARGET ...)
   # debug
   cisst_cmake_debug ("cisst_target_link_libraries called with: ${ARGV}")
   if (${ARGC} LESS 2)
@@ -296,22 +296,19 @@ function (cisst_target_link_libraries TARGET ...)
   target_link_libraries (${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
   cisst_target_link_package_libraries (${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
 
-endfunction (cisst_target_link_libraries)
+endmacro (cisst_target_link_libraries)
 
 
-
-
-
-# The function adds a SWIG module to a CISST-related project by processing the
+# The macro adds a SWIG module to a CISST-related project by processing the
 # following parameters
 #
 # - MODULE is the prefix of the main .i file.  The module name will be <MODULE>Python
 # - INTERFACE_DIRECTORY is the directory containing the .i file (use relative path from current source dir)
 # - CISST_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
 #
-function (cisst_add_swig_module ...)
+macro (cisst_add_swig_module ...)
   # debug
-  cisst_cmake_debug ("cisst_add_library called with: ${ARGV}")
+  cisst_cmake_debug ("cisst_add_swig_module called with: ${ARGV}")
 
   # set all keywords and their values to ""
   set (FUNCTION_KEYWORDS
@@ -337,7 +334,7 @@ function (cisst_add_swig_module ...)
 
   # debug
   foreach (keyword ${FUNCTION_KEYWORDS})
-    cisst_cmake_debug ("cisst_add_library: ${keyword}: ${${keyword}}")
+    cisst_cmake_debug ("cisst_add_swig_module: ${keyword}: ${${keyword}}")
   endforeach (keyword)
 
   # interface file
@@ -386,7 +383,7 @@ function (cisst_add_swig_module ...)
     message ("Can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
-endfunction (cisst_add_swig_module)
+endmacro (cisst_add_swig_module)
 
 
 # Function to use cisstComponentGenerator, this function assumes input
@@ -585,9 +582,6 @@ IF(CISST_BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
     VARIABLE_REQUIRES(CISST_BUILD_LIBS_${LIBRARY} CISST_BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
     # Set the link flags
     TARGET_LINK_LIBRARIES(${LIBRARY} ${DEPENDENCIES})
-    # Keep a trace of dependencies for main CMake level
-    SET(${LIBRARY}_DEPENDENCIES "${DEPENDENCIES}" CACHE STRING "Required libraries for ${LIBRARY}" FORCE)
-    MARK_AS_ADVANCED(${LIBRARY}_DEPENDENCIES)
   ENDIF(DEPENDENCIES)
 
   # Install all header files

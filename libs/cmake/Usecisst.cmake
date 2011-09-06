@@ -28,9 +28,19 @@ if (NOT CURRENT_PROJECT_IS_CISST)
   link_directories (${CISST_LIBRARY_DIR})
 
   # Load all settings for external dependencies
-  cisst_load_package_setting (${CISST_LIBRARIES})
+  cisst_load_package_setting (${CISST_LIBRARIES_REQUIRED_INTERNAL})
 
 endif (NOT CURRENT_PROJECT_IS_CISST)
 
 # Add link and include directories based on required libraries
 cisst_set_directories (${CISST_LIBRARIES_REQUIRED_INTERNAL})
+
+macro (cisst_setup_swig_python)
+   if (CISST_HAS_SWIG_PYTHON)
+     set(SWIG_EXECUTABLE ${CISST_SWIG_EXECUTABLE})
+     find_package(SWIG REQUIRED)
+     include(${SWIG_USE_FILE})
+   endif (CISST_HAS_SWIG_PYTHON)
+endmacro (cisst_setup_swig_python)
+
+
