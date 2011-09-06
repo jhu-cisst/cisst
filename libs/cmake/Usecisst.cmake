@@ -35,6 +35,10 @@ endif (NOT CURRENT_PROJECT_IS_CISST)
 # Add link and include directories based on required libraries
 cisst_set_directories (${CISST_LIBRARIES_REQUIRED_INTERNAL})
 
+# This macro should be called from external projects that need to
+# use SWIG to wrap for Python. It relies on CISST_SWIG_EXECUTABLE
+# to be defined in cisst-config.cmake.
+# Then, call the cisst_add_swig_module function for each Python module.
 macro (cisst_setup_swig_python)
    if (CISST_HAS_SWIG_PYTHON)
      set(SWIG_EXECUTABLE ${CISST_SWIG_EXECUTABLE})

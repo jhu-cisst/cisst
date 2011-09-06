@@ -299,20 +299,25 @@ macro (cisst_target_link_libraries TARGET ...)
 endmacro (cisst_target_link_libraries)
 
 
-# The macro adds a SWIG module to a CISST-related project by processing the
+# The function adds a SWIG module to a CISST-related project by processing the
 # following parameters
 #
 # - MODULE is the prefix of the main .i file.  The module name will be <MODULE>Python
+# - INTERFACE_FILENAME is the filename of the .i file (if not specified, defaults to <MODULE>.i)
 # - INTERFACE_DIRECTORY is the directory containing the .i file (use relative path from current source dir)
 # - CISST_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
 #
-macro (cisst_add_swig_module ...)
+# NOTE: This must be a function, not a macro, because if it is a macro the keyword CISST_LIBRARIES
+#       interferes with the CISST_LIBRARIES variable defined in the main CMakeLists.txt.
+#       It would be better to rename one of these.
+function (cisst_add_swig_module ...)
   # debug
   cisst_cmake_debug ("cisst_add_swig_module called with: ${ARGV}")
 
   # set all keywords and their values to ""
   set (FUNCTION_KEYWORDS
        MODULE
+       INTERFACE_FILENAME
        INTERFACE_DIRECTORY
        CISST_LIBRARIES)
 
@@ -320,7 +325,7 @@ macro (cisst_add_swig_module ...)
   foreach(keyword ${FUNCTION_KEYWORDS})
     set (${keyword} "")
   endforeach(keyword)
-
+  
   # parse input
   foreach (arg ${ARGV})
     list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
@@ -332,13 +337,18 @@ macro (cisst_add_swig_module ...)
     endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
   endforeach (arg)
 
+  # set default interface file name
+  if (NOT INTERFACE_FILENAME)
+    set (INTERFACE_FILENAME "${MODULE}.i")
+  endif (NOT INTERFACE_FILENAME)
+
   # debug
   foreach (keyword ${FUNCTION_KEYWORDS})
     cisst_cmake_debug ("cisst_add_swig_module: ${keyword}: ${${keyword}}")
   endforeach (keyword)
 
   # interface file
-  set (SWIG_INTERFACE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE_DIRECTORY}/${MODULE}.i)
+  set (SWIG_INTERFACE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE_DIRECTORY}/${INTERFACE_FILENAME})
   cisst_cmake_debug ("cisst_add_swig_module: looking for interface file ${SWIG_INTERFACE_FILE}")
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
@@ -355,9 +365,10 @@ macro (cisst_add_swig_module ...)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
+    cisst_load_package_setting ("cisstPython")
+    cisst_include_directories ("cisstPython")
     swig_link_libraries (${MODULE_NAME} ${CISST_LIBRARIES}
-                         debug ${PYTHON_DEBUG_LIBRARIES}
-                         optimized ${PYTHON_LIBRARIES})
+                         ${CISST_LIBRARIES_FOR_cisstPython_USING_Python})
 
     # copy the .py file generated to wherever the libraries are
     add_custom_command (TARGET _${MODULE_NAME}
@@ -383,7 +394,7 @@ macro (cisst_add_swig_module ...)
     message ("Can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
-endmacro (cisst_add_swig_module)
+endfunction (cisst_add_swig_module)
 
 
 # Function to use cisstComponentGenerator, this function assumes input

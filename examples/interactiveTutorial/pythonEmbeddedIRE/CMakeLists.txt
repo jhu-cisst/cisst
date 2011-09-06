@@ -40,52 +40,11 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 # To link with build libraries
 link_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-
-# Run swig for each interface file
-set (MODULES SineGenerator)
-
-foreach (module ${MODULES})
-  set (interface ${CMAKE_CURRENT_SOURCE_DIR}/${module}Python.i)
-  # We are using C++ code
-  set_source_files_properties (${interface} PROPERTIES CPLUSPLUS ON)
-  # Set the verbose flag
-  set_source_files_properties (${interface}
-                               PROPERTIES SWIG_FLAGS "-v;-modern;-fcompact;-fvirtual")
-  swig_add_module (${module}Python python ${interface})
-  swig_link_libraries (${module}Python ${module}
-                       debug ${PYTHON_DEBUG_LIBRARIES}
-                       optimized ${PYTHON_LIBRARIES})
-  # uses .pyd instead of dll on Windows
-  if (WIN32)
-    set_target_properties (_${module}Python PROPERTIES SUFFIX .pyd)
-    set_target_properties (_${module}Python PROPERTIES DEBUG_POSTFIX "_d")
-  endif (WIN32)
-  # Copy the .py file generated to wherever the libraries are
-  add_custom_command (TARGET _${module}Python
-                      POST_BUILD
-                      COMMAND ${CMAKE_COMMAND}
-                      ARGS -E copy
-                              ${CMAKE_CURRENT_BINARY_DIR}/${module}Python.py
-                              ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${module}Python.py)
-  # Create a SineGenerator.py as CMake assumes one should be created
-  # This is a bug that should be fixed in future releases of CMake.
-  add_custom_command (TARGET _${module}Python
-                      POST_BUILD
-                      COMMAND ${CMAKE_COMMAND}
-                      ARGS -E copy
-                              ${CMAKE_CURRENT_BINARY_DIR}/${module}Python.py
-                              ${CMAKE_CURRENT_BINARY_DIR}/${module}.py)
-  # Build list of files to clean
-  set (CISST_CLEAN_FILES ${CISST_CLEAN_FILES}
-                         ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${module}Python.py
-                         ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${module}Python.pyc
-                         ${module}Python_wrap.cxx)
-endforeach (module)
-
-# Additional files to clean
-set_directory_properties (PROPERTIES
-                          ADDITIONAL_MAKE_CLEAN_FILES
-                          "${CISST_CLEAN_FILES}")
+# Run SWIG on the interface file
+cisst_add_swig_module(MODULE SineGenerator
+                      INTERFACE_FILENAME SineGeneratorPython.i
+                      INTERFACE_DIRECTORY .
+                      CISST_LIBRARIES SineGenerator)
 
 add_executable (pythonEmbeddedIRE pythonEmbeddedIRE.cpp)
 
