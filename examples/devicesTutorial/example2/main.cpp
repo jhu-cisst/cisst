@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 /* $Id$ */
 
-#include <cisstVector.h>
-#include <cisstOSAbstraction.h>
-#include <cisstDevices.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstDevices/devSartoriusSerial.h>
 
 #include "displayTask.h"
 #include "displayUI.h"

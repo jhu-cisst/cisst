@@ -1,6 +1,6 @@
+#ifndef _devSetPoints_h
+#define _devSetPoints_h
 
-
-#include <cisstCommon.h>
 #include <list>
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctQuaternionRotation3.h>
@@ -8,9 +8,6 @@
 
 #include <cisstDevices/robotcomponents/devRobotComponent.h>
 #include <cisstDevices/devExport.h>
-
-#ifndef _devSetPoints_h
-#define _devSetPoints_h
 
 class CISST_EXPORT devSetPoints : public devRobotComponent {
 

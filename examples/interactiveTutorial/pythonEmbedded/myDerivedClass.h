@@ -7,8 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2004-10-05
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 
 
-#include <cisstCommon.h>
-#include <cisstVector.h>
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstVector/vctTypes.h>
 
 
 // code required for the DLL generation

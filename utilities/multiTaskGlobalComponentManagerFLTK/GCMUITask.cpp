@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-02-26
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "PopupBrowser.h"
 
 #include <cisstCommon/cmnStrings.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <FL/fl_ask.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Button.H>

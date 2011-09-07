@@ -7,7 +7,7 @@
   Author(s):  Ali Uneri
   Created on: 2009-08-11
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "trackerSimulator.h"
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(trackerSimulator);
 
