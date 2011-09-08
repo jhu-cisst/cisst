@@ -51,6 +51,14 @@ if (CISST_HAS_FLTK)
   set (CISST_FLTK_DIR @FLTK_INCLUDE_DIR@)
 endif (CISST_HAS_FLTK)
 
+# Include settings per library
+foreach (lib ${CISST_LIBRARIES})
+  set (ADDITIONAL_BUILD_CMAKE ${CISST_BINARY_DIR}/${lib}Build.cmake)
+  if (EXISTS ${ADDITIONAL_BUILD_CMAKE})
+    include (${ADDITIONAL_BUILD_CMAKE})
+  endif (EXISTS ${ADDITIONAL_BUILD_CMAKE})
+endforeach (lib ${CISST_LIBRARIES})
+
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 
