@@ -715,9 +715,9 @@ inline std::ostream & operator << (std::ostream & output,
     return output;
 }
 
-// Now, define proxies for cisstVector classes
-// (see also mtsVector.h, which uses multiple inheritance,
-// rather than proxies, for dynamic vectors).
+// Now, define proxies for cisstVector classes (see also
+// mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
+// rather than proxies).
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
@@ -733,6 +733,12 @@ typedef mtsGenericObjectProxy<vct5> mtsVct5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct5)
 typedef mtsGenericObjectProxy<vct6> mtsVct6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct6)
+typedef mtsGenericObjectProxy<vct7> mtsVct7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct7)
+typedef mtsGenericObjectProxy<vct8> mtsVct8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct8)
+typedef mtsGenericObjectProxy<vct9> mtsVct9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct9)
 
 typedef mtsGenericObjectProxy<vctFloat1> mtsVctFloat1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat1)
@@ -746,6 +752,50 @@ typedef mtsGenericObjectProxy<vctFloat5> mtsVctFloat5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat5)
 typedef mtsGenericObjectProxy<vctFloat6> mtsVctFloat6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat6)
+typedef mtsGenericObjectProxy<vctFloat7> mtsVctFloat7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat7)
+typedef mtsGenericObjectProxy<vctFloat8> mtsVctFloat8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat8)
+typedef mtsGenericObjectProxy<vctFloat9> mtsVctFloat9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat9)
+
+typedef mtsGenericObjectProxy<vctLong1> mtsVctLong1;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong1)
+typedef mtsGenericObjectProxy<vctLong2> mtsVctLong2;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong2)
+typedef mtsGenericObjectProxy<vctLong3> mtsVctLong3;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong3)
+typedef mtsGenericObjectProxy<vctLong4> mtsVctLong4;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong4)
+typedef mtsGenericObjectProxy<vctLong5> mtsVctLong5;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong5)
+typedef mtsGenericObjectProxy<vctLong6> mtsVctLong6;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong6)
+typedef mtsGenericObjectProxy<vctLong7> mtsVctLong7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong7)
+typedef mtsGenericObjectProxy<vctLong8> mtsVctLong8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong8)
+typedef mtsGenericObjectProxy<vctLong9> mtsVctLong9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong9)
+
+typedef mtsGenericObjectProxy<vctULong1> mtsVctULong1;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong1)
+typedef mtsGenericObjectProxy<vctULong2> mtsVctULong2;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong2)
+typedef mtsGenericObjectProxy<vctULong3> mtsVctULong3;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong3)
+typedef mtsGenericObjectProxy<vctULong4> mtsVctULong4;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong4)
+typedef mtsGenericObjectProxy<vctULong5> mtsVctULong5;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong5)
+typedef mtsGenericObjectProxy<vctULong6> mtsVctULong6;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong6)
+typedef mtsGenericObjectProxy<vctULong7> mtsVctULong7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong7)
+typedef mtsGenericObjectProxy<vctULong8> mtsVctULong8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong8)
+typedef mtsGenericObjectProxy<vctULong9> mtsVctULong9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong9)
 
 typedef mtsGenericObjectProxy<vctInt1> mtsVctInt1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt1)
@@ -759,6 +809,12 @@ typedef mtsGenericObjectProxy<vctInt5> mtsVctInt5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt5)
 typedef mtsGenericObjectProxy<vctInt6> mtsVctInt6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt6)
+typedef mtsGenericObjectProxy<vctInt7> mtsVctInt7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt7)
+typedef mtsGenericObjectProxy<vctInt8> mtsVctInt8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt8)
+typedef mtsGenericObjectProxy<vctInt9> mtsVctInt9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt9)
 
 typedef mtsGenericObjectProxy<vctUInt1> mtsVctUInt1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt1)
@@ -772,6 +828,12 @@ typedef mtsGenericObjectProxy<vctUInt5> mtsVctUInt5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt5)
 typedef mtsGenericObjectProxy<vctUInt6> mtsVctUInt6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt6)
+typedef mtsGenericObjectProxy<vctUInt7> mtsVctUInt7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt7)
+typedef mtsGenericObjectProxy<vctUInt8> mtsVctUInt8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt8)
+typedef mtsGenericObjectProxy<vctUInt9> mtsVctUInt9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt9)
 
 typedef mtsGenericObjectProxy<vctShort1> mtsVctShort1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort1)
@@ -785,6 +847,31 @@ typedef mtsGenericObjectProxy<vctShort5> mtsVctShort5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort5)
 typedef mtsGenericObjectProxy<vctShort6> mtsVctShort6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort6)
+typedef mtsGenericObjectProxy<vctShort7> mtsVctShort7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort7)
+typedef mtsGenericObjectProxy<vctShort8> mtsVctShort8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort8)
+typedef mtsGenericObjectProxy<vctShort9> mtsVctShort9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort9)
+
+typedef mtsGenericObjectProxy<vctUShort1> mtsVctUShort1;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort1)
+typedef mtsGenericObjectProxy<vctUShort2> mtsVctUShort2;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort2)
+typedef mtsGenericObjectProxy<vctUShort3> mtsVctUShort3;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort3)
+typedef mtsGenericObjectProxy<vctUShort4> mtsVctUShort4;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort4)
+typedef mtsGenericObjectProxy<vctUShort5> mtsVctUShort5;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort5)
+typedef mtsGenericObjectProxy<vctUShort6> mtsVctUShort6;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort6)
+typedef mtsGenericObjectProxy<vctUShort7> mtsVctUShort7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort7)
+typedef mtsGenericObjectProxy<vctUShort8> mtsVctUShort8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort8)
+typedef mtsGenericObjectProxy<vctUShort9> mtsVctUShort9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort9)
 
 typedef mtsGenericObjectProxy<vctChar1> mtsVctChar1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar1)
@@ -798,6 +885,31 @@ typedef mtsGenericObjectProxy<vctChar5> mtsVctChar5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar5)
 typedef mtsGenericObjectProxy<vctChar6> mtsVctChar6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar6)
+typedef mtsGenericObjectProxy<vctChar7> mtsVctChar7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar7)
+typedef mtsGenericObjectProxy<vctChar8> mtsVctChar8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar8)
+typedef mtsGenericObjectProxy<vctChar9> mtsVctChar9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar9)
+
+typedef mtsGenericObjectProxy<vctUChar1> mtsVctUChar1;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar1)
+typedef mtsGenericObjectProxy<vctUChar2> mtsVctUChar2;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar2)
+typedef mtsGenericObjectProxy<vctUChar3> mtsVctUChar3;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar3)
+typedef mtsGenericObjectProxy<vctUChar4> mtsVctUChar4;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar4)
+typedef mtsGenericObjectProxy<vctUChar5> mtsVctUChar5;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar5)
+typedef mtsGenericObjectProxy<vctUChar6> mtsVctUChar6;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar6)
+typedef mtsGenericObjectProxy<vctUChar7> mtsVctUChar7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar7)
+typedef mtsGenericObjectProxy<vctUChar8> mtsVctUChar8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar8)
+typedef mtsGenericObjectProxy<vctUChar9> mtsVctUChar9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar9)
 
 typedef mtsGenericObjectProxy<vctBool1> mtsVctBool1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool1)
@@ -811,6 +923,12 @@ typedef mtsGenericObjectProxy<vctBool5> mtsVctBool5;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool5)
 typedef mtsGenericObjectProxy<vctBool6> mtsVctBool6;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool6)
+typedef mtsGenericObjectProxy<vctBool7> mtsVctBool7;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool7)
+typedef mtsGenericObjectProxy<vctBool8> mtsVctBool8;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool8)
+typedef mtsGenericObjectProxy<vctBool9> mtsVctBool9;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool9)
 
 // Define a few fixed size matrices
 
