@@ -20,6 +20,8 @@ if( OPENSCENEGRAPH_FOUND )
 
   project( osg )
 
+  find_package( OpenCV2 )
+
   add_executable( OSGtest   OSGtest.cpp )
   add_executable( OSGstereo OSGstereo.cpp )
   add_executable( OSGwam    OSGwam.cpp )
@@ -30,91 +32,33 @@ if( OPENSCENEGRAPH_FOUND )
   add_executable( mtsOSGwam    mtsOSGwam.cpp )
   add_executable( mtsOSGbh     mtsOSGbh.cpp )
 
-  include_directories( ${OPENSCENEGRAPH_INCLUDE_DIRS} )
+  include_directories( 
+    ${INCLUDE_OUTPUT_PATH}
+    ${OPENSCENEGRAPH_INCLUDE_DIRS} 
+    ${OpenCV2_INCLUDE_DIRS} 
+    )
 
-  target_link_libraries( 
-    OSGtest 
+  set( OSG_EXE_LIBRARIES 
     cisstOSG
     cisstCommon 
     cisstVector 
     cisstOSAbstraction
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    OSGstereo
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    OSGwam
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
-    cisstRobot
-    cisstNumerical
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    OSGbh
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
-    cisstRobot
-    cisstNumerical
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    mtsOSGTest
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
-    cisstRobot
-    cisstNumerical
-    cisstMultiTask 
+    cisstMultiTask
     cisstParameterTypes
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    mtsOSGstereo
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
     cisstRobot
     cisstNumerical
-    cisstMultiTask 
-    cisstParameterTypes
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    mtsOSGwam
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
-    cisstRobot
-    cisstNumerical
-    cisstMultiTask 
-    cisstParameterTypes
-    ${OPENSCENEGRAPH_LIBRARIES} )  
-
-  target_link_libraries( 
-    mtsOSGbh
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    cisstOSAbstraction
-    cisstRobot
-    cisstNumerical
-    cisstMultiTask 
-    cisstParameterTypes
-    ${OPENSCENEGRAPH_LIBRARIES} )  
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${OpenCV2_LIBRARIES}
+    )  
+    
+  target_link_libraries( OSGtest ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( OSGstereo ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( OSGwam ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( OSGbh ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( mtsOSGTest ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( mtsOSGstereo ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( mtsOSGwam ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( mtsOSGbh ${OSG_EXE_LIBRARIES} ) 
 
 endif( OPENSCENEGRAPH_FOUND )
 

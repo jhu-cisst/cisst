@@ -19,7 +19,8 @@ private:
 
 public:
 
-  WAMMotion() : mtsTaskPeriodic( "WAMMotion", 0.01, true ){
+  WAMMotion( double period ) : 
+    mtsTaskPeriodic( "WAMMotion", period, true ){
 
     q.SetSize(7);
     q.SetAll(0.0);
@@ -102,7 +103,7 @@ int main(){
 			       vctDynamicVector<double>( 7, 0.0 ) );
   taskManager->AddComponent( WAM );
   
-  WAMMotion motion;
+  WAMMotion motion( 0.002 );
   taskManager->AddComponent( &motion );
 
   taskManager->Connect( motion.GetName(), "Input",  WAM->GetName(), "Output" );

@@ -72,13 +72,13 @@ void mtsOSGCameraTask::Startup(){
   camera->getCamera()->setUpdateCallback( mtscb );
 
 }
+#include <cisstOSAbstraction/osaSleep.h>
 
 void mtsOSGCameraTask::Run(){
   ProcessQueuedCommands();
 
   if( !camera->done() )
     { camera->frame(); }
-
 }
 
 void mtsOSGCameraTask::Cleanup(){}

@@ -3,6 +3,12 @@
 #ifndef _cisstOSGMono_h
 #define _cisstOSGMono_h
 
+#include <cisstOSG/cisstOSGConfig.h>
+
+#if CISST_OSG_OPENCV
+#include <opencv2/opencv.hpp>
+#endif
+
 #include <cisstVector/vctDynamicNArray.h>
 #include <cisstOSG/cisstOSGCamera.h>
 #include <cisstOSG/cisstOSGExport.h>
@@ -52,13 +58,15 @@ class CISST_EXPORT cisstOSGMono : public cisstOSGCamera {
 
   void Initialize();
     
-#if CISST_DEV_HAS_OPENCV22
+#if CISST_OSG_OPENCV
+
  public:
-  std::list< std::list< cisstOSGBody* > > GetVisibilityList();
-  vctDynamicMatrix<double> GetRangeData();
-  vctDynamicNArray<unsigned char,3> GetRGBPlanarImage();
-  cv::Mat GetRGBImage();
-  cv::Mat GetDepthImage();
+
+  cisstOSGCamera::Errno GetRangeData( vctDynamicMatrix<double>& rangedata );
+  cisstOSGCamera::Errno GetRGBPlanarImage( vctDynamicNArray<unsigned char,3>& rgb );
+  cisstOSGCamera::Errno GetRGBImage( cv::Mat& rgb );
+  cisstOSGCamera::Errno GetDepthImage( cv::Mat& depth );
+
 #endif
   
 };

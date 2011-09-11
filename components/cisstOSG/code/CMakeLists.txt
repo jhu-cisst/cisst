@@ -4,6 +4,11 @@ find_package( OpenSceneGraph
 
 if( OPENSCENEGRAPH_FOUND )
 
+  find_package( OpenCV2 )
+  if( OpenCV2_FOUND )
+    set( CISST_OSG_OPENCV ON )
+  endif( OpenCV2_FOUND )
+  
   SET( 
     HEADER_FILES 
     ${HEADER_FILES} 
@@ -59,7 +64,11 @@ if( OPENSCENEGRAPH_FOUND )
          )
     endif( ${OPENSCENEGRAPH_VERSION} VERSION_GREATER 2.9.15 )
 
-    include_directories( ${OPENSCENEGRAPH_INCLUDE_DIRS} )
+    include_directories( 
+      ${INCLUDE_OUTPUT_PATH}
+      ${OPENSCENEGRAPH_INCLUDE_DIRS} 
+      ${OpenCV2_INCLUDE_DIRS} 
+      )
 
     add_library( cisstOSG ${HEADER_FILES} ${SOURCE_FILES} )
 
@@ -72,6 +81,17 @@ if( OPENSCENEGRAPH_FOUND )
       cisstNumerical
       cisstMultiTask
       cisstParameterTypes )
+
+    set( 
+      CISST_OSG_CONFIG_FILE 
+      ${INCLUDE_OUTPUT_PATH}/cisstOSG/cisstOSGConfig.h 
+      )
+
+    configure_file(
+      ../cisstOSGConfig.h.in
+      ${CISST_OSG_CONFIG_FILE}
+      @ONLY)
+    
 
 
     mark_as_advanced( 
@@ -100,6 +120,8 @@ if( OPENSCENEGRAPH_FOUND )
       OSG_LIBRARY
       OSG_LIBRARY_DEBUG
       )
+
+  mark_as_advanced( FORCE ${OpenCV2_OPTIONS})
 
 endif( OPENSCENEGRAPH_FOUND )
 

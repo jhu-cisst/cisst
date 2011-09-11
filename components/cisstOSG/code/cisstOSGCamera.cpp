@@ -23,11 +23,10 @@ void cisstOSGCamera::UpdateCallback::operator()( osg::Node* node,
 
 }
 
-#if CISST_DEV_HAS_OPENCV22
+#if CISST_OSG_OPENCV
 
 cisstOSGCamera::FinalDrawCallback::Data::Data( size_t width, size_t height ) : 
   osg::Referenced(),                            // referenced object
-  visibilityrequest( false ),                   // no request
   rangerequest( false ),                        // no request
   depthrequest( false ),                        // no request
   colorrequest( false ),                        // no request
@@ -41,10 +40,6 @@ cisstOSGCamera::FinalDrawCallback::Data::~Data(){
   rgbimage.release();
 }
 
-std::list< std::list<cisstOSGBody*> >
-cisstOSGCamera::FinalDrawCallback::Data::GetVisibilityList() const
-{ return visibilitylist; }
-
 vctDynamicMatrix<double>
 cisstOSGCamera::FinalDrawCallback::Data::GetRangeData() const
 { return rangedata; }
@@ -56,11 +51,6 @@ cisstOSGCamera::FinalDrawCallback::Data::GetDepthImage() const
 cv::Mat 
 cisstOSGCamera::FinalDrawCallback::Data::GetRGBImage() const
 { return rgbimage; }
-
-void 
-cisstOSGCamera::FinalDrawCallback::Data::SetVisibilityList
-( const std::list< std::list<cisstOSGBody*> >& visibilitylist )
-{ this->visibilitylist = visibilitylist; visibilityrequest = false;}
 
 void
 cisstOSGCamera::FinalDrawCallback::Data::SetRangeData
@@ -90,8 +80,7 @@ cisstOSGCamera::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera ){
   // Create and attach a depth image to the camera
   try{ depthbufferimg = new osg::Image; }
   catch( std::bad_alloc ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Failed to allocate image for depth buffer."
+    CMN_LOG_RUN_ERROR << " Failed to allocate image for depth buffer."
 		      << std::endl;
   }
   depthbufferimg->allocateImage(width, height, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
@@ -100,8 +89,7 @@ cisstOSGCamera::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera ){
   // Create and attach a color image to the camera
   try{ colorbufferimg = new osg::Image; }
   catch( std::bad_alloc ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Failed to allocate image for color buffer."
+    CMN_LOG_RUN_ERROR << " Failed to allocate image for color buffer."
 		      << std::endl;
   }
   colorbufferimg->allocateImage( width, height, 1, GL_RGB, GL_UNSIGNED_BYTE );
@@ -111,8 +99,7 @@ cisstOSGCamera::FinalDrawCallback::FinalDrawCallback( osg::Camera* camera ){
   osg::ref_ptr< cisstOSGCamera::FinalDrawCallback::Data > data;
   try{ data = new cisstOSGCamera::FinalDrawCallback::Data( width, height ); }
   catch( std::bad_alloc ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Failed to create data for final draw callback." 
+    CMN_LOG_RUN_ERROR << " Failed to create data for final draw callback." 
 		      << std::endl;
   }
 
@@ -158,8 +145,6 @@ void cisstOSGCamera::FinalDrawCallback::operator()(osg::RenderInfo& info)const{
 	  if( data->DepthImageRequested() )
 	    { ComputeDepthImage( camera ); }
 	  
-	  if( data->VisibilityListRequested() )
-	    { ComputeVisibilityList( camera ); }
 	}
 	break;
 	
@@ -177,99 +162,6 @@ void cisstOSGCamera::FinalDrawCallback::operator()(osg::RenderInfo& info)const{
       
     }
   }
-}
-
-static bool CompareVisibilityList( const std::list< cisstOSGBody* >& l1,
-				   const std::list< cisstOSGBody* >& l2 ){
-  std::list< cisstOSGBody* >::const_iterator b1 = l1.begin();
-  std::list< cisstOSGBody* >::const_iterator b2 = l2.begin();
-  while( (b1!=l1.end()) && (b2!=l2.end()) ){
-    if( *b1 < *b2 ) return true;
-    if( *b2 < *b1 ) return false;
-    b1++;
-    b2++;
-  }
-  if( l1.size() < l2.size() ) return true;
-  else return false;
-}
-
-void
-cisstOSGCamera::FinalDrawCallback::ComputeVisibilityList
-( osg::Camera* camera ) const {
-
-  // remove the const
-  osg::Referenced* ref = const_cast< osg::Referenced* >( getUserData() );
-  // cast as callback data
-  cisstOSGCamera::FinalDrawCallback::Data* data = NULL;
-  data = dynamic_cast< cisstOSGCamera::FinalDrawCallback::Data* >( ref );
-
-  // ensure that the casting worked
-  if( data != NULL ){
-
-    // get the viewport size
-    const osg::Viewport* viewport = camera->getViewport();
-    size_t width = viewport->width();
-    size_t height = viewport->height();
-
-    std::list< std::list< cisstOSGBody* > > visibilitylist;
-
-    // For each pixel in the image
-    for( size_t r=0; r<height; r++ ){
-      for( size_t c=0; c<width; c++ ){
-
-	std::list< cisstOSGBody* > visibility;
-
-	double x = (2.0 * c ) / width  - 1.0;
-	double y = (2.0 * r ) / height - 1.0;
-	double dx( .05 ), dy( .05 );
-
-	// create a picker
-	osg::ref_ptr< osgUtil::PolytopeIntersector> pi;
-	pi = new osgUtil::PolytopeIntersector( osgUtil::Intersector::PROJECTION,
-					       x-dx, y-dy, x+dx, y+dy );
-
-	// and an intersection visitor
-	osgUtil::IntersectionVisitor iv( pi );
-
-	// run the visitor on the camera
-	camera->accept( iv );
-	
-	// any intersection found?
-	if( pi->containsIntersections() ){
-
-	  // loop over all the intersections
-	  osgUtil::PolytopeIntersector::Intersections::const_iterator iter;
-      
-	  for( iter =pi->getIntersections().begin(); 
-	       iter!=pi->getIntersections().end();
-	       iter++ ){
-	    
-	    // get the nodepath for this intersection
-	    const osg::NodePath& nodePath = iter->nodePath;
-	    unsigned int idx = nodePath.size();
-	    
-	    // for all the nodes along the path
-	    while(idx--){
-	      
-	      // cast the node as a osg body
-	      cisstOSGBody* body = dynamic_cast< cisstOSGBody* >( nodePath[ idx ] );
-	      
-	      // if successfull then add the body to the list
-	      if( body != NULL )
-		{ visibility.push_back( body ); }
-	    }
-	  }
-	  visibility.unique();
-	  visibilitylist.push_back( visibility );
-
-	  visibilitylist.sort( CompareVisibilityList );
-	  visibilitylist.unique();
-	}
-      }
-    }
-    data->SetVisibilityList( visibilitylist );
-  }
-  
 }
 
 void 
@@ -508,7 +400,11 @@ void cisstOSGCamera::SetTransform( const vctFrm3& Rt )
 
 vctFrm3 cisstOSGCamera::GetTransform() const {
 
-  osg::Matrixd Rt = getCameraManipulator()->getMatrix();
+  osg::Matrixd Rt;
+  if( getCameraManipulator()!= NULL )
+    Rt = getCameraManipulator()->getMatrix();
+  else
+    Rt = getCamera()->getViewMatrix();
 
   vctMatrixRotation3<double> R( Rt(0, 0), Rt(1, 0), Rt(2, 0),
 				Rt(0, 1), Rt(1, 1), Rt(2, 1),

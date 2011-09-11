@@ -22,6 +22,8 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
 
   project( ode )
 
+  find_package( OpenCV2 )
+
   add_executable( ODETest  ODETest.cpp )
   add_executable( ODEwam   ODEwam.cpp )
   add_executable( ODEbh    ODEbh.cpp )
@@ -33,70 +35,34 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
 
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE" )
 
-  include_directories( ${OPENSCENEGRAPH_INCLUDE_DIRS} ${ODE_INCLUDE_DIR} )
+  include_directories( 
+    ${INCLUDE_OUTPUT_PATH}
+    ${OPENSCENEGRAPH_INCLUDE_DIRS} 
+    ${OpenCV2_INCLUDE_DIRS} 
+    )
 
-  target_link_libraries( 
-    ODETest
+  set( OSG_EXE_LIBRARIES 
     cisstODE
     cisstOSG
     cisstCommon 
     cisstVector 
+    cisstOSAbstraction
+    cisstMultiTask
+    cisstParameterTypes
+    cisstRobot
+    cisstNumerical
     ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
+    ${ODE_LIBRARY}
+    ${OpenCV2_LIBRARIES}
+    )  
 
-  target_link_libraries( 
-    ODEwam
-    cisstODE
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
-
-  target_link_libraries( 
-    ODEbh
-    cisstODE
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
-
-  target_link_libraries( 
-    ODEwambh
-    cisstODE
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
-
-  target_link_libraries( 
-    mtsODEwam
-    cisstODE
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
-
-  target_link_libraries( 
-    mtsODEbh
-    cisstODE
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
-
-  target_link_libraries( 
-    mtsODEwambh
-    cisstODE
-    cisstOSG
-    cisstCommon 
-    cisstVector 
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${ODE_LIBRARY} )  
+  target_link_libraries( ODETest ${OSG_EXE_LIBRARIES} )
+  target_link_libraries( ODEwam ${OSG_EXE_LIBRARIES} )
+  target_link_libraries( ODEbh ${OSG_EXE_LIBRARIES} )
+  target_link_libraries( ODEwambh ${OSG_EXE_LIBRARIES} )
+  target_link_libraries( mtsODEwam ${OSG_EXE_LIBRARIES} )
+  target_link_libraries( mtsODEbh ${OSG_EXE_LIBRARIES} )
+  target_link_libraries( mtsODEwambh ${OSG_EXE_LIBRARIES} )
 
 endif( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
 

@@ -40,15 +40,20 @@ if( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
   
   add_library( cisstODE ${HEADER_FILES} ${SOURCE_FILES} )
 
-  cisst_target_link_libraries ( 
-    cisstODE
+  set (CISST_LIBRARIES_NEEDED 
     cisstCommon
+    cisstCommonXML
     cisstVector
-    cisstOSAbstraction
-    cisstRobot
     cisstNumerical
+    cisstOSAbstraction
     cisstMultiTask
-    cisstParameterTypes )
+    cisstParameterTypes
+    cisstRobot)
+
+  cisst_set_directories( ${CISST_LIBRARIES_NEEDED} )
+  
+  cisst_target_link_libraries( cisstODE ${CISST_LIBRARIES_NEEDED} )
+
 
 endif( OPENSCENEGRAPH_FOUND AND ODE_FOUND )
 

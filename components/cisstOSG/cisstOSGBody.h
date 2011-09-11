@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <osg/Group>
 #include <osg/Switch>
 #include <osg/MatrixTransform>
+#include <osg/TriangleFunctor>
 
 #include <cisstVector/vctTransformationTypes.h>
 
@@ -35,6 +36,49 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   enum Switch{ SWITCH_OFF, SWITCH_ON };
 
  protected:
+
+  // Use this class to get the list of triangles in a geometry
+
+  // This class is used to extract the triangle mesh out of the OSG
+  // classes/structures. It is a geode visitor that traverse the drawable 
+  // objects and extract all the triangles from all the drawables
+  class GeodeVisitor : public osg::NodeVisitor {
+    
+  private:
+
+    // Create a structure to hold a triangle
+    struct Triangle
+    { osg::Vec3 p1, p2, p3; };
+
+    // For each drawable, a TriangleExtractor object is created. The operator() 
+    // is called for each triangle of the drawable
+    struct TriangleExtractor {
+
+      // The list of triangles for a drawable
+      std::vector< cisstOSGBody::GeodeVisitor::Triangle > drawabletriangles;
+
+      // This method is called for each triangle of the drawable. All it does
+      // is to copy the vertices to the vector
+      inline void operator ()( const osg::Vec3& p1, 
+			       const osg::Vec3& p2, 
+			       const osg::Vec3& p3, 
+			       bool treatVertexDataAsTemporary );
+    };
+    
+  public:
+    
+    // the list of triangles for the geode (composed of several drawables)
+    std::vector< cisstOSGBody::GeodeVisitor::Triangle > geodetriangles;
+    
+    // Default constructor
+    GeodeVisitor();
+
+    // This method is called for each geode. It scans all the drawable of the 
+    // geode and extract/copy the triangles to the triangle vector
+    virtual void apply( osg::Geode& geode );
+    
+  };  // GeodeVisitor
+
 
   // Callback stuff
 
@@ -155,6 +199,7 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   void SetModePoint();
   void SetModeFill();
 
+  virtual vctDynamicMatrix<double> GetVertices();
 
 };
 

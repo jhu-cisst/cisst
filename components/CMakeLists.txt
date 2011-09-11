@@ -15,6 +15,7 @@
 project (cisstComponents)
 
 # Set the ouptut path for the libraries and executables
+set (INCLUDE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/include")
 set (LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set (EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin")
 

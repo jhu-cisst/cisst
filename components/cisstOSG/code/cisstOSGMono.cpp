@@ -22,7 +22,7 @@ cisstOSGMono::cisstOSGMono( cisstOSGWorld* world,
   getCamera()->setViewport( new osg::Viewport( x, y, width, height ) );
 
   // Setup the OpenCV stuff
-#if CISST_DEV_HAS_OPENCV22
+#if CISST_OSG_OPENCV
 
   // Create a drawing callback. This callback is set to capture depth+color 
   // buffer (true, true)
@@ -74,8 +74,9 @@ void cisstOSGMono::Initialize(){
 
 }
 
-#if CISST_DEV_HAS_OPENCV22
+#if CISST_OSG_OPENCV
 
+/*
 std::list< std::list< cisstOSGBody* > > cisstOSGMono::GetVisibilityList(){
 
   // get the camera final draw callback
@@ -93,26 +94,46 @@ std::list< std::list< cisstOSGBody* > > cisstOSGMono::GetVisibilityList(){
   }
   return std::list< std::list< cisstOSGBody* > >();
 }
+*/
 
 
-vctDynamicMatrix<double> cisstOSGMono::GetRangeData(){
+
+cisstOSGMono::Errno
+cisstOSGMono::GetRangeData(vctDynamicMatrix<double>& rangedata){
 
   // get the camera final draw callback
   osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
  
-  // 
-  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
-  osg::ref_ptr<cisstOSGCamera::FinalDrawCallback::Data> data = NULL;
-  data = dynamic_cast<cisstOSGCamera::FinalDrawCallback::Data*>( ref.get() );
-  if( data != NULL ){
-    data->RequestRangeData();
-    osaSleep( 1.0 );
-    return data->GetRangeData();
+  if( dcb != NULL ){
+
+    osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+    osg::ref_ptr<cisstOSGCamera::FinalDrawCallback::Data> data = NULL;
+    data = dynamic_cast<cisstOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+
+    if( data != NULL ){
+      data->RequestRangeData();
+      osaSleep( 1.0 );
+      rangedata = data->GetRangeData();
+    }
+
+    else{
+      CMN_LOG_RUN_ERROR << "Could not get the user data from the callback" 
+			<< std::endl;
+      return cisstOSGMono::EFAILURE;
+    }
+
+    return cisstOSGMono::ESUCCESS;
   }
-  return vctDynamicMatrix<double>();
+
+  else{
+    CMN_LOG_RUN_ERROR << "Could not get the drawing callback" << std::endl;
+    return cisstOSGMono::EFAILURE;
+  }
+
 }
 
+/*
 vctDynamicNArray<unsigned char,3> cisstOSGMono::GetRGBPlanarImage(){
 
   // get the camera final draw callback
@@ -141,39 +162,74 @@ vctDynamicNArray<unsigned char,3> cisstOSGMono::GetRGBPlanarImage(){
   return vctDynamicNArray<unsigned char, 3>();
 }
 
-cv::Mat cisstOSGMono::GetRGBImage(){
+*/
+
+cisstOSGMono::Errno cisstOSGMono::GetRGBImage( cv::Mat& rgb ){
 
   // get the camera final draw callback
   osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
-  // 
-  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
-  osg::ref_ptr<cisstOSGCamera::FinalDrawCallback::Data> data = NULL;
-  data = dynamic_cast<cisstOSGCamera::FinalDrawCallback::Data*>( ref.get() );
-  if( data != NULL ){
-    data->RequestRGBImage();
-    osaSleep( 1.0 );
-    return data->GetRGBImage();
+  if( dcb != NULL ){
+
+    osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+    osg::ref_ptr<cisstOSGCamera::FinalDrawCallback::Data> data = NULL;
+    data = dynamic_cast<cisstOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+
+    if( data != NULL ){
+      data->RequestRGBImage();
+      osaSleep( 1.0 );
+      rgb = data->GetRGBImage();
+    }
+    
+    else{
+      CMN_LOG_RUN_ERROR << "Could not get the user data from the callback" 
+			<< std::endl;
+      return cisstOSGMono::EFAILURE;
+    }
+    
+    return cisstOSGMono::ESUCCESS;
   }
-  return cv::Mat();
+  
+  else{
+    CMN_LOG_RUN_ERROR << "Could not get the drawing callback" << std::endl;
+    return cisstOSGMono::EFAILURE;
+  }
+  
 }
 
-cv::Mat cisstOSGMono::GetDepthImage(){
+cisstOSGMono::Errno cisstOSGMono::GetDepthImage( cv::Mat& depth ){
+
   // get the camera final draw callback
   osg::Camera::DrawCallback* dcb = NULL;
   dcb = getCamera()->getFinalDrawCallback();
 
-  // 
-  osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
-  osg::ref_ptr<cisstOSGCamera::FinalDrawCallback::Data> data = NULL;
-  data = dynamic_cast<cisstOSGCamera::FinalDrawCallback::Data*>( ref.get() );
-  if( data != NULL ){
-    data->RequestDepthImage();
-    osaSleep( 1.0 );
-    return data->GetDepthImage();
+  if( dcb != NULL ){
+
+    osg::ref_ptr<osg::Referenced> ref = dcb->getUserData();
+    osg::ref_ptr<cisstOSGCamera::FinalDrawCallback::Data> data = NULL;
+    data = dynamic_cast<cisstOSGCamera::FinalDrawCallback::Data*>( ref.get() );
+    if( data != NULL ){
+      data->RequestDepthImage();
+      osaSleep( 1.0 );
+      depth = data->GetDepthImage();
+    }
+    
+    else{
+      CMN_LOG_RUN_ERROR << "Could not get the user data from the callback" 
+			<< std::endl;
+      return cisstOSGMono::EFAILURE;
+    }
+    
+    return cisstOSGMono::ESUCCESS;
   }
-  return cv::Mat();
+  
+  else{
+    CMN_LOG_RUN_ERROR << "Could not get the drawing callback" << std::endl;
+    return cisstOSGMono::EFAILURE;
+  }
+  
 }
+
 
 #endif

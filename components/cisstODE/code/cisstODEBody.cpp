@@ -2,41 +2,6 @@
 #include <cisstODE/cisstODEWorld.h>
 #include <cisstVector/vctMatrixRotation3.h>
 
-// Default constructor for the geode visitor
-cisstODEBody::GeodeVisitor::GeodeVisitor() : 
-  osg::NodeVisitor( osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN ){}
-
-// Method called for each geode during the traversal
-void cisstODEBody::GeodeVisitor::apply( osg::Geode& geode  ){
-
-  for( size_t i=0; i< geode.getNumDrawables(); ++i){
-    // create a triangle extractor
-    osg::TriangleFunctor<TriangleExtractor> te;
-    // apply the extractor to the drawable
-    geode.getDrawable( i )->accept( te );
-
-    // copyt the drawable triangles to the geode triangles
-    geodetriangles.insert( geodetriangles.end(),
-			   te.drawabletriangles.begin(),
-			   te.drawabletriangles.end() );
-  }
-
-  traverse( geode );
-}
-
-// For each triangle in a drawable this operator is called
-void 
-cisstODEBody::GeodeVisitor::TriangleExtractor::operator ()
-  ( const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3, bool ){
-
-  cisstODEBody::GeodeVisitor::Triangle triangle;
-  triangle.v1[0] = v1[0];  triangle.v1[1] = v1[1];  triangle.v1[2] = v1[2];
-  triangle.v2[0] = v2[0];  triangle.v2[1] = v2[1];  triangle.v2[2] = v2[2];
-  triangle.v3[0] = v3[0];  triangle.v3[1] = v3[1];  triangle.v3[2] = v3[2];
-  drawabletriangles.push_back( triangle );
-
-}
-
 
 cisstODEBody::cisstODEBody( const std::string& model,
 			    cisstODEWorld* odeworld,
@@ -276,7 +241,7 @@ void cisstODEBody::Initialize( const vctFrame4x4<double>& Rtwb,
 
 void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
 
-  cisstODEBody::GeodeVisitor gv;
+  cisstOSGBody::GeodeVisitor gv;
   this->accept( gv );
   
   // Create the array for ODE and copy the data
@@ -291,21 +256,21 @@ void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
   for( size_t ti=0, vi=0; ti<gv.geodetriangles.size(); ti++ ){
 
     // copy the vertices
-    Vertices[vi][0] = gv.geodetriangles[ti].v1[0] - com[0];
-    Vertices[vi][1] = gv.geodetriangles[ti].v1[1] - com[1];
-    Vertices[vi][2] = gv.geodetriangles[ti].v1[2] - com[2];
+    Vertices[vi][0] = gv.geodetriangles[ti].p1[0] - com[0];
+    Vertices[vi][1] = gv.geodetriangles[ti].p1[1] - com[1];
+    Vertices[vi][2] = gv.geodetriangles[ti].p1[2] - com[2];
     Indices[vi] = vi;
     vi++;
 
-    Vertices[vi][0] = gv.geodetriangles[ti].v2[0] - com[0];
-    Vertices[vi][1] = gv.geodetriangles[ti].v2[1] - com[1];
-    Vertices[vi][2] = gv.geodetriangles[ti].v2[2] - com[2];
+    Vertices[vi][0] = gv.geodetriangles[ti].p2[0] - com[0];
+    Vertices[vi][1] = gv.geodetriangles[ti].p2[1] - com[1];
+    Vertices[vi][2] = gv.geodetriangles[ti].p2[2] - com[2];
     Indices[vi] = vi;
     vi++;
 
-    Vertices[vi][0] = gv.geodetriangles[ti].v3[0] - com[0];
-    Vertices[vi][1] = gv.geodetriangles[ti].v3[1] - com[1];
-    Vertices[vi][2] = gv.geodetriangles[ti].v3[2] - com[2];
+    Vertices[vi][0] = gv.geodetriangles[ti].p3[0] - com[0];
+    Vertices[vi][1] = gv.geodetriangles[ti].p3[1] - com[1];
+    Vertices[vi][2] = gv.geodetriangles[ti].p3[2] - com[2];
     Indices[vi] = vi;
     vi++;
 
@@ -404,10 +369,10 @@ vctFixedSizeVector<double,3> cisstODEBody::GetPosition() const{
 vctFrm3 cisstODEBody::GetTransform() const{
   return vctFrm3( GetOrientation(), GetPosition() );
 }
-
+/*
 vctDynamicMatrix<double> cisstODEBody::GetVertices() const
 { return vctVertices; }
-
+*/
 
 /*
   // used to accumulate the vertices of all geometries

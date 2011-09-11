@@ -19,7 +19,45 @@ http://www.cisst.org/cisst/license.txt.
 #include <osg/PolygonMode>
 #include <osg/Material>
 
+#include <algorithm>
+
 #include <cisstOSG/cisstOSGBody.h>
+
+// Default constructor for the geode visitor
+cisstOSGBody::GeodeVisitor::GeodeVisitor() : 
+  osg::NodeVisitor( osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN ){}
+
+// Method called for each geode during the traversal
+void cisstOSGBody::GeodeVisitor::apply( osg::Geode& geode  ){
+
+  for( size_t i=0; i< geode.getNumDrawables(); ++i ){
+    // create a triangle extractor
+    osg::TriangleFunctor<TriangleExtractor> te;
+    // apply the extractor to the drawable
+    geode.getDrawable( i )->accept( te );
+
+    // copyt the drawable triangles to the geode triangles
+    geodetriangles.insert( geodetriangles.end(),
+			   te.drawabletriangles.begin(),
+			   te.drawabletriangles.end() );
+  }
+
+  traverse( geode );
+}
+
+// For each triangle in a drawable this operator is called
+void 
+cisstOSGBody::GeodeVisitor::TriangleExtractor::operator ()
+  ( const osg::Vec3& p1, const osg::Vec3& p2, const osg::Vec3& p3, bool ){
+
+  cisstOSGBody::GeodeVisitor::Triangle triangle;
+  triangle.p1 = p1;
+  triangle.p2 = p2;
+  triangle.p3 = p3;
+  drawabletriangles.push_back( triangle );
+
+}
+
 
 // This is called at each update traversal
 void cisstOSGBody::TransformCallback::operator()( osg::Node* node, 
@@ -326,3 +364,37 @@ void cisstOSGBody::SetModePoint(){
 }
 
 
+vctDynamicMatrix<double> cisstOSGBody::GetVertices(){
+
+  std::vector< osg::Vec3 > vertices;
+
+  cisstOSGBody::GeodeVisitor gv;
+  this->accept( gv );
+
+  //vctDynamicMatrix<double> vertices( 3, gv.geodetriangles.size(), 0.0 );
+
+  for( size_t i=0; i<gv.geodetriangles.size(); i++ ){
+  
+    vertices.push_back(  gv.geodetriangles[i].p1 );
+    vertices.push_back(  gv.geodetriangles[i].p2 );
+    vertices.push_back(  gv.geodetriangles[i].p3 );
+
+  }
+  
+  std::sort( vertices.begin(), vertices.end() );
+
+  std::vector< osg::Vec3 >::iterator last;
+  last = std::unique( vertices.begin(), vertices.end() );
+  
+  vertices.resize( last - vertices.begin() );
+
+  vctDynamicMatrix<double> P( 3, vertices.size() );
+  for( size_t i=0; i<vertices.size(); i++ ){
+    P[0][i] = vertices[i][0];
+    P[1][i] = vertices[i][1];
+    P[2][i] = vertices[i][2];
+  }
+
+  return P;
+
+}

@@ -3,23 +3,28 @@
 #ifndef _cisstOSGCamera_h
 #define _cisstOSGCamera_h
 
+#include <cisstOSG/cisstOSGConfig.h>
+
+#if CISST_OSG_OPENCV
+#include <opencv2/opencv.hpp>
+#endif
+
 #include <osgViewer/Viewer>
 
 #include <cisstVector/vctDynamicMatrix.h>
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctFrame4x4.h>
-//#include <cisstDevices/robotcomponents/osg/cisstOSGBody.h>
 #include <cisstOSG/cisstOSGWorld.h>
-
-#if CISST_DEV_HAS_OPENCV22
-#include <opencv2/opencv.hpp>
-#endif
 
 #include <cisstOSG/cisstOSGExport.h>
 
 class mtsOSGCamera;
 
 class CISST_EXPORT cisstOSGCamera : public osgViewer::Viewer{
+
+ public:
+
+  enum Errno { ESUCCESS, EFAILURE };
 
  private:
 
@@ -81,6 +86,116 @@ class CISST_EXPORT cisstOSGCamera : public osgViewer::Viewer{
 
 
 
+
+  // Only enable this if OpenCV2 is enabled
+#if CISST_OSG_OPENCV
+
+  //! Final drawing callback
+  /**
+     This class is used to capture/process images during the final drawing
+     callback traversal.
+  */
+  class FinalDrawCallback : public osg::Camera::DrawCallback {
+    
+  public:
+
+    // Data for the final draw callback. This data is used to copy images
+    // outside the drawing traversal.
+    class Data : public osg::Referenced {
+
+    private:
+      
+      bool rangerequest;
+      bool depthrequest;
+      bool colorrequest;
+
+      //! Converted 3D range data.
+      /**
+        Create a 3xN range data matrix.
+	[ x1 ... xN ]
+	[ y1 ... yN ]
+	[ z1 ... zN ]
+      */
+      vctDynamicMatrix<double> rangedata;
+
+      //! Depth image
+      /**
+	 This is a depth image, where at each pixel, you have the depth of 
+	 the projected point.
+      */
+      cv::Mat depthimage;
+      
+      //! RGB image
+      cv::Mat rgbimage;
+      
+    public:
+      
+      Data( size_t width, size_t height );
+      ~Data();
+      
+      void RequestRangeData()       { rangerequest = true; }
+      void RequestDepthImage()      { depthrequest = true; }
+      void RequestRGBImage()        { colorrequest = true; }
+
+      bool RangeDataRequested()       const { return rangerequest; }
+      bool DepthImageRequested()      const { return depthrequest; }
+      bool RGBImageRequested()        const { return colorrequest; }
+
+      vctDynamicMatrix<double> GetRangeData() const;
+      cv::Mat GetDepthImage() const;
+      cv::Mat GetRGBImage() const;
+
+      void SetRangeData( const vctDynamicMatrix<double>& rangedata );
+      void SetDepthImage( const cv::Mat& depthimage );
+      void SetRGBImage( const cv::Mat& rgbimage );
+
+    }; // Data
+
+  private:
+
+    //! OSG image containing the depth buffer
+    osg::ref_ptr<osg::Image> depthbufferimg;
+
+    //! OSG image containing the color buffer
+    osg::ref_ptr<osg::Image> colorbufferimg;
+  
+    //! Callback operator
+    /**
+       This callback is called during the final drawing traversal. This 
+       operator calls the Capture method to grab frames from the depth and 
+       color buffers.
+    */
+    virtual void operator () ( osg::RenderInfo& ) const;
+    
+    //! Convert the depth buffer to range data
+    void ComputeRangeData( osg::Camera* camera ) const;
+
+    //! Convert the depth buffer to a depth image
+    void ComputeDepthImage( osg::Camera* camera ) const;
+
+    //! Convert the color buffer to a color image
+    void ComputeRGBImage( osg::Camera* camera ) const;
+
+  public:
+    
+    //! Default constructor
+    /**
+       Constructor for a final drawing callback object. This object will
+       determine the operation performed at each frame rendering.
+       \param camera A pointer to an OSG camera
+       \param capturedepth Read and convert depth buffer
+       \param capturecolor Read and convert color buffer
+    */
+    FinalDrawCallback( osg::Camera* camera );
+    
+    ~FinalDrawCallback();
+    
+  }; // FinalDrawCallback
+
+#endif // CISST_OSG_OPENCV
+
+
+
  public : 
 
   //! Create an OSG viewer (actually it's a OSG viewer)
@@ -111,140 +226,3 @@ class CISST_EXPORT cisstOSGCamera : public osgViewer::Viewer{
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if CISST_DEV_HAS_OPENCV22
-
-  //! Final drawing callback
-  /**
-     This class is used to capture/process images during the final drawing
-     callback traversal.
-  */
-  class FinalDrawCallback : public osg::Camera::DrawCallback {
-    
-  public:
-
-    // Data for the final draw callback. This data is used to copy images
-    // outside the drawing traversal.
-    class Data : public osg::Referenced {
-
-    private:
-      
-      bool visibilityrequest;
-      bool rangerequest;
-      bool depthrequest;
-      bool colorrequest;
-
-      //! Converted 3D range data.
-      /**
-        Create a 3xN range data matrix.
-	[ x1 ... xN ]
-	[ y1 ... yN ]
-	[ z1 ... zN ]
-      */
-      vctDynamicMatrix<double> rangedata;
-
-      //! visibility list
-      /**
-	 Each list element you get a list of pointer to bodies that 
-	 are sorted by visibility
-      */
-      //std::list< std::list< cisstOSGBody* > > visibilitylist;
-      
-      //! Depth image
-      /**
-	 This is a depth image, where at each pixel, you have the depth of 
-	 the projected point.
-      */
-      cv::Mat depthimage;
-      
-      //! RGB image
-      cv::Mat rgbimage;
-      
-    public:
-      
-      Data( size_t width, size_t height );
-      ~Data();
-      
-      void RequestVisibilityList()  { visibilityrequest = true; }
-      void RequestRangeData()       { rangerequest = true; }
-      void RequestDepthImage()      { depthrequest = true; }
-      void RequestRGBImage()        { colorrequest = true; }
-
-      bool VisibilityListRequested() const { return visibilityrequest; }
-      bool RangeDataRequested()       const { return rangerequest; }
-      bool DepthImageRequested()      const { return depthrequest; }
-      bool RGBImageRequested()        const { return colorrequest; }
-
-      //std::list< std::list<cisstOSGBody*> > GetVisibilityList() const;
-      vctDynamicMatrix<double> GetRangeData() const;
-      cv::Mat GetDepthImage() const;
-      cv::Mat GetRGBImage() const;
-
-      void SetVisibilityList(const std::list< std::list<cisstOSGBody*> >& vl );
-      void SetRangeData( const vctDynamicMatrix<double>& rangedata );
-      void SetDepthImage( const cv::Mat& depthimage );
-      void SetRGBImage( const cv::Mat& rgbimage );
-
-    };
-
-  private:
-
-    //! OSG image containing the depth buffer
-    osg::ref_ptr<osg::Image> depthbufferimg;
-
-    //! OSG image containing the color buffer
-    osg::ref_ptr<osg::Image> colorbufferimg;
-  
-    //! Callback operator
-    /**
-       This callback is called during the final drawing traversal. This 
-       operator calls the Capture method to grab frames from the depth and 
-       color buffers.
-    */
-    virtual void operator () ( osg::RenderInfo& ) const;
-    
-    //! Convert the depth buffer to range data
-    void ComputeRangeData( osg::Camera* camera ) const;
-
-    //! Convert the depth buffer to range data
-    void ComputeVisibilityList( osg::Camera* camera ) const;
-
-    //! Convert the depth buffer to a depth image
-    void ComputeDepthImage( osg::Camera* camera ) const;
-
-    //! Convert the color buffer to a color image
-    void ComputeRGBImage( osg::Camera* camera ) const;
-
-  public:
-    
-    //! Default constructor
-    /**
-       Constructor for a final drawing callback object. This object will
-       determine the operation performed at each frame rendering.
-       \param camera A pointer to an OSG camera
-       \param capturedepth Read and convert depth buffer
-       \param capturecolor Read and convert color buffer
-    */
-    FinalDrawCallback( osg::Camera* camera );
-    
-    ~FinalDrawCallback();
-    
-  };
-
-#endif // CISST_DEV_HAS_OPENCV22
-
-
-

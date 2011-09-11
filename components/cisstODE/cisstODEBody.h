@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <ode/ode.h>
 
 #include <osg/Geode>
-#include <osg/TriangleFunctor>
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctMatrixRotation3.h>
@@ -49,46 +48,6 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
   //! The ODE state of the body
   cisstODEBody::State ODEstate;
   
-  // This class is used to extract the triangle mesh out of the OSG
-  // classes/structures. It is a geode visitor that traverse the drawable 
-  // objects and extract all the triangles from all the drawables
-  class GeodeVisitor : public osg::NodeVisitor {
-    
-  private:
-
-    // Create a structure to hold a triangle
-    struct Triangle
-    { dVector3 v1, v2, v3; };
-
-    // For each drawable, a TriangleExtractor object is created. The operator() 
-    // is called for each triangle of the drawable
-    struct TriangleExtractor {
-
-      // The list of triangles for a drawable
-      std::vector< cisstODEBody::GeodeVisitor::Triangle > drawabletriangles;
-
-      // This method is called for each triangle of the drawable. All it does
-      // is to copy the vertices to the vector
-      inline void operator ()( const osg::Vec3& v1, 
-			       const osg::Vec3& v2, 
-			       const osg::Vec3& v3, 
-			       bool treatVertexDataAsTemporary );
-    };
-    
-  public:
-    
-    // the list of triangles for the geode (composed of several drawables)
-    std::vector< cisstODEBody::GeodeVisitor::Triangle > geodetriangles;
-    
-    // Default constructor
-    GeodeVisitor();
-
-    // This method is called for each geode. It scans all the drawable of the 
-    // geode and extract/copy the triangles to the triangle vector
-    virtual void apply( osg::Geode& geode );
-    
-  };  // GeodeVisitor
-
   //! The World ID
   cisstODEWorld* odeworld;
 
@@ -270,7 +229,7 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
 
   vctFrm3 GetTransform() const;
 
-  vctDynamicMatrix<double> GetVertices() const;
+  //vctDynamicMatrix<double> GetVertices() const;
   
 };
 

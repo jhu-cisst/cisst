@@ -103,12 +103,14 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
      while too few gives bad results (100 contacts points is actually quite 
      large)
   */
-  static const size_t NUM_CONTACTS = 50;
+  static const size_t NUM_CONTACTS = 200;
 
  protected:
   
   //! Default gravity
   static const vctFixedSizeVector<double,3> GRAVITY;
+
+  double contacterp;
 
  public:
 
@@ -145,7 +147,6 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
 
   void SetContactMaxCorrectingVel( double cmcv )
   { dWorldSetContactMaxCorrectingVel( GetWorldID(), cmcv ); }
-  
 
   //! Process collisions between two geometries
   /**
@@ -162,28 +163,10 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
   //! Get a list of contacts
   std::list< cisstODEContact > GetContacts();
 
+  void SetContactERP( double erp ){ contacterp = erp; }
+  
+
 };
 
 #endif
 
-/*
-
-    
-*/
-
-
-  //! Detect a manipulator "self collision"
-  /**
-     A self collision is a collision when the manipulator hits itself. This is
-     called to avoid computing these self collision because they hog too much 
-     CPU and often make the simulation unstable. The problem is that adjacent 
-     links can touch each other at the joint, thus, creating permanent collision.
-     This really mess things up and it's better to avoid them altogether. Sure 
-     it less realistic but eventually it would be nice to have the manipulator 
-     handle these collision by themselves (and permit some links to interfere)
-     \param o1 The geometry of the first object
-     \param o2 The geometry of the second object
-     \return true if the two geometries belong to the same subspace. false
-             otherwise
-  */
-//bool SelfCollision( dGeomID o1, dGeomID o2 );

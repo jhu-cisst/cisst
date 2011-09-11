@@ -38,12 +38,14 @@ cisstODEContact::cisstODEContact( cisstODEBody* b1,
   depth( d ) {}
 
 
-const vctFixedSizeVector<double,3> cisstODEWorld::GRAVITY = vctFixedSizeVector<double,3>(0.0, 0.0, -9.81);
+const vctFixedSizeVector<double,3> cisstODEWorld::GRAVITY = vctFixedSizeVector<d
+ouble,3>(0.0, 0.0, -9.81);
 
 cisstODEWorld::cisstODEWorld( double period,
 			      const vctFixedSizeVector<double,3>& g ) : 
 
-  timestep( period ) {
+  timestep( period ),
+  contacterp( 0.8 ){
 
   dInitODE2(0);                           // initialize the engine
 
@@ -57,7 +59,7 @@ cisstODEWorld::cisstODEWorld( double period,
   SetGravity( g );
 
   // error reduction parameter
-  SetERP( 0.15 );
+  SetERP( 0.25 );
 
   // constraint force mixing
   SetCFM( 0.0000001 );
@@ -65,7 +67,7 @@ cisstODEWorld::cisstODEWorld( double period,
   // set the surface layer depth
   dWorldSetContactSurfaceLayer( GetWorldID(), 0.0001 );
 
-  SetContactMaxCorrectingVel( 0.01 );
+  SetContactMaxCorrectingVel( 0.005 );
 
 }
 
@@ -79,7 +81,7 @@ cisstODEWorld::~cisstODEWorld(){
 void cisstODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 
   dContact dContacts[cisstODEWorld::NUM_CONTACTS];
-  
+
   for(size_t i=0; i<cisstODEWorld::NUM_CONTACTS; i++){
     dContacts[i].surface.mode = (
 				 dContactMu2 |
@@ -93,20 +95,20 @@ void cisstODEWorld::Collision( dGeomID o1, dGeomID o2 ){
     dContacts[i].surface.bounce = 0.1;
     dContacts[i].surface.soft_cfm = 0.0000001;
     dContacts[i].surface.soft_erp = 0.15;
-
     */
+
     dContacts[i].surface.mu = .2;
     dContacts[i].surface.mu2 = 0.2;
     dContacts[i].surface.bounce = 0.2;
     dContacts[i].surface.soft_cfm = 0.0001;
-    dContacts[i].surface.soft_erp = 0.8;
+    dContacts[i].surface.soft_erp = contacterp;
 
   }
-
+ 
   int N = dCollide( o1, o2,
-                    cisstODEWorld::NUM_CONTACTS,
-                    &(dContacts[0].geom),
-                    sizeof(dContact) );
+		    cisstODEWorld::NUM_CONTACTS,
+		    &(dContacts[0].geom),
+		    sizeof(dContact) );
 
   for(int i=0; i<N; i++){
 
@@ -200,4 +202,5 @@ std::list<cisstODEContact> cisstODEWorld::GetContacts(){
   return matches;
   */
 }
+
 
