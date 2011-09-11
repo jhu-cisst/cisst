@@ -1,0 +1,31 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+$Id: devConfig.h.in 2303 2011-02-11 04:35:12Z sleonar7 $
+
+Author(s): Simon Leonard
+Created on: 2011-09-01
+
+(C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty. The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#ifndef _cisstOSGConfig_h
+#define _cisstOSGConfig_h
+
+#include <cisstConfig.h>
+
+// Using OpenCV 2.2
+#cmakedefine01 CISST_OSG_OPENCV
+
+#endif

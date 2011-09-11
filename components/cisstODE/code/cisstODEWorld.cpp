@@ -38,8 +38,7 @@ cisstODEContact::cisstODEContact( cisstODEBody* b1,
   depth( d ) {}
 
 
-const vctFixedSizeVector<double,3> cisstODEWorld::GRAVITY = vctFixedSizeVector<d
-ouble,3>(0.0, 0.0, -9.81);
+const vctFixedSizeVector<double,3> cisstODEWorld::GRAVITY = vctFixedSizeVector<double,3>(0.0, 0.0, -9.81);
 
 cisstODEWorld::cisstODEWorld( double period,
 			      const vctFixedSizeVector<double,3>& g ) : 
