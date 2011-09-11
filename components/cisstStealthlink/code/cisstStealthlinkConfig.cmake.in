@@ -14,3 +14,4 @@
 set (cisstStealthlink_INCLUDE_DIR "@cisstStealthlink_INCLUDE_DIR@")
 set (cisstStealthlink_LIBRARY_DIR "@cisstStealthlink_LIBRARY_DIR@")
 set (cisstStealthlink_LIBRARIES   "@cisstStealthlink_LIBRARIES@")
+set (cisstStealthlink_IS_SIMULATOR @cisstStealthlink_IS_SIMULATOR@)

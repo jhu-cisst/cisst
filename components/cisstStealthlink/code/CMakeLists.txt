@@ -12,6 +12,16 @@
 #
 # --- end cisst license ---
 
+# create alias for code and cmake configured file
+option (CISST_BUILD_COMP_cisstStealthlink_SIMULATOR "Wrappers for Medtronic StealthLink simulator (build instead of real wrapper which requires binaries from Medtronic" OFF)
+mark_as_advanced (CISST_BUILD_COMP_cisstStealthlink_SIMULATOR)
+set (cisstStealthlink_IS_SIMULATOR ${CISST_BUILD_COMP_cisstStealthlink_SIMULATOR})
+
+# add definition for code
+if (cisstStealthlink_IS_SIMULATOR)
+  add_definitions (-DcisstStealthlink_IS_SIMULATOR)
+endif (cisstStealthlink_IS_SIMULATOR)
+
 set (CISST_LIBRARIES_NEEDED cisstCommon
                             cisstCommonXML
                             cisstVector

@@ -38,15 +38,27 @@ if (cisst_FOUND)
     add_executable (cisstStealthlinkExample
                     mtsStealthlinkExampleComponent.h
                     mtsStealthlinkExampleComponent.cpp
-                    main.cpp
-                    )
-
+                    main.cpp)
     target_link_libraries (cisstStealthlinkExample
-                           cisstStealthlink
-                           ${Stealthlink_LIBRARIES}
-                           )
-
+                           cisstStealthlink ${Stealthlink_LIBRARIES})
     cisst_target_link_libraries (cisstStealthlinkExample ${CISST_LIBRARIES_NEEDED})
+
+    # compile distributed example is ZeroC Ice is available
+    if (CISST_MTS_HAS_ICE)
+      add_executable (cisstStealthlinkExampleServer
+                      mainServer.cpp)
+      target_link_libraries (cisstStealthlinkExampleServer
+                             cisstStealthlink ${Stealthlink_LIBRARIES})
+      cisst_target_link_libraries (cisstStealthlinkExampleServer ${CISST_LIBRARIES_NEEDED})
+
+      add_executable (cisstStealthlinkExampleClient
+                      mtsStealthlinkExampleComponent.h
+                      mtsStealthlinkExampleComponent.cpp
+                      mainClient.cpp)
+      target_link_libraries (cisstStealthlinkExampleClient
+                             cisstStealthlink ${Stealthlink_LIBRARIES})
+      cisst_target_link_libraries (cisstStealthlinkExampleClient ${CISST_LIBRARIES_NEEDED})
+    endif (CISST_MTS_HAS_ICE)
 
   endif (cisstStealthlink_FOUND)
 

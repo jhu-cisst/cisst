@@ -39,10 +39,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <AsCL/AsCL_Client.h>
 #include "mtsStealthlink_AsCL_Stuff.h"
 
-//#define STEALTH_SIM
-
-#ifdef STEALTH_SIM
-void AsCL_MSG(int verbose_level, char* msg, ...) {}
+#ifdef cisstStealthlink_IS_SIMULATOR
+void AsCL_MSG(int CMN_UNUSED(verbose_level), char * CMN_UNUSED(msg), ...) {}
 #endif
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsStealthlink, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
@@ -50,7 +48,7 @@ CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsStealthlink, mtsTaskPeriodic, mtsTaskPe
 void mtsStealthlink::Init(void)
 {
     // create Stealthlink objects
-#ifdef STEALTH_SIM
+#ifdef cisstStealthlink_IS_SIMULATOR
     this->Client = 0;
 #else
     this->Client = new AsCL_Client;
@@ -127,16 +125,17 @@ void mtsStealthlink::Configure(const std::string &filename)
 
     // initialize serial port
     std::string ipAddress;
-    if (!config.GetXMLValue("/tracker/controller", "@ip", ipAddress, "192.168.0.1"))
-        CMN_LOG_CLASS_INIT_WARNING << "IP address not found, using default: " << ipAddress << std::endl;
+    if (!config.GetXMLValue("/tracker/controller", "@ip", ipAddress, "192.168.0.1")) {
+        CMN_LOG_CLASS_INIT_WARNING << "Configure: IP address not found, using default: " << ipAddress << std::endl;
+    }
 
-#ifndef STEALTH_SIM
+#ifndef cisstStealthlink_IS_SIMULATOR
     // Configure Stealthlink interface
     AsCL_SetVerboseLevel(0);
     this->Client->SetPort(GRI_PORT_NUMBER);
 
     // Set StealthLink server IP address
-    CMN_LOG_CLASS_INIT_VERBOSE << "Setting Stealthink IP address = " << ipAddress << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting Stealthink IP address = " << ipAddress << std::endl;
     this->Client->SetHostName(const_cast<char *>(ipAddress.c_str()));
 #endif
 
@@ -159,11 +158,11 @@ void mtsStealthlink::Configure(const std::string &filename)
         }
     }
 
-#ifdef STEALTH_SIM
-    CMN_LOG_CLASS_INIT_VERBOSE << "Using simulated Stealthstation" << std::endl;
+#ifdef cisstStealthlink_IS_SIMULATOR
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: using simulated Stealthstation" << std::endl;
     StealthlinkPresent = true;
 #else
-    CMN_LOG_CLASS_INIT_VERBOSE << "Initializing Stealthlink" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: initializing Stealthlink" << std::endl;
     StealthlinkPresent = this->Client->Initialize(*(this->Utils)) ? true : false;
     if (!StealthlinkPresent) {
         CMN_LOG_CLASS_RUN_WARNING << "Configure: could not Initialize StealthLink" << std::endl;
@@ -241,7 +240,7 @@ void mtsStealthlink::RequestSurgicalPlan(void)
 {
     if (StealthlinkPresent) {
         surg_plan the_surg_plan;
-#ifndef STEALTH_SIM
+#ifndef cisstStealthlink_IS_SIMULATOR
         this->Client->GetDataForCode(GET_SURGICAL_PLAN,
                                      reinterpret_cast<void*>(&the_surg_plan));
 #endif
@@ -265,7 +264,7 @@ void mtsStealthlink::Run(void)
 {
     ResetAllTools();  // Set all tools invalid
     if (StealthlinkPresent) {
-#ifndef STEALTH_SIM
+#ifndef cisstStealthlink_IS_SIMULATOR
         // Get the data from Stealthlink.
         all_info info;
         this->Client->GetDataForCode(GET_ALL, reinterpret_cast<void*>(&info));
@@ -275,6 +274,33 @@ void mtsStealthlink::Run(void)
         ToolData = info.Tool;
         FrameData = info.Frame;
         RegistrationData = info.Reg;
+#else
+        // Compute some simulated data
+        const ToolsContainer::const_iterator firstTool = Tools.begin();
+        if (firstTool != Tools.end()) {
+            tool simulatedTool;
+            for (unsigned int i = 0; i < 3; i++) {
+                for (unsigned int j = 0; j < 3; j++) {
+                    if (i == j) {
+                        simulatedTool.xform[i][j] = 1.0;
+                    } else {
+                        simulatedTool.xform[i][j] = 0.0;
+                    }
+                }
+                simulatedTool.xform[i][3] = static_cast<float>(i);
+            }
+            simulatedTool.geometry_error = 1.11;
+            const std::string toolName = (*firstTool)->GetStealthName();
+            for (unsigned int k = 0; k < NAME_LENGTH; k++) {
+                if (k < toolName.size()) {
+                    simulatedTool.name[k] = toolName[k];
+                } else {
+                    simulatedTool.name[k] = '\0';
+                }
+            }
+            simulatedTool.valid = true;
+            ToolData = simulatedTool;
+        }
 #endif
 
         // update tool interfaces data
@@ -293,7 +319,7 @@ void mtsStealthlink::Run(void)
             }
             // Get tool tip calibration if it is invalid or has changed
             if ((strcmp(ToolData.GetName(), ProbeCal.GetName()) != 0) || !ProbeCal.Valid()) {
-#ifndef STEALTH_SIM
+#ifndef cisstStealthlink_IS_SIMULATOR
                 probe_calibration probe_cal;
                 this->Client->GetDataForCode(GET_PROBE_CALIBRATION,
                                              reinterpret_cast<void*>(&probe_cal));
