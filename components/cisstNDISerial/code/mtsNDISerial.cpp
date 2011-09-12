@@ -897,10 +897,12 @@ void mtsNDISerial::ReportStrayMarkers(void)
     unsigned int numGarbageBits = (4 * outOfVolumeReplySize) - numMarkers;
     for (unsigned int i = 0; i < outOfVolumeReplySize; i++) {
         std::bitset<4> outOfVolumeReplyByte(parsePointer[i]);
+        outOfVolumeReplyByte.flip();
         for (unsigned int j = 0; j < 4; j++) {
             outOfVolumeReply[4*i + j] = outOfVolumeReplyByte[3-j];
         }
     }
+    parsePointer += outOfVolumeReplySize;
 
     // read each marker's position
     vctDynamicVector<vctDouble3> A(numMarkers);
