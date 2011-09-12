@@ -68,7 +68,6 @@ public:
     typedef std::vector<ValuePair> Values;
     typedef std::vector<Values> SetOfValues;
 
-#if CISST_MTS_HAS_ICE
     //-------------------------------------------------------------------------
     //  Proxy Object Control (Creation, Removal)
     //-------------------------------------------------------------------------
@@ -100,12 +99,10 @@ public:
     /*! Remove a required interface proxy */
     virtual bool RemoveInterfaceRequiredProxy(
         const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "") = 0;
-#endif
 
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
     /*! \brief Connect interfaces at server side 
         \param description Description of connection
         \param listenerID Id of local component manager (set as process name) 
@@ -127,7 +124,6 @@ public:
               the connection after timeout.  This method is always executed 
               ahead of ConnectServerSideInterface(). */
     virtual bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
-#endif
 
     //-------------------------------------------------------------------------
     //  Getters
@@ -135,7 +131,6 @@ public:
     /*! Returns a name of this local component manager */
     virtual const std::string GetProcessName(const std::string & listenerID = "") const = 0;
 
-#if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
     virtual void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                                     const std::string & componentName, 
@@ -238,7 +233,6 @@ public:
     virtual bool GetInterfaceRequiredDescription(
         const std::string & componentName, const std::string & requiredInterfaceName,
         InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
-#endif
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocalInterface)

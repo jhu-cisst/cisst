@@ -128,26 +128,20 @@ protected:
         executes commands, it checks if it has a local connection to the LCM on
         the same process and, if yes, it sends the command to the local LCM.
         If not, it delivers the command to a remote LCM same as before. */
-#if CISST_MTS_HAS_ICE
     mtsManagerLocal * LocalManager;
-#endif
     mtsManagerLocalInterface * LocalManagerConnected;
 
     /*! Mutex for thread-safe processing */
     osaMutex ProcessMapChange;    // for thread-safe ProcessMap update
     osaMutex ConnectionMapChange; // for thread-safe ConnectionMap update
     osaMutex ConnectionChange;    // to process Connect() request one-by-one
-#if CISST_MTS_HAS_ICE
     osaMutex DisconnectedProcessCleanupMapChange; // for thread-safe DisconnectedProcessCleanupMap update
-#endif
 
     /*! Counter to issue a new connection ID */
     ConnectionIDType ConnectionID;
 
-#if CISST_MTS_HAS_ICE
     /*! Network proxy server */
     mtsManagerProxyServer * ProxyServer;
-#endif
 
     /*! For dynamic component composition feature */
     mtsManagerComponentServer * ManagerComponentServer;
@@ -166,7 +160,6 @@ protected:
     void * ThreadDisconnectProcess(void * arg);
 
     /*! To clean up disconnected process */
-#if CISST_MTS_HAS_ICE
     typedef struct CleanupElementType {
         std::string ProcessName;
         std::string ComponentProxyName;
@@ -174,7 +167,6 @@ protected:
     typedef std::list<CleanupElementType> CleanupElementListType;
     typedef cmnNamedMap<CleanupElementListType> DisconnectedProcessCleanupMapType;
     DisconnectedProcessCleanupMapType DisconnectedProcessCleanupMap;
-#endif
 
     /*! Prints out ProcessMap in human readable format */
     void ShowInternalStructure(void);
@@ -243,11 +235,9 @@ protected:
         is dequeued from disconnect waiting queue and enqueued to disconnected queue. */
     void DisconnectInternal(void);
 
-#if CISST_MTS_HAS_ICE
     /*! Maintains information to clean up disconnected processes */
     void AddToDisconnectedProcessCleanup(const std::string & sourceProcessName,
         const std::string & targetProcessName, const std::string & targetComponentProxyName);
-#endif
 
 public:
     /*! Constructor and destructor */
@@ -265,11 +255,7 @@ public:
 
     bool FindProcess(const std::string & processName) const;
 
-#if CISST_MTS_HAS_ICE
     bool RemoveProcess(const std::string & processName, const bool networkDisconnect = false);
-#else
-    bool RemoveProcess(const std::string & processName);
-#endif
 
     //-------------------------------------------------------------------------
     //  Component Management
@@ -312,11 +298,9 @@ public:
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-#if CISST_MTS_HAS_ICE
     bool InitiateConnect(const ConnectionIDType connectionID);
 
     bool ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
-#endif
 
     void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const;
 
@@ -349,7 +333,6 @@ public:
                                              const std::string & componentName,
                                              std::vector<std::string> & namesOfInterfacesRequired) const;
 
-#if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(const std::string & processName,
                             const std::string & componentName,
@@ -423,7 +406,6 @@ public:
 
     /*! Generate unique name of a proxy component */
     static const std::string GetComponentProxyName(const std::string & processName, const std::string & componentName);
-#endif
 
     /*! Get a process object (local component manager object) */
     mtsManagerLocalInterface * GetProcessObject(const std::string & processName) const;
@@ -435,7 +417,6 @@ public:
     //-------------------------------------------------------------------------
     //  Networking
     //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
     /*! Start network proxy server. The server's listening port number is
         fetched from config.server file (default port: 10705) */
     bool StartServer(void);
@@ -457,7 +438,6 @@ public:
         confirmed by the LCM within timeout after the GCM issues a new connection
         id.  Otherwise, the GCM actively disconnects the pending connection. */
     void CheckConnectConfirmTimeout(void);
-#endif
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerGlobal)
