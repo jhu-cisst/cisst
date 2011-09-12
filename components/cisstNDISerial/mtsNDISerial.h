@@ -154,6 +154,7 @@ class CISST_EXPORT mtsNDISerial : public mtsTaskPeriodic
     void ToggleTracking(const mtsBool & track);
     void Track(void);
     void CalibratePivot(const mtsStdString & toolName);
+    void ReportStrayMarkers(void);
 
     osaSerialPort SerialPort;
     char SerialBuffer[MAX_BUFFER_SIZE];

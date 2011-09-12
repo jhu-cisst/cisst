@@ -57,6 +57,7 @@ class CISST_EXPORT mtsNDISerialControllerQtComponent : public QObject, public mt
         mtsFunctionVoid Enable;
         mtsFunctionWrite CalibratePivot;
         mtsFunctionWrite Track;
+        mtsFunctionVoid ReportStrayMarkers;
     } NDI;
 
     struct {
@@ -69,6 +70,7 @@ class CISST_EXPORT mtsNDISerialControllerQtComponent : public QObject, public mt
     void NDIInitializeQSlot(void);
     void NDICalibratePivotQSlot(void);
     void NDITrackQSlot(bool toggled);
+    void NDIReportStrayMarkersQSlot(void);
     void RecordQSlot(bool toggled);
 };
 
