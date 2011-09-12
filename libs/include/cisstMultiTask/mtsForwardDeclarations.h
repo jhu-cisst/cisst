@@ -135,8 +135,10 @@ class mtsCollectorBase;
 class mtsCollectorState;
 
 // classes for networked configurations
+class mtsComponentProxy;
 class mtsProxySerializer;
 class mtsManagerProxyServer;
+class mtsManagerProxyClient;
 
 // managers
 class mtsManagerLocal;
