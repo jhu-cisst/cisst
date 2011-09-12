@@ -103,7 +103,7 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
      while too few gives bad results (100 contacts points is actually quite 
      large)
   */
-  static const size_t NUM_CONTACTS = 200;
+  static const size_t NUM_CONTACTS = 50;
 
  protected:
   
@@ -111,6 +111,9 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
   static const vctFixedSizeVector<double,3> GRAVITY;
 
   double contacterp;
+  double contactbounce;
+  double mu;
+  double surfacelayer;
 
  public:
 
@@ -164,7 +167,11 @@ class CISST_EXPORT cisstODEWorld : public cisstOSGWorld {
   std::list< cisstODEContact > GetContacts();
 
   void SetContactERP( double erp ){ contacterp = erp; }
-  
+  void SetContactBouncing( double cb ){ contactbounce = cb; }
+  void SetContactFriction( double mu ){ this->mu = mu; }
+  void SetContactSurfaceLayer( double sl )
+  { dWorldSetContactSurfaceLayer( GetWorldID(), sl ); }
+
 
 };
 

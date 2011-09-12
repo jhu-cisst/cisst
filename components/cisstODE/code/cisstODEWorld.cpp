@@ -64,9 +64,9 @@ cisstODEWorld::cisstODEWorld( double period,
   SetCFM( 0.0000001 );
   
   // set the surface layer depth
-  dWorldSetContactSurfaceLayer( GetWorldID(), 0.0001 );
+  SetContactSurfaceLayer( 0.0001 );
 
-  SetContactMaxCorrectingVel( 0.005 );
+  SetContactMaxCorrectingVel( 0.001 );
 
 }
 
@@ -81,24 +81,17 @@ void cisstODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 
   dContact dContacts[cisstODEWorld::NUM_CONTACTS];
 
-  for(size_t i=0; i<cisstODEWorld::NUM_CONTACTS; i++){
-    dContacts[i].surface.mode = (
-				 dContactMu2 |
-				 dContactBounce 
-				 | dContactSoftERP
-				 | dContactSoftCFM 
-				 );
-    /*
-    dContacts[i].surface.mu = 150.0;
-    dContacts[i].surface.mu2 = 150.0;
-    dContacts[i].surface.bounce = 0.1;
-    dContacts[i].surface.soft_cfm = 0.0000001;
-    dContacts[i].surface.soft_erp = 0.15;
-    */
+  int mode = dContactSoftERP | dContactSoftCFM;
 
-    dContacts[i].surface.mu = .2;
-    dContacts[i].surface.mu2 = 0.2;
-    dContacts[i].surface.bounce = 0.2;
+  if( 0.0 < contactbounce ) 
+    mode |= dContactBounce;
+
+  for(size_t i=0; i<cisstODEWorld::NUM_CONTACTS; i++){
+
+    dContacts[i].surface.mode = mode;
+    dContacts[i].surface.mu = mu;
+    dContacts[i].surface.mu2 = mu;
+    dContacts[i].surface.bounce = contactbounce;
     dContacts[i].surface.soft_cfm = 0.0001;
     dContacts[i].surface.soft_erp = contacterp;
 
@@ -161,6 +154,8 @@ static void space_collision(void *argv, dGeomID o1, dGeomID o2){
     
     // dAreConnected doesn't like if both bodies are "zero" (that is if both
     // geoms are non-placeable
+    world->Collision( o1, o2 ); 
+
     if( b1 != 0 && b2 != 0 ) {
       if( dAreConnected( b1, b2 ) == 0 ){
 	world->Collision( o1, o2 ); 

@@ -1,5 +1,7 @@
 #include <cisstODE/cisstODEBody.h>
 #include <cisstODE/cisstODEWorld.h>
+#include <osgUtil/Simplifier>
+
 #include <cisstVector/vctMatrixRotation3.h>
 
 
@@ -241,9 +243,18 @@ void cisstODEBody::Initialize( const vctFrame4x4<double>& Rtwb,
 
 void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
 
+  cisstOSGBody::GeodeVisitor gvtmp;
+  this->accept( gvtmp );
+
+  if( 1000 < gvtmp.geodetriangles.size() ){
+    double ratio = 1000.0 / ( (double) gvtmp.geodetriangles.size() );
+    osgUtil::Simplifier simplifier( ratio, 4.0 );
+    this->accept( simplifier );
+  }
+
   cisstOSGBody::GeodeVisitor gv;
   this->accept( gv );
-  
+
   // Create the array for ODE and copy the data
   VertexCount =  gv.geodetriangles.size()*3;  // 3 vertex per triangle
   Vertices  = new dVector3[ VertexCount ];    // create the vertices vector
@@ -369,6 +380,7 @@ vctFixedSizeVector<double,3> cisstODEBody::GetPosition() const{
 vctFrm3 cisstODEBody::GetTransform() const{
   return vctFrm3( GetOrientation(), GetPosition() );
 }
+
 /*
 vctDynamicMatrix<double> cisstODEBody::GetVertices() const
 { return vctVertices; }
