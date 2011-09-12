@@ -313,6 +313,8 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
         OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)
 
     ELSE(OpenCV2_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
+
         IF(CISST_SVL_HAS_OPENCV2)
             MARK_AS_ADVANCED(CLEAR ${OpenCV2_OPTIONS})
             MESSAGE(FATAL_ERROR "OpenCV 2.2+ required. Please specify its location.")
@@ -323,6 +325,8 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
     ENDIF(OpenCV2_FOUND)
 
 ELSE(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+    cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
+
     MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
     OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" OFF)
 ENDIF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
@@ -455,6 +459,8 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
         OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
 
     ELSE(OpenCV_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision OpenCV)
+
         IF(CISST_SVL_HAS_OPENCV)
             MARK_AS_ADVANCED(CLEAR ${OpenCV_OPTIONS})
             MESSAGE(FATAL_ERROR "OpenCV required. Please specify its location.")
@@ -465,6 +471,8 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
     ENDIF(OpenCV_FOUND)
 
 ELSE(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+    cisst_unset_all_package_settings (cisstStereoVision OpenCV)
+
     MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
     OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
 ENDIF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
@@ -1055,7 +1063,7 @@ IF(UNIX)
     IF(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
         FIND_PACKAGE(X11)
         IF(X11_FOUND)
-            SET(SVL_X11_FOUND ${X11_FOUND})
+            SET(SVL_X11_FOUND ${X11_FOUND} CACHE INTERNAL "SVL X11 found")
 
             cisst_set_package_settings (cisstStereoVision X11 INCLUDE_DIRECTORIES X11_INCLUDE_DIR)
             cisst_set_package_settings (cisstStereoVision X11 LIBRARIES           X11_LIBRARIES)
@@ -1087,6 +1095,8 @@ IF(UNIX)
             ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
 
         ELSE(X11_FOUND)
+            cisst_unset_all_package_settings (cisstStereoVision X11)
+
             IF(CISST_SVL_HAS_X11)
                 MESSAGE(FATAL_ERROR "X11 required. Please specify its location.")
             ELSE(CISST_SVL_HAS_X11)
@@ -1095,6 +1105,8 @@ IF(UNIX)
         ENDIF(X11_FOUND)
 
     ELSE(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision X11)
+
         OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
         SET(CISST_SVL_HAS_XV "OFF" CACHE INTERNAL "SVL Has Xvideo")
     ENDIF(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
