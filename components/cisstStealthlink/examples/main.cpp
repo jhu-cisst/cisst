@@ -28,11 +28,12 @@ int main(int CMN_UNUSED(argc), char * CMN_UNUSED(argv[]))
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // set the log level of detail on select components
     cmnLogger::SetMaskClass("cmnXMLPath", CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClass("mtsStealthlink", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
     // create the components
     mtsStealthlink * componentStealthlink = new mtsStealthlink("Stealthlink", 50.0 * cmn_ms);

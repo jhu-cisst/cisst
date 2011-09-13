@@ -27,13 +27,14 @@ int main(int argc, char * argv[])
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    // get all message to log file
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
-    // get only errors and warnings to std::cout
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    // specify a higher, more verbose log level for these classes
+
+    // set the log level of detail on select components
+    cmnLogger::SetMaskClass("cmnXMLPath", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
-    // enable system-wide thread-safe logging
+
 #ifdef MTS_LOGGING
     mtsManagerLocal::SetLogForwarding(true);
 #endif

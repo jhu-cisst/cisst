@@ -56,14 +56,6 @@ void mtsStealthTool::Assign(const mtsStealthTool & that)
 void mtsStealthTool::Assign(const struct tool & griTool)
 {
     frameConversion(this->XForm, griTool.xform);
-#if 0
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            XForm.Rotation().at(i, j) =  griTool.xform[i][j];
-        }
-        XForm.Translation().at(i) = griTool.xform[i][3];
-    }
-#endif
     GeometryError = griTool.geometry_error;
     for (int k = 0; k < NAME_LENGTH; k++) {
         Name[k] = griTool.name[k];
@@ -117,7 +109,8 @@ void mtsStealthTool::ToStreamRaw(std::ostream & outputStream, const char delimit
 void mtsStealthTool::SerializeRaw(std::ostream & outputStream) const
 {
     mtsGenericObject::SerializeRaw(outputStream);
-    //cmnSerializeRaw(outputStream, this->Name);
+    std::string name = this->Name;
+    cmnSerializeRaw(outputStream, name);
     this->XForm.SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, this->GeometryError);
 }
@@ -125,7 +118,9 @@ void mtsStealthTool::SerializeRaw(std::ostream & outputStream) const
 void mtsStealthTool::DeSerializeRaw(std::istream & inputStream)
 {
     mtsGenericObject::DeSerializeRaw(inputStream);
-    //cmnDeSerializeRaw(outputStream, this->Name);
+    std::string name;
+    cmnDeSerializeRaw(inputStream, name);
+    strncpy(this->Name, name.c_str(), name.size() + 1); // copy all characters include \0
     this->XForm.DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, this->GeometryError);
 }
@@ -141,14 +136,6 @@ void mtsStealthFrame::Assign(const mtsStealthFrame & that)
 void mtsStealthFrame::Assign (const struct frame & griFrame)
 {
     frameConversion(this->XForm, griFrame.xform);
-#if 0
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            XForm.Rotation().at(i, j) =  griFrame.xform[i][j];
-        }
-        XForm.Translation().at(i) = griFrame.xform[i][3];
-    }
-#endif
     GeometryError = griFrame.geometry_error;
     for (int k = 0; k < NAME_LENGTH; k++) Name[k] = griFrame.name[k];
     this->SetValid(griFrame.valid);
@@ -204,14 +191,6 @@ void mtsStealthRegistration::Assign(const mtsStealthRegistration & that)
 void mtsStealthRegistration::Assign (const struct registration & griRegistration)
 {
     frameConversion(this->XForm, griRegistration.xform);
-#if 0
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            XForm.Rotation().at(i, j) =  griRegistration.xform[i][j];
-        }
-        XForm.Translation().at(i) = griRegistration.xform[i][3];
-    }
-#endif
     predictedAccuracy = griRegistration.predicted_accuracy;
     this->SetValid(griRegistration.valid);
 }

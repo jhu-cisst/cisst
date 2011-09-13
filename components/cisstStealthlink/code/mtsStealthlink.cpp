@@ -308,8 +308,16 @@ void mtsStealthlink::Run(void)
             if (!CurrentTool || (CurrentTool->GetStealthName() != ToolData.GetName())) {
                 CurrentTool = FindTool(ToolData.GetName());
                 if (!CurrentTool) {
-                    CMN_LOG_CLASS_INIT_VERBOSE << "Adding new tool: " << ToolData.GetName() << std::endl;
+                    CMN_LOG_CLASS_INIT_VERBOSE << "Run: adding new tool \""
+                                               << ToolData.GetName() << "\"" << std::endl;
                     CurrentTool = AddTool(ToolData.GetName(), ToolData.GetName());
+                }
+                if (CurrentTool) {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Run: current tool is now \""
+                                              << CurrentTool->GetInterfaceName() << "\"" << std::endl;
+                } else {
+                    CMN_LOG_CLASS_RUN_ERROR << "Run: unable to add provided interface for new tool \""
+                                            << ToolData.GetName() << "\"" << std::endl;
                 }
             }
             // rely on older interface to retrieve tool information
@@ -363,5 +371,5 @@ void mtsStealthlink::Cleanup(void)
         delete this->Utils;
         this->Utils = 0;
     }
-    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS << "...Finished." << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "Cleanup: finished" << std::endl;
 }
