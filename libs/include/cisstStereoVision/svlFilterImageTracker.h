@@ -73,6 +73,8 @@ protected:
     virtual void LinkChannelsVertically();
     virtual int ReconstructRigidBody();
     virtual void BackprojectRigidBody();
+    virtual int ComputeHomography();
+    virtual void BackprojectHomography();
     virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
     virtual int UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height);
     virtual void PushSamplesToAsyncOutputs(double timestamp);
@@ -89,6 +91,8 @@ private:
     vctDynamicVector<double> RigidBodyAngle;
     vctDynamicVector<double> RigidBodyScale;
     vctDynamicVector<vct3x3> RigidBodyTransform;
+
+    vctDynamicVector< vctFixedSizeVector<double, 9> > Homography;
 
     bool ResetFlag;
     svlSampleTargets InitialTargets;

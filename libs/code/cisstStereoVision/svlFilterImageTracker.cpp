@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstStereoVision/svlTrackerMSBruteForce.h>
 
+//#include <cisstNumerical/nmrSVD.h>
+
 #include <math.h>
 
 #define __PI    3.1415926535898
@@ -220,6 +222,8 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
         RigidBodyScale.SetSize(VideoChannels);
         RigidBodyScale.SetAll(1.0);
         RigidBodyTransform.SetSize(VideoChannels);
+
+        Homography.SetSize(VideoChannels);
 
         WarpedRigidBodyAngle.SetSize(VideoChannels);
         WarpedRigidBodyAngle.SetAll(0.0);
@@ -426,7 +430,9 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
             LinkChannelsVertically();
             for (i = 0; i < 3; i ++) ReconstructRigidBody();
+            //ComputeHomography();
             BackprojectRigidBody();
+            //BackprojectHomography();
 
             for (vch = 0; vch < VideoChannels; vch ++) {
 
@@ -739,6 +745,107 @@ void svlFilterImageTracker::BackprojectRigidBody()
             target ++;
         }
     }
+}
+
+int svlFilterImageTracker::ComputeHomography()
+{
+/*
+    const unsigned int targetcount = Targets.cols();
+    vctDynamicMatrixRef<int> proto_pos;
+    svlTarget2D *target = 0;
+    unsigned int i, j, vch;
+    double x, y, proto_x, proto_y, ax, ay, apx, apy, conf, sum_conf;
+
+    for (vch = 0; vch < VideoChannels; vch ++) {
+
+        proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(vch));
+
+        unsigned int visiblecount;
+
+        // Compute center of weight
+        for (i = 0, ax = 0, ay = 0, apx = 0, apy = 0, sum_conf = 0, visiblecount = 0, target = Targets.Pointer(vch, 0);
+             i < targetcount;
+             i ++, target ++) {
+            if (target->visible) {
+                conf = target->conf;
+                ax += target->pos.x;// * conf;
+                ay += target->pos.y;// * conf;
+                apx += proto_pos.Element(0, i);// * conf;
+                apy += proto_pos.Element(1, i);// * conf;
+                sum_conf += conf;
+                visiblecount ++;
+            }
+        }
+        ax /= visiblecount;//sum_conf;
+        ay /= visiblecount;//sum_conf;
+        apx /= visiblecount;//sum_conf;
+        apy /= visiblecount;//sum_conf;
+
+        vctDynamicMatrix<double> A(visiblecount * 2, 9, VCT_COL_MAJOR);
+
+        for (i = 0, j = 0, target = Targets.Pointer(vch, 0); i < targetcount; i ++, target ++) {
+            if (target->visible) {
+                x = target->pos.x - ax;
+                y = target->pos.y - ay;
+                proto_x = proto_pos.Element(0, i) - apx;
+                proto_y = proto_pos.Element(1, i) - apy;
+                A.Row(j).Assign(-proto_x, -proto_y, -1.0, 0.0, 0.0, 0.0, proto_x * x, proto_y * x, x);
+                A.Row(j + 1).Assign(0.0, 0.0, 0.0, -proto_x, -proto_y, -1.0, proto_x * y, proto_y * y, y);
+                j += 2;
+            }
+        }
+
+        nmrSVDDynamicData svdData(A);
+        nmrSVD(A, svdData);
+
+        for (i = 0; i < 9; i ++) {
+            Homography[vch][i] = svdData.Vt().Element(8, i) / svdData.Vt().Element(8, 8);
+        }
+
+        std::cerr << "Video channel: " << vch << std::endl;
+        std::cout << "Homography: (" << j << ") " << Homography[vch] << std::endlls -l
+                  << "Singular values: " << svdData.S() << std::endl
+                  << "Eigen vectors:" << std::endl << svdData.Vt().TransposeRef() << std::endl << std::endl;
+    }
+*/
+    return 0;
+}
+
+void svlFilterImageTracker::BackprojectHomography()
+{
+/*
+    const unsigned int targetcount = Targets.cols();
+    double rx, ry, proto_x, proto_y;
+    vctDynamicMatrixRef<int> proto_pos;
+    vctFixedSizeVectorRef<double, 9, 1> h;
+    svlTarget2D *target;
+    unsigned int i, vch;
+
+    for (vch = 0; vch < VideoChannels; vch ++) {
+        if (!Trackers[vch]) continue;
+
+        proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(vch));
+        h.SetRef(Homography[vch]);
+
+        // Backproject transformed model onto output targets
+        for (i = 0, target = Targets.Pointer(vch, 0); i < targetcount; i ++, target ++) {
+            if (target->used) {
+                proto_x = proto_pos.Element(0, i);
+                proto_y = proto_pos.Element(1, i);
+
+                rx = (proto_x * h[0] + proto_y * h[1] + h[2]) / (proto_x * h[6] + proto_y * h[7] + 1.0);
+                ry = (proto_x * h[3] + proto_y * h[4] + h[5]) / (proto_x * h[6] + proto_y * h[7] + 1.0);
+
+                target->pos.x = rx;
+                target->pos.y = ry;
+
+//                std::cerr << "(" << x << ", " << y << "), "
+//                          << "(" << proto_x << ", " << proto_y << "), "
+//                          << "(" << rx << ", " << ry << ")" << std::endl;
+            }
+        }
+    }
+*/
 }
 
 void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch, int threadid)
