@@ -71,13 +71,14 @@ protected:
 
     typedef std::vector<Tool *> ToolsContainer;
     ToolsContainer Tools;
-    Tool * CurrentTool;
+    Tool * CurrentTool, * CurrentFrame;
 
     // Class used to store registration data
     class Registration
     {
     public:
-        mtsFrm3 Transformation;
+        vctFrm3 Transformation;
+        mtsBool Valid;
         mtsDouble PredictedAccuracy;
     };
 
