@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 svlSampleQueue::svlSampleQueue(svlStreamType type, unsigned int size) :
     Type(type),
-    Size(std::max(size, 1u)),
+    Size(std::max(size, 2u)), // TO DO: check why it doesn't work when min=1
     DroppedSamples(0),
     UnusedItems(Size, 0)
 {
