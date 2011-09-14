@@ -8,9 +8,15 @@
 cisstODEBody::cisstODEBody( const std::string& model,
 			    cisstODEWorld* odeworld,
 			    const vctFrame4x4<double>& Rtwb,
-			    cisstOSGWorld* osgworld ) :
+			    double scale,
+			    const std::string& options,
+			    cisstOSGWorld* osgworld ):
 
-  cisstOSGBody( model, (osgworld == NULL) ? odeworld : osgworld, Rtwb ),
+  cisstOSGBody( model, 
+		(osgworld == NULL) ? odeworld : osgworld, 
+		Rtwb,
+		scale,
+		options ),
   odeworld( odeworld ),
   bodyid( 0 ),
   mass( NULL ),
@@ -19,17 +25,23 @@ cisstODEBody::cisstODEBody( const std::string& model,
   VertexCount( 0 ),
   Indices( NULL ),
   IndexCount( 0 ){
-
-  Initialize( Rtwb );
+    this->scale = scale;
+    Initialize( Rtwb );
     
 }
 
 cisstODEBody::cisstODEBody( const std::string& model,
 			    cisstODEWorld* odeworld,
 			    const vctFrm3& Rtwb,
-			    cisstOSGWorld* osgworld ) :
+			    double scale,
+                            const std::string& options,
+			    cisstOSGWorld* osgworld ):
 			    
-  cisstOSGBody( model, (osgworld == NULL) ? odeworld : osgworld, Rtwb ),
+  cisstOSGBody( model, 
+		(osgworld == NULL) ? odeworld : osgworld, 
+		Rtwb,
+		scale,
+		options ),
   odeworld( odeworld ),
   bodyid( 0 ),
   mass( NULL ),
@@ -38,6 +50,7 @@ cisstODEBody::cisstODEBody( const std::string& model,
   VertexCount( 0 ),
   Indices( NULL ),
   IndexCount( 0 ){
+  this->scale = scale;
 
   // Hack to avoid non-normalized rotations!
   const vctMatrixRotation3<double>& Rwb = Rtwb.Rotation();
@@ -55,9 +68,15 @@ cisstODEBody::cisstODEBody( const std::string& model,
 			    cisstODEWorld* odeworld, 
 			    const vctFrame4x4<double>& Rtwb,
 			    double m,
-			    cisstOSGWorld* osgworld ) :
+			    double scale,
+                            const std::string& options,
+			    cisstOSGWorld* osgworld ):
 
-  cisstOSGBody( model, (osgworld == NULL) ? odeworld : osgworld, Rtwb ),
+  cisstOSGBody( model, 
+		(osgworld == NULL) ? odeworld : osgworld,
+		Rtwb,
+		scale,
+		options ),
   odeworld( odeworld ),
   bodyid( 0 ),
   mass( NULL ),
@@ -66,6 +85,7 @@ cisstODEBody::cisstODEBody( const std::string& model,
   VertexCount( 0 ),
   Indices( NULL ),
   IndexCount( 0 ){
+  this->scale = scale;
 
   vctFixedSizeVector<double,3> tbcom( 0.0 );
   vctFixedSizeMatrix<double,3,3> moit = vctFixedSizeMatrix<double,3,3>::Eye();
@@ -77,9 +97,15 @@ cisstODEBody::cisstODEBody( const std::string& model,
 			    cisstODEWorld* odeworld, 
 			    const vctFrm3& Rtwb,
 			    double m,
-			    cisstOSGWorld* osgworld ) :
+			    double scale,
+                            const std::string& options,
+			    cisstOSGWorld* osgworld ):
 
-  cisstOSGBody( model, (osgworld == NULL) ? odeworld : osgworld, Rtwb ),
+  cisstOSGBody( model, 
+		(osgworld == NULL) ? odeworld : osgworld, 
+		Rtwb,
+		scale,
+		options ),
   odeworld( odeworld ),
   bodyid( 0 ),
   mass( NULL ),
@@ -89,6 +115,7 @@ cisstODEBody::cisstODEBody( const std::string& model,
   Indices( NULL ),
   IndexCount( 0 ){
 
+  this->scale = scale;
   vctFixedSizeVector<double,3> tbcom( 0.0 );
   vctFixedSizeMatrix<double,3,3> moit = vctFixedSizeMatrix<double,3,3>::Eye();
 
@@ -109,9 +136,15 @@ cisstODEBody::cisstODEBody( const std::string& model,
 			    double m,
 			    const vctFixedSizeVector<double,3>& tbcom,
 			    const vctFixedSizeMatrix<double,3,3>& moit,
+			    double scale,
+                            const std::string& options,
 			    cisstOSGWorld* osgworld ) :
 
-  cisstOSGBody( model, (osgworld == NULL) ? odeworld : osgworld, Rtwb ),
+  cisstOSGBody( model, 
+		(osgworld == NULL) ? odeworld : osgworld,
+		Rtwb,
+		scale,
+		options ),
   odeworld( odeworld ),
   bodyid( 0 ),
   mass( NULL ),
@@ -121,6 +154,7 @@ cisstODEBody::cisstODEBody( const std::string& model,
   Indices( NULL ),
   IndexCount( 0 ){
 
+  this->scale = scale;
   Initialize( Rtwb, m, tbcom, moit );
 
 }
@@ -132,9 +166,14 @@ cisstODEBody::cisstODEBody( const std::string& model,
 			    double m,
 			    const vctFixedSizeVector<double,3>& tbcom,
 			    const vctFixedSizeMatrix<double,3,3>& moit,
-			    cisstOSGWorld* osgworld ) :
-
-  cisstOSGBody( model, (osgworld == NULL) ? odeworld : osgworld, Rtwb ),
+			    double scale,
+                            const std::string& options,
+			    cisstOSGWorld* osgworld ):
+  cisstOSGBody( model, 
+		(osgworld == NULL) ? odeworld : osgworld,
+		Rtwb,
+		scale,
+		options ),
   odeworld( odeworld ),
   bodyid( 0 ),
   mass( NULL ),
@@ -143,8 +182,9 @@ cisstODEBody::cisstODEBody( const std::string& model,
   VertexCount( 0 ),
   Indices( NULL ),
   IndexCount( 0 ){
-  
-  // Hack to avoid non-normalized rotations!
+   
+  this->scale = scale;
+ // Hack to avoid non-normalized rotations!
   const vctMatrixRotation3<double>& Rwb = Rtwb.Rotation();
   vctQuaternionRotation3<double> qwb( Rwb, VCT_NORMALIZE );
   vctFixedSizeVector<double,3> twb( Rtwb.Translation() );
@@ -228,7 +268,7 @@ void cisstODEBody::Initialize( const vctFrame4x4<double>& Rtwb,
     
     // set the body position
     dBodySetPosition( GetBodyID(), Rtwcom[0][3], Rtwcom[1][3], Rtwcom[2][3] );
-    
+
     // get the orientation of the body
     dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
 		   Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
@@ -243,15 +283,6 @@ void cisstODEBody::Initialize( const vctFrame4x4<double>& Rtwb,
 
 void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
 
-  cisstOSGBody::GeodeVisitor gvtmp;
-  this->accept( gvtmp );
-
-  if( 1000 < gvtmp.geodetriangles.size() ){
-    double ratio = 1000.0 / ( (double) gvtmp.geodetriangles.size() );
-    osgUtil::Simplifier simplifier( ratio, 4.0 );
-    this->accept( simplifier );
-  }
-
   cisstOSGBody::GeodeVisitor gv;
   this->accept( gv );
 
@@ -264,36 +295,28 @@ void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
   // copy the data
   // ti: triangle index
   // vi: vertex index
+
   for( size_t ti=0, vi=0; ti<gv.geodetriangles.size(); ti++ ){
 
     // copy the vertices
-    Vertices[vi][0] = gv.geodetriangles[ti].p1[0] - com[0];
-    Vertices[vi][1] = gv.geodetriangles[ti].p1[1] - com[1];
-    Vertices[vi][2] = gv.geodetriangles[ti].p1[2] - com[2];
+    Vertices[vi][0] = gv.geodetriangles[ti].p1[0]*scale - com[0];
+    Vertices[vi][1] = gv.geodetriangles[ti].p1[1]*scale - com[1];
+    Vertices[vi][2] = gv.geodetriangles[ti].p1[2]*scale - com[2];
+    Indices[vi] = vi;
+    vi++;
+    
+    Vertices[vi][0] = gv.geodetriangles[ti].p2[0]*scale - com[0];
+    Vertices[vi][1] = gv.geodetriangles[ti].p2[1]*scale - com[1];
+    Vertices[vi][2] = gv.geodetriangles[ti].p2[2]*scale - com[2];
+    Indices[vi] = vi;
+    vi++;
+    
+    Vertices[vi][0] = gv.geodetriangles[ti].p3[0]*scale - com[0];
+    Vertices[vi][1] = gv.geodetriangles[ti].p3[1]*scale - com[1];
+    Vertices[vi][2] = gv.geodetriangles[ti].p3[2]*scale - com[2];
     Indices[vi] = vi;
     vi++;
 
-    Vertices[vi][0] = gv.geodetriangles[ti].p2[0] - com[0];
-    Vertices[vi][1] = gv.geodetriangles[ti].p2[1] - com[1];
-    Vertices[vi][2] = gv.geodetriangles[ti].p2[2] - com[2];
-    Indices[vi] = vi;
-    vi++;
-
-    Vertices[vi][0] = gv.geodetriangles[ti].p3[0] - com[0];
-    Vertices[vi][1] = gv.geodetriangles[ti].p3[1] - com[1];
-    Vertices[vi][2] = gv.geodetriangles[ti].p3[2] - com[2];
-    Indices[vi] = vi;
-    vi++;
-
-  }
-
-  // Create the cisst vector matrix of vertices
-  vctVertices.SetSize( 3, VertexCount );
-  // copy the data
-  for( size_t i=0; i<gv.geodetriangles.size(); i++ ){
-    vctVertices[0][i] = Vertices[i][0];
-    vctVertices[1][i] = Vertices[i][1];
-    vctVertices[2][i] = Vertices[i][2];
   }
 
   if( 0 < IndexCount && 0 < VertexCount ){

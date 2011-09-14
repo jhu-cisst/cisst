@@ -47,7 +47,7 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
   
   //! The ODE state of the body
   cisstODEBody::State ODEstate;
-  
+  double scale;
   //! The World ID
   cisstODEWorld* odeworld;
 
@@ -116,6 +116,8 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
   cisstODEBody( const std::string& model,
 		cisstODEWorld* odeworld,
 		const vctFrame4x4<double>& Rtwb,
+		double scale = 1.0,
+		const std::string& options = std::string(""),
 		cisstOSGWorld* osgworld = NULL );
 
 
@@ -132,6 +134,8 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
   cisstODEBody( const std::string& model,
 		cisstODEWorld* odeworld,
 		const vctFrm3& Rtwb,
+		double scale = 1.0,
+		const std::string& options = std::string(""),
 		cisstOSGWorld* osgworld = NULL );
 			
 
@@ -153,6 +157,8 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
 		double m,
 		const vctFixedSizeVector<double,3>& com,
 		const vctFixedSizeMatrix<double,3,3>& moit,
+		double scale = 1.0,
+		const std::string& options = std::string(""),
 		cisstOSGWorld* osgworld = NULL );
 
   //! Main constructor
@@ -173,6 +179,8 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
 		double m,
 		const vctFixedSizeVector<double,3>& tbcom,
 		const vctFixedSizeMatrix<double,3,3>& moit,
+		double scale = 1.0,
+		const std::string& options = std::string(""),
 		cisstOSGWorld* osgworld = NULL );
 
   //! Main constructor
@@ -190,6 +198,8 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
 		cisstODEWorld* odeworld, 
 		const vctFrame4x4<double>& Rt,
 		double m,
+		double scale = 1.0,
+		const std::string& options = std::string(""),
 		cisstOSGWorld* osgworld = NULL );
   
   //! Main constructor
@@ -207,6 +217,8 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
 		cisstODEWorld* odeworld, 
 		const vctFrm3& Rt,
 		double m,
+		double scale = 1.0,
+		const std::string& options = std::string(""),
 		cisstOSGWorld* osgworld = NULL );
   
 

@@ -31,6 +31,8 @@ cisstODEBH::cisstODEBH( const std::string& palmmodel,
 			      1.17,                    // mass
 			      vctFixedSizeVector<double,3>(0.0, 0.0, -0.025),
 			      I,                       // iniertia tensor
+			      1.0,
+			      "",
 			      (cisstOSGWorld*)this );  // ODE world space
   this->base = odebase;
   
@@ -108,6 +110,8 @@ cisstODEBH::cisstODEBH( const std::string& palmmodel,
 			      1.17,                    // mass
 			      vctFixedSizeVector<double,3>(0.0, 0.0, -0.025),
 			      I,                       // iniertia tensor
+			      1.0,
+			      "",
 			      (cisstOSGWorld*)this );  // ODE world space
   this->base = odebase;
 

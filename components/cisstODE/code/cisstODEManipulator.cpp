@@ -108,6 +108,8 @@ cisstODEManipulator::CreateManipulator( const std::vector<std::string>& models,
 				1.0,                                    // m   
 				vctFixedSizeVector<double,3>(0.0),      // com
 				vctFixedSizeMatrix<double,3,3>::Eye(),  // moit
+				1.0,
+				"",
 				(cisstOSGWorld*)this );
     
     // attach the base
@@ -137,6 +139,8 @@ cisstODEManipulator::CreateManipulator( const std::vector<std::string>& models,
 			      links[i-1].Mass(),                       // m   
 			      links[i-1].CenterOfMass(),               // com
 			      links[i-1].MomentOfInertiaAtCOM(),       // I 
+			      1.0,
+			      "",
 			      (cisstOSGWorld*)(osglinks.get()) );;
   }
 
@@ -220,6 +224,8 @@ cisstODEManipulator::CreateManipulator(const std::vector<std::string>& models){
 			      links[i-1].Mass(),                       // m   
 			      links[i-1].CenterOfMass(),               // com
 			      links[i-1].MomentOfInertiaAtCOM(),       // I 
+			      1.0,
+			      "",
 			      (cisstOSGWorld*)(osglinks.get()) );;
   }
 
