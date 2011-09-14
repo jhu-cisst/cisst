@@ -30,27 +30,69 @@ http://www.cisst.org/cisst/license.txt.
 #ifdef __APPLE__ 
 #define SAMPLE_CONFIG_PATH "/Developer-old/Kinect/SensorKinect/avin2-SensorKinect-28738dc/OpenNI/Data/SamplesConfig.xml"
 #endif
+#ifdef linux // This is defined by gcc
+#define SAMPLE_CONFIG_PATH "/etc/openni/SamplesConfig.xml"
+#endif
 
-int main(){
+int main( int argc, char** argv ){
   
 	cmnLogger::SetMask( CMN_LOG_ALLOW_ALL );
 	cmnLogger::SetMaskFunction( CMN_LOG_ALLOW_ALL );
 	cmnLogger::SetMaskDefaultLog( CMN_LOG_ALLOW_ALL );
+    
+    int numusers = 0;
+    if( argc == 2 ){ sscanf( argv[1], "%d", &numusers ); }
 
-	cisstOpenNI kinect(1);
-    kinect.Configure(SAMPLE_CONFIG_PATH);
-    kinect.InitSkeletons();
-	while(true){
+	cisstOpenNI kinect( numusers );
+    kinect.Configure( SAMPLE_CONFIG_PATH );
+    if( 0 < numusers ){ kinect.InitSkeletons(); }
+
+	while( true ){
         
         // Wait and Update All
-        kinect.Update(WAIT_AND_UPDATE_ALL);
-        kinect.UpdateUserSkeletons();
-		//vctDynamicMatrix<double> depth = kinect.GetDepthImage8bit();
-		vctDynamicMatrix<unsigned char> rgb = kinect.GetRGBImage();
-		vctDynamicMatrix<double> range = kinect.GetRangeData();
-        std::vector<cisstOpenNISkeleton*> skeletons = kinect.UpdateAndGetUserSkeletons();
+        kinect.Update( WAIT_AND_UPDATE_ALL );
+        if( 0 < numusers ){ kinect.UpdateUserSkeletons(); }
 
-		osaSleep(10*cmn_ms);
+        {
+            vctDynamicMatrix<unsigned char> rgb;
+            if( kinect.GetRGBImage( rgb ) != cisstOpenNI::ESUCCESS ){
+                CMN_LOG_RUN_ERROR << "Failed to get RGB image" << std::endl;
+                return -1;
+            }
+            std::ofstream ofs( "rgb" );
+            for( size_t r=0; r<rgb.rows(); r++ ){
+                for( size_t c=0; c<rgb.cols(); c++ )
+                    { ofs << (int)rgb[r][c] << " "; }
+                ofs << std::endl;
+            }
+            ofs.close();
+        }
+
+        {
+            vctDynamicMatrix<double> depth;
+            if( kinect.GetDepthImageRaw( depth ) != cisstOpenNI::ESUCCESS ){
+                CMN_LOG_RUN_ERROR << "Failed to get RGB image" << std::endl;
+                return -1;
+            }
+            std::ofstream ofs( "depth" );
+            ofs << depth;
+            ofs.close();
+        }
+            
+        {
+            vctDynamicMatrix<double> range;
+            if( kinect.GetRangeData( range ) != cisstOpenNI::ESUCCESS ){
+                CMN_LOG_RUN_ERROR << "Failed to get RGB image" << std::endl;
+                return -1;
+            }
+            std::ofstream ofs( "range" );
+            ofs << range;
+            ofs.close();
+        }
+            
+        if( 0 < numusers )
+            { std::vector<cisstOpenNISkeleton*> skeletons = kinect.UpdateAndGetUserSkeletons(); }
+
 	}
 
 	return 0;
