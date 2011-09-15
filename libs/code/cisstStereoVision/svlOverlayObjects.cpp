@@ -1386,6 +1386,111 @@ void svlOverlayStaticTriangle::DrawInternal(svlSampleImage* bgimage, svlSample* 
 }
 
 
+/****************************/
+/*** svlOverlayPoly class ***/
+/****************************/
+
+svlOverlayPoly::svlOverlayPoly() :
+    svlOverlay(),
+    svlOverlayInput(),
+    Color(255, 255, 255),
+    Thickness(1)
+{
+}
+
+svlOverlayPoly::svlOverlayPoly(unsigned int videoch,
+                               bool visible,
+                               const std::string & inputname,
+                               svlRGB color) :
+    svlOverlay(videoch, visible),
+    svlOverlayInput(inputname),
+    Color(color),
+    Thickness(1)
+{
+}
+
+svlOverlayPoly::svlOverlayPoly(unsigned int videoch,
+                               bool visible,
+                               const std::string & inputname,
+                               svlRGB color,
+                               unsigned int thickness) :
+    svlOverlay(videoch, visible),
+    svlOverlayInput(inputname),
+    Color(color),
+    Thickness(thickness)
+{
+}
+
+svlOverlayPoly::~svlOverlayPoly()
+{
+}
+
+void svlOverlayPoly::SetColor(svlRGB color)
+{
+    Color = color;
+}
+
+void svlOverlayPoly::SetThickness(unsigned int thickness)
+{
+    Thickness = thickness;
+}
+
+svlRGB svlOverlayPoly::GetColor() const
+{
+    return Color;
+}
+
+unsigned int svlOverlayPoly::GetThickness() const
+{
+    return Thickness;
+}
+
+bool svlOverlayPoly::IsInputTypeValid(svlStreamType inputtype)
+{
+    if (inputtype == svlTypeMatrixInt32) return true;
+    return false;
+}
+
+void svlOverlayPoly::DrawInternal(svlSampleImage* bgimage, svlSample* input)
+{
+    // Get sample from input
+    svlSampleMatrixInt32* matrix_smpl = dynamic_cast<svlSampleMatrixInt32*>(input);
+    if (!matrix_smpl) return;
+
+    vctDynamicMatrix<int>& matrix = matrix_smpl->GetDynamicMatrixRef();
+    const int length = static_cast<int>(matrix.cols()) - 1;
+    if (length < 1) return;
+    int start = matrix.Element(0, length);
+    if (start < 0 || start >= length) start = 0;
+    if (Poly.size() != static_cast<unsigned int>(length)) Poly.SetSize(length);
+
+    if (Transformed) {
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+        double x, y;
+
+        for (int i = 0; i < length; i ++) {
+            x = matrix.Element(0, i);
+            y = matrix.Element(1, i);
+            Poly[i].x = static_cast<int>(x * m00 + y * m01 + m02);
+            Poly[i].y = static_cast<int>(x * m10 + y * m11 + m12);
+        }
+    }
+    else {
+        for (int i = 0; i < length; i ++) {
+            Poly[i].x = matrix.Element(0, i);
+            Poly[i].y = matrix.Element(1, i);
+        }
+    }
+
+    svlDraw::Poly(bgimage, VideoCh, Poly, Color, Thickness, start);
+}
+
+
 /**********************************/
 /*** svlOverlayStaticPoly class ***/
 /**********************************/
@@ -1573,14 +1678,19 @@ void svlOverlayStaticPoly::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
             const unsigned int length = Poly.size();
             if (PolyXF.size() != length) PolyXF.SetSize(length);
 
-            vct3 pos, pos_xf;
+            const double m00 = Transform.Element(0, 0);
+            const double m01 = Transform.Element(0, 1);
+            const double m02 = Transform.Element(0, 2);
+            const double m10 = Transform.Element(1, 0);
+            const double m11 = Transform.Element(1, 1);
+            const double m12 = Transform.Element(1, 2);
+            double x, y;
+
             for (unsigned int i = 0; i < length; i ++) {
-                pos[0] = Poly[i].x;
-                pos[1] = Poly[i].y;
-                pos[2] = 1.0;
-                pos_xf.ProductOf(Transform, pos);
-                PolyXF[i].x = pos_xf[0];
-                PolyXF[i].y = pos_xf[1];
+                x = Poly[i].x;
+                y = Poly[i].y;
+                PolyXF[i].x = static_cast<int>(x * m00 + y * m01 + m02);
+                PolyXF[i].y = static_cast<int>(x * m10 + y * m11 + m12);
             }
         CS.Leave();
 

@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlConverters.h>
 
 
-
 /*****************************/
 /*** svlVidCapSrcBMD class ***/
 /*****************************/
@@ -156,7 +155,9 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
     printf("Width:%d, Height:%d at %4.2fHz\n", width, height, frameRate);
 }
 
-IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
+IDeckLinkIterator* svlVidCapSrcBMD::CreateDeckLinkIteratorInstance(void)
+{
+}
 
 IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
 {

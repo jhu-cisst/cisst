@@ -33,7 +33,7 @@ int main( int, char** argv ){
 
   osg::ref_ptr< cisstOSGBody > background;
   background = new cisstOSGBody( path+"background.3ds", world, 
-				 vctFrame4x4<double>() );
+  				 vctFrame4x4<double>() );
   
   std::cout << "ESC to quit" << std::endl;
 

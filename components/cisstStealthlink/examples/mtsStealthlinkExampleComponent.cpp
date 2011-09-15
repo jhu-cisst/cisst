@@ -42,6 +42,7 @@ mtsStealthlinkExampleComponent::mtsStealthlinkExampleComponent(const std::string
     required = AddInterfaceRequired("Registration");
     if (required) {
         required->AddFunction("GetTransformation", Registration.GetTransformation);
+        required->AddFunction("GetValid", Registration.GetValid);
         required->AddFunction("GetPredictedAccuracy", Registration.GetPredictedAccuracy);
     }
 }
@@ -62,6 +63,7 @@ void mtsStealthlinkExampleComponent::Run(void)
     mtsStealthTool StealthTool;
     mtsStealthFrame StealthFrame;
     prmPositionCartesianGet prmPos;
+    vctFrm3 vctFrm;
     mtsFrm3 mtsFrm;
     mtsDouble predictedAccuracy;
 
@@ -114,6 +116,9 @@ void mtsStealthlinkExampleComponent::Run(void)
         if (prmPos.Valid()) {
             std::cout << "Interface Frame: " << prmPos.Position().Translation();
             didOutput = true;
+        } else {
+            std::cerr << "Interface Frame, invalid position" << std::endl;
+            didOutput = true;
         }
     }
     if (Frame.GetMarkerCartesian.IsValid()) {
@@ -124,16 +129,28 @@ void mtsStealthlinkExampleComponent::Run(void)
         if (prmPos.Valid()) {
             std::cout << "Interface FrameM: " << prmPos.Position().Translation();
             didOutput = true;
-        }
-    }
-
-    if (Registration.GetTransformation.IsValid()) {
-        Registration.GetTransformation(mtsFrm);
-        if (mtsFrm.Valid()) {
-            std::cout << "Registration: " << mtsFrm.Translation();
+        } else {
+            std::cerr << "Interface Frame, invalid position" << std::endl;
             didOutput = true;
         }
     }
+
+    mtsBool valid;   
+    if (Registration.GetValid.IsValid()) {
+        result = Registration.GetValid(valid);
+        if (!result.IsOK()) {
+            std::cout << "Registration.GetValid() failed: " << result << std::endl;
+        }
+        if (valid) {
+            Registration.GetTransformation(vctFrm);
+            std::cout << "Registration: " << vctFrm.Translation();
+            didOutput = true;
+        } else {
+            std::cout << "Registration: invalid" << std::endl;
+            didOutput = true;
+        }
+    }
+
     if (didOutput) {
         std::cout << std::endl;
     } else {

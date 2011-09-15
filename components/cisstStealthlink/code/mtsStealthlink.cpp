@@ -79,10 +79,12 @@ void mtsStealthlink::Init(void)
     // Add interface for registration, ideally we should standardize such interface commands/payloads
     // maybe we should create a separate state table for registration?  Would only advance if changed.
     StateTable.AddData(RegistrationMember.Transformation, "RegistrationTransformation");
+    StateTable.AddData(RegistrationMember.Valid, "RegistrationValid");
     StateTable.AddData(RegistrationMember.PredictedAccuracy, "RegistrationPredictedAccuracy");
     provided = AddInterfaceProvided("Registration");
     if (provided) {
         provided->AddCommandReadState(StateTable, RegistrationMember.Transformation, "GetTransformation");
+        provided->AddCommandReadState(StateTable, RegistrationMember.Valid, "GetValid");
         provided->AddCommandReadState(StateTable, RegistrationMember.PredictedAccuracy, "GetPredictedAccuracy");
     }
 }
@@ -90,7 +92,8 @@ void mtsStealthlink::Init(void)
 mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & periodInSeconds) :
     mtsTaskPeriodic(taskName, periodInSeconds, false, 1000),
     StealthlinkPresent(false),
-    CurrentTool(0)
+    CurrentTool(0),
+    CurrentFrame(0)
 {
     Init();
 }
@@ -99,7 +102,8 @@ mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & peri
 mtsStealthlink::mtsStealthlink(const mtsTaskPeriodicConstructorArg &arg) :
     mtsTaskPeriodic(arg),
     StealthlinkPresent(false),
-    CurrentTool(0)
+    CurrentTool(0),
+    CurrentFrame(0)
 {
     Init();
 }
@@ -302,7 +306,6 @@ void mtsStealthlink::Run(void)
             ToolData = simulatedTool;
         }
 #endif
-
         // update tool interfaces data
         if (ToolData.Valid()) {
             if (!CurrentTool || (CurrentTool->GetStealthName() != ToolData.GetName())) {
@@ -342,10 +345,34 @@ void mtsStealthlink::Run(void)
                 CurrentTool->TooltipPosition.SetValid(true);
             }
         }
-        
+
+        // update frame interface data
+        if (FrameData.Valid()) {
+            if (!CurrentFrame || (CurrentFrame->GetStealthName() != FrameData.GetName())) {
+                CurrentFrame = FindTool(FrameData.GetName());
+                if (!CurrentFrame) {
+                    CMN_LOG_CLASS_INIT_VERBOSE << "Run: adding new tool \""
+                                               << FrameData.GetName() << "\"" << std::endl;
+                    CurrentFrame = AddTool(FrameData.GetName(), FrameData.GetName());
+                }
+                if (CurrentFrame) {
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Run: current tool is now \""
+                                              << CurrentFrame->GetInterfaceName() << "\"" << std::endl;
+                } else {
+                    CMN_LOG_CLASS_RUN_ERROR << "Run: unable to add provided interface for new tool \""
+                                            << FrameData.GetName() << "\"" << std::endl;
+                }
+            }
+            // rely on older interface to retrieve tool information
+            if (CurrentFrame) {
+                CurrentFrame->MarkerPosition.Position() = FrameData.GetFrame();
+                CurrentFrame->MarkerPosition.SetValid(true);
+            }
+        }
+
         // update registration interface data
         this->RegistrationMember.Transformation = RegistrationData.GetFrame();
-        this->RegistrationMember.Transformation.SetValid(RegistrationData.Valid());
+        this->RegistrationMember.Valid = RegistrationData.Valid();
         this->RegistrationMember.PredictedAccuracy = RegistrationData.GetAccuracy();
         this->RegistrationMember.PredictedAccuracy.SetValid(RegistrationData.Valid());
     }

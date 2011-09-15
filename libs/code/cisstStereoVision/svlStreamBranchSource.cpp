@@ -68,6 +68,7 @@ int svlStreamBranchSource::Initialize(svlSample* &syncOutput)
 
     // Pass unused but initialized sample downstream
     syncOutput = SampleQueue.Pull(0.0);
+    if (!syncOutput) return SVL_FAIL;
 
     return SVL_OK;
 }

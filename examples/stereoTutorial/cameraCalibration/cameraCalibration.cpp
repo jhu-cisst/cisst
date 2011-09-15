@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
-#include <cv.h>
 #include <limits>
 
 using namespace std;

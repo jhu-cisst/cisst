@@ -31,10 +31,12 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageCenterFinder, svlFilterBase)
 
 svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
     svlFilterBase(),
-    MassRatio(50),
     Smoothing(0.0),
+    ThresholdLevel(10),
+    MassRatio(50),
     MaskEnabled(false),
-    ThresholdLevel(10)
+    LinkHorizontally(false),
+    LinkVertically(true)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -42,6 +44,98 @@ svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
+}
+
+int svlFilterImageCenterFinder::GetCenter(int &x, int &y, unsigned int videoch) const
+{
+    if (!IsRunning()) return SVL_FAIL;
+    if (videoch >= CenterX.size()) return SVL_FAIL;
+
+    x = CenterX[videoch];
+    y = CenterY[videoch];
+
+    return SVL_OK;
+}
+
+int svlFilterImageCenterFinder::GetRadius(int &x, int &y, unsigned int videoch) const
+{
+    if (!IsRunning()) return SVL_FAIL;
+    if (videoch >= RadiusX.size()) return SVL_FAIL;
+
+    x = RadiusX[videoch];
+    y = RadiusY[videoch];
+
+    return SVL_OK;
+}
+
+void svlFilterImageCenterFinder::SetTrajectorySmoothing(double smoothing)
+{
+    Smoothing = smoothing;
+}
+
+void svlFilterImageCenterFinder::SetThreshold(unsigned char thresholdlevel)
+{
+    ThresholdLevel = thresholdlevel;
+}
+
+void svlFilterImageCenterFinder::SetMassRatio(unsigned int ratio)
+{
+    if (ratio > 100) ratio = 100;
+    MassRatio = ratio;
+}
+
+void svlFilterImageCenterFinder::SetMask(bool enablemask)
+{
+    MaskEnabled = enablemask;
+}
+
+void svlFilterImageCenterFinder::SetHorizontalLink(bool enable)
+{
+    LinkHorizontally = enable;
+}
+
+void svlFilterImageCenterFinder::SetVerticalLink(bool enable)
+{
+    LinkVertically = enable;
+}
+
+double svlFilterImageCenterFinder::GetTrajectorySmoothing() const
+{
+    return Smoothing;
+}
+
+unsigned char svlFilterImageCenterFinder::GetThreshold() const
+{
+    return static_cast<unsigned char>(ThresholdLevel);
+}
+
+unsigned int svlFilterImageCenterFinder::GetMassRatio() const
+{
+    return MassRatio;
+}
+
+bool svlFilterImageCenterFinder::GetMask() const
+{
+    return MaskEnabled;
+}
+
+bool svlFilterImageCenterFinder::GetHorizontalLink() const
+{
+    return LinkHorizontally;
+}
+
+bool svlFilterImageCenterFinder::GetVerticalLink() const
+{
+    return LinkVertically;
+}
+
+void svlFilterImageCenterFinder::AddReceiver(svlFilterImageCenterFinderInterface* receiver)
+{
+    if (!receiver) return;
+
+    unsigned int size = Receivers.size();
+    Receivers.resize(size + 1);
+    Receivers[size] = receiver;
 }
 
 int svlFilterImageCenterFinder::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -52,6 +146,10 @@ int svlFilterImageCenterFinder::Initialize(svlSample* syncInput, svlSample* &syn
 
     ProjectionV.SetSize(videochannels);
     ProjectionH.SetSize(videochannels);
+    CenterXInternal.SetSize(videochannels);
+    CenterYInternal.SetSize(videochannels);
+    RadiusXInternal.SetSize(videochannels);
+    RadiusYInternal.SetSize(videochannels);
     CenterX.SetSize(videochannels);
     CenterY.SetSize(videochannels);
     RadiusX.SetSize(videochannels);
@@ -60,11 +158,11 @@ int svlFilterImageCenterFinder::Initialize(svlSample* syncInput, svlSample* &syn
     for (i = 0; i < videochannels; i ++) {
         size = image->GetWidth(i);
         ProjectionV[i].SetSize(size);
-        RadiusX[i] = CenterX[i] = static_cast<int>(size) / 2;
+        RadiusXInternal[i] = CenterXInternal[i] = RadiusX[i] = CenterX[i] = static_cast<int>(size) / 2;
 
         size = image->GetHeight(i);
         ProjectionH[i].SetSize(size);
-        RadiusY[i] = CenterY[i] = static_cast<int>(size) / 2;
+        RadiusYInternal[i] = CenterYInternal[i] = RadiusY[i] = CenterY[i] = static_cast<int>(size) / 2;
     }
 
     syncOutput = syncInput;
@@ -85,7 +183,8 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
     unsigned char *img;
     const unsigned int thrsh = ThresholdLevel * 3;
 
-    _ParallelLoop(procInfo, vch, videochannels) {
+    _ParallelLoop(procInfo, vch, videochannels)
+    {
         width = image->GetWidth(vch);
         height = image->GetHeight(vch);
         stride = width * 3 - 2;
@@ -137,7 +236,7 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
             x += a * i;
         }
         if (vsum != 0) x /= vsum;
-        else x = CenterX[vch];
+        else x = CenterXInternal[vch];
 
         y = hsum = 0;
         for (j = 0; j < height; j ++) {
@@ -145,7 +244,7 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
             y += a * j;
         }
         if (hsum != 0) y /= hsum;
-        else y = CenterY[vch];
+        else y = CenterYInternal[vch];
 
 
         // Find radii
@@ -173,108 +272,65 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
 
         // Smoothing results
         if (FrameCounter > 0 && Smoothing > 0.0) {
-            x  = static_cast<int>((Smoothing * CenterX[vch] + x ) / (1.0 + Smoothing));
-            y  = static_cast<int>((Smoothing * CenterY[vch] + y ) / (1.0 + Smoothing));
-            rx = static_cast<int>((Smoothing * RadiusX[vch] + rx) / (1.0 + Smoothing));
-            ry = static_cast<int>((Smoothing * RadiusY[vch] + ry) / (1.0 + Smoothing));
+            x  = static_cast<int>((Smoothing * CenterXInternal[vch] + x ) / (1.0 + Smoothing));
+            y  = static_cast<int>((Smoothing * CenterYInternal[vch] + y ) / (1.0 + Smoothing));
+            rx = static_cast<int>((Smoothing * RadiusXInternal[vch] + rx) / (1.0 + Smoothing));
+            ry = static_cast<int>((Smoothing * RadiusYInternal[vch] + ry) / (1.0 + Smoothing));
         }
 
         // Storing results
-        CenterX[vch] = x;
-        CenterY[vch] = y;
-        RadiusX[vch] = rx;
-        RadiusY[vch] = ry;
+        CenterXInternal[vch] = x;
+        CenterYInternal[vch] = y;
+        RadiusXInternal[vch] = rx;
+        RadiusYInternal[vch] = ry;
     }
 
     _SynchronizeThreads(procInfo);
 
-    _OnSingleThread(procInfo) {
-
+    _OnSingleThread(procInfo)
+    {
         x = y = rx = ry = 0;
-        for (vch = 0; vch < videochannels; vch ++) {
-            x  += CenterX[vch];
-            y  += CenterY[vch];
-            rx += RadiusX[vch];
-            ry += RadiusY[vch];
+
+        if (LinkHorizontally) {
+            for (vch = 0; vch < videochannels; vch ++) {
+                x  += CenterXInternal[vch];
+                rx += RadiusXInternal[vch];
+            }
         }
-        x  /= videochannels;
-        y  /= videochannels;
-        rx /= videochannels;
-        ry /= videochannels;
+        if (LinkVertically) {
+            for (vch = 0; vch < videochannels; vch ++) {
+                y  += CenterYInternal[vch];
+                ry += RadiusYInternal[vch];
+            }
+        }
+
+        for (vch = 0; vch < videochannels; vch ++) {
+            if (LinkHorizontally) {
+                CenterX[vch] = x  / videochannels;
+                RadiusX[vch] = rx / videochannels;
+            }
+            else {
+                CenterX[vch] = CenterXInternal[vch];
+                RadiusX[vch] = RadiusXInternal[vch];
+            }
+            if (LinkVertically) {
+                CenterY[vch] = y  / videochannels;
+                RadiusY[vch] = ry / videochannels;
+            }
+            else {
+                CenterY[vch] = CenterYInternal[vch];
+                RadiusY[vch] = RadiusYInternal[vch];
+            }
+        }
 
         for (i = 0; i < Receivers.size(); i ++) {
             if (Receivers[i]) {
-                for (vch = 0; vch < videochannels; vch ++) Receivers[i]->SetCenter( x,  y, rx, ry, vch);
+                for (vch = 0; vch < videochannels; vch ++) {
+                    Receivers[i]->SetCenter(CenterX[vch], CenterY[vch], RadiusX[vch], RadiusY[vch], vch);
+                }
             }
         }
     }
-
-    return SVL_OK;
-}
-
-void svlFilterImageCenterFinder::AddReceiver(svlFilterImageCenterFinderInterface* receiver)
-{
-    if (!receiver) return;
-
-    unsigned int size = Receivers.size();
-    Receivers.resize(size + 1);
-    Receivers[size] = receiver;
-}
-
-void svlFilterImageCenterFinder::SetTrajectorySmoothing(double smoothing)
-{
-    Smoothing = smoothing;
-}
-
-double svlFilterImageCenterFinder::GetTrajectorySmoothing()
-{
-    return Smoothing;
-}
-
-void svlFilterImageCenterFinder::SetMask(bool enablemask)
-{
-    MaskEnabled = enablemask;
-}
-
-bool svlFilterImageCenterFinder::GetMask()
-{
-    return MaskEnabled;
-}
-
-void svlFilterImageCenterFinder::SetThreshold(unsigned char thresholdlevel)
-{
-    ThresholdLevel = thresholdlevel;
-}
-
-unsigned char svlFilterImageCenterFinder::GetThreshold()
-{
-    return static_cast<unsigned char>(ThresholdLevel);
-}
-
-void svlFilterImageCenterFinder::SetMassRatio(unsigned int ratio)
-{
-    if (ratio > 100) ratio = 100;
-    MassRatio = ratio;
-}
-
-int svlFilterImageCenterFinder::GetCenter(int &x, int &y, unsigned int videoch)
-{
-    if (!IsRunning()) return SVL_FAIL;
-    if (videoch >= CenterX.size()) return SVL_FAIL;
-
-    x = CenterX[videoch];
-    y = CenterY[videoch];
-
-    return SVL_OK;
-}
-
-int svlFilterImageCenterFinder::GetRadius(int &x, int &y, unsigned int videoch)
-{
-    if (!IsRunning()) return SVL_FAIL;
-    if (videoch >= RadiusX.size()) return SVL_FAIL;
-
-    x = RadiusX[videoch];
-    y = RadiusY[videoch];
 
     return SVL_OK;
 }

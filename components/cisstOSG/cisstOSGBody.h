@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <osg/Switch>
 #include <osg/MatrixTransform>
 #include <osg/TriangleFunctor>
+#include <osg/PositionAttitudeTransform>
+#include <osgUtil/TransformAttributeFunctor>
 
 #include <cisstVector/vctTransformationTypes.h>
 
@@ -36,8 +38,6 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   enum Switch{ SWITCH_OFF, SWITCH_ON };
 
  protected:
-
-  // Use this class to get the list of triangles in a geometry
 
   // This class is used to extract the triangle mesh out of the OSG
   // classes/structures. It is a geode visitor that traverse the drawable 
@@ -92,6 +92,9 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   };
   osg::ref_ptr<UserData> userdata;
 
+  // A scaling factor
+  osg::ref_ptr<osg::PositionAttitudeTransform> osgscale;
+
   // This is used to update the position of the body
   class TransformCallback : public osg::NodeCallback {    
   public:
@@ -133,11 +136,12 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
 
 
   // I/O
-  void ReadModel( const std::string& fname );
+  void ReadModel( const std::string& fname,
+		  const std::string& options );
 
   void Read3DData( const vctDynamicMatrix<double>& pc,
-		   const vctFixedSizeVector<unsigned char,3>& RGB = 
-		   vctFixedSizeVector<unsigned char,3>( 200, 200, 200 ) );
+		   const vctFixedSizeVector<unsigned char,3>& RGB = RGBDEFAULT,
+		   float size = 3.0 );
 
  public: 
 
@@ -151,7 +155,9 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
      \param Rt The initial transformation of the body
   */
   cisstOSGBody( const std::string& model,
-		const vctFrame4x4<double>& Rt );
+		const vctFrame4x4<double>& Rt,
+		double scale = 1.0,
+		const std::string& option = std::string("") );
 
   //! OSG Body constructor
   /**
@@ -163,7 +169,9 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   */
   cisstOSGBody( const std::string& model,
 		cisstOSGWorld* world,
-		const vctFrame4x4<double>& Rt );
+		const vctFrame4x4<double>& Rt,
+		double scale = 1.0,
+		const std::string& option = std::string("") );
 
   //! OSG Body constructor
   /**
@@ -175,17 +183,21 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   */
   cisstOSGBody( const std::string& model,
 		cisstOSGWorld* world,
-		const vctFrm3& Rt );
+		const vctFrm3& Rt,
+		double scale = 1.0,
+		const std::string& option = std::string("") );
+
 
   //! Construcor for 3D point cloud
   cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
 		cisstOSGWorld* world,
 	        const vctFrm3& Rt,
-		const vctFixedSizeVector<unsigned char,3>& rgb=RGBDEFAULT );
+		const vctFixedSizeVector<unsigned char,3>& rgb=RGBDEFAULT,
+		float size = 3.0 );
 
   ~cisstOSGBody();
 
-  void Initialize();
+  void Initialize( double scale = 1.0 );
 
   //! Set the transform of the body
   void SetTransform( const vctFrame4x4<double>& Rt );

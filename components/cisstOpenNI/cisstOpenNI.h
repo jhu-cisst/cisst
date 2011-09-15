@@ -10,6 +10,16 @@
 #define WAIT_ANY_UPDATE_ONE         2
 #define WAIT_NONE_UPDATE_ALL        3
 
+#define CNI_USR_NEW         0
+#define CNI_USR_LOST        1
+#define CNI_USR_POSE        2
+#define CNI_USR_CAL_START   3
+#define CNI_USR_CAL_END     4
+#define CNI_USR_SUCCESS     5
+#define CNI_USR_FAIL        6
+#define CNI_USR_WAIT        7
+#define CNI_USR_IDLE        -1
+
 
 /*! 
 \todo move ctor code to Configure method
@@ -27,6 +37,10 @@ class CISST_EXPORT cisstOpenNI {
 
     friend class cisstOpenNISkeleton;
 
+ public: 
+    
+    enum Errno{ ESUCCESS, EFAILURE };
+
 private:
 
     //! Private OpenNI Data Structure
@@ -43,7 +57,7 @@ private:
 public:
 
     //! Default Constructor
-    cisstOpenNI(int numUsers);
+    cisstOpenNI( int numUsers = 0 );
 
     //! Default DeConstructor
     ~cisstOpenNI();
@@ -76,7 +90,7 @@ public:
     the context.
     \return A 3x(MxN) point cloud.
     */
-    vctDynamicMatrix<double> GetRangeData();
+    cisstOpenNI::Errno GetRangeData( vctDynamicMatrix<double>& rangedata );
 
     //! Get Raw Depth Image
     /**
@@ -84,7 +98,7 @@ public:
     The value at each pixel represents the depth of the picture element. This method 
     is non-const due to updating the context.
     */
-    void GetDepthImageRaw(vctDynamicMatrix<double> & placeHolder);
+    cisstOpenNI::Errno GetDepthImageRaw( vctDynamicMatrix<double>& depthimage );
 
     //! Get Depth Image
     /**
@@ -92,18 +106,19 @@ public:
     The value at each pixel represents the depth of the picture element. This method 
     is non-const due to updating the context.
     */
-    void GetDepthImage(vctDynamicMatrix<double> & placeHolder);
+    void GetDepthImage( vctDynamicMatrix<double>& placeHolder );
 
     //! Get (interlaced) RGB image
     /**
 
     */
-    vctDynamicMatrix<unsigned char> GetRGBImage();
+    cisstOpenNI::Errno GetRGBImage( vctDynamicMatrix<unsigned char>& RGBinterlaced );
 
     //! Get (planar) RGB image
     /**
     */
-    vctDynamicNArray<unsigned char,3> GetRGBPlanarImage();
+    cisstOpenNI::Errno GetRGBPlanarImage( vctDynamicNArray<unsigned char,3>& RGBplanar );
+
 
     //! Get Current User Skeletons
     /**

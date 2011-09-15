@@ -44,7 +44,9 @@ cisstODEWorld::cisstODEWorld( double period,
 			      const vctFixedSizeVector<double,3>& g ) : 
 
   timestep( period ),
-  contacterp( 0.8 ){
+  contacterp( 0.8 ),
+  contactbounce( 0.1 ),
+  mu( 0.2 ){
 
   dInitODE2(0);                           // initialize the engine
 
@@ -52,13 +54,13 @@ cisstODEWorld::cisstODEWorld( double period,
   spaceid = dSimpleSpaceCreate(0);        // create a new space for geometries
   contactsgid = dJointGroupCreate(0);     // create a new contact group
 
-  floor = dCreatePlane( GetSpaceID(), 0.0, 0.0, 1.0, 0.0 );
+  //floor = dCreatePlane( GetSpaceID(), 0.0, 0.0, 1.0, 0.0 );
   
   // Set the gravity
   SetGravity( g );
 
   // error reduction parameter
-  SetERP( 0.25 );
+  SetERP( 0.8 );
 
   // constraint force mixing
   SetCFM( 0.0000001 );

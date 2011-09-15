@@ -42,6 +42,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 #ifdef MTS_LOGGING
     mtsManagerLocal::SetLogForwarding(true);
 #endif
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
     // Create and start global component manager
     mtsManagerGlobal * globalComponentManager = new mtsManagerGlobal;

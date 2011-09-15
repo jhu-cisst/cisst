@@ -27,6 +27,7 @@ void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator,
 
     cisstOpenNIData* openNIDataObject = reinterpret_cast<cisstOpenNIData*>(pCookie);
     openNIDataObject->usrState = CNI_USR_LOST;
+    openNIDataObject->usrCalState = CNI_USR_IDLE;
 }
 
 

@@ -17,15 +17,19 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <osgDB/ReadFile> 
 #include <osg/PolygonMode>
+#include <osg/Point>
 #include <osg/Material>
 
 #include <algorithm>
 
 #include <cisstOSG/cisstOSGBody.h>
 
+
+const vctFixedSizeVector<unsigned char,3> cisstOSGBody::RGBDEFAULT = vctFixedSizeVector<unsigned char,3>( 255, 0, 0 );
+
 // Default constructor for the geode visitor
 cisstOSGBody::GeodeVisitor::GeodeVisitor() : 
-  osg::NodeVisitor( osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN ){}
+  osg::NodeVisitor( osg::NodeVisitor::TRAVERSE_ALL_CHILDREN ){}
 
 // Method called for each geode during the traversal
 void cisstOSGBody::GeodeVisitor::apply( osg::Geode& geode  ){
@@ -90,23 +94,28 @@ void cisstOSGBody::SwitchCallback::operator()( osg::Node* node,
 
 
 cisstOSGBody::cisstOSGBody( const std::string& model, 
-			    const vctFrame4x4<double>& Rt ) :
+			    const vctFrame4x4<double>& Rt,
+			    double scale,
+			    const std::string& options ) :
   transform( Rt ),
   onoff( SWITCH_ON ){
   
-  Initialize();
-  ReadModel( model );
+  Initialize( scale );
+  ReadModel( model, options );
 
 }
 
 cisstOSGBody::cisstOSGBody( const std::string& model, 
 			    cisstOSGWorld* world,
-			    const vctFrame4x4<double>& Rt ) :
+			    const vctFrame4x4<double>& Rt,
+			    double scale,
+			    const std::string& options ) :
+
   transform( Rt ),
   onoff( SWITCH_ON ){
   
-  Initialize();
-  ReadModel( model );
+  Initialize( scale );
+  ReadModel( model, options );
 
   // Once this is done add the body to the world
   if( world != NULL )
@@ -116,7 +125,10 @@ cisstOSGBody::cisstOSGBody( const std::string& model,
 
 cisstOSGBody::cisstOSGBody( const std::string& model, 
 			    cisstOSGWorld* world,
-			    const vctFrm3& Rt ):
+			    const vctFrm3& Rt,
+			    double scale,
+			    const std::string& options ) :
+
   onoff( SWITCH_ON ){
 
   // Hack to avoid non-normalized rotations!
@@ -124,8 +136,8 @@ cisstOSGBody::cisstOSGBody( const std::string& model,
   vctQuaternionRotation3<double> q( R, VCT_NORMALIZE );
   transform = vctFrame4x4<double>( q, Rt.Translation() );
 
-  Initialize();
-  ReadModel( model );
+  Initialize( scale );
+  ReadModel( model, options );
 
   // Once this is done add the body to the world
   if( world != NULL )
@@ -136,7 +148,9 @@ cisstOSGBody::cisstOSGBody( const std::string& model,
 cisstOSGBody::cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
 			    cisstOSGWorld* world,
 			    const vctFrm3& Rt,
-			    const vctFixedSizeVector<unsigned char,3>& rgb ) :
+			    const vctFixedSizeVector<unsigned char,3>& rgb,
+			    float size ):
+
   onoff( SWITCH_ON ){
 
   // Hack to avoid non-normalized rotations!
@@ -145,7 +159,7 @@ cisstOSGBody::cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
   transform = vctFrame4x4<double>( q, Rt.Translation() );
 
   Initialize();
-  Read3DData( pointcloud, rgb );
+  Read3DData( pointcloud, rgb, size );
 
   if( world != NULL )
     { world->addChild( this ); }
@@ -155,7 +169,7 @@ cisstOSGBody::cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
 
 cisstOSGBody::~cisstOSGBody(){}
 
-void cisstOSGBody::Initialize(){
+void cisstOSGBody::Initialize( double scale ){
 
   // always moving  
   setDataVariance( osg::Object::DYNAMIC );
@@ -165,38 +179,43 @@ void cisstOSGBody::Initialize(){
   userdata = new cisstOSGBody::UserData( this );
   this->setUserData( userdata );
 
+  osgscale = new osg::PositionAttitudeTransform();
+  osgscale->setScale( osg::Vec3( scale, scale, scale ) );
+  if( scale != 1.0 ){
+    osg::ref_ptr<osg::StateSet> stateset = osgscale->getOrCreateStateSet(); 
+    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+  }
+
+  
   // Create and configure the transform node
   osgtransform = new osg::MatrixTransform;
   osgtransform->setUserData( userdata );
-
+  
   // Add an update callback to the transform
   transformcallback = new cisstOSGBody::TransformCallback;
   osgtransform->setUpdateCallback( transformcallback );
-
+  
   // Create and configure the switch node
   osgswitch = new osg::Switch();
   osgswitch->setUserData( userdata );
-
+  
   // Add an update callback to the switch
   switchcallback = new cisstOSGBody::SwitchCallback;
   osgswitch->setUpdateCallback( switchcallback );
-
-  // add the transform as the child of the switch
-  osgswitch->addChild( osgtransform );
   
-  // add the switch as the child of the main node
+  osgtransform->addChild( osgscale );
+  osgswitch->addChild( osgtransform );
   this->addChild( osgswitch );
   
   SetTransform( transform );
 
 }
 
-void cisstOSGBody::ReadModel( const std::string& model ){
+void cisstOSGBody::ReadModel( const std::string& model,
+			      const std::string& options ){
 
-  osg::ref_ptr< osgDB::ReaderWriter::Options > options;
-  // "noRotation" is to cancel the default -X in .obj files
-  //options = new osgDB::ReaderWriter::Options("noRotation");
-  options = new osgDB::ReaderWriter::Options();
+  osg::ref_ptr< osgDB::ReaderWriter::Options > osgoptions;
+  osgoptions = new osgDB::ReaderWriter::Options( options );
 
   std::string path;
   size_t found;
@@ -208,13 +227,13 @@ void cisstOSGBody::ReadModel( const std::string& model ){
 
   if( found != std::string::npos )
     { path.assign( model, 0, found ); }
-  options->setDatabasePath( path );
-
-  osg::ref_ptr<osg::Node> node = osgDB::readNodeFile( model, options );
+  osgoptions->setDatabasePath( path );
+  
+  osg::ref_ptr<osg::Node> node = osgDB::readNodeFile( model, osgoptions );
 
   if( node != NULL ){
     // Add the node to the transformation node
-    osgtransform->addChild( node );
+    osgscale->addChild( node );
   }
   else{
     CMN_LOG_RUN_ERROR << "Failed to create node for: " << model << std::endl;
@@ -223,7 +242,8 @@ void cisstOSGBody::ReadModel( const std::string& model ){
 }
 
 void cisstOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
-			       const vctFixedSizeVector<unsigned char,3>& RGB ){
+			       const vctFixedSizeVector<unsigned char,3>& RGB,
+			       float size ){
   
   size_t npoints= 0;
   if( pc.rows() == 3 )
@@ -240,7 +260,7 @@ void cisstOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
 		      << "Failed to create a geode." 
 		      << std::endl;
   }
-  osgtransform->addChild( geode );
+  osgscale->addChild( geode );
 
   // then create a geometry
   osg::ref_ptr<osg::Geometry> pointsGeom;
@@ -250,7 +270,9 @@ void cisstOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
 		      << "Failed to create a points geometry." 
 		      << std::endl;
   }
-  // add the geometry to the geode
+  pointsGeom->getOrCreateStateSet()->setAttribute( new osg::Point( size ),
+  						   osg::StateAttribute::ON );
+  // add the geometry to the geod
   geode->addDrawable( pointsGeom );
 
   // Create an array primitive set 
@@ -308,7 +330,8 @@ void cisstOSGBody::UpdateTransform(){
 					 Rt[0][3], Rt[1][3], Rt[2][3], 1.0 ) );
 }
 
-void cisstOSGBody::UpdateSwitch(){}
+void cisstOSGBody::UpdateSwitch()
+{ osgswitch->setValue( 0, onoff ); }
 
 void cisstOSGBody::SetTransform( const vctFrame4x4<double>& Rt )
 { transform = Rt; }

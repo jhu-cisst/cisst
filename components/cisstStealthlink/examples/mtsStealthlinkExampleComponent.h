@@ -39,6 +39,7 @@ public:
 
     struct RegistrationStruct {
         mtsFunctionRead GetTransformation;
+        mtsFunctionRead GetValid;
         mtsFunctionRead GetPredictedAccuracy;
     };
 

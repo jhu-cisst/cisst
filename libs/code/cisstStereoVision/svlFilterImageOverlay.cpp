@@ -247,12 +247,10 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                                 else {
                                 // Sample is not recent
                                     do {
-                                        ovrlsample = input->PullSample(true, 0.025);
+                                        ovrlsample = input->PullSample(true, 0.1);
                                         if (ovrlsample) itersample->second = ovrlsample;
                                     }
-                                    while (IsRunning() &&
-                                           overlayinput->GetInputSynchronized() &&
-                                           (!ovrlsample || ovrlsample->GetTimestamp() < current_time));
+                                    while (IsRunning() && (!ovrlsample || ovrlsample->GetTimestamp() < current_time));
                                     if (IsRunning()) overlay->Draw(src_image, ovrlsample);
                 }
             }

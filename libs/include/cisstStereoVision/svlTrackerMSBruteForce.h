@@ -40,6 +40,7 @@ public:
     void SetScales(unsigned int  scales);
     void SetTemplateRadius(unsigned int radius);
     void SetSearchRadius(unsigned int radius);
+    void SetOverwriteTemplates(bool enable);
     void SetTemplateUpdateWeight(double weight);
     void SetConfidenceThreshold(double threshold);
 
@@ -47,6 +48,7 @@ public:
     unsigned int GetScales() const;
     unsigned int GetTemplateRadius() const;
     unsigned int GetSearchRadius() const;
+    bool GetOverwriteTemplates() const;
     double GetTemplateUpdateWeight() const;
     double GetConfidenceThreshold() const;
 
@@ -63,8 +65,9 @@ public:
 protected:
     std::string ScaleName;
 
-    unsigned int FrameCounter;
     bool TargetsAdded;
+    bool OverwriteTemplates;
+    unsigned int FrameCounter;
     unsigned int TemplateRadiusRequested;
     unsigned int SearchRadiusRequested;
     unsigned int TemplateRadius;

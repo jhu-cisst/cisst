@@ -107,6 +107,8 @@ int svlFilterImageWindowTargetSelect::Initialize(svlSample* syncInput, svlSample
 
     syncOutput = syncInput;
 
+    GetOutput("targets")->SetupSample(&Targets);
+
     svlFilterImageWindow::SetEventHandler(this);
     return svlFilterImageWindow::Initialize(DisplayImage, syncOutput);
 }
