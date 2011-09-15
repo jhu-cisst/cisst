@@ -140,8 +140,8 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
 		  const std::string& options );
 
   void Read3DData( const vctDynamicMatrix<double>& pc,
-		   const vctFixedSizeVector<unsigned char,3>& RGB = 
-		   vctFixedSizeVector<unsigned char,3>( 200, 200, 200 ) );
+		   const vctFixedSizeVector<unsigned char,3>& RGB = RGBDEFAULT,
+		   float size = 3.0 );
 
  public: 
 
@@ -192,7 +192,8 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
 		cisstOSGWorld* world,
 	        const vctFrm3& Rt,
-		const vctFixedSizeVector<unsigned char,3>& rgb=RGBDEFAULT );
+		const vctFixedSizeVector<unsigned char,3>& rgb=RGBDEFAULT,
+		float size = 3.0 );
 
   ~cisstOSGBody();
 

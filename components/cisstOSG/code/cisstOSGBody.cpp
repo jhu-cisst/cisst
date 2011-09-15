@@ -17,12 +17,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <osgDB/ReadFile> 
 #include <osg/PolygonMode>
+#include <osg/Point>
 #include <osg/Material>
 
 #include <algorithm>
 
 #include <cisstOSG/cisstOSGBody.h>
 
+
+const vctFixedSizeVector<unsigned char,3> cisstOSGBody::RGBDEFAULT = vctFixedSizeVector<unsigned char,3>( 255, 0, 0 );
 
 // Default constructor for the geode visitor
 cisstOSGBody::GeodeVisitor::GeodeVisitor() : 
@@ -145,7 +148,8 @@ cisstOSGBody::cisstOSGBody( const std::string& model,
 cisstOSGBody::cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
 			    cisstOSGWorld* world,
 			    const vctFrm3& Rt,
-			    const vctFixedSizeVector<unsigned char,3>& rgb ):
+			    const vctFixedSizeVector<unsigned char,3>& rgb,
+			    float size ):
 
   onoff( SWITCH_ON ){
 
@@ -155,7 +159,7 @@ cisstOSGBody::cisstOSGBody( const vctDynamicMatrix<double>& pointcloud,
   transform = vctFrame4x4<double>( q, Rt.Translation() );
 
   Initialize();
-  Read3DData( pointcloud, rgb );
+  Read3DData( pointcloud, rgb, size );
 
   if( world != NULL )
     { world->addChild( this ); }
@@ -238,7 +242,8 @@ void cisstOSGBody::ReadModel( const std::string& model,
 }
 
 void cisstOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
-			       const vctFixedSizeVector<unsigned char,3>& RGB ){
+			       const vctFixedSizeVector<unsigned char,3>& RGB,
+			       float size ){
   
   size_t npoints= 0;
   if( pc.rows() == 3 )
@@ -255,7 +260,7 @@ void cisstOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
 		      << "Failed to create a geode." 
 		      << std::endl;
   }
-  osgtransform->addChild( geode );
+  osgscale->addChild( geode );
 
   // then create a geometry
   osg::ref_ptr<osg::Geometry> pointsGeom;
@@ -265,7 +270,9 @@ void cisstOSGBody::Read3DData( const vctDynamicMatrix<double>& pc,
 		      << "Failed to create a points geometry." 
 		      << std::endl;
   }
-  // add the geometry to the geode
+  pointsGeom->getOrCreateStateSet()->setAttribute( new osg::Point( size ),
+  						   osg::StateAttribute::ON );
+  // add the geometry to the geod
   geode->addDrawable( pointsGeom );
 
   // Create an array primitive set 
@@ -323,7 +330,8 @@ void cisstOSGBody::UpdateTransform(){
 					 Rt[0][3], Rt[1][3], Rt[2][3], 1.0 ) );
 }
 
-void cisstOSGBody::UpdateSwitch(){}
+void cisstOSGBody::UpdateSwitch()
+{ osgswitch->setValue( 0, onoff ); }
 
 void cisstOSGBody::SetTransform( const vctFrame4x4<double>& Rt )
 { transform = Rt; }
