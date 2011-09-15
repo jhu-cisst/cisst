@@ -177,6 +177,11 @@ void cisstOSGBody::Initialize( double scale ){
 
   osgscale = new osg::PositionAttitudeTransform();
   osgscale->setScale( osg::Vec3( scale, scale, scale ) );
+  if( scale != 1.0 ){
+    osg::ref_ptr<osg::StateSet> stateset = osgscale->getOrCreateStateSet(); 
+    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+  }
+
   
   // Create and configure the transform node
   osgtransform = new osg::MatrixTransform;

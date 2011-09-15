@@ -283,6 +283,15 @@ void cisstODEBody::Initialize( const vctFrame4x4<double>& Rtwb,
 
 void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
 
+  cisstOSGBody::GeodeVisitor gvtmp; 
+  this->accept( gvtmp ); 
+  
+  if( 1000 < gvtmp.geodetriangles.size() ){ 
+    double ratio = 1000.0 / ( (double) gvtmp.geodetriangles.size() ); 
+    osgUtil::Simplifier simplifier( ratio, 4.0 ); 
+    this->accept( simplifier ); 
+  } 
+  
   cisstOSGBody::GeodeVisitor gv;
   this->accept( gv );
 
