@@ -38,6 +38,7 @@ mtsNDISerialControllerQtComponent::mtsNDISerialControllerQtComponent(const std::
         required->AddFunction("PortHandlesEnable", NDI.Enable);
         required->AddFunction("CalibratePivot", NDI.CalibratePivot);
         required->AddFunction("ToggleTracking", NDI.Track);
+        required->AddFunction("ReportStrayMarkers", NDI.ReportStrayMarkers);
     }
 
     required = AddInterfaceRequired("DataCollector");
@@ -55,6 +56,8 @@ mtsNDISerialControllerQtComponent::mtsNDISerialControllerQtComponent(const std::
                      this, SLOT(NDICalibratePivotQSlot()));
     QObject::connect(ControllerWidget.ButtonTrack, SIGNAL(toggled(bool)),
                      this, SLOT(NDITrackQSlot(bool)));
+    QObject::connect(ControllerWidget.ButtonReportStrayMarkers, SIGNAL(clicked()),
+                     this, SLOT(NDIReportStrayMarkersQSlot()));
     QObject::connect(ControllerWidget.ButtonRecord, SIGNAL(toggled(bool)),
                      this, SLOT(RecordQSlot(bool)));
 }
@@ -94,6 +97,12 @@ void mtsNDISerialControllerQtComponent::NDITrackQSlot(bool toggled)
 {
     NDI.Track(mtsBool(toggled));
     qApp->beep();
+}
+
+
+void mtsNDISerialControllerQtComponent::NDIReportStrayMarkersQSlot(void)
+{
+    NDI.ReportStrayMarkers();
 }
 
 

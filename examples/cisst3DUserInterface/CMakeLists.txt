@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisst3DUserInterface)
+if (CISST_BUILD_LIBS_cisst3DUserInterface)
 
   find_package (VTK REQUIRED)
   include (${VTK_USE_FILE})
@@ -47,6 +47,6 @@ if (BUILD_LIBS_cisst3DUserInterface)
     message (WARNING " cisst3DUserInterface example daVinciStereoVideo will not be compiled since it requires CISST_UI3_HAS_DAVINCI")
   endif (CISST_UI3_HAS_DAVINCI)
 
-else (BUILD_LIBS_cisst3DUserInterface)
-  message (WARNING " cisst3DUserInterface examples will not be compiled since they require BUILD_LIBS_3DUserInterface")
-endif (BUILD_LIBS_cisst3DUserInterface)
+else (CISST_BUILD_LIBS_cisst3DUserInterface)
+  message (WARNING " cisst3DUserInterface examples will not be compiled since they require CISST_BUILD_LIBS_3DUserInterface")
+endif (CISST_BUILD_LIBS_cisst3DUserInterface)

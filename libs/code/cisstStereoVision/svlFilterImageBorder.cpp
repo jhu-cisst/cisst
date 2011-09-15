@@ -91,8 +91,7 @@ int svlFilterImageBorder::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 int svlFilterImageBorder::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = OutputImage;
-    _SkipIfAlreadyProcessed(syncInput, syncOutput);
-
+    
     svlSampleImage* inimg = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int videochannels = inimg->GetVideoChannels();
     int i, ws, hs, wo, ho, xs, ys, xo, yo, copylen, linecount;

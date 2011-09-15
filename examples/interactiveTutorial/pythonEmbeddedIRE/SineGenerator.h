@@ -7,8 +7,7 @@
   Author(s): Peter Kazanzides
   Created on: 2005-12-21
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,7 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _SineGenerator_h
 
 #include <cmath>
-#include <cisstCommon.h>
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnConstants.h>
 
 // code required for the DLL generation
 #ifdef SineGenerator_EXPORTS

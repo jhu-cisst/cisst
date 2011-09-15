@@ -21,8 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _GCMUITask_h
 #define _GCMUITask_h
 
-#include <cisstMultiTask.h>
-#include <cisstOSAbstraction.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsComponentViewer.h>
+#include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaMutex.h>
 #include "GlobalComponentManagerUI.h"
 #include "multiplot_cisst.h"
 

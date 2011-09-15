@@ -2,9 +2,9 @@
 # Find the cisst settings
 
 project (myProject)
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
-find_package (cisst REQUIRED)
+find_package (cisst REQUIRED cisstCommon cisstVector cisstNumerical)
 
 if (cisst_FOUND)
   # Modify CMake configuration to use cisst

@@ -53,6 +53,9 @@ public:
     virtual void GetFullScreen(bool & fullscreen) const;
     virtual void GetTitle(std::string & title) const;
 
+    virtual void Show(unsigned int videoch = SVL_LEFT);
+    virtual void Hide(unsigned int videoch = SVL_LEFT);
+
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);

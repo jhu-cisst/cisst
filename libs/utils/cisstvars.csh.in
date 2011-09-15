@@ -21,10 +21,10 @@
 
 
 set CISST_DIR="@cisst_BINARY_DIR@"
-set BUILD_TESTS=@BUILD_TESTS@
-set BUILD_EXAMPLES=@BUILD_EXAMPLES@
-set BUILD_UTILITIES=@BUILD_UTILITIES@
-set BUILD_COMPONENTS=@BUILD_COMPONENTS@
+set CISST_BUILD_TESTS=@CISST_BUILD_TESTS@
+set CISST_BUILD_EXAMPLES=@CISST_BUILD_EXAMPLES@
+set CISST_BUILD_UTILITIES=@CISST_BUILD_UTILITIES@
+set CISST_BUILD_COMPONENTS=@CISST_BUILD_COMPONENTS@
 
 set OS=`uname`
 
@@ -52,7 +52,7 @@ endif
 
 
 # Add path to test code
-if (${BUILD_TESTS} == "ON") then
+if (${CISST_BUILD_TESTS} == "ON") then
     setenv PATH "${CISST_DIR}/tests/bin:$PATH"
     set LIBRARY_PATH="${CISST_DIR}/tests/lib:$LIBRARY_PATH"
     setenv PYTHONPATH "${CISST_DIR}/tests/lib:$PYTHONPATH"
@@ -60,7 +60,7 @@ endif
 
 
 # Add path to example code
-if (${BUILD_EXAMPLES} == "ON") then
+if (${CISST_BUILD_EXAMPLES} == "ON") then
     setenv PATH "${CISST_DIR}/examples/bin:$PATH"
     set LIBRARY_PATH="${CISST_DIR}/examples/lib:$LIBRARY_PATH"
     setenv PYTHONPATH "${CISST_DIR}/examples/lib:$PYTHONPATH"
@@ -68,7 +68,7 @@ endif
 
 
 # Add path to utility code
-if (${BUILD_UTILITIES} == "ON") then
+if (${CISST_BUILD_UTILITIES} == "ON") then
     setenv PATH "${CISST_DIR}/utilities/bin:$PATH"
     set LIBRARY_PATH="${CISST_DIR}/utilities/lib:$LIBRARY_PATH"
     setenv PYTHONPATH "${CISST_DIR}/utilities/lib:$PYTHONPATH"
@@ -76,7 +76,7 @@ endif
 
 
 # Add path to components code
-if (${BUILD_COMPONENTS} == "ON") then
+if (${CISST_BUILD_COMPONENTS} == "ON") then
     setenv PATH "${CISST_DIR}/components/bin:$PATH"
     set LIBRARY_PATH="${CISST_DIR}/components/lib:$LIBRARY_PATH"
     setenv PYTHONPATH "${CISST_DIR}/components/lib:$PYTHONPATH"

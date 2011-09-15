@@ -29,7 +29,7 @@ svlCCCameraCalibration::svlCCCameraCalibration(int boardWidth, int boardHeight, 
     maxNumberOfGrids = 25;
     minHandEyeAvgError = std::numeric_limits<double>::max( );
     debug = false;
-    groundTruthTest = false;
+    groundTruthTest = true;
     visibility = new int[maxNumberOfGrids];
     groundTruthCameraMatrix = cv::Mat::eye(3, 3, CV_64F);
     groundTruthDistCoeffs  = cv::Mat::zeros(5, 1, CV_64F);

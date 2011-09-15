@@ -18,6 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <bitset>
+
 #include <cisstCommon/cmnStrings.h>
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
@@ -44,6 +46,7 @@ mtsNDISerial::mtsNDISerial(const std::string & taskName, const double period) :
         provided->AddCommandVoid(&mtsNDISerial::PortHandlesQuery, this, "PortHandlesQuery");
         provided->AddCommandVoid(&mtsNDISerial::PortHandlesEnable, this, "PortHandlesEnable");
         provided->AddCommandWrite(&mtsNDISerial::CalibratePivot, this, "CalibratePivot", mtsStdString());
+        provided->AddCommandVoid(&mtsNDISerial::ReportStrayMarkers, this, "ReportStrayMarkers");
         provided->AddCommandWrite(&mtsNDISerial::ToggleTracking, this, "ToggleTracking", mtsBool());
         provided->AddCommandReadState(StateTable, IsTracking, "IsTracking");
     }
@@ -785,7 +788,7 @@ void mtsNDISerial::Track(void)
             CMN_LOG_CLASS_RUN_ERROR << "Track: line feed expected, received: " << *parsePointer << std::endl;
             return;
         }
-        parsePointer += 1;  // skip '\n'
+        parsePointer += 1;  // skip line feed (LF)
     }
     parsePointer += 4;  // skip System Status
 }
@@ -844,7 +847,7 @@ void mtsNDISerial::CalibratePivot(const mtsStdString & toolName)
 
     vct3 error;
     double errorSquareSum = 0.0;
-    for (int i = 0; i < numPoints; i++) {
+    for (unsigned int i = 0; i < numPoints; i++) {
         error = (frames[i] * tooltip) - pivot;
         CMN_LOG_CLASS_RUN_DEBUG << error << std::endl;
         errorSquareSum += error.NormSquare();
@@ -858,6 +861,66 @@ void mtsNDISerial::CalibratePivot(const mtsStdString & toolName)
 #else
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: requires cisstNetlib" << std::endl;
 #endif
+}
+
+
+void mtsNDISerial::ReportStrayMarkers(void)
+{
+    char * parsePointer;
+    unsigned int numPortHandles = 0;
+    unsigned int numMarkers = 0;
+
+    // save tracking status
+    bool wasTracking = IsTracking;
+    ToggleTracking(true);
+
+    CommandSend("TX 1000");
+    ResponseRead();
+    parsePointer = SerialBuffer;
+
+    // skip handle number for all port handles
+    sscanf(parsePointer, "%02X", &numPortHandles);
+    parsePointer += 2;
+    for (unsigned int i = 0; i < numPortHandles; i++) {
+        parsePointer += 2;  // skip handle number
+        parsePointer += 1;  // skip line feed (LF)
+    }
+
+    // read number of stray markers
+    sscanf(parsePointer, "%02X", &numMarkers);
+    parsePointer += 2;
+    CMN_LOG_CLASS_RUN_DEBUG << "ReportStrayMarkers: " << numMarkers << " stray markers detected" << std::endl;
+
+    // read out of volume reply
+    unsigned int outOfVolumeReplySize = static_cast<unsigned int>(ceil(numMarkers / 4.0));
+    std::vector<bool> outOfVolumeReply(4 * outOfVolumeReplySize);
+    unsigned int numGarbageBits = (4 * outOfVolumeReplySize) - numMarkers;
+    for (unsigned int i = 0; i < outOfVolumeReplySize; i++) {
+        std::bitset<4> outOfVolumeReplyByte(parsePointer[i]);
+        outOfVolumeReplyByte.flip();
+        for (unsigned int j = 0; j < 4; j++) {
+            outOfVolumeReply[4*i + j] = outOfVolumeReplyByte[3-j];
+        }
+    }
+    parsePointer += outOfVolumeReplySize;
+
+    // read each marker's position
+    vctDynamicVector<vctDouble3> A(numMarkers);
+    vctDynamicVector<bool> B(numMarkers);
+    for (unsigned int i = 0; i < numMarkers; i++) {
+
+        sscanf(parsePointer, "%7lf%7lf%7lf",
+               &(A[i].X()), &(A[i].Y()), &(A[i].Z()));
+        parsePointer += (3 * 7);
+        A[i].Divide(100.0);
+        B[i] = outOfVolumeReply[i + numGarbageBits];
+
+        CMN_LOG_CLASS_RUN_DEBUG << "ReportStrayMarkers: " << i + 1 << "th marker visibility: " << B[i] << ", position: " << A[i] << std::endl;
+    }
+    parsePointer += 4;  // skip System Status
+
+    // restore tracking status
+    ToggleTracking(wasTracking);
 }
 
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
-    <height>351</height>
+    <width>372</width>
+    <height>445</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="0" rowspan="6">
+   <item row="1" column="0" rowspan="7">
     <spacer name="SpacerLeftTop">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -69,7 +69,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="4" rowspan="6">
+   <item row="1" column="4" rowspan="7">
     <spacer name="SpacerRightTop">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -114,7 +114,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="2">
+   <item row="7" column="2">
     <widget class="QPushButton" name="ButtonRecord">
      <property name="text">
       <string>Record</string>
@@ -124,7 +124,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
+   <item row="8" column="0">
     <spacer name="SpacerLeftBottom">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -137,10 +137,10 @@
      </property>
     </spacer>
    </item>
-   <item row="7" column="1" colspan="3">
+   <item row="8" column="1" colspan="3">
     <layout class="QVBoxLayout" name="LayoutTools"/>
    </item>
-   <item row="8" column="2">
+   <item row="9" column="2">
     <spacer name="SpacerBottom">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -153,7 +153,7 @@
      </property>
     </spacer>
    </item>
-   <item row="7" column="4">
+   <item row="8" column="4">
     <spacer name="SpacerRightBottom">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -170,6 +170,13 @@
     <widget class="QPushButton" name="ButtonInitialize">
      <property name="text">
       <string>Initialize</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="ButtonReportStrayMarkers">
+     <property name="text">
+      <string>Report Stray Markers</string>
      </property>
     </widget>
    </item>

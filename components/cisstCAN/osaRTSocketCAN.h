@@ -37,8 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT osaRTSocketCAN : public cisstCAN {
 
-  CMN_DECLARE_SERVICES( CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR );
-  
  private:
   
   //! The name of the CAN device (rtcan0, rtcan1, ...)
@@ -107,7 +105,5 @@ public:
   cisstCAN::Errno AddFilter( const cisstCAN::Filter& filter );
 
 };
-
-CMN_DECLARE_SERVICES_INSTANTIATION( osaRTSocketCAN )
 
 #endif

@@ -29,15 +29,15 @@ foreach (lib ${CISST_LIBRARIES})
   # Test if the directory exists
   if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
     # Build by default and mark as advanced
-    option (BUILD_TESTS_${lib} "Build ${lib} tests." ON)
-    mark_as_advanced (BUILD_TESTS_${lib})
+    option (CISST_BUILD_TESTS_${lib} "Build ${lib} tests." ON)
+    mark_as_advanced (CISST_BUILD_TESTS_${lib})
   endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
 endforeach (lib)
 
 # Generate tests for wrapped libraries
 if (CISST_HAS_SWIG_PYTHON)
-  option (BUILD_TESTS_wrapping "Build wrapping tests." ON)
-  mark_as_advanced (BUILD_TESTS_wrapping)
+  option (CISST_BUILD_TESTS_wrapping "Build wrapping tests." ON)
+  mark_as_advanced (CISST_BUILD_TESTS_wrapping)
 endif (CISST_HAS_SWIG_PYTHON)
 
 # Create the main library
@@ -59,27 +59,27 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/include)
 # Create targets for each test
 # Build in each subdir
 foreach (lib ${CISST_LIBS})
-  if (BUILD_LIBS_${lib})
-    if (BUILD_TESTS_${lib})
+  if (CISST_BUILD_LIBS_${lib})
+    if (CISST_BUILD_TESTS_${lib})
       add_subdirectory (${lib})
-    endif (BUILD_TESTS_${lib})
-  else (BUILD_LIBS_${lib})
-    if (BUILD_TESTS_${lib})
-      message ("Info: BUILD_TESTS_${lib} turned off since it requires BUILD_LIBS_${lib}")
-      set (BUILD_TESTS_${lib} OFF CACHE BOOL "Build ${lib} tests." FORCE)
-    endif (BUILD_TESTS_${lib})
-  endif (BUILD_LIBS_${lib})
+    endif (CISST_BUILD_TESTS_${lib})
+  else (CISST_BUILD_LIBS_${lib})
+    if (CISST_BUILD_TESTS_${lib})
+      message ("Info: CISST_BUILD_TESTS_${lib} turned off since it requires CISST_BUILD_LIBS_${lib}")
+      set (CISST_BUILD_TESTS_${lib} OFF CACHE BOOL "Build ${lib} tests." FORCE)
+    endif (CISST_BUILD_TESTS_${lib})
+  endif (CISST_BUILD_LIBS_${lib})
 endforeach (lib)
 
 # Generate tests for wrapped libraries
-if (BUILD_TESTS_wrapping)
+if (CISST_BUILD_TESTS_wrapping)
   if (CISST_HAS_SWIG_PYTHON)
     add_subdirectory (wrapping)
   else (CISST_HAS_SWIG_PYTHON)
-    message ("Info: BUILD_TESTS_wrapping turned off since it requires CISST_HAS_SWIG_PYTHON")
-    set (BUILD_TESTS_wrapping OFF CACHE BOOL "Build wrapping tests." FORCE)
+    message ("Info: CISST_BUILD_TESTS_wrapping turned off since it requires CISST_HAS_SWIG_PYTHON")
+    set (CISST_BUILD_TESTS_wrapping OFF CACHE BOOL "Build wrapping tests." FORCE)
   endif (CISST_HAS_SWIG_PYTHON)
-endif (BUILD_TESTS_wrapping)
+endif (CISST_BUILD_TESTS_wrapping)
 
 # For other libraries using the same testing framework
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmake/cisstTestsBuild.cmake.in

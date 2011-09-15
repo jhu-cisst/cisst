@@ -4,28 +4,28 @@
 # Cmake configuration file for the installed version of cisstDevices
 #
 # Author(s):  Anton Deguet
-# Created on: 2009-03-17 
+# Created on: 2009-03-17
 #
 # (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
 # Which flags have been set and include path/libs
 
-# --- Sensable --- 
+# --- Sensable ---
 set (CISST_DEV_HAS_SENSABLEHD @CISST_DEV_HAS_SENSABLEHD@)
 set (SENSABLE_INCLUDE_DIR "@SENSABLE_INCLUDE_DIR@")
 set (SENSABLE_LIBRARIES "@SENSABLE_LIBRARIES@")
 
-if (CISST_DEV_HAS_SENSABLEHD) 
+if (CISST_DEV_HAS_SENSABLEHD)
   set (CISST_ADDITIONAL_INCLUDE_DIRECTORIES
        ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
        ${SENSABLE_INCLUDE_DIR})
@@ -39,7 +39,7 @@ endif (CISST_DEV_HAS_SENSABLEHD)
 set (CISST_DEV_HAS_NOVINTHDL @CISST_DEV_HAS_NOVINTHDL@)
 set (NOVINT_INCLUDE_DIR "@NOVINT_INCLUDE_DIR@")
 set (NOVINT_LIBRARIES "@NOVINT_LIBRARIES@")
-if (CISST_DEV_HAS_NOVINTHDL) 
+if (CISST_DEV_HAS_NOVINTHDL)
   set (CISST_ADDITIONAL_INCLUDE_DIRECTORIES
        ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
        ${NOVINT_INCLUDE_DIR})

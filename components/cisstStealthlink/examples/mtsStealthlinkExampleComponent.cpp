@@ -33,8 +33,12 @@ mtsStealthlinkExampleComponent::mtsStealthlinkExampleComponent(const std::string
         required->AddFunction("GetTool", Stealthlink.GetTool);
         required->AddFunction("GetFrame", Stealthlink.GetFrame);
     }
+
+    // the following two tools are using names normally defined in config.xml
     AddToolInterface("Pointer", Pointer);
     AddToolInterface("Frame", Frame);
+    
+    // get registration information
     required = AddInterfaceRequired("Registration");
     if (required) {
         required->AddFunction("GetTransformation", Registration.GetTransformation);
@@ -62,50 +66,77 @@ void mtsStealthlinkExampleComponent::Run(void)
     mtsDouble predictedAccuracy;
 
     bool didOutput = false;
-    Stealthlink.GetTool(StealthTool);
-    Stealthlink.GetFrame(StealthFrame);
+    mtsExecutionResult result;
+    result = Stealthlink.GetTool(StealthTool);
+    if (!result.IsOK()) {
+        std::cout << "Stealthlink.GetTool() failed: " << result << std::endl;
+    }
     if (StealthTool.Valid()) {
         std::cout << "Tool " << StealthTool.GetName() << ": " << StealthTool.GetFrame().Translation() << "; ";
         didOutput = true;
+    }
+
+    result = Stealthlink.GetFrame(StealthFrame);
+    if (!result.IsOK()) {
+        std::cout << "Stealthlink.GetFrame() failed: " << result << std::endl;
     }
     if (StealthFrame.Valid()) {
         std::cout << "Frame " << StealthFrame.GetName() << ": " << StealthFrame.GetFrame().Translation() << "; ";
         didOutput = true;
     }
+
     if (Pointer.GetPositionCartesian.IsValid()) {
-        Pointer.GetPositionCartesian(prmPos);
+        result = Pointer.GetPositionCartesian(prmPos);
+        if (!result.IsOK()) {
+            std::cout << "Pointer.GetPositionCartesian() failed: " << result << std::endl;
+        }
         if (prmPos.Valid()) {
             std::cout << "Interface Pointer: " << prmPos.Position().Translation() << "; ";
             didOutput = true;
         }
     }
-    else if (Pointer.GetMarkerCartesian.IsValid()) {
-        Pointer.GetMarkerCartesian(prmPos);
+    if (Pointer.GetMarkerCartesian.IsValid()) {
+        result = Pointer.GetMarkerCartesian(prmPos);
+        if (!result.IsOK()) {
+            std::cout << "Pointer.GetMarkerCartesian() failed: " << result << std::endl;
+        }
         if (prmPos.Valid()) {
             std::cout << "Interface PointerM: " << prmPos.Position().Translation() << "; ";
             didOutput = true;
         }
     }
+
     if (Frame.GetPositionCartesian.IsValid()) {
-        Frame.GetPositionCartesian(prmPos);
+        result = Frame.GetPositionCartesian(prmPos);
+        if (!result.IsOK()) {
+            std::cout << "Frame.GetPositionCartesian() failed: " << result << std::endl;
+        }
         if (prmPos.Valid()) {
             std::cout << "Interface Frame: " << prmPos.Position().Translation();
             didOutput = true;
         }
     }
-    else if (Frame.GetMarkerCartesian.IsValid()) {
-        Frame.GetMarkerCartesian(prmPos);
+    if (Frame.GetMarkerCartesian.IsValid()) {
+        result = Frame.GetMarkerCartesian(prmPos);
+        if (!result.IsOK()) {
+            std::cout << "Frame.GetMarkerCartesian() failed: " << result << std::endl;
+        }
         if (prmPos.Valid()) {
             std::cout << "Interface FrameM: " << prmPos.Position().Translation();
             didOutput = true;
         }
     }
+
     if (Registration.GetTransformation.IsValid()) {
         Registration.GetTransformation(mtsFrm);
-        std::cout << "Registration: " << mtsFrm.Translation();
-        didOutput = true;
+        if (mtsFrm.Valid()) {
+            std::cout << "Registration: " << mtsFrm.Translation();
+            didOutput = true;
+        }
     }
     if (didOutput) {
         std::cout << std::endl;
+    } else {
+        std::cout << "." << std::flush;
     }
 }

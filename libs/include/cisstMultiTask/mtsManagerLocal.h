@@ -86,15 +86,13 @@ public:
     /*! Typedef for local component manager's configuration */
     enum ConfigurationType {
         // Standalone mode: supports only local components/connections
-        LCM_CONFIG_STANDALONE
-#if CISST_MTS_HAS_ICE
+        LCM_CONFIG_STANDALONE,
         // Networked mode: supports both local and remote components/connections
-        , LCM_CONFIG_NETWORKED
+        LCM_CONFIG_NETWORKED,
         // Networked mode with global component manager: basically identical to
         // LCM_CONFIG_NETWORKED configuration except that LCM runs with the
         // global component manager on the same process.
-        , LCM_CONFIG_NETWORKED_WITH_GCM
-#endif
+        LCM_CONFIG_NETWORKED_WITH_GCM
     };
 
 
@@ -190,18 +188,17 @@ protected:
     /*! Protected constructor (singleton) */
     mtsManagerLocal(void);
 
-#if CISST_MTS_HAS_ICE
     mtsManagerLocal(const std::string & globalComponentManagerIP,
                     const std::string & thisProcessName,
                     const std::string & thisProcessIP);
     mtsManagerLocal(mtsManagerGlobal & globalComponentManager);
-#endif
 
     /*! Destructor. Includes OS-specific cleanup. */
     virtual ~mtsManagerLocal();
 
     /*! Initialization */
     void Initialize(void);
+    void InitializeLocal(void);
 
     /*! \brief Create internal manager components automatically when LCM is
                initialized.  */
@@ -226,14 +223,12 @@ protected:
                InterfaceComponent.Provided) */
     bool ConnectToManagerComponentClient(const std::string & componentName);
 
-#if CISST_MTS_HAS_ICE
     /*! \brief Set IP address of this machine */
     void SetIPAddress(void);
 
     /*! \brief Create Ice proxy for this LCM and connects to the GCM
         \return True if success, false otherwise */
     bool ConnectToGlobalComponentManager(void);
-#endif
 
     /*! \brief Register all interfaces that a component owns to the global
                component manager.  The GCM uses this information to connect
@@ -268,7 +263,6 @@ protected:
     //
     //  See mtsManagerLocalInterface.h for detailed documentation.
     //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
     /*! \brief Create component proxy
         \param componentProxyName Name of component proxy
         \param listenerID Not used
@@ -308,7 +302,6 @@ protected:
 
     /*! \brief Connect two local interfaces at the client side */
     bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
-#endif
 
     /*! Get information about provided interface */
     bool GetInterfaceProvidedDescription(
@@ -395,7 +388,6 @@ public:
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-#if CISST_MTS_HAS_ICE
     /*! \brief Connect two remote interfaces
         \param clientProcessName Name of client process
         \param clientComponentName Name of client component
@@ -424,7 +416,6 @@ public:
                  const std::string & serverProcessName, const std::string & serverComponentName,
                  const std::string & serverInterfaceProvidedName,
                  const unsigned int retryCount = 10);
-#endif
 
     /*! Disconnect two interfaces */
     bool Disconnect(const ConnectionIDType connectionID);
@@ -432,12 +423,10 @@ public:
     bool Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-#if CISST_MTS_HAS_ICE
     bool Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
                     const std::string & clientInterfaceRequiredName,
                     const std::string & serverProcessName, const std::string & serverComponentName,
                     const std::string & serverInterfaceProvidedName);
-#endif
 
     //-------------------------------------------------------------------------
     //  Getters and Utilities
@@ -448,11 +437,18 @@ public:
     /*! Name of local component manager running with the global component manager */
     static std::string ProcessNameOfLCMWithGCM;
 
-#if !CISST_MTS_HAS_ICE
-    /*! Get a singleton object of local component manager */
+    /*! Get a singleton object of local component manager.
+        \note  If this is called first, the local component manager is
+               configured in standalone mode. If one of the other GetInstance
+               methods (with arguments) is later called, the singleton object is
+               reconfigured in networked mode if (CISST_MTS_HAS_ICE is defined)
+               to support inter-process communication. During
+               this reconfiguration process, a caller thread is blocked for
+               thread-safe transition of all internal data.
+    */
     static mtsManagerLocal * GetInstance(void);
-#else
-    /*! \brief Return singleton object of local component manager.
+
+    /*! \brief Return singleton object of local component manager (networked mode)
         \param globalComponentManagerIP Ip address of global component manager
                that this local component manager connects to
         \param thisProcessName Name of this process. If not specified, set as
@@ -460,28 +456,19 @@ public:
         \param thisProcessIP IP address of this process. If not specified, set
                as the first ip address detected
         \return Pointer to singleton object
-        \note  If no argument is specified, local component manager is
-               configured as the standalone mode. If this method is called again
-               with proper arguments, the singleton object is reconfigured as
-               the networked mode to support inter-process communication. During
-               this reconfiguration process, a caller thread is blocked for
-               thread-safe transition of all internal data. */
-    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP = "",
+    */
+    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP,
                                          const std::string & thisProcessName = "",
                                          const std::string & thisProcessIP = "");
 
+    /*! \brief Return singleton object of local component manager (networked mode, as GCM)
+        \param globalComponentManager reference to global component manager (GCM)
+    */
     static mtsManagerLocal * GetInstance(mtsManagerGlobal & globalComponentManager);
-
-#endif
-
+   
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
-    std::vector<std::string> CISST_DEPRECATED GetNamesOfDevices(void) const;  // For backward compatibility
-    std::vector<std::string> CISST_DEPRECATED GetNamesOfTasks(void) const;  // For backward compatibility
-
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
-    void CISST_DEPRECATED GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const; // For backward compatibility
-    void CISST_DEPRECATED GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
 
     /*! Return a reference to the time server. */
 #if 0
@@ -506,7 +493,6 @@ public:
         return GCMConnected;
     }
 
-#if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                             const std::string & componentName,
@@ -589,7 +575,6 @@ public:
 
     /*! Set endpoint access information */
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
-#endif
 
     /*! For debugging. Dumps to stream the maps maintained by the manager. */
     void /*CISST_DEPRECATED*/ ToStream(std::ostream & outputStream) const;

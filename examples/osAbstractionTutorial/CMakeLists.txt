@@ -12,9 +12,9 @@
 #
 # --- end cisst license ---
 
-if (BUILD_LIBS_cisstOSAbstraction)
+if (CISST_BUILD_LIBS_cisstOSAbstraction)
   add_subdirectory (serialPort)
   add_subdirectory (socket)
-else (BUILD_LIBS_cisstOSAbstraction)
-  message (WARNING " osAbstractionTutorial examples will not be compiled since they require BUILD_LIBS_cisstOSAbstraction")
-endif (BUILD_LIBS_cisstOSAbstraction)
+else (CISST_BUILD_LIBS_cisstOSAbstraction)
+  message (WARNING " osAbstractionTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstOSAbstraction")
+endif (CISST_BUILD_LIBS_cisstOSAbstraction)

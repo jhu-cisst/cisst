@@ -18,7 +18,7 @@
 # set the library name
 set (LIBRARY cisstDevices)
 set (LIBRARY_INCLUDE_DIR ${cisstLibs_SOURCE_DIR}/include/${LIBRARY})
-set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot)
+set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstMultiTask cisstParameterTypes cisstRobot)
 
 # make sure all options are set for all devices to OFF
 option (CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
@@ -36,7 +36,7 @@ set (HEADER_FILES
      devSartoriusSerial.h
      devExport.h
      devKeyboard.h
-     can/devCAN.h   
+     can/devCAN.h
      )
 
 set (SOURCE_FILES
@@ -52,6 +52,7 @@ if( CISST_DEV_HAS_ROBOTCOMPONENTS )
   set( SOURCE_FILES ${SOURCE_FILES} ${ROBOTCOMPONENTS_SOURCE_FILES} )
 endif( CISST_DEV_HAS_ROBOTCOMPONENTS )
 
+# Sensable Omni
 if (CISST_DEV_HAS_SENSABLEHD)
   find_package (Sensable REQUIRED)
   include_directories (${SENSABLE_INCLUDE_DIR})
@@ -68,11 +69,11 @@ if( CISST_DEV_HAS_BITCTRL )
   find_package( BitCtrl )
   if( BITCTRL_FOUND )
     include_directories( ${BITCTRL_INCLUDE_DIR} )
-    set( SOURCE_FILES ${SOURCE_FILES} can/devCANopen.cpp 
+    set( SOURCE_FILES ${SOURCE_FILES} can/devCANopen.cpp
                                       can/devBitCtrl.cpp )
     set( HEADER_FILES ${HEADER_FILES} can/CiA301.h
                                       can/CiA402.h
-                                      can/devCANopen.h   
+                                      can/devCANopen.h
                                       can/devBitCtrl.h )
   endif( BITCTRL_FOUND )
 endif( CISST_DEV_HAS_BITCTRL )
@@ -97,6 +98,7 @@ if (CISST_DEV_HAS_LOPOMOCO)
        devLoPoMoCo.h)
 endif (CISST_DEV_HAS_LOPOMOCO)
 
+# OpenIGTLink
 if (CISST_DEV_HAS_OPENIGTLINK)
   find_package (OpenIGTLink REQUIRED)
   include (${OpenIGTLink_USE_FILE})
@@ -106,20 +108,17 @@ if (CISST_DEV_HAS_OPENIGTLINK)
   set (HEADER_FILES
        ${HEADER_FILES}
        devOpenIGTLink.h)
-  set (DEV_ADDITIONAL_CMAKE_FILES
-       "${DEV_ADDITIONAL_CMAKE_FILES}"
-       ${OpenIGTLink_USE_FILE})
-  set (DEV_ADDITIONAL_PACKAGES
-       "${DEV_ADDITIONAL_PACKAGES}"
-       OpenIGTLink)
-  set (DEV_ADDITIONAL_LINK_DIRECTORIES
-       "${DEV_ADDITIONAL_LINK_DIRECTORIES}"
-       ${OpenIGTLink_LIBRARY_DIRS})
-  set (DEV_ADDITIONAL_LIBRARIES
-       "${DEV_ADDITIONAL_LIBRARIES}"
-       OpenIGTLink)
+  cisst_set_package_settings (cisstDevices OpenIGTLink CMAKE_FILES      OpenIGTLink_USE_FILE)
+  set (OpenIGTLink_PACKAGE_NAME "OpenIGTLink")
+  cisst_set_package_settings (cisstDevices OpenIGTLink PACKAGES         OpenIGTLink_PACKAGE_NAME)
+  cisst_set_package_settings (cisstDevices OpenIGTLink LINK_DIRECTORIES OpenIGTLink_LIBRARY_DIRS)
+  set (OpenIGTLink_LIBRARY_NAME "OpenIGTLink")
+  cisst_set_package_settings (cisstDevices OpenIGTLink LIBRARIES        OpenIGTLink_LIBRARY_NAME)
+else (CISST_DEV_HAS_OPENIGTLINK)
+  cisst_unset_all_package_settings (cisstDevices OpenIGTLink)
 endif (CISST_DEV_HAS_OPENIGTLINK)
 
+# Novint Falcon
 if (CISST_DEV_HAS_NOVINTHDL)
   find_package (NovintHDL REQUIRED)
   include_directories (${NOVINT_INCLUDE_DIR})
@@ -221,13 +220,6 @@ if (CISST_HAS_QT)
        devNDISerialToolQDevice.h)
 
 endif (CISST_HAS_QT)
-
-# Exporting settings to applications that link against cisst
-cisst_add_to_internal (CISST_ADDITIONAL_PACKAGES DEV_ADDITIONAL_PACKAGES)
-cisst_add_to_internal (CISST_ADDITIONAL_CMAKE_FILES DEV_ADDITIONAL_CMAKE_FILES)
-cisst_add_to_internal (CISST_ADDITIONAL_LINK_DIRECTORIES DEV_ADDITIONAL_LINK_DIRECTORIES)
-cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES DEV_ADDITIONAL_LIBRARIES)
-cisst_add_to_internal (CISST_ADDITIONAL_INCLUDE_DIRECTORIES DEV_ADDITIONAL_INCLUDE_DIR)
 
 # Create the config file
 set (CISST_DEV_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstDevices/devConfig.h)

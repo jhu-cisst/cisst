@@ -24,12 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 #include <setjmp.h>
 
-#if (CISST_OS == CISST_DARWIN) && CISST_SVL_HAS_OPENCV
+#define JPEG_6B_LINK_ERROR_WORKAROUND   0
+
+#if (JPEG_6B_LINK_ERROR_WORKAROUND > 0) && (CISST_OS == CISST_DARWIN) && CISST_SVL_HAS_OPENCV
     // Macports bug; revisit it later
     #include <../lib/jpeg6b/include/jpeglib.h>
-#else // CISST_DARWIN && CISST_SVL_HAS_OPENCV
+#else // JPEG_6B_LINK_ERROR_WORKAROUND
     #include "jpeglib.h"
-#endif // CISST_DARWIN && CISST_SVL_HAS_OPENCV
+#endif // JPEG_6B_LINK_ERROR_WORKAROUND
 
 #define __JPEG_ERROR_VERBOSE__
 

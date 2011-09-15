@@ -68,4 +68,3 @@ cisst_target_link_libraries (
 
 set( cisstCAN_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}" )
 set( cisstCAN_LIBRARY_DIR ${LIBRARY_OUTPUT_PATH} )
-set( cisstCAN_LIBRARIES cisstCAN ${ciOPENNI_LIBRARIES})

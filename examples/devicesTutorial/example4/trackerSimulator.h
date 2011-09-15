@@ -7,7 +7,7 @@
   Author(s):  Ali Uneri
   Created on: 2009-08-11
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,9 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _trackerSimulator_h
 #define _trackerSimulator_h
 
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
-#include <cisstParameterTypes.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 #include "trackerUI.h"
 

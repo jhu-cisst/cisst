@@ -38,6 +38,9 @@ CMN_IMPLEMENT_SERVICES(prmForceCartesianGet);
 #include <cisstParameterTypes/prmForceCartesianSet.h>
 CMN_IMPLEMENT_SERVICES(prmForceCartesianSet);
 
+#include <cisstParameterTypes/prmForceTorqueJointSet.h>
+CMN_IMPLEMENT_SERVICES(prmForceTorqueJointSet);
+
 #include "cisstParameterTypes/prmGainParameters.h"
 CMN_IMPLEMENT_SERVICES(prmGainParameters);
 

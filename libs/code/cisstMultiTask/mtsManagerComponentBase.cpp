@@ -66,6 +66,7 @@ const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConne
 const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";
 const std::string mtsManagerComponentBase::EventNames::MCSReady      = "MCSReady";
+const std::string mtsManagerComponentBase::EventNames::PrintLog      = "PrintLog";
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentBase, mtsTaskFromSignal);
 

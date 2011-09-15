@@ -59,11 +59,7 @@ public:
 
     /*! \brief Remove process 
         \param processName Name of process */
-#if CISST_MTS_HAS_ICE
     virtual bool RemoveProcess(const std::string & processName, const bool networkDisconnect) = 0;
-#else
-    virtual bool RemoveProcess(const std::string & processName) = 0;
-#endif
 
     //-------------------------------------------------------------------------
     //  Component Management
@@ -167,7 +163,6 @@ public:
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) = 0;
 
-#if CISST_MTS_HAS_ICE
     /*! \brief Initiate connection process
         \param connectionID Connection id issued by GCM's Connect().
         \return True if success, false otherwise
@@ -182,7 +177,6 @@ public:
         \param connectionID Connection id issued by GCM
         \return True if success, false otherwise */
     virtual bool ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID) = 0;
-#endif
 
     /*! Get a list of all active connections represented by a set of strings */
     virtual void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const = 0;
@@ -190,7 +184,6 @@ public:
     //-------------------------------------------------------------------------
     //  Networking
     //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
     /*! \brief Set access information of the provided interface proxy
         \param connectionID connection id
         \param endpointInfo Ice proxy access information
@@ -213,7 +206,6 @@ public:
     virtual bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName, 
         const std::string & serverInterfaceProvidedName, std::string & endpointInfo) = 0;
-#endif
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerGlobalInterface)

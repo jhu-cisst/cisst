@@ -22,13 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
-//#define SYSTEM_LOG_TEST_MCS
-#ifdef SYSTEM_LOG_TEST_MCS
-#include <iostream>
-#include <fstream>
-std::ofstream logfileMCS;
-#endif
-
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentServer, mtsManagerComponentBase);
 
 mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
@@ -36,10 +29,6 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
-#ifdef SYSTEM_LOG_TEST_MCS
-    logfileMCS.open("MCS.txt");
-#endif
-
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
     static int instanceCount = 0;
@@ -50,19 +39,17 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     InterfaceGCMFunctionMap.SetOwner(*this);
 
     // For system-wide thread-safe logging
-    mtsInterfaceRequired * required = AddInterfaceRequired(
-        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired, MTS_OPTIONAL);
-    if (required) {
-        required->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, PrintLog);
+    mtsInterfaceProvided * provided = AddInterfaceProvided(
+        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided);
+    if (provided) {
+        provided->AddEventWrite(this->EventPrintLog,
+                                mtsManagerComponentBase::EventNames::PrintLog,
+                                mtsLogMessage());
     }
 }
 
 mtsManagerComponentServer::~mtsManagerComponentServer()
 {
-#ifdef SYSTEM_LOG_TEST_MCS
-    logfileMCS.close();
-#endif
-
     InterfaceGCMFunctionMapType::iterator it = InterfaceGCMFunctionMap.begin();
     const InterfaceGCMFunctionMapType::iterator itEnd = InterfaceGCMFunctionMap.end();
     for (; it != itEnd; ++it) {
@@ -622,19 +609,8 @@ void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessag
     mtsLogMessage _log(ss.str().c_str(), ss.str().size());
     _log.ProcessName = log.ProcessName;
 
-    if (!PrintLog.IsValid()) {
-#ifdef SYSTEM_LOG_TEST_MCS
-        logfileMCS << ss.str();
-#endif
-        return;
-    }
-    
-    mtsExecutionResult ret = PrintLog(_log);
-#ifdef SYSTEM_LOG_TEST_MCS
-    if ((ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED)) {
-        logfileMCS << "Logger forwarding error: (" << ret << ") " << ss.str();
-    }
-#endif
+    // Generate system-wide thread-safe logging event
+    EventPrintLog(_log);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,

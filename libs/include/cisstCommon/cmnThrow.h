@@ -56,11 +56,11 @@ http://www.cisst.org/cisst/license.txt.
 
   \li In some special cases such as real-time programming, exceptions
   can be somewhat impractical.  If the variable \c
-  CMN_THROW_DOES_ABORT is defined at compilation time, cmnThrow
+  CISST_CMN_THROW_DOES_ABORT is defined at compilation time, cmnThrow
   doesn't throw an exception but uses the \c abort function.  This is
   a very special case and the vast majority of users should not use
   this option.<br>Using the CMake advanced mode, it is possible to
-  define CMN_THROW_DOES_ABORT for the whole cisst package.  It is
+  define CISST_CMN_THROW_DOES_ABORT for the whole cisst package.  It is
   important to note that this option will break many of the cisst
   package tests programs (tests based on \c try and \c catch).
 
@@ -86,13 +86,13 @@ inline void cmnThrow(const _exceptionType & except, cmnLogLevel lod = CMN_LOG_LE
         CMN_LOG(lod) << "cmnThrow with non std::exception"
                      << std::endl;
     }
-#ifdef CMN_THROW_DOES_ABORT
-    CMN_LOG(lod) << "cmnThrow is configured to abort() (CMN_THROW_DOES_ABORT defined)"
+#ifdef CISST_CMN_THROW_DOES_ABORT
+    CMN_LOG(lod) << "cmnThrow is configured to abort() (CISST_CMN_THROW_DOES_ABORT defined)"
                  << std::endl;
     std::abort();
 #else
     throw except;
-#endif // CMN_THROW_DOES_ABORT
+#endif // CISST_CMN_THROW_DOES_ABORT
 }
 
 

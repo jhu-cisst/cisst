@@ -14,6 +14,9 @@
 #
 # --- end cisst license ---
 
+# paths for headers/libraries
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+
 # test library
 add_library (cisstMultiTaskTestsLib
              ${IS_SHARED}

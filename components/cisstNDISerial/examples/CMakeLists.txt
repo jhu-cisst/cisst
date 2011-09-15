@@ -11,16 +11,39 @@
 #
 # --- end cisst license ---
 
-add_executable (cisstNDISerialQtExample
-                mainQt.cpp
-                )
+# create a list of libraries needed for this project
+set (CISST_LIBRARIES_REQUIRED cisstCommon cisstCommonQt cisstCommonXML
+                              cisstVector cisstOSAbstraction cisstNumerical
+                              cisstMultiTask cisstParameterTypes cisstRobot)
 
-target_link_libraries (cisstNDISerialQtExample
-                       cisstNDISerial
-                       cisstNDISerialQt
-                       ${QT_LIBRARIES}
-                       )
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${CISST_LIBRARIES_REQUIRED})
 
-cisst_target_link_libraries (cisstNDISerialQtExample
-                             cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstRobot
-                             )
+if (cisst_FOUND)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  # cisstNDISerial has been compiled within cisst, we should find it automatically
+  find_package (cisstNDISerial REQUIRED HINTS "${CISST_BINARY_DIR}/components")
+
+  if (cisstNDISerial_FOUND)
+
+    # cisstNDISerial configuration
+    include_directories (${cisstNDISerial_INCLUDE_DIR})
+    link_directories (${cisstNDISerial_LIBRARY_DIR})
+
+    add_executable (cisstNDISerialQtExample mainQt.cpp)
+
+    # link against non cisst libraries and cisst components
+    target_link_libraries (cisstNDISerialQtExample
+                           ${cisstNDISerial_LIBRARIES}
+                           ${cisstNDISerialQt_LIBRARIES}
+                           ${QT_LIBRARIES}
+                         )
+    # link against cisst libraries (and dependencies)
+    cisst_target_link_libraries (cisstNDISerialQtExample ${CISST_LIBRARIES_REQUIRED})
+
+  endif (cisstNDISerial_FOUND)
+
+endif (cisst_FOUND)

@@ -15,6 +15,9 @@
 # name of project and executable
 PROJECT(multiTaskTutorialExample7)
 
+# Set include/link directories
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask)
+
 # add include paths
 INCLUDE_DIRECTORIES(${multiTaskTutorialExample7_SOURCE_DIR})
 
@@ -38,4 +41,4 @@ ADD_EXECUTABLE(multiTaskTutorialExample7
 	       )
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskTutorialExample7" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+cisst_target_link_libraries(multiTaskTutorialExample7 cisstCommon cisstOSAbstraction cisstMultiTask)

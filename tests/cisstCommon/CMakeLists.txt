@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,6 +13,9 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
+
+# paths for headers/libraries
+cisst_set_directories (cisstCommon)
 
 # all source files
 set (SOURCE_FILES

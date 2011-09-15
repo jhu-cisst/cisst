@@ -38,13 +38,9 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsManagerGlobal::mtsManagerGlobal() :
     ProcessMap("ProcessMap"),
-#if CISST_MTS_HAS_ICE
     LocalManager(0),
-#endif
     LocalManagerConnected(0), ConnectionID(0),
-#if CISST_MTS_HAS_ICE
     ProxyServer(0),
-#endif
     ManagerComponentServer(0),
     ThreadDisconnectRunning(true)
 {
@@ -623,7 +619,7 @@ bool mtsManagerGlobal::FindProcess(const std::string & processName) const
 #if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::RemoveProcess(const std::string & processName, const bool networkDisconnect)
 #else
-bool mtsManagerGlobal::RemoveProcess(const std::string & processName)
+bool mtsManagerGlobal::RemoveProcess(const std::string & processName, const bool)
 #endif
 {
     if (!FindProcess(processName)) {
@@ -1575,9 +1571,9 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     return thisConnectionID;
 }
 
-#if CISST_MTS_HAS_ICE
 void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
 {
+#if CISST_MTS_HAS_ICE
     if (ConnectionMap.empty()) return;
 
     mtsConnection * connection = 0;
@@ -1614,8 +1610,10 @@ void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
         // Reset iterator since Disconnect above invalidates ConnectionMap
         it = ConnectionMap.begin();
     }
-}
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "CheckConnectConfirmTimeout called when CISST_MTS_HAS_ICE is false" << std::endl;
 #endif
+}
 
 bool mtsManagerGlobal::ConnectConfirm(const ConnectionIDType connectionID)
 {
@@ -1635,10 +1633,10 @@ bool mtsManagerGlobal::ConnectConfirm(const ConnectionIDType connectionID)
     return true;
 }
 
-#if CISST_MTS_HAS_ICE
 void mtsManagerGlobal::AddToDisconnectedProcessCleanup(const std::string & sourceProcessName,
     const std::string & targetProcessName, const std::string & targetComponentProxyName)
 {
+#if CISST_MTS_HAS_ICE
     DisconnectedProcessCleanupMapChange.Lock();
     CleanupElementListType * list = DisconnectedProcessCleanupMap.GetItem(sourceProcessName);
     // If new source process
@@ -1654,8 +1652,10 @@ void mtsManagerGlobal::AddToDisconnectedProcessCleanup(const std::string & sourc
     list->push_back(element);
 
     DisconnectedProcessCleanupMapChange.Unlock();
-}
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "AddToDisconnectedProcessCleanup called when CISST_MTS_HAS_ICE is false" << std::endl;
 #endif
+}
 
 //  MJ: Design of Disconnect()
 //
@@ -1715,9 +1715,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
             serverInterfaceName = 
                 mtsComponentProxy::GetNameOfProvidedInterfaceInstance(serverInterfaceName, connectionID);
         }
-#endif
-
-#if !CISST_MTS_HAS_ICE
+#else
         if (!localConfiguration) {
             CMN_LOG_CLASS_RUN_ERROR << "Disconnect: invalid process names requested for disconnection: "
                                     << "\"" << serverProcessName << "\", \"" << clientProcessName << "\"" << std::endl;
@@ -2077,7 +2075,6 @@ bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
 //-------------------------------------------------------------------------
 //  Getters
 //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::IsProxyComponent(const std::string & componentName)
 {
     // PK: Need to fix this to be more robust
@@ -2092,7 +2089,6 @@ const std::string mtsManagerGlobal::GetComponentProxyName(const std::string & pr
 
     return processName + "." + componentName + "Proxy";
 }
-#endif
 
 const std::string mtsManagerGlobal::GetInterfaceUID(
     const std::string & processName, const std::string & componentName, const std::string & interfaceName)
@@ -2150,7 +2146,6 @@ void mtsManagerGlobal::GetNamesOfInterfacesRequiredOrInput(const std::string & p
 
 }
 
-#if CISST_MTS_HAS_ICE
 void mtsManagerGlobal::GetNamesOfCommands(const std::string & processName,
                                           const std::string & componentName,
                                           const std::string & providedInterfaceName,
@@ -2329,14 +2324,13 @@ void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
     }
 }
 
-#endif
 
 //-------------------------------------------------------------------------
 //  Networking
 //-------------------------------------------------------------------------
-#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::StartServer(void)
 {
+#if CISST_MTS_HAS_ICE
     // Create an instance of mtsComponentInterfaceProxyServer
     ProxyServer = new mtsManagerProxyServer("ManagerServerAdapter", mtsManagerProxyServer::GetManagerCommunicatorID());
 
@@ -2350,12 +2344,15 @@ bool mtsManagerGlobal::StartServer(void)
 
     // Register an instance of mtsComponentInterfaceProxyServer
     LocalManagerConnected = ProxyServer;
-
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "StartServer called when CISST_MTS_HAS_ICE is false" << std::endl;
+#endif
     return true;
 }
 
 bool mtsManagerGlobal::StopServer(void)
 {
+#if CISST_MTS_HAS_ICE
     if (!ProxyServer) {
         CMN_LOG_CLASS_RUN_ERROR << "StopServer: no proxy server found" << std::endl;
         return false;
@@ -2373,12 +2370,15 @@ bool mtsManagerGlobal::StopServer(void)
     ProxyServer->StopProxy();
 
     delete ProxyServer;
-
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "StopServer called when CISST_MTS_HAS_ICE is false" << std::endl;
+#endif
     return true;
 }
 
 bool mtsManagerGlobal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo)
 {
+#if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
     if (!connection) {
         CMN_LOG_CLASS_INIT_ERROR << "SetInterfaceProvidedProxyAccessInfo: no connection id found: " << connectionID << std::endl;
@@ -2389,12 +2389,15 @@ bool mtsManagerGlobal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDTyp
 
     CMN_LOG_CLASS_INIT_VERBOSE << "SetInterfaceProvidedProxyAccessInfo: (connection [ " << connectionID << " ]) "
         << "set proxy access information : " << endpointInfo << std::endl;
-
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "SetInterfaceProvidedProxyAccessInfo called when CISST_MTS_HAS_ICE is false" << std::endl;
+#endif
     return true;
 }
 
 bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo)
 {
+#if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
     if (!connection) {
         CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceProvidedProxyAccessInfo: no connection id found: " << connectionID << std::endl;
@@ -2402,7 +2405,9 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const ConnectionIDTyp
     }
 
     endpointInfo = connection->GetEndpointInfo();
-
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedProxyAccessInfo called when CISST_MTS_HAS_ICE is false" << std::endl;
+#endif
     return true;
 }
 
@@ -2410,6 +2415,7 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const std::string & c
     const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
 {
+#if CISST_MTS_HAS_ICE
     // Iteration may take a while
     ConnectionMapChange.Lock();
 
@@ -2433,12 +2439,15 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const std::string & c
     }
 
     ConnectionMapChange.Unlock();
-
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "GetInterfaceProvidedProxyAccessInfo called when CISST_MTS_HAS_ICE is false" << std::endl;
+#endif
     return false;
 }
 
 bool mtsManagerGlobal::InitiateConnect(const ConnectionIDType connectionID)
 {
+#if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
     if (!connection) {
         CMN_LOG_CLASS_INIT_ERROR << "InitiateConnect: invalid connection id: " << connectionID << std::endl;
@@ -2455,10 +2464,15 @@ bool mtsManagerGlobal::InitiateConnect(const ConnectionIDType connectionID)
     connection->GetDescriptionConnection(description);
 
     return localManagerClient->ConnectClientSideInterface(description, description.Client.ProcessName);
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "InitiateConnect called when CISST_MTS_HAS_ICE is false" << std::endl;
+    return false;
+#endif
 }
 
 bool mtsManagerGlobal::ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID)
 {
+#if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
     if (!connection) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectServerSideInterfaceRequest: invalid connection id: " << connectionID << std::endl;
@@ -2477,8 +2491,11 @@ bool mtsManagerGlobal::ConnectServerSideInterfaceRequest(const ConnectionIDType 
     connection->GetDescriptionConnection(description);
 
     return localManagerServer->ConnectServerSideInterface(description, description.Server.ProcessName);
-}
+#else
+    CMN_LOG_CLASS_INIT_WARNING << "ConnectServerSideInterfaceRequest called when CISST_MTS_HAS_ICE is false" << std::endl;
+    return false;
 #endif
+}
 
 void mtsManagerGlobal::GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const
 {

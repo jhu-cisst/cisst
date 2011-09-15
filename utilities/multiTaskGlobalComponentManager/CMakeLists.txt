@@ -1,22 +1,27 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 project (multiTaskGlobalComponentManager)
 
+# set all libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstMultiTask)
+
+# set include and link directories for cisst
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 # name the main executable and specifies with source files to use
-ADD_EXECUTABLE(multiTaskGlobalComponentManager main.cpp)
+add_executable (multiTaskGlobalComponentManager main.cpp)
 
 # link with the cisst libraries
-CISST_REQUIRES("multiTaskGlobalComponentManager" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
-
+cisst_target_link_libraries (multiTaskGlobalComponentManager ${CISST_LIBRARIES_NEEDED})

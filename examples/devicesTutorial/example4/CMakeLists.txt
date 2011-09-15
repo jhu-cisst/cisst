@@ -4,7 +4,7 @@
 #   Author(s):  Ali Uneri
 #   Created on: 2009-08-13
 #
-#   (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+#   (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -18,6 +18,18 @@ project(devicesTutorialExample4)
 
 find_package(OpenIGTLink REQUIRED)
 include(${OpenIGTLink_USE_FILE})
+
+# List cisst libraries needed
+set (CISST_LIBRARIES_NEEDED cisstCommon
+                            cisstVector
+                            cisstOSAbstraction
+                            cisstMultiTask
+                            cisstParameterTypes
+                            cisstDevices
+                            )
+
+# Set include/link directories
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 fltk_wrap_ui(devicesTutorialExample4Simulator
              trackerUI.fl
@@ -34,8 +46,8 @@ target_link_libraries(devicesTutorialExample4Simulator
                       OpenIGTLink
                       )
 
-cisst_requires(devicesTutorialExample4Simulator
-               "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
+cisst_target_link_libraries(devicesTutorialExample4Simulator
+               ${CISST_LIBRARIES_NEEDED}
                )
 
 if(CISST_DEV_HAS_SENSABLEHD)
@@ -51,7 +63,7 @@ if(CISST_DEV_HAS_SENSABLEHD)
                         ${SENSABLE_LIBRARIES}
                         )
 
-  cisst_requires(devicesTutorialExample4Sensable
-                 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
+  cisst_target_link_libraries(devicesTutorialExample4Sensable
+                 ${CISST_LIBRARIES_NEEDED}
                  )
 endif(CISST_DEV_HAS_SENSABLEHD)

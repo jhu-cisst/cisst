@@ -135,6 +135,16 @@ void svlFilterImageWindow::GetTitle(std::string & title) const
     title = Title;
 }
 
+void svlFilterImageWindow::Show(unsigned int videoch)
+{
+    WindowManager->Show(true, videoch);
+}
+
+void svlFilterImageWindow::Hide(unsigned int videoch)
+{
+    WindowManager->Show(false, videoch);
+}
+
 int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
@@ -203,7 +213,6 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
 int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
-//    _SkipIfAlreadyProcessed(syncInput, syncOutput);
     _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);

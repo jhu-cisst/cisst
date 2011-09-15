@@ -134,17 +134,11 @@ class mtsStateTable;
 class mtsCollectorBase;
 class mtsCollectorState;
 
-// classes defined when ICE is used
-#if CISST_MTS_HAS_ICE
+// classes for networked configurations
 class mtsComponentProxy;
 class mtsProxySerializer;
 class mtsManagerProxyServer;
 class mtsManagerProxyClient;
-class mtsComponentInterfaceProxyServer;
-class mtsComponentInterfaceProxyClient;
-class mtsManagerProxyServer;
-class mtsManagerProxyClient;
-#endif // CISST_MTS_HAS_ICE
 
 // managers
 class mtsManagerLocal;

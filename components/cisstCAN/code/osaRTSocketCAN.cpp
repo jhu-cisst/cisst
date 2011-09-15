@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCAN/osaRTSocketCAN.h>
 #include <cisstCommon/cmnLogger.h>
 
-CMN_IMPLEMENT_SERVICES( osaRTSocketCAN );
-
 osaRTSocketCAN::osaRTSocketCAN( const std::string& devicename, 
 				cisstCAN::Rate rate,
 				cisstCAN::Loopback loopback ) : 
@@ -199,6 +197,12 @@ cisstCAN::Errno osaRTSocketCAN::AddFilter( const cisstCAN::Filter& filter ){
 #if (CISST_OS == CISST_LINUX_XENOMAI )
 
   if( filterscnt < osaRTSocketCAN::MAX_NUM_FILTERS ){
+
+    // Avoid duplicates
+    for( size_t i=0; i<filterscnt; i++ ){
+      if( filters[i].can_mask == filter.mask && filters[i].can_id == filter.id )
+	{ return cisstCAN::ESUCCESS; }
+    }
 
     filters[filterscnt].can_mask = filter.mask;
     filters[filterscnt].can_id   = filter.id;

@@ -11,6 +11,9 @@
 #
 # --- end cisst license ---
 
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstDevices)
+cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+
 add_executable (devicesTutorialExample6
                 main.cpp
                 )
@@ -19,6 +22,4 @@ target_link_libraries (devicesTutorialExample6
                        ${QT_LIBRARIES}
                        )
 
-cisst_target_link_libraries (devicesTutorialExample6
-                             cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstDevices
-                             )
+cisst_target_link_libraries (devicesTutorialExample6 ${CISST_LIBRARIES_NEEDED})

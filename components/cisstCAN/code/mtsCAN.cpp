@@ -34,8 +34,8 @@ mtsCAN::mtsCAN( const std::string& componentname, cisstCAN* can ) :
   // Create the IO interface and add read/write commands
   io = AddInterfaceProvided( "IO" );
   if( io ){
-    io->AddCommandRead ( &mtsCAN::Read,  this, "Read" );
-    io->AddCommandWrite( &mtsCAN::Write, this, "Write" );
+    io->AddCommandRead ( &mtsCAN::mtsRead,  this, "Read" );
+    io->AddCommandWrite( &mtsCAN::mtsWrite, this, "Write" );
   }
   else{
     CMN_LOG_CLASS_RUN_ERROR << "Failed to create the interface IO" << std::endl;
@@ -44,8 +44,8 @@ mtsCAN::mtsCAN( const std::string& componentname, cisstCAN* can ) :
   // Create the CTL itnerface
   ctl = AddInterfaceProvided( "CTL" );
   if( ctl ){
-    ctl->AddCommandVoid( &mtsCAN::Open,  this, "Open" );
-    ctl->AddCommandVoid( &mtsCAN::Close, this, "Close" );
+    ctl->AddCommandVoid( &mtsCAN::mtsOpen,  this, "Open" );
+    ctl->AddCommandVoid( &mtsCAN::mtsClose, this, "Close" );
   }
   else{
     CMN_LOG_CLASS_RUN_ERROR << "Failed to create the interface CTL"<< std::endl;
@@ -54,15 +54,15 @@ mtsCAN::mtsCAN( const std::string& componentname, cisstCAN* can ) :
 }
 
 // Write a CAN frame to the device
-void mtsCAN::Open()
+void mtsCAN::mtsOpen()
 { if( can != NULL ) { can->Open(); } }
 
 // Write a CAN frame to the device
-void mtsCAN::Close()
+void mtsCAN::mtsClose()
 { if( can != NULL ) { can->Close(); } }
 
 // Read a CAN frame from the device
-void mtsCAN::Read( mtsCANFrame &frame ) const {
+void mtsCAN::mtsRead( mtsCANFrame &frame ) const {
   if( can != NULL ){
     cisstCANFrame f;
     can->Recv( f );
@@ -71,7 +71,7 @@ void mtsCAN::Read( mtsCANFrame &frame ) const {
 }
 
 // Write a CAN frame to the device
-void mtsCAN::Write( const mtsCANFrame &frame ) {
+void mtsCAN::mtsWrite( const mtsCANFrame &frame ) {
   if( can != NULL )
     { can->Send( (cisstCANFrame)frame ); }
 }
