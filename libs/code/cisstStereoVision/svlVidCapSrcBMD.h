@@ -79,7 +79,6 @@ private:
     DeckLinkCaptureDelegate** Delegate;
 
     void SetWidthHeightByBMDDisplayMode();
-    IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
     IDeckLinkIterator* GetIDeckLinkIterator();
 
 };

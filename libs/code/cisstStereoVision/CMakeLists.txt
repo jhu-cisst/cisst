@@ -1258,6 +1258,8 @@ if (CISST_SVL_HAS_BM_DECKLINK)
          )
     set (SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${DeckLink_LIBRARIES})
     mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_LIBRARIES)
+    cisst_set_package_settings (cisstStereoVision decklink INCLUDE_DIRECTORIES DeckLink_INCLUDE_DIR)
+    cisst_set_package_settings (cisstStereoVision decklink LIBRARIES           DeckLink_LIBRARIES)
   endif (DeckLink_FOUND)
 endif (CISST_SVL_HAS_BM_DECKLINK)
             

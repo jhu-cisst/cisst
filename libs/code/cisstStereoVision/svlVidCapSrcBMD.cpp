@@ -42,7 +42,7 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
 {
     BMDNumberOfDevices = 0;
     inputFlags = 0;
-    displayMode = bmdModeHD1080i5994; //bmdModeHD1080p30
+    displayMode = bmdModeHD1080p30;//bmdModeHD1080i5994;
     SetWidthHeightByBMDDisplayMode();
     pixelFormat = bmdFormat8BitYUV; //bmdFormat8BitARGB
     debug = false;
@@ -155,9 +155,7 @@ void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
     printf("Width:%d, Height:%d at %4.2fHz\n", width, height, frameRate);
 }
 
-IDeckLinkIterator* svlVidCapSrcBMD::CreateDeckLinkIteratorInstance(void)
-{
-}
+IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
 
 IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
 {
