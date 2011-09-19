@@ -37,15 +37,15 @@ class CISST_EXPORT svlFilterImageDeinterlacer : public svlFilterBase
 public:
     svlFilterImageDeinterlacer();
 
-    void SetAlgorithm(svlImageProcessing::DI_Algorithm algorithm);
-    svlImageProcessing::DI_Algorithm GetAlgorithm();
+    void SetAlgorithm(svlImageProcessing::DI_Algorithm algorithm, int videoch = -1);
+    svlImageProcessing::DI_Algorithm GetAlgorithm(unsigned int videoch = SVL_LEFT);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
 private:
-    svlImageProcessing::DI_Algorithm Algorithm;
+    vctDynamicVector<svlImageProcessing::DI_Algorithm> Algorithm;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageDeinterlacer)

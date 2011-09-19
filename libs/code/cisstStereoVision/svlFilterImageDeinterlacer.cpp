@@ -39,7 +39,8 @@ svlFilterImageDeinterlacer::svlFilterImageDeinterlacer() :
     AddOutput("output", true);
     SetAutomaticOutputType(true);
 
-    Algorithm = svlImageProcessing::DI_Blending;
+    Algorithm.SetSize(SVL_MAX_CHANNELS);
+    Algorithm.SetAll(svlImageProcessing::DI_Discarding);
 }
 
 int svlFilterImageDeinterlacer::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -60,19 +61,24 @@ int svlFilterImageDeinterlacer::Process(svlProcInfo* procInfo, svlSample* syncIn
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        svlImageProcessing::Deinterlace(img, idx, Algorithm);
+        if (Algorithm[idx] != svlImageProcessing::DI_None) {
+            svlImageProcessing::Deinterlace(img, idx, Algorithm[idx]);
+        }
     }
 
     return SVL_OK;
 }
 
-void svlFilterImageDeinterlacer::SetAlgorithm(svlImageProcessing::DI_Algorithm algorithm)
+void svlFilterImageDeinterlacer::SetAlgorithm(svlImageProcessing::DI_Algorithm algorithm, int videoch)
 {
-    Algorithm = algorithm;
+    if (videoch < 0) Algorithm.SetAll(algorithm);
+    else if (videoch < static_cast<int>(SVL_MAX_CHANNELS)) Algorithm[videoch] = algorithm;
 }
 
-svlImageProcessing::DI_Algorithm svlFilterImageDeinterlacer::GetAlgorithm()
+svlImageProcessing::DI_Algorithm svlFilterImageDeinterlacer::GetAlgorithm(unsigned int videoch)
 {
-    return Algorithm;
+    if (videoch < SVL_MAX_CHANNELS) return Algorithm[videoch];
+    return svlImageProcessing::DI_None;
 }
+
 
