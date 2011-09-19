@@ -40,6 +40,7 @@ public:
     
     int usrState;
     int calState;
+    int skelID;
 
 };
 

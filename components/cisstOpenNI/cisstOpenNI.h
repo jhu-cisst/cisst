@@ -52,13 +52,18 @@ private:
     std::vector<cisstOpenNISkeleton*> skeletons;
     
     int users;
+    char userCalibDataPath;
+    bool usingPrecapturedCalibration;
 
 
 public:
 
     //! Default Constructor
     cisstOpenNI( int numUsers = 0 );
-
+    
+    //! Constructor for Predefined Skeleton Calibration FIles
+    cisstOpenNI(int numUsers, char usrPath);
+    
     //! Default DeConstructor
     ~cisstOpenNI();
 
