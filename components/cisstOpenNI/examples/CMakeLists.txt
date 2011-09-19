@@ -2,11 +2,11 @@
 project( OpenNI )
 
 # KINECT_TEST #################################################################
-add_executable(cniExKinectTest                          cniExKinectTest.cpp )
+add_executable(cisstOpenNIExKinectTest                          cisstOpenNIExKinectTest.cpp )
 
-target_link_libraries(cniExKinectTest                   cisstOpenNI )
+target_link_libraries(cisstOpenNIExKinectTest                   cisstOpenNI )
   
-cisst_target_link_libraries(cniExKinectTest             cisstCommon
-                                                        cisstVector 
-                                                        cisstOSAbstraction 
-                                                        cisstMultiTask )
+cisst_target_link_libraries(cisstOpenNIExKinectTest             cisstCommon
+                                                        		cisstVector 
+                                                        		cisstOSAbstraction 
+                                                        		cisstMultiTask )

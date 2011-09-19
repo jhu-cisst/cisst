@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: cniExKinectTest.cpp 2916 2011-09-14 02:35:29Z sleonar7 $
 
   Author(s):  Kelleher Guerin and Simon Leonard
   Created on: 2008
