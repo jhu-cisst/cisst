@@ -1,14 +1,26 @@
-#include <cisstOpenNI/cisstOpenNI.h>
+//#include <cisstOpenNI/cisstOpenNI.h>
 #include "cisstOpenNIData.h"
 
 
 cisstOpenNI::cisstOpenNI(int numUsers){
-
+    
     this->Data = new cisstOpenNIData;
     this->Data->SetStates();
     this->users = numUsers;
-
+    this->usingPrecapturedCalibration = false;
 }
+
+cisstOpenNI::cisstOpenNI(int numUsers, char usrPath){
+    
+    this->Data = new cisstOpenNIData;
+    this->Data->SetStates();
+    this->users = numUsers;
+    
+    this->userCalibDataPath = usrPath;
+    this->usingPrecapturedCalibration = true;
+}
+
+
 
 cisstOpenNI::~cisstOpenNI()
 {
@@ -257,7 +269,7 @@ std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
     if(nUsers > this->users) printf("More users than max allowance\n");
 
     for (int i = 0; i < this->users; ++i)
-    {
+    {   
         if (Data->usergenerator.GetSkeletonCap().IsTracking(aUsers[i]))
         {
             this->skeletons[i]->Update(aUsers[i]);

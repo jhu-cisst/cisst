@@ -12,6 +12,7 @@ cisstOpenNISkeleton::cisstOpenNISkeleton(cisstOpenNI * openNI)
     this->OpenNI = openNI;
     usrState = CNI_USR_IDLE;
     calState = CNI_USR_IDLE;
+    this->skelID = -1;
 
 
 }
@@ -20,7 +21,7 @@ cisstOpenNISkeleton::~cisstOpenNISkeleton(){}
 
 void cisstOpenNISkeleton::Update(int id)
 {
-
+    this->skelID = id;
     for(int i = 1; i < points3D.size();i++){
         XnSkeletonJointPosition pos;
         XnSkeletonJoint joint = XnSkeletonJoint(i);
@@ -85,7 +86,7 @@ void cisstOpenNISkeleton::PrintUserState(void)
     
     if(this->calState == CNI_USR_SUCCESS)
         std::cout<<"Calibration Success"<<std::endl;
-    else if(this->calState == CNI_USR_SUCCESS)
+    else if(this->calState == CNI_USR_FAIL)
         std::cout<<"Calibration Failure"<<std::endl;
     
 }
