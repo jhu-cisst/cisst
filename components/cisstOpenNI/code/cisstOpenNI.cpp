@@ -250,8 +250,8 @@ cisstOpenNI::Errno cisstOpenNI::GetRangeData( vctDynamicMatrix<double>& rangedat
 std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
 
     // Initialize Users
-    XnUserID aUsers[this->users];
-    XnUInt16 nUsers = this->users;
+    XnUserID aUsers[6];
+    XnUInt16 nUsers = 6;
     Data->usergenerator.GetUsers(aUsers, nUsers);
 
     if(nUsers > this->users) printf("More users than max allowance\n");
@@ -272,8 +272,8 @@ std::vector<cisstOpenNISkeleton*> &cisstOpenNI::UpdateAndGetUserSkeletons(){
 void cisstOpenNI::UpdateUserSkeletons(){
     
     // Initialize Users
-    XnUserID aUsers[this->users];
-    XnUInt16 nUsers = this->users;
+    XnUserID aUsers[6];
+    XnUInt16 nUsers = 6;
     Data->usergenerator.GetUsers(aUsers, nUsers);
     
     if(nUsers > this->users) printf("More users than max allowance\n");
