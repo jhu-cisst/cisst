@@ -313,7 +313,7 @@ int svlWindowManagerX11::DoModal(bool show, bool fullscreen)
         osaSleep(0.001);
 #if CISST_SVL_HAS_XV
         if (!xvupdateimage) {
-            while (XPending(xDisplay)) {
+            for (int events = XPending(xDisplay); events > 0; events --) {
 #else // CISST_SVL_HAS_XV
         if (XPending(xDisplay)) {
 #endif // CISST_SVL_HAS_XV
@@ -669,9 +669,10 @@ void svlWindowManagerX11::DrawImages()
 void svlWindowManagerX11::Destroy()
 {
     DestroyFlag = true;
+    signalImage.Raise();
 
     if (DestroyedSignal) {
-        DestroyedSignal->Wait(1.0);
+        DestroyedSignal->Wait(/*1.0*/);
         delete(DestroyedSignal);
         DestroyedSignal = 0;
     }

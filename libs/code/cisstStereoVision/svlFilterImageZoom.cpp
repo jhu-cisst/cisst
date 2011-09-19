@@ -123,12 +123,24 @@ int svlFilterImageZoom::Process(svlProcInfo* procInfo, svlSample* syncInput, svl
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        memset(OutputImage->GetUCharPointer(idx), 0, OutputImage->GetDataSize(idx));
-
         width   = static_cast<int>(input->GetWidth(idx));
         height  = static_cast<int>(input->GetHeight(idx));
+
+        if (Zoom[idx] == 1.0) {
+            if (Center[idx].x == width  / 2 &&
+                Center[idx].y == height / 2) {
+                memcpy(OutputImage->GetUCharPointer(idx), input->GetUCharPointer(idx), OutputImage->GetDataSize(idx));
+                continue;
+            }
+            else {
+                // TODO: implement image translation
+            }
+        }
+
         in_width   = static_cast<int>(width  / Zoom[idx]);
         in_height  = static_cast<int>(height / Zoom[idx]);
+
+        memset(OutputImage->GetUCharPointer(idx), 0, OutputImage->GetDataSize(idx));
 
         out_rect.left   = width  / 2 - width  / 2;
         out_rect.top    = height / 2 - height / 2;

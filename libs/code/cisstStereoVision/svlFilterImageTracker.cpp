@@ -992,7 +992,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     for (i = 0; i < mosaic_size; i ++) {
         k = *count_buffer;
         if (k) *out_mos_buffer = (*accu_buffer) / k;
-        else *out_mos_buffer = 0;
+        else *out_mos_buffer = 64;
         accu_buffer ++;
         count_buffer ++;
         out_mos_buffer ++;

@@ -480,7 +480,7 @@ void svlStreamManager::Stop(void)
     filter = StreamSource;
     while (filter) {
         filter->Running = false;
-    
+
         // PK TEMP: Send event indicating that filter is now stopped
         filter->State = mtsComponentState::READY;
         EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), filter->GetName(), 

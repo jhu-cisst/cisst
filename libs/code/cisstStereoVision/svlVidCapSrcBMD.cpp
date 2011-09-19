@@ -394,7 +394,7 @@ void svlVidCapSrcBMD::Close()
 
 int svlVidCapSrcBMD::Start()
 {
-    if(debug) {
+    if (debug) {
         std::cerr << "svlVidCapSrcBMD::Start() called" << std::endl;
     }
 
@@ -407,6 +407,9 @@ int svlVidCapSrcBMD::Start()
 svlImageRGB* svlVidCapSrcBMD::GetLatestFrame(bool waitfornew, unsigned int videoch)
 {
     if (videoch >= NumOfStreams || !ImageBuffer[videoch]) return 0;
+    if (debug) {
+        std::cerr << "svlVidCapSrcBMD::GetLatestFrame(" << waitfornew << ", " << videoch << ") called" << std::endl;
+    }
     return ImageBuffer[videoch]->Pull(waitfornew);
 }
 
