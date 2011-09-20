@@ -50,6 +50,7 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsTask, mtsComponent)
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskContinuous, mtsTask)
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskMain, mtsTaskContinuous)
 
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskFromCallback, mtsTask)
