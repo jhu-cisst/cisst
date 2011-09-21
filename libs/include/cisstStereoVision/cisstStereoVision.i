@@ -193,7 +193,11 @@ static int PythonCallBack(void * imgdata, void *callbackdata)
    try{
 	   func = (PyObject *) callbackdata;             // Get Python function
 
-           state = PyGILState_Ensure();
+           if(Py_IsInitialized()){
+                state = PyGILState_Ensure();
+           }else{
+                return -1;
+           }
            arglist = Py_BuildValue("(O)",pythonImage);             // Build argument list
 
 	   if(func && arglist){
