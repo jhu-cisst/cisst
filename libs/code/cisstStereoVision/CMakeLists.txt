@@ -1220,17 +1220,19 @@ ENDIF(CISST_SVL_HAS_CUDA)
 # Options for BlackMagic DeckLink SDK
 option (CISST_SVL_HAS_BM_DECKLINK "Compile BlackMagic(BM) DeckLink extensions" OFF)
 if (CISST_SVL_HAS_BM_DECKLINK)
-  find_package (DeckLink REQUIRED)
-  if (DeckLink_FOUND)
-    include (${DeckLink_USE_FILE})
-    set (SOURCE_FILES
-         ${SOURCE_FILES}
-         svlVidCapSrcBMD.h      # private header
-         svlVidCapSrcBMD.cpp
-         )
-    set (SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${DeckLink_LIBRARIES})
-    mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_LIBRARIES)
-  endif (DeckLink_FOUND)
+    find_package (DeckLink REQUIRED)
+    if (DeckLink_FOUND)
+        include (${DeckLink_USE_FILE})
+        set (SOURCE_FILES
+             ${SOURCE_FILES}
+             svlVidCapSrcBMD.h      # private header
+             svlVidCapSrcBMD.cpp
+             )
+        set (SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${DeckLink_LIBRARIES})
+        mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_LIBRARIES)
+        cisst_set_package_settings (cisstStereoVision decklink INCLUDE_DIRECTORIES DeckLink_INCLUDE_DIR)
+        cisst_set_package_settings (cisstStereoVision decklink LIBRARIES           DeckLink_LIBRARIES)
+    endif (DeckLink_FOUND)
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
