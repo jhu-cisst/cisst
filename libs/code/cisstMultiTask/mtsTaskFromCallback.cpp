@@ -79,6 +79,8 @@ void mtsTaskFromCallback::Create(void * CMN_UNUSED(data))
 void mtsTaskFromCallback::Start(void)
 {
     if (this->State == mtsComponentState::INITIALIZING) {
+        if (CheckForOwnThread())
+            RunInternal(0);
         WaitToStart(this->InitializationDelay);
     }
     if (this->State == mtsComponentState::READY) {

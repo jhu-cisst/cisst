@@ -1801,48 +1801,57 @@ void mtsManagerLocal::CreateAll(void)
 void mtsManagerLocal::StartAll(void)
 {
     // Get the current thread id in order to check if any task will use the current thread.
-    // If so, start that task for last.
+    // If so, start that task last.
     const osaThreadId threadId = osaGetCurrentThreadId();
 
     mtsTask * componentTask;
 
     ComponentMapChange.Lock();
-    {
-        ComponentMapType::const_iterator iterator = ComponentMap.begin();
-        const ComponentMapType::const_iterator end = ComponentMap.end();
-        ComponentMapType::const_iterator lastTask = ComponentMap.end();
 
-        for (; iterator != end; ++iterator) {
-            // look for component
-            componentTask = dynamic_cast<mtsTask*>(iterator->second);
-            if (componentTask) {
-                // Check if the task will use the current thread.
-                if (componentTask->Thread.GetId() == threadId) {
+    ComponentMapType::const_iterator iterator = ComponentMap.begin();
+    const ComponentMapType::const_iterator end = ComponentMap.end();
+    ComponentMapType::const_iterator lastTask = ComponentMap.end();
+
+    for (; iterator != end; ++iterator) {
+        // look for component
+        componentTask = dynamic_cast<mtsTask*>(iterator->second);
+        if (componentTask) {
+            // Check if the task will use the current thread.
+            if (componentTask->Thread.GetId() == threadId) {
+                if (dynamic_cast<mtsTaskFromCallback*>(iterator->second)) {
+                    CMN_LOG_CLASS_INIT_VERBOSE << "StartAll: component \"" << iterator->first
+                                               << "\" uses current thread, but is a callback task;"
+                                               << " expect that it will be called by dispatcher." << std::endl;
+                    iterator->second->Start();
+                }
+                else {
                     CMN_LOG_CLASS_INIT_WARNING << "StartAll: component \"" << iterator->first
                                                << "\" uses current thread, will be started last." << std::endl;
                     if (lastTask != end) {
                         CMN_LOG_CLASS_INIT_ERROR << "StartAll: found another task using current thread (\""
                                                  << iterator->first << "\"), only first will be started (\""
                                                  << lastTask->first << "\")." << std::endl;
+                        iterator->second->Start();
                     } else {
                         // set iterator to last task to be started
                         lastTask = iterator;
                     }
-                } else {
-                    CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
-                    iterator->second->Start();  // If task will not use current thread, start it immediately.
                 }
             } else {
-                CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting component \"" << iterator->first << "\"" << std::endl;
-                iterator->second->Start();  // this is a component, it doesn't have a thread
+                CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
+                iterator->second->Start();  // If task will not use current thread, start it immediately.
             }
-        }
-
-        if (lastTask != end) {
-            lastTask->second->Start();
+        } else {
+            CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting component \"" << iterator->first << "\"" << std::endl;
+            iterator->second->Start();  // this is a component, it doesn't have a thread
         }
     }
+
     ComponentMapChange.Unlock();
+
+    if (lastTask != end) {
+        lastTask->second->Start();
+    }
 }
 
 

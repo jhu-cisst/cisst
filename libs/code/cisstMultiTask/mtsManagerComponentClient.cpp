@@ -83,7 +83,7 @@ bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & cla
         return false;
     }
 
-    // Add new component with supoprt for the dynamic component control
+    // Add new component with support for the dynamic component control
     if (!LCM->AddComponent(newComponent)) {
         CMN_LOG_CLASS_RUN_ERROR << "CreateAndAddNewComponent: failed to add component: "
             << "\"" << componentName << "\" of type \"" << className << "\"" << std::endl;

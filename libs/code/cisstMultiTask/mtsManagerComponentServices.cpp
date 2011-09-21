@@ -102,7 +102,7 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
     bool result;
     mtsExecutionResult executionResult = ServiceComponentManagement.Create(componentDescription, result);
 
-    // check is command was sent properly
+    // check if command was sent properly
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to execute command \"Create\" (error "
                                 << executionResult << ")" << std::endl;
@@ -114,7 +114,7 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
         return false;
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: successfully create component: " << componentDescription << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: successfully created component: " << componentDescription << std::endl;
     return true;
 }
 
@@ -147,7 +147,7 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
     bool result;
     mtsExecutionResult executionResult = ServiceComponentManagement.Create(componentDescription, result);
 
-    // check is command was sent properly
+    // check if command was sent properly
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to execute command \"Create\" (error "
                                 << executionResult << ")" << std::endl;
@@ -159,7 +159,7 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
         return false;
     }
 
-    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: successfully create component: " << componentDescription << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: successfully created component: " << componentDescription << std::endl;
     return true;
 }
 
