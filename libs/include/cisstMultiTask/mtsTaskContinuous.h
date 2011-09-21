@@ -166,7 +166,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskContinuous)
 
 // Continuous task that doesn't create a thread (uses main thread).
 
-class mtsTaskMain : public mtsTaskContinuous
+class CISST_EXPORT mtsTaskMain : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
