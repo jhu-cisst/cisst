@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DOpenGLFLTK.h 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05

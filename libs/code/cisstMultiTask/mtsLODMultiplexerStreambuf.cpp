@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsLODMultiplexerStreambuf.h 2075 2010-11-19 17:08:37Z adeguet1 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2011-08-04

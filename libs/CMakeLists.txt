@@ -233,15 +233,15 @@ endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 # Which libraries to build
 set (CISST_LIBS_STABLE
      cisstCommon
+     cisstVector
+     cisstOSAbstraction
+     cisstNumerical
+     cisstInteractive
      )
 
 set (CISST_LIBS_UNSTABLE
-     cisstVector
-     cisstOSAbstraction
      cisstMultiTask
      cisstStereoVision
-     cisstNumerical
-     cisstInteractive
      cisstRobot
      cisstParameterTypes
      cisstDevices
@@ -290,19 +290,6 @@ if (CISST_HAS_SWIG_PYTHON)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (CISST_HAS_SWIG_PYTHON)
 
-# If cisstNumerical is ON, turn CISST_HAS_CISSTNETLIB ON as well
-if (CISST_BUILD_LIBS_cisstNumerical)
-  # Use Fortran NETLIB by default
-  option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." ON)
-  mark_as_advanced (CISST_HAS_CISSTNETLIB)
-  if (CISST_HAS_CISSTNETLIB)
-    find_package (CisstNetlib)
-    cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
-    cisst_set_package_settings (cisstNumerical cisstNetlib LIBRARIES           CISSTNETLIB_LIBRARIES)
-  else (CISST_HAS_CISSTNETLIB)
-    cisst_unset_all_package_settings (cisstNumerical cisstNetlib)
-  endif (CISST_HAS_CISSTNETLIB)
-endif (CISST_BUILD_LIBS_cisstNumerical)
 
 # List of libraries to be built
 foreach (lib ${CISST_LIBS})

@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,6 +14,7 @@
 #
 # --- end cisst license ---
 
+project (cisstNumerical)
 
 # all source files
 set (SOURCE_FILES
@@ -90,11 +91,3 @@ cisst_add_library (LIBRARY cisstNumerical
                    HEADER_FILES ${HEADER_FILES}
                    SOURCE_FILES ${SOURCE_FILES}
                    )
-
-
-# Python wrappers
-if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module (MODULE cisstNumerical
-                        INTERFACE_DIRECTORY ../../include/cisstNumerical
-                        CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
-endif (CISST_HAS_SWIG_PYTHON)

@@ -393,14 +393,19 @@ function (cisst_add_swig_module ...)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
                                  PROPERTIES SWIG_FLAGS "-v;-modern;-fcompact;-fvirtual")
+    # load python settings
+    cisst_load_package_setting ("cisstPython")
+    cisst_set_directories ("cisstPython")
+    # load settings for extra cisst libraries
+    cisst_load_package_setting (${CISST_LIBRARIES})
+    cisst_set_directories (${CISST_LIBRARIES})
+    # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
     swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
     if (WIN32)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
-    cisst_load_package_setting ("cisstPython")
-    cisst_include_directories ("cisstPython")
     swig_link_libraries (${MODULE_NAME} ${CISST_LIBRARIES}
                          ${CISST_LIBRARIES_FOR_cisstPython_USING_Python})
 

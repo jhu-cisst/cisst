@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlFilterImageQtWidget.cpp 2537 2011-05-09 21:56:17Z pkazanz1 $
+  $Id$
 
   Author(s):  Marcin Balicki
   Created on: 2011-02-18

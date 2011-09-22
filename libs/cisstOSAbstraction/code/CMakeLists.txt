@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstOSAbstraction
 #
-# (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,6 +13,8 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
+
+project (cisstOSAbstraction)
 
 # all source files
 set (SOURCE_FILES
@@ -92,7 +94,7 @@ endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Create the config file
 set (CISST_OSA_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstOSAbstraction/osaConfig.h)
-configure_file (${cisst_SOURCE_DIR}/libs/include/cisstOSAbstraction/osaConfig.h.in
+configure_file (${cisstOSAbstractionLibs_SOURCE_DIR}/osaConfig.h.in
                 ${CISST_OSA_CONFIG_FILE}
                 @ONLY)
 install_files (/include/cisstOSAbstraction
@@ -131,10 +133,3 @@ else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
     target_link_libraries (cisstOSAbstraction ${CISST_RT_LIBRARY})
   endif (UNIX AND NOT APPLE)
 endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-
-# Python wrappers
-if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstOSAbstraction
-                        INTERFACE_DIRECTORY ../../include/cisstOSAbstraction
-			CISST_LIBRARIES cisstCommon cisstOSAbstraction)
-endif (CISST_HAS_SWIG_PYTHON)

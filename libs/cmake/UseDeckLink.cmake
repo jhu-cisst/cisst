@@ -1,5 +1,5 @@
 #
-# $Id: UseDeckLink.cmake 2627 2011-06-03 01:55:02Z adeguet1 $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2011-06-02

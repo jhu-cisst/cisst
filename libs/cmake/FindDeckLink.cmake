@@ -1,5 +1,5 @@
 #
-# $Id: FindDeckLink.cmake 2625 2011-06-02 21:02:02Z adeguet1 $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2011-05-31

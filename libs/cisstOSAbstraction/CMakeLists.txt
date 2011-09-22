@@ -12,19 +12,11 @@
 #
 # --- end cisst license ---
 
-# All cisstVector libraries
-project (cisstVectorLibs)
+# All cisstOSAbstraction libraries
+project (cisstOSAbstractionLibs)
 
 add_subdirectory (code)
-
-if (CISST_HAS_FLTK AND CISST_HAS_OPENGL)
-  add_subdirectory (codeFLTK)
-endif (CISST_HAS_FLTK AND CISST_HAS_OPENGL)
 
 if (CISST_HAS_SWIG_PYTHON)
   add_subdirectory (codePython)
 endif (CISST_HAS_SWIG_PYTHON)
-
-if (CISST_HAS_QT AND CISST_HAS_OPENGL)
-  add_subdirectory (codeQt)
-endif (CISST_HAS_QT AND CISST_HAS_OPENGL)

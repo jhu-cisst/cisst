@@ -21,6 +21,7 @@ message ("todo: rename cisstBuild.in to cisst-config.in")
 message ("todo: provide useful message if using deprecated cisst macros")
 message ("todo: keep track of components required in find_package and provide warning message when using cisst_target_link_library")
 message ("todo: check generated cisst-config.cmake")
+message ("todo: should RTAI and QNX flags be moved to cisstOSAbstraction")
 
 # cisst (Computer Integrated Surgical Systems and Technology)
 project (cisst)
