@@ -1,9 +1,7 @@
 #
 # $Id$
 #
-# CMakeLists for cisstVector
-#
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 # 
 # --- begin cisst license - do not edit ---
@@ -14,6 +12,7 @@
 # 
 # --- end cisst license ---
 
+project (cisstVector)
 
 # all source files
 set (SOURCE_FILES
@@ -154,6 +153,8 @@ if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
        vctPlot2DBase.h
        vctPlot2DOpenGL.h
        )
+  cisst_library_use_settings (cisstVector cisstOpenGL)
+
 endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
 
@@ -162,48 +163,3 @@ cisst_add_library (
   DEPENDENCIES cisstCommon
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})
-
-
-# Qt widgets
-if (CISST_HAS_OPENGL AND CISST_HAS_QT)
-
-  # To include Qt generated files
-  include_directories (${CMAKE_CURRENT_BINARY_DIR})
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../../include/cisstVector/vctPlot2DOpenGLQtWidget.h)
-
-  cisst_add_library (
-    LIBRARY cisstVectorQt
-    LIBRARY_DIR cisstVector
-    DEPENDENCIES cisstCommon
-                 cisstVector
-    SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
-    HEADER_FILES vctPlot2DOpenGLQtWidget.h
-                 vctExportQt.h
-    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
-
-  target_link_libraries (cisstVectorQt ${QT_LIBRARIES})
-
-endif (CISST_HAS_OPENGL AND CISST_HAS_QT)
-
-
-# FLTK widgets
-if (CISST_HAS_OPENGL AND CISST_HAS_FLTK)
-
-  cisst_add_library (
-    LIBRARY cisstVectorFLTK
-    LIBRARY_DIR cisstVector
-    DEPENDENCIES cisstCommon
-                 cisstVector
-    SOURCE_FILES vctPlot2DOpenGLFLTK.cpp
-    HEADER_FILES vctPlot2DOpenGLFLTK.h
-                 vctExportFLTK.h)
-
-endif (CISST_HAS_OPENGL AND CISST_HAS_FLTK)
-
-# Python wrappers
-if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstVector
-                        INTERFACE_DIRECTORY ../../include/cisstVector
-			CISST_LIBRARIES cisstCommon cisstVector)
-endif (CISST_HAS_SWIG_PYTHON)

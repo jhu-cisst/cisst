@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,6 +12,13 @@
 #
 # --- end cisst license ---
 
-add_executable (commonTutorialPortability portability.cpp)
+find_package (cisst COMPONENTS cisstCommon)
 
-cisst_target_link_libraries (commonTutorialPortability cisstCommon)
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
+  add_executable (commonTutorialPortability portability.cpp)
+
+  cisst_target_link_libraries (commonTutorialPortability cisstCommon)
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
+endif (cisst_FOUND_AS_REQUIRED)

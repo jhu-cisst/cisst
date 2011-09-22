@@ -31,12 +31,12 @@ macro (cisst_load_package_setting ...)
   # Set all variables based on dependencies
   foreach (lib ${ARGV})
     # External dependency file
-    set (SETTINGS_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${lib}External.cmake")
+    set (SETTINGS_FILE "${cisst_BINARY_DIR}/cisst-dependencies/${lib}External.cmake")
     if (EXISTS ${SETTINGS_FILE})
       include (${SETTINGS_FILE})
       set (EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
       foreach (package ${EXTERNAL_PACKAGES})
-        set (PACKAGE_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${lib}${package}.cmake")
+        set (PACKAGE_FILE "${cisst_BINARY_DIR}/cisst-dependencies/${lib}${package}.cmake")
         if (EXISTS ${PACKAGE_FILE})
           include (${PACKAGE_FILE})
         else (EXISTS ${PACKAGE_FILE})
@@ -44,6 +44,11 @@ macro (cisst_load_package_setting ...)
         endif (EXISTS ${PACKAGE_FILE})
       endforeach (package)
     endif (EXISTS ${SETTINGS_FILE})
+     # find and load general settings
+    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${SETTINGS})
+      cisst_load_package_setting (${${SETTINGS}})
+    endif (${SETTINGS})
   endforeach (lib)
 endmacro (cisst_load_package_setting)
 
@@ -51,6 +56,7 @@ endmacro (cisst_load_package_setting)
 # macro to set the include directory based on external settings
 macro (cisst_include_directories ...)
   foreach (lib ${ARGV})
+    # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
       foreach (package ${${PACKAGES}})
@@ -60,6 +66,11 @@ macro (cisst_include_directories ...)
         endif (${VARIABLE_NAME})
       endforeach (package)
     endif (${PACKAGES})
+     # find and load general settings
+    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${SETTINGS})
+      cisst_include_directories (${${SETTINGS}})
+    endif (${SETTINGS})
   endforeach (lib)
 endmacro (cisst_include_directories)
 
@@ -67,6 +78,7 @@ endmacro (cisst_include_directories)
 # macro to set the link directories based on external settings
 macro (cisst_link_directories ...)
   foreach (lib ${ARGV})
+    # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
       foreach (package ${${PACKAGES}})
@@ -76,6 +88,11 @@ macro (cisst_link_directories ...)
         endif (${VARIABLE_NAME})
       endforeach (package)
     endif (${PACKAGES})
+     # find and load general settings
+    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${SETTINGS})
+      cisst_link_directories (${${SETTINGS}})
+    endif (${SETTINGS})
   endforeach (lib)
 endmacro (cisst_link_directories)
 
@@ -83,21 +100,33 @@ endmacro (cisst_link_directories)
 # macro to find packages based on external settings
 macro (cisst_find_and_use_packages ...)
   foreach (lib ${ARGV})
+    # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
       foreach (package ${${PACKAGES}})
         # find package
         set (VARIABLE_NAME CISST_PACKAGES_FOR_${lib}_USING_${package})
         if (${VARIABLE_NAME})
-          find_package (${${VARIABLE_NAME}} REQUIRED)
+          # check for components if needed
+          set (COMPONENT_VARIABLE_NAME CISST_PACKAGE_COMPONENTS_FOR_${lib}_USING_${package})
+          if (${COMPONENT_VARIABLE_NAME})
+            find_package (${${VARIABLE_NAME}} REQUIRED ${${COMPONENT_VARIABLE_NAME}})
+          else (${COMPONENT_VARIABLE_NAME})
+            find_package (${${VARIABLE_NAME}} REQUIRED)
+          endif (${COMPONENT_VARIABLE_NAME})
         endif (${VARIABLE_NAME})
         # use package
         set (VARIABLE_NAME CISST_CMAKE_FILES_FOR_${lib}_USING_${package})
         if (${VARIABLE_NAME})
-          include (${${VARIABLE_NAME}} REQUIRED)
+          include (${${VARIABLE_NAME}})
         endif (${VARIABLE_NAME})
       endforeach (package)
     endif (${PACKAGES})
+    # find and load general settings
+    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${SETTINGS})
+      cisst_find_and_use_packages (${${SETTINGS}})
+    endif (${SETTINGS})
   endforeach (lib)
 endmacro (cisst_find_and_use_packages)
 
@@ -137,7 +166,10 @@ macro (cisst_add_library ...)
 
   # set all keywords and their values to ""
   set (FUNCTION_KEYWORDS
-       LIBRARY LIBRARY_DIR PROJECT DEPENDENCIES
+       LIBRARY
+       LIBRARY_DIR
+       PROJECT
+       DEPENDENCIES
        SOURCE_FILES HEADER_FILES
        ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
 
@@ -170,16 +202,10 @@ macro (cisst_add_library ...)
     cisst_cmake_debug ("cisst_add_library: ${keyword}: ${${keyword}}")
   endforeach (keyword)
 
-  # Build source list with full path
-  set (SOURCES "")
-  foreach (file ${SOURCE_FILES})
-    set (SOURCES ${SOURCES} ${${PROJECT_NAME}_SOURCE_DIR}/code/${LIBRARY_DIR}/${file})
-  endforeach (file)
-
   # Build header list with full path and generate a main header file for the library
   set (HEADERS "")
   string (ASCII 35 CISST_STRING_POUND)
-  set (LIBRARY_MAIN_HEADER ${${PROJECT_NAME}_BINARY_DIR}/include/${LIBRARY}.h)
+  set (LIBRARY_MAIN_HEADER ${${PROJECT}_BINARY_DIR}/include/${LIBRARY}.h)
 
   set (FILE_CONTENT "/* This file is generated automatically by CMake, DO NOT EDIT\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   CMake: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\n")
@@ -189,7 +215,7 @@ macro (cisst_add_library ...)
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}ifndef _${LIBRARY}_h\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}define _${LIBRARY}_h\n\n")
   foreach (file ${HEADER_FILES})
-    set (HEADERS ${HEADERS} ${${PROJECT_NAME}_SOURCE_DIR}/include/${LIBRARY_DIR}/${file})
+    set (HEADERS ${HEADERS} ${${PROJECT}_SOURCE_DIR}/${LIBRARY_DIR}/${file})
     set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}include <${LIBRARY_DIR}/${file}>\n")
   endforeach (file)
   set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
@@ -202,10 +228,10 @@ macro (cisst_add_library ...)
   cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
 
   # Add the library
-  cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCES} ${HEADERS}")
+  cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCE_FILES} ${HEADERS}")
   add_library (${LIBRARY}
                ${IS_SHARED}
-               ${SOURCES}
+               ${SOURCE_FILES}
                ${ADDITIONAL_SOURCE_FILES}
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
@@ -242,8 +268,12 @@ endmacro (cisst_add_library)
 
 
 macro (cisst_target_link_package_libraries target ...)
-  cisst_load_package_setting(${ARGV})
-  foreach (lib ${ARGV})
+  # create list of all but target
+  set (DEPENDENCIES ${ARGV})
+  list (REMOVE_AT DEPENDENCIES 0) # remove first argument, i.e. target
+  cisst_load_package_setting(${DEPENDENCIES})
+  foreach (lib ${DEPENDENCIES})
+    # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
       foreach (package ${${PACKAGES}})
@@ -251,9 +281,13 @@ macro (cisst_target_link_package_libraries target ...)
         if (${VARIABLE_NAME})
           target_link_libraries (${target} ${${VARIABLE_NAME}})
         endif (${VARIABLE_NAME})
-
       endforeach (package)
     endif (${PACKAGES})
+     # find and load general settings
+    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${SETTINGS})
+      cisst_target_link_package_libraries (${target} ${${SETTINGS}})
+    endif (${SETTINGS})
   endforeach (lib)
 endmacro (cisst_target_link_package_libraries)
 
@@ -265,7 +299,7 @@ macro (cisst_target_link_libraries TARGET ...)
   # debug
   cisst_cmake_debug ("cisst_target_link_libraries called with: ${ARGV}")
   if (${ARGC} LESS 2)
-    message ("cisst_target_link_libraries takes at least two arguments, target and one or more libraries.  Got: ${ARGV}")
+    message (SEND_ERROR "cisst_target_link_libraries takes at least two arguments, target and one or more libraries.  Got: ${ARGV}")
   endif (${ARGC} LESS 2)
 
   set (REQUIRED_CISST_LIBRARIES ${ARGV})
@@ -325,7 +359,7 @@ function (cisst_add_swig_module ...)
   foreach(keyword ${FUNCTION_KEYWORDS})
     set (${keyword} "")
   endforeach(keyword)
-  
+
   # parse input
   foreach (arg ${ARGV})
     list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
@@ -391,7 +425,7 @@ function (cisst_add_swig_module ...)
                    ${INTERFACE})
 
   else (EXISTS ${SWIG_INTERFACE_FILE})
-    message ("Can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
+    message (SEND_ERROR "Can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
 endfunction (cisst_add_swig_module)
@@ -403,7 +437,7 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
   # debug
   cisst_cmake_debug ("cisst_component_generator called with: ${ARGV}")
   if (${ARGC} LESS 1)
-    message ("cisst_component_generator takes at least one argument.")
+    message (SEND_ERROR "cisst_component_generator takes at least one argument.")
   endif (${ARGC} LESS 1)
   list (REMOVE_AT ARGV 0) # first one is name of variable
 
@@ -460,7 +494,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
   # debug
   cisst_cmake_debug ("cisst_data_generator called with: ${ARGV}")
   if (${ARGC} LESS 1)
-    message ("cisst_data_generator takes at least one argument.")
+    message (SEND_ERROR "cisst_data_generator takes at least one argument.")
   endif (${ARGC} LESS 1)
   list (REMOVE_AT ARGV 0) # first one is name of variable
 
@@ -647,7 +681,7 @@ function (cisst_add_test ...)
   cisst_cmake_debug ("cisst_add_test called with: ${ARGV}")
 
   if (${ARGC} LESS 5)
-    message ("cisst_add_test takes 5 arguments, test program, INSTANCES and number, ITERATIONS and number.  Got: ${ARGV}")
+    message (SEND_ERROR "cisst_add_test takes 5 arguments, test program, INSTANCES and number, ITERATIONS and number.  Got: ${ARGV}")
   endif (${ARGC} LESS 5)
 
   set (ALL_ARGS ${ARGV})

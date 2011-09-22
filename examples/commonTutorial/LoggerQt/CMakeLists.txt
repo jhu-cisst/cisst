@@ -4,7 +4,7 @@
 #   Author(s):  Anton Deguet
 #   Created on: 2009-11-16
 #
-#   (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
+#   (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,8 +14,12 @@
 #
 # --- end cisst license ---
 
-add_executable (commonTutorialLoggerQt main.cpp)
+find_package (cisst COMPONENTS cisstCommon cisstCommonQt)
 
-target_link_libraries (commonTutorialLoggerQt ${QT_LIBRARIES})
-
-cisst_target_link_libraries (commonTutorialLoggerQt cisstCommon cisstCommonQt)
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
+  add_executable (commonTutorialLoggerQt main.cpp)
+  cisst_target_link_libraries (commonTutorialLoggerQt cisstCommon cisstCommonQt)
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon and cisstCommonQt")
+endif (cisst_FOUND_AS_REQUIRED)
