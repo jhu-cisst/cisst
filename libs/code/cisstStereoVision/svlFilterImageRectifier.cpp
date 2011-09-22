@@ -96,15 +96,22 @@ int svlFilterImageRectifier::Process(svlProcInfo* procInfo, svlSample* syncInput
 
     _OnSingleThread(procInfo)
     {
-        svlSampleCameraGeometry* camgeo = dynamic_cast<svlSampleCameraGeometry*>(GetInput("calibration")->PullSample(false));
+        svlSampleCameraGeometry* camgeo = dynamic_cast<svlSampleCameraGeometry*>(GetInput("calibration")->PullSample(true, 0.0));
         if (camgeo) {
             for (idx = 0; idx < videochannels; idx ++) {
-                table = new svlImageProcessingHelper::RectificationInternals;
-                if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {
-                    delete table;
-                    continue;
+                if(camgeo->IsInitialized())
+                {
+                    table = new svlImageProcessingHelper::RectificationInternals;
+                    if (!table->Generate(inimg->GetWidth(idx), inimg->GetHeight(idx), *camgeo, idx)) {
+                        delete table;
+                        continue;
+                    }
+                    Tables[idx].Set(table);
                 }
-                Tables[idx].Set(table);
+                else
+                {
+                    Tables[idx].Release();
+                }
             }
         }
     }
@@ -142,7 +149,47 @@ int svlFilterImageRectifier::LoadTable(const std::string &filepath, unsigned int
     return SVL_OK;
 }
 
+/**************************************************************************************************
+* SetTableFromCameraCalibration					
+*	Calls svlImageProcessingHelper to setup rectification table from Matlab calibration results.	
+*
+* Input:
+*	height	unsigned int					- pixel height of the image
+*	width	unsigned int					- pixel width of the image
+*	R		vct3x3							- rotation matrix
+*	f		vct2							- is the focal length
+*	c		vct2							- is the camera center
+*	k		vctFixedSizeVector<double,5>	- distortion coefficents
+*	alpha:	double							- skew
+*	KK_new	vct3x3							- camera model of the target camera
+*	videoch	unsigned int					- the video channal for which this table is going to be used.
+*	
+* Output:
+*	int										- SVL integer indicator
+*
+*
+* Last Change, S. Schafer, 2011/05/17, changed "vctFixedSizeVector<double,5> k", to "vctFixedSizeVector<double,7> k"
+***********************************************************************************************************/
+int svlFilterImageRectifier::SetTableFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch)
+{
+
+    if (IsInitialized() == true) return SVL_ALREADY_INITIALIZED;
+    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
+
+    svlImageProcessingHelper::RectificationInternals* table = new svlImageProcessingHelper::RectificationInternals;
+    if (!table->SetFromCameraCalibration(height,width,R, f, c, k, alpha, videoch)) {
+        delete table;
+        return SVL_FAIL;
+	}
+
+    Tables[videoch].Set(table);
+
+    return SVL_OK;
+
+}
+
 void svlFilterImageRectifier::EnableInterpolation(bool enable)
 {
     InterpolationEnabled = enable;
 }
+

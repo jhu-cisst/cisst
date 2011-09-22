@@ -52,9 +52,9 @@ public:
     int SetChannelCount(unsigned int channelcount);
     int SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch = SVL_LEFT);
     int SetSequence(unsigned int numberofdigits = 0, unsigned int from = 0, unsigned int to = 0);
-
     unsigned int GetWidth(unsigned int videoch = SVL_LEFT) const;
     unsigned int GetHeight(unsigned int videoch = SVL_LEFT) const;
+    int SetFrame(unsigned int numberofdigits = 0, unsigned int frame = 0);
 
 protected:
     virtual int Initialize(svlSample* &syncOutput);
@@ -73,6 +73,7 @@ private:
     unsigned int To;
     unsigned int FileCounter;
     bool StopLoop;
+    bool FrameSet;
 
     int BuildFilePath(int videoch, unsigned int framecounter = 0);
 
