@@ -170,6 +170,22 @@ cisstOpenNI::Errno cisstOpenNI::GetRGBImage( vctDynamicMatrix<unsigned char>& RG
 
 }
 
+cisstOpenNI::Errno cisstOpenNI::GetRGBImage(vctDynamicMatrixRef<unsigned char> RGBimage)
+{
+    xn::ImageMetaData rgbMD;
+    Data->rgbgenerator.GetMetaData(rgbMD);
+
+    // check image size
+    if (RGBimage.cols() != (rgbMD.XRes() * 3) ||
+        RGBimage.rows() != rgbMD.YRes()) {
+        CMN_LOG_RUN_ERROR << "cisstOpenNI::GetRGBImage - image size mismatch" << std::endl;
+        return cisstOpenNI::EFAILURE;
+    }
+
+    memcpy(RGBimage.Pointer(), rgbMD.Data(), rgbMD.YRes() * rgbMD.XRes() * 3);
+
+    return cisstOpenNI::ESUCCESS;
+}
 
 cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw( vctDynamicMatrix<double> & depthimage ){
 
@@ -192,6 +208,23 @@ cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw( vctDynamicMatrix<double> & dep
   
 }
 
+cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw(vctDynamicMatrixRef<unsigned short> depthimage)
+{
+    xn::DepthMetaData depthMD;
+    Data->depthgenerator.GetMetaData(depthMD);
+
+    // check image size
+    if (depthimage.cols() != depthMD.XRes() ||
+        depthimage.rows() != depthMD.YRes()) {
+        CMN_LOG_RUN_ERROR << "cisstOpenNI::GetDepthImageRaw - image size mismatch" << std::endl;
+        return cisstOpenNI::EFAILURE;
+    }
+
+    memcpy(depthimage.Pointer(), depthMD.Data(), depthMD.YRes() * depthMD.XRes());
+
+    return cisstOpenNI::ESUCCESS;
+}
+
 void cisstOpenNI::GetDepthImage( vctDynamicMatrix<double>& placeHolder ){
 
     // Get depth data
@@ -201,6 +234,7 @@ void cisstOpenNI::GetDepthImage( vctDynamicMatrix<double>& placeHolder ){
 
     placeHolder.SetSize( depthMD.YRes(), depthMD.XRes() );
     double* ptr = placeHolder.Pointer();
+
     const size_t end = depthMD.YRes()*depthMD.XRes();
     for( size_t i = 0; i < end; i++ )
     {
@@ -211,10 +245,9 @@ void cisstOpenNI::GetDepthImage( vctDynamicMatrix<double>& placeHolder ){
 
 
 cisstOpenNI::Errno 
-cisstOpenNI::GetRangeData
-( vctDynamicMatrix<double>& rangedata,
-  const std::vector< vctFixedSizeVector<unsigned short,2> >& pixels ){
-  
+cisstOpenNI::GetRangeData( vctDynamicMatrix<double>& rangedata,
+                           const std::vector< vctFixedSizeVector<unsigned short,2> >& pixels ){
+
   // Get data
   xn::DepthMetaData depthMD;
   Data->depthgenerator.GetMetaData( depthMD );

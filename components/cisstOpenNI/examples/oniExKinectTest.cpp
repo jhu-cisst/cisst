@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #define SAMPLE_CONFIG_PATH "C:/dev/OpenNI/data/SamplesConfig.xml"
 #endif
 #ifdef __APPLE__ 
-#define SAMPLE_CONFIG_PATH "/Developer-old/Kinect/SensorKinect/avin2-SensorKinect-28738dc/OpenNI/Data/SamplesConfig.xml"
+#define SAMPLE_CONFIG_PATH "/Users/vagvoba/Code/Kinect/avin2-SensorKinect-2d13967/OpenNI/Data/SamplesConfig.xml"
 #endif
 #ifdef linux // This is defined by gcc
 #define SAMPLE_CONFIG_PATH "/etc/openni/SamplesConfig.xml"
@@ -81,7 +81,8 @@ int main( int argc, char** argv ){
             
         {
             vctDynamicMatrix<double> range;
-            if( kinect.GetRangeData( range ) != cisstOpenNI::ESUCCESS ){
+            std::vector< vctFixedSizeVector<unsigned short, 2> > pixels;
+            if( kinect.GetRangeData(range, pixels) != cisstOpenNI::ESUCCESS ){
                 CMN_LOG_RUN_ERROR << "Failed to get RGB image" << std::endl;
                 return -1;
             }
@@ -93,6 +94,7 @@ int main( int argc, char** argv ){
         if( 0 < numusers )
             { std::vector<cisstOpenNISkeleton*> skeletons = kinect.UpdateAndGetUserSkeletons(); }
 
+        std::cerr << "*";
 	}
 
 	return 0;

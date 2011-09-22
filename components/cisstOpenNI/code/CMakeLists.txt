@@ -13,31 +13,67 @@
 # --- end cisst license ---
 
 
-set( HEADER_FILES	../cisstOpenNI.h
-					../cisstOpenNISkeleton.h
-					cisstOpenNIData.h )
-set( SOURCE_FILES	cisstOpenNI.cpp
-					cisstOpenNISkeleton.cpp
-					cisstOpenNIData.cpp )
+set (HEADER_FILES
+     ../cisstOpenNI.h
+     ../cisstOpenNISkeleton.h
+     cisstOpenNIData.h
+     )
+set (SOURCE_FILES
+     cisstOpenNI.cpp
+     cisstOpenNISkeleton.cpp
+     cisstOpenNIData.cpp
+     )
 
+# SVL (cisstStereoVision) headers and sources
+set (HEADER_FILES
+     ${HEADER_FILES}
+     ../svlFilterSourceKinect.h
+     )
+set (SOURCE_FILES
+     ${SOURCE_FILES}
+     svlFilterSourceKinect.cpp
+     )
+
+cisst_set_directories (cisstCommon
+                       cisstVector
+                       cisstOSAbstraction
+                       cisstMultiTask
+                       cisstStereoVision
+                       )
 
 # Finally create the library
-add_library( cisstOpenNI ${HEADER_FILES} ${SOURCE_FILES} )
+add_library (cisstOpenNI
+             ${HEADER_FILES}
+             ${SOURCE_FILES}
+             )
 
-target_link_libraries( cisstOpenNI ${OPENNI_LIBRARIES} )
+target_link_libraries (cisstOpenNI
+                       ${OPENNI_LIBRARIES}
+                       )
 
-cisst_target_link_libraries ( 
-  cisstOpenNI
-  cisstCommon
-  cisstVector
-  cisstOSAbstraction
-  cisstMultiTask )
+cisst_target_link_libraries (cisstOpenNI
+                             cisstCommon
+                             cisstVector
+                             cisstOSAbstraction
+                             cisstMultiTask
+                             cisstStereoVision
+                             )
 
-set( cisstOpenNI_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}" )
-set( cisstOpenNI_LIBRARY_DIR ${LIBRARY_OUTPUT_PATH} )
-set( cisstOpenNI_LIBRARIES cisstOpenNI 
-                            ${OPENNI_LIBRARIES})
+set (cisstOpenNI_INCLUDE_DIR
+     "${cisstComponents_SOURCE_DIR}"
+     )
+
+set (cisstOpenNI_LIBRARY_DIR
+     ${LIBRARY_OUTPUT_PATH}
+     )
+
+set (cisstOpenNI_LIBRARIES
+     cisstOpenNI
+     ${OPENNI_LIBRARIES}
+     )
 
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstOpenNIConfig.cmake.in"
                 "${cisstComponents_BINARY_DIR}/cisstOpenNIConfig.cmake"
-                 @ONLY@)
+                @ONLY@
+                )
+

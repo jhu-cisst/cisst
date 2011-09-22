@@ -95,11 +95,9 @@ public:
     method is non-const due to updating the context.
     \return A 3x(MxN) point cloud.
     */
-    cisstOpenNI::Errno GetRangeData
-      ( vctDynamicMatrix<double>& rangedata,
-	const std::vector< vctFixedSizeVector<unsigned short,2> >& pixels = 
-	std::vector< vctFixedSizeVector<unsigned short,2> >() );
-    
+    cisstOpenNI::Errno GetRangeData( vctDynamicMatrix<double>& rangedata,
+                                     const std::vector< vctFixedSizeVector<unsigned short, 2> >& pixels);
+
     //! Get Raw Depth Image
     /**
     Query the depth generator to obtain a depth image. Resulting image as 8-bit depth. 
@@ -107,6 +105,7 @@ public:
     is non-const due to updating the context.
     */
     cisstOpenNI::Errno GetDepthImageRaw( vctDynamicMatrix<double>& depthimage );
+    cisstOpenNI::Errno GetDepthImageRaw( vctDynamicMatrixRef<unsigned short> depthimage );
 
     //! Get Depth Image
     /**
@@ -121,6 +120,7 @@ public:
 
     */
     cisstOpenNI::Errno GetRGBImage( vctDynamicMatrix<unsigned char>& RGBinterlaced );
+    cisstOpenNI::Errno GetRGBImage( vctDynamicMatrixRef<unsigned char> RGBinterlaced );
 
     //! Get (planar) RGB image
     /**
