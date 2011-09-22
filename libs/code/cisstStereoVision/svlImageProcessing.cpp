@@ -725,7 +725,7 @@ int svlImageProcessing::Dilate(svlSampleImage* src_img, unsigned int src_videoch
         height < 1 || height != static_cast<int>(dst_img->GetHeight(dst_videoch))) return SVL_FAIL;
 
     unsigned char *input  = src_img->GetUCharPointer(src_videoch);
-    unsigned char *output = dst_img->GetUCharPointer(src_videoch);
+    unsigned char *output = dst_img->GetUCharPointer(dst_videoch);
 
     if (radius < 1) {
         memcpy(output, input, width * height);
@@ -782,7 +782,7 @@ int svlImageProcessing::Erode(svlSampleImage* src_img, unsigned int src_videoch,
         height < 1 || height != static_cast<int>(dst_img->GetHeight(dst_videoch))) return SVL_FAIL;
 
     unsigned char *input  = src_img->GetUCharPointer(src_videoch);
-    unsigned char *output = dst_img->GetUCharPointer(src_videoch);
+    unsigned char *output = dst_img->GetUCharPointer(dst_videoch);
 
     if (radius < 1) {
         memcpy(output, input, width * height);
@@ -820,6 +820,40 @@ int svlImageProcessing::Erode(svlSampleImage* src_img, unsigned int src_videoch,
             input   ++;
             output  ++;
         }
+    }
+
+    return SVL_OK;
+}
+
+int svlImageProcessing::SwapColorChannels(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch)
+{
+    if (!src_img || src_img->GetVideoChannels() <= src_videoch ||
+        !dst_img || dst_img->GetVideoChannels() <= dst_videoch) return SVL_FAIL;
+
+    const int width  = static_cast<int>(src_img->GetWidth(src_videoch));
+    const int height = static_cast<int>(src_img->GetHeight(src_videoch));
+
+    if (src_img->GetPixelType() != svlPixelRGB ||
+        dst_img->GetPixelType() != svlPixelRGB ||
+        width  < 1 || width  != static_cast<int>(dst_img->GetWidth(dst_videoch)) ||
+        height < 1 || height != static_cast<int>(dst_img->GetHeight(dst_videoch))) return SVL_FAIL;
+
+    const unsigned int pixelcount = width * height;
+    unsigned char r, b, *ri, *bi, *ro, *bo;
+
+    ri = src_img->GetUCharPointer(src_videoch);
+    bi = ri + 2;
+    ro = dst_img->GetUCharPointer(dst_videoch);
+    bo = ri + 2;
+
+    for (unsigned int i = 0; i < pixelcount; i ++) {
+        // Intermediate step required so that it will work even if the source and the destination are the same
+        r = *ri;
+        b = *bi;
+        *ro = b;
+        *bo = r;
+        ri += 3; bi += 3;
+        ro += 3; bo += 3;
     }
 
     return SVL_OK;
