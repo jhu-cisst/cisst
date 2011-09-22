@@ -89,14 +89,17 @@ public:
 
     //! Get range data
     /**
-    Query the depth generator to obtain a depth image and convert the image to a points
-    cloud. If the depth image is MxN, then the point cloud is a matrix of size 3x(MxN) where
-    each column are the X-Y-Z coordinate of a point. This method is non-const due to updating
-    the context.
+    Query the depth generator to obtain a depth image and convert the image to 
+    a points cloud. If the depth image is MxN, then the point cloud is a matrix 
+    of size 3x(MxN) where each column are the X-Y-Z coordinate of a point. This
+    method is non-const due to updating the context.
     \return A 3x(MxN) point cloud.
     */
-    cisstOpenNI::Errno GetRangeData( vctDynamicMatrix<double>& rangedata );
-
+    cisstOpenNI::Errno GetRangeData
+      ( vctDynamicMatrix<double>& rangedata,
+	const std::vector< vctFixedSizeVector<unsigned short,2> >& pixels = 
+	std::vector< vctFixedSizeVector<unsigned short,2> >() );
+    
     //! Get Raw Depth Image
     /**
     Query the depth generator to obtain a depth image. Resulting image as 8-bit depth. 
@@ -140,6 +143,11 @@ public:
      */
     std::vector<cisstOpenNISkeleton*> &GetUserSkeletons();
 
+    // Convert 3D to projective
+    cisstOpenNI::Errno 
+      Convert3DToProjectiveMask( const vctDynamicMatrix<double>& rangedata,
+				 vctDynamicMatrix<bool>& mask );
+    
 };
 
 #endif

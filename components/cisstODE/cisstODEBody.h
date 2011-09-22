@@ -239,6 +239,7 @@ class CISST_EXPORT cisstODEBody : public cisstOSGBody {
 
   const std::string& GetUserData();
 
+  void SetTransform( const vctFrame4x4<double>& Rt );
   vctFrm3 GetTransform() const;
 
   //vctDynamicMatrix<double> GetVertices() const;

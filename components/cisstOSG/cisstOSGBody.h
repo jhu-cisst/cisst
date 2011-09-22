@@ -200,8 +200,10 @@ class CISST_EXPORT cisstOSGBody : public osg::Group {
   void Initialize( double scale = 1.0 );
 
   //! Set the transform of the body
-  void SetTransform( const vctFrame4x4<double>& Rt );
-  void SetTransform( const vctFrm3& Rt );
+  virtual void SetTransform( const vctFrame4x4<double>& Rt );
+  virtual void SetTransform( const vctFrm3& Rt );
+  virtual vctFrm3 GetTransform() const;
+
 
   //! Set the switch of the body
   void SwitchOn();

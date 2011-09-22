@@ -343,6 +343,14 @@ void cisstOSGBody::SetTransform( const vctFrm3& Rt ){
   SetTransform( vctFrame4x4<double>( q, Rt.Translation() ) );
 }
 
+vctFrm3 cisstOSGBody::GetTransform() const{ 
+  vctMatrixRotation3<double> R(transform[0][0],transform[0][1],transform[0][2],
+			       transform[1][0],transform[1][1],transform[1][2],
+			       transform[2][0],transform[2][1],transform[2][2]);
+  return vctFrm3( R, transform.Translation() ); 
+}
+
+
 //! Set the switch of the body
 void cisstOSGBody::SwitchOn()
 { onoff = SWITCH_ON; }
