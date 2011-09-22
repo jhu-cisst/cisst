@@ -220,7 +220,7 @@ cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw(vctDynamicMatrixRef<unsigned sh
         return cisstOpenNI::EFAILURE;
     }
 
-    memcpy(depthimage.Pointer(), depthMD.Data(), depthMD.YRes() * depthMD.XRes());
+    memcpy(depthimage.Pointer(), depthMD.Data(), depthMD.YRes() * depthMD.XRes() * 2);
 
     return cisstOpenNI::ESUCCESS;
 }
