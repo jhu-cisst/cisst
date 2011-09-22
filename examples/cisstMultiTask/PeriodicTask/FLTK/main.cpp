@@ -40,12 +40,12 @@ int main(int argc, char ** argv)
     // create our two tasks
     const double PeriodSine = 5.0 * cmn_ms; // in milliseconds
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-    sineTask * sineIntance = new sineTask("Sine", PeriodSine);
+    sineTask * sineInstance = new sineTask("Sine", PeriodSine);
     clockComponent * clockInstance = new clockComponent("Clock");
     displayUI * uiInstance = new displayUI("Display");
 
     // add the tasks to the component manager
-    componentManager->AddComponent(sineIntance);
+    componentManager->AddComponent(sineInstance);
     componentManager->AddComponent(clockInstance);
     componentManager->AddComponent(uiInstance);
 
@@ -55,29 +55,23 @@ int main(int argc, char ** argv)
 
     // create the components, i.e. find the commands
     componentManager->CreateAll();
-    uiInstance->DoCallback();
     componentManager->WaitForStateAll(mtsComponentState::READY, 2.0 * cmn_s);
 
     // start the periodic Run
     componentManager->StartAll();
-    uiInstance->DoCallback();
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE, 2.0 * cmn_s);
 
     // FLTK
-    uiInstance->show(argc, argv);
-    Fl::add_idle(displayUI::IdleCallback, uiInstance);
     Fl::run();
-    Fl::remove_idle(displayUI::IdleCallback, uiInstance);
 
     // cleanup
     componentManager->KillAll();
-    uiInstance->DoCallback();
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
     componentManager->Cleanup();
 
     delete uiInstance;
     delete clockInstance;
-    delete sineIntance;
+    delete sineInstance;
 
     return 0;
 }
