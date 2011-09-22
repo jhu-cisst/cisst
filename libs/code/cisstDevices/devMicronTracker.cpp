@@ -20,56 +20,56 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstStereoVision/svlConverters.h>
 #if CISST_HAS_CISSTNETLIB
-    #include <cisstNumerical/nmrLSSolver.h>
+    #include <cisstNumerical/nmrLSqLin.h>
 #endif
 #include <cisstDevices/devMicronTracker.h>
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(devMicronTracker, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg);
+CMN_IMPLEMENT_SERVICES(devMicronTracker);
 
 // macro to check for and report MTC usage errors
 #define MTC(func) { int retval = func; if (retval != mtOK) CMN_LOG_CLASS_RUN_ERROR << "MTC: " << MTLastErrorString() << std::endl;};
 
 
 devMicronTracker::devMicronTracker(const std::string & taskName, const double period) :
-    mtsTaskPeriodic(taskName, period, false, 100),
+    mtsTaskPeriodic(taskName, period, false, 5000),
     IsCapturing(false),
-    IsTracking(false)
+    IsTracking(false),
+    ImageTable(10, "ImageTable")
 {
-    InitComponent();
-}
+    RGB = new svlSampleImageRGB();
+    RGB->SetSize(FrameWidth, FrameHeight);
+    ImageBufferLeft = new svlBufferSample(*RGB);
+    ImageBufferRight = new svlBufferSample(*RGB);
 
+    ImageLeft.SetSize(FrameSize);
+    ImageRight.SetSize(FrameSize);
 
-devMicronTracker::devMicronTracker(const mtsTaskPeriodicConstructorArg &arg) :
-    mtsTaskPeriodic(arg),
-    IsCapturing(false),
-    IsTracking(false)
-{
-    InitComponent();
-}
-
-void devMicronTracker::InitComponent(void)
-{
-    CameraFrameLeft.SetSize(640 * 480);
-    CameraFrameRight.SetSize(640 * 480);
+    ImageTable.SetAutomaticAdvance(false);
+    AddStateTable(&ImageTable);
 
     mtsInterfaceProvided * provided = AddInterfaceProvided("Controller");
     if (provided) {
-        StateTable.AddData(CameraFrameLeft, "CameraFrameLeft");
-        StateTable.AddData(CameraFrameRight, "CameraFrameRight");
         StateTable.AddData(IsCapturing, "IsCapturing");
         StateTable.AddData(IsTracking, "IsTracking");
+        ImageTable.AddData(ImageLeft, "ImageLeft");
+        ImageTable.AddData(ImageRight, "ImageRight");
 
         provided->AddCommandWrite(&devMicronTracker::CalibratePivot, this, "CalibratePivot", mtsStdString());
         provided->AddCommandWrite(&devMicronTracker::ToggleCapturing, this, "ToggleCapturing", mtsBool());
         provided->AddCommandWrite(&devMicronTracker::ToggleTracking, this, "ToggleTracking", mtsBool());
-        provided->AddCommandReadState(StateTable, CameraFrameLeft, "GetCameraFrameLeft");
-        provided->AddCommandReadState(StateTable, CameraFrameRight, "GetCameraFrameRight");
         provided->AddCommandReadState(StateTable, IsCapturing, "IsCapturing");
         provided->AddCommandReadState(StateTable, IsTracking, "IsTracking");
+        provided->AddCommandReadState(ImageTable, ImageLeft, "GetCameraFrameLeft");
+        provided->AddCommandReadState(ImageTable, ImageRight, "GetCameraFrameRight");
+        provided->AddCommandWrite(&devMicronTracker::ComputeCameraModel, this, "ComputeCameraModel", mtsStdString());
     }
 }
+
 
 void devMicronTracker::Configure(const std::string & filename)
 {
@@ -78,42 +78,27 @@ void devMicronTracker::Configure(const std::string & filename)
     cmnXMLPath config;
     config.SetInputSource(filename);
 
-    // attach cameras
-    std::string calibration;
-    config.GetXMLValue("/config/device", "@calibration", calibration);
-    MTC( Cameras_AttachAvailableCameras(const_cast<char *>(calibration.c_str())) );
-    if (Cameras_Count() < 1) {
-        CMN_LOG_CLASS_INIT_ERROR << "Configure: no camera found" << std::endl;
-    }
-    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: found " << Cameras_Count() << " camera(s)" << std::endl;
-
-    // load marker templates
-    std::string markers;
-    config.GetXMLValue("/config/device", "@markers", markers);
-    MTC( Markers_LoadTemplates(const_cast<char *>(markers.c_str())) );
-    if (Markers_TemplatesCount() < 1) {
-        CMN_LOG_CLASS_INIT_ERROR << "Configure: no marker template found" << std::endl;
-    }
-    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: loaded " << Markers_TemplatesCount() << " marker template(s)" << std::endl;
+    // get required paths
+    config.GetXMLValue("/tracker/controller", "@calibration", CameraCalibrationDir);
+    config.GetXMLValue("/tracker/controller", "@markers", MarkerTemplatesDir);
 
     // add tools
     int maxNumTools = 100;
     std::string toolName;
-    bool toolEnabled;
     std::string toolSerial, toolSerialLast;
     std::string toolDefinition;
 
     for (int i = 0; i < maxNumTools; i++) {
         std::stringstream context;
-        context << "/config/tools/tool[" << i << "]";
-        config.GetXMLValue(context.str().c_str(), "@name", toolName);
-        config.GetXMLValue(context.str().c_str(), "@enabled", toolEnabled);
-        config.GetXMLValue(context.str().c_str(), "@serial", toolSerial);
+        context << "/tracker/tools/tool[" << i << "]";
+        config.GetXMLValue(context.str().c_str(), "@name", toolName, "");
+        if (toolName.empty()) {
+            continue;
+        }
+        config.GetXMLValue(context.str().c_str(), "@marker", toolSerial);
         if (toolSerial != toolSerialLast) {
             toolSerialLast = toolSerial;
-            if (toolEnabled) {
-                AddTool(toolName, toolSerial);
-            }
+            AddTool(toolName, toolSerial);
         }
     }
 }
@@ -184,21 +169,49 @@ std::string devMicronTracker::GetToolName(const unsigned int index) const
 
 void devMicronTracker::Startup(void)
 {
+    // attach cameras
+    MTC( Cameras_AttachAvailableCameras(const_cast<char *>(CameraCalibrationDir.c_str())) );
+    if (Cameras_Count() < 1) {
+        CMN_LOG_CLASS_INIT_ERROR << "Startup: no camera found" << std::endl;
+    }
+    CMN_LOG_CLASS_INIT_VERBOSE << "Startup: found " << Cameras_Count() << " camera(s)" << std::endl;
+
+    // load marker templates
+    MTC( Markers_LoadTemplates(const_cast<char *>(MarkerTemplatesDir.c_str())) );
+    if (Markers_TemplatesCount() < 1) {
+        CMN_LOG_CLASS_INIT_ERROR << "Startup: no marker template found" << std::endl;
+    }
+    CMN_LOG_CLASS_INIT_VERBOSE << "Startup: loaded " << Markers_TemplatesCount() << " marker template(s)" << std::endl;
+
     IdentifiedMarkers = Collection_New();
     PoseXf = Xform3D_New();
     Path = Persistence_New();
 
-    // get serial number
-    MTC( Cameras_ItemGet(0, &CurrentCamera) );  // select current camera
-    int serialNumber;
-    MTC( Camera_SerialNumberGet(CurrentCamera, &serialNumber) );
-    CMN_LOG_CLASS_INIT_VERBOSE << "Startup: serial number of the current camera is " << serialNumber << std::endl;
+    // select current camera
+    MTC( Cameras_ItemGet(0, &CurrentCamera) );
 
-    int resolutionX, resolutionY;
-    MTC( Camera_ResolutionGet(CurrentCamera, &resolutionX, &resolutionY) );
-    CMN_LOG_CLASS_INIT_VERBOSE << "Startup: resolution of the current camera is " << resolutionX << "x" << resolutionY << std::endl;
+    // check if a camera is connected
+    int retval = Cameras_GrabFrame(CurrentCamera);
+    if (retval != mtOK) {
+        if (retval == mtGrabFrameError) {
+            CMN_LOG_CLASS_INIT_ERROR << "Startup: camera is not connected" << std::endl;
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "Startup: " << MTLastErrorString() << std::endl;
+        }
+        return;
+    }
 
-    Camera_HdrEnabledSet(CurrentCamera, true);
+    // get calibration info
+    char lines[80][80];
+    int numLines;
+    MTC( Camera_CalibrationInfo(CurrentCamera, lines, 80, &numLines) );
+    std::stringstream calibrationInfo;
+    for (int i = 0; i < numLines; i++) {
+        calibrationInfo << " * " << lines[i] << "\n";
+    }
+    CMN_LOG_CLASS_INIT_DEBUG << "Startup: calibration parameters:\n" << calibrationInfo.str() << std::endl;
+
+    //Camera_HdrEnabledSet(CurrentCamera, true);
     Camera_HistogramEqualizeImagesSet(CurrentCamera, true);
     Camera_LightCoolnessSet(CurrentCamera, 0.56);  // obtain this value using CoolCard
 }
@@ -221,8 +234,14 @@ void devMicronTracker::Run(void)
         MTC( Camera_FramesGrabbedGet(CurrentCamera, &numFramesGrabbed) );
         if (numFramesGrabbed > 0) {
             MTC( Camera_ImagesGet(CurrentCamera,
-                                  CameraFrameLeft.Pointer(),
-                                  CameraFrameRight.Pointer()) );
+                                  ImageLeft.Pointer(),
+                                  ImageRight.Pointer()) );
+            ImageTable.Advance();
+
+            svlConverter::Gray8toRGB24(ImageLeft.Pointer(), RGB->GetUCharPointer(), FrameSize);
+            ImageBufferLeft->Push(RGB);
+            svlConverter::Gray8toRGB24(ImageRight.Pointer(), RGB->GetUCharPointer(), FrameSize);
+            ImageBufferRight->Push(RGB);
         }
     }
     if (IsTracking) {
@@ -361,11 +380,11 @@ void devMicronTracker::Track(void)
 
             CMN_LOG_CLASS_RUN_DEBUG << "Track: " << markerName << " is at:\n" << tooltipPosition << std::endl;
 
-            MTC( Camera_ProjectionOnImage(CurrentCamera, 0, tooltipPosition.Translation().Pointer(),
+            MTC( Camera_ProjectionOnImage(CurrentCamera, LEFT_CAMERA, tooltipPosition.Translation().Pointer(),
                                           &(tool->MarkerProjectionLeft.X()),
                                           &(tool->MarkerProjectionLeft.Y())) );
 
-            MTC( Camera_ProjectionOnImage(CurrentCamera, 1, tooltipPosition.Translation().Pointer(),
+            MTC( Camera_ProjectionOnImage(CurrentCamera, RIGHT_CAMERA, tooltipPosition.Translation().Pointer(),
                                           &(tool->MarkerProjectionRight.X()),
                                           &(tool->MarkerProjectionRight.Y())) );
         }
@@ -375,54 +394,57 @@ void devMicronTracker::Track(void)
 
 void devMicronTracker::CalibratePivot(const mtsStdString & toolName)
 {
+    Tool * tool = Tools.GetItem(toolName.Data);
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << tool->Name << std::endl;
+
 #if CISST_HAS_CISSTNETLIB
     const unsigned int numPoints = 250;
 
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.Data << std::endl;
-    Tool * tool = Tools.GetItem(toolName.Data);
     tool->TooltipOffset.SetAll(0.0);
 
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration in 5 seconds" << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting sampling in 5 seconds" << std::endl;
     osaSleep(5.0 * cmn_s);
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibration started" << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: sampling started" << std::endl;
 
     vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
-    vctMat b(3 * numPoints, 1, VCT_COL_MAJOR);
+    vctVec b(3 * numPoints);
     std::vector<vctFrm3> frames(numPoints);
+
+    vctDynamicMatrixRef<double> matrixRef;
+    vctDynamicVectorRef<double> vectorRef;
 
     for (unsigned int i = 0; i < numPoints; i++) {
         MTC( Cameras_GrabFrame(CurrentCamera) );
         Track();
         frames[i] = tool->MarkerPosition.Position();
 
-        vctDynamicMatrixRef<double> rotation(3, 3, 1, numPoints*3, A.Pointer(i*3, 0));
-        rotation.Assign(tool->MarkerPosition.Position().Rotation());
+        matrixRef.SetRef(3, 3, 1, 3*numPoints, A.Pointer(3*i, 0));
+        matrixRef.Assign(tool->MarkerPosition.Position().Rotation());
 
-        vctDynamicMatrixRef<double> identity(3, 3, 1, numPoints*3, A.Pointer(i*3, 3));
-        identity.Assign(-vctRot3::Identity());
+        matrixRef.SetRef(3, 3, 1, 3*numPoints, A.Pointer(3*i, 3));
+        matrixRef.Assign(-vctMat::Eye(3));
 
-        vctDynamicVectorRef<double> translation(3, b.Pointer(i*3, 0));
-        translation.Assign(tool->MarkerPosition.Position().Translation());
+        vectorRef.SetRef(3, b.Pointer(i*3));
+        vectorRef.Assign(tool->MarkerPosition.Position().Translation());
 
         osaSleep(50.0 * cmn_ms);  // to prevent frame grab timeout
     }
 
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibration stopped" << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: sampling completed" << std::endl;
 
-    nmrLSSolver calibration(A, b);
-    calibration.Solve(A, b);
-
+    vctVec x(b.size());
     vct3 tooltip;
     vct3 pivot;
+    nmrLSqLin(A, b, x);
     for (unsigned int i = 0; i < 3; i++) {
-        tooltip[i] = -b.at(i, 0);
-        pivot[i] = -b.at(i+3, 0);
+        tooltip[i] = -x[i];
+        pivot[i] = -x[i+3];
     }
     tool->TooltipOffset = tooltip;
 
     vct3 error;
     double errorSquareSum = 0.0;
-    for (int i = 0; i < numPoints; i++) {
+    for (unsigned int i = 0; i < numPoints; i++) {
         error = (frames[i] * tooltip) - pivot;
         CMN_LOG_CLASS_RUN_ERROR << "CalibratePivot: error " << i << ": " << error << std::endl;
         errorSquareSum += error.NormSquare();
@@ -430,11 +452,225 @@ void devMicronTracker::CalibratePivot(const mtsStdString & toolName)
     double errorRMS = sqrt(errorSquareSum / numPoints);
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot:\n"
-                              << " * tooltip offset: " << tooltip << "\n"
-                              << " * pivot position: " << pivot << "\n"
+                              << " * tooltip offset:\n" << tooltip << "\n"
+                              << " * pivot position:\n" << pivot << "\n"
                               << " * error RMS: " << errorRMS << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: done" << std::endl;
+
 #else
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: requires cisstNetlib" << std::endl;
+#endif
+}
+
+
+void devMicronTracker::ComputeCameraModel(const mtsStdString & pathRectificationLUT)
+{
+    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel: exporting rectification LUT to " << pathRectificationLUT.Data << std::endl;
+
+#if CISST_HAS_CISSTNETLIB
+    int resolutionX, resolutionY;
+    int retval;
+    calRay ray;
+
+    MTC( Markers_ProcessFrame(CurrentCamera) );
+    MTC( Camera_ResolutionGet(CurrentCamera, &resolutionX, &resolutionY) );
+
+    vct2 imageCenterPX(resolutionX / 2.0, resolutionY / 2.0);
+    double imagePlaneZ = 1500.0;
+
+    unsigned int numPointsMax = resolutionX * resolutionY;
+    vctMat interpolatedRay(numPointsMax, 6, VCT_COL_MAJOR);
+    vctMat L(3 * numPointsMax, 4, VCT_COL_MAJOR);
+    vctVec T(3 * numPointsMax);
+    vctMat I(2 * numPointsMax, 4, VCT_COL_MAJOR);
+    vctVec Q_2D(2 * numPointsMax);
+    vctVec ray_dir_2D(2 * numPointsMax);
+    vctDynamicMatrixRef<double> matrixRef;
+    vctDynamicVectorRef<double> vectorRef;
+
+    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel: computing camera model" << std::endl;
+    unsigned int index = 0;
+    for (double x = 0; x <= resolutionX; x++) {
+        for (double y = 0; y <= resolutionY; y++) {
+            retval = Camera_InterpolatedRayGet(CurrentCamera, x, y, LEFT_CAMERA, &ray);
+            if (retval == mtOK) {
+                matrixRef.SetRef(1, 6, interpolatedRay.row_stride(), interpolatedRay.col_stride(), interpolatedRay.Pointer(index, 0));
+                matrixRef.Assign(x, y, ray.X0, ray.Y0, ray.Dx2Dz, ray.Dy2Dz);
+
+                matrixRef.SetRef(3, 3, L.row_stride(), L.col_stride(), L.Pointer(3*index, 0));
+                matrixRef.Assign(vctMat::Eye(3));
+
+                matrixRef.SetRef(3, 1, L.row_stride(), L.col_stride(), L.Pointer(3*index, 3));
+                matrixRef.Assign(ray.Dx2Dz, ray.Dy2Dz, 1.0);
+
+                vectorRef.SetRef(3, T.Pointer(3*index));
+                vectorRef.Assign(ray.X0, ray.Y0, 0.0);
+
+                matrixRef.SetRef(2, 4, I.row_stride(), I.col_stride(), I.Pointer(2*index, 0));
+                matrixRef.Assign(x-imageCenterPX[0], 0.0, 1.0, 0.0, 0.0, y-imageCenterPX[1], 0.0, 1.0);
+
+                vectorRef.SetRef(2, Q_2D.Pointer(2*index));
+                vectorRef.Assign(ray.X0+(imagePlaneZ*ray.Dx2Dz), ray.Y0+(imagePlaneZ*ray.Dy2Dz));
+
+                vectorRef.SetRef(2, ray_dir_2D.Pointer(2*index));
+                vectorRef.Assign(ray.Dx2Dz, ray.Dy2Dz);
+
+                index++;
+            }
+        }
+    }
+    unsigned int numInterpolatedRays = index;
+
+    interpolatedRay.resize(numInterpolatedRays, 6);
+    L.resize(3 * numInterpolatedRays, 4);
+    T.resize(3 * numInterpolatedRays);
+    I.resize(2 * numInterpolatedRays, 4);
+    Q_2D.resize(2 * numInterpolatedRays);
+    ray_dir_2D.resize(2 * numInterpolatedRays);
+
+    vctVec temp1(T.size());
+    vct3 cameraOriginMM;
+    nmrLSqLin(L, T, temp1);
+    for (unsigned int i = 0; i < 3; i++) {
+        cameraOriginMM[i] = temp1[i];
+    }
+
+//    vctVec temp2(ray_dir_2D.size());
+//    vct2 solution2;
+//    nmrLSqLin(I, ray_dir_2D, temp2);
+//    for (unsigned int i = 2; i < 4; i++) {
+//        solution2[i] = temp2[i];
+//    }
+//    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel: direction of the ray at image center:\n" << solution2 << std::endl;
+
+    vctVec temp3(Q_2D.size());
+    vct2 pixelSizeMM;
+    vct2 solution3;
+    nmrLSqLin(I, Q_2D, temp3);
+    for (unsigned int i = 0; i < 2; i++) {
+        pixelSizeMM[i] = temp3[i];
+        solution3[i] = temp3[i+2];
+    }
+
+    vct2 imageOriginPX(cameraOriginMM[0], cameraOriginMM[1]);
+    imageOriginPX.Subtract(solution3);
+    imageOriginPX.ElementwiseDivide(pixelSizeMM);
+    imageOriginPX.Add(imageCenterPX);
+
+    double focalLengthMM = imagePlaneZ + abs(cameraOriginMM[2]);
+    vct2 focalLengthPX(focalLengthMM, focalLengthMM);
+    focalLengthPX.ElementwiseDivide(pixelSizeMM);
+
+    vct3x3 intrinsics(focalLengthPX[0], 0.0, imageOriginPX[0],
+                      0.0, focalLengthPX[1], imageOriginPX[1],
+                      0.0, 0.0, 1.0);
+    vct4x4 extrinsics(1.0, 0.0, 0.0, cameraOriginMM[0],
+                      0.0, 1.0, 0.0, cameraOriginMM[1],
+                      0.0, 0.0, 1.0, cameraOriginMM[2],
+                      0.0, 0.0, 0.0, 1.0);
+    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel:\n"
+                              << " * instrinsics:\n" << intrinsics << "\n"
+                              << " * extrinsics:\n" << extrinsics << std::endl;
+
+    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel: exporting rectification lookup table" << std::endl;
+
+    std::ostringstream str_resolution;
+    std::ostringstream str_ind_new;
+    std::ostringstream str_ind_1, str_ind_2, str_ind_3, str_ind_4;
+    std::ostringstream str_a1, str_a2, str_a3, str_a4;
+
+    str_resolution.flags(std::ios::scientific);
+    str_ind_new.flags(std::ios::scientific);
+    str_ind_1.flags(std::ios::scientific);
+    str_ind_2.flags(std::ios::scientific);
+    str_ind_3.flags(std::ios::scientific);
+    str_ind_4.flags(std::ios::scientific);
+    str_a1.flags(std::ios::scientific);
+    str_a2.flags(std::ios::scientific);
+    str_a3.flags(std::ios::scientific);
+    str_a4.flags(std::ios::scientific);
+
+    str_resolution.precision(7);
+    str_ind_new.precision(7);
+    str_ind_1.precision(7);
+    str_ind_2.precision(7);
+    str_ind_3.precision(7);
+    str_ind_4.precision(7);
+    str_a1.precision(7);
+    str_a2.precision(7);
+    str_a3.precision(7);
+    str_a4.precision(7);
+
+    str_resolution << "  " << static_cast<double>(resolutionY) << "\n"
+                   << "  " << static_cast<double>(resolutionX);
+    for (unsigned int i = 0; i < numInterpolatedRays; i++) {
+        double imageXYZ[3];
+        imageXYZ[0] = (interpolatedRay(i,0) - imageCenterPX[0]) * pixelSizeMM[0];
+        imageXYZ[1] = (interpolatedRay(i,1) - imageCenterPX[1]) * pixelSizeMM[1];
+        imageXYZ[2] = 0.0;
+
+        double trackerXYZ[3];
+        trackerXYZ[0] = imageXYZ[0] + cameraOriginMM[0];
+        trackerXYZ[1] = imageXYZ[1] + cameraOriginMM[1];
+        trackerXYZ[2] = imageXYZ[2] + imagePlaneZ;
+
+        double positionX, positionY;
+        retval = Camera_ProjectionOnImage(CurrentCamera, LEFT_CAMERA, trackerXYZ, &positionX, &positionY);
+
+        positionX += 0.5;
+        positionY += 0.5;
+
+        int pixelX = static_cast<int>(floor(positionX));
+        int pixelY = static_cast<int>(floor(positionY));
+
+        double alphaX = positionX - pixelX;
+        double alphaY = positionY - pixelY;
+
+        double a1 = (1 - alphaY) * (1 - alphaX);
+        double a2 = (1 - alphaY) * alphaX;
+        double a3 = alphaY * (1 - alphaX);
+        double a4 = alphaY * alphaX;
+
+        pixelX += 1;
+        pixelY += 1;
+
+        double ind_1 = pixelX * resolutionY + (pixelY + 1);
+        double ind_2 = (pixelX + 1) * resolutionY + (pixelY + 1);
+        double ind_3 = pixelX * resolutionY + (pixelY + 2);
+        double ind_4 = (pixelX + 1) * resolutionY + (pixelY + 2);
+
+        double ind_new = interpolatedRay(i,0) * resolutionY + (interpolatedRay(i,1) + 1);
+
+        if (retval == mtOK) {
+            str_ind_new << "  " << ind_new;
+            str_ind_1 << "  " << ind_1;
+            str_ind_2 << "  " << ind_2;
+            str_ind_3 << "  " << ind_3;
+            str_ind_4 << "  " << ind_4;
+            str_a1 << "  " << a1;
+            str_a2 << "  " << a2;
+            str_a3 << "  " << a3;
+            str_a4 << "  " << a4;
+        }
+    }
+
+    std::ofstream file;
+    file.open(pathRectificationLUT.Data.c_str(), std::ios::out);
+    file << str_resolution.str() << "\n"
+         << str_ind_new.str() << "\n"
+         << str_ind_1.str() << "\n"
+         << str_ind_2.str() << "\n"
+         << str_ind_3.str() << "\n"
+         << str_ind_4.str() << "\n"
+         << str_a1.str() << "\n"
+         << str_a2.str() << "\n"
+         << str_a3.str() << "\n"
+         << str_a4.str() << std::endl;
+    file.close();
+    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel: done" << std::endl;
+
+#else
+    CMN_LOG_CLASS_RUN_WARNING << "ComputeCameraModel: requires cisstNetlib to solve for model parameters" << std::endl;
 #endif
 }
 
