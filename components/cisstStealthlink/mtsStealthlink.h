@@ -81,9 +81,20 @@ protected:
         mtsBool Valid;
         mtsDouble PredictedAccuracy;
     };
-
     Registration RegistrationMember;
 
+    // Class used to store exam info
+    class ExamInformation
+    {
+    public:
+        vctDouble3 VoxelScale;
+        vctInt3 Size;
+        bool Valid;
+    };
+    ExamInformation ExamInformationMember;
+    void RequestExamInformation(void);
+
+    // surgical plan
     void RequestSurgicalPlan(void);
     void GetSurgicalPlan(mtsDoubleVec & plan) const;
 

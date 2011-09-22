@@ -37,13 +37,22 @@ mtsStealthlinkExampleComponent::mtsStealthlinkExampleComponent(const std::string
     // the following two tools are using names normally defined in config.xml
     AddToolInterface("Pointer", Pointer);
     AddToolInterface("Frame", Frame);
-    
-    // get registration information
+
+     // get registration information
     required = AddInterfaceRequired("Registration");
     if (required) {
         required->AddFunction("GetTransformation", Registration.GetTransformation);
-        required->AddFunction("GetValid", Registration.GetValid);
         required->AddFunction("GetPredictedAccuracy", Registration.GetPredictedAccuracy);
+        required->AddFunction("GetValid", Registration.GetValid);
+    }
+
+    // get exam information
+    required = AddInterfaceRequired("ExamInformation");
+    if (required) {
+        required->AddFunction("RequestExamInformation", ExamInformation.RequestExamInformation);
+        required->AddFunction("GetVoxelScale", ExamInformation.GetVoxelScale);
+        required->AddFunction("GetSize", ExamInformation.GetSize);
+        required->AddFunction("GetValid", ExamInformation.GetValid);
     }
 }
 
@@ -114,7 +123,7 @@ void mtsStealthlinkExampleComponent::Run(void)
             std::cout << "Frame.GetPositionCartesian() failed: " << result << std::endl;
         }
         if (prmPos.Valid()) {
-            std::cout << "Interface Frame: " << prmPos.Position().Translation();
+            std::cout << "Interface Frame: " << prmPos.Position().Translation() << "; ";
             didOutput = true;
         } else {
             std::cerr << "Interface Frame, invalid position" << std::endl;
@@ -127,7 +136,7 @@ void mtsStealthlinkExampleComponent::Run(void)
             std::cout << "Frame.GetMarkerCartesian() failed: " << result << std::endl;
         }
         if (prmPos.Valid()) {
-            std::cout << "Interface FrameM: " << prmPos.Position().Translation();
+            std::cout << "Interface FrameM: " << prmPos.Position().Translation() << "; ";;
             didOutput = true;
         } else {
             std::cerr << "Interface Frame, invalid position" << std::endl;
@@ -135,7 +144,7 @@ void mtsStealthlinkExampleComponent::Run(void)
         }
     }
 
-    mtsBool valid;   
+    mtsBool valid;
     if (Registration.GetValid.IsValid()) {
         result = Registration.GetValid(valid);
         if (!result.IsOK()) {
@@ -143,11 +152,44 @@ void mtsStealthlinkExampleComponent::Run(void)
         }
         if (valid) {
             Registration.GetTransformation(vctFrm);
-            std::cout << "Registration: " << vctFrm.Translation();
+            std::cout << "Registration: " << vctFrm.Translation() << "; ";;
             didOutput = true;
         } else {
             std::cout << "Registration: invalid" << std::endl;
             didOutput = true;
+        }
+    }
+
+    if (ExamInformation.RequestExamInformation.IsValid()) {
+        result = ExamInformation.RequestExamInformation.ExecuteBlocking();
+        if (!result.IsOK()) {
+            std::cout << "ExamInformation.RequestExamInformation() failed: " << result << std::endl;
+        } else {
+            result = ExamInformation.GetValid(valid);
+            if (!result.IsOK()) {
+                std::cout << "ExamInformation.GetValid() failed: " << result << std::endl;
+            } else {
+                if (valid) {
+                    vctDouble3 voxelScale;
+                    result = ExamInformation.GetVoxelScale(voxelScale);
+                    if (!result.IsOK()) {
+                        std::cout << "ExamInformation.GetVoxelScale() failed: " << result << std::endl;
+                    } else {
+                        std::cout << "Voxel scale: " << voxelScale << "; ";
+                        didOutput = true;
+                    }
+                    vctInt3 sizes;
+                    result = ExamInformation.GetSize(sizes);
+                    if (!result.IsOK()) {
+                        std::cout << "ExamInformation.GetSize() failed: " << result << std::endl;
+                    } else {
+                        std::cout << "Size: " << sizes << "; ";
+                    }
+                } else {
+                    std::cout << "ExamInformation is not valid" << std::endl;
+                    didOutput = true;
+                }
+            }
         }
     }
 

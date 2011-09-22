@@ -87,6 +87,18 @@ void mtsStealthlink::Init(void)
         provided->AddCommandReadState(StateTable, RegistrationMember.Valid, "GetValid");
         provided->AddCommandReadState(StateTable, RegistrationMember.PredictedAccuracy, "GetPredictedAccuracy");
     }
+
+    // Add interface for exam information
+    StateTable.AddData(ExamInformationMember.VoxelScale, "ExamInformationVoxelScale"); 
+    StateTable.AddData(ExamInformationMember.Size, "ExamInformationSize"); 
+    StateTable.AddData(ExamInformationMember.Valid, "ExamInformationValid"); 
+    provided = AddInterfaceProvided("ExamInformation");
+    if (provided) {
+        provided->AddCommandVoid(&mtsStealthlink::RequestExamInformation, this, "RequestExamInformation");
+        provided->AddCommandReadState(StateTable, ExamInformationMember.VoxelScale, "GetVoxelScale");
+        provided->AddCommandReadState(StateTable, ExamInformationMember.Size, "GetSize");
+        provided->AddCommandReadState(StateTable, ExamInformationMember.Valid, "GetValid");
+    }
 }
 
 mtsStealthlink::mtsStealthlink(const std::string & taskName, const double & periodInSeconds) :
@@ -237,6 +249,25 @@ mtsStealthlink::Tool * mtsStealthlink::AddTool(const std::string & stealthName, 
         provided->AddCommandReadState(StateTable, tool->MarkerPosition, "GetMarkerCartesian");
     }
     return tool;
+}
+
+
+void mtsStealthlink::RequestExamInformation(void)
+{
+    if (StealthlinkPresent) {
+        exam_info the_exam_info;
+#ifndef cisstStealthlink_IS_SIMULATOR
+        this->Client->GetDataForCode(GET_EXAM_INFO,
+                                     reinterpret_cast<void*>(&the_exam_info));
+#endif
+        ExamInformationMember.VoxelScale[0] = the_exam_info.voxel_scale[0];
+        ExamInformationMember.VoxelScale[1] = the_exam_info.voxel_scale[1];
+        ExamInformationMember.VoxelScale[2] = the_exam_info.voxel_scale[2];
+        ExamInformationMember.Size[0] = the_exam_info.size[0];
+        ExamInformationMember.Size[1] = the_exam_info.size[1];
+        ExamInformationMember.Size[2] = the_exam_info.size[2];
+        ExamInformationMember.Valid = the_exam_info.valid;
+    }
 }
 
 
