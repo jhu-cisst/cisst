@@ -30,6 +30,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstMultiTask/mtsComponentDispatcher.h>
+
+class MainDispatcher : public mtsComponentDispatcherMain
+{
+    mtsComponent *Shell;
+public:
+    MainDispatcher(const std::string &name, mtsComponent *shell) :
+        mtsComponentDispatcherMain(name), Shell(shell) {}
+    ~MainDispatcher() {}
+    void Run(void) {
+        mtsComponentDispatcherMain::Run();
+        osaSleep(0.1);
+        if (Shell->IsTerminated())
+            Kill();
+    }
+};
 
 class CommandEntryBase {
     std::string command;
@@ -708,12 +724,11 @@ int main(int argc, char * argv[])
     localManager->AddComponent(shell);
     shell->Configure("");
 
+    MainDispatcher *dispatcher = new MainDispatcher("Main", shell);
+    localManager->AddComponent(dispatcher);
+
     localManager->CreateAll();
     localManager->StartAll();
-
-    while (!shell->IsTerminated())
-        osaSleep(0.1);
-
 
 #if CISST_MTS_HAS_ICE
     // Cleanup global component manager

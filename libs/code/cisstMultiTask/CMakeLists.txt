@@ -123,6 +123,7 @@ set (HEADER_FILES
      mtsCommandWriteReturn.h
 
      mtsComponent.h
+     mtsComponentDispatcher.h
      mtsComponentGeneratorMacros.h
      mtsComponentState.h
      mtsComponentViewer.h

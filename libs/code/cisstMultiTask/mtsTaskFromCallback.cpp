@@ -104,3 +104,9 @@ void mtsTaskFromCallback::Suspend(void)
     }
 }
 
+void mtsTaskFromCallback::Kill(void)
+{
+    BaseType::Kill();
+    if ((this->State == mtsComponentState::FINISHING)&& CheckForOwnThread())
+        RunInternal(0);
+}

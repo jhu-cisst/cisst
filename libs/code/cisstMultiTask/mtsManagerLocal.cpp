@@ -441,6 +441,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(void)
 {
     if (!Instance) {
         Instance = new mtsManagerLocal;
+        Instance->MainThreadId = osaGetCurrentThreadId();
 
         // Create manager components
         if (!Instance->CreateManagerComponents()) {
@@ -463,6 +464,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         } else {
             Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
         }
+        Instance->MainThreadId = osaGetCurrentThreadId();
 
         // Create manager components
         if (!Instance->CreateManagerComponents()) {
@@ -658,6 +660,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & globalComponen
 #if CISST_MTS_HAS_ICE
     if (!Instance) {
         Instance = new mtsManagerLocal(globalComponentManager);
+        Instance->MainThreadId = osaGetCurrentThreadId();
 
         // Create manager components
         if (!Instance->CreateManagerComponents()) {
