@@ -31,7 +31,7 @@ int main()
     svlStreamManager stream;
     svlFilterSourceKinect kinect;
     svlFilterImageWindow window_rgb;
-    svlFilterStreamTypeConverter depth2rgb(svlTypeImageMono8, svlTypeImageRGB);
+    svlFilterStreamTypeConverter depth2rgb(svlTypeImageMono16, svlTypeImageRGB);
     svlFilterImageWindow window_depth;
 
     // Setup Mono16 to RGB converter
