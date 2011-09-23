@@ -18,6 +18,7 @@ if( OPENSCENEGRAPH_FOUND )
     ../cisstOSGCamera.h
     ../cisstOSGManipulator.h
     ../cisstOSGMono.h
+    ../cisstOSGPick.h
     ../cisstOSGStereo.h
     ../cisstOSGWorld.h
     
@@ -41,6 +42,7 @@ if( OPENSCENEGRAPH_FOUND )
       cisstOSGCamera.cpp
       cisstOSGManipulator.cpp
       cisstOSGMono.cpp
+      cisstOSGPick.cpp
       cisstOSGStereo.cpp
       cisstOSGWorld.cpp
 
@@ -72,6 +74,13 @@ if( OPENSCENEGRAPH_FOUND )
 
     add_library( cisstOSG ${HEADER_FILES} ${SOURCE_FILES} )
 
+
+    target_link_libraries( 
+      cisstOSG 
+      ${OPENSCENEGRAPH_LIBRARIES} 
+      ${OpenCV2_LIBRARIES}
+      )
+
     cisst_target_link_libraries ( 
       cisstOSG
       cisstCommon
@@ -91,8 +100,6 @@ if( OPENSCENEGRAPH_FOUND )
       ../cisstOSGConfig.h.in
       ${CISST_OSG_CONFIG_FILE}
       @ONLY)
-    
-
 
     mark_as_advanced( 
       OPENTHREADS_INCLUDE_DIR

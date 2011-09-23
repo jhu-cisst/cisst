@@ -26,6 +26,7 @@ if( OPENSCENEGRAPH_FOUND )
   add_executable( OSGstereo OSGstereo.cpp )
   add_executable( OSGwam    OSGwam.cpp )
   add_executable( OSGbh     OSGbh.cpp )
+  add_executable( OSGpick   OSGpick.cpp )
 
   add_executable( mtsOSGTest   mtsOSGTest.cpp )
   add_executable( mtsOSGstereo mtsOSGstereo.cpp )
@@ -39,7 +40,6 @@ if( OPENSCENEGRAPH_FOUND )
     )
 
   set( OSG_EXE_LIBRARIES 
-    cisstOSG
     cisstCommon 
     cisstVector 
     cisstOSAbstraction
@@ -47,18 +47,31 @@ if( OPENSCENEGRAPH_FOUND )
     cisstParameterTypes
     cisstRobot
     cisstNumerical
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${OpenCV2_LIBRARIES}
     )  
     
-  target_link_libraries( OSGtest ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( OSGstereo ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( OSGwam ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( OSGbh ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( mtsOSGTest ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( mtsOSGstereo ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( mtsOSGwam ${OSG_EXE_LIBRARIES} ) 
-  target_link_libraries( mtsOSGbh ${OSG_EXE_LIBRARIES} ) 
+  target_link_libraries( OSGtest      cisstOSG ) 
+  target_link_libraries( OSGstereo    cisstOSG ) 
+  target_link_libraries( OSGwam       cisstOSG ) 
+  target_link_libraries( OSGbh        cisstOSG ) 
+  target_link_libraries( OSGpick      cisstOSG ) 
+
+  target_link_libraries( mtsOSGTest   cisstOSG ) 
+  target_link_libraries( mtsOSGstereo cisstOSG ) 
+  target_link_libraries( mtsOSGwam    cisstOSG ) 
+  target_link_libraries( mtsOSGbh     cisstOSG ) 
+  
+  # IMHO I don't think we need this since cisstOSG already has 
+  # cisst_target_link_libraries
+  cisst_target_link_libraries( OSGtest      ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( OSGstereo    ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( OSGwam       ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( OSGbh        ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( OSGpick      ${OSG_EXE_LIBRARIES} ) 
+
+  cisst_target_link_libraries( mtsOSGTest   ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( mtsOSGstereo ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( mtsOSGwam    ${OSG_EXE_LIBRARIES} ) 
+  cisst_target_link_libraries( mtsOSGbh     ${OSG_EXE_LIBRARIES} ) 
 
 endif( OPENSCENEGRAPH_FOUND )
 

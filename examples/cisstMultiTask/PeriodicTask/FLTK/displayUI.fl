@@ -2,31 +2,28 @@
 version 1.0
 header_name {.h} 
 code_name {.cxx}
-class displayUI {open : {public mtsTaskFromCallback}
+class CISST_EXPORT displayUI {open : {public mtsTaskFromCallback}
 } {
-  decl {bool WaitingForTrigger;} {private local
-  }
-  decl {mtsFunctionRead GetData;} {private local
-  }
-  decl {mtsFunctionWrite SetAmplitude;} {private local
-  }
-  decl {mtsFunctionWrite SetTriggerThreshold;} {private local
-  }
-  decl {mtsFunctionVoid ResetTrigger;} {private local
-  }
-  decl {mtsFunctionRead GetTime;} {private local
-  }
-  decl {vctPlot2DBase::Trace * DataTrace;} {private local
-  }
-  decl {vctPlot2DBase::Trace * TriggerTrace;} {private local
-  }
-  Function {displayUI(const std::string & name): mtsTaskFromCallback(name)} {open
-  } {
+  decl {bool WaitingForTrigger;} {}
+  decl {mtsFunctionRead GetData;} {}
+  decl {mtsFunctionWrite SetAmplitude;} {}
+  decl {mtsFunctionWrite SetTriggerThreshold;} {}
+  decl {mtsFunctionVoid ResetTrigger;} {}
+  decl {mtsFunctionRead GetTime;} {}
+  decl {vctPlot2DBase::Trace * DataTrace;} {}
+  decl {vctPlot2DBase::Trace * TriggerTrace;} {}
+  Function {displayUI(const std::string & name): mtsTaskFromCallback(name)} {} {
     Fl_Window DisplayWindow {
       label DisplayWindow user_data_type {void*} open
       private xywh {757 504 579 329} type Double
-      code0 {\#include <cisstMultiTask/mtsTaskFromCallback.h>}
-      code1 {\#include <cisstMultiTask/mtsInterfaceRequired.h>} visible
+      code0 {\#include <cisstMultiTask/mtsTaskFromCallback.h>
+\#include <cisstMultiTask/mtsInterfaceRequired.h>
+\#include <cisstVector/vctPlot2DOpenGLFLTK.h>}
+      code1 {\#ifdef cisstMultiTaskPeriodicTaskGuiFLTK_EXPORTS
+\#define CISST_THIS_LIBRARY_AS_DLL
+\#endif
+\#include <cisstCommon/cmnExportMacros.h>
+\#undef CISST_THIS_LIBRARY_AS_DLL}
     } {
       Fl_Value_Output Data {
         label {Data:}
@@ -66,9 +63,8 @@ this->ResetTrigger();}
         private tooltip {Current trigger value} xywh {490 165 80 25} box PLASTIC_DOWN_BOX labeltype NO_LABEL align 5
       }
       Fl_Box Plot {
-        label {Graph Region} selected
+        label {Graph Region}
         private xywh {10 10 385 310} box PLASTIC_DOWN_BOX labelfont 1 labelsize 12
-        code0 {\#include <cisstVector/vctPlot2DOpenGLFLTK.h>}
         class vctPlot2DOpenGLFLTK
       }
     }
@@ -87,6 +83,12 @@ if (interfaceRequired) {
     interfaceRequired->AddFunction("GetTime", GetTime);
 }
 
+interfaceRequired = AddInterfaceRequired("Dispatcher", MTS_OPTIONAL);
+if (interfaceRequired) {
+    interfaceRequired->AddEventHandlerVoid(&displayUI::CheckFLTK, this,
+                                           "RunEvent", MTS_EVENT_NOT_QUEUED);
+}
+
 // configure FLTK widgets
 double maxValue = 5.0; double minValue = 0.5;
 double startValue =  1.0;
@@ -103,7 +105,9 @@ this->DataTrace->SetColor(vct3(1.0, 0.9, 0.9));
 this->TriggerTrace = this->Plot->AddTrace("Trigger");
 this->TriggerTrace->SetColor(vct3(0.0, 1.0, 0.0));
 this->Plot->SetContinuousFitY(false);
-this->Plot->FitY(-5.0, 5.0); // set Y range} {}
+this->Plot->FitY(-5.0, 5.0); // set Y range
+Thread.CreateFromThreadId(mtsManagerLocal::GetInstance()->GetMainThreadId());
+} {}
   }
   Function {show(int argc, char**argv)} {open
   } {
@@ -114,6 +118,25 @@ this->Plot->show();} {}
   } {
     code {displayUI * whichUI = reinterpret_cast<displayUI *>(data);
 whichUI->DoCallback();} {}
+  }
+  Function {StartRunLoop(void)} {return_type {static int}
+  } {
+    code {return Fl::run();} {}
+  }
+  Function {CheckFLTK(void)} {return_type void
+  } {
+    code {DoCallback(); Fl::check();} {}
+  }
+  Function {Startup(void)} {open return_type void
+  } {
+    code {show(0, 0);
+Fl::add_idle(displayUI::IdleCallback, this);
+  } {}
+  }
+  Function {Cleanup(void)} {return_type void
+  } {
+    code {Fl::remove_idle(displayUI::IdleCallback, this);
+  } {}
   }
   Function {Run(void)} {open return_type void
   } {

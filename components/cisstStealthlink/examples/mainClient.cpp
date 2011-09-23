@@ -90,10 +90,17 @@ int main(int argc, char * argv[])
         CMN_LOG_INIT_WARNING << "Could not connect test component to Frame tool." << std::endl;
     }
 
-    // Connect the registration interfaces
+    // Connect the registration interface
     if (!componentManager->Connect("ProcessClient", componentExample->GetName(), "Registration",
                                    "ProcessServer", "Stealthlink",  "Registration")) {
         CMN_LOG_INIT_ERROR << "Could not connect test component to Registration interface." << std::endl;
+        return 0;
+    }
+
+    // Connect the exam information interface
+    if (!componentManager->Connect("ProcessClient", componentExample->GetName(), "ExamInformation",
+                                   "ProcessServer", "Stealthlink", "ExamInformation")) {
+        CMN_LOG_INIT_ERROR << "Could not connect test component to ExamInformation interface." << std::endl;
         return 0;
     }
 

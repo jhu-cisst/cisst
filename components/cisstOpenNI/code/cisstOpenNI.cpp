@@ -170,6 +170,22 @@ cisstOpenNI::Errno cisstOpenNI::GetRGBImage( vctDynamicMatrix<unsigned char>& RG
 
 }
 
+cisstOpenNI::Errno cisstOpenNI::GetRGBImage(vctDynamicMatrixRef<unsigned char> RGBimage)
+{
+    xn::ImageMetaData rgbMD;
+    Data->rgbgenerator.GetMetaData(rgbMD);
+
+    // check image size
+    if (RGBimage.cols() != (rgbMD.XRes() * 3) ||
+        RGBimage.rows() != rgbMD.YRes()) {
+        CMN_LOG_RUN_ERROR << "cisstOpenNI::GetRGBImage - image size mismatch" << std::endl;
+        return cisstOpenNI::EFAILURE;
+    }
+
+    memcpy(RGBimage.Pointer(), rgbMD.Data(), rgbMD.YRes() * rgbMD.XRes() * 3);
+
+    return cisstOpenNI::ESUCCESS;
+}
 
 cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw( vctDynamicMatrix<double> & depthimage ){
 
@@ -192,6 +208,23 @@ cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw( vctDynamicMatrix<double> & dep
   
 }
 
+cisstOpenNI::Errno cisstOpenNI::GetDepthImageRaw(vctDynamicMatrixRef<unsigned short> depthimage)
+{
+    xn::DepthMetaData depthMD;
+    Data->depthgenerator.GetMetaData(depthMD);
+
+    // check image size
+    if (depthimage.cols() != depthMD.XRes() ||
+        depthimage.rows() != depthMD.YRes()) {
+        CMN_LOG_RUN_ERROR << "cisstOpenNI::GetDepthImageRaw - image size mismatch" << std::endl;
+        return cisstOpenNI::EFAILURE;
+    }
+
+    memcpy(depthimage.Pointer(), depthMD.Data(), depthMD.YRes() * depthMD.XRes() * 2);
+
+    return cisstOpenNI::ESUCCESS;
+}
+
 void cisstOpenNI::GetDepthImage( vctDynamicMatrix<double>& placeHolder ){
 
     // Get depth data
@@ -201,6 +234,7 @@ void cisstOpenNI::GetDepthImage( vctDynamicMatrix<double>& placeHolder ){
 
     placeHolder.SetSize( depthMD.YRes(), depthMD.XRes() );
     double* ptr = placeHolder.Pointer();
+
     const size_t end = depthMD.YRes()*depthMD.XRes();
     for( size_t i = 0; i < end; i++ )
     {
@@ -210,34 +244,53 @@ void cisstOpenNI::GetDepthImage( vctDynamicMatrix<double>& placeHolder ){
 }
 
 
-cisstOpenNI::Errno cisstOpenNI::GetRangeData( vctDynamicMatrix<double>& rangedata){
+cisstOpenNI::Errno 
+cisstOpenNI::GetRangeData( vctDynamicMatrix<double>& rangedata,
+                           const std::vector< vctFixedSizeVector<unsigned short,2> >& pixels ){
 
   // Get data
   xn::DepthMetaData depthMD;
   Data->depthgenerator.GetMetaData( depthMD );
   
   // create arrays
-  XnUInt32 cnt = depthMD.XRes()*depthMD.YRes();
+  XnUInt32 cnt;
   XnPoint3D* proj = NULL;
   XnPoint3D* wrld = NULL;
-  try{ 
+
+  if( pixels.empty() ){
+
+    // create arrays
+    cnt = depthMD.XRes()*depthMD.YRes();
     proj = new XnPoint3D[ cnt ];
     wrld = new XnPoint3D[ cnt ];
-  }
-  catch( std::bad_alloc& ){}
-  
-  CMN_ASSERT( proj != NULL );
-  CMN_ASSERT( wrld != NULL );
 
-  // Create projective coordinates
-  for( size_t i=0, x=0; x<depthMD.XRes(); x++ ){
-    for( size_t y=0; y<depthMD.YRes(); i++, y++ ){
+    // Create projective coordinates
+    for( size_t i=0, x=0; x<depthMD.XRes(); x++ ){
+      for( size_t y=0; y<depthMD.YRes(); i++, y++ ){
+	proj[i].X = (XnFloat)x;
+	proj[i].Y = (XnFloat)y;
+	proj[i].Z = depthMD(x,y);
+      }
+    }
+
+  }
+  else{
+
+    // create arrays
+    cnt = pixels.size();
+    proj = new XnPoint3D[ cnt ];
+    wrld = new XnPoint3D[ cnt ];
+
+    for( size_t i=0; i<pixels.size(); i++ ){
+      unsigned int x = pixels[i][0];
+      unsigned int y = pixels[i][1];
       proj[i].X = (XnFloat)x;
       proj[i].Y = (XnFloat)y;
       proj[i].Z = depthMD(x,y);
     }
+
   }
-  
+
   // Convert projective to 3D
   XnStatus status = Data->depthgenerator.ConvertProjectiveToRealWorld(cnt, proj, wrld);
   if( status != XN_STATUS_OK ){
@@ -249,8 +302,8 @@ cisstOpenNI::Errno cisstOpenNI::GetRangeData( vctDynamicMatrix<double>& rangedat
   rangedata.SetSize( 3, cnt );
   for( size_t i=0; i<cnt; i++ ){
     rangedata[0][i] = -wrld[i].X/1000.0;
-    rangedata[1][i] = wrld[i].Y/1000.0;
-    rangedata[2][i] = wrld[i].Z/1000.0;
+    rangedata[1][i] =  wrld[i].Y/1000.0;
+    rangedata[2][i] =  wrld[i].Z/1000.0;
   }
   
   delete[] proj;
@@ -307,6 +360,47 @@ std::vector<cisstOpenNISkeleton*> &cisstOpenNI::GetUserSkeletons(){
     return skeletons;
 }
 
+cisstOpenNI::Errno 
+cisstOpenNI::Convert3DToProjectiveMask(const vctDynamicMatrix<double>& rangedata,
+				       vctDynamicMatrix<bool>& mask ) {
+
+  // allocate the arrays
+  XnUInt32 cnt = rangedata.cols();
+  XnPoint3D*  wrld = new XnPoint3D[ cnt ];
+  XnPoint3D*  proj = new XnPoint3D[ cnt ];
+
+  // copy the 3d points to the 3d array
+  for( XnUInt32 i=0; i<cnt; i++ ){
+    wrld[i].X = -rangedata[0][i]*1000.0;
+    wrld[i].Y =  rangedata[1][i]*1000.0;
+    wrld[i].Z =  rangedata[2][i]*1000.0;
+  }
+
+  // convert to projective
+  XnStatus status;
+  status = Data->depthgenerator.ConvertRealWorldToProjective( cnt, wrld, proj );
+  if( status != XN_STATUS_OK ){
+    CMN_LOG_RUN_ERROR << "Failed to convert world to projective: "
+		      << xnGetStatusString( status ) << std::endl;
+    return cisstOpenNI::EFAILURE;
+  }
+
+  // use this to find the size of the mask
+  xn::DepthMetaData depthMD;
+  Data->depthgenerator.GetMetaData( depthMD );
+  mask.SetSize( depthMD.YRes(), depthMD.XRes() );
+  mask.SetAll( false );
+
+  for( XnUInt32 i=0; i<cnt; i++ ){
+    mask[ proj[i].Y ][ proj[i].X ] = true;
+  }
+
+  delete[] wrld;
+  delete[] proj;
+
+  return cisstOpenNI::ESUCCESS;
+
+}
 
 
 

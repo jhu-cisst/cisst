@@ -60,6 +60,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaMutex.h>
+#include <cisstOSAbstraction/osaThread.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
@@ -99,6 +100,9 @@ public:
 private:
     /*! Singleton object */
     static mtsManagerLocal * Instance;
+
+    /*! Thread ID of main thread */
+    osaThreadId MainThreadId;
 
     /*! Flag for unit tests. Enabled only for unit tests (false by default) */
     static bool UnitTestEnabled;
@@ -492,6 +496,19 @@ public:
     inline bool IsGCMActive(void) const {
         return GCMConnected;
     }
+
+    /*! Set main thread id based on the current thread. In most situations, it is not
+        necessary to call this function because the main thread id is initialized
+        in GetInstance. */
+    void SetMainThreadId(void) { MainThreadId = osaGetCurrentThreadId(); }
+
+    /*! Set main thread id based on the passed parameter. In most situations, it is not
+        necessary to call this function because the main thread id is initialized
+        in GetInstance. */
+    void SetMainThreadId(const osaThreadId &threadId) { MainThreadId = threadId; }
+
+    /*! Return main thread id. */
+    osaThreadId GetMainThreadId(void) const { return MainThreadId; }
 
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,

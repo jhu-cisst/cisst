@@ -129,6 +129,9 @@ public:
     /*! Suspend the execution of the task */
     void Suspend(void);
 
+    /*! End the task */
+    void Kill(void);
+
     /*! Hook for calling RunInternal */
     virtual void *DoCallback(void *data = 0) {
         // The user Run() method should call SetThreadReturnValue.

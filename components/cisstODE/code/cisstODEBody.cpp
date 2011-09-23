@@ -286,8 +286,8 @@ void cisstODEBody::BuildODETriMesh( const vctFixedSizeVector<double,3>& com ){
   cisstOSGBody::GeodeVisitor gvtmp; 
   this->accept( gvtmp ); 
   
-  if( 1000 < gvtmp.geodetriangles.size() ){ 
-    double ratio = 1000.0 / ( (double) gvtmp.geodetriangles.size() ); 
+  if( 200 < gvtmp.geodetriangles.size() ){ 
+    double ratio = 200.0 / ( (double) gvtmp.geodetriangles.size() ); 
     osgUtil::Simplifier simplifier( ratio, 4.0 ); 
     this->accept( simplifier ); 
   } 
@@ -408,6 +408,28 @@ vctFixedSizeVector<double,3> cisstODEBody::GetPosition() const{
   return vctFixedSizeVector<double,3>( 0.0 );
 }
 
+
+void cisstODEBody::SetTransform( const vctFrame4x4<double>& Rtwb ){
+
+  vctFrame4x4<double> Rtbcom( this->Rtcomb );
+  Rtbcom.InverseSelf();
+
+  // Center of mass wrt to the world frame
+  vctFrame4x4<double> Rtwcom = Rtwb * Rtbcom;
+    
+  // set the body position
+  dBodySetPosition(GetBodyID(), Rtwcom[0][3], Rtwcom[1][3], Rtwcom[2][3]);
+  
+  // get the orientation of the body
+  dMatrix3 R = { Rtwb[0][0], Rtwb[0][1], Rtwb[0][2], 0.0,
+		 Rtwb[1][0], Rtwb[1][1], Rtwb[1][2], 0.0,
+		 Rtwb[2][0], Rtwb[2][1], Rtwb[2][2], 0.0 };
+  
+  // set the orientation
+  dBodySetRotation( GetBodyID(), R );
+  cisstOSGBody::SetTransform( Rtwb );
+  cisstOSGBody::UpdateTransform();  
+}
 
 vctFrm3 cisstODEBody::GetTransform() const{
   return vctFrm3( GetOrientation(), GetPosition() );

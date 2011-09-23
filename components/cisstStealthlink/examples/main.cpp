@@ -63,10 +63,17 @@ int main(int CMN_UNUSED(argc), char * CMN_UNUSED(argv[]))
         CMN_LOG_INIT_WARNING << "Could not connect test component to Frame tool." << std::endl;
     }
 
-    // Connect the registration interfaces
+    // Connect the registration interface
     if (!componentManager->Connect(componentExample->GetName(), "Registration",
                                    componentStealthlink->GetName(), "Registration")) {
         CMN_LOG_INIT_ERROR << "Could not connect test component to Registration interface." << std::endl;
+        return 0;
+    }
+
+    // Connect the exam information interface
+    if (!componentManager->Connect(componentExample->GetName(), "ExamInformation",
+                                   componentStealthlink->GetName(), "ExamInformation")) {
+        CMN_LOG_INIT_ERROR << "Could not connect test component to ExamInformation interface." << std::endl;
         return 0;
     }
  

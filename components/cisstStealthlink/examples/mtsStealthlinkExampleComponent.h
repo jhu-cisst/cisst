@@ -39,8 +39,15 @@ public:
 
     struct RegistrationStruct {
         mtsFunctionRead GetTransformation;
-        mtsFunctionRead GetValid;
         mtsFunctionRead GetPredictedAccuracy;
+        mtsFunctionRead GetValid;
+    };
+
+    struct ExamInformationStruct {
+        mtsFunctionVoid RequestExamInformation;
+        mtsFunctionRead GetVoxelScale;
+        mtsFunctionRead GetSize;
+        mtsFunctionRead GetValid;
     };
 
     mtsStealthlinkExampleComponent(const std::string & name,
@@ -56,6 +63,7 @@ public:
     ToolStruct Pointer;
     ToolStruct Frame;
     RegistrationStruct Registration;
+    ExamInformationStruct ExamInformation;
 };
 
 #endif // _mtsStealthlinkExampleComponent_h

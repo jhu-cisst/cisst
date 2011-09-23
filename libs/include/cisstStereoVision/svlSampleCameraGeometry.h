@@ -44,7 +44,7 @@ public:
         vctDouble2 fc;
         vctDouble2 cc;
         double     a;
-        vctDouble5 kc;
+        vctDouble7 kc;
     };
 
     struct Extrinsics
@@ -83,11 +83,11 @@ public:
     int LoadCalibration(const std::string & filepath);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
-    void SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble5 kc, const unsigned int cam_id = 0);
+    void SetIntrinsics(const vctDouble2 fc, const vctDouble2 cc, const double a, const vctDouble7 kc, const unsigned int cam_id = 0);
     void SetIntrinsics(const double fcx, const double fcy,
                        const double ccx, const double ccy,
                        const double a,
-                       const double kc0, const double kc1, const double kc2, const double kc3, const double kc4,
+                       const double kc0, const double kc1, const double kc2, const double kc3, const double kc4, const double kc5, const double kc6,
                        const unsigned int cam_id = 0);
     void SetExtrinsics(const Extrinsics & extrinsics, const unsigned int cam_id = 0);
     void SetExtrinsics(const vctDouble3 om, const vctDouble3 T, const unsigned int cam_id = 0);
@@ -101,7 +101,7 @@ public:
     int GetIntrinsics(double& fcx, double& fcy,
                       double& ccx, double& ccy,
                       double& a,
-                      double& kc0, double& kc1, double& kc2, double& kc3, double& kc4,
+                      double& kc0, double& kc1, double& kc2, double& kc3, double& kc4, double& kc5, double& kc6,
                       const unsigned int cam_id = 0);
     int GetExtrinsics(Extrinsics & extrinsics, const unsigned int cam_id = 0) const;
     Extrinsics GetExtrinsics(const unsigned int cam_id = 0) const;
