@@ -192,7 +192,9 @@ class CISST_EXPORT osaThread {
 protected:
 
     /*! Creates a new thread. */
-    void CreateInternal(const char* name, void* func, void* userdata, bool newThread = true);
+    void CreateInternal(const char* name, void* func, void* userdata);
+
+    void SetThreadName(const char* name);
 
 public:
 
@@ -246,9 +248,20 @@ public:
     {
         Priority = priority;
         Policy = policy;
-        CreateInternal(name, 0, 0, false);
+        ThreadId = osaGetCurrentThreadId();
+        SetThreadName(name);
+        Valid = true;
     }
 
+    void CreateFromThreadId(const osaThreadId &threadId,
+                            const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
+    {
+        Priority = priority;
+        Policy = policy;
+        ThreadId = threadId;
+        SetThreadName(name);
+        Valid = true;
+    }
 
     /*! Deletes a thread.  Deletes (removes from memory) everything
       associated with a thread, e.g. stack, local data, static
