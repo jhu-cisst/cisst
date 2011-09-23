@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,9 +12,5 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstInteractive)
-  add_subdirectory (pythonEmbedded)
-  add_subdirectory (pythonEmbeddedIRE)
-else (CISST_BUILD_LIBS_cisstInteractive)
-  message (WARNING " interactiveTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstInteractive")
-endif (CISST_BUILD_LIBS_cisstInteractive)
+add_subdirectory (pythonEmbedded)
+add_subdirectory (pythonEmbeddedIRE)

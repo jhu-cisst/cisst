@@ -89,6 +89,10 @@ if (CISST_HAS_SWIG_PYTHON)
     message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
   else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
     include (${SWIG_USE_FILE})
+    # save SWIG settings
+    set (CISST_SWIG_PACKAGE "SWIG") 
+    cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
+    cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE) 
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
   # Note that SWIG_EXECUTABLE is saved in cisst-config.cmake (cisstBuild.cmake.in) for use
   # by external projects (see Usecisst.cmake).
@@ -319,8 +323,28 @@ endif (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_BUILD_LIBS_cisstInteractive})
 
+# Create list of general settings, i.e. cisstPython, cisstQt, cisstFLTK, cisstOpenGL, ...
+set (CISST_SETTINGS "")
+if (CISST_HAS_QT)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstQt)
+endif (CISST_HAS_QT)
+
+if (CISST_HAS_FLTK)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstFLTK)
+endif (CISST_HAS_FLTK)
+
+if (CISST_HAS_SWIG_PYTHON)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstPython)
+endif (CISST_HAS_SWIG_PYTHON)
+
+if (CISST_HAS_OPENGL)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstOpenGL)
+endif (CISST_HAS_OPENGL)
+
+
 # Finally, create lib targets
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
+cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
 
 # Build everything
 foreach (lib ${CISST_LIBS})

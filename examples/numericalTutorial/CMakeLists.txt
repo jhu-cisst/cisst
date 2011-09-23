@@ -12,8 +12,8 @@
 #
 # --- end cisst license ---
 
-set (CISST_LIBRARIES_REQUIRED cisstCommon cisstVector cisstNumerical)
-find_package (cisst COMPONENTS ${CISST_LIBRARIES_REQUIRED})
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
@@ -34,12 +34,12 @@ if (cisst_FOUND_AS_REQUIRED)
                     ExampleIsOrthonormal.h
                     ExampleGaussJordanInverse.h
                     )
-    cisst_target_link_libraries(numericalTutorial ${CISST_LIBRARIES_REQUIRED})
+    cisst_target_link_libraries(numericalTutorial ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)
     message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")
   endif (CISST_HAS_CISSTNETLIB)
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${CISST_LIBRARIES_REQUIRED}")
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

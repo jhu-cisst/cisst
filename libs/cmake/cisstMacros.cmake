@@ -302,33 +302,34 @@ macro (cisst_target_link_libraries TARGET ...)
     message (SEND_ERROR "cisst_target_link_libraries takes at least two arguments, target and one or more libraries.  Got: ${ARGV}")
   endif (${ARGC} LESS 2)
 
-  set (REQUIRED_CISST_LIBRARIES ${ARGV})
-  list (GET REQUIRED_CISST_LIBRARIES 0 WHO_REQUIRES)
-  list (REMOVE_AT REQUIRED_CISST_LIBRARIES 0) # first one is the library name
-  cisst_cmake_debug ("cisst_target_link_libraries, library ${WHO_REQUIRES} to link against ${REQUIRED_CISST_LIBRARIES}")
+  set (_REQUIRED_CISST_LIBRARIES ${ARGV})
+  list (GET _REQUIRED_CISST_LIBRARIES 0 _WHO_REQUIRES)
+  list (REMOVE_AT _REQUIRED_CISST_LIBRARIES 0) # first one is the library name
+  cisst_cmake_debug ("cisst_target_link_libraries, target ${_WHO_REQUIRES} will be linked against ${_REQUIRED_CISST_LIBRARIES}")
 
   if (CISST_BUILD_SHARED_LIBS)
     add_definitions(-DCISST_DLL)
   endif (CISST_BUILD_SHARED_LIBS)
 
   # First test that all libraries should have been compiled
-  foreach (required ${REQUIRED_CISST_LIBRARIES})
-    if ("${CISST_LIBRARIES}"  MATCHES ${required})
-    else ("${CISST_LIBRARIES}"  MATCHES ${required})
-      message (SEND_ERROR "${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
-    endif ("${CISST_LIBRARIES}"  MATCHES ${required})
+  foreach (required ${_REQUIRED_CISST_LIBRARIES})
+    set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
+    list (FIND _CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
+    if (${FOUND_IT} EQUAL -1 )
+      message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+    endif (${FOUND_IT} EQUAL -1 )
   endforeach (required)
 
   # Second, create a list of libraries in the right order
   foreach (existing ${CISST_LIBRARIES})
-    if ("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
-      set (CISST_LIBRARIES_TO_USE ${CISST_LIBRARIES_TO_USE} ${existing})
-    endif ("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+    if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+      set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
+    endif ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
   endforeach (existing)
 
   # Finally, link with the required libraries
-  target_link_libraries (${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
-  cisst_target_link_package_libraries (${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE})
+  target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
+  cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
 
 endmacro (cisst_target_link_libraries)
 
@@ -339,11 +340,8 @@ endmacro (cisst_target_link_libraries)
 # - MODULE is the prefix of the main .i file.  The module name will be <MODULE>Python
 # - INTERFACE_FILENAME is the filename of the .i file (if not specified, defaults to <MODULE>.i)
 # - INTERFACE_DIRECTORY is the directory containing the .i file (use relative path from current source dir)
-# - CISST_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
+# - MODULE_LINK_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
 #
-# NOTE: This must be a function, not a macro, because if it is a macro the keyword CISST_LIBRARIES
-#       interferes with the CISST_LIBRARIES variable defined in the main CMakeLists.txt.
-#       It would be better to rename one of these.
 function (cisst_add_swig_module ...)
   # debug
   cisst_cmake_debug ("cisst_add_swig_module called with: ${ARGV}")
@@ -353,12 +351,12 @@ function (cisst_add_swig_module ...)
        MODULE
        INTERFACE_FILENAME
        INTERFACE_DIRECTORY
-       CISST_LIBRARIES)
+       MODULE_LINK_LIBRARIES)
 
   # reset local variables
-  foreach(keyword ${FUNCTION_KEYWORDS})
+  foreach (keyword ${FUNCTION_KEYWORDS})
     set (${keyword} "")
-  endforeach(keyword)
+  endforeach (keyword)
 
   # parse input
   foreach (arg ${ARGV})
@@ -397,8 +395,8 @@ function (cisst_add_swig_module ...)
     cisst_load_package_setting ("cisstPython")
     cisst_set_directories ("cisstPython")
     # load settings for extra cisst libraries
-    cisst_load_package_setting (${CISST_LIBRARIES})
-    cisst_set_directories (${CISST_LIBRARIES})
+    cisst_load_package_setting (${MODULE_LINK_LIBRARIES})
+    cisst_set_directories (${MODULE_LINK_LIBRARIES})
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
     swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
@@ -406,7 +404,7 @@ function (cisst_add_swig_module ...)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
-    swig_link_libraries (${MODULE_NAME} ${CISST_LIBRARIES}
+    swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES}
                          ${CISST_LIBRARIES_FOR_cisstPython_USING_Python})
 
     # copy the .py file generated to wherever the libraries are

@@ -20,4 +20,4 @@ cisst_set_directories (cisstPython)
 # create wrappers using swig
 cisst_add_swig_module(MODULE cisstCommon
                       INTERFACE_DIRECTORY ..
-                      CISST_LIBRARIES cisstCommon)
+                      MODULE_LINK_LIBRARIES cisstCommon)

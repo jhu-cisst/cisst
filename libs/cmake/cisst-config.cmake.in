@@ -31,6 +31,7 @@ set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
 
 # Which libraries have been compiled
 set (CISST_LIBRARIES "@CISST_LIBRARIES@")
+set (CISST_SETTINGS "@CISST_SETTINGS@")
 set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
 
 # Which flags have been set and include path/libs
@@ -63,17 +64,19 @@ set (cisst_FOUND_AS_REQUIRED 1)
 if (cisst_FIND_COMPONENTS)
   # First test that all libraries should have been compiled
   foreach (required ${cisst_FIND_COMPONENTS})
-    if ("${CISST_LIBRARIES}" MATCHES ${required})
-      # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))
-      set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES_REQUIRED_INTERNAL} ${required})
-      list (REMOVE_DUPLICATES CISST_LIBRARIES_REQUIRED_INTERNAL)
-      set (cisst_${required}_FOUND 1)
-    else ("${CISST_LIBRARIES}" MATCHES ${required})
+    set (CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
+    list (FIND CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
+    if (${FOUND_IT} EQUAL -1 )
       # inform user and set variables to not-found/false
       message (WARNING "cisst library \"${required}\" doesn't exist or hasn't been compiled.  Available libraries are: ${CISST_LIBRARIES}")
       set (cisst_FOUND_AS_REQUIRED 0)
       set (cisst_${required}_FOUND 0)
-    endif ("${CISST_LIBRARIES}" MATCHES ${required})
+    else (${FOUND_IT} EQUAL -1)
+      # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))
+      set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES_REQUIRED_INTERNAL} ${required})
+      list (REMOVE_DUPLICATES CISST_LIBRARIES_REQUIRED_INTERNAL)
+      set (cisst_${required}_FOUND 1)
+    endif (${FOUND_IT} EQUAL -1)
   endforeach (required)
 else (cisst_FIND_COMPONENTS)
   # otherwise, assumes user needs all available libraries

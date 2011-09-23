@@ -18,4 +18,4 @@ project (cisstNumericalPython)
 
 cisst_add_swig_module (MODULE cisstNumerical
                        INTERFACE_DIRECTORY ..
-                       CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
+                       MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstNumerical)
