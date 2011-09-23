@@ -61,8 +61,11 @@ int main(int argc, char ** argv)
     componentManager->StartAll();
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE, 2.0 * cmn_s);
 
-    // FLTK
-    Fl::run();
+    // Start FLTK run loop (i.e., call Fl::run). Note that calling Fl::run directly
+    // might not work; for example, if static FLTK libraries are used and displayUI
+    // is dynamically loaded, then (on Windows) this program and displayUI will have
+    // different copies of Fl::run (seems to work fine on Linux).
+    displayUI::StartRunLoop();
 
     // cleanup
     componentManager->KillAll();

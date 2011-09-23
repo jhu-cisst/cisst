@@ -1,8 +1,8 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0
+version 1.0109 
 header_name {.h} 
 code_name {.cxx}
-class displayUI {open : {public mtsTaskFromCallback}
+class CISST_EXPORT displayUI {open : {public mtsTaskFromCallback}
 } {
   decl {bool WaitingForTrigger;} {}
   decl {mtsFunctionRead GetData;} {}
@@ -19,6 +19,11 @@ class displayUI {open : {public mtsTaskFromCallback}
       code0 {\#include <cisstMultiTask/mtsTaskFromCallback.h>
 \#include <cisstMultiTask/mtsInterfaceRequired.h>
 \#include <cisstVector/vctPlot2DOpenGLFLTK.h>}
+      code1 {\#ifdef cisstMultiTaskPeriodicTaskGuiFLTK_EXPORTS
+\#define CISST_THIS_LIBRARY_AS_DLL
+\#endif
+\#include <cisstCommon/cmnExportMacros.h>
+\#undef CISST_THIS_LIBRARY_AS_DLL}
     } {
       Fl_Value_Output Data {
         label {Data:}
@@ -95,9 +100,7 @@ this->TriggerTrace = this->Plot->AddTrace("Trigger");
 this->TriggerTrace->SetColor(vct3(0.0, 1.0, 0.0));
 this->Plot->SetContinuousFitY(false);
 this->Plot->FitY(-5.0, 5.0); // set Y range
-// PK TEMP: Set the current thread (assumes that the constructor
-// is called from the main thread).
-Thread.CreateFromCurrentThread();
+Thread.CreateFromThreadId(mtsManagerLocal::GetInstance()->GetMainThreadId());
 } {}
   }
   Function {show(int argc, char**argv)} {open
@@ -109,6 +112,10 @@ this->Plot->show();} {}
   } {
     code {displayUI * whichUI = reinterpret_cast<displayUI *>(data);
 whichUI->DoCallback();} {}
+  }
+  Function {StartRunLoop(void)} {return_type {static int}
+  } {
+    code {return Fl::run();} {}
   }
   Function {Startup(void)} {open return_type void
   } {
