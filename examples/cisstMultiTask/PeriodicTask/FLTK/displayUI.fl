@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0109 
+version 1.0
 header_name {.h} 
 code_name {.cxx}
 class CISST_EXPORT displayUI {open : {public mtsTaskFromCallback}
@@ -83,6 +83,12 @@ if (interfaceRequired) {
     interfaceRequired->AddFunction("GetTime", GetTime);
 }
 
+interfaceRequired = AddInterfaceRequired("Dispatcher", MTS_OPTIONAL);
+if (interfaceRequired) {
+    interfaceRequired->AddEventHandlerVoid(&displayUI::CheckFLTK, this,
+                                           "RunEvent", MTS_EVENT_NOT_QUEUED);
+}
+
 // configure FLTK widgets
 double maxValue = 5.0; double minValue = 0.5;
 double startValue =  1.0;
@@ -116,6 +122,10 @@ whichUI->DoCallback();} {}
   Function {StartRunLoop(void)} {return_type {static int}
   } {
     code {return Fl::run();} {}
+  }
+  Function {CheckFLTK(void)} {return_type void
+  } {
+    code {DoCallback(); Fl::check();} {}
   }
   Function {Startup(void)} {open return_type void
   } {

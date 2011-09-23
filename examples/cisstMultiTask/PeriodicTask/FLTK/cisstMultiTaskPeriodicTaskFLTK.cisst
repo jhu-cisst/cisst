@@ -1,0 +1,23 @@
+# Create and run the cisstMultiTaskPeriodicTaskFLTK example
+# using cisstComponentManager.
+# From command line:  cisstComponentManager -e cisstMultiTaskPeriodicTaskFLTK.cisst
+# From component manager:  execute cisstMultiTaskPeriodicTaskFLTK.cisst
+
+load cisstMultiTaskPeriodicTaskComponents
+load cisstMultiTaskPeriodicTaskGuiFLTK
+
+sleep 1
+
+create sineTask       "Sine 0.005"
+create clockComponent Clock
+create displayUI      Display
+
+connect Display DataGenerator Sine MainInterface
+connect Display TimeGenerator Clock MainInterface
+connect Main    Dispatch      Display Dispatcher
+
+sleep 1
+
+start Sine
+start Clock
+start Display
