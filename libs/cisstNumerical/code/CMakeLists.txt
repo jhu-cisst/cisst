@@ -85,9 +85,28 @@ if (CISST_HAS_CISSTNETLIB)
        )
 endif (CISST_HAS_CISSTNETLIB)
 
+# Create the config file
+set (CISST_NMR_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstNumerical/nmrConfig.h)
+configure_file (${cisstNumericalLibs_SOURCE_DIR}/nmrConfig.h.in
+                ${CISST_NMR_CONFIG_FILE}
+                @ONLY)
+install_files (/include/cisstNumerical
+               ".h"
+               ${CISST_NMR_CONFIG_FILE})
 
+# Add the config file to the project
+set_source_files_properties ("${CISST_NMR_CONFIG_FILE}"
+                             PROPERTIES GENERATED TRUE)
+set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_NMR_CONFIG_FILE})
+
+# Finally, create main library
 cisst_add_library (LIBRARY cisstNumerical
                    DEPENDENCIES cisstCommon cisstVector
                    HEADER_FILES ${HEADER_FILES}
                    SOURCE_FILES ${SOURCE_FILES}
-                   )
+                   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
+
+# Create the CMake config file
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstNumericalBuild.cmake.in
+                ${cisstLibs_BINARY_DIR}/cisstNumericalBuild.cmake
+                @ONLY)

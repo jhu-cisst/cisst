@@ -17,13 +17,15 @@
 cmake_minimum_required (VERSION 2.6.2)
 
 message ("todo: need to save SWIG_EXECUTABLE for external projects")
-message ("todo: rename cisstBuild.in to cisst-config.in")
 message ("todo: provide useful message if using deprecated cisst macros")
 message ("todo: keep track of components required in find_package and provide warning message when using cisst_target_link_library")
 message ("todo: check generated cisst-config.cmake")
 message ("todo: should RTAI and QNX flags be moved to cisstOSAbstraction")
+message ("todo: consolidate numericalTutorial and registrationTest in examples/cisstNumerical")
+message ("todo: rename example osAbstractionTutorial")
+message ("todo: remove dependency on cisstNumerical/cisstNetlib from vector tutorial")
 
-# cisst (Computer Integrated Surgical Systems and Technology)
+# cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
@@ -60,7 +62,6 @@ include_directories (${CISST_INCLUDE_DIR})
 if (CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif (CMAKE_COMPILER_IS_GNUCXX)
-
 
 # To have more warnings with gcc
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -102,28 +103,6 @@ endif (CISST_BUILD_COMPONENTS)
 if (CISST_BUILD_DOC)
   add_subdirectory (doc)
 endif (CISST_BUILD_DOC)
-
-# # Generate cisst-config.cmake to work with find_package NO_MODULE (if
-# # the user builds against an "installed" version of cisst) -- not
-# # supported yet
-# set (CISST_INSTALLED_INCLUDE_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/include)
-# set (CISST_INSTALLED_DOXYGEN_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include)
-# set (CISST_INSTALLED_LINK_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/lib)
-# configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstInstalled.cmake.in
-#                 ${cisst_BINARY_DIR}/cisstInstalled.cmake
-#                 @ONLY)
-# install_files (/share/cisst/cmake
-#                ".cmake"
-#                ${cisst_BINARY_DIR}/cisstInstalled.cmake)
-
-
-# # Configuration file
-# set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-# configure_file (${cisst_SOURCE_DIR}/libs/include/cisstConfig.h.in
-#                 ${cisst_BINARY_DIR}/libs/include/cisstConfig.h)
-# install_files (/include
-#                ".h"
-#                ${cisst_BINARY_DIR}/libs/include/cisstConfig.h)
 
 
 # Environment variables for Windows

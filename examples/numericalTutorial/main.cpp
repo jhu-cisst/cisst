@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on:	2006-01-12
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,18 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/* This code is used for the cisstNumerical Quick Start.  Please
-   update the LaTeX document as well. ! */
-
 // include what is needed from cisst
-#include <cisstConfig.h>
+#include <cisstNumerical/nmrConfig.h>
 
 // system includes
 #include <iostream>
-
-// to simplify the code
-using namespace std;
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
@@ -61,58 +54,58 @@ using namespace std;
 
 int main(void)
 {
-    cout << "--- ExampleSVDUserOutputWorkspace ---" << endl;
+    std::cout << "--- ExampleSVDUserOutputWorkspace ---" << std::endl;
     ExampleSVDUserOutputWorkspace();
 
-    cout << "--- ExampleSVDImplicitWorkspace ---" << endl;
+    std::cout << "--- ExampleSVDImplicitWorkspace ---" << std::endl;
     ExampleSVDImplicitWorkspace();
 
-    cout << "--- ExampleSVDWorkspaceSize ---" << endl;
+    std::cout << "--- ExampleSVDWorkspaceSize ---" << std::endl;
     ExampleSVDWorkspaceSize();
 
-    cout << "--- ExampleSVDDynamicData ---" << endl;
+    std::cout << "--- ExampleSVDDynamicData ---" << std::endl;
     ExampleSVDDynamicData();
 
-    cout << "--- ExampleSVDUpdateMatrixS ---" << endl;
+    std::cout << "--- ExampleSVDUpdateMatrixS ---" << std::endl;
     ExampleSVDUpdateMatrixS();
 
-    cout << "--- ExampleSVDFixedSize ---" << endl;
+    std::cout << "--- ExampleSVDFixedSize ---" << std::endl;
     ExampleSVDFixedSize();
 
-    cout << "--- ExampleSVDFixedSizeData ---" << endl;
+    std::cout << "--- ExampleSVDFixedSizeData ---" << std::endl;
     ExampleSVDFixedSizeData();
 
-    cout << "--- ExampleInverse ---" << endl;
+    std::cout << "--- ExampleInverse ---" << std::endl;
     ExampleInverse();
 
-    cout << "--- ExamplePInverse ---" << endl;
+    std::cout << "--- ExamplePInverse ---" << std::endl;
     ExamplePInverse();
 
-    cout << "--- ExampleSVDEconomyUserOutputWorkspace ---" << endl;
+    std::cout << "--- ExampleSVDEconomyUserOutputWorkspace ---" << std::endl;
     ExampleSVDEconomyUserOutputWorkspace();
 
-    cout << "--- ExampleSVDEconomyImplicitWorkspace ---" << endl;
+    std::cout << "--- ExampleSVDEconomyImplicitWorkspace ---" << std::endl;
     ExampleSVDEconomyImplicitWorkspace();
 
-    cout << "--- ExampleSVDEconomyWorkspaceSize ---" << endl;
+    std::cout << "--- ExampleSVDEconomyWorkspaceSize ---" << std::endl;
     ExampleSVDEconomyWorkspaceSize();
 
-    cout << "--- ExampleSVDEconomyDynamicData ---" << endl;
+    std::cout << "--- ExampleSVDEconomyDynamicData ---" << std::endl;
     ExampleSVDEconomyDynamicData();
 
-    cout << "--- ExampleSVDEconomyUpdateMatrixS ---" << endl;
+    std::cout << "--- ExampleSVDEconomyUpdateMatrixS ---" << std::endl;
     ExampleSVDEconomyUpdateMatrixS();
 
-    cout << "--- ExamplePInverseEconomy ---" << endl;
+    std::cout << "--- ExamplePInverseEconomy ---" << std::endl;
     ExamplePInverseEconomy();
 
-    cout << "--- ExampleLUDynamicData ---" << endl;
+    std::cout << "--- ExampleLUDynamicData ---" << std::endl;
     ExampleLUDynamicData();
 
-    cout << "--- ExampleIsOrthonormal ---" << endl;
+    std::cout << "--- ExampleIsOrthonormal ---" << std::endl;
     ExampleIsOrthonormal();
 
-    cout << "--- ExampleGaussJordanInverse ---" << endl;
+    std::cout << "--- ExampleGaussJordanInverse ---" << std::endl;
     ExampleGaussJordanInverse();
 
     return 0;

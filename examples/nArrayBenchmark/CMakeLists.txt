@@ -12,7 +12,12 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction)
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+
+if (cisst_FOUND_AS_REQUIRED)
+
+  include (${CISST_USE_FILE})
 
   # This project is designed to be built outside the Insight source tree.
   # Find ITK.
@@ -22,27 +27,27 @@ if (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)
     include (${ITK_USE_FILE})
 
     add_executable (Subarray_ITK_Benchmark Subarray_ITK_Benchmark.cpp )
-    cisst_target_link_libraries (Subarray_ITK_Benchmark cisstCommon cisstOSAbstraction)
+    cisst_target_link_libraries (Subarray_ITK_Benchmark ${REQUIRED_CISST_LIBRARIES})
     target_link_libraries (Subarray_ITK_Benchmark ITKCommon)
 
     add_executable (Subarray_nArray_Benchmark Subarray_nArray_Benchmark.cpp)
-    cisst_target_link_libraries (Subarray_nArray_Benchmark cisstCommon cisstVector cisstOSAbstraction)
+    cisst_target_link_libraries (Subarray_nArray_Benchmark ${REQUIRED_CISST_LIBRARIES})
 
     add_executable (ImageAdd_ITK_Benchmark ImageAdd_ITK_Benchmark.cpp)
-    cisst_target_link_libraries (ImageAdd_ITK_Benchmark cisstCommoncisstOSAbstraction)
+    cisst_target_link_libraries (ImageAdd_ITK_Benchmark ${REQUIRED_CISST_LIBRARIES})
     target_link_libraries (ImageAdd_ITK_Benchmark ITKCommon)
 
     add_executable (ImageAdd_nArray_Benchmark ImageAdd_nArray_Benchmark.cpp)
-    cisst_target_link_libraries (ImageAdd_nArray_Benchmark cisstCommon cisstVector cisstOSAbstraction)
+    cisst_target_link_libraries (ImageAdd_nArray_Benchmark ${REQUIRED_CISST_LIBRARIES})
 
   else (ITK_FOUND)
-    message (WARNING " nArrayBenchmark examples Subarray_ITK_Benchmark, Subarray_nArray_Benchmark, ImageAdd_ITK_Benchmark and ImageAdd_nArray_Benchmark will not be compiled since they require ITK")
+    message ("Example in ${CMAKE_CURRENT_SOURCE_DIR}: nArrayBenchmark examples Subarray_ITK_Benchmark, Subarray_nArray_Benchmark, ImageAdd_ITK_Benchmark and ImageAdd_nArray_Benchmark will not be compiled since they require ITK")
     mark_as_advanced (ITK_FOUND ITK_DIR)
   endif (ITK_FOUND)
 
   add_executable (optimizedEngines optimizedEngines.cpp)
-  cisst_target_link_libraries (optimizedEngines cisstCommon cisstVector cisstOSAbstraction)
+  cisst_target_link_libraries (optimizedEngines ${REQUIRED_CISST_LIBRARIES})
 
-else (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)
-  message (WARNING " nArrayBenchmark examples will not be compiled since they require CISST_BUILD_LIBS_cisstVector and CISST_BUILD_LIBS_cisstOSAbstraction")
-endif (CISST_BUILD_LIBS_cisstVector AND CISST_BUILD_LIBS_cisstOSAbstraction)
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

@@ -11,26 +11,35 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
-if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
-  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
-  add_executable (numericalTutorial
-                  main.cpp
-                  ExampleSVDUserOutputWorkspace.h
-                  ExampleSVDImplicitWorkspace.h
-                  ExampleSVDWorkspaceSize.h
-                  ExampleSVDDynamicData.h
-                  ExampleSVDUpdateMatrixS.h
-                  ExampleSVDFixedSize.h
-                  ExampleSVDFixedSizeData.h
-                  ExampleInverse.h
-                  ExamplePInverse.h
-                  ExampleLUDynamicData.h
-                  ExampleIsOrthonormal.h
-                  ExampleGaussJordanInverse.h
-                  )
-  cisst_target_link_libraries(numericalTutorial cisstCommon cisstVector cisstNumerical)
+set (CISST_LIBRARIES_REQUIRED cisstCommon cisstVector cisstNumerical)
+find_package (cisst COMPONENTS ${CISST_LIBRARIES_REQUIRED})
 
-else (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  message (WARNING " numericalTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
-endif (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
+
+  if (CISST_HAS_CISSTNETLIB)
+    add_executable (numericalTutorial
+                    main.cpp
+                    ExampleSVDUserOutputWorkspace.h
+                    ExampleSVDImplicitWorkspace.h
+                    ExampleSVDWorkspaceSize.h
+                    ExampleSVDDynamicData.h
+                    ExampleSVDUpdateMatrixS.h
+                    ExampleSVDFixedSize.h
+                    ExampleSVDFixedSizeData.h
+                    ExampleInverse.h
+                    ExamplePInverse.h
+                    ExampleLUDynamicData.h
+                    ExampleIsOrthonormal.h
+                    ExampleGaussJordanInverse.h
+                    )
+    cisst_target_link_libraries(numericalTutorial ${CISST_LIBRARIES_REQUIRED})
+
+  else (CISST_HAS_CISSTNETLIB)
+    message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")
+  endif (CISST_HAS_CISSTNETLIB)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${CISST_LIBRARIES_REQUIRED}")
+endif (cisst_FOUND_AS_REQUIRED)

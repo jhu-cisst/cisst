@@ -15,35 +15,38 @@
 cmake_minimum_required (VERSION 2.8)
 
 # create a list of libraries needed for this project
-set (CISST_LIBRARIES_REQUIRED cisstCommon cisstVector cisstNumerical)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${CISST_LIBRARIES_REQUIRED})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND)
+if (cisst_FOUND_AS_REQUIRED)
 
   # load cisst configuration
   include (${CISST_USE_FILE})
 
-  # make sure cisstNumerical has been compiled with cisstNetlib
-  if (NOT CISST_HAS_CISSTNETLIB)
-    message (SEND_ERROR "cisstVector example needs cisstNetlib, make sure cisstNumerical is compiled with cisstNetlib")
-  endif (NOT CISST_HAS_CISSTNETLIB)
+   # make sure cisstNumerical has been compiled with cisstNetlib
+  if (CISST_HAS_CISSTNETLIB)
+    add_executable (vectorTutorial
+                    main.cpp
+                    ExampleFrame.h
+                    ExampleCommon.h
+                    ExampleReference.h
+                    ExampleReferenceFixedSize.h
+                    ExampleDynamic.h
+                    ExampleFixedSizeFunctions.h
+                    ExampleDynamicFunctions.h
+	            ExampleNArray.h
+                    ExampleNumerical.h
+                    ExampleSTL.h
+                   )
+    # link against cisst libraries (and dependencies)
+    cisst_target_link_libraries (vectorTutorial ${REQUIRED_CISST_LIBRARIES})
 
-  add_executable (vectorTutorial
-                  main.cpp
-                  ExampleFrame.h
-                  ExampleCommon.h
-                  ExampleReference.h
-                  ExampleReferenceFixedSize.h
-                  ExampleDynamic.h
-                  ExampleFixedSizeFunctions.h
-                  ExampleDynamicFunctions.h
-	          ExampleNArray.h
-                  ExampleNumerical.h
-                  ExampleSTL.h
-                 )
-  # link against cisst libraries (and dependencies)
-  cisst_target_link_libraries (vectorTutorial ${CISST_LIBRARIES_REQUIRED})
+  else (CISST_HAS_CISSTNETLIB)
+    message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")
+  endif (CISST_HAS_CISSTNETLIB)
 
-endif (cisst_FOUND)
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${CISST_LIBRARIES_REQUIRED}")
+endif (cisst_FOUND_AS_REQUIRED)

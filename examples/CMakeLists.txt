@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -22,6 +22,7 @@ set (CISST_EXAMPLES
      cisst3DUserInterface
      cisstMultiTask
      commonTutorial
+     vectorTutorial
      devicesTutorial
      interactiveTutorial
 #     multiTaskTutorial
@@ -45,15 +46,3 @@ foreach (example ${CISST_EXAMPLES})
     add_subdirectory (${example})
   endif (CISST_BUILD_EXAMPLES_${example})
 endforeach (example)
-
-
-# cisstVector tutorial requires cisstVector, cisstNumerical and cisstNetlib
-if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  option (CISST_BUILD_EXAMPLES_cisstVector "Build examples for cisstVector." ON)
-  mark_as_advanced (CISST_BUILD_EXAMPLES_cisstVector)
-  if (CISST_BUILD_EXAMPLES_cisstVector)
-    add_subdirectory (vectorTutorial)
-  endif (CISST_BUILD_EXAMPLES_cisstVector)
-else (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  message (WARNING " cisstVector examples will not be compiled since they require CISST_BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
-endif (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)

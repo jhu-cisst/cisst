@@ -4,10 +4,10 @@
 /*
 $Id$
 
-Author(s): Simon Leonard
-Created on: 2011-09-01
+Author(s): Anton Deguet
+Created on: 2011-09-22
 
-(C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+(C) Copyright 2011 Johns Hopkins University (JHU), All Rights
 Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,12 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cisstOSGConfig_h
-#define _cisstOSGConfig_h
+#ifndef _nmrConfig_h
+#define _nmrConfig_h
 
 #include <cisstConfig.h>
 
-// Using OpenCV 2.2
-#cmakedefine01 CISST_OSG_OPENCV
+// Do we have cisstNetlib
+#cmakedefine01 CISST_HAS_CISSTNETLIB
 
-#endif
+#endif // _nmrConfig_h

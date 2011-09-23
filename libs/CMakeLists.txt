@@ -34,6 +34,12 @@ endfunction (CISST_ADD_TO_INTERNAL)
 
 # Where to find cisst defined CMake Macros/Modules
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisstLibs_SOURCE_DIR}/cmake)
+
+# The upper case variables have been used in the past and need to be preserved
+set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
+set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
+
+# Include all useful CMake macros and functions for cisst 
 include (cisstMacros)
 include (cisstInternalMacros)
 
@@ -205,22 +211,6 @@ endif (CISST_BUILD_COMPONENTS)
 
 include_directories (${CISST_INCLUDE_DIR})
 
-# To allow mixing static and dynamic libraries
-if (CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-endif (CMAKE_COMPILER_IS_GNUCXX)
-
-
-# To have more warnings with gcc
-if (CMAKE_COMPILER_IS_GNUCXX)
-  include (CheckCXXCompilerFlag)
-  check_cxx_compiler_flag ("-Wextra" CXX_SUPPORTS_WEXTRA)
-  if (CXX_SUPPORTS_WEXTRA)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-  endif (CXX_SUPPORTS_WEXTRA)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif (CMAKE_COMPILER_IS_GNUCXX)
-
 
 # Find native threads
 if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
@@ -341,8 +331,6 @@ endforeach (lib)
 
 
 # Create misc. config files
-set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
-set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR}/libs/include)
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})

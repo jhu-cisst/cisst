@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,9 +12,18 @@
 #
 # --- end cisst license ---
 
-add_executable (serialPortServer server.cpp)
-cisst_target_link_libraries (serialPortServer cisstCommon cisstOSAbstraction)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction)
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-add_executable (serialPortClient client.cpp)
-cisst_target_link_libraries (serialPortClient cisstCommon cisstOSAbstraction)
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
 
+  add_executable (serialPortServer server.cpp)
+  cisst_target_link_libraries (serialPortServer ${REQUIRED_CISST_LIBRARIES})
+
+  add_executable (serialPortClient client.cpp)
+  cisst_target_link_libraries (serialPortClient ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

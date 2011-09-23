@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrNetlib_h
 #define _nmrNetlib_h
 
-#include <cisstConfig.h>
+#include <cisstNumerical/nmrConfig.h>
 
 #if CISST_HAS_CISSTNETLIB
 

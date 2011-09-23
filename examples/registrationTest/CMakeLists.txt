@@ -12,16 +12,23 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-  cisst_set_directories (cisstCommon cisstVector cisstNumerical)
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
 
-  add_executable (accuracy Accuracy.cpp DataSet.cpp DataSet.h)
-  cisst_target_link_libraries (accuracy cisstCommon cisstVector cisstNumerical)
+  if (CISST_HAS_CISSTNETLIB)
+    add_executable (accuracy Accuracy.cpp DataSet.cpp DataSet.h)
+    cisst_target_link_libraries (accuracy ${REQUIRED_CISST_LIBRARIES})
 
-  add_executable (distances Distances.cpp DataSet.cpp DataSet.h)
-  cisst_target_link_libraries (distances cisstCommon cisstVector)
+    add_executable (distances Distances.cpp DataSet.cpp DataSet.h)
+    cisst_target_link_libraries (distances ${REQUIRED_CISST_LIBRARIES})
 
-else (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  message (WARNING " registrationTest examples will not be compiled since they require CISST_BUILD_LIBS_cisstNumerical and CISST_HAS_CISSTNETLIB")
-endif (CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+  else (CISST_HAS_CISSTNETLIB)
+    message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")
+  endif (CISST_HAS_CISSTNETLIB)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

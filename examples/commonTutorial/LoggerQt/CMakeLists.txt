@@ -14,12 +14,14 @@
 #
 # --- end cisst license ---
 
-find_package (cisst COMPONENTS cisstCommon cisstCommonQt)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstCommonQt)
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
   add_executable (commonTutorialLoggerQt main.cpp)
-  cisst_target_link_libraries (commonTutorialLoggerQt cisstCommon cisstCommonQt)
+  cisst_target_link_libraries (commonTutorialLoggerQt ${REQUIRED_CISST_LIBRARIES})
+
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon and cisstCommonQt")
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)
