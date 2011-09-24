@@ -86,7 +86,7 @@ endfunction (cisst_unset_all_package_settings)
 # Function to propagate settings across libraries, e.g. Qt for all Qt based libraries
 function (cisst_library_use_settings whoRequires value)
   # load existing settings
-  cisst_load_package_setting (whoRequires)
+  cisst_load_package_setting (${whoRequires})
   # Add to list of all external dependencies
   set (CISST_GENERAL_SETTINGS_FOR_${whoRequires} ${CISST_GENERAL_SETTINGS_FOR_${whoRequires}} ${value})
   list (REMOVE_DUPLICATES CISST_GENERAL_SETTINGS_FOR_${whoRequires})

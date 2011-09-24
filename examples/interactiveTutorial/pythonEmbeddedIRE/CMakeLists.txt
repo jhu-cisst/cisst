@@ -30,7 +30,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
-  cisst_target_link_libraries (SineGenerator cisstCommon cisstVector)
+  cisst_target_link_libraries (SineGenerator ${REQUIRED_CISST_LIBRARIES})
 
   # If OS Abstraction is compiled, offer a choice
   # if (CISST_BUILD_LIBS_cisstOSAbstraction)

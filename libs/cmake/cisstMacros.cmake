@@ -28,105 +28,116 @@ endfunction (cisst_cmake_debug)
 # macro to load settings set for external packages
 # usage: cisst_load_package_setting (cisstCommon cisstVector) or cisst_load_package_setting (${CISST_LIBRARIES})
 macro (cisst_load_package_setting ...)
+  cisst_cmake_debug ("cisst_load_package_setting called with: ${ARGV}")
   # Set all variables based on dependencies
   foreach (lib ${ARGV})
+    # Additional settings 
+    set (_clps_ADDITIONAL_BUILD_CMAKE "${CISST_BINARY_DIR}/libs/${lib}Build.cmake")
+    if (EXISTS ${_clps_ADDITIONAL_BUILD_CMAKE})
+      include (${_clps_ADDITIONAL_BUILD_CMAKE})
+    endif (EXISTS ${_clps_ADDITIONAL_BUILD_CMAKE})
     # External dependency file
-    set (SETTINGS_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${lib}External.cmake")
-    if (EXISTS ${SETTINGS_FILE})
-      include (${SETTINGS_FILE})
-      set (EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
-      foreach (package ${EXTERNAL_PACKAGES})
-        set (PACKAGE_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${lib}${package}.cmake")
-        if (EXISTS ${PACKAGE_FILE})
-          include (${PACKAGE_FILE})
-        else (EXISTS ${PACKAGE_FILE})
-          message (SEND_ERROR "Based on ${EXTERNAL_PACKAGES}, there should be a file named ${PACKAGE_FILE}, you might need to start from an empty build tree")
-        endif (EXISTS ${PACKAGE_FILE})
+    set (_clps_SETTINGS_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${lib}External.cmake")
+    if (EXISTS ${_clps_SETTINGS_FILE})
+      include (${_clps_SETTINGS_FILE})
+      set (_clps_EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
+      foreach (package ${_clps_EXTERNAL_PACKAGES})
+        set (_clps_PACKAGE_FILE "${CISST_BINARY_DIR}/cisst-dependencies/${lib}${package}.cmake")
+        if (EXISTS ${_clps_PACKAGE_FILE})
+          include (${_clps_PACKAGE_FILE})
+        else (EXISTS ${_clsp_PACKAGE_FILE})
+          message (SEND_ERROR "Based on ${_clps_EXTERNAL_PACKAGES}, there should be a file named ${_clps_PACKAGE_FILE}, you might need to start from an empty build tree")
+        endif (EXISTS ${_clps_PACKAGE_FILE})
       endforeach (package)
-    endif (EXISTS ${SETTINGS_FILE})
+    endif (EXISTS ${_clps_SETTINGS_FILE})
      # find and load general settings
-    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
-    if (${SETTINGS})
-      cisst_load_package_setting (${${SETTINGS}})
-    endif (${SETTINGS})
+    set (_clps_SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${_clps_SETTINGS})
+      cisst_load_package_setting (${${_clps_SETTINGS}})
+    endif (${_clps_SETTINGS})
   endforeach (lib)
 endmacro (cisst_load_package_setting)
 
 
 # macro to set the include directory based on external settings
 macro (cisst_include_directories ...)
+  cisst_cmake_debug ("cisst_include_directories called with: ${ARGV}")
   foreach (lib ${ARGV})
     # find and load setting for external packages
-    set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
-    if (${PACKAGES})
-      foreach (package ${${PACKAGES}})
-        set (VARIABLE_NAME CISST_INCLUDE_DIRECTORIES_FOR_${lib}_USING_${package})
-        if (${VARIABLE_NAME})
-          include_directories (${${VARIABLE_NAME}})
-        endif (${VARIABLE_NAME})
+    set (_cid_PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
+    if (${_cid_PACKAGES})
+      foreach (package ${${_cid_PACKAGES}})
+        set (_cid_VARIABLE_NAME CISST_INCLUDE_DIRECTORIES_FOR_${lib}_USING_${package})
+        if (${_cid_VARIABLE_NAME})
+          include_directories (${${_cid_VARIABLE_NAME}})
+        endif (${_cid_VARIABLE_NAME})
       endforeach (package)
-    endif (${PACKAGES})
+    endif (${_cid_PACKAGES})
      # find and load general settings
-    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
-    if (${SETTINGS})
-      cisst_include_directories (${${SETTINGS}})
-    endif (${SETTINGS})
+    set (_cid_SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${_cid_SETTINGS})
+      cisst_include_directories (${${_cid_SETTINGS}})
+    endif (${_cid_SETTINGS})
   endforeach (lib)
 endmacro (cisst_include_directories)
 
 
 # macro to set the link directories based on external settings
 macro (cisst_link_directories ...)
+  cisst_cmake_debug ("cisst_link_directories called with: ${ARGV}")
   foreach (lib ${ARGV})
     # find and load setting for external packages
-    set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
-    if (${PACKAGES})
-      foreach (package ${${PACKAGES}})
-        set (VARIABLE_NAME CISST_LINK_DIRECTORIES_FOR_${lib}_USING_${package})
-        if (${VARIABLE_NAME})
-          link_directories (${${VARIABLE_NAME}})
-        endif (${VARIABLE_NAME})
+    set (_cld_PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
+    if (${_cld_PACKAGES})
+      foreach (package ${${_cld_PACKAGES}})
+        set (_cld_VARIABLE_NAME CISST_LINK_DIRECTORIES_FOR_${lib}_USING_${package})
+        if (${_cld_VARIABLE_NAME})
+          link_directories (${${_cld_VARIABLE_NAME}})
+        endif (${_cld_VARIABLE_NAME})
       endforeach (package)
-    endif (${PACKAGES})
+    endif (${_cld_PACKAGES})
      # find and load general settings
-    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
-    if (${SETTINGS})
-      cisst_link_directories (${${SETTINGS}})
-    endif (${SETTINGS})
+    set (_cld_SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${_cld_SETTINGS})
+      cisst_link_directories (${${_cld_SETTINGS}})
+    endif (${_cld_SETTINGS})
   endforeach (lib)
 endmacro (cisst_link_directories)
 
 
 # macro to find packages based on external settings
 macro (cisst_find_and_use_packages ...)
+  cisst_cmake_debug ("cisst_find_and_use_packages called with: ${ARGV}")
   foreach (lib ${ARGV})
     # find and load setting for external packages
-    set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
-    if (${PACKAGES})
-      foreach (package ${${PACKAGES}})
+    set (_cfup_PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
+    if (${_cfup_PACKAGES})
+      foreach (package ${${_cfup_PACKAGES}})
         # find package
-        set (VARIABLE_NAME CISST_PACKAGES_FOR_${lib}_USING_${package})
-        if (${VARIABLE_NAME})
+        set (_cfup_VARIABLE_NAME CISST_PACKAGES_FOR_${lib}_USING_${package})
+        if (${_cfup_VARIABLE_NAME})
           # check for components if needed
-          set (COMPONENT_VARIABLE_NAME CISST_PACKAGE_COMPONENTS_FOR_${lib}_USING_${package})
-          if (${COMPONENT_VARIABLE_NAME})
-            find_package (${${VARIABLE_NAME}} REQUIRED ${${COMPONENT_VARIABLE_NAME}})
-          else (${COMPONENT_VARIABLE_NAME})
-            find_package (${${VARIABLE_NAME}} REQUIRED)
-          endif (${COMPONENT_VARIABLE_NAME})
-        endif (${VARIABLE_NAME})
+          set (_cfup_COMPONENT_VARIABLE_NAME CISST_PACKAGE_COMPONENTS_FOR_${lib}_USING_${package})
+          if (${_cfup_COMPONENT_VARIABLE_NAME})
+	    cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})")
+            find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})
+          else (${_cfup_COMPONENT_VARIABLE_NAME})
+	    cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)")
+            find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)
+          endif (${_cfup_COMPONENT_VARIABLE_NAME})
+        endif (${_cfup_VARIABLE_NAME})
         # use package
-        set (VARIABLE_NAME CISST_CMAKE_FILES_FOR_${lib}_USING_${package})
-        if (${VARIABLE_NAME})
-          include (${${VARIABLE_NAME}})
-        endif (${VARIABLE_NAME})
+        set (_cfup_VARIABLE_NAME CISST_CMAKE_FILES_FOR_${lib}_USING_${package})
+        if (${_cfup_VARIABLE_NAME})
+          include (${${_cfup_VARIABLE_NAME}})
+        endif (${_cfup_VARIABLE_NAME})
       endforeach (package)
-    endif (${PACKAGES})
+    endif (${_cfup_PACKAGES})
     # find and load general settings
-    set (SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
-    if (${SETTINGS})
-      cisst_find_and_use_packages (${${SETTINGS}})
-    endif (${SETTINGS})
+    set (_cfup_SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+    if (${_cfup_SETTINGS})
+      cisst_find_and_use_packages (${${_cfup_SETTINGS}})
+    endif (${_cfup_SETTINGS})
   endforeach (lib)
 endmacro (cisst_find_and_use_packages)
 
@@ -139,6 +150,27 @@ macro (cisst_set_directories ...)
   cisst_link_directories (${ARGV})
   cisst_find_and_use_packages (${ARGV})
 endmacro (cisst_set_directories)
+
+
+# helper macro to extract all settings for a library
+macro (cisst_extract_settings __LIBRARY __KEYWORD __VARIABLE_NAME)
+  cisst_load_package_setting (${__LIBRARY})
+  set (_ces_PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${__LIBRARY})
+  # find and load setting for external packages
+  if (${_ces_PACKAGES})
+    foreach (package ${${_ces_PACKAGES}})
+      set (_ces_VARIABLE_NAME CISST_${__KEYWORD}_FOR_${__LIBRARY}_USING_${package})
+      if (${_ces_VARIABLE_NAME})
+	set (${__VARIABLE_NAME} ${${__VARIABLE_NAME}} ${${_ces_VARIABLE_NAME}})
+      endif (${_ces_VARIABLE_NAME})
+    endforeach (package)
+  endif (${_ces_PACKAGES})
+  # find and load general settings
+  # set (_cld_SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
+  # if (${_cld_SETTINGS})
+  #   cisst_link_directories (${${_cld_SETTINGS}})
+  # endif (${_cld_SETTINGS})
+endmacro (cisst_extract_settings)
 
 
 # The macro adds a library to a CISST-related project by processing the
@@ -243,11 +275,13 @@ macro (cisst_add_library ...)
   # Add dependencies for linking, also check BUILD_xxx for dependencies
   if (DEPENDENCIES)
     # Check that dependencies are build
-    set (BUILD_DEPENDENCIES "")
     foreach (dependency ${DEPENDENCIES})
-      set (BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} CISST_BUILD_LIBS_${dependency})
+      set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
+      list (FIND _CISST_LIBRARIES_AND_SETTINGS ${dependency} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1 )
+        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+      endif (${FOUND_IT} EQUAL -1 )
     endforeach (dependency)
-    variable_requires (CISST_BUILD_LIBS_${LIBRARY} CISST_BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
     cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
@@ -267,11 +301,12 @@ macro (cisst_add_library ...)
 endmacro (cisst_add_library)
 
 
+
 macro (cisst_target_link_package_libraries target ...)
   # create list of all but target
   set (DEPENDENCIES ${ARGV})
   list (REMOVE_AT DEPENDENCIES 0) # remove first argument, i.e. target
-  cisst_load_package_setting(${DEPENDENCIES})
+  cisst_load_package_setting (${DEPENDENCIES})
   foreach (lib ${DEPENDENCIES})
     # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
@@ -307,8 +342,9 @@ macro (cisst_target_link_libraries TARGET ...)
   list (REMOVE_AT _REQUIRED_CISST_LIBRARIES 0) # first one is the library name
   cisst_cmake_debug ("cisst_target_link_libraries, target ${_WHO_REQUIRES} will be linked against ${_REQUIRED_CISST_LIBRARIES}")
 
+  # If cisst has been compile as shared libraries, need to import symbols
   if (CISST_BUILD_SHARED_LIBS)
-    add_definitions(-DCISST_DLL)
+    add_definitions (-DCISST_DLL)
   endif (CISST_BUILD_SHARED_LIBS)
 
   # First test that all libraries should have been compiled
@@ -380,32 +416,32 @@ function (cisst_add_swig_module ...)
   endforeach (keyword)
 
   # interface file
-  set (SWIG_INTERFACE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE_DIRECTORY}/${INTERFACE_FILENAME})
+  set (SWIG_INTERFACE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE_DIRECTORY}/${INTERFACE_FILENAME}")
   cisst_cmake_debug ("cisst_add_swig_module: looking for interface file ${SWIG_INTERFACE_FILE}")
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
+    # load settings for extra cisst libraries (and Python)
+    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython)
+    cisst_set_directories (${_LIBRARIES_AND_SETTINGS})
+    # retrieve libraries needed for Python
+    cisst_extract_settings (cisstPython LIBRARIES cisstPython_LIBRARIES)
     # create a directory in build tree
-    file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE_DIRECTORY})
+    file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE_DIRECTORY}")
     # we are using C++ code
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES CPLUSPLUS ON)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
                                  PROPERTIES SWIG_FLAGS "-v;-modern;-fcompact;-fvirtual")
-    # load python settings
-    cisst_load_package_setting ("cisstPython")
-    cisst_set_directories ("cisstPython")
-    # load settings for extra cisst libraries
-    cisst_load_package_setting (${MODULE_LINK_LIBRARIES})
-    cisst_set_directories (${MODULE_LINK_LIBRARIES})
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
+    cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
     swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
     if (WIN32)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
-    swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES}
-                         ${CISST_LIBRARIES_FOR_cisstPython_USING_Python})
+    cisst_cmake_debug ("cisst_add_swig_module: swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})")
+    swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})
 
     # copy the .py file generated to wherever the libraries are
     add_custom_command (TARGET _${MODULE_NAME}

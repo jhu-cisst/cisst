@@ -77,56 +77,6 @@ endif (CISST_BUILD_SHARED_LIBS)
 add_subdirectory (cisst-dependencies)
 
 
-# Wrapping with swig for Python
-option (CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
-mark_as_advanced (CISST_HAS_SWIG_PYTHON)
-if (CISST_HAS_SWIG_PYTHON)
-  # Find Swig
-  set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
-  find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
-  # It looks like version is not yet supported by CMake for SWIG so we are checking manually
-  if (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-    message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
-  else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-    include (${SWIG_USE_FILE})
-    # save SWIG settings
-    set (CISST_SWIG_PACKAGE "SWIG") 
-    cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
-    cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE) 
-  endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-  # Note that SWIG_EXECUTABLE is saved in cisst-config.cmake (cisstBuild.cmake.in) for use
-  # by external projects (see Usecisst.cmake).
-
-  # Force to use exceptions
-  set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
-  set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
-
-  # Find Python
-  find_package (PythonLibs REQUIRED)
-  # Some older CMake don't define the debug library
-  if (NOT PYTHON_DEBUG_LIBRARIES)
-    set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
-  endif (NOT PYTHON_DEBUG_LIBRARIES)
-  find_package (PythonInterp REQUIRED)
-  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
-  set (PYTHON_ALL_LIBRARIES "debug;${PYTHON_DEBUG_LIBRARIES};optimized;${PYTHON_LIBRARIES}")
-  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
-  # We also need numpy if we have cisstVector
-  if (CISST_BUILD_LIBS_cisstVector)
-    find_package (Numpy REQUIRED)
-    if (PYTHON_NUMPY_FOUND)
-      cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
-      mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
-    else (PYTHON_NUMPY_FOUND)
-      cisst_unset_all_package_settings (cisstPython NumPy)
-    endif (PYTHON_NUMPY_FOUND)
-  endif (CISST_BUILD_LIBS_cisstVector)
-else (CISST_HAS_SWIG_PYTHON)
-  cisst_unset_all_package_settings (cisstPython Python)
-  cisst_unset_all_package_settings (cisstPython NumPy)
-endif (CISST_HAS_SWIG_PYTHON)
-
-
 # Extra link flag if for Apple
 if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
@@ -171,6 +121,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+
 # Determine if cmnThrow uses "throw" or "abort"
 option (CISST_CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
 mark_as_advanced (CISST_CMN_THROW_DOES_ABORT)
@@ -178,12 +129,14 @@ if (CISST_CMN_THROW_DOES_ABORT)
   add_definitions (-DCISST_CMN_THROW_DOES_ABORT)
 endif (CISST_CMN_THROW_DOES_ABORT)
 
+
 # Determine if CMN_ASSERT should be disabled
 option (CISST_CMN_ASSERT_DISABLED "CMN_ASSERT is disabled, i.e. does not assert (for release mode)" OFF)
 mark_as_advanced (CISST_CMN_ASSERT_DISABLED)
 if (CISST_CMN_ASSERT_DISABLED)
   add_definitions (-DCISST_CMN_ASSERT_DISABLED)
 endif (CISST_CMN_ASSERT_DISABLED)
+
 
 # Determine if CMN_ASSERT should throw an exception instead of abort
 option (CISST_CMN_ASSERT_THROWS_EXCEPTION "CMN_ASSERT throws an exception instead of abort" OFF)

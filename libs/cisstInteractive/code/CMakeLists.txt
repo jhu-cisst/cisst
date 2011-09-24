@@ -38,9 +38,6 @@ cisst_add_library (LIBRARY cisstInteractive
                    HEADER_FILES ${HEADER_FILES}
                    )
 
-# Link against these libraries
-target_link_libraries (cisstInteractive debug ${PYTHON_DEBUG_LIBRARIES} optimized ${PYTHON_LIBRARIES})
-
 # Call makeIrepy to compile the Python source files (*.py) and place
 # the results (*.pyc files) in the destination directory.
 add_custom_target (cisstInteractive_COMPILE_IREPY ALL

@@ -22,7 +22,6 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   # Create myDerivedClass as a shared library
-  cisst_set_directories (cisstCommon cisstVector)
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
   cisst_target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
 

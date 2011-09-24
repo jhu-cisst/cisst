@@ -13,75 +13,80 @@
 #
 # --- end cisst license ---
 
-# Set the ouptut path for the libraries and executables
-set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
+project (cisstTests)
 
-# Load CppUnit stuff
-include (${cisst_SOURCE_DIR}/libs/cmake/FindCppUnit.cmake)
-# TO DO, check if CPPUNIT Found
-include_directories (${CPPUNIT_INCLUDE_DIR})
-link_libraries (optimized ${CPPUNIT_LIBRARIES}
-                debug ${CPPUNIT_DEBUG_LIBRARIES})
+# Find cisst using all libraries
+find_package (cisst REQUIRED)
 
-# Which tests to build based on which libraries have been compiled
-foreach (lib ${CISST_LIBRARIES})
-  # Test if the directory exists
-  if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
-    # Build by default and mark as advanced
-    option (CISST_BUILD_TESTS_${lib} "Build ${lib} tests." ON)
-    mark_as_advanced (CISST_BUILD_TESTS_${lib})
-  endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
-endforeach (lib)
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
 
-# Generate tests for wrapped libraries
-if (CISST_HAS_SWIG_PYTHON)
-  option (CISST_BUILD_TESTS_wrapping "Build wrapping tests." ON)
-  mark_as_advanced (CISST_BUILD_TESTS_wrapping)
-endif (CISST_HAS_SWIG_PYTHON)
+  # Set the ouptut path for the libraries and executables
+  set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
+  set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-# Create the main library
-set (CISST_TESTS_MAIN_SRC
-     ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestMain.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestParameters.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestParameters.h)
-add_library (cisstTestsMain STATIC ${CISST_TESTS_MAIN_SRC})
+  # Load CppUnit stuff
+  include (${cisst_SOURCE_DIR}/libs/cmake/FindCppUnit.cmake)
+  # TO DO, check if CPPUNIT Found
+  include_directories (${CPPUNIT_INCLUDE_DIR})
+  link_libraries (optimized ${CPPUNIT_LIBRARIES}
+                  debug ${CPPUNIT_DEBUG_LIBRARIES})
 
-# Configure the OS test program
-get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
-get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstCommon/cmnPortabilityTestCMake.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/include/cmnPortabilityTestCMake.h
-                @ONLY@)
-# Add the path for the includes
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/include)
+  # Which tests to build based on which libraries have been compiled
+  foreach (lib ${CISST_LIBRARIES})
+    # Test if the directory exists
+    if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
+      # Build by default and mark as advanced
+      option (CISST_BUILD_TESTS_${lib} "Build ${lib} tests." ON)
+      mark_as_advanced (CISST_BUILD_TESTS_${lib})
+    endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib})
+  endforeach (lib)
 
-# Create targets for each test
-# Build in each subdir
-foreach (lib ${CISST_LIBS})
-  if (CISST_BUILD_LIBS_${lib})
+  # Generate tests for wrapped libraries
+  if (CISST_HAS_SWIG_PYTHON)
+    option (CISST_BUILD_TESTS_wrapping "Build wrapping tests." ON)
+    mark_as_advanced (CISST_BUILD_TESTS_wrapping)
+  endif (CISST_HAS_SWIG_PYTHON)
+
+  # Create the main library
+  set (CISST_TESTS_MAIN_SRC
+       ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestMain.cpp
+       ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestParameters.cpp
+       ${CMAKE_CURRENT_SOURCE_DIR}/code/cisstTestParameters.h)
+  add_library (cisstTestsMain STATIC ${CISST_TESTS_MAIN_SRC})
+
+  # Configure the OS test program
+  get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
+  get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstCommon/cmnPortabilityTestCMake.h.in
+                  ${CMAKE_CURRENT_BINARY_DIR}/include/cmnPortabilityTestCMake.h
+                  @ONLY@)
+  # Add the path for the includes
+  include_directories (${CMAKE_CURRENT_BINARY_DIR}/include)
+
+  # Create targets for each test
+  # Build in each subdir
+  foreach (lib ${CISST_LIBRARIES})
     if (CISST_BUILD_TESTS_${lib})
       add_subdirectory (${lib})
     endif (CISST_BUILD_TESTS_${lib})
-  else (CISST_BUILD_LIBS_${lib})
-    if (CISST_BUILD_TESTS_${lib})
-      message ("Info: CISST_BUILD_TESTS_${lib} turned off since it requires CISST_BUILD_LIBS_${lib}")
-      set (CISST_BUILD_TESTS_${lib} OFF CACHE BOOL "Build ${lib} tests." FORCE)
-    endif (CISST_BUILD_TESTS_${lib})
-  endif (CISST_BUILD_LIBS_${lib})
-endforeach (lib)
+  endforeach (lib)
 
-# Generate tests for wrapped libraries
-if (CISST_BUILD_TESTS_wrapping)
-  if (CISST_HAS_SWIG_PYTHON)
-    add_subdirectory (wrapping)
-  else (CISST_HAS_SWIG_PYTHON)
-    message ("Info: CISST_BUILD_TESTS_wrapping turned off since it requires CISST_HAS_SWIG_PYTHON")
-    set (CISST_BUILD_TESTS_wrapping OFF CACHE BOOL "Build wrapping tests." FORCE)
-  endif (CISST_HAS_SWIG_PYTHON)
-endif (CISST_BUILD_TESTS_wrapping)
+  # Generate tests for wrapped libraries
+  if (CISST_BUILD_TESTS_wrapping)
+    if (CISST_HAS_SWIG_PYTHON)
+      # add_subdirectory (wrapping)
+    else (CISST_HAS_SWIG_PYTHON)
+      message ("Info: CISST_BUILD_TESTS_wrapping turned off since it requires CISST_HAS_SWIG_PYTHON")
+      set (CISST_BUILD_TESTS_wrapping OFF CACHE BOOL "Build wrapping tests." FORCE)
+    endif (CISST_HAS_SWIG_PYTHON)
+  endif (CISST_BUILD_TESTS_wrapping)
 
-# For other libraries using the same testing framework
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmake/cisstTestsBuild.cmake.in
-                ${CMAKE_CURRENT_BINARY_DIR}/cisstTestsBuild.cmake
-                @ONLY)
+  # For other libraries using the same testing framework
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmake/cisstTestsBuild.cmake.in
+                  ${CMAKE_CURRENT_BINARY_DIR}/cisstTestsBuild.cmake
+                  @ONLY)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Tests in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, they require the cisst libraries")
+endif (cisst_FOUND_AS_REQUIRED)
