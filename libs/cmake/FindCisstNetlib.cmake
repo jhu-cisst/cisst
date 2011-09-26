@@ -8,11 +8,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 #
 # Try to find CNetlib
@@ -25,36 +25,6 @@
 #
 # $Id$
 #
-
-set (CISSTNETLIB_10_FILES
-     include/cisstNetlib.h
-     include/cisstNetlib/fortran-types.h
-     include/cisstNetlib/hanson-haskell.h
-     include/cisstNetlib/lapack3e.h
-     include/cisstNetlib/lawson-hanson.h
-     include/cisstNetlib/minpack.h 
-     include/cisstNetlib/o8para.h
-     include/cisstNetlib/o8userfunc.h
-     lib/${CMAKE_STATIC_LIBRARY_PREFIX}cisstNetlib${CMAKE_STATIC_LIBRARY_SUFFIX}
-     lib/${CMAKE_STATIC_LIBRARY_PREFIX}cisstNetlibGCC${CMAKE_STATIC_LIBRARY_SUFFIX}
-     lib/${CMAKE_STATIC_LIBRARY_PREFIX}cisstNetlibF95${CMAKE_STATIC_LIBRARY_SUFFIX}
-     )
-
-set (CISSTNETLIB_20_FILES
-     include/cisstNetlib.h
-     include/cisstNetlib/fortran-types.h
-     include/cisstNetlib/fortran-types-gnu.h
-     include/cisstNetlib/fortran-types-win32.h
-     include/cisstNetlib/hanson-haskell.h
-     include/cisstNetlib/lapack.h
-     include/cisstNetlib/lawson-hanson.h
-     include/cisstNetlib/minpack.h 
-     include/cisstNetlib/o8para.h
-     include/cisstNetlib/o8userfunc.h
-     lib/${CMAKE_STATIC_LIBRARY_PREFIX}cisstNetlib${CMAKE_STATIC_LIBRARY_SUFFIX}
-     lib/${CMAKE_STATIC_LIBRARY_PREFIX}cisstNetlibgcc${CMAKE_STATIC_LIBRARY_SUFFIX}
-     lib/${CMAKE_STATIC_LIBRARY_PREFIX}cisstNetlibgfortran${CMAKE_STATIC_LIBRARY_SUFFIX}
-     )
 
 # try to find automatically
 set (CISSTNETLIB_SEARCH_PATH
@@ -76,11 +46,9 @@ if (NOT CISSTNETLIB_DIR)
       set (CISSTNETLIB_DOWNLOAD_ARCHITECTURE "undefined" CACHE STRING "Choose \"i586\" for 32 bits Intel or \"x86_64\" for 64 bits Intel")
       if (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "i586")
         set (CISSTNETLIB_DOWNLOAD_PREFIX "cisstNetlib-2.0-MacOS-i585")
-        set (CISSTNETLIB_DOWNLOAD_FILES ${CISSTNETLIB_20_FILES})
       else (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "i586")
         if (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "x86_64")
           set (CISSTNETLIB_DOWNLOAD_PREFIX "cisstNetlib-2.0-MacOS-x86_64")
-          set (CISSTNETLIB_DOWNLOAD_FILES ${CISSTNETLIB_20_FILES})
         else (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "x86_64")
 	  message (SEND_ERROR "CISSTNETLIB_DOWNLOAD_ARCHITECTURE must be either \"i586\" or \"x86_64\", not ${CISSTNETLIB_DOWNLOAD_ARCHITECTURE}")
           set (CISSTNETLIB_DOWNLOAD_ARCHITECTURE "undefined" CACHE STRING "Choose \"i586\" for 32 bits Intel or \"x86_64\" for 64 bits Intel" FORCE)
@@ -93,11 +61,9 @@ if (NOT CISSTNETLIB_DIR)
       set (CISSTNETLIB_DOWNLOAD_ARCHITECTURE "undefined" CACHE STRING "Choose \"i686\" for 32 bits Intel or \"x86_64\" for 64 bits Intel")
       if (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "i686")
         set (CISSTNETLIB_DOWNLOAD_PREFIX "cisstNetlib-Linux-i686-2007-04-09")
-        set (CISSTNETLIB_DOWNLOAD_FILES ${CISSTNETLIB_10_FILES})
       else (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "i686")
         if (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "x86_64")
           set (CISSTNETLIB_DOWNLOAD_PREFIX "cisstNetlib-Linux-x86_64-2007-04-09")
-          set (CISSTNETLIB_DOWNLOAD_FILES ${CISSTNETLIB_10_FILES})
         else (${CISSTNETLIB_DOWNLOAD_ARCHITECTURE} MATCHES "x86_64")
 	  message (SEND_ERROR "CISSTNETLIB_DOWNLOAD_ARCHITECTURE must be either \"i686\" or \"x86_64\", not ${CISSTNETLIB_DOWNLOAD_ARCHITECTURE}")
           set (CISSTNETLIB_DOWNLOAD_ARCHITECTURE "undefined" CACHE STRING "Choose \"i686\" for 32 bits Intel or \"x86_64\" for 64 bits Intel" FORCE)
@@ -113,18 +79,20 @@ if (NOT CISSTNETLIB_DIR)
         set (CISSTNETLIB_DOWNLOAD_PREFIX "")
       else (CISST_CMAKE_COMPILER_IS_MSVC_64)
         set (CISSTNETLIB_DOWNLOAD_PREFIX "cisstNetlib-Windows-i686-2007-04-09")
-        set (CISSTNETLIB_DOWNLOAD_FILES ${CISSTNETLIB_10_FILES})
       endif (CISST_CMAKE_COMPILER_IS_MSVC_64)
     endif (WIN32)
 
     # download files once prefix is set
-    if (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "") 
-      foreach (file ${CISSTNETLIB_DOWNLOAD_FILES})
-        file (DOWNLOAD
-              http://www.cisst.org/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}/${file}
-              "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}/${file}"
-              SHOWPROGRESS)
-      endforeach (file ${CISSTNETLIB_DOWNLOAD_FILES})
+    if (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "")
+      # download tgz file
+      message ("Downloading: http://www.cisst.org/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz")
+      file (DOWNLOAD
+            http://www.cisst.org/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz
+            "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
+            SHOWPROGRESS)
+      # uncompress using cmake -E tar
+      execute_process (COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
+                       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
       # turn download option off as we just downloaded it
       set (CISSTNETLIB_DOWNLOAD_NOW OFF CACHE BOOL "Download cisstNetlib and install in your build tree" FORCE)
       # hide options not used anymore
@@ -133,12 +101,12 @@ if (NOT CISSTNETLIB_DIR)
       set (CISSTNETLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}" CACHE PATH "Path were cisstNetlib has been downloaded" FORCE)
       message ("You need to configure once more to use the newly downloaded cisstNetlib")
    endif (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "")
- 
+
   endif (CISSTNETLIB_DOWNLOAD_NOW)
 endif (NOT CISSTNETLIB_DIR)
 
 # when directory is defined, find libraries
-if (CISSTNETLIB_DIR) 
+if (CISSTNETLIB_DIR)
 
   mark_as_advanced (FORCE CISSTNETLIB_DIR)
   mark_as_advanced (CISSTNETLIB_DOWNLOAD_NOW) # hide this option since we have found cisstNetlib
