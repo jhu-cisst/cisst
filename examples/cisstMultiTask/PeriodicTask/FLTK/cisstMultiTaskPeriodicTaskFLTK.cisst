@@ -10,7 +10,7 @@ sleep 1
 
 create sineTask       "Sine 0.005"
 create clockComponent Clock
-create displayUI      Display
+create displayTask    Display
 
 connect Display DataGenerator Sine MainInterface
 connect Display TimeGenerator Clock MainInterface
