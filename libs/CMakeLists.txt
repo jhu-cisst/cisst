@@ -311,18 +311,6 @@ endforeach (lib)
 set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR}/libs/include)
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
-
-# set (CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_F95_LIBRARIES})
-# if (NOT UNIX)
-#     set (CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISST_BUILD_CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_GCC_LIBRARIES})
-# endif (NOT UNIX)
-# # Preserved for backward compatibility
-# configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstBuild.cmake.in
-#                 ${cisst_BINARY_DIR}/cisstBuild.cmake
-#                 @ONLY)
-# Very similar file but usable with CMake find_package NO_MODULE (if
-# the user builds against the cisst build tree)
-
 configure_file ("${cisstLibs_SOURCE_DIR}/cmake/cisst-config.cmake.in"
                 "${cisstLibs_BINARY_DIR}/cisst-config.cmake"
                 @ONLY)
@@ -358,7 +346,6 @@ configure_file ("${cisstLibs_SOURCE_DIR}/cmake/cisst-config.cmake.in"
 # install_files (/share/cisst/cmake
 #                ".cmake"
 #                ${cisst_BINARY_DIR}/cisstInstalled.cmake)
-
 
 # Configuration file
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})

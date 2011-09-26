@@ -59,6 +59,12 @@ if (CISST_HAS_QT)
   # XML Qt based
   option (CISST_HAS_QT_XML "Use Qt XML and Patterns for cmnXMLPath" ON)
   mark_as_advanced (CISST_HAS_QT_XML)
+
+  # Create the CMake config file
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
+                  ${cisstLibs_BINARY_DIR}/cisstQtBuild.cmake
+                  @ONLY)
+
 else (CISST_HAS_QT)
   cisst_unset_all_package_settings (cisstQt Qt)
 endif (CISST_HAS_QT)
@@ -86,6 +92,12 @@ if (CISST_HAS_FLTK)
     # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
     cisst_set_package_settings (cisstCommon FLTK LINK_DIRECTORIES  FLTK_LIBRARY_DIRS)
   endif (FLTK_LIBRARY_DIRS)
+
+  # Create the CMake config file
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstFLTKBuild.cmake.in
+                  ${cisstLibs_BINARY_DIR}/cisstFLTKBuild.cmake
+                  @ONLY)
+
 else (CISST_HAS_FLTK)
   cisst_unset_all_package_settings (cisstCommon FLTK)
 endif (CISST_HAS_FLTK)

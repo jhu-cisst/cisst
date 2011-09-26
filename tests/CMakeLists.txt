@@ -75,7 +75,7 @@ if (cisst_FOUND_AS_REQUIRED)
   # Generate tests for wrapped libraries
   if (CISST_BUILD_TESTS_wrapping)
     if (CISST_HAS_SWIG_PYTHON)
-      # add_subdirectory (wrapping)
+      add_subdirectory (wrapping)
     else (CISST_HAS_SWIG_PYTHON)
       message ("Info: CISST_BUILD_TESTS_wrapping turned off since it requires CISST_HAS_SWIG_PYTHON")
       set (CISST_BUILD_TESTS_wrapping OFF CACHE BOOL "Build wrapping tests." FORCE)
