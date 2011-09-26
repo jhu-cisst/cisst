@@ -15,11 +15,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstConfig.h>
 #include "displayTask.h"
 
-#if (CISST_OS == CISST_WINDOWS)
+// Following needed for Windows; does not seem to matter for Linux
 template int mtsComponentFLTK<displayUI>::StartRunLoop(void);
-#endif
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(displayTask, mtsTaskFromCallback, std::string);
