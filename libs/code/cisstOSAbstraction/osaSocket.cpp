@@ -171,7 +171,7 @@ std::string osaSocket::GetLocalhostIP(void)
     char hostname[256] = { 0 };
     gethostname(hostname, 255);
     CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
-    strcpy(  hostname, "robodoc" );
+
     struct hostent * he = gethostbyname(hostname);
     if (!he) {
         CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
