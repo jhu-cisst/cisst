@@ -42,4 +42,5 @@ cisst_target_link_libraries (devicesTutorialExample7
                              cisstCommon cisstCommonXML
                              cisstOSAbstraction
                              cisstMultiTask
+                             cisstStereoVision
                              cisstDevices)

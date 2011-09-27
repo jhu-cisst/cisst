@@ -21,9 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devMicronTrackerControllerQDevice_h
 #define _devMicronTrackerControllerQDevice_h
 
-#include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsVector.h>
 
 #include <QImage>
@@ -33,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "ui_devMicronTrackerControllerQWidget.h"
 
 
-class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
+class devMicronTrackerControllerQDevice : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -51,9 +52,9 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
     }
 
  protected:
-    enum { FRAME_WIDTH = 640 };
-    enum { FRAME_HEIGHT = 480 };
-    enum { FRAME_SIZE = FRAME_WIDTH * FRAME_HEIGHT };
+    static const unsigned int FrameWidth = 640;
+    static const unsigned int FrameHeight = 480;
+    static const unsigned int FrameSize = FrameWidth * FrameHeight;
 
     Ui::devMicronTrackerControllerQWidget ControllerWidget;
     QWidget CentralWidget;
@@ -64,6 +65,7 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
         mtsFunctionWrite Track;
         mtsFunctionRead GetFrameLeft;
         mtsFunctionRead GetFrameRight;
+        mtsFunctionWrite ComputeCameraModel;
 
         mtsUCharVec FrameLeft;
         mtsUCharVec FrameRight;
@@ -86,8 +88,10 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
     void timerEvent(QTimerEvent * event);
     void PaintImage(QImage & frameIndexed8, QList<QPoint *> & markers);
     void MTCCalibratePivotQSlot(void);
+    void MTCComputeCameraModelQSlot(void);
     void MTCTrackQSlot(bool toggled);
     void RecordQSlot(bool toggled);
+    void ScreenshotQSlot(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTrackerControllerQDevice);
