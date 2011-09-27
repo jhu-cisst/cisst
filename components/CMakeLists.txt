@@ -31,6 +31,12 @@ if (CISST_BUILD_COMP_cisstISIAPI)
   add_subdirectory (cisstISIAPI)
 endif (CISST_BUILD_COMP_cisstISIAPI)
 
+# cisstMicronTracker
+option (CISST_BUILD_COMP_cisstMicronTracker "Wrappers for MicronTracker trackers from Claron" OFF)
+if (CISST_BUILD_COMP_cisstMicronTracker)
+  add_subdirectory (cisstMicronTracker)
+endif (CISST_BUILD_COMP_cisstMicronTracker)
+
 # cisstNDISerial
 option (CISST_BUILD_COMP_cisstNDISerial "Wrappers for serial port based trackers from NDI, i.e. Polaris, Aurora, Vicra ..." OFF)
 if (CISST_BUILD_COMP_cisstNDISerial)

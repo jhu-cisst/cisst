@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<tracker>
+
+  <controller calibration="C:\\Program Files\\Claron Technology\\MicronTracker\\CalibrationFiles\\"
+              markers="C:\\Program Files\\Claron Technology\\MicronTracker\\Markers\\" />
+
+  <tools>
+
+    <tool name="Pointer"
+          marker="lptr" />
+
+    <tool name="Reference"
+          marker="tool" />
+  </tools>
+</tracker>
