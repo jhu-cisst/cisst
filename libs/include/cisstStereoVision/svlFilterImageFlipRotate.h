@@ -51,6 +51,7 @@ protected:
 
 private:
     svlSampleImage* OutputImage;
+    bool InOutSizesMatch;
 
     int CWQuarters[2];
     bool FlipHorizontal[2];
