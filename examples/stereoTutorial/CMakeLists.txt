@@ -12,8 +12,6 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstStereoVision)
-
 add_subdirectory (simple)
 add_subdirectory (cameraviewer)
 add_subdirectory (stereocameraviewer)
@@ -26,7 +24,3 @@ add_subdirectory (gridtracker)
 add_subdirectory (exposurecorrection)
 add_subdirectory (svlmts1)
 #ADD_SUBDIRECTORY(webgui)
-
-else (CISST_BUILD_LIBS_cisstStereoVision)
-  message (WARNING " stereoTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstStereoVision")
-endif (CISST_BUILD_LIBS_cisstStereoVision)

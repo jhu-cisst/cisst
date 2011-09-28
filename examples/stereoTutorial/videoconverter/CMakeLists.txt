@@ -12,8 +12,22 @@
 #
 # --- end cisst license ---
 
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
-ADD_EXECUTABLE(svlExVideoConverter videoconverter.cpp)
-cisst_target_link_libraries (svlExVideoConverter ${CISST_LIBRARIES_NEEDED})
+cmake_minimum_required (VERSION 2.8)
 
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
+
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  add_executable (svlExVideoConverter videoconverter.cpp)
+  cisst_target_link_libraries (svlExVideoConverter ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

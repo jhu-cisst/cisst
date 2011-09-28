@@ -12,12 +12,26 @@
 #
 # --- end cisst license ---
 
-IF(CISST_SVL_HAS_X11 OR WIN32)
+cmake_minimum_required (VERSION 2.8)
 
-    set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
-    cisst_set_directories (${CISST_LIBRARIES_NEEDED})
-    ADD_EXECUTABLE(svlExSimpleStream simplestream.cpp)
-    cisst_target_link_libraries (svlExSimpleStream ${CISST_LIBRARIES_NEEDED})
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
 
-ENDIF(CISST_SVL_HAS_X11 OR WIN32)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  if (CISST_SVL_HAS_X11 OR WIN32)
+    add_executable (svlExSimpleStream simplestream.cpp)
+    cisst_target_link_libraries (svlExSimpleStream ${REQUIRED_CISST_LIBRARIES})
+  else (CISST_SVL_HAS_X11 OR WIN32)
+    message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")
+  endif (CISST_SVL_HAS_X11 OR WIN32)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

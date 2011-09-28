@@ -12,16 +12,34 @@
 #
 # --- end cisst license ---
 
-IF(CISST_SVL_HAS_X11 OR WIN32)
+cmake_minimum_required (VERSION 2.8)
 
-    IF(CISST_HAS_QT)
-        set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
-    ELSE(CISST_HAS_QT)
-        set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
-    ENDIF(CISST_HAS_QT)
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
 
-    cisst_set_directories (${CISST_LIBRARIES_NEEDED})
-    ADD_EXECUTABLE(svlExVideoPlayer videoplayer.cpp)
-    cisst_target_link_libraries (svlExVideoPlayer ${CISST_LIBRARIES_NEEDED})
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-ENDIF(CISST_SVL_HAS_X11 OR WIN32)
+if (cisst_FOUND)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  if (CISST_SVL_HAS_X11 OR WIN32)
+
+    if (CISST_HAS_QT)
+      set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+    else (CISST_HAS_QT)
+      set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
+    endif (CISST_HAS_QT)
+
+    add_executable (svlExVideoPlayer videoplayer.cpp)
+    cisst_target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
+
+  else (CISST_SVL_HAS_X11 OR WIN32)
+    message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")
+  endif (CISST_SVL_HAS_X11 OR WIN32)
+
+else (cisst_FOUND)
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND)
