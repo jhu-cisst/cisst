@@ -188,68 +188,70 @@ unsigned int osaThread::SizeOfInternals(void) {
 
 // OS-dependent implementation of templated Create().  Note that void* parameters are used,
 // which should be fine for all OS variations.
-void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool newThread)
+void osaThread::CreateInternal(const char *name, void* cb, void* userdata)
 {
     CMN_LOG_INIT_VERBOSE << "osaThread::CreateInternal: create thread named: " << (name?name:"Unnamed") 
-                         << (newThread?" (new)":"") << std::endl;
+                         << std::endl;
     
-    if (newThread) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-        pthread_attr_t new_attr;
-        pthread_attr_init(&new_attr);
-        /*
-          pthread_attr_setdetachstate(&new_attr, PTHREAD_CREATE_DETACHED);
-          pthread_attr_setschedpolicy(&new_attr, policy);
-          new_param.sched_priority = priority;
-          pthread_attr_setschedparam(&new_attr, &new_param);
-        */
-        typedef void *(*CB_FuncType)(void *);
-        int retval = pthread_create(&INTERNALS(Thread), &new_attr, (CB_FuncType)cb, userdata);
-        if( retval != 0 ){
-            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "pthread_create failed. "
-                              << strerror(retval) << ": " << retval 
-                              << std::endl;
-        }
-        pthread_attr_destroy(&new_attr);
-        // Set thread Id
-        reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = INTERNALS(Thread);
+    pthread_attr_t new_attr;
+    pthread_attr_init(&new_attr);
+    /*
+      pthread_attr_setdetachstate(&new_attr, PTHREAD_CREATE_DETACHED);
+      pthread_attr_setschedpolicy(&new_attr, policy);
+      new_param.sched_priority = priority;
+      pthread_attr_setschedparam(&new_attr, &new_param);
+    */
+    typedef void *(*CB_FuncType)(void *);
+    int retval = pthread_create(&INTERNALS(Thread), &new_attr, (CB_FuncType)cb, userdata);
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "pthread_create failed. "
+                          << strerror(retval) << ": " << retval 
+                          << std::endl;
+    }
+    pthread_attr_destroy(&new_attr);
+    // Set thread Id
+    reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = INTERNALS(Thread);
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
 
-        typedef void (*CB_FuncType)(void *);
-        int retval = 0;
-        retval = rt_task_spawn( &INTERNALS(Task),
-                                NULL,
-                                0,
-                                89,
-                                T_FPU | T_JOINABLE,
-                                (CB_FuncType)cb,
-                                (void*)userdata );
-        if( retval != 0 ){
-            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "rt_task_spawn failed. "
-                              << strerror(retval) << ": " << retval
-                              << std::endl;
-        }
-        // copy the address                                                                                                                    
-        reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->Task = &INTERNALS(Task);
+    typedef void (*CB_FuncType)(void *);
+    int retval = 0;
+    retval = rt_task_spawn( &INTERNALS(Task),
+                            NULL,
+                            0,
+                            89,
+                            T_FPU | T_JOINABLE,
+                            (CB_FuncType)cb,
+                            (void*)userdata );
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "rt_task_spawn failed. "
+                          << strerror(retval) << ": " << retval
+                          << std::endl;
+    }
+    // copy the address
+    reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->Task = &INTERNALS(Task);
 #elif (CISST_OS == CISST_WINDOWS)
-        DWORD threadId;
-        INTERNALS(Thread) = CreateThread(
-                              NULL,                       //default security attributes
-                              0,                          //use default stack size
-                              (LPTHREAD_START_ROUTINE) cb,     //thread 'start routine'
-                              (LPVOID) userdata,          //argument to 'start routine'
-                              0,                          //default creation flags
-                              &threadId                   //keep Id for later, we might need it
-                              );
-        // Set thread Id
-        reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = threadId;
+    DWORD threadId;
+    INTERNALS(Thread) = CreateThread(
+                          NULL,                       //default security attributes
+                          0,                          //use default stack size
+                          (LPTHREAD_START_ROUTINE) cb,     //thread 'start routine'
+                          (LPVOID) userdata,          //argument to 'start routine'
+                          0,                          //default creation flags
+                          &threadId                   //keep Id for later, we might need it
+                          );
+    // Set thread Id
+    reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = threadId;
 #endif // CISST_WINDOWS
-    }
-    else {
-        ThreadId = osaGetCurrentThreadId();
-    }
+
+    SetThreadName(name);
+    Valid = true;
+}
+
+void osaThread::SetThreadName(const char* name)
+{
     unsigned int i;
     if (name) {
         for (i=0; (i < sizeof(Name)-1) && (name[i]!='\0'); i++)
@@ -259,7 +261,6 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
             Name[i] = 'X';
     }
     Name[sizeof(Name)-1] = 0;
-    Valid = true;
 }
 
 // PK: Should we check if Delete is being called on self?
