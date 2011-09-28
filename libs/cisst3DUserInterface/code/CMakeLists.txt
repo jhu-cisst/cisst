@@ -1,9 +1,7 @@
 #
 # $Id$
 #
-# CMakeLists for cisst3DUserInterface
-#
-# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,6 +11,8 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
+
+project (cisst3DUserInterface)
 
 # all source files
 set (SOURCE_FILES
@@ -95,7 +95,7 @@ cisst_add_library (LIBRARY cisst3DUserInterface
                    )
 
 # find icons
-set (CISST_UI3_ICONS_DIR "${cisst_SOURCE_DIR}/libs/etc/cisst3DUserInterface/icons")
+set (CISST_UI3_ICONS_DIR "${cisst3DUserInterfaceLibs_SOURCE_DIR}/share/icons")
 file (GLOB CISST_UI3_ICONS RELATIVE ${CISST_UI3_ICONS_DIR} ${CISST_UI3_ICONS_DIR}/*.png)
 
 # post build command to copy icons in build tree
@@ -105,5 +105,5 @@ foreach (icon ${CISST_UI3_ICONS})
                       COMMAND ${CMAKE_COMMAND}
                       ARGS -E copy_if_different
                              ${CISST_UI3_ICONS_DIR}/${icon}
-                             ${cisst_BINARY_DIR}/etc/cisst3DUserInterface/icons/${icon})
+                             ${cisst_BINARY_DIR}/share/cisst3DUserInterface/icons/${icon})
 endforeach (icon)

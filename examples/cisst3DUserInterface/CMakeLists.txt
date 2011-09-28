@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,41 +12,51 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisst3DUserInterface)
+cmake_minimum_required (VERSION 2.8)
 
-  find_package (VTK REQUIRED)
-  include (${VTK_USE_FILE})
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
+                              cisstMultiTask cisstStereoVision cisst3DUserInterface)
 
-  # library of sample behavior
-  include_directories(behaviors)
-  add_subdirectory(behaviors)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-  # programs, depends on hardware availability
+if (cisst_FOUND_AS_REQUIRED)
 
-  # Sensable specific examples, requires cisstDevices
-  if (CISST_DEV_HAS_SENSABLEHD)
-    add_subdirectory(SensableNoVideo)
-    add_subdirectory(SensableStereoVideo)
-    add_subdirectory(SensableStereoVideoNetwork)
-  else (CISST_DEV_HAS_SENSABLEHD)
-    message (WARNING " cisst3DUserInterface examples SensableNoVideo, SensableStereoVideo, and SensableStereoVideoNetwork will not be compiled since they require CISST_DEV_HAS_SENSABLEHD")
-  endif (CISST_DEV_HAS_SENSABLEHD)
+  # load cisst configuration
+  include (${CISST_USE_FILE})
 
-  # Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
-  option (CISST_UI3_HAS_DAVINCI "Build 3DUserInterface example using the daVinci API" OFF)
-  if (CISST_UI3_HAS_DAVINCI)
-    option (CISST_UI3_HAS_DAVINCI_BBAPI "Use the daVinci BBAPI" OFF)
-    if (CISST_UI3_HAS_DAVINCI_BBAPI)
-      find_package (cisstDaVinci-isi-bbapi)
-      include_directories (${cisstDaVinci-isi-bbapi_INCLUDE_DIR})
-      link_directories (${cisstDaVinci-isi-bbapi_LIBRARY_DIR})
-    endif (CISST_UI3_HAS_DAVINCI_BBAPI)
-    set(daVinci_ALL_LIBRARIES ${daVinci_LIBRARIES} ${BBAPI_LIBRARIES} ${cisstDaVinci-isi-bbapi_LIBRARIES})
-    add_subdirectory(daVinciStereoVideo)
-  else (CISST_UI3_HAS_DAVINCI)
-    message (WARNING " cisst3DUserInterface example daVinciStereoVideo will not be compiled since it requires CISST_UI3_HAS_DAVINCI")
-  endif (CISST_UI3_HAS_DAVINCI)
+  include_directories (behaviors)
+  add_subdirectory (behaviors)
 
-else (CISST_BUILD_LIBS_cisst3DUserInterface)
-  message (WARNING " cisst3DUserInterface examples will not be compiled since they require CISST_BUILD_LIBS_3DUserInterface")
-endif (CISST_BUILD_LIBS_cisst3DUserInterface)
+#   # Sensable specific examples, requires cisstDevices
+#   if (CISST_DEV_HAS_SENSABLEHD)
+#     add_subdirectory(SensableNoVideo)
+#     add_subdirectory(SensableStereoVideo)
+#     add_subdirectory(SensableStereoVideoNetwork)
+#   else (CISST_DEV_HAS_SENSABLEHD)
+#     message (WARNING " cisst3DUserInterface examples SensableNoVideo, SensableStereoVideo, and SensableStereoVideoNetwork will not be compiled since they require CISST_DEV_HAS_SENSABLEHD")
+#   endif (CISST_DEV_HAS_SENSABLEHD)
+
+#   # Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
+#   option (CISST_UI3_HAS_DAVINCI "Build 3DUserInterface example using the daVinci API" OFF)
+#   if (CISST_UI3_HAS_DAVINCI)
+#     option (CISST_UI3_HAS_DAVINCI_BBAPI "Use the daVinci BBAPI" OFF)
+#     if (CISST_UI3_HAS_DAVINCI_BBAPI)
+#       find_package (cisstDaVinci-isi-bbapi)
+#       include_directories (${cisstDaVinci-isi-bbapi_INCLUDE_DIR})
+#       link_directories (${cisstDaVinci-isi-bbapi_LIBRARY_DIR})
+#     endif (CISST_UI3_HAS_DAVINCI_BBAPI)
+#     set(daVinci_ALL_LIBRARIES ${daVinci_LIBRARIES} ${BBAPI_LIBRARIES} ${cisstDaVinci-isi-bbapi_LIBRARIES})
+#     add_subdirectory(daVinciStereoVideo)
+#   else (CISST_UI3_HAS_DAVINCI)
+#     message (WARNING " cisst3DUserInterface example daVinciStereoVideo will not be compiled since it requires CISST_UI3_HAS_DAVINCI")
+#   endif (CISST_UI3_HAS_DAVINCI)
+
+# else (CISST_BUILD_LIBS_cisst3DUserInterface)
+#   message (WARNING " cisst3DUserInterface examples will not be compiled since they require CISST_BUILD_LIBS_3DUserInterface")
+# endif (CISST_BUILD_LIBS_cisst3DUserInterface)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)
