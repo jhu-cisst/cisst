@@ -107,7 +107,9 @@ this->Plot->show();} {}
     code {show(0, 0);} {}
   }
   Function {Cleanup(void)} {return_type void
-  } {}
+  } {
+    code {} {}
+  }
   Function {Run(void)} {open return_type void
   } {
     code {// process queued events
