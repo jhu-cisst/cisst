@@ -184,13 +184,13 @@ set (CISST_LIBS_STABLE
      cisstOSAbstraction
      cisstNumerical
      cisstInteractive
+     cisstMultiTask
+     cisstParameterTypes
+     cisstRobot
      )
 
 set (CISST_LIBS_UNSTABLE
-     cisstMultiTask
      cisstStereoVision
-     cisstRobot
-     cisstParameterTypes
      cisstDevices
      cisst3DUserInterface
      )

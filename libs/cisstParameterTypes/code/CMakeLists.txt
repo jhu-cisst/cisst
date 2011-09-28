@@ -1,4 +1,5 @@
-# CMakeLists for prmParameterTypes
+#
+# $Id$
 #
 # (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
 # Reserved.
@@ -11,6 +12,7 @@
 #
 # --- end cisst license ---
 
+project (cisstParameterTypes)
 
 # all source files
 set (SOURCE_FILES
@@ -72,23 +74,10 @@ set (HEADER_FILES
      prmRobotState.h
      prmActuatorParameters.h
      prmGainParameters.h
-
-     prmCollaborativeControlForce.h
      )
 
 cisst_add_library (LIBRARY cisstParameterTypes
-                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstRobot
+                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    )
-
-# Python wrappers
-if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module (MODULE cisstParameterTypes
-                         INTERFACE_DIRECTORY ../../include/cisstParameterTypes
-                         CISST_LIBRARIES cisstParameterTypes
-                                         cisstMultiTask
-                                         cisstOSAbstraction
-                                         cisstVector
-                                         cisstCommon)
-endif (CISST_HAS_SWIG_PYTHON)

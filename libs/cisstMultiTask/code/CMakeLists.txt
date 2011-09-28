@@ -198,15 +198,6 @@ set (HEADER_FILES
      )
 
 
-# make sure all options are set for all devices to OFF
-find_package (Ice)
-if (ICE_FOUND)
-  option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" ON)
-  mark_as_advanced (CISST_MTS_HAS_ICE)
-else (ICE_FOUND)
-  option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" OFF)
-endif (ICE_FOUND)
-
 if (CISST_MTS_HAS_ICE)
 
   set (SOURCE_FILES ${SOURCE_FILES}
@@ -271,10 +262,6 @@ if (CISST_MTS_HAS_ICE)
        mtsManagerProxy
        )
 
-  find_package (Ice REQUIRED)
-
-  cisst_set_package_settings (cisstMultiTask ZeroCIce INCLUDE_DIRECTORIES ICE_INCLUDE_DIR)
-  cisst_set_package_settings (cisstMultiTask ZeroCIce LINK_DIRECTORIES ICE_LIBRARY_DIR)
 
   # create a list of include directories for slice
   foreach (ice_include_dir ${ICE_INCLUDE_DIR})
@@ -306,31 +293,8 @@ if (CISST_MTS_HAS_ICE)
   endforeach (slice_file ${SLICE_FILES})
 
   set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
-
-else (CISST_MTS_HAS_ICE)
-  cisst_unset_all_package_settings (cisstMultiTask ZeroCIce)
 endif (CISST_MTS_HAS_ICE)
 
-
-
-# Create the config file
-set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstMultiTask/mtsConfig.h)
-configure_file (${cisst_SOURCE_DIR}/libs/include/cisstMultiTask/mtsConfig.h.in
-                ${CISST_MTS_CONFIG_FILE}
-                @ONLY)
-install_files (/include/cisstMultiTask
-               ".h"
-               ${CISST_MTS_CONFIG_FILE})
-
-# Add the config file to the project
-set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"
-                             PROPERTIES GENERATED TRUE)
-set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE})
-
-# Create the CMake config file
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
-                ${cisst_BINARY_DIR}/cisstMultiTaskBuild.cmake
-                @ONLY)
 
 # Finally add the library
 cisst_add_library(
@@ -345,53 +309,8 @@ cisst_add_library(
 # Add linking to external libraries
 if (CISST_MTS_HAS_ICE)
   if (WIN32)
-    set (ICE_LIBRARIES_ALL optimized Ice  optimized IceUtil
-                           debug     Iced debug     IceUtild)
-    target_link_libraries (cisstMultiTask
-                           ${ICE_LIBRARIES_ALL})
-    cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES_ALL)
+    target_link_libraries (cisstMultiTask ${ICE_LIBRARIES_ALL})
   else (WIN32)
-    set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
-    target_link_libraries (cisstMultiTask
-                           ${ICE_LIBRARIES})
-    link_directories(${ICE_LIBRARY_DIR})
-    cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES)
+    target_link_libraries (cisstMultiTask ${ICE_LIBRARIES})
   endif (WIN32)
-
 endif (CISST_MTS_HAS_ICE)
-
-
-# Qt widgets
-if (CISST_HAS_QT)
-
-  # To include Qt generated files
-  include_directories (${CMAKE_CURRENT_BINARY_DIR})
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-               ../../include/cisstMultiTask/mtsCollectorQtComponent.h
-               ../../include/cisstMultiTask/mtsCollectorQtWidget.h)
-
-  cisst_add_library (
-    LIBRARY cisstMultiTaskQt
-    LIBRARY_DIR cisstMultiTask
-    DEPENDENCIES cisstCommon
-                 cisstOSAbstraction
-                 cisstVector
-                 cisstMultiTask
-    SOURCE_FILES mtsClassServicesQt.cpp
-                 mtsCollectorQtComponent.cpp
-                 mtsCollectorQtWidget.cpp
-    HEADER_FILES mtsCollectorQtComponent.h
-                 mtsCollectorQtWidget.h
-                 mtsExportQt.h
-    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
-
-  target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
-
-endif (CISST_HAS_QT)
-
-# Python wrappers
-if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module (MODULE cisstMultiTask
-                         INTERFACE_DIRECTORY ../../include/cisstMultiTask
-			 CISST_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon)
-endif (CISST_HAS_SWIG_PYTHON)
