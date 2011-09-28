@@ -89,9 +89,16 @@ public:
         Fl::remove_idle(mtsComponentFLTK<BaseClass>::IdleCallback, this);
     }
 
-    static int StartRunLoop(void) { return Fl::run(); }
+    static int StartRunLoop(void)
+    {
+        return Fl::run(); 
+    }
 
-    void CheckFLTK(void) { this->DoCallback(); Fl::check(); }
+    void CheckFLTK(void)
+    {
+        this->DoCallback();
+        Fl::check();
+    }
 };
 
 #endif // _mtsComponentFLTK_h

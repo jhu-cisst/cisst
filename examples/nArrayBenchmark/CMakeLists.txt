@@ -41,7 +41,7 @@ if (cisst_FOUND_AS_REQUIRED)
     cisst_target_link_libraries (ImageAdd_nArray_Benchmark ${REQUIRED_CISST_LIBRARIES})
 
   else (ITK_FOUND)
-    message ("Example in ${CMAKE_CURRENT_SOURCE_DIR}: nArrayBenchmark examples Subarray_ITK_Benchmark, Subarray_nArray_Benchmark, ImageAdd_ITK_Benchmark and ImageAdd_nArray_Benchmark will not be compiled since they require ITK")
+    message ("Code in ${CMAKE_CURRENT_SOURCE_DIR}: nArrayBenchmark examples Subarray_ITK_Benchmark, Subarray_nArray_Benchmark, ImageAdd_ITK_Benchmark and ImageAdd_nArray_Benchmark will not be compiled since they require ITK")
     mark_as_advanced (ITK_FOUND ITK_DIR)
   endif (ITK_FOUND)
 
@@ -49,5 +49,5 @@ if (cisst_FOUND_AS_REQUIRED)
   cisst_target_link_libraries (optimizedEngines ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

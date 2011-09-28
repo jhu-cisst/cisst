@@ -16,9 +16,7 @@
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-add_subdirectory (cisstComponentGenerator)
 add_subdirectory (cisstComponentManager)
-add_subdirectory (cisstDataGenerator)
 add_subdirectory (cisstDataPlayer)
 
 add_subdirectory (multiTaskGlobalComponentManager)

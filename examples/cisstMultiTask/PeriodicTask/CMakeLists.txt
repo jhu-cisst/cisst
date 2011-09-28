@@ -12,22 +12,38 @@
 #
 # --- end cisst license ---
 
-# shared components used by either example
-if (CISST_HAS_FLTK OR CISST_HAS_QT)
-  add_subdirectory (components)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
-endif (CISST_HAS_FLTK OR CISST_HAS_QT)
 
-# FLTK examples
-if (CISST_HAS_FLTK)
-  add_subdirectory (FLTK)
-else (CISST_HAS_FLTK)
-  message (WARNING " cisstMultiTask example PeriodicTask/FLTK will not be compiled since it requires CISST_HAS_FLTK")
-endif (CISST_HAS_FLTK)
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstNumerical cisstOSAbstraction cisstMultiTask)
 
-# Qt examples
-if (CISST_HAS_QT)
-  add_subdirectory (Qt)
-else (CISST_HAS_QT)
-  message (WARNING " cisstMultiTask example PeriodicTask/Qt will not be compiled since it requires CISST_HAS_QT")
-endif (CISST_HAS_QT)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  # shared components used by either example
+  if (CISST_HAS_FLTK OR CISST_HAS_QT)
+    add_subdirectory (components)
+    include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+  endif (CISST_HAS_FLTK OR CISST_HAS_QT)
+
+  # FLTK examples
+  if (CISST_HAS_FLTK)
+    add_subdirectory (FLTK)
+  else (CISST_HAS_FLTK)
+    message ("Code in ${CMAKE_CURRENT_SOURCE_DIR}/FLTK will not be compiled, it requires CISST_HAS_FLTK")
+  endif (CISST_HAS_FLTK)
+
+  # Qt examples
+  if (CISST_HAS_QT)
+    add_subdirectory (Qt)
+  else (CISST_HAS_QT)
+    message ("Code in ${CMAKE_CURRENT_SOURCE_DIR}/Qt will not be compiled, it requires CISST_HAS_QT")
+  endif (CISST_HAS_QT)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

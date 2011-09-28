@@ -299,13 +299,18 @@ endif (CISST_HAS_OPENGL)
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
 
-# Build everything
+# Build all libraries
 foreach (lib ${CISST_LIBS})
   if (CISST_BUILD_LIBS_${lib})
     add_subdirectory (${lib})
   endif (CISST_BUILD_LIBS_${lib})
 endforeach (lib)
 
+# Building the code generation tools
+if (CISST_BUILD_LIBS_cisstMultiTask)
+  add_subdirectory (cisstComponentGenerator)
+endif (CISST_BUILD_LIBS_cisstMultiTask)
+add_subdirectory (cisstDataGenerator)
 
 # Create misc. config files
 set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})

@@ -342,30 +342,37 @@ macro (cisst_target_link_libraries TARGET ...)
   list (REMOVE_AT _REQUIRED_CISST_LIBRARIES 0) # first one is the library name
   cisst_cmake_debug ("cisst_target_link_libraries, target ${_WHO_REQUIRES} will be linked against ${_REQUIRED_CISST_LIBRARIES}")
 
-  # If cisst has been compile as shared libraries, need to import symbols
-  if (CISST_BUILD_SHARED_LIBS)
-    add_definitions (-DCISST_DLL)
-  endif (CISST_BUILD_SHARED_LIBS)
+  # make sure CISST_LIBRARIES has been defined
+  if (NOT CISST_LIBRARIES)
+    message (SEND_ERROR "cisst_target_link_libraries can only be used after find_package (cisst) succeeded (this should define CISST_LIBRARIES)")
+  else (NOT CISST_LIBRARIES)
 
-  # First test that all libraries should have been compiled
-  foreach (required ${_REQUIRED_CISST_LIBRARIES})
-    set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-    list (FIND _CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
-    if (${FOUND_IT} EQUAL -1 )
-      message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
-    endif (${FOUND_IT} EQUAL -1 )
-  endforeach (required)
+    # If cisst has been compile as shared libraries, need to import symbols
+    if (CISST_BUILD_SHARED_LIBS)
+      add_definitions (-DCISST_DLL)
+    endif (CISST_BUILD_SHARED_LIBS)
 
-  # Second, create a list of libraries in the right order
-  foreach (existing ${CISST_LIBRARIES})
-    if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
-      set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
-    endif ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
-  endforeach (existing)
+    # First test that all libraries should have been compiled
+    foreach (required ${_REQUIRED_CISST_LIBRARIES})
+      set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
+      list (FIND _CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1 )
+        message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+      endif (${FOUND_IT} EQUAL -1 )
+    endforeach (required)
 
-  # Finally, link with the required libraries
-  target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
-  cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
+    # Second, create a list of libraries in the right order
+    foreach (existing ${CISST_LIBRARIES})
+      if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+        set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
+      endif ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+    endforeach (existing)
+
+    # Finally, link with the required libraries
+    target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
+    cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
+
+  endif (NOT CISST_LIBRARIES)
 
 endmacro (cisst_target_link_libraries)
 
@@ -488,12 +495,12 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
       # if the target exists, use its destination
       get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
     else (TARGET cisstComponentGenerator)
-      message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator, turn CISST_BUILD_UTILITIES ON first and then CISST_BUILD_UTILITIES_cisstComponentGenerator")
+      message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator")
     endif (TARGET cisstComponentGenerator)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
     find_program (CISST_CG_EXECUTABLE cisstComponentGenerator
-                  PATHS "${CISST_BINARY_DIR}/utilities/bin")
+                  PATHS "${CISST_BINARY_DIR}/lib/bin")
   endif (TARGET cisstCommon)
 
   # loop over input files
@@ -545,12 +552,12 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
       # if the target exists, use its destination
       get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
     else (TARGET cisstDataGenerator)
-      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator, turn CISST_BUILD_UTILITIES ON first and then CISST_BUILD_UTILITIES_cisstDataGenerator")
+      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator")
     endif (TARGET cisstDataGenerator)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
     find_program (CISST_DG_EXECUTABLE cisstDataGenerator
-                  PATHS "${CISST_BINARY_DIR}/utilities/bin")
+                  PATHS "${CISST_BINARY_DIR}/libs/bin")
   endif (TARGET cisstCommon)
 
   # loop over input files

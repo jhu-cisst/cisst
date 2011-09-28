@@ -68,5 +68,5 @@ if (cisst_FOUND_AS_REQUIRED)
 #   endif (CISST_BUILD_LIBS_cisstParameterTypes)
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

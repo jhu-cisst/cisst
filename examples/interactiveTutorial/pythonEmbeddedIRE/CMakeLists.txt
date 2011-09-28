@@ -15,18 +15,11 @@
 
 project (pythonEmbeddedIRE)
 
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstPython)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstPython)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
-
-
-# if (CISST_BUILD_LIBS_cisstMultiTask)
-#   set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstVector cisstMultiTask)
-# else (CISST_BUILD_LIBS_cisstMultiTask)
-#   set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction)
-# endif (CISST_BUILD_LIBS_cisstMultiTask)
 
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
@@ -80,5 +73,5 @@ if (cisst_FOUND_AS_REQUIRED)
                       COMMENT "Copy of pythonEmbeddedIRE.py to the library directory")
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

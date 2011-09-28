@@ -12,16 +12,16 @@
 # --- end cisst license ---
 
 # List cisst libraries needed
-set (CISST_LIBRARIES_NEEDED cisstCommon
-                            cisstCommonQt
-                            cisstVector
-                            cisstVectorQt
-                            cisstOSAbstraction
-                            cisstMultiTask
-                            cisstMultiTaskQt)
+set (REQUIRED_CISST_LIBRARIES cisstCommon
+                              cisstCommonQt
+                              cisstVector
+                              cisstVectorQt
+                              cisstOSAbstraction
+                              cisstMultiTask
+                              cisstMultiTaskQt)
 
 # Set include/link directories
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 
 qt4_wrap_cpp (QT_WRAPPED_CPP
               displayQtComponent.h
@@ -38,6 +38,5 @@ add_executable (cisstMultiTaskPeriodicTaskQt
                 main.cpp)
 
 target_link_libraries (cisstMultiTaskPeriodicTaskQt
-                       cisstMultiTaskPeriodicTaskComponents
-                       ${QT_LIBRARIES})
-cisst_target_link_libraries (cisstMultiTaskPeriodicTaskQt ${CISST_LIBRARIES_NEEDED})
+                       cisstMultiTaskPeriodicTaskComponents)
+cisst_target_link_libraries (cisstMultiTaskPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
