@@ -65,6 +65,8 @@ int svlFilterImageFlipRotate::Initialize(svlSample* syncInput, svlSample* &syncO
     svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int channels = input->GetVideoChannels();
 
+    InOutSizesMatch = true;
+
     // Initializing image sizes and processing parameters
     for (unsigned int i = 0; i < channels; i ++) {
         // Consolidating rotation
@@ -169,6 +171,9 @@ int svlFilterImageFlipRotate::Initialize(svlSample* syncInput, svlSample* &syncO
 
         if (CWQuarters[i] == 0) OutputImage->SetSize(i, input->GetWidth(i), input->GetHeight(i));
         else OutputImage->SetSize(i, input->GetHeight(i), input->GetWidth(i));
+
+        if (input->GetWidth(i)  != OutputImage->GetWidth(i) ||
+            input->GetHeight(i) != OutputImage->GetHeight(i)) InOutSizesMatch = false;
     }
 
     syncOutput = OutputImage;
@@ -178,14 +183,19 @@ int svlFilterImageFlipRotate::Initialize(svlSample* syncInput, svlSample* &syncO
 
 int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
+    if (InOutSizesMatch && IsDisabled()) {
+        syncOutput = syncInput;
+        return SVL_OK;
+    }
+
     syncOutput = OutputImage;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+
+    typedef vctFixedSizeVector<unsigned char, 3> RGBPixelType;
 
     svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = input->GetVideoChannels();
     unsigned int idx;
-
-    typedef vctFixedSizeVector<unsigned char, 3> RGBPixelType;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {

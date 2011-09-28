@@ -2,7 +2,7 @@
 version 1.0
 header_name {.h} 
 code_name {.cxx}
-class CISST_EXPORT displayUI {open : {public mtsTaskFromCallback}
+class displayUI {open : {public mtsTaskFromCallback}
 } {
   decl {bool WaitingForTrigger;} {}
   decl {mtsFunctionRead GetData;} {}
@@ -12,18 +12,14 @@ class CISST_EXPORT displayUI {open : {public mtsTaskFromCallback}
   decl {mtsFunctionRead GetTime;} {}
   decl {vctPlot2DBase::Trace * DataTrace;} {}
   decl {vctPlot2DBase::Trace * TriggerTrace;} {}
-  Function {displayUI(const std::string & name): mtsTaskFromCallback(name)} {} {
+  Function {displayUI(const std::string & name): mtsTaskFromCallback(name)} {open
+  } {
     Fl_Window DisplayWindow {
-      label DisplayWindow user_data_type {void*} open
+      label DisplayWindow user_data_type {void*} selected
       private xywh {757 504 579 329} type Double
-      code0 {\#include <cisstMultiTask/mtsTaskFromCallback.h>
-\#include <cisstMultiTask/mtsInterfaceRequired.h>
-\#include <cisstVector/vctPlot2DOpenGLFLTK.h>}
-      code1 {\#ifdef cisstMultiTaskPeriodicTaskGuiFLTK_EXPORTS
-\#define CISST_THIS_LIBRARY_AS_DLL
-\#endif
-\#include <cisstCommon/cmnExportMacros.h>
-\#undef CISST_THIS_LIBRARY_AS_DLL}
+      code0 {\#include <cisstMultiTask/mtsTaskFromCallback.h>}
+      code1 {\#include <cisstMultiTask/mtsInterfaceRequired.h>}
+      code2 {\#include <cisstVector/vctPlot2DOpenGLFLTK.h>} visible
     } {
       Fl_Value_Output Data {
         label {Data:}
@@ -83,12 +79,6 @@ if (interfaceRequired) {
     interfaceRequired->AddFunction("GetTime", GetTime);
 }
 
-interfaceRequired = AddInterfaceRequired("Dispatcher", MTS_OPTIONAL);
-if (interfaceRequired) {
-    interfaceRequired->AddEventHandlerVoid(&displayUI::CheckFLTK, this,
-                                           "RunEvent", MTS_EVENT_NOT_QUEUED);
-}
-
 // configure FLTK widgets
 double maxValue = 5.0; double minValue = 0.5;
 double startValue =  1.0;
@@ -105,39 +95,19 @@ this->DataTrace->SetColor(vct3(1.0, 0.9, 0.9));
 this->TriggerTrace = this->Plot->AddTrace("Trigger");
 this->TriggerTrace->SetColor(vct3(0.0, 1.0, 0.0));
 this->Plot->SetContinuousFitY(false);
-this->Plot->FitY(-5.0, 5.0); // set Y range
-Thread.CreateFromThreadId(mtsManagerLocal::GetInstance()->GetMainThreadId());
-} {}
+this->Plot->FitY(-5.0, 5.0); // set Y range} {}
   }
   Function {show(int argc, char**argv)} {open
   } {
     code {this->DisplayWindow->show();
 this->Plot->show();} {}
   }
-  Function {IdleCallback(void * data)} {open return_type {static void}
-  } {
-    code {displayUI * whichUI = reinterpret_cast<displayUI *>(data);
-whichUI->DoCallback();} {}
-  }
-  Function {StartRunLoop(void)} {return_type {static int}
-  } {
-    code {return Fl::run();} {}
-  }
-  Function {CheckFLTK(void)} {return_type void
-  } {
-    code {DoCallback(); Fl::check();} {}
-  }
   Function {Startup(void)} {open return_type void
   } {
-    code {show(0, 0);
-Fl::add_idle(displayUI::IdleCallback, this);
-  } {}
+    code {show(0, 0);} {}
   }
   Function {Cleanup(void)} {return_type void
-  } {
-    code {Fl::remove_idle(displayUI::IdleCallback, this);
   } {}
-  }
   Function {Run(void)} {open return_type void
   } {
     code {// process queued events
@@ -165,14 +135,5 @@ if (!this->WaitingForTrigger) {
     code {this->WaitForTrigger->value(0);
 this->WaitForTrigger->activate();
 this->WaitingForTrigger = false;} {}
-  }
-  decl {CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_ALL);} {}
-} 
-
-declblock {\#if 1} {after {\#endif}
-} {
-  decl {CMN_DECLARE_SERVICES_INSTANTIATION(displayUI);} {public global
-  }
-  decl {CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(displayUI, mtsTaskFromCallback, std::string);} {global
   }
 } 

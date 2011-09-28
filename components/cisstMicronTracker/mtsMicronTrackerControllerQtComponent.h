@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devMicronTrackerControllerQDevice_h
-#define _devMicronTrackerControllerQDevice_h
+#ifndef _mtsMicronTrackerControllerQDevice_h
+#define _mtsMicronTrackerControllerQDevice_h
 
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
@@ -31,17 +31,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <QList>
 #include <QPainter>
 
-#include "ui_devMicronTrackerControllerQWidget.h"
+#include "ui_mtsMicronTrackerControllerQtWidget.h"
 
 
-class devMicronTrackerControllerQDevice : public QObject, public mtsComponent
+class mtsMicronTrackerControllerQDevice : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    devMicronTrackerControllerQDevice(const std::string & taskName);
-    ~devMicronTrackerControllerQDevice(void) {};
+    mtsMicronTrackerControllerQDevice(const std::string & taskName);
+    ~mtsMicronTrackerControllerQDevice(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
@@ -56,7 +56,7 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsComponent
     static const unsigned int FrameHeight = 480;
     static const unsigned int FrameSize = FrameWidth * FrameHeight;
 
-    Ui::devMicronTrackerControllerQWidget ControllerWidget;
+    Ui::mtsMicronTrackerControllerQtWidget ControllerWidget;
     QWidget CentralWidget;
 
     struct {
@@ -94,6 +94,6 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsComponent
     void ScreenshotQSlot(void);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTrackerControllerQDevice);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMicronTrackerControllerQDevice);
 
-#endif  // _devMicronTrackerControllerQDevice_h
+#endif  // _mtsMicronTrackerControllerQDevice_h

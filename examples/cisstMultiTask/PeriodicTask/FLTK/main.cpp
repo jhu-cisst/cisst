@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
-#include "displayUI.h"
+#include "displayTask.h"
 
 int main(int argc, char ** argv)
 {
@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
     sineTask * sineInstance = new sineTask("Sine", PeriodSine);
     clockComponent * clockInstance = new clockComponent("Clock");
-    displayUI * uiInstance = new displayUI("Display");
+    displayTask * uiInstance = new displayTask("Display");
 
     // add the tasks to the component manager
     componentManager->AddComponent(sineInstance);
@@ -62,10 +62,10 @@ int main(int argc, char ** argv)
     componentManager->WaitForStateAll(mtsComponentState::ACTIVE, 2.0 * cmn_s);
 
     // Start FLTK run loop (i.e., call Fl::run). Note that calling Fl::run directly
-    // might not work; for example, if static FLTK libraries are used and displayUI
-    // is dynamically loaded, then (on Windows) this program and displayUI will have
+    // might not work; for example, if static FLTK libraries are used and displayTask
+    // is dynamically loaded, then (on Windows) this program and displayTask will have
     // different copies of Fl::run (seems to work fine on Linux).
-    displayUI::StartRunLoop();
+    displayTask::StartRunLoop();
 
     // cleanup
     componentManager->KillAll();

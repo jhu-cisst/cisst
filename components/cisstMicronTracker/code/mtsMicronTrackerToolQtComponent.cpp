@@ -20,17 +20,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMicronTracker/mtsMicronTrackerToolQtComponent.h>
 
 #include <QDir>
 #include <QString>
 
-#include "devMicronTrackerToolQDevice.h"
-
-CMN_IMPLEMENT_SERVICES(devMicronTrackerToolQDevice);
+CMN_IMPLEMENT_SERVICES(mtsMicronTrackerToolQtComponent);
 
 
-devMicronTrackerToolQDevice::devMicronTrackerToolQDevice(const std::string & taskName) :
-    mtsDevice(taskName)
+mtsMicronTrackerToolQtComponent::mtsMicronTrackerToolQtComponent(const std::string & taskName) :
+    mtsComponent(taskName)
 {
     MTC.MarkerProjectionLeft.SetSize(2);
     MTC.MarkerProjectionRight.SetSize(2);
@@ -54,7 +53,7 @@ devMicronTrackerToolQDevice::devMicronTrackerToolQDevice(const std::string & tas
 }
 
 
-void devMicronTrackerToolQDevice::timerEvent(QTimerEvent * event)
+void mtsMicronTrackerToolQtComponent::timerEvent(QTimerEvent * event)
 {
     MTC.GetPositionCartesian(MTC.PositionCartesian);
     MTC.GetMarkerProjectionLeft(MTC.MarkerProjectionLeft);
@@ -80,7 +79,7 @@ void devMicronTrackerToolQDevice::timerEvent(QTimerEvent * event)
 }
 
 
-void devMicronTrackerToolQDevice::RecordQSlot(void)
+void mtsMicronTrackerToolQtComponent::RecordQSlot(void)
 {
     QString path = QDir::currentPath() + "/CollectedPoints.csv";
     std::ofstream file;

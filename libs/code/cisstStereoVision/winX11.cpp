@@ -672,7 +672,7 @@ void svlWindowManagerX11::Destroy()
     signalImage.Raise();
 
     if (DestroyedSignal) {
-        DestroyedSignal->Wait(/*1.0*/);
+        DestroyedSignal->Wait(1.0);
         delete(DestroyedSignal);
         DestroyedSignal = 0;
     }

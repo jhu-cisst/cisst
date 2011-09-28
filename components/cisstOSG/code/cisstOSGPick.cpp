@@ -1,6 +1,6 @@
-#include <cisstCommon/cmnLogger.h>
 #include <cisstOSG/cisstOSGPick.h>
-#include <cisstOSG/cisstOSGBody.h>
+
+#include <cisstCommon/cmnLogger.h>
 
 cisstOSGPick::cisstOSGPick() : osgGA::GUIEventHandler(), mousex(0), mousey(0){}
 

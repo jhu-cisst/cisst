@@ -20,17 +20,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMicronTracker/mtsMicronTrackerControllerQtComponent.h>
 
 #include <QDir>
 #include <QString>
 
-#include "devMicronTrackerControllerQDevice.h"
-
-CMN_IMPLEMENT_SERVICES(devMicronTrackerControllerQDevice);
+CMN_IMPLEMENT_SERVICES(mtsMicronTrackerControllerQtComponent);
 
 
-devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::string & taskName) :
-    mtsDevice(taskName)
+mtsMicronTrackerControllerQtComponent::mtsMicronTrackerControllerQtComponent(const std::string & taskName) :
+    mtsComponent(taskName)
 {
     MTC.FrameLeft.SetSize(FrameSize);
     MTC.FrameRight.SetSize(FrameSize);
@@ -71,7 +70,7 @@ devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::
 }
 
 
-void devMicronTrackerControllerQDevice::AddToolWidget(QWidget * toolWidget, QPoint * markerLeft, QPoint * markerRight)
+void mtsMicronTrackerControllerQtComponent::AddToolWidget(QWidget * toolWidget, QPoint * markerLeft, QPoint * markerRight)
 {
     ControllerWidget.LayoutTools->addWidget(toolWidget);
     ControllerWidget.BoxTools->addItem(toolWidget->windowTitle());
@@ -82,7 +81,7 @@ void devMicronTrackerControllerQDevice::AddToolWidget(QWidget * toolWidget, QPoi
 }
 
 
-void devMicronTrackerControllerQDevice::timerEvent(QTimerEvent * event)
+void mtsMicronTrackerControllerQtComponent::timerEvent(QTimerEvent * event)
 {
     if (ControllerWidget.ButtonCaptureFrameLeft->isChecked()) {
         MTC.GetFrameLeft(MTC.FrameLeft);
@@ -106,7 +105,7 @@ void devMicronTrackerControllerQDevice::timerEvent(QTimerEvent * event)
 }
 
 
-void devMicronTrackerControllerQDevice::PaintImage(QImage & frameIndexed8, QList<QPoint *> & markers)
+void mtsMicronTrackerControllerQtComponent::PaintImage(QImage & frameIndexed8, QList<QPoint *> & markers)
 {
     FrameRGB = frameIndexed8.convertToFormat(QImage::Format_ARGB32_Premultiplied);
     const size_t numTools = ControllerWidget.LayoutTools->count();
@@ -124,20 +123,20 @@ void devMicronTrackerControllerQDevice::PaintImage(QImage & frameIndexed8, QList
 }
 
 
-void devMicronTrackerControllerQDevice::MTCCalibratePivotQSlot(void)
+void mtsMicronTrackerControllerQtComponent::MTCCalibratePivotQSlot(void)
 {
     mtsStdString toolName = ControllerWidget.BoxTools->currentText().toStdString();
     MTC.CalibratePivot(mtsStdString(toolName));
 }
 
 
-void devMicronTrackerControllerQDevice::MTCComputeCameraModelQSlot(void)
+void mtsMicronTrackerControllerQtComponent::MTCComputeCameraModelQSlot(void)
 {
     MTC.ComputeCameraModel(mtsStdString("MicronTrackerLeftRectification.dat"));
 }
 
 
-void devMicronTrackerControllerQDevice::MTCTrackQSlot(bool toggled)
+void mtsMicronTrackerControllerQtComponent::MTCTrackQSlot(bool toggled)
 {
     MTC.Capture(mtsBool(toggled));
     MTC.Track(mtsBool(toggled));
@@ -145,7 +144,7 @@ void devMicronTrackerControllerQDevice::MTCTrackQSlot(bool toggled)
 }
 
 
-void devMicronTrackerControllerQDevice::RecordQSlot(bool toggled)
+void mtsMicronTrackerControllerQtComponent::RecordQSlot(bool toggled)
 {
     if (toggled) {
         CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: starting data collection" << std::endl;
@@ -157,7 +156,7 @@ void devMicronTrackerControllerQDevice::RecordQSlot(bool toggled)
 }
 
 
-void devMicronTrackerControllerQDevice::ScreenshotQSlot(void)
+void mtsMicronTrackerControllerQtComponent::ScreenshotQSlot(void)
 {
     QPixmap leftCamera = QPixmap::grabWidget(ControllerWidget.FrameLeft);
     QPixmap rightCamera = QPixmap::grabWidget(ControllerWidget.FrameRight);

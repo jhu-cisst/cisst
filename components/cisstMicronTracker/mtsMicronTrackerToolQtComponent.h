@@ -18,25 +18,25 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devMicronTrackerToolQDevice_h
-#define _devMicronTrackerToolQDevice_h
+#ifndef _mtsMicronTrackerToolQtComponent_h
+#define _mtsMicronTrackerToolQtComponent_h
 
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
-#include "ui_devMicronTrackerToolQWidget.h"
+#include "ui_mtsMicronTrackerToolQtWidget.h"
 
 
-class devMicronTrackerToolQDevice : public QObject, public mtsComponent
+class mtsMicronTrackerToolQtComponent : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    devMicronTrackerToolQDevice(const std::string & taskName);
-    ~devMicronTrackerToolQDevice(void) {};
+    mtsMicronTrackerToolQtComponent(const std::string & taskName);
+    ~mtsMicronTrackerToolQtComponent(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
@@ -51,7 +51,7 @@ class devMicronTrackerToolQDevice : public QObject, public mtsComponent
     }
 
  protected:
-    Ui::devMicronTrackerToolQWidget ToolWidget;
+    Ui::mtsMicronTrackerToolQtWidget ToolWidget;
     QWidget CentralWidget;
 
     struct {
@@ -72,6 +72,6 @@ class devMicronTrackerToolQDevice : public QObject, public mtsComponent
     void RecordQSlot(void);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTrackerToolQDevice);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMicronTrackerToolQtComponent);
 
-#endif  // _devMicronTrackerToolQDevice_h
+#endif  // _mtsMicronTrackerToolQtComponent_h

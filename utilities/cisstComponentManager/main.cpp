@@ -355,7 +355,7 @@ bool shellTask::Quit(void) const
 bool shellTask::ExecuteMultiLine(const std::string &curLine) const
 {
     cmnTokenizer tokens;
-    tokens.SetDelimiters(";\n");
+    tokens.SetDelimiters(";\r\n");
     tokens.Parse(curLine);
     cmnTokenizer::size_type i;
     for (i = 0; i < tokens.GetNumTokens(); i++) {
@@ -369,6 +369,7 @@ bool shellTask::ExecuteMultiLine(const std::string &curLine) const
 bool shellTask::ExecuteLine(const std::string &curLine) const
 {
     static cmnTokenizer tokens;
+    tokens.SetDelimiters(" \t\r\n");
     bool ret = true;
     shellTask::lastError = "";
     std::string procLine(curLine);
