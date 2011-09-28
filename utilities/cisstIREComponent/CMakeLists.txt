@@ -11,23 +11,27 @@
 #
 # --- end cisst license ---
 
-# cisst libraries used for this project
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction
-                            cisstMultiTask cisstInteractive)
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
-
 # name of project and executable
 project (cisstIREComponent)
 
-# name the main executable and specifies with source files to use
-add_executable (cisstIREComponent main.cpp)
+# cisst libraries used for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction
+                              cisstMultiTask cisstInteractive)
 
-# link with the cisst libraries
-cisst_target_link_libraries (cisstIREComponent ${CISST_LIBRARIES_NEEDED})
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-# PK: check whether the following is still needed
-if(UNIX)
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_libraries(cisstIREComponent util)
-  endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-endif(UNIX)
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  # name the main executable and specifies with source files to use
+  add_executable (cisstIREComponent main.cpp)
+
+  # link with the cisst libraries
+  cisst_target_link_libraries (cisstIREComponent ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

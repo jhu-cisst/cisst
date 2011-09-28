@@ -11,57 +11,66 @@
 #
 # --- end cisst license ---
 
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstVector cisstVectorQt cisstMultiTask cisstStereoVision cisstStereoVisionQt cisstQt)
 
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-include_directories (${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+if (cisst_FOUND_AS_REQUIRED)
 
-qt4_wrap_cpp (QT_WRAPPED_CPP
-              cdpPlayerBase.h
-              cdpPlayerExample.h
-              cdpPlayerManager.h
-              cdpPlayerVideo.h
-              cdpPlayerPlot2D.h
-              )
+  # load cisst configuration
+  include (${CISST_USE_FILE})
 
-qt4_wrap_ui (QT_WRAPPED_UI
-             cdpPlayerManagerWidget.ui
-             cdpPlayerWidget.ui)
+  include_directories (${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library (cisstDataPlayerComponents
-             ${QT_WRAPPED_CPP}
-             ${QT_WRAPPED_UI}
-             cdpExport.h
-             cdpPlayerBase.h
-             cdpPlayerBase.cpp
-             cdpPlayerManager.h
-             cdpPlayerManager.cpp
-             cdpSaveParameters.h
-             cdpSaveParameters.cpp
-             cdpPlayerDataInfo.h
-             cdpPlayerDataInfo.cpp
-             cdpPlayerExample.h
-             cdpPlayerExample.cpp
-             cdpPlayerPlot2D.h
-             cdpPlayerPlot2D.cpp
-             cdpPlayerVideo.h
-             cdpPlayerVideo.cpp
-             cdpPlayerParseStateTableData.h
-             cdpPlayerParseStateTableData.cpp
-             )
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                cdpPlayerBase.h
+                cdpPlayerExample.h
+                cdpPlayerManager.h
+                cdpPlayerVideo.h
+                cdpPlayerPlot2D.h
+                )
 
-cisst_target_link_libraries (cisstDataPlayerComponents ${CISST_LIBRARIES_NEEDED})
-target_link_libraries (cisstDataPlayerComponents ${QT_LIBRARIES})
+  qt4_wrap_ui (QT_WRAPPED_UI
+               cdpPlayerManagerWidget.ui
+               cdpPlayerWidget.ui)
 
-add_executable (cisstDataPlayer
-                main.cpp)
+  add_library (cisstDataPlayerComponents
+               ${QT_WRAPPED_CPP}
+               ${QT_WRAPPED_UI}
+               cdpExport.h
+               cdpPlayerBase.h
+               cdpPlayerBase.cpp
+               cdpPlayerManager.h
+               cdpPlayerManager.cpp
+               cdpSaveParameters.h
+               cdpSaveParameters.cpp
+               cdpPlayerDataInfo.h
+               cdpPlayerDataInfo.cpp
+               cdpPlayerExample.h
+               cdpPlayerExample.cpp
+               cdpPlayerPlot2D.h
+               cdpPlayerPlot2D.cpp
+               cdpPlayerVideo.h
+               cdpPlayerVideo.cpp
+               cdpPlayerParseStateTableData.h
+               cdpPlayerParseStateTableData.cpp
+               )
 
-target_link_libraries (cisstDataPlayer cisstDataPlayerComponents ${QT_LIBRARIES})
-cisst_target_link_libraries (cisstDataPlayer ${CISST_LIBRARIES_NEEDED})
+  cisst_target_link_libraries (cisstDataPlayerComponents ${REQUIRED_CISST_LIBRARIES})
 
-add_executable (cisstQtVideoPlayer
-                qtVideoPlayer.cpp)
+  add_executable (cisstDataPlayer
+                  main.cpp)
 
-target_link_libraries (cisstQtVideoPlayer cisstDataPlayerComponents ${QT_LIBRARIES})
-cisst_target_link_libraries (cisstQtVideoPlayer ${CISST_LIBRARIES_NEEDED})
+  target_link_libraries (cisstDataPlayer cisstDataPlayerComponents)
+  cisst_target_link_libraries (cisstDataPlayer ${REQUIRED_CISST_LIBRARIES})
+
+  add_executable (cisstQtVideoPlayer
+                  qtVideoPlayer.cpp)
+
+  target_link_libraries (cisstQtVideoPlayer cisstDataPlayerComponents)
+  cisst_target_link_libraries (cisstQtVideoPlayer ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

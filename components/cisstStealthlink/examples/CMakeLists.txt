@@ -19,7 +19,7 @@ set (CISST_LIBRARIES_NEEDED cisstCommon
                             cisstParameterTypes)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${CISST_LIBRARIES_REQUIRED})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 

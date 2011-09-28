@@ -48,5 +48,5 @@ if (cisst_FOUND_AS_REQUIRED)
   endif (CISST_HAS_CISSTNETLIB)
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${CISST_LIBRARIES_REQUIRED}")
+  message ("Example in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

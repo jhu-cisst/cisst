@@ -12,25 +12,35 @@
 #
 # --- end cisst license ---
 
-project( cisstRobotUtilities )
+project (cisstRobotUtilities)
 
-set( PROJECT_DEPENDENCIES
-  cisstCommon
-  cisstVector
-  cisstOSAbstraction
-  cisstRobot
-  cisstNumerical )
+set (REQUIRED_CISST_LIBRARIES
+    cisstCommon
+    cisstVector
+    cisstOSAbstraction
+    cisstRobot
+    cisstNumerical)
 
-cisst_set_directories (${PROJECT_DEPENDENCIES})
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-add_executable( RandomJoints RandomJoints.cpp )
-cisst_target_link_libraries( RandomJoints ${PROJECT_DEPENDENCIES} )
+if (cisst_FOUND_AS_REQUIRED)
 
-add_executable( ForwardKinematics ForwardKinematics.cpp )
-cisst_target_link_libraries( ForwardKinematics ${PROJECT_DEPENDENCIES} )
+  # load cisst configuration
+  include (${CISST_USE_FILE})
 
-add_executable( KinematicsIdentification KinematicsIdentification.cpp )
-cisst_target_link_libraries( KinematicsIdentification ${PROJECT_DEPENDENCIES} )
+  add_executable (cisstRandomJoints RandomJoints.cpp)
+  cisst_target_link_libraries (cisstRandomJoints ${REQUIRED_CISST_LIBRARIES})
+
+  add_executable (cisstForwardKinematics ForwardKinematics.cpp)
+  cisst_target_link_libraries (cisstForwardKinematics ${REQUIRED_CISST_LIBRARIES})
+
+  add_executable (cisstKinematicsIdentification KinematicsIdentification.cpp)
+  cisst_target_link_libraries (cisstKinematicsIdentification ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)
 
 
 

@@ -12,32 +12,30 @@
 # --- end cisst license ---
 
 # name of project and executable
-PROJECT(cisstComponentManager)
+project (cisstComponentManager)
 
-# set all libraries needed
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstMultiTask)
 
-# set include and link directories for cisst
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
+cmake_minimum_required (VERSION 2.8)
 
-# name the main executable and specifies with source files to use
-add_executable (cisstComponentManager main.cpp)
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask)
 
-# link with the cisst libraries
-cisst_target_link_libraries(cisstComponentManager ${CISST_LIBRARIES_NEEDED})
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-# PK: check whether the following is still needed
-if(UNIX)
-  # For QNX
-  SET(IS_QNX FALSE)
-  IF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-    SET(IS_QNX TRUE)
-  MESSAGE("QNX detected")
-  ENDIF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+if (cisst_FOUND_AS_REQUIRED)
 
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    if(NOT IS_QNX)
-      target_link_libraries(cisstComponentManager util)
-    endif(NOT IS_QNX)
-  endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-endif(UNIX)
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+
+  # name the main executable and specifies with source files to use
+  add_executable (cisstComponentManager main.cpp)
+
+  # link with the cisst libraries
+  cisst_target_link_libraries (cisstComponentManager ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

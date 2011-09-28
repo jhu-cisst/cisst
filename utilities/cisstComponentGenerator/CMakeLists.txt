@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,15 +12,30 @@
 #
 # --- end cisst license ---
 
+cmake_minimum_required (VERSION 2.8)
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon)
 
-# name the main executable and specifies with source files to use
-add_executable (cisstComponentGenerator
-                cisstComponentGenerator.cpp
-                ccgComponent.h
-                ccgParser.h
-                ccgComponent.cpp
-                ccgParser.cpp)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-cisst_target_link_libraries (cisstComponentGenerator cisstCommon)
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+
+  add_executable (cisstComponentGenerator
+                  cisstComponentGenerator.cpp
+                  ccgComponent.h
+                  ccgParser.h
+                  ccgComponent.cpp
+                  ccgParser.cpp)
+
+  cisst_target_link_libraries (cisstComponentGenerator ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

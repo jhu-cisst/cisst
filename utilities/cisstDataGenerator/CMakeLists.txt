@@ -3,7 +3,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,25 +14,42 @@
 #
 # --- end cisst license ---
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+cmake_minimum_required (VERSION 2.8)
 
-# name the main executable and specifies with source files to use
-add_executable (cisstDataGenerator
-                cisstDataGenerator.cpp
-                cdgScope.h
-                cdgScope.cpp
-                cdgGlobal.h
-                cdgGlobal.cpp
-                cdgClass.h
-                cdgClass.cpp
-                cdgMember.h
-                cdgMember.cpp
-                cdgTypedef.h
-                cdgTypedef.cpp
-                cdgCode.h
-                cdgCode.cpp
-                cdgFile.h
-                cdgFile.cpp
-                )
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon)
 
-cisst_target_link_libraries (cisstDataGenerator cisstCommon)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+
+  # name the main executable and specifies with source files to use
+  add_executable (cisstDataGenerator
+                  cisstDataGenerator.cpp
+                  cdgScope.h
+                  cdgScope.cpp
+                  cdgGlobal.h
+                  cdgGlobal.cpp
+                  cdgClass.h
+                  cdgClass.cpp
+                  cdgMember.h
+                  cdgMember.cpp
+                  cdgTypedef.h
+                  cdgTypedef.cpp
+                  cdgCode.h
+                  cdgCode.cpp
+                  cdgFile.h
+                  cdgFile.cpp
+                  )
+
+  cisst_target_link_libraries (cisstDataGenerator ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Utility in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

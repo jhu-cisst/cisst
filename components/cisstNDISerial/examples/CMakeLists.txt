@@ -12,12 +12,12 @@
 # --- end cisst license ---
 
 # create a list of libraries needed for this project
-set (CISST_LIBRARIES_REQUIRED cisstCommon cisstCommonQt cisstCommonXML
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstCommonQt cisstCommonXML
                               cisstVector cisstOSAbstraction cisstNumerical
                               cisstMultiTask cisstParameterTypes cisstRobot)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${CISST_LIBRARIES_REQUIRED})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
@@ -42,7 +42,7 @@ if (cisst_FOUND)
                            ${QT_LIBRARIES}
                          )
     # link against cisst libraries (and dependencies)
-    cisst_target_link_libraries (cisstNDISerialQtExample ${CISST_LIBRARIES_REQUIRED})
+    cisst_target_link_libraries (cisstNDISerialQtExample ${REQUIRED_CISST_LIBRARIES})
 
   endif (cisstNDISerial_FOUND)
 
