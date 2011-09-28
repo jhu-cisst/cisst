@@ -43,8 +43,6 @@ private:
         CPPUNIT_TEST(TestGetInstance);
         CPPUNIT_TEST(TestGetComponent);
         CPPUNIT_TEST(TestGetNamesOfComponents);
-        CPPUNIT_TEST(TestGetNamesOfTasks);
-        CPPUNIT_TEST(TestGetNamesOfDevices);
         CPPUNIT_TEST(TestGetProcessName);
 
         CPPUNIT_TEST(TestConnectLocally);

@@ -32,41 +32,21 @@ add_library (cisstMultiTaskPythonTest SHARED
              mtsPeriodicTaskTest.h mtsPeriodicTaskTest.cpp)
 cisst_target_link_libraries (cisstMultiTaskPythonTest ${CISST_LIBRARIES_NEEDED})
 
-# Python wrappers
-set (PROXY_TESTS cisstMultiTaskPythonTest)
-foreach (proxyTest ${PROXY_TESTS})
-  set (interface ${CMAKE_CURRENT_SOURCE_DIR}/${proxyTest}.i)
-  set (module ${proxyTest}Python)
-  set (TEST_PROGRAMS ${TEST_PROGRAMS} ${proxyTest}.py)
 
-  set_source_files_properties (${interface} PROPERTIES CPLUSPLUS ON)
-  set_source_files_properties (${interface}
-                               PROPERTIES SWIG_FLAGS "-v;-modern;-fcompact;-fvirtual")
-  swig_add_module (${module} python ${interface})
-  if (WIN32)
-    set_target_properties(_${module} PROPERTIES SUFFIX .pyd)
-  endif(WIN32)
-  swig_link_libraries(${module}
-	              cisstMultiTaskPythonTest
-                      cisstMultiTask cisstVector cisstCommon
-                      debug ${PYTHON_DEBUG_LIBRARIES}
-                      optimized ${PYTHON_LIBRARIES})
-  # Copy the .py file generated to wherever the libraries are
-  add_custom_command (TARGET _${module}
-                      POST_BUILD
-                      COMMAND ${CMAKE_COMMAND}
-                      ARGS -E copy
-                              ${CMAKE_CURRENT_BINARY_DIR}/${module}.py
-                              ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${module}.py)
-  # Create a cisstMultiTask.py as CMake assumes one should be created
-  # This is a bug that should be fixed in future releases of CMake.
-  add_custom_command (TARGET _${module}
-                      POST_BUILD
-                      COMMAND ${CMAKE_COMMAND}
-                      ARGS -E copy
-                              ${CMAKE_CURRENT_BINARY_DIR}/${module}.py
-                              ${CMAKE_CURRENT_BINARY_DIR}/${proxyTest}.py)
-endforeach (proxyTest)
+# Allow generated c++ code to find header files
+include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+
+# We are using C++ code
+cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
+                       MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstMultiTaskPythonTest)
+
+# Copy the .py file generated to wherever the libraries are
+add_custom_command (TARGET _cisstMultiTaskPythonTest
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND}
+                    ARGS -E copy
+                            ${CMAKE_CURRENT_BINARY_DIR}/cisstMultiTaskPythonTest.py
+                            ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskPythonTest.py)
 
 # Create the scripts from .in
 set (LIB cisstMultiTask)

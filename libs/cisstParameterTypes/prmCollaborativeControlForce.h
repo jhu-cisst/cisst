@@ -26,6 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
+#error "This class is deprecated, do not use"
+
 MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(robCollaborativeControlForce::ParameterType, prmCollaborativeControlForce);
 
 #endif

@@ -26,9 +26,6 @@ CMN_IMPLEMENT_SERVICES(prmActuatorParameters);
 #include <cisstParameterTypes/prmActuatorState.h>
 CMN_IMPLEMENT_SERVICES(prmActuatorState);
 
-#include <cisstParameterTypes/prmCollaborativeControlForce.h>
-CMN_IMPLEMENT_SERVICES(prmCollaborativeControlForce);
-
 #include <cisstParameterTypes/prmEventButton.h>
 CMN_IMPLEMENT_SERVICES(prmEventButton);
 

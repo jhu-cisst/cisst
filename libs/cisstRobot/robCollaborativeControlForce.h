@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 //Always include last
 #include <cisstRobot/robExport.h>
 
+#error "This class is deprecated, do not use"
+
 class CISST_EXPORT robCollaborativeControlForce {
 
 public:

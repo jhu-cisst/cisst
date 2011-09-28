@@ -273,6 +273,7 @@ void mtsManagerLocalTest::TestGetComponent(void)
     CPPUNIT_ASSERT(device3 == localManager.GetComponent(device3->GetName()));
 }
 
+
 void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 {
     mtsManagerLocal localManager;
@@ -301,64 +302,6 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
         CPPUNIT_ASSERT(namesOfComponents2[i] == device1->GetName() ||
                        namesOfComponents2[i] == device2->GetName() ||
                        namesOfComponents2[i] == device3->GetName());
-    }
-}
-
-void mtsManagerLocalTest::TestGetNamesOfTasks(void)
-{
-    mtsManagerLocal localManager;
-    mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
-    mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
-
-    CPPUNIT_ASSERT(localManager.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager.AddComponent(device2));
-    CPPUNIT_ASSERT(localManager.AddComponent(periodic1));
-    CPPUNIT_ASSERT(localManager.AddComponent(continuous1));
-
-    std::vector<std::string> namesOfTasks1 = localManager.GetNamesOfTasks();
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfTasks1.size());
-    for (size_t i = 0; i < 2; ++i) {
-        CPPUNIT_ASSERT(namesOfTasks1[i] == continuous1->GetName() ||
-                       namesOfTasks1[i] == periodic1->GetName());
-    }
-
-    std::vector<std::string> namesOfTasks2;
-    localManager.GetNamesOfTasks(namesOfTasks2);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfTasks2.size());
-    for (size_t i = 0; i < 2; ++i) {
-        CPPUNIT_ASSERT(namesOfTasks2[i] == continuous1->GetName() ||
-                       namesOfTasks2[i] == periodic1->GetName());
-    }
-}
-
-void mtsManagerLocalTest::TestGetNamesOfDevices(void)
-{
-    mtsManagerLocal localManager;
-    mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
-    mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
-
-    CPPUNIT_ASSERT(localManager.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager.AddComponent(device2));
-    CPPUNIT_ASSERT(localManager.AddComponent(periodic1));
-    CPPUNIT_ASSERT(localManager.AddComponent(continuous1));
-
-    std::vector<std::string> namesOfDevices1 = localManager.GetNamesOfDevices();
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfDevices1.size());
-    for (size_t i = 0; i < 2; ++i) {
-        CPPUNIT_ASSERT(namesOfDevices1[i] == device1->GetName() ||
-                       namesOfDevices1[i] == device2->GetName());
-    }
-
-    std::vector<std::string> namesOfDevices2;
-    localManager.GetNamesOfDevices(namesOfDevices2);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfDevices2.size());
-    for (size_t i = 0; i < 2; ++i) {
-        CPPUNIT_ASSERT(namesOfDevices2[i] == device1->GetName() ||
-                       namesOfDevices2[i] == device2->GetName());
     }
 }
 

@@ -24,8 +24,8 @@ cisst_set_directories (cisstQt)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 qt4_wrap_cpp (QT_WRAPPED_CPP
-              ../../include/cisstMultiTask/mtsCollectorQtComponent.h
-              ../../include/cisstMultiTask/mtsCollectorQtWidget.h)
+              ../mtsCollectorQtComponent.h
+              ../mtsCollectorQtWidget.h)
 
 cisst_add_library (LIBRARY cisstMultiTaskQt
                    LIBRARY_DIR cisstMultiTask

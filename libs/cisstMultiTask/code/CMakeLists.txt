@@ -295,15 +295,32 @@ if (CISST_MTS_HAS_ICE)
   set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
 endif (CISST_MTS_HAS_ICE)
 
+# Create the config file
+set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstMultiTask/mtsConfig.h)
+configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in
+                ${CISST_MTS_CONFIG_FILE}
+                @ONLY)
+install_files (/include/cisstMultiTask
+               ".h"
+               ${CISST_MTS_CONFIG_FILE})
+
+# Add the config file to the project
+set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"
+                             PROPERTIES GENERATED TRUE)
+set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE})
+
+# Create the CMake config file
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
+                ${cisst_BINARY_DIR}/cisstMultiTaskBuild.cmake
+                @ONLY)
 
 # Finally add the library
-cisst_add_library(
-  LIBRARY cisstMultiTask
-  DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
-  SOURCE_FILES ${SOURCE_FILES}
-  HEADER_FILES ${HEADER_FILES}
-  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
-  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
+cisst_add_library (LIBRARY cisstMultiTask
+                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
+                   SOURCE_FILES ${SOURCE_FILES}
+                   HEADER_FILES ${HEADER_FILES}
+                   ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
+                   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
 
 # Add linking to external libraries
