@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,6 +13,8 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
+
+project (cisstStereoVision)
 
 # set dependencies
 SET(DEPENDENCIES
@@ -1269,9 +1271,10 @@ SET(SOURCE_FILES
     svlVideoCodecInitializer.h
     svlVideoCodecInitializer.cpp
     )
-SET(HEADER_FILES
-    ${HEADER_FILES}
-    svlInitializer.h)
+
+set (HEADER_FILES
+     ${HEADER_FILES}
+     svlInitializer.h)
 
 # Add svlFilterImageOpenGL is OpenGL is used
 if (CISST_HAS_OPENGL)
@@ -1286,18 +1289,18 @@ if (CISST_HAS_OPENGL)
 endif (CISST_HAS_OPENGL)
 
 # Create the config file
-SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
-CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstStereoVision/svlConfig.h.in
-               ${CISST_SVL_CONFIG_FILE}
-               @ONLY)
-INSTALL_FILES(/include/cisstStereoVision
+set (CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
+configure_file (${cisstStereoVisionLibs_SOURCE_DIR}/svlConfig.h.in
+                ${CISST_SVL_CONFIG_FILE}
+                @ONLY)
+install_files (/include/cisstStereoVision
                ".h"
                ${CISST_SVL_CONFIG_FILE})
 
 # Add the config file to the project
-SET_SOURCE_FILES_PROPERTIES("${CISST_SVL_CONFIG_FILE}"
-                            PROPERTIES GENERATED TRUE)
-SET(ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
+set_source_files_properties ("${CISST_SVL_CONFIG_FILE}"
+                             PROPERTIES GENERATED TRUE)
+set (ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 
 # Finally create the library
 cisst_add_library (
@@ -1307,100 +1310,7 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
-
-# Python wrappers
-if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstStereoVision
-                        INTERFACE_DIRECTORY ../../include/cisstStereoVision
-			CISST_LIBRARIES cisstStereoVision
-                                        ${DEPENDENCIES})
-endif (CISST_HAS_SWIG_PYTHON)
-
-
 # Link `cisstStereoVision` against CUDA generated libraries
 IF(CISST_SVL_HAS_CUDA)
     TARGET_LINK_LIBRARIES(cisstStereoVision ${CUDA_GENERATED_LIBRARIES})
 ENDIF(CISST_SVL_HAS_CUDA)
-
-
-# Qt widgets
-IF(CISST_HAS_QT)
-    SET(SVL_QT_HEADER_FILES
-        svlQtObjectFactory.h
-        svlQtDialog.h
-        svlQtWidgetFileOpen.h
-        svlQtWidgetFramerate.h
-        svlQtWidgetVideoEncoder.h
-        svlQtWidgetVidCapSrcImageProperties.h
-        )
-    SET(SVL_QT_SOURCE_FILES
-        svlQtObjectFactory.cpp
-        svlQtDialog.cpp
-        svlQtWidgetFileOpen.cpp
-        svlQtWidgetFramerate.cpp
-        svlQtWidgetVideoEncoder.cpp
-        svlQtWidgetVidCapSrcImageProperties.cpp
-        )
-    SET(SVL_QT_UI_FILES
-        svlQtWidgetFramerate.ui
-        svlQtWidgetVideoEncoder.ui
-        svlQtWidgetVidCapSrcImageProperties.ui
-        )
-
-    IF(CISST_HAS_OPENGL)
-        SET(SVL_QT_HEADER_FILES
-            ${SVL_QT_HEADER_FILES}
-            svlFilterImageWindowQt.h
-            svlFilterImageOpenGLQtWidget.h
-            )
-        SET(SVL_QT_SOURCE_FILES
-            ${SVL_QT_SOURCE_FILES}
-            winQt4OpenGL.h          # private header
-            winQt4OpenGL.cpp
-            svlFilterImageWindowQt.cpp
-            svlFilterImageOpenGLQtWidget.cpp
-            )
-        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP
-                     winQt4OpenGL.h
-                     )
-    ENDIF(CISST_HAS_OPENGL)
-
-    # Include Qt generated files
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
-    FOREACH(HEADER ${SVL_QT_HEADER_FILES})
-        QT4_WRAP_CPP(SVL_QT_WRAPPED_CPP_TEMP
-                     ../../include/cisstStereoVision/${HEADER}
-                     )
-        SET(SVL_QT_WRAPPED_CPP
-            ${SVL_QT_WRAPPED_CPP}
-            ${SVL_QT_WRAPPED_CPP_TEMP}
-            )
-    ENDFOREACH(HEADER)
-
-    FOREACH(UI ${SVL_QT_UI_FILES})
-        QT4_WRAP_UI(SVL_QT_WRAPPED_UI
-                    ${UI}
-                    )
-        SET(SVL_QT_WRAPPED_UI
-            ${SVL_QT_WRAPPED_UI}
-            ${SVL_QT_WRAPPED_UI_TEMP}
-            )
-    ENDFOREACH(UI)
-
-    CISST_ADD_LIBRARY(LIBRARY cisstStereoVisionQt
-                      LIBRARY_DIR cisstStereoVision
-                      DEPENDENCIES cisstCommon
-                                   cisstVector
-                                   cisstStereoVision
-                      SOURCE_FILES ${SVL_QT_SOURCE_FILES}
-                      HEADER_FILES ${SVL_QT_HEADER_FILES}
-                                   svlExportQt.h
-                      ADDITIONAL_SOURCE_FILES ${SVL_QT_WRAPPED_CPP}
-                                              ${SVL_QT_WRAPPED_UI}
-                      )
-
-    TARGET_LINK_LIBRARIES(cisstStereoVisionQt ${QT_LIBRARIES})
-
-ENDIF(CISST_HAS_QT)
-

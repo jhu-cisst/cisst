@@ -14,6 +14,8 @@
 #
 # --- end cisst license ---
 
+project (cisstMultiTaskQt)
+
 # cisstMultiTaskQt relies on cisstQt settings (for future use)
 cisst_library_use_settings (cisstMultiTaskQt cisstQt)
 
