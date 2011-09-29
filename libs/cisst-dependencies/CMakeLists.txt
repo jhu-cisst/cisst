@@ -57,8 +57,8 @@ if (CISST_HAS_QT)
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
   # XML Qt based
-  option (CISST_HAS_QT_XML "Use Qt XML and Patterns for cmnXMLPath" ON)
-  mark_as_advanced (CISST_HAS_QT_XML)
+  set (CISST_FOUND_QT_XML ON CACHE BOOL "Is Qt XML available" FORCE)
+  mark_as_advanced (CISST_FOUND_QT_XML)
 
   # Create the CMake config file
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
@@ -67,6 +67,9 @@ if (CISST_HAS_QT)
 
 else (CISST_HAS_QT)
   cisst_unset_all_package_settings (cisstQt Qt)
+  # XML Qt based
+  set (CISST_FOUND_QT_XML OFF CACHE BOOL "Is Qt XML available" FORCE)
+  mark_as_advanced (CISST_FOUND_QT_XML)
 endif (CISST_HAS_QT)
 
 
@@ -116,9 +119,9 @@ if (CISST_HAS_SWIG_PYTHON)
   else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
     include (${SWIG_USE_FILE})
     # save SWIG settings
-    set (CISST_SWIG_PACKAGE "SWIG") 
+    set (CISST_SWIG_PACKAGE "SWIG")
     cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
-    cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE) 
+    cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE)
 
     # Create the CMake config file
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
@@ -155,3 +158,14 @@ else (CISST_HAS_SWIG_PYTHON)
   cisst_unset_all_package_settings (cisstPython Python)
   cisst_unset_all_package_settings (cisstPython NumPy)
 endif (CISST_HAS_SWIG_PYTHON)
+
+
+# Support for cisstCommonXML, just to see what is available
+find_package (LibXml2)
+if (LIBXML2_FOUND)
+  set (CISST_FOUND_LIBXML2_XML ON CACHE BOOL "Is LibXml2 XML available" FORCE)
+  mark_as_advanced (CISST_FOUND_LIBXML2_XML)
+else (LIBXML2_FOUND)
+  set (CISST_FOUND_LIBXML2_XML OFF CACHE BOOL "Is LibXml2 XML available" FORCE)
+  mark_as_advanced (CISST_FOUND_LIBXML2_XML)
+endif (LIBXML2_FOUND)

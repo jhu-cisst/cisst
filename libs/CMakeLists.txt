@@ -266,12 +266,9 @@ foreach (lib ${CISST_LIBS})
 endforeach (lib)
 
 # Add cisstCommonXML if needed
-if (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
-  set (CISST_BUILD_LIBS_cisstCommonXML ON CACHE BOOL "Build cisstCommonXML" FORCE)
+if (CISST_BUILD_LIBS_cisstCommonXML)
   set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
-else (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
-  set (CISST_BUILD_LIBS_cisstCommonXML OFF CACHE BOOL "Build cisstCommonXML" FORCE)
-endif (CISST_BUILD_LIBS_cisstCommon AND CISST_HAS_XML)
+endif (CISST_BUILD_LIBS_cisstCommonXML)
 
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_BUILD_LIBS_cisstInteractive})

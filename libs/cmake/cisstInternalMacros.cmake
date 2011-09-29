@@ -97,3 +97,17 @@ function (cisst_library_use_settings whoRequires value)
   file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
   file (APPEND ${FILENAME} "set (CISST_GENERAL_SETTINGS_FOR_${whoRequires} \"${CISST_GENERAL_SETTINGS_FOR_${whoRequires}}\")\n")
 endfunction (cisst_library_use_settings)
+
+
+function (cisst_library_remove_settings whoRequires value)
+  # load existing settings
+  cisst_load_package_setting (${whoRequires})
+  # Add to list of all external dependencies
+  list (REMOVE_ITEM CISST_GENERAL_SETTINGS_FOR_${whoRequires} ${value})
+  # Also update the list of external packages for the given library
+  set (FILENAME "${cisst_BINARY_DIR}/cisst-dependencies/${whoRequires}External.cmake")
+  file (WRITE  ${FILENAME} "# This file is generated automatically by CMake for cisst, DO NOT EDIT\n")
+  file (APPEND ${FILENAME} "# Source: ${CMAKE_SOURCE_DIR}\n\n")
+  file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
+  file (APPEND ${FILENAME} "set (CISST_GENERAL_SETTINGS_FOR_${whoRequires} \"${CISST_GENERAL_SETTINGS_FOR_${whoRequires}}\")\n")
+endfunction (cisst_library_use_settings)

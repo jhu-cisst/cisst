@@ -25,33 +25,17 @@ if (CISST_HAS_QT)
   add_subdirectory (codeQt)
 endif (CISST_HAS_QT)
 
+# set option to compile cisstCommonXML, default is on is either libxml2 or Qt has been found
+if (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
+  option (CISST_BUILD_LIBS_cisstCommonXML "Build cisstCommonXML" ON)
+else (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
+  option (CISST_BUILD_LIBS_cisstCommonXML "Build cisstCommonXML" OFF)
+endif (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
 
-# # Use XML or not, using libxml2 over
-# find_package (LibXml2)
-# if (LIBXML2_FOUND AND NOT CISST_HAS_QT_XML)
-#   option (CISST_HAS_LIBXML2_XML "Use libxml2 for cmnXMLPath" ON)
-# else (LIBXML2_FOUND AND NOT CISST_HAS_QT_XML)
-#   option (CISST_HAS_LIBXML2_XML "Use libxml2 for cmnXMLPath" OFF)
-# endif (LIBXML2_FOUND AND NOT CISST_HAS_QT_XML)
-# mark_as_advanced (CISST_HAS_LIBXML2_XML)
-
-# if (CISST_HAS_LIBXML2_XML)
-#   find_package (LibXml2 REQUIRED)
-#   cisst_set_package_settings (cisstCommonXML Libxml2 LIBRARIES LIBXML2_LIBRARIES)
-# else (CISST_HAS_LIBXML2_XML)
-#   cisst_unset_all_package_settings (cisstCommonXML libxml2)
-# endif (CISST_HAS_LIBXML2_XML)
-
-# # Safety check
-# if (CISST_HAS_LIBXML2_XML AND CISST_HAS_QT_XML)
-#   message (SEND_ERROR "You must choose either CISST_HAS_LIBXML2_XML or CISST_HAS_QT_XML")
-# endif (CISST_HAS_LIBXML2_XML AND CISST_HAS_QT_XML)
-
-# # Do we have some kind of XML?
-# if (CISST_HAS_LIBXML2_XML OR CISST_HAS_QT_XML)
-#   set (CISST_HAS_XML ON)
-#   add_subdirectory (codeXML)
-# else (CISST_HAS_LIBXML2_XML OR CISST_HAS_QT_XML)
-#   set (CISST_HAS_XML OFF)
-# endif (CISST_HAS_LIBXML2_XML OR CISST_HAS_QT_XML)
-# mark_as_advanced (CISST_HAS_XML)
+# if on, include cisstCommonXML and let parent directory know for cisst-config.cmake
+if (CISST_BUILD_LIBS_cisstCommonXML)
+  add_subdirectory (codeXML)
+  set (CISST_HAS_XML ON PARENT_SCOPE) 
+else (CISST_BUILD_LIBS_cisstCommonXML)
+  set (CISST_HAS_XML OFF PARENT_SCOPE)
+endif (CISST_BUILD_LIBS_cisstCommonXML)

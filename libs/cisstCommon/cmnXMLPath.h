@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnXMLPath_h
 #define _cmnXMLPath_h
 
-#include <cisstConfig.h>
+#include <cisstCommon/cmnConfigXML.h>
 #include <cisstCommon/cmnGenericObject.h>
 
 #if CISST_HAS_XML

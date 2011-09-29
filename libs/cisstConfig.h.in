@@ -49,12 +49,6 @@ http://www.cisst.org/cisst/license.txt.
 // Using XML or not
 #cmakedefine01 CISST_HAS_XML
 
-// Using libxml2 for cmnXMLPath
-#cmakedefine01 CISST_HAS_LIBXML2_XML
-
-// Using Qt XML for cmnXMLPath
-#cmakedefine01 CISST_HAS_QT_XML
-
 // Using IRE (and Swig/Python) or not
 #cmakedefine01 CISST_HAS_IRE
 
