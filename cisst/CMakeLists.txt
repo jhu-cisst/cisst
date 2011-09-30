@@ -214,25 +214,25 @@ set (CISST_LIBS_WITH_FLTK
 
 # Build by default
 foreach (lib ${CISST_LIBRARIES_DEFAULT})
-  option (CISST_BUILD_LIBS_${lib} "Build ${lib}." ON)
+  option (CISST_BUILD_${lib} "Build ${lib}." ON)
 endforeach (lib)
 
 foreach (lib ${CISST_LIBRARIES_OPTIONAL})
-  option (CISST_BUILD_LIBS_${lib} "Build ${lib}." OFF)
+  option (CISST_BUILD_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 
 # If OS abstraction is compiled, require dynamic loading libraries
-if (CISST_BUILD_LIBS_cisstOSAbstraction OR CISST_BUILD_LIBS_cisstInteractive)
+if (CISST_BUILD_cisstOSAbstraction OR CISST_BUILD_cisstInteractive)
   if (CMAKE_DL_LIBS)
     cisst_set_package_settings (cisstOSAbstraction DL LIBRARIES CMAKE_DL_LIBS)
     cisst_set_package_settings (cisstInteractive DL LIBRARIES CMAKE_DL_LIBS)
   endif (CMAKE_DL_LIBS)
-endif (CISST_BUILD_LIBS_cisstOSAbstraction OR CISST_BUILD_LIBS_cisstInteractive)
+endif (CISST_BUILD_cisstOSAbstraction OR CISST_BUILD_cisstInteractive)
 
 # If cisstInteractive in turned on, also force SWIG for Python and shared libraries
-if (CISST_BUILD_LIBS_cisstInteractive)
+if (CISST_BUILD_cisstInteractive)
   set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
-endif (CISST_BUILD_LIBS_cisstInteractive)
+endif (CISST_BUILD_cisstInteractive)
 if (CISST_HAS_SWIG_PYTHON)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (CISST_HAS_SWIG_PYTHON)
@@ -240,16 +240,16 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 # List of libraries to be built
 foreach (lib ${CISST_LIBS})
-  if (CISST_BUILD_LIBS_${lib})
+  if (CISST_BUILD_${lib})
     set (CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
     # Add libraries with Qt
     if (CISST_HAS_QT)
       list (FIND CISST_LIBS_WITH_QT ${lib} ${lib}_HAS_QT)
       if (${${lib}_HAS_QT} GREATER -1)
         set (CISST_LIBRARIES ${lib}Qt ${CISST_LIBRARIES})
-        set (CISST_BUILD_LIBS_${lib}Qt ON)
+        set (CISST_BUILD_${lib}Qt ON)
       else (${${lib}_HAS_QT} GREATER -1)
-        set (CISST_BUILD_LIBS_${lib}Qt OFF)
+        set (CISST_BUILD_${lib}Qt OFF)
       endif (${${lib}_HAS_QT} GREATER -1)
     endif (CISST_HAS_QT)
     # Add libraries with FLTK
@@ -257,21 +257,21 @@ foreach (lib ${CISST_LIBS})
       list (FIND CISST_LIBS_WITH_FLTK ${lib} ${lib}_HAS_FLTK)
       if (${${lib}_HAS_FLTK} GREATER -1)
         set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
-        set (CISST_BUILD_LIBS_${lib}FLTK ON)
+        set (CISST_BUILD_${lib}FLTK ON)
       else (${${lib}_HAS_FLTK} GREATER -1)
-        set (CISST_BUILD_LIBS_${lib}FLTK OFF)
+        set (CISST_BUILD_${lib}FLTK OFF)
       endif (${${lib}_HAS_FLTK} GREATER -1)
     endif (CISST_HAS_FLTK)
-  endif (CISST_BUILD_LIBS_${lib})
+  endif (CISST_BUILD_${lib})
 endforeach (lib)
 
 # Add cisstCommonXML if needed
-if (CISST_BUILD_LIBS_cisstCommonXML)
+if (CISST_BUILD_cisstCommonXML)
   set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
-endif (CISST_BUILD_LIBS_cisstCommonXML)
+endif (CISST_BUILD_cisstCommonXML)
 
 # create equivalent for cisstInteractive
-set (CISST_HAS_IRE ${CISST_BUILD_LIBS_cisstInteractive})
+set (CISST_HAS_IRE ${CISST_BUILD_cisstInteractive})
 
 # Create list of general settings, i.e. cisstPython, cisstQt, cisstFLTK, cisstOpenGL, ...
 set (CISST_SETTINGS "")
@@ -298,15 +298,15 @@ cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
 
 # Build all libraries
 foreach (lib ${CISST_LIBS})
-  if (CISST_BUILD_LIBS_${lib})
+  if (CISST_BUILD_${lib})
     add_subdirectory (${lib})
-  endif (CISST_BUILD_LIBS_${lib})
+  endif (CISST_BUILD_${lib})
 endforeach (lib)
 
 # Building the code generation tools
-if (CISST_BUILD_LIBS_cisstMultiTask)
+if (CISST_BUILD_cisstMultiTask)
   add_subdirectory (cisstComponentGenerator)
-endif (CISST_BUILD_LIBS_cisstMultiTask)
+endif (CISST_BUILD_cisstMultiTask)
 add_subdirectory (cisstDataGenerator)
 
 # Create misc. config files

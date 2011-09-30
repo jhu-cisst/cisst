@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstDevices)
+if (CISST_BUILD_cisstDevices)
 
   if (CISST_DEV_HAS_ROBOTCOMPONENTS)
     add_subdirectory (robotcomponents)
@@ -59,6 +59,6 @@ if (CISST_BUILD_LIBS_cisstDevices)
     message (WARNING " devicesTutorial examples 6 and 7 will not be compiled since they require CISST_HAS_XML and CISST_HAS_QT")
   endif (CISST_HAS_QT AND CISST_HAS_XML)
 
-else (CISST_BUILD_LIBS_cisstDevices)
-  message (WARNING " devicesTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstDevices")
-endif (CISST_BUILD_LIBS_cisstDevices)
+else (CISST_BUILD_cisstDevices)
+  message (WARNING " devicesTutorial examples will not be compiled since they require CISST_BUILD_cisstDevices")
+endif (CISST_BUILD_cisstDevices)

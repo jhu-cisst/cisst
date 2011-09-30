@@ -43,7 +43,7 @@ else (${CISST_XML_LIB} STREQUAL "LibXml2")
     cisst_set_directories (cisstQt)
     set (CISST_HAS_QT_XML 1) # for cmnConfigXML.h
   else (${CISST_XML_LIB} STREQUAL "QtXML")  
-    message (SEND_ERROR "CISST_XML_LIB must be set to either \"LibXml2\" or \"QtXML\" to compile cisstCommonXML.  You can also turn off CISST_BUILD_LIBS_cisstCommonXML")
+    message (SEND_ERROR "CISST_XML_LIB must be set to either \"LibXml2\" or \"QtXML\" to compile cisstCommonXML.  You can also turn off CISST_BUILD_cisstCommonXML")
     set (CISST_HAS_QT_XML 0) # for cmnConfigXML.h
   endif (${CISST_XML_LIB} STREQUAL "QtXML")  
 endif (${CISST_XML_LIB} STREQUAL "LibXml2")

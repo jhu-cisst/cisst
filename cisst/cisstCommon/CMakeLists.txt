@@ -27,18 +27,18 @@ endif (CISST_HAS_QT)
 
 # set option to compile cisstCommonXML, default is on is either libxml2 or Qt has been found
 if (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-  option (CISST_BUILD_LIBS_cisstCommonXML "Build cisstCommonXML" ON)
+  option (CISST_BUILD_cisstCommonXML "Build cisstCommonXML" ON)
 else (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-  option (CISST_BUILD_LIBS_cisstCommonXML "Build cisstCommonXML" OFF)
+  option (CISST_BUILD_cisstCommonXML "Build cisstCommonXML" OFF)
 endif (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
 
 # if on, include cisstCommonXML and let parent directory know for cisst-config.cmake
-if (CISST_BUILD_LIBS_cisstCommonXML)
+if (CISST_BUILD_cisstCommonXML)
   add_subdirectory (codeXML)
   set (CISST_HAS_XML ON PARENT_SCOPE) 
-else (CISST_BUILD_LIBS_cisstCommonXML)
+else (CISST_BUILD_cisstCommonXML)
   set (CISST_HAS_XML OFF PARENT_SCOPE)
-endif (CISST_BUILD_LIBS_cisstCommonXML)
+endif (CISST_BUILD_cisstCommonXML)
 
 # build examples, add an option to skip them
 if (CISST_BUILD_EXAMPLES)

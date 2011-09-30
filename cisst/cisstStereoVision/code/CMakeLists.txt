@@ -222,7 +222,7 @@ SET(HEADER_FILES
 
 
 # cisstNumerical dependency
-IF(CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+IF(CISST_BUILD_cisstNumerical AND CISST_HAS_CISSTNETLIB)
     SET(DEPENDENCIES
         ${DEPENDENCIES}
         cisstNumerical
@@ -240,7 +240,7 @@ IF(CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
         ${HEADER_FILES}
         svlTrackerCisst.h
         )
-ENDIF(CISST_BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+ENDIF(CISST_BUILD_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
 
 ## WebGUI

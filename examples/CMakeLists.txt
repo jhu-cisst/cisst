@@ -22,7 +22,7 @@ set (CISST_EXAMPLES
      cisst3DUserInterface
      cisstMultiTask
 #     commonTutorial
-     vectorTutorial
+#     vectorTutorial
      devicesTutorial
      interactiveTutorial
 #     multiTaskTutorial

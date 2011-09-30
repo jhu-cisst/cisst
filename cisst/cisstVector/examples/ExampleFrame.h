@@ -1,3 +1,24 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id$
+
+  Author(s):  Anton Deguet, Ofri Sadowsky
+  Created on: 2003-10-15
+
+  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 void ExampleFrame(void) {
     // create 3 points
     vct3 point000(0.0, 0.0, 0.0);
@@ -25,15 +46,15 @@ void ExampleFrame(void) {
 
     /* three ways to display the result: */
     // 1. Just output a vector
-    cout << "X: " << axisX << endl;
+    std::cout << "X: " << axisX << std::endl;
     // 2. Output vector component by index
-    cout << "Y: " << axisY[0]
-         << " " << axisY[1]
-         << " " << axisY[2] << endl;
+    std::cout << "Y: " << axisY[0]
+	      << " " << axisY[1]
+	      << " " << axisY[2] << std::endl;
     // 3. Output vector component by ``name''
-    cout << "Z: " << axisZ.X()
-         << " " << axisZ.Y()
-         << " " << axisZ.Z() << endl;
+    std::cout << "Z: " << axisZ.X()
+	      << " " << axisZ.Y()
+	      << " " << axisZ.Z() << std::endl;
     /**/
 
     // create a rotation along axis "tmp"
@@ -59,9 +80,9 @@ void ExampleFrame(void) {
     double dotYZ = vctDotProduct(newAxisY, newAxisZ);
     // 3. Using named method DotProduct
     double dotZX = newAxisZ.DotProduct(newAxisX);
-    
-    cout << "Dot products: " << dotXY << " "
-         << dotYZ << " " << dotZX << endl;
+
+    std::cout << "Dot products: " << dotXY << " "
+	      << dotYZ << " " << dotZX << std::endl;
     /**/
 
     // create a rigid transformation frame from
@@ -70,17 +91,17 @@ void ExampleFrame(void) {
     vctFrm3 frame(rotation, translation);
     // Apply the frame to a vector
     vct3 frameOnX = frame * axisX;
-    cout << "Image of X: " << frameOnX << endl;
- 
-   // inverse of the frame
+    std::cout << "Image of X: " << frameOnX << std::endl;
+
+    // inverse of the frame
     vctFrm3 inverse;
     inverse.InverseOf(frame);
     // The product of a frame and its inverse
     // should be the identity (eye for rotation,
     // zero for translation).
-    cout << "frame * inverse: " << endl << frame * inverse
-         << endl;
+    std::cout << "frame * inverse: " << std::endl << frame * inverse
+	      << std::endl;
     // Compare this with the actual identity frame
-    cout << "Identity frame: " << endl
-         << vctFrm3::Identity() << endl;
+    std::cout << "Identity frame: " << std::endl
+	      << vctFrm3::Identity() << std::endl;
 }

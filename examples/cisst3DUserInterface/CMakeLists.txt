@@ -53,9 +53,9 @@ if (cisst_FOUND_AS_REQUIRED)
 #     message ("cisst3DUserInterface example daVinciStereoVideo will not be compiled since it requires CISST_UI3_HAS_DAVINCI")
 #   endif (CISST_UI3_HAS_DAVINCI)
 
-# else (CISST_BUILD_LIBS_cisst3DUserInterface)
-#   message ("cisst3DUserInterface examples will not be compiled since they require CISST_BUILD_LIBS_3DUserInterface")
-# endif (CISST_BUILD_LIBS_cisst3DUserInterface)
+# else (CISST_BUILD_cisst3DUserInterface)
+#   message ("cisst3DUserInterface examples will not be compiled since they require CISST_BUILD_3DUserInterface")
+# endif (CISST_BUILD_cisst3DUserInterface)
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
