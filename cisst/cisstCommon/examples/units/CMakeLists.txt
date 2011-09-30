@@ -16,9 +16,9 @@ find_package (cisst COMPONENTS cisstCommon)
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
-  add_executable (commonTutorialUnits units.cpp)
+  add_executable (cmnExUnits units.cpp)
 
-  cisst_target_link_libraries (commonTutorialUnits cisstCommon)
+  cisst_target_link_libraries (cmnExUnits cisstCommon)
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
 endif (cisst_FOUND_AS_REQUIRED)

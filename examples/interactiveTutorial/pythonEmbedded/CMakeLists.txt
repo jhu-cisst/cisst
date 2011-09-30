@@ -16,7 +16,7 @@
 project (pythonEmbedded)
 
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstPython)
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})

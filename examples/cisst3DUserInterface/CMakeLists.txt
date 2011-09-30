@@ -19,7 +19,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
                               cisstMultiTask cisstStereoVision cisst3DUserInterface)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
 

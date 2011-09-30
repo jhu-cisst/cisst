@@ -39,3 +39,12 @@ if (CISST_BUILD_LIBS_cisstCommonXML)
 else (CISST_BUILD_LIBS_cisstCommonXML)
   set (CISST_HAS_XML OFF PARENT_SCOPE)
 endif (CISST_BUILD_LIBS_cisstCommonXML)
+
+# build examples, add an option to skip them
+if (CISST_BUILD_EXAMPLES)
+  option (CISST_BUILD_cisstCommon_EXAMPLES "Build examples for cisstCommon." ON)
+  mark_as_advanced (CISST_BUILD_cisstCommon_EXAMPLES)
+  if (CISST_BUILD_cisstCommon_EXAMPLES)
+    add_subdirectory (examples)
+  endif (CISST_BUILD_cisstCommon_EXAMPLES)
+endif (CISST_BUILD_EXAMPLES)

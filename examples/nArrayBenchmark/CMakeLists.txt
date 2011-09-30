@@ -21,7 +21,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # This project is designed to be built outside the Insight source tree.
   # Find ITK.
-  find_package (ITK)
+  find_package (ITK QUIET)
 
   if (ITK_FOUND)
     include (${ITK_USE_FILE})
