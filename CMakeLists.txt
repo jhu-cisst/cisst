@@ -47,12 +47,6 @@ endif (UNIX)
 set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/libs/include
      ${cisst_SOURCE_DIR}/libs)
-if (CISST_BUILD_COMPONENTS)
-  set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR}
-                         ${cisst_BINARY_DIR}/components
-                         ${cisst_SOURCE_DIR}/components)
-endif (CISST_BUILD_COMPONENTS)
-
 include_directories (${CISST_INCLUDE_DIR})
 
 # To allow mixing static and dynamic libraries

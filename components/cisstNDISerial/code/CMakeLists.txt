@@ -19,11 +19,9 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstNumerical
                               cisstOSAbstraction
                               cisstMultiTask
-                              cisstParameterTypes
-                              cisstRobot)
+                              cisstParameterTypes)
 
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
-
 
 if (cisst_FOUND_AS_REQUIRED)
 
@@ -43,7 +41,6 @@ if (cisst_FOUND_AS_REQUIRED)
     # this needs to be moved to cisstMacros.cmake
     MACRO (CISST_QT4_WRAP_UI outfiles)
       QT4_EXTRACT_OPTIONS (ui_files ui_options ${ARGN})
-
       FOREACH (it ${ui_files})
         GET_FILENAME_COMPONENT (outfile ${it} NAME_WE)
         GET_FILENAME_COMPONENT (infile ${it} ABSOLUTE)
@@ -57,11 +54,14 @@ if (cisst_FOUND_AS_REQUIRED)
       ENDFOREACH (it)
     ENDMACRO (CISST_QT4_WRAP_UI)
 
+    # initial find_package doesn't have cisstQt
+    cisst_set_directories (cisstQt)
+
+    # for Qt generated header files
     include_directories (${CMAKE_CURRENT_BINARY_DIR})
     qt4_wrap_cpp (CISST_NDISERIAL_QT_COMPONENTS_GENERATED
                   ../mtsNDISerialControllerQtComponent.h
-                  ../mtsNDISerialToolQtComponent.h
-                  )
+                  ../mtsNDISerialToolQtComponent.h)
     cisst_qt4_wrap_ui (CISST_NDISERIAL_QT_WIDGETS_GENERATED
                        mtsNDISerialControllerQtWidget.ui
                        mtsNDISerialToolQtWidget.ui)
@@ -76,7 +76,7 @@ if (cisst_FOUND_AS_REQUIRED)
                  ../mtsNDISerialToolQtComponent.h)
 
     target_link_libraries (cisstNDISerialQt ${QT_LIBRARIES})
-    cisst_target_link_libraries (cisstNDISerialQt ${REQUIRED_CISST_LIBRARIES})
+    cisst_target_link_libraries (cisstNDISerialQt ${REQUIRED_CISST_LIBRARIES} cisstQt)
   endif (CISST_HAS_QT)
 
   # create/configure file for find_package (cisstNDISerial)
