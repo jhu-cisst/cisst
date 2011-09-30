@@ -1,0 +1,78 @@
+#
+# $Id$
+#
+# Cmake configuration file for the installed version of cisst
+#
+# Author(s):  Anton Deguet
+# Created on: 2003-07-31
+#
+# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+# Paths
+set (CISST_SOURCE_DIR "@CISST_SOURCE_DIR@")
+set (CISST_BINARY_DIR "@CISST_BINARY_DIR@")
+set (CISST_INCLUDE_DIR "@CISST_BUILD_INCLUDE_DIRECTORIES@")
+set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
+set (CISST_LIBRARY_DIR "@CISST_BUILD_LINK_DIRECTORIES@")
+set (CISST_CMAKE_DIR "${CISST_SOURCE_DIR}/cisst/cmake")
+set (CISST_USE_FILE "${CISST_CMAKE_DIR}/Usecisst.cmake")
+
+# On Windows, CMake uses a different compiler at configuration time
+set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
+
+# Which libraries have been compiled
+set (CISST_LIBRARIES "@CISST_LIBRARIES@")
+set (CISST_SETTINGS "@CISST_SETTINGS@")
+set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
+
+# Which flags have been set and include path/libs
+set (CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@)
+set (CISST_HAS_SWIG_PYTHON @CISST_HAS_SWIG_PYTHON@)
+set (CISST_HAS_XML @CISST_HAS_XML@)
+set (CISST_HAS_OPENGL @CISST_HAS_OPENGL@)
+set (CISST_HAS_QT @CISST_HAS_QT@)
+set (CISST_HAS_FLTK @CISST_HAS_FLTK@)
+
+# Include settings per library
+foreach (lib ${CISST_LIBRARIES})
+  set (ADDITIONAL_BUILD_CMAKE ${CISST_BINARY_DIR}/cisst/${lib}Build.cmake)
+  if (EXISTS ${ADDITIONAL_BUILD_CMAKE})
+    include (${ADDITIONAL_BUILD_CMAKE})
+  endif (EXISTS ${ADDITIONAL_BUILD_CMAKE})
+endforeach (lib ${CISST_LIBRARIES})
+
+# Where to install
+set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
+
+# Check against componenents required
+set (cisst_FOUND_AS_REQUIRED 1)
+if (cisst_FIND_COMPONENTS)
+  # First test that all libraries should have been compiled
+  foreach (required ${cisst_FIND_COMPONENTS})
+    set (CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
+    list (FIND CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
+    if (${FOUND_IT} EQUAL -1 )
+      # inform user and set variables to not-found/false
+      message (WARNING "cisst library \"${required}\" doesn't exist or hasn't been compiled.  Available libraries are: ${CISST_LIBRARIES}")
+      set (cisst_FOUND_AS_REQUIRED 0)
+      set (cisst_${required}_FOUND 0)
+    else (${FOUND_IT} EQUAL -1)
+      # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))
+      set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES_REQUIRED_INTERNAL} ${required})
+      list (REMOVE_DUPLICATES CISST_LIBRARIES_REQUIRED_INTERNAL)
+      set (cisst_${required}_FOUND 1)
+    endif (${FOUND_IT} EQUAL -1)
+  endforeach (required)
+else (cisst_FIND_COMPONENTS)
+  # otherwise, assumes user needs all available libraries
+  set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES})
+endif (cisst_FIND_COMPONENTS)

@@ -26,7 +26,8 @@ if (cisst_FOUND_AS_REQUIRED)
   set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
   # Load CppUnit stuff
-  include (${cisst_SOURCE_DIR}/libs/cmake/FindCppUnit.cmake)
+  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIR})
+  find_package (CppUnit REQUIRED)
   # TO DO, check if CPPUNIT Found
   include_directories (${CPPUNIT_INCLUDE_DIR})
   link_libraries (optimized ${CPPUNIT_LIBRARIES}
