@@ -75,9 +75,9 @@ if (cisst_FOUND_AS_REQUIRED)
     cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsQtClient ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_MTS_HAS_ICE)
-    message(WARNING "Code in ${CMAKE_CURRENT_SOURCE_DIR}: example will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
+    message(WARNING "Information: code in ${CMAKE_CURRENT_SOURCE_DIR}: example will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
   endif (CISST_MTS_HAS_ICE)
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

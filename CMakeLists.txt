@@ -16,7 +16,6 @@
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
 
-message ("todo: keep track of components required in find_package and provide warning message when using cisst_target_link_library")
 message ("todo: should RTAI and QNX flags be moved to cisstOSAbstraction")
 message ("todo: consolidate numericalTutorial and registrationTest in examples/cisstNumerical")
 message ("todo: rename example osAbstractionTutorial")

@@ -73,5 +73,5 @@ if (cisst_FOUND_AS_REQUIRED)
                       COMMENT "Copy of pythonEmbeddedIRE.py to the library directory")
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

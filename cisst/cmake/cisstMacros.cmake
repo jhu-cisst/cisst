@@ -677,3 +677,17 @@ function (cisst_add_test ...)
   set_directory_properties (PROPERTIES TEST_INCLUDE_FILE
                             "${CMAKE_CURRENT_BINARY_DIR}/DartTestfile-${TEST_PROGRAM}.txt")
 endfunction (cisst_add_test)
+
+
+# macro to generated standardized message explaining why optional code will not be compiled
+macro (cisst_information_message_missing_libraries ...)
+  set (_cimml_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
+  set (_cimml_MISSING_LIBRARIES "")
+  foreach (lib ${ARGV})
+    list (FIND _cimml_LIBRARIES_AND_SETTINGS ${lib} FOUND_IT)
+    if (${FOUND_IT} EQUAL -1 )
+      set (_cimml_MISSING_LIBRARIES ${_cimml_MISSING_LIBRARIES} ${lib})
+    endif (${FOUND_IT} EQUAL -1 )
+  endforeach (lib)
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
+endmacro (cisst_information_message_missing_libraries)

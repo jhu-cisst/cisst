@@ -89,5 +89,5 @@ if (cisst_FOUND_AS_REQUIRED)
                   @ONLY)
 
 else (cisst_FOUND_AS_REQUIRED)
-  message ("Code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires at least some of the cisst libraries")
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires at least some of the cisst libraries")
 endif (cisst_FOUND_AS_REQUIRED)

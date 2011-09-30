@@ -178,27 +178,27 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Which libraries to build
-set (CISST_LIBS_STABLE
+set (CISST_LIBRARIES_DEFAULT
      cisstCommon
      cisstVector
      cisstOSAbstraction
      cisstNumerical
-     cisstInteractive
      cisstMultiTask
      cisstParameterTypes
      cisstRobot
+     cisstStereoVision
      )
 
-set (CISST_LIBS_UNSTABLE
-     cisstStereoVision
+set (CISST_LIBRARIES_OPTIONAL
+     cisstInteractive
      cisstDevices
      cisst3DUserInterface
      )
 
 # All libraries
 set (CISST_LIBS
-     ${CISST_LIBS_STABLE}
-     ${CISST_LIBS_UNSTABLE})
+     ${CISST_LIBRARIES_DEFAULT}
+     ${CISST_LIBRARIES_OPTIONAL})
 
 # Which librairies have Qt Widgets
 set (CISST_LIBS_WITH_QT
@@ -213,11 +213,11 @@ set (CISST_LIBS_WITH_FLTK
 
 
 # Build by default
-foreach (lib ${CISST_LIBS_STABLE})
+foreach (lib ${CISST_LIBRARIES_DEFAULT})
   option (CISST_BUILD_LIBS_${lib} "Build ${lib}." ON)
 endforeach (lib)
 
-foreach (lib ${CISST_LIBS_UNSTABLE})
+foreach (lib ${CISST_LIBRARIES_OPTIONAL})
   option (CISST_BUILD_LIBS_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 

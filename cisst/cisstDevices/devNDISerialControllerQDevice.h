@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstDevices/devNDISerialControllerQWidget.h>
-#include <cisstDevices/devExport.h>  // always include last
+#include <cisstDevices/devExportQt.h>  // always include last
 
 
 class CISST_EXPORT devNDISerialControllerQDevice : public QObject, public mtsComponent
