@@ -16,6 +16,7 @@
 project (cisstCommonLibs)
 
 add_subdirectory (code)
+add_subdirectory (applications/cisstDataGenerator)
 
 if (CISST_HAS_SWIG_PYTHON)
   add_subdirectory (codePython)

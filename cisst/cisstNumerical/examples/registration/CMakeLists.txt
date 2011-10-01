@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -19,22 +19,11 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   if (CISST_HAS_CISSTNETLIB)
-    add_executable (numericalTutorial
-                    main.cpp
-                    ExampleSVDUserOutputWorkspace.h
-                    ExampleSVDImplicitWorkspace.h
-                    ExampleSVDWorkspaceSize.h
-                    ExampleSVDDynamicData.h
-                    ExampleSVDUpdateMatrixS.h
-                    ExampleSVDFixedSize.h
-                    ExampleSVDFixedSizeData.h
-                    ExampleInverse.h
-                    ExamplePInverse.h
-                    ExampleLUDynamicData.h
-                    ExampleIsOrthonormal.h
-                    ExampleGaussJordanInverse.h
-                    )
-    cisst_target_link_libraries(numericalTutorial ${REQUIRED_CISST_LIBRARIES})
+    add_executable (nmrExRegistrationAccuracy Accuracy.cpp DataSet.cpp DataSet.h)
+    cisst_target_link_libraries (nmrExRegistrationAccuracy ${REQUIRED_CISST_LIBRARIES})
+
+    add_executable (nmrExRegistrationDistances Distances.cpp DataSet.cpp DataSet.h)
+    cisst_target_link_libraries (nmrExRegistrationDistances ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")

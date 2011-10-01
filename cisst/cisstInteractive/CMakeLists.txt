@@ -16,3 +16,11 @@
 project (cisstInteractiveLibs)
 
 add_subdirectory (code)
+
+if (CISST_BUILD_EXAMPLES)
+  option (CISST_BUILD_cisstInteractive_EXAMPLES "Build examples for cisstInteractive." ON)
+  mark_as_advanced (CISST_BUILD_cisstInteractive_EXAMPLES)
+  if (CISST_BUILD_cisstInteractive_EXAMPLES)
+    add_subdirectory (examples)
+  endif (CISST_BUILD_cisstInteractive_EXAMPLES)
+endif (CISST_BUILD_EXAMPLES)

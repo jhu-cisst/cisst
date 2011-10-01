@@ -13,7 +13,7 @@
 # --- end cisst license ---
 
 
-add_library (cisst3DUserInterfaceBehaviors
+add_library (ui3ExBehaviors
              ${IS_SHARED}
 	     ui3BehaviorsExport.h
              SimpleBehavior.h
@@ -30,6 +30,6 @@ add_library (cisst3DUserInterfaceBehaviors
              RegistrationBehavior.cpp
 	     )
 
-cisst_target_link_libraries (cisst3DUserInterfaceBehaviors
+cisst_target_link_libraries (ui3ExBehaviors
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                              cisstStereoVision cisstRobot cisstParameterTypes cisst3DUserInterface)

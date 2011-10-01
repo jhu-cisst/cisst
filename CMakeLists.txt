@@ -17,9 +17,7 @@
 cmake_minimum_required (VERSION 2.6.2)
 
 message ("todo: should RTAI and QNX flags be moved to cisstOSAbstraction")
-message ("todo: consolidate numericalTutorial and registrationTest in examples/cisstNumerical")
-message ("todo: rename example osAbstractionTutorial")
-message ("todo: remove dependency on cisstNumerical/cisstNetlib from vector tutorial")
+message ("todo: re-organize test programs")
 
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
@@ -81,10 +79,6 @@ if (CISST_BUILD_TESTS)
   # cisst Tests
   add_subdirectory (tests)
 endif (CISST_BUILD_TESTS)
-
-if (CISST_BUILD_EXAMPLES)
-  add_subdirectory (examples)
-endif (CISST_BUILD_EXAMPLES)
 
 if (CISST_BUILD_COMPONENTS)
   add_subdirectory (saw)

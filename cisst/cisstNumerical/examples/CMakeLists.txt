@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,4 +13,4 @@
 # --- end cisst license ---
 
 add_subdirectory (tutorial)
-add_subdirectory (narrayBenchmark)
+add_subdirectory (registration)

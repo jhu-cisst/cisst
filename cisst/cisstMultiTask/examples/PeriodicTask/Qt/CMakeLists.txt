@@ -29,7 +29,7 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable (cisstMultiTaskPeriodicTaskQt
+add_executable (mtsExPeriodicTaskQt
                 ${QT_WRAPPED_CPP}
                 displayQtComponent.cpp
                 displayQtComponent.h
@@ -37,6 +37,6 @@ add_executable (cisstMultiTaskPeriodicTaskQt
                 displayQtWidget.h
                 main.cpp)
 
-target_link_libraries (cisstMultiTaskPeriodicTaskQt
-                       cisstMultiTaskPeriodicTaskComponents)
-cisst_target_link_libraries (cisstMultiTaskPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mtsExPeriodicTaskQt
+                       mtsExPeriodicTaskComponents)
+cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})

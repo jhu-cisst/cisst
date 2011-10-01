@@ -303,11 +303,6 @@ foreach (lib ${CISST_LIBS})
   endif (CISST_BUILD_${lib})
 endforeach (lib)
 
-# Building the code generation tools
-if (CISST_BUILD_cisstMultiTask)
-  add_subdirectory (cisstComponentGenerator)
-endif (CISST_BUILD_cisstMultiTask)
-add_subdirectory (cisstDataGenerator)
 
 # Create misc. config files
 set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})

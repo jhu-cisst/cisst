@@ -260,6 +260,10 @@ macro (cisst_add_library ...)
   cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
 
   # Add the library
+  list (SORT SOURCE_FILES)
+  list (SORT HEADERS)
+  list (SORT ADDITIONAL_SOURCE_FILES)
+  list (SORT ADDITIONAL_HEADER_FILES)
   cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCE_FILES} ${HEADERS}")
   add_library (${LIBRARY}
                ${IS_SHARED}

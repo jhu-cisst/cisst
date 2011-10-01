@@ -39,7 +39,7 @@ if (cisst_FOUND_AS_REQUIRED)
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
   # create example using a single process
-  add_executable (cisstMultiTaskCommandsAndEventsQtLocal
+  add_executable (mtsExCommandsAndEventsQtLocal
                   main.cpp
                   clientQtComponent.cpp
                   clientQtComponent.h
@@ -51,28 +51,28 @@ if (cisst_FOUND_AS_REQUIRED)
                   ${QT_SERVER_WRAPPED_CPP}
                  )
 
-  cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
+  cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
 
   # compile network version if ICE is available
   if (CISST_MTS_HAS_ICE)
 
-    add_executable (cisstMultiTaskCommandsAndEventsQtServer
+    add_executable (mtsExCommandsAndEventsQtServer
                     serverMain.cpp
                     serverQtComponent.cpp
                     serverQtComponent.h
                     ${QT_SERVER_WRAPPED_UI}
                     ${QT_SERVER_WRAPPED_CPP}
                    )
-    cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsQtServer ${REQUIRED_CISST_LIBRARIES})
+    cisst_target_link_libraries (mtsExCommandsAndEventsQtServer ${REQUIRED_CISST_LIBRARIES})
 
-    add_executable (cisstMultiTaskCommandsAndEventsQtClient
+    add_executable (mtsExCommandsAndEventsQtClient
                     clientMain.cpp
                     clientQtComponent.cpp
                     clientQtComponent.h
                     ${QT_CLIENT_WRAPPED_UI}
                     ${QT_CLIENT_WRAPPED_CPP}
                    )
-    cisst_target_link_libraries (cisstMultiTaskCommandsAndEventsQtClient ${REQUIRED_CISST_LIBRARIES})
+    cisst_target_link_libraries (mtsExCommandsAndEventsQtClient ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_MTS_HAS_ICE)
     message(WARNING "Information: code in ${CMAKE_CURRENT_SOURCE_DIR}: example will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
