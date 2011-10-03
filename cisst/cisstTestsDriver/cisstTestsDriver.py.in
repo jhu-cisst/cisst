@@ -31,10 +31,8 @@ import getopt
 
 
 module = '@LIB@'
-pathTest =  '@cisstWrappingTests_SOURCE_DIR@'
-pathTestCases = pathTest + "/" + module
+pathTestCases = '@CMAKE_CURRENT_SOURCE_DIR@'
 pathLib = '@cisst_LIBRARY_PATH@/@config@'
-
 
 
 sys.path.append(pathTestCases)

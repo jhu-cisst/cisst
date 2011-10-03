@@ -23,6 +23,9 @@ endif (CISST_HAS_FLTK AND CISST_HAS_OPENGL)
 
 if (CISST_HAS_SWIG_PYTHON)
   add_subdirectory (codePython)
+  if (CISST_BUILD_TESTS)
+    add_subdirectory (testsPython)
+  endif (CISST_BUILD_TESTS)
 endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_HAS_QT AND CISST_HAS_OPENGL)

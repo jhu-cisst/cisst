@@ -20,6 +20,9 @@ add_subdirectory (applications/cisstDataGenerator)
 
 if (CISST_HAS_SWIG_PYTHON)
   add_subdirectory (codePython)
+  if (CISST_BUILD_TESTS)
+    add_subdirectory (testsPython)
+  endif (CISST_BUILD_TESTS)
 endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_HAS_QT)
