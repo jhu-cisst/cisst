@@ -17,6 +17,15 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon)
 
+# Configure the OS test program
+get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
+get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmnPortabilityTestCMake.h.in
+                ${CMAKE_CURRENT_BINARY_DIR}/cmnPortabilityTestCMake.h
+                @ONLY@)
+# Add the path for the includes
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+
 # all source files
 set (SOURCE_FILES
      cmnClassRegisterTest.cpp
@@ -46,9 +55,12 @@ if (CISST_HAS_XML)
   set (HEADER_FILES ${HEADER_FILES} cmnXMLPathTest.h)
 endif (CISST_HAS_XML)
 
+# CppUnit include directories
+include_directories (${CPPUNIT_INCLUDE_DIR})
+
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstCommonTests cisstTestsMain)
+target_link_libraries (cisstCommonTests cisstTestsDriver)
 cisst_target_link_libraries (cisstCommonTests cisstCommon)
 
 # Add a static library with some classes registered
@@ -70,6 +82,11 @@ endif (NOT CISST_BUILD_SHARED_LIBS)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstCommonTests ITERATIONS 2 INSTANCES 2)
+
+# CppUnit libraries
+target_link_libraries (cisstCommonTests
+                       optimized ${CPPUNIT_LIBRARIES}
+                       debug ${CPPUNIT_DEBUG_LIBRARIES})
 
 if (CISST_HAS_XML)
   cisst_target_link_libraries (cisstCommonTests cisstCommonXML)

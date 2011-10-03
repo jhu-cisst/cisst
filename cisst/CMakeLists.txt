@@ -39,7 +39,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisstLibs_SOURCE_DIR}/cmake)
 set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 
-# Include all useful CMake macros and functions for cisst 
+# Include all useful CMake macros and functions for cisst
 include (cisstMacros)
 include (cisstInternalMacros)
 
@@ -168,6 +168,12 @@ endif (CISST_BUILD_COMPONENTS)
 
 include_directories (${CISST_INCLUDE_DIR})
 
+# Build test driver if needed
+if (CISST_BUILD_TESTS)
+  find_package (CppUnit REQUIRED)
+  # TO DO, check if CPPUNIT Found
+  add_subdirectory (cisstTestsDriver)
+endif (CISST_BUILD_TESTS)
 
 # Find native threads
 if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
@@ -302,7 +308,6 @@ foreach (lib ${CISST_LIBS})
     add_subdirectory (${lib})
   endif (CISST_BUILD_${lib})
 endforeach (lib)
-
 
 # Create misc. config files
 set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})

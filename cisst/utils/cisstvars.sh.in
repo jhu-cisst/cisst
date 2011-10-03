@@ -28,6 +28,8 @@ CISST_BUILD_COMPONENTS=@CISST_BUILD_COMPONENTS@
 
 OS=`uname`
 
+PATH="${CISST_DIR}/cisst/bin:${PATH}"
+
 # Path to dynamic libraries
 if [ "${OS}" == "Darwin" ]
 then

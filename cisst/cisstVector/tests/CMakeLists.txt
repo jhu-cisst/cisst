@@ -111,11 +111,19 @@ set (HEADER_FILES
      vctPlot2DBaseTest.h
      )
 
+
+# CppUnit include directories
+include_directories (${CPPUNIT_INCLUDE_DIR})
+
 # Add executable for C++ tests
 add_executable (cisstVectorTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstVectorTests cisstTestsMain)
+target_link_libraries (cisstVectorTests cisstTestsDriver)
 cisst_target_link_libraries (cisstVectorTests cisstCommon cisstVector)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstVectorTests ITERATIONS 10 INSTANCES 2)
 
+# CppUnit libraries
+target_link_libraries (cisstVectorTests
+                       optimized ${CPPUNIT_LIBRARIES}
+                       debug ${CPPUNIT_DEBUG_LIBRARIES})

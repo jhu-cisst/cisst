@@ -13,7 +13,7 @@
 # --- end cisst license ---
 
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction)
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
 

@@ -47,8 +47,8 @@ void cmnPathTest::TestFind(void) {
     path.Add(CISST_BUILD_ROOT, cmnPath::TAIL);
     // test a file that should exist
     std::string fullName(CISST_BUILD_ROOT);
-    fullName += "/libs/include/cisstConfig.h";
-    CPPUNIT_ASSERT(fullName == path.Find("libs/include/cisstConfig.h", cmnPath::READ));
+    fullName += "/cisst/include/cisstConfig.h";
+    CPPUNIT_ASSERT(fullName == path.Find("cisst/include/cisstConfig.h", cmnPath::READ));
     // test with a file that shouldn't exist
     std::string thisFileCantExist = "/aBadPath/QwErTy.hohoho";
     CPPUNIT_ASSERT("" == path.Find(thisFileCantExist, cmnPath::READ));

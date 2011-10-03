@@ -35,10 +35,20 @@ option (CISST_BUILD_UTILITIES "Build utility programs built using cisst." ON)
 option (CISST_BUILD_TESTS "Build cisst tests." OFF)
 option (CISST_BUILD_EXAMPLES "Build cisst examples." OFF)
 option (CISST_BUILD_COMPONENTS "Build SAW components." OFF)
-
 if (UNIX)
   option (CISST_BUILD_DOC "Build the documentation." OFF)
 endif (UNIX)
+
+# Activate tests before any directory is added
+if (CISST_BUILD_TESTS)
+  # Settings for CTest
+  enable_testing ()
+  mark_as_advanced (BUILD_TESTING) # CMake variable for CTest
+  include (Dart)
+  mark_as_advanced (DART_ROOT)
+  # cisst Tests
+  # add_subdirectory (tests)
+endif (CISST_BUILD_TESTS)
 
 # Add include directories
 set (CISST_INCLUDE_DIR
@@ -69,16 +79,6 @@ cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 if (CISST_BUILD_UTILITIES)
   add_subdirectory (utilities)
 endif (CISST_BUILD_UTILITIES)
-
-if (CISST_BUILD_TESTS)
-  # Settings for CTest
-  enable_testing ()
-  mark_as_advanced (BUILD_TESTING) # CMake variable for CTest
-  include (Dart)
-  mark_as_advanced (DART_ROOT)
-  # cisst Tests
-  add_subdirectory (tests)
-endif (CISST_BUILD_TESTS)
 
 if (CISST_BUILD_COMPONENTS)
   add_subdirectory (saw)
