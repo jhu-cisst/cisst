@@ -151,7 +151,7 @@ void mtsCommandAndEventNetworkedTest::setUp(void)
     std::vector<std::string> arguments;
 
     std::string executablePath =
-        std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/")
+        std::string(CISST_BUILD_ROOT) + std::string("/cisst/bin/")
         + CMAKE_CFG_INTDIR_WITH_QUOTES + std::string("/");
 
     // start network manager

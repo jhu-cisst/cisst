@@ -17,7 +17,6 @@
 cmake_minimum_required (VERSION 2.6.2)
 
 message ("todo: should RTAI and QNX flags be moved to cisstOSAbstraction")
-message ("todo: re-organize test programs")
 
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
@@ -46,8 +45,6 @@ if (CISST_BUILD_TESTS)
   mark_as_advanced (BUILD_TESTING) # CMake variable for CTest
   include (Dart)
   mark_as_advanced (DART_ROOT)
-  # cisst Tests
-  # add_subdirectory (tests)
 endif (CISST_BUILD_TESTS)
 
 # Add include directories

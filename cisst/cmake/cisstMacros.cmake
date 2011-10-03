@@ -32,7 +32,7 @@ macro (cisst_load_package_setting ...)
   # Set all variables based on dependencies
   foreach (lib ${ARGV})
     # Additional settings
-    set (_clps_ADDITIONAL_BUILD_CMAKE "${CISST_BINARY_DIR}/libs/${lib}Build.cmake")
+    set (_clps_ADDITIONAL_BUILD_CMAKE "${CISST_BINARY_DIR}/cisst/${lib}Build.cmake")
     if (EXISTS ${_clps_ADDITIONAL_BUILD_CMAKE})
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
     endif (EXISTS ${_clps_ADDITIONAL_BUILD_CMAKE})
@@ -561,7 +561,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
     find_program (CISST_DG_EXECUTABLE cisstDataGenerator
-                  PATHS "${CISST_BINARY_DIR}/libs/bin")
+                  PATHS "${CISST_BINARY_DIR}/cisst/bin")
   endif (TARGET cisstCommon)
 
   # loop over input files

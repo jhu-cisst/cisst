@@ -54,7 +54,7 @@ typedef ::Ice::Long mtsIceCommandIDType;
 //#define ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
 
 /*! Path to Ice property files */
-#define ICE_PROPERTY_FILE_ROOT CISST_SOURCE_ROOT"/libs/etc/cisstMultiTask/Ice/"
+#define ICE_PROPERTY_FILE_ROOT CISST_SOURCE_ROOT"/cisst/cisstMultiTask/share/Ice/"
 
 //-----------------------------------------------------------------------------
 //  Common Base Class Definitions

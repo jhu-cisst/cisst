@@ -311,7 +311,7 @@ set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE}
 
 # Create the CMake config file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
-                ${cisst_BINARY_DIR}/cisstMultiTaskBuild.cmake
+                ${cisstLibs_BINARY_DIR}/cisstMultiTaskBuild.cmake
                 @ONLY)
 
 # Finally add the library

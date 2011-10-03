@@ -33,7 +33,7 @@ void osaPipeExecTest::TestPipe(void)
 {
     osaPipeExec pipe1, pipe2;
     std::string command =
-        std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
+        std::string(CISST_BUILD_ROOT) + std::string("/cisst/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
         + std::string("/cisstOSAbstractionTestsPipeExecUtility");
 
     /* Test opening twice, make sure it fails the second time */

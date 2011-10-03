@@ -42,7 +42,7 @@ bool ui3MenuButton::CreateVTKObjects(void)
     CMN_ASSERT(this->PNGReader);
     cmnPath path;
     // this is were the icons have been copied by CMake post build rule
-    path.Add(std::string(CISST_BUILD_ROOT) + "/etc/cisst3DUserInterface/icons");
+    path.Add(std::string(CISST_BUILD_ROOT) + "/share/cisst3DUserInterface/icons");
     // in case the user provided a full path, search from / as well
     path.Add("/", cmnPath::TAIL);
     std::string iconFullName = path.Find(this->IconFile, cmnPath::READ);
