@@ -97,9 +97,12 @@ endif (CISST_HAS_CISSTNETLIB)
 #
 # ENDIF(CISST_HAS_CNETLIB)
 
+# CppUnit include directories
+include_directories (${CPPUNIT_INCLUDE_DIR})
+
 # Add executable for C++ tests
 add_executable (cisstNumericalTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstNumericalTests cisstTestsMain)
+target_link_libraries (cisstNumericalTests cisstTestsDriver)
 
 # If cisstOSAbstraction is compiled, compile multithreaded tests
 # and link differently
@@ -114,3 +117,8 @@ endif (CISST_BUILD_cisstOSAbstraction)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstNumericalTests ITERATIONS 10 INSTANCES 2)
+
+# CppUnit libraries
+target_link_libraries (cisstNumericalTests
+                       optimized ${CPPUNIT_LIBRARIES}
+                       debug ${CPPUNIT_DEBUG_LIBRARIES})

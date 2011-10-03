@@ -41,10 +41,18 @@ set (HEADER_FILES
      prmTransformationManagerTests.h
      )
 
+# CppUnit include directories
+include_directories (${CPPUNIT_INCLUDE_DIR})
+
 # Add executable for C++ tests
 add_executable (cisstParameterTypesTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstParameterTypesTests cisstTestsMain)
+target_link_libraries (cisstParameterTypesTests cisstTestsDriver)
 cisst_target_link_libraries (cisstParameterTypesTests cisstParameterTypes cisstVector cisstCommon cisstMultiTask)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstParameterTypesTests ITERATIONS 1 INSTANCES 1)
+
+# CppUnit libraries
+target_link_libraries (cisstParameterTypesTests
+                       optimized ${CPPUNIT_LIBRARIES}
+                       debug ${CPPUNIT_DEBUG_LIBRARIES})

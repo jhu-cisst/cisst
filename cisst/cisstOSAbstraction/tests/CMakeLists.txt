@@ -38,10 +38,13 @@ set (HEADER_FILES
 # add executable for C++ tests
 add_executable (cisstOSAbstractionTestsPipeExecUtility osaPipeExecUtility.cpp)
 
+# CppUnit include directories
+include_directories (${CPPUNIT_INCLUDE_DIR})
+
 # to find executables generated, provide internal configuration
 add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 add_executable (cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstOSAbstractionTests cisstTestsMain )
+target_link_libraries (cisstOSAbstractionTests cisstTestsDriver )
 cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction)
 add_dependencies(cisstOSAbstractionTests cisstOSAbstractionTestsPipeExecUtility)
 
@@ -51,3 +54,8 @@ target_link_libraries (cisstOSAbstractionTests ${CMAKE_THREAD_LIBS_INIT})
 
 # to generate a CTest list of tests
 cisst_add_test (cisstOSAbstractionTests INSTANCES 2 ITERATIONS 2)
+
+# CppUnit libraries
+target_link_libraries (cisstOSAbstractionTests
+                       optimized ${CPPUNIT_LIBRARIES}
+                       debug ${CPPUNIT_DEBUG_LIBRARIES})

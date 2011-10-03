@@ -19,8 +19,8 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
-  add_executable (commonTutorialLoggerQt main.cpp)
-  cisst_target_link_libraries (commonTutorialLoggerQt ${REQUIRED_CISST_LIBRARIES})
+  add_executable (cmnExLoggerQt main.cpp)
+  cisst_target_link_libraries (cmnExLoggerQt ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

@@ -77,9 +77,12 @@ endif (CISST_MTS_HAS_ICE)
 # to find executables generated, provide internal configuration
 add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 
+# CppUnit include directories
+include_directories (${CPPUNIT_INCLUDE_DIR})
+
 # add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries (cisstMultiTaskTests cisstTestsMain cisstMultiTaskTestsLib)
+target_link_libraries (cisstMultiTaskTests cisstTestsDriver cisstMultiTaskTestsLib)
 cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
 
@@ -108,3 +111,8 @@ endif (CISST_MTS_HAS_ICE)
 
 # to generate a CTest list of tests
 cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)
+
+# CppUnit libraries
+target_link_libraries (cisstMultiTaskTests
+                       optimized ${CPPUNIT_LIBRARIES}
+                       debug ${CPPUNIT_DEBUG_LIBRARIES})

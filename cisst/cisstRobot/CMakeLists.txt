@@ -16,3 +16,16 @@
 project (cisstRobotLibs)
 
 add_subdirectory (code)
+
+# build tests, add an option to skip them
+set (EXTRAS TESTS)
+foreach (extra ${EXTRAS})
+  string (TOLOWER ${extra} extra_lower)
+  if (CISST_BUILD_${extra})
+    option (CISST_BUILD_cisstRobot_${extra} "Build ${extra_lower} for cisstRobot." ON)
+    mark_as_advanced (CISST_BUILD_cisstRobot_{extra})
+    if (CISST_BUILD_cisstRobot_${extra})
+      add_subdirectory (${extra_lower})
+    endif (CISST_BUILD_cisstRobot_${extra})
+  endif (CISST_BUILD_${extra})
+endforeach (extra)
