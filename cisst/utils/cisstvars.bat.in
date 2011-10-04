@@ -3,27 +3,24 @@
 @rem Author(s): Anton Deguet
 @rem Created on: 2006-05-02
 
-@rem (C) Copyright 2006-2007 Johns Hopkins University (JHU), All
+@rem (C) Copyright 2006-2011 Johns Hopkins University (JHU), All
 @rem Rights Reserved.
 
 @rem Always edit the source file: cisstvars.bat.in
 @rem Do not edit the generated file: cisstvars.bat
 
 @rem --- begin cisst license - do not edit ---
-@rem 
+@rem
 @rem This software is provided "as is" under an open source license, with
 @rem no warranty.  The complete license can be found in license.txt and
 @rem http://www.cisst.org/cisst/license.txt.
-@rem 
+@rem
 @rem --- end cisst license ---
 
 
 @set CISST_DIR=${cisst_BINARY_DIR_NATIVE}
 @set CMAKE_GENERATOR=${CMAKE_GENERATOR}
-@set CISST_BUILD_TESTS=${CISST_BUILD_TESTS}
-@set CISST_BUILD_EXAMPLES=${CISST_BUILD_EXAMPLES}
-@set CISST_BUILD_UTILITIES=${CISST_BUILD_UTILITIES}
-@set CISST_BUILD_COMPONENTS=${CISST_BUILD_COMPONENTS}
+@set CISST_BUILD_SAW=${CISST_BUILD_SAW}
 
 @if "%CMAKE_GENERATOR%" == "NMake Makefiles" goto nmake
 @goto visual
@@ -46,18 +43,9 @@
 @set CISST_PATH=%CISST_DIR%\bin\%CISST_INTDIR%;%CISST_DIR%\cisst\lib\%CISST_INTDIR%
 @set CISST_PYTHONPATH=%CISST_DIR%\cisst\lib;%CISST_DIR%\cisst\lib\%CISST_INTDIR%
 
-@if "%CISST_BUILD_TESTS%" == "ON" set CISST_PATH=%CISST_DIR%\tests\bin\%CISST_INTDIR%;%CISST_DIR%\tests\lib\%CISST_INTDIR%;%CISST_PATH%
-@if "%CISST_BUILD_TESTS%" == "ON" set CISST_PYTHONPATH=%CISST_DIR%\tests\lib\%CISST_INTDIR%;%CISST_DIR%\tests\lib;%CISST_PYTHONPATH%
-
-@if "%CISST_BUILD_EXAMPLES%" == "ON" set CISST_PATH=%CISST_DIR%\examples\bin\%CISST_INTDIR%;%CISST_DIR%\examples\lib\%CISST_INTDIR%;%CISST_PATH%
-@if "%CISST_BUILD_EXAMPLES%" == "ON" set CISST_PYTHONPATH=%CISST_DIR%\examples\lib\%CISST_INTDIR%;%CISST_DIR%\examples\lib;%CISST_PYTHONPATH%
-
-@if "%CISST_BUILD_UTILITIES%" == "ON" set CISST_PATH=%CISST_DIR%\utilities\bin\%CISST_INTDIR%;%CISST_DIR%\utilities\lib\%CISST_INTDIR%;%CISST_PATH%
-@if "%CISST_BUILD_UTILITIES%" == "ON" set CISST_PYTHONPATH=%CISST_DIR%\utilities\lib\%CISST_INTDIR%;%CISST_DIR%\utilities\lib;%CISST_PYTHONPATH%
-
-@if "%CISST_BUILD_COMPONENTS%" == "ON" set CISST_PATH=%CISST_DIR%\components\bin\%CISST_INTDIR%;%CISST_DIR%\components\lib\%CISST_INTDIR%;%CISST_PATH%
-@if "%CISST_BUILD_COMPONENTS%" == "ON" set CISST_PYTHONPATH=%CISST_DIR%\components\lib\%CISST_INTDIR%;%CISST_DIR%\components\lib;%CISST_PYTHONPATH%
-@if "%CISST_BUILD_COMPONENTS%" == "ON" set CISST_CLASSPATH=%CISST_DIR%\components\lib\%CISST_INTDIR%;%CISST_DIR%\components\lib;%CISST_CLASSPATH%
+@if "%CISST_BUILD_SAW%" == "ON" set CISST_PATH=%CISST_DIR%\saw\bin\%CISST_INTDIR%;%CISST_DIR%\saw\lib\%CISST_INTDIR%;%CISST_PATH%
+@if "%CISST_BUILD_SAW%" == "ON" set CISST_PYTHONPATH=%CISST_DIR%\saw\lib\%CISST_INTDIR%;%CISST_DIR%\saw\lib;%CISST_PYTHONPATH%
+@if "%CISST_BUILD_SAW%" == "ON" set CISST_CLASSPATH=%CISST_DIR%\saw\lib\%CISST_INTDIR%;%CISST_DIR%\saw\lib;%CISST_CLASSPATH%
 
 @set PATH=%CISST_PATH%;%PATH%
 @set PYTHONPATH=%CISST_PYTHONPATH%;%PYTHONPATH%

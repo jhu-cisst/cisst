@@ -16,6 +16,7 @@
 project (cisstRobotLibs)
 
 add_subdirectory (code)
+add_subdirectory (applications)
 
 # build tests, add an option to skip them
 set (EXTRAS TESTS)

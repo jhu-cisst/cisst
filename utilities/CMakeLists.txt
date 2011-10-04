@@ -23,5 +23,3 @@ add_subdirectory (multiTaskGlobalComponentManager)
 add_subdirectory (multiTaskGlobalComponentManagerFLTK)
 
 add_subdirectory (cisstIREComponent)
-
-add_subdirectory (cisstRobot)

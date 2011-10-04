@@ -5,28 +5,27 @@
 # Author(s): Anton Deguet
 # Created on: 2006-05-02
 
-# (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # Always edit the source file: cisstvars.csh.in
 # Do not edit the generated file: cisstvars.csh
 
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
 set CISST_DIR="@cisst_BINARY_DIR@"
-set CISST_BUILD_TESTS=@CISST_BUILD_TESTS@
-set CISST_BUILD_EXAMPLES=@CISST_BUILD_EXAMPLES@
-set CISST_BUILD_UTILITIES=@CISST_BUILD_UTILITIES@
-set CISST_BUILD_COMPONENTS=@CISST_BUILD_COMPONENTS@
+set CISST_BUILD_SAW=@CISST_BUILD_SAW@
 
 set OS=`uname`
+
+setenv PATH "${CISST_DIR}/cisst/bin:$PATH"
 
 # Path to dynamic libraries
 if (${OS} == "Darwin") then
@@ -50,36 +49,11 @@ else
     setenv PYTHONPATH "${CISST_DIR}/cisst/lib:$PYTHONPATH"
 endif
 
-
-# Add path to test code
-if (${CISST_BUILD_TESTS} == "ON") then
-    setenv PATH "${CISST_DIR}/tests/bin:$PATH"
-    set LIBRARY_PATH="${CISST_DIR}/tests/lib:$LIBRARY_PATH"
-    setenv PYTHONPATH "${CISST_DIR}/tests/lib:$PYTHONPATH"
-endif
-
-
-# Add path to example code
-if (${CISST_BUILD_EXAMPLES} == "ON") then
-    setenv PATH "${CISST_DIR}/examples/bin:$PATH"
-    set LIBRARY_PATH="${CISST_DIR}/examples/lib:$LIBRARY_PATH"
-    setenv PYTHONPATH "${CISST_DIR}/examples/lib:$PYTHONPATH"
-endif
-
-
-# Add path to utility code
-if (${CISST_BUILD_UTILITIES} == "ON") then
-    setenv PATH "${CISST_DIR}/utilities/bin:$PATH"
-    set LIBRARY_PATH="${CISST_DIR}/utilities/lib:$LIBRARY_PATH"
-    setenv PYTHONPATH "${CISST_DIR}/utilities/lib:$PYTHONPATH"
-endif
-
-
-# Add path to components code
-if (${CISST_BUILD_COMPONENTS} == "ON") then
-    setenv PATH "${CISST_DIR}/components/bin:$PATH"
-    set LIBRARY_PATH="${CISST_DIR}/components/lib:$LIBRARY_PATH"
-    setenv PYTHONPATH "${CISST_DIR}/components/lib:$PYTHONPATH"
+# Add path to SAW code
+if (${CISST_BUILD_SAW} == "ON") then
+    setenv PATH "${CISST_DIR}/saw/bin:$PATH"
+    set LIBRARY_PATH="${CISST_DIR}/saw/lib:$LIBRARY_PATH"
+    setenv PYTHONPATH "${CISST_DIR}/saw/lib:$PYTHONPATH"
 endif
 
 
@@ -89,4 +63,3 @@ if (${OS} == "Darwin") then
 else
     setenv LD_LIBRARY_PATH "${LIBRARY_PATH}"
 endif
-

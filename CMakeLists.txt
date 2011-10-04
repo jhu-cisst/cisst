@@ -33,7 +33,7 @@ mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 option (CISST_BUILD_UTILITIES "Build utility programs built using cisst." ON)
 option (CISST_BUILD_TESTS "Build cisst tests." OFF)
 option (CISST_BUILD_EXAMPLES "Build cisst examples." OFF)
-option (CISST_BUILD_COMPONENTS "Build SAW components." OFF)
+option (CISST_BUILD_SAW "Build SAW." OFF)
 if (UNIX)
   option (CISST_BUILD_DOC "Build the documentation." OFF)
 endif (UNIX)
@@ -77,9 +77,9 @@ if (CISST_BUILD_UTILITIES)
   add_subdirectory (utilities)
 endif (CISST_BUILD_UTILITIES)
 
-if (CISST_BUILD_COMPONENTS)
+if (CISST_BUILD_SAW)
   add_subdirectory (saw)
-endif (CISST_BUILD_COMPONENTS)
+endif (CISST_BUILD_SAW)
 
 if (CISST_BUILD_DOC)
   add_subdirectory (doc)
@@ -134,44 +134,8 @@ IF(WIN32)
           "${EXECUTABLE_OUTPUT_PATH}" "${EXECUTABLE_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}"
           "${LIBRARY_OUTPUT_PATH}" "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
 
-      # To find tests programs and libraries
-      IF(CISST_BUILD_TESTS)
-        SET(CISST_PATH_CMAKE_FORMAT
-            ${CISST_PATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/tests/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/tests/bin/${CISST_PATH_CONFIGURATION}")
-        SET(CISST_PYTHONPATH_CMAKE_FORMAT
-            ${CISST_PYTHONPATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/tests/lib" "${cisst_BINARY_DIR}/tests/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/tests/bin" "${cisst_BINARY_DIR}/tests/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(CISST_BUILD_TESTS)
-
-      # To find examples programs and libraries
-      IF(CISST_BUILD_EXAMPLES)
-        SET(CISST_PATH_CMAKE_FORMAT
-            ${CISST_PATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/examples/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/examples/bin/${CISST_PATH_CONFIGURATION}")
-        SET(CISST_PYTHONPATH_CMAKE_FORMAT
-            ${CISST_PYTHONPATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/examples/lib" "${cisst_BINARY_DIR}/examples/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/examples/bin" "${cisst_BINARY_DIR}/examples/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(CISST_BUILD_EXAMPLES)
-
-      # To find utilities programs and libraries
-      IF(CISST_BUILD_UTILITIES)
-        SET(CISST_PATH_CMAKE_FORMAT
-            ${CISST_PATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/utilities/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
-        SET(CISST_PYTHONPATH_CMAKE_FORMAT
-            ${CISST_PYTHONPATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/utilities/lib" "${cisst_BINARY_DIR}/utilities/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/utilities/bin" "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(CISST_BUILD_UTILITIES)
-
       # To find components (libraries) and example programs
-      IF(BUILD_COMPONENTS)
+      IF(CISST_BUILD_SAW)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
@@ -180,7 +144,7 @@ IF(WIN32)
             ${CISST_PYTHONPATH_CMAKE_FORMAT}
             "${cisst_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
             "${cisst_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(BUILD_COMPONENTS)
+      ENDIF(CISST_BUILD_SAW)
 
       # Convert to native format to be able to compare
       FILE(TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)
