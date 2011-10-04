@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-project (multiTaskGlobalComponentManager)
+project (cisstGlobalComponentManager)
 
 # set all libraries needed
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask)
@@ -25,9 +25,9 @@ if (cisst_FOUND_AS_REQUIRED)
   # load cisst configuration
   include (${CISST_USE_FILE})
 
-  add_executable (multiTaskGlobalComponentManager main.cpp)
+  add_executable (cisstGlobalComponentManager main.cpp)
 
-  cisst_target_link_libraries (multiTaskGlobalComponentManager ${REQUIRED_CISST_LIBRARIES})
+  cisst_target_link_libraries (cisstGlobalComponentManager ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})

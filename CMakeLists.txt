@@ -30,7 +30,6 @@ option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake"
 mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 
 # Options
-option (CISST_BUILD_UTILITIES "Build utility programs built using cisst." ON)
 option (CISST_BUILD_TESTS "Build cisst tests." OFF)
 option (CISST_BUILD_EXAMPLES "Build cisst examples." OFF)
 option (CISST_BUILD_SAW "Build SAW." OFF)
@@ -73,10 +72,6 @@ add_subdirectory (cisst)
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 
 # Conditional builds
-if (CISST_BUILD_UTILITIES)
-  add_subdirectory (utilities)
-endif (CISST_BUILD_UTILITIES)
-
 if (CISST_BUILD_SAW)
   add_subdirectory (saw)
 endif (CISST_BUILD_SAW)
