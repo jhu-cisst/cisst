@@ -40,7 +40,7 @@
 :setpath
 @echo Setting environment variables for the cisst package
 
-@set CISST_PATH=%CISST_DIR%\bin\%CISST_INTDIR%;%CISST_DIR%\cisst\lib\%CISST_INTDIR%
+@set CISST_PATH=%CISST_DIR%\cisst\bin\%CISST_INTDIR%;%CISST_DIR%\cisst\lib\%CISST_INTDIR%
 @set CISST_PYTHONPATH=%CISST_DIR%\cisst\lib;%CISST_DIR%\cisst\lib\%CISST_INTDIR%
 
 @if "%CISST_BUILD_SAW%" == "ON" set CISST_PATH=%CISST_DIR%\saw\bin\%CISST_INTDIR%;%CISST_DIR%\saw\lib\%CISST_INTDIR%;%CISST_PATH%
