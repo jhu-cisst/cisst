@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentGeneratorMacros.h>
 
 // check if this module is built as a DLL
-#ifdef cisstMultiTaskPeriodicTaskComponents_EXPORTS
+#ifdef mtsExPeriodicTaskComponents_EXPORTS
 #define CISST_THIS_LIBRARY_AS_DLL
 #endif
 #include <cisstCommon/cmnExportMacros.h>
