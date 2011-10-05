@@ -93,7 +93,7 @@ if (CISST_HAS_FLTK)
   if (FLTK_LIBRARY_DIRS)
     # If FLTK was built using CMake (i.e., there is an FLTKConfig.cmake), the FLTK_LIBRARIES (above) does not include the path,
     # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
-    cisst_set_package_settings (cisstCommon FLTK LINK_DIRECTORIES  FLTK_LIBRARY_DIRS)
+    cisst_set_package_settings (cisstFLTK FLTK LINK_DIRECTORIES  FLTK_LIBRARY_DIRS)
   endif (FLTK_LIBRARY_DIRS)
 
   # Create the CMake config file

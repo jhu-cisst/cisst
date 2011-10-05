@@ -16,7 +16,7 @@
 project(devicesTutorialExample2)
 
 # list of cisst libraries needed
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstDevices)
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes cisstDevices cisstFLTK)
 cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 # magic CMake command, generate .cxx and .h from .fl files

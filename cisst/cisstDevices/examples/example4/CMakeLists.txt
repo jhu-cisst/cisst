@@ -26,6 +26,7 @@ set (CISST_LIBRARIES_NEEDED cisstCommon
                             cisstMultiTask
                             cisstParameterTypes
                             cisstDevices
+                            cisstFLTK
                             )
 
 # Set include/link directories
