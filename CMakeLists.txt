@@ -123,11 +123,11 @@ IF(WIN32)
 
       # Initial settings for paths
       SET(CISST_PATH_CMAKE_FORMAT
-          "${EXECUTABLE_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}"
-          "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
+          "${cisst_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
+          "${cisst_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
       SET(CISST_PYTHONPATH_CMAKE_FORMAT
-          "${EXECUTABLE_OUTPUT_PATH}" "${EXECUTABLE_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}"
-          "${LIBRARY_OUTPUT_PATH}" "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
+          "${cisst_BINARY_DIR}/cisst/lib" "${cisst_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
+          "${cisst_BINARY_DIR}/cisst/bin" "${cisst_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
 
       # To find components (libraries) and example programs
       IF(CISST_BUILD_SAW)
