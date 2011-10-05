@@ -58,19 +58,6 @@ else (CMAKE_CL_64)
   set (CISST_CMAKE_COMPILER_IS_MSVC_64 OFF)
 endif (CMAKE_CL_64)
 
-# Build static or dynamic libraries
-option (CISST_BUILD_SHARED_LIBS "Build cisst with shared libraries." OFF)
-mark_as_advanced (CISST_BUILD_SHARED_LIBS)
-if (CISST_BUILD_SHARED_LIBS)
-  set (IS_SHARED SHARED)
-  set (BUILD_SHARED_LIBS SHARED)
-  if (WIN32)
-    add_definitions (-DCISST_DLL)
-  endif (WIN32)
-else (CISST_BUILD_SHARED_LIBS)
-  set (IS_SHARED STATIC)
-endif (CISST_BUILD_SHARED_LIBS)
-
 
 # Use a separate directory to find external dependencies, this allows
 # to include some CMake "use" files without polluting the environment

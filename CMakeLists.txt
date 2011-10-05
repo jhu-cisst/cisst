@@ -46,6 +46,19 @@ if (CISST_BUILD_TESTS)
   mark_as_advanced (DART_ROOT)
 endif (CISST_BUILD_TESTS)
 
+# Build static or dynamic libraries
+option (CISST_BUILD_SHARED_LIBS "Build cisst with shared libraries." OFF)
+mark_as_advanced (CISST_BUILD_SHARED_LIBS)
+if (CISST_BUILD_SHARED_LIBS)
+  set (IS_SHARED SHARED)
+  set (BUILD_SHARED_LIBS SHARED)
+  if (WIN32)
+    add_definitions (-DCISST_DLL)
+  endif (WIN32)
+else (CISST_BUILD_SHARED_LIBS)
+  set (IS_SHARED STATIC)
+endif (CISST_BUILD_SHARED_LIBS)
+
 # Add include directories
 set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/cisst/include
