@@ -18,3 +18,4 @@
 # --- end cisst license ---
 
 set (FLTK_INCLUDE_DIR "@FLTK_INCLUDE_DIR@")
+set (FLTK_FLUID_EXECUTABLE "@FLTK_FLUID_EXECUTABLE@")
