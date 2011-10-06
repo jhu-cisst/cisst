@@ -71,7 +71,7 @@ target_link_libraries (cisstCommonTests cmnClassRegisterTestStatic)
 
 # Add a dynamic library with some classes registered
 if (NOT CISST_BUILD_SHARED_LIBS)
-  message ("Info: Since the cisst libraries are compiled statically, the tests for class registration based on dynamically exported classes will be skipped.")
+  message ("Information: Since the cisst libraries are compiled statically, the tests for class registration based on dynamically exported classes will be skipped.")
 else (NOT CISST_BUILD_SHARED_LIBS)
   add_library (cmnClassRegisterTestDynamic
                SHARED

@@ -11,7 +11,7 @@
 #
 # --- end cisst license ---
 
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstDevices)
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstCommonXML cisstOSAbstraction cisstMultiTask cisstDevices cisstDevices cisstDevicesQt cisstQt)
 cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 add_executable (devicesTutorialExample6
