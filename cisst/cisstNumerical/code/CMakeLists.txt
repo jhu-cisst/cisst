@@ -108,5 +108,5 @@ cisst_add_library (LIBRARY cisstNumerical
 
 # Create the CMake config file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstNumericalBuild.cmake.in
-                ${cisstLibs_BINARY_DIR}/cisstNumericalBuild.cmake
+                ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstNumericalBuild.cmake
                 @ONLY)

@@ -48,7 +48,6 @@ endif (CISST_BUILD_TESTS)
 
 # Build static or dynamic libraries
 option (CISST_BUILD_SHARED_LIBS "Build cisst with shared libraries." OFF)
-mark_as_advanced (CISST_BUILD_SHARED_LIBS)
 if (CISST_BUILD_SHARED_LIBS)
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)

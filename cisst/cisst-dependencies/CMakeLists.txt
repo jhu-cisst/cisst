@@ -57,18 +57,18 @@ if (CISST_HAS_QT)
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
   # XML Qt based
-  set (CISST_FOUND_QT_XML ON CACHE BOOL "Is Qt XML available" FORCE)
+  set (CISST_FOUND_QT_XML ON CACHE BOOL "Is Qt XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_QT_XML)
 
   # Create the CMake config file
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
-                  ${cisstLibs_BINARY_DIR}/cisstQtBuild.cmake
+                  ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstQtBuild.cmake
                   @ONLY)
 
 else (CISST_HAS_QT)
   cisst_unset_all_package_settings (cisstQt Qt)
   # XML Qt based
-  set (CISST_FOUND_QT_XML OFF CACHE BOOL "Is Qt XML available" FORCE)
+  set (CISST_FOUND_QT_XML OFF CACHE BOOL "Is Qt XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_QT_XML)
 endif (CISST_HAS_QT)
 
@@ -98,7 +98,7 @@ if (CISST_HAS_FLTK)
 
   # Create the CMake config file
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstFLTKBuild.cmake.in
-                  ${cisstLibs_BINARY_DIR}/cisstFLTKBuild.cmake
+                  ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstFLTKBuild.cmake
                   @ONLY)
 
 else (CISST_HAS_FLTK)
@@ -125,7 +125,7 @@ if (CISST_HAS_SWIG_PYTHON)
 
     # Create the CMake config file
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
-                    ${cisstLibs_BINARY_DIR}/cisstPythonBuild.cmake
+                    ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstPythonBuild.cmake
                     @ONLY)
 
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
@@ -163,9 +163,9 @@ endif (CISST_HAS_SWIG_PYTHON)
 # Support for cisstCommonXML, just to see what is available
 find_package (LibXml2)
 if (LIBXML2_FOUND)
-  set (CISST_FOUND_LIBXML2_XML ON CACHE BOOL "Is LibXml2 XML available" FORCE)
+  set (CISST_FOUND_LIBXML2_XML ON CACHE BOOL "Is LibXml2 XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_LIBXML2_XML)
 else (LIBXML2_FOUND)
-  set (CISST_FOUND_LIBXML2_XML OFF CACHE BOOL "Is LibXml2 XML available" FORCE)
+  set (CISST_FOUND_LIBXML2_XML OFF CACHE BOOL "Is LibXml2 XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_LIBXML2_XML)
 endif (LIBXML2_FOUND)
