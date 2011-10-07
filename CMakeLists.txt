@@ -16,8 +16,6 @@
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
 
-message ("todo: should RTAI and QNX flags be moved to cisstOSAbstraction")
-
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
 
