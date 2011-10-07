@@ -300,9 +300,9 @@ set (CISST_MTS_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstMultiTask/mtsCon
 configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in
                 ${CISST_MTS_CONFIG_FILE}
                 @ONLY)
-install_files (/include/cisstMultiTask
-               ".h"
-               ${CISST_MTS_CONFIG_FILE})
+install (FILES ${CISST_MTS_CONFIG_FILE}
+         DESTINATION include/cisstMultiTask
+         COMPONENT cisstMultiTask)
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"

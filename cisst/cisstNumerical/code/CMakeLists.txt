@@ -90,9 +90,9 @@ set (CISST_NMR_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstNumerical/nmrCon
 configure_file (${cisstNumericalLibs_SOURCE_DIR}/nmrConfig.h.in
                 ${CISST_NMR_CONFIG_FILE}
                 @ONLY)
-install_files (/include/cisstNumerical
-               ".h"
-               ${CISST_NMR_CONFIG_FILE})
+install (FILES ${CISST_NMR_CONFIG_FILE}
+         DESTINATION include/cisstNumerical
+         COMPONENT cisstNumerical)
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_NMR_CONFIG_FILE}"

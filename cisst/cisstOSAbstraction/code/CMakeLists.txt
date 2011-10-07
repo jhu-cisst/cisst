@@ -67,9 +67,9 @@ set (CISST_OSA_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstOSAbstraction/os
 configure_file (${cisstOSAbstractionLibs_SOURCE_DIR}/osaConfig.h.in
                 ${CISST_OSA_CONFIG_FILE}
                 @ONLY)
-install_files (/include/cisstOSAbstraction
-               ".h"
-               ${CISST_OSA_CONFIG_FILE})
+install (FILES ${CISST_OSA_CONFIG_FILE}
+         DESTINATION include/cisstOSAbstraction
+         COMPONENT cisstOSAbstraction)
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_OSA_CONFIG_FILE}"

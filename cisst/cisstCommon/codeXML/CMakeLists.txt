@@ -51,9 +51,9 @@ set (CISST_CMN_XML_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstCommon/cmnCo
 configure_file (${cisstCommonLibs_SOURCE_DIR}/cmnConfigXML.h.in
                 ${CISST_CMN_XML_CONFIG_FILE}
                 @ONLY)
-install_files (/include/cisstCommon
-               ".h"
-               ${CISST_CMN_XML_CONFIG_FILE})
+install (FILES ${CISST_CMN_XML_CONFIG_FILE}
+         DESTINATION include/cisstCommon
+         COMPONENT cisstCommonXML)
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_CMN_XML_CONFIG_FILE}"

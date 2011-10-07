@@ -181,9 +181,9 @@ set (CISST_DEV_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstDevices/devConfi
 configure_file (${cisstDevicesLibs_SOURCE_DIR}/devConfig.h.in
                 ${CISST_DEV_CONFIG_FILE}
                 @ONLY)
-install_files (/include/cisstDevices
-               ".h"
-               ${CISST_DEV_CONFIG_FILE})
+install (FILES ${CISST_DEV_CONFIG_FILE}
+         DESTINATION include/cisstDevices
+         COMPONENT cisstDevices)
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_DEV_CONFIG_FILE}" PROPERTIES GENERATED TRUE)

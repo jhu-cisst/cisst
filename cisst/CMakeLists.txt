@@ -19,6 +19,11 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst libraries (Computer Integrated Surgical Systems and Technology)
 project (cisstLibs)
 
+# set the version number
+set (CISST_VERSION_MAJOR "1")
+set (CISST_VERSION_MINOR "0")
+set (CISST_VERSION_PATCH "0")
+
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
 set (CURRENT_PROJECT_IS_CISST ON)
 
@@ -309,6 +314,32 @@ configure_file ("${cisstLibs_SOURCE_DIR}/cmake/cisst-config.cmake.in"
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 configure_file (${cisstLibs_SOURCE_DIR}/cisstConfig.h.in
                 ${cisstLibs_BINARY_DIR}/include/cisstConfig.h)
-install_files (/include
-               ".h"
-               ${cisstLibs_BINARY_DIR}/include/cisstConfig.h)
+install (FILES  ${cisstLibs_BINARY_DIR}/include/cisstConfig.h
+         DESTINATION include
+         COMPONENT cisstCommon)
+
+# Use CPack package generator
+set(CPACK_PACKAGE_NAME "cisst")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
+# For now, enable all default libraries (even if not compiled)
+set(CPACK_COMPONENTS_ALL ${CISST_LIBRARIES_DEFAULT})
+set(CPACK_PACKAGE_VENDOR "JHU")
+set(CPACK_PACKAGE_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${CISST_VERSION_PATCH})
+set(CPACK_RESOURCE_FILE_LICENSE "${CISST_SOURCE_DIR}/license.txt")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
+set(CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
+# Dependencies should be done automatically
+set(CPACK_COMPONENT_CISSTVECTOR_DEPENDS          cisstCommon)
+set(CPACK_COMPONENT_CISSTNUMERICAL_DEPENDS       cisstCommon cisstVector)
+set(CPACK_COMPONENT_CISSTOSABSTRACTION_DEPENDS   cisstCommon)
+set(CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVector cisstOSAbstraction)
+set(CPACK_COMPONENT_CISSTSTEREOVISION_DEPENDS    cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+set(CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+set(CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon cisstVector cisstNumerical)
+if (WIN32)
+  set(CPACK_NSIS_MODIFY_PATH ON)
+endif (WIN32)
+INCLUDE(CPack)

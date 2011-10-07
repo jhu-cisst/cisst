@@ -274,11 +274,14 @@ macro (cisst_add_library ...)
                )
 
   # Install the library
-  install_targets (/lib ${LIBRARY})
+  install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
+           RUNTIME DESTINATION bin
+           LIBRARY DESTINATION lib
+           ARCHIVE DESTINATION lib)
 
   # Add dependencies for linking, also check BUILD_xxx for dependencies
   if (DEPENDENCIES)
-    # Check that dependencies are build
+    # Check that dependencies are built
     foreach (dependency ${DEPENDENCIES})
       set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
       list (FIND _CISST_LIBRARIES_AND_SETTINGS ${dependency} FOUND_IT)
@@ -295,12 +298,12 @@ macro (cisst_add_library ...)
   cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES})
 
   # Install all header files
-  install_files (/include/${LIBRARY_DIR}
-                 ".h"
-                 ${HEADERS})
-  install_files (/include/
-                 ".h"
-                 ${LIBRARY_MAIN_HEADER})
+  install (FILES ${HEADERS}
+           DESTINATION include/${LIBRARY_DIR}
+           COMPONENT ${LIBRARY})
+  install (FILES ${LIBRARY_MAIN_HEADER}
+           DESTINATION include
+           COMPONENT ${LIBRARY})
 
 endmacro (cisst_add_library)
 
@@ -470,9 +473,9 @@ function (cisst_add_swig_module ...)
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py)
     # install the interface files so that one can %import them
-    install_files (/include
-                   ".i"
-                   ${INTERFACE})
+    install (FILES ${INTERFACE}
+             DESTINATION include
+             COMPONENT ${LIBRARY})
 
   else (EXISTS ${SWIG_INTERFACE_FILE})
     message (SEND_ERROR "Can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")

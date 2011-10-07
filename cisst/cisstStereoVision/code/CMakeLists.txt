@@ -1293,9 +1293,9 @@ set (CISST_SVL_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstStereoVision/svl
 configure_file (${cisstStereoVisionLibs_SOURCE_DIR}/svlConfig.h.in
                 ${CISST_SVL_CONFIG_FILE}
                 @ONLY)
-install_files (/include/cisstStereoVision
-               ".h"
-               ${CISST_SVL_CONFIG_FILE})
+install (FILES ${CISST_SVL_CONFIG_FILE}
+         DESTINATION include/cisstStereoVision
+         COMPONENT cisstStereoVision)
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_SVL_CONFIG_FILE}"
