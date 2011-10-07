@@ -35,7 +35,7 @@ endif (CISST_HAS_OPENGL)
 
 # Support for QT
 set (CISST_QT_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns)
-find_package (Qt4 REQUIRED ${CISST_QT_COMPONENTS})
+find_package (Qt4 COMPONENTS ${CISST_QT_COMPONENTS})
 if (QT_FOUND)
   option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" ON)
   mark_as_advanced (CISST_HAS_QT)
