@@ -246,11 +246,13 @@ if (CISST_MTS_HAS_ICE)
        )
 
   set (ICE_RESOURCE_DIR ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice)
-  set (ICE_RESOURCE_FILES
+  set (ICE_CONFIG_FILES
        ${ICE_RESOURCE_DIR}/config.client
        ${ICE_RESOURCE_DIR}/config.server
        ${ICE_RESOURCE_DIR}/config.LCM
-       ${ICE_RESOURCE_DIR}/config.GCM
+       ${ICE_RESOURCE_DIR}/config.GCM)
+  set (ICE_RESOURCE_FILES
+       ${ICE_CONFIG_FILES}
        ${ICE_RESOURCE_DIR}/mtsComponentInterfaceProxy.ice
        ${ICE_RESOURCE_DIR}/mtsManagerProxy.ice
        )
@@ -331,3 +333,14 @@ if (CISST_MTS_HAS_ICE)
     target_link_libraries (cisstMultiTask ${ICE_LIBRARIES})
   endif (WIN32)
 endif (CISST_MTS_HAS_ICE)
+
+# Add installer files (only tested on WIN32)
+if (WIN32 AND CISST_MTS_HAS_ICE)
+  set (ICE_BIN ${ICE_HOME}/bin)
+  file (GLOB icedll "${ICE_BIN}/Ice??.dll")
+  install (FILES ${icedll} DESTINATION bin COMPONENT cisstMultiTask)
+  file (GLOB iceutildll "${ICE_BIN}/IceUtil??.dll")
+  install (FILES ${iceutildll} DESTINATION bin COMPONENT cisstMultiTask)
+  install (FILES ${ICE_BIN}/bzip2.dll DESTINATION bin COMPONENT cisstMultiTask)
+  install (FILES ${ICE_CONFIG_FILES} DESTINATION share COMPONENT cisstMultiTask)
+endif (WIN32 AND CISST_MTS_HAS_ICE)

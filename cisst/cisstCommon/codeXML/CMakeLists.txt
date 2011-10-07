@@ -70,3 +70,15 @@ cisst_add_library (LIBRARY cisstCommonXML
 if (${CISST_XML_LIB} STREQUAL "QtXML")  
   target_link_libraries (cisstCommonXML ${QT_LIBRARIES})
 endif (${CISST_XML_LIB} STREQUAL "QtXML")  
+
+# Add libxml2 runtime dependencies (so far, only tested on WIN32).
+# There must be a better way to do this.
+# Also, zlib1.dll is also needed by cisstStereoVision (gnuwin32 package) --
+# which one should be used?
+if (WIN32 AND ${CISST_XML_LIB} STREQUAL "LibXml2")
+  # Assume that xmllint.exe was found and DLLs are in that directory
+  get_filename_component (LIBXML2_BIN ${LIBXML2_XMLLINT_EXECUTABLE} PATH)
+  install (FILES ${LIBXML2_BIN}/libxml2.dll ${LIBXML2_BIN}/iconv.dll ${LIBXML2_BIN}/zlib1.dll
+           DESTINATION bin
+           COMPONENT cisstCommonXML)
+endif (WIN32 AND ${CISST_XML_LIB} STREQUAL "LibXml2")
