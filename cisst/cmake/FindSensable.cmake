@@ -39,6 +39,7 @@ if (WIN32)
   set (SENSABLE_BASE_ENV $ENV{3DTOUCH_BASE})
 
   if (DEFINED SENSABLE_BASE_ENV)
+    set (SENSABLE_FOUND true)
     set (SENSABLE_INCLUDE_DIR
          ${SENSABLE_BASE_ENV}/include
          ${SENSABLE_BASE_ENV}/utilities/include)
