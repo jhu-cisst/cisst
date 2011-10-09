@@ -12,7 +12,7 @@
 #
 # --- end cisst license ---
 
-if (CISST_BUILD_LIBS_cisstMultiTask AND CISST_HAS_FLTK)
+if (CISST_BUILD_cisstMultiTask AND CISST_HAS_FLTK)
 
   add_subdirectory (example1) # sineTask and display
   add_subdirectory (example2) # example 1 + event + device
@@ -36,14 +36,14 @@ if (CISST_BUILD_LIBS_cisstMultiTask AND CISST_HAS_FLTK)
 
   add_subdirectory (example9) # show all types of commands and events + ICE if available
 
-  if (CISST_BUILD_LIBS_cisstParameterTypes)
+  if (CISST_BUILD_cisstParameterTypes)
     add_subdirectory (benchmark1) # benchmarking loop time + ICE if available
     add_subdirectory (benchmark2) # benchmarking latency + ICE if available
-  else (CISST_BUILD_LIBS_cisstParameterTypes)
-    message (WARNING " multiTaskTutorial benchmark 1 and 2 will not be compiled since they require CISST_BUILD_LIBS_cisstParameterTypes")
-  endif (CISST_BUILD_LIBS_cisstParameterTypes)
+  else (CISST_BUILD_cisstParameterTypes)
+    message (WARNING " multiTaskTutorial benchmark 1 and 2 will not be compiled since they require CISST_BUILD_cisstParameterTypes")
+  endif (CISST_BUILD_cisstParameterTypes)
 
-else (CISST_BUILD_LIBS_cisstMultiTask AND CISST_HAS_FLTK)
-  message (WARNING " multiTaskTutorial examples will not be compiled since they require CISST_BUILD_LIBS_cisstMultiTask and CISST_HAS_FLTK")
-endif (CISST_BUILD_LIBS_cisstMultiTask AND CISST_HAS_FLTK)
+else (CISST_BUILD_cisstMultiTask AND CISST_HAS_FLTK)
+  message (WARNING " multiTaskTutorial examples will not be compiled since they require CISST_BUILD_cisstMultiTask and CISST_HAS_FLTK")
+endif (CISST_BUILD_cisstMultiTask AND CISST_HAS_FLTK)
 

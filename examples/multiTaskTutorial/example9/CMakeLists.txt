@@ -81,5 +81,5 @@ if (CISST_MTS_HAS_ICE)
                                cisstCommon cisstOSAbstraction cisstMultiTask)
 
 else (CISST_MTS_HAS_ICE)
-  message (WARNING " multiTaskTutorial example9 will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
 endif (CISST_MTS_HAS_ICE)

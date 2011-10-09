@@ -1,0 +1,171 @@
+#
+# $Id$
+#
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+
+# Support for OpenGL
+find_package (OpenGL)
+if (OPENGL_FOUND)
+  option (CISST_HAS_OPENGL "Is OpenGL available." ON)
+  mark_as_advanced (CISST_HAS_OPENGL)
+else (OPENGL_FOUND)
+  option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
+endif (OPENGL_FOUND)
+
+if (CISST_HAS_OPENGL)
+  find_package (OpenGL REQUIRED)
+  if (OPENGL_INCLUDE_DIR)
+    cisst_set_package_settings (cisstOpenGL OpenGL INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
+  endif (OPENGL_INCLUDE_DIR)
+  cisst_set_package_settings (cisstOpenGL OpenGL LIBRARIES OPENGL_LIBRARIES)
+else (CISST_HAS_OPENGL)
+  cisst_unset_all_package_settings (cisstOpenGL OpenGL)
+endif (CISST_HAS_OPENGL)
+
+
+# Support for QT
+set (CISST_QT_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns)
+find_package (Qt4 COMPONENTS ${CISST_QT_COMPONENTS})
+if (QT_FOUND)
+  option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" ON)
+  mark_as_advanced (CISST_HAS_QT)
+else (QT_FOUND)
+  option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" OFF)
+endif (QT_FOUND)
+
+# if detected or if user requests it
+if (CISST_HAS_QT)
+  # Qt is now required so we can include the QT_USE_FILE
+  find_package (Qt4 REQUIRED ${CISST_QT_COMPONENTS})
+  include (${QT_USE_FILE})
+  set (CISST_QT_PACKAGE "Qt4")
+  cisst_set_package_settings (cisstQt Qt PACKAGES           CISST_QT_PACKAGE)
+  cisst_set_package_settings (cisstQt Qt PACKAGE_COMPONENTS CISST_QT_COMPONENTS)
+  cisst_set_package_settings (cisstQt Qt CMAKE_FILES        QT_USE_FILE)
+  cisst_set_package_settings (cisstQt Qt LIBRARIES          QT_LIBRARIES)
+  # OpenGL
+  set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
+  mark_as_advanced (CISST_HAS_OPENGL)
+  # XML Qt based
+  set (CISST_FOUND_QT_XML ON CACHE BOOL "Is Qt XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
+  mark_as_advanced (CISST_FOUND_QT_XML)
+
+  # Create the CMake config file
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
+                  ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstQtBuild.cmake
+                  @ONLY)
+
+else (CISST_HAS_QT)
+  cisst_unset_all_package_settings (cisstQt Qt)
+  # XML Qt based
+  set (CISST_FOUND_QT_XML OFF CACHE BOOL "Is Qt XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
+  mark_as_advanced (CISST_FOUND_QT_XML)
+endif (CISST_HAS_QT)
+
+
+# Support for FLTK
+find_package (FLTK)
+if (FLTK_FOUND)
+  option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" ON)
+  mark_as_advanced (CISST_HAS_FLTK)
+else (FLTK_FOUND)
+  option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" OFF)
+endif (FLTK_FOUND)
+
+if (CISST_HAS_FLTK)
+  # OpenGL
+  set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
+  mark_as_advanced (CISST_HAS_OPENGL)
+  # FLTK is now required
+  find_package (FLTK REQUIRED)
+  cisst_set_package_settings (cisstFLTK FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
+  cisst_set_package_settings (cisstFLTK FLTK LIBRARIES           FLTK_LIBRARIES)
+  if (FLTK_LIBRARY_DIRS)
+    # If FLTK was built using CMake (i.e., there is an FLTKConfig.cmake), the FLTK_LIBRARIES (above) does not include the path,
+    # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
+    cisst_set_package_settings (cisstFLTK FLTK LINK_DIRECTORIES  FLTK_LIBRARY_DIRS)
+  endif (FLTK_LIBRARY_DIRS)
+
+  # Create the CMake config file
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstFLTKBuild.cmake.in
+                  ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstFLTKBuild.cmake
+                  @ONLY)
+
+else (CISST_HAS_FLTK)
+  cisst_unset_all_package_settings (cisstCommon FLTK)
+endif (CISST_HAS_FLTK)
+
+
+# Wrapping with swig for Python
+option (CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
+mark_as_advanced (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON)
+  # Find Swig
+  set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
+  find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
+  # It looks like version is not yet supported by CMake for SWIG so we are checking manually
+  if (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+    message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
+  else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+    include (${SWIG_USE_FILE})
+    # save SWIG settings
+    set (CISST_SWIG_PACKAGE "SWIG")
+    cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
+    cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE)
+
+    # Create the CMake config file
+    configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
+                    ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstPythonBuild.cmake
+                    @ONLY)
+
+  endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+
+  # Force to use exceptions
+  set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
+  set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
+
+  # Find Python
+  find_package (PythonLibs REQUIRED)
+  # Some older CMake don't define the debug library
+  if (NOT PYTHON_DEBUG_LIBRARIES)
+    set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
+  endif (NOT PYTHON_DEBUG_LIBRARIES)
+  find_package (PythonInterp REQUIRED)
+  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
+  set (PYTHON_ALL_LIBRARIES "debug;${PYTHON_DEBUG_LIBRARIES};optimized;${PYTHON_LIBRARIES}")
+  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
+  # We also need numpy if we have cisstVector
+  if (CISST_BUILD_cisstVector)
+    find_package (Numpy REQUIRED)
+    if (PYTHON_NUMPY_FOUND)
+      cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
+      mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
+    else (PYTHON_NUMPY_FOUND)
+      cisst_unset_all_package_settings (cisstPython NumPy)
+    endif (PYTHON_NUMPY_FOUND)
+  endif (CISST_BUILD_cisstVector)
+else (CISST_HAS_SWIG_PYTHON)
+  cisst_unset_all_package_settings (cisstPython Python)
+  cisst_unset_all_package_settings (cisstPython NumPy)
+endif (CISST_HAS_SWIG_PYTHON)
+
+
+# Support for cisstCommonXML, just to see what is available
+find_package (LibXml2)
+if (LIBXML2_FOUND)
+  set (CISST_FOUND_LIBXML2_XML ON CACHE BOOL "Is LibXml2 XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
+  mark_as_advanced (CISST_FOUND_LIBXML2_XML)
+else (LIBXML2_FOUND)
+  set (CISST_FOUND_LIBXML2_XML OFF CACHE BOOL "Is LibXml2 XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
+  mark_as_advanced (CISST_FOUND_LIBXML2_XML)
+endif (LIBXML2_FOUND)

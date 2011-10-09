@@ -1,0 +1,243 @@
+#!/usr/bin/python
+
+# -*- Mode: python; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+# ex: set filetype=python softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
+
+#
+# $Id$
+#
+
+# Author: Andy LaMora, Anton Deguet
+# Date: 2005-04-08
+
+# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+# Reserved.
+
+# This file is processed automatically by CMake, if you need to modify
+# it, modify the .in (input) processed by CMake
+
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+import unittest
+import sys
+import os
+import getopt
+
+
+module = '@LIB@'
+pathTestCases = '@CMAKE_CURRENT_SOURCE_DIR@'
+pathLib = '@cisst_LIBRARY_PATH@/@config@'
+
+
+sys.path.append(pathTestCases)
+sys.path.append(pathLib)
+
+verbose = False
+listOfModules = []
+
+# Load all the available tests from the source directory
+ext  = '.py'
+for filename in os.listdir(pathTestCases):
+    if filename.endswith(ext):
+        if verbose:
+            print "Found python file", filename
+        currentModuleName = os.path.splitext(filename)[0]
+        command = "import " + currentModuleName
+        exec command
+        listOfModules.append(currentModuleName)
+    else:
+        if verbose:
+            print "Found non python file", filename
+
+
+
+
+# Class to list all the tests based on the module, class and method to use
+class TestInfo:
+    classList = []
+    def __init__( self ):
+        self.Refresh()
+    def Refresh( self ):
+        for x in listOfModules:
+            if verbose:
+                print "Checking if", x, "contains any test case"
+            if x.find("__") < 0 and x != "unittest":
+                try:  # this is a cheap way of handling dir(x) failure (not a module)
+                    content = eval("dir(" + x + ")")
+                    for y in content:
+                        if verbose:
+                             print "Found", y, "in module", x
+                        if y.find("__") < 0 and y != "unittest":
+                             if issubclass(eval(x + "." + y), unittest.TestCase):
+                                self.classList.append([x, y])
+                                if verbose:
+                                    print "Found test case", y, "in module", x
+                                break
+                except:
+                    pass
+
+
+
+
+# Print a somewhat accurate help message
+def PrintHelp():
+    print "cisst unit testing for python modules"
+    print "Options:"
+    print "   -h, --help:                    print this message"
+    print "   -l, --list:                    list all tests for this library"
+    print "   -r, --run:                     run all tests"
+    print "   -d <python>, --dart <python>:  like -l, but formated for CMake/ctest and requires full name of Python"
+    print "   -t <test>, --test <test>:      run a specific test"
+    print " "
+
+
+
+
+# List all the tests in human readable format
+def ListTests(prefix):
+    tests = TestInfo()
+    for x in tests.classList:
+        moduleName = x[0]
+        className = x[1]
+        list = unittest.getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        for method in list:
+            print moduleName + "." + className + "." + method
+    return 0
+
+
+
+
+# List all the tests formated for CMake/ctest
+def ListTestsCMake(prefix, pythonExe):
+    tests = TestInfo()
+    for x in tests.classList:
+        moduleName = x[0]
+        className = x[1]
+        list = unittest.getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        programName = sys.argv[0]
+        programName = programName.replace('\\', '/')
+        for method in list:
+            testName = className + "." + method
+            print "ADD_TEST(\"Python: " + testName + "\" " + pythonExe + " " + programName + " -t " + moduleName + "." + testName + ")"
+    return 0
+
+
+
+
+# Run all tests
+def RunAllTests(prefix):
+    tests = TestInfo()
+
+    result = unittest.TestResult()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+
+    for x in tests.classList:
+        moduleName = x[0]
+        className = x[1]
+        list = unittest.getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        for method in list:
+            suite.addTest(loader.loadTestsFromName(method, eval(moduleName + "." + className)))
+
+    suite.run(result)
+    print result
+    if not result.wasSuccessful():
+        for i in range(len(result.errors)):
+            print "!!!ERROR!!!"
+            print str((result.errors[i])[0])
+            print (result.errors[i])[1]
+        for i in range( len(result.failures)):
+            print "!!!FAILURE!!!"
+            print str((result.failures[i])[0])
+            print (result.failures[i])[1]
+    else:
+        print "successful"
+    return 0
+
+
+
+
+# Run one specific test specified in format module.class.method
+def RunOneTest(testName):
+
+    if len(testName)==0:
+        print >>sys.stderr, "You need to provide an argument with -t"
+        PrintHelp()
+        return 1
+
+    if testName.find(".") < 0:
+        print "Missing test name"
+        PrintHelp()
+        return 1
+
+    else:
+        mod, cls, meth = testName.split(".")
+        result = unittest.TestResult()
+        loader = unittest.TestLoader()
+        suite   = loader.loadTestsFromName(meth, eval(mod + "." + cls))
+        print "Running test: " + mod + "." + cls + "." + meth
+        suite.run(result)
+        print result
+        if not result.wasSuccessful():
+            if len(result.errors) != 0:
+                print "!!!ERRORS!!!"
+                print str((result.errors[0])[0])
+                print (result.errors[0])[1]
+            if len(result.failures) != 0:
+                print "!!!FAILURES!!!"
+                print str((result.failures[0])[0])
+                print (result.failures[0])[1]
+
+            return 1
+        else:
+            print "OK (1 test)"
+            return 0
+
+
+
+
+def main(argv = None):
+    prefix = "Test"
+
+    if argv is None:
+        argv = sys.argv
+
+    try:
+        opts, args = getopt.getopt(argv[1:], "hlrd:t:", ["help", "list", "run", "dart=", "test="])
+    except getopt.GetoptError:
+        print "Unknown option(s)"
+        PrintHelp()
+        return 1
+
+
+    for option, argument in opts:
+        if option in ("-h", "--help"):
+            return PrintHelp()
+        if option in ("-l", "--list"):
+            return ListTests(prefix)
+        if option in ("-r", "--run"):
+            return RunAllTests(prefix)
+        if option in ("-d", "--dart"):
+            return ListTestsCMake(prefix, argument)
+        if option in ("-t", "--test"):
+            return RunOneTest(argument)
+
+    print "No option provided"
+    PrintHelp()
+    return 1
+
+
+
+
+# This is the main.
+# It should return to the shell the return value of main()
+if __name__ == "__main__":
+    sys.exit(main())
+
+

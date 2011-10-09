@@ -1,0 +1,71 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id$
+
+  Author(s):	Anton Deguet
+  Created on: 2004-02-18
+
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#pragma once
+
+#ifndef _cisstConfig_h
+#define _cisstConfig_h
+
+// cisst version
+#define CISST_VERSION_MAJOR ${CISST_VERSION_MAJOR}
+#define CISST_VERSION_MINOR ${CISST_VERSION_MINOR}
+#define CISST_VERSION_PATCH ${CISST_VERSION_PATCH}
+#define CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}"
+
+// Path to source root (to find some configuration files)
+#define CISST_SOURCE_ROOT "${CISST_SOURCE_DIR}"
+
+// Path to build root (to find some configuration files)
+#define CISST_BUILD_ROOT "${CISST_BINARY_DIR}"
+
+// Path to build files
+#define CISST_BUILD_LINK_DIRECTORIES "${CISST_BUILD_LINK_DIRECTORIES}"
+
+// Was cisst compiled as shared libraries or static
+#cmakedefine01 CISST_BUILD_SHARED_LIBS
+
+// For MSVC, CMake generator assumes either 32 or 64 bits compiler
+#cmakedefine01 CISST_CMAKE_COMPILER_IS_MSVC_64
+
+// RTAI Realtime extension for Linux
+#cmakedefine01 CISST_HAS_LINUX_RTAI
+
+// Xenomai Realtime extension for Linux
+#cmakedefine01 CISST_HAS_LINUX_XENOMAI
+
+// Using XML or not
+#cmakedefine01 CISST_HAS_XML
+
+// Using IRE (and Swig/Python) or not
+#cmakedefine01 CISST_HAS_IRE
+
+// Using FLTK or not
+#cmakedefine01 CISST_HAS_FLTK
+
+// Using Qt or not
+#cmakedefine01 CISST_HAS_QT
+
+// Using OpenGL or not
+#cmakedefine01 CISST_HAS_OPENGL
+
+
+#endif // _cisstConfig_h

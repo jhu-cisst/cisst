@@ -1,0 +1,31 @@
+#
+# $Id$
+#
+# (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+find_package (cisst COMPONENTS cisstCommon)
+
+if (cisst_FOUND_AS_REQUIRED)
+  include (${CISST_USE_FILE})
+
+  add_library (cmnExSerializationClasses STATIC classes.h classes.cpp)
+
+  add_executable (cmnExSerializationWrite write.cpp)
+  cisst_target_link_libraries (cmnExSerializationWrite cisstCommon)
+  target_link_libraries (cmnExSerializationWrite cmnExSerializationClasses)
+
+  add_executable (cmnExSerializationRead read.cpp)
+  cisst_target_link_libraries (cmnExSerializationRead cisstCommon)
+  target_link_libraries (cmnExSerializationRead cmnExSerializationClasses)
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
+endif (cisst_FOUND_AS_REQUIRED)
