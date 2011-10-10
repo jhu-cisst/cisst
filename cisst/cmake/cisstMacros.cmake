@@ -677,7 +677,7 @@ function (cisst_add_test ...)
   add_custom_command (TARGET ${TEST_PROGRAM}
                       POST_BUILD
                       COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${TEST_PROGRAM}
-                      ARGS -d -i ${ITERATIONS} -o ${INSTANCES} > ${CMAKE_CURRENT_BINARY_DIR}/CtestTestfile-${TEST_PROGRAM}.txt
+                      ARGS -d -i ${ITERATIONS} -o ${INSTANCES} > ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt
                       COMMENT "Generating ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt")
 
   # Add the custom build list
