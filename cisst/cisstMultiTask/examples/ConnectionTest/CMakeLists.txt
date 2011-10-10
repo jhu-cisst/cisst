@@ -76,5 +76,5 @@ if (CISST_HAS_FLTK)
   endif (cisst_FOUND_AS_REQUIRED)
 
 else (CISST_HAS_FLTK)
-  message("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires FLTK")
+  message("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_FLTK")
 endif (CISST_HAS_FLTK)

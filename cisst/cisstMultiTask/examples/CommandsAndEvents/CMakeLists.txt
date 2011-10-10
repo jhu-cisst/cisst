@@ -12,5 +12,14 @@
 #
 # --- end cisst license ---
 
-add_subdirectory (FLTK)
-add_subdirectory (Qt)
+if (CISST_HAS_FLTK)
+  add_subdirectory (FLTK)
+else (CISST_HAS_FLTK)
+  message("Information: code in ${CMAKE_CURRENT_SOURCE_DIR}/FLTK will not be compiled, it requires CISST_HAS_FLTK")
+endif (CISST_HAS_FLTK)
+
+if (CISST_HAS_QT)
+  add_subdirectory (Qt)
+else (CISST_HAS_QT)
+  message("Information: code in ${CMAKE_CURRENT_SOURCE_DIR}/Qt will not be compiled, it requires CISST_HAS_QT")
+endif (CISST_HAS_QT)
