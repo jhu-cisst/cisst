@@ -1,8 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 # 
@@ -13,48 +12,58 @@
 # --- end cisst license ---
 
 # name of project
-PROJECT(multiTaskTutorialBenchmark1)
+project(mtsExBenchmark1)
 
-# Set include/link directories
-cisst_set_directories (cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
+set(REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes) 
 
-# name the main executable and specifies with source files to use
-ADD_EXECUTABLE(multiTaskTutorialBenchmark1Local
-               clientTask.cpp
-               serverTask.cpp
-               localMain.cpp
-               clientTask.h
-               serverTask.h
-               configuration.h
-               )
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-# link with the cisst libraries
-cisst_target_link_libraries(multiTaskTutorialBenchmark1Local cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
+if (cisst_FOUND_AS_REQUIRED)
 
-
-# compile network version if ICE is available
-if (CISST_MTS_HAS_ICE)
+  # load cisst configuration
+  include (${CISST_USE_FILE})
 
   # name the main executable and specifies with source files to use
-  ADD_EXECUTABLE(multiTaskTutorialBenchmark1Server
-                 serverTask.cpp
-                 serverMain.cpp
-                 serverTask.h
-                 configuration.h
-                 )          
-
-  # link with the cisst libraries
-  cisst_target_link_libraries(multiTaskTutorialBenchmark1Server cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
-
-  # name the main executable and specifies with source files to use
-  ADD_EXECUTABLE(multiTaskTutorialBenchmark1Client
+  add_executable(mtsExBenchmark1
                  clientTask.cpp
-                 clientMain.cpp
+                 serverTask.cpp
+                 localMain.cpp
                  clientTask.h
+                 serverTask.h
                  configuration.h
                  )
 
   # link with the cisst libraries
-  cisst_target_link_libraries(multiTaskTutorialBenchmark1Client cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
+  cisst_target_link_libraries(mtsExBenchmark1 ${REQUIRED_CISST_LIBRARIES})
 
-endif (CISST_MTS_HAS_ICE)
+  # compile network version if ICE is available
+  if (CISST_MTS_HAS_ICE)
+
+    # name the main executable and specifies with source files to use
+    add_executable(mtsExBenchmark1Server
+                   serverTask.cpp
+                   serverMain.cpp
+                   serverTask.h
+                   configuration.h
+                   )          
+
+    # link with the cisst libraries
+    cisst_target_link_libraries(mtsExBenchmark1Server ${REQUIRED_CISST_LIBRARIES})
+
+    # name the main executable and specifies with source files to use
+    add_executable(mtsExBenchmark1Client
+                   clientTask.cpp
+                   clientMain.cpp
+                   clientTask.h
+                   configuration.h
+                   )
+
+    # link with the cisst libraries
+    cisst_target_link_libraries(mtsExBenchmark1Client ${REQUIRED_CISST_LIBRARIES})
+
+  endif (CISST_MTS_HAS_ICE)
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)

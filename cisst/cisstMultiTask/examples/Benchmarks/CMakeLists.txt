@@ -1,8 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -12,7 +11,6 @@
 #
 # --- end cisst license ---
 
-add_subdirectory (PeriodicTask)
-add_subdirectory (CommandsAndEvents)
-add_subdirectory (ConnectionTest)
-add_subdirectory (Benchmarks)
+add_subdirectory (benchmark1) # benchmarking loop time + ICE if available
+add_subdirectory (benchmark2) # benchmarking latency + ICE if available
+
