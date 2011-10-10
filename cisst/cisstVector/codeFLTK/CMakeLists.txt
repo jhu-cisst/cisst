@@ -31,4 +31,4 @@ cisst_add_library (
                vctExportFLTK.h)
 
 # link against FLTK libraries
-target_link_libraries (cisstCommonQt ${FLTK_LIBRARIES})
+target_link_libraries (cisstVectorFLTK ${FLTK_LIBRARIES})
