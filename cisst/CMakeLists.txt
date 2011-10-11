@@ -139,8 +139,8 @@ if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
-# Put "." in the rpath of all CISST shared libraries.
-link_directories (. ${LIBRARY_OUTPUT_PATH})
+# Path of all CISST shared libraries.
+link_directories (${LIBRARY_OUTPUT_PATH})
 
 # Determine if we want to use rpath, no by default
 if (UNIX)
