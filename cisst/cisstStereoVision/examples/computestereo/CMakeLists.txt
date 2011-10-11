@@ -33,22 +33,22 @@ if (cisst_FOUND_AS_REQUIRED)
     # Copy example images to the build tree
     if (WIN32)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/tsukuba3.bmp
-                      ${CMAKE_BINARY_DIR}/examples/stereoTutorial/example3/tsukuba3.bmp COPYONLY)
+                      ${CMAKE_CURRENT_BINARY_DIR}/tsukuba3.bmp COPYONLY)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/tsukuba4.bmp
-                      ${CMAKE_BINARY_DIR}/examples/stereoTutorial/example3/tsukuba4.bmp COPYONLY)
+                      ${CMAKE_CURRENT_BINARY_DIR}/tsukuba4.bmp COPYONLY)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/venus_l.bmp
-                      ${CMAKE_BINARY_DIR}/examples/stereoTutorial/example3/venus_l.bmp COPYONLY)
+                      ${CMAKE_CURRENT_BINARY_DIR}/venus_l.bmp COPYONLY)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/venus_r.bmp
-                      ${CMAKE_BINARY_DIR}/examples/stereoTutorial/example3/venus_r.bmp COPYONLY)
+                      ${CMAKE_CURRENT_BINARY_DIR}/venus_r.bmp COPYONLY)
     else (WIN32)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/tsukuba3.bmp
-                      ${CMAKE_BINARY_DIR}/examples/bin/tsukuba3.bmp COPYONLY)
+                      ${EXECUTABLE_OUTPUT_PATH}/tsukuba3.bmp COPYONLY)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/tsukuba4.bmp
-                      ${CMAKE_BINARY_DIR}/examples/bin/tsukuba4.bmp COPYONLY)
+                      ${EXECUTABLE_OUTPUT_PATH}/tsukuba4.bmp COPYONLY)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/venus_l.bmp
-                      ${CMAKE_BINARY_DIR}/examples/bin/venus_l.bmp COPYONLY)
+                      ${EXECUTABLE_OUTPUT_PATH}/venus_l.bmp COPYONLY)
       configure_file (${CMAKE_CURRENT_SOURCE_DIR}/venus_r.bmp
-                      ${CMAKE_BINARY_DIR}/examples/bin/venus_r.bmp COPYONLY)
+                      ${EXECUTABLE_OUTPUT_PATH}/venus_r.bmp COPYONLY)
     endif (WIN32)
 
   else (CISST_SVL_HAS_X11 OR WIN32)
