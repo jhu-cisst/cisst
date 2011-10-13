@@ -1,17 +1,9 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id$ */
-
-#ifndef _fltkMutex_h
-#define _fltkMutex_h
-
-#include <cisstOSAbstraction/osaMutex.h>
-
-extern osaMutex fltkMutex;
-
-#endif // _fltkMutex_h
 
 /*
+  $Id$
+
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2009-08-10
 
@@ -27,3 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
+
+#ifndef _fltkMutex_h
+#define _fltkMutex_h
+
+#include <cisstOSAbstraction/osaMutex.h>
+
+extern osaMutex fltkMutex;
+
+#endif // _fltkMutex_h

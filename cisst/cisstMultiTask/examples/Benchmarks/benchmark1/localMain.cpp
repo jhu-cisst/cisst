@@ -1,10 +1,26 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id$ */
 
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
-#include <cisstMultiTask.h>
+/*
+  $Id$
+
+  Author(s):  Anton Deguet
+  Created on: 2009-08-10
+
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "serverTask.h"
 #include "clientTask.h"
@@ -14,9 +30,6 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    // add a log per thread
-    osaThreadedLogFile threadedLog("example9Local");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // create our two tasks
     serverTask * server = new serverTask("Server", confServerPeriod);
@@ -46,20 +59,3 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     return 0;
 }
-
-/*
-  Author(s):  Anton Deguet
-  Created on: 2009-08-10
-
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
-
---- begin cisst license - do not edit ---
-
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
-
---- end cisst license ---
-
-*/
