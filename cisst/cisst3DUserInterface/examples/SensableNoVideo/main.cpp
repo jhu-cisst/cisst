@@ -22,10 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstDevices/devSensableHD.h>
-#include <cisstDevices/devKeyboard.h>
-#include <cisstCommon.h>
-#include <cisstStereoVision.h>
+
+#include <sawSensablePhantom/mtsSensableHD.h>
+#include <sawKeyboard/mtsKeyboard.h>
 
 #include <SimpleBehavior.h>
 #include <ImageViewer.h>
@@ -34,22 +33,18 @@ http://www.cisst.org/cisst/license.txt.
 int main()
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    // add a log per thread
-    osaThreadedLogFile threadedLog("example1-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+	cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+	cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+	cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+	cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("RegistrationBehavior", CMN_LOG_LOD_VERY_VERBOSE);
+	cmnLogger::SetMaskClassMatching("ui3", CMN_LOG_ALLOW_ALL);
+	cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsTaskManager * componentManager = mtsTaskManager::GetInstance();
 
-    devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
-    taskManager->AddTask(sensable);
+    mtsSensableHD * sensable = new mtsSensableHD("Omni", "Omni1"); //, "Omni2" /* name in driver, see Preferences in Sensable Driver */);
+    componentManager->AddComponent(sensable);
 
 
     ui3Manager guiManager;
@@ -70,7 +65,7 @@ int main()
                            "cube.png");            // icon file: no texture
 */
     svlCameraGeometry camera_geometry;
-    camera_geometry.SetPerspective(400.0, 2);
+    camera_geometry.SetPerspective(1000.0, 400, 300);
     camera_geometry.RotateWorldAboutY(180.0);
 
     guiManager.AddRenderer(400, 300,           // render width & height
@@ -92,7 +87,7 @@ int main()
     ui3CursorBase * rightCursor = new ui3CursorSphere();
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
-
+#if 0
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
     ui3MasterArm * leftMaster = new ui3MasterArm("Omni2");
     guiManager.AddMasterArm(leftMaster);
@@ -104,12 +99,12 @@ int main()
     ui3CursorBase * leftCursor = new ui3CursorSphere();
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
-
+#endif
 
     // connect keyboard to ui3 and Omnis
-    devKeyboard * keyboard = new devKeyboard();
+    mtsKeyboard * keyboard = new mtsKeyboard();
 
-    taskManager->AddTask(keyboard);
+    componentManager->AddComponent(keyboard);
     keyboard->SetQuitKey('q');
 
     // MaM
@@ -119,9 +114,9 @@ int main()
     guiManager.ConnectAll();
 
     // following should be replaced by a utility function or method of ui3Manager 
-    taskManager->CreateAll();
+    componentManager->CreateAll();
     osaSleep(3.0 * cmn_s);
-    taskManager->StartAll();
+    componentManager->StartAll();
 
     osaSleep(1.0 * cmn_s);
 
@@ -129,11 +124,10 @@ int main()
         osaSleep(10.0 * cmn_ms);
     } while (!keyboard->Done());
 
-    taskManager->KillAll();
+    componentManager->KillAll();
 
-    guiManager.SaveConfiguration("config.xml");
+    componentManager->Cleanup();
 
-    taskManager->Cleanup();
-    return 0;
+	cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
+	return 0;
 }
-

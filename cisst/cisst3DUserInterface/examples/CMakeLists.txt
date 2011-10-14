@@ -29,9 +29,14 @@ if (cisst_FOUND_AS_REQUIRED)
   include_directories (behaviors)
   add_subdirectory (behaviors)
 
-#   # Sensable specific examples, requires cisstDevices
-#   if (CISST_DEV_HAS_SENSABLEHD)
-#     add_subdirectory(SensableNoVideo)
+  # sawSensablePhantom has been compiled within cisst, we should find it automatically
+  find_package (sawSensablePhantom HINTS "${CISST_BINARY_DIR}/saw/components")
+  find_package (sawKeyboard HINTS "${CISST_BINARY_DIR}/saw/components")
+
+  if (sawSensablePhantom_FOUND AND sawKeyboard_FOUND)
+    add_subdirectory(SensableNoVideo)
+  endif (sawSensablePhantom_FOUND AND sawKeyboard_FOUND)
+
 #     add_subdirectory(SensableStereoVideo)
 #     add_subdirectory(SensableStereoVideoNetwork)
 #   else (CISST_DEV_HAS_SENSABLEHD)

@@ -13,12 +13,23 @@
 #
 # --- end cisst license ---
 
-project (cisst3DUserInterfaceSensableNoVideo)
+project (ui3ExSensableNoVideo)
 
-add_executable (cisst3DUserInterfaceSensableNoVideo main.cpp)
 
-target_link_libraries (cisst3DUserInterfaceSensableNoVideo cisst3DUserInterfaceBehaviors)
+# sawSensablePhantom configuration
+include_directories (${sawSensablePhantom_INCLUDE_DIR}
+                     ${sawKeyboard_INCLUDE_DIR})
+link_directories (${sawSensablePhantom_LIBRARY_DIR}
+                  ${sawKeyboard_LIBRARY_DIR})
 
-cisst_target_link_libraries (cisst3DUserInterfaceSensableNoVideo
+
+add_executable (ui3ExSensableNoVideo main.cpp)
+
+target_link_libraries (ui3ExSensableNoVideo
+                       ui3ExBehaviors
+                       ${sawSensablePhantom_LIBRARIES}
+                       ${sawKeyboard_LIBRARIES})
+
+cisst_target_link_libraries (ui3ExSensableNoVideo
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                             cisstStereoVision cisstDevices cisstParameterTypes cisst3DUserInterface)
+                             cisstStereoVision cisstParameterTypes cisst3DUserInterface)
