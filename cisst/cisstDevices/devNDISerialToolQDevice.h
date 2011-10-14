@@ -21,43 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devNDISerialToolQDevice_h
 #define _devNDISerialToolQDevice_h
 
-#include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsFunctionRead.h>
-#include <cisstMultiTask/mtsFunctionWrite.h>
-#include <cisstParameterTypes/prmPositionCartesianGet.h>
-#include <cisstDevices/devNDISerialToolQWidget.h>
-#include <cisstDevices/devExportQt.h>  // always include last
-
-
-class CISST_EXPORT devNDISerialToolQDevice : public QObject, public mtsComponent
-{
-    Q_OBJECT;
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
- public:
-    devNDISerialToolQDevice(const std::string & taskName);
-    ~devNDISerialToolQDevice(void) {};
-
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {};
-
-    QWidget * GetWidget(void) {
-        return &CentralWidget;
-    }
-
- protected:
-    Ui::devNDISerialToolQWidget ToolWidget;
-    QWidget CentralWidget;
-
-    struct {
-        mtsFunctionRead GetPositionCartesian;
-        prmPositionCartesianGet PositionCartesian;
-    } NDI;
-
- public slots:
-    void timerEvent(QTimerEvent * event);
-    void RecordQSlot(void);
-};
-
-CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialToolQDevice);
+#error "The class devNDISerialToolQDevice is now deprecated and has been replaced by sawNDITracker/mtsNDISerialToolQtComponent - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif  // _devNDISerialToolQDevice_h

@@ -34,7 +34,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/devConfig.h>
 
 #if CISST_HAS_XML
-#include <cisstDevices/devNDISerial.h>
     #if CISST_DEV_HAS_MICRONTRACKER
         #include <cisstDevices/devMicronTracker.h>
     #endif

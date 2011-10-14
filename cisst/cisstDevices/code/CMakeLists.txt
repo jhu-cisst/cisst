@@ -21,10 +21,8 @@ set (LIBRARY cisstDevices)
 set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstMultiTask cisstParameterTypes cisstRobot)
 
 # make sure all options are set for all devices to OFF
-option (CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
 option (CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
 option (CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
-option (CISST_DEV_HAS_NOVINTHDL "Build Novint Device using HDL library" OFF)
 option (CISST_DEV_HAS_MICRONTRACKER "Add support for Claron MicronTracker." OFF)
 option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
 option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
@@ -51,18 +49,6 @@ if( CISST_DEV_HAS_ROBOTCOMPONENTS )
   set( HEADER_FILES ${HEADER_FILES} ${ROBOTCOMPONENTS_HEADER_FILES} )
   set( SOURCE_FILES ${SOURCE_FILES} ${ROBOTCOMPONENTS_SOURCE_FILES} )
 endif( CISST_DEV_HAS_ROBOTCOMPONENTS )
-
-# Sensable Omni
-if (CISST_DEV_HAS_SENSABLEHD)
-  find_package (Sensable REQUIRED)
-  include_directories (${SENSABLE_INCLUDE_DIR})
-  set (SOURCE_FILES ${SOURCE_FILES}
-      devSensableHD.cpp
-      devSensableHDMasterSlave.cpp)
-  set (HEADER_FILES ${HEADER_FILES}
-      devSensableHD.h
-      devSensableHDMasterSlave.h)
-endif (CISST_DEV_HAS_SENSABLEHD)
 
 # Check for BitCtrl
 if( CISST_DEV_HAS_BITCTRL )
@@ -118,21 +104,7 @@ else (CISST_DEV_HAS_OPENIGTLINK)
   cisst_unset_all_package_settings (cisstDevices OpenIGTLink)
 endif (CISST_DEV_HAS_OPENIGTLINK)
 
-# Novint Falcon
-if (CISST_DEV_HAS_NOVINTHDL)
-  find_package (NovintHDL REQUIRED)
-  include_directories (${NOVINT_INCLUDE_DIR})
-  set (SOURCE_FILES ${SOURCE_FILES}
-       devNovintHDL.cpp
-       devNovintHDLMasterSlave.cpp)
-  set (HEADER_FILES ${HEADER_FILES}
-       devNovintHDL.h
-       devNovintHDLMasterSlave.h)
-endif (CISST_DEV_HAS_NOVINTHDL)
-
 if (CISST_HAS_XML)
-  list (APPEND SOURCE_FILES devNDISerial.cpp)
-  list (APPEND HEADER_FILES devNDISerial.h)
   set (DEPENDENCIES ${DEPENDENCIES} cisstCommonXML)
 
   if (CISST_DEV_HAS_MICRONTRACKER)
@@ -203,14 +175,6 @@ cisst_add_library (LIBRARY cisstDevices
                    )
 
 # Add libraries to link with based on options
-if (CISST_DEV_HAS_SENSABLEHD)
-  target_link_libraries (cisstDevices ${SENSABLE_LIBRARIES})
-endif (CISST_DEV_HAS_SENSABLEHD)
-
-if (CISST_DEV_HAS_NOVINTHDL)
-  target_link_libraries (cisstDevices ${NOVINT_LIBRARIES})
-endif (CISST_DEV_HAS_NOVINTHDL)
-
 if (CISST_DEV_HAS_MICRONTRACKER)
   target_link_libraries (cisstDevices ${MicronTracker_LIBRARIES})
 endif (CISST_DEV_HAS_MICRONTRACKER)

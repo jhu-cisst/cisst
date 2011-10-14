@@ -25,17 +25,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 
-// Using Sensable (i.e. Omni, Phantom, ...)
-#cmakedefine01 CISST_DEV_HAS_SENSABLEHD
-
 // Support for LoPoMoCo (JHU Low Power Motor Control)
 #cmakedefine01 CISST_DEV_HAS_LOPOMOCO
 
 // Support for OpenIGTLink
 #cmakedefine01 CISST_DEV_HAS_OPENIGTLINK
-
-// Using Novint HDL (i.e. Falcon, ...)
-#cmakedefine01 CISST_DEV_HAS_NOVINTHDL
 
 // Support for Claron MicronTracker.
 #cmakedefine01 CISST_DEV_HAS_MICRONTRACKER

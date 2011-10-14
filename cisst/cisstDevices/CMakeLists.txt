@@ -21,10 +21,6 @@ if (CISST_HAS_SWIG_PYTHON)
   add_subdirectory (codePython)
 endif (CISST_HAS_SWIG_PYTHON)
 
-if (CISST_HAS_QT)
-  add_subdirectory (codeQt)
-endif (CISST_HAS_QT)
-
 if (CISST_BUILD_EXAMPLES)
   option (CISST_BUILD_cisstDevices_EXAMPLES "Build examples for cisstDevices." ON)
   mark_as_advanced (CISST_BUILD_cisstDevices_EXAMPLES)
