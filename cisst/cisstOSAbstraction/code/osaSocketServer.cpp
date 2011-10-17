@@ -70,7 +70,7 @@ osaSocketServer::osaSocketServer(void)
         CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to set socket to non-blocking mode" << std::endl;
     }
 #else
-    char arg;
+    int arg=0;
     if (ioctl(ServerSocketFD, FIONBIO, &arg) == -1 ) {
         CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to set socket to non-blocking mode" << std::endl;
     }
