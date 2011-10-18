@@ -111,3 +111,26 @@ function (cisst_library_remove_settings whoRequires value)
   file (APPEND ${FILENAME} "set (CISST_EXTERNAL_PACKAGES_FOR_${whoRequires} \"${CISST_EXTERNAL_PACKAGES_FOR_${whoRequires}}\")\n")
   file (APPEND ${FILENAME} "set (CISST_GENERAL_SETTINGS_FOR_${whoRequires} \"${CISST_GENERAL_SETTINGS_FOR_${whoRequires}}\")\n")
 endfunction (cisst_library_remove_settings)
+
+
+# Offer the option to compile a given application or remove the option
+# based on CISST_BUILD_APPLICATIONS
+# For example: cisst_offer_application (cisstMultiTask ComponentGenerator ON)
+macro (cisst_offer_application library application default)
+  set (coa_OPTION_NAME CISST_BUILD_${library}_${application})
+  if (CISST_BUILD_APPLICATIONS)
+    option (${coa_OPTION_NAME} "Build cisst${application}" ${default})
+    mark_as_advanced (${coa_OPTION_NAME})
+    if (${coa_OPTION_NAME})
+      add_subdirectory (cisst${application})
+    endif (${coa_OPTION_NAME})
+  else (CISST_BUILD_APPLICATIONS)
+    unset (${coa_OPTION_NAME} CACHE)
+  endif (CISST_BUILD_APPLICATIONS)
+endmacro (cisst_offer_application)
+
+
+macro (cisst_do_not_offer_application library application)
+  set (coa_OPTION_NAME CISST_BUILD_${library}_${application})
+  unset (${coa_OPTION_NAME} CACHE)
+endmacro (cisst_do_not_offer_application)

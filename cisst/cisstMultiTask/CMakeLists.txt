@@ -41,21 +41,13 @@ else (CISST_MTS_HAS_ICE)
 endif (CISST_MTS_HAS_ICE)
 
 add_subdirectory (code)
-add_subdirectory (applications/cisstComponentManager)
 
 # Applications
-add_subdirectory (applications/cisstComponentGenerator)
-if (CISST_MTS_HAS_ICE)
-  add_subdirectory (applications/cisstGlobalComponentManager)
-  if (CISST_HAS_FLTK)
-    add_subdirectory (applications/cisstGlobalComponentManagerFLTK)
-  endif (CISST_HAS_FLTK)
-endif (CISST_MTS_HAS_ICE)
+add_subdirectory (applications)
 
 # SWIG Python wrappers and tests
 if (CISST_HAS_SWIG_PYTHON)
   add_subdirectory (codePython)
-  add_subdirectory (applications/cisstIREComponent)
   if (CISST_BUILD_TESTS)
     add_subdirectory (testsPython)
   endif (CISST_BUILD_TESTS)

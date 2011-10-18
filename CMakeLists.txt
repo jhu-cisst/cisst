@@ -30,6 +30,11 @@ mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 # Options
 option (CISST_BUILD_TESTS "Build cisst tests." OFF)
 option (CISST_BUILD_EXAMPLES "Build cisst examples." OFF)
+
+# Applications should be compiled by default
+option (CISST_BUILD_APPLICATIONS "Build cisst applications." ON)
+mark_as_advanced (CISST_BUILD_APPLICATIONS)
+
 option (CISST_BUILD_SAW "Build SAW." OFF)
 if (UNIX)
   option (CISST_BUILD_DOC "Build the documentation." OFF)
