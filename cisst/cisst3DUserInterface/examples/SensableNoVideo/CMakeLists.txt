@@ -15,7 +15,6 @@
 
 project (ui3ExSensableNoVideo)
 
-
 # sawSensablePhantom configuration
 include_directories (${sawSensablePhantom_INCLUDE_DIR}
                      ${sawKeyboard_INCLUDE_DIR})

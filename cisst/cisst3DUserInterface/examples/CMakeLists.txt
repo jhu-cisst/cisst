@@ -30,8 +30,8 @@ if (cisst_FOUND_AS_REQUIRED)
   add_subdirectory (behaviors)
 
   # sawSensablePhantom has been compiled within cisst, we should find it automatically
-  find_package (sawSensablePhantom HINTS "${CISST_BINARY_DIR}/saw/components")
-  find_package (sawKeyboard HINTS "${CISST_BINARY_DIR}/saw/components")
+  find_package (sawSensablePhantom HINTS "${CISST_BINARY_DIR}/saw/components" QUIET)
+  find_package (sawKeyboard HINTS "${CISST_BINARY_DIR}/saw/components" QUIET)
 
   if (sawSensablePhantom_FOUND AND sawKeyboard_FOUND)
     add_subdirectory(SensableNoVideo)
@@ -43,24 +43,12 @@ if (cisst_FOUND_AS_REQUIRED)
 #     message ("cisst3DUserInterface examples SensableNoVideo, SensableStereoVideo, and SensableStereoVideoNetwork will not be compiled since they require CISST_DEV_HAS_SENSABLEHD")
 #   endif (CISST_DEV_HAS_SENSABLEHD)
 
-#   # Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
-#   option (CISST_UI3_HAS_DAVINCI "Build 3DUserInterface example using the daVinci API" OFF)
-#   if (CISST_UI3_HAS_DAVINCI)
-#     option (CISST_UI3_HAS_DAVINCI_BBAPI "Use the daVinci BBAPI" OFF)
-#     if (CISST_UI3_HAS_DAVINCI_BBAPI)
-#       find_package (cisstDaVinci-isi-bbapi)
-#       include_directories (${cisstDaVinci-isi-bbapi_INCLUDE_DIR})
-#       link_directories (${cisstDaVinci-isi-bbapi_LIBRARY_DIR})
-#     endif (CISST_UI3_HAS_DAVINCI_BBAPI)
-#     set(daVinci_ALL_LIBRARIES ${daVinci_LIBRARIES} ${BBAPI_LIBRARIES} ${cisstDaVinci-isi-bbapi_LIBRARIES})
-#     add_subdirectory(daVinciStereoVideo)
-#   else (CISST_UI3_HAS_DAVINCI)
-#     message ("cisst3DUserInterface example daVinciStereoVideo will not be compiled since it requires CISST_UI3_HAS_DAVINCI")
-#   endif (CISST_UI3_HAS_DAVINCI)
+  # sawIntuitiveDaVinci has been compiled within cisst, we should find it automatically
+  find_package (sawIntuitiveDaVinci HINTS "${CISST_BINARY_DIR}/saw/components" QUIET)
 
-# else (CISST_BUILD_cisst3DUserInterface)
-#   message ("cisst3DUserInterface examples will not be compiled since they require CISST_BUILD_3DUserInterface")
-# endif (CISST_BUILD_cisst3DUserInterface)
+  if (sawIntuitiveDaVinci_FOUND)
+    add_subdirectory(daVinciStereoVideo)
+  endif (sawIntuitiveDaVinci_FOUND)
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

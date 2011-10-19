@@ -15,7 +15,7 @@
 
 add_library (ui3ExBehaviors
              ${IS_SHARED}
-	     ui3BehaviorsExport.h
+             ui3BehaviorsExport.h
              SimpleBehavior.h
              SimpleBehavior.cpp
              MeasurementBehavior.h
@@ -28,7 +28,7 @@ add_library (ui3ExBehaviors
              ImageViewerKidney.cpp
              RegistrationBehavior.h
              RegistrationBehavior.cpp
-	     )
+             )
 
 cisst_target_link_libraries (ui3ExBehaviors
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask

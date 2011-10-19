@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):  Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on: 2008-05-23
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -24,8 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
-//#include <cisstDaVinciAPI/cdvReadOnly.h>
-#include <cisstDaVinci/cdvReadWrite.h>
+#include <sawIntuitiveDaVinci/mtsIntuitiveDaVinci.h>
 
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
@@ -40,22 +39,20 @@ http://www.cisst.org/cisst/license.txt.
 #define HAS_ULTRASOUDS 0
 int main()
 {
-	std::cout << "Demo started" << std::endl;
+    std::cout << "Demo started" << std::endl;
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-	cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
     cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-	cmnLogger::SetMaskClassMatching("ui3", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("ui3", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClassMatching("cdv", CMN_LOG_ALLOW_ALL);
 
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-#if 0
-    cdvReadOnly * daVinci = new cdvReadOnly("daVinci", 0.0 /* period to be removed */,
-                                                   "10.0.0.5", 5002, 0x1111, 50);
+#if 1
+    mtsIntuitiveDaVinci * daVinci = new mtsIntuitiveDaVinci("daVinci", 50);
 #else
     cdvReadWrite * daVinci = new cdvReadWrite("daVinci", 60 /* Hz */);
 #endif
@@ -76,7 +73,7 @@ int main()
     guiManager.AddBehavior(&imageViewer,
                            3,
                            "move.png");
-	
+
     ImageViewerKidney imageViewerKidney("imageKidney");
     guiManager.AddBehavior(&imageViewerKidney,
                            4,
@@ -223,13 +220,13 @@ int main()
     componentManager->Connect(measurementBehavior.GetName(), "StartStopMeasure", daVinci->GetName(), "Clutch");
 
     // following should be replaced by a utility function or method of ui3Manager
-	std::cout << "Creating components" << std::endl;
+    std::cout << "Creating components" << std::endl;
     componentManager->CreateAll();
-	componentManager->WaitForStateAll(mtsComponentState::READY);
+    componentManager->WaitForStateAll(mtsComponentState::READY);
 
-	std::cout << "Starting components" << std::endl;
+    std::cout << "Starting components" << std::endl;
     componentManager->StartAll();
-	componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
     
     int ch;
     
@@ -241,13 +238,14 @@ int main()
         osaSleep(100.0 * cmn_ms);
     } while (ch != 'q');
 #if HAS_ULTRASOUDS
-	vidUltrasoundStream.Release();
+    vidUltrasoundStream.Release();
 #endif
-	std::cout << "Stopping components" << std::endl;
-    componentManager->KillAll();
-	componentManager->WaitForStateAll(mtsComponentState::READY, 10.0 * cmn_s);
 
-    componentManager->Cleanup();
+    std::cout << "Stopping components" << std::endl;
+    componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY, 10.0 * cmn_s);
+
+    // this seems to crash the video: componentManager->Cleanup();
     return 0;
 }
 

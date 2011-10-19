@@ -12,28 +12,34 @@
 #
 # --- end cisst license ---
 
-add_executable (cisst3DUserInterfaceDaVinciStereoVideo
+project (ui3ExDaVinciStereoVideo)
+
+# sawSensablePhantom configuration
+include_directories (${sawIntuitiveDaVinci_INCLUDE_DIR})
+link_directories (${sawIntuitiveDaVinci_LIBRARY_DIR})
+
+
+add_executable (ui3ExDaVinciStereoVideo
                 main.cpp
                 BehaviorLUS.cpp
                 BehaviorLUS.h
                 CSOpenGLStippleActor.cxx
-                CSOpenGLStippleActor.h
-                )
+                CSOpenGLStippleActor.h)
 
-target_link_libraries (cisst3DUserInterfaceDaVinciStereoVideo
-                       cisst3DUserInterfaceBehaviors
-                       ${daVinci_ALL_LIBRARIES}
-                       )
+target_link_libraries (ui3ExDaVinciStereoVideo
+                       ui3ExBehaviors
+                       ${sawIntuitiveDaVinci_LIBRARIES})
+
+cisst_target_link_libraries (ui3ExDaVinciStereoVideo
+                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                             cisstStereoVision cisstParameterTypes cisst3DUserInterface)
 
 # Copy VTK models to the build tree
 if (WIN32)
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/probeEnd.STL
-                    ${CMAKE_BINARY_DIR}/examples/cisst3DUserInterface/daVinciStereoVideo/probeEnd.STL COPYONLY)
+                    ${CMAKE_CURRENT_BINARY_DIR}/probeEnd.STL COPYONLY)
 else (WIN32)
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/probeEnd.STL
-                    ${CMAKE_BINARY_DIR}/examples/bin/probeEnd.STL COPYONLY)
+                    ${EXECUTABLE_OUTPUT_PATH}/probeEnd.STL COPYONLY)
 endif (WIN32)
 
-cisst_target_link_libraries (cisst3DUserInterfaceDaVinciStereoVideo
-                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                             cisstStereoVision cisstRobot cisstParameterTypes cisst3DUserInterface)
