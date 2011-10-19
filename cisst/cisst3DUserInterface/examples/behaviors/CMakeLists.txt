@@ -28,6 +28,10 @@ add_library (ui3ExBehaviors
              ImageViewerKidney.cpp
              RegistrationBehavior.h
              RegistrationBehavior.cpp
+             PNGViewer3D.h
+             PNGViewer3D.cpp
+             VideoViewer3D.h
+             VideoViewer3D.cpp
              )
 
 cisst_target_link_libraries (ui3ExBehaviors

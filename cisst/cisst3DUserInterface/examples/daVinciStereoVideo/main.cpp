@@ -35,8 +35,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "MapBehavior.h"
 #include <ImageViewer.h>
 #include <ImageViewerKidney.h>
+#include <PNGViewer3D.h>
 
 #define HAS_ULTRASOUDS 0
+
 int main()
 {
     std::cout << "Demo started" << std::endl;
@@ -78,6 +80,15 @@ int main()
     guiManager.AddBehavior(&imageViewerKidney,
                            4,
                            "move.png");
+
+    // this is were the icons have been copied by CMake post build rule
+    cmnPath path;
+    path.Add(std::string(CISST_BUILD_ROOT) + "/share/cisst3DUserInterface/icons");
+    std::string fileName = path.Find("move.png", cmnPath::READ);
+    PNGViewer3D pngViewer("PGNViewer", fileName);
+    guiManager.AddBehavior(&pngViewer,
+                           5,
+                           "square.png");
 
 #if HAS_ULTRASOUDS
     svlInitialize();
