@@ -78,7 +78,7 @@ void svlFilterImageOpenGL::RenderResize(double width, double height)
 
 void svlFilterImageOpenGL::Render(void)
 {
-    std::cerr << "render" << std::endl;
+    //std::cerr << "render" << std::endl;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0f, 0.6f, 0.0f, 0.0f); // provide a green background by default
 
@@ -143,7 +143,7 @@ int svlFilterImageOpenGL::Process(svlProcInfo * procInfo, svlSample * syncInput,
     _OnSingleThread(procInfo)
     {
         Image->CopyOf(syncInput);
-        std::cerr << "end of svl process" << std::endl;
+        //std::cerr << "end of svl process" << std::endl;
         PostProcess();
     }
 
