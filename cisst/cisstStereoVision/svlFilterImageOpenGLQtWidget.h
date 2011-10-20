@@ -39,6 +39,7 @@ class CISST_EXPORT svlFilterImageOpenGLQtWidget: public QGLWidget, public svlFil
  public:
     svlFilterImageOpenGLQtWidget(QWidget *parent = 0);
     ~svlFilterImageOpenGLQtWidget();
+    void SetEnableToolTip(bool enabled) { ToolTipEnabled = enabled;};
 
  protected:
     // Qt derived methods
@@ -56,6 +57,7 @@ class CISST_EXPORT svlFilterImageOpenGLQtWidget: public QGLWidget, public svlFil
 
  private:
     QPoint LastPosition;
+    bool ToolTipEnabled;
 
  signals:
     void QSignalUpdateGL();

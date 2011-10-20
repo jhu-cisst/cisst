@@ -50,6 +50,11 @@ class CISST_EXPORT svlFilterImageOpenGL: public svlFilterBase
     // a signal)
     virtual void PostProcess(void) = 0;
 
+    int GetImageHeight();
+    int GetImageWidth();
+    int GetWindowHeight() {return Height;}
+    int GetWindowWidth()  {return Width;}
+
  private:
     svlSampleImage * Image;
     int Height;

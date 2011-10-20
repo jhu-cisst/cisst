@@ -106,6 +106,17 @@ int svlFilterImageCropper::SetCenter(int x, int y, int rx, int ry, unsigned int 
     }
 }
 
+svlRect  svlFilterImageCropper::GetRectangle(unsigned int videoch) {
+
+    if (videoch >= Rectangles.size()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Requested channel does not exist"<<std::endl;
+        return svlRect();
+    }
+
+    return Rectangles[videoch];
+}
+
+
 int svlFilterImageCropper::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();

@@ -195,3 +195,18 @@ void svlFilterImageOpenGL::CheckGLError(const std::string & functionName)
     }
 }
 
+int svlFilterImageOpenGL::GetImageHeight() {
+
+    if (Image){
+         return Image->GetHeight();
+    }
+    else return 0;
+}
+
+int svlFilterImageOpenGL::GetImageWidth() {
+
+    if (Image){
+         return Image->GetWidth();
+    }
+    else return 0;
+}

@@ -42,6 +42,7 @@ public:
     int SetCorner(int x, int y, unsigned int videoch = SVL_LEFT);
     int SetCenter(int x, int y, unsigned int videoch = SVL_LEFT);
     int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT);
+    svlRect GetRectangle(unsigned int videoch = SVL_LEFT);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);

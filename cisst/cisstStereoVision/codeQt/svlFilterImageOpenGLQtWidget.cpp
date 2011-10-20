@@ -35,9 +35,11 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageOpenGLQtWidget);
 
 svlFilterImageOpenGLQtWidget::svlFilterImageOpenGLQtWidget(QWidget * parent):
     QGLWidget(parent),
-    svlFilterImageOpenGL()
+    svlFilterImageOpenGL(),
+    ToolTipEnabled(false)
 {
     QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(updateGL()));
+    setMouseTracking(true);  //enables mouse events if button is not pressed
 }
 
 
@@ -77,6 +79,8 @@ void svlFilterImageOpenGLQtWidget::mouseMoveEvent(QMouseEvent * event)
     int dx = event->x() - LastPosition.x();
     int dy = event->y() - LastPosition.y();
 
+
+
     if (event->buttons() & Qt::LeftButton) {
 
     }
@@ -85,6 +89,19 @@ void svlFilterImageOpenGLQtWidget::mouseMoveEvent(QMouseEvent * event)
 
     }
     LastPosition = event->pos();
+
+    if (ToolTipEnabled) {
+        QString posStr;
+        if (IsInitialized() && GetWindowWidth() != 0  && GetWindowHeight() != 0) {
+            int iw = GetImageWidth() * (double)LastPosition.x() / (double) this->GetWindowWidth();
+            int ih = GetImageHeight() * (double)LastPosition.y() / (double) this->GetWindowHeight();
+            posStr = QString::number(iw) + QString(",") + QString::number(ih);
+        }
+        else {
+            posStr = QString::number(LastPosition.x()) + QString(",") + QString::number(LastPosition.y());
+        }
+        QToolTip::showText(event->globalPos(),posStr,this, this->rect());
+    }
 }
 
 
