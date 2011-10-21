@@ -1,7 +1,7 @@
 # Create and run the cisstMultiTaskPeriodicTaskFLTK example
 # using cisstComponentManager.
-# From command line:  cisstComponentManager -e cisstMultiTaskPeriodicTaskFLTK.cisst
-# From component manager:  execute cisstMultiTaskPeriodicTaskFLTK.cisst
+# From command line:  cisstComponentManager -e mtsExPeriodicTaskFLTK.cisst
+# From component manager:  execute mtsExPeriodicTaskFLTK.cisst
 
 load mtsExPeriodicTaskComponents
 load mtsExPeriodicTaskGuiFLTK

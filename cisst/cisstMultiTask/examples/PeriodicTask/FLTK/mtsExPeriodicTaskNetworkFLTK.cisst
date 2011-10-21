@@ -1,0 +1,29 @@
+# Create and run the mtsExPeriodicTaskFLTK example
+# using cisstComponentManager.
+# From command line:  cisstComponentManager -e mtsExPeriodicTaskFLTK.cisst
+# From component manager:  execute mtsExPeriodicTaskFLTK.cisst
+
+system "cisstComponentManager localhost ProcessClient"
+system "cisstComponentManager localhost ProcessServer"
+
+sleep 10
+
+load ProcessServer mtsExPeriodicTaskComponents
+load ProcessClient mtsExPeriodicTaskGuiFLTK
+
+sleep 1
+
+create ProcessServer sineTask       "Sine 0.005"
+create ProcessServer clockComponent Clock
+create ProcessClient displayTask    Display
+
+connect ProcessClient Display DataGenerator ProcessServer Sine MainInterface
+connect ProcessClient Display TimeGenerator ProcessServer Clock MainInterface
+connect ProcessClient Main    Dispatch      ProcessClient Display Dispatcher
+
+sleep 1
+
+start ProcessClient Main
+start ProcessServer Sine
+start ProcessServer Clock
+start ProcessClient Display
