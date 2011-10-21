@@ -3,8 +3,8 @@
 # From command line:  cisstComponentManager -e cisstMultiTaskPeriodicTaskFLTK.cisst
 # From component manager:  execute cisstMultiTaskPeriodicTaskFLTK.cisst
 
-load cisstMultiTaskPeriodicTaskComponents
-load cisstMultiTaskPeriodicTaskGuiFLTK
+load mtsExPeriodicTaskComponents
+load mtsExPeriodicTaskGuiFLTK
 
 sleep 1
 
