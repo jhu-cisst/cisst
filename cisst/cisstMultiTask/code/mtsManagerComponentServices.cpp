@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
@@ -537,3 +538,83 @@ bool mtsManagerComponentServices::Load(const std::string & processName, const st
     return result;
 }
 
+bool mtsManagerComponentServices::CheckAndWait(const std::vector<std::string> &list, const std::string &key, double &timeoutInSec,
+                                               mtsEventReceiverWrite &eventReceiver)
+{
+    std::vector<std::string>::const_iterator it = std::find(list.begin(), list.end(), key);
+    if (it == list.end()) {
+        if (timeoutInSec == 0.0)
+            return false;
+        double curTime = osaGetTime();
+        if (timeoutInSec < 0.0) {
+            // Timeout less than 0 means wait indefinitely. Internally, however, we wait with a timeout
+            // just in case we miss the event (e.g., due to a race condition).
+            CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for " << key << std::endl;
+            eventReceiver.WaitWithTimeout(3.0);  // still poll 3 seconds
+        }
+        else {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for " << key << ", timeout = " << timeoutInSec << std::endl;
+            eventReceiver.WaitWithTimeout(timeoutInSec);
+            timeoutInSec -= (osaGetTime() - curTime);
+            if (timeoutInSec < 0.0)
+                timeoutInSec = 0.0;
+        }
+        return false;
+    }
+    return true;
+}
+
+bool mtsManagerComponentServices::WaitFor(const std::string & processName, double timeoutInSec)
+{
+    bool found = false;
+    while (!found) {
+        std::vector<std::string> processList = GetNamesOfProcesses();
+        found = CheckAndWait(processList, processName, timeoutInSec, EventReceivers.AddComponent);
+        if (!found && (timeoutInSec == 0.0)) {
+            processList = GetNamesOfProcesses();
+            found = CheckAndWait(processList, processName, timeoutInSec, EventReceivers.AddComponent);
+            break;
+        }
+    }
+    return found;
+}
+
+bool mtsManagerComponentServices::WaitFor(const std::string & processName, const std::string & componentName,
+                                          double timeoutInSec)
+{
+    bool found = WaitFor(processName, timeoutInSec);
+    if (found) {
+        found = false;
+        while (!found) {
+            std::vector<std::string> componentList = GetNamesOfComponents(processName);
+            found = CheckAndWait(componentList, componentName, timeoutInSec, EventReceivers.AddComponent);
+            if (!found && (timeoutInSec == 0.0)) {
+                componentList = GetNamesOfComponents(processName);
+                found = CheckAndWait(componentList, componentName, timeoutInSec, EventReceivers.AddComponent);
+                break;
+            }
+        }
+    }
+    return found;
+}
+
+bool mtsManagerComponentServices::WaitFor(const std::string & processName, const std::string & componentName,
+                                          const std::string & componentState, double timeoutInSec)
+{
+    bool found = WaitFor(processName, componentName, timeoutInSec);
+    if (found) {
+        found = false;
+        while (!found) {
+            std::vector<std::string> stateList(1);
+            stateList.push_back(ComponentGetState(processName, componentName));
+            found = CheckAndWait(stateList, componentState, timeoutInSec, EventReceivers.ChangeState);
+            if (!found && (timeoutInSec == 0.0)) {
+                stateList.clear();
+                stateList.push_back(ComponentGetState(processName, componentName));
+                found = CheckAndWait(stateList, componentState, timeoutInSec, EventReceivers.ChangeState);
+                break;
+            }
+        }
+    }
+    return found;
+}

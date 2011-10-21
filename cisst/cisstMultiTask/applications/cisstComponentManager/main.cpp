@@ -103,6 +103,23 @@ public:
 };
 
 template <class _classType>
+class CommandEntryMethodArgvNonConst : public CommandEntryBase
+{
+    typedef bool (_classType::*ActionType)(const std::vector<std::string> &args);
+    ActionType Action;
+    _classType *classInstance;
+
+public:
+    CommandEntryMethodArgvNonConst(const std::string &cmd, const std::string &argString,
+                           ActionType action, _classType *ptr, int nArgs = -1) :
+        CommandEntryBase(cmd, argString, nArgs), Action(action), classInstance(ptr) {}
+    ~CommandEntryMethodArgvNonConst() {}
+
+    bool Execute(const std::vector<std::string> &args) const
+    { return (classInstance->*Action)(args); }
+};
+
+template <class _classType>
 class CommandEntryMethodVoid : public CommandEntryBase
 {
     typedef bool (_classType::*ActionType)(void) const;
@@ -256,6 +273,8 @@ public:
     bool ExecuteFile(const std::string &fileName) const;
     bool Sleep(const std::string &time) const;
     bool Viewer(void) const;
+    bool WaitFor(const std::vector<std::string> &args);
+    bool Echo(const std::string &message) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(shellTask)
@@ -292,6 +311,11 @@ void shellTask::Configure(const std::string &)
                                                              &shellTask::Sleep, this));
     CommandList.insert(new CommandEntryMethodVoid<shellTask>("viewer", "",
                                                              &shellTask::Viewer, this));
+    CommandList.insert(new CommandEntryMethodArgvNonConst<shellTask>("waitfor",
+                                                             "<process_name> [<component_name> [component_state]]",
+                                                             &shellTask::WaitFor, this));
+    CommandList.insert(new CommandEntryMethodStr1<shellTask>("echo", "<\"message_string\">",
+                                                             &shellTask::Echo, this));
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
     if (Manager) {
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
@@ -645,28 +669,31 @@ bool shellTask::Viewer(void) const
     return ExecuteMultiLine("create mtsComponentViewer Viewer;sleep 0.5;start Viewer;sleep 3");
 }
 
-#if 0
-// waitfor <processName> [<componentName>] [<status>]
-bool shellTask::WaitFor(const std::vector<std::string> &args) const
+// waitfor <processName> [<componentName> [<componentState>]]
+bool shellTask::WaitFor(const std::vector<std::string> &args)
 {
     mtsManagerComponentServices *Manager = GetManagerComponentServices();
-    if (args.size() == 1) {
-        std::vector<std::string> procList;
-        procList = ManagerComponentServices->GetNamesOfProcesses();
-        // Look for args[0]
+    if (Manager) {
+        if (args.size() == 1)
+            Manager->WaitFor(args[0]);
+        else if (args.size() == 2)
+            Manager->WaitFor(args[0], args[1]);
+        else if (args.size() == 3)
+            Manager->WaitFor(args[0], args[1], args[2]);
+        else {
+            std::cout << "Syntax: waitfor processName [<componentName> [<componentState>]]" << std::endl;
+            return false;
+       }
+       return true;
     }
-    else if (args.size() == 2) {
-        std::vector<std::string> compList;
-        compList = ManagerComponentServices->GetNamesOfComponents(args[0]);
-        // Look for args[1]
-    }
-    else {
-        std::cout << "Syntax: waitfor processName [<componentName>]" << std::endl;
-        return false;
-    }
+    return false;
+}
+
+bool shellTask::Echo(const std::string &message) const
+{
+    std::cout << message << std::endl;
     return true;
 }
-#endif
 
 // Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename] [-c commands]
 int main(int argc, char * argv[])

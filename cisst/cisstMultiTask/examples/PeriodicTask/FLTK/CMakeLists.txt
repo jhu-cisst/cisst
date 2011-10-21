@@ -43,3 +43,14 @@ target_link_libraries (mtsExPeriodicTaskFLTK mtsExPeriodicTaskGuiFLTK mtsExPerio
 # link with the cisst libraries
 cisst_target_link_libraries (mtsExPeriodicTaskGuiFLTK ${REQUIRED_CISST_LIBRARIES})
 cisst_target_link_libraries (mtsExPeriodicTaskFLTK ${REQUIRED_CISST_LIBRARIES})
+
+add_custom_target (mtsExPeriodicTaskFLTK_Scripts ALL
+                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskFLTK.cisst
+                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}
+                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskNetworkFLTK.cisst
+                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}
+                   SOURCES mtsExPeriodicTaskFLTK.cisst mtsExPeriodicTaskNetworkFLTK.cisst
+                   COMMENT "Copying cisst scripts to the binary directory")
+

@@ -273,6 +273,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Get pointer to manager component services, which extends the internal required interface
       to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
+    const mtsManagerComponentServices *GetManagerComponentServices(void) const
+    { return this->ManagerComponentServices; }
     mtsManagerComponentServices *GetManagerComponentServices(void)
     { return this->ManagerComponentServices; }
 

@@ -70,6 +70,9 @@ protected:
         mtsEventReceiverWrite    ChangeState;
     } EventReceivers;
 
+    // private function used by WaitFor methods.
+    bool CheckAndWait(const std::vector<std::string> &list, const std::string &key, double &timeoutInSec,
+                      mtsEventReceiverWrite &eventReceiver);
 public:
     mtsManagerComponentServices(mtsInterfaceRequired * internalInterfaceRequired);
     ~mtsManagerComponentServices() {}
@@ -190,6 +193,14 @@ public:
     bool Load(const std::string & fileName) const;
     // Dynamically load the file (fileName) into the process processName
     bool Load(const std::string & processName, const std::string & fileName) const;
+
+    // Wait for component state change. This can be used to wait for a process to be created, or for a component
+    // to be created (in those cases, any state is acceptable). A negative timeout is used to wait indefinitely.
+    // Returns false if timeout occurred.
+    bool WaitFor(const std::string & processName, double timeoutInSec = -1.0);
+    bool WaitFor(const std::string & processName, const std::string & componentName, double timeoutInSec = -1.0);
+    bool WaitFor(const std::string & processName, const std::string & componentName, const std::string & state,
+                 double timeoutInSec = -1.0);
     //@}
 
 };
