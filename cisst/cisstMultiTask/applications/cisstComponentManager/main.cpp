@@ -640,6 +640,10 @@ bool shellTask::ExecuteFile(const std::string &fileName) const
     static std::string curLine;
 
     std::ifstream file(fileName.c_str());
+    if (!file.is_open()) {
+        std::cout << "ExecuteFile: could not open " << fileName << std::endl;
+        return false;
+    }
     while (!file.eof()) {
         getline(file, curLine);
         if (!ExecuteLine(curLine))
