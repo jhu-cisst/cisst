@@ -43,7 +43,6 @@ protected:
       not */
     mtsQueue<mtsBlockingType> BlockingFlagQueue;
 
-private:
     inline mtsCommandQueuedWriteBase(void):
         BaseType("??"),
         MailBox(0),

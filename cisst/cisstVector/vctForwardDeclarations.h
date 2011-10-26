@@ -218,10 +218,12 @@ class vctRodriguezRotation3;
 
 namespace vctEulerRotation3Order {
 //enum OrderType { XZX, XZY, XYX, XYZ, YXY, YXZ, YZY, YZX, ZYZ, ZYX, ZXZ, ZXY };
-enum OrderType { ZYZ, ZYX };
+    //typedef enum { ZYZ, ZYX } OrderType;
+    enum { ZYZ, ZYX };
+    typedef unsigned int OrderType;
 };
 
-template <vctEulerRotation3Order::OrderType order>
+template <vctEulerRotation3Order::OrderType _order>
 class vctEulerRotation3;
 
 template <class _containerType>

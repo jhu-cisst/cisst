@@ -67,7 +67,7 @@ public:
         void GenericTestFixedSizeUsingDataObject(void);
 
     template <vct::size_type _rows, vct::size_type _cols>
-        void GenericTestCompareWithMatlab(double input_ptr[], double pinverse_ptr[], int caseNo, double tolerance);
+        void GenericTestCompareWithMatlab(double input_ptr[], double pinverse_ptr[], int caseNo, double tolerance = cmnTypeTraits<double>::Tolerance());
 
     void GenericTestDynamic(vct::size_type rows, vct::size_type cols, bool storageOrder);
     void GenericTestDynamicUsingDataObject(vct::size_type rows, vct::size_type cols, bool storageOrder);

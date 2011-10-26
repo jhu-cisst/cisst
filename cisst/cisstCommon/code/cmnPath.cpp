@@ -76,7 +76,7 @@ void cmnPath::Add(const std::string & path, bool head) {
     while (*tokens != NULL) {
         Path.insert(position, std::string(*tokens));
         // std::cout << *tokens << std::endl;
-        *tokens ++;
+        tokens++;
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "Path is now set to: " << ToString() << std::endl;
 }

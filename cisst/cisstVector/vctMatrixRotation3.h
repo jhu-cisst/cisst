@@ -202,8 +202,8 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     }
 
     /*! Constructor from a vctEulerRotation3. */
-    template <vctEulerRotation3Order::OrderType order>
-    inline vctMatrixRotation3(const vctEulerRotation3<order> & eulerRotation)
+    template <vctEulerRotation3Order::OrderType __order>
+    inline vctMatrixRotation3(const vctEulerRotation3<__order> & eulerRotation)
         throw(std::runtime_error)
     {
         this->From(eulerRotation);
@@ -344,8 +344,8 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     }
 
     /*! Construction from a vctEulerRotation3. */
-    template <vctEulerRotation3Order::OrderType order>
-    inline vctMatrixRotation3(const vctEulerRotation3<order> & eulerRotation,
+    template <vctEulerRotation3Order::OrderType __order>
+    inline vctMatrixRotation3(const vctEulerRotation3<__order> & eulerRotation,
                               bool normalizeInput)
     {
         if (normalizeInput) {

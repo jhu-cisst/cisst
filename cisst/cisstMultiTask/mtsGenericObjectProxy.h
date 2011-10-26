@@ -395,7 +395,7 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        outputStream << " Value: " << this->Data;
+        // adeguet1 --------- do not check in ---------- outputStream << " Value: " << this->Data;
     }
 
     /*! To stream raw data. */
@@ -406,7 +406,7 @@ public:
             outputStream << delimiter << headerPrefix << "-data";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            outputStream << delimiter << this->Data;
+            // adeguet1 --------- do not check in ---------- outputStream << delimiter << this->Data;
         }
     }
 };
@@ -498,7 +498,7 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        outputStream << " Value(ref): " << this->rData;
+        // adeguet1 --------- do not check in ---------- outputStream << " Value(ref): " << this->rData;
     }
 
     /*! To stream raw data. */
@@ -509,7 +509,7 @@ public:
             outputStream << delimiter << headerPrefix << "-data(ref)";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            outputStream << delimiter << this->rData;
+            // adeguet1 --------- do not check in ---------- outputStream << delimiter << this->rData;
         }
     }
 };

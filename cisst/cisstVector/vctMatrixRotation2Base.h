@@ -658,7 +658,7 @@ public:
     /*! Set this rotation as the inverse of another one.  See also
       InverseSelf(). */
     inline ThisType & InverseOf(const ThisType & otherRotation) {
-        TransposeOf(otherRotation);
+        this->TransposeOf(otherRotation);
         return *this;
     }
 

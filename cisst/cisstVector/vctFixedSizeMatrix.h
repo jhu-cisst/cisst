@@ -84,7 +84,7 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
       \param value the value used to set all the elements of the matrix
     */
     explicit inline vctFixedSizeMatrix(const value_type & value) {
-        SetAll(value);
+        this->SetAll(value);
     }
 
     /*! Initialize the elements of the matrix with a set of given

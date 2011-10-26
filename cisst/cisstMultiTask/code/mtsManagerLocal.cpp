@@ -868,7 +868,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
             std::stringstream buffer(constructorArgSerialized);
             cmnDeSerializer deserializer(buffer);
             try {
-                tempArg = dynamic_cast<const cmnGenericObject *>(deserializer.DeSerialize());
+                tempArg = dynamic_cast<cmnGenericObject *>(deserializer.DeSerialize());
             } catch (std::exception &e) {
                 CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamically: failed to deserialize constructor arg for class \""
                                          << className << "\", error = " << e.what() << std::endl;

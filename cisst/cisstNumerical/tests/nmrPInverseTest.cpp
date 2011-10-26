@@ -427,7 +427,7 @@ void nmrPInverseTest::TestDynamicRowMajor(void) {
 }
 
 template <vct::size_type _rows, vct::size_type _cols>
-void nmrPInverseTest::GenericTestCompareWithMatlab(double input_ptr[], double pinverse_ptr[], int caseNo, double tolerance = cmnTypeTraits<double>::Tolerance())
+void nmrPInverseTest::GenericTestCompareWithMatlab(double input_ptr[], double pinverse_ptr[], int caseNo, double tolerance)
 {
     vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> input;
     vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> inputCopy;
