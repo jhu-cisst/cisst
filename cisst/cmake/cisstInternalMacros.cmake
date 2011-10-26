@@ -134,3 +134,33 @@ macro (cisst_do_not_offer_application library application)
   set (coa_OPTION_NAME CISST_${library}_${application})
   unset (${coa_OPTION_NAME} CACHE)
 endmacro (cisst_do_not_offer_application)
+
+
+# Offer the option to compile all examples in relative directory "examples"
+# Default values are hard coded intentionally
+macro (cisst_offer_examples library)
+  set (coe_OPTION_NAME CISST_${library}_EXAMPLES)
+  if (CISST_BUILD_EXAMPLES)
+    option (${coe_OPTION_NAME} "Build ${library} examples" OFF)
+    if (${coe_OPTION_NAME})
+      add_subdirectory (examples)
+    endif (${coe_OPTION_NAME})
+  else (CISST_BUILD_EXAMPLES)
+    unset (${coe_OPTION_NAME} CACHE)
+  endif (CISST_BUILD_EXAMPLES)
+endmacro (cisst_offer_examples)
+
+# Offer the option to compile all tests in relative directory "tests"
+# Default values are hard coded intentionally
+macro (cisst_offer_tests library)
+  set (cot_OPTION_NAME CISST_${library}_TESTS)
+  if (CISST_BUILD_TESTS)
+    option (${cot_OPTION_NAME} "Build ${library} tests" ON)
+    mark_as_advanced (${cot_OPTION_NAME})
+    if (${cot_OPTION_NAME})
+      add_subdirectory (tests)
+    endif (${cot_OPTION_NAME})
+  else (CISST_BUILD_TESTS)
+    unset (${cot_OPTION_NAME} CACHE)
+  endif (CISST_BUILD_TESTS)
+endmacro (cisst_offer_tests)

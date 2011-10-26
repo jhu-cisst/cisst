@@ -17,10 +17,4 @@ project (cisst3DUserInterfaceLibs)
 
 add_subdirectory (code)
 
-if (CISST_BUILD_EXAMPLES)
-  option (CISST_cisst3DUserInterface_EXAMPLES "Build examples for cisst3DUserInterface." ON)
-  mark_as_advanced (CISST_cisst3DUserInterface_EXAMPLES)
-  if (CISST_cisst3DUserInterface_EXAMPLES)
-    add_subdirectory (examples)
-  endif (CISST_cisst3DUserInterface_EXAMPLES)
-endif (CISST_BUILD_EXAMPLES)
+cisst_offer_examples (cisst3DUserInterface)
