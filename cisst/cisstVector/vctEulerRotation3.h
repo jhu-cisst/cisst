@@ -182,7 +182,7 @@ public:
         }
     }
 
-    // adeguet1, commented out for clang ~vctEulerRotation3() {}
+    ~vctEulerRotation3() {}
 
     /*! Conversion from a vctMatrixRotation3. */
     template <class _matrixType>
