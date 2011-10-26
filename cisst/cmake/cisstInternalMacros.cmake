@@ -117,7 +117,7 @@ endfunction (cisst_library_remove_settings)
 # based on CISST_BUILD_APPLICATIONS
 # For example: cisst_offer_application (cisstMultiTask ComponentGenerator ON)
 macro (cisst_offer_application library application default)
-  set (coa_OPTION_NAME CISST_BUILD_${library}_${application})
+  set (coa_OPTION_NAME CISST_${library}_${application})
   if (CISST_BUILD_APPLICATIONS)
     option (${coa_OPTION_NAME} "Build cisst${application}" ${default})
     mark_as_advanced (${coa_OPTION_NAME})
@@ -131,6 +131,6 @@ endmacro (cisst_offer_application)
 
 
 macro (cisst_do_not_offer_application library application)
-  set (coa_OPTION_NAME CISST_BUILD_${library}_${application})
+  set (coa_OPTION_NAME CISST_${library}_${application})
   unset (${coa_OPTION_NAME} CACHE)
 endmacro (cisst_do_not_offer_application)

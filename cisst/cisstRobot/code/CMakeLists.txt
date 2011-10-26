@@ -105,7 +105,7 @@ if (CISST_HAS_CISSTNETLIB )
 
 else (CISST_HAS_CISSTNETLIB)
   message ("cisstRobot requires cisstNumerical to be compiled with the option CISST_HAS_CISSTNETLIB")
-  set (CISST_LIBS_BUILD_cisstRobot OFF CACHE BOOL "Build cisstRobot" FORCE)
+  set (CISST_cisstRobot OFF CACHE BOOL "Build cisstRobot" FORCE)
 endif (CISST_HAS_CISSTNETLIB)
 
 

@@ -56,6 +56,13 @@ foreach (lib ${CISST_LIBRARIES})
   endif (EXISTS ${ADDITIONAL_BUILD_CMAKE})
 endforeach (lib ${CISST_LIBRARIES})
 
+# To allow users to check if a library has been compiled
+foreach (lib ${CISST_LIBRARIES})
+  set (CISST_BUILD_LIBS_${lib} ON) # Backward compatibility
+  set (BUILD_LIBS_${lib} ON) # Backward compatibility
+  set (CISST_${lib} ON)
+endforeach (lib ${CISST_LIBRARIES})
+
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 

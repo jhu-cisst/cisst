@@ -15,7 +15,7 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstNumerical cisstMultiTask cisstParameterTypes cisstRobot)
 
-if( CISST_BUILD_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+if( CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
   # all source files
   set (SOURCE_FILES
@@ -49,4 +49,4 @@ if( CISST_BUILD_cisstNumerical AND CISST_HAS_CISSTNETLIB )
                          optimized ${CPPUNIT_LIBRARIES}
                          debug ${CPPUNIT_DEBUG_LIBRARIES})
 
-endif( CISST_BUILD_cisstNumerical AND CISST_HAS_CISSTNETLIB )
+endif( CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB )

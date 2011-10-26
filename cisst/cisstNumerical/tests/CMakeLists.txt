@@ -106,14 +106,14 @@ target_link_libraries (cisstNumericalTests cisstTestsDriver)
 
 # If cisstOSAbstraction is compiled, compile multithreaded tests
 # and link differently
-if (CISST_BUILD_cisstOSAbstraction)
+if (CISST_cisstOSAbstraction)
   add_definitions (-DBUILD_MULTITHREADED_TESTS)
   cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction)
   target_link_libraries (cisstNumericalTests
                          ${CMAKE_THREAD_LIBS_INIT})
-else (CISST_BUILD_cisstOSAbstraction)
+else (CISST_cisstOSAbstraction)
   cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical)
-endif (CISST_BUILD_cisstOSAbstraction)
+endif (CISST_cisstOSAbstraction)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstNumericalTests ITERATIONS 10 INSTANCES 2)

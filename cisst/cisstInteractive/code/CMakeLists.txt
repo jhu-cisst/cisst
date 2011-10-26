@@ -20,11 +20,11 @@ set (SOURCE_FILES ireFramework.cpp)
 set (HEADER_FILES ireExport.h ireFramework.h)
 set (DEPENDENCIES cisstCommon)
 
-if (CISST_BUILD_cisstMultiTask)
+if (CISST_cisstMultiTask)
   set (SOURCE_FILES ${SOURCE_FILES} ireTask.cpp)
   set (HEADER_FILES ${HEADER_FILES} ireTask.h)
   set (DEPENDENCIES ${DEPENDENCIES} cisstOSAbstraction cisstMultiTask)
-endif (CISST_BUILD_cisstMultiTask)
+endif (CISST_cisstMultiTask)
 
 # cisstInteractive relies on cisstPython settings (for future use)
 cisst_library_use_settings (cisstInteractive cisstPython)

@@ -35,15 +35,15 @@ if (${CISST_XML_LIB} STREQUAL "LibXml2")
   set (CISST_HAS_QT_XML 0) # for cmnConfigXML.h
 else (${CISST_XML_LIB} STREQUAL "LibXml2")
   cisst_unset_all_package_settings (cisstCommonXML LibXml2)
-  if (${CISST_XML_LIB} STREQUAL "QtXML")  
+  if (${CISST_XML_LIB} STREQUAL "QtXML")
     # cisstCommonXML relies on cisstQt settings (for future use)
     cisst_library_use_settings (cisstCommonXML cisstQt)
     cisst_set_directories (cisstQt)
     set (CISST_HAS_QT_XML 1) # for cmnConfigXML.h
-  else (${CISST_XML_LIB} STREQUAL "QtXML")  
-    message (SEND_ERROR "CISST_XML_LIB must be set to either \"LibXml2\" or \"QtXML\" to compile cisstCommonXML.  You can also turn off CISST_BUILD_cisstCommonXML")
+  else (${CISST_XML_LIB} STREQUAL "QtXML")
+    message (SEND_ERROR "CISST_XML_LIB must be set to either \"LibXml2\" or \"QtXML\" to compile cisstCommonXML.  You can also turn off CISST_CommonXML")
     set (CISST_HAS_QT_XML 0) # for cmnConfigXML.h
-  endif (${CISST_XML_LIB} STREQUAL "QtXML")  
+  endif (${CISST_XML_LIB} STREQUAL "QtXML")
 endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 
 # Create the config file
@@ -67,9 +67,9 @@ cisst_add_library (LIBRARY cisstCommonXML
                    ADDITIONAL_HEADER_FILES ${CISST_CMN_XML_CONFIG_FILE})
 
 # link against Qt libraries if needed
-if (${CISST_XML_LIB} STREQUAL "QtXML")  
+if (${CISST_XML_LIB} STREQUAL "QtXML")
   target_link_libraries (cisstCommonXML ${QT_LIBRARIES})
-endif (${CISST_XML_LIB} STREQUAL "QtXML")  
+endif (${CISST_XML_LIB} STREQUAL "QtXML")
 
 # Add libxml2 runtime dependencies (so far, only tested on WIN32).
 # There must be a better way to do this.

@@ -52,45 +52,45 @@ if (CMAKE_BUILD_TYPE)
 endif (CMAKE_BUILD_TYPE)
 
 # Tells which libraries have been compiled and assumed tests have been as well
-if (CISST_BUILD_cisstCommon)
+if (CISST_cisstCommon)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Co)
-endif (CISST_BUILD_cisstCommon)
+endif (CISST_cisstCommon)
 
-if (CISST_BUILD_cisstVector)
+if (CISST_cisstVector)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Ve)
-endif (CISST_BUILD_cisstVector)
+endif (CISST_cisstVector)
 
-if (CISST_BUILD_cisstNumerical)
+if (CISST_cisstNumerical)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Nu)
-endif (CISST_BUILD_cisstNumerical)
+endif (CISST_cisstNumerical)
 
-if (CISST_BUILD_cisstInteractive)
+if (CISST_cisstInteractive)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}In)
-endif (CISST_BUILD_cisstInteractive)
+endif (CISST_cisstInteractive)
 
-if (CISST_BUILD_cisstOSAbstraction)
+if (CISST_cisstOSAbstraction)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Os)
-endif (CISST_BUILD_cisstOSAbstraction)
+endif (CISST_cisstOSAbstraction)
 
-if (CISST_BUILD_cisstRobot)
+if (CISST_cisstRobot)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Ro)
-endif (CISST_BUILD_cisstRobot)
+endif (CISST_cisstRobot)
 
-if (CISST_BUILD_cisstParameterTypes)
+if (CISST_cisstParameterTypes)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Pt)
-endif (CISST_BUILD_cisstParameterTypes)
+endif (CISST_cisstParameterTypes)
 
-if (CISST_BUILD_cisstMultiTask)
+if (CISST_cisstMultiTask)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Mt)
-endif (CISST_BUILD_cisstMultiTask)
+endif (CISST_cisstMultiTask)
 
-if (CISST_BUILD_cisstStereoVision)
+if (CISST_cisstStereoVision)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Sv)
-endif (CISST_BUILD_cisstStereoVision)
+endif (CISST_cisstStereoVision)
 
-if (CISST_BUILD_cisstDevices)
+if (CISST_cisstDevices)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Dv)
-endif (CISST_BUILD_cisstDevices)
+endif (CISST_cisstDevices)
 
 # Tells if Python was used
 if (CISST_HAS_SWIG_PYTHON)
