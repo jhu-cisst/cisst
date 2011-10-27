@@ -48,40 +48,52 @@ FIND_PATH(OpenCV2_ROOT_DIR
 
 FIND_PATH(OpenCV2_CORE_INCLUDE_DIR
           NAMES core_c.h core.hpp wimage.hpp eigen.hpp internal.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/core")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/core"
+                "${OpenCV2_ROOT_DIR}/modules/core/include/opencv2/core")
 FIND_PATH(OpenCV2_IMGPROC_INCLUDE_DIR
           NAMES imgproc_c.h imgproc.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/imgproc")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/imgproc"
+                "${OpenCV2_ROOT_DIR}/modules/imgproc/include/opencv2/imgproc")
 FIND_PATH(OpenCV2_FEATURES2D_INCLUDE_DIR
           NAMES features2d.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/features2d")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/features2d"
+                "${OpenCV2_ROOT_DIR}/modules/features2d/include/opencv2/features2d")
 FIND_PATH(OpenCV2_FLANN_INCLUDE_DIR
           NAMES flann.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/flann")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/flann"
+                "${OpenCV2_ROOT_DIR}/modules/flann/include/opencv2/flann")
 FIND_PATH(OpenCV2_CALIB3D_INCLUDE_DIR
           NAMES calib3d.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/calib3d")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/calib3d"
+                "${OpenCV2_ROOT_DIR}/modules/calib3d/include/opencv2/calib3d")
 FIND_PATH(OpenCV2_OBJDETECT_INCLUDE_DIR
           NAMES objdetect.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/objdetect")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/objdetect"
+                "${OpenCV2_ROOT_DIR}/modules/objdetect/include/opencv2/objdetect")
 FIND_PATH(OpenCV2_LEGACY_INCLUDE_DIR
           NAMES compat.hpp legacy.hpp blobtrack.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/legacy")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/legacy"
+                "${OpenCV2_ROOT_DIR}/modules/legacy/include/opencv2/legacy")
 FIND_PATH(OpenCV2_CONTRIB_INCLUDE_DIR
           NAMES contrib.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/contrib")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/contrib"
+                "${OpenCV2_ROOT_DIR}/modules/contrib/include/opencv2/contrib")
 FIND_PATH(OpenCV2_HIGHGUI_INCLUDE_DIR
           NAMES   highgui_c.h highgui.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/highgui")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/highgui"
+                "${OpenCV2_ROOT_DIR}/modules/highgui/include/opencv2/highgui")
 FIND_PATH(OpenCV2_ML_INCLUDE_DIR
           NAMES ml.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/ml")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/ml"
+                "${OpenCV2_ROOT_DIR}/modules/ml/include/opencv2/ml")
 FIND_PATH(OpenCV2_VIDEO_INCLUDE_DIR
           NAMES tracking.hpp background_segm.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/video")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/video"
+                "${OpenCV2_ROOT_DIR}/modules/video/include/opencv2/video")
 FIND_PATH(OpenCV2_GPU_INCLUDE_DIR
           NAMES gpu.hpp
-          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/gpu")
+          PATHS "${OpenCV2_ROOT_DIR}/include/opencv2/gpu"
+                "${OpenCV2_ROOT_DIR}/modules/gpu/include/opencv2/gpu")
 
 
 # absolute path to all libraries 
@@ -129,9 +141,9 @@ IF(WIN32)
     FIND_LIBRARY(OpenCV2_GPU_LIBRARY
                  NAMES opencv_gpu230 opencv_gpu220
                  PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
-    FIND_LIBRARY(OpenCV2_FFMPEG_LIBRARY
-                 NAMES opencv_ffmpeg230 opencv_ffmpeg220
-                 PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
+#    FIND_LIBRARY(OpenCV2_FFMPEG_LIBRARY
+#                 NAMES opencv_ffmpeg230 opencv_ffmpeg220
+#                 PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
     FIND_LIBRARY(OpenCV2_TS_LIBRARY
                  NAMES opencv_ts230 opencv_ts220
                  PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
@@ -188,7 +200,7 @@ IF(WIN32)
         )
     SET(OpenCV2_LIBRARIES
         ${OpenCV2_LIBRARIES}
-        ${OpenCV2_FFMPEG_LIBRARY}
+       #${OpenCV2_FFMPEG_LIBRARY}
         ${OpenCV2_TS_LIBRARY}
         )
 ENDIF(WIN32)
@@ -234,7 +246,7 @@ MARK_AS_ADVANCED(FORCE
                  )
 IF(WIN32)
     MARK_AS_ADVANCED(FORCE
-                     OpenCV2_FFMPEG_LIBRARY
+                    #OpenCV2_FFMPEG_LIBRARY
                      OpenCV2_TS_LIBRARY
                      )
 ENDIF(WIN32)
