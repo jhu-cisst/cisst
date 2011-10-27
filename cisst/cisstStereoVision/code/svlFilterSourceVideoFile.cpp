@@ -211,6 +211,8 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
                             }
                         }
                     }
+
+                    Status = SVL_OK;
                 }
 
                 _SynchronizeThreads(procInfo);
@@ -218,19 +220,21 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
                 // Extract frame
                 ret = Codec[idx]->Read(procInfo, *OutputImage, idx, true);
 
-                if (ret == SVL_VID_END_REACHED && !GetLoop()) {
-                    ret = SVL_STOP_REQUEST;
-                    break;
-                }
+                if (ret != SVL_OK) Status = ret;
+                if (ret == SVL_VID_END_REACHED && !GetLoop()) Status = SVL_STOP_REQUEST;
+
+                _SynchronizeThreads(procInfo);
+
+                if (Status == SVL_STOP_REQUEST) break;
 
                 // Manage looped playback and frame timing
                 _OnSingleThread(procInfo)
                 {
-                    if (ret == SVL_VID_END_REACHED) {
+                    if (Status == SVL_VID_END_REACHED || Status == SVL_VID_RETRY) {
                         // Loop around
-                        ret = Codec[idx]->Read(0, *OutputImage, idx, true);
+                        Status = Codec[idx]->Read(0, *OutputImage, idx, true);
                     }
-                    if (ret != SVL_OK) {
+                    if (Status != SVL_OK) {
                         CMN_LOG_CLASS_INIT_ERROR << "Process: failed to read video frame on channel: " << idx << std::endl; 
                         break;
                     }

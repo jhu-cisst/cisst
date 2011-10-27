@@ -79,6 +79,7 @@ private:
     double FirstTimestamp;
     double NativeFramerate;
     osaStopwatch Timer;
+    int Status;
 
 protected:
     typedef svlFilterSourceVideoFile ThisType;

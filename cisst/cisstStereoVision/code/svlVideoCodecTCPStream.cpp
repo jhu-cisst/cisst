@@ -85,10 +85,10 @@ http://www.cisst.org/cisst/license.txt.
     #define __EAGAIN        EAGAIN
 #endif
 
-//#define _NET_VERBOSE_
+#define _NET_VERBOSE_
 
 #define MAX_CLIENTS         5
-#define PACKET_SIZE         10240u
+#define PACKET_SIZE         1250u
 #define BROKEN_FRAME        1
 
 
@@ -582,7 +582,11 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
                 longsize = (end - start) * Width * 2;
 
                 // Decompress frame part
-                if (uncompress(yuvBuffer + offset, &longsize, comprBuffer + ComprPartOffset[i], ComprPartSize[i]) != Z_OK) break;
+                if (uncompress(yuvBuffer + offset, &longsize, comprBuffer + ComprPartOffset[i], ComprPartSize[i]) != Z_OK) {
+                    std::cerr << "svlVideoCodecTCPStream::Read - error in CVI uncompress (part #" << i << ")" << std::endl;
+                    ret = SVL_VID_RETRY;
+                    break;
+                }
 
                 // Convert YUV422 planar to RGB format
                 svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
@@ -593,7 +597,11 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
                 svlSampleImage *subimage = const_cast<svlSampleImage&>(image).GetSubImage(start, end - start, videoch);
 
                 // Decompress buffer into sub-image
-                if (svlImageIO::Read(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[i], ComprPartSize[i], true) != SVL_OK) break;
+                if (svlImageIO::Read(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[i], ComprPartSize[i], true) != SVL_OK) {
+                    std::cerr << "svlVideoCodecTCPStream::Read - error in JPEG uncompress (part #" << i << ")" << std::endl;
+                    ret = SVL_VID_RETRY;
+                    break;
+                }
 
                 // Delete sub-image reference
                 delete subimage;
@@ -1274,7 +1282,9 @@ int svlVideoCodecTCPStream::Receive()
 
             if (!framestart) {
                 if (!started) {
-                    // Looking for "frame start marker"
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::Receive - looking for frame start marker" << std::endl;
+#endif
                     continue;
                 }
             }
