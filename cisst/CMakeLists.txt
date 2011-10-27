@@ -139,6 +139,14 @@ if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
+# Determine if size_t is a native type
+include (CheckSizeTNativeType)
+check_size_t_native_type (CISST_SIZE_T_NATIVE)
+if (CISST_SIZE_T_NATIVE)
+  add_definitions (-DCISST_SIZE_T_NATIVE)
+endif (CISST_SIZE_T_NATIVE)
+
+
 # Path of all CISST shared libraries.
 link_directories (${LIBRARY_OUTPUT_PATH})
 
