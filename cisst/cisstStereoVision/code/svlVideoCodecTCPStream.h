@@ -102,6 +102,8 @@ protected:
     svlProcInfo ProcInfoSingleThread;
 
     char* PacketData;
+    char* PacketDataAccumulator;
+    unsigned int AccumulatedSize;
     unsigned char* yuvBuffer;
     unsigned int yuvBufferSize;
     unsigned char* comprBuffer;
@@ -139,6 +141,7 @@ protected:
     void* SendProc(unsigned int clientid);
     void* ReceiveProc(int param);
     int   Receive();
+    int   FindFrameHeader(unsigned char* data1, const unsigned char* data2, unsigned int size);
     bool  CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size);
     int   ParseFilename(const std::string & filename);
 };
