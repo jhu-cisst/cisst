@@ -198,7 +198,7 @@ void svlSampleBlobs::SetChannelCount(const unsigned int channelcount)
 
 unsigned int svlSampleBlobs::GetChannelCount() const
 {
-    return Blobs.size();
+    return static_cast<unsigned int>(Blobs.size());
 }
 
 int svlSampleBlobs::SetBufferSize(const unsigned int size, const unsigned int videochannel)
@@ -217,7 +217,7 @@ int svlSampleBlobs::SetBufferSize(const unsigned int size, const unsigned int vi
 unsigned int svlSampleBlobs::GetBufferSize(const unsigned int videochannel) const
 {
     if (videochannel < GetChannelCount()) {
-        return Blobs[videochannel].size();
+        return static_cast<unsigned int>(Blobs[videochannel].size());
     }
     return 0;
 }

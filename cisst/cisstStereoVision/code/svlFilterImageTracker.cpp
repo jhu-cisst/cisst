@@ -498,7 +498,7 @@ void svlFilterImageTracker::LinkChannelsVertically()
 {
     if (VideoChannels < 2) return;
 
-    const unsigned int targetcount = Targets.cols();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.cols());
     svlTarget2D *target_0, *target;
     unsigned int i, vch, visible_sum;
     int avrg_y;
@@ -533,7 +533,7 @@ void svlFilterImageTracker::LinkChannelsVertically()
 
 int svlFilterImageTracker::ReconstructRigidBody()
 {
-    const unsigned int targetcount = Targets.cols();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.cols());
     double dconf, sum_conf = 0.0, ax, ay, rx, ry, vx, vy, angle, cos_an, sin_an, scale;
     double proto_ax, proto_ay, proto_vx, proto_vy, proto_dist;
     double avrg_scale, avrg_angle, avrg_conf;
@@ -690,7 +690,7 @@ int svlFilterImageTracker::ReconstructRigidBody()
 
 void svlFilterImageTracker::BackprojectRigidBody()
 {
-    const unsigned int targetcount = Targets.cols();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.cols());
     double ax, ay, rx, ry, vx, vy, proto_ax, proto_ay, sin_an, cos_an, scale;
     vctDynamicMatrixRef<int> proto_pos;
     svlTarget2D *target;
@@ -916,7 +916,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     const int mosaic_stride = mosaic_width * 3;
     const int image_center_x = width  >> 1;
     const int image_center_y = height >> 1;
-    const int targetcount = Targets.cols();
+    const int targetcount = static_cast<int>(Targets.cols());
     const int tmpl_radius = tracker->GetTemplateRadius();
     const int tmpl_size = tmpl_radius * 2 + 1;
     const int tmpl_stride = tmpl_size * 3;

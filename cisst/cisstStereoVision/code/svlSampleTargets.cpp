@@ -115,7 +115,7 @@ const unsigned char* svlSampleTargets::GetUCharPointer() const
 
 unsigned int svlSampleTargets::GetDataSize() const
 {
-    return (Matrix.size() * sizeof(int));
+    return static_cast<unsigned int>(Matrix.size() * sizeof(int));
 }
 
 void svlSampleTargets::SerializeRaw(std::ostream & outputStream) const
@@ -172,7 +172,7 @@ void svlSampleTargets::SetSize(unsigned int dimensions, unsigned int maxtargets,
 void svlSampleTargets::SetDimensions(unsigned int dimensions)
 {
     Dimensions = dimensions;
-    SetSize(dimensions, Matrix.cols(), Channels);
+    SetSize(dimensions, static_cast<unsigned int>(Matrix.cols()), Channels);
 }
 
 unsigned int svlSampleTargets::GetDimensions() const
@@ -187,13 +187,13 @@ void svlSampleTargets::SetMaxTargets(unsigned int maxtargets)
 
 unsigned int svlSampleTargets::GetMaxTargets() const
 {
-    return Matrix.cols();
+    return static_cast<unsigned int>(Matrix.cols());
 }
 
 void svlSampleTargets::SetChannels(unsigned int channels)
 {
     Channels = channels;
-    SetSize(Dimensions, Matrix.cols(), channels);
+    SetSize(Dimensions, static_cast<unsigned int>(Matrix.cols()), channels);
 }
 
 unsigned int svlSampleTargets::GetChannels() const
@@ -304,7 +304,7 @@ void svlSampleTargets::SetPosition(unsigned int targetid, const vctInt3& value, 
     if (targetid >= Matrix.cols() || Dimensions != 3 || channel >= Channels) return;
     
     int* ptr = Matrix.Pointer(2 + channel * 4, targetid);
-    const unsigned int stride = Matrix.cols();
+    const unsigned int stride = static_cast<unsigned int>(Matrix.cols());
     
     *ptr = value[0]; ptr += stride;
     *ptr = value[1]; ptr += stride;
@@ -328,7 +328,7 @@ int svlSampleTargets::GetPosition(unsigned int targetid, vctInt3& value, unsigne
     if (targetid >= Matrix.cols() || Dimensions != 3 || channel >= Channels) return SVL_FAIL;
     
     const int* ptr = Matrix.Pointer(2 + channel * 4, targetid);
-    unsigned int stride = Matrix.cols();
+    unsigned int stride = static_cast<unsigned int>(Matrix.cols());
     
     value[0] = ptr[0];
     value[1] = ptr[stride]; stride <<= 1;

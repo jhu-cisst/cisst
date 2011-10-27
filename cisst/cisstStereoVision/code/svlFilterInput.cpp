@@ -86,7 +86,7 @@ int svlFilterInput::AddType(svlStreamType type)
     // TO DO: figure out if filter needs to be initialized
     if (!Filter/* || Filter->IsInitialized()*/) return SVL_FAIL;
 
-    unsigned int size = SupportedTypes.size();
+    unsigned int size = static_cast<unsigned int>(SupportedTypes.size());
     SupportedTypes.resize(size + 1);
     SupportedTypes[size] = type;
     return SVL_OK;
@@ -99,7 +99,7 @@ bool svlFilterInput::IsConnected(void) const
 
 bool svlFilterInput::IsTypeSupported(svlStreamType type)
 {
-    const unsigned int size = SupportedTypes.size();
+    const unsigned int size = static_cast<unsigned int>(SupportedTypes.size());
     for (unsigned int i = 0; i < size; i ++) {
         if (SupportedTypes[i] == type) return true;
     }

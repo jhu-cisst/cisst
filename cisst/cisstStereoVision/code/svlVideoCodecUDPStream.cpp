@@ -449,7 +449,7 @@ int svlVideoCodecUDPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
 
     while (1) {
         // file start marker
-        strmoffset = FrameStartMarker.length();
+        strmoffset = static_cast<unsigned int>(FrameStartMarker.length());
 
         // frame data size after file start marker
         strmoffset += sizeof(unsigned int);
@@ -575,7 +575,7 @@ int svlVideoCodecUDPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
 
         // Add "frame start marker"
         memcpy(strmbuf, FrameStartMarker.c_str(), FrameStartMarker.length());
-        used = FrameStartMarker.length();
+        used = static_cast<unsigned int>(FrameStartMarker.length());
 
         // Add "data size after frame start marker"
         size = sizeof(unsigned int) * (4 + proccount) + sizeof(double);
@@ -719,7 +719,7 @@ void* svlVideoCodecUDPStream::ServerProc(unsigned short port)
 #endif
 #endif
 
-        ServerSocket = socket(PF_INET, SOCK_DGRAM, 0);
+        ServerSocket = static_cast<int>(socket(PF_INET, SOCK_DGRAM, 0));
         if (ServerSocket < 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecUDPStream::ServerProc - cannot create socket" << std::endl;
@@ -825,7 +825,7 @@ void* svlVideoCodecUDPStream::SendProc(int CMN_UNUSED(param))
         hdr.indexInFrame = 0;
         hdr.frame ++;
         // this is the ceiling function to determine number of packets total to be sent in this frame
-        hdr.totalInFrame = (used + (DATA_SIZE - 1)) / DATA_SIZE;
+        hdr.totalInFrame = static_cast<unsigned short>((used + (DATA_SIZE - 1)) / DATA_SIZE);
 
         for (i = 0; i < used; i += DATA_SIZE) {
             memset(localbuf, 0, PACKET_SIZE);
@@ -926,7 +926,7 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
 #endif
 #endif
 
-        ReceiveSocket = socket(AF_INET, SOCK_DGRAM, 0);
+        ReceiveSocket = static_cast<int>(socket(AF_INET, SOCK_DGRAM, 0));
         if (ReceiveSocket < 0) {
             std::cout << "svlVideoCodecUDPStream::ReceiveProc - cannot create socket" << std::endl;
             break;
@@ -1004,7 +1004,7 @@ void* svlVideoCodecUDPStream::ReceiveProc(int CMN_UNUSED(param))
 void* svlVideoCodecUDPStream::Receive(int CMN_UNUSED(param))
 {
     const unsigned char* fsm = reinterpret_cast<const unsigned char*>(FrameStartMarker.c_str());
-    const unsigned int fsm_len = FrameStartMarker.length();
+    const unsigned int fsm_len = static_cast<unsigned int>(FrameStartMarker.length());
     unsigned char* framebuf;
     unsigned char localbuf[PACKET_SIZE];
     unsigned int size = PACKET_SIZE;

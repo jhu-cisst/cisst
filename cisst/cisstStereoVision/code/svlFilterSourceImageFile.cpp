@@ -351,7 +351,7 @@ void svlFilterSourceImageFile::SetFileCommand(const FileInfo & fileinfo)
 
 void svlFilterSourceImageFile::GetChannelsCommand(int & channels) const
 {
-    channels = ImageCodec.size();
+    channels = static_cast<int>(ImageCodec.size());
 }
 
 void svlFilterSourceImageFile::GetFileCommand(FileInfo & fileinfo) const

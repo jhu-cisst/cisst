@@ -278,7 +278,7 @@ void svlDraw::Poly(svlSampleImage* image,
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
 
-    const unsigned int size = points.size();
+    const unsigned int size = static_cast<unsigned int>(points.size());
 
     if (size < 1) return;
     if (size == 1) Pixel(image, videoch, points[0], color);

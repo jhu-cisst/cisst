@@ -89,7 +89,7 @@ int svlFilterSplitter::AddOutput(const std::string &name, const unsigned int thr
     output->SetThreadCount(threadcount);
     output->SetBufferSize(buffersize);
 
-    const unsigned int size = AsyncOutputs.size();
+    const unsigned int size = static_cast<unsigned int>(AsyncOutputs.size());
     AsyncOutputs.resize(size + 1);
     AsyncOutputs[size] = output;
 
@@ -109,7 +109,7 @@ int svlFilterSplitter::OnConnectInput(svlFilterInput &input, svlStreamType type)
     GetOutput()->SetType(type);
 
     // Then set the output types of non-trunk outputs
-    const unsigned int size = AsyncOutputs.size();
+    const unsigned int size = static_cast<unsigned int>(AsyncOutputs.size());
     for (unsigned int i = 0; i < size; i ++) {
         if (AsyncOutputs[i]) AsyncOutputs[i]->SetType(type);
     }
@@ -122,7 +122,7 @@ int svlFilterSplitter::Initialize(svlSample* syncInput, svlSample* &syncOutput)
     syncOutput = syncInput;
 
     // Non-trunk outputs setup their buffers based on the input sample
-    const unsigned int size = AsyncOutputs.size();
+    const unsigned int size = static_cast<unsigned int>(AsyncOutputs.size());
     for (unsigned int i = 0; i < size; i ++) {
         if (AsyncOutputs[i]) AsyncOutputs[i]->SetupSample(syncInput);
     }
@@ -137,7 +137,7 @@ int svlFilterSplitter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlS
 
     _OnSingleThread(procInfo) {
         // Non-trunk outputs copy the input sample into their buffers
-        const unsigned int size = AsyncOutputs.size();
+        const unsigned int size = static_cast<unsigned int>(AsyncOutputs.size());
         for (unsigned int i = 0; i < size; i ++) {
             if (AsyncOutputs[i]) AsyncOutputs[i]->PushSample(syncInput);
         }

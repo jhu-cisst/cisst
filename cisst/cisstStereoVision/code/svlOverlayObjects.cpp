@@ -396,8 +396,8 @@ void svlOverlayTargets::DrawInternal(svlSampleImage* bgimage, svlSample* input)
                 pos[1] = y;
                 pos[2] = 1.0;
                 pos_xf.ProductOf(Transform, pos);
-                x = pos_xf[0];
-                y = pos_xf[1];
+                x = static_cast<int>(pos_xf[0]);
+                y = static_cast<int>(pos_xf[1]);
             }
 
             if (Crosshair) {
@@ -587,8 +587,8 @@ void svlOverlayToolTips::DrawInternal(svlSampleImage* bgimage, svlSample* input)
     //    [Tool_3_left][Tool_3_right]
 
     vctDynamicMatrix<double>& matrix = matrix_smpl->GetDynamicMatrixRef();
-    const unsigned int tool_count = matrix.rows() / 3;
-    const unsigned int vch_count  = matrix.cols() / 3;
+    const unsigned int tool_count = static_cast<unsigned int>(matrix.rows() / 3);
+    const unsigned int vch_count  = static_cast<unsigned int>(matrix.cols() / 3);
     if (tool_count < 1 || InputCh >= vch_count) return;
 
     vctFixedSizeMatrix<double, 3, 4> vertices, xf_vertices;
@@ -617,10 +617,10 @@ void svlOverlayToolTips::DrawInternal(svlSampleImage* bgimage, svlSample* input)
             // Draw poly line
             for (j = 1; j < vertices.cols(); j ++) {
                 svlDraw::Line(bgimage, VideoCh,
-                              vertices.Element(0, j - 1),
-                              vertices.Element(1, j - 1),
-                              vertices.Element(0, j),
-                              vertices.Element(1, j),
+                              static_cast<int>(vertices.Element(0, j - 1)),
+                              static_cast<int>(vertices.Element(1, j - 1)),
+                              static_cast<int>(vertices.Element(0, j)),
+                              static_cast<int>(vertices.Element(1, j)),
                               Color.r, Color.g, Color.b);
             }
         }
@@ -628,10 +628,10 @@ void svlOverlayToolTips::DrawInternal(svlSampleImage* bgimage, svlSample* input)
             // Draw poly line
             for (j = 1; j < vertices.cols(); j ++) {
                 svlDraw::Line(bgimage, VideoCh,
-                              xf_vertices.Element(0, j - 1),
-                              xf_vertices.Element(1, j - 1),
-                              xf_vertices.Element(0, j),
-                              xf_vertices.Element(1, j),
+                              static_cast<int>(xf_vertices.Element(0, j - 1)),
+                              static_cast<int>(xf_vertices.Element(1, j - 1)),
+                              static_cast<int>(xf_vertices.Element(0, j)),
+                              static_cast<int>(xf_vertices.Element(1, j)),
                               Color.r, Color.g, Color.b);
             }
         }
@@ -1607,7 +1607,7 @@ unsigned int svlOverlayStaticPoly::GetStart() const
 unsigned int svlOverlayStaticPoly::AddPoint(svlPoint2D point)
 {
     CS.Enter();
-        unsigned int size = Poly.size();
+        unsigned int size = static_cast<unsigned int>(Poly.size());
         Poly.resize(size + 1);
         Poly[size] = point;
     CS.Leave();
@@ -1617,7 +1617,7 @@ unsigned int svlOverlayStaticPoly::AddPoint(svlPoint2D point)
 unsigned int svlOverlayStaticPoly::AddPoint(int x, int y)
 {
     CS.Enter();
-        unsigned int size = Poly.size();
+        unsigned int size = static_cast<unsigned int>(Poly.size());
         Poly.resize(size + 1);
         Poly[size].x = x;
         Poly[size].y = y;
@@ -1675,7 +1675,7 @@ void svlOverlayStaticPoly::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
 {
     if (Transformed) {
         CS.Enter();
-            const unsigned int length = Poly.size();
+            const unsigned int length = static_cast<unsigned int>(Poly.size());
             if (PolyXF.size() != length) PolyXF.SetSize(length);
 
             const double m00 = Transform.Element(0, 0);

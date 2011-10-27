@@ -215,7 +215,7 @@ int ppmWrite(const unsigned char* buffer, const unsigned int width, const unsign
            << width << "\n"
            << height << "\n"
            << 255 << "\n";
-    headersize = stream.str().size();
+    headersize = static_cast<unsigned int>(stream.str().size());
 
     if (magicnumber == 6) size *= 3;
 

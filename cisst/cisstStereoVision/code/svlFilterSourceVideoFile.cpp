@@ -637,7 +637,7 @@ void svlFilterSourceVideoFile::SetRangeRCommand(const vctInt2& range)
 
 void svlFilterSourceVideoFile::GetChannelsCommand(int & channels) const
 {
-    channels = Codec.size();
+    channels = static_cast<int>(Codec.size());
 }
 
 void svlFilterSourceVideoFile::GetPathLCommand(std::string & filepath) const

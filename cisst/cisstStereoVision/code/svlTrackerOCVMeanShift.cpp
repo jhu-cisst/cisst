@@ -131,7 +131,7 @@ int svlTrackerOCVMeanShift::Track(svlSampleImage & CMN_UNUSED(image), unsigned i
 {
     if (!Initialized) return SVL_FAIL;
 
-    const unsigned int targetcount = Targets.size();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
     unsigned int i;
 
     CvTermCriteria criteria;

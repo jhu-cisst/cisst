@@ -2228,7 +2228,7 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref)
 {
-    const unsigned int size = objref.size();
+    const unsigned int size = static_cast<unsigned int>(objref.size());
 
     for (unsigned int i = 0; i < size; i ++) {
 
@@ -2244,7 +2244,7 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref)
 {
-    const unsigned int size = objref.size();
+    const unsigned int size = static_cast<unsigned int>(objref.size());
 
     for (unsigned int i = 0; i < size; i ++) {
 

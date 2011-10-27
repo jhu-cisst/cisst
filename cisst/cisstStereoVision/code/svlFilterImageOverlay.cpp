@@ -75,7 +75,7 @@ int svlFilterImageOverlay::AddInputImage(const std::string &name)
     while (1) {
         if (IsInputAlreadyQueued(name)) break;
 
-        unsigned int size = ImageInputsToAdd.size();
+        unsigned int size = static_cast<unsigned int>(ImageInputsToAdd.size());
         ImageInputsToAddUsed ++;
         if (ImageInputsToAddUsed > size) ImageInputsToAdd.resize(size + 10);
         ImageInputsToAdd[ImageInputsToAddUsed - 1] = name;
@@ -97,7 +97,7 @@ int svlFilterImageOverlay::AddInputMatrix(const std::string &name)
     while (1) {
         if (IsInputAlreadyQueued(name)) break;
 
-        unsigned int size = MatrixInputsToAdd.size();
+        unsigned int size = static_cast<unsigned int>(MatrixInputsToAdd.size());
         MatrixInputsToAddUsed ++;
         if (MatrixInputsToAddUsed > size) MatrixInputsToAdd.resize(size + 10);
         MatrixInputsToAdd[MatrixInputsToAddUsed - 1] = name;
@@ -119,7 +119,7 @@ int svlFilterImageOverlay::AddInputTargets(const std::string &name)
     while (1) {
         if (IsInputAlreadyQueued(name)) break;
 
-        unsigned int size = TargetInputsToAdd.size();
+        unsigned int size = static_cast<unsigned int>(TargetInputsToAdd.size());
         TargetInputsToAddUsed ++;
         if (TargetInputsToAddUsed > size) TargetInputsToAdd.resize(size + 10);
         TargetInputsToAdd[TargetInputsToAddUsed - 1] = name;
@@ -141,7 +141,7 @@ int svlFilterImageOverlay::AddInputBlobs(const std::string &name)
     while (1) {
         if (IsInputAlreadyQueued(name)) break;
 
-        unsigned int size = BlobInputsToAdd.size();
+        unsigned int size = static_cast<unsigned int>(BlobInputsToAdd.size());
         BlobInputsToAddUsed ++;
         if (BlobInputsToAddUsed > size) BlobInputsToAdd.resize(size + 10);
         BlobInputsToAdd[BlobInputsToAddUsed - 1] = name;
@@ -163,7 +163,7 @@ int svlFilterImageOverlay::AddInputText(const std::string &name)
     while (1) {
         if (IsInputAlreadyQueued(name)) break;
 
-        unsigned int size = TextInputsToAdd.size();
+        unsigned int size = static_cast<unsigned int>(TextInputsToAdd.size());
         TextInputsToAddUsed ++;
         if (TextInputsToAddUsed > size) TextInputsToAdd.resize(size + 10);
         TextInputsToAdd[TextInputsToAddUsed - 1] = name;
@@ -180,7 +180,7 @@ void svlFilterImageOverlay::AddOverlay(svlOverlay & overlay)
 {
     CS.Enter();
 
-        unsigned int size = OverlaysToAdd.size();
+        unsigned int size = static_cast<unsigned int>(OverlaysToAdd.size());
         OverlaysToAddUsed ++;
         if (OverlaysToAddUsed > size) OverlaysToAdd.resize(size + 10);
         OverlaysToAdd[OverlaysToAddUsed - 1] = &overlay;

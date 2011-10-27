@@ -507,7 +507,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
             if (!strmbuf || !used) break;
 
             // file start marker
-            strmoffset = FrameStartMarker.length();
+            strmoffset = static_cast<unsigned int>(FrameStartMarker.length());
 
             // frame data size after file start marker
             strmoffset += sizeof(unsigned int);
@@ -562,7 +562,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
 
     unsigned int size, start, end;
     unsigned char *img = image.GetUCharPointer(videoch);
-    partcount = ComprPartOffset.size();
+    partcount = static_cast<unsigned int>(ComprPartOffset.size());
     ret = SVL_OK;
 
     _ParallelLoop(procInfo, i, partcount)
@@ -678,7 +678,7 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
             // Compress sub-image into buffer
             size_t csize = size * 2;
             svlImageIO::Write(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[procid], csize, compr);
-            comprsize = csize;
+            comprsize = static_cast<unsigned int>(csize);
 
             // Delete sub-image reference
             delete subimage;
@@ -706,7 +706,7 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
 
         // Add "frame start marker"
         memcpy(strmbuf, FrameStartMarker.c_str(), FrameStartMarker.length());
-        used = FrameStartMarker.length();
+        used = static_cast<unsigned int>(FrameStartMarker.length());
 
         // Add "data size after frame start marker"
         size = sizeof(unsigned int) * (4 + proccount) + sizeof(double);
@@ -856,7 +856,7 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
 #endif
 #endif
 
-        ServerSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        ServerSocket = static_cast<int>(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
         if (ServerSocket < 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecTCPStream::ServerProc - cannot create socket" << std::endl;
@@ -960,7 +960,7 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
             std::cerr << "svlVideoCodecTCPStream::ServerProc - incoming connection..." << std::endl;
 #endif
 
-            connection = accept(ServerSocket, 0, 0);
+            connection = static_cast<int>(accept(ServerSocket, 0, 0));
             if (connection < 0) {
 #ifdef _NET_VERBOSE_
                 std::cerr << "svlVideoCodecTCPStream::ServerProc - accept failed" << std::endl;
@@ -1118,7 +1118,7 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
 #endif
 #endif
 
-        ReceiveSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        ReceiveSocket = static_cast<unsigned int>(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
         if (ReceiveSocket < 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecTCPStream::ReceiveProc - cannot create socket" << std::endl;
@@ -1234,7 +1234,7 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
 int svlVideoCodecTCPStream::Receive()
 {
     const unsigned char* fsm = reinterpret_cast<const unsigned char*>(FrameStartMarker.c_str());
-    const unsigned int fsm_len = FrameStartMarker.length();
+    const unsigned int fsm_len = static_cast<unsigned int>(FrameStartMarker.length());
     unsigned char* buffer = reinterpret_cast<unsigned char*>(PacketData);
     unsigned int size = PACKET_SIZE;
     unsigned int framesize = 0;

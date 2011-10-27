@@ -242,13 +242,13 @@ public:
 
     unsigned int GetCols() const
     {
-        if (Matrix) return Matrix->cols();
+        if (Matrix) return static_cast<unsigned int>(Matrix->cols());
         return 0;
     }
 
     unsigned int GetRows() const
     {
-        if (Matrix) return Matrix->rows();
+        if (Matrix) return static_cast<unsigned int>(Matrix->rows());
         return 0;
     }
 
@@ -260,7 +260,7 @@ public:
 
     unsigned int GetRowStride() const
     {
-        if (Matrix) return (Matrix->cols() * sizeof(_ValueType));
+        if (Matrix) return static_cast<unsigned int>(Matrix->cols() * sizeof(_ValueType));
         return 0;
     }
 

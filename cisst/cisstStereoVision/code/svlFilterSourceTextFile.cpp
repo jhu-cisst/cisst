@@ -69,7 +69,7 @@ void svlFilterSourceTextFile::AddFile(const FileInfo & fileinfo)
         return;
     }
 
-    const unsigned int size = FilePaths.size();
+    const unsigned int size = static_cast<unsigned int>(FilePaths.size());
     FilePaths.resize(size + 1);
     FilePaths[size] = fileinfo.filepath;
     TimeColumns.resize(size + 1);
@@ -103,7 +103,7 @@ void svlFilterSourceTextFile::RemoveFiles(void)
 
 int svlFilterSourceTextFile::Initialize(svlSample* &syncOutput)
 {
-    const unsigned int file_count = FilePaths.size();
+    const unsigned int file_count = static_cast<unsigned int>(FilePaths.size());
     if (file_count < 1) return SVL_FAIL;
 
     Files.SetSize(file_count);
@@ -161,10 +161,10 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
         // Try to keep target frequency (if specified)
         WaitForTargetTimer();
 
-        const unsigned int file_count = Files.size();
+        const unsigned int file_count = static_cast<unsigned int>(Files.size());
         bool anydata = false;
         unsigned int c, r;
-        float fval;
+        double fval;
 
         for (r = 0; r < file_count; r ++) {
 
@@ -210,7 +210,7 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
                     }
 
                     // Store value
-                    WorkMatrix.Element(0, r) = fval;
+                    WorkMatrix.Element(0, r) = static_cast<float>(fval);
                     anydata = true;
                 }
 
@@ -236,7 +236,7 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
                         }
 
                         // Store value
-                        WorkMatrix.Element(c, r) = fval;
+                        WorkMatrix.Element(c, r) = static_cast<float>(fval);
                         anydata = true;
                     }
                 }
@@ -313,7 +313,7 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
 
 int svlFilterSourceTextFile::Release()
 {
-    const unsigned int file_count = Files.size();
+    const unsigned int file_count = static_cast<unsigned int>(Files.size());
     for (unsigned int r = 0; r < file_count; r ++) {
         if (Files[r]) {
             if (Files[r]->is_open()) Files[r]->close();

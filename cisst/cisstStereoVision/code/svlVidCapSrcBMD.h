@@ -29,6 +29,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlBufferImage.h>
 #include <cisstOSAbstraction/osaMutex.h>
 
+#if _MSC_VER >= 1500
+    // Balazs: seems to be needed on Visual Studio 2008
+    #define interface __interface
+#endif // _MSC_VER
+
 #include "DeckLinkAPI.h"
 
 

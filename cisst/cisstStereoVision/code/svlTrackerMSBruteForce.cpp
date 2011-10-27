@@ -146,7 +146,7 @@ void svlTrackerMSBruteForce::SetTemplateUpdateWeight(double weight)
     else if (ival > 255) ival = 255;
     TemplateUpdateWeight = static_cast<unsigned char>(ival);
 
-    if (Initialized && LowerScale) LowerScale->SetSearchRadius(weight);
+    if (Initialized && LowerScale) LowerScale->SetTemplateUpdateWeight(weight);
 }
 
 void svlTrackerMSBruteForce::SetConfidenceThreshold(double threshold)
@@ -225,7 +225,7 @@ int svlTrackerMSBruteForce::Initialize()
     Release();
 
     unsigned int i, templatesize;
-    const unsigned int targetcount = Targets.size();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
 
 #ifdef __DEBUG_TRACKER
         std::stringstream __name;
@@ -289,7 +289,7 @@ int svlTrackerMSBruteForce::Initialize()
 
 void svlTrackerMSBruteForce::ResetTargets()
 {
-    const unsigned int targetcount = Targets.size();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
     for (unsigned int i = 0; i < targetcount; i ++) {
         Targets[i].feature_quality = -1;
         Targets[i].feature_data.SetAll(0);
@@ -323,7 +323,7 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
     const int topborder    = ROI.top    + TemplateRadius;
     const int rightborder  = ROI.right  - TemplateRadius;
     const int bottomborder = ROI.bottom - TemplateRadius;
-    const unsigned int targetcount = Targets.size();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
     const unsigned int scalem1 = Scale - 1;
     unsigned int templatesize = TemplateRadius * 2 + 1;
     templatesize *= templatesize * 3;
@@ -505,7 +505,7 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
     const int topborder    = ROI.top    + TemplateRadius;
     const int rightborder  = ROI.right  - TemplateRadius;
     const int bottomborder = ROI.bottom - TemplateRadius;
-    const unsigned int targetcount = Targets.size();
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
     const unsigned int target_from = procInfo->ID;
     const unsigned int target_step = procInfo->count;
     const unsigned int scalem1 = Scale - 1;

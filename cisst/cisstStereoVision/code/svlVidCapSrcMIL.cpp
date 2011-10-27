@@ -556,10 +556,10 @@ bool svlVidCapSrcMIL::MILInitializeDevice(int device, bool capture, bool overlay
     MdigAlloc(MilSystem[device], M_DEV0, MIL_TEXT("M_DEFAULT"), M_DEFAULT, &(MilDigitizer[device]));
     if (MilDigitizer[device] == M_NULL) goto labError;
 
-    MilWidth[device] = MdigInquire(MilDigitizer[device], M_SIZE_X, M_NULL);
-    MilHeight[device] = MdigInquire(MilDigitizer[device], M_SIZE_Y, M_NULL);
-    MilBands[device] = MdigInquire(MilDigitizer[device], M_SIZE_BAND, M_NULL); 
-    MilBandBits[device] = MdigInquire(MilDigitizer[device], M_SIZE_BIT, M_NULL);
+    MilWidth[device] = static_cast<long>(MdigInquire(MilDigitizer[device], M_SIZE_X, M_NULL));
+    MilHeight[device] = static_cast<long>(MdigInquire(MilDigitizer[device], M_SIZE_Y, M_NULL));
+    MilBands[device] = static_cast<long>(MdigInquire(MilDigitizer[device], M_SIZE_BAND, M_NULL)); 
+    MilBandBits[device] = static_cast<long>(MdigInquire(MilDigitizer[device], M_SIZE_BIT, M_NULL));
 
     if (overlay) {
         MdispAlloc(MilSystem[device], M_DEFAULT, MIL_TEXT("M_DEFAULT"), M_DEFAULT, &(MilDisplay[device]));

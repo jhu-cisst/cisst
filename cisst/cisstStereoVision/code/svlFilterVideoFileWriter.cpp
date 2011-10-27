@@ -629,7 +629,7 @@ void svlFilterVideoFileWriter::PauseAtTime(double time)
 
 void svlFilterVideoFileWriter::UpdateCodecCount(const unsigned int count)
 {
-    const unsigned int prevsize = Codec.size();
+    const unsigned int prevsize = static_cast<unsigned int>(Codec.size());
     if (prevsize < count) {
         ErrorOnChannel.resize(count);
         ImageDimensions.resize(count);
