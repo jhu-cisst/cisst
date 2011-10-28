@@ -24,7 +24,6 @@ cisst_set_directories (cisstQt)
 
 
 set (HEADER_FILES
-     svlExportQt.h
      svlQtObjectFactory.h
      svlQtDialog.h
      svlQtWidgetFileOpen.h
@@ -97,7 +96,7 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
                                 cisstMultiTask
                                 cisstStereoVision
                    SOURCE_FILES ${SOURCE_FILES}
-                   HEADER_FILES ${HEADER_FILES}
+                   HEADER_FILES ${HEADER_FILES} svlExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP}
                                            ${QT_WRAPPED_UI}
                    )
