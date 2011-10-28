@@ -62,7 +62,7 @@ void svlFilterImageColorSegmentation::AddColor(int x, int y, int z, unsigned cha
 
 void svlFilterImageColorSegmentation::AddColor(svlColorSpace colorspace, int x, int y, int z, unsigned char threshold, unsigned char label)
 {
-    unsigned int size = Color.size();
+    unsigned int size = static_cast<unsigned int>(Color.size());
 
     Color.resize(size + 1);
     ColorSpace.resize(size + 1);
@@ -145,7 +145,7 @@ int svlFilterImageColorSegmentation::Process(svlProcInfo* procInfo, svlSample* s
 
 void svlFilterImageColorSegmentation::ComputeSegmentation(svlSampleImage* image, unsigned int videoch)
 {
-    const unsigned int colorcount = Color.size();
+    const unsigned int colorcount = static_cast<unsigned int>(Color.size());
     const unsigned int pixelcount = image->GetWidth(videoch) * image->GetHeight(videoch);
     unsigned char *inbuf, *outbuf, *distbuf;
     unsigned char label, dist;

@@ -68,10 +68,10 @@ svlImageIO* svlImageIO::GetInstance()
 
 svlImageIO::~svlImageIO()
 {
-    const unsigned int size = CodecCache.size();
+    const unsigned int size = static_cast<unsigned int>(CodecCache.size());
     unsigned int i, j, cachesize;
     for (i = 0; i < size; i ++) {
-        cachesize = CodecCache[i].size();
+        cachesize = static_cast<unsigned int>(CodecCache[i].size());
         for (j = 0; j < cachesize; j ++) {
             delete CodecCache[i][j];
         }
@@ -92,7 +92,7 @@ int svlImageIO::GetExtension(const std::string &filename,
 
     char ch;
     const int offset = 'a' - 'A';
-    const unsigned int len = extension.size();
+    const unsigned int len = static_cast<unsigned int>(extension.size());
     if (len == 0) return SVL_FAIL;
 
     for (unsigned int i = 0; i < len; i ++) {
@@ -119,7 +119,7 @@ svlImageCodecBase* svlImageIO::GetCodec(const std::string &filename)
     extension.append(";");
 
     svlImageIO* instance = GetInstance();
-    const unsigned int size = instance->Codecs.size();
+    const unsigned int size = static_cast<unsigned int>(instance->Codecs.size());
     unsigned int i;
     int j, cachesize, cacheitem;
 
@@ -171,10 +171,10 @@ void svlImageIO::ReleaseCodec(svlImageCodecBase* codec)
     // Enter critical section
     instance->CS.Enter();
 
-    const unsigned int size = instance->CodecCache.size();
+    const unsigned int size = static_cast<unsigned int>(instance->CodecCache.size());
     unsigned int i, j, cachesize;
     for (i = 0; i < size; i ++) {
-        cachesize = instance->CodecCache[i].size();
+        cachesize = static_cast<unsigned int>(instance->CodecCache[i].size());
         for (j = 0; j < cachesize; j ++) {
             if (codec == instance->CodecCache[i][j]) {
                 instance->CodecCacheUsed[i][j] = false;

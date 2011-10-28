@@ -486,7 +486,6 @@ int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
 /*************************************/
 
 DeckLinkCaptureDelegate::DeckLinkCaptureDelegate(svlBufferImage* buffer) :
-    IDeckLinkInputCallback(),
     m_refCount(0)
 {
     m_mutex = new osaMutex();

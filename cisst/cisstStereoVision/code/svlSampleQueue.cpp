@@ -113,7 +113,7 @@ unsigned int svlSampleQueue::GetLength()
 
 unsigned int svlSampleQueue::GetUsage()
 {
-    return Size - UnusedItems.size();
+    return Size - static_cast<unsigned int>(UnusedItems.size());
 }
 
 double svlSampleQueue::GetUsageRatio()

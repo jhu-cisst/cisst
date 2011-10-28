@@ -33,6 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlDefinitions.h>
 #include <cisstStereoVision/svlConfig.h>
 
+#ifdef _MSC_VER
+    // Disable warning C4996
+    #pragma warning(disable : 4996)
+#endif // _MSC_VER
+
 #if CISST_SVL_HAS_OPENCV2
     #include <core_c.h>
     #include <core.hpp>
@@ -70,6 +75,10 @@ http://www.cisst.org/cisst/license.txt.
     #endif // CISST_SVL_HAS_OPENCV
 #endif // CISST_SVL_HAS_OPENCV2
 
+#ifdef _MSC_VER
+    // Resume C4996 warnings
+    #pragma warning(default : 4996)
+#endif // _MSC_VER
 
 #pragma pack(1)
 

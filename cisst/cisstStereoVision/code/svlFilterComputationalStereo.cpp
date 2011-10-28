@@ -450,8 +450,8 @@ void svlFilterComputationalStereo::CreateXCheckImageColor(unsigned char* source,
 
 void svlFilterComputationalStereo::PerformXCheck()
 {
-    const int width = DisparityBuffer.width() - 1;
-    const int height = DisparityBuffer.height() - 1;
+    const int width = static_cast<int>(DisparityBuffer.width()) - 1;
+    const int height = static_cast<int>(DisparityBuffer.height()) - 1;
     int i, j, k, r, l, from, to, dispmin, disp, prevdisp;
 
     // find occlusions and inconsistencies

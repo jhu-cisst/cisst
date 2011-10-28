@@ -71,7 +71,7 @@ void PNG_read_data_memory(png_structp png_ptr, png_bytep data, png_size_t length
         if (source->buffer && source->buffersize >= length) {
             memcpy(data, source->buffer, length);
             source->buffer += length;
-            source->buffersize -= length;
+            source->buffersize -= static_cast<unsigned int>(length);
             source->error = false;
             return;
         }
@@ -97,7 +97,7 @@ void PNG_user_write_data_proc(png_structp png_ptr, png_bytep data, png_size_t le
         PNG_target_mem_info* targetinfo = reinterpret_cast<PNG_target_mem_info*>(png_ptr->io_ptr);
         if (!targetinfo->error && targetinfo->ptr && targetinfo->size && (targetinfo->size - targetinfo->comprsize) >= length) {
             memcpy(targetinfo->ptr + targetinfo->comprsize, data, length);
-            targetinfo->comprsize += length;
+            targetinfo->comprsize += static_cast<unsigned int>(length);
             targetinfo->error = false;
             return;
         }
@@ -214,7 +214,7 @@ int svlImageCodecPNG::ReadDimensions(const unsigned char *buffer, const size_t b
     }
     _PNG_source_memory source;
     source.buffer = const_cast<unsigned char*>(buffer + PNG_SIG_SIZE);
-    source.buffersize = buffersize - PNG_SIG_SIZE;
+    source.buffersize = static_cast<unsigned int>(buffersize - PNG_SIG_SIZE);
     source.error = false;
     png_set_read_fn(png_ptr, &source, PNG_read_data_memory);
 
@@ -373,7 +373,7 @@ int svlImageCodecPNG::Read(svlSampleImage &image, const unsigned int videoch, co
     }
     _PNG_source_memory source;
     source.buffer = const_cast<unsigned char*>(buffer + PNG_SIG_SIZE);
-    source.buffersize = buffersize - PNG_SIG_SIZE;
+    source.buffersize = static_cast<unsigned int>(buffersize - PNG_SIG_SIZE);
     source.error = false;
     png_set_read_fn(png_ptr, &source, PNG_read_data_memory);
 
@@ -508,7 +508,7 @@ int svlImageCodecPNG::Write(const svlSampleImage &image, const unsigned int vide
 
     PNG_target_mem_info targetinfo;
     targetinfo.ptr = buffer;
-    targetinfo.size = buffersize;
+    targetinfo.size = static_cast<unsigned int>(buffersize);
     targetinfo.comprsize = 0;
     targetinfo.error = false;
 

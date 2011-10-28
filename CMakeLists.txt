@@ -84,7 +84,6 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 
 # Finally, create lib targets
 add_subdirectory (cisst)
-cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 
 # Conditional builds
 if (CISST_BUILD_SAW)

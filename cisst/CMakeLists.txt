@@ -139,6 +139,14 @@ if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
+# Determine if size_t is a native type
+include (CheckSizeTNativeType)
+check_size_t_native_type (CISST_SIZE_T_NATIVE)
+if (CISST_SIZE_T_NATIVE)
+  add_definitions (-DCISST_SIZE_T_NATIVE)
+endif (CISST_SIZE_T_NATIVE)
+
+
 # Path of all CISST shared libraries.
 link_directories (${LIBRARY_OUTPUT_PATH})
 
@@ -153,12 +161,6 @@ endif (UNIX)
 set (CISST_INCLUDE_DIR
      ${cisstLibs_BINARY_DIR}/include
      ${cisstLibs_SOURCE_DIR})
-if (CISST_BUILD_COMPONENTS)
-  set (CISST_INCLUDE_DIR ${CISST_INCLUDE_DIR}
-                         ${cisst_BINARY_DIR}/components
-                         ${cisst_SOURCE_DIR}/components)
-endif (CISST_BUILD_COMPONENTS)
-
 include_directories (${CISST_INCLUDE_DIR})
 
 # Build test driver if needed
@@ -214,25 +216,25 @@ set (CISST_LIBS_WITH_FLTK
 
 # Build by default
 foreach (lib ${CISST_LIBRARIES_DEFAULT})
-  option (CISST_BUILD_${lib} "Build ${lib}." ON)
+  option (CISST_${lib} "Build ${lib}." ON)
 endforeach (lib)
 
 foreach (lib ${CISST_LIBRARIES_OPTIONAL})
-  option (CISST_BUILD_${lib} "Build ${lib}." OFF)
+  option (CISST_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 
 # If OS abstraction is compiled, require dynamic loading libraries
-if (CISST_BUILD_cisstOSAbstraction OR CISST_BUILD_cisstInteractive)
+if (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
   if (CMAKE_DL_LIBS)
     cisst_set_package_settings (cisstOSAbstraction DL LIBRARIES CMAKE_DL_LIBS)
     cisst_set_package_settings (cisstInteractive DL LIBRARIES CMAKE_DL_LIBS)
   endif (CMAKE_DL_LIBS)
-endif (CISST_BUILD_cisstOSAbstraction OR CISST_BUILD_cisstInteractive)
+endif (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
 
 # If cisstInteractive in turned on, also force SWIG for Python and shared libraries
-if (CISST_BUILD_cisstInteractive)
+if (CISST_cisstInteractive)
   set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
-endif (CISST_BUILD_cisstInteractive)
+endif (CISST_cisstInteractive)
 if (CISST_HAS_SWIG_PYTHON)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (CISST_HAS_SWIG_PYTHON)
@@ -240,16 +242,16 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 # List of libraries to be built
 foreach (lib ${CISST_LIBS})
-  if (CISST_BUILD_${lib})
+  if (CISST_${lib})
     set (CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
     # Add libraries with Qt
     if (CISST_HAS_QT)
       list (FIND CISST_LIBS_WITH_QT ${lib} ${lib}_HAS_QT)
       if (${${lib}_HAS_QT} GREATER -1)
         set (CISST_LIBRARIES ${lib}Qt ${CISST_LIBRARIES})
-        set (CISST_BUILD_${lib}Qt ON)
+        set (CISST_${lib}Qt ON)
       else (${${lib}_HAS_QT} GREATER -1)
-        set (CISST_BUILD_${lib}Qt OFF)
+        set (CISST_${lib}Qt OFF)
       endif (${${lib}_HAS_QT} GREATER -1)
     endif (CISST_HAS_QT)
     # Add libraries with FLTK
@@ -257,21 +259,21 @@ foreach (lib ${CISST_LIBS})
       list (FIND CISST_LIBS_WITH_FLTK ${lib} ${lib}_HAS_FLTK)
       if (${${lib}_HAS_FLTK} GREATER -1)
         set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
-        set (CISST_BUILD_${lib}FLTK ON)
+        set (CISST_${lib}FLTK ON)
       else (${${lib}_HAS_FLTK} GREATER -1)
-        set (CISST_BUILD_${lib}FLTK OFF)
+        set (CISST_${lib}FLTK OFF)
       endif (${${lib}_HAS_FLTK} GREATER -1)
     endif (CISST_HAS_FLTK)
-  endif (CISST_BUILD_${lib})
+  endif (CISST_${lib})
 endforeach (lib)
 
 # Add cisstCommonXML if needed
-if (CISST_BUILD_cisstCommonXML)
+if (CISST_cisstCommonXML)
   set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
-endif (CISST_BUILD_cisstCommonXML)
+endif (CISST_cisstCommonXML)
 
 # create equivalent for cisstInteractive
-set (CISST_HAS_IRE ${CISST_BUILD_cisstInteractive})
+set (CISST_HAS_IRE ${CISST_cisstInteractive})
 
 # Create list of general settings, i.e. cisstPython, cisstQt, cisstFLTK, cisstOpenGL, ...
 set (CISST_SETTINGS "")
@@ -298,9 +300,9 @@ cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
 
 # Build all libraries
 foreach (lib ${CISST_LIBS})
-  if (CISST_BUILD_${lib})
+  if (CISST_${lib})
     add_subdirectory (${lib})
-  endif (CISST_BUILD_${lib})
+  endif (CISST_${lib})
 endforeach (lib)
 
 # Create misc. config files
@@ -324,11 +326,11 @@ set(CPACK_PACKAGE_NAME "cisst")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
 # For now, enable all default libraries (even if not compiled)
 set(CPACK_COMPONENTS_ALL ${CISST_LIBRARIES_DEFAULT})
-if (CISST_BUILD_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is activated
+if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is activated
   if (${CISST_XML_LIB} STREQUAL "LibXml2")
     set (CPACK_COMPONENTS_ALL ${CPACK_COMPONENTS_ALL} cisstCommonXML)
   endif (${CISST_XML_LIB} STREQUAL "LibXml2")
-endif (CISST_BUILD_cisstCommonXML)
+endif (CISST_cisstCommonXML)
 set(CPACK_PACKAGE_VENDOR "JHU")
 set(CPACK_PACKAGE_VERSION ${CISST_VERSION})
 set(CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})

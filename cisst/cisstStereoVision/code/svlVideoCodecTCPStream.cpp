@@ -85,10 +85,10 @@ http://www.cisst.org/cisst/license.txt.
     #define __EAGAIN        EAGAIN
 #endif
 
-//#define _NET_VERBOSE_
+#define _NET_VERBOSE_
 
 #define MAX_CLIENTS         5
-#define PACKET_SIZE         10240u
+#define PACKET_SIZE         1300u
 #define BROKEN_FRAME        1
 
 
@@ -113,6 +113,8 @@ svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     Writing(false),
     Timestamp(-1.0),
     PacketData(0),
+    PacketDataAccumulator(0),
+    AccumulatedSize(0),
     yuvBuffer(0),
     yuvBufferSize(0),
     comprBuffer(0),
@@ -136,7 +138,8 @@ svlVideoCodecTCPStream::svlVideoCodecTCPStream() :
     SendBuffer.SetAll(0);
 
     SockAddr = new char[sizeof(sockaddr_in)];
-    PacketData = new char[PACKET_SIZE];
+    PacketData = new char[PACKET_SIZE * 2];
+    PacketDataAccumulator = new char[PACKET_SIZE * 2];
 
     ProcInfoSingleThread.count = 1;
     ProcInfoSingleThread.ID    = 0;
@@ -153,6 +156,7 @@ svlVideoCodecTCPStream::~svlVideoCodecTCPStream()
     if (comprBuffer && comprBufferSize) delete [] comprBuffer;
     if (SockAddr) delete [] SockAddr;
     if (PacketData) delete [] PacketData;
+    if (PacketDataAccumulator) delete [] PacketDataAccumulator;
 }
 
 int svlVideoCodecTCPStream::Open(const std::string &filename, unsigned int &width, unsigned int &height, double &framerate)
@@ -176,6 +180,7 @@ int svlVideoCodecTCPStream::Open(const std::string &filename, unsigned int &widt
         delete [] yuvBuffer;
         yuvBuffer = 0;
         yuvBufferSize = 0;
+        AccumulatedSize = 0;
 
         // Start data receiving thread
         ReceiveInitialized = false;
@@ -507,7 +512,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
             if (!strmbuf || !used) break;
 
             // file start marker
-            strmoffset = FrameStartMarker.length();
+            strmoffset = static_cast<unsigned int>(FrameStartMarker.length());
 
             // frame data size after file start marker
             strmoffset += sizeof(unsigned int);
@@ -562,7 +567,7 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
 
     unsigned int size, start, end;
     unsigned char *img = image.GetUCharPointer(videoch);
-    partcount = ComprPartOffset.size();
+    partcount = static_cast<unsigned int>(ComprPartOffset.size());
     ret = SVL_OK;
 
     _ParallelLoop(procInfo, i, partcount)
@@ -582,7 +587,11 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
                 longsize = (end - start) * Width * 2;
 
                 // Decompress frame part
-                if (uncompress(yuvBuffer + offset, &longsize, comprBuffer + ComprPartOffset[i], ComprPartSize[i]) != Z_OK) break;
+                if (uncompress(yuvBuffer + offset, &longsize, comprBuffer + ComprPartOffset[i], ComprPartSize[i]) != Z_OK) {
+                    std::cerr << "svlVideoCodecTCPStream::Read - error in CVI uncompress (part #" << i << ")" << std::endl;
+                    ret = SVL_VID_RETRY;
+                    break;
+                }
 
                 // Convert YUV422 planar to RGB format
                 svlConverter::YUV422PtoRGB24(yuvBuffer + offset, img + offset * 3 / 2, longsize >> 1);
@@ -593,7 +602,11 @@ int svlVideoCodecTCPStream::Read(svlProcInfo* procInfo, svlSampleImage &image, c
                 svlSampleImage *subimage = const_cast<svlSampleImage&>(image).GetSubImage(start, end - start, videoch);
 
                 // Decompress buffer into sub-image
-                if (svlImageIO::Read(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[i], ComprPartSize[i], true) != SVL_OK) break;
+                if (svlImageIO::Read(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[i], ComprPartSize[i], true) != SVL_OK) {
+                    std::cerr << "svlVideoCodecTCPStream::Read - error in JPEG uncompress (part #" << i << ")" << std::endl;
+                    ret = SVL_VID_RETRY;
+                    break;
+                }
 
                 // Delete sub-image reference
                 delete subimage;
@@ -670,7 +683,7 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
             // Compress sub-image into buffer
             size_t csize = size * 2;
             svlImageIO::Write(subimage[0], 0, "jpg", comprBuffer + ComprPartOffset[procid], csize, compr);
-            comprsize = csize;
+            comprsize = static_cast<unsigned int>(csize);
 
             // Delete sub-image reference
             delete subimage;
@@ -698,7 +711,7 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
 
         // Add "frame start marker"
         memcpy(strmbuf, FrameStartMarker.c_str(), FrameStartMarker.length());
-        used = FrameStartMarker.length();
+        used = static_cast<unsigned int>(FrameStartMarker.length());
 
         // Add "data size after frame start marker"
         size = sizeof(unsigned int) * (4 + proccount) + sizeof(double);
@@ -848,7 +861,7 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
 #endif
 #endif
 
-        ServerSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        ServerSocket = static_cast<int>(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
         if (ServerSocket < 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecTCPStream::ServerProc - cannot create socket" << std::endl;
@@ -952,7 +965,7 @@ void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
             std::cerr << "svlVideoCodecTCPStream::ServerProc - incoming connection..." << std::endl;
 #endif
 
-            connection = accept(ServerSocket, 0, 0);
+            connection = static_cast<int>(accept(ServerSocket, 0, 0));
             if (connection < 0) {
 #ifdef _NET_VERBOSE_
                 std::cerr << "svlVideoCodecTCPStream::ServerProc - accept failed" << std::endl;
@@ -1110,7 +1123,7 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
 #endif
 #endif
 
-        ReceiveSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        ReceiveSocket = static_cast<unsigned int>(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP));
         if (ReceiveSocket < 0) {
 #ifdef _NET_VERBOSE_
             std::cerr << "svlVideoCodecTCPStream::ReceiveProc - cannot create socket" << std::endl;
@@ -1226,15 +1239,20 @@ void* svlVideoCodecTCPStream::ReceiveProc(int CMN_UNUSED(param))
 int svlVideoCodecTCPStream::Receive()
 {
     const unsigned char* fsm = reinterpret_cast<const unsigned char*>(FrameStartMarker.c_str());
-    const unsigned int fsm_len = FrameStartMarker.length();
+    const unsigned int fsm_len = static_cast<unsigned int>(FrameStartMarker.length());
     unsigned char* buffer = reinterpret_cast<unsigned char*>(PacketData);
     unsigned int size = PACKET_SIZE;
     unsigned int framesize = 0;
-    bool framestart = false;
+    unsigned int leftover_chunk_size = 0;
     bool started = false;
+    int framestart = -1;
     fd_set mask;
     int ret;
 
+    if (AccumulatedSize > 0) {
+        // If any data is left over from the previous frame
+        memcpy(buffer, PacketDataAccumulator, AccumulatedSize);
+    }
 
     while (1) {
 
@@ -1258,7 +1276,7 @@ int svlVideoCodecTCPStream::Receive()
         }
 
         ret = recv(ReceiveSocket,
-                   reinterpret_cast<char*>(buffer),
+                   reinterpret_cast<char*>(buffer + AccumulatedSize),
                    std::min(size, PACKET_SIZE),
                    0);
 
@@ -1269,23 +1287,53 @@ int svlVideoCodecTCPStream::Receive()
             break;
         }
         else if (ret > 0) {
-            // Check if it starts with a "frame start marker"
-            framestart = CompareData(buffer, fsm, fsm_len);
+            if (AccumulatedSize > 0) {
+                ret += AccumulatedSize;
+                AccumulatedSize = 0;
+            }
 
-            if (!framestart) {
+            if (leftover_chunk_size > 0) {
+                ret += leftover_chunk_size;
+                buffer -= leftover_chunk_size;
+                leftover_chunk_size = 0;
+            }
+
+            // Find "frame start marker"
+            framestart = FindFrameHeader(buffer, fsm, fsm_len);
+
+            if (framestart < 0) {
                 if (!started) {
-                    // Looking for "frame start marker"
+#ifdef _NET_VERBOSE_
+                    std::cerr << "svlVideoCodecTCPStream::Receive - looking for frame start marker" << std::endl;
+#endif
                     continue;
                 }
             }
             else {
                 if (started) {
+                    AccumulatedSize = ret - framestart;
+                    memcpy(PacketDataAccumulator, buffer + framestart, AccumulatedSize);
+                    ret = framestart;
+
+                    if (size > static_cast<unsigned int>(framestart)) {
 #ifdef _NET_VERBOSE_
-                    std::cerr << "svlVideoCodecTCPStream::Receive - broken frame" << std::endl;
+                        std::cerr << "svlVideoCodecTCPStream::Receive - broken frame" << std::endl;
 #endif
-                    return BROKEN_FRAME;
+                        return BROKEN_FRAME;
+                    }
                 }
                 else {
+                    ret -= framestart;
+                    buffer += framestart;
+
+                    if (ret < (fsm_len + sizeof(unsigned int) * 3)) {
+                        // Frame start marker found on packet boundary
+                        // Receive one more packet to get the whole header
+                        leftover_chunk_size = ret;
+                        buffer += ret;
+                        continue;
+                    }
+
                     // Extract dimensions from header
                     int offset = fsm_len + sizeof(unsigned int);
                     const unsigned int w = reinterpret_cast<unsigned int*>(buffer + offset)[0];
@@ -1311,8 +1359,9 @@ int svlVideoCodecTCPStream::Receive()
                         ReceiveBuffer = new svlBufferMemory(size);
                     }
 
-                    buffer = ReceiveBuffer->GetPushBuffer();
-                    memcpy(buffer, PacketData, ret);
+                    unsigned char* tbuf = ReceiveBuffer->GetPushBuffer();
+                    memcpy(tbuf, buffer, ret);
+                    buffer = tbuf;
 
                     Width = w;
                     Height = h;
@@ -1370,6 +1419,22 @@ int svlVideoCodecTCPStream::Receive()
     }
 
     return SVL_FAIL;
+}
+
+int svlVideoCodecTCPStream::FindFrameHeader(unsigned char* data1, const unsigned char* data2, unsigned int size)
+{
+    const unsigned int maxpos = PACKET_SIZE - size;
+    unsigned int outpos, inpos;
+
+    for (outpos = 0; outpos < maxpos; outpos ++) {
+        for (inpos = 0; inpos < size; inpos ++) {
+            if (data1[inpos] != data2[inpos]) break;
+        }
+        if (inpos == size) return outpos;
+        data1 ++;
+    }
+
+    return -1;
 }
 
 bool svlVideoCodecTCPStream::CompareData(const unsigned char* data1, const unsigned char* data2, unsigned int size)

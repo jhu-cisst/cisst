@@ -394,7 +394,7 @@ int svlStreamManager::Play(void)
 
     for (i = 0; i < ThreadCount; i ++) {
         // Starting multi thread processing
-        StreamProcInstance[i] = new svlStreamProc(ThreadCount, i);
+        StreamProcInstance[i] = new svlStreamProc(ThreadCount, static_cast<unsigned int>(i));
         StreamProcThread[i] = new osaThread;
         StreamProcThread[i]->Create<svlStreamProc, svlStreamManager*>(StreamProcInstance[i], &svlStreamProc::Proc, this);
     }

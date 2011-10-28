@@ -107,7 +107,7 @@ const unsigned char* svlSampleTransform3D::GetUCharPointer() const
 
 unsigned int svlSampleTransform3D::GetDataSize() const
 {
-    return (Matrix.size() * sizeof(double));
+    return static_cast<unsigned int>(Matrix.size() * sizeof(double));
 }
 
 void svlSampleTransform3D::SerializeRaw(std::ostream & outputStream) const

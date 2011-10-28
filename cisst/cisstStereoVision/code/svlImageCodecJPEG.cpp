@@ -23,7 +23,18 @@ http://www.cisst.org/cisst/license.txt.
 #include "svlImageCodecJPEG.h"
 #include <cisstStereoVision/svlTypes.h>
 #include <setjmp.h>
-#include "jpeglib.h"
+
+#if defined(_MSC_VER) && defined(_WIN64)
+    // Balazs: seems to be needed on Visual Studio 2008 x64
+    #undef FAR
+    #ifndef XMD_H
+        #define XMD_H
+        #include "jpeglib.h"
+        #undef XMD_H
+    #endif // XMD_H
+#else // _MSC_VER && _WIN64
+    #include "jpeglib.h"
+#endif // _MSC_VER && _WIN64
 
 #define __JPEG_ERROR_VERBOSE__
 

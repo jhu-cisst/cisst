@@ -29,6 +29,17 @@ SET(DIRECTSHOW_FOUND "NO")
 
 # DirectShow is only available on Windows platforms
 IF(WIN32)
+    SET(SVL_WIN64 FALSE)
+    IF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64"     OR
+       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64"     OR
+       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005 Win64" OR
+       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008 Win64")
+       SET(SVL_WIN64 TRUE)
+    ENDIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64"     OR
+          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64"     OR
+          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005 Win64" OR
+          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008 Win64")
+
     SET(PROGRAMFILES_DIR "$ENV{SystemDrive}/Program Files")
     SET(PROGRAMFILES_X86_DIR "$ENV{SystemDrive}/Program Files (x86)")
 
@@ -46,19 +57,36 @@ IF(WIN32)
         "$ENV{SystemDrive}/DXSDK/Include"
         )
 
-    SET(DIRECTSHOW_LIBRARY_DIRS
-       "${PROGRAMFILES_DIR}/Microsoft SDKs/Windows/v7.0/Lib"
-       "${PROGRAMFILES_DIR}/Microsoft SDKs/Windows/v6.0A/Lib"
-       "${PROGRAMFILES_DIR}/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
-       "${PROGRAMFILES_DIR}/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
-       "${PROGRAMFILES_DIR}/Microsoft Platform SDK/Lib"
-       "${PROGRAMFILES_X86_DIR}/Microsoft SDKs/Windows/v7.0/Lib"
-       "${PROGRAMFILES_X86_DIR}/Microsoft SDKs/Windows/v6.0A/Lib"
-       "${PROGRAMFILES_X86_DIR}/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
-       "${PROGRAMFILES_X86_DIR}/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
-       "${PROGRAMFILES_X86_DIR}/Microsoft Platform SDK/Lib"
-       "$ENV{SystemDrive}/DXSDK/Include/Lib"
-       )
+    IF(SVL_WIN64)
+       MESSAGE(STATUS "DirectShow using 64-bit static libraries")
+       SET(DIRECTSHOW_LIBRARY_DIRS
+           "${PROGRAMFILES_DIR}/Microsoft SDKs/Windows/v7.0/Lib/x64"
+           "${PROGRAMFILES_DIR}/Microsoft SDKs/Windows/v6.0A/Lib/x64"
+           "${PROGRAMFILES_DIR}/Microsoft Platform SDK for Windows Server 2003 R2/Lib/x64"
+           "${PROGRAMFILES_DIR}/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib/x64"
+           "${PROGRAMFILES_DIR}/Microsoft Platform SDK/Lib/x64"
+           "${PROGRAMFILES_X86_DIR}/Microsoft SDKs/Windows/v7.0/Lib/x64"
+           "${PROGRAMFILES_X86_DIR}/Microsoft SDKs/Windows/v6.0A/Lib/x64"
+           "${PROGRAMFILES_X86_DIR}/Microsoft Platform SDK for Windows Server 2003 R2/Lib/x64"
+           "${PROGRAMFILES_X86_DIR}/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib/x64"
+           "${PROGRAMFILES_X86_DIR}/Microsoft Platform SDK/Lib/x64"
+           "$ENV{SystemDrive}/DXSDK/Include/Lib/x64"
+           )
+    ELSE(SVL_WIN64)
+       SET(DIRECTSHOW_LIBRARY_DIRS
+           "${PROGRAMFILES_DIR}/Microsoft SDKs/Windows/v7.0/Lib"
+           "${PROGRAMFILES_DIR}/Microsoft SDKs/Windows/v6.0A/Lib"
+           "${PROGRAMFILES_DIR}/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
+           "${PROGRAMFILES_DIR}/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
+           "${PROGRAMFILES_DIR}/Microsoft Platform SDK/Lib"
+           "${PROGRAMFILES_X86_DIR}/Microsoft SDKs/Windows/v7.0/Lib"
+           "${PROGRAMFILES_X86_DIR}/Microsoft SDKs/Windows/v6.0A/Lib"
+           "${PROGRAMFILES_X86_DIR}/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
+           "${PROGRAMFILES_X86_DIR}/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
+           "${PROGRAMFILES_X86_DIR}/Microsoft Platform SDK/Lib"
+           "$ENV{SystemDrive}/DXSDK/Include/Lib"
+           )
+    ENDIF(SVL_WIN64)
 
     # Find DirectX Include Directory
     FIND_PATH(DIRECTX_INCLUDE_DIR

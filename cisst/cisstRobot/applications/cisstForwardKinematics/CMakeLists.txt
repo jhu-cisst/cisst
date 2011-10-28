@@ -12,9 +12,14 @@
 #
 # --- end cisst license ---
 
-# All cisstRobot applications
-project (cisstRobotApplications)
+set (REQUIRED_CISST_LIBRARIES
+    cisstCommon
+    cisstVector
+    cisstOSAbstraction
+    cisstRobot
+    cisstNumerical)
 
-cisst_offer_application (cisstRobot RandomJoints ON)
-cisst_offer_application (cisstRobot ForwardKinematics ON)
-cisst_offer_application (cisstRobot KinematicsIdentification ON)
+cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
+
+add_executable (cisstForwardKinematics ForwardKinematics.cpp)
+cisst_target_link_libraries (cisstForwardKinematics ${REQUIRED_CISST_LIBRARIES})

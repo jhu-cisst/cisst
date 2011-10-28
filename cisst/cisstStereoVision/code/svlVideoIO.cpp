@@ -78,10 +78,10 @@ svlVideoIO* svlVideoIO::GetInstance()
 
 svlVideoIO::~svlVideoIO()
 {
-    const unsigned int size = CodecCache.size();
+    const unsigned int size = static_cast<unsigned int>(CodecCache.size());
     unsigned int i, j, cachesize;
     for (i = 0; i < size; i ++) {
-        cachesize = CodecCache[i].size();
+        cachesize = static_cast<unsigned int>(CodecCache[i].size());
         for (j = 0; j < cachesize; j ++) {
             delete CodecCache[i][j];
         }
@@ -229,7 +229,7 @@ int svlVideoIO::GetFormatList(std::string &formatlist)
 {
     svlVideoIO* instance = GetInstance();
 
-    const unsigned int codeccount = instance->Names.size();
+    const unsigned int codeccount = static_cast<unsigned int>(instance->Names.size());
     if (codeccount < 1) return SVL_FAIL;
 
     char ext[128];
@@ -264,7 +264,7 @@ int svlVideoIO::GetWindowsExtensionFilter(std::string &filter)
 {
     svlVideoIO* instance = GetInstance();
 
-    const unsigned int codeccount = instance->Names.size();
+    const unsigned int codeccount = static_cast<unsigned int>(instance->Names.size());
     if (codeccount < 1) return SVL_FAIL;
 
     char ext[128], zero = 0;
@@ -346,7 +346,7 @@ int svlVideoIO::GetExtension(const std::string &filename, std::string &extension
     // Convert upper-case characters to lower-case
     char ch;
     const int offset = 'a' - 'A';
-    const unsigned int len = extension.size();
+    const unsigned int len = static_cast<unsigned int>(extension.size());
     if (len == 0) return SVL_FAIL;
 
     for (unsigned int i = 0; i < len; i ++) {
@@ -373,7 +373,7 @@ svlVideoCodecBase* svlVideoIO::GetCodec(const std::string &filename)
     extension.append(";");
 
     svlVideoIO* instance = GetInstance();
-    const unsigned int size = instance->Codecs.size();
+    const unsigned int size = static_cast<unsigned int>(instance->Codecs.size());
     unsigned int i;
     int j, cachesize, cacheitem;
 
@@ -432,10 +432,10 @@ void svlVideoIO::ReleaseCodec(svlVideoCodecBase* codec)
     // Enter critical section
     instance->CS.Enter();
 
-    const unsigned int size = instance->CodecCache.size();
+    const unsigned int size = static_cast<unsigned int>(instance->CodecCache.size());
     unsigned int i, j, cachesize;
     for (i = 0; i < size; i ++) {
-        cachesize = instance->CodecCache[i].size();
+        cachesize = static_cast<unsigned int>(instance->CodecCache[i].size());
         for (j = 0; j < cachesize; j ++) {
             if (codec == instance->CodecCache[i][j]) {
                 codec->Close();

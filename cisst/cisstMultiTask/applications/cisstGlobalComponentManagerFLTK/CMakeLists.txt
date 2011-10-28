@@ -47,7 +47,7 @@ if (cisst_FOUND_AS_REQUIRED)
   # link with the cisst libraries
   cisst_target_link_libraries (cisstGlobalComponentManagerFLTK ${REQUIRED_CISST_LIBRARIES})
 
-#   if (CISST_BUILD_cisstParameterTypes)
+#   if (CISST_cisstParameterTypes)
 #     # set all libraries needed
 #     set (CISST_LIBRARIES_NEEDED ${CISST_LIBRARIES_NEEDED} cisstParameterTypes)
 
@@ -65,7 +65,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
 #     # link with the cisst libraries
 #     cisst_target_link_libraries (TestSignalGenerator ${CISST_LIBRARIES_NEEDED})
-#   endif (CISST_BUILD_cisstParameterTypes)
+#   endif (CISST_cisstParameterTypes)
 
 else (cisst_FOUND_AS_REQUIRED)
   cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})

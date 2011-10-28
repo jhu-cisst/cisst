@@ -428,19 +428,19 @@ public:
 
     unsigned int GetWidth(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels) return (Image[videochannel].width() / _DataChannels);
+        if (videochannel < _VideoChannels) return static_cast<unsigned int>(Image[videochannel].width() / _DataChannels);
         return 0;
     }
 
     unsigned int GetHeight(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels) return Image[videochannel].height();
+        if (videochannel < _VideoChannels) return static_cast<unsigned int>(Image[videochannel].height());
         return 0;
     }
 
     unsigned int GetRowStride(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels) return Image[videochannel].width();
+        if (videochannel < _VideoChannels) return static_cast<unsigned int>(Image[videochannel].width());
         return 0;
     }
 

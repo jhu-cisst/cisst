@@ -311,7 +311,7 @@ int svlVideoCodecCVI::Create(const std::string &filename, const unsigned int wid
         }
 
         // Write "file start marker" (always writes the latest version)
-        Version = FileStartMarker.size() - 1;
+        Version = static_cast<int>(FileStartMarker.size()) - 1;
         len = FileStartMarker[Version].length();
         if (File.Write(FileStartMarker[Version].c_str(), len) != len) {
             CMN_LOG_CLASS_INIT_ERROR << "Create: failed to write `file start marker`" << std::endl;
@@ -600,7 +600,7 @@ int svlVideoCodecCVI::GetPosAtTime(const double time) const
     if (Opened && !Writing && Version > 1) {
 
         int begpos     = 0;
-        int endpos     = FrameTimestamps.size() - 1;
+        int endpos     = static_cast<int>(FrameTimestamps.size()) - 1;
         double begtime = FrameTimestamps[begpos];
         double endtime = FrameTimestamps[endpos];
         int halfpos;
@@ -1053,7 +1053,7 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 
         // Add "frame start marker"
         memcpy(saveBuffer[savebufferid], FrameStartMarker.c_str(), FrameStartMarker.length());
-        SaveBufferUsedSize = FrameStartMarker.length();
+        SaveBufferUsedSize = static_cast<unsigned int>(FrameStartMarker.length());
 
         // Add "timestamp"
         memcpy(saveBuffer[savebufferid] + SaveBufferUsedSize, &timestamp, sizeof(double));

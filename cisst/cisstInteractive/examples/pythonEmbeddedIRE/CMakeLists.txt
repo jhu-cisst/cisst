@@ -26,10 +26,10 @@ if (cisst_FOUND_AS_REQUIRED)
   cisst_target_link_libraries (SineGenerator ${REQUIRED_CISST_LIBRARIES})
 
   # If OS Abstraction is compiled, offer a choice
-  # if (CISST_BUILD_cisstOSAbstraction)
+  # if (CISST_cisstOSAbstraction)
   #  option (EXAMPLE_IRE_USE_OSATHREAD "Use osaThread in pythonEmbeddedIRE example." OFF)
   #  mark_as_advanced (EXAMPLE_IRE_USE_OSATHREAD)
-  #endif (CISST_BUILD_cisstOSAbstraction)
+  #endif (CISST_cisstOSAbstraction)
 
   # Allow generated c++ code to find header files
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})

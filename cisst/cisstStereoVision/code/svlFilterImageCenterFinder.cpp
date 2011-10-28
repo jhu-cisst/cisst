@@ -133,7 +133,7 @@ void svlFilterImageCenterFinder::AddReceiver(svlFilterImageCenterFinderInterface
 {
     if (!receiver) return;
 
-    unsigned int size = Receivers.size();
+    unsigned int size = static_cast<unsigned int>(Receivers.size());
     Receivers.resize(size + 1);
     Receivers[size] = receiver;
 }

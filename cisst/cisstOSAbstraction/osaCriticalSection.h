@@ -40,7 +40,7 @@ class CISST_EXPORT osaCriticalSection
 
 #if (CISST_OS == CISST_WINDOWS)
     // for Windows only, hide critical section handle in internals
-    enum {INTERNALS_SIZE = 32};
+    enum {INTERNALS_SIZE = 64};
     char Internals[INTERNALS_SIZE];
 #endif
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)

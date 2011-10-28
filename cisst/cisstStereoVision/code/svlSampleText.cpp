@@ -113,7 +113,7 @@ const unsigned char* svlSampleText::GetUCharPointer() const
 
 unsigned int svlSampleText::GetDataSize() const
 {
-    return String.size();
+    return static_cast<unsigned int>(String.size());
 }
 
 void svlSampleText::SerializeRaw(std::ostream & outputStream) const
@@ -174,11 +174,11 @@ const char* svlSampleText::GetCharPointer() const
 
 unsigned int svlSampleText::GetSize() const
 {
-    return String.size();
+    return static_cast<unsigned int>(String.size());
 }
 
 unsigned int svlSampleText::GetLength() const
 {
-    return String.size();
+    return static_cast<unsigned int>(String.size());
 }
 

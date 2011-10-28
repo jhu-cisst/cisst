@@ -43,7 +43,7 @@ svlBufferMemory::svlBufferMemory(unsigned int size) :
 
 unsigned int svlBufferMemory::GetMaxSize()
 {
-    return Buffer.cols();
+    return static_cast<unsigned int>(Buffer.cols());
 }
 
 unsigned char* svlBufferMemory::GetPushBuffer()

@@ -112,7 +112,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
     try {
         fin.open(filepath.c_str());
         memset(chstr, 0, 2048);
-        pos = fin.read(chstr, 2047).gcount();
+        pos = static_cast<int>(fin.read(chstr, 2047).gcount());
     } catch (std::ifstream::failure e) {
     }
     fin.close();
@@ -127,7 +127,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         // LEFT CAMERA INTRINSIC
 
         // left focal length
-        pos = str.find("fc_left = [ ");
+        pos = static_cast<int>(str.find("fc_left = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 12);
             strstrm >> fc[0] >> fc[1];
@@ -135,7 +135,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // left principal point
-        pos = str.find("cc_left = [ ");
+        pos = static_cast<int>(str.find("cc_left = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 12);
             strstrm >> cc[0] >> cc[1];
@@ -143,7 +143,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // left skew
-        pos = str.find("alpha_c_left = [ ");
+        pos = static_cast<int>(str.find("alpha_c_left = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 17);
             strstrm >> a;
@@ -151,7 +151,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // left radial distortion
-        pos = str.find("kc_left = [ ");
+        pos = static_cast<int>(str.find("kc_left = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 12);
             strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
@@ -164,7 +164,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         // RIGHT CAMERA INTRINSIC
 
         // right focal length
-        pos = str.find("fc_right = [ ");
+        pos = static_cast<int>(str.find("fc_right = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 13);
             strstrm >> fc[0] >> fc[1];
@@ -172,7 +172,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // right principal point
-        pos = str.find("cc_right = [ ");
+        pos = static_cast<int>(str.find("cc_right = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 13);
             strstrm >> cc[0] >> cc[1];
@@ -180,7 +180,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // right skew
-        pos = str.find("alpha_c_right = [ ");
+        pos = static_cast<int>(str.find("alpha_c_right = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 18);
             strstrm >> a;
@@ -188,7 +188,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // right radial distortion
-        pos = str.find("kc_right = [ ");
+        pos = static_cast<int>(str.find("kc_right = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 13);
             strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
@@ -204,7 +204,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         SetExtrinsics(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, SVL_LEFT);
 
         // rotation between cameras
-        pos = str.find(" om = [ ");
+        pos = static_cast<int>(str.find(" om = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 8);
             strstrm >> om[0] >> om[1] >> om[2];
@@ -212,7 +212,7 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         else success = SVL_FAIL;
 
         // translation between cameras
-        pos = str.find(" T = [ ");
+        pos = static_cast<int>(str.find(" T = [ "));
         if (pos >= 0) {
             strstrm.seekg(pos + 7);
             strstrm >> T[0] >> T[1] >> T[2];
@@ -401,7 +401,7 @@ int svlCameraGeometry::IsCameraPairRectified(const unsigned int cam_id1, const u
 int svlCameraGeometry::SetWorldToCenter()
 {
     unsigned int i;
-    const unsigned int camcount = ExtrinsicParams.size();
+    const unsigned int camcount = static_cast<unsigned int>(ExtrinsicParams.size());
     if (camcount == 0) return SVL_FAIL;
     if (camcount == 1) return SVL_OK;
 
@@ -439,7 +439,7 @@ int svlCameraGeometry::SetWorldToCenter()
 
 int svlCameraGeometry::RotateWorldAboutY(double degrees)
 {
-    const unsigned int camcount = ExtrinsicParams.size();
+    const unsigned int camcount = static_cast<unsigned int>(ExtrinsicParams.size());
     if (camcount == 0) return SVL_FAIL;
 
     // Create axis-angle rotation
@@ -465,7 +465,7 @@ int svlCameraGeometry::RotateWorldAboutY(double degrees)
 
 int svlCameraGeometry::RotateWorldAboutZ(double degrees)
 {
-    const unsigned int camcount = ExtrinsicParams.size();
+    const unsigned int camcount = static_cast<unsigned int>(ExtrinsicParams.size());
     if (camcount == 0) return SVL_FAIL;
 
     // Create axis-angle rotation

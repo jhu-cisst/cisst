@@ -61,17 +61,17 @@ svlBufferImage::~svlBufferImage()
 
 unsigned int svlBufferImage::GetWidth()
 {
-    return (Buffer[0].width() / 3);
+    return static_cast<unsigned int>(Buffer[0].width() / 3);
 }
 
 unsigned int svlBufferImage::GetHeight()
 {
-    return Buffer[0].height();
+    return static_cast<unsigned int>(Buffer[0].height());
 }
 
 unsigned int svlBufferImage::GetDataSize()
 {
-    return (Buffer[0].width() * Buffer[0].height());
+    return static_cast<unsigned int>(Buffer[0].width() * Buffer[0].height());
 }
 
 unsigned char* svlBufferImage::GetPushBuffer()
@@ -105,7 +105,7 @@ void svlBufferImage::Push()
 
 bool svlBufferImage::Push(const unsigned char* buffer, unsigned int size, bool topdown)
 {
-    unsigned int datasize = Buffer[0].width() * Buffer[0].height();
+    unsigned int datasize = static_cast<unsigned int>(Buffer[0].width() * Buffer[0].height());
     if (buffer == 0 || size < datasize) return false;
 
     bool ret = true;
@@ -232,8 +232,8 @@ bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, const unsigned cha
     if (targetbuffer == 0 ||
         sourcebuffer == 0) return false;
 
-    const unsigned int linesize = Buffer[0].width();
-    const unsigned int height = Buffer[0].height();
+    const unsigned int linesize = static_cast<unsigned int>(Buffer[0].width());
+    const unsigned int height = static_cast<unsigned int>(Buffer[0].height());
     unsigned char *tptr1 = targetbuffer;
     unsigned char *tptr2 = const_cast<unsigned char*>(sourcebuffer) + linesize * (height - 1);
 

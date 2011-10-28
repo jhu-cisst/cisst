@@ -53,7 +53,7 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
 {
     if (!input || !output || kernel.size() < 1) return;
 
-    const int kernel_size = kernel.size();
+    const int kernel_size = static_cast<int>(kernel.size());
     const int kernel_rad = kernel_size / 2;
     const int rowstride = width * 3;
     int sum1, sum2, sum3;
@@ -166,7 +166,7 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
 {
     if (!input || !output || kernel.size() < 1) return;
 
-    const int kernel_size = kernel.size();
+    const int kernel_size = static_cast<int>(kernel.size());
     const int kernel_rad = kernel_size / 2;
     const int rowstride = width * 4;
     int sum1, sum2, sum3, sum4;
@@ -285,7 +285,7 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
 {
     if (!input || !output || kernel.size() < 1) return;
 
-    const int kernel_size = kernel.size();
+    const int kernel_size = static_cast<int>(kernel.size());
     const int kernel_rad = kernel_size / 2;
     unsigned char *input2;
     int *kernelptr;
@@ -384,7 +384,7 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 {
     if (!input || !output || kernel.size() < 1) return;
 
-    const int kernel_size = kernel.size();
+    const int kernel_size = static_cast<int>(kernel.size());
     const int kernel_rad = kernel_size / 2;
     unsigned short *input2;
     int *kernelptr;
@@ -483,7 +483,7 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
 {
     if (!input || !output || kernel.size() < 1) return;
 
-    const int kernel_size = kernel.size();
+    const int kernel_size = static_cast<int>(kernel.size());
     const int kernel_rad = kernel_size / 2;
     unsigned int *input2;
     int *kernelptr;
@@ -582,7 +582,7 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
 {
     if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
 
-    const int kernel_size = kernel.cols();
+    const int kernel_size = static_cast<int>(kernel.cols());
     const int kernel_rad = kernel_size / 2;
     const int rowstride = width * 3;
     const int rowstride_short = rowstride - kernel_size * 3;
@@ -668,7 +668,7 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
 {
     if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
 
-    const int kernel_size = kernel.cols();
+    const int kernel_size = static_cast<int>(kernel.cols());
     const int kernel_rad = kernel_size / 2;
     const int rowstride = width * 4;
     const int rowstride_short = rowstride - kernel_size * 4;
@@ -757,7 +757,7 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
 {
     if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
 
-    const int kernel_size = kernel.cols();
+    const int kernel_size = static_cast<int>(kernel.cols());
     const int kernel_rad = kernel_size / 2;
     const int rowstride_short = width - kernel_size;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
@@ -835,7 +835,7 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 {
     if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
 
-    const int kernel_size = kernel.cols();
+    const int kernel_size = static_cast<int>(kernel.cols());
     const int kernel_rad = kernel_size / 2;
     const int rowstride_short = width - kernel_size;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
@@ -913,7 +913,7 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
 {
     if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
 
-    const int kernel_size = kernel.cols();
+    const int kernel_size = static_cast<int>(kernel.cols());
     const int kernel_rad = kernel_size / 2;
     const int rowstride_short = width - kernel_size;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
@@ -2183,33 +2183,33 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 	if (Width > maxwidth || Height > maxheight) goto labError;
                
 	//this is not efficient 
-	valcnt = ind_new.size();
+	valcnt = static_cast<int>(ind_new.size());
 
-	idxDestSize = ind_new.size();
+	idxDestSize = static_cast<int>(ind_new.size());
     idxDest = new unsigned int[ind_new.size()];
 
-	idxSrc1Size = ind_1.size();
+	idxSrc1Size = static_cast<int>(ind_1.size());
     idxSrc1 = new unsigned int[ind_1.size()];
 
-	idxSrc2Size = ind_2.size();
+	idxSrc2Size = static_cast<int>(ind_2.size());
     idxSrc2 = new unsigned int[ind_2.size()];
 
-	idxSrc3Size = ind_3.size();
+	idxSrc3Size = static_cast<int>(ind_3.size());
     idxSrc3 = new unsigned int[ind_3.size()];
 
-	idxSrc4Size = ind_4.size();
+	idxSrc4Size = static_cast<int>(ind_4.size());
     idxSrc4 = new unsigned int[ind_4.size()];
 
-	blendSrc1Size = a1.size();
+	blendSrc1Size = static_cast<int>(a1.size());
     blendSrc1 = new unsigned char[a1.size()];
 
-	blendSrc2Size = a2.size();
+	blendSrc2Size = static_cast<int>(a2.size());
     blendSrc2 = new unsigned char[a2.size()];
 
-	blendSrc3Size = a3.size();
+	blendSrc3Size = static_cast<int>(a3.size());
     blendSrc3 = new unsigned char[a3.size()];
 
-	blendSrc4Size = a4.size();
+	blendSrc4Size = static_cast<int>(a4.size());
     blendSrc4 = new unsigned char[a4.size()];
 
     for (i = 0; i < valcnt; i ++) {
@@ -2277,9 +2277,9 @@ int svlImageProcessingHelper::RectificationInternals::LoadLine(std::ifstream &fi
 	double negexpTens[] = {1.0, 0.0000000001, 0.00000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.0000000000001, 0.0000000000001};
     double posexp[] = {1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0};
     
-    filepos = file.tellg();
+    filepos = static_cast<unsigned int>(file.tellg());
     file.read(chbuf, bufsize);
-    datalen = file.gcount();
+    datalen = static_cast<unsigned int>(file.gcount());
     file.clear();
     
     if (explen == 3) {

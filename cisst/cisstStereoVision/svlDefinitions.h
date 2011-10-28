@@ -139,6 +139,7 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_ALREADY_PROCESSED                  10
 #define SVL_STOP_REQUEST                       11
 #define SVL_VID_END_REACHED                    11
+#define SVL_VID_RETRY                          12
 
 #define SVL_TYPE_MISMATCH                     -12
 #define SVL_ALREADY_INITIALIZED               -13

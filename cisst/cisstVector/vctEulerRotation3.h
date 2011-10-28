@@ -65,7 +65,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef SWIG
 // helper functions for subtemplated methods of a templated class
 
-#define DECLARE_EULER_CONVERSIONS(ORDER) \
+#define VCT_DECLARE_EULER_CONVERSIONS(ORDER) \
     template <class _matrixType> \
     void \
     vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
@@ -75,8 +75,8 @@ http://www.cisst.org/cisst/license.txt.
     vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
                       vctMatrixRotation3Base<_matrixType> & matrixRot);
 
-DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYZ)
-DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYX)
+VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYZ)
+VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYX)
 #endif
 
 
@@ -326,7 +326,7 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
 #ifndef SWIG
 #ifdef CISST_COMPILER_IS_MSVC
 // declare instances of helper functions
-#define DECLARE_EULER_CONVERSION_TEMPLATES(ORDER) \
+#define VCT_DECLARE_EULER_CONVERSION_TEMPLATES(ORDER) \
     template CISST_EXPORT void \
     vctEulerFromMatrixRotation3(vctEulerRotation3<ORDER> & eulerRot, \
             const vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3, VCT_ROW_MAJOR> > & matrixRot); \
@@ -376,8 +376,8 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
     vctEulerToMatrixRotation3(const vctEulerRotation3<ORDER> & eulerRot, \
             vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRot);
 
-DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYZ)
-DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYX)
+VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYZ)
+VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYX)
 #endif // CISST_COMPILER_IS_MSVC
 #endif // !SWIG
 

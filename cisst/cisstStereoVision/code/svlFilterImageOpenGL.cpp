@@ -97,7 +97,7 @@ void svlFilterImageOpenGL::Render(void)
 
     glPushMatrix();
     glRotatef(-90.0, 0.0, 0.0, 1.0);
-    glTranslatef(-this->Height, 0.0, 0.0);
+    glTranslatef(static_cast<GLfloat>(-this->Height), 0.0, 0.0);
 
     glBegin (GL_QUADS);
     {
@@ -105,13 +105,13 @@ void svlFilterImageOpenGL::Render(void)
         glVertex3f(0.0, 0.0, 0.0);
 
         glTexCoord2f(0.0, 1.0);
-        glVertex3f(this->Height, 0.0, 0.0);
+        glVertex3f(static_cast<GLfloat>(this->Height), 0.0, 0.0);
 
         glTexCoord2f(1.0, 1.0);
-        glVertex3f(this->Height, this->Width, 0.0);
+        glVertex3f(static_cast<GLfloat>(this->Height), static_cast<GLfloat>(this->Width), 0.0);
 
         glTexCoord2f(1.0, 0.0);
-        glVertex3f(0.0, this->Width, 0.0);
+        glVertex3f(0.0, static_cast<GLfloat>(this->Width), 0.0);
     }
     glEnd();
 
