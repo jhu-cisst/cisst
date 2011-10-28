@@ -395,7 +395,11 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        // adeguet1 --------- do not check in ---------- outputStream << " Value: " << this->Data;
+#if (CISST_COMPILER == CISST_CLANG)
+#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
+#else
+        outputStream << " Value: " << this->Data;
+#endif
     }
 
     /*! To stream raw data. */
@@ -406,7 +410,11 @@ public:
             outputStream << delimiter << headerPrefix << "-data";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            // adeguet1 --------- do not check in ---------- outputStream << delimiter << this->Data;
+#if (CISST_COMPILER == CISST_CLANG)
+#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
+#else
+            outputStream << delimiter << this->Data;
+#endif
         }
     }
 };
@@ -498,7 +506,11 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        // adeguet1 --------- do not check in ---------- outputStream << " Value(ref): " << this->rData;
+#if (CISST_COMPILER == CISST_CLANG)
+#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
+#else
+        outputStream << " Value(ref): " << this->rData;
+#endif
     }
 
     /*! To stream raw data. */
@@ -509,7 +521,11 @@ public:
             outputStream << delimiter << headerPrefix << "-data(ref)";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            // adeguet1 --------- do not check in ---------- outputStream << delimiter << this->rData;
+#if (CISST_COMPILER == CISST_CLANG)
+#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
+#else
+            outputStream << delimiter << this->rData;
+#endif
         }
     }
 };
