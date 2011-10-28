@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -84,6 +84,8 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_DOTNET2003 7
 #define CISST_DOTNET2005 8
 #define CISST_DOTNET2008 9
+#define CISST_DOTNET2010 10
+#define CISST_CLANG 11
 //@}
 
 
@@ -144,6 +146,13 @@ http://www.cisst.org/cisst/license.txt.
 #endif // __GNUC__
 
 
+// CLang compiler
+#ifdef __clang__  // clang -dM -E -x c /dev/null
+  #undef CISST_COMPILER
+  #define CISST_COMPILER CISST_CLANG
+#endif // __clang__
+
+
 // Microsoft compilers
 #ifdef _WIN32  // see msdn.microsoft.com
 // we require Windows 2000, XP or more
@@ -172,7 +181,7 @@ http://www.cisst.org/cisst/license.txt.
     #if (_MSC_VER == 1400)
       #define CISST_COMPILER CISST_DOTNET2005
     #endif
-	#if (_MSC_VER >= 1500)
+    #if (_MSC_VER >= 1500)
       #define CISST_COMPILER CISST_DOTNET2008
     #endif
   #endif
@@ -244,6 +253,12 @@ http://www.cisst.org/cisst/license.txt.
   #endif
 #endif // CISST_COMPILER == CISST_GCC
 
+#if CISST_COMPILER == CISST_CLANG
+  #if defined(__LP64__) && __LP64__
+    #define CISST_DATA_MODEL CISST_LP64
+  #endif // __LP64__
+#endif // CISST_COMPILER == CISST_CLANG
+
 #ifdef CISST_COMPILER_IS_MSVC
   #ifdef CISST_COMPILER_IS_MSVC_64
     #define CISST_DATA_MODEL CISST_LLP64
@@ -284,7 +299,7 @@ http://www.cisst.org/cisst/license.txt.
   \note More work needs to be done on how to declare a deprecated class
 */
 //@{
-#if (CISST_COMPILER == CISST_GCC)
+#if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_CLANG)
 #define CISST_DEPRECATED __attribute__ ((deprecated))
 #elif (CISST_COMPILER == CISST_DOTNET7) || (CISST_COMPILER == CISST_DOTNET2003) || (CISST_COMPILER == CISST_DOTNET2005) || (CISST_COMPILER == CISST_DOTNET2008)
 #define CISST_DEPRECATED __declspec(deprecated)
@@ -461,7 +476,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
   use the macro in the header file.  Nervertheless, we recommend to
   use it in both places.
  */
-#if (CISST_COMPILER == CISST_GCC)
+#if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_CLANG)
 #define CMN_UNUSED(argument) MARKED_AS_UNUSED ## argument __attribute__((unused))
 #else
 #define CMN_UNUSED(argument) MARKED_AS_UNUSED ## argument
@@ -499,7 +514,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 /*! \brief Somewhat portable compilation warning message.  This works
   with very recent versions of gcc (4.5) and with Microsoft
   compilers.  This macro has not been ported to other compilers. */
-#if (CISST_COMPILER == CISST_GCC)
+#if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_CLANG)
     // gcc 4.5 and above will support this, for lower versions there is a warning about the pragma itself
     #define CMN_DO_PRAGMA(x) _Pragma (#x)
     #define CMN_COMPILATION_WARNING(warningMessage) CMN_DO_PRAGMA(warning("Warning: " #warningMessage))
@@ -529,18 +544,18 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 // Visual C++
 #ifdef CISST_COMPILER_IS_MSVC
     #ifdef __FUNCSIG__
-        #define CMN_PRETTY_FUNCTION	__FUNCSIG__
+        #define CMN_PRETTY_FUNCTION __FUNCSIG__
     #else
         #warning "With Visual Studio, you need /EP or /P to have __FUNCSIG__"
     #endif
 
 // GNU CC and Intel CC
-#elif (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC)
+#elif (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC) || (CISST_COMPILER == CISST_CLANG)
     #define CMN_PRETTY_FUNCTION __PRETTY_FUNCTION__
 
 // Otherwise
 #else
-	#warning "Visual C++, GNU C++ and Intel CC are supported so far"
+    #warning "Visual C++, GNU C++ and Intel CC are supported so far"
 #endif
 
 // Set a default value
