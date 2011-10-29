@@ -159,11 +159,11 @@ public:
        either #VCT_ROW_MAJOR or #VCT_COL_MAJOR. */
     //@{
     vctDynamicMatrix(size_type rows, size_type cols, bool storageOrder = VCT_DEFAULT_STORAGE) {
-        SetSize(rows, cols, storageOrder);
+        this->SetSize(rows, cols, storageOrder);
     }
 
     vctDynamicMatrix(const nsize_type & matrixSize, bool storageOrder = VCT_DEFAULT_STORAGE) {
-        SetSize(matrixSize, storageOrder);
+        this->SetSize(matrixSize, storageOrder);
     }
     //@}
 
@@ -172,13 +172,13 @@ public:
        either #VCT_ROW_MAJOR or #VCT_COL_MAJOR.*/
     //@{
     vctDynamicMatrix(size_type rows, size_type cols, value_type value, bool storageOrder = VCT_DEFAULT_STORAGE) {
-        SetSize(rows, cols, storageOrder);
-        SetAll(value);
+        this->SetSize(rows, cols, storageOrder);
+        this->SetAll(value);
     }
 
     vctDynamicMatrix(const nsize_type & matrixSize, value_type value, bool storageOrder = VCT_DEFAULT_STORAGE) {
-        SetSize(matrixSize, storageOrder);
-        SetAll(value);
+        this->SetSize(matrixSize, storageOrder);
+        this->SetAll(value);
     }
     //@}
 
@@ -196,7 +196,7 @@ public:
     vctDynamicMatrix(const ThisType & otherMatrix):
         BaseType()
     {
-        SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
+        this->SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
     }
 
@@ -206,7 +206,7 @@ public:
       #VCT_ROW_MAJOR or #VCT_COL_MAJOR.*/
     template <class __matrixOwnerType, typename __otherMatrixElementType>
     vctDynamicMatrix(const vctDynamicConstMatrixBase<__matrixOwnerType, __otherMatrixElementType> & otherMatrix, bool storageOrder) {
-        SetSize(otherMatrix.rows(), otherMatrix.cols(), storageOrder);
+        this->SetSize(otherMatrix.rows(), otherMatrix.cols(), storageOrder);
         this->Assign(otherMatrix);
     }
 
@@ -217,7 +217,7 @@ public:
     */
     template <class __matrixOwnerType>
     vctDynamicMatrix(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & otherMatrix) {
-        SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
+        this->SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
     }
 
@@ -229,7 +229,7 @@ public:
     */
     template <class __matrixOwnerType, typename __otherMatrixElementType>
     explicit vctDynamicMatrix(const vctDynamicConstMatrixBase<__matrixOwnerType, __otherMatrixElementType> & otherMatrix) {
-        SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
+        this->SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
     }
 
@@ -243,7 +243,7 @@ public:
     */
     template <class __matrixOwnerType, typename __elementType>
     ThisType & operator = (const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & otherMatrix) {
-        SetSize(otherMatrix.rows(), otherMatrix.cols());
+        this->SetSize(otherMatrix.rows(), otherMatrix.cols());
         this->Assign(otherMatrix);
 		return *this;
     }
@@ -255,7 +255,7 @@ public:
       elements of the input matrix are copied into this matrix.
     */
     ThisType & operator = (const ThisType& otherMatrix) {
-        SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
+        this->SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
 		return *this;
     }

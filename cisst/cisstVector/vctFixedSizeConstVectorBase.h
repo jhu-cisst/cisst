@@ -36,6 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnTypeTraits.h>
+#include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDeSerializer.h>
 
 #include <cisstVector/vctFixedSizeVectorTraits.h>
 #include <cisstVector/vctBinaryOperations.h>

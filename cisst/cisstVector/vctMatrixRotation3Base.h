@@ -206,9 +206,9 @@ public:
     }
 
     /*! Conversion from an Euler rotation. */
-    template <vctEulerRotation3Order::OrderType order>
+    template <vctEulerRotation3Order::OrderType __order>
     inline ThisType &
-    From(const vctEulerRotation3<order> & eulerRotation)
+    From(const vctEulerRotation3<__order> & eulerRotation)
         throw(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(eulerRotation);
@@ -317,9 +317,9 @@ public:
 
 
     /*! Conversion from an Euler rotation. */
-    template <vctEulerRotation3Order::OrderType order>
+    template <vctEulerRotation3Order::OrderType __order>
     inline ThisType &
-    FromNormalized(const vctEulerRotation3<order> & eulerRotation)
+    FromNormalized(const vctEulerRotation3<__order> & eulerRotation)
     {
         return this->FromRaw(eulerRotation.Normalized());
     }
@@ -436,9 +436,9 @@ public:
     }
 
     /*! Conversion from an Euler angle rotation */
-    template <vctEulerRotation3Order::OrderType order>
+    template <vctEulerRotation3Order::OrderType __order>
     inline ThisType &
-    FromRaw(const vctEulerRotation3<order> & eulerRotation) {
+    FromRaw(const vctEulerRotation3<__order> & eulerRotation) {
         vctEulerToMatrixRotation3(eulerRotation, *this);
         return *this;
     }

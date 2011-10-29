@@ -708,7 +708,7 @@ mtsManagerLocalInterface * mtsManagerGlobal::GetProcessObject(const std::string 
 {
     if (!ProcessMap.FindItem(processName)) {
         CMN_LOG_CLASS_RUN_ERROR << "GetProcessObject: no process found: " << "\"" << processName << "\"" << std::endl;
-        return false;
+        return 0;
     }
 
 #if CISST_MTS_HAS_ICE

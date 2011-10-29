@@ -147,14 +147,14 @@ public:
     /*! Constructor: Create a vector of the specified size.  Elements
        initialized with default constructor. */
     explicit vctDynamicVector(size_type size) {
-        SetSize(size);
+        this->SetSize(size);
     }
 
     /*! Constructor: Create a vector of the specified size and assign all
       elements a specific value. */
     vctDynamicVector(size_type size, value_type value) {
-        SetSize(size);
-        SetAll(value);
+        this->SetSize(size);
+        this->SetAll(value);
     }
 
     /*! Constructor for any size greater than or equal to 2, using
@@ -173,7 +173,7 @@ public:
         if (size < 2) {
             cmnThrow(std::runtime_error("vctDynamicVector: Constructor from va_list requires size >= 2"));
         }
-        SetSize(size);
+        this->SetSize(size);
         this->at(0) = element0;
         this->at(1) = element1;
         va_list nextArg;
@@ -187,8 +187,8 @@ public:
     /*! Constructor: Create a vector of the specified size and assign the
       elements values from the memory block pointed to */
     vctDynamicVector(size_type size, const value_type * values) {
-        SetSize(size);
-        Assign(values);
+        this->SetSize(size);
+        this->Assign(values);
     }
 
     /*! Special copy constructor: Take ownership of the data of a
@@ -205,7 +205,7 @@ public:
     vctDynamicVector(const ThisType & otherVector):
         BaseType()
     {
-        SetSize(otherVector.size());
+        this->SetSize(otherVector.size());
         this->Assign(otherVector);
     }
 
@@ -215,7 +215,7 @@ public:
     */
     template <class _otherVectorOwnerType>
     vctDynamicVector(const vctDynamicConstVectorBase<_otherVectorOwnerType, value_type> & otherVector) {
-        SetSize(otherVector.size());
+        this->SetSize(otherVector.size());
         this->Assign(otherVector);
     }
 
@@ -226,14 +226,14 @@ public:
     */
     template <class _otherVectorOwnerType, typename _otherVectorElementType>
     explicit vctDynamicVector(const vctDynamicConstVectorBase<_otherVectorOwnerType, _otherVectorElementType> & otherVector) {
-        SetSize(otherVector.size());
+        this->SetSize(otherVector.size());
         this->Assign(otherVector);
     }
 
     /*! Constructor from a fixed-size vector */
     template <size_type __size, stride_type __stride, class __elementType, class __dataPtrType>
     explicit vctDynamicVector(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType> & fixedVector) {
-        SetSize(__size);
+        this->SetSize(__size);
         this->Assign(fixedVector);
     }
 
@@ -244,7 +244,7 @@ public:
     */
     template <class __vectorOwnerType, typename __elementType>
     ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & otherVector) {
-        SetSize(otherVector.size());
+        this->SetSize(otherVector.size());
         this->Assign(otherVector);
 		return *this;
     }
@@ -256,7 +256,7 @@ public:
       elements of the input vector are copied into this vector.
     */
     ThisType & operator = (const ThisType& other) {
-        SetSize(other.size());
+        this->SetSize(other.size());
         this->Assign(other);
 		return *this;
     }

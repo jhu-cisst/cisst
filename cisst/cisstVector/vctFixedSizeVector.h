@@ -83,7 +83,7 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
       \param value the value used to set all the elements of the vector
     */
     explicit inline vctFixedSizeVector(const value_type & value) {
-        SetAll(value);
+        this->SetAll(value);
     }
 
     /*! Initialize the elements of this vector with values from another

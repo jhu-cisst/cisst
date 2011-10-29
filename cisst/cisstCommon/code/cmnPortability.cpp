@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2003-09-08
+  Author(s):  Anton Deguet
+  Created on: 2003-09-08
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -44,5 +44,7 @@ const std::string cmnCompilersStrings[] = {"Undefined",
                                            "Intel CC",
                                            ".NET 2003",
                                            ".NET 2005",
-                                           ".NET 2008"};
+                                           ".NET 2008",
+                                           ".NET 2010",
+                                           "clang"};
 

@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-08-09
-  
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -57,11 +57,13 @@ void cmnPortabilityTest::TestWithCMake(void) {
                                           "CC",
                                           "CC",
                                           "icc",
-	                                      "cl", /* CISST_DOTNET2003 */
-	                                      "cl", /* CISST_DOTNET2005 */
-                                          "cl"  /* CISST_DOTNET2008 */};
+                                          "cl", /* CISST_DOTNET2003 */
+                                          "cl", /* CISST_DOTNET2005 */
+                                          "cl", /* CISST_DOTNET2008 */
+                                          "cl", /* CISST_DOTNET2010 */
+                                          "clang++"};
 
-    CPPUNIT_ASSERT(cmnOperatingSystemsStrings[CISST_OS] == CISST_CMAKE_SYSTEM_NAME);
+    CPPUNIT_ASSERT_EQUAL(cmnOperatingSystemsStrings[CISST_OS], std::string(CISST_CMAKE_SYSTEM_NAME));
     if (CISST_COMPILER == CISST_GCC) {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == std::string("gcc"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("c++"))
@@ -75,32 +77,35 @@ void cmnPortabilityTest::TestWithCMake(void) {
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.4"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.5")));
     } else {
-        CPPUNIT_ASSERT(CISST_CMAKE_CXX_COMPILER == CMakeCompilerStrings[CISST_COMPILER]);
+        CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_CXX_COMPILER), CMakeCompilerStrings[CISST_COMPILER]);
     }
 
     // to avoid the confusion with c++ and g++
     if (CISST_COMPILER == CISST_GCC) {
-        CPPUNIT_ASSERT(std::string(CISST_CMAKE_COMPILER_IS_GNUCXX) == std::string("1"));
+        CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_COMPILER_IS_GNUCXX), std::string("1"));
     } else {
-        CPPUNIT_ASSERT(std::string(CISST_CMAKE_COMPILER_IS_GNUCXX) == std::string(""));
+        CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_COMPILER_IS_GNUCXX), std::string(""));
     }
 
     // compiler is cl for vc++6 and .net 7, check by generator
     if (CISST_OS == CISST_WINDOWS) {
         if (CISST_COMPILER == CISST_VCPP6) {
-            CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 6"));
+            CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 6"));
         }
         if (CISST_COMPILER == CISST_DOTNET7) {
-            CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 7"));
+            CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 7"));
         }
-		if (CISST_COMPILER == CISST_DOTNET2003) {
-            CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 7 .NET 2003"));
+        if (CISST_COMPILER == CISST_DOTNET2003) {
+            CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 7 .NET 2003"));
         }
         if (CISST_COMPILER == CISST_DOTNET2005) {
-            CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 8 2005"));
+            CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 8 2005"));
         }
         if (CISST_COMPILER == CISST_DOTNET2008) {
-            CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 9 2008"));
+            CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 9 2008"));
+        }
+        if (CISST_COMPILER == CISST_DOTNET2010) {
+            CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 10 2010"));
         }
     }
 }
@@ -132,4 +137,3 @@ void cmnPortabilityTest::TestCMN_ISFINITE(void) {
     x /= Zero;
     CPPUNIT_ASSERT(!CMN_ISFINITE(x));
 }
-

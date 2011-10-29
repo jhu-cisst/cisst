@@ -96,7 +96,7 @@ public:
     inline vctRodriguezRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis)
         throw(std::runtime_error)
     {
-        From(axis);
+        this->From(axis);
     }
 
     /*! Constructor from a elements representing a 3D vector.
@@ -105,7 +105,7 @@ public:
     inline vctRodriguezRotation3(value_type x, value_type y, value_type z)
         throw(std::runtime_error)
     {
-        From(x, y, z);
+        this->From(x, y, z);
     }
 
     /*! Constructor from a vctQuaternionRotation3. */
@@ -113,7 +113,7 @@ public:
     inline vctRodriguezRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
         throw(std::runtime_error)
     {
-        From(quaternionRotation);
+        this->From(quaternionRotation);
     }
 
     /*! Constructor from a vctMatrixRotation3. */
@@ -121,14 +121,14 @@ public:
     inline vctRodriguezRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
         throw(std::runtime_error)
     {
-        From(matrixRotation);
+        this->From(matrixRotation);
     }
 
     /*! Constructor from a vctAxisAngleRotation3. */
     inline vctRodriguezRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
         throw(std::runtime_error)
     {
-        From(axisAngleRotation);
+        this->From(axisAngleRotation);
     }
 
     //@}
@@ -181,9 +181,9 @@ public:
                                  bool normalizeInput)
     {
         if (normalizeInput) {
-            FromNormalized(x, y, z);
+            this->FromNormalized(x, y, z);
         } else {
-            FromRaw(x, y, z);
+            this->FromRaw(x, y, z);
         }
     }
 
@@ -193,9 +193,9 @@ public:
                                  bool normalizeInput)
     {
         if (normalizeInput) {
-            FromNormalized(quaternionRotation);
+            this->FromNormalized(quaternionRotation);
         } else {
-            FromRaw(quaternionRotation);
+            this->FromRaw(quaternionRotation);
         }
     }
 
@@ -205,9 +205,9 @@ public:
                                  bool normalizeInput)
     {
         if (normalizeInput) {
-            FromNormalized(matrixRotation);
+            this->FromNormalized(matrixRotation);
         } else {
-            FromRaw(matrixRotation);
+            this->FromRaw(matrixRotation);
         }
     }
 
@@ -216,9 +216,9 @@ public:
                                  bool normalizeInput)
     {
         if (normalizeInput) {
-            FromNormalized(axisAngleRotation);
+            this->FromNormalized(axisAngleRotation);
         } else {
-            FromRaw(axisAngleRotation);
+            this->FromRaw(axisAngleRotation);
         }
     }
 

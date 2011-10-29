@@ -135,7 +135,7 @@ public:
         BaseType()
     {
         this->Allocate();
-        Assign(quaternionRotation);
+        this->Assign(quaternionRotation);
     }
 
 
@@ -537,7 +537,7 @@ public:
 
     /*! Set this rotation as the inverse of another one. */
     inline ThisType & InverseOf(const ThisType & otherRotation) {
-        ConjugateOf(otherRotation);
+        this->ConjugateOf(otherRotation);
         return *this;
     }
 

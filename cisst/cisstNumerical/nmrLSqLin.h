@@ -179,7 +179,7 @@ public:
             minmn = (1 > minmn)?1:minmn;
             lwork = 2*minmn;
             return lwork;
-        } else if ((me == 0)) { // case LSI
+        } else if (me == 0) { // case LSI
             k = (ma+mg>n)?(ma+mg):n;
             return k+n+(mg+2)*(n+7);
         } else { // case LSEI
@@ -191,7 +191,7 @@ public:
     {
         if ((me == 0) && (mg ==0)) {// case LS
             return 0;
-        } else if ((me == 0)) { // case LSI
+        } else if (me == 0) { // case LSI
             return mg+2*n+1;
         } else { // case LSEI
             return mg+2*n+2;
