@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Forward declarations and \#define for cisstVector
   \ingroup cisstVector
 */
-
+#include <cisstCommon/cmnPortability.h>
 #include <cisstVector/vctContainerTraits.h>
 
 /*!
