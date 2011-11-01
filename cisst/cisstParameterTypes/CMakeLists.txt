@@ -17,9 +17,9 @@ project (cisstParameterTypesLibs)
 
 add_subdirectory (code)
 
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
   add_subdirectory (codePython)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
 
 # build tests, add an option to skip them
 cisst_offer_tests (cisstParameterTypes)

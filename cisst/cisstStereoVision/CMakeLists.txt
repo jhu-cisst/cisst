@@ -17,9 +17,9 @@ project (cisstStereoVisionLibs)
 
 add_subdirectory (code)
 
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
   add_subdirectory (codePython)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
 
 if (CISST_HAS_QT)
   add_subdirectory (codeQt)

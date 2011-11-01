@@ -64,6 +64,9 @@ if (CISST_HAS_QT)
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
                   ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstQtBuild.cmake
                   @ONLY)
+  install (FILES ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstQtBuild.cmake
+           DESTINATION share/cisst/cmake
+           COMPONENT cisstCommon)
 
 else (CISST_HAS_QT)
   cisst_unset_all_package_settings (cisstQt Qt)
@@ -100,6 +103,9 @@ if (CISST_HAS_FLTK)
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstFLTKBuild.cmake.in
                   ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstFLTKBuild.cmake
                   @ONLY)
+  install (FILES ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstFLTKBuild.cmake
+           DESTINATION share/cisst/cmake
+           COMPONENT cisstCommon)
 
 else (CISST_HAS_FLTK)
   cisst_unset_all_package_settings (cisstCommon FLTK)
@@ -116,6 +122,8 @@ if (CISST_HAS_SWIG_PYTHON)
   # It looks like version is not yet supported by CMake for SWIG so we are checking manually
   if (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
     message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
+    # propagate the fact that SWIG was found
+    set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
   else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
     include (${SWIG_USE_FILE})
     # save SWIG settings
@@ -123,10 +131,16 @@ if (CISST_HAS_SWIG_PYTHON)
     cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
     cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE)
 
+    # propagate the fact that SWIG was found
+    set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
+ 
     # Create the CMake config file
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
                     ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstPythonBuild.cmake
                     @ONLY)
+    install (FILES ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstPythonBuild.cmake
+             DESTINATION share/cisst/cmake
+             COMPONENT cisstCommon)
 
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
 
@@ -155,6 +169,8 @@ if (CISST_HAS_SWIG_PYTHON)
     endif (PYTHON_NUMPY_FOUND)
   endif (CISST_cisstVector)
 else (CISST_HAS_SWIG_PYTHON)
+  # propagate the fact that SWIG was not found
+  set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
   cisst_unset_all_package_settings (cisstPython Python)
   cisst_unset_all_package_settings (cisstPython NumPy)
 endif (CISST_HAS_SWIG_PYTHON)

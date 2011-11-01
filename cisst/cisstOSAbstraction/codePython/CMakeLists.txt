@@ -18,4 +18,5 @@ project (cisstOSAbstractionPython)
 
 cisst_add_swig_module (MODULE cisstOSAbstraction
                        INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../osaPython.h
                        MODULE_LINK_LIBRARIES cisstCommon cisstOSAbstraction)

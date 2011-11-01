@@ -36,6 +36,10 @@ if (cisst_FOUND_AS_REQUIRED)
   # link with the cisst libraries
   cisst_target_link_libraries (cisstComponentManager ${REQUIRED_CISST_LIBRARIES})
 
+  install (TARGETS cisstComponentManager
+           COMPONENT cisstMultiTask
+           RUNTIME DESTINATION bin)
+
 else (cisst_FOUND_AS_REQUIRED)
   cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})
 endif (cisst_FOUND_AS_REQUIRED)

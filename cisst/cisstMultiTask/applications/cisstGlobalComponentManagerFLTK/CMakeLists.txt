@@ -47,6 +47,10 @@ if (cisst_FOUND_AS_REQUIRED)
   # link with the cisst libraries
   cisst_target_link_libraries (cisstGlobalComponentManagerFLTK ${REQUIRED_CISST_LIBRARIES})
 
+  install (TARGETS cisstGlobalComponentManagerFLTK
+           COMPONENT cisstMultiTask
+           RUNTIME DESTINATION bin)
+
 #   if (CISST_cisstParameterTypes)
 #     # set all libraries needed
 #     set (CISST_LIBRARIES_NEEDED ${CISST_LIBRARIES_NEEDED} cisstParameterTypes)

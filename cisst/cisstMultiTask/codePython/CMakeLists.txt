@@ -19,4 +19,5 @@ project (cisstMultiTaskPython)
 # create wrappers using swig
 cisst_add_swig_module (MODULE cisstMultiTask
                        INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../mtsPython.h
                        MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon)

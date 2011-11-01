@@ -253,9 +253,6 @@ macro (cisst_add_library ...)
   set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
   file (WRITE ${LIBRARY_MAIN_HEADER} ${FILE_CONTENT})
 
-  # Add the main header to the library, for IDEs
-  set (HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
-
   # Set paths
   cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
 
@@ -269,6 +266,7 @@ macro (cisst_add_library ...)
                ${IS_SHARED}
                ${SOURCE_FILES}
                ${ADDITIONAL_SOURCE_FILES}
+               ${LIBRARY_MAIN_HEADER}
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
                )
@@ -401,6 +399,7 @@ function (cisst_add_swig_module ...)
        MODULE
        INTERFACE_FILENAME
        INTERFACE_DIRECTORY
+       HEADER_FILES
        MODULE_LINK_LIBRARIES)
 
   # reset local variables
@@ -473,12 +472,28 @@ function (cisst_add_swig_module ...)
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py)
     # install the interface files so that one can %import them
-    install (FILES ${INTERFACE}
-             DESTINATION include
-             COMPONENT ${LIBRARY})
+    install (FILES ${SWIG_INTERFACE_FILE}
+             DESTINATION include/${MODULE}
+             COMPONENT ${MODULE})
+
+    # install library and python file
+    install (TARGETS _${MODULE_NAME}
+             RUNTIME DESTINATION bin
+             LIBRARY DESTINATION lib
+             COMPONENT ${MODULE})
+    install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py
+             DESTINATION lib
+             COMPONENT ${MODULE})
+
+    # install extra header files
+    foreach (header ${HEADER_FILES})
+      install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+               DESTINATION include/${MODULE}
+               COMPONENT ${MODULE})
+    endforeach (header)
 
   else (EXISTS ${SWIG_INTERFACE_FILE})
-    message (SEND_ERROR "Can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
+    message (SEND_ERROR "cisst_add_swig_module: can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
 endfunction (cisst_add_swig_module)

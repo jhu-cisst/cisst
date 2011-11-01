@@ -15,6 +15,7 @@
 project (cisstCommonPython)
 
 # create wrappers using swig
-cisst_add_swig_module(MODULE cisstCommon
-                      INTERFACE_DIRECTORY ..
-                      MODULE_LINK_LIBRARIES cisstCommon)
+cisst_add_swig_module (MODULE cisstCommon
+                       INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../cmnPython.h
+                       MODULE_LINK_LIBRARIES cisstCommon)

@@ -17,7 +17,8 @@
 project (cisstStereoVisionPython)
 
 # create wrappers using swig
-cisst_add_swig_module(MODULE cisstStereoVision
-                      INTERFACE_DIRECTORY ..
-                      MODULE_LINK_LIBRARIES cisstStereoVision
-                                            cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+cisst_add_swig_module (MODULE cisstStereoVision
+                       INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../svlPython.h
+                       MODULE_LINK_LIBRARIES cisstStereoVision
+                                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)

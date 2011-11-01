@@ -14,6 +14,7 @@
 
 project (cisstVectorPython)
 
-cisst_add_swig_module(MODULE cisstVector
-                      INTERFACE_DIRECTORY ..
-                      MODULE_LINK_LIBRARIES cisstCommon cisstVector)
+cisst_add_swig_module (MODULE cisstVector
+                       INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../vctPython.h
+                       MODULE_LINK_LIBRARIES cisstCommon cisstVector)

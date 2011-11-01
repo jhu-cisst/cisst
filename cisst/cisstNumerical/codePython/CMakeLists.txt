@@ -18,4 +18,5 @@ project (cisstNumericalPython)
 
 cisst_add_swig_module (MODULE cisstNumerical
                        INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../nmrPython.h
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstNumerical)

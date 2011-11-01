@@ -16,6 +16,7 @@ project (cisstParameterTypesPython)
 
 cisst_add_swig_module (MODULE cisstParameterTypes
                        INTERFACE_DIRECTORY ..
+                       HEADER_FILES ../prmPython.h
                        MODULE_LINK_LIBRARIES cisstParameterTypes
                                              cisstMultiTask
                                              cisstOSAbstraction

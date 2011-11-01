@@ -27,12 +27,12 @@ endif (CISST_HAS_CISSTNETLIB)
 
 add_subdirectory (code)
 
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
   add_subdirectory (codePython)
   if (CISST_BUILD_TESTS)
     add_subdirectory (testsPython)
   endif (CISST_BUILD_TESTS)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
 
 # build examples and tests, add an option to skip them
 cisst_offer_examples (cisstNumerical)

@@ -44,3 +44,7 @@ add_custom_target (cisstInteractive_COMPILE_IREPY ALL
                    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/makeIrepy.py
                    ${CMAKE_CURRENT_SOURCE_DIR}/irepy  # src-dir
                    ${LIBRARY_OUTPUT_PATH}/irepy)   # dest-dir
+
+install (DIRECTORY ${LIBRARY_OUTPUT_PATH}/irepy
+         DESTINATION lib
+         COMPONENT cisstInteractive)

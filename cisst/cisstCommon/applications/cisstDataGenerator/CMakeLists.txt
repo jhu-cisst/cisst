@@ -50,6 +50,10 @@ if (cisst_FOUND_AS_REQUIRED)
 
   cisst_target_link_libraries (cisstDataGenerator ${REQUIRED_CISST_LIBRARIES})
 
+  install (TARGETS cisstDataGenerator
+           COMPONENT cisstCommon
+           RUNTIME DESTINATION bin)
+
 else (cisst_FOUND_AS_REQUIRED)
   cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})
 endif (cisst_FOUND_AS_REQUIRED)
