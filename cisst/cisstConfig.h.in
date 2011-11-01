@@ -46,6 +46,9 @@ http://www.cisst.org/cisst/license.txt.
 // For MSVC, CMake generator assumes either 32 or 64 bits compiler
 #cmakedefine01 CISST_CMAKE_COMPILER_IS_MSVC_64
 
+// To allow overloading of functions for size_t
+#cmakedefine01 CISST_SIZE_T_NATIVE
+
 // RTAI Realtime extension for Linux
 #cmakedefine01 CISST_HAS_LINUX_RTAI
 
