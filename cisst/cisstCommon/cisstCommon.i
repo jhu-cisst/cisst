@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2004-10-06
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -32,12 +32,12 @@ http://www.cisst.org/cisst/license.txt.
 %include "std_iostream.i"
 
 // Force insertion of code related to Python iterators in cxx file
-// Version 1.3.37 removed symbols starting with Py 
+// Version 1.3.37 removed symbols starting with Py
 #if (SWIG_VERSION > 0x010336)
   %fragment("SwigPyIterator_T");
 #else
   %fragment("PySwigIterator_T");
-  #define SwigPyIterator PySwigIterator  
+  #define SwigPyIterator PySwigIterator
 #endif
 
 // We define __setitem__ and __getitem__
@@ -65,9 +65,11 @@ http://www.cisst.org/cisst/license.txt.
 
 %ignore operator<<;
 
+// CISST_EXPORT is not needed for SWIG 
 #define CISST_EXPORT
-#define CISST_DEPRECATED
-#define CMN_UNUSED(a) a
+
+// To load some cisst settings, mostly for conditional compilation
+%import "cisstCommon/cmnPortability.h"
 
 %ignore CMN_LOG_DETAILS;
 
@@ -116,7 +118,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstCommon/cmnClassRegisterMacros.h"
 %template() std::pair<std::string, cmnClassServicesBase*>;
 %template(cmnClassServicesContainer) std::map<std::string, cmnClassServicesBase*>;
-%apply std::map<std::string, cmnClassServicesBase*>::const_iterator { 
+%apply std::map<std::string, cmnClassServicesBase*>::const_iterator {
     cmnClassRegister::const_iterator
 };
 %newobject cmnClassRegister::iterator(PyObject **PYTHON_SELF);
@@ -135,7 +137,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstCommon/cmnObjectRegister.h"
 %template() std::pair<std::string, cmnGenericObject*>;
 %template(cmnGenericObjectContainer) std::map<std::string, cmnGenericObject*>;
-%apply std::map<std::string, cmnGenericObject*>::const_iterator { 
+%apply std::map<std::string, cmnGenericObject*>::const_iterator {
     cmnObjectRegister::const_iterator
 };
 %newobject cmnObjectRegister::iterator(PyObject **PYTHON_SELF);
