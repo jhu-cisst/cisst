@@ -1,13 +1,33 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-// $Id$
+/*
+  $Id$
+
+  Author(s):  Anton Deguet
+  Created on: 2008-02-10
+
+  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
 
 #include <iostream>
+#include <cisstRevision.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 
 
 int main (void) {
+
+    std::cout << CISST_FULL_REVISION << std::endl;
 
 #if (CISST_OS == CISST_WINDOWS)
     std::cout << "Running Windows" << std::endl;
@@ -28,7 +48,7 @@ int main (void) {
 #elif (CISST_OS == CISST_QNX)
     std::cout << "Running QNX" << std::endl;
 #endif
-    
+
 #if (CISST_COMPILER == CISST_GCC)
     std::cout << "Compiling with gcc" << std::endl;
 #elif (CISST_COMPILER == CISST_SGI_CC)
@@ -44,7 +64,7 @@ int main (void) {
 #elif (CISST_COMPILER == CISST_DOTNET2008)
     std::cout << "Compiling with Microsoft .net 2008, aka 9.0" << std::endl;
 #endif
-    
+
 #ifdef CISST_COMPILER_IS_MSVC
     std::cout << "The compiler is a Microsoft compiler" << std::endl;
 #else
@@ -70,24 +90,6 @@ int main (void) {
     } else {
         std::cout << "Did you really enter \"0\"?" << std::endl;
     }
-    
+
     return 0;
 }
-
-
-/*
-  Author(s):  Anton Deguet
-  Created on: 2008-02-10
-
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
-
---- begin cisst license - do not edit ---
-
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
-
---- end cisst license ---
-
-*/

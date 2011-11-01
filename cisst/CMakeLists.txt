@@ -19,11 +19,25 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst libraries (Computer Integrated Surgical Systems and Technology)
 project (cisstLibs)
 
-# set the version number
+# Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
 set (CISST_VERSION_PATCH "0")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
+
+# Try to find SVN version number
+find_package (Subversion QUIET)
+set (CISST_WC_REVISION "undefined (SVN executable not found)")
+if (Subversion_FOUND)
+  Subversion_WC_INFO (${cisst_SOURCE_DIR} CISST)
+endif (Subversion_FOUND)
+message ("Configuring cisst ${CISST_VERSION} from \"${cisst_SOURCE_DIR}\", revision: ${CISST_WC_REVISION}")
+configure_file (${cisstLibs_SOURCE_DIR}/cisstRevision.h.in
+                ${cisstLibs_BINARY_DIR}/include/cisstRevision.h)
+install (FILES ${cisstLibs_BINARY_DIR}/include/cisstRevision.h
+         DESTINATION include
+         COMPONENT cisstCommon)
+
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
 set (CURRENT_PROJECT_IS_CISST ON)
