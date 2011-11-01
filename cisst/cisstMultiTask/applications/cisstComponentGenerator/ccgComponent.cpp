@@ -1,6 +1,24 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id$ */
+
+/*
+  $Id$
+
+  Author(s): Jonathan Kriss, Anton Deguet
+  Created on: 2010
+
+  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
 
 #include <string>
 #include <ccgComponent.h>
@@ -42,7 +60,7 @@ std::string ccgComponent::WriteInterfaceProvided(void)
     for (size_t i = 0; i < size; i++) {
         ccgCommand command = interf.Commands.front();
 
-        s += "    localResult = interfaceProvided->AddCommand";
+        s += "    localResult = (0 != interfaceProvided->AddCommand";
         if (command.Type == "Void" || command.Type == "Write" || command.Type == "QualifiedRead") {
             s += command.Type + "(&" + Name + "::" + command.Func + ", this, " + command.Name;
 
@@ -50,15 +68,15 @@ std::string ccgComponent::WriteInterfaceProvided(void)
                 s += ", " + command.Arg1;
             }
 
-            s += ");\n";
+            s += "));\n";
         } else if (command.Type == "Read") {
             if (command.Arg2 == "void") {
-                s += command.Type + "(&" + Name + "::" + command.Func + ", " + command.Arg1 + ", " + command.Name + ");\n";
+                s += command.Type + "(&" + Name + "::" + command.Func + ", " + command.Arg1 + ", " + command.Name + "));\n";
             } else {
-                s += command.Type + "(&" + command.Arg2 + "::" + command.Func + ", " + command.Arg1 + ", " + command.Name + ");\n";
+                s += command.Type + "(&" + command.Arg2 + "::" + command.Func + ", " + command.Arg1 + ", " + command.Name + "));\n";
             }
         } else if (command.Type == "ReadState") {
-            s += command.Type + "(StateTable, " + command.Func + ", " + command.Name + ");\n";
+            s += command.Type + "(StateTable, " + command.Func + ", " + command.Name + "));\n";
         }
         s += "    if (!localResult) {\n";
         s += "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add command to interface\\\"\" << interfaceProvided->GetFullName() << \"\\\"\" << std::endl;\n";
@@ -72,12 +90,12 @@ std::string ccgComponent::WriteInterfaceProvided(void)
     for (size_t i = 0; i < size; i++) {
         ccgEvent e = interf.Events.front();
 
-        s += "    localResult = interfaceProvided->AddEvent";
+        s += "    localResult = (0 != interfaceProvided->AddEvent";
         s += e.Type + "(" + interf.Name + "." + e.Function + ", " + e.Name;
         if (e.Type == "Write") {
-            s += ", " + e.Arg1 + ");\n";
+            s += ", " + e.Arg1 + "));\n";
         } else {
-            s += ");\n";
+            s += "));\n";
         }
         s += "    if (!localResult) {\n";
         s += "        CMN_LOG_CLASS_INIT_ERROR << \"failed to add event to interface\\\"\" << interfaceProvided->GetFullName() << \"\\\"\" << std::endl;\n";
