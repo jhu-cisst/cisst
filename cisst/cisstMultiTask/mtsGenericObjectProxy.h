@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsGenericObjectProxy_h
 #define _mtsGenericObjectProxy_h
 
+#include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
