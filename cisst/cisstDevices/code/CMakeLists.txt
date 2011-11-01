@@ -33,14 +33,12 @@ set (HEADER_FILES
      devNull.h
      devSartoriusSerial.h
      devExport.h
-     devKeyboard.h
      can/devCAN.h
      )
 
 set (SOURCE_FILES
      devNull.cpp
      devSartoriusSerial.cpp
-     devKeyboard.cpp
      can/devCAN.cpp
      )
 
