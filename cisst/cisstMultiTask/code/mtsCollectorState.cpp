@@ -379,15 +379,20 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
     }
 }
 
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
 {
     std::string currentDateTime;
     std::ostringstream out;          
     osaGetDateTimeString(currentDateTime);
-
+    mtsTaskManager * componentManager = mtsTaskManager::GetInstance();
+    const osaTimeServer & timeServer = componentManager->GetTimeServer();
+    osaAbsoluteTime origin;
+    timeServer.GetTimeOrigin(origin);
+    out.precision(20);
     if (this->OutputStreamHeader) {        
-
+        this->OutputStreamHeader->precision(20);
         //this->OutputStreamHeader = (std::ostream*) &out;
         out << "Ticks";
         RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
@@ -424,7 +429,8 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
         // File Name
         *(this->OutputStreamHeader) << this->OutputFileName << std::endl;
         // Date
-        *(this->OutputStreamHeader) << currentDateTime << std::endl;
+        *(this->OutputStreamHeader) << currentDateTime << " ";
+        *(this->OutputStreamHeader) << origin.ToSeconds() << std::endl;
        // Format
         if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
             *(this->OutputStreamHeader) << "Text" << std::endl ;
