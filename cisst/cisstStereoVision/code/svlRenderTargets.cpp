@@ -116,7 +116,7 @@ void svlRenderTargets::ReleaseAll()
         }
     }
 #if CISST_SVL_HAS_MIL
-    svlVidCapSrcMIL::GetInstance()->ReleaseAll();
+    svlVidCapSrcMIL::GetInstance()->Release();
 #endif // CISST_SVL_HAS_MIL
 }
 

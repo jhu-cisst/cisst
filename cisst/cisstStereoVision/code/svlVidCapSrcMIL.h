@@ -33,6 +33,8 @@ http://www.cisst.org/cisst/license.txt.
     typedef long    MIL_INT32;
 #endif
 
+#define MIL_MAX_SYS     2
+#define MIL_MAX_DIG     64
 
 class osaThread;
 class svlBufferImage;
@@ -42,7 +44,7 @@ class svlVidCapSrcMILRenderTarget : public svlRenderTargetBase
 friend class svlRenderTargets;
 
 protected:
-    svlVidCapSrcMILRenderTarget(unsigned int deviceID);
+    svlVidCapSrcMILRenderTarget(unsigned int deviceID, unsigned int displayID = 0);
     ~svlVidCapSrcMILRenderTarget();
 
 public:
@@ -53,7 +55,8 @@ public:
     void* ThreadProc(void* param);
 
 private:
-    int DeviceID;
+    int SystemID;
+    int DigitizerID;
 
     osaThread* Thread;
     osaThreadSignal NewFrameSignal;
@@ -87,7 +90,6 @@ private:
 
 public:
     static svlVidCapSrcMIL* GetInstance();
-    void ReleaseAll();
 
     svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
@@ -106,48 +108,47 @@ public:
     int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
     void Release();
 
-    bool IsCaptureSupported(int devid);
-    bool IsOverlaySupported(int devid);
-    bool EnableCapture(int devid, bool enable = true);
-    bool EnableOverlay(int devid, bool enable = true);
+    bool IsCaptureSupported(unsigned int sysid, unsigned int digid = 0);
+    bool IsOverlaySupported(unsigned int sysid, unsigned int digid = 0);
 
 private:
     unsigned int NumOfStreams;
     bool Initialized;
     bool Running;
 
-    int* DeviceID;
-    bool CaptureEnabled[2];
-    bool OverlayEnabled[2];
-    bool CaptureSupported[2];
-    bool OverlaySupported[2];
-    int Width[2];
-    int Height[2];
-    svlBufferImage** ImageBuffer;
+    vctDynamicVector<int> SystemID;
+    vctDynamicVector<int> DigitizerID;
+    vctDynamicVector<svlBufferImage*> ImageBuffer;
 
-    int MILNumberOfDevices;
-    MIL_ID MilApplication;
-    MIL_ID MilSystem[2];
-    MIL_ID MilDisplay[2];
-    MIL_ID MilDigitizer[2];
-    MIL_ID MilDisplayImage[2];
-    MIL_ID MilOverlayImage[2];
-    MIL_INT MilDeviceID[2];
-    bool MilDeviceInitialized[2];
-    bool MilCaptureEnabled[2];
-    bool MilOverlayEnabled[2];
-    long MilWidth[2];
-    long MilHeight[2];
-    long MilBands[2];
-    long MilBandBits[2];
-    unsigned char *MilOverlayBuffer[2];
+    unsigned int MILNumberOfSystems;
+    unsigned int MilNumberOfDigitizers[MIL_MAX_SYS];
     unsigned int MilCaptureBuffers;
-    MILCaptureParameters MilCaptureParams[2];
+
+    MIL_ID MilApplication;
+    MIL_ID MilSystem[MIL_MAX_SYS];
+    MIL_ID MilDigitizer[MIL_MAX_SYS][MIL_MAX_DIG];
+    MIL_ID MilDisplay[MIL_MAX_SYS][MIL_MAX_DIG];
+    long MilWidth[MIL_MAX_SYS][MIL_MAX_DIG];
+    long MilHeight[MIL_MAX_SYS][MIL_MAX_DIG];
+    long MilBands[MIL_MAX_SYS][MIL_MAX_DIG];
+    long MilBandBits[MIL_MAX_SYS][MIL_MAX_DIG];
+    MIL_ID MilDisplayImage[MIL_MAX_SYS][MIL_MAX_DIG];
+    MIL_ID MilOverlayImage[MIL_MAX_SYS][MIL_MAX_DIG];
+    unsigned char* MilOverlayBuffer[MIL_MAX_SYS][MIL_MAX_DIG];
+    MILCaptureParameters MilCaptureParams[MIL_MAX_SYS][MIL_MAX_DIG];
+    bool MilCaptureSupported[MIL_MAX_SYS][MIL_MAX_DIG];
+    bool MilOverlaySupported[MIL_MAX_SYS][MIL_MAX_DIG];
 
     bool MILInitializeApplication();
-    bool MILInitializeDevice(int device, bool capture, bool overlay, int& width, int& height, int& bands);
-    bool MILUploadOverlay(int device);
-    void MILReleaseDevice(int device);
+    bool MILInitializeSystem(int system);
+    bool MILInitializeDigitizer(int system, int digitizer);
+    bool MILInitializeCapture(int system, int digitizer);
+    bool MILInitializeOverlay(int system, int digitizer);
+    bool MILUploadOverlay(int system, int digitizer);
+    void MILReleaseOverlay(int system, int digitizer);
+    void MILReleaseCapture(int system, int digitizer);
+    void MILReleaseDigitizer(int system, int digitizer);
+    void MILReleaseSystem(int system);
     void MILReleaseApplication();
 };
 

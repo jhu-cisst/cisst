@@ -373,7 +373,7 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
 #if CISST_SVL_HAS_MIL 
         else if (platform == MatroxImaging) {
             // Check if Matrox device supports capture
-            if (dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[API[i]])->EnableCapture(APIDeviceID[i]) == false) {
+            if (dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[API[i]])->IsCaptureSupported(APIDeviceID[i], InputID[i]) == false) {
                 ret = SVL_VCS_UNABLE_TO_OPEN;
                 goto labError;
             }
