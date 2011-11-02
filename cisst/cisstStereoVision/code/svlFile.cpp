@@ -199,12 +199,13 @@ bool svlFile::IsOpen()
 
 long long int svlFile::Read(char* buffer, const long long int length)
 {
-    if (!Opened || Mode != R) return -1;
+    if (!Opened || Mode != R || length < 0) return -1;
 
 #if (CISST_OS == CISST_WINDOWS) && (CISST_COMPILER > CISST_DOTNET2003)
     size_t readsize, size = 0;
-    if (length > static_cast<long long int>(SIZE_MAX)) readsize = SIZE_MAX;
-    else readsize = static_cast<size_t>(length);
+    unsigned long long int _length = length;
+    if (_length > static_cast<long long int>(SIZE_MAX)) readsize = SIZE_MAX;
+    else readsize = static_cast<size_t>(_length);
     do {
         size += fread(buffer + size, 1, readsize - size, INTERNALS(File));
     }
@@ -227,12 +228,13 @@ long long int svlFile::Read(char* buffer, const long long int length)
 
 long long int svlFile::Write(const char* buffer, const long long int length)
 {
-    if (!Opened || Mode != W) return -1;
+    if (!Opened || Mode != W || length < 0) return -1;
 
 #if (CISST_OS == CISST_WINDOWS) && (CISST_COMPILER > CISST_DOTNET2003)
     size_t writesize, size = 0;
-    if (length > static_cast<long long int>(SIZE_MAX)) writesize = SIZE_MAX;
-    else writesize = static_cast<size_t>(length);
+    unsigned long long int _length = length;
+    if (_length > static_cast<long long int>(SIZE_MAX)) writesize = SIZE_MAX;
+    else writesize = static_cast<size_t>(_length);
     do {
         size += fwrite(buffer + size, 1, writesize - size, INTERNALS(File));
     }
