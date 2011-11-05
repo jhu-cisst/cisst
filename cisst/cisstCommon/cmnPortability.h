@@ -555,7 +555,10 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 
 // Otherwise
 #else
-    #warning "Visual C++, GNU C++ and Intel CC are supported so far"
+// For SWIG pre-processor, no need to issue a warning
+    #ifndef SWIG
+         #warning "Visual C++, GNU C++ and Intel CC are supported so far"
+    #endif
 #endif
 
 // Set a default value
