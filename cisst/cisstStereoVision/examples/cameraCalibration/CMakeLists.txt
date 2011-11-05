@@ -23,10 +23,10 @@ if (cisst_FOUND)
   # load cisst configuration
   include (${CISST_USE_FILE})
 
-  IF(CISST_SVL_HAS_OPENCV)
+  IF(CISST_SVL_HAS_OPENCV2)
     add_executable (svlExCameraCalibration cameraCalibration.cpp)
     cisst_target_link_libraries (svlExCameraCalibration ${REQUIRED_CISST_LIBRARIES})
-  ENDIF(CISST_SVL_HAS_OPENCV)
+  ENDIF(CISST_SVL_HAS_OPENCV2)
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
