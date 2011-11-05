@@ -492,12 +492,6 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
         cisst_set_package_settings (cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBRARIES)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
-            svlCCCalibrationGrid.cpp
-            svlCCCornerDetector.cpp
-            svlCCFileIO.cpp
-            svlCCHandEyeCalibration.cpp
-            svlCCOriginDetector.cpp
-            svlFilterImageCameraCalibrationOpenCV.cpp
             svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
             #svlVideoCodecOpenCV.h       # private header
@@ -513,16 +507,30 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
         ENDIF(NOT WIN32)
         SET(HEADER_FILES
             ${HEADER_FILES}
-            svlCCCalibrationGrid.h
-            svlCCCornerDetector.h
-            svlCCFileIO.h
-            svlCCHandEyeCalibration.h
-            svlCCOriginDetector.h
-            svlFilterImageCameraCalibrationOpenCV.h
             svlFilterImageZoom.h
             svlFilterToolTracker.h
             svlTrackerOCVMeanShift.h        
             )
+        IF(CISST_SVL_HAS_OPENCV2)
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                svlCCCalibrationGrid.cpp
+                svlCCCornerDetector.cpp
+                svlCCFileIO.cpp
+                svlCCHandEyeCalibration.cpp
+                svlCCOriginDetector.cpp
+                svlFilterImageCameraCalibrationOpenCV.cpp
+            )
+            SET(HEADER_FILES
+                ${HEADER_FILES}
+                svlCCCalibrationGrid.h
+                svlCCCornerDetector.h
+                svlCCFileIO.h
+                svlCCHandEyeCalibration.h
+                svlCCOriginDetector.h
+                svlFilterImageCameraCalibrationOpenCV.h
+            )
+        ENDIF(CISST_SVL_HAS_OPENCV2)
         MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
 
