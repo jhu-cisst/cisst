@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     }
 
     svlCCObject = new svlFilterImageCameraCalibrationOpenCV();
-    svlCCObject->SetBoardSize(cv::Size(boardWidth,boardHeight));
+    svlCCObject->SetBoardSize(boardWidth,boardHeight);
     svlCCObject->SetSquareSize(squareSize);
     cout << "Calling svlExCameraCalibration " << imageDirectory << " "<< imagePrefix << " " << imageType << " ";
     cout << startIndex << " " << stopIndex << " " << boardWidth << " " << boardHeight << endl;
