@@ -33,14 +33,4 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmPython.h>
 #include <cisstDevices/devConfig.h>
 
-#if CISST_HAS_XML
-    #if CISST_DEV_HAS_MICRONTRACKER
-        #include <cisstDevices/devMicronTracker.h>
-    #endif
-#endif
-
-#include <cisstDevices/devKeyboard.h>
-
-
-
 #endif // _devPython_h

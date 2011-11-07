@@ -23,7 +23,6 @@ set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical ciss
 # make sure all options are set for all devices to OFF
 option (CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
 option (CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
-option (CISST_DEV_HAS_MICRONTRACKER "Add support for Claron MicronTracker." OFF)
 option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
 option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
 option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
@@ -100,49 +99,6 @@ else (CISST_DEV_HAS_OPENIGTLINK)
   cisst_unset_all_package_settings (cisstDevices OpenIGTLink)
 endif (CISST_DEV_HAS_OPENIGTLINK)
 
-if (CISST_HAS_XML)
-  set (DEPENDENCIES ${DEPENDENCIES} cisstCommonXML)
-
-  if (CISST_DEV_HAS_MICRONTRACKER)
-    list (APPEND DEPENDENCIES cisstStereoVision)
-    find_path (MicronTracker_INCLUDE_DIR
-               NAMES MTC.h
-               PATHS "C:/Program Files/Claron Technology/MicronTracker/Dist"
-                     "C:/Program Files (x86)/Claron Technology/MicronTracker/Dist")
-    include_directories (${MicronTracker_INCLUDE_DIR})
-    find_library (MicronTracker_MTC_LIBRARY
-                  NAMES MTC
-                  HINTS ${MicronTracker_INCLUDE_DIR})
-    set (MicronTracker_LIBRARIES
-         ${MicronTracker_MTC_LIBRARY})
-    if (UNIX)
-      find_library (MicronTracker_dc1394_LIBRARY
-                    NAMES dc1394
-                    HINTS ${MicronTracker_INCLUDE_DIR})
-      find_library (raw1394_LIBRARY
-                    NAMES raw1394)
-      find_library (vnl_LIBRARY
-                NAMES vnl)
-      find_library (vnl_algo_LIBRARY
-                NAMES vnl_algo)
-      find_library (vcl_LIBRARY
-                NAMES vcl)
-      find_library (v3p_netlib_LIBRARY
-                NAMES v3p_netlib)
-      list (APPEND MicronTracker_LIBRARIES
-            ${MicronTracker_dc1394_LIBRARY}
-            ${raw1394_LIBRARY}
-            ${vnl_LIBRARY}
-            ${vnl_algo_LIBRARY}
-            ${vcl_LIBRARY}
-            ${v3p_netlib_LIBRARY})
-    endif (UNIX)
-    list (APPEND SOURCE_FILES devMicronTracker.cpp)
-    list (APPEND HEADER_FILES devMicronTracker.h)
-    list (APPEND DEV_ADDITIONAL_INCLUDE_DIR ${MicronTracker_INCLUDE_DIR})
-    list (APPEND DEV_ADDITIONAL_LIBRARIES ${MicronTracker_LIBRARIES})
-  endif (CISST_DEV_HAS_MICRONTRACKER)
-endif (CISST_HAS_XML)
 
 # Create the config file
 set (CISST_DEV_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstDevices/devConfig.h)

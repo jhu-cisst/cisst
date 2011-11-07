@@ -63,15 +63,6 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_EXPORT
 #define CISST_DEPRECATED
 
-// Wrap devices
-#if CISST_HAS_XML
-    #if CISST_DEV_HAS_MICRONTRACKER
-        %include "cisstDevices/devMicronTracker.h"
-    #endif
-#endif
-
-%include "cisstDevices/devKeyboard.h"
-
 #if CISST_DEV_HAS_ROBOTCOMPONENTS
     %include "cisstDevices/robotcomponents/devRobotComponents.i"
 #endif
