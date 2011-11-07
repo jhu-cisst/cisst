@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisst3DUserInterface/ui3Widget3D.h>
+#include <cisst3DUserInterface/ui3Manager.h>
 
 #include "ImageViewerKidney.h"
 

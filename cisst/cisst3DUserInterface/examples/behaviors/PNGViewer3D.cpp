@@ -21,12 +21,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <PNGViewer3D.h>
 
+#include <vtkProperty.h>
+#include <vtkImageData.h>
 #include <vtkPNGReader.h>
 #include <vtkTexture.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 
+#include <cisst3DUserInterface/ui3Manager.h>
 
 class PNGViewer3DVisibleObject: public ui3VisibleObject
 {

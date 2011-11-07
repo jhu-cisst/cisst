@@ -19,8 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterSourceVideoFile.h>
 
-#include <cisst3DUserInterface.h>
+#include <cisst3DUserInterface/ui3BehaviorBase.h>
+#include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
+#include <cisst3DUserInterface/ui3Widget3D.h>
 
 // Always include last!
 #include <ui3BehaviorsExport.h>

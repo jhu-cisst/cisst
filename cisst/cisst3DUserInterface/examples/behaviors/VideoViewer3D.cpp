@@ -21,6 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <VideoViewer3D.h>
 
+#include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+
+#include <cisst3DUserInterface/ui3ImagePlane.h>
+#include <cisst3DUserInterface/ui3Manager.h>
 
 VideoViewer3D::VideoViewer3D(const std::string & name):
     ui3BehaviorBase(std::string("VideoViewer3D::") + name, 0),

@@ -19,11 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <MapBehavior.h>
+
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-
-#include <MapBehavior.h>
+#include <cisst3DUserInterface/ui3Manager.h>
+#include <cisst3DUserInterface/ui3SlaveArm.h> // bad, ui3 should not have slave arm to start with (adeguet1)
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>

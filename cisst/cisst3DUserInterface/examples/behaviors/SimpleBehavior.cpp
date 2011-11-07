@@ -19,11 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <SimpleBehavior.h>
+
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-
-#include <SimpleBehavior.h>
+#include <cisst3DUserInterface/ui3Manager.h>
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>

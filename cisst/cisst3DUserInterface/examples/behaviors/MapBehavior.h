@@ -20,8 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstParameterTypes.h>
-#include <cisst3DUserInterface.h>
+#include <cisstParameterTypes/prmPositionJointGet.h>
+#include <cisst3DUserInterface/ui3BehaviorBase.h>
+#include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
+
 #include <list>
 #include <limits>
 #define MARKER_MAX 20

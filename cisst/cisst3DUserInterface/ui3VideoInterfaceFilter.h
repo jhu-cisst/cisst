@@ -22,8 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _ui3VideoInterfaceFilter_h
 #define _ui3VideoInterfaceFilter_h
 
-#include <cisstStereoVision.h>
-
+#include <cisstStereoVision/svlFilterBase.h>
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 
 // Always include last!

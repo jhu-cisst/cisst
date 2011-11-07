@@ -20,7 +20,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisst3DUserInterface.h>
+#include <cisst3DUserInterface/ui3BehaviorBase.h>
+#include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
+#include <cisst3DUserInterface/ui3Widget3D.h>
 
 // forward declaration for our visible objects
 class ImageViewerSkinVisibleObject;
