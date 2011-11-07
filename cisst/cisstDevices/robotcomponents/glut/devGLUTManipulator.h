@@ -18,60 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devGLUTManipulator_h
 #define _devGLUTManipulator_h
 
-#include <cisstRobot/robManipulator.h>
-#include <cisstDevices/robotcomponents/manipulators/devManipulator.h>
-#include <cisstDevices/robotcomponents/glut/devMeshTriangular.h>
-#include <cisstDevices/devExport.h>
-
-class CISST_EXPORT devGLUTManipulator : 
-
-  public devManipulator,
-  public robManipulator {
-
- private:
-
-  RnIO* input;
-  RnIO* output;
-
- protected:
-
-  vctDynamicVector<double> q;
-
-  devMeshTriangular* base;
-  std::vector< devMeshTriangular* > meshes;
-
- public: 
-
-  //! GLUT Manipulator generic constructor
-  /**
-     This constructor initializes an GLUT manipulator with the kinematics and 
-     dynamics contained in a file. Plus it initializes the GLUT elements of the
-     manipulators (bodies and joints) for the engine.
-     \param devname The name of the task
-     \param period The period of the task
-     \param robotfile The file with the kinematics and dynamics parameters
-     \param qinit The initial joint angles
-     \param Rtw0 The offset transformation of the robot base
-  */
-  devGLUTManipulator( const std::string& devname,
-		      double period,
-		      devManipulator::State state,
-		      osaCPUMask mask,
-		      const std::string& robotfn,
-		      const vctFrame4x4<double>& Rtw0,
-		      const vctDynamicVector<double>& qinit,
-		      const std::vector<std::string>& geomfiles,
-		      const std::string& basefile,
-		      bool rotateX90 = false );
-
-  ~devGLUTManipulator(){}
-
- protected:
-
-  void Read();
-  void Write();
-  void Write( const vctDynamicVector<double>& q );
-
-};
+#error "The class devGLUTManipulator is now deprecated and has been deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif

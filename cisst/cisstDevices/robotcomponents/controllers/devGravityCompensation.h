@@ -2,34 +2,6 @@
 #ifndef _devGravityCompensation_h
 #define _devGravityCompensation_h
 
-#include <cisstRobot/robManipulator.h>
-#include <cisstDevices/robotcomponents/controllers/devController.h>
-#include <cisstDevices/devExport.h>
-
-class CISST_EXPORT devGravityCompensation : 
-
-  public devController,
-  public robManipulator {
-
- private:
-
-  RnIO* output;
-  RnIO* feedback;
-
- protected:
-
-  void Evaluate();
-
- public:
-
-  devGravityCompensation( const std::string& name, 
-			  double period,
-			  devController::State state,
-			  osaCPUMask mask,
-			  const std::string& robfile,
-			  const vctFrame4x4<double>& Rtwb );
-
-
-};
+#error "The class devGravityCompensation is now deprecated and has been deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif

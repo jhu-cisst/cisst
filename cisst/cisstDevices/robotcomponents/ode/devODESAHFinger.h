@@ -18,20 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devODESAHFinger_h
 #define _devODESAHFinger_h
 
-#include <cisstDevices/robotcomponents/ode/devODEManipulator.h>
-#include <cisstDevices/devExport.h>
-
-class CISST_EXPORT devODESAHFinger : public devODEManipulator {
-
- public: 
-
-  devODESAHFinger( const std::string& devname,
-		   double period,
-		   devODEWorld& world,
-		   const vctFrame4x4<double>& Rtb0,
-		   const std::vector<std::string>& fingergeoms,
-		   dBodyID palmbodyid );
-
-};
+#error "The class devODESAHFinger is now deprecated and has been deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif

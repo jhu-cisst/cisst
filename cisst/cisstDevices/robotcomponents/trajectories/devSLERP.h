@@ -18,46 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devSLERP_h
 #define _devSLERP_h
 
-#include <iostream>
-
-#include <cisstRobot/robSLERP.h>
-#include <cisstDevices/robotcomponents/trajectories/devTrajectory.h>
-#include <cisstDevices/devExport.h>
-
-class CISST_EXPORT devSLERP : public devTrajectory {
-
- private:
-  
-  SO3IO* input;
-  SO3IO* output;
-
-  vctQuaternionRotation3<double> qold;
-  double wmax;
-
-  vctQuaternionRotation3<double> GetInput();
-
- protected:
-
-  // Declare a pure virtual method 
-  //! Create a new function that will be added to the list of functions
-  robFunction* Queue( double t, robFunction* function );
-  robFunction* Track( double, robFunction*  ){return NULL;}
-
-  void Evaluate( double t, robFunction* function );
-  bool IsInputNew();
-  
- public:
-  
-  devSLERP( const std::string& name,
-	    double period,
-	    devTrajectory::State state,
-	    osaCPUMask mask,
-	    devTrajectory::Mode mode,
-	    devTrajectory::Variables variables,
-	    const vctQuaternionRotation3<double>& qinit , 
-	    double wmax );
-  ~devSLERP(){}
-
-};
+#error "The class devSLERP is now deprecated and has been deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif

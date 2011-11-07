@@ -3,48 +3,6 @@
 #ifndef _devLinearSE3_h
 #define _devLinearSE3_h
 
-#include <cisstVector/vctFrame4x4.h>
-#include <cisstDevices/robotcomponents/trajectories/devTrajectory.h>
-#include <cisstDevices/devExport.h>
-
-class CISST_EXPORT devLinearSE3 : public devTrajectory {
-
- private:
-  
-  SE3IO* input;
-  SE3IO* output;
-
-  double vmax;
-  double wmax;
-
-  vctFrame4x4<double> oldinput;
-
-  vctFrame4x4<double> GetInput();
-
- protected:
-
-  // Declare a pure virtual method 
-  //! Create a new function that will be added to the list of functions
-  robFunction* Queue( double t, robFunction* function );
-  robFunction* Track( double t, robFunction* function  );
-
-  void Evaluate( double t, robFunction* function );
-  bool IsInputNew();
-  
- public:
-  
-  devLinearSE3( const std::string& name,
-		double period,
-		devTrajectory::State state,
-		osaCPUMask cpumask,
-		devTrajectory::Mode mode,
-		devTrajectory::Variables variables,
-		const vctFrame4x4<double>& Rtinit , 
-		double vmax,
-		double wmax );
-
-  ~devLinearSE3(){}
-
-};
+#error "The class devLinearSE3 is now deprecated and has been deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif

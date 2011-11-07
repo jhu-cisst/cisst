@@ -15,67 +15,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _robGUI_h
-#define _robGUI_h
+#ifndef _devGLUT_h
+#define _devGLUT_h
 
-#include <stdlib.h>
-#include <cisstCommon/cmnPortability.h>
-#if (CISST_OS == CISST_DARWIN)
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-#include <vector>
-
-#include <cisstDevices/robotcomponents/glut/devGeometry.h>
-#include <cisstDevices/devExport.h>
-
-class CISST_EXPORT devGLUT {
-
- private:
-
-  int x, y;           // X, Y positions (top left corner)
-  int width, height;  // width and heiht
-    
-  double azimuth;       // rotation about the Z axis
-  double elevation;     // elevation from the X-Y plane
-  double distance;      // distance from the origin
-  float perspective;  // camera FOV
-
-  double sleepPeriod;  // to save CPU
-  
-  void DrawXYZ();     // draw the X-Y-Z axis
-  void DrawGrid(double width, int subdivisions); // draw the floor
-  
-  // compute the camera XYZ coordinates
-  vctFixedSizeVector<double,3> CameraPosition() const;
-  
-  std::vector<const devGeometry*> geoms; // the geometries
-  
- public:
-
-  static devGLUT* glut;
-  
-  //! Default constructor
-  devGLUT( int argc, char** argv);
-  
-  //! 
-  static void Register( const devGeometry* geom );
-
-  //! Draw everything
-  void Draw();
-  
-  //! Process the keboard
-  void Keyboard( int k, int x, int y );
-
-  devGeometry* LoadOBJ( const std::string& filename );
-
-  //! Setter
-  void SetSleepPeriod( const double sleepPeriodInSec ) {
-      sleepPeriod = sleepPeriodInSec;
-  }
-
-  static void Refresh();
-};
+#error "The class devGLUT is now deprecated and has been deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif
