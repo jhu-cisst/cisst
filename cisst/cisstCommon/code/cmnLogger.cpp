@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h>
 #include <fstream>
 
+#include <cisstRevision.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnClassRegister.h>
@@ -34,6 +35,7 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     LoDMultiplexerStreambuf()
 {
     LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);
+    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " " << CISST_FULL_REVISION << std::endl;
 }
 
 
@@ -125,11 +127,12 @@ bool cmnLogger::SetMaskClassMatching(const std::string & stringToMatch, cmnLogMa
     return cmnClassRegister::SetLogMaskClassMatching(stringToMatch, mask);
 }
 
-const char *cmnLogger::ExtractFileName(const char *file)
-{ 
-    const char *p1 = strrchr(file, '/');
+
+const char * cmnLogger::ExtractFileName(const char * file)
+{
+    const char * p1 = strrchr(file, '/');
 #if (CISST_OS == CISST_WINDOWS)
-    const char *p2 = strrchr(file, '\\');
+    const char * p2 = strrchr(file, '\\');
     if (p2 > p1) return p2+1;
 #endif
     if (p1) return p1+1;

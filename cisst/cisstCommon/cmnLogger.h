@@ -433,7 +433,7 @@ class CISST_EXPORT cmnLogger {
         Instance()->RemoveChannelInstance(outputStream);
     }
 
-    static const char *ExtractFileName(const char *file);
+    static const char * ExtractFileName(const char * file);
 };
 
 
