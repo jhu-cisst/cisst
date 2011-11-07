@@ -15,7 +15,7 @@
 if (CISST_cisstDevices)
 
   if (CISST_DEV_HAS_ROBOTCOMPONENTS)
-    add_subdirectory (robotcomponents)
+    #add_subdirectory (robotcomponents)
   else (CISST_DEV_HAS_ROBOTCOMPONENTS)
       message ("Information: cisstDevices examples robotcomponents will not be compiled since they require CISST_DEV_HAS_ROBOTCOMPONENTS")
   endif (CISST_DEV_HAS_ROBOTCOMPONENTS)
