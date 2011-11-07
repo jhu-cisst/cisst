@@ -21,39 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devNull_h
 #define _devNull_h
 
-/*!
-  \file
-  \brief Defines a null device.
-*/
-
-#include <cisstMultiTask/mtsComponent.h>
-
-// Always include last
-#include <cisstDevices/devExport.h>
-
-/*!
-  \ingroup cisstMultiTask
-
-  This class provides a null device.
-*/
-class CISST_EXPORT devNull: public mtsComponent {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
-public:
-    devNull(const std::string & name) : mtsComponent(name) {}
-    ~devNull() {}
-
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {}
-	void Create(void * CMN_UNUSED(data) = 0) {}
-    void Run() {}
-	void Start(void) {}
-	void Kill(void) {}
-    void Cleanup(void) {};
-};
-
-
-CMN_DECLARE_SERVICES_INSTANTIATION(devNull)
-
+#error "The class devNull is now deprecated - if you really need this class, please revert your SVN local copy to revision https://svn.lcsr.jhu.edu/cisst/tags/pre-saw/"
 
 #endif // _devNull_h
 

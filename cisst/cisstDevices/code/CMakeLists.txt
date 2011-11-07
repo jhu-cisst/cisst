@@ -30,14 +30,12 @@ option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
 #option( CISST_DEV_HAS_ROBOTCOMPONENTS "Build robot components." OFF )
 
 set (HEADER_FILES
-     devNull.h
      devSartoriusSerial.h
      devExport.h
      can/devCAN.h
      )
 
 set (SOURCE_FILES
-     devNull.cpp
      devSartoriusSerial.cpp
      can/devCAN.cpp
      )
