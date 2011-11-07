@@ -22,7 +22,6 @@ set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical ciss
 
 # make sure all options are set for all devices to OFF
 option (CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
-option (CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
 option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
 option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
 option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
@@ -78,27 +77,6 @@ if (CISST_DEV_HAS_LOPOMOCO)
   set (HEADER_FILES ${HEADER_FILES}
        devLoPoMoCo.h)
 endif (CISST_DEV_HAS_LOPOMOCO)
-
-# OpenIGTLink
-if (CISST_DEV_HAS_OPENIGTLINK)
-  find_package (OpenIGTLink REQUIRED)
-  include (${OpenIGTLink_USE_FILE})
-  set (SOURCE_FILES
-       ${SOURCE_FILES}
-       devOpenIGTLink.cpp)
-  set (HEADER_FILES
-       ${HEADER_FILES}
-       devOpenIGTLink.h)
-  cisst_set_package_settings (cisstDevices OpenIGTLink CMAKE_FILES      OpenIGTLink_USE_FILE)
-  set (OpenIGTLink_PACKAGE_NAME "OpenIGTLink")
-  cisst_set_package_settings (cisstDevices OpenIGTLink PACKAGES         OpenIGTLink_PACKAGE_NAME)
-  cisst_set_package_settings (cisstDevices OpenIGTLink LINK_DIRECTORIES OpenIGTLink_LIBRARY_DIRS)
-  set (OpenIGTLink_LIBRARY_NAME "OpenIGTLink")
-  cisst_set_package_settings (cisstDevices OpenIGTLink LIBRARIES        OpenIGTLink_LIBRARY_NAME)
-else (CISST_DEV_HAS_OPENIGTLINK)
-  cisst_unset_all_package_settings (cisstDevices OpenIGTLink)
-endif (CISST_DEV_HAS_OPENIGTLINK)
-
 
 # Create the config file
 set (CISST_DEV_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstDevices/devConfig.h)

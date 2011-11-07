@@ -21,14 +21,8 @@ if (CISST_cisstDevices)
   endif (CISST_DEV_HAS_ROBOTCOMPONENTS)
 
   if (CISST_HAS_FLTK)
+    # Sartorius scale example
     add_subdirectory(example2)
-
-    if (CISST_DEV_HAS_OPENIGTLINK)
-      add_subdirectory (example4)
-    else (CISST_DEV_HAS_OPENIGTLINK)
-      message ("Information: cisstDevices example 4 will not be compiled since it requires CISST_DEV_HAS_OPENIGTLINK")
-    endif(CISST_DEV_HAS_OPENIGTLINK)
-
   else (CISST_HAS_FLTK)
     message ("Information: cisstDevices examples 1, 2, 3, 4 and 5 will not be compiled since they require CISST_HAS_FLTK")
   endif(CISST_HAS_FLTK)
