@@ -3,19 +3,19 @@
 
 /*
   $Id: svlCCHandEyeCalibration.cpp 2426 2011-05-21 00:53:58Z wliu25 $
-
+  
   Author(s):  Wen P. Liu
   Created on: 2011
-
+  
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
-
+  
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
 no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
-
+    
 --- end cisst license ---
 */
 
@@ -36,76 +36,79 @@ double svlCCHandEyeCalibration::calibrate()
     double error;
     cameraMatrix.clear();
     worldToTCPMatrix.clear();
-
+    
     std::cout << std::endl << "Starting hand eye calibration" << std::endl;
     std::cout << "==========================================" << std::endl;
-
+    
     //process calibration grid images
     cv::Mat rmatrix, tvec;
     CvMat* worldToTCP;
     CvMat *cmatrix, *tcpMatrix, *tcpMatrixTemp;
     for(int i=0;i<calibrationGrids.size();i++)
     {
-        if(debug)
-            std::cout << "Processing Grid# " << i << " of " << calibrationGrids.size() << std::endl;
-        cmatrix = cvCreateMat(4,4,CV_64FC1);
-        //camera to grid transformation
-        if(debug)
+        if(calibrationGrids.at(i)->valid)
         {
-            rmatrix = calibrationGrids.at(i)->groundTruthRmatrix;
-            tvec = calibrationGrids.at(i)->groundTruthTvec;
-        }else
-        {
-            rmatrix = calibrationGrids.at(i)->rmatrix;
-            tvec = calibrationGrids.at(i)->tvec;
+            if(debug)
+                std::cout << "Processing Grid# " << i << " of " << calibrationGrids.size() << std::endl;
+            cmatrix = cvCreateMat(4,4,CV_64FC1);
+            //camera to grid transformation
+            if(debug)
+            {
+                rmatrix = calibrationGrids.at(i)->groundTruthRmatrix;
+                tvec = calibrationGrids.at(i)->groundTruthTvec;
+            }else
+            {
+                rmatrix = calibrationGrids.at(i)->rmatrix;
+                tvec = calibrationGrids.at(i)->tvec;
+            }
+            cmatrix->data.db[0] = rmatrix.at<double>(0,0);
+            cmatrix->data.db[1] = rmatrix.at<double>(0,1);
+            cmatrix->data.db[2] = rmatrix.at<double>(0,2);
+            cmatrix->data.db[3] = tvec.at<double>(0,0);
+            cmatrix->data.db[4] = rmatrix.at<double>(1,0);
+            cmatrix->data.db[5] = rmatrix.at<double>(1,1);
+            cmatrix->data.db[6] = rmatrix.at<double>(1,2);
+            cmatrix->data.db[7] = tvec.at<double>(0,1);
+            cmatrix->data.db[8] = rmatrix.at<double>(2,0);
+            cmatrix->data.db[9] = rmatrix.at<double>(2,1);
+            cmatrix->data.db[10] = rmatrix.at<double>(2,2);
+            cmatrix->data.db[11] = tvec.at<double>(0,2);
+            cmatrix->data.db[12] = 0;
+            cmatrix->data.db[13] = 0;
+            cmatrix->data.db[14] = 0;
+            cmatrix->data.db[15] = 1;
+            
+            cameraMatrix.push_back(cmatrix);
+            
+            //world to tcp
+            worldToTCP = calibrationGrids.at(i)->worldToTCP;
+            tcpMatrix = cvCreateMat(4,4,CV_64FC1);
+            tcpMatrix->data.db[0] = worldToTCP->data.fl[0];
+            tcpMatrix->data.db[1] = worldToTCP->data.fl[1];
+            tcpMatrix->data.db[2] = worldToTCP->data.fl[2];
+            tcpMatrix->data.db[3] = worldToTCP->data.fl[3];
+            tcpMatrix->data.db[4] = worldToTCP->data.fl[4];
+            tcpMatrix->data.db[5] = worldToTCP->data.fl[5];
+            tcpMatrix->data.db[6] = worldToTCP->data.fl[6];
+            tcpMatrix->data.db[7] = worldToTCP->data.fl[7];
+            tcpMatrix->data.db[8] = worldToTCP->data.fl[8];
+            tcpMatrix->data.db[9] = worldToTCP->data.fl[9];
+            tcpMatrix->data.db[10] = worldToTCP->data.fl[10];
+            tcpMatrix->data.db[11] = worldToTCP->data.fl[11];
+            tcpMatrix->data.db[12] = 0;
+            tcpMatrix->data.db[13] = 0;
+            tcpMatrix->data.db[14] = 0;
+            tcpMatrix->data.db[15] = 1;
+            worldToTCPMatrix.push_back(tcpMatrix);
         }
-        cmatrix->data.db[0] = rmatrix.at<double>(0,0);
-        cmatrix->data.db[1] = rmatrix.at<double>(0,1);
-        cmatrix->data.db[2] = rmatrix.at<double>(0,2);
-        cmatrix->data.db[3] = tvec.at<double>(0,0);
-        cmatrix->data.db[4] = rmatrix.at<double>(1,0);
-        cmatrix->data.db[5] = rmatrix.at<double>(1,1);
-        cmatrix->data.db[6] = rmatrix.at<double>(1,2);
-        cmatrix->data.db[7] = tvec.at<double>(0,1);
-        cmatrix->data.db[8] = rmatrix.at<double>(2,0);
-        cmatrix->data.db[9] = rmatrix.at<double>(2,1);
-        cmatrix->data.db[10] = rmatrix.at<double>(2,2);
-        cmatrix->data.db[11] = tvec.at<double>(0,2);
-        cmatrix->data.db[12] = 0;
-        cmatrix->data.db[13] = 0;
-        cmatrix->data.db[14] = 0;
-        cmatrix->data.db[15] = 1;
-
-        cameraMatrix.push_back(cmatrix);
-
-        //world to tcp
-        worldToTCP = calibrationGrids.at(i)->worldToTCP;
-        tcpMatrix = cvCreateMat(4,4,CV_64FC1);
-        tcpMatrix->data.db[0] = worldToTCP->data.fl[0];
-        tcpMatrix->data.db[1] = worldToTCP->data.fl[1];
-        tcpMatrix->data.db[2] = worldToTCP->data.fl[2];
-        tcpMatrix->data.db[3] = worldToTCP->data.fl[3];
-        tcpMatrix->data.db[4] = worldToTCP->data.fl[4];
-        tcpMatrix->data.db[5] = worldToTCP->data.fl[5];
-        tcpMatrix->data.db[6] = worldToTCP->data.fl[6];
-        tcpMatrix->data.db[7] = worldToTCP->data.fl[7];
-        tcpMatrix->data.db[8] = worldToTCP->data.fl[8];
-        tcpMatrix->data.db[9] = worldToTCP->data.fl[9];
-        tcpMatrix->data.db[10] = worldToTCP->data.fl[10];
-        tcpMatrix->data.db[11] = worldToTCP->data.fl[11];
-        tcpMatrix->data.db[12] = 0;
-        tcpMatrix->data.db[13] = 0;
-        tcpMatrix->data.db[14] = 0;
-        tcpMatrix->data.db[15] = 1;
-        worldToTCPMatrix.push_back(tcpMatrix);
     }
-
+    
     valid = new int*[calibrationGrids.size()];
     for(int i=0;i<calibrationGrids.size();i++)
     {
         *(valid+i)=new int[calibrationGrids.size()];
     }
-
+    
     for(int i=0;i<calibrationGrids.size();i++)
     {
         for(int j=0;j<calibrationGrids.size();j++)
@@ -120,7 +123,7 @@ double svlCCHandEyeCalibration::calibrate()
                 valid[i][j] = 0;
         }
     }
-
+    
     //calibrate
     switch(handEyeMethodFlag)
     {
@@ -131,10 +134,10 @@ double svlCCHandEyeCalibration::calibrate()
         std::cout << "Unknown hand eye method: " <<  handEyeMethodFlag << std::endl;
         break;
     }
-
+    
     //if(debug)
     //printData();
-
+    
     // Free memory
     //rmatrix.~Mat();
     //tvec.~Mat();
@@ -156,21 +159,21 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
     int* myIndicies = new int[cameraMatrix.size()];
     for(int j=0;j<cameraMatrix.size();j++)
         myIndicies[j] = j;
-
+    
     int* myPermutationIndicies = new int[cameraMatrix.size()];
     for(int j=0;j<cameraMatrix.size();j++)
         myPermutationIndicies[j] = j;
-
+    
     int setIteration = 0;
     int totalIteration = 0;
     double maxThreshold = 0.3;
     double minThreshold = 0.2;
-
+    
     int maxIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)10000);
     int maxSetIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)1000);
     if(cameraMatrix.size() < 10)
         maxThreshold = 1.0;
-
+    
     for(int i=cameraMatrix.size();i>std::max(cameraMatrix.size()/2,(cameraMatrix.size()-5));i--)
     {
         //combinations
@@ -191,17 +194,17 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
                 myPermutationIndicies[j] = myIndicies[j]; 
             setIteration = 0;
             maxSetIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)1000);
-
+            
             //permutations
             do
             {
                 handEyeError = dualQuaternionMethod(myPermutationIndicies,i,false)*cameraMatrix.size()/i;
                 if(handEyeError < minHandEyeAvgError)
                 {
-
+                    
                     minHandEyeAvgError = handEyeError;
                     minTcpTCamera = tcp_T_camera;
-
+                    
                     if(debug)
                     {
                         std::cout << "      Iteration: " << totalIteration << " of " <<maxIteration << " perm: " << handEyeError << " using "<<i ;
@@ -210,7 +213,7 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
                             std::cout << myPermutationIndicies[k];
                         std::cout << std::endl;
                     }
-
+                    
                     if(minHandEyeAvgError < minThreshold)
                         maxSetIteration = maxIteration;
                 }
@@ -223,7 +226,7 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
     }
     if(debug)
         std::cout << "call ends at iteration " << totalIteration << " of max " << maxIteration << "||" << std::endl;
-
+    
     handEyeAvgError = minHandEyeAvgError;
     tcp_T_camera = minTcpTCamera;
     std::cout << "HandEye Avg Error " << handEyeAvgError << std::endl << std::endl;
@@ -239,7 +242,7 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
 **************************************************************************************************/
 double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indiciesSize, bool runCombination)
 {
-
+    
     CvMat *A, *B, *temp0, *temp1, *mulResult, *invResult, *q, *qPrime, *sTemp, *a3x1, *b3x1, *aPrime3x1, *bPrime3x1, *T;
     std::vector<CvMat*> aQ;
     std::vector<CvMat*> aQPrime;
@@ -250,7 +253,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     std::vector<CvMat*> bMatrix;
     int aIndex,bIndex;
     handEyeAvgError = 0;
-
+    
     //cameraMatrix,worldToTCPMatrix;
     int j = 0;
     for(int i=0;i<(indiciesSize)*(indiciesSize);i++)
@@ -269,7 +272,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         }
         aIndex = indicies[i%indiciesSize];
         bIndex = indicies[j];
-
+        
         if(valid[aIndex][bIndex])
         {
             if(debug)
@@ -284,28 +287,28 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
             aPrime3x1 = cvCreateMat(3,1,CV_64FC1);
             b3x1 = cvCreateMat(3,1,CV_64FC1);
             bPrime3x1 = cvCreateMat(3,1,CV_64FC1);
-
+            
             // A = inv(Hmarker2world(:,:,i+1))*Hmarker2world(:,:,i);
             temp0 = worldToTCPMatrix[aIndex];
             temp1 = worldToTCPMatrix[bIndex];
             cvInvert(temp1, invResult, CV_LU);
             cvMatMul(invResult, temp0, A);
             aMatrix.push_back(A);
-
+            
             //B = Hgrid2cam(:,:,i+1)*inv(Hgrid2cam(:,:,i));
             temp0 = cameraMatrix[aIndex];
             temp1 = cameraMatrix[bIndex];
             cvInvert(temp0,invResult,CV_LU);
             cvMatMul(temp1,invResult,B);
             bMatrix.push_back(B);
-
+            
             //[q,qprime] = getDualQuaternion(A(1:3,1:3),A(1:3,4));
             q = cvCreateMat(4,1,CV_64FC1);
             qPrime = cvCreateMat(4,1,CV_64FC1);
             getDualQuaternion(A, q, qPrime);
             aQ.push_back(q);
             aQPrime.push_back(qPrime);
-
+            
             //[q,qprime] = getDualQuaternion(B(1:3,1:3),B(1:3,4));
             q = cvCreateMat(4,1,CV_64FC1);
             qPrime = cvCreateMat(4,1,CV_64FC1);
@@ -314,14 +317,14 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
             bQPrime.push_back(qPrime);
         }
     }
-
+    
     if(aMatrix.size() < 1)
     {
         if(debug)
             std::cout << std::endl << "Cannot process hand eye calibration, valid pairs images total: "<< aMatrix.size() << std::endl ;
         return std::numeric_limits<double>::max( );
     }
-
+    
     //The dual quaternion is (Q.q + epsilon*Q.prime)
     //a = Qa.q, a' = Qa.prime  idem for b
     if(aQ.size()>0)
@@ -347,7 +350,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         populateComplexMatrixST(a3x1,b3x1,aPrime3x1,bPrime3x1,sTemp, T, i);
         S.push_back(sTemp);
     }
-
+    
     CvMat* U  = cvCreateMat(T->rows,T->rows,CV_64FC1);
     CvMat* uTranspose  = cvCreateMat(T->rows,T->rows,CV_64FC1);
     CvMat* D  = cvCreateMat(T->rows,T->cols,CV_64FC1);
@@ -358,7 +361,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     cvSVD(T, D, uTranspose, vTranspose, CV_SVD_U_T|CV_SVD_V_T); // A = U D V^T
     cvTranspose(uTranspose,U);
     cvTranspose(vTranspose,V);
-
+    
     CvMat *u1, *u1Transpose, *u2, *u2Transpose, *v1, *v2;
     u1 = cvCreateMat(4,1,CV_64FC1);
     u1Transpose = cvCreateMat(1,4,CV_64FC1);
@@ -366,7 +369,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     u2Transpose = cvCreateMat(1,4,CV_64FC1);
     v1 = cvCreateMat(4,1,CV_64FC1);
     v2 = cvCreateMat(4,1,CV_64FC1);
-
+    
     u1->data.db[0] = V->data.db[6];
     u1->data.db[1] = V->data.db[14];
     u1->data.db[2] = V->data.db[22];
@@ -376,7 +379,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     v1->data.db[1] = V->data.db[46];
     v1->data.db[2] = V->data.db[54];
     v1->data.db[3] = V->data.db[62];
-
+    
     u2->data.db[0] = V->data.db[7];
     u2->data.db[1] = V->data.db[15];
     u2->data.db[2] = V->data.db[23];
@@ -386,8 +389,8 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     v2->data.db[1] = V->data.db[47];
     v2->data.db[2] = V->data.db[55];
     v2->data.db[3] = V->data.db[63];
-
-
+    
+    
     CvMat *aTemp, *bTemp, *cTemp, *poly, *roots, *temp0Mul1x1, *temp1Mul1x1, *temp2Mul1x1, *val0, *val1;
     CvMat *qFinal, *qConj, *rMatrix, *tMatrix;
     double root, val, lambda0, lambda1;
@@ -405,7 +408,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     qConj = cvCreateMat(4,1,CV_64FC1);
     rMatrix = cvCreateMat(3,3,CV_64FC1);
     tMatrix = cvCreateMat(4,1,CV_64FC1);
-
+    
     cvMatMul(u1Transpose,v1,aTemp);
     cvMatMul(u1Transpose,v2,temp0Mul1x1);
     cvMatMul(u2Transpose,v1,temp1Mul1x1);
@@ -416,7 +419,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     poly->data.db[2] = cTemp->data.db[0];
     //cvSolvePoly keeps returning NaN, writing own quadratic solver
     solveQuadratic(poly->data.db[0],poly->data.db[1],poly->data.db[2],roots);
-
+    
     cvMatMul(u1Transpose,u1,temp0Mul1x1);
     temp0Mul1x1->data.db[0] = temp0Mul1x1->data.db[0]*roots->data.db[0]*roots->data.db[0];
     cvMatMul(u1Transpose,u2,temp1Mul1x1);
@@ -424,7 +427,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     cvAdd(temp0Mul1x1,temp1Mul1x1,temp2Mul1x1);
     cvMatMul(u2Transpose,u2,temp0Mul1x1);
     cvAdd(temp2Mul1x1,temp0Mul1x1,val0);
-
+    
     cvMatMul(u1Transpose,u1,temp0Mul1x1);
     temp0Mul1x1->data.db[0] = temp0Mul1x1->data.db[0]*roots->data.db[1]*roots->data.db[1];
     cvMatMul(u1Transpose,u2,temp1Mul1x1);
@@ -432,7 +435,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     cvAdd(temp0Mul1x1,temp1Mul1x1,temp2Mul1x1);
     cvMatMul(u2Transpose,u2,temp0Mul1x1);
     cvAdd(temp2Mul1x1,temp0Mul1x1,val1);
-
+    
     if(val0->data.db[0]>val1->data.db[0])
     {
         root = roots->data.db[0];
@@ -442,10 +445,10 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         root = roots->data.db[1];
         val = val1->data.db[0];
     }
-
+    
     lambda1 = sqrt(1/val);
     lambda0 = root*lambda1;
-
+    
     qFinal->data.db[0] = lambda0*u1->data.db[0]+lambda1*u2->data.db[0];
     qFinal->data.db[1] = lambda0*u1->data.db[1]+lambda1*u2->data.db[1];
     qFinal->data.db[2] = lambda0*u1->data.db[2]+lambda1*u2->data.db[2];
@@ -454,7 +457,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     qFinal->data.db[5] = lambda0*v1->data.db[1]+lambda1*v2->data.db[1];
     qFinal->data.db[6] = lambda0*v1->data.db[2]+lambda1*v2->data.db[2];
     qFinal->data.db[7] = lambda0*v1->data.db[3]+lambda1*v2->data.db[3];
-
+    
     q = cvCreateMat(4,1,CV_64FC1);
     qPrime = cvCreateMat(4,1,CV_64FC1);
     q->data.db[0] = qFinal->data.db[1];
@@ -469,20 +472,20 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     qConj->data.db[1] = -q->data.db[1];
     qConj->data.db[2] = -q->data.db[2];
     qConj->data.db[3] = q->data.db[3];
-
+    
     quaternionToRMatrix(rMatrix,q);
     quaternionMul(qPrime,qConj,tMatrix);
     cvSetReal2D(tMatrix,0,0,2*tMatrix->data.db[0]);
     cvSetReal2D(tMatrix,1,0,2*tMatrix->data.db[1]);
     cvSetReal2D(tMatrix,2,0,2*tMatrix->data.db[2]);
     cvSetReal2D(tMatrix,3,0,2*tMatrix->data.db[3]);
-
+    
     CvMat *tMatrix3x1, *rMatrixNeg, *invCameraToTCP, *tempMul3x1;
     tMatrix3x1 = cvCreateMat(3,1,CV_64FC1);
     rMatrixNeg = cvCreateMat(3,3,CV_64FC1);
     tempMul3x1 = cvCreateMat(3,1,CV_64FC1);
     invCameraToTCP = cvCreateMat(4,4,CV_64FC1);
-
+    
     cvSetReal2D(rMatrixNeg,0,0,-rMatrix->data.db[0]);
     cvSetReal2D(rMatrixNeg,0,1,-rMatrix->data.db[1]);
     cvSetReal2D(rMatrixNeg,0,2,-rMatrix->data.db[2]);
@@ -492,11 +495,11 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     cvSetReal2D(rMatrixNeg,2,0,-rMatrix->data.db[6]);
     cvSetReal2D(rMatrixNeg,2,1,-rMatrix->data.db[7]);
     cvSetReal2D(rMatrixNeg,2,2,-rMatrix->data.db[8]);
-
+    
     cvSetReal2D(tMatrix3x1,0,0,tMatrix->data.db[0]);
     cvSetReal2D(tMatrix3x1,1,0,tMatrix->data.db[1]);
     cvSetReal2D(tMatrix3x1,2,0,tMatrix->data.db[2]);
-
+    
     cvMatMul(rMatrixNeg,tMatrix3x1,tempMul3x1);
     cvSetReal2D(invCameraToTCP,0,0,rMatrix->data.db[0]);
     cvSetReal2D(invCameraToTCP,0,1,rMatrix->data.db[1]);
@@ -514,7 +517,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     cvSetReal2D(invCameraToTCP,3,1,0);
     cvSetReal2D(invCameraToTCP,3,2,0);
     cvSetReal2D(invCameraToTCP,3,3,1);
-
+    
     cvInvert(invCameraToTCP,cameraToTCP);
     cameraToTCP->data.db[12] = 0.0;
     cameraToTCP->data.db[13] = 0.0;
@@ -524,7 +527,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
                           cameraToTCP->data.db[4],cameraToTCP->data.db[5],cameraToTCP->data.db[6],cameraToTCP->data.db[7],
                           cameraToTCP->data.db[8],cameraToTCP->data.db[9],cameraToTCP->data.db[10],cameraToTCP->data.db[11],
                           cameraToTCP->data.db[12],cameraToTCP->data.db[13],cameraToTCP->data.db[14],cameraToTCP->data.db[15]);
-
+    
     if(debug)
     {
         std::cout << "===============T===============" << std::endl;
@@ -583,21 +586,21 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         std::cout <<"===============t===============" << std::endl;
         printCvMatDouble(tMatrix);
     }
-
+    
     //std::cout <<"===============TCP_T_Camera===============" << std::endl;
     //printCvMatDouble(cameraToTCP);
-
+    
     //free memory
     //CvMat *A, *B, *temp0, *temp1, *mulResult, *invResult, *q, *qPrime, *sTemp, *a3x1, *b3x1, *aPrime3x1, *bPrime3x1, *T;
     //cvReleaseMat(&A);
     //cvReleaseMat(&B);
-
+    
     // oddly releasing temp0,temp1,mulResult,invResult causes errors
     //cvReleaseMat(&temp0);
     //cvReleaseMat(&temp1);
     //cvReleaseMat(&mulResult);
     //cvReleaseMat(&invResult);
-
+    
     if(q && qPrime && sTemp && a3x1 && b3x1 && aPrime3x1 && bPrime3x1 && T)
     {
         cvReleaseMat(&q);
@@ -609,7 +612,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         cvReleaseMat(&bPrime3x1);
         cvReleaseMat(&T);
     }
-
+    
     if(U && uTranspose && D && V && vTranspose)
     {
         cvReleaseMat(&U);
@@ -618,7 +621,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         cvReleaseMat(&V);
         cvReleaseMat(&vTranspose);
     }
-
+    
     //CvMat *aTemp, *bTemp, *cTemp, *poly, *roots, *temp0Mul1x1, *temp1Mul1x1, *temp2Mul1x1, *val0, *val1;
     //CvMat *qFinal, *qConj, *rMatrix, *tMatrix;
     if(aTemp && bTemp && cTemp && poly && roots && temp0Mul1x1 && temp1Mul1x1 && temp2Mul1x1 && val0 && val1 && qFinal && qConj && rMatrix && tMatrix)
@@ -638,7 +641,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         cvReleaseMat(&rMatrix);
         cvReleaseMat(&tMatrix);
     }
-
+    
     //CvMat *tMatrix3x1, *rMatrixNeg, *invCameraToTCP, *tempMul3x1;
     if(tMatrix3x1 && rMatrixNeg && invCameraToTCP && tempMul3x1)
     {
@@ -647,7 +650,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         cvReleaseMat(&invCameraToTCP);
         cvReleaseMat(&tempMul3x1);
     }
-
+    
     return getAvgHandEyeError(aMatrix, bMatrix);
 }
 
@@ -663,9 +666,9 @@ double svlCCHandEyeCalibration::getAvgHandEyeError(std::vector<CvMat*> aMatrix, 
         error = checkAXXB(aMatrix.at(k),bMatrix.at(k));
         totalError+= error;
     }
-
+    
     avgError = totalError / k;
-
+    
     return avgError;
 }
 
@@ -682,9 +685,9 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
     tempArith3x1 = cvCreateMat(3,1,CV_64FC1);
     tempMul3x1 = cvCreateMat(3,1,CV_64FC1);
     c = cvCreateMat(3,1,CV_64FC1);
-
+    
     double rvecNormDouble, tempArithDouble;
-
+    
     //Conversion from R,t to the screw representation [d,theta,l,m]
     rmatrix = cvCreateMat(3,3,CV_64FC1);
     rmatrix->data.db[0] = matrix->data.db[0];
@@ -699,20 +702,20 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
     tvec->data.db[0] = matrix->data.db[3];
     tvec->data.db[1] = matrix->data.db[7];
     tvec->data.db[2] = matrix->data.db[11];
-
+    
     //r = rodrigues(R);
     cvRodrigues2(rmatrix,rvec);
     //theta = norm(r);
     rvecNormDouble = cv::norm(rvec);
     cvAddS(rvecNorm,cvScalar(rvecNormDouble),rvecNorm);
-
+    
     //l = r/norm(theta);
     cvDiv(rvec,rvecNorm,l);
-
+    
     //d = l'*t;
     cvTranspose(l,transpose);
     cvMatMul(transpose,tvec,tempArith1x1);
-
+    
     //c = .5*(t-d*l)+cot(theta/2)*cross(l,t);
     //cvScaleAdd
     tempMul3x1->data.db[0] = tempArith1x1->data.db[0]*l->data.db[0];
@@ -728,30 +731,30 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
     tempMul3x1->data.db[1] = tempMul3x1->data.db[1]*tempArithDouble;
     tempMul3x1->data.db[2] = tempMul3x1->data.db[2]*tempArithDouble;
     cvAdd(tempArith3x1,tempMul3x1,c);
-
+    
     //  q = [sin(theta/2)*l; cos(theta/2)];
     q->data.db[0] = l->data.db[0]*sin(rvecNormDouble/2);
     q->data.db[1] = l->data.db[1]*sin(rvecNormDouble/2);
     q->data.db[2] = l->data.db[2]*sin(rvecNormDouble/2);
     q->data.db[3] = cos(rvecNormDouble/2);
-
+    
     //qprime = [.5*(q(4)*t+cross(t,q(1:3)));-.5*q(1:3)'*t];
     tempArith3x1->data.db[0] = q->data.db[0];
     tempArith3x1->data.db[1] = q->data.db[1];
     tempArith3x1->data.db[2] = q->data.db[2];
     cvCrossProduct(tvec,tempArith3x1,tempMul3x1);
     cvTranspose(tempArith3x1,transpose);
-
+    
     tempArith3x1->data.db[0] = tvec->data.db[0]*q->data.db[3];
     tempArith3x1->data.db[1] = tvec->data.db[1]*q->data.db[3];
     tempArith3x1->data.db[2] = tvec->data.db[2]*q->data.db[3];
-
+    
     qPrime->data.db[0] = (tempArith3x1->data.db[0]+tempMul3x1->data.db[0])/2;
     qPrime->data.db[1] = (tempArith3x1->data.db[1]+tempMul3x1->data.db[1])/2;
     qPrime->data.db[2] = (tempArith3x1->data.db[2]+tempMul3x1->data.db[2])/2;
     cvMatMul(transpose,tvec,tempArith1x1);
     qPrime->data.db[3] = -tempArith1x1->data.db[0]/2;
-
+    
     //free memory
     //*rvec, *tvec, *rmatrix, *rvecNorm, *l, *transpose, *tempArith1x1, *tempArith3x1, *tempMul3x1, *c;
     if(rvec && tvec && rmatrix && rvecNorm && l && transpose && tempArith1x1 && tempArith3x1 && tempMul3x1 &&c)
@@ -774,15 +777,15 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
 void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat* aPrime, CvMat* bPrime, CvMat* s, CvMat* T, int index)
 {
     CvMat* tempArith3x1 = cvCreateMat(3,1,CV_64FC1);
-
+    
     //S(:,:,i) = [Qa(i).q(1:3)-Qb(i).q(1:3)   crossprod(Qa(i).q(1:3)+Qb(i).q(1:3)) zeros(3,1) zeros(3,3);...
     //            Qa(i).qprime(1:3)-Qb(i).qprime(1:3)   crossprod(Qa(i).qprime(1:3)+Qb(i).qprime(1:3)) Qa(i).q(1:3)-Qb(i).q(1:3)   crossprod(Qa(i).q(1:3)+Qb(i).q(1:3))];
-
+    
     cvSub(a,b,tempArith3x1);
     s->data.db[0] = tempArith3x1->data.db[0];
     s->data.db[8] = tempArith3x1->data.db[1];
     s->data.db[16] = tempArith3x1->data.db[2];
-
+    
     cvAdd(a,b,tempArith3x1);
     s->data.db[1] = 0;
     s->data.db[2] = -tempArith3x1->data.db[2];
@@ -793,12 +796,12 @@ void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat*
     s->data.db[17] = -tempArith3x1->data.db[1];
     s->data.db[18] = tempArith3x1->data.db[0];
     s->data.db[19] = 0;
-
+    
     cvSub(aPrime,bPrime,tempArith3x1);
     s->data.db[24] = tempArith3x1->data.db[0];
     s->data.db[32] = tempArith3x1->data.db[1];
     s->data.db[40] = tempArith3x1->data.db[2];
-
+    
     cvAdd(aPrime,bPrime,tempArith3x1);
     s->data.db[25] = 0;
     s->data.db[26] = -tempArith3x1->data.db[2];
@@ -809,12 +812,12 @@ void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat*
     s->data.db[41] = -tempArith3x1->data.db[1];
     s->data.db[42] = tempArith3x1->data.db[0];
     s->data.db[43] = 0;
-
+    
     cvSub(a,b,tempArith3x1);
     s->data.db[28] = tempArith3x1->data.db[0];
     s->data.db[36] = tempArith3x1->data.db[1];
     s->data.db[44] = tempArith3x1->data.db[2];
-
+    
     cvAdd(a,b,tempArith3x1);
     s->data.db[29] = 0;
     s->data.db[30] = -tempArith3x1->data.db[2];
@@ -825,14 +828,14 @@ void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat*
     s->data.db[45] = -tempArith3x1->data.db[1];
     s->data.db[46] = tempArith3x1->data.db[0];
     s->data.db[47] = 0;
-
+    
     //copy to T
     int tIndex = index*s->rows*s->cols;
     for(int i=0;i<s->rows*s->cols;i++)
     {
         T->data.db[tIndex+i] = s->data.db[i];
     }
-
+    
     //free memory
     if(tempArith3x1)
         cvReleaseMat(&tempArith3x1);
@@ -848,7 +851,7 @@ void svlCCHandEyeCalibration::quaternionMul(CvMat* q1, CvMat* q2, CvMat* result)
     double y2=q2->data.db[1];
     double z2=q2->data.db[2];
     double w2=q2->data.db[3];
-
+    
     result->data.db[0] = ( x1*w2 + y1*z2 - z1*y2 + w1*x2);
     result->data.db[1] = (-x1*z2 + y1*w2 + z1*x2 + w1*y2);
     result->data.db[2] = ( x1*y2 - y1*x2 + z1*w2 + w1*z2);
@@ -871,7 +874,7 @@ void svlCCHandEyeCalibration::quaternionToRMatrix(CvMat* rMatrix, CvMat* quatern
     double xw = x * w;
     double yw = y * w;
     double zw = z * w;
-
+    
     cvSetReal2D(rMatrix,0,0, (x2 - y2 - z2 + w2));
     cvSetReal2D(rMatrix,0,1, (2.0 * (xy + zw)));
     cvSetReal2D(rMatrix,0,2, (2.0 * (xz - yw)));
@@ -896,7 +899,7 @@ void svlCCHandEyeCalibration::printData()
         std::cout << "==============CameraMatrix "<<i<<" =============="<<std::endl;
         printCvMatDouble(cameraMatrix[i]);
     }
-
+    
     for(int i=0;i<worldToTCPMatrix.size();i++)
     {
         std::cout << "==============WorldToTCP "<<i<<" =============="<<std::endl;
@@ -933,10 +936,10 @@ double svlCCHandEyeCalibration::checkAXXB(CvMat* A, CvMat* B)
     cvInvert(xb,xbInv,CV_LU);
     cvMatMul(xbInv,ax,axxb);
     cvAbsDiff(identity,axxb,result);
-
+    
     if(debug)
         std::cout << "Avg Error " << cvAvg(result).val[0] << std::endl;
-
+    
     if(ax && xb && xbInv && axxb && identity)
     {
         cvReleaseMat(&ax);
