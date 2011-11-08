@@ -50,13 +50,17 @@ public:
 
     bool ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
     bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
+    void Reset();    
     bool RunCameraCalibration(bool runHandEye);
-    void SetBoardSize(cv::Size size){ BoardSize = size;};
+    void SetBoardSize(int width, int height){ BoardSize = cv::Size(width,height);};
     void SetSquareSize(float size){ SquareSize = size;};
     std::vector<svlSampleImageRGB> GetImages(){return Images;};
     svlSampleCameraGeometry* GetCameraGeometry(){return CameraGeometry;};
+    void SetCameraGeometry(vct2 f, vct2 c, double alpha, vctFixedSizeVector<double,7> k) { CameraGeometry->SetIntrinsics(f,c,alpha,k);};
     void PrintCalibrationParameters();
     void WriteToFileCalibrationParameters(std::string directory);
+    double GetCameraCalibrationReprojectionError(void){return CameraCalibrationError;};
+    double GetHandEyeCalibrationError(void) { return MinHandEyeAvgError;};
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -103,6 +107,7 @@ private:
     //vector of track point files (.coords)
     std::vector<svlCCPointsFileIO*> PointFiles;
     int* Visibility;
+    double CameraCalibrationError;
 
     //Hand Eye Calibration
     svlCCHandEyeCalibration* CalHandEye;

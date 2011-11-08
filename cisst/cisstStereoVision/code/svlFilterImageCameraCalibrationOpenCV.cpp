@@ -46,7 +46,6 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageCameraCalibrationOpenCV, svlFilterB
     Visibility = new int[MAXNUMBEROFGRIDS];
     CameraGeometry = new svlSampleCameraGeometry();
     MinHandEyeAvgError = std::numeric_limits<double>::max( );
-    CameraCalibrationError = std::numeric_limits<double>::max( );
 }
 
 svlFilterImageCameraCalibrationOpenCV::~svlFilterImageCameraCalibrationOpenCV()
@@ -54,17 +53,6 @@ svlFilterImageCameraCalibrationOpenCV::~svlFilterImageCameraCalibrationOpenCV()
     if(Visibility) delete Visibility;
     if(CameraGeometry) delete CameraGeometry;
 
-}
-
-void svlFilterImageCameraCalibrationOpenCV::Reset()
-{
-    Images.clear();
-    CalibrationGrids.clear();
-    Rvecs.clear();
-    Tvecs.clear();
-    MinHandEyeAvgError = std::numeric_limits<double>::max( );
-    CameraCalibrationError = std::numeric_limits<double>::max( );
-    CameraGeometry->Empty();
 }
 
 int svlFilterImageCameraCalibrationOpenCV::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -426,8 +414,8 @@ double svlFilterImageCameraCalibrationOpenCV::Calibrate(bool projected, bool gro
         //get Points
         for(int i=0;i<(int)CalibrationGrids.size();i++)
         {
-            Visibility[i] = 0;
             if((!groundTruthTest && CalibrationGrids.at(i)->valid)|| (groundTruthTest && CalibrationGrids.at(i)->validGroundTruth)){
+                Visibility[i] = 1;
                 points2D.clear();
                 points3D.clear();
                 if(groundTruthTest)
@@ -446,9 +434,9 @@ double svlFilterImageCameraCalibrationOpenCV::Calibrate(bool projected, bool gro
                     ImagePoints.push_back(points2D);
                     ObjectPoints.push_back(points3D);
                     *pointsCount += points2D.size();
-                    Visibility[i] = 1;
                 }
-            }
+            }else
+                Visibility[i] = 0;
         }
     }
 
@@ -508,17 +496,18 @@ bool svlFilterImageCameraCalibrationOpenCV::CheckCalibration(bool projected)
     bool ok = false;
     std::vector<float> reprojErrs;
     ok = checkRange(CameraMatrix) && checkRange(DistCoeffs);
+    double avgErr;
 
     if(projected)
     {
-        CameraCalibrationError = ComputeReprojectionErrors(ProjectedObjectPoints, ProjectedImagePoints,
+        avgErr = ComputeReprojectionErrors(ProjectedObjectPoints, ProjectedImagePoints,
             Rvecs, Tvecs, CameraMatrix, DistCoeffs, reprojErrs, projected);
     }else
     {
-        CameraCalibrationError = ComputeReprojectionErrors(ObjectPoints, ImagePoints,
+        avgErr = ComputeReprojectionErrors(ObjectPoints, ImagePoints,
             Rvecs, Tvecs, CameraMatrix, DistCoeffs, reprojErrs, projected);
     }
-    std::cout << "Range check " << ok << ", average L1 Norm error: " << CameraCalibrationError <<std::endl;
+    std::cout << "Range check " << ok << ", average L1 Norm error: " << avgErr <<std::endl;
 
     if(ok && DEBUG)
     {
@@ -652,10 +641,7 @@ void svlFilterImageCameraCalibrationOpenCV::UpdateCalibrationGrids()
             CalibrationGrids.at(i)->distCoeffs = DistCoeffs;
             CalibrationGrids.at(i)->rvec = Rvecs[validIndex];
             CalibrationGrids.at(i)->tvec = Tvecs[validIndex];
-            CalibrationGrids.at(i)->valid = 1;
             validIndex++;
-        }else{
-            CalibrationGrids.at(i)->valid = 0;
         }
     }
 }
