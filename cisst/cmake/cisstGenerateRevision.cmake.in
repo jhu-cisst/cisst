@@ -1,0 +1,39 @@
+#
+# $Id$
+#
+# Cmake configuration file for the installed version of cisst
+#
+# Author(s):  Anton Deguet
+# Created on: 2011-11-08
+#
+# (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+set (CISST_VERSION_MAJOR "@CISST_VERSION_MAJOR@")
+set (CISST_VERSION_MINOR "@CISST_VERSION_MINOR@")
+set (CISST_VERSION "@CISST_VERSION@")
+
+set (CISST_REVISION_HEADER_SRC "@CISST_REVISION_HEADER_SRC@")
+set (CISST_REVISION_HEADER "@CISST_REVISION_HEADER@")
+set (Subversion_FOUND "@Subversion_FOUND@")
+set (Subversion_SVN_EXECUTABLE "@Subversion_SVN_EXECUTABLE@")
+set (CISST_WC_REVISION "@CISST_WC_REVISION@")
+
+# To make sure the Subversion_WC_INFO macro is defined
+find_package (Subversion QUIET)
+
+set (CISST_WC_REVISION "undefined (SVN executable not found)")
+if (Subversion_FOUND)
+  Subversion_WC_INFO ("${cisst_SOURCE_DIR}" CISST)
+endif (Subversion_FOUND)
+
+configure_file ("${CISST_REVISION_HEADER_SRC}"
+                "${CISST_REVISION_HEADER}")

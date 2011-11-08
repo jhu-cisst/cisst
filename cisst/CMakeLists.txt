@@ -28,12 +28,24 @@ set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
 find_package (Subversion QUIET)
 set (CISST_WC_REVISION "undefined (SVN executable not found)")
 if (Subversion_FOUND)
-  Subversion_WC_INFO (${cisst_SOURCE_DIR} CISST)
+  Subversion_WC_INFO ("${cisst_SOURCE_DIR}" CISST)
 endif (Subversion_FOUND)
 message ("Configuring cisst ${CISST_VERSION} from \"${cisst_SOURCE_DIR}\", revision: ${CISST_WC_REVISION}")
-configure_file (${cisstLibs_SOURCE_DIR}/cisstRevision.h.in
-                ${cisstLibs_BINARY_DIR}/include/cisstRevision.h)
-install (FILES ${cisstLibs_BINARY_DIR}/include/cisstRevision.h
+
+# Generate cisstRevision.h
+set (CISST_REVISION_HEADER_SRC "${cisstLibs_SOURCE_DIR}/cisstRevision.h.in")
+set (CISST_REVISION_HEADER "${cisstLibs_BINARY_DIR}/include/cisstRevision.h")
+# Script to be executed everytime
+configure_file ("${cisstLibs_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                "${cisstLibs_BINARY_DIR}/cmake/cisstGenerateRevision.cmake")
+add_custom_target (cisstRevision ALL
+                   COMMAND ${CMAKE_COMMAND} -P "${cisstLibs_BINARY_DIR}/cmake/cisstGenerateRevision.cmake"
+                   COMMENT "Generating ${CISST_REVISION_HEADER} from ${CISST_REVISION_HEADER_SRC}"
+                   SOURCES "${CISST_REVISION_HEADER_SRC}")
+
+# Install cisstRevision.h
+set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
+install (FILES "${cisstLibs_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)
 
