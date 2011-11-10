@@ -228,4 +228,6 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 
 %include "cisstStereoVision/svlFilterBuffer.h"
 #endif
+%include "cisstStereoVision/svlFilterOutput.h"
+
 
