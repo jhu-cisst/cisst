@@ -21,7 +21,6 @@ set (LIBRARY cisstDevices)
 set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstMultiTask cisstParameterTypes cisstRobot)
 
 # make sure all options are set for all devices to OFF
-option (CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
 option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
 option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
 option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
@@ -68,15 +67,6 @@ if( CISST_DEV_HAS_ACCELEGLOVE )
   set(SOURCE_FILES ${SOURCE_FILES} devAcceleGlove.cpp)
   set(HEADER_FILES ${HEADER_FILES} devAcceleGlove.h)
 endif( CISST_DEV_HAS_ACCELEGLOVE )
-
-if (CISST_DEV_HAS_LOPOMOCO)
-  set (SOURCE_FILES ${SOURCE_FILES}
-       devLoPoMoCo.cpp
-       devLoPoMoCoOffsets.h
-       devLoPoMoCoBoardIO.h)
-  set (HEADER_FILES ${HEADER_FILES}
-       devLoPoMoCo.h)
-endif (CISST_DEV_HAS_LOPOMOCO)
 
 # Create the config file
 set (CISST_DEV_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstDevices/devConfig.h)

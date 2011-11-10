@@ -44,7 +44,7 @@ add_custom_target (cisstRevision ALL
                    SOURCES "${CISST_REVISION_HEADER_SRC}")
 
 # Install cisstRevision.h
-set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
+# set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
 install (FILES "${cisstLibs_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)

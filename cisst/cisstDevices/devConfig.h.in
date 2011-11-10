@@ -25,9 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 
-// Support for LoPoMoCo (JHU Low Power Motor Control)
-#cmakedefine01 CISST_DEV_HAS_LOPOMOCO
-
 // 
 #cmakedefine01 CISST_DEV_HAS_ROBOTCOMPONENTS
 
