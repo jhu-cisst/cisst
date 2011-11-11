@@ -2602,3 +2602,319 @@ void svlImageProcessingHelper::ExposureInternals::CalculateCurve()
     Modified = false;
 }
 
+/*************************************************************/
+/*** svlImageProcessingHelper::BlobDetectorInternals class ***/
+/*************************************************************/
+
+svlImageProcessingHelper::BlobDetectorInternals::BlobDetectorInternals() :
+    svlImageProcessingInternals(),
+    BlobCount(0)
+{
+}
+
+unsigned int svlImageProcessingHelper::BlobDetectorInternals::CalculateLabels(const svlSampleImageMono8* image,
+                                                                              svlSampleImageMono32* labels)
+{
+    return CalculateLabelsInternal(const_cast<svlSampleImageMono8*>(image),
+                                   labels,
+                                   SVL_LEFT);
+}
+
+unsigned int svlImageProcessingHelper::BlobDetectorInternals::CalculateLabels(const svlSampleImageMono8Stereo* image,
+                                                                              svlSampleImageMono32Stereo* labels,
+                                                                              const unsigned int videoch)
+{
+    return CalculateLabelsInternal(const_cast<svlSampleImageMono8Stereo*>(image),
+                                   labels,
+                                   videoch);
+}
+
+bool svlImageProcessingHelper::BlobDetectorInternals::GetBlobs(const svlSampleImageMono8* image,
+                                                               const svlSampleImageMono32* labels,
+                                                               svlSampleBlobs* blobs,
+                                                               unsigned int min_area,
+                                                               unsigned int max_area,
+                                                               double min_compactness,
+                                                               double max_compactness)
+{
+    return GetBlobsInternal(const_cast<svlSampleImageMono8*>(image),
+                            const_cast<svlSampleImageMono32*>(labels),
+                            blobs,
+                            SVL_LEFT,
+                            min_area,
+                            max_area,
+                            min_compactness,
+                            max_compactness);
+}
+
+bool svlImageProcessingHelper::BlobDetectorInternals::GetBlobs(const svlSampleImageMono8Stereo* image,
+                                                               const svlSampleImageMono32Stereo* labels,
+                                                               svlSampleBlobs* blobs,
+                                                               const unsigned int videoch,
+                                                               unsigned int min_area,
+                                                               unsigned int max_area,
+                                                               double min_compactness,
+                                                               double max_compactness)
+{
+    return GetBlobsInternal(const_cast<svlSampleImageMono8Stereo*>(image),
+                            const_cast<svlSampleImageMono32Stereo*>(labels),
+                            blobs,
+                            videoch,
+                            min_area,
+                            max_area,
+                            min_compactness,
+                            max_compactness);
+}
+
+unsigned int svlImageProcessingHelper::BlobDetectorInternals::CalculateLabelsInternal(svlSampleImage* image,
+                                                                                      svlSampleImage* labels,
+                                                                                      const unsigned int videoch)
+{
+    if (!image || !labels || videoch >= image->GetVideoChannels()) return 0;
+
+    const int width  = static_cast<int>(image->GetWidth(videoch));
+    const int height = static_cast<int>(image->GetHeight(videoch));
+
+    unsigned int cbufsize = width * height / 2;
+    if (ContourBuffer.cols() < cbufsize) ContourBuffer.SetSize(4, cbufsize);
+
+    int *fx  = ContourBuffer.Pointer();
+    int *fy  = fx + cbufsize;
+    int *fnx = fy + cbufsize;
+    int *fny = fnx + cbufsize;
+    unsigned int fu, fnu;
+
+    unsigned int *blobids = reinterpret_cast<unsigned int*>(labels->GetUCharPointer(videoch));
+    memset(blobids, 0, labels->GetDataSize(videoch));
+
+    unsigned char *imgbuf = const_cast<unsigned char*>(image->GetUCharPointer(videoch));
+    const int width_m1  = width - 1;
+    const int height_m1 = height - 1;
+
+    const unsigned int FBSm1  = cbufsize - 1;
+    unsigned int k, off, off2, imgval, c = 0, maxblobcount = 1;
+    int i, j, x, y;
+    int *tptr;
+
+
+    for (j = 0; j < height; j ++) {
+        for (i = 0; i < width; i ++) {
+            imgval = imgbuf[c];
+
+            if (imgval == 0 || blobids[c] != 0) {
+                c ++;
+                continue;
+            }
+
+            // Fill current pixel
+            *fnx = i; *fny = j; fnu = 1;
+            blobids[c] = maxblobcount;
+
+            while (fnu) {
+                // Swap fill buffers
+                tptr = fx; fx = fnx; fnx = tptr;
+                tptr = fy; fy = fny; fny = tptr;
+                fu = fnu; fnu = 0;
+
+                for (k = 0; k < fu; k ++) {
+                    x = fx[k]; y = fy[k];
+                    off = y * width + x;
+
+                    // Check left neighbor
+                    if (x > 0) {
+                        off2 = off - 1;
+                        if (blobids[off2] == 0 && imgbuf[off2] == imgval && fnu < FBSm1) {
+                            // Fill pixel
+                            fnx[fnu] = x - 1; fny[fnu] = y; fnu ++;
+                            blobids[off2] = maxblobcount;
+                        }
+                    }
+
+                    // Check right neighbor
+                    if (x < width_m1) {
+                        off2 = off + 1;
+                        if (blobids[off2] == 0 && imgbuf[off2] == imgval && fnu < FBSm1) {
+                            // Fill pixel
+                            fnx[fnu] = x + 1; fny[fnu] = y; fnu ++;
+                            blobids[off2] = maxblobcount;
+                        }
+                    }
+
+                    // Check top neighbor
+                    if (y > 0) {
+                        off2 = off - width;
+                        if (blobids[off2] == 0 && imgbuf[off2] == imgval && fnu < FBSm1) {
+                            // Fill pixel
+                            fnx[fnu] = x; fny[fnu] = y - 1; fnu ++;
+                            blobids[off2] = maxblobcount;
+                        }
+                    }
+
+                    // Check bottom neighbor
+                    if (y < height_m1) {
+                        off2 = off + width;
+                        if (blobids[off2] == 0 && imgbuf[off2] == imgval && fnu < FBSm1) {
+                            // Fill pixel
+                            fnx[fnu] = x; fny[fnu] = y + 1; fnu ++;
+                            blobids[off2] = maxblobcount;
+                        }
+                    }
+                }
+            }
+
+            maxblobcount ++;
+            c ++;
+        }
+    }
+
+    BlobCount = maxblobcount - 1;
+    return BlobCount;
+}
+
+bool svlImageProcessingHelper::BlobDetectorInternals::GetBlobsInternal(svlSampleImage* image,
+                                                                       svlSampleImage* labels,
+                                                                       svlSampleBlobs* blobs,
+                                                                       const unsigned int videoch,
+                                                                       const unsigned int min_area,
+                                                                       const unsigned int max_area,
+                                                                       const double min_compactness,
+                                                                       const double max_compactness)
+{
+    if (!image || !labels || !blobs ||
+        videoch >= image->GetVideoChannels() ||
+        videoch >= blobs->GetChannelCount()) return false;
+
+    const unsigned int blobsbuffsize = blobs->GetBufferSize();
+    const unsigned int maxblobcount = std::min(BlobCount, blobsbuffsize);
+    unsigned int *blobids = reinterpret_cast<unsigned int*>(labels->GetUCharPointer(videoch));
+    unsigned char *imgbuf = image->GetUCharPointer(videoch);
+    svlBlob *blbbuf = blobs->GetBlobsPointer(videoch);
+    const int width  = static_cast<int>(image->GetWidth(videoch));
+    const int height = static_cast<int>(image->GetHeight(videoch));
+    const int width_m1  = width - 1;
+    const int height_m1 = height - 1;
+
+    bool do_filtering = false;
+    double compactness, db_area, db_circumference;
+    unsigned int k;
+    svlBlob *blob;
+    int i, j;
+
+
+    blob = blbbuf;
+    for (k = 0; k < maxblobcount; k ++) {
+        blob->ID            = k + 1;
+        blob->used          = true;
+        blob->left          = 100000;
+        blob->right         = -1;
+        blob->top           = 100000;
+        blob->bottom        = -1;
+        blob->center_x      = 0;
+        blob->center_y      = 0;
+        blob->area          = 0;
+        blob->circumference = 0;
+        blob->label         = 0;
+        blob ++;
+    }
+
+    for (j = 0; j < height; j ++) {
+        for (i = 0; i < width; i ++) {
+
+            k = *blobids;
+            if (k > 0 && k <= maxblobcount) {
+
+                blob = blbbuf + k - 1;
+
+                // Bounding rectangle
+                if (i < blob->left) blob->left = i;
+                if (i > blob->right) blob->right = i;
+                if (j < blob->top) blob->top = j;
+                if (j > blob->bottom) blob->bottom = j;
+
+                // Center of weight
+                blob->center_x += i;
+                blob->center_y += j;
+
+                // Area
+                blob->area ++;
+
+                // Circumference
+                if ((i > 0         && blobids[    -1] != k) ||
+                    (i < width_m1  && blobids[     1] != k) ||
+                    (j > 0         && blobids[-width] != k) ||
+                    (j < height_m1 && blobids[ width] != k)) {
+                    blob->circumference ++;
+                }
+
+                // Label
+                if (blob->label == 0) blob->label = *imgbuf;
+            }
+
+            imgbuf ++;
+            blobids ++;
+        }
+    }
+
+    blob = blbbuf;
+    for (k = 0; k < maxblobcount; k ++) {
+        blob->center_x /= blob->area;
+        blob->center_y /= blob->area;
+        blob ++;
+    }
+
+    if (min_area > 0 || max_area > 0) {
+        do_filtering = true;
+
+        blob = blbbuf;
+        for (k = 0; k < maxblobcount; k ++) {
+            if ((max_area && blob->area > max_area) || blob->area < min_area) {
+                blob->used = false;
+            }
+            blob ++;
+        }
+    }
+
+    if (min_compactness > 0.0 || max_compactness > 0.0) {
+        do_filtering = true;
+
+        blob = blbbuf;
+        for (k = 0; k < maxblobcount; k ++) {
+
+            // r=sqrt(area/pi)
+            // compactness=(area/circumference)/r
+            // compactness=1.0 (if prefect circular disk)
+            // compactness<1.0 (if any other shape)
+
+            db_area          = static_cast<double>(blob->area);
+            db_circumference = static_cast<double>(blob->circumference);
+            compactness = std::min(1.0, db_area / (db_circumference * std::sqrt(db_area * 0.318309886183791)));
+
+            if ((min_compactness > 0.0 && compactness < min_compactness) ||
+                (max_compactness > 0.0 && compactness > max_compactness)) {
+                blob->used = false;
+            }
+            blob ++;
+        }
+    }
+
+    if (do_filtering) {
+        blobids = reinterpret_cast<unsigned int*>(labels->GetUCharPointer(videoch));
+
+        for (j = 0; j < height; j ++) {
+            for (i = 0; i < width; i ++) {
+
+                k = *blobids;
+                if (k > 0 && k <= maxblobcount) {
+                    if (blbbuf[k - 1].used == false) *blobids = 0;
+                }
+
+                blobids ++;
+            }
+        }
+    }
+
+    blobs->SetBufferUsed(maxblobcount, videoch);
+
+    return true;
+}
+

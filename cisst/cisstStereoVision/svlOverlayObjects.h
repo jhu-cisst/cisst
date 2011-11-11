@@ -54,6 +54,9 @@ public:
     bool IsUsed() const;
 
     void SetTransform(const vct3x3 & transform);
+    void SetTransformID(int ID);
+    int GetTransformID() const;
+    bool IsTransformed() const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input) = 0;
@@ -65,6 +68,7 @@ protected:
     unsigned int VideoCh;
     bool Visible;
     vct3x3 Transform;
+    int TransformID;
     bool Transformed;
 
 private:

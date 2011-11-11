@@ -502,5 +502,27 @@ private:
 };
 
 
+/************************************/
+/*** IReqFilterImageOverlay class ***/
+/************************************/
+
+class CISST_EXPORT IReqFilterImageOverlay
+{
+public:
+    IReqFilterImageOverlay(const std::string& name, mtsComponent* owner);
+    ~IReqFilterImageOverlay();
+
+    mtsFunctionWrite SetTransform;
+    mtsFunctionWrite SetTransforms;
+
+private:
+    IReqFilterImageOverlay();
+    IReqFilterImageOverlay(const IReqFilterImageOverlay& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
 #endif // _svlRequiredInterfaces_h
 

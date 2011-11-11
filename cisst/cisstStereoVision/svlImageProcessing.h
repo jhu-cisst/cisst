@@ -152,6 +152,31 @@ namespace svlImageProcessing
                                        unsigned int src_videoch,
                                        svlSampleImage* dst_img,
                                        unsigned int dst_videoch);
+
+    unsigned int CISST_EXPORT LabelBlobs(const svlSampleImageMono8* image,
+                                         svlSampleImageMono32* labels,
+                                         Internals& internals);
+    unsigned int CISST_EXPORT LabelBlobs(const svlSampleImageMono8Stereo* image,
+                                         svlSampleImageMono32Stereo* labels,
+                                         const unsigned int videoch,
+                                         Internals& internals);
+    int CISST_EXPORT GetBlobsFromLabels(const svlSampleImageMono8* image,
+                                        const svlSampleImageMono32* labels,
+                                        svlSampleBlobs* blobs,
+                                        Internals& internals,
+                                        unsigned int min_area = 0,
+                                        unsigned int max_area = 0,
+                                        double min_compactness = 0.0,
+                                        double max_compactness = 0.0);
+    int CISST_EXPORT GetBlobsFromLabels(const svlSampleImageMono8Stereo* image,
+                                        const svlSampleImageMono32Stereo* labels,
+                                        svlSampleBlobs* blobs,
+                                        const unsigned int videoch,
+                                        Internals& internals,
+                                        unsigned int min_area = 0,
+                                        unsigned int max_area = 0,
+                                        double min_compactness = 0.0,
+                                        double max_compactness = 0.0);
 };
 
 #endif // _svlImageProcessing_h

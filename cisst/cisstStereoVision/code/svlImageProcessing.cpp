@@ -859,6 +859,60 @@ int svlImageProcessing::SwapColorChannels(svlSampleImage* src_img, unsigned int 
     return SVL_OK;
 }
 
+unsigned int svlImageProcessing::LabelBlobs(const svlSampleImageMono8* image,
+                                            svlSampleImageMono32* labels,
+                                            Internals& internals)
+{
+    svlImageProcessingHelper::BlobDetectorInternals* detector = dynamic_cast<svlImageProcessingHelper::BlobDetectorInternals*>(internals.Get());
+    if (detector == 0) {
+        detector = new svlImageProcessingHelper::BlobDetectorInternals;
+        internals.Set(detector);
+    }
+    return detector->CalculateLabels(image, labels);
+}
+
+unsigned int svlImageProcessing::LabelBlobs(const svlSampleImageMono8Stereo* image,
+                                            svlSampleImageMono32Stereo* labels,
+                                            const unsigned int videoch,
+                                            Internals& internals)
+{
+    svlImageProcessingHelper::BlobDetectorInternals* detector = dynamic_cast<svlImageProcessingHelper::BlobDetectorInternals*>(internals.Get());
+    if (detector == 0) {
+        detector = new svlImageProcessingHelper::BlobDetectorInternals;
+        internals.Set(detector);
+    }
+    return detector->CalculateLabels(image, labels, videoch);
+}
+
+int svlImageProcessing::GetBlobsFromLabels(const svlSampleImageMono8* image,
+                                           const svlSampleImageMono32* labels,
+                                           svlSampleBlobs* blobs,
+                                           Internals& internals,
+                                           unsigned int min_area,
+                                           unsigned int max_area,
+                                           double min_compactness,
+                                           double max_compactness)
+{
+    svlImageProcessingHelper::BlobDetectorInternals* detector = dynamic_cast<svlImageProcessingHelper::BlobDetectorInternals*>(internals.Get());
+    if (!detector || !detector->GetBlobs(image, labels, blobs, min_area, max_area, min_compactness, max_compactness)) return SVL_FAIL;
+    return SVL_OK;
+}
+
+int svlImageProcessing::GetBlobsFromLabels(const svlSampleImageMono8Stereo* image,
+                                           const svlSampleImageMono32Stereo* labels,
+                                           svlSampleBlobs* blobs,
+                                           const unsigned int videoch,
+                                           Internals& internals,
+                                           unsigned int min_area,
+                                           unsigned int max_area,
+                                           double min_compactness,
+                                           double max_compactness)
+{
+    svlImageProcessingHelper::BlobDetectorInternals* detector = dynamic_cast<svlImageProcessingHelper::BlobDetectorInternals*>(internals.Get());
+    if (!detector || !detector->GetBlobs(image, labels, blobs, videoch, min_area, max_area, min_compactness, max_compactness)) return SVL_FAIL;
+    return SVL_OK;
+}
+
 
 /*******************************************/
 /*** svlImageProcessing::Internals class ***/

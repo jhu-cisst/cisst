@@ -485,3 +485,26 @@ IReqVideoEncoder::~IReqVideoEncoder()
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }
 
+
+/************************************/
+/*** IReqFilterImageOverlay class ***/
+/************************************/
+
+IReqFilterImageOverlay::IReqFilterImageOverlay(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
+        if (required) {
+            required->AddFunction("SetTransform",  SetTransform);
+            required->AddFunction("SetTransforms", SetTransforms);
+        }
+    }
+}
+
+IReqFilterImageOverlay::~IReqFilterImageOverlay()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+

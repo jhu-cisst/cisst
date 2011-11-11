@@ -36,7 +36,16 @@ class CISST_EXPORT svlFilterImageOverlay : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+public:
+    typedef svlFilterImageOverlay ThisType;
+    typedef struct _ImageTransform {
+	    int ID;
+        vct3x3 frame;
+    } ImageTransform;
+
+protected:
     typedef std::map<svlFilterInput*, svlSample*> _SampleCacheMap;
+    typedef std::map<int, vct3x3> _TransformCacheMap;
 
 public:
     svlFilterImageOverlay();
@@ -54,12 +63,19 @@ protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
+protected:
+    virtual void CreateInterfaces();
+    virtual void SetTransform(const ThisType::ImageTransform & transform);
+    virtual void SetTransforms(const vctDynamicVector<ThisType::ImageTransform> & transforms);
+
 private:
     svlOverlay* FirstOverlay;
     svlOverlay* LastOverlay;
     _SampleCacheMap SampleCache;
+    _TransformCacheMap TransformCache;
 
     osaCriticalSection CS;
+    osaCriticalSection TransformCS;
 
     unsigned int ImageInputsToAddUsed;
     unsigned int MatrixInputsToAddUsed;
@@ -78,7 +94,15 @@ private:
     void AddQueuedItemsInternal();
 };
 
+typedef mtsGenericObjectProxy<svlFilterImageOverlay::ImageTransform> svlFilterImageOverlay_ImageTransform;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay_ImageTransform);
+typedef mtsGenericObjectProxy<vctDynamicVector<svlFilterImageOverlay::ImageTransform> > svlFilterImageOverlay_ImageTransformVector;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay_ImageTransformVector);
+
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay)
+
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterImageOverlay::ImageTransform & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const vctDynamicVector<svlFilterImageOverlay::ImageTransform> & objref);
 
 #endif // _svlFilterImageOverlay_h
 

@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageBlobDetector_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlImageProcessing.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -50,16 +51,13 @@ private:
     bool BlobsOutputConnected;
     svlSampleImage* OutputBlobIDs;
     svlSampleBlobs* OutputBlobs;
-    vctDynamicMatrix<int> FillBuffer;
 
     unsigned int MaxBlobCount;
     unsigned int FiltMinArea;
     unsigned int FiltMaxArea;
     double FiltMinCompactness;
     double FiltMaxCompactness;
-
-    unsigned int ComputeBlobIDs(svlSampleImage* input, unsigned int videoch);
-    void ComputeBlobStats(unsigned int maxblobid, svlSampleImage* input, unsigned int videoch);
+    vctFixedSizeVector<svlImageProcessing::Internals, SVL_MAX_CHANNELS> DetectorInternals;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageBlobDetector)

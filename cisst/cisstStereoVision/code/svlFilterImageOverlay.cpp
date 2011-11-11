@@ -23,12 +23,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageOverlay.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+
 
 /***************************************/
 /*** svlFilterImageOverlay class *******/
 /***************************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageOverlay, svlFilterBase)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlay_ImageTransform)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlay_ImageTransformVector)
 
 svlFilterImageOverlay::svlFilterImageOverlay() :
     svlFilterBase(),
@@ -216,15 +220,32 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             TextInputsToAddUsed   ||
             OverlaysToAddUsed) AddQueuedItemsInternal();
 
+        // Update transformations
+        TransformCS.Enter();
+            svlOverlay* overlay = FirstOverlay;
+            for (; overlay; overlay = overlay->Next) {
+                if (overlay->TransformID >= 0) {
+                    _TransformCacheMap::iterator iterxform;
+                    iterxform = TransformCache.find(overlay->TransformID);
+                    if (iterxform != TransformCache.end()) {
+                        overlay->SetTransform(iterxform->second);
+                    }
+                    else {
+                        CMN_LOG_CLASS_INIT_WARNING << "Process: failed to find transformation: " << overlay->TransformID << std::endl;
+                    }
+                }
+            }
+        TransformCS.Leave();
+
         _SampleCacheMap::iterator itersample;
         svlSampleImage* src_image = dynamic_cast<svlSampleImage*>(syncInput);
         svlOverlayInput* overlayinput = 0;
         svlFilterInput* input = 0;
-        svlOverlay* overlay = FirstOverlay;
         svlSample* ovrlsample = 0;
         double current_time = syncInput->GetTimestamp();
 
-        while (overlay) {
+        for (overlay = FirstOverlay; overlay; overlay = overlay->Next) {
+
             // Cross casting to the input base class
             overlayinput = dynamic_cast<svlOverlayInput*>(overlay);
             if (overlayinput) {
@@ -267,12 +288,51 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             // Overlays without input
                 overlay->Draw(src_image, 0);
             }
-
-            overlay = overlay->Next;
         }
     }
 
     return SVL_OK;
+}
+
+void svlFilterImageOverlay::CreateInterfaces()
+{
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Transformations", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterImageOverlay::SetTransform,  this, "SetTransform");
+        provided->AddCommandWrite(&svlFilterImageOverlay::SetTransforms, this, "SetTransforms");
+    }
+}
+
+void svlFilterImageOverlay::SetTransform(const ThisType::ImageTransform & transform)
+{
+    TransformCS.Enter();
+        _TransformCacheMap::iterator iterxform;
+        iterxform = TransformCache.find(transform.ID);
+        if (iterxform != TransformCache.end()) {
+            iterxform->second = transform.frame;
+        }
+        else {
+            TransformCache[transform.ID] = transform.frame;
+            CMN_LOG_CLASS_INIT_VERBOSE << "SetTransform - new transformation added: " << transform.ID << std::endl;
+        }
+    TransformCS.Leave();
+}
+
+void svlFilterImageOverlay::SetTransforms(const vctDynamicVector<ThisType::ImageTransform> & transforms)
+{
+    TransformCS.Enter();
+        for (unsigned int i = 0; i < transforms.size(); i ++) {
+            _TransformCacheMap::iterator iterxform;
+            iterxform = TransformCache.find(transforms[i].ID);
+            if (iterxform != TransformCache.end()) {
+                iterxform->second = transforms[i].frame;
+            }
+            else {
+                TransformCache[transforms[i].ID] = transforms[i].frame;
+                CMN_LOG_CLASS_INIT_VERBOSE << "SetTransforms - new transformation added: " << transforms[i].ID << std::endl;
+            }
+        }
+    TransformCS.Leave();
 }
 
 bool svlFilterImageOverlay::IsInputAlreadyQueued(const std::string &name)
@@ -359,5 +419,24 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
     OverlaysToAddUsed     = 0;
 
     CS.Leave();
+}
+
+
+/****************************/
+/*** Stream out operators ***/
+/****************************/
+
+std::ostream & operator << (std::ostream & stream, const svlFilterImageOverlay::ImageTransform & objref)
+{
+    stream << "ID=" << objref.ID << std::endl << objref.frame << std::endl;
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const vctDynamicVector<svlFilterImageOverlay::ImageTransform> & objref)
+{
+    for (unsigned int i = 0; i < objref.size(); i ++) {
+        stream << "ID=" << objref[i].ID << std::endl << objref[i].frame << std::endl;
+    }
+    return stream;
 }
 

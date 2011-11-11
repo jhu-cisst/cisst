@@ -166,6 +166,56 @@ namespace svlImageProcessingHelper
         double Gamma;
         bool Modified;
     };
+
+    //////////////////
+    // BlobDetector //
+    //////////////////
+
+    class BlobDetectorInternals : public svlImageProcessingInternals
+    {
+    public:
+        BlobDetectorInternals();
+
+        void SetFilterArea();
+        void SetFilterCompactness();
+
+        unsigned int CalculateLabels(const svlSampleImageMono8* image,
+                                     svlSampleImageMono32* labels);
+        unsigned int CalculateLabels(const svlSampleImageMono8Stereo* image,
+                                     svlSampleImageMono32Stereo* labels,
+                                     const unsigned int videoch);
+        bool GetBlobs(const svlSampleImageMono8* image,
+                      const svlSampleImageMono32* labels,
+                      svlSampleBlobs* blobs,
+                      unsigned int min_area,
+                      unsigned int max_area,
+                      double min_compactness,
+                      double max_compactness);
+        bool GetBlobs(const svlSampleImageMono8Stereo* image,
+                      const svlSampleImageMono32Stereo* labels,
+                      svlSampleBlobs* blobs,
+                      const unsigned int videoch,
+                      unsigned int min_area,
+                      unsigned int max_area,
+                      double min_compactness,
+                      double max_compactness);
+
+    protected:
+        unsigned int  BlobCount;
+        vctDynamicMatrix<int> ContourBuffer;
+
+        unsigned int CalculateLabelsInternal(svlSampleImage* image,
+                                             svlSampleImage* labels,
+                                             const unsigned int videoch);
+        bool GetBlobsInternal(svlSampleImage* image,
+                              svlSampleImage* labels,
+                              svlSampleBlobs* blobs,
+                              const unsigned int videoch,
+                              const unsigned int min_area,
+                              const unsigned int max_area,
+                              const double min_compactness,
+                              const double max_compactness);
+    };
 };
 
 #endif // _svlImageProcessingHelper_h

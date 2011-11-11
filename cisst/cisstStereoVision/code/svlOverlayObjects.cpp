@@ -34,6 +34,7 @@ svlOverlay::svlOverlay() :
     VideoCh(0),
     Visible(true),
     Transform(vct3x3::Eye()),
+    TransformID(-1),
     Transformed(false),
     Next(0),
     Prev(0),
@@ -46,6 +47,7 @@ svlOverlay::svlOverlay(unsigned int videoch,
     VideoCh(videoch),
     Visible(visible),
     Transform(vct3x3::Eye()),
+    TransformID(-1),
     Transformed(false),
     Next(0),
     Prev(0),
@@ -87,6 +89,21 @@ void svlOverlay::SetTransform(const vct3x3 & transform)
     Transform.Assign(transform);
     if (Transform != vct3x3::Eye()) Transformed = true;
     else Transformed = false;
+}
+
+void svlOverlay::SetTransformID(int ID)
+{
+    TransformID = ID;
+}
+
+int svlOverlay::GetTransformID() const
+{
+    return TransformID;
+}
+
+bool svlOverlay::IsTransformed() const
+{
+    return Transformed;
 }
 
 void svlOverlay::Draw(svlSampleImage* bgimage, svlSample* input)
