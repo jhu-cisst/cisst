@@ -51,17 +51,22 @@ if (CISST_HAS_OPENGL)
   set (HEADER_FILES
        ${HEADER_FILES}
        svlFilterImageWindowQt.h
+       svlFilterImageWindowQtStereo.h
        svlFilterImageOpenGLQtWidget.h
        )
   set (SOURCE_FILES
        ${SOURCE_FILES}
        winQt4OpenGL.h          # private header
        winQt4OpenGL.cpp
+       winQt4OpenGLStereo.h    # private header
+       winQt4OpenGLStereo.cpp
        svlFilterImageWindowQt.cpp
+       svlFilterImageWindowQtStereo.cpp
        svlFilterImageOpenGLQtWidget.cpp
        )
   QT4_WRAP_CPP(QT_WRAPPED_CPP
                winQt4OpenGL.h
+               winQt4OpenGLStereo.h
                )
 
 endif (CISST_HAS_OPENGL)
