@@ -245,6 +245,8 @@ svlVidCapSrcMIL::svlVidCapSrcMIL() :
             MilDisplayImage[sys][dig] = M_NULL;
             MilOverlayImage[sys][dig] = M_NULL;
             MilOverlayBuffer[sys][dig] = 0;
+            MilCaptureParams[sys][dig].SystemID = 0;
+            MilCaptureParams[sys][dig].DigitizerID = 0;
             MilCaptureParams[sys][dig].MilFrames = 0;
             MilCaptureParams[sys][dig].ImageBuffer = 0;
             MilCaptureParams[sys][dig].OverlayModified = false;
@@ -454,6 +456,8 @@ int svlVidCapSrcMIL::Open()
         ImageBuffer[i] = new svlBufferImage(width, height);
         // Set the pointer in the capture structure that will be accessed in the callback
         MilCaptureParams[SystemID[i]][DigitizerID[i]].ImageBuffer = ImageBuffer[i];
+        MilCaptureParams[SystemID[i]][DigitizerID[i]].SystemID    = SystemID[i];
+        MilCaptureParams[SystemID[i]][DigitizerID[i]].DigitizerID = DigitizerID[i];
     }
 
     Initialized = true;
@@ -689,6 +693,8 @@ bool svlVidCapSrcMIL::MILInitializeSystem(int system)
 
     MsysAlloc(M_SYSTEM_DEFAULT, system, M_SETUP, &(MilSystem[system]));
     if (MilSystem[system] == M_NULL) return false;
+
+    MsysControl(system, M_MODIFIED_BUFFER_HOOK_MODE, M_MULTI_THREAD);
 
     MilNumberOfDigitizers[system] = static_cast<unsigned int>(MsysInquire(MilSystem[system], M_DIGITIZER_NUM, M_NULL));
     if (MilNumberOfDigitizers[system] > 0) {
@@ -989,7 +995,6 @@ void svlVidCapSrcMIL::MILReleaseApplication()
 /*** MILProcessingCallback ***********/
 /*************************************/
 
-
 MIL_INT MFTYPE MILProcessingCallback(MIL_INT CMN_UNUSED(HookType), MIL_ID HookId, void MPTYPE *HookDataPtr)
 {
 #if __VERBOSE__ == 1
@@ -998,11 +1003,11 @@ MIL_INT MFTYPE MILProcessingCallback(MIL_INT CMN_UNUSED(HookType), MIL_ID HookId
 
     svlVidCapSrcMIL::MILCaptureParameters *milcaptureparams = (svlVidCapSrcMIL::MILCaptureParameters*)HookDataPtr;
 
+//std::cerr << milcaptureparams->DigitizerID;
     if (milcaptureparams->ImageBuffer) {
         MIL_INT milbufferindex;
-	    // Get modified buffer index
-	    MdigGetHookInfo(HookId, M_MODIFIED_BUFFER+M_BUFFER_INDEX, &milbufferindex);
-    	MbufGetColor(milcaptureparams->MilFrames[milbufferindex],
+        MdigGetHookInfo(HookId, M_MODIFIED_BUFFER+M_BUFFER_ID, &milbufferindex);
+        MbufGetColor(milbufferindex,
     				 M_PACKED+M_RGB24,
     				 M_ALL_BANDS,
                      milcaptureparams->ImageBuffer->GetPushBuffer());

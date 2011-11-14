@@ -77,6 +77,8 @@ friend class svlVidCapSrcMILRenderTarget;
 
 public:
     typedef struct tagMILCaptureParameters {
+        int SystemID;
+        int DigitizerID;
         MIL_ID *MilFrames;
         svlBufferImage *ImageBuffer;
         bool OverlayModified;
