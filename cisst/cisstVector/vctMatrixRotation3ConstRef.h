@@ -81,25 +81,6 @@ class vctMatrixRotation3ConstRef: public vctMatrixRotation3Base<vctFixedSizeCons
     inline vctMatrixRotation3ConstRef(const vctMatrixRotation3ConstBase<__containerType> & other) {
         this->SetRef(other.Pointer());
     }
-
-    /*! The assignment from BaseType (i.e. a 3 by 3 fixed size matrix)
-      has to be redefined for this class (C++ restriction).  This
-      operator uses the Assign() method inherited from the BaseType.
-      This operator (as well as the Assign method) allows to set a
-      rotation matrix to whatever value without any further validity
-      checking.  It is recommended to use it with caution. */
-    inline ThisType & operator = (const ContainerType & other) {
-        return reinterpret_cast<ThisType &>(this->Assign(other));
-    }
-
-    inline ThisType & operator = (const ThisType & other) {
-        return reinterpret_cast<ThisType &>(this->Assign(other));
-    }
-
-    inline ThisType & operator = (const BaseType & other) {
-        return reinterpret_cast<ThisType &>(this->Assign(other));
-    }
-
 };
 
 
