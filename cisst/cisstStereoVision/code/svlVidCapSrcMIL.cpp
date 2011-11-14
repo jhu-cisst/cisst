@@ -225,7 +225,7 @@ svlVidCapSrcMIL::svlVidCapSrcMIL() :
     MilCaptureBuffers(3)
 {
 #if __VERBOSE__ == 1
-    std::cerr << "svlVidCapSrcMIL::constructor()" << std::endl;
+    std::cerr << "svlVidCapSrcMIL::constructor() - MIL version=" << M_MIL_CURRENT_ASCII_VERSION << std::endl;
 #endif
 
     MilApplication = M_NULL;
@@ -746,7 +746,12 @@ bool svlVidCapSrcMIL::MILInitializeCapture(int system, int digitizer)
     if (system    < 0 || system    >= static_cast<int>(MILNumberOfSystems) ||
         digitizer < 0 || digitizer >= static_cast<int>(MilNumberOfDigitizers[system]) ||
         MilSystem[system]               == M_NULL ||
-        MilDigitizer[system][digitizer] == M_NULL) return false;
+        MilDigitizer[system][digitizer] == M_NULL) {
+#if __VERBOSE__ == 1
+        std::cerr << "svlVidCapSrcMIL::MILInitializeCapture() - error: system or digitizer not yet initialized" << std::endl;
+#endif
+        return false;
+    }
 
     if (MilCaptureSupported[system][digitizer] &&
         MilCaptureParams[system][digitizer].MilFrames) {
@@ -790,6 +795,9 @@ bool svlVidCapSrcMIL::MILInitializeCapture(int system, int digitizer)
     return true;
 
 labError:
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMIL::MILInitializeCapture() - error" << std::endl;
+#endif
     MILReleaseCapture(system, digitizer);
     return false;
 }
@@ -803,7 +811,12 @@ bool svlVidCapSrcMIL::MILInitializeOverlay(int system, int digitizer)
     if (system    < 0 || system    >= static_cast<int>(MILNumberOfSystems) ||
         digitizer < 0 || digitizer >= static_cast<int>(MilNumberOfDigitizers[system]) ||
         MilSystem[system]               == M_NULL ||
-        MilDigitizer[system][digitizer] == M_NULL) return false;
+        MilDigitizer[system][digitizer] == M_NULL) {
+#if __VERBOSE__ == 1
+        std::cerr << "svlVidCapSrcMIL::MILInitializeOverlay() - error: system or digitizer not yet initialized" << std::endl;
+#endif
+        return false;
+    }
 
     MilOverlaySupported[system][digitizer] = false;
 
@@ -843,6 +856,9 @@ bool svlVidCapSrcMIL::MILInitializeOverlay(int system, int digitizer)
     return true;
 
 labError:
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMIL::MILInitializeOverlay() - error" << std::endl;
+#endif
     MILReleaseOverlay(system, digitizer);
     return false;
 }
@@ -857,12 +873,19 @@ bool svlVidCapSrcMIL::MILUploadOverlay(int system, int digitizer)
         digitizer < 0 || digitizer >= static_cast<int>(MilNumberOfDigitizers[system]) ||
         MilSystem[system]               == M_NULL ||
         MilDigitizer[system][digitizer] == M_NULL ||
-        MilOverlaySupported[system][digitizer] == false) return false;
+        MilOverlaySupported[system][digitizer] == false) {
+#if __VERBOSE__ == 1
+        std::cerr << "svlVidCapSrcMIL::MILUploadOverlay() - error: system or digitizer not yet initialized" << std::endl;
+#endif
+        return false;
+    }
 
-    if (MilCaptureSupported[system][digitizer]) {
+    if (MilCaptureParams[system][digitizer].MilFrames) {
+        // Capture is active
         MilCaptureParams[system][digitizer].OverlayModified = true;
     }
     else {
+        // Overlay only
         MbufPutColor(MilOverlayImage[system][digitizer],
                      M_PACKED+M_RGB24, M_ALL_BANDS,
                      MilOverlayBuffer[system][digitizer]);
