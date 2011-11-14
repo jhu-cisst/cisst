@@ -325,8 +325,10 @@ typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::FormatListType> svlFi
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_FormatList);
 typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageFormat> svlFilterSourceVideoCapture_Format;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Format);
-typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageProperties> svlFilterSourceVideoCapture_ImageProperties;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_ImageProperties);
+// Note: do not use svlFilterSourceVideoCapture_ImageProperties because it will confict with SWIG
+//       wrapping of svlFilterSourceVideoCapture::ImageProperties (SWIG will change :: to _).
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageProperties> svlFilterSourceVideoCaptureImageProperties;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCaptureImageProperties);
 typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ExternalTrigger> svlFilterSourceVideoCapture_Trigger;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Trigger);
 

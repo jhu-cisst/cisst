@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "svlImageProcessingHelper.h"
 #include "cisstCommon/cmnPortability.h"
 #include <fstream>
+#include <cmath>
 
 
 /*****************************************/
