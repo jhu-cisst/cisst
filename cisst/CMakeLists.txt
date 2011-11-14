@@ -16,13 +16,36 @@
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
 
+# message ("----------- modify cisst-config.cmake to set CISST_BINARY_DIR based on current dir")
+# message ("----------- what to do with DOXYGEN_DIR and LIBRARY_DIR in cisst-config.cmake, needed?")
+# message ("----------- get rid of CISST_ROOT_DIR in cisstConfig.h, Simon uses it a lot, should provide short function to help")
+
 # cisst libraries (Computer Integrated Surgical Systems and Technology)
-project (cisstLibs)
+project (cisst)
 
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
+
+# To compile examples within this project
+set (CURRENT_PROJECT_IS_CISST ON)
+
+# The upper case variables have been used in the past and need to be preserved
+set (CISST_BINARY_DIR "${cisst_BINARY_DIR}")
+set (CISST_SOURCE_DIR "${cisst_SOURCE_DIR}")
+set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${CISST_VERSION}")
+set (CISST_SHARE_DIR  "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
+set (CISST_CMAKE_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake")
+set (CISST_CMAKE_SOURCE_DIR "${CISST_SOURCE_DIR}/cmake")
+set (CISST_CMAKE_BINARY_DIR "${CISST_BINARY_DIR}/${CISST_CMAKE_INSTALL_SUFFIX}")
+set (CISST_CMAKE_DIRS "${CISST_CMAKE_SOURCE_DIR}" "${CISST_CMAKE_BINARY_DIR}")
+
+# Add include directories
+set (CISST_INCLUDE_DIR
+     ${cisst_BINARY_DIR}/include
+     ${cisst_SOURCE_DIR})
+include_directories (${CISST_INCLUDE_DIR})
 
 # Try to find SVN version number
 find_package (Subversion QUIET)
@@ -33,19 +56,19 @@ endif (Subversion_FOUND)
 message ("Configuring cisst ${CISST_VERSION} from \"${cisst_SOURCE_DIR}\", revision: ${CISST_WC_REVISION}")
 
 # Generate cisstRevision.h
-set (CISST_REVISION_HEADER_SRC "${cisstLibs_SOURCE_DIR}/cisstRevision.h.in")
-set (CISST_REVISION_HEADER "${cisstLibs_BINARY_DIR}/include/cisstRevision.h")
+set (CISST_REVISION_HEADER_SRC "${cisst_SOURCE_DIR}/cisstRevision.h.in")
+set (CISST_REVISION_HEADER "${cisst_BINARY_DIR}/include/cisstRevision.h")
 # Script to be executed everytime
-configure_file ("${cisstLibs_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
-                "${cisstLibs_BINARY_DIR}/cmake/cisstGenerateRevision.cmake")
+configure_file ("${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake")
 add_custom_target (cisstRevision ALL
-                   COMMAND ${CMAKE_COMMAND} -P "${cisstLibs_BINARY_DIR}/cmake/cisstGenerateRevision.cmake"
+                   COMMAND ${CMAKE_COMMAND} -P "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
                    COMMENT "Generating ${CISST_REVISION_HEADER} from ${CISST_REVISION_HEADER_SRC}"
                    SOURCES "${CISST_REVISION_HEADER_SRC}")
 
 # Install cisstRevision.h
-# set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
-install (FILES "${cisstLibs_BINARY_DIR}/include/cisstRevision.h"
+set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
+install (FILES "${cisst_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)
 
@@ -64,19 +87,16 @@ function (CISST_ADD_TO_INTERNAL list newElements)
 endfunction (CISST_ADD_TO_INTERNAL)
 
 # Where to find cisst defined CMake Macros/Modules
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisstLibs_SOURCE_DIR}/cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CISST_CMAKE_SOURCE_DIR}")
 
-# The upper case variables have been used in the past and need to be preserved
-set (CISST_BINARY_DIR ${cisst_BINARY_DIR})
-set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 
 # Include all useful CMake macros and functions for cisst
 include (cisstMacros)
 include (cisstInternalMacros)
 
 # Output directories.
-set (LIBRARY_OUTPUT_PATH ${cisstLibs_BINARY_DIR}/lib)
-set (EXECUTABLE_OUTPUT_PATH ${cisstLibs_BINARY_DIR}/bin)
+set (LIBRARY_OUTPUT_PATH ${cisst_BINARY_DIR}/lib)
+set (EXECUTABLE_OUTPUT_PATH ${cisst_BINARY_DIR}/bin)
 
 # Where to find afterwards
 set (cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
@@ -181,8 +201,8 @@ endif (UNIX)
 
 # Add include directories
 set (CISST_INCLUDE_DIR
-     ${cisstLibs_BINARY_DIR}/include
-     ${cisstLibs_SOURCE_DIR})
+     ${cisst_BINARY_DIR}/include
+     ${cisst_SOURCE_DIR})
 include_directories (${CISST_INCLUDE_DIR})
 
 # Build test driver if needed
@@ -328,50 +348,77 @@ foreach (lib ${CISST_LIBS})
 endforeach (lib)
 
 # Create misc. config files
-set (CISST_BUILD_INCLUDE_DIRECTORIES ${CISST_INCLUDE_DIR})
-set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisstLibs_SOURCE_DIR})
+set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
+set (CISST_BINARY_DIR_FOR_CONFIG ${CISST_BINARY_DIR})
+set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
+
+set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
-configure_file ("${cisstLibs_SOURCE_DIR}/cmake/cisst-config.cmake.in"
-                "${cisstLibs_BINARY_DIR}/cisst-config.cmake"
+
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
+                "${cisst_BINARY_DIR}/cisst-config.cmake"
                 @ONLY)
+
+set (CISST_BINARY_DIR_FOR_CONFIG "")
+set (CISST_INCLUDE_DIR_FOR_CONFIG "")
+set (CISST_CMAKE_DIRS_FOR_CONFIG "")
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
+                "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
+                @ONLY)
+install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         RENAME "cisst-config.cmake"
+         COMPONENT cisstCommon)
+
+# CMake use cisst file
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/Usecisst.cmake"
+                "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
+                COPYONLY)
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstMacros.cmake"
+                "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
+                COPYONLY)
+install (FILES "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
+               "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         COMPONENT cisstCommon)
 
 # Configuration file
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-configure_file (${cisstLibs_SOURCE_DIR}/cisstConfig.h.in
-                ${cisstLibs_BINARY_DIR}/include/cisstConfig.h)
-install (FILES  ${cisstLibs_BINARY_DIR}/include/cisstConfig.h
+configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
+                ${cisst_BINARY_DIR}/include/cisstConfig.h)
+install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
          DESTINATION include
          COMPONENT cisstCommon)
 
 # Use CPack package generator
-set(CPACK_PACKAGE_NAME "cisst")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
+set (CPACK_PACKAGE_NAME "cisst")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
 # For now, enable all default libraries (even if not compiled)
-set(CPACK_COMPONENTS_ALL ${CISST_LIBRARIES_DEFAULT})
+set (CPACK_COMPONENTS_ALL ${CISST_LIBRARIES_DEFAULT})
 if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is activated
   if (${CISST_XML_LIB} STREQUAL "LibXml2")
     set (CPACK_COMPONENTS_ALL ${CPACK_COMPONENTS_ALL} cisstCommonXML)
   endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 endif (CISST_cisstCommonXML)
-set(CPACK_PACKAGE_VENDOR "JHU")
-set(CPACK_PACKAGE_VERSION "${CISST_VERSION}.${CISST_WC_REVISION}")
-set(CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${CISST_WC_REVISION})
-set(CPACK_RESOURCE_FILE_LICENSE "${CISST_SOURCE_DIR}/license.txt")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
-set(CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
+set (CPACK_PACKAGE_VENDOR "JHU")
+set (CPACK_PACKAGE_VERSION "${CISST_VERSION}.${CISST_WC_REVISION}")
+set (CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${CISST_WC_REVISION})
+set (CPACK_RESOURCE_FILE_LICENSE "${cisst_saw_SOURCE_DIR}/license.txt")
+set (CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
+set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
 # Dependencies should be done automatically (don't really need to specify
 # cisstCommon dependency because it is a required component)
-set(CPACK_COMPONENT_CISSTCOMMONXML_DEPENDS       cisstCommon)
-set(CPACK_COMPONENT_CISSTVECTOR_DEPENDS          cisstCommon)
-set(CPACK_COMPONENT_CISSTNUMERICAL_DEPENDS       cisstCommon cisstVector)
-set(CPACK_COMPONENT_CISSTOSABSTRACTION_DEPENDS   cisstCommon)
-set(CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVector cisstOSAbstraction)
-set(CPACK_COMPONENT_CISSTSTEREOVISION_DEPENDS    cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
-set(CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
-set(CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon cisstVector cisstNumerical)
+set (CPACK_COMPONENT_CISSTCOMMONXML_DEPENDS       cisstCommon)
+set (CPACK_COMPONENT_CISSTVECTOR_DEPENDS          cisstCommon)
+set (CPACK_COMPONENT_CISSTNUMERICAL_DEPENDS       cisstCommon cisstVector)
+set (CPACK_COMPONENT_CISSTOSABSTRACTION_DEPENDS   cisstCommon)
+set (CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVector cisstOSAbstraction)
+set (CPACK_COMPONENT_CISSTSTEREOVISION_DEPENDS    cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+set (CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+set (CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon cisstVector cisstNumerical)
 if (WIN32)
   set(CPACK_NSIS_MODIFY_PATH ON)
 endif (WIN32)
-INCLUDE(CPack)
+include (CPack)

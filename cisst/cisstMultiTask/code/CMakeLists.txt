@@ -275,17 +275,17 @@ if (CISST_MTS_HAS_ICE)
     set (GENERATED_H_FILE "${CMAKE_CURRENT_BINARY_DIR}/${slice_file}.h")
 
     add_custom_command (
-      OUTPUT ${GENERATED_CPP_FILE} ${GENERATED_H_FILE} ${cisstLibs_BINARY_DIR}/include/cisstMultiTask/${slice_file}.h
+      OUTPUT ${GENERATED_CPP_FILE} ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/include/cisstMultiTask/${slice_file}.h
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       # first run slice2cpp
       COMMAND ${ICE_SLICE2CPP}
       ARGS    -I ${ICE_SLICE_DIR} ${SLICE_OPTIONS} ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice/${slice_file}.ice
       # then create a directory to copy the header file
       COMMAND ${CMAKE_COMMAND}
-      ARGS -E make_directory ${cisstLibs_BINARY_DIR}/include/cisstMultiTask
+      ARGS -E make_directory ${cisst_BINARY_DIR}/include/cisstMultiTask
       # and finally copy the header file
       COMMAND ${CMAKE_COMMAND}
-      ARGS -E copy_if_different ${GENERATED_H_FILE} ${cisstLibs_BINARY_DIR}/include/cisstMultiTask
+      ARGS -E copy_if_different ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/include/cisstMultiTask
       COMMENT "Compiling ${slice_file}.ice"
     )
 
@@ -298,7 +298,7 @@ if (CISST_MTS_HAS_ICE)
 endif (CISST_MTS_HAS_ICE)
 
 # Create the config file
-set (CISST_MTS_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstMultiTask/mtsConfig.h)
+set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstMultiTask/mtsConfig.h)
 configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in
                 ${CISST_MTS_CONFIG_FILE}
                 @ONLY)
@@ -313,8 +313,11 @@ set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE}
 
 # Create the CMake config file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
-                ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstMultiTaskBuild.cmake
+                ${CISST_CMAKE_BINARY_DIR}/cisstMultiTaskBuild.cmake
                 @ONLY)
+install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstMultiTaskBuild.cmake
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         COMPONENT cisstMultiTask)
 
 # Finally add the library
 cisst_add_library (LIBRARY cisstMultiTask

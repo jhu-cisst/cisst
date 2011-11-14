@@ -1321,7 +1321,7 @@ if (CISST_HAS_OPENGL)
 endif (CISST_HAS_OPENGL)
 
 # Create the config file
-set (CISST_SVL_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstStereoVision/svlConfig.h)
+set (CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstStereoVision/svlConfig.h)
 configure_file (${cisstStereoVisionLibs_SOURCE_DIR}/svlConfig.h.in
                 ${CISST_SVL_CONFIG_FILE}
                 @ONLY)

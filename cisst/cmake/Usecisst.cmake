@@ -20,7 +20,7 @@
 if (NOT CURRENT_PROJECT_IS_CISST)
 
   # Extend CMake Module Path to find cisst defined Macros
-  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIR})
+  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIRS})
   include (cisstMacros)
 
   # Add the include and lib paths for cisst

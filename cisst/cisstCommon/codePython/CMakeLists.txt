@@ -18,4 +18,5 @@ project (cisstCommonPython)
 cisst_add_swig_module (MODULE cisstCommon
                        INTERFACE_DIRECTORY ..
                        HEADER_FILES ../cmnPython.h
-                       MODULE_LINK_LIBRARIES cisstCommon)
+                       MODULE_LINK_LIBRARIES cisstCommon
+                       INSTALL_FILES 1)

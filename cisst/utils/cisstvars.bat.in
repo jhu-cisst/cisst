@@ -18,7 +18,7 @@
 @rem --- end cisst license ---
 
 
-@set CISST_DIR=${cisst_BINARY_DIR_NATIVE}
+@set CISST_DIR=${cisst_saw_BINARY_DIR_NATIVE}
 @set CMAKE_GENERATOR=${CMAKE_GENERATOR}
 @set CISST_BUILD_SAW=${CISST_BUILD_SAW}
 

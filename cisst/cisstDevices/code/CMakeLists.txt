@@ -69,7 +69,7 @@ if( CISST_DEV_HAS_ACCELEGLOVE )
 endif( CISST_DEV_HAS_ACCELEGLOVE )
 
 # Create the config file
-set (CISST_DEV_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstDevices/devConfig.h)
+set (CISST_DEV_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstDevices/devConfig.h)
 configure_file (${cisstDevicesLibs_SOURCE_DIR}/devConfig.h.in
                 ${CISST_DEV_CONFIG_FILE}
                 @ONLY)
@@ -82,8 +82,11 @@ set_source_files_properties ("${CISST_DEV_CONFIG_FILE}" PROPERTIES GENERATED TRU
 
 # Create the CMake config file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstDevicesBuild.cmake.in
-                ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstDevicesBuild.cmake
+                ${CISST_CMAKE_BINARY_DIR}/cisstDevicesBuild.cmake
                 @ONLY)
+install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstDevicesBuild.cmake
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         COMPONENT cisstDevices)
 
 # Finally create the library
 cisst_add_library (LIBRARY cisstDevices

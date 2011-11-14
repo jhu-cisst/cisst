@@ -21,4 +21,5 @@ cisst_add_swig_module (MODULE cisstStereoVision
                        INTERFACE_DIRECTORY ..
                        HEADER_FILES ../svlPython.h
                        MODULE_LINK_LIBRARIES cisstStereoVision
-                                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+                                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                       INSTALL_FILES 1)

@@ -30,8 +30,8 @@ if (cisst_FOUND_AS_REQUIRED)
   add_subdirectory (behaviors)
 
   # sawSensablePhantom has been compiled within cisst, we should find it automatically
-  find_package (sawSensablePhantom HINTS "${CISST_BINARY_DIR}/saw/components" QUIET)
-  find_package (sawKeyboard HINTS "${CISST_BINARY_DIR}/saw/components" QUIET)
+  find_package (sawSensablePhantom HINTS "${cisst_saw_BINARY_DIR}/saw/components" QUIET)
+  find_package (sawKeyboard HINTS "${cisst_saw_BINARY_DIR}/saw/components" QUIET)
 
   if (sawSensablePhantom_FOUND AND sawKeyboard_FOUND)
     add_subdirectory(SensableNoVideo)
@@ -44,7 +44,7 @@ if (cisst_FOUND_AS_REQUIRED)
 #   endif (CISST_DEV_HAS_SENSABLEHD)
 
   # sawIntuitiveDaVinci has been compiled within cisst, we should find it automatically
-  find_package (sawIntuitiveDaVinci HINTS "${CISST_BINARY_DIR}/saw/components" QUIET)
+  find_package (sawIntuitiveDaVinci HINTS "${cisst_saw_BINARY_DIR}/saw/components" QUIET)
 
   if (sawIntuitiveDaVinci_FOUND)
     add_subdirectory(daVinciStereoVideo)

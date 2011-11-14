@@ -52,12 +52,12 @@ add_custom_command (TARGET _cisstMultiTaskPythonTest
 set (LIB cisstMultiTask)
 if (CMAKE_CONFIGURATION_TYPES)
   foreach (config ${CMAKE_CONFIGURATION_TYPES})
-    configure_file (${cisstLibs_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
+    configure_file (${cisst_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
                     ${EXECUTABLE_OUTPUT_PATH}/${config}/cisstMultiTaskTests.py
                     IMMEDIATE @ONLY@)
   endforeach (config)
 else (CMAKE_CONFIGURATION_TYPES)
-  configure_file (${cisstLibs_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
+  configure_file (${cisst_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
                   ${EXECUTABLE_OUTPUT_PATH}/cisstMultiTaskTests.py
                   IMMEDIATE @ONLY@)
 endif (CMAKE_CONFIGURATION_TYPES)

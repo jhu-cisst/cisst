@@ -47,7 +47,7 @@ else (${CISST_XML_LIB} STREQUAL "LibXml2")
 endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 
 # Create the config file
-set (CISST_CMN_XML_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstCommon/cmnConfigXML.h)
+set (CISST_CMN_XML_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstCommon/cmnConfigXML.h)
 configure_file (${cisstCommonLibs_SOURCE_DIR}/cmnConfigXML.h.in
                 ${CISST_CMN_XML_CONFIG_FILE}
                 @ONLY)

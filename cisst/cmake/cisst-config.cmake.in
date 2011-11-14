@@ -23,13 +23,15 @@ set (CISST_VERSION_MINOR "@CISST_VERSION_MINOR@")
 set (CISST_VERSION "@CISST_VERSION@")
 
 # Paths
-set (CISST_SOURCE_DIR "@CISST_SOURCE_DIR@")
-set (CISST_BINARY_DIR "@CISST_BINARY_DIR@")
-set (CISST_INCLUDE_DIR "@CISST_BUILD_INCLUDE_DIRECTORIES@")
+set (CISST_BINARY_DIR "@CISST_BINARY_DIR_FOR_CONFIG@")
+set (CISST_INCLUDE_DIR "@CISST_INCLUDE_DIR_FOR_CONFIG@")
 set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
 set (CISST_LIBRARY_DIR "@CISST_BUILD_LINK_DIRECTORIES@")
-set (CISST_CMAKE_DIR "${CISST_SOURCE_DIR}/cisst/cmake")
-set (CISST_USE_FILE "${CISST_CMAKE_DIR}/Usecisst.cmake")
+set (CISST_CMAKE_DIRS "@CISST_CMAKE_DIRS_FOR_CONFIG@")
+find_file (CISST_USE_FILE
+           NAMES Usecisst.cmake
+           PATHS ${CISST_CMAKE_DIRS}
+           NO_DEFAULT_PATH)
 
 # On Windows, CMake uses a different compiler at configuration time
 set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
@@ -49,10 +51,14 @@ set (CISST_HAS_FLTK @CISST_HAS_FLTK@)
 
 # Include settings per library
 foreach (lib ${CISST_LIBRARIES})
-  set (ADDITIONAL_BUILD_CMAKE ${CISST_BINARY_DIR}/cisst/CMakeFiles/${lib}Build.cmake)
-  if (EXISTS ${ADDITIONAL_BUILD_CMAKE})
+  find_file (ADDITIONAL_BUILD_CMAKE
+             NAMES ${lib}Build.cmake
+             PATHS ${CISST_CMAKE_DIRS}
+             NO_DEFAULT_PATH)
+  if (ADDITIONAL_BUILD_CMAKE)
     include (${ADDITIONAL_BUILD_CMAKE})
-  endif (EXISTS ${ADDITIONAL_BUILD_CMAKE})
+  endif (ADDITIONAL_BUILD_CMAKE)
+  unset (ADDITIONAL_BUILD_CMAKE CACHE) # find_file stores the result in cache
 endforeach (lib ${CISST_LIBRARIES})
 
 # To allow users to check if a library has been compiled

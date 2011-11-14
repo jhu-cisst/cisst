@@ -17,11 +17,10 @@
 cmake_minimum_required (VERSION 2.6.2)
 
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
-project (cisst)
+project (cisst_saw)
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
-set (CURRENT_PROJECT_IS_CISST ON)
-set (cisst_DIR "${cisst_BINARY_DIR}/cisst")
+set (cisst_DIR "${cisst_saw_BINARY_DIR}/cisst")
 
 # Option to make cisst CMake functions more verbose
 option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake" OFF)
@@ -61,12 +60,6 @@ else (CISST_BUILD_SHARED_LIBS)
   set (IS_SHARED STATIC)
 endif (CISST_BUILD_SHARED_LIBS)
 
-# Add include directories
-set (CISST_INCLUDE_DIR
-     ${cisst_BINARY_DIR}/cisst/include
-     ${cisst_SOURCE_DIR}/cisst)
-include_directories (${CISST_INCLUDE_DIR})
-
 # To allow mixing static and dynamic libraries
 if (CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
@@ -98,23 +91,23 @@ endif (CISST_BUILD_DOC)
 # Environment variables for Windows
 IF(WIN32)
   # Script to set cisst environment variables
-  FILE(TO_NATIVE_PATH ${cisst_BINARY_DIR} cisst_BINARY_DIR_NATIVE)
-  CONFIGURE_FILE(${cisst_SOURCE_DIR}/cisst/utils/cisstvars.bat.in
-                 ${cisst_BINARY_DIR}/cisstvars.bat)
+  FILE(TO_NATIVE_PATH ${cisst_saw_BINARY_DIR} cisst_saw_BINARY_DIR_NATIVE)
+  CONFIGURE_FILE(${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvars.bat.in
+                 ${cisst_saw_BINARY_DIR}/cisstvars.bat)
   # Script to set Microsoft compiler environment variables
   GET_FILENAME_COMPONENT(BUILD_TOOL_DIRECTORY ${CMAKE_MAKE_PROGRAM} PATH)
   FIND_PROGRAM(VSVARS32_BAT
                NAMES vsvars32.bat
                PATHS ${BUILD_TOOL_DIRECTORY}/../../Common7/Tools)
   MARK_AS_ADVANCED(VSVARS32_BAT)
-  CONFIGURE_FILE(${cisst_SOURCE_DIR}/cisst/utils/cisstvsvars.bat.in
-                 ${cisst_BINARY_DIR}/cisstvsvars.bat)
+  CONFIGURE_FILE(${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvsvars.bat.in
+                 ${cisst_saw_BINARY_DIR}/cisstvsvars.bat)
 
   # If Visual Studio
   IF(CMAKE_GENERATOR MATCHES "Visual Studio*" )
     FOREACH(config ${CMAKE_CONFIGURATION_TYPES})
-      CONFIGURE_FILE(${cisst_SOURCE_DIR}/cisst/utils/visual-studio.bat.in
-                     ${cisst_BINARY_DIR}/visual-studio-${config}.bat)
+      CONFIGURE_FILE(${cisst_saw_SOURCE_DIR}/cisst/utils/visual-studio.bat.in
+                     ${cisst_saw_BINARY_DIR}/visual-studio-${config}.bat)
     ENDFOREACH(config)
   ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio*" )
 
@@ -137,22 +130,22 @@ IF(WIN32)
 
       # Initial settings for paths
       SET(CISST_PATH_CMAKE_FORMAT
-          "${cisst_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
-          "${cisst_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
+          "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
+          "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
       SET(CISST_PYTHONPATH_CMAKE_FORMAT
-          "${cisst_BINARY_DIR}/cisst/lib" "${cisst_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
-          "${cisst_BINARY_DIR}/cisst/bin" "${cisst_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
+          "${cisst_saw_BINARY_DIR}/cisst/lib" "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
+          "${cisst_saw_BINARY_DIR}/cisst/bin" "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
 
       # To find components (libraries) and example programs
       IF(CISST_BUILD_SAW)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
+            "${cisst_saw_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
+            "${cisst_saw_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
         SET(CISST_PYTHONPATH_CMAKE_FORMAT
             ${CISST_PYTHONPATH_CMAKE_FORMAT}
-            "${cisst_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
+            "${cisst_saw_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
+            "${cisst_saw_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
       ENDIF(CISST_BUILD_SAW)
 
       # Convert to native format to be able to compare
@@ -236,11 +229,11 @@ ENDIF(WIN32)
 # Environment variables for Unix
 if (UNIX)
   # Script to set cisst environment variables
-  configure_file (${cisst_SOURCE_DIR}/cisst/utils/cisstvars.csh.in
-                  ${cisst_BINARY_DIR}/cisstvars.csh
+  configure_file (${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvars.csh.in
+                  ${cisst_saw_BINARY_DIR}/cisstvars.csh
                   @ONLY)
   # Script to set cisst environment variables
-  configure_file (${cisst_SOURCE_DIR}/cisst/utils/cisstvars.sh.in
-                  ${cisst_BINARY_DIR}/cisstvars.sh
+  configure_file (${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvars.sh.in
+                  ${cisst_saw_BINARY_DIR}/cisstvars.sh
                   @ONLY)
 endif (UNIX)

@@ -62,10 +62,10 @@ if (CISST_HAS_QT)
 
   # Create the CMake config file
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
-                  ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstQtBuild.cmake
+                  ${CISST_CMAKE_BINARY_DIR}/cisstQtBuild.cmake
                   @ONLY)
-  install (FILES ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstQtBuild.cmake
-           DESTINATION share/cisst/cmake
+  install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstQtBuild.cmake
+           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
            COMPONENT cisstCommon)
 
 else (CISST_HAS_QT)
@@ -101,10 +101,10 @@ if (CISST_HAS_FLTK)
 
   # Create the CMake config file
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstFLTKBuild.cmake.in
-                  ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstFLTKBuild.cmake
+                  ${CISST_CMAKE_BINARY_DIR}/cisstFLTKBuild.cmake
                   @ONLY)
-  install (FILES ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstFLTKBuild.cmake
-           DESTINATION share/cisst/cmake
+  install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstFLTKBuild.cmake
+           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
            COMPONENT cisstCommon)
 
 else (CISST_HAS_FLTK)
@@ -136,10 +136,10 @@ if (CISST_HAS_SWIG_PYTHON)
  
     # Create the CMake config file
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
-                    ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstPythonBuild.cmake
+                    ${CISST_CMAKE_BINARY_DIR}/cisstPythonBuild.cmake
                     @ONLY)
-    install (FILES ${cisstLibs_BINARY_DIR}/CMakeFiles/cisstPythonBuild.cmake
-             DESTINATION share/cisst/cmake
+    install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstPythonBuild.cmake
+             DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
              COMPONENT cisstCommon)
 
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})

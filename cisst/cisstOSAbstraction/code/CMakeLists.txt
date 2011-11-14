@@ -63,7 +63,7 @@ set (HEADER_FILES
      )
 
 # Create the config file
-set (CISST_OSA_CONFIG_FILE ${cisstLibs_BINARY_DIR}/include/cisstOSAbstraction/osaConfig.h)
+set (CISST_OSA_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstOSAbstraction/osaConfig.h)
 configure_file (${cisstOSAbstractionLibs_SOURCE_DIR}/osaConfig.h.in
                 ${CISST_OSA_CONFIG_FILE}
                 @ONLY)

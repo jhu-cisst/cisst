@@ -105,5 +105,5 @@ foreach (icon ${CISST_UI3_ICONS})
                       COMMAND ${CMAKE_COMMAND}
                       ARGS -E copy_if_different
                              ${CISST_UI3_ICONS_DIR}/${icon}
-                             ${cisst_BINARY_DIR}/share/cisst3DUserInterface/icons/${icon})
+                             ${CISST_SHARE_DIR}/cisst3DUserInterface/icons/${icon})
 endforeach (icon)

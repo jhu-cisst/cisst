@@ -20,7 +20,7 @@
 # --- end cisst license ---
 
 
-set CISST_DIR="@cisst_BINARY_DIR@"
+set CISST_DIR="@cisst_saw_BINARY_DIR@"
 set CISST_BUILD_SAW=@CISST_BUILD_SAW@
 
 set OS=`uname`

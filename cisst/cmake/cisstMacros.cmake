@@ -32,24 +32,36 @@ macro (cisst_load_package_setting ...)
   # Set all variables based on dependencies
   foreach (lib ${ARGV})
     # Additional settings
-    set (_clps_ADDITIONAL_BUILD_CMAKE "${CISST_BINARY_DIR}/cisst/CMakeFiles/${lib}Build.cmake")
-    if (EXISTS ${_clps_ADDITIONAL_BUILD_CMAKE})
+    find_file (_clps_ADDITIONAL_BUILD_CMAKE
+               NAMES ${lib}Build.cmake
+               PATHS ${CISST_CMAKE_DIRS}
+               NO_DEFAULT_PATH)
+    if (_clps_ADDITIONAL_BUILD_CMAKE)
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
-    endif (EXISTS ${_clps_ADDITIONAL_BUILD_CMAKE})
+    endif (_clps_ADDITIONAL_BUILD_CMAKE)
+    unset (_clps_ADDITIONAL_BUILD_CMAKE CACHE) # find_file stores the result in cache
     # External dependency file
-    set (_clps_SETTINGS_FILE "${CISST_BINARY_DIR}/cisst/CMakeFiles/${lib}External.cmake")
-    if (EXISTS ${_clps_SETTINGS_FILE})
+    find_file (_clps_SETTINGS_FILE
+               NAMES ${lib}External.cmake
+               PATHS ${CISST_CMAKE_DIRS}
+               NO_DEFAULT_PATH)
+    if (_clps_SETTINGS_FILE)
       include (${_clps_SETTINGS_FILE})
       set (_clps_EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
       foreach (package ${_clps_EXTERNAL_PACKAGES})
-        set (_clps_PACKAGE_FILE "${CISST_BINARY_DIR}/cisst/CMakeFiles/${lib}${package}.cmake")
-        if (EXISTS ${_clps_PACKAGE_FILE})
+        find_file (_clps_PACKAGE_FILE
+                   NAMES ${lib}${package}.cmake
+                   PATHS ${CISST_CMAKE_DIRS}
+                   NO_DEFAULT_PATH)
+        if (_clps_PACKAGE_FILE)
           include (${_clps_PACKAGE_FILE})
-        else (EXISTS ${_clsp_PACKAGE_FILE})
+        else (_clsp_PACKAGE_FILE)
           message (SEND_ERROR "Based on ${_clps_EXTERNAL_PACKAGES}, there should be a file named ${_clps_PACKAGE_FILE}, you might need to start from an empty build tree")
-        endif (EXISTS ${_clps_PACKAGE_FILE})
+        endif (_clps_PACKAGE_FILE)
+        unset (_clps_PACKAGE_FILE CACHE) # find_file stores the result in cache
       endforeach (package)
-    endif (EXISTS ${_clps_SETTINGS_FILE})
+    endif (_clps_SETTINGS_FILE)
+    unset (_clps_SETTINGS_FILE CACHE) # find_file stores the result in cache
      # find and load general settings
     set (_clps_SETTINGS CISST_GENERAL_SETTINGS_FOR_${lib})
     if (${_clps_SETTINGS})
@@ -176,7 +188,7 @@ endmacro (cisst_extract_settings)
 # The macro adds a library to a CISST-related project by processing the
 # following parameters
 #
-# - PROJECT (cisstLibs by default)
+# - PROJECT (cisst by default)
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
@@ -223,7 +235,7 @@ macro (cisst_add_library ...)
 
   # fill defaults
   if (PROJECT STREQUAL "")
-    set (PROJECT "cisstLibs")
+    set (PROJECT "cisst")
   endif (PROJECT STREQUAL "")
   if (LIBRARY_DIR STREQUAL "")
     set (LIBRARY_DIR ${LIBRARY})
@@ -400,7 +412,8 @@ function (cisst_add_swig_module ...)
        INTERFACE_FILENAME
        INTERFACE_DIRECTORY
        HEADER_FILES
-       MODULE_LINK_LIBRARIES)
+       MODULE_LINK_LIBRARIES
+       INSTALL_FILES)
 
   # reset local variables
   foreach (keyword ${FUNCTION_KEYWORDS})
@@ -471,32 +484,37 @@ function (cisst_add_swig_module ...)
                         ARGS -E copy_if_different
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py)
-    # install the interface files so that one can %import them
-    install (FILES ${SWIG_INTERFACE_FILE}
-             DESTINATION include/${MODULE}
-             COMPONENT ${MODULE})
 
-    # install library and python file
-    install (TARGETS _${MODULE_NAME}
-             RUNTIME DESTINATION bin
-             LIBRARY DESTINATION lib
-             COMPONENT ${MODULE})
-    install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py
-             DESTINATION lib
-             COMPONENT ${MODULE})
-
-    # install extra header files
-    foreach (header ${HEADER_FILES})
-      install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+    # install files if requested
+    if (${INSTALL_FILES})
+      # install the interface files so that one can %import them
+      install (FILES ${SWIG_INTERFACE_FILE}
                DESTINATION include/${MODULE}
                COMPONENT ${MODULE})
-    endforeach (header)
+
+      # install library and python file
+      install (TARGETS _${MODULE_NAME}
+               RUNTIME DESTINATION bin
+               LIBRARY DESTINATION lib
+               COMPONENT ${MODULE})
+      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py
+               DESTINATION lib
+               COMPONENT ${MODULE})
+
+      # install extra header files
+      foreach (header ${HEADER_FILES})
+        install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+                 DESTINATION include/${MODULE}
+                 COMPONENT ${MODULE})
+      endforeach (header)
+    endif  (${INSTALL_FILES})
 
   else (EXISTS ${SWIG_INTERFACE_FILE})
     message (SEND_ERROR "cisst_add_swig_module: can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
 endfunction (cisst_add_swig_module)
+
 
 
 # Function to use cisstComponentGenerator, this function assumes input
@@ -522,7 +540,7 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
     find_program (CISST_CG_EXECUTABLE cisstComponentGenerator
-                  PATHS "${CISST_BINARY_DIR}/lib/bin")
+                  PATHS "${CISST_BINARY_DIR}/bin")
   endif (TARGET cisstCommon)
 
   # loop over input files
@@ -579,7 +597,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
   else (TARGET cisstCommon)
     # assumes this is an external project, find using the path provided in cisst-config.cmake
     find_program (CISST_DG_EXECUTABLE cisstDataGenerator
-                  PATHS "${CISST_BINARY_DIR}/cisst/bin")
+                  PATHS "${CISST_BINARY_DIR}/bin")
   endif (TARGET cisstCommon)
 
   # loop over input files
@@ -636,7 +654,7 @@ endfunction (cisst_data_generator)
 
 macro (CISST_ADD_LIBRARY_TO_PROJECT PROJECT_NAME)
   message (SEND_ERROR "The macro CISST_ADD_LIBRARY_TO_PROJECT is now deprecated, use \"cisst_add_library\" instead.")
-ENDMACRO(CISST_ADD_LIBRARY_TO_PROJECT)
+endmacro (CISST_ADD_LIBRARY_TO_PROJECT)
 
 
 # DEPRECATED, USE cisst_target_link_libraries INSTEAD

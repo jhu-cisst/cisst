@@ -39,12 +39,12 @@ add_custom_command (TARGET _cisstVectorPythonTest
 set (LIB cisstVector)
 if (CMAKE_CONFIGURATION_TYPES)
   foreach (config ${CMAKE_CONFIGURATION_TYPES})
-    configure_file (${cisstLibs_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
+    configure_file (${cisst_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
                     ${EXECUTABLE_OUTPUT_PATH}/${config}/cisstVectorTests.py
                     IMMEDIATE @ONLY@)
   endforeach (config)
 else (CMAKE_CONFIGURATION_TYPES)
-  configure_file (${cisstLibs_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
+  configure_file (${cisst_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
                   ${EXECUTABLE_OUTPUT_PATH}/cisstVectorTests.py
                   IMMEDIATE @ONLY@)
 endif (CMAKE_CONFIGURATION_TYPES)
