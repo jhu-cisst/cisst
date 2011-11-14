@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsMacrosTestClassA: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(double, Value);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, Value);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMacrosTestClassA);

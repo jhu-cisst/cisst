@@ -861,3 +861,6 @@ MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
 
 // Wrap mtsStateIndex
 %include "cisstMultiTask/mtsStateIndex.h"
+
+ // Wrap mtsIntervalStatistics
+%include "cisstMultiTask/mtsIntervalStatistics.h"

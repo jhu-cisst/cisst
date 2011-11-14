@@ -53,4 +53,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmTransformationFixed.h>
 #include <cisstParameterTypes/prmTransformationDynamic.h>
 
+#include <cisstParameterTypes/prmRobotState.h>
+
 #endif // _prmPython_h

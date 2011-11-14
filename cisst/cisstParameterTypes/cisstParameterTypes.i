@@ -78,3 +78,5 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmTransformationManager.h"
 %include "cisstParameterTypes/prmTransformationDynamic.h"
 %include "cisstParameterTypes/prmTransformationFixed.h"
+
+%include "cisstParameterTypes/prmRobotState.h"
