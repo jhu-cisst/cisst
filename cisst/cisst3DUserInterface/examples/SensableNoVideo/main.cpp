@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisst3DUserInterface/ui3CursorSphere.h>
 
 #include <sawSensablePhantom/mtsSensableHD.h>
 #include <sawKeyboard/mtsKeyboard.h>

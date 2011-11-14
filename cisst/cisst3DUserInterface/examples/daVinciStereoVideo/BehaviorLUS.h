@@ -21,8 +21,13 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstParameterTypes/prmPositionJointGet.h>
-#include <cisstStereoVision.h>
-#include <cisst3DUserInterface.h>
+#include <cisst3DUserInterface/ui3BehaviorBase.h>
+#include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
+#include <cisst3DUserInterface/ui3Manager.h>
+#include <cisst3DUserInterface/ui3ImagePlane.h>
+#include <cisst3DUserInterface/ui3SlaveArm.h>
+
 #include <list>
 
 #define DEPTH           -200

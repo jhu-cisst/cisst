@@ -20,19 +20,20 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnGetChar.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstStereoVision/svlRenderTargets.h>
+#include <cisst3DUserInterface/ui3CursorSphere.h>
 
 #include <sawIntuitiveDaVinci/mtsIntuitiveDaVinci.h>
-
-#include <cisstCommon.h>
-#include <cisstStereoVision.h>
 
 #include "BehaviorLUS.h"
 
 #include <MeasurementBehavior.h>
-#include "MapBehavior.h"
+#include <MapBehavior.h>
 #include <ImageViewer.h>
 #include <ImageViewerKidney.h>
 #include <PNGViewer3D.h>
@@ -83,7 +84,7 @@ int main()
 
     // this is were the icons have been copied by CMake post build rule
     cmnPath path;
-    path.Add(std::string(CISST_BUILD_ROOT) + "/share/cisst3DUserInterface/icons");
+    path.Add(std::string(CISST_BUILD_ROOT) + "/share/cisst-1.0/cisst3DUserInterface/icons");
     std::string fileName = path.Find("move.png", cmnPath::READ);
     PNGViewer3D pngViewer("PGNViewer", fileName);
     guiManager.AddBehavior(&pngViewer,
