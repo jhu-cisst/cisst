@@ -40,6 +40,8 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstVector/vctFrameBase.h"
 %include "cisstVector/vctTransformationTypes.h"
 
+// ------------- types used for vctFrm3 -------------------
+ 
 // to get access to the translation data member
 %include "cisstVector/vctDynamicVectorTypemaps.i"
 %apply vctDynamicVector         {vctFixedSizeVector< vctMatrixRotation3< double,VCT_ROW_MAJOR >::value_type,vctFrameBase< vctMatrixRotation3< double,VCT_ROW_MAJOR > >::DIMENSION >};
@@ -52,6 +54,7 @@ http://www.cisst.org/cisst/license.txt.
 %apply vctDynamicMatrix &       {vctFrameBase< vctMatrixRotation3< double,VCT_ROW_MAJOR > >::RotationType &};
 %apply const vctDynamicMatrix & {const vctFrameBase< vctMatrixRotation3< double,VCT_ROW_MAJOR > >::RotationType &};
 
+
 %template(vctFrm3) vctFrameBase<vctRot3 >;
 
 // type declarations for SWIG
@@ -62,6 +65,13 @@ http://www.cisst.org/cisst/license.txt.
 typedef vctFrameBase<vctRot3 > vctFrm3;
 
 %types(vctFrm3 *);
+
+
+// ------------- types used for vctFrm4x4 -------------------
+
+%apply vctDynamicMatrix         {vctFrame4x4<double, VCT_ROW_MAJOR >};
+%apply vctDynamicMatrix &       {vctFrame4x4<double, VCT_ROW_MAJOR > &};
+%apply const vctDynamicMatrix & {const vctFrame4x4<double, VCT_ROW_MAJOR > &};
 
 
 #endif // _vctFrame_i

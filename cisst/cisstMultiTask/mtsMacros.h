@@ -63,6 +63,9 @@ public:                                                                      \
         className::ToStreamRaw(outputStream, delimiter,                      \
                                headerOnly, headerPrefix);                    \
     }                                                                        \
+    className & Data(void) {                                                 \
+        return *this;                                                        \
+    }                                                                        \
 };                                                                           \
 inline std::ostream & operator << (std::ostream & output,                    \
                                    const newName & object) {                 \
