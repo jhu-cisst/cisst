@@ -108,7 +108,25 @@ if (ICE_ICE_H_INCLUDE_DIR)
         ${ICE_HOME}/share/Ice-3.3.1/slice
         ${ICE_HOME}/share/Ice-3.3.0/slice )
   endif (WIN32)
-  set (ICE_LIBRARY_DIR ${ICE_HOME}/lib)
+
+  set(ICE_WIN64 FALSE)
+  if(WIN32)
+    if(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64"     OR
+       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64"     OR
+       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005 Win64" OR
+       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008 Win64")
+      set(ICE_WIN64 TRUE)
+    endif(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64"     OR
+          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64"     OR
+          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005 Win64" OR
+          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008 Win64")
+  endif(WIN32)
+
+  if(ICE_WIN64)
+    set(ICE_LIBRARY_DIR ${ICE_HOME}/lib/x64)
+  else(ICE_WIN64)
+    set(ICE_LIBRARY_DIR ${ICE_HOME}/lib)
+  endif(ICE_WIN64)
 
   # debian package splits off slice files into a different place
   if (ICE_HOME MATCHES /usr)
