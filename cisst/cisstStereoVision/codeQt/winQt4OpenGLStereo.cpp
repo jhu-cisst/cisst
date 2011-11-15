@@ -43,12 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 /**************************************/
 
 svlWidgetQt4OpenGLStereo::svlWidgetQt4OpenGLStereo(QWidget* parent) :
-    QGLWidget(QGLFormat(QGL::DoubleBuffer |
-                        QGL::DepthBuffer |
-                        QGL::Rgba |
-                        QGL::StencilBuffer |
-                        QGL::AlphaChannel |
-                        QGL::StereoBuffers), parent),
+    QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::StereoBuffers), parent),
     Manager(0),
     ImageBuffer(0),
     LatestImage(0),
@@ -91,18 +86,22 @@ void svlWidgetQt4OpenGLStereo::Destroy()
 void svlWidgetQt4OpenGLStereo::UpdateImage()
 {
     if (!ImageBuffer) return;
+
     svlSampleImageRGBStereo* img = dynamic_cast<svlSampleImageRGBStereo*>(ImageBuffer->Pull(false));
     if (!img) return;
     LatestImage = img;
-    emit QSignalUpdateGL();
+    QMetaObject::invokeMethod(this, "QSignalUpdateGL", Qt::BlockingQueuedConnection);
 }
 
 void svlWidgetQt4OpenGLStereo::initializeGL()
 {
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_STEREO);
-    CheckGLError(__FUNCTION__);
     TextureID[0] = TextureID[1] = 0;
+	glDeleteTextures(1, &(TextureID[0]));
+	glDeleteTextures(1, &(TextureID[1]));
+    glGenTextures(1, &(TextureID[0]));
+    glGenTextures(1, &(TextureID[1]));
+
+    CheckGLError(__FUNCTION__);
 }
 
 void svlWidgetQt4OpenGLStereo::paintGL()
@@ -110,13 +109,8 @@ void svlWidgetQt4OpenGLStereo::paintGL()
     if (!LatestImage) return;
 
     for (unsigned int i = 0; i < 2; i ++) {
-
-        std::cerr << (int)(format().stereo()) << std::endl;
-    	glDeleteTextures(1, &(TextureID[i]));
-        glGenTextures(1, &(TextureID[i]));
-
         glBindTexture(GL_TEXTURE_2D, TextureID[i]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, 3,
                      LatestImage->GetWidth(i), LatestImage->GetHeight(i),
@@ -126,15 +120,12 @@ void svlWidgetQt4OpenGLStereo::paintGL()
         if (i) glDrawBuffer(GL_BACK_RIGHT);
         else   glDrawBuffer(GL_BACK_LEFT);
 
-        glClearColor(0.0f, 0.6f, 0.0f, 0.0f); // provide a green background by default
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable (GL_TEXTURE_2D);
-
+        glEnable(GL_TEXTURE_2D);
         glPushMatrix();
         glRotatef(-90.0, 0.0, 0.0, 1.0);
         glTranslatef(-WindowHeight, 0.0, 0.0);
 
-        glBegin (GL_QUADS);
+        glBegin(GL_QUADS);
         {
             glTexCoord2f(0.0, 0.0);
             glVertex3f(0.0, 0.0, 0.0);
@@ -150,8 +141,8 @@ void svlWidgetQt4OpenGLStereo::paintGL()
         }
         glEnd();
 
-        glDisable(GL_TEXTURE_2D);
         glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
 
         CheckGLError(__FUNCTION__);
     }

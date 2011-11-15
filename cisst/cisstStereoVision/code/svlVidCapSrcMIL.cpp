@@ -1026,7 +1026,6 @@ MIL_INT MFTYPE MILProcessingCallback(MIL_INT CMN_UNUSED(HookType), MIL_ID HookId
 
     svlVidCapSrcMIL::MILCaptureParameters *milcaptureparams = (svlVidCapSrcMIL::MILCaptureParameters*)HookDataPtr;
 
-//std::cerr << milcaptureparams->DigitizerID;
     if (milcaptureparams->ImageBuffer) {
         MIL_INT milbufferindex;
         MdigGetHookInfo(HookId, M_MODIFIED_BUFFER+M_BUFFER_ID, &milbufferindex);
