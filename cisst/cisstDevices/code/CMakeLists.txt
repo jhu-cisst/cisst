@@ -27,13 +27,11 @@ option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
 #option( CISST_DEV_HAS_ROBOTCOMPONENTS "Build robot components." OFF )
 
 set (HEADER_FILES
-     devSartoriusSerial.h
      devExport.h
      can/devCAN.h
      )
 
 set (SOURCE_FILES
-     devSartoriusSerial.cpp
      can/devCAN.cpp
      )
 
@@ -96,8 +94,3 @@ cisst_add_library (LIBRARY cisstDevices
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
                    ADDITIONAL_HEADER_FILES ${CISST_DEV_CONFIG_FILE}
                    )
-
-# Add libraries to link with based on options
-if (CISST_DEV_HAS_MICRONTRACKER)
-  target_link_libraries (cisstDevices ${MicronTracker_LIBRARIES})
-endif (CISST_DEV_HAS_MICRONTRACKER)
