@@ -3,7 +3,7 @@
 @rem Author(s): Anton Deguet
 @rem Created on: 2006-05-02
 
-@rem (C) Copyright 2006-2007 Johns Hopkins University (JHU), All
+@rem (C) Copyright 2006-2011 Johns Hopkins University (JHU), All
 @rem Rights Reserved.
 
 @rem Always edit the source file: visual-studio.bat.in
@@ -20,4 +20,4 @@
 
 @call cisstvsvars.bat
 @call cisstvars.bat ${config}
-${CMAKE_MAKE_PROGRAM} /useenv cisst.sln
+${CMAKE_MAKE_PROGRAM} /useenv cisst_saw.sln
