@@ -26,8 +26,41 @@ set (CISST_VERSION "@CISST_VERSION@")
 set (CISST_BINARY_DIR "@CISST_BINARY_DIR_FOR_CONFIG@")
 set (CISST_INCLUDE_DIR "@CISST_INCLUDE_DIR_FOR_CONFIG@")
 set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
-set (CISST_LIBRARY_DIR "@CISST_BUILD_LINK_DIRECTORIES@")
 set (CISST_CMAKE_DIRS "@CISST_CMAKE_DIRS_FOR_CONFIG@")
+set (CISST_CMAKE_INSTALL_SUFFIX "@CISST_CMAKE_INSTALL_SUFFIX@")
+set (CISST_LIBRARY_INSTALL_SUFFIX "@CISST_LIBRARY_INSTALL_SUFFIX@")
+
+# Check that paths are set.  If CISST_BINARY_DIR is not set, we are
+# using cisst-config from the installed tree and all paths are
+# relative to this file.
+if ("${CISST_BINARY_DIR}" STREQUAL "") 
+  # retrieve the path where cisst was installed
+  set (cisst_CONFIG_FILE ${CMAKE_CURRENT_LIST_FILE})
+  get_filename_component (CISST_CMAKE_DIRS
+                          ${cisst_CONFIG_FILE}
+                          PATH)
+  # find root of install be removing the CISST_CMAKE_INSTALL_SUFFIX
+  string (REPLACE "${CISST_CMAKE_INSTALL_SUFFIX}" ""
+                  CISST_BINARY_DIR
+                  ${CISST_CMAKE_DIRS})
+  set (CISST_INCLUDE_DIR "${CISST_BINARY_DIR}/include")
+  # simple check to make sure cisst has indeed been found
+  find_file (CISST_HEADER_FILE_FOUND
+             NAMES cisstConfig.h
+             PATHS ${CISST_INCLUDE_DIR})
+  if (CISST_HEADER_FILE_FOUND)
+    message ("Information: cisst has been found in \"${CISST_BINARY_DIR}\", headers are in \"${CISST_INCLUDE_DIR}\"")
+  else (CISST_HEADER_FILE_FOUND)
+    message (WARNING "cisst-config was found in \"${CISST_CMAKE_DIRS}\", the cisst install root is assumed to be \"${CISST_BINARY_DIR}\" but we can't find \"cisstConfig.h\" in \"${CISST_INCLUDE_DIR}\".  This is alarming!")
+  endif (CISST_HEADER_FILE_FOUND)
+  # no need to preserve this in cache (find_file does by default)
+  unset (CISST_HEADER_FILE_FOUND CACHE)
+endif ("${CISST_BINARY_DIR}" STREQUAL "") 
+
+# set CISST_LIBRARY_DIR
+set (CISST_LIBRARY_DIR "${CISST_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
+
+# locate cisst use file
 find_file (CISST_USE_FILE
            NAMES Usecisst.cmake
            PATHS ${CISST_CMAKE_DIRS}
