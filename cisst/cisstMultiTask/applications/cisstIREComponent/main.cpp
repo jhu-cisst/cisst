@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnObjectRegister.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsManagerComponentBase.h>
 #include <cisstInteractive/ireTask.h>
 
 // Syntax:
@@ -31,6 +32,9 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int argc, char * argv[])
 {
+    // Enable system-wide thread-safe Logger
+    mtsManagerLocal::SetLogForwarding(true);
+
     std::string globalComponentManagerIP;
 
     // Set global component manager's ip address
@@ -55,6 +59,15 @@ int main(int argc, char * argv[])
         shell = IRE_IPYTHON;
     ireTask *ire = new ireTask("IRE", shell);  // Could add startup string as third parameter
     taskManager->AddComponent(ire);
+
+    if (!taskManager->Connect(
+            "ProcessIRE",
+            "IRE",
+            mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+            mtsManagerLocal::ProcessNameOfLCMWithGCM,
+            mtsManagerComponentBase::ComponentNames::ManagerComponentServer,
+            mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided))
+        CMN_LOG_INIT_ERROR << "Failed to connect system-wide thread-safe logger" << std::endl;
 
     taskManager->CreateAll();
     taskManager->StartAll();

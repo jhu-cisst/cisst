@@ -80,6 +80,9 @@ class CISST_EXPORT ireTask : public mtsTaskContinuous {
     IRE_Shell Shell;
     std::string StartupCommands;  // startup string
 
+    void Initialize(void);
+    void Log(const mtsLogMessage & log);
+
 public:
     ireTask(const std::string &name = "IRE",
             IRE_Shell shell = IRE_WXPYTHON,

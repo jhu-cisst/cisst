@@ -104,6 +104,8 @@ public:
     // Set the channel log mask
     static PyObject* SetMask(PyObject* self, PyObject* args);
 
+    static void SetupStreambuf(void);
+
     // The C++ callback function that is passed to cmnCallbackStreambuf
     static void PrintLog(const char * str, int len);
 
@@ -146,9 +148,6 @@ PyObject* PyTextCtrlHook::SetTextOutput(PyObject* CMN_UNUSED(self), PyObject* ar
         Py_XDECREF(PythonWindow);      // Release any previous handler
         PythonWindow = handler;
         Mask = static_cast<cmnLogMask>(iMask);
-        if (!Streambuf)
-            Streambuf = new cmnCallbackStreambuf<char>(PrintLog);
-        cmnLogger::GetMultiplexer()->AddChannel(Streambuf, Mask);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -190,6 +189,12 @@ PyObject* PyTextCtrlHook::SetMask(PyObject* CMN_UNUSED(self), PyObject* args)
     return Py_None;
 }
 
+void PyTextCtrlHook::SetupStreambuf(void)
+{
+    if (!Streambuf)
+        Streambuf = new cmnCallbackStreambuf<char>(PrintLog);
+    cmnLogger::GetMultiplexer()->AddChannel(Streambuf, Mask);
+}
 
 // The C++ callback function that is passed to cmnCallbackStreambuf.
 // It calls the Python callback function stored in PythonFunc.
@@ -386,7 +391,8 @@ void ireFramework::FinalizeShellInstance(void)
 // Developers should take care to DECREF (decrease the reference counts)
 // of any PyObject s that use hard references.
 //
-void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython) {
+void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython,
+                                          bool useStreambuf) {
     //start python
     const char * python_args[] = { "", startup };
 
@@ -425,6 +431,8 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
     else {
         PyRun_SimpleString("from irepy import ireMain");
         strcpy(launchString, "ireMain.launchIrePython()");
+        if (useStreambuf)
+            PyTextCtrlHook::SetupStreambuf();
     }
 
     if (NewPythonThread) {
@@ -519,3 +527,7 @@ void ireFramework::BlockThreads()
         PyEval_RestoreThread(static_cast<PyThreadState *>(IreThreadState));
 }
 
+void ireFramework::PrintLog(const char * str, int len)
+{
+    PyTextCtrlHook::PrintLog(str, len);
+}

@@ -112,14 +112,26 @@ CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(ireTask, mtsTaskContinuous, ireTaskConstru
 ireTask::ireTask(const std::string &name, IRE_Shell shell, const std::string &startup) :
     mtsTaskContinuous(name), Shell(shell), StartupCommands(startup)
 {
-    EnableDynamicComponentManagement();
-    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
+    Initialize();
 }
 
 ireTask::ireTask(const ireTaskConstructorArg &arg) :
     mtsTaskContinuous(arg.Name), Shell(arg.Shell), StartupCommands(arg.Startup)
 {
+    Initialize();
+}
+
+void ireTask::Initialize(void)
+{
     EnableDynamicComponentManagement();
+    // For receiving system-wide logs
+    mtsInterfaceRequired * required = AddInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+        MTS_OPTIONAL);
+    if (required) {
+        required->AddEventHandlerWrite(&ireTask::Log, this, 
+                                       mtsManagerComponentBase::EventNames::PrintLog);
+    }
     SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
 }
 
@@ -146,7 +158,8 @@ void ireTask::Startup(void)
             << "Manager = " << GetName() << ".GetManagerComponentServices(); "
             << StartupCommands;
     try {
-        ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON));
+        // Don't use cmnCallbackStreambuf because we will use system-wide log
+        ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON), false);
     }
     catch (...) {
         if (Shell == IRE_IPYTHON)
@@ -174,4 +187,9 @@ void ireTask::Run(void)
 void ireTask::Cleanup(void)
 {
     cmnObjectRegister::Remove(this->GetName());
+}
+
+void ireTask::Log(const mtsLogMessage & log)
+{
+    ireFramework::PrintLog(log.Message, log.Length);
 }

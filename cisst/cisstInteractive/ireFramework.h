@@ -97,7 +97,8 @@ private:
     void InitShellInstance(void);
 
     void FinalizeShellInstance(void);
-    void LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython);
+    void LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython,
+                                bool useStreambuf);
 
 	void JoinIREShellInstance(double timeout);
 
@@ -171,14 +172,19 @@ public:
 	  of the IRE (GUI). IPython is an enhanced interactive Python shell, allowing autocompletion, etc.
 	  For more information, see http://ipython.scipy.org/moin/
 
+      If the useStreambuf field is true, the IRE logger will show locally-generated
+      log messages (using cmnCallbackStreambuf).  When using the system-wide logger,
+      it is recommended to set this to false.
+
       If the IRE state on entry is IRE_INITIALIZED, this method changes
       it to IRE_LAUNCHED; otherwise, it throws an exception.
       When the Python code finishes its initialization, it will call a
       callback function to change the state to IRE_ACTIVE prior to entering
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
-	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false) throw(std::runtime_error) {
-	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython);
+	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false,
+                                      bool useStreambuf = true) throw(std::runtime_error) {
+	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython, useStreambuf);
 	}
 
     /*! Single argument function that can be passed directly to osaThread::Create, e.g.,:
@@ -189,7 +195,7 @@ public:
     */
     static inline void *RunIRE_wxPython(const char *startup) {
         try {
-            LaunchIREShell(startup, false, false);
+            LaunchIREShell(startup, false, false, true);
         }
         catch (...) {
             CMN_LOG_INIT_ERROR << "Could not launch IRE shell (wxPython)" << std::endl;
@@ -206,7 +212,7 @@ public:
     */
     static inline void *RunIRE_IPython(const char *startup) {
         try {
-            LaunchIREShell(startup, false, true);
+            LaunchIREShell(startup, false, true, false);
         }
         catch (...) {
             CMN_LOG_INIT_ERROR << "Could not launch IRE shell (IPython)" << std::endl;
@@ -251,6 +257,9 @@ public:
 
     /*! Re-acquire the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
     static void BlockThreads();
+
+    /*! Write a string to the logger window */
+    static void PrintLog(const char * str, int len);
 };
 
 #endif // _ireFramework_h

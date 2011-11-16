@@ -134,12 +134,12 @@ class ireMain(wx.Frame):
 
         
         # Create a frame that is 750 x 500 pixels in size (if not embedded) or
-        # 750 x 700 pixels in size (if embedded).  The larger size provides more
+        # 750 x 750 pixels in size (if embedded).  The larger size provides more
         # room for the Register Contents and Logger Output windows, which are enabled
         # by default when the IRE is embedded in a C++ program.
         ireSize = (750, 500)
         if ireEmbedded:
-           ireSize = (750, 700)
+           ireSize = (750, 750)
         wx.Frame.__init__(self, parent, -1, title, pos=(150, 150), size=ireSize)
 
         #------------------------------------------------------
@@ -321,7 +321,7 @@ class ireMain(wx.Frame):
                               style = wx.TE_READONLY | wx.HSCROLL | wx.TE_MULTILINE | wx.TE_RICH)
         # Only show logger window if IRE is embedded.
         if ireEmbedded:
-            self.MainSplitter.SplitHorizontally(self.TopSplitter, self.LoggerPanel, -100)
+            self.MainSplitter.SplitHorizontally(self.TopSplitter, self.LoggerPanel, -150)
         else:
             self.MainSplitter.Initialize(self.TopSplitter)
             self.LoggerPanel.Show(False)
@@ -813,7 +813,7 @@ class ireMain(wx.Frame):
     
     def OnViewLogger(self, event):
         if event.IsChecked():
-            self.MainSplitter.SplitHorizontally(self.TopSplitter, self.LoggerPanel, -100)
+            self.MainSplitter.SplitHorizontally(self.TopSplitter, self.LoggerPanel, -150)
             # Following needed for Mac OS X
             self.LoggerPanel.Show()
         else:
@@ -915,7 +915,7 @@ class ireMain(wx.Frame):
 'Developed by the Engineering Research Center for'.center(twidth) + '\n' + \
 'Computer-Integrated Surgical Systems & Technology (CISST)'.center(twidth) + '\n' + \
 'http://cisst.org'.center(twidth) + '\n\n' + \
-'Copyright (c) 2004-2009, The Johns Hopkins University'.center(twidth) + '\n' + \
+'Copyright (c) 2004-2011, The Johns Hopkins University'.center(twidth) + '\n' + \
 'All Rights Reserved.\n\n'.center(twidth) + '\n\n' + \
 'Based on the Py module of wxPython:\n' + \
 '  Shell Revision: %s\n' % self.Shell.revision + \
