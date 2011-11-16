@@ -15,7 +15,7 @@
 # --- end cisst license ---
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstMultiTask cisstParameterTypes cisstRobot)
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstMultiTask cisstParameterTypes)
 
 # all source files
 set (SOURCE_FILES
