@@ -237,3 +237,7 @@ if (UNIX)
                   ${cisst_saw_BINARY_DIR}/cisstvars.sh
                   @ONLY)
 endif (UNIX)
+
+# License file
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/license.txt
+                ${CMAKE_CURRENT_BINARY_DIR}/license.txt COPYONLY)
