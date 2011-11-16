@@ -1,8 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,6 +21,5 @@ add_subdirectory (videoconverter)
 add_subdirectory (pointtracker)
 add_subdirectory (gridtracker)
 add_subdirectory (exposurecorrection)
-add_subdirectory (svlmts1)
 add_subdirectory (cameraCalibration)
-#ADD_SUBDIRECTORY(webgui)
+#add_subdirectory(webgui)
