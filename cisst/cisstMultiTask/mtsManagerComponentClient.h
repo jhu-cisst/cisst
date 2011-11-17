@@ -137,14 +137,6 @@ protected:
     // to the connection should be removed.
     bool DisconnectCleanup(const std::string & componentName);
 
-public:
-    mtsManagerComponentClient(const std::string & componentName);
-    ~mtsManagerComponentClient();
-
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void);
-
     bool AddInterfaceLCM(void);
     bool AddInterfaceComponent(void);
 
@@ -163,6 +155,8 @@ public:
     // Called from LCM
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+
+    bool IsLocalProcess(const std::string &procName) const;
 
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
@@ -214,6 +208,15 @@ public:
     mtsFunctionWrite InterfaceComponentEvents_ChangeState;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
+
+public:
+    mtsManagerComponentClient(const std::string & componentName);
+    ~mtsManagerComponentClient();
+
+    void Startup(void);
+    void Run(void);
+    void Cleanup(void);
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentClient);

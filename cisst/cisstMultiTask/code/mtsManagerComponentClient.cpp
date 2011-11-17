@@ -739,13 +739,16 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
     return result;
 }
 
-
-void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
+bool mtsManagerComponentClient::IsLocalProcess(const std::string &procName) const
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string nameOfThisLCM = LCM->GetProcessName();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        nameOfThisLCM == componentDescription.ProcessName)
+    return (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE) || (nameOfThisLCM == procName);
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
+{
+    if (IsLocalProcess(componentDescription.ProcessName))
     {
         InterfaceLCMCommands_ComponentCreate(componentDescription, result);
         return;
@@ -760,20 +763,14 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentCreate(const
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    const std::string nameOfThisLCM = LCM->GetProcessName();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        nameOfThisLCM == arg.ProcessName)
-    {
+    if (IsLocalProcess(arg.ProcessName))
         InterfaceLCMCommands_ComponentConfigure(arg);
-        return;
-    } else {
-        if (!InterfaceLCMFunction.ComponentConfigure.IsValid()) {
+    else {
+        if (InterfaceLCMFunction.ComponentConfigure.IsValid())
+            //InterfaceLCMFunction.ComponentConfigure.ExecuteBlocking(arg);
+            InterfaceLCMFunction.ComponentConfigure(arg);
+        else
             CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConfigure: failed to execute \"Component Configure\"" << std::endl;
-            return;
-        }
-        //InterfaceLCMFunction.ComponentConfigure.ExecuteBlocking(arg);
-        InterfaceLCMFunction.ComponentConfigure(arg);
     }
 }
 
@@ -829,11 +826,9 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect(c
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg)
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    const std::string nameOfThisLCM = LCM->GetProcessName();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        nameOfThisLCM == arg.ProcessName)
+    if (IsLocalProcess(arg.ProcessName))
     {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(arg.ComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: failed to execute \"Component Start\"" << std::endl;
@@ -854,10 +849,9 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const 
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg)
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        LCM->GetProcessName() == arg.ProcessName)
+    if (IsLocalProcess(arg.ProcessName))
     {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(arg.ComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: failed to execute \"Component Stop\"" << std::endl;
@@ -878,11 +872,9 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const m
 
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg)
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    const std::string nameOfThisLCM = LCM->GetProcessName();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        LCM->GetProcessName() == arg.ProcessName)
+    if (IsLocalProcess(arg.ProcessName))
     {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(arg.ComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: failed to execute \"Component Resume\"" << std::endl;
@@ -904,10 +896,9 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
 void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(const mtsDescriptionComponent &component,
                                                                              mtsComponentState &state) const
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        LCM->GetProcessName() == component.ProcessName)
+    if (IsLocalProcess(component.ProcessName))
     {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(component.ComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component Resume\"" << std::endl;
@@ -981,9 +972,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfComponentCla
 void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
                                  InterfaceProvidedDescription & description) const
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        LCM->GetProcessName() == intfc.ProcessName)
+    if (IsLocalProcess(intfc.ProcessName))
     {
         InterfaceLCMCommands_GetInterfaceProvidedDescription(intfc, description);
     } else {
@@ -998,9 +987,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedD
 void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
                                  InterfaceRequiredDescription & description) const
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
-        LCM->GetProcessName() == intfc.ProcessName)
+    if (IsLocalProcess(intfc.ProcessName))
     {
         InterfaceLCMCommands_GetInterfaceRequiredDescription(intfc, description);
     } else {
@@ -1014,8 +1001,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredD
 
 void mtsManagerComponentClient::InterfaceComponentCommands_LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const
 {
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (lib.ProcessName == LCM->GetProcessName())
+    if (IsLocalProcess(lib.ProcessName))
         InterfaceLCMCommands_LoadLibrary(lib.LibraryName, result);
     else {
         if (!InterfaceLCMFunction.LoadLibrary.IsValid()) {
