@@ -130,18 +130,8 @@ if (CISST_HAS_SWIG_PYTHON)
     set (CISST_SWIG_PACKAGE "SWIG")
     cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
     cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE)
-
     # propagate the fact that SWIG was found
     set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
- 
-    # Create the CMake config file
-    configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
-                    ${CISST_CMAKE_BINARY_DIR}/cisstPythonBuild.cmake
-                    @ONLY)
-    install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstPythonBuild.cmake
-             DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-             COMPONENT cisstCommon)
-
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
 
   # Force to use exceptions
@@ -168,6 +158,20 @@ if (CISST_HAS_SWIG_PYTHON)
       cisst_unset_all_package_settings (cisstPython NumPy)
     endif (PYTHON_NUMPY_FOUND)
   endif (CISST_cisstVector)
+
+  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and PYTHON_EXECUTABLE.
+  # (Currently, this is only created if the correct version of SWIG was found -- should that check be removed?
+  #  Also, note that "if (CISST_SWIG_FOUND)" does not work at this point in the CMakeLists.txt.)
+  if (NOT ${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+    # Create the CMake config file
+    configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstPythonBuild.cmake.in
+                    ${CISST_CMAKE_BINARY_DIR}/cisstPythonBuild.cmake
+                    @ONLY)
+    install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstPythonBuild.cmake
+             DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+             COMPONENT cisstCommon)
+  endif (NOT ${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+
 else (CISST_HAS_SWIG_PYTHON)
   # propagate the fact that SWIG was not found
   set (CISST_SWIG_FOUND 0 PARENT_SCOPE)

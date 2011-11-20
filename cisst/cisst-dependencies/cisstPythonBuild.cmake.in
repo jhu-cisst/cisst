@@ -18,3 +18,4 @@
 # --- end cisst license ---
 
 set (SWIG_EXECUTABLE "@SWIG_EXECUTABLE@")
+set (PYTHON_EXECUTABLE "@PYTHON_EXECUTABLE@")
