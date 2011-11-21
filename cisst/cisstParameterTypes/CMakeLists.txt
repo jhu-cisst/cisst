@@ -21,5 +21,6 @@ if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
   add_subdirectory (codePython)
 endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
 
-# build tests, add an option to skip them
+# build examples and tests, add an option to skip them
+cisst_offer_examples (cisstParameterTypes)
 cisst_offer_tests (cisstParameterTypes)
