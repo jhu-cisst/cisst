@@ -81,13 +81,13 @@ protected:
     class SectionFormat
     {
     public:
-        SectionFormat(int lnNum, char* fmtarray)
+        SectionFormat(int lnNum, const char* fmtarray)
         {
             lineNum = lnNum;
             fmt = fmtarray;
         }
         int lineNum;
-        char* fmt;
+        const char* fmt;
     };
     // Creates an ifstream object for the specified file
     std::ifstream& openFile(const char* filename)
@@ -107,7 +107,7 @@ protected:
     }
 
     //Parses a line from a file according to a format string
-    void parseLine(char line[], char format[], int lineNum)
+    void parseLine(const char line[], const char format[], int lineNum)
     {
         char buffer[200];
         int i = 0;
