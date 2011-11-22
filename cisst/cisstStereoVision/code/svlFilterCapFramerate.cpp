@@ -99,7 +99,6 @@ int svlFilterCapFramerate::Process(svlProcInfo * procInfo, svlSample * syncInput
         this->TimeForLastFrame = currentTime;
         if (timeSinceLastFrame < this->DesiredFrameInterval) {
             osaSleep(this->DesiredFrameInterval - timeSinceLastFrame);
-            std::cerr << ".";
         }
     }
     return SVL_OK;

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlCCHandEyeCalibration.cpp 2426 2011-05-21 00:53:58Z wliu25 $
+  $Id$
   
   Author(s):  Wen P. Liu
   Created on: 2011

@@ -67,6 +67,7 @@ SET(SOURCE_FILES
     svlOverlayObjects.cpp
 
   # Filter API
+    svlFilterAddLatency.cpp
     svlFilterCapFramerate.cpp
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
@@ -172,6 +173,7 @@ SET(HEADER_FILES
     svlOverlayObjects.h
 
   # Filter API
+    svlFilterAddLatency.h
     svlFilterCapFramerate.h
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
