@@ -67,6 +67,7 @@ SET(SOURCE_FILES
     svlOverlayObjects.cpp
 
   # Filter API
+    svlFilterCapFramerate.cpp
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
     svlFilterImageBorder.cpp
@@ -171,6 +172,7 @@ SET(HEADER_FILES
     svlOverlayObjects.h
 
   # Filter API
+    svlFilterCapFramerate.h
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
     svlFilterImageBorder.h
@@ -521,7 +523,7 @@ IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
             ${HEADER_FILES}
             svlFilterImageZoom.h
             svlFilterToolTracker.h
-            svlTrackerOCVMeanShift.h        
+            svlTrackerOCVMeanShift.h
             )
         IF(OpenCV21_FOUND)
             SET(SOURCE_FILES
