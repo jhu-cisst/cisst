@@ -1555,3 +1555,39 @@ void svlConverter::UYVYtoRGB24(unsigned char* input, unsigned char* output, cons
     }
 }
 
+void svlConverter::HSV24toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1, bool ch2, bool ch3)
+{
+    int r, g, b, h, s, v, f, p, q, t;
+
+    for (unsigned int i = 0; i < pixelcount; i ++) {
+        h = *input; input ++;
+        s = *input; input ++;
+        v = *input; input ++;
+
+        if (s > 0) {
+            f = ((h % 43) * 255) / 42;
+            h /= 43;
+     
+            p = (v * (255 - s)) / 255;
+            q = (v * (255 - (s * f) / 255)) / 255;
+            t = (v * (255 - (s * (255 - f)) / 255)) / 255;
+     
+            switch (h) {
+                case 0:  r = v; g = t; b = p; break;
+                case 1:  r = q; g = v; b = p; break;
+                case 2:  r = p; g = v; b = t; break;
+                case 3:  r = p; g = q; b = v; break;
+                case 4:  r = t; g = p; b = v; break;
+                default: r = v; g = p; b = q; break;
+            }
+        }
+        else {
+            r = g = b = v;
+        }
+
+        if (ch1) *output = static_cast<unsigned char>(r); else *output = 0; output ++;
+        if (ch2) *output = static_cast<unsigned char>(g); else *output = 0; output ++;
+        if (ch3) *output = static_cast<unsigned char>(b); else *output = 0; output ++;
+    }
+}
+

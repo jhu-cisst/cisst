@@ -166,7 +166,9 @@ svlOverlayImage::svlOverlayImage() :
     svlOverlayInput(),
     InputCh(0),
     Pos(0, 0),
-    Alpha(255)
+    Alpha(255),
+    QuadMappingEnabled(false),
+    QuadMappingSet(false)
 {
 }
 
@@ -180,7 +182,9 @@ svlOverlayImage::svlOverlayImage(unsigned int videoch,
     svlOverlayInput(inputname),
     InputCh(inputch),
     Pos(pos),
-    Alpha(alpha)
+    Alpha(alpha),
+    QuadMappingEnabled(false),
+    QuadMappingSet(false)
 {
 }
 
@@ -209,6 +213,29 @@ void svlOverlayImage::SetAlpha(unsigned char alpha)
     Alpha = alpha;
 }
 
+void svlOverlayImage::SetEnableQuadMapping(bool enable)
+{
+    QuadMappingEnabled = enable;
+}
+
+void svlOverlayImage::SetQuadMapping(vctInt2 ul, vctInt2 ur, vctInt2 ll, vctInt2 lr)
+{
+    QuadUL = ul;
+    QuadUR = ur;
+    QuadLL = ll;
+    QuadLR = lr;
+    QuadMappingSet = true;
+}
+
+void svlOverlayImage::SetQuadMapping(int xul, int yul, int xur, int yur, int xll, int yll, int xlr, int ylr)
+{
+    QuadUL.Assign(xul, yul);
+    QuadUR.Assign(xur, yur);
+    QuadLL.Assign(xll, yll);
+    QuadLR.Assign(xlr, ylr);
+    QuadMappingSet = true;
+}
+
 unsigned int svlOverlayImage::GetInputChannel() const
 {
     return InputCh;
@@ -222,6 +249,11 @@ vctInt2 svlOverlayImage::GetPosition() const
 unsigned char svlOverlayImage::GetAlpha() const
 {
     return Alpha;
+}
+
+bool svlOverlayImage::GetEnableQuadMapping() const
+{
+    return QuadMappingEnabled;
 }
 
 bool svlOverlayImage::IsInputTypeValid(svlStreamType inputtype)
@@ -239,6 +271,66 @@ void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
     if (!ovrlimage ||
         InputCh >= ovrlimage->GetVideoChannels() ||
         bgimage->GetBPP() != ovrlimage->GetBPP()) return;
+
+    if (QuadMappingEnabled && QuadMappingSet) {
+        const int ulx = 0, uly = 0, llx = 0, ury = 0;
+        const int urx = ovrlimage->GetWidth(InputCh)  - 1, lrx = ovrlimage->GetWidth(InputCh)  - 1;
+        const int lly = ovrlimage->GetHeight(InputCh) - 1, lry = ovrlimage->GetHeight(InputCh) - 1;
+        svlTriangle tri_in, tri_out;
+
+        tri_in.Assign(ulx, uly, urx, ury, llx, lly);
+        tri_out.Assign(QuadUL[0], QuadUL[1], QuadUR[0], QuadUR[1], QuadLL[0], QuadLL[1]);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals);
+
+        tri_in.Assign(llx, lly, urx, ury, lrx, lry);
+        tri_out.Assign(QuadLL[0], QuadLL[1], QuadUR[0], QuadUR[1], QuadLR[0], QuadLR[1]);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals);
+
+        return;
+    }
+
+    if (Transformed) {
+        const int iulx = 0, iuly = 0, illx = 0, iury = 0;
+        const int iurx = ovrlimage->GetWidth(InputCh)  - 1, ilrx = ovrlimage->GetWidth(InputCh)  - 1;
+        const int illy = ovrlimage->GetHeight(InputCh) - 1, ilry = ovrlimage->GetHeight(InputCh) - 1;
+        const int halfwidth  = ovrlimage->GetWidth(InputCh)  / 2;
+        const int halfheight = ovrlimage->GetHeight(InputCh) / 2;
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+        double x, y;
+
+        x = iulx - halfwidth; y = iuly - halfheight;
+        const int oulx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int ouly = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = iurx - halfwidth; y = iury - halfheight;
+        const int ourx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int oury = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = illx - halfwidth; y = illy - halfheight;
+        const int ollx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int olly = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = ilrx - halfwidth; y = ilry - halfheight;
+        const int olrx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int olry = static_cast<int>(x * m10 + y * m11 + m12);
+
+        svlTriangle tri_in, tri_out;
+
+        tri_in.Assign(iulx, iuly, iurx, iury, illx, illy);
+        tri_out.Assign(oulx, ouly, ourx, oury, ollx, olly);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, 80);
+
+        tri_in.Assign(illx, illy, iurx, iury, ilrx, ilry);
+        tri_out.Assign(ollx, olly, ourx, oury, olrx, olry);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, 80);
+
+        return;
+    }
 
     int i, ws, hs, wo, ho, xs, ys, xo, yo, copylen, linecount;
 

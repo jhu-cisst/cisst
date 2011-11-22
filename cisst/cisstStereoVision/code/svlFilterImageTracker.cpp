@@ -920,6 +920,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     const int tmpl_radius = tracker->GetTemplateRadius();
     const int tmpl_size = tmpl_radius * 2 + 1;
     const int tmpl_stride = tmpl_size * 3;
+    const unsigned char default_value = 0;
 
     svlTarget2D *target = 0;
     unsigned char *tdata, *count_buffer, *cdata, *out_mos_buffer;
@@ -992,7 +993,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     for (i = 0; i < mosaic_size; i ++) {
         k = *count_buffer;
         if (k) *out_mos_buffer = (*accu_buffer) / k;
-        else *out_mos_buffer = 64;
+        else *out_mos_buffer = default_value;
         accu_buffer ++;
         count_buffer ++;
         out_mos_buffer ++;

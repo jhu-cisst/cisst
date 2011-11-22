@@ -30,7 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageChannelSwapper, svlFilterBase)
 
 svlFilterImageChannelSwapper::svlFilterImageChannelSwapper() :
-    svlFilterBase()
+    svlFilterBase(),
+    OutputImage(0)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -42,34 +43,54 @@ svlFilterImageChannelSwapper::svlFilterImageChannelSwapper() :
 
 int svlFilterImageChannelSwapper::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    syncOutput = syncInput;
+    Release();
+
+    OutputImage = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
+    if (!OutputImage) return SVL_FAIL;
+    OutputImage->SetSize(syncInput);
+    syncOutput = OutputImage;
+
+    return SVL_OK;
+}
+
+int svlFilterImageChannelSwapper::Release()
+{
+    if (OutputImage) {
+        delete OutputImage;
+        OutputImage = 0;
+    }
     return SVL_OK;
 }
 
 int svlFilterImageChannelSwapper::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    syncOutput = syncInput;
+    syncOutput = OutputImage;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
-    _SkipIfDisabled();
 
-    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
-    unsigned int i, videochannels = img->GetVideoChannels();
+    svlSampleImage* in_img = dynamic_cast<svlSampleImage*>(syncInput);
+    unsigned int i, videochannels = in_img->GetVideoChannels();
     unsigned int pixelcount;
-    unsigned char colval, *r, *b;
+    unsigned char r, g, b, *in_ptr, *out_ptr;
     unsigned int idx;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        pixelcount = img->GetWidth(idx) * img->GetHeight(idx);
-        r = img->GetUCharPointer(idx);
-        b = r + 2;
+        pixelcount = in_img->GetWidth(idx) * in_img->GetHeight(idx);
+        in_ptr  = in_img->GetUCharPointer(idx);
+        out_ptr = OutputImage->GetUCharPointer(idx);
+
+        if (IsDisabled()) {
+            memcpy(out_ptr, in_ptr, pixelcount * 3);
+            continue;
+        }
 
         for (i = 0; i < pixelcount; i ++) {
-            colval = *r;
-            *r = *b;
-            *b = colval;
-            r += 3;
-            b += 3;
+            r = *in_ptr; in_ptr ++;
+            g = *in_ptr; in_ptr ++;
+            b = *in_ptr; in_ptr ++;
+            *out_ptr = b; out_ptr ++;
+            *out_ptr = g; out_ptr ++;
+            *out_ptr = r; out_ptr ++;
         }
     }
 

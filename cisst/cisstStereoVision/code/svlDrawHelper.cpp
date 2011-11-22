@@ -409,9 +409,10 @@ bool svlDrawHelper::TriangleWarpInternals::SetOutputImage(svlSampleImage* image,
 }
 
 void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
-                                                int ox1, int oy1, int ox2, int oy2, int ox3, int oy3)
+                                                int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
+                                                unsigned int alpha)
 {
-    if (!Input || !Output) return;
+    if (!Input || !Output || alpha == 0) return;
 
     int miny = MIN3(oy1, oy2, oy3);
     int maxy = MAX3(oy1, oy2, oy3);
@@ -473,10 +474,19 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {
-            ResampleLine(_ixs[id1][pos1], _iys[id1][pos1],
-                         _ixs[id2][pos2], _iys[id2][pos2],
-                         _lm_x[i], i,
-                         _rm_x[i], i);
+            if (alpha == 256) {
+                ResampleLine(_ixs[id1][pos1], _iys[id1][pos1],
+                             _ixs[id2][pos2], _iys[id2][pos2],
+                             _lm_x[i], i,
+                             _rm_x[i], i);
+            }
+            else {
+                ResampleLineAlpha(_ixs[id1][pos1], _iys[id1][pos1],
+                                  _ixs[id2][pos2], _iys[id2][pos2],
+                                  _lm_x[i], i,
+                                  _rm_x[i], i,
+                                  alpha);
+            }
         }
     }
 }
@@ -831,6 +841,103 @@ void svlDrawHelper::TriangleWarpInternals::ResampleLine(int ix1, int iy1, int ix
                     *out_buf = 0; out_buf ++;
                     *out_buf = 0; out_buf ++;
                     *out_buf = 0;
+                }
+            }
+            out_idxs ++;
+
+            if ((eps << 1) >= olen) {
+                eps -= olen;
+                in_idxs ++;
+            }
+            eps += ilen;
+        }
+    }
+}
+
+void svlDrawHelper::TriangleWarpInternals::ResampleLineAlpha(int ix1, int iy1, int ix2, int iy2,
+                                                             int ox1, int oy1, int ox2, int oy2,
+                                                             unsigned int alpha)
+{
+    int ilen = GetLinePixels(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
+    int olen = GetLinePixels(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);
+
+    int* in_idxs = _in_idxs;
+    int* out_idxs = _out_idxs;
+    unsigned char *in_buf, *out_buf;
+    int ipix, opix, aval = alpha, iaval = 256 - aval;
+
+    if (olen == 1) {
+
+        opix = *out_idxs;
+        if (opix >= 0) {
+            out_buf = Output + opix;
+
+            ipix = *in_idxs;
+            if (ipix >= 0) {
+                in_buf  = Input + ipix;
+                *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
+            }
+            else {
+                *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+                *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+                *out_buf = (iaval * (int)(*out_buf)) >> 8;
+            }
+        }
+
+        return;
+    }
+
+    int i, eps = 0;
+
+    if (ilen >= olen) {
+        for (i = 0; i < ilen; i ++) {
+            eps += olen;
+            if ((eps << 1) >= ilen) {
+
+                opix = *out_idxs;
+                if (opix >= 0) {
+                    out_buf = Output + opix;
+
+                    ipix = *in_idxs;
+                    if (ipix >= 0) {
+                        in_buf  = Input + ipix;
+                        *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                        *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                        *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
+                    }
+                    else {
+                        *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+                        *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+                        *out_buf = (iaval * (int)(*out_buf)) >> 8;
+                    }
+                }
+                out_idxs ++;
+
+                eps -= ilen;
+            }
+            in_idxs ++;
+        }
+    }
+    else {
+        for (i = 0; i < olen; i ++) {
+
+            opix = *out_idxs;
+            if (opix >= 0) {
+                out_buf = Output + opix;
+
+                ipix = *in_idxs;
+                if (ipix >= 0) {
+                    in_buf  = Input + ipix;
+                    *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                    *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                    *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
+                }
+                else {
+                    *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+                    *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+                    *out_buf = (iaval * (int)(*out_buf)) >> 8;
                 }
             }
             out_idxs ++;

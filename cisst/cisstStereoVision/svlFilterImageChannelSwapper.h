@@ -39,6 +39,10 @@ public:
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Release();
+
+private:
+    svlSampleImage* OutputImage;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageChannelSwapper)

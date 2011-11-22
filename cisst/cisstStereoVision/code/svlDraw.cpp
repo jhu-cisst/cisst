@@ -443,7 +443,8 @@ void svlDraw::Text(svlSampleImage* image,
 
 void svlDraw::WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
                            svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
-                           svlDraw::Internals& internals)
+                           svlDraw::Internals& internals,
+                           unsigned int alpha)
 {
     svlDrawHelper::TriangleWarpInternals* trianglewarper = dynamic_cast<svlDrawHelper::TriangleWarpInternals*>(internals.Get());
     if (trianglewarper == 0) {
@@ -454,7 +455,8 @@ void svlDraw::WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTri
         !trianglewarper->SetOutputImage(out_img, out_vch)) return;
 
     trianglewarper->Draw(in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
-                         out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3);
+                         out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3,
+                         alpha);
 }
 
 

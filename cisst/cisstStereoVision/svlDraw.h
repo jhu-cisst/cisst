@@ -66,7 +66,8 @@ namespace svlDraw
 
     void CISST_EXPORT WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
                                    svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
-                                   svlDraw::Internals& internals);
+                                   svlDraw::Internals& internals,
+                                   unsigned int alpha = 256);
 };
 
 #endif // _svlDraw_h
