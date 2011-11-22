@@ -184,6 +184,20 @@ vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<float> & axisAngleRotation,
 
 template void
 vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<double> & axisAngleRotation,
+                             const vctMatrixRotation3Base<vctFixedSizeConstMatrixRef<double, 3, 3, 4, 1> > & matrixRotation);
+template void
+vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<float> & axisAngleRotation,
+                             const vctMatrixRotation3Base<vctFixedSizeConstMatrixRef<float, 3, 3, 4, 1> > & matrixRotation);
+
+template void
+vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<double> & axisAngleRotation,
+                             const vctMatrixRotation3Base<vctFixedSizeConstMatrixRef<double, 3, 3, 1, 4> > & matrixRotation);
+template void
+vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<float> & axisAngleRotation,
+                             const vctMatrixRotation3Base<vctFixedSizeConstMatrixRef<float, 3, 3, 1, 4> > & matrixRotation);
+
+template void
+vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<double> & axisAngleRotation,
                              const vctRodriguezRotation3Base<vctFixedSizeVector<double, 3> > & rodriguezRotation);
 template void
 vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<float> & axisAngleRotation,
