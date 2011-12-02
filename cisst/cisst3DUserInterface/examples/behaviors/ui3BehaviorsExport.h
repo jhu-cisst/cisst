@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 // check if this module is build as a DLL
-#ifdef cisst3DUserInterfaceBehaviors_EXPORTS
+#ifdef ui3ExBehaviors_EXPORTS
 #define CISST_THIS_LIBRARY_AS_DLL
 #endif
 
