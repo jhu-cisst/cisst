@@ -44,6 +44,7 @@ class CISST_EXPORT mtsExecutionResult
     /* IMPORTANT: make sure you update the ToStream method in cpp file
        to handle all cases */
     enum Enum {
+        UNDEFINED,
         COMMAND_SUCCEEDED,
         COMMAND_QUEUED,
         FUNCTION_NOT_BOUND,

@@ -25,7 +25,7 @@
 
 mtsExecutionResult::mtsExecutionResult(void)
 {
-    this->Value = COMMAND_SUCCEEDED;
+    this->Value = UNDEFINED;
 }
 
 
@@ -55,6 +55,7 @@ void mtsExecutionResult::ToStream(std::ostream & outputStream) const
 const std::string & mtsExecutionResult::ToString(const Enum & value)
 {
     static const std::string resultDescription[] = {
+        "undefined",
         "command succeeded",
         "command queued",
         "function not bound to a command",
