@@ -28,8 +28,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               ../mtsCollectorQtComponent.h
               ../mtsCollectorQtWidget.h
-              ../mtsArgumentWidget.h
-              ../mtsArgumentWidgets.h
+              ../mtsQtWidgetGenericObject.h
               ../mtsCommandWidget.h
               ../mtsCommandWidgets.h
               ../mtsComponentWidget.h
@@ -44,15 +43,15 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorQtComponent.cpp
                                 mtsCollectorQtWidget.cpp
-                                mtsArgumentWidget.cpp
-                                mtsArgumentWidgets.cpp
+                                mtsQtWidgetFactory.cpp
+                                mtsQtWidgetGenericObject.cpp
                                 mtsCommandWidget.cpp
                                 mtsComponentWidget.cpp
                                 mtsInterfaceRequiredWidget.cpp
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
-                                mtsArgumentWidget.h
-                                mtsArgumentWidgets.h
+                                mtsQtWidgetFactory.h
+                                mtsQtWidgetGenericObject.h
                                 mtsCommandWidget.h
                                 mtsCommandWidgets.h
                                 mtsComponentWidget.h

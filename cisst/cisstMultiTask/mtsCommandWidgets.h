@@ -27,12 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QObject>
 
-#include <cisstMultiTask/mtsCommandVoid.h>
-#include <cisstMultiTask/mtsCommandVoidReturn.h>
-#include <cisstMultiTask/mtsCommandWrite.h>
-#include <cisstMultiTask/mtsCommandWriteReturn.h>
-#include <cisstMultiTask/mtsCommandRead.h>
-#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 //#include <cisstMultiTask/mtsEventVoid.h>
 //#include <cisstMultiTask/mtsEventWrite.h>
 

@@ -23,18 +23,20 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandWidget_h
 #define _mtsCommandWidget_h
 
-#include <cisstMultiTask/mtsArgumentWidget.h>
-
 #include <map>
+
+class mtsQtWidgetGenericObjectRead;
+class mtsQtWidgetGenericObjectWrite;
 
 #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsFunctionBase.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
+/// \todo replace by forward declarations for all Qt types
 #include <QWidget>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QLabel>
 #include <QFormLayout>
 #include <QTime>
@@ -43,33 +45,6 @@ class mtsCommandWidget;
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
-
-class TypeInfoComparator {
-public:
-    inline bool operator()(const std::type_info* a, const std::type_info* b) const;
-};
-
-
-bool TypeInfoComparator::operator()(const std::type_info* a, const std::type_info* b) const
-{
-    return a->before(*b);
-}
-
-/* ! Output widget for the mtsExecutionResult returned by Command::Execute(). */
-class CISST_EXPORT mtsExecutionResultWidget : public QWidget {
-
-    Q_OBJECT;
-
-private:
-    QLabel* Label;
-
-public slots:
-    void SetValue(mtsExecutionResult result);
-
-public:
-    mtsExecutionResultWidget();
-};
-
 
 /* ! A button that allows the user to invoke Command::Execute(). */
 class CISST_EXPORT mtsExecuteButton : public QPushButton {
@@ -90,17 +65,17 @@ class CISST_EXPORT mtsPeriodicExecutionWidget : public QWidget {
     Q_OBJECT;
 
 private:
-    QCheckBox* CheckBox;
-    QSpinBox* SpinBox;
-    QWidget* Container;
-    mtsCommandWidget* CommandWidget;
+    QCheckBox * CheckBox;
+    QDoubleSpinBox * SpinBox;
+    QWidget * Container;
+    mtsCommandWidget * CommandWidget;
 
 private slots:
     void HandleStateChanged(int enabled);
-    void HandleIntervalChanged(int newTime);
+    void HandleIntervalChanged(double newTime);
 
 public:
-    mtsPeriodicExecutionWidget(mtsCommandWidget* parent);
+    mtsPeriodicExecutionWidget(mtsCommandWidget * parent);
     bool ExecutePeriodically(void) const;
     double ExecutionInterval(void) const;
 };
@@ -128,27 +103,28 @@ public:
 };
 
 /* ! A widget that wraps a single mtsCommand, allowing the user to execute the command and view its output. */
-class CISST_EXPORT mtsCommandWidget : public QWidget {
+class CISST_EXPORT mtsCommandWidget : public QWidget, public cmnGenericObject
+{
+    Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    Q_OBJECT
+ private:
+    QLabel * Label;
+    QFormLayout * Layout;
 
-	private:
-    QLabel* Label;
-    QFormLayout* Layout;
-
+    // execution result
+    QLabel * ExecutionResultLabel;
+    mtsExecutionResult LastResult;
     void timerEvent(QTimerEvent * event);
-
-    static bool Constructed;
-    typedef std::map<const std::type_info*, ArgumentWidget* (*)(), TypeInfoComparator> TypeInfoMap;
-    static TypeInfoMap InputWidgets;
-    static TypeInfoMap OutputWidgets;
-
-    static void CreateDefaultWidgetBindings();
 
 protected:
 
-    std::vector<ArgumentWidget*> Arguments;
-    mtsExecutionResultWidget * ExecutionResult;
+    void SetExecutionResult(mtsExecutionResult result);
+
+    mtsQtWidgetGenericObjectRead * ReadWidget;
+    mtsQtWidgetGenericObjectWrite * WriteWidget;
+    mtsGenericObject * ReadValue;
+    mtsGenericObject* WriteValue;
     mtsExecuteButton * ExecuteButton;
     mtsPeriodicExecutionWidget * PeriodicExecution;
     mtsEventInformationWidget * EventInformation;
@@ -162,14 +138,14 @@ protected:
        @param prototype An instance of the datatype that the widget should handle.
     */
 
-    void AddWriteArgument(const char* label, const mtsGenericObject& prototype);
+    void SetWriteWidget(const std::string & label, const mtsGenericObject & prototype);
     /* ! Add a display widget to the mtsCommandWidget. The display widget can be used
        to show the result of executing an mtsCommand.
        @param label The text to put in the QLabel associated with the widget.
        @param prototype An instance of the datatype that the widget should handle.
     */
 
-    void AddReadArgument(const char* label, const mtsGenericObject& prototype);
+    void SetReadWidget(const std::string & label, const mtsGenericObject & prototype);
     /* ! Add a set of widgets that allow the user to execute an mtsCommand to the
        mtsCommandWidget.
        @param allowPeriodicExecution If true, add a PeriodicExecutionWidget.
@@ -189,12 +165,6 @@ public:
     void SetTimer(int interval);
     void StopTimer(void);
 
-    /* ! Set the widget used by mtsCommandWidget used to handle argument values of a certain type.
-       @param type A pointer to the typeid of the type to be handled.
-       @param createWidget A pointer to a function which creates widgets to handle the given type.
-    */
-    static void SetWidgetForType(const std::type_info* type, ArgumentWidget* (*createWidget)());
-
     static mtsCommandWidget* CreateCommandVoidWidget(mtsFunctionVoid& command);
     static mtsCommandWidget* CreateCommandVoidReturnWidget(mtsFunctionVoidReturn& command);
     static mtsCommandWidget* CreateCommandWriteWidget(mtsFunctionWrite& command);
@@ -204,5 +174,7 @@ public:
     static mtsCommandWidget* CreateEventVoidWidget();
     static mtsCommandWidget* CreateEventWriteWidget();
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsCommandWidget)
 
 #endif //ifndef _mtsCommandWidget_h

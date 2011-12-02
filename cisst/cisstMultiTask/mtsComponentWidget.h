@@ -38,9 +38,10 @@ http://www.cisst.org/cisst/license.txt.
 // adeguet1: should this be more like a component that has a widget,
 // more than a widget that has a component?  Somehow this would make
 // more sense to me.
-class CISST_EXPORT mtsComponentWidget : public QWidget {
-
+class CISST_EXPORT mtsComponentWidget: public QWidget, public cmnGenericObject
+{
     Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 private:
 
@@ -77,5 +78,7 @@ public:
   return interfaceWidgets[interface];
   }
 */
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentWidget);
 
 #endif // _mtsComponentWidget_h

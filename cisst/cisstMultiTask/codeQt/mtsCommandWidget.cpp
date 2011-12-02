@@ -23,28 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWidget.h>
 #include <cisstMultiTask/mtsCommandWidgets.h>
 
+#include <cisstCommon/cmnUnits.h>
+#include <cisstMultiTask/mtsQtWidgetFactory.h>
+#include <cisstMultiTask/mtsQtWidgetGenericObject.h>
+
 #include <QObject>
 #include <QLabel>
 #include <QGroupBox>
-
-
-mtsExecutionResultWidget::mtsExecutionResultWidget(void)
-    : QWidget()
-{
-    QLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    Label = new QLabel();
-    Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-    layout->addWidget(Label);
-    setLayout(layout);
-    setFocusPolicy(Qt::StrongFocus);
-}
-
-
-void mtsExecutionResultWidget::SetValue(mtsExecutionResult result)
-{
-    Label->setText(mtsExecutionResult::ToString(result.GetResult()).c_str());
-}
 
 
 mtsExecuteButton::mtsExecuteButton(void)
@@ -69,28 +54,26 @@ void mtsExecuteButton::Enable(void)
 mtsPeriodicExecutionWidget::mtsPeriodicExecutionWidget(mtsCommandWidget* parent)
     : CommandWidget(parent)
 {
-    QLayout* grouplayout = new QVBoxLayout();
+    QLayout * groupLayout = new QHBoxLayout();
     CheckBox = new QCheckBox("Execute periodically");
-    grouplayout->addWidget(CheckBox);
+    groupLayout->addWidget(CheckBox);
+    SpinBox = new QDoubleSpinBox();
+    SpinBox->setMaximum(1.0 * cmn_hour);
+    SpinBox->setMinimum(50.0 * cmn_ms);
+    SpinBox->setValue(1.0 * cmn_s);
+    SpinBox->setSingleStep(10.0 * cmn_ms);
+    groupLayout->addWidget(SpinBox);
+    groupLayout->addWidget(new QLabel("secs"));
     Container = new QWidget();
-    QLayout* containerLayout = new QHBoxLayout();
-    containerLayout->addWidget(new QLabel("Execute every"));
-    SpinBox = new QSpinBox();
-    SpinBox->setMaximum(1000000);
-    SpinBox->setMinimum(1);
-    SpinBox->setValue(1000);
-    containerLayout->addWidget(SpinBox);
-    containerLayout->addWidget(new QLabel("milliseconds"));
-    Container->setLayout(containerLayout);
+    Container->setLayout(groupLayout);
     Container->setEnabled(false);
-    grouplayout->addWidget(Container);
-    QGroupBox* groupBox = new QGroupBox();
-    groupBox->setLayout(grouplayout);
-    QLayout* layout = new QVBoxLayout();
+    QGroupBox * groupBox = new QGroupBox();
+    groupBox->setLayout(groupLayout);
+    QLayout * layout = new QVBoxLayout();
     layout->addWidget(groupBox);
     setLayout(layout);
     connect(CheckBox, SIGNAL(stateChanged(int)), this, SLOT(HandleStateChanged(int)));
-    connect(SpinBox, SIGNAL(valueChanged(int)), this, SLOT(HandleIntervalChanged(int)));
+    connect(SpinBox, SIGNAL(valueChanged(double)), this, SLOT(HandleIntervalChanged(double)));
 }
 
 
@@ -98,17 +81,17 @@ void mtsPeriodicExecutionWidget::HandleStateChanged(int enabled)
 {
     Container->setEnabled(enabled);
     if(enabled) {
-        CommandWidget->SetTimer(SpinBox->value());
+        CommandWidget->SetTimer(SpinBox->value() * 1000);
     } else {
         CommandWidget->StopTimer();
     }
 }
 
 
-void mtsPeriodicExecutionWidget::HandleIntervalChanged(int newInterval)
+void mtsPeriodicExecutionWidget::HandleIntervalChanged(double newInterval)
 {
     CommandWidget->StopTimer();
-    CommandWidget->SetTimer(SpinBox->value());
+    CommandWidget->SetTimer(SpinBox->value() * 1000);
 }
 
 
@@ -164,21 +147,24 @@ void mtsEventInformationWidget::timerEvent(QTimerEvent * CMN_UNUSED(event))
 }
 
 
-bool mtsCommandWidget::Constructed = false;
-std::map<const std::type_info*, ArgumentWidget* (*)(), TypeInfoComparator> mtsCommandWidget::InputWidgets;
-std::map<const std::type_info*, ArgumentWidget* (*)(), TypeInfoComparator> mtsCommandWidget::OutputWidgets;
-
-
 mtsCommandWidget::mtsCommandWidget(void)
     : QWidget(), HasTimer(false)
 {
     Layout = new QFormLayout();
     setLayout(Layout);
+    Layout->setContentsMargins(0, 0, 0, 0);
+    ExecutionResultLabel = new QLabel();
+    ExecutionResultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    Layout->addWidget(ExecutionResultLabel);
+}
 
-    if(!Constructed) {
-        CreateDefaultWidgetBindings();
-        Constructed = true;
+
+void mtsCommandWidget::SetExecutionResult(mtsExecutionResult result)
+{
+    if (result != LastResult) { 
+        ExecutionResultLabel->setText(mtsExecutionResult::ToString(result.GetResult()).c_str());
     }
+    LastResult = result;
 }
 
 
@@ -205,46 +191,33 @@ void mtsCommandWidget::timerEvent(QTimerEvent * CMN_UNUSED(event))
 }
 
 
-void mtsCommandWidget::CreateDefaultWidgetBindings(void)
+void mtsCommandWidget::SetWriteWidget(const std::string & label, const mtsGenericObject & prototype)
 {
-    InputWidgets[&typeid(mtsInt)] = &ArgumentWidget::CreateIntInputWidget;
-    InputWidgets[&typeid(mtsBool)] = &ArgumentWidget::CreateBoolInputWidget;
-    InputWidgets[&typeid(mtsDouble)] = &ArgumentWidget::CreateDoubleInputWidget;
-    InputWidgets[&typeid(mtsStdString)] = &ArgumentWidget::CreateStdStringInputWidget;
-
-    OutputWidgets[&typeid(mtsInt)] = &ArgumentWidget::CreateIntOutputWidget;
-    OutputWidgets[&typeid(mtsBool)] = &ArgumentWidget::CreateBoolOutputWidget;
-    OutputWidgets[&typeid(mtsDouble)] = &ArgumentWidget::CreateDoubleOutputWidget;
-    OutputWidgets[&typeid(mtsStdString)] = &ArgumentWidget::CreateStdStringOutputWidget;
-}
-
-
-void mtsCommandWidget::AddWriteArgument(const char * label, const mtsGenericObject & prototype)
-{
-    TypeInfoMap::const_iterator iterator = InputWidgets.find(&typeid(prototype));
-    if (iterator != InputWidgets.end()) {
-        ArgumentWidget * widget = (iterator->second)(); // object factory for widget
-        Layout->addRow(label, widget);
-        Arguments.push_back(widget);
+    mtsQtWidgetGenericObjectWrite * widget = mtsQtWidgetFactory::CreateWidgetWrite(&typeid(prototype));
+    if (widget) {
+        Layout->addRow(label.c_str(), widget);
+        WriteWidget = widget;
+    } else {
+        CMN_LOG_CLASS_INIT_WARNING << "SetWriteWidget: can't create write widget for \"" << prototype.Services()->GetName() << "\"" << std::endl;
     }
 }
 
 
-void mtsCommandWidget::AddReadArgument(const char * label, const mtsGenericObject& prototype)
+void mtsCommandWidget::SetReadWidget(const std::string & label, const mtsGenericObject & prototype)
 {
-    TypeInfoMap::const_iterator iterator = OutputWidgets.find(&typeid(prototype));
-    if (iterator != OutputWidgets.end()) {
-        ArgumentWidget * widget = (iterator->second)();
-        Layout->addRow(label, widget);
-        Arguments.push_back(widget);
+    mtsQtWidgetGenericObjectRead * widget = mtsQtWidgetFactory::CreateWidgetRead(&typeid(prototype));
+    if (widget) {
+        Layout->addRow(label.c_str(), widget);
+        ReadWidget = widget;
+    } else {
+        CMN_LOG_CLASS_INIT_WARNING << "SetReadWidget: can't create read widget for \"" << prototype.Services()->GetName() << "\"" << std::endl;
     }
 }
 
 
 void mtsCommandWidget::AddExecutionWidgets(bool CMN_UNUSED(allowPeriodicExecution))
 {
-    ExecutionResult = new mtsExecutionResultWidget();
-    Layout->addRow("Execution result", ExecutionResult);
+    Layout->addRow("Execution result", ExecutionResultLabel);
     //if(allowPeriodicExecution) {
     PeriodicExecution = new mtsPeriodicExecutionWidget(this);
     Layout->addWidget(PeriodicExecution);
@@ -319,7 +292,7 @@ CommandVoidWidget::CommandVoidWidget(mtsFunctionVoid & command)
 
 void CommandVoidWidget::Execute(void)
 {
-    ExecutionResult->SetValue(function());
+    SetExecutionResult(function());
     ExecuteButton->setEnabled(true);
 }
 
@@ -327,74 +300,88 @@ void CommandVoidWidget::Execute(void)
 CommandVoidReturnWidget::CommandVoidReturnWidget(mtsFunctionVoidReturn& command)
     : mtsCommandWidget(), function(command)
 {
-    AddReadArgument("Result", *(command.GetResultPrototype()));
+    ReadValue = dynamic_cast<mtsGenericObject *>(command.GetResultPrototype()->Services()->Create());
+    std::cout << CMN_LOG_DETAILS << " -- add error handling here" << std::endl;
+    SetReadWidget("Result", *(command.GetResultPrototype()));
     AddExecutionWidgets();
 }
 
-
 void CommandVoidReturnWidget::Execute(void)
 {
-    ExecutionResult->SetValue(function(Arguments[0]->GetValueRef()));
+    SetExecutionResult(function(*ReadValue));
     ExecuteButton->setEnabled(true);
-    Arguments[0]->SetValue(Arguments[0]->GetValueRef());
+    ReadWidget->SetValue(*ReadValue);
 }
 
 
 CommandWriteWidget::CommandWriteWidget(mtsFunctionWrite & command)
     : mtsCommandWidget(), function(command)
 {
-    AddWriteArgument("Argument", *(command.GetArgumentPrototype()));
+    WriteValue = dynamic_cast<mtsGenericObject *>(command.GetArgumentPrototype()->Services()->Create());
+    std::cout << CMN_LOG_DETAILS << " -- add error handling here" << std::endl;
+    SetWriteWidget("Argument", *(command.GetArgumentPrototype()));
     AddExecutionWidgets();
 }
 
 void CommandWriteWidget::Execute(void)
 {
-    ExecutionResult->SetValue(function(Arguments[0]->GetValue()));
+    WriteWidget->GetValue(*WriteValue);
+    SetExecutionResult(function(*WriteValue));
     ExecuteButton->setEnabled(true);
 }
+
 
 CommandWriteReturnWidget::CommandWriteReturnWidget(mtsFunctionWriteReturn& command)
     : mtsCommandWidget(), function(command)
 {
-    AddWriteArgument("Argument", *(command.GetArgumentPrototype()));
-    AddReadArgument("Result", *(command.GetResultPrototype()));
+    WriteValue = dynamic_cast<mtsGenericObject *>(command.GetArgumentPrototype()->Services()->Create());
+    ReadValue = dynamic_cast<mtsGenericObject *>(command.GetResultPrototype()->Services()->Create());
+    SetWriteWidget("Argument", *(command.GetArgumentPrototype()));
+    SetReadWidget("Result", *(command.GetResultPrototype()));
     AddExecutionWidgets();
 }
 
 void CommandWriteReturnWidget::Execute(void)
 {
-    ExecutionResult->SetValue(function(Arguments[0]->GetValue(), Arguments[1]->GetValueRef()));
+    WriteWidget->GetValue(*WriteValue);
+    SetExecutionResult(function(*WriteValue, *ReadValue));
     ExecuteButton->setEnabled(true);
-    Arguments[1]->SetValue(Arguments[1]->GetValueRef());
+    ReadWidget->SetValue(*ReadValue);
 }
 
-CommandReadWidget::CommandReadWidget(mtsFunctionRead& command)
+
+CommandReadWidget::CommandReadWidget(mtsFunctionRead & command)
     : mtsCommandWidget(), function(command)
 {
-    AddReadArgument("Result", *(command.GetArgumentPrototype()));
+    ReadValue = dynamic_cast<mtsGenericObject *>(command.GetArgumentPrototype()->Services()->Create());
+    SetReadWidget("Result", *(command.GetArgumentPrototype()));
     AddExecutionWidgets(true);
 }
 
 void CommandReadWidget::Execute(void)
 {
-    ExecutionResult->SetValue(function(Arguments[0]->GetValueRef()));
+    SetExecutionResult(function(*ReadValue));
     ExecuteButton->setEnabled(true);
-    Arguments[0]->SetValue(Arguments[0]->GetValueRef());
+    ReadWidget->SetValue(*ReadValue);
 }
+
 
 CommandQualifiedReadWidget::CommandQualifiedReadWidget(mtsFunctionQualifiedRead& command)
     : mtsCommandWidget(), function(command)
 {
-    AddWriteArgument("Qualifier", *(command.GetArgument1Prototype()));
-    AddReadArgument("Result", *(command.GetArgument2Prototype()));
+    WriteValue = dynamic_cast<mtsGenericObject *>(command.GetArgument1Prototype()->Services()->Create());
+    ReadValue = dynamic_cast<mtsGenericObject *>(command.GetArgument2Prototype()->Services()->Create());
+    SetWriteWidget("Qualifier", *(command.GetArgument1Prototype()));
+    SetReadWidget("Result", *(command.GetArgument2Prototype()));
     AddExecutionWidgets(true);
 }
 
 void CommandQualifiedReadWidget::Execute(void)
 {
-    ExecutionResult->SetValue(function(Arguments[0]->GetValue(), Arguments[1]->GetValueRef()));
+    WriteWidget->GetValue(*WriteValue);
+    SetExecutionResult(function(*WriteValue, *ReadValue));
     ExecuteButton->setEnabled(true);
-    Arguments[1]->SetValue(Arguments[1]->GetValueRef());
+    ReadWidget->SetValue(*ReadValue);
 }
 
 CommandEventVoidWidget::CommandEventVoidWidget(void)

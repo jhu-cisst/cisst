@@ -22,9 +22,18 @@ http://www.cisst.org/cisst/license.txt.
 
 /* Qt dependent classes */
 #include <cisstConfig.h>
-#if CISST_HAS_QT
 
 #include <cisstMultiTask/mtsCollectorQtComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsCollectorQtComponent);
 
-#endif
+#include <cisstMultiTask/mtsComponentWidget.h>
+CMN_IMPLEMENT_SERVICES(mtsComponentWidget);
+
+#include <cisstMultiTask/mtsCommandWidget.h>
+CMN_IMPLEMENT_SERVICES(mtsCommandWidget);
+
+#include <cisstMultiTask/mtsQtWidgetGenericObject.h>
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsInt, mtsQtWidgetIntRead, mtsQtWidgetIntWrite);
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBool, mtsQtWidgetBoolRead, mtsQtWidgetBoolWrite);
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDouble, mtsQtWidgetDoubleRead, mtsQtWidgetDoubleWrite);
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStdString, mtsQtWidgetStdStringRead, mtsQtWidgetStdStringWrite);
