@@ -32,8 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 
 #include <QVBoxLayout>
-
-mtsEventVoidHandler::mtsEventVoidHandler(mtsCommandWidget * widget)
+// #include <QTabWidget>
+#include <QToolBox>
+ 
+mtsEventVoidHandler::mtsEventVoidHandler(mtsQtWidgetFunction * widget)
     : Widget(widget)
 {
 
@@ -44,12 +46,12 @@ void mtsEventVoidHandler::HandleEvent(void)
     Widget->Execute();
 }
 
-mtsEventVoidHandler* mtsEventVoidHandler::CreateEventVoidHandler(mtsCommandWidget * widget)
+mtsEventVoidHandler* mtsEventVoidHandler::CreateEventVoidHandler(mtsQtWidgetFunction * widget)
 {
     return new mtsEventVoidHandler(widget);
 }
 
-mtsEventWriteHandler::mtsEventWriteHandler(mtsCommandWidget * widget)
+mtsEventWriteHandler::mtsEventWriteHandler(mtsQtWidgetFunction * widget)
     : Widget(widget)
 {
 
@@ -60,7 +62,7 @@ void mtsEventWriteHandler::HandleEvent(const mtsGenericObject & data)
     Widget->Execute();
 }
 
-mtsEventWriteHandler* mtsEventWriteHandler::CreateEventWriteHandler(mtsCommandWidget * widget)
+mtsEventWriteHandler* mtsEventWriteHandler::CreateEventWriteHandler(mtsQtWidgetFunction * widget)
 {
     return new mtsEventWriteHandler(widget);
 }
@@ -71,8 +73,9 @@ mtsInterfaceRequiredWidget::mtsInterfaceRequiredWidget(mtsInterfaceProvided * in
     Interface(interface),
     ExecutionInterface(executionInterface)
 {
-    TabWidget = new QTabWidget();
-    TabWidget->setMovable(true);
+    // TabWidget = new QTabWidget();
+    TabWidget = new QToolBox();
+    // TabWidget->setMovable(true);
     QLayout* layout = new QVBoxLayout();
     layout->addWidget(TabWidget);
     setLayout(layout);
@@ -134,7 +137,7 @@ void mtsInterfaceRequiredWidget::UpdateUI(mtsInterfaceProvided & interface, mtsI
         mtsEventVoidHandler * eventHandler;
         mtsCommandVoid * command;
         for ( ; i < e; ++i) {
-            eventHandler = mtsEventVoidHandler::CreateEventVoidHandler(mtsCommandWidget::CreateEventVoidWidget());
+            eventHandler = mtsEventVoidHandler::CreateEventVoidHandler(mtsQtWidgetFunction::CreateEventVoidWidget());
             command = executionInterface.AddEventHandlerVoid(mtsEventVoidHandler::HandleFunction(), eventHandler, *i, MTS_INTERFACE_EVENT_POLICY);
         }
     }
@@ -146,7 +149,7 @@ void mtsInterfaceRequiredWidget::UpdateUI(mtsInterfaceProvided & interface, mtsI
         mtsEventWriteHandler * eventHandler;
         mtsCommandWriteBase * command;
         for ( ; i < e; ++i) {
-            eventHandler = mtsEventWriteHandler::CreateEventWriteHandler(mtsCommandWidget::CreateEventWriteWidget());
+            eventHandler = mtsEventWriteHandler::CreateEventWriteHandler(mtsQtWidgetFunction::CreateEventWriteWidget());
             command = executionInterface.AddEventHandlerWriteGeneric(mtsEventWriteHandler::HandleFunction(), eventHandler, *i, MTS_INTERFACE_EVENT_POLICY);
         }
     }
@@ -157,37 +160,37 @@ void mtsInterfaceRequiredWidget::UpdateUI(mtsInterfaceProvided & interface, mtsI
                                    executionInterface,
                                    executionInterface.GetNamesOfFunctionsVoid(),
                                    &mtsInterfaceRequired::GetFunctionVoid,
-                                   &mtsCommandWidget::CreateCommandVoidWidget
+                                   &mtsQtWidgetFunction::CreateCommandVoidWidget
                                    );
     CreateWidgets<mtsFunctionVoidReturn>(
                                          executionInterface,
                                          executionInterface.GetNamesOfFunctionsVoidReturn(),
                                          &mtsInterfaceRequired::GetFunctionVoidReturn,
-                                         &mtsCommandWidget::CreateCommandVoidReturnWidget
+                                         &mtsQtWidgetFunction::CreateCommandVoidReturnWidget
                                          );
     CreateWidgets<mtsFunctionWrite>(
                                     executionInterface,
                                     executionInterface.GetNamesOfFunctionsWrite(),
                                     &mtsInterfaceRequired::GetFunctionWrite,
-                                    &mtsCommandWidget::CreateCommandWriteWidget
+                                    &mtsQtWidgetFunction::CreateCommandWriteWidget
                                     );
     CreateWidgets<mtsFunctionWriteReturn>(
                                           executionInterface,
                                           executionInterface.GetNamesOfFunctionsWriteReturn(),
                                           &mtsInterfaceRequired::GetFunctionWriteReturn,
-                                          &mtsCommandWidget::CreateCommandWriteReturnWidget
+                                          &mtsQtWidgetFunction::CreateCommandWriteReturnWidget
                                           );
     CreateWidgets<mtsFunctionRead>(
                                    executionInterface,
                                    executionInterface.GetNamesOfFunctionsRead(),
                                    &mtsInterfaceRequired::GetFunctionRead,
-                                   &mtsCommandWidget::CreateCommandReadWidget
+                                   &mtsQtWidgetFunction::CreateCommandReadWidget
                                    );
     CreateWidgets<mtsFunctionQualifiedRead>(
                                             executionInterface,
                                             executionInterface.GetNamesOfFunctionsQualifiedRead(),
                                             &mtsInterfaceRequired::GetFunctionQualifiedRead,
-                                            &mtsCommandWidget::CreateCommandQualifiedReadWidget
+                                            &mtsQtWidgetFunction::CreateCommandQualifiedReadWidget
                                             );
 }
 
@@ -211,7 +214,7 @@ template<typename functionType>
 void mtsInterfaceRequiredWidget::CreateWidgets(mtsInterfaceRequired& executionInterface,
                                                const std::vector< std::string >& namesOfFunctions,
                                                functionType* (mtsInterfaceRequired::*getFunctionCallback) (const std::string&) const,
-                                               mtsCommandWidget * (*createWidgetsCallback) (functionType&)
+                                               mtsQtWidgetFunction * (*createWidgetsCallback) (functionType&)
                                                )
 {
     std::vector< std::string >::const_iterator i = namesOfFunctions.begin();
@@ -219,7 +222,7 @@ void mtsInterfaceRequiredWidget::CreateWidgets(mtsInterfaceRequired& executionIn
     functionType* function;
     for( ; i < e; ++i) {
         function = (executionInterface.*getFunctionCallback)(*i);
-        TabWidget->addTab((*createWidgetsCallback)(*function), i->c_str());
+        TabWidget->addItem((*createWidgetsCallback)(*function), i->c_str());
     }
 }
 

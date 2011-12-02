@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "TestComponent.h"
 
-#include <cisstMultiTask/mtsComponentWidget.h>
+#include <cisstMultiTask/mtsQtWidgetComponent.h>
 
 #include <QApplication>
 #include <QMainWindow>
@@ -32,20 +32,24 @@ http://www.cisst.org/cisst/license.txt.
 int main(int argc, char** argv)
 {
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    TestComponent * testComponent = new TestComponent();
+    testComponent->Configure("");
+    manager->AddComponent(testComponent);
+
     QApplication app(argc, argv);
-    TestComponent* tc = new TestComponent();
-    tc->Configure("");
-    manager->AddComponent(tc);
+
+    mtsQtWidgetComponent * componentWidget = new mtsQtWidgetComponent("QtWidgetComponent");
+    componentWidget->CreateWidgetsForComponent(*testComponent);
+    QMainWindow win;
+    win.setCentralWidget(componentWidget);
+    win.show();
+
     manager->CreateAll();
     manager->WaitForStateAll(mtsComponentState::READY, 5.0 * cmn_s);
     manager->StartAll();
     manager->WaitForStateAll(mtsComponentState::ACTIVE, 5.0 * cmn_s);
-    mtsComponentWidget* cw = new mtsComponentWidget(tc);
-    QMainWindow win;
-    win.setCentralWidget(cw);
-    win.show();
-    manager->StartAll();
-    manager->WaitForStateAll(mtsComponentState::ACTIVE, 5.0 * cmn_s);
+
     app.exec();
+
     return 0;
 }

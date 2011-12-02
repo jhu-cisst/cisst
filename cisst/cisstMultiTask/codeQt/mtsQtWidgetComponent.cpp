@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstMultiTask/mtsComponentWidget.h>
+#include <cisstMultiTask/mtsQtWidgetComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequiredWidget.h>
 
 #include <cisstMultiTask/mtsComponent.h>
@@ -28,33 +28,37 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QVBoxLayout>
 
-mtsComponentWidget::mtsComponentWidget(const mtsComponent * component, bool makeWindow):
+mtsQtWidgetComponent::mtsQtWidgetComponent(const std::string & name):
     QWidget(),
-    Component(component),
-    ExecutionComponent(new mtsComponent("QtTesterComponent"))
+    mtsComponent(name)
 {
     QLayout* layout = new QVBoxLayout();
     TabWidget = new QTabWidget();
     TabWidget->setMovable(true);
     layout->addWidget(TabWidget);
     setLayout(layout);
-    UpdateUI(*component);
 }
 
 
-void mtsComponentWidget::UpdateUI(const mtsComponent & component)
+void mtsQtWidgetComponent::CreateWidgetsForComponent(const mtsComponent & component)
 {
     //TODO: swap layout
     //TODO: execution component? This will have to be refreshed as well (Probably new/delete)
     typedef std::vector<std::string> ContainerType;
     ContainerType interfaceNames = component.GetNamesOfInterfacesProvided();
 
-    ContainerType::const_iterator i = interfaceNames.begin();
+    ContainerType::const_iterator i;
     const ContainerType::const_iterator end = interfaceNames.end();
-    for ( ; i < end; ++i)
-    {
-        ExecutionComponent->AddInterfaceRequired(*i);
-        mtsInterfaceRequired * requiredInterface = ExecutionComponent->GetInterfaceRequired(*i);
-        TabWidget->addTab(new mtsInterfaceRequiredWidget(Component->GetInterfaceProvided(*i), requiredInterface), i->c_str());
+    for (i = interfaceNames.begin(); i < end; ++i) {
+        CreateWidgetsForInterface(component, *i);
     }
+}
+
+
+void mtsQtWidgetComponent::CreateWidgetsForInterface(const mtsComponent & component, const std::string & interfaceName)
+{
+    mtsInterfaceProvided * interfaceProvided = component.GetInterfaceProvided(interfaceName);
+    const std::string & interfaceFullName = interfaceProvided->GetFullName();
+    mtsInterfaceRequired * requiredInterface = this->AddInterfaceRequired(interfaceFullName);
+    TabWidget->addTab(new mtsInterfaceRequiredWidget(interfaceProvided, requiredInterface), interfaceFullName.c_str());
 }

@@ -23,10 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterfaceRequiredWidget_h
 #define _mtsInterfaceRequiredWidget_h
 
-#include "mtsCommandWidget.h"
+#include <cisstMultiTask/mtsQtWidgetFunction.h>
 
 #include <QWidget>
-#include <QTabWidget>
+class QToolBox;
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
@@ -35,16 +35,16 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsEventVoidHandler {
 private:
-    mtsCommandWidget * Widget;
+    mtsQtWidgetFunction * Widget;
 
-    mtsEventVoidHandler(mtsCommandWidget * widget);
+    mtsEventVoidHandler(mtsQtWidgetFunction * widget);
 
 public:
     typedef void (mtsEventVoidHandler::*HandleFunctionType)();
 
     void HandleEvent(void);
     inline static HandleFunctionType HandleFunction(void);
-    static mtsEventVoidHandler * CreateEventVoidHandler(mtsCommandWidget * widget);
+    static mtsEventVoidHandler * CreateEventVoidHandler(mtsQtWidgetFunction * widget);
 };
 
 
@@ -56,16 +56,16 @@ inline mtsEventVoidHandler::HandleFunctionType mtsEventVoidHandler::HandleFuncti
 
 class mtsEventWriteHandler {
 private:
-    mtsCommandWidget * Widget;
+    mtsQtWidgetFunction * Widget;
 
-    mtsEventWriteHandler(mtsCommandWidget * widget);
+    mtsEventWriteHandler(mtsQtWidgetFunction * widget);
 
 public:
     typedef void (mtsEventWriteHandler::*HandleFunctionType)(const mtsGenericObject& data);
 
     void HandleEvent(const mtsGenericObject & data);
     inline static HandleFunctionType HandleFunction(void);
-    static mtsEventWriteHandler* CreateEventWriteHandler(mtsCommandWidget * widget);
+    static mtsEventWriteHandler* CreateEventWriteHandler(mtsQtWidgetFunction * widget);
 };
 
 
@@ -75,11 +75,12 @@ inline mtsEventWriteHandler::HandleFunctionType mtsEventWriteHandler::HandleFunc
 }
 
 
-class mtsInterfaceRequiredWidget : public QWidget {
+class mtsInterfaceRequiredWidget: public QWidget
+{
 
-    Q_OBJECT
+    Q_OBJECT;
 
-    public:
+public:
     mtsInterfaceRequiredWidget(mtsInterfaceProvided * interface,
                                mtsInterfaceRequired * executionInterface = 0);
     inline const mtsInterfaceProvided * GetInterfaceProvided(void) const;
@@ -88,7 +89,8 @@ class mtsInterfaceRequiredWidget : public QWidget {
 private:
     mtsInterfaceProvided * Interface;
     mtsInterfaceRequired * ExecutionInterface;
-    QTabWidget * TabWidget;
+    // QTabWidget * TabWidget;
+    QToolBox * TabWidget;
 
     void UpdateUI(mtsInterfaceProvided & interface, mtsInterfaceRequired & executionInterface);
 
@@ -102,7 +104,7 @@ private:
     void CreateWidgets(mtsInterfaceRequired & executionInterface,
                        const std::vector< std::string > & namesOfFunctions,
                        functionType * (mtsInterfaceRequired::*getFunctionCallback) (const std::string&) const,
-                       mtsCommandWidget * (*createWidgetsCallback) (functionType&)
+                       mtsQtWidgetFunction * (*createWidgetsCallback) (functionType&)
                        );
 
     static mtsFunctionVoid * CreateFunctionVoid(void);

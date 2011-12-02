@@ -26,11 +26,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorQtComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsCollectorQtComponent);
 
-#include <cisstMultiTask/mtsComponentWidget.h>
-CMN_IMPLEMENT_SERVICES(mtsComponentWidget);
+#include <cisstMultiTask/mtsQtWidgetComponent.h>
+CMN_IMPLEMENT_SERVICES(mtsQtWidgetComponent);
 
-#include <cisstMultiTask/mtsCommandWidget.h>
-CMN_IMPLEMENT_SERVICES(mtsCommandWidget);
+#include <cisstMultiTask/mtsQtWidgetFunction.h>
+CMN_IMPLEMENT_SERVICES(mtsQtWidgetFunction);
 
 #include <cisstMultiTask/mtsQtWidgetGenericObject.h>
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsInt, mtsQtWidgetIntRead, mtsQtWidgetIntWrite);
