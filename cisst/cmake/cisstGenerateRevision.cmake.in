@@ -31,9 +31,9 @@ set (CISST_WC_REVISION "@CISST_WC_REVISION@")
 find_package (Subversion QUIET)
 
 set (CISST_WC_REVISION "undefined (SVN executable not found)")
-if (Subversion_FOUND)
+if (Subversion_FOUND AND EXISTS "${cisst_SOURCE_DIR}/.svn/")
   Subversion_WC_INFO ("${cisst_SOURCE_DIR}" CISST)
-endif (Subversion_FOUND)
+endif (Subversion_FOUND AND EXISTS "${cisst_SOURCE_DIR}/.svn/")
 
 configure_file ("${CISST_REVISION_HEADER_SRC}"
                 "${CISST_REVISION_HEADER}")
