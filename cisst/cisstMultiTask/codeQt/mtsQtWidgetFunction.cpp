@@ -61,8 +61,8 @@ void mtsEventInformationWidget::ResetTimeSinceLastEvent(void)
 void mtsEventInformationWidget::timerEvent(QTimerEvent * CMN_UNUSED(event))
 {
     if (SecondsSinceLastEvent >= 120) {
-        QString s;
-        TimeSinceLastEvent->setText(s.sprintf("Last event occured at %s", TimeOfLastEvent.toString("h:mm:ss ap")));
+        QString s = TimeOfLastEvent.toString("h:mm:ss ap");
+        TimeSinceLastEvent->setText(s);
     } else {
         ++SecondsSinceLastEvent;
         if (SecondsSinceLastEvent == 1) {
