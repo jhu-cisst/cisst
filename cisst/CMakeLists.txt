@@ -423,14 +423,4 @@ if (WIN32)
   set(CPACK_NSIS_MODIFY_PATH ON)
 endif (WIN32)
 
-if (UNIX)
-  # Ubuntu debian package
-  set (CPACK_BINARY_DEB ON)
-  set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
-  # Define ubuntu dependencies (NOTE: This contains all possible deps. It should
-  # really  be built conditionally based on the selected libraries)
-  set (CPACK_DEBIAN_PACKAGE_DEPENDS "doxygen (>= 1.6.3-1), libxml2-dev (>=2.7.6.dfsg-1ubuntu1.2), libcppunit-dev (>=0.9.2-0ubuntu1), swig (>=1.3.40-2ubuntu1), python (>=2.6.5-0ubuntu1), libwxgtk2.8-dev (2.8.10.1-0ubuntu1.2), libfltk1.1-dev (>=1.1.10-2), fluid (>=1.1.10-2), libqt4-dev (>=4:4.6.2-0ubuntu5.3), libjpeg62-dev (>=6b-15ubuntu1), zlib1g-dev (>=1:1.2.3.3.dfsg-15ubuntu1), libpng12-dev (>=1.2.42-1ubuntu2.2), ffmpeg (>=4:0.5.1-1ubuntu1.2), libdc1394-22-dev (>=2.1.2-2), libv4l-dev (0.6.4-1ubuntu1), librtai-dev (3.7.1-1), libxenomai-dev (2.4.8-2ubuntu1), libcomedi-dev (0.8.1-5ubuntu3)")
-  set (CPACK_DEBIAN_PACKAGE_MAINTAINER "CISST Dev Team <erc-cisst-devel@lists.johnshopkins.edu>" )
-endif (UNIX)
-
 include (CPack)
