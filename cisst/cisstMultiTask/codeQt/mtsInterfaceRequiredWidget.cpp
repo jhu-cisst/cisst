@@ -43,7 +43,7 @@ mtsEventVoidHandler::mtsEventVoidHandler(mtsQtWidgetFunction * widget)
 
 void mtsEventVoidHandler::HandleEvent(void)
 {
-    Widget->Execute();
+    Widget->ExecuteIfEnabled();
 }
 
 mtsEventVoidHandler* mtsEventVoidHandler::CreateEventVoidHandler(mtsQtWidgetFunction * widget)
@@ -59,7 +59,7 @@ mtsEventWriteHandler::mtsEventWriteHandler(mtsQtWidgetFunction * widget)
 
 void mtsEventWriteHandler::HandleEvent(const mtsGenericObject & data)
 {
-    Widget->Execute();
+    Widget->ExecuteIfEnabled();
 }
 
 mtsEventWriteHandler* mtsEventWriteHandler::CreateEventWriteHandler(mtsQtWidgetFunction * widget)
