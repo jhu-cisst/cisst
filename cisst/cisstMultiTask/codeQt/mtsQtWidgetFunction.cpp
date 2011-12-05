@@ -35,46 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QDoubleSpinBox>
 
 
-mtsEventInformationWidget::mtsEventInformationWidget(void)
-    : SecondsSinceLastEvent(0), EventFired(false)
-{
-    QLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    TimeSinceLastEvent = new QLabel("N/A");
-    layout->addWidget(TimeSinceLastEvent);
-    setLayout(layout);
-    TimerID = startTimer(1000);
-}
-
-
-void mtsEventInformationWidget::ResetTimeSinceLastEvent(void)
-{
-    killTimer(TimerID);
-    EventFired = true;
-    SecondsSinceLastEvent = 0;
-    TimeOfLastEvent = QTime::currentTime();
-    TimeSinceLastEvent->setText("0 seconds since last event");
-    TimerID = startTimer(1000);
-}
-
-
-void mtsEventInformationWidget::timerEvent(QTimerEvent * CMN_UNUSED(event))
-{
-    if (SecondsSinceLastEvent >= 120) {
-        QString s = TimeOfLastEvent.toString("h:mm:ss ap");
-        TimeSinceLastEvent->setText(s);
-    } else {
-        ++SecondsSinceLastEvent;
-        if (SecondsSinceLastEvent == 1) {
-            TimeSinceLastEvent->setText("1 second since last event");
-        } else {
-            QString s;
-            TimeSinceLastEvent->setText(s.sprintf("%d seconds since last event", SecondsSinceLastEvent));
-        }
-    }
-}
-
-
 mtsQtWidgetFunction::mtsQtWidgetFunction(void):
     QWidget(),
     HasTimer(false),
@@ -99,7 +59,7 @@ mtsQtWidgetFunction::mtsQtWidgetFunction(void):
     PeriodSpinBox->setToolTip("period between calls, set to 0 to stop");
     ControlLayout->addWidget(PeriodSpinBox);
     connect(PeriodSpinBox, SIGNAL(valueChanged(double)), this, SLOT(HandleIntervalChanged(double)));
-    
+
     ExecuteButton = new QPushButton("Execute");
     ControlLayout->addWidget(ExecuteButton);
     connect(ExecuteButton, SIGNAL(clicked()), this, SLOT(ExecuteIfEnabled()));
@@ -117,7 +77,7 @@ mtsQtWidgetFunction::mtsQtWidgetFunction(void):
 
 void mtsQtWidgetFunction::SetExecutionResult(mtsExecutionResult result)
 {
-    if (result != LastResult) { 
+    if (result != LastResult) {
         ExecutionResultLabel->setText(mtsExecutionResult::ToString(result.GetResult()).c_str());
     }
     LastResult = result;
@@ -209,174 +169,124 @@ void mtsQtWidgetFunction::StopPeriodicExecution()
 
 void mtsQtWidgetFunction::AddEventWidgets(void)
 {
-    EventInformation = new mtsEventInformationWidget();
+    // EventInformation = new mtsEventInformationWidget();
     std::cerr << CMN_LOG_DETAILS << " fix this, events are broken now" << std::endl;
     // Layout->addWidget(EventInformation);
 }
 
 
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateCommandVoidWidget(mtsFunctionVoid & command)
-{
-    return new mtsQtWidgetFunctionVoid(command);
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateCommandVoidReturnWidget(mtsFunctionVoidReturn & command)
-{
-    return new mtsQtWidgetFunctionVoidReturn(command);
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateCommandWriteWidget(mtsFunctionWrite & command)
-{
-    return new mtsQtWidgetFunctionWrite(command);
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateCommandWriteReturnWidget(mtsFunctionWriteReturn & command)
-{
-    return new mtsQtWidgetFunctionWriteReturn(command);
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateCommandReadWidget(mtsFunctionRead & command)
-{
-    return new mtsQtWidgetFunctionRead(command);
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateCommandQualifiedReadWidget(mtsFunctionQualifiedRead & command)
-{
-    return new mtsQtWidgetFunctionQualifiedRead(command);
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateEventVoidWidget(void)
-{
-    return new CommandEventVoidWidget();
-}
-
-
-mtsQtWidgetFunction * mtsQtWidgetFunction::CreateEventWriteWidget(void)
-{
-    return new CommandEventWriteWidget();
-}
-
-
-
-mtsQtWidgetFunctionVoid::mtsQtWidgetFunctionVoid(mtsFunctionVoid & function):
+mtsQtWidgetFunctionVoid::mtsQtWidgetFunctionVoid(mtsFunctionVoid * function):
     mtsQtWidgetFunction(),
     Function(function)
+{
+}
+
+void mtsQtWidgetFunctionVoid::CreateArgumentsWidgets(void)
 {
 }
 
 void mtsQtWidgetFunctionVoid::Execute(void)
 {
-    SetExecutionResult(Function());
+    SetExecutionResult((*Function)());
 }
 
 
-mtsQtWidgetFunctionVoidReturn::mtsQtWidgetFunctionVoidReturn(mtsFunctionVoidReturn & function):
+mtsQtWidgetFunctionVoidReturn::mtsQtWidgetFunctionVoidReturn(mtsFunctionVoidReturn * function):
     mtsQtWidgetFunction(),
     Function(function)
 {
-    ReadValue = dynamic_cast<mtsGenericObject *>(function.GetResultPrototype()->Services()->Create());
-    SetReadWidget("Result:", *(function.GetResultPrototype()));
+}
+
+void mtsQtWidgetFunctionVoidReturn::CreateArgumentsWidgets(void)
+{
+    ReadValue = dynamic_cast<mtsGenericObject *>(Function->GetResultPrototype()->Services()->Create());
+    SetReadWidget("Result:", *(Function->GetResultPrototype()));
 }
 
 void mtsQtWidgetFunctionVoidReturn::Execute(void)
 {
-    SetExecutionResult(Function(*ReadValue));
+    SetExecutionResult((*Function)(*ReadValue));
     ReadWidget->SetValue(*ReadValue);
 }
 
 
-mtsQtWidgetFunctionWrite::mtsQtWidgetFunctionWrite(mtsFunctionWrite & function):
+mtsQtWidgetFunctionWrite::mtsQtWidgetFunctionWrite(mtsFunctionWrite * function):
     mtsQtWidgetFunction(),
     Function(function)
 {
-    WriteValue = dynamic_cast<mtsGenericObject *>(function.GetArgumentPrototype()->Services()->Create());
-    SetWriteWidget("Argument:", *(function.GetArgumentPrototype()));
+}
+
+void mtsQtWidgetFunctionWrite::CreateArgumentsWidgets(void)
+{
+    WriteValue = dynamic_cast<mtsGenericObject *>(Function->GetArgumentPrototype()->Services()->Create());
+    SetWriteWidget("Argument:", *(Function->GetArgumentPrototype()));
 }
 
 void mtsQtWidgetFunctionWrite::Execute(void)
 {
     WriteWidget->GetValue(*WriteValue);
-    SetExecutionResult(Function(*WriteValue));
+    SetExecutionResult((*Function)(*WriteValue));
 }
 
 
-mtsQtWidgetFunctionWriteReturn::mtsQtWidgetFunctionWriteReturn(mtsFunctionWriteReturn & function):
+mtsQtWidgetFunctionWriteReturn::mtsQtWidgetFunctionWriteReturn(mtsFunctionWriteReturn * function):
     mtsQtWidgetFunction(),
     Function(function)
 {
-    WriteValue = dynamic_cast<mtsGenericObject *>(function.GetArgumentPrototype()->Services()->Create());
-    SetWriteWidget("Argument:", *(function.GetArgumentPrototype()));
-    ReadValue = dynamic_cast<mtsGenericObject *>(function.GetResultPrototype()->Services()->Create());
-    SetReadWidget("Result:", *(function.GetResultPrototype()));
+}
+
+void mtsQtWidgetFunctionWriteReturn::CreateArgumentsWidgets(void)
+{
+    WriteValue = dynamic_cast<mtsGenericObject *>(Function->GetArgumentPrototype()->Services()->Create());
+    SetWriteWidget("Argument:", *(Function->GetArgumentPrototype()));
+    ReadValue = dynamic_cast<mtsGenericObject *>(Function->GetResultPrototype()->Services()->Create());
+    SetReadWidget("Result:", *(Function->GetResultPrototype()));
 }
 
 void mtsQtWidgetFunctionWriteReturn::Execute(void)
 {
     WriteWidget->GetValue(*WriteValue);
-    SetExecutionResult(Function(*WriteValue, *ReadValue));
+    SetExecutionResult((*Function)(*WriteValue, *ReadValue));
     ReadWidget->SetValue(*ReadValue);
 }
 
 
-mtsQtWidgetFunctionRead::mtsQtWidgetFunctionRead(mtsFunctionRead & function):
+mtsQtWidgetFunctionRead::mtsQtWidgetFunctionRead(mtsFunctionRead * function):
     mtsQtWidgetFunction(),
     Function(function)
 {
-    ReadValue = dynamic_cast<mtsGenericObject *>(function.GetArgumentPrototype()->Services()->Create());
-    SetReadWidget("Result:", *(function.GetArgumentPrototype()));
+}
+
+void mtsQtWidgetFunctionRead::CreateArgumentsWidgets(void)
+{
+    ReadValue = dynamic_cast<mtsGenericObject *>(Function->GetArgumentPrototype()->Services()->Create());
+SetReadWidget("Result:", *(Function->GetArgumentPrototype()));
 }
 
 void mtsQtWidgetFunctionRead::Execute(void)
 {
-    SetExecutionResult(Function(*ReadValue));
+    SetExecutionResult((*Function)(*ReadValue));
     ReadWidget->SetValue(*ReadValue);
 }
 
 
-mtsQtWidgetFunctionQualifiedRead::mtsQtWidgetFunctionQualifiedRead(mtsFunctionQualifiedRead & function):
+mtsQtWidgetFunctionQualifiedRead::mtsQtWidgetFunctionQualifiedRead(mtsFunctionQualifiedRead * function):
     mtsQtWidgetFunction(),
     Function(function)
 {
-    WriteValue = dynamic_cast<mtsGenericObject *>(function.GetArgument1Prototype()->Services()->Create());
-    SetWriteWidget("Qualifier:", *(function.GetArgument1Prototype()));
-    ReadValue = dynamic_cast<mtsGenericObject *>(function.GetArgument2Prototype()->Services()->Create());
-    SetReadWidget("Result:", *(function.GetArgument2Prototype()));
+}
+
+void mtsQtWidgetFunctionQualifiedRead::CreateArgumentsWidgets(void)
+{
+    WriteValue = dynamic_cast<mtsGenericObject *>(Function->GetArgument1Prototype()->Services()->Create());
+    SetWriteWidget("Qualifier:", *(Function->GetArgument1Prototype()));
+    ReadValue = dynamic_cast<mtsGenericObject *>(Function->GetArgument2Prototype()->Services()->Create());
+    SetReadWidget("Result:", *(Function->GetArgument2Prototype()));
 }
 
 void mtsQtWidgetFunctionQualifiedRead::Execute(void)
 {
     WriteWidget->GetValue(*WriteValue);
-    SetExecutionResult(Function(*WriteValue, *ReadValue));
+    SetExecutionResult((*Function)(*WriteValue, *ReadValue));
     ReadWidget->SetValue(*ReadValue);
-}
-
-
-
-CommandEventVoidWidget::CommandEventVoidWidget(void)
-    : mtsQtWidgetFunction()
-{
-    AddEventWidgets();
-}
-
-void CommandEventVoidWidget::Execute(void)
-{
-    EventInformation->ResetTimeSinceLastEvent();
-}
-
-CommandEventWriteWidget::CommandEventWriteWidget(void)
-    : mtsQtWidgetFunction()
-{
-    AddEventWidgets();
-    //AddReadArgument("Value", *(command.GetArgument2Prototype()));
-}
-
-void CommandEventWriteWidget::Execute(void)
-{
-    EventInformation->ResetTimeSinceLastEvent();
 }

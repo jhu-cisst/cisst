@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsQtWidgetComponent.h>
-#include <cisstMultiTask/mtsInterfaceRequiredWidget.h>
+#include <cisstMultiTask/mtsQtWidgetInterfaceRequired.h>
 
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
@@ -60,5 +60,5 @@ void mtsQtWidgetComponent::CreateWidgetsForInterface(const mtsComponent & compon
     mtsInterfaceProvided * interfaceProvided = component.GetInterfaceProvided(interfaceName);
     const std::string & interfaceFullName = interfaceProvided->GetFullName();
     mtsInterfaceRequired * requiredInterface = this->AddInterfaceRequired(interfaceFullName);
-    TabWidget->addTab(new mtsInterfaceRequiredWidget(interfaceProvided, requiredInterface), interfaceFullName.c_str());
+    TabWidget->addTab(new mtsQtWidgetInterfaceRequired(interfaceProvided, requiredInterface), interfaceFullName.c_str());
 }

@@ -30,8 +30,8 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
               ../mtsCollectorQtWidget.h
               ../mtsQtWidgetGenericObject.h
               ../mtsQtWidgetComponent.h
-              ../mtsQtWidgetFunction.h
-              ../mtsInterfaceRequiredWidget.h)
+              ../mtsQtWidgetInterfaceRequired.h
+              ../mtsQtWidgetFunction.h)
 
 cisst_add_library (LIBRARY cisstMultiTaskQt
                    LIBRARY_DIR cisstMultiTask
@@ -45,15 +45,15 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
                                 mtsQtWidgetComponent.cpp
+                                mtsQtWidgetInterfaceRequired.cpp
                                 mtsQtWidgetFunction.cpp
-                                mtsInterfaceRequiredWidget.cpp
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h
                                 mtsQtWidgetComponent.h
+                                mtsQtWidgetInterfaceRequired.h
                                 mtsQtWidgetFunction.h
-                                mtsInterfaceRequiredWidget.h
                                 mtsExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 

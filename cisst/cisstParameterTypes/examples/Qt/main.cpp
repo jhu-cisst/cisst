@@ -31,6 +31,12 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int argc, char** argv)
 {
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cerr, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
     TestComponent * testComponent = new TestComponent();
     testComponent->Configure("");

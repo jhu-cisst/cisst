@@ -75,7 +75,7 @@ class CISST_EXPORT mtsQtWidgetFactory
 
     static mtsQtWidgetGenericObjectRead * CreateWidgetRead(const std::type_info * type);
     static mtsQtWidgetGenericObjectWrite * CreateWidgetWrite(const std::type_info * type);
-                                            
+
 
  protected:
     static WidgetReadCreatorMap & GetWidgetReadCreators(void);

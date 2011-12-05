@@ -47,35 +47,11 @@ class QHBoxLayout;
 class QFormLayout;
 class QDoubleSpinBox;
 
-class mtsQtWidgetFunction;
-
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
-/* ! Output widget for all the information associated with an event.
-   Currently, the only information which is displayed is the last
-   time that the event was generated.
-*/
-class CISST_EXPORT mtsEventInformationWidget: public QWidget {
-
-    Q_OBJECT;
-
-private:
-    QLabel* TimeSinceLastEvent;
-    int SecondsSinceLastEvent;
-    bool EventFired;
-    QTime TimeOfLastEvent;
-    int TimerID;
-
-    void timerEvent(QTimerEvent* event);
-
-public:
-    mtsEventInformationWidget(void);
-    void ResetTimeSinceLastEvent(void);
-};
-
 /* ! A widget that wraps a single mtsCommand, allowing the user to execute the command and view its output. */
-class CISST_EXPORT mtsQtWidgetFunction : public QWidget, public cmnGenericObject
+class CISST_EXPORT mtsQtWidgetFunction: public QWidget, public cmnGenericObject
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -88,7 +64,7 @@ class CISST_EXPORT mtsQtWidgetFunction : public QWidget, public cmnGenericObject
 
     // periodic execution
     QDoubleSpinBox * PeriodSpinBox;
-   
+
     // execution result
     QLabel * ExecutionResultLabel;
     mtsExecutionResult LastResult;
@@ -104,7 +80,6 @@ class CISST_EXPORT mtsQtWidgetFunction : public QWidget, public cmnGenericObject
     mtsQtWidgetGenericObjectWrite * WriteWidget;
     mtsGenericObject * ReadValue;
     mtsGenericObject * WriteValue;
-    mtsEventInformationWidget * EventInformation;
 
     int TimerID;
     bool HasTimer;
@@ -134,25 +109,16 @@ class CISST_EXPORT mtsQtWidgetFunction : public QWidget, public cmnGenericObject
 
     virtual void Execute(void) = 0;
 
-public slots:
+ public slots:
     void ExecuteIfEnabled(void);
     void StopPeriodicExecution(void);
     void HandleIntervalChanged(double newInterval);
 
-public:
+ public:
     mtsQtWidgetFunction(void);
-
+    virtual void CreateArgumentsWidgets(void) = 0;
     void SetTimer(int interval);
     void StopTimer(void);
-
-    static mtsQtWidgetFunction * CreateCommandVoidWidget(mtsFunctionVoid & command);
-    static mtsQtWidgetFunction * CreateCommandVoidReturnWidget(mtsFunctionVoidReturn & command);
-    static mtsQtWidgetFunction * CreateCommandWriteWidget(mtsFunctionWrite & command);
-    static mtsQtWidgetFunction * CreateCommandWriteReturnWidget(mtsFunctionWriteReturn & command);
-    static mtsQtWidgetFunction * CreateCommandReadWidget(mtsFunctionRead & command);
-    static mtsQtWidgetFunction * CreateCommandQualifiedReadWidget(mtsFunctionQualifiedRead & command);
-    static mtsQtWidgetFunction * CreateEventVoidWidget(void);
-    static mtsQtWidgetFunction * CreateEventWriteWidget(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetFunction)
@@ -163,11 +129,12 @@ class CISST_EXPORT mtsQtWidgetFunctionVoid: public mtsQtWidgetFunction
 {
     Q_OBJECT;
  private:
-    mtsFunctionVoid Function;
+    mtsFunctionVoid * Function;
  public slots:
     virtual void Execute(void);
  public:
-    explicit mtsQtWidgetFunctionVoid(mtsFunctionVoid & function);
+    explicit mtsQtWidgetFunctionVoid(mtsFunctionVoid * function);
+    void CreateArgumentsWidgets(void);
 };
 
 
@@ -175,11 +142,12 @@ class CISST_EXPORT mtsQtWidgetFunctionVoidReturn: public mtsQtWidgetFunction
 {
     Q_OBJECT;
  private:
-    mtsFunctionVoidReturn Function;
+    mtsFunctionVoidReturn * Function;
  public slots:
     virtual void Execute(void);
  public:
-    explicit mtsQtWidgetFunctionVoidReturn(mtsFunctionVoidReturn & function);
+    explicit mtsQtWidgetFunctionVoidReturn(mtsFunctionVoidReturn * function);
+    void CreateArgumentsWidgets(void);
 };
 
 
@@ -187,11 +155,12 @@ class CISST_EXPORT mtsQtWidgetFunctionWrite: public mtsQtWidgetFunction
 {
     Q_OBJECT;
  private:
-    mtsFunctionWrite Function;
+    mtsFunctionWrite * Function;
  public slots:
     virtual void Execute(void);
  public:
-    explicit mtsQtWidgetFunctionWrite(mtsFunctionWrite & function);
+    explicit mtsQtWidgetFunctionWrite(mtsFunctionWrite * function);
+    void CreateArgumentsWidgets(void);
 };
 
 
@@ -199,11 +168,12 @@ class CISST_EXPORT mtsQtWidgetFunctionWriteReturn: public mtsQtWidgetFunction
 {
     Q_OBJECT;
  private:
-    mtsFunctionWriteReturn Function;
+    mtsFunctionWriteReturn * Function;
  public slots:
     virtual void Execute(void);
  public:
-    explicit mtsQtWidgetFunctionWriteReturn(mtsFunctionWriteReturn & function);
+    explicit mtsQtWidgetFunctionWriteReturn(mtsFunctionWriteReturn * function);
+    void CreateArgumentsWidgets(void);
 };
 
 
@@ -211,11 +181,12 @@ class CISST_EXPORT mtsQtWidgetFunctionRead : public mtsQtWidgetFunction
 {
     Q_OBJECT;
  private:
-    mtsFunctionRead Function;
+    mtsFunctionRead * Function;
  public slots:
     virtual void Execute(void);
  public:
-    explicit mtsQtWidgetFunctionRead(mtsFunctionRead & function);
+    explicit mtsQtWidgetFunctionRead(mtsFunctionRead * function);
+    void CreateArgumentsWidgets(void);
 };
 
 
@@ -223,31 +194,12 @@ class CISST_EXPORT mtsQtWidgetFunctionQualifiedRead: public mtsQtWidgetFunction
 {
     Q_OBJECT;
  private:
-    mtsFunctionQualifiedRead Function;
+    mtsFunctionQualifiedRead * Function;
  public slots:
     virtual void Execute(void);
  public:
-    explicit mtsQtWidgetFunctionQualifiedRead(mtsFunctionQualifiedRead & function);
-};
-
-
-class CISST_EXPORT CommandEventVoidWidget: public mtsQtWidgetFunction
-{
-    Q_OBJECT;
- public slots:
-    virtual void Execute(void);
- public:
-    CommandEventVoidWidget(void);
-};
-
-
-class CommandEventWriteWidget: public mtsQtWidgetFunction
-{
-    Q_OBJECT;
-public slots:
-    virtual void Execute(void);
-public:
-    CommandEventWriteWidget(void);
+    explicit mtsQtWidgetFunctionQualifiedRead(mtsFunctionQualifiedRead * function);
+    void CreateArgumentsWidgets(void);
 };
 
 
