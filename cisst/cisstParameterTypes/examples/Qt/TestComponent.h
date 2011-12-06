@@ -37,6 +37,7 @@ private:
     mtsInt CounterInt;
     mtsBool CounterBool;
     mtsFunctionWrite EventWriteInt;
+    mtsFunctionVoid EventVoid;
 
 public:
     TestComponent();

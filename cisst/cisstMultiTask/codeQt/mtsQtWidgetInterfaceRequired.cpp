@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsQtWidgetInterfaceRequired.h>
+#include <cisstMultiTask/mtsQtWidgetFunction.h>
+#include <cisstMultiTask/mtsQtWidgetEvent.h>
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
@@ -50,100 +52,137 @@ mtsQtWidgetInterfaceRequired::mtsQtWidgetInterfaceRequired(mtsInterfaceProvided 
 void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interface, mtsInterfaceRequired & executionInterface)
 {
     typedef std::vector<std::string> NamesVector;
-    NamesVector functionNames;
-    NamesVector::const_iterator functionName;
+    NamesVector names;
+    NamesVector::const_iterator name;
     NamesVector::const_iterator end;
-    std::string name;
+    std::string stdName;
+
+    // keep track of functions added to retrieve argument prototype after connection
     mtsQtWidgetFunction * functionWidget;
     typedef std::list<mtsQtWidgetFunction *> FunctionWidgetsList;
     FunctionWidgetsList functionWidgets;
 
+    // keep track of events added to retrieve argument prototype after connection
+    typedef std::list<mtsQtWidgetEventWrite *> EventWidgetsList;
+    EventWidgetsList eventWidgets;
+
     // void functions
     mtsFunctionVoid * functionVoid;
-    functionNames = interface.GetNamesOfCommandsVoid();
-    end = functionNames.end();
-    for (functionName = functionNames.begin(); functionName != end; functionName++) {
-        name = *functionName;
+    names = interface.GetNamesOfCommandsVoid();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
         functionVoid = new mtsFunctionVoid;
-        executionInterface.AddFunction(name, *functionVoid, MTS_REQUIRED);
+        executionInterface.AddFunction(stdName, *functionVoid, MTS_REQUIRED);
         functionWidget = new mtsQtWidgetFunctionVoid(functionVoid);
-        FunctionsWidget->addItem(functionWidget, name.c_str());
+        FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
     }
 
     // void return functions
     mtsFunctionVoidReturn * functionVoidReturn;
-    functionNames = interface.GetNamesOfCommandsVoidReturn();
-    end = functionNames.end();
-    for (functionName = functionNames.begin(); functionName != end; functionName++) {
-        name = *functionName;
+    names = interface.GetNamesOfCommandsVoidReturn();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
         functionVoidReturn = new mtsFunctionVoidReturn;
-        executionInterface.AddFunction(name, *functionVoidReturn, MTS_REQUIRED);
+        executionInterface.AddFunction(stdName, *functionVoidReturn, MTS_REQUIRED);
         functionWidget = new mtsQtWidgetFunctionVoidReturn(functionVoidReturn);
-        FunctionsWidget->addItem(functionWidget, name.c_str());
+        FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
     }
 
     // write functions
     mtsFunctionWrite * functionWrite;
-    functionNames = interface.GetNamesOfCommandsWrite();
-    end = functionNames.end();
-    for (functionName = functionNames.begin(); functionName != end; functionName++) {
-        name = *functionName;
+    names = interface.GetNamesOfCommandsWrite();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
         functionWrite = new mtsFunctionWrite;
-        executionInterface.AddFunction(name, *functionWrite, MTS_REQUIRED);
+        executionInterface.AddFunction(stdName, *functionWrite, MTS_REQUIRED);
         functionWidget = new mtsQtWidgetFunctionWrite(functionWrite);
-        FunctionsWidget->addItem(functionWidget, name.c_str());
+        FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
     }
 
     // write return functions
     mtsFunctionWriteReturn * functionWriteReturn;
-    functionNames = interface.GetNamesOfCommandsWriteReturn();
-    end = functionNames.end();
-    for (functionName = functionNames.begin(); functionName != end; functionName++) {
-        name = *functionName;
+    names = interface.GetNamesOfCommandsWriteReturn();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
         functionWriteReturn = new mtsFunctionWriteReturn;
-        executionInterface.AddFunction(name, *functionWriteReturn, MTS_REQUIRED);
+        executionInterface.AddFunction(stdName, *functionWriteReturn, MTS_REQUIRED);
         functionWidget = new mtsQtWidgetFunctionWriteReturn(functionWriteReturn);
-        FunctionsWidget->addItem(functionWidget, name.c_str());
+        FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
     }
 
     // read functions
     mtsFunctionRead * functionRead;
-    functionNames = interface.GetNamesOfCommandsRead();
-    end = functionNames.end();
-    for (functionName = functionNames.begin(); functionName != end; functionName++) {
-        name = *functionName;
+    names = interface.GetNamesOfCommandsRead();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
         functionRead = new mtsFunctionRead;
-        executionInterface.AddFunction(name, *functionRead, MTS_REQUIRED);
+        executionInterface.AddFunction(stdName, *functionRead, MTS_REQUIRED);
         functionWidget = new mtsQtWidgetFunctionRead(functionRead);
-        FunctionsWidget->addItem(functionWidget, name.c_str());
+        FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
     }
 
     // qualified read functions
     mtsFunctionQualifiedRead * functionQualifiedRead;
-    functionNames = interface.GetNamesOfCommandsQualifiedRead();
-    end = functionNames.end();
-    for (functionName = functionNames.begin(); functionName != end; functionName++) {
-        name = *functionName;
+    names = interface.GetNamesOfCommandsQualifiedRead();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
         functionQualifiedRead = new mtsFunctionQualifiedRead;
-        executionInterface.AddFunction(name, *functionQualifiedRead, MTS_REQUIRED);
+        executionInterface.AddFunction(stdName, *functionQualifiedRead, MTS_REQUIRED);
         functionWidget = new mtsQtWidgetFunctionQualifiedRead(functionQualifiedRead);
-        FunctionsWidget->addItem(functionWidget, name.c_str());
+        FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
     }
 
+    // void events
+    mtsQtWidgetEventVoid * eventVoidWidget;
+    names = interface.GetNamesOfEventsVoid();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
+        eventVoidWidget = new mtsQtWidgetEventVoid;
+        executionInterface.AddEventHandlerVoid(&mtsQtWidgetEventVoid::EventHandler, eventVoidWidget, stdName);
+        FunctionsWidget->addItem(eventVoidWidget, stdName.c_str());
+    }
+
+    // write events
+    mtsCommandWriteBase * eventCommand;
+    mtsQtWidgetEventWrite * eventWriteWidget;
+    names = interface.GetNamesOfEventsWrite();
+    end = names.end();
+    for (name = names.begin(); name != end; name++) {
+        stdName= *name;
+        eventWriteWidget = new mtsQtWidgetEventWrite;
+        eventCommand = executionInterface.AddEventHandlerWriteGeneric(&mtsQtWidgetEventWrite::EventHandler, eventWriteWidget, stdName);
+        eventWriteWidget->SetCommand(eventCommand);
+        FunctionsWidget->addItem(eventWriteWidget, stdName.c_str());
+        eventWidgets.push_back(eventWriteWidget);
+    }
 
     // connect all
     executionInterface.ConnectTo(&interface);
 
     // refresh all widgets based on argument prototypes
-    FunctionWidgetsList::iterator widgetIterator = functionWidgets.begin();
-    FunctionWidgetsList::iterator widgetIteratorEnd = functionWidgets.end();
-    for (; widgetIterator != widgetIteratorEnd; ++widgetIterator) {
-        (*widgetIterator)->CreateArgumentsWidgets();
+    FunctionWidgetsList::iterator widgetFunctionIterator = functionWidgets.begin();
+    FunctionWidgetsList::iterator widgetFunctionIteratorEnd = functionWidgets.end();
+    for (; widgetFunctionIterator != widgetFunctionIteratorEnd; ++widgetFunctionIterator) {
+        (*widgetFunctionIterator)->CreateArgumentsWidgets();
     }
+
+    EventWidgetsList::iterator widgetEventIterator = eventWidgets.begin();
+    EventWidgetsList::iterator widgetEventIteratorEnd = eventWidgets.end();
+    for (; widgetEventIterator != widgetEventIteratorEnd; ++widgetEventIterator) {
+        (*widgetEventIterator)->CreateArgumentsWidgets();
+    }
+
 }

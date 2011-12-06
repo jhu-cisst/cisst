@@ -32,6 +32,9 @@ CMN_IMPLEMENT_SERVICES(mtsQtWidgetComponent);
 #include <cisstMultiTask/mtsQtWidgetFunction.h>
 CMN_IMPLEMENT_SERVICES(mtsQtWidgetFunction);
 
+#include <cisstMultiTask/mtsQtWidgetEvent.h>
+CMN_IMPLEMENT_SERVICES(mtsQtWidgetEvent);
+
 #include <cisstMultiTask/mtsQtWidgetGenericObject.h>
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsInt, mtsQtWidgetIntRead, mtsQtWidgetIntWrite);
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBool, mtsQtWidgetBoolRead, mtsQtWidgetBoolWrite);

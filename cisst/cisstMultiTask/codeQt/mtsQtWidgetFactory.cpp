@@ -47,7 +47,7 @@ mtsQtWidgetGenericObjectRead * mtsQtWidgetFactory::CreateWidgetRead(const std::t
     if (creator != GetWidgetReadCreators().end()) {
         return (creator->second)();
     }
-    CMN_LOG_INIT_WARNING << "Class mtsQtWidgetFactory: CreateWidgetRead: can't find creator for type " << type << " (" << type->name() << ")" << std::endl;
+    CMN_LOG_INIT_WARNING << "Class mtsQtWidgetFactory: CreateWidgetRead: can't find creator for type \"" << type->name() << "\"" << std::endl;
     return 0;
 }
 

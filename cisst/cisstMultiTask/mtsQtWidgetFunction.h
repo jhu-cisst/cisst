@@ -75,6 +75,7 @@ class CISST_EXPORT mtsQtWidgetFunction: public QWidget, public cmnGenericObject
     QPushButton * ExecuteButton;
 
     void SetExecutionResult(mtsExecutionResult result);
+    void DisableExecute(void);
 
     mtsQtWidgetGenericObjectRead * ReadWidget;
     mtsQtWidgetGenericObjectWrite * WriteWidget;

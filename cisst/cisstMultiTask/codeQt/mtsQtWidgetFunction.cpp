@@ -123,12 +123,12 @@ void mtsQtWidgetFunction::SetWriteWidget(const std::string & label, const mtsGen
         widget->SetValue(prototype);
         WriteWidget = widget;
     } else {
-        std::string message = prototype.Services()->GetName();
-        CMN_LOG_CLASS_INIT_WARNING << "SetWriteWidget: can't create write widget for \"" << message << "\"" << std::endl;
-        message.append(" not supported, command disabled!");
+        std::string message = std::string("type \"") + prototype.Services()->GetName() + "\"";
+        CMN_LOG_CLASS_INIT_WARNING << "SetWriteWidget: can't create write widget for " << message << std::endl;
+        message.append(" not supported.");
         ResultLayout->addRow(label.c_str(), new QLabel(message.c_str()));
         WriteWidget = 0;
-        Enabled = false;
+        DisableExecute();
     }
 }
 
@@ -141,13 +141,21 @@ void mtsQtWidgetFunction::SetReadWidget(const std::string & label, const mtsGene
         widget->SetValue(prototype);
         ReadWidget = widget;
     } else {
-        std::string message = prototype.Services()->GetName();
-        CMN_LOG_CLASS_INIT_WARNING << "SetReadWidget: can't create read widget for \"" << message << "\"" << std::endl;
-        message.append(" not supported, command disabled!");
+        std::string message = std::string("type \"") + prototype.Services()->GetName() + "\"";
+        CMN_LOG_CLASS_INIT_WARNING << "SetReadWidget: can't create read widget for " << message << std::endl;
+        message.append(" not supported.");
         ResultLayout->addRow(label.c_str(), new QLabel(message.c_str()));
         ReadWidget = 0;
-        Enabled = false;
+        DisableExecute();
     }
+}
+
+
+void mtsQtWidgetFunction::DisableExecute(void)
+{
+    Enabled = false;
+    ExecuteButton->setDisabled(true);
+    PeriodSpinBox->setDisabled(true);
 }
 
 

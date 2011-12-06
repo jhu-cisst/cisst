@@ -23,8 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsQtWidgetInterfaceRequired_h
 #define _mtsQtWidgetInterfaceRequired_h
 
-#include <cisstMultiTask/mtsQtWidgetFunction.h>
-
 #include <QWidget>
 class QToolBox;
 

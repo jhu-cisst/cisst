@@ -48,6 +48,7 @@ void TestComponent::CommandVoid(void)
     CounterDouble = 0.0;
     CounterInt = 0;
     CounterBool = false;
+    EventVoid();
 }
 
 
@@ -84,6 +85,7 @@ void TestComponent::Configure(const std::string & CMN_UNUSED(file))
 	interfaceProvided->AddCommandWriteReturn<TestComponent, mtsBool, mtsStdString>(&TestComponent::CommandWriteReturnBool, this, "WriteReturnBool");
 	interfaceProvided->AddCommandReadState(this->StateTable, CounterDouble, "ReadDouble");
 	interfaceProvided->AddCommandReadState(this->StateTable, CounterInt, "ReadInt");
+	interfaceProvided->AddEventVoid(EventVoid, "EventVoid");
 	interfaceProvided->AddEventWrite(EventWriteInt, "EventWriteInt", mtsInt());
     }
 }
@@ -95,6 +97,6 @@ void TestComponent::Run(void)
    CounterInt++;
    CounterDouble += 0.1;
    if ((CounterInt % 100) == 0) {
-       EventWriteInt(CounterInt);
+       EventWriteInt(mtsInt(CounterInt / 100));
    }
 }
