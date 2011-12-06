@@ -513,6 +513,9 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
     provided->AddEventWrite(this->InterfaceComponentEvents_RemoveConnection,
                             mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
+    provided->AddCommandRead(&mtsManagerComponentClient::GetAbsoluteTimeInSeconds, this, "GetAbsoluteTimeInSeconds");
+
+
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceComponent: successfully added \"Component\" interfaces" << std::endl;
 
@@ -1366,4 +1369,9 @@ void mtsManagerComponentClient::HandleMCSReadyEvent(void)
 {
     //CMN_LOG_CLASS_INIT_VERBOSE << "MCS ready event" << std::endl;
     //MCSReady = true;
+}
+
+void mtsManagerComponentClient::GetAbsoluteTimeInSeconds(mtsDouble &time) const
+{
+    time = mtsManagerLocal::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();
 }

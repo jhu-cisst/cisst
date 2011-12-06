@@ -209,6 +209,9 @@ protected:
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
 
+    void GetAbsoluteTimeInSeconds(mtsDouble &time) const;
+
+
 public:
     mtsManagerComponentClient(const std::string & componentName);
     ~mtsManagerComponentClient();
