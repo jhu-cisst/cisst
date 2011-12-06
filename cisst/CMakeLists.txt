@@ -49,7 +49,7 @@ include_directories (${CISST_INCLUDE_DIR})
 
 # Try to find SVN version number
 find_package (Subversion QUIET)
-set (CISST_WC_REVISION "undefined (SVN executable not found)")
+set (CISST_WC_REVISION "undefined")
 if (Subversion_FOUND AND EXISTS "${cisst_saw_SOURCE_DIR}/.svn/")
   Subversion_WC_INFO ("${cisst_SOURCE_DIR}" CISST)
 endif (Subversion_FOUND AND EXISTS "${cisst_saw_SOURCE_DIR}/.svn/")
