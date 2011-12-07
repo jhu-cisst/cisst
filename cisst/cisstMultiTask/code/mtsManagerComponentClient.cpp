@@ -1251,8 +1251,12 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
     InterfaceComponentFunctionType * functionSet = 
         InterfaceComponentFunctionMap.GetItem(component.ComponentName, CMN_LOG_LEVEL_NONE);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentGetState: failed to find required interface for component "
-                                << component.ComponentName << std::endl;
+        // MJ: It is possible that the component viewer tries to fetch component state via
+        // component services when a new component is added to a system and not all
+        // internal connections are ready.  In this case, return INITIALIZING.
+        state = mtsComponentState::INITIALIZING;
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentGetState: failed to find required interface for component "
+                                  << component.ComponentName << std::endl;
         return;
     }
     if (!functionSet->ComponentGetState.IsValid()) {
