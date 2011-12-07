@@ -31,8 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(TestComponent);
 
 
-TestComponent::TestComponent()
-    : mtsTaskPeriodic("TestComponent", 10 * cmn_ms)
+TestComponent::TestComponent():
+    mtsTaskPeriodic("TestComponent", 10.0 * cmn_ms)
 {
     CounterInt = 0;
     CounterDouble = 0.0;
@@ -80,23 +80,23 @@ void TestComponent::Configure(const std::string & CMN_UNUSED(file))
 {
     mtsInterfaceProvided * interfaceProvided = AddInterfaceProvided("TestInterface1");
     if (interfaceProvided) {
-	interfaceProvided->AddCommandVoid<TestComponent>(&TestComponent::CommandVoid, this, "Void");
-	interfaceProvided->AddCommandQualifiedRead<TestComponent, mtsDouble, mtsStdString>(&TestComponent::CommandQualifiedReadDouble, this, "QualifiedReadDouble");
-	interfaceProvided->AddCommandWriteReturn<TestComponent, mtsBool, mtsStdString>(&TestComponent::CommandWriteReturnBool, this, "WriteReturnBool");
-	interfaceProvided->AddCommandReadState(this->StateTable, CounterDouble, "ReadDouble");
-	interfaceProvided->AddCommandReadState(this->StateTable, CounterInt, "ReadInt");
-	interfaceProvided->AddEventVoid(EventVoid, "EventVoid");
-	interfaceProvided->AddEventWrite(EventWriteInt, "EventWriteInt", mtsInt());
+        interfaceProvided->AddCommandVoid<TestComponent>(&TestComponent::CommandVoid, this, "Void");
+        interfaceProvided->AddCommandQualifiedRead<TestComponent, mtsDouble, mtsStdString>(&TestComponent::CommandQualifiedReadDouble, this, "QualifiedReadDouble");
+        interfaceProvided->AddCommandWriteReturn<TestComponent, mtsBool, mtsStdString>(&TestComponent::CommandWriteReturnBool, this, "WriteReturnBool");
+        interfaceProvided->AddCommandReadState(this->StateTable, CounterDouble, "ReadDouble");
+        interfaceProvided->AddCommandReadState(this->StateTable, CounterInt, "ReadInt");
+        interfaceProvided->AddEventVoid(EventVoid, "EventVoid");
+        interfaceProvided->AddEventWrite(EventWriteInt, "EventWriteInt", mtsInt());
     }
 }
 
 
 void TestComponent::Run(void)
 {
-   ProcessQueuedCommands();
-   CounterInt++;
-   CounterDouble += 0.1;
-   if ((CounterInt % 100) == 0) {
-       EventWriteInt(mtsInt(CounterInt / 100));
-   }
+    ProcessQueuedCommands();
+    CounterInt++;
+    CounterDouble += 0.1;
+    if ((CounterInt % 100) == 0) {
+        EventWriteInt(mtsInt(CounterInt));
+    }
 }
