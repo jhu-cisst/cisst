@@ -485,11 +485,13 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mts
     // interface.
     InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(component.ProcessName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get function set: " << component << std::endl;
+        state = mtsComponentState::INITIALIZING;
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceGCMCommands_ComponentGetState: failed to get function set: " << component << std::endl;
         return;
     }
     if (!functionSet->ComponentGetState.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+        state = mtsComponentState::INITIALIZING;
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceGCMCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
         return;
     }
 
