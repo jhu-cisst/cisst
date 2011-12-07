@@ -561,16 +561,17 @@ void osaThreadBuddy::WaitForRemainingPeriod(void)
 
 #elif (CISST_OS == CISST_QNX)
 
-   if (!IsPeriodic()) { return; }
+    if (!IsPeriodic()) { return; }
    
-   // wait to receive the next pulse
-   struct _pulse pulse;
-   MsgReceivePulse( Data->chid, &pulse, sizeof(pulse), NULL );
+    // wait to receive the next pulse
+    struct _pulse pulse;
+    MsgReceivePulse( Data->chid, &pulse, sizeof(pulse), NULL );
 
 #else // default unix
-    if (!IsPeriodic())
+    if (!IsPeriodic()) {
         return;
-    double elapsedTime, timeRemaining;
+    }
+    double elapsedTimeMicroSec, timeRemainingNanoSec;
     struct timeval timeNow, timeLater;
     struct timespec timeSleep;
     do {
@@ -579,11 +580,16 @@ void osaThreadBuddy::WaitForRemainingPeriod(void)
             gettimeofday(&Data->DueTime, NULL);
         }
         gettimeofday(&timeNow, NULL);
-        elapsedTime = (double)(1000 * 1000 * (timeNow.tv_sec - Data->DueTime.tv_sec)
-                + (timeNow.tv_usec - Data->DueTime.tv_usec)); // in usec
-        timeRemaining = Period - elapsedTime*1000;
+        elapsedTimeMicroSec = static_cast<double>(1000 * 1000 * (timeNow.tv_sec - Data->DueTime.tv_sec)
+                                                  + (timeNow.tv_usec - Data->DueTime.tv_usec)); // in usec
+        timeRemainingNanoSec = Period - elapsedTimeMicroSec * 1000.0; // floating point
         timeSleep.tv_sec = 0;
-        timeSleep.tv_nsec = (long)timeRemaining;
+        timeSleep.tv_nsec = static_cast<long>(timeRemainingNanoSec);
+        // this is required, at least for Mac OS X
+        while (timeSleep.tv_nsec > 1000000000) {
+            timeSleep.tv_nsec -= 1000000000;
+            timeSleep.tv_sec++;
+        }
         pselect(0, NULL, NULL, NULL, &timeSleep, NULL);
         gettimeofday(&timeLater, NULL);
         Data->DueTime.tv_sec = timeLater.tv_sec;
