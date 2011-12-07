@@ -1260,8 +1260,9 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
         return;
     }
     if (!functionSet->ComponentGetState.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentGetState: failed to execute \"Component GetState\""
-                                << component << std::endl;
+        state = mtsComponentState::INITIALIZING;
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentGetState: failed to execute \"Component GetState\""
+                                  << component << std::endl;
         return;
     }
 
