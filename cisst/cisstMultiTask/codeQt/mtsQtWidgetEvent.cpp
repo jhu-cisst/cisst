@@ -66,7 +66,6 @@ mtsQtWidgetEventVoid::mtsQtWidgetEventVoid(void):
 
 void mtsQtWidgetEventVoid::EventHandler(void)
 {
-    Counter++;
     UpdateInfo();
 }
 
@@ -81,7 +80,6 @@ mtsQtWidgetEventWrite::mtsQtWidgetEventWrite(void):
 
 void mtsQtWidgetEventWrite::EventHandler(const mtsGenericObject & payload)
 {
-    Counter++;
     UpdateInfo();
     mtsQtWidgetGenericObjectRead * widget = dynamic_cast<mtsQtWidgetGenericObjectRead *>(PayloadWidget);
     if (widget) {
