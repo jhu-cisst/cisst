@@ -1248,7 +1248,8 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
     }
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(component.ComponentName);
+    InterfaceComponentFunctionType * functionSet = 
+        InterfaceComponentFunctionMap.GetItem(component.ComponentName, CMN_LOG_LEVEL_NONE);
     if (!functionSet) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentGetState: failed to find required interface for component "
                                 << component.ComponentName << std::endl;
