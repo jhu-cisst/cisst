@@ -483,7 +483,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mts
 
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(component.ProcessName);
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(component.ProcessName, , CMN_LOG_LEVEL_NONE);
     if (!functionSet) {
         state = mtsComponentState::INITIALIZING;
         CMN_LOG_CLASS_RUN_WARNING << "InterfaceGCMCommands_ComponentGetState: failed to get function set: " << component << std::endl;
