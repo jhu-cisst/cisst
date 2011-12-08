@@ -17,7 +17,9 @@ project (cisstVectorQt)
 # To include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
-              ../vctPlot2DOpenGLQtWidget.h)
+              ../vctPlot2DOpenGLQtWidget.h
+              ../vctQtWidgetDynamicVector.h
+              )
 
 # cisstVectorQt relies on cisstQt settings (for future use)
 cisst_library_use_settings (cisstVectorQt cisstQt cisstOpenGL)
@@ -32,7 +34,9 @@ cisst_add_library (
   DEPENDENCIES cisstCommon
                cisstVector
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
+               vctQtWidgetDynamicVector.cpp
   HEADER_FILES vctPlot2DOpenGLQtWidget.h
+               vctQtWidgetDynamicVector.h
                vctExportQt.h
   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
