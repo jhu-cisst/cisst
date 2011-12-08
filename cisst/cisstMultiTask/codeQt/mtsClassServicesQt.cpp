@@ -35,8 +35,13 @@ CMN_IMPLEMENT_SERVICES(mtsQtWidgetFunction);
 #include <cisstMultiTask/mtsQtWidgetEvent.h>
 CMN_IMPLEMENT_SERVICES(mtsQtWidgetEvent);
 
-#include <cisstMultiTask/mtsQtWidgetGenericObject.h>
+#include <cisstMultiTask/mtsQtWidgetGenericObjectProxy.h>
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsInt, mtsQtWidgetIntRead, mtsQtWidgetIntWrite);
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBool, mtsQtWidgetBoolRead, mtsQtWidgetBoolWrite);
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDouble, mtsQtWidgetDoubleRead, mtsQtWidgetDoubleWrite);
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStdString, mtsQtWidgetStdStringRead, mtsQtWidgetStdStringWrite);
+
+#include <cisstMultiTask/mtsQtWidgetVectorTypes.h>
+#include <cisstMultiTask/mtsVector.h>
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDoubleVec, mtsQtWidgetDoubleVecRead, mtsQtWidgetDoubleVecWrite);
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBoolVec, mtsQtWidgetBoolVecRead, mtsQtWidgetBoolVecWrite);
