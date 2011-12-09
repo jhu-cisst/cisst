@@ -38,8 +38,8 @@ svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     Action(false),
     ActionTime(0.0),
     TargetActionTime(0.0),
-    TargetCaptureLength(-1),
-    CaptureLength(-1), // Continuous saving by default
+    TargetCaptureLength(0), // Continuous saving by default?
+    CaptureLength(0),
     CodecsMultithreaded(false)
 {
     AddInput("input", true);
@@ -186,7 +186,9 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
             }
         }
 
-        if (CaptureLength > 0) CaptureLength --;
+        if (CaptureLength > 0) {
+            CaptureLength --;
+        }
     }
 
     return SVL_OK;
@@ -487,6 +489,8 @@ int svlFilterVideoFileWriter::OpenFile(unsigned int videoch)
 
     CS.Enter();
 
+    CaptureLength = 0;
+
     while (1) {
 
         // Close video file if currently open
@@ -576,6 +580,8 @@ int svlFilterVideoFileWriter::CloseFile(unsigned int videoch)
         Codec[videoch] = 0;
     }
 
+    CaptureLength = 0;
+
     CS.Leave();
 
     return SVL_OK;
@@ -590,6 +596,7 @@ void svlFilterVideoFileWriter::Record(int frames)
 
 void svlFilterVideoFileWriter::RecordAtTime(int frames, double time)
 {
+
     if (time <= 0.0) {
         // Get current absolute time
         osaAbsoluteTime abstime;
@@ -648,5 +655,15 @@ void svlFilterVideoFileWriter::UpdateCodecCount(const unsigned int count)
             Framerate[i]      = 30.0;
         }
     }
+}
+
+bool svlFilterVideoFileWriter::GetIsRecording() const
+{
+    if (IsDisabled())
+        return false;
+    else if (CaptureLength == 0)
+        return false;
+    else
+        return true;
 }
 

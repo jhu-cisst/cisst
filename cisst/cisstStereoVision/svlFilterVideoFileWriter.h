@@ -69,6 +69,8 @@ public:
     void Pause();
     void PauseAtTime(double time = -1.0);
 
+    bool GetIsRecording() const;
+
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int OnStart(unsigned int procCount);
@@ -95,6 +97,7 @@ private:
     vctDynamicVector<svlVideoIO::Compression*> CodecParam;
     vctDynamicVector<std::string> FilePath;
     vctDynamicVector<double> Framerate;
+
 
     void UpdateCodecCount(const unsigned int count);
 };
