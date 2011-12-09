@@ -1152,7 +1152,7 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const b
     }
 
     // Get a component to be removed
-    mtsComponent * component = ComponentMap.GetItem(componentName);
+    mtsComponent * component = ComponentMap.GetItem(componentName, CMN_LOG_LEVEL_NONE);
     if (!component) {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to get component to be removed: " << componentName << std::endl;
         return false;
@@ -1412,7 +1412,7 @@ void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
     switch (eventGeneratorType) {
         case 'V':
             {
-                mtsCommandVoid * eventGenerator = interfaceProvided->EventVoidGenerators.GetItem(actualEventGeneratorName);
+                mtsCommandVoid * eventGenerator = interfaceProvided->EventVoidGenerators.GetItem(actualEventGeneratorName, CMN_LOG_LEVEL_NONE);
                 if (!eventGenerator) {
                     description = "No void event generator found";
                     return;
@@ -1422,7 +1422,7 @@ void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
             break;
         case 'W':
             {
-                mtsCommandWriteBase * eventGenerator = interfaceProvided->EventWriteGenerators.GetItem(actualEventGeneratorName);
+                mtsCommandWriteBase * eventGenerator = interfaceProvided->EventWriteGenerators.GetItem(actualEventGeneratorName, CMN_LOG_LEVEL_NONE);
                 if (!eventGenerator) {
                     description = "No write event generator found";
                     return;
@@ -1457,7 +1457,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
     switch (functionType) {
         case 'V':
             {
-                mtsInterfaceRequired::CommandInfo<mtsCommandVoidBase> * function = requiredInterface->CommandPointersVoid.GetItem(actualFunctionName);
+                mtsInterfaceRequired::CommandInfo<mtsCommandVoidBase> * function = requiredInterface->CommandPointersVoid.GetItem(actualFunctionName, CMN_LOG_LEVEL_NONE);
                 if (!function) {
                     description = "No void function found";
                     return;
@@ -1467,7 +1467,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
             break;
         case 'W':
             {
-                mtsInterfaceRequired::CommandInfo<mtsCommandWriteBase> * function = requiredInterface->CommandPointersWrite.GetItem(actualFunctionName);
+                mtsInterfaceRequired::CommandInfo<mtsCommandWriteBase> * function = requiredInterface->CommandPointersWrite.GetItem(actualFunctionName, CMN_LOG_LEVEL_NONE);
                 if (!function) {
                     description = "No write function found";
                     return;
@@ -1481,7 +1481,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
             break;
         case 'R':
             {
-                mtsInterfaceRequired::CommandInfo<mtsCommandReadBase> * function = requiredInterface->CommandPointersRead.GetItem(actualFunctionName);
+                mtsInterfaceRequired::CommandInfo<mtsCommandReadBase> * function = requiredInterface->CommandPointersRead.GetItem(actualFunctionName, CMN_LOG_LEVEL_NONE);
                 if (!function) {
                     description = "No read function found";
                     return;
@@ -1495,7 +1495,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
             break;
         case 'Q':
             {
-                mtsInterfaceRequired::CommandInfo<mtsCommandQualifiedReadBase> * function = requiredInterface->CommandPointersQualifiedRead.GetItem(actualFunctionName);
+                mtsInterfaceRequired::CommandInfo<mtsCommandQualifiedReadBase> * function = requiredInterface->CommandPointersQualifiedRead.GetItem(actualFunctionName, CMN_LOG_LEVEL_NONE);
                 if (!function) {
                     description = "No qualified read function found";
                     return;
@@ -1542,7 +1542,7 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
     switch (eventHandlerType) {
         case 'V':
             {
-                mtsCommandVoid * command = requiredInterface->EventHandlersVoid.GetItem(actualEventHandlerName);
+                mtsCommandVoid * command = requiredInterface->EventHandlersVoid.GetItem(actualEventHandlerName, CMN_LOG_LEVEL_NONE);
                 if (!command) {
                     description = "No void event handler found";
                     return;
@@ -1552,7 +1552,7 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
             break;
         case 'W':
             {
-                mtsCommandWriteBase * command = requiredInterface->EventHandlersWrite.GetItem(actualEventHandlerName);
+                mtsCommandWriteBase * command = requiredInterface->EventHandlersWrite.GetItem(actualEventHandlerName, CMN_LOG_LEVEL_NONE);
                 if (!command) {
                     description = "No write event handler found";
                     return;
@@ -1678,14 +1678,14 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
 
 mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
 {
-    return ComponentMap.GetItem(componentName);
+    return ComponentMap.GetItem(componentName, CMN_LOG_LEVEL_NONE);
 }
 
 mtsTask * mtsManagerLocal::GetComponentAsTask(const std::string & componentName) const
 {
     mtsTask * componentTask = 0;
 
-    mtsComponent * component = ComponentMap.GetItem(componentName);
+    mtsComponent * component = ComponentMap.GetItem(componentName, CMN_LOG_LEVEL_NONE);
     if (component) {
         componentTask = dynamic_cast<mtsTask*>(component);
     }
@@ -1700,7 +1700,7 @@ mtsTask CISST_DEPRECATED * mtsManagerLocal::GetTask(const std::string & taskName
 
 mtsComponent CISST_DEPRECATED * mtsManagerLocal::GetDevice(const std::string & deviceName)
 {
-    return ComponentMap.GetItem(deviceName);
+    return ComponentMap.GetItem(deviceName, CMN_LOG_LEVEL_NONE);
 }
 
 bool mtsManagerLocal::FindComponent(const std::string & componentName) const
