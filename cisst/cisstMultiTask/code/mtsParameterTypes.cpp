@@ -417,7 +417,7 @@ mtsLogMessage::mtsLogMessage(const mtsLogMessage & other)
     memcpy(this->Message, other.Message, this->Length);
 }
 
-mtsLogMessage::mtsLogMessage(const char * log, size_t len) 
+mtsLogMessage::mtsLogMessage(const char * log, unsigned int len) 
     : mtsGenericObject(),
       Length(len), ProcessName("")
 {

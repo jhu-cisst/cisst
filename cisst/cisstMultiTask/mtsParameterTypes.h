@@ -366,16 +366,16 @@ class CISST_EXPORT mtsLogMessage: public mtsGenericObject
 public:
     enum { MAX_LOG_SIZE = 1024 };
 
-    size_t      Length;
-    char        Message[MAX_LOG_SIZE];
-    std::string ProcessName;
+    unsigned int Length;
+    char         Message[MAX_LOG_SIZE];
+    std::string  ProcessName;
 
     /*! Default constructor */
     mtsLogMessage();
     /*! Copy constructor */
     mtsLogMessage(const mtsLogMessage & other);
     /*! Constructor */
-    mtsLogMessage(const char * log, size_t len);
+    mtsLogMessage(const char * log, unsigned int len);
     /*! Destructor */
     ~mtsLogMessage() {}
 
