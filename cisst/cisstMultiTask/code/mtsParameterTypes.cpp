@@ -403,26 +403,26 @@ void mtsDescriptionLoadLibrary::DeSerializeRaw(std::istream & inputStream)
 //  System-wide Thread-safe Logging
 //
 mtsLogMessage::mtsLogMessage()
+    : mtsGenericObject(),
+      Length(0), ProcessName("")
 {
-    this->Length = 0;
     memset(this->Message, 0, MAX_LOG_SIZE);
-    ProcessName = ""; // MJ: This should be set my LCM when log gets dispatched.
 }
 
-mtsLogMessage::mtsLogMessage(const mtsLogMessage & other): mtsGenericObject(other)
+mtsLogMessage::mtsLogMessage(const mtsLogMessage & other)
+    : mtsGenericObject(other),
+      Length(other.Length), ProcessName(other.ProcessName)
 {
-    this->Length = other.Length;
+    memset(this->Message, 0, MAX_LOG_SIZE);
     memcpy(this->Message, other.Message, this->Length);
-    this->ProcessName = other.ProcessName;
 }
 
-mtsLogMessage::mtsLogMessage(const char * log, size_t len)
+mtsLogMessage::mtsLogMessage(const char * log, size_t len) 
+    : mtsGenericObject(),
+      Length(len), ProcessName("")
 {
     memset(this->Message, 0, MAX_LOG_SIZE);
-
-    this->Length = len;
     memcpy(this->Message, log, this->Length);
-    ProcessName = ""; // MJ: This should be set my LCM when log gets dispatched.
 }
 
 void mtsLogMessage::ToStream(std::ostream & outputStream) const
