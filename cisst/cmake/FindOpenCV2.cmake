@@ -21,7 +21,7 @@
 # typical root dirs of installations, exactly one of them is used
 IF(WIN32)
     SET(OpenCV2_POSSIBLE_ROOT_DIRS
-        "$ENV{OpenCV_ROOT_DIR}"
+        "$ENV{OpenCV2_ROOT_DIR}"
         "$ENV{SystemDrive}/OpenCV2.3"                     # Windows: OpenCV 2.3 default installation dir (expected future revision)
         "$ENV{SystemDrive}/OpenCV2.2"                     # Windows: OpenCV 2.2 default installation dir
         "$ENV{SystemDrive}/Program Files/OpenCV2.3"       # 32 bit ProgramFiles dir on Win32;  64 bit ProgramFiles dir on Win64 (expected future revision)
@@ -144,9 +144,9 @@ IF(WIN32)
 #    FIND_LIBRARY(OpenCV2_FFMPEG_LIBRARY
 #                 NAMES opencv_ffmpeg230 opencv_ffmpeg220
 #                 PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
-    FIND_LIBRARY(OpenCV2_TS_LIBRARY
-                 NAMES opencv_ts230 opencv_ts220
-                 PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
+#    FIND_LIBRARY(OpenCV2_TS_LIBRARY
+#                 NAMES opencv_ts230 opencv_ts220
+#                 PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
 ELSE(WIN32)
     FIND_LIBRARY(OpenCV2_CORE_LIBRARY       NAMES opencv_core       PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
     FIND_LIBRARY(OpenCV2_IMGPROC_LIBRARY    NAMES opencv_imgproc    PATHS ${OPENCV2_LIBRARY_SEARCH_PATHS})
@@ -198,16 +198,17 @@ IF(WIN32)
         ${OpenCV2_ROOT_DIR}/include
         ${OpenCV2_INCLUDE_DIRS}
         )
-    SET(OpenCV2_LIBRARIES
-        ${OpenCV2_LIBRARIES}
-       #${OpenCV2_FFMPEG_LIBRARY}
-        ${OpenCV2_TS_LIBRARY}
-        )
+#    SET(OpenCV2_LIBRARIES
+#        ${OpenCV2_LIBRARIES}
+#       #${OpenCV2_FFMPEG_LIBRARY}
+#        ${OpenCV2_TS_LIBRARY}
+#        )
 ENDIF(WIN32)
 
 SET(OpenCV2_FOUND ON)
 FOREACH(NAME ${OpenCV2_INCLUDE_DIRS})
     IF(NOT EXISTS ${NAME})
+    message( ${NAME} )
         SET(OpenCV2_FOUND OFF)
     ENDIF(NOT EXISTS ${NAME})
 ENDFOREACH(NAME)
