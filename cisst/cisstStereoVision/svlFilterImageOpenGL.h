@@ -35,7 +35,7 @@ class CISST_EXPORT svlFilterImageOpenGL: public svlFilterBase
 
  public:
     svlFilterImageOpenGL();
-    ~svlFilterImageOpenGL();
+    virtual ~svlFilterImageOpenGL();
 
  protected:
     // rendering function for OpenGL

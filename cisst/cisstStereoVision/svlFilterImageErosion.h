@@ -35,7 +35,7 @@ class CISST_EXPORT svlFilterImageErosion : public svlFilterBase
 
 public:
     svlFilterImageErosion();
-    ~svlFilterImageErosion();
+    virtual ~svlFilterImageErosion();
 
     void SetIterations(unsigned int iterations);
     unsigned int GetIterations() const;

@@ -40,7 +40,7 @@ class CISST_EXPORT svlFilterSourceVideoFile : public svlFilterSourceBase
 public:
     svlFilterSourceVideoFile();
     svlFilterSourceVideoFile(unsigned int channelcount);
-    ~svlFilterSourceVideoFile();
+    virtual ~svlFilterSourceVideoFile();
 
     // Configuration methods
     int SetChannelCount(unsigned int channelcount);

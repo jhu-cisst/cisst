@@ -40,7 +40,7 @@ class CISST_EXPORT svlFilterVideoFileWriter : public svlFilterBase
 
 public:
     svlFilterVideoFileWriter();
-    ~svlFilterVideoFileWriter();
+    virtual ~svlFilterVideoFileWriter();
 
     int DialogOpenFile(unsigned int videoch = SVL_LEFT);
     int DialogFramerate(unsigned int videoch = SVL_LEFT);

@@ -35,7 +35,7 @@ class CISST_EXPORT svlFilterImageColorSegmentation : public svlFilterBase
 
 public:
     svlFilterImageColorSegmentation();
-    ~svlFilterImageColorSegmentation();
+    virtual ~svlFilterImageColorSegmentation();
 
     void AddColor(int x, int y, int z, unsigned char threshold, unsigned char label);
 

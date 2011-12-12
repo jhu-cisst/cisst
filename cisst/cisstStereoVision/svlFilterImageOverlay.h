@@ -49,7 +49,7 @@ protected:
 
 public:
     svlFilterImageOverlay();
-    ~svlFilterImageOverlay();
+    virtual ~svlFilterImageOverlay();
 
     int AddInputImage(const std::string &name);
     int AddInputMatrix(const std::string &name);

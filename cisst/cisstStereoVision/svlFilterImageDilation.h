@@ -35,7 +35,7 @@ class CISST_EXPORT svlFilterImageDilation : public svlFilterBase
 
 public:
     svlFilterImageDilation();
-    ~svlFilterImageDilation();
+    virtual ~svlFilterImageDilation();
 
     void SetIterations(unsigned int iterations);
     unsigned int GetIterations() const;

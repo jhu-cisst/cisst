@@ -36,7 +36,7 @@ class CISST_EXPORT svlFilterImageBlobDetector : public svlFilterBase
 
 public:
     svlFilterImageBlobDetector();
-    ~svlFilterImageBlobDetector();
+    virtual ~svlFilterImageBlobDetector();
 
     int SetMaxBlobCount(unsigned int max_blobs);
     void SetFilterArea(unsigned int min_area, unsigned int max_area);

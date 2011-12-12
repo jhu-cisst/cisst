@@ -35,7 +35,7 @@ class CISST_EXPORT svlFilterImageBlobTracker : public svlFilterBase
 
 public:
     svlFilterImageBlobTracker();
-    ~svlFilterImageBlobTracker();
+    virtual ~svlFilterImageBlobTracker();
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
