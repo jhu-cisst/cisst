@@ -23,7 +23,7 @@ set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical ciss
 # make sure all options are set for all devices to OFF
 option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
 option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
-option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
+#option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
 #option( CISST_DEV_HAS_ROBOTCOMPONENTS "Build robot components." OFF )
 
 set (HEADER_FILES
