@@ -21,18 +21,18 @@ set (LIBRARY cisstDevices)
 set (DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstMultiTask cisstParameterTypes cisstRobot)
 
 # make sure all options are set for all devices to OFF
-option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
-option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
+#option( CISST_DEV_HAS_BITCTRL "Use support BitCtrl." OFF )
+#option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
 #option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
 #option( CISST_DEV_HAS_ROBOTCOMPONENTS "Build robot components." OFF )
 
 set (HEADER_FILES
      devExport.h
-     can/devCAN.h
+#     can/devCAN.h
      )
 
 set (SOURCE_FILES
-     can/devCAN.cpp
+#     can/devCAN.cpp
      )
 
 #if( CISST_DEV_HAS_ROBOTCOMPONENTS )
