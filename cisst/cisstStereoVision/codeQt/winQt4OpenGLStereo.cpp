@@ -246,10 +246,6 @@ svlWindowManagerQt4OpenGLStereo::svlWindowManagerQt4OpenGLStereo() :
     RButtonDown(false)
 {
     DestroySignal = new osaThreadSignal;
-
-    QGLFormat fmt;
-    fmt.setStereo(true);
-    QGLFormat::setDefaultFormat(fmt);
 }
 
 svlWindowManagerQt4OpenGLStereo::svlWindowManagerQt4OpenGLStereo(const svlWindowManagerQt4OpenGLStereo& CMN_UNUSED(other)) :
@@ -341,7 +337,6 @@ void svlWindowManagerQt4OpenGLStereo::QSlotCreateWindow()
 
     Window = new svlWidgetQt4OpenGLStereo(ParentWidget);
     Window->Create(ImageBuffer, Width[0], Height[0], this);
-//    Window->showFullScreen();
     Window->show();
 
     ParentWidget->move(PosX[0], PosY[0]);
@@ -356,7 +351,9 @@ void svlWindowManagerQt4OpenGLStereo::QSlotCreateWindow()
 void svlWindowManagerQt4OpenGLStereo::QSlotDestroyWindow()
 {
     delete Window;
+    delete ParentWidget;
     Window = 0;
+    ParentWidget = 0;
 }
 
 void svlWindowManagerQt4OpenGLStereo::QSlotShow()
