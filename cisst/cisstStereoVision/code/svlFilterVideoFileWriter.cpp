@@ -36,10 +36,11 @@ CMN_IMPLEMENT_SERVICES(svlFilterVideoFileWriter)
 svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     svlFilterBase(),
     Action(false),
+    IsRecording(false),
     ActionTime(0.0),
     TargetActionTime(0.0),
-    TargetCaptureLength(0), // Continuous saving by default?
-    CaptureLength(0),
+    TargetCaptureLength(-1), // Continuous saving by default?
+    CaptureLength(-1),
     CodecsMultithreaded(false)
 {
     AddInput("input", true);
@@ -92,6 +93,7 @@ int svlFilterVideoFileWriter::Initialize(svlSample* syncInput, svlSample* &syncO
 
     // Initialize video frame counter
     VideoFrameCounter = 0;
+    IsRecording = false;
 
     syncOutput = syncInput;
 
@@ -128,6 +130,7 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
 
     if (CaptureLength == 0) {
         if (ActionTime < syncInput->GetTimestamp()) {
+            IsRecording = false;
             _OnSingleThread(procInfo) CS.Leave();
             return SVL_OK;
         }
@@ -140,6 +143,8 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
             return SVL_OK;
         }
     }
+
+    IsRecording = true;
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncOutput);
     const unsigned int videochannels = img->GetVideoChannels();
@@ -184,9 +189,11 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
                     CloseFile(idx);
                 }
             }
+            IsRecording = false;
         }
 
         if (CaptureLength > 0) {
+            IsRecording = true;
             CaptureLength --;
         }
     }
@@ -489,8 +496,6 @@ int svlFilterVideoFileWriter::OpenFile(unsigned int videoch)
 
     CS.Enter();
 
-    CaptureLength = 0;
-
     while (1) {
 
         // Close video file if currently open
@@ -580,8 +585,6 @@ int svlFilterVideoFileWriter::CloseFile(unsigned int videoch)
         Codec[videoch] = 0;
     }
 
-    CaptureLength = 0;
-
     CS.Leave();
 
     return SVL_OK;
@@ -657,13 +660,7 @@ void svlFilterVideoFileWriter::UpdateCodecCount(const unsigned int count)
     }
 }
 
-bool svlFilterVideoFileWriter::GetIsRecording() const
-{
-    if (IsDisabled())
-        return false;
-    else if (CaptureLength == 0)
-        return false;
-    else
-        return true;
+bool svlFilterVideoFileWriter::GetIsRecording() const {
+    return IsRecording;
 }
 

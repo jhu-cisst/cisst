@@ -84,6 +84,7 @@ private:
     bool Action;
     double ActionTime;
     double TargetActionTime;
+    bool IsRecording;
     osaTimeServer* TimeServer;
     unsigned int TargetCaptureLength;
 
@@ -97,7 +98,6 @@ private:
     vctDynamicVector<svlVideoIO::Compression*> CodecParam;
     vctDynamicVector<std::string> FilePath;
     vctDynamicVector<double> Framerate;
-
 
     void UpdateCodecCount(const unsigned int count);
 };
