@@ -108,8 +108,20 @@ bool svlOverlay::IsTransformed() const
 
 void svlOverlay::Draw(svlSampleImage* bgimage, svlSample* input)
 {
-    if (bgimage && VideoCh < bgimage->GetVideoChannels() && Visible) {
-        DrawInternal(bgimage, input);
+    if (!bgimage || !Visible) return;
+
+    if (VideoCh != SVL_ALL_CHANNELS) {
+        if (VideoCh < bgimage->GetVideoChannels()) {
+            DrawInternal(bgimage, input);
+        }
+    }
+    else {
+        // Iterate through all video channels
+        for (unsigned int vch = 0; vch < bgimage->GetVideoChannels(); vch ++) {
+            VideoCh = vch;
+            DrawInternal(bgimage, input);
+        }
+        VideoCh = SVL_ALL_CHANNELS;
     }
 }
 
@@ -280,11 +292,11 @@ void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
 
         tri_in.Assign(ulx, uly, urx, ury, llx, lly);
         tri_out.Assign(QuadUL[0], QuadUL[1], QuadUR[0], QuadUR[1], QuadLL[0], QuadLL[1]);
-        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
 
         tri_in.Assign(llx, lly, urx, ury, lrx, lry);
         tri_out.Assign(QuadLL[0], QuadLL[1], QuadUR[0], QuadUR[1], QuadLR[0], QuadLR[1]);
-        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
 
         return;
     }
@@ -323,11 +335,11 @@ void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
 
         tri_in.Assign(iulx, iuly, iurx, iury, illx, illy);
         tri_out.Assign(oulx, ouly, ourx, oury, ollx, olly);
-        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, 80);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
 
         tri_in.Assign(illx, illy, iurx, iury, ilrx, ilry);
         tri_out.Assign(ollx, olly, ourx, oury, olrx, olry);
-        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, 80);
+        svlDraw::WarpTriangle(ovrlimage, InputCh, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
 
         return;
     }

@@ -118,6 +118,7 @@ http://www.cisst.org/cisst/license.txt.
 // Status and error codes //
 ////////////////////////////
 
+#define SVL_ALL_CHANNELS                        0xFFFFFFFF
 #define SVL_LEFT                                0
 #define SVL_RIGHT                               1
 #define SVL_OK                                  0

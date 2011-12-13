@@ -75,14 +75,38 @@ void svlFilterImageFlipRotate::FlipRotate(_pixelType* input, _pixelType* output,
         unsigned int i, j;
         _pixelType* temp_out;
         output += outstart;
-        for (j = 0; j < inheight; j ++) {
-            temp_out = output;
-            for (i = 0; i < inwidth; i ++) {
-                *temp_out = *input;
-                input ++;
-                temp_out += outstride;
+        if (outstride == 1) {
+            for (j = 0; j < inheight; j ++) {
+                temp_out = output;
+                for (i = 0; i < inwidth; i ++) {
+                    *temp_out = *input;
+                    input ++;
+                    temp_out ++;
+                }
+                output += outlinestride;
             }
-            output += outlinestride;
+        }
+        else if (outstride == -1) {
+            for (j = 0; j < inheight; j ++) {
+                temp_out = output;
+                for (i = 0; i < inwidth; i ++) {
+                    *temp_out = *input;
+                    input ++;
+                    temp_out --;
+                }
+                output += outlinestride;
+            }
+        }
+        else {
+            for (j = 0; j < inheight; j ++) {
+                temp_out = output;
+                for (i = 0; i < inwidth; i ++) {
+                    *temp_out = *input;
+                    input ++;
+                    temp_out += outstride;
+                }
+                output += outlinestride;
+            }
         }
     }
     else if (quickcopy == 1) {
