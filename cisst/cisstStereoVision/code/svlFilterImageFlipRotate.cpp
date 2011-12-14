@@ -32,7 +32,8 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageFlipRotate, svlFilterBase)
 
 svlFilterImageFlipRotate::svlFilterImageFlipRotate() :
     svlFilterBase(),
-    OutputImage(0)
+    OutputImage(0),
+    StereoChannelSwap(false)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -195,41 +196,53 @@ int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInpu
 
     svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = input->GetVideoChannels();
-    unsigned int idx;
+    unsigned int in_idx, out_idx;
+    bool stereo_swap = false;
 
-    _ParallelLoop(procInfo, idx, videochannels)
+    if (StereoChannelSwap && videochannels == 2) {
+        // Applies only in stereo mode when left and right input and output images are of same size
+        if (input->GetWidth(SVL_LEFT)        == input->GetWidth(SVL_RIGHT)       &&
+            input->GetHeight(SVL_LEFT)       == input->GetHeight(SVL_RIGHT)      &&
+            OutputImage->GetWidth(SVL_LEFT)  == OutputImage->GetWidth(SVL_RIGHT) &&
+            OutputImage->GetHeight(SVL_LEFT) == OutputImage->GetHeight(SVL_RIGHT)) stereo_swap = true;
+    }
+
+    _ParallelLoop(procInfo, in_idx, videochannels)
     {
+        if (!stereo_swap) out_idx = in_idx;
+        else out_idx = (in_idx == SVL_LEFT ? SVL_RIGHT : SVL_LEFT);
+
         switch (GetInput()->GetType()) {
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
-                FlipRotate<RGBPixelType>(reinterpret_cast<RGBPixelType *>(input->GetUCharPointer(idx)),
-                                         reinterpret_cast<RGBPixelType *>(OutputImage->GetUCharPointer(idx)),
-                                         input->GetWidth(idx), input->GetHeight(idx),
-                                         QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
+                FlipRotate<RGBPixelType>(reinterpret_cast<RGBPixelType *>(input->GetUCharPointer(in_idx)),
+                                         reinterpret_cast<RGBPixelType *>(OutputImage->GetUCharPointer(out_idx)),
+                                         input->GetWidth(in_idx), input->GetHeight(in_idx),
+                                         QuickCopy[in_idx], StartOffset[in_idx], Stride[in_idx], LineStride[in_idx]);
             break;
 
             case svlTypeImageMono8:
             case svlTypeImageMono8Stereo:
-                FlipRotate<unsigned char>(input->GetUCharPointer(idx),
-                                          OutputImage->GetUCharPointer(idx),
-                                          input->GetWidth(idx), input->GetHeight(idx),
-                                          QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
+                FlipRotate<unsigned char>(input->GetUCharPointer(in_idx),
+                                          OutputImage->GetUCharPointer(out_idx),
+                                          input->GetWidth(in_idx), input->GetHeight(in_idx),
+                                          QuickCopy[in_idx], StartOffset[in_idx], Stride[in_idx], LineStride[in_idx]);
             break;
 
             case svlTypeImageMono16:
             case svlTypeImageMono16Stereo:
-                FlipRotate<unsigned short>(reinterpret_cast<unsigned short*>(input->GetUCharPointer(idx)),
-                                           reinterpret_cast<unsigned short*>(OutputImage->GetUCharPointer(idx)),
-                                           input->GetWidth(idx), input->GetHeight(idx),
-                                           QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
+                FlipRotate<unsigned short>(reinterpret_cast<unsigned short*>(input->GetUCharPointer(in_idx)),
+                                           reinterpret_cast<unsigned short*>(OutputImage->GetUCharPointer(out_idx)),
+                                           input->GetWidth(in_idx), input->GetHeight(in_idx),
+                                           QuickCopy[in_idx], StartOffset[in_idx], Stride[in_idx], LineStride[in_idx]);
             break;
 
             case svlTypeImageMono32:
             case svlTypeImageMono32Stereo:
-                FlipRotate<unsigned int>(reinterpret_cast<unsigned int*>(input->GetUCharPointer(idx)),
-                                         reinterpret_cast<unsigned int*>(OutputImage->GetUCharPointer(idx)),
-                                         input->GetWidth(idx), input->GetHeight(idx),
-                                         QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
+                FlipRotate<unsigned int>(reinterpret_cast<unsigned int*>(input->GetUCharPointer(in_idx)),
+                                         reinterpret_cast<unsigned int*>(OutputImage->GetUCharPointer(out_idx)),
+                                         input->GetWidth(in_idx), input->GetHeight(in_idx),
+                                         QuickCopy[in_idx], StartOffset[in_idx], Stride[in_idx], LineStride[in_idx]);
             break;
 
             case svlTypeImageRGBA:
@@ -320,5 +333,10 @@ int svlFilterImageFlipRotate::SetRotation(unsigned int videoch, int cw_quarters)
     if (IsInitialized()) return SVL_FAIL;
     if (videoch <= 1) CWQuarters[videoch] = cw_quarters;
     return SVL_OK;
+}
+
+void svlFilterImageFlipRotate::SetStereoChannelSwap(bool enable)
+{
+    StereoChannelSwap = enable;
 }
 

@@ -43,6 +43,7 @@ public:
     int SetVerticalFlip(unsigned int videoch, bool flip);
     int SetRotation(int cw_quarters);
     int SetRotation(unsigned int videoch, int cw_quarters);
+    void SetStereoChannelSwap(bool enable);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -52,6 +53,7 @@ protected:
 private:
     svlSampleImage* OutputImage;
     bool InOutSizesMatch;
+    bool StereoChannelSwap;
 
     int CWQuarters[2];
     bool FlipHorizontal[2];
