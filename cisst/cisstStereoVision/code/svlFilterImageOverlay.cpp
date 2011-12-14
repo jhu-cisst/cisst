@@ -231,7 +231,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                         overlay->SetTransform(iterxform->second);
                     }
                     else {
-                        CMN_LOG_CLASS_INIT_WARNING << "Process: failed to find transformation: " << overlay->TransformID << std::endl;
+                        CMN_LOG_CLASS_RUN_DEBUG << "Process: failed to find transformation: " << overlay->TransformID << std::endl;
                     }
                 }
             }
@@ -313,7 +313,7 @@ void svlFilterImageOverlay::SetTransform(const ThisType::ImageTransform & transf
         }
         else {
             TransformCache[transform.ID] = transform.frame;
-            CMN_LOG_CLASS_INIT_VERBOSE << "SetTransform - new transformation added: " << transform.ID << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "SetTransform - new transformation added: " << transform.ID << std::endl;
         }
     TransformCS.Leave();
 }
@@ -329,7 +329,7 @@ void svlFilterImageOverlay::SetTransforms(const vctDynamicVector<ThisType::Image
             }
             else {
                 TransformCache[transforms[i].ID] = transforms[i].frame;
-                CMN_LOG_CLASS_INIT_VERBOSE << "SetTransforms - new transformation added: " << transforms[i].ID << std::endl;
+                CMN_LOG_CLASS_RUN_DEBUG << "SetTransforms - new transformation added: " << transforms[i].ID << std::endl;
             }
         }
     TransformCS.Leave();
