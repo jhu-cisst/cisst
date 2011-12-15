@@ -1496,13 +1496,36 @@ bool svlOverlayStaticTriangle::GetFill() const
 
 void svlOverlayStaticTriangle::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
-    if (Fill) {
-        svlDraw::Triangle(bgimage, VideoCh, Corner1, Corner2, Corner3, Color, DrawInternals[0]);
+    int x1, y1, x2, y2, x3, y3;
+
+    if (Transformed) {
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+
+        x1 = static_cast<int>(Corner1.x * m00 + Corner1.y * m01 + m02);
+        y1 = static_cast<int>(Corner1.x * m10 + Corner1.y * m11 + m12);
+        x2 = static_cast<int>(Corner2.x * m00 + Corner2.y * m01 + m02);
+        y2 = static_cast<int>(Corner2.x * m10 + Corner2.y * m11 + m12);
+        x3 = static_cast<int>(Corner3.x * m00 + Corner3.y * m01 + m02);
+        y3 = static_cast<int>(Corner3.x * m10 + Corner3.y * m11 + m12);
     }
     else {
-        svlDraw::Line(bgimage, VideoCh, Corner1, Corner2, Color);
-        svlDraw::Line(bgimage, VideoCh, Corner2, Corner3, Color);
-        svlDraw::Line(bgimage, VideoCh, Corner3, Corner1, Color);
+        x1 = Corner1.x; y1 = Corner1.y;
+        x2 = Corner2.x; y2 = Corner2.y;
+        x3 = Corner3.x; y3 = Corner3.y;
+    }
+
+    if (Fill) {
+        svlDraw::Triangle(bgimage, VideoCh, x1, y1, x2, y2, x3, y3, Color, DrawInternals[0]);
+    }
+    else {
+        svlDraw::Line(bgimage, VideoCh, x1, y1, x2, y2, Color.r, Color.g, Color.b);
+        svlDraw::Line(bgimage, VideoCh, x2, y2, x3, y3, Color.r, Color.g, Color.b);
+        svlDraw::Line(bgimage, VideoCh, x3, y3, x1, y1, Color.r, Color.g, Color.b);
     }
 }
 
