@@ -82,6 +82,8 @@ protected:
         mtsFunctionQualifiedRead ComponentGetState;
         mtsFunctionQualifiedRead LoadLibrary;
         mtsFunctionWrite PrintLog;
+        mtsFunctionWrite EnableLogForwarding;
+        mtsFunctionWrite DisableLogForwarding;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -90,6 +92,7 @@ protected:
         mtsFunctionQualifiedRead GetListOfComponentClasses;
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
+        mtsFunctionQualifiedRead GetAbsoluteTimeDiffs;
     } InterfaceLCMFunctionType;
 
     InterfaceLCMFunctionType InterfaceLCMFunction;
@@ -175,6 +178,8 @@ protected:
     void InterfaceLCMCommands_LoadLibrary(const std::string &fileName, bool &result) const;
     void InterfaceLCMCommands_GetListOfComponentClasses(
                               std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
+    void InterfaceLCMCommands_SetLogForwarding(const bool &state);
+    void InterfaceLCMCommands_GetAbsoluteTimeInSeconds(double &time) const;
 
     /*! Event generators for InterfaceLCM's provided interface */
     mtsFunctionWrite InterfaceLCMEvents_ChangeState;
@@ -202,6 +207,10 @@ protected:
     void InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, 
                                                                     InterfaceRequiredDescription & description) const;
     void InterfaceComponentCommands_LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const;
+    void InterfaceComponentCommands_EnableLogForwarding(const std::vector<std::string> &processNames);
+    void InterfaceComponentCommands_DisableLogForwarding(const std::vector<std::string> &processNames);
+    void InterfaceComponentCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames,
+                                                         std::vector<double> &processTimes) const;
 
     /*! Event generators for InterfaceComponent's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;
@@ -209,7 +218,7 @@ protected:
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
 
-    void GetAbsoluteTimeInSeconds(mtsDouble &time) const;
+    void GetAbsoluteTimeInSeconds(mtsDouble &time) const;  // DEPRECATED
 
 
 public:

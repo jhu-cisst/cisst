@@ -732,6 +732,23 @@ inline std::ostream & operator << (std::ostream & output,
     return output;
 }
 
+typedef std::vector<double> stdDoubleVec;
+typedef mtsGenericObjectProxy<stdDoubleVec> mtsStdDoubleVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
+
+// Define stream out operator for stdDoubleVec
+inline std::ostream & operator << (std::ostream & output,
+                            const stdDoubleVec & object) {
+    output << "[";
+    for (size_t i = 0; i < object.size(); i++) {
+        output << object[i];
+        if (i < object.size()-1)
+            output << ", ";
+    }
+    output << "]";
+    return output;
+}
+
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
 // rather than proxies).

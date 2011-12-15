@@ -56,6 +56,7 @@ http://www.cisst.org/cisst/license.txt.
 %apply cmnGenericObject * {mtsGenericObject *};
 
 %template(mtsStringVector) std::vector<std::string>;
+%template(mtsDoubleVector) std::vector<double>;
 
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
@@ -654,6 +655,7 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsULong, unsigned long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsBool, bool);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdDoubleVecProxy, stdDoubleVec);
 
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct1, vct1);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct2, vct2);

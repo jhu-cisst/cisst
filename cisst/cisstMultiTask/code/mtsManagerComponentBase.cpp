@@ -59,6 +59,11 @@ const std::string mtsManagerComponentBase::CommandNames::RemoveEndUserInterface 
 const std::string mtsManagerComponentBase::CommandNames::RemoveObserverList = "RemoveObserverList";
 const std::string mtsManagerComponentBase::CommandNames::LoadLibrary = "LoadLibrary";
 const std::string mtsManagerComponentBase::CommandNames::PrintLog = "PrintLog";
+const std::string mtsManagerComponentBase::CommandNames::SetLogForwarding = "SetLogForwarding";
+const std::string mtsManagerComponentBase::CommandNames::EnableLogForwarding = "EnableLogForwarding";
+const std::string mtsManagerComponentBase::CommandNames::DisableLogForwarding = "DisableLogForwarding";
+const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds = "GetAbsoluteTimeInSeconds";
+const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs = "GetAbsoluteTimeDiffs";
 
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";

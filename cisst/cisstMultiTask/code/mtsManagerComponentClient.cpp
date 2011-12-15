@@ -505,6 +505,13 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                                       this, mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_LoadLibrary,
                                       this, mtsManagerComponentBase::CommandNames::LoadLibrary);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_EnableLogForwarding,
+                              this, mtsManagerComponentBase::CommandNames::EnableLogForwarding);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_DisableLogForwarding,
+                              this, mtsManagerComponentBase::CommandNames::DisableLogForwarding);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetAbsoluteTimeDiffs,
+                                      this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs);
+
     provided->AddEventWrite(this->InterfaceComponentEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceComponentEvents_ChangeState,
@@ -513,7 +520,7 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                             mtsManagerComponentBase::EventNames::AddConnection, mtsDescriptionConnection());
     provided->AddEventWrite(this->InterfaceComponentEvents_RemoveConnection,
                             mtsManagerComponentBase::EventNames::RemoveConnection, mtsDescriptionConnection());
-    provided->AddCommandRead(&mtsManagerComponentClient::GetAbsoluteTimeInSeconds, this, "GetAbsoluteTimeInSeconds");
+    provided->AddCommandRead(&mtsManagerComponentClient::GetAbsoluteTimeInSeconds, this, "GetAbsoluteTimeInSeconds");  // DEPRECATED
 
 
 
@@ -574,6 +581,12 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.LoadLibrary);
     required->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog,
                           InterfaceLCMFunction.PrintLog);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::EnableLogForwarding,
+                          InterfaceLCMFunction.EnableLogForwarding);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::DisableLogForwarding,
+                          InterfaceLCMFunction.DisableLogForwarding);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs,
+                          InterfaceLCMFunction.GetAbsoluteTimeDiffs);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                           InterfaceLCMFunction.GetNamesOfProcesses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
@@ -632,6 +645,10 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::LoadLibrary);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses,
                              this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
+    provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_SetLogForwarding,
+                             this, mtsManagerComponentBase::CommandNames::SetLogForwarding);
+    provided->AddCommandRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetAbsoluteTimeInSeconds,
+                             this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds);
     provided->AddEventWrite(this->InterfaceLCMEvents_ChangeState,
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceLCM: successfully added \"LCM\" interfaces" << std::endl;
@@ -1015,6 +1032,30 @@ void mtsManagerComponentClient::InterfaceComponentCommands_LoadLibrary(const mts
     }
 }
 
+void mtsManagerComponentClient::InterfaceComponentCommands_EnableLogForwarding(const std::vector<std::string> &processNames)
+{
+    if (InterfaceLCMFunction.EnableLogForwarding.IsValid())
+        InterfaceLCMFunction.EnableLogForwarding(processNames);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_EnableLogForwarding: function not bound to command" << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_DisableLogForwarding(const std::vector<std::string> &processNames)
+{
+    if (InterfaceLCMFunction.DisableLogForwarding.IsValid())
+        InterfaceLCMFunction.DisableLogForwarding(processNames);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_DisableLogForwarding: function not bound to command" << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames,
+                                                                                std::vector<double> &processTimes) const
+{
+    if (InterfaceLCMFunction.GetAbsoluteTimeDiffs.IsValid())
+        InterfaceLCMFunction.GetAbsoluteTimeDiffs(processNames, processTimes);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetAbsoluteTimeDiffs: function not bound to command" << std::endl;
+}
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
@@ -1336,6 +1377,20 @@ void mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses(
     }
 }
 
+void mtsManagerComponentClient::InterfaceLCMCommands_SetLogForwarding(const bool &state)
+{
+    if (!state)
+        CMN_LOG_CLASS_RUN_VERBOSE << "Disabling log forwarding" << std::endl;
+    mtsManagerLocal::SetLogForwarding(state);
+    if (state)
+        CMN_LOG_CLASS_RUN_VERBOSE << "Enabled log forwarding" << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_GetAbsoluteTimeInSeconds(double &time) const
+{
+    time = mtsManagerLocal::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();
+}
+
 void mtsManagerComponentClient::HandleAddComponentEvent(const mtsDescriptionComponent &component)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "MCC AddComponent event, component = " << component << std::endl;
@@ -1377,6 +1432,7 @@ void mtsManagerComponentClient::HandleMCSReadyEvent(void)
     //MCSReady = true;
 }
 
+// DEPRECATED
 void mtsManagerComponentClient::GetAbsoluteTimeInSeconds(mtsDouble &time) const
 {
     time = mtsManagerLocal::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();

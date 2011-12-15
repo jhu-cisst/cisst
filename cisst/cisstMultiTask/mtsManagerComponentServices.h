@@ -48,8 +48,12 @@ protected:
         mtsFunctionWrite Resume;
         mtsFunctionQualifiedRead GetState;     // in: process, component, out: state
         mtsFunctionQualifiedRead LoadLibrary;  // in: process, library name, out: result (bool)
-        mtsFunctionWrite PrintLog;
     } ServiceComponentManagement;
+
+    struct LogStruct {
+        mtsFunctionWrite EnableLogForwarding;
+        mtsFunctionWrite DisableLogForwarding;
+    } ServiceLogManagement;
 
     // Getters
     struct GetterStruct {
@@ -60,6 +64,7 @@ protected:
         mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
+        mtsFunctionQualifiedRead GetAbsoluteTimeDiffs;
     } ServiceGetters;
 
     // Event receivers
@@ -78,6 +83,9 @@ public:
     ~mtsManagerComponentServices() {}
 
     bool InitializeInterfaceInternalRequired(void);
+
+    bool IsConnected(void) const
+    { return (InternalInterfaceRequired->GetConnectedInterface() != 0); }
 
     /*! Add event handlers to the internal required interface */
     //@{
@@ -193,6 +201,15 @@ public:
     bool Load(const std::string & fileName) const;
     // Dynamically load the file (fileName) into the process processName
     bool Load(const std::string & processName, const std::string & fileName) const;
+
+    // Enable/disable log forwarding
+    void EnableLogForwarding(void);  // for all processes
+    void EnableLogForwarding(const std::vector<std::string> &processNames);
+    void DisableLogForwarding(void);  // for all processes
+    void DisableLogForwarding(const std::vector<std::string> &processNames);
+
+    // Get absolute time differences of specified processes with respect to GCM
+    std::vector<double> GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames) const;
 
     // Wait for component state change. This can be used to wait for a process to be created, or for a component
     // to be created (in those cases, any state is acceptable). A negative timeout is used to wait indefinitely.

@@ -140,7 +140,11 @@ public:
         const static std::string ComponentResume;
         const static std::string ComponentGetState;
         const static std::string LoadLibrary;  // dynamic loading
+        // Logging
         const static std::string PrintLog;
+        const static std::string SetLogForwarding;
+        const static std::string EnableLogForwarding;
+        const static std::string DisableLogForwarding;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
@@ -149,6 +153,10 @@ public:
         const static std::string GetListOfComponentClasses;
         const static std::string GetInterfaceProvidedDescription;
         const static std::string GetInterfaceRequiredDescription;
+        // Get absolute time for each process
+        const static std::string GetAbsoluteTimeInSeconds;
+        // Get absolute time differences between each process and GCM
+        const static std::string GetAbsoluteTimeDiffs;
         // Establishing connections
         const static std::string GetEndUserInterface;
         const static std::string AddObserverList;

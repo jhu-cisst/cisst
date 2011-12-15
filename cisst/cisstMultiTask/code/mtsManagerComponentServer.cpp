@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
@@ -126,6 +127,12 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::LoadLibrary);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_PrintLog,
                               this, mtsManagerComponentBase::CommandNames::PrintLog, MTS_COMMAND_NOT_QUEUED);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_EnableLogForwarding,
+                              this, mtsManagerComponentBase::CommandNames::EnableLogForwarding);
+    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_DisableLogForwarding,
+                              this, mtsManagerComponentBase::CommandNames::DisableLogForwarding);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetAbsoluteTimeDiffs,
+                                      this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs);
 
     provided->AddEventWrite(this->InterfaceGCMEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
@@ -184,8 +191,13 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->GetInterfaceRequiredDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
                           newFunctionSet->LoadLibrary);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::SetLogForwarding,
+                          newFunctionSet->SetLogForwarding);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds,
+                          newFunctionSet->GetAbsoluteTimeInSeconds);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
                           newFunctionSet->GetListOfComponentClasses);
+
     required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this, 
                                    mtsManagerComponentBase::EventNames::ChangeState);
 
@@ -594,12 +606,14 @@ void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessag
 {
     static osaTimeServer timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
 
+#if 0  // NOT USED
     // Get absolute timestamp
     double timestamp = log.Timestamp();
     // Convert absolute to relative timestamp
     struct osaAbsoluteTime s;
     s.FromSeconds(timestamp);
     timeServer.AbsoluteToRelative(s);
+#endif
 
     std::string now;
     osaGetDateTimeString(now, ':');
@@ -613,6 +627,77 @@ void mtsManagerComponentServer::InterfaceGCMCommands_PrintLog(const mtsLogMessag
 
     // Generate system-wide thread-safe logging event
     EventPrintLog(_log);
+}
+
+// Internal command
+void mtsManagerComponentServer::InterfaceGCMCommands_SetLogForwarding(const std::vector<std::string> & processNames, bool state)
+{
+    for (unsigned int i = 0; i < processNames.size(); i++) {
+        InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processNames[i], CMN_LOG_LEVEL_NONE);
+        if (functionSet)
+            functionSet->SetLogForwarding(state);
+        else
+            CMN_LOG_CLASS_RUN_ERROR << "SetLogForwarding: could not find functions for process " << processNames[i] << std::endl;
+    }
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_EnableLogForwarding(const std::vector<std::string> & processNames)
+{
+    InterfaceGCMCommands_SetLogForwarding(processNames, true);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_DisableLogForwarding(const std::vector<std::string> & processNames)
+{
+    InterfaceGCMCommands_SetLogForwarding(processNames, false);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> & processNames,
+                                                                          std::vector<double> & processTimes) const
+{
+    double sleepTime = 0.1;
+    unsigned int numOfTrials = 10;
+
+    vctDynamicVector<double> trialTimes(numOfTrials);
+
+    double time;
+    mtsExecutionResult result;
+
+    // Make sure return vector has correct size
+    processTimes.resize(processNames.size());
+
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string thisProcess = LCM->GetProcessName();
+
+    for (unsigned int i = 0; i < processNames.size(); i++) {
+
+        processTimes[i] = 0.0;
+        if (processNames[i] == thisProcess)
+            continue;
+
+        InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processNames[i], CMN_LOG_LEVEL_NONE);
+        if (!functionSet) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetAbsoluteTimeDiffs: could not find functions for process " << processNames[i] << std::endl;
+            continue;
+        }
+
+        trialTimes.Zeros();
+        for (unsigned int t = 0; t < numOfTrials; t++) {
+            double tic = LCM->GetTimeServer().GetAbsoluteTimeInSeconds();
+            result = functionSet->GetAbsoluteTimeInSeconds(time);
+            if (result.IsOK()) {
+                double roundTripTime =  LCM->GetTimeServer().GetAbsoluteTimeInSeconds() - tic;
+                trialTimes[i] = (tic + roundTripTime/2.0) - time;
+            }
+            else {
+                CMN_LOG_CLASS_RUN_ERROR << "GetAbsoluteTimeDiffs: could not execute command for process " << processNames[i]
+                                        << ", result = " << result << std::endl;
+                trialTimes.Zeros();
+                break;
+            }
+            osaSleep(sleepTime);
+        }
+        processTimes[i] = trialTimes.SumOfElements()/numOfTrials;
+    }
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,

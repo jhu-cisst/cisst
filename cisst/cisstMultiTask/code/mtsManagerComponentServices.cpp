@@ -52,6 +52,12 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.GetState);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
                                                ServiceComponentManagement.LoadLibrary);
+        // Log services
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::EnableLogForwarding,
+                                               ServiceLogManagement.EnableLogForwarding);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::DisableLogForwarding,
+                                               ServiceLogManagement.DisableLogForwarding);
+
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
                                                ServiceGetters.GetNamesOfProcesses);
@@ -67,6 +73,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetInterfaceProvidedDescription);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                                                ServiceGetters.GetInterfaceRequiredDescription);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs,
+                                               ServiceGetters.GetAbsoluteTimeDiffs);
 
         // Event receivers
         InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::AddComponent,
@@ -536,6 +544,33 @@ bool mtsManagerComponentServices::Load(const std::string & processName, const st
     bool result = false;
     ServiceComponentManagement.LoadLibrary(argIn, result);
     return result;
+}
+
+void mtsManagerComponentServices::EnableLogForwarding(void)
+{
+    EnableLogForwarding(GetNamesOfProcesses());
+}
+
+void mtsManagerComponentServices::EnableLogForwarding(const std::vector<std::string> &processNames)
+{
+    ServiceLogManagement.EnableLogForwarding(processNames);
+}
+
+void mtsManagerComponentServices::DisableLogForwarding(void)
+{
+    DisableLogForwarding(GetNamesOfProcesses());
+}
+ 
+void mtsManagerComponentServices::DisableLogForwarding(const std::vector<std::string> &processNames)
+{
+    ServiceLogManagement.DisableLogForwarding(processNames);
+}
+
+std::vector<double> mtsManagerComponentServices::GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames) const
+{
+    std::vector<double> processTimes(processNames.size());
+    ServiceGetters.GetAbsoluteTimeDiffs(processNames, processTimes);
+    return processTimes;
 }
 
 bool mtsManagerComponentServices::CheckAndWait(const std::vector<std::string> &list, const std::string &key, double &timeoutInSec,
