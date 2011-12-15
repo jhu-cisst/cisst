@@ -1701,14 +1701,14 @@ svlOverlayStaticPoly::~svlOverlayStaticPoly()
 void svlOverlayStaticPoly::SetPoints(const TypeRef points)
 {
     CS.Enter();
-        Poly = points;
+        Poly.ForceAssign(points);
     CS.Leave();
 }
 
 void svlOverlayStaticPoly::SetPoints(const TypeRef points, unsigned int start)
 {
     CS.Enter();
-        Poly = points;
+        Poly.ForceAssign(points);
         Start = start;
     CS.Leave();
 }
