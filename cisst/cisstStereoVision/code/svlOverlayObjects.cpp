@@ -1197,9 +1197,9 @@ void svlOverlayStaticText::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
         _rect.left   = static_cast<int>(Transform.Element(0, 0) * Rect.left +
                                         Transform.Element(0, 1) * Rect.top +
                                         Transform.Element(0, 2));
-        _rect.right  = static_cast<int>(Transform.Element(1, 0) * Rect.left +
-                                        Transform.Element(1, 1) * Rect.top +
-                                        Transform.Element(1, 2));
+        _rect.top  = static_cast<int>(Transform.Element(1, 0) * Rect.left +
+                                      Transform.Element(1, 1) * Rect.top +
+                                      Transform.Element(1, 2));
         _rect.right  = _rect.left + (Rect.right - Rect.left);
         _rect.bottom = _rect.top  + (Rect.bottom - Rect.top);
     }
