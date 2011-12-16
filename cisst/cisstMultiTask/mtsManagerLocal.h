@@ -68,6 +68,23 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
+// Helper macro (useful to connect interfaces in main.cpp)
+#define CONNECT_LOCAL(_clientComp, _reqInt, _serverComp, _prvInt)\
+    if (!mtsManagerLocal::GetInstance()->Connect(_clientComp, _reqInt, _serverComp, _prvInt)) {\
+        CMN_LOG_INIT_ERROR << "Failed to connect: "\
+                           << _clientComp << ":" << _reqInt << " - "\
+                           << _serverComp << ":" << _prvInt << std::endl;\
+        exit(1);\
+    }
+
+#define CONNECT_REMOTE(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)\
+    if (!mtsManagerLocal::GetInstance()->Connect(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)) {\
+        CMN_LOG_INIT_ERROR << "Failed to connect: "\
+                           << _clientProc << ":" << _clientComp << ":" << _reqInt << " - "\
+                           << _serverProc << ":" << _serverComp << ":" << _prvInt << std::endl;\
+        exit(1);\
+    }
+
 class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {
     // for unit-testing
