@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 
-void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double timeoutInSec)
+void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double CMN_UNUSED(timeoutInSec))
 {
     WaitingForResponse = true;
     pipe.Write(s, s.length());
