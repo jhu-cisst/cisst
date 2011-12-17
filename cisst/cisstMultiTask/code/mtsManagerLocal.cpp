@@ -274,6 +274,8 @@ void mtsManagerLocal::InitializeLocal(void)
 
 void mtsManagerLocal::Cleanup(void)
 {
+    if (LogThreadFinishWaiting) return;
+
     LogThreadFinishWaiting = true;
     LogTheadFinished.Wait();
 
@@ -395,28 +397,28 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
     int count = 0;
 
     while (!LogThreadFinishWaiting) {
-        // MJ: Note that this sleep introduces a bit of delay in forwarding 
-        // log messages.
-        osaSleep(1 * cmn_ms);
-
         if (LogQueue.size() == 0) {
+            osaSleep(1 * cmn_ms);
             continue;
         }
 
-        // Don't forward queued logs until everything is ready.
-        if (!MCCReadyForLogForwarding()) continue;
+        // Wait for MCC to be ready (activated and connected) before starting log fowarding
+        if (!MCCReadyForLogForwarding()) {
+            osaSleep(100 * cmn_ms);
+            continue;
+        }
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin(); it != LogQueue.end(); ) {
+        for (LogQueueType::iterator it = LogQueue.begin(); 
+             it != LogQueue.end(); 
+             // MJ: after 30 log messages forwarded, give other threads a chance to queue
+             // logs by releasing the lock (30 is arbitrary)
+             count++ < 30) 
+        {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
                 LogQueue.pop_front(); // FIFO
-            }
-
-            // release the lock not to block other threads too long
-            if (++count == 30) { // MJ TEMP: 30 is arbitrary for now
-                break;
             }
         }
         LogMutex.Unlock();
