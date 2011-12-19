@@ -647,12 +647,14 @@ void mtsManagerComponentServer::InterfaceGCMCommands_SetLogForwarding(const std:
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const
 {
+    states.resize(processNames.size());
+
     bool state;
     for (unsigned int i = 0; i < processNames.size(); i++) {
         InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processNames[i], CMN_LOG_LEVEL_NONE);
         if (functionSet) {
             functionSet->GetLogForwardingState(state);
-            states[i] = state;
+            states[i] = (state ? 1 : 0);
         }
         else
             CMN_LOG_CLASS_RUN_ERROR << "GetLogForwardingStates: could not find functions for process " << processNames[i] << std::endl;
