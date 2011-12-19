@@ -220,6 +220,8 @@ GCMUITask::GCMUITask(const std::string & taskName, const double period,
                                        mtsManagerComponentBase::EventNames::PrintLog);
     }
 
+    EnableDynamicComponentManagement();
+
     // File log
     SystemLogFile.open("cisstSystemLog.txt");
 }
@@ -690,29 +692,49 @@ void GCMUITask::CheckComponentInspectorInput(void)
     }
 }
 
+// Handle click events from Logger tab
 void GCMUITask::CheckLoggerInput(void)
 {
-    // Process UI in Logger clicked
     if (UI.BrowserProcessLogClicked) {
         UI.BrowserProcessLogClicked = false;
+        // Get checked state
+        int checked = UI.BrowserProcessLog->checked(UI.BrowserProcessLog->value());
+        const std::string processName = UI.BrowserProcessLog->text(UI.BrowserProcessLog->value());
+        stdStringVec processNames;
+        processNames.push_back(processName);
+        if (checked == 1) {
+            ManagerComponentServices->EnableLogForwarding(processNames);
+            std::cout << "Enabling system-wide logging for process \"" << processName << "\"" << std::endl;
+        } else {
+            ManagerComponentServices->DisableLogForwarding(processNames);
+            //CMN_LOG_CLASS_RUN_VERBOSE << "Disabling system-wide logging for process \"" << processName << "\"" << std::endl;
+            std::cout << "Disabling system-wide logging for process \"" << processName << "\"" << std::endl;
+        }
+        return;
     }
 
     if (UI.ButtonLogForwardEnableAllClicked) {
         UI.BrowserProcessLog->check_all();
         UI.ButtonLogForwardEnableAllClicked = false;
+        ManagerComponentServices->EnableLogForwarding();
+        //CMN_LOG_CLASS_RUN_VERBOSE << "Enabling system-wide logging for all processes" << std::endl;
+        std::cout << "Enabling system-wide logging for all processes" << std::endl;
+        return;
     }
 
     if (UI.ButtonLogForwardDisableAllClicked) {
         UI.BrowserProcessLog->check_none();
         UI.ButtonLogForwardDisableAllClicked = false;
+        ManagerComponentServices->DisableLogForwarding();
+        //CMN_LOG_CLASS_RUN_VERBOSE << "Disabling system-wide logging for all processes" << std::endl;
+        std::cout << "Disabling system-wide logging for all processes" << std::endl;
+        return;
     }
 
     if (UI.ButtonLogForwardSetLoDClicked) {
         UI.ButtonLogForwardSetLoDClicked = false;
+        // TODO: implement this
     }
-
-    // MJ TODO: Extract (process_name, log forwarding flag, lod) information
-    // and send this to MCS
 }
 
 void GCMUITask::UpdateUI(void)

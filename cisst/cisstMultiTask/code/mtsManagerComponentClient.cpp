@@ -574,7 +574,7 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.EnableLogForwarding);
     required->AddFunction(mtsManagerComponentBase::CommandNames::DisableLogForwarding,
                           InterfaceLCMFunction.DisableLogForwarding);
-    required->AddFunction(mtsManagerComponentBase::CommandNames::GetLogForwardingState,
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetLogForwardingStates,
                           InterfaceLCMFunction.GetLogForwardingStates);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs,
                           InterfaceLCMFunction.GetAbsoluteTimeDiffs);
