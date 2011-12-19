@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0
 header_name {.h} 
 code_name {.cxx}
 class GlobalComponentManagerUI {open
@@ -357,60 +357,60 @@ class GlobalComponentManagerUI {open
     code {SpinnerGlobalOffsetControlClicked = false;} {}
     code {SpinnerSignalOffsetControlClicked = false;} {}
   }
-  decl {bool BrowserComponentClicked;} {public local
+  decl {bool BrowserComponentClicked;} {public
   }
-  decl {bool BrowserProcessClicked;} {public local
+  decl {bool BrowserProcessClicked;} {public
   }
-  decl {bool BrowserProcessLogClicked;} {public local
+  decl {bool BrowserProcessLogClicked;} {public
   }
-  decl {bool BrowserVisualizeCommandNameClicked;} {public local
+  decl {bool BrowserVisualizeCommandNameClicked;} {public
   }
-  decl {bool BrowserSelectedSignalsClicked;} {public local
+  decl {bool BrowserSelectedSignalsClicked;} {public
   }
-  decl {bool ButtonAutoRefreshClicked;} {public local
+  decl {bool ButtonAutoRefreshClicked;} {public
   }
-  decl {bool ButtonRefreshClicked;} {public local
+  decl {bool ButtonRefreshClicked;} {public
   }
-  decl {bool ButtonComponentViewerClicked;} {public local
+  decl {bool ButtonComponentViewerClicked;} {public
   }
-  decl {bool ButtonRemoveClicked;} {public local
+  decl {bool ButtonRemoveClicked;} {public
   }
-  decl {bool ButtonRemoveAllClicked;} {public local
+  decl {bool ButtonRemoveAllClicked;} {public
   }
-  decl {bool ButtonAutoScaleClicked;} {public local
+  decl {bool ButtonAutoScaleClicked;} {public
   }
-  decl {bool ButtonHideClicked;} {public local
+  decl {bool ButtonHideClicked;} {public
   }
-  decl {bool ButtonYScaleUpClicked;} {public local
+  decl {bool ButtonYScaleUpClicked;} {public
   }
-  decl {bool ButtonYScaleDownClicked;} {public local
+  decl {bool ButtonYScaleDownClicked;} {public
   }
-  decl {bool ButtonXScaleUpClicked;} {public local
+  decl {bool ButtonXScaleUpClicked;} {public
   }
-  decl {bool ButtonXScaleDownClicked;} {public local
+  decl {bool ButtonXScaleDownClicked;} {public
   }
-  decl {bool ButtonSignalOffsetIncreaseClicked;} {public local
+  decl {bool ButtonSignalOffsetIncreaseClicked;} {public
   }
-  decl {bool ButtonSignalOffsetDecreaseClicked;} {public local
+  decl {bool ButtonSignalOffsetDecreaseClicked;} {public
   }
-  decl {bool ButtonGlobalOffsetIncreaseClicked;} {public local
+  decl {bool ButtonGlobalOffsetIncreaseClicked;} {public
   }
-  decl {bool ButtonGlobalOffsetDecreaseClicked;} {public local
+  decl {bool ButtonGlobalOffsetDecreaseClicked;} {public
   }
-  decl {bool ButtonHoldClicked;} {public local
+  decl {bool ButtonHoldClicked;} {public
   }
-  decl {bool ButtonCaptureClicked;} {public local
+  decl {bool ButtonCaptureClicked;} {public
   }
-  decl {bool ButtonLogForwardEnableAllClicked;} {public local
+  decl {bool ButtonLogForwardEnableAllClicked;} {public
   }
-  decl {bool ButtonLogForwardDisableAllClicked;} {public local
+  decl {bool ButtonLogForwardDisableAllClicked;} {public
   }
-  decl {bool ButtonLogForwardSetLoDClicked;} {public local
+  decl {bool ButtonLogForwardSetLoDClicked;} {public
   }
-  decl {bool SpinnerGlobalOffsetControlClicked;} {public local
+  decl {bool SpinnerGlobalOffsetControlClicked;} {public
   }
-  decl {bool SpinnerSignalOffsetControlClicked;} {public local
+  decl {bool SpinnerSignalOffsetControlClicked;} {public
   }
-  decl {bool Opened;} {public local
+  decl {bool Opened;} {public
   }
 } 
