@@ -711,7 +711,7 @@ void GCMUITask::CheckLoggerInput(void)
         UI.ButtonLogForwardSetLoDClicked = false;
     }
 
-    // smmy: Extract (process_name, log forwarding, lod) information
+    // MJ TODO: Extract (process_name, log forwarding flag, lod) information
     // and send this to MCS
 }
 
@@ -733,14 +733,23 @@ void GCMUITask::UpdateUI(void)
 
     UI.BrowserProcessLog->clear();
 
-    // Periodically fetch process list from GCM
+    // Periodically fetch active process list from GCM
     StringVector names;
     GlobalComponentManager.GetNamesOfProcesses(names);
+
+    // Populate process list UI of the Component Viewer tab
     for (StringVector::size_type i = 0; i < names.size(); ++i) {
         AddLineToBrowser(UI.BrowserProcesses, names[i].c_str());
-        AddLineToBrowser(UI.BrowserProcessLog, names[i].c_str());
     }
 
+    // Populate process list UI of the Logger tab
+    stdCharVec logForwardStates;
+    ManagerComponentServices->GetLogForwardingStates(names, logForwardStates);
+
+    for (stdCharVec::size_type i = 0; i < logForwardStates.size(); ++i) {
+        AddLineToBrowser(UI.BrowserProcessLog, names[i].c_str(), logForwardStates[i]);
+    }
+   
     LastIndexClicked.Reset();
 }
 
@@ -761,9 +770,9 @@ void GCMUITask::AddLineToBrowser(Fl_Browser * browser, const char * line, const 
     browser->add(ss.str().c_str());
 }
 
-void GCMUITask::AddLineToBrowser(Fl_Check_Browser * browser, const char * line)
+void GCMUITask::AddLineToBrowser(Fl_Check_Browser * browser, const char * line, bool checked)
 {
-    browser->add(line);
+    browser->add(line, (checked? 1 : 0));
 }
 
 void GCMUITask::AddLineToDescription(Fl_Output * output, const char * msg)

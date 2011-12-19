@@ -77,7 +77,8 @@ protected:
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
         mtsFunctionQualifiedRead LoadLibrary;
         mtsFunctionWrite SetLogForwarding;
-        mtsFunctionRead  GetAbsoluteTimeInSeconds;
+        mtsFunctionRead GetLogForwardingState;
+        mtsFunctionRead GetAbsoluteTimeInSeconds;
         mtsFunctionRead GetListOfComponentClasses;
     } InterfaceGCMFunctionType;
 
@@ -108,6 +109,7 @@ protected:
     void InterfaceGCMCommands_SetLogForwarding(const std::vector<std::string> & processNames, bool state);  // internal
     void InterfaceGCMCommands_EnableLogForwarding(const std::vector<std::string> & processNames);
     void InterfaceGCMCommands_DisableLogForwarding(const std::vector<std::string> & processNames);
+    void InterfaceGCMCommands_GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const;
     void InterfaceGCMCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> & processNames,
                                                    std::vector<double> & processTimes) const;
     void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName, 

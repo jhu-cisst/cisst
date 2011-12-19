@@ -58,7 +58,8 @@ http://www.cisst.org/cisst/license.txt.
 class GCMUITask: public mtsTaskPeriodic {
 
 public:
-    typedef std::vector<std::string> StringVector;
+    //typedef std::vector<std::string> StringVector;
+    typedef stdStringVec StringVector;
 
     //-------------------------------------------------------------------------
     //  Component Inspector
@@ -335,7 +336,7 @@ public:
                           const int fg = FLTK_COLOR_BLACK, 
                           const int bg = FLTK_COLOR_WHITE, 
                           const char style = '0');
-    void AddLineToBrowser(Fl_Check_Browser * checkBrowser, const char * line);
+    void AddLineToBrowser(Fl_Check_Browser * checkBrowser, const char * line, bool checked = false);
     void AddLineToDescription(Fl_Output * output, const char * msg);
 
     SignalSelected * GetCurrentSignal(void) const;

@@ -319,13 +319,20 @@ void mtsManagerLocal::SetupSystemLogger(void)
     }
 }
 
-bool mtsManagerLocal::IsLogForwardingEnabled(void) const {
+bool mtsManagerLocal::IsLogForwardingEnabled(void) {
     return LogForwardEnabled;
 }
 
-void mtsManagerLocal::SetLogForwarding(bool activate) 
-{
+void mtsManagerLocal::SetLogForwarding(bool activate) {
     LogForwardEnabled = activate;
+}
+
+void mtsManagerLocal::GetLogForwardingState(bool & state) {
+    state = IsLogForwardingEnabled();
+}
+
+bool mtsManagerLocal::GetLogForwardingState(void) {
+    return IsLogForwardingEnabled();
 }
 
 bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 

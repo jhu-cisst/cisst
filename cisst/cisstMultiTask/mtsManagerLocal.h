@@ -202,8 +202,12 @@ public:
     /*! Enable or disable system-wide thread-safe logging */
     static void SetLogForwarding(bool activate);
 
+    /*! Get whether system-wide logging is enabled or not */
+    static void GetLogForwardingState(bool & state);
+    static bool GetLogForwardingState(void);
+
     /*! Is system-wide thread-safe logging enabled? */
-    bool IsLogForwardingEnabled(void) const;
+    static bool IsLogForwardingEnabled(void);
 
 protected:    
     /*! Protected constructor (singleton) */

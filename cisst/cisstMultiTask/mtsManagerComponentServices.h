@@ -53,6 +53,7 @@ protected:
     struct LogStruct {
         mtsFunctionWrite EnableLogForwarding;
         mtsFunctionWrite DisableLogForwarding;
+        mtsFunctionQualifiedRead GetLogForwardingStates;
     } ServiceLogManagement;
 
     // Getters
@@ -207,6 +208,8 @@ public:
     void EnableLogForwarding(const std::vector<std::string> &processNames);
     void DisableLogForwarding(void);  // for all processes
     void DisableLogForwarding(const std::vector<std::string> &processNames);
+    void GetLogForwardingStates(stdCharVec & states) const;  // for all processes
+    void GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const;
 
     // Get absolute time differences of specified processes with respect to GCM
     std::vector<double> GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames) const;
