@@ -168,10 +168,9 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 		void set_grid_color(float r, float g, float b);
 
 		/**
-		 *	clears all traces if keepPreviousData is false.
-         *  If keepPreviousData is true, it preserves current trace data up to maxpoints
+		 *	clears all traces
 		 */
-		void clear(const bool keepPreviousData = false);
+		void clear(void);
 		
 		/**
 		*	this function call clears trace number t
@@ -472,38 +471,12 @@ inline void MULTIPLOT_BASE::set_linewidth(unsigned int trace, float width)
 	tsettings[trace].line_width=width;
 }
 
-inline void MULTIPLOT_BASE::clear(const bool keepPreviousData)
+inline void MULTIPLOT_BASE::clear(void)
 {
-    //if (!keepPreviousData) {
-        for(unsigned int a=0;a<traces.size();a++)
-        {
-            traces[a].clear();
-            tsettings[a].pos=0;
-        }
-        /*
-    } else {
-        std::vector<PLOT_POINT> temp;
-        for(unsigned int i = 0; i < traces.size(); ++i) {
-            // Shift all data towards vector's end()
-            if (max_points > traces[i].size()) {
-                temp.clear();
-                temp.insert(temp.begin(), traces[i].begin(), traces[i].begin() + traces[i].size());
-                traces[i].clear();
-                //traces[i].insert(traces[i].begin() + (max_points - traces[i].size()), temp.begin(), temp.end());
-                traces[i].insert(traces[i].begin(), temp.begin(), temp.end());
-                tsettings[i].pos = max_points - traces[i].size();
-            } else if (max_points == traces[i].size()) {
-                // NOP
-            } else { // max_points < traces[i].size()
-                temp.clear();
-                temp.insert(temp.begin(), traces[i].end() - traces[i].size(), traces[i].end());
-                traces[i].clear();
-                traces[i].insert(traces[i].begin(), temp.begin(), temp.end());
-                tsettings[i].pos = traces[i].size();
-            }
-        }
+    for(unsigned int a=0;a<traces.size();a++) {
+        traces[a].clear();
+        tsettings[a].pos=0;
     }
-    */
 }
 
 inline void MULTIPLOT_BASE::remove(unsigned int trace)
