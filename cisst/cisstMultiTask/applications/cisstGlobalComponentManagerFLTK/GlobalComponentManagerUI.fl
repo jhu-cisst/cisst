@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0
+version 1.0109 
 header_name {.h} 
 code_name {.cxx}
 class GlobalComponentManagerUI {open
@@ -14,8 +14,8 @@ class GlobalComponentManagerUI {open
         xywh {10 85 670 540} box GTK_UP_BOX color 46 labelsize 12 align 8
       } {
         Fl_Group {} {
-          label {Component Inspector} open selected
-          xywh {15 114 665 506} labelfont 1 labelsize 13
+          label {Component Inspector} open
+          xywh {15 114 665 506} labelfont 1 labelsize 13 hide
         } {
           Fl_Group {} {
             label {Provided Interface} open
@@ -81,11 +81,11 @@ class GlobalComponentManagerUI {open
           }
         }
         Fl_Group Logger {
-          label Logger open
-          xywh {15 110 665 510} labelfont 1 hide
+          label Logger open selected
+          xywh {15 110 665 510} labelfont 1
         } {
           Fl_Text_Display Log {
-            xywh {15 285 660 335} labelfont 13 labelsize 11 textfont 4 textsize 9
+            xywh {15 240 665 380} labelfont 13 labelsize 11 textfont 4 textsize 9
           }
           Fl_Check_Browser BrowserProcessLog {
             label {Process:                            Log Forwarding:}
@@ -103,16 +103,6 @@ class GlobalComponentManagerUI {open
             callback {ButtonLogForwardDisableAllClicked = true;}
             xywh {249 131 70 104} box GTK_UP_BOX labelsize 12
             code0 {ButtonLogForwardDisableAllClicked = false;}
-          }
-          Fl_Input_Choice InputChoiceLoDSetting {
-            label {LoD Setting:} open
-            xywh {15 255 155 25} box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 when 6 textfont 4 textsize 12
-          } {}
-          Fl_Button ButtonLogForwardSetLoD {
-            label {Set LoD}
-            callback {ButtonLogForwardSetLoDClicked = true;}
-            xywh {175 255 145 25} box GTK_UP_BOX labelsize 12
-            code0 {ButtonLogForwardSetLoDClicked = false;}
           }
         }
         Fl_Group DataVisualizer {
@@ -288,13 +278,13 @@ class GlobalComponentManagerUI {open
           } {
             Fl_Spinner SpinnerSignalOffsetControl {
               callback {SpinnerSignalOffsetControlClicked = true;}
-              xywh {255 595 80 25} type Float box GTK_THIN_UP_BOX labeltype NO_LABEL labelsize 12 textsize 12 deactivate
+              xywh {255 595 80 25} type Float box GTK_THIN_UP_BOX labeltype NO_LABEL labelsize 12 value 1 textsize 12 deactivate
               code0 {SpinnerSignalOffsetControlClicked = false;}
             }
           }
           Fl_Spinner SpinnerGlobalOffsetControl {
             callback {SpinnerGlobalOffsetControlClicked = true;}
-            xywh {595 360 75 20} type Float box GTK_THIN_UP_BOX labeltype NO_LABEL labelsize 12 textsize 12 deactivate
+            xywh {595 360 75 20} type Float box GTK_THIN_UP_BOX labeltype NO_LABEL labelsize 12 value 1 textsize 12 deactivate
             code0 {SpinnerGlobalOffsetControlClicked = false;}
           }
         }

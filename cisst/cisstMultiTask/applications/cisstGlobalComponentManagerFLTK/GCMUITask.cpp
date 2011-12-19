@@ -327,16 +327,6 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
         buf = new Fl_Text_Buffer();
         UI.Log->buffer(buf);
         buf->text("");
-
-        // Populate LoD setting UI
-        UI.InputChoiceLoDSetting->add("INIT_ERRROR");
-        UI.InputChoiceLoDSetting->add("INIT_WARNING");
-        UI.InputChoiceLoDSetting->add("INIT_VERBOSE");
-        UI.InputChoiceLoDSetting->add("INIT_DEBUG");
-        UI.InputChoiceLoDSetting->add("RUN_ERROR");
-        UI.InputChoiceLoDSetting->add("RUN_WARNING");
-        UI.InputChoiceLoDSetting->add("RUN_VERBOSE");
-        UI.InputChoiceLoDSetting->add("RUN_DEBUG");
     }
 }
 
