@@ -31,21 +31,22 @@ class QToolBox;
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsQtWidgetInterfaceRequired: public QWidget
+class CISST_EXPORT mtsQtWidgetInterfaceRequired: public QWidget, public cmnGenericObject
 {
     Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
     mtsQtWidgetInterfaceRequired(mtsInterfaceProvided * interface,
                                  mtsInterfaceRequired * executionInterface = 0);
 
  private:
-    // mtsInterfaceProvided * Interface;
     mtsInterfaceRequired * ExecutionInterface;
     QToolBox * FunctionsWidget;
 
     void CreateWidgets(mtsInterfaceProvided & interface, mtsInterfaceRequired & executionInterface);
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetInterfaceRequired);
 
 #endif // _mtsQtWidgetInterfaceRequired_h
