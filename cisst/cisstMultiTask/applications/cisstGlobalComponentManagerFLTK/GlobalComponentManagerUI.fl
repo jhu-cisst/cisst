@@ -343,7 +343,6 @@ class GlobalComponentManagerUI {open
     code {ButtonCaptureClicked = false;} {}
     code {ButtonLogForwardEnableAllClicked = false;} {}
     code {ButtonLogForwardDisableAllClicked = false;} {}
-    code {ButtonLogForwardSetLoDClicked = false;} {}
     code {SpinnerGlobalOffsetControlClicked = false;} {}
     code {SpinnerSignalOffsetControlClicked = false;} {}
   }
@@ -394,8 +393,6 @@ class GlobalComponentManagerUI {open
   decl {bool ButtonLogForwardEnableAllClicked;} {public
   }
   decl {bool ButtonLogForwardDisableAllClicked;} {public
-  }
-  decl {bool ButtonLogForwardSetLoDClicked;} {public
   }
   decl {bool SpinnerGlobalOffsetControlClicked;} {public
   }
