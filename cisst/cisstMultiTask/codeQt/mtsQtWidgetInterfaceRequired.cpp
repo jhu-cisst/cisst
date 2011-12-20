@@ -77,6 +77,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionVoid(functionVoid);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for void function \"" << stdName << "\"" << std::endl; 
     }
 
     // void return functions
@@ -90,6 +91,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionVoidReturn(functionVoidReturn);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for void return function \"" << stdName << "\"" << std::endl; 
     }
 
     // write functions
@@ -103,6 +105,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionWrite(functionWrite);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for write function \"" << stdName << "\"" << std::endl; 
     }
 
     // write return functions
@@ -116,6 +119,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionWriteReturn(functionWriteReturn);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for write return function \"" << stdName << "\"" << std::endl; 
     }
 
     // read functions
@@ -129,6 +133,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionRead(functionRead);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for read function \"" << stdName << "\"" << std::endl;
     }
 
     // qualified read functions
@@ -142,6 +147,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionQualifiedRead(functionQualifiedRead);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for qualified read function \"" << stdName << "\"" << std::endl;
     }
 
     // void events
@@ -150,9 +156,12 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
     end = names.end();
     for (name = names.begin(); name != end; name++) {
         stdName= *name;
-        eventVoidWidget = new mtsQtWidgetEventVoid;
-        executionInterface.AddEventHandlerVoid(&mtsQtWidgetEventVoid::EventHandler, eventVoidWidget, stdName);
-        FunctionsWidget->addItem(eventVoidWidget, stdName.c_str());
+        if (stdName != "BlockingCommandExecuted") {
+            eventVoidWidget = new mtsQtWidgetEventVoid;
+            executionInterface.AddEventHandlerVoid(&mtsQtWidgetEventVoid::EventHandler, eventVoidWidget, stdName);
+            FunctionsWidget->addItem(eventVoidWidget, stdName.c_str());
+            CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for event void \"" << stdName << "\"" << std::endl;
+        }
     }
 
     // write events
@@ -162,11 +171,14 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
     end = names.end();
     for (name = names.begin(); name != end; name++) {
         stdName= *name;
-        eventWriteWidget = new mtsQtWidgetEventWrite;
-        eventCommand = executionInterface.AddEventHandlerWriteGeneric(&mtsQtWidgetEventWrite::EventHandler, eventWriteWidget, stdName);
-        eventWriteWidget->SetCommand(eventCommand);
-        FunctionsWidget->addItem(eventWriteWidget, stdName.c_str());
-        eventWidgets.push_back(eventWriteWidget);
+        if (stdName != "BlockingCommandReturnExecuted") {
+            eventWriteWidget = new mtsQtWidgetEventWrite;
+            eventCommand = executionInterface.AddEventHandlerWriteGeneric(&mtsQtWidgetEventWrite::EventHandler, eventWriteWidget, stdName);
+            eventWriteWidget->SetCommand(eventCommand);
+            FunctionsWidget->addItem(eventWriteWidget, stdName.c_str());
+            eventWidgets.push_back(eventWriteWidget);
+            CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for event write \"" << stdName << "\"" << std::endl;
+        }
     }
 
     // connect all
