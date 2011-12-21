@@ -348,7 +348,7 @@ void GCMUITask::Run(void)
 
     static int count = 0;
     if (++count == 20) { // 1 sec
-        // TODO: Replace autorefresh/refresh buttons with callback mechanism
+        // TODO: Replace autorefresh/refresh buttons with callback/event mechanism
         FLTK_CRITICAL_SECTION {
             if (UI.ButtonAutoRefresh->value() != 0) {
                 UpdateUI();
@@ -361,7 +361,7 @@ void GCMUITask::Run(void)
     FLTK_CRITICAL_SECTION {
         // Check user's input from the 'Component Inspector' tab
         CheckComponentInspectorInput();
-        // Check user's input from the 'Component Inspector' tab
+        // Check user's input from the 'Logger' tab
         CheckLoggerInput();
         // Check user's input from the 'Data Visualizer' tab
         CheckDataVisualizerInput();
@@ -687,18 +687,21 @@ void GCMUITask::CheckLoggerInput(void)
     if (UI.BrowserProcessLogClicked) {
         UI.BrowserProcessLogClicked = false;
         // Get checked state
-        int checked = UI.BrowserProcessLog->checked(UI.BrowserProcessLog->value());
-        const std::string processName = UI.BrowserProcessLog->text(UI.BrowserProcessLog->value());
-        stdStringVec processNames;
-        processNames.push_back(processName);
-        if (checked == 1) {
-            ManagerComponentServices->EnableLogForwarding(processNames);
-            CMN_LOG_CLASS_RUN_VERBOSE << "Enabling system-wide logging for process \"" << processName << "\"" << std::endl;
-        } else {
-            ManagerComponentServices->DisableLogForwarding(processNames);
-            CMN_LOG_CLASS_RUN_VERBOSE << "Disabling system-wide logging for process \"" << processName << "\"" << std::endl;
+        const int index = UI.BrowserProcessLog->value();
+        if (index != 0) {
+            int checked = UI.BrowserProcessLog->checked(index);
+            const std::string processName = UI.BrowserProcessLog->text(index);
+            stdStringVec processNames;
+            processNames.push_back(processName);
+            if (checked == 1) {
+                ManagerComponentServices->EnableLogForwarding(processNames);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Enabling system-wide logging for process \"" << processName << "\"" << std::endl;
+            } else {
+                ManagerComponentServices->DisableLogForwarding(processNames);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Disabling system-wide logging for process \"" << processName << "\"" << std::endl;
+            }
+            return;
         }
-        return;
     }
 
     if (UI.ButtonLogForwardEnableAllClicked) {
