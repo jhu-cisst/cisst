@@ -528,13 +528,18 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const Cl
     LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandReadSerialized: received " << serializedArgument.size() << " bytes");
 #endif
 
-    // Deserialize the argument returned
-    mtsProxySerializer * deserializer = PerCommandSerializerMap[commandID];
-    if (!deserializer) {
-        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: cannot find per-command serializer");
-        return false;
+    // Deserialize only if the command succeeded
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
+        // Deserialize the argument returned
+        mtsProxySerializer * deserializer = PerCommandSerializerMap[commandID];
+        if (!deserializer) {
+            LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: cannot find per-command serializer");
+            return false;
+        }
+        deserializer->DeSerialize(serializedArgument, argument);
     }
-    deserializer->DeSerialize(serializedArgument, argument);
+    else
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: command execution failed, " << executionResult);
 
     return true;
 }
