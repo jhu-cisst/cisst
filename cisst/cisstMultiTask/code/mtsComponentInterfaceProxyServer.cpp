@@ -756,7 +756,6 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
     }
 #else
     while (IsActiveProxy()) {
-        // Check connections at every 1 second
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         try {
             if (ComponentInterfaceProxyServer) {

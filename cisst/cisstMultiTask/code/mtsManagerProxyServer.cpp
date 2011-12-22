@@ -1480,8 +1480,7 @@ void mtsManagerProxyServer::ManagerServerI::Run()
 #ifdef _COMMUNICATION_TEST_
     int count = 0;
 
-    while (IsActiveProxy())
-    {
+    while (IsActiveProxy()) {
         osaSleep(1 * cmn_s);
         std::cout << "\tServer [" << ManagerProxyServer->GetProxyName() << "] running (" << ++count << ")" << std::endl;
 
@@ -1498,7 +1497,6 @@ void mtsManagerProxyServer::ManagerServerI::Run()
             ManagerProxyServer->CheckConnectConfirmTimeout();
         }
 
-        // Check connections at every 1 second
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         try {
             ManagerProxyServer->MonitorConnections();

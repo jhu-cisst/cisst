@@ -642,6 +642,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
     }
 #else
     while (IsActiveProxy()) {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
