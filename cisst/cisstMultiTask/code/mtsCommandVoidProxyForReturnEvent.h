@@ -56,7 +56,6 @@ public:
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
-        mtsExecutionResult executionResult;
         // figure out which function was blocking
         mtsFunctionReturnProxyBase * lastFunction = this->InterfaceRequired->GetLastFunction();
         // get address at which result should be sent
@@ -66,10 +65,16 @@ public:
         InterfaceRequired->ResetLastFunction();
 
         CMN_ASSERT(!NetworkProxyServer);
+        mtsExecutionResult executionResult;
         // Event void execution: server (event generator) -> client (event handler)
         std::string serializedResult;
         Serializer.Serialize(*result, serializedResult);
-        if (!NetworkProxyClient->SendExecuteEventReturnSerialized(CommandID, resultAddress, serializedResult)) {
+        if (NetworkProxyClient->IsActiveProxy()) {
+            if (!NetworkProxyClient->SendExecuteEventReturnSerialized(CommandID, resultAddress, serializedResult)) {
+                NetworkProxyClient->StopProxy();
+                return mtsExecutionResult::NETWORK_ERROR;
+            }
+        } else {
             return mtsExecutionResult::NETWORK_ERROR;
         }
         return executionResult;

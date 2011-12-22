@@ -88,10 +88,12 @@ public:
         }
         mtsExecutionResult executionResult;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandWriteReturnSerialized(ClientID, CommandID,
-                                                                             executionResult,
-                                                                             argument,
-                                                                             result)) {
+            if (NetworkProxyServer->IsActiveProxy()) {
+                if (!NetworkProxyServer->SendExecuteCommandWriteReturnSerialized(ClientID, CommandID, executionResult, argument, result)) {
+                    NetworkProxyServer->StopProxy();
+                    return mtsExecutionResult::NETWORK_ERROR;
+                }
+            } else {
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }

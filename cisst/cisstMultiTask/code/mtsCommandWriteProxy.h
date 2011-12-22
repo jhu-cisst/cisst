@@ -87,15 +87,29 @@ public:
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
+
         mtsExecutionResult result;
+        // Command write execution: client (request) -> server (execution)
         if (NetworkProxyServer) {
-            // Command write execution: client (request) -> server (execution)
-            if (!NetworkProxyServer->SendExecuteCommandWriteSerialized(ClientID, CommandID, blocking, result, argument)) {
+            if (NetworkProxyServer->IsActiveProxy()) {
+                if (!NetworkProxyServer->SendExecuteCommandWriteSerialized(ClientID, CommandID, blocking, result, argument)) {
+                    NetworkProxyServer->StopProxy();
+                    return mtsExecutionResult::NETWORK_ERROR;
+                }
+            } else {
+                // inactive proxy cannot send message
                 return mtsExecutionResult::NETWORK_ERROR;
             }
-        } else {
-            // Event write execution: server (event generator) -> client (event handler)
-            if (!NetworkProxyClient->SendExecuteEventWriteSerialized(CommandID, argument)) {
+        } 
+        // Event write execution: server (event generator) -> client (event handler)
+        else {
+            if (NetworkProxyClient->IsActiveProxy()) {
+                if (!NetworkProxyClient->SendExecuteEventWriteSerialized(CommandID, argument)) {
+                    NetworkProxyClient->StopProxy();
+                    return mtsExecutionResult::NETWORK_ERROR;
+                }
+            } else {
+                // inactive proxy cannot send message
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }

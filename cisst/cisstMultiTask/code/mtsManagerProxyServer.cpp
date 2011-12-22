@@ -1492,8 +1492,6 @@ void mtsManagerProxyServer::ManagerServerI::Run()
     }
 #else
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::CheckPeriodForManagerConnections);
-
         // If a pending connection fails to be confirmed by LCM, it should be
         // cleaned up
         if (ManagerProxyServer) {
@@ -1507,6 +1505,7 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         } catch (const Ice::Exception & ex) {
             LogError(mtsManagerProxyServer::ManagerServerI, "Process (LCM) disconnection detected: " << ex.what());
         }
+        osaSleep(mtsProxyConfig::CheckPeriodForManagerConnections);
     }
 #endif
 }
