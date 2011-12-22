@@ -209,6 +209,9 @@ public:
     /*! Is system-wide thread-safe logging enabled? */
     static bool IsLogForwardingEnabled(void);
 
+    /*! Check if further logs are allowed */
+    static bool IsLogAllowed(void);
+
 protected:    
     /*! Protected constructor (singleton) */
     mtsManagerLocal(void);
@@ -457,10 +460,10 @@ public:
     //  Getters and Utilities
     //-------------------------------------------------------------------------
     /*! Default name of local component manager */
-    static std::string ProcessNameOfLCMDefault;
+    static const std::string ProcessNameOfLCMDefault;
 
     /*! Name of local component manager running with the global component manager */
-    static std::string ProcessNameOfLCMWithGCM;
+    static const std::string ProcessNameOfLCMWithGCM;
 
     /*! Get a singleton object of local component manager.
         \note  If this is called first, the local component manager is

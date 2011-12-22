@@ -56,14 +56,15 @@ osaMutex mtsManagerLocal::ConfigurationChange;
 bool mtsManagerLocal::UnitTestEnabled = false;
 bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 
-std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
-std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
+const std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
+const std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
 // System-wide logging: Define logger-related variables here so that
 // the logger doesn't have to call GetInstance() everytime it receives
 // log messages. {{
 mtsLODMultiplexerStreambuf * SystemLogMultiplexer = 0;
 bool           LogForwardEnabled = false;
+bool           LogDisabled = false;
 osaMutex       LogMutex;
 
 typedef std::list<mtsLogMessage> LogQueueType;
@@ -279,6 +280,12 @@ void mtsManagerLocal::Cleanup(void)
     LogThreadFinishWaiting = true;
     LogTheadFinished.Wait();
 
+    if (SystemLogMultiplexer) {
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
+    }
+
     if (ManagerGlobal) {
         delete ManagerGlobal;
         ManagerGlobal = 0;
@@ -292,12 +299,6 @@ void mtsManagerLocal::Cleanup(void)
     if (ManagerComponent.Server) {
         delete ManagerComponent.Server;
         ManagerComponent.Server = 0;
-    }
-
-    if (SystemLogMultiplexer) {
-        SystemLogMultiplexer->RemoveAllChannels();
-        delete SystemLogMultiplexer;
-        SystemLogMultiplexer = 0;
     }
 
     __os_exit();
@@ -317,6 +318,10 @@ void mtsManagerLocal::SetupSystemLogger(void)
     if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
         CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
     }
+}
+
+bool mtsManagerLocal::IsLogAllowed(void) {
+    return !LogDisabled;
 }
 
 bool mtsManagerLocal::IsLogForwardingEnabled(void) {
@@ -1878,6 +1883,9 @@ void mtsManagerLocal::KillAll(void)
     }
 
     ComponentMapChange.Unlock();
+
+    // Block further logs 
+    LogDisabled = true;
 }
 
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
