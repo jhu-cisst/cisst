@@ -280,12 +280,6 @@ void mtsManagerLocal::Cleanup(void)
     LogThreadFinishWaiting = true;
     LogTheadFinished.Wait();
 
-    if (SystemLogMultiplexer) {
-        SystemLogMultiplexer->RemoveAllChannels();
-        delete SystemLogMultiplexer;
-        SystemLogMultiplexer = 0;
-    }
-
     if (ManagerGlobal) {
         delete ManagerGlobal;
         ManagerGlobal = 0;
@@ -299,6 +293,12 @@ void mtsManagerLocal::Cleanup(void)
     if (ManagerComponent.Server) {
         delete ManagerComponent.Server;
         ManagerComponent.Server = 0;
+    }
+
+    if (SystemLogMultiplexer) {
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
     }
 
     __os_exit();
@@ -1886,6 +1886,7 @@ void mtsManagerLocal::KillAll(void)
 
     // Block further logs 
     LogDisabled = true;
+    SetLogForwarding(false);
 }
 
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
