@@ -142,7 +142,7 @@ void mtsComponentInterfaceProxyServer::StopProxy()
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyServer: ");
         error += e.what();
-        LogError(mtsManagerProxyClient, error);
+        LogError(mtsComponentInterfaceProxyServer, error);
     }
 
     IceGUID = "";
@@ -183,7 +183,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         LogWarning(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to request disconnection: connection id [ " << connectionID << " ]" << std::endl);
         return false;
     } else {
-        LogPrint(mtsManagerProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << connectionID << " ]" << std::endl);
+        LogPrint(mtsComponentInterfaceProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << connectionID << " ]" << std::endl);
         return true;
     }
 }
@@ -762,7 +762,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
                 ComponentInterfaceProxyServer->MonitorConnections();
             }
         } catch (const Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
+            LogPrint(mtsComponentInterfaceProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
         }
         osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
     }
