@@ -55,10 +55,8 @@ public:
     // "observed" and will create the corresponding required
     // interfaces as well as their widgets.
     void CreateWidgetsForComponent(const mtsComponent & component);
+    bool CreateWidgetsForComponent(const std::string & componentName);
     void CreateWidgetsForInterface(const mtsComponent & component, const std::string & interfaceName);
-
-    inline const QWidget * GetWindow(void) const;
-    inline QWidget * GetWindow(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetComponent);

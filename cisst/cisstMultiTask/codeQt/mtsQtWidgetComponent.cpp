@@ -42,23 +42,53 @@ mtsQtWidgetComponent::mtsQtWidgetComponent(const std::string & name):
 
 void mtsQtWidgetComponent::CreateWidgetsForComponent(const mtsComponent & component)
 {
-    //TODO: swap layout
-    //TODO: execution component? This will have to be refreshed as well (Probably new/delete)
+    // TODO: swap layout
+    // TODO: execution component? This will have to be refreshed as well (Probably new/delete)
     typedef std::vector<std::string> ContainerType;
     ContainerType interfaceNames = component.GetNamesOfInterfacesProvided();
-
     ContainerType::const_iterator i;
     const ContainerType::const_iterator end = interfaceNames.end();
+
+    CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgetsForComponent: called for component \"" << component.GetName() << "\" ("
+                             << interfaceNames.size() << " provided interface(s) found)" << std::endl;
+
     for (i = interfaceNames.begin(); i < end; ++i) {
-        CreateWidgetsForInterface(component, *i);
+        // skip "system" interfaces
+        if (*i == "InterfaceInternalProvided") {
+            CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgetsForComponent: skipping interface \"InterfaceInternalProvided\"" << std::endl;
+        } else {
+            size_t found = i->find("StateTable", 0, 10 /* 10 chars in StateTable */);
+            if (found != std::string::npos) {
+                CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgetsForComponent: skipping interface \"StateTable\": " << *i << std::endl;
+            } else {
+                CreateWidgetsForInterface(component, *i);
+            }
+        }
     }
+}
+
+
+bool mtsQtWidgetComponent::CreateWidgetsForComponent(const std::string & componentName)
+{
+    // this is implemented the way around, we should keep strings as long as possible instead of getting a pointer
+    mtsComponent * component = mtsComponentManager::GetInstance()->GetComponent(componentName);
+    if (component) {
+        this->CreateWidgetsForComponent(*component);
+        return true;
+    }
+    CMN_LOG_CLASS_INIT_WARNING << "CreateWidgetsForComponent: can't find component \"" << componentName << "\"" << std::endl;
+    return false;
 }
 
 
 void mtsQtWidgetComponent::CreateWidgetsForInterface(const mtsComponent & component, const std::string & interfaceName)
 {
+    CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgetsForInterface: called for component \"" << component.GetName()
+                             << "\", interface \"" << interfaceName << "\"" << std::endl;
     mtsInterfaceProvided * interfaceProvided = component.GetInterfaceProvided(interfaceName);
     const std::string & interfaceFullName = interfaceProvided->GetFullName();
     mtsInterfaceRequired * requiredInterface = this->AddInterfaceRequired(interfaceFullName);
-    TabWidget->addTab(new mtsQtWidgetInterfaceRequired(interfaceProvided, requiredInterface), interfaceFullName.c_str());
+    int tabIndex = TabWidget->addTab(new mtsQtWidgetInterfaceRequired(interfaceProvided, requiredInterface),
+                                     interfaceFullName.c_str());
+    TabWidget->setTabToolTip(tabIndex, interfaceFullName.c_str());
 }

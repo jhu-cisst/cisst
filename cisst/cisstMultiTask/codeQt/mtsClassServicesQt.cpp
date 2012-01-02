@@ -29,6 +29,9 @@ CMN_IMPLEMENT_SERVICES(mtsCollectorQtComponent);
 #include <cisstMultiTask/mtsQtWidgetComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsQtWidgetComponent);
 
+#include <cisstMultiTask/mtsQtWidgetInterfaceRequired.h>
+CMN_IMPLEMENT_SERVICES(mtsQtWidgetInterfaceRequired);
+
 #include <cisstMultiTask/mtsQtWidgetFunction.h>
 CMN_IMPLEMENT_SERVICES(mtsQtWidgetFunction);
 

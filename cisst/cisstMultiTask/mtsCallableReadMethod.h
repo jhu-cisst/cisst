@@ -101,8 +101,10 @@ protected:
             typedef typename ResultType::RefType ResultRefType;
             ResultRefType * dataRef = dynamic_cast<ResultRefType *>(&argument);
             if (!dataRef) {
-                CMN_LOG_INIT_ERROR << "mtsCallableRead: CallMethod could not cast from " << typeid(argument).name()
-                                   << " to " << typeid(ResultRefType).name() << std::endl;
+                CMN_LOG_INIT_ERROR << "mtsCallableRead for " << typeid(ClassType).name()
+                                   << ": CallMethod could not cast from " << typeid(argument).name()
+                                   << " to " << typeid(ResultRefType).name() 
+		                   << ", arg type is " << argument.Services()->GetName() << std::endl;
                 return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
             // Now, make the call using the temporary

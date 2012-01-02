@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,19 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 /*!
-  \brief Declaration of Manager Component Client
+  \brief Declaration of Manager Component Client (MCC)
   \ingroup cisstMultiTask
 
-  This class defines the manager component client which is managed by all local 
-  component managers (LCMs).  An instance of this class is automatically created 
-  and gets connected to the manager component server which runs on LCM that runs
-  with the global component manager (GCM).
+  This class defines MCC which provides application developers with a way to access cisst 
+  internal services such as dynamic component composition or system-wide log forwarding.
+  It is a unique component in a process and runs in parallel with the Local Component 
+  Manager (LCM) for now.  MCC is automatically created when LCM is instantiated and 
+  internally gets connected to the Manager Component Server (MCS) that runs on the Global 
+  Component Manager (GCM) process.
   
-  This component has two sets of interfaces, one for communication with the 
-  manager component server and the other one for command exchange between other
-  manager component clients.
-  
-  \note Related classes: mtsManagerComponentBase, mtsManagerComponentServer
+  \note Related classes: mtsManagerComponentServices, mtsManagerComponentBase, mtsManagerComponentServer
 */
 
 #ifndef _mtsManagerComponentClient_h
@@ -47,7 +45,7 @@ class mtsManagerComponentClient : public mtsManagerComponentBase
 
 protected:
     /*! Get a list of all processes running in the system */
-    mtsFunctionRead GetNamesOfProcesses;
+    //mtsFunctionRead GetNamesOfProcesses;
 
     /*! If MCS is ready */
     bool MCSReady;
@@ -84,6 +82,7 @@ protected:
         mtsFunctionWrite PrintLog;
         mtsFunctionWrite EnableLogForwarding;
         mtsFunctionWrite DisableLogForwarding;
+        mtsFunctionQualifiedRead GetLogForwardingStates;
         // Getters
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
@@ -179,6 +178,7 @@ protected:
     void InterfaceLCMCommands_GetListOfComponentClasses(
                               std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
     void InterfaceLCMCommands_SetLogForwarding(const bool &state);
+    void InterfaceLCMCommands_GetLogForwardingState(bool & state) const;
     void InterfaceLCMCommands_GetAbsoluteTimeInSeconds(double &time) const;
 
     /*! Event generators for InterfaceLCM's provided interface */
@@ -209,6 +209,7 @@ protected:
     void InterfaceComponentCommands_LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const;
     void InterfaceComponentCommands_EnableLogForwarding(const std::vector<std::string> &processNames);
     void InterfaceComponentCommands_DisableLogForwarding(const std::vector<std::string> &processNames);
+    void InterfaceComponentCommands_GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const;
     void InterfaceComponentCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames,
                                                          std::vector<double> &processTimes) const;
 

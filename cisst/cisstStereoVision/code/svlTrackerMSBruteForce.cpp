@@ -255,13 +255,13 @@ int svlTrackerMSBruteForce::Initialize()
         LowerScaleImage->SetSize(Width / 2, Height / 2);
 
         // modify current parameters for multiscale processing + add some margin
-        TemplateRadius = std::max(TemplateRadiusRequested, 2u);
+        TemplateRadius = std::max(TemplateRadiusRequested, 1u);
         SearchRadius = 2;
     }
     else {
         // coarsest scale so go by the original parameters
-        TemplateRadius = std::max(TemplateRadiusRequested, 2u);
-        SearchRadius = std::max(SearchRadiusRequested, 2u);
+        TemplateRadius = std::max(TemplateRadiusRequested, 1u);
+        SearchRadius = std::max(SearchRadiusRequested, 1u);
     }
 
     // create previous image buffer

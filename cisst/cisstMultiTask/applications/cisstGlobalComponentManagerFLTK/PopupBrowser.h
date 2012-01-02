@@ -56,8 +56,8 @@ public:
                     }
 
                     Fl_Menu_Item popupMenu[] = {
-                        { "Visualize this", 0, callbackVisualize, (void*)this},
-                        { 0 }
+                        { "Visualize this", 0, callbackVisualize, (void*)this, 0, FL_NORMAL_LABEL, FL_HELVETICA, 12, FL_FOREGROUND_COLOR },
+                        { 0, 0, 0, 0, 0, FL_NORMAL_LABEL, FL_HELVETICA, 12, FL_FOREGROUND_COLOR }
                     };
                     const Fl_Menu_Item * m = popupMenu->popup(Fl::event_x(), Fl::event_y(), 0, 0, 0);
                     if (m) {

@@ -246,7 +246,6 @@ int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
     }
 
     CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
-   std::cout <<  "GetLocalhostIP: hostname is " << hostname << std::endl;
     struct hostent * he = gethostbyname(hostname);
     if (!he) {
         CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;

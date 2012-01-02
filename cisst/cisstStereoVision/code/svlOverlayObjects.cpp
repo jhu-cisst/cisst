@@ -768,7 +768,9 @@ svlOverlayStaticImage::svlOverlayStaticImage() :
     svlOverlay(),
     Buffer(0),
     Pos(0, 0),
-    Alpha(255)
+    Alpha(255),
+    QuadMappingEnabled(false),
+    QuadMappingSet(false)
 {
 }
 
@@ -780,7 +782,9 @@ svlOverlayStaticImage::svlOverlayStaticImage(unsigned int videoch,
     svlOverlay(videoch, visible),
     Buffer(0),
     Pos(pos),
-    Alpha(alpha)
+    Alpha(alpha),
+    QuadMappingEnabled(false),
+    QuadMappingSet(false)
 {
     SetImage(image);
 }
@@ -854,6 +858,29 @@ void svlOverlayStaticImage::SetAlpha(unsigned char alpha)
     Alpha = alpha;
 }
 
+void svlOverlayStaticImage::SetEnableQuadMapping(bool enable)
+{
+    QuadMappingEnabled = enable;
+}
+
+void svlOverlayStaticImage::SetQuadMapping(vctInt2 ul, vctInt2 ur, vctInt2 ll, vctInt2 lr)
+{
+    QuadUL = ul;
+    QuadUR = ur;
+    QuadLL = ll;
+    QuadLR = lr;
+    QuadMappingSet = true;
+}
+
+void svlOverlayStaticImage::SetQuadMapping(int xul, int yul, int xur, int yur, int xll, int yll, int xlr, int ylr)
+{
+    QuadUL.Assign(xul, yul);
+    QuadUR.Assign(xur, yur);
+    QuadLL.Assign(xll, yll);
+    QuadLR.Assign(xlr, ylr);
+    QuadMappingSet = true;
+}
+
 vctInt2 svlOverlayStaticImage::GetPosition() const
 {
     return Pos;
@@ -864,6 +891,11 @@ unsigned char svlOverlayStaticImage::GetAlpha() const
     return Alpha;
 }
 
+bool svlOverlayStaticImage::GetEnableQuadMapping() const
+{
+    return QuadMappingEnabled;
+}
+
 void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
     if (!Buffer) return;
@@ -871,17 +903,83 @@ void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN
     svlImageRGB* ovrlimage = Buffer->Pull(false);
     if (!ovrlimage) return;
 
+    if (QuadMappingEnabled && QuadMappingSet) {
+        svlSampleImageRGB _ovrlimage(false);
+        _ovrlimage.SetMatrix(*ovrlimage);
+
+        const int ulx = 0, uly = 0, llx = 0, ury = 0;
+        const int urx = _ovrlimage.GetWidth(0)  - 1, lrx = _ovrlimage.GetWidth(0)  - 1;
+        const int lly = _ovrlimage.GetHeight(0) - 1, lry = _ovrlimage.GetHeight(0) - 1;
+        svlTriangle tri_in, tri_out;
+
+        tri_in.Assign(ulx, uly, urx, ury, llx, lly);
+        tri_out.Assign(QuadUL[0], QuadUL[1], QuadUR[0], QuadUR[1], QuadLL[0], QuadLL[1]);
+        svlDraw::WarpTriangle(&_ovrlimage, 0, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
+
+        tri_in.Assign(llx, lly, urx, ury, lrx, lry);
+        tri_out.Assign(QuadLL[0], QuadLL[1], QuadUR[0], QuadUR[1], QuadLR[0], QuadLR[1]);
+        svlDraw::WarpTriangle(&_ovrlimage, 0, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
+
+        return;
+    }
+
+    if (Transformed) {
+        svlSampleImageRGB _ovrlimage(false);
+        _ovrlimage.SetMatrix(*ovrlimage);
+
+        const int iulx = 0, iuly = 0, illx = 0, iury = 0;
+        const int iurx = _ovrlimage.GetWidth(0)  - 1, ilrx = _ovrlimage.GetWidth(0)  - 1;
+        const int illy = _ovrlimage.GetHeight(0) - 1, ilry = _ovrlimage.GetHeight(0) - 1;
+        const int halfwidth  = _ovrlimage.GetWidth(0)  / 2;
+        const int halfheight = _ovrlimage.GetHeight(0) / 2;
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+        double x, y;
+
+        x = iulx - halfwidth; y = iuly - halfheight;
+        const int oulx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int ouly = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = iurx - halfwidth; y = iury - halfheight;
+        const int ourx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int oury = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = illx - halfwidth; y = illy - halfheight;
+        const int ollx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int olly = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = ilrx - halfwidth; y = ilry - halfheight;
+        const int olrx = static_cast<int>(x * m00 + y * m01 + m02);
+        const int olry = static_cast<int>(x * m10 + y * m11 + m12);
+
+        svlTriangle tri_in, tri_out;
+
+        tri_in.Assign(iulx, iuly, iurx, iury, illx, illy);
+        tri_out.Assign(oulx, ouly, ourx, oury, ollx, olly);
+        svlDraw::WarpTriangle(&_ovrlimage, 0, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
+
+        tri_in.Assign(illx, illy, iurx, iury, ilrx, ilry);
+        tri_out.Assign(ollx, olly, ourx, oury, olrx, olry);
+        svlDraw::WarpTriangle(&_ovrlimage, 0, tri_in, bgimage, VideoCh, tri_out, WarpInternals, Alpha);
+
+        return;
+    }
+
     int i, ws, hs, wo, ho, xs, ys, xo, yo, copylen, linecount;
 
     // Prepare for data copy
-    ws = static_cast<int>(bgimage->GetWidth(VideoCh) * 3);
+    ws = static_cast<int>(bgimage->GetWidth(VideoCh) * bgimage->GetBPP());
     hs = static_cast<int>(bgimage->GetHeight(VideoCh));
     wo = static_cast<int>(ovrlimage->cols());
     ho = static_cast<int>(ovrlimage->rows());
 
     copylen = wo;
     linecount = ho;
-    xs = Pos.X() * 3;
+    xs = Pos.X() * bgimage->GetBPP();
     ys = Pos.Y();
     xo = yo = 0;
 
@@ -1093,6 +1191,22 @@ svlRect svlOverlayStaticText::GetTextSize(const std::string & CMN_UNUSED(text))
 
 void svlOverlayStaticText::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
+    svlRect _rect;
+
+    if (Transformed) {
+        _rect.left   = static_cast<int>(Transform.Element(0, 0) * Rect.left +
+                                        Transform.Element(0, 1) * Rect.top +
+                                        Transform.Element(0, 2));
+        _rect.top  = static_cast<int>(Transform.Element(1, 0) * Rect.left +
+                                      Transform.Element(1, 1) * Rect.top +
+                                      Transform.Element(1, 2));
+        _rect.right  = _rect.left + (Rect.right - Rect.left);
+        _rect.bottom = _rect.top  + (Rect.bottom - Rect.top);
+    }
+    else {
+        _rect.Assign(Rect);
+    }
+
     if (FontChanged) {
         CvSize size;
         cvInitFont(&Font, CV_FONT_HERSHEY_PLAIN, FontSize, FontSize, 0, 1, 4);
@@ -1101,13 +1215,13 @@ void svlOverlayStaticText::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
         FontChanged = false;
     }
 
-    if (Background) svlDraw::Rectangle(bgimage, VideoCh, Rect, BGColor);
+    if (Background) svlDraw::Rectangle(bgimage, VideoCh, _rect, BGColor);
 
     CvRect cvrect;
-    cvrect.x      = Rect.left;
-    cvrect.width  = Rect.right - Rect.left;
-    cvrect.y      = Rect.top + 1;
-    cvrect.height = Rect.bottom - Rect.top + 1;
+    cvrect.x      = _rect.left;
+    cvrect.width  = _rect.right - _rect.left;
+    cvrect.y      = _rect.top + 1;
+    cvrect.height = _rect.bottom - _rect.top + 1;
 
     IplImage* cvimg = bgimage->IplImageRef(VideoCh);
     cvSetImageROI(cvimg, cvrect);
@@ -1372,9 +1486,30 @@ void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* C
 {
 #if CISST_SVL_HAS_OPENCV
 
+    int cx, cy, rx, ry;
+
+    if (Transformed) {
+        // Calculate translation
+        cx = static_cast<int>(Transform.Element(0, 0) * Center.x +
+                              Transform.Element(0, 1) * Center.y +
+                              Transform.Element(0, 2));
+        cy = static_cast<int>(Transform.Element(1, 0) * Center.x +
+                              Transform.Element(1, 1) * Center.y +
+                              Transform.Element(1, 2));
+        // Calculate scale from rotation matrix norm
+        vctFixedSizeMatrixRef<double, 2, 2, 3, 1> rot(Transform.Pointer());
+        double norm = rot.Norm();
+        rx = static_cast<int>(norm * RadiusHoriz);
+        ry = static_cast<int>(norm * RadiusVert);
+    }
+    else {
+        cx = Center.x;    cy = Center.y;
+        rx = RadiusHoriz; ry = RadiusVert;
+    }
+
     cvEllipse(bgimage->IplImageRef(VideoCh),
-              cvPoint(Center.x, Center.y),
-              cvSize(RadiusHoriz, RadiusVert),
+              cvPoint(cx, cy),
+              cvSize(rx, ry),
               Angle, 0.0, 360.0,
               cvScalar(Color.r, Color.g, Color.b),
               (Fill ? -1 : 1));
@@ -1506,12 +1641,12 @@ void svlOverlayStaticTriangle::DrawInternal(svlSampleImage* bgimage, svlSample* 
         const double m11 = Transform.Element(1, 1);
         const double m12 = Transform.Element(1, 2);
 
-        x1 = static_cast<int>(Corner1.x * m00 + Corner1.y * m01 + m02);
-        y1 = static_cast<int>(Corner1.x * m10 + Corner1.y * m11 + m12);
-        x2 = static_cast<int>(Corner2.x * m00 + Corner2.y * m01 + m02);
-        y2 = static_cast<int>(Corner2.x * m10 + Corner2.y * m11 + m12);
-        x3 = static_cast<int>(Corner3.x * m00 + Corner3.y * m01 + m02);
-        y3 = static_cast<int>(Corner3.x * m10 + Corner3.y * m11 + m12);
+        x1 = static_cast<int>(m00 * Corner1.x + m01 * Corner1.y + m02);
+        y1 = static_cast<int>(m10 * Corner1.x + m11 * Corner1.y + m12);
+        x2 = static_cast<int>(m00 * Corner2.x + m01 * Corner2.y + m02);
+        y2 = static_cast<int>(m10 * Corner2.x + m11 * Corner2.y + m12);
+        x3 = static_cast<int>(m00 * Corner3.x + m01 * Corner3.y + m02);
+        y3 = static_cast<int>(m10 * Corner3.x + m11 * Corner3.y + m12);
     }
     else {
         x1 = Corner1.x; y1 = Corner1.y;

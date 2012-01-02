@@ -68,6 +68,23 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
+// Helper macro (useful to connect interfaces in main.cpp)
+#define CONNECT_LOCAL(_clientComp, _reqInt, _serverComp, _prvInt)\
+    if (!mtsManagerLocal::GetInstance()->Connect(_clientComp, _reqInt, _serverComp, _prvInt)) {\
+        CMN_LOG_INIT_ERROR << "Failed to connect: "\
+                           << _clientComp << ":" << _reqInt << " - "\
+                           << _serverComp << ":" << _prvInt << std::endl;\
+        exit(1);\
+    }
+
+#define CONNECT_REMOTE(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)\
+    if (!mtsManagerLocal::GetInstance()->Connect(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)) {\
+        CMN_LOG_INIT_ERROR << "Failed to connect: "\
+                           << _clientProc << ":" << _clientComp << ":" << _reqInt << " - "\
+                           << _serverProc << ":" << _serverComp << ":" << _prvInt << std::endl;\
+        exit(1);\
+    }
+
 class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {
     // for unit-testing
@@ -185,8 +202,15 @@ public:
     /*! Enable or disable system-wide thread-safe logging */
     static void SetLogForwarding(bool activate);
 
+    /*! Get whether system-wide logging is enabled or not */
+    static void GetLogForwardingState(bool & state);
+    static bool GetLogForwardingState(void);
+
     /*! Is system-wide thread-safe logging enabled? */
-    bool IsLogForwardingEnabled(void) const;
+    static bool IsLogForwardingEnabled(void);
+
+    /*! Check if further logs are allowed */
+    static bool IsLogAllowed(void);
 
 protected:    
     /*! Protected constructor (singleton) */
@@ -436,10 +460,10 @@ public:
     //  Getters and Utilities
     //-------------------------------------------------------------------------
     /*! Default name of local component manager */
-    static std::string ProcessNameOfLCMDefault;
+    static const std::string ProcessNameOfLCMDefault;
 
     /*! Name of local component manager running with the global component manager */
-    static std::string ProcessNameOfLCMWithGCM;
+    static const std::string ProcessNameOfLCMWithGCM;
 
     /*! Get a singleton object of local component manager.
         \note  If this is called first, the local component manager is

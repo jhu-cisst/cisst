@@ -142,7 +142,7 @@ void mtsComponentInterfaceProxyServer::StopProxy()
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyServer: ");
         error += e.what();
-        LogError(mtsManagerProxyClient, error);
+        LogError(mtsComponentInterfaceProxyServer, error);
     }
 
     IceGUID = "";
@@ -183,7 +183,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         LogWarning(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to request disconnection: connection id [ " << connectionID << " ]" << std::endl);
         return false;
     } else {
-        LogPrint(mtsManagerProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << connectionID << " ]" << std::endl);
+        LogPrint(mtsComponentInterfaceProxyServer, "OnClientDisconnect: requested disconnection, connection id [ " << connectionID << " ]" << std::endl);
         return true;
     }
 }
@@ -528,13 +528,18 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandReadSerialized(const Cl
     LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandReadSerialized: received " << serializedArgument.size() << " bytes");
 #endif
 
-    // Deserialize the argument returned
-    mtsProxySerializer * deserializer = PerCommandSerializerMap[commandID];
-    if (!deserializer) {
-        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: cannot find per-command serializer");
-        return false;
+    // Deserialize only if the command succeeded
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
+        // Deserialize the argument returned
+        mtsProxySerializer * deserializer = PerCommandSerializerMap[commandID];
+        if (!deserializer) {
+            LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: cannot find per-command serializer");
+            return false;
+        }
+        deserializer->DeSerialize(serializedArgument, argument);
     }
-    deserializer->DeSerialize(serializedArgument, argument);
+    else
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandReadSerialized: command execution failed, " << executionResult);
 
     return true;
 }
@@ -751,18 +756,15 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
     }
 #else
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
-
-        // Check connections at every 1 second
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
-
         try {
             if (ComponentInterfaceProxyServer) {
                 ComponentInterfaceProxyServer->MonitorConnections();
             }
         } catch (const Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
+            LogPrint(mtsComponentInterfaceProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
         }
+        osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
     }
 #endif
 }

@@ -57,6 +57,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceLogManagement.EnableLogForwarding);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::DisableLogForwarding,
                                                ServiceLogManagement.DisableLogForwarding);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetLogForwardingStates,
+                                               ServiceLogManagement.GetLogForwardingStates);
 
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
@@ -564,6 +566,16 @@ void mtsManagerComponentServices::DisableLogForwarding(void)
 void mtsManagerComponentServices::DisableLogForwarding(const std::vector<std::string> &processNames)
 {
     ServiceLogManagement.DisableLogForwarding(processNames);
+}
+
+void mtsManagerComponentServices::GetLogForwardingStates(stdCharVec & states) const
+{
+    ServiceLogManagement.GetLogForwardingStates(GetNamesOfProcesses(), states);
+}
+
+void mtsManagerComponentServices::GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const
+{
+    ServiceLogManagement.GetLogForwardingStates(processNames, states);
 }
 
 std::vector<double> mtsManagerComponentServices::GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames) const

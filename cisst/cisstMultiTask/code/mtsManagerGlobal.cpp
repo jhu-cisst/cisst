@@ -2010,11 +2010,12 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // Step 6. Send disconnection event to ManagerComponentServer
         if (ManagerComponentServer)
             ManagerComponentServer->RemoveConnectionEvent(connection);
+
+        CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: successfully disconnected [ " << connectionID << " ] : "
+                                << "\"" << serverComponentName << ":" << serverInterfaceName << " - "
+                                << clientComponentName << ":" << clientInterfaceName << "\"" << std::endl;
     }
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: successfully disconnected [ " << connectionID << " ] : "
-                               << "\"" << serverComponentName << ":" << serverInterfaceName << " - "
-                               << clientComponentName << ":" << clientInterfaceName << "\"" << std::endl;
     ShowInternalStructure();
 }
 

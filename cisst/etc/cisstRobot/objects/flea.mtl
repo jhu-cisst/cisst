@@ -1,0 +1,56 @@
+#
+# Wavefront material file: e:\src\cisst\cisst\etc\cisstrobot\objects\flea.mtl
+#
+# Converted by the PolyTrans geometry converter from Okino Computer Graphics, Inc.
+# Date/time of export: 12/21/2011 08:42:34
+#
+# Bounding box of geometry = (-1.45,-1.45,-2.51318) to (1.45,1.45,2.34182).
+
+newmtl default
+	Ns 32
+	d 1
+	illum 2
+	Kd 0.4 0.4 0.4
+	Ks 0.7 0.7 0.7
+	Ka 0.3 0.3 0.3
+
+newmtl Material__15
+	Ns 32
+	d 1
+	illum 2
+	Kd 0.4 0.4 0.4
+	Ks 0.7 0.7 0.7
+	Ka 0.3 0.3 0.3
+
+newmtl Material__4
+	Ns 24
+	d 1
+	illum 2
+	Kd 0 0 0
+	Ks 0.7 0.7 0.7
+	Ka 0 0 0
+
+newmtl Material__12_002
+	Ns 21
+	d 1
+	illum 2
+	Kd 0 0 0
+	Ks 0.35 0.35 0.35
+	Ka 0 0 0
+
+newmtl Material__17_002
+	Ns 21
+	d 1
+	illum 2
+	Kd 0.240941 0.240941 0.240941
+	Ks 0.35 0.35 0.35
+	Ka 0 0 0
+
+newmtl Material__19_002
+	Ns 21
+	d 1
+	illum 2
+	Kd 0.160627 0.160627 0.160627
+	Ks 0.35 0.35 0.35
+	Ka 0 0 0
+

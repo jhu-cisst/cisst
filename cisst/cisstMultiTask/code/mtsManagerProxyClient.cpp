@@ -166,8 +166,8 @@ void mtsManagerProxyClient::StopProxy()
     if (!IsActiveProxy()) return;
 
     try {
-        BaseClientType::StopProxy();
         Server->Stop();
+        BaseClientType::StopProxy();
     } catch (const Ice::Exception& e) {
         std::string error("mtsManagerProxyClient: ");
         error += e.what();
@@ -991,7 +991,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
     }
 #else
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
+        IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
@@ -1000,6 +1000,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
                 ManagerProxyClient->OnServerDisconnect(ex);
             }
         }
+        osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
     }
 #endif
 

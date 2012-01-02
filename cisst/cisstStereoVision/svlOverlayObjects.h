@@ -264,9 +264,13 @@ public:
     void SetPosition(vctInt2 pos);
     void SetPosition(int x, int y);
     void SetAlpha(unsigned char alpha);
+    void SetEnableQuadMapping(bool enable);
+    void SetQuadMapping(vctInt2 ul, vctInt2 ur, vctInt2 ll, vctInt2 lr);
+    void SetQuadMapping(int xul, int yul, int xur, int yur, int xll, int yll, int xlr, int ylr);
 
     vctInt2 GetPosition() const;
     unsigned char GetAlpha() const;
+    bool GetEnableQuadMapping() const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
@@ -275,6 +279,10 @@ private:
     svlBufferImage* Buffer;
     vctInt2 Pos;
     unsigned char Alpha;
+    bool QuadMappingEnabled;
+    bool QuadMappingSet;
+    vctInt2 QuadUL, QuadUR, QuadLL, QuadLR;
+    svlDraw::Internals WarpInternals;
 };
 
 

@@ -131,6 +131,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::EnableLogForwarding);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_DisableLogForwarding,
                               this, mtsManagerComponentBase::CommandNames::DisableLogForwarding);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetLogForwardingStates,
+                              this, mtsManagerComponentBase::CommandNames::GetLogForwardingStates);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetAbsoluteTimeDiffs,
                                       this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs);
 
@@ -193,6 +195,8 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->LoadLibrary);
     required->AddFunction(mtsManagerComponentBase::CommandNames::SetLogForwarding,
                           newFunctionSet->SetLogForwarding);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetLogForwardingState,
+                          newFunctionSet->GetLogForwardingState);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds,
                           newFunctionSet->GetAbsoluteTimeInSeconds);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
@@ -638,6 +642,22 @@ void mtsManagerComponentServer::InterfaceGCMCommands_SetLogForwarding(const std:
             functionSet->SetLogForwarding(state);
         else
             CMN_LOG_CLASS_RUN_ERROR << "SetLogForwarding: could not find functions for process " << processNames[i] << std::endl;
+    }
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const
+{
+    states.resize(processNames.size());
+
+    bool state;
+    for (unsigned int i = 0; i < processNames.size(); i++) {
+        InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processNames[i], CMN_LOG_LEVEL_NONE);
+        if (functionSet) {
+            functionSet->GetLogForwardingState(state);
+            states[i] = (state ? 1 : 0);
+        }
+        else
+            CMN_LOG_CLASS_RUN_ERROR << "GetLogForwardingStates: could not find functions for process " << processNames[i] << std::endl;
     }
 }
 

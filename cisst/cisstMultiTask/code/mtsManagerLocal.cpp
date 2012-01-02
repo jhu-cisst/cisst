@@ -56,14 +56,15 @@ osaMutex mtsManagerLocal::ConfigurationChange;
 bool mtsManagerLocal::UnitTestEnabled = false;
 bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 
-std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
-std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
+const std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
+const std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
 // System-wide logging: Define logger-related variables here so that
 // the logger doesn't have to call GetInstance() everytime it receives
 // log messages. {{
 mtsLODMultiplexerStreambuf * SystemLogMultiplexer = 0;
 bool           LogForwardEnabled = false;
+bool           LogDisabled = false;
 osaMutex       LogMutex;
 
 typedef std::list<mtsLogMessage> LogQueueType;
@@ -274,6 +275,8 @@ void mtsManagerLocal::InitializeLocal(void)
 
 void mtsManagerLocal::Cleanup(void)
 {
+    if (LogThreadFinishWaiting) return;
+
     LogThreadFinishWaiting = true;
     LogTheadFinished.Wait();
 
@@ -317,13 +320,24 @@ void mtsManagerLocal::SetupSystemLogger(void)
     }
 }
 
-bool mtsManagerLocal::IsLogForwardingEnabled(void) const {
+bool mtsManagerLocal::IsLogAllowed(void) {
+    return !LogDisabled;
+}
+
+bool mtsManagerLocal::IsLogForwardingEnabled(void) {
     return LogForwardEnabled;
 }
 
-void mtsManagerLocal::SetLogForwarding(bool activate) 
-{
+void mtsManagerLocal::SetLogForwarding(bool activate) {
     LogForwardEnabled = activate;
+}
+
+void mtsManagerLocal::GetLogForwardingState(bool & state) {
+    state = IsLogForwardingEnabled();
+}
+
+bool mtsManagerLocal::GetLogForwardingState(void) {
+    return IsLogForwardingEnabled();
 }
 
 bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 
@@ -395,28 +409,28 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
     int count = 0;
 
     while (!LogThreadFinishWaiting) {
-        // MJ: Note that this sleep introduces a bit of delay in forwarding 
-        // log messages.
-        osaSleep(1 * cmn_ms);
-
         if (LogQueue.size() == 0) {
+            osaSleep(1 * cmn_ms);
             continue;
         }
 
-        // Don't forward queued logs until everything is ready.
-        if (!MCCReadyForLogForwarding()) continue;
+        // Wait for MCC to be ready (activated and connected) before starting log fowarding
+        if (!MCCReadyForLogForwarding()) {
+            osaSleep(100 * cmn_ms);
+            continue;
+        }
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin(); it != LogQueue.end(); ) {
+        for (LogQueueType::iterator it = LogQueue.begin(); 
+             it != LogQueue.end(); 
+             // MJ: after 30 log messages forwarded, give other threads a chance to queue
+             // logs by releasing the lock (30 is arbitrary)
+             count++ < 30) 
+        {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
                 LogQueue.pop_front(); // FIFO
-            }
-
-            // release the lock not to block other threads too long
-            if (++count == 30) { // MJ TEMP: 30 is arbitrary for now
-                break;
             }
         }
         LogMutex.Unlock();
@@ -1869,6 +1883,10 @@ void mtsManagerLocal::KillAll(void)
     }
 
     ComponentMapChange.Unlock();
+
+    // Block further logs 
+    LogDisabled = true;
+    SetLogForwarding(false);
 }
 
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,

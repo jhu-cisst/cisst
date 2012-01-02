@@ -28,6 +28,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Menu.H>
 #include <FL/Fl_Color_Chooser.H>
+#include <FL/Fl_Input_Choice.H>
+
+#include <iostream>
+#include <fstream>
+
+static std::ofstream SystemLogFile;
+
+// macro to create an FLTK critical section with lock, unlock and awake
+#define FLTK_CRITICAL_SECTION Fl::lock(); for (bool firstRun = true; firstRun; firstRun = false, Fl::unlock(), Fl::awake())
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -54,7 +63,7 @@ GCMUITask * GCMUI;
 //  Callback Functions
 //-------------------------------------------------------------------------
 // Callback invoked when menu item selected
-void callbackSignalSelect(Fl_Widget * w, void * v) 
+void callbackSignalSelect(Fl_Widget * CMN_UNUSED(w), void * v) 
 {
     if (!v) return;
     
@@ -86,7 +95,9 @@ void callbackSignalSelect(Fl_Widget * w, void * v)
     // Switch the current focus to the data visualization tab
     GCMUI->UI.TabControl->value(GCMUI->UI.DataVisualizer);
     // Start collecting data for visualization
-    GCMUI->VisualizeSignal(*signal);
+    FLTK_CRITICAL_SECTION {
+        GCMUI->VisualizeSignal(*signal);
+    }
 
     delete signal;
 }
@@ -198,12 +209,39 @@ GCMUITask::GCMUITask(const std::string & taskName, const double period,
 {
     GCMUI = this;
     TimeOrigin = 0.0;
-    TimestampLastUIUpdate = 0.0;
 
     TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
+
+    // To receive system-wide logs from MCS
+    mtsInterfaceRequired * required = AddInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired);
+    if (required) {
+        required->AddEventHandlerWrite(&GCMUITask::Log, this, 
+                                       mtsManagerComponentBase::EventNames::PrintLog);
+    }
+
+    EnableDynamicComponentManagement();
+
+    // File log
+    SystemLogFile.open("cisstSystemLog.txt");
+}
+
+GCMUITask::~GCMUITask()
+{
+    delete UI.Log->buffer();
+
+    if (SystemLogFile.is_open())
+        SystemLogFile.close();
 }
 
 void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
+{
+    // make the UI visible
+    UI.show(0, NULL);
+	UI.Opened = true;
+}
+
+void GCMUITask::Startup(void) 
 {
     //
     // Component Inspector
@@ -213,7 +251,9 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
 
     // HostIP
     Fl_Text_Buffer * buf = new Fl_Text_Buffer();
-    UI.TextDisplayHostIP->buffer(buf);
+    FLTK_CRITICAL_SECTION {
+        UI.TextDisplayHostIP->buffer(buf);
+    }
     
     StringVector ipAddresses;
     GlobalComponentManager.GetIPAddress(ipAddresses);
@@ -238,200 +278,198 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     //
     XAxisScaleFactor = 150;
 
-    GraphPane = UI.GraphPane;
-    GraphPane->set_scrolling(100);
-    GraphPane->SetAutoScale(false);
-    GraphPane->set_grid(MP_LINEAR_GRID, MP_LINEAR_GRID, true);
-    GraphPane->set_grid_color(GRAY);
-    //GraphPane->set_grid_color(DARK_GRAY);
-    //GraphPane->set_bg_color(1.0f, 1.0f, 1.0f);
+    FLTK_CRITICAL_SECTION {
+        GraphPane = UI.GraphPane;
+        GraphPane->set_scrolling(100);
+        GraphPane->SetAutoScale(false);
+        GraphPane->set_grid(MP_LINEAR_GRID, MP_LINEAR_GRID, true);
+        GraphPane->set_grid_color(GRAY);
+        //GraphPane->set_grid_color(DARK_GRAY);
+        //GraphPane->set_bg_color(1.0f, 1.0f, 1.0f);
 
-    for (int i=0; i< MAX_ARGUMENT_PARAMETER_COUNT; ++i) {
-        GraphPane->set_pointsize(i, 1.0);
-        GraphPane->set_linewidth(i, 1.0);
+        for (int i=0; i< MAX_ARGUMENT_PARAMETER_COUNT; ++i) {
+            GraphPane->set_pointsize(i, 1.0);
+            GraphPane->set_linewidth(i, 1.0);
+        }
+
+        // Populate available signal color set
+        SignalColorSet.push_back(1);
+        SignalColorSet.push_back(2);
+        SignalColorSet.push_back(3);
+        SignalColorSet.push_back(4);
+        SignalColorSet.push_back(5);
+        SignalColorSet.push_back(6);
+        SignalColorSet.push_back(9);
+        SignalColorSet.push_back(10);
+        SignalColorSet.push_back(11);
+        SignalColorSet.push_back(12);
+        SignalColorSet.push_back(13);
+        SignalColorSet.push_back(14);
+
+        // Setup for progress bars
+        ProgressBars[0] = UI.Progress1;
+        ProgressBars[1] = UI.Progress2;
+        ProgressBars[2] = UI.Progress3;
+        ProgressBars[3] = UI.Progress4;
+        ProgressBars[4] = UI.Progress5;
+        ProgressBars[5] = UI.Progress6;
+        ProgressBars[6] = UI.Progress7;
+        ProgressBars[7] = UI.Progress8;
+        ProgressBars[8] = UI.Progress9;
+        ProgressBars[9] = UI.Progress10;
+        ProgressBars[10] = UI.Progress11;
+        ProgressBars[11] = UI.Progress12;
+        for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
+            ProgressBars[i]->maximum(1.0);
+        }
+
+        // Offset controller
+        UI.SpinnerGlobalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
+        UI.SpinnerSignalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
+
+        ResetDataVisualizerUI();
+
+        // Logger
+        UI.Log->textsize(13);
+        buf = new Fl_Text_Buffer();
+        UI.Log->buffer(buf);
+        buf->text("");
     }
-
-    // Populate available signal color set
-    SignalColorSet.push_back(1);
-    SignalColorSet.push_back(2);
-    SignalColorSet.push_back(3);
-    SignalColorSet.push_back(4);
-    SignalColorSet.push_back(5);
-    SignalColorSet.push_back(6);
-    SignalColorSet.push_back(9);
-    SignalColorSet.push_back(10);
-    SignalColorSet.push_back(11);
-    SignalColorSet.push_back(12);
-    SignalColorSet.push_back(13);
-    SignalColorSet.push_back(14);
-
-    // Setup for progress bars
-    ProgressBars[0] = UI.Progress1;
-    ProgressBars[1] = UI.Progress2;
-    ProgressBars[2] = UI.Progress3;
-    ProgressBars[3] = UI.Progress4;
-    ProgressBars[4] = UI.Progress5;
-    ProgressBars[5] = UI.Progress6;
-    ProgressBars[6] = UI.Progress7;
-    ProgressBars[7] = UI.Progress8;
-    ProgressBars[8] = UI.Progress9;
-    ProgressBars[9] = UI.Progress10;
-    ProgressBars[10] = UI.Progress11;
-    ProgressBars[11] = UI.Progress12;
-    for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
-        ProgressBars[i]->maximum(1.0);
-    }
-
-    // Offset controller
-    UI.SpinnerGlobalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
-    UI.SpinnerSignalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
-
-    ResetDataVisualizerUI();
-}
-
-void GCMUITask::Startup(void) 
-{
-    // make the UI visible
-    UI.show(0, NULL);
 }
 
 void GCMUITask::Run(void)
 {
-    const double currentTime = osaGetTime();
-
-    if (currentTime < TimestampLastUIUpdate + 20 * cmn_ms) {
+    if (!UIOpened()) 
         return;
-    }
-
-    TimestampLastUIUpdate = currentTime;
 
 #ifdef BASIC_PLOTTING_TEST
     PlotGraph();
 #endif
 
-    // Refresh Component Inspector at every 5th time and data visualzer at the
-    // other times
     static int count = 0;
-    if (++count == 50) { // 1 sec
-        // TODO: Replace autorefresh/refresh buttons with callback mechanism
-        if (UI.ButtonAutoRefresh->value() != 0) {
-            UpdateUI();
-            if (Fl::check() == 0) {
-                Kill();
+    if (++count == 20) { // 1 sec
+        // TODO: Replace autorefresh/refresh buttons with callback/event mechanism
+        FLTK_CRITICAL_SECTION {
+            if (UI.ButtonAutoRefresh->value() != 0) {
+                UpdateUI();
             }
+            count = 0;
         }
-        count = 0;
         return;
     }
 
-    // Check user's input on the 'Component Inspector' tab
-    CheckComponentInspectorInput();
+    FLTK_CRITICAL_SECTION {
+        // Check user's input from the 'Component Inspector' tab
+        CheckComponentInspectorInput();
+        // Check user's input from the 'Logger' tab
+        CheckLoggerInput();
+        // Check user's input from the 'Data Visualizer' tab
+        CheckDataVisualizerInput();
 
-    // Check user's input on the 'Data Visualizer' tab
-    CheckDataVisualizerInput();
+        // Fetch/sample current values that user has chosen to visualize.
+        FetchCurrentValues();
 
-    // Fetch/sample current values that user has chosen to visualize.
-    FetchCurrentValues();
-
-    // Refresh immediately
-    if (UI.ButtonRefreshClicked) {
-        OnButtonRefreshClicked();
-        UI.ButtonRefreshClicked = false;
-        return;
-    }
-
-    // Connect to Component Viewer
-    if (UI.ButtonTaskViewerClicked) {
-        // Create and start Component Viewer
-        if (!ComponentViewer) {
-            ComponentViewer = new mtsComponentViewer("ComponentViewer");
-            mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
-            managerLocal->AddComponent(ComponentViewer);
-            osaSleep(0.2);
-            ComponentViewer->Create();
-            osaSleep(0.2);
-            ComponentViewer->Start();
+        // Refresh immediately
+        if (UI.ButtonRefreshClicked) {
+            OnButtonRefreshClicked();
+            UI.ButtonRefreshClicked = false;
         }
-        UI.ButtonTaskViewerClicked = false;
-    }
+
+        // Connect to Component Viewer
+        if (UI.ButtonComponentViewerClicked) {
+            // Create and start Component Viewer
+            if (!ComponentViewer) {
+                ComponentViewer = new mtsComponentViewer("ComponentViewer");
+                mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
+                managerLocal->AddComponent(ComponentViewer);
+                osaSleep(0.2);
+                ComponentViewer->Create();
+                osaSleep(0.2);
+                ComponentViewer->Start();
+            }
+            UI.ButtonComponentViewerClicked = false;
+        }
 
 #if 0
-    // TEMP: for now, don't allow Component Viewer to be recreated because
-    // it causes an unhandled exception.  Perhaps RemoveComponent does not work.
-    if (ComponentViewer && ComponentViewer->IsTerminated()) {
-        mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
-        managerLocal->RemoveComponent(ComponentViewer);
-        delete ComponentViewer;
-        ComponentViewer = 0;
-    }
+        // TEMP: for now, don't allow Component Viewer to be recreated because
+        // it causes an unhandled exception.  Perhaps RemoveComponent does not work.
+        if (ComponentViewer && ComponentViewer->IsTerminated()) {
+            mtsManagerLocal *managerLocal = mtsManagerLocal::GetInstance();
+            managerLocal->RemoveComponent(ComponentViewer);
+            delete ComponentViewer;
+            ComponentViewer = 0;
+        }
 #endif
-    if (Fl::check() == 0) {
-        Kill();
     }
+
+    ProcessQueuedEvents();
+    //ProcessQueuedCommands();
 }
 
 #ifdef BASIC_PLOTTING_TEST
 void GCMUITask::PlotGraph(void)
 {
-    // Show min/max Y values
-    const float Ymin = GraphPane->GetYMin();
-    const float Ymax = GraphPane->GetYMax();
+    FLTK_CRITICAL_SECTION {
+        // Show min/max Y values
+        const float Ymin = GraphPane->GetYMin();
+        const float Ymax = GraphPane->GetYMax();
 
-    char buf[100] = "";
-    sprintf(buf, "%.2f", Ymax); UI.OutputMaxValue->value(buf);
-    sprintf(buf, "%.2f", Ymin); UI.OutputMinValue->value(buf);
-    
+        char buf[100] = "";
+        sprintf(buf, "%.2f", Ymax); UI.OutputMaxValue->value(buf);
+        sprintf(buf, "%.2f", Ymin); UI.OutputMinValue->value(buf);
+
 #ifdef BASIC_PLOTTING_TEST
-    static unsigned int x = 0;
-    
-    for (int i=0; i<=12; ++i) {
-        if (i <= 7) {
-            GraphPane->set_pointsize(i, 2.0);
-            GraphPane->set_linewidth(i, 1.0);
-        } else {
-            GraphPane->set_pointsize(i, 2.0);
-            GraphPane->set_linewidth(i, 1.0);
+        static unsigned int x = 0;
+
+        for (int i=0; i<=12; ++i) {
+            if (i <= 7) {
+                GraphPane->set_pointsize(i, 2.0);
+                GraphPane->set_linewidth(i, 1.0);
+            } else {
+                GraphPane->set_pointsize(i, 2.0);
+                GraphPane->set_linewidth(i, 1.0);
+            }
         }
-    }
 
-    float value = sin(x/6.0f);
-    
-    GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f,  RED));
-    GraphPane->add(1, PLOT_POINT((float)x, value * 1.1f,  GREEN));
-    GraphPane->add(2, PLOT_POINT((float)x, value * 1.2f,  YELLOW));
-    /*
-    GraphPane->add(3, PLOT_POINT((float)x, value * 1.3f,  BLUE));
-    GraphPane->add(4, PLOT_POINT((float)x, value * 1.4f,  FUCHSIA));
-    GraphPane->add(5, PLOT_POINT((float)x, value * 1.5f,  AQUA));
-    GraphPane->add(6, PLOT_POINT((float)x, value * 1.6f,  DARK_RED));
-    GraphPane->add(7, PLOT_POINT((float)x, value * 1.7f,  DARK_GREEN));
-    GraphPane->add(8, PLOT_POINT((float)x, value * 1.8f,  DARK_YELLOW));
-    GraphPane->add(9, PLOT_POINT((float)x, value * 1.9f,  LIGHT_PURPLE));
-    GraphPane->add(10, PLOT_POINT((float)x, value * 2.0f, DARK_PURPLE));
-    GraphPane->add(11, PLOT_POINT((float)x, value * 2.1f, DARK_AQUA));
-    */
+        float value = sin(x/6.0f);
 
-    ++x;
+        GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f,  RED));
+        GraphPane->add(1, PLOT_POINT((float)x, value * 1.1f,  GREEN));
+        GraphPane->add(2, PLOT_POINT((float)x, value * 1.2f,  YELLOW));
+        /*
+           GraphPane->add(3, PLOT_POINT((float)x, value * 1.3f,  BLUE));
+           GraphPane->add(4, PLOT_POINT((float)x, value * 1.4f,  FUCHSIA));
+           GraphPane->add(5, PLOT_POINT((float)x, value * 1.5f,  AQUA));
+           GraphPane->add(6, PLOT_POINT((float)x, value * 1.6f,  DARK_RED));
+           GraphPane->add(7, PLOT_POINT((float)x, value * 1.7f,  DARK_GREEN));
+           GraphPane->add(8, PLOT_POINT((float)x, value * 1.8f,  DARK_YELLOW));
+           GraphPane->add(9, PLOT_POINT((float)x, value * 1.9f,  LIGHT_PURPLE));
+           GraphPane->add(10, PLOT_POINT((float)x, value * 2.0f, DARK_PURPLE));
+           GraphPane->add(11, PLOT_POINT((float)x, value * 2.1f, DARK_AQUA));
+           */
+
+        ++x;
 #endif
 
 #ifdef SIGNAL_CONTROL_TEST
-    static unsigned int x = 0;
-    
-    GraphPane->set_pointsize(1, 3.0);
-    GraphPane->set_linewidth(1, 1.0);
-    GraphPane->set_pointsize(2, 1.0);
-    GraphPane->set_linewidth(2, 1.0);
+        static unsigned int x = 0;
 
-    float value1 = sin(x/6.0f) * 10.0f;
-    float value2 = cos(x/6.0f + M_PI/2) * 7.0f;
+        GraphPane->set_pointsize(1, 3.0);
+        GraphPane->set_linewidth(1, 1.0);
+        GraphPane->set_pointsize(2, 1.0);
+        GraphPane->set_linewidth(2, 1.0);
 
-    GraphPane->add(0, PLOT_POINT((float)x, value1, YELLOW));
-    GraphPane->add(1, PLOT_POINT((float)x, value2, RED));
+        float value1 = sin(x/6.0f) * 10.0f;
+        float value2 = cos(x/6.0f + M_PI/2) * 7.0f;
 
-    ++x;
+        GraphPane->add(0, PLOT_POINT((float)x, value1, YELLOW));
+        GraphPane->add(1, PLOT_POINT((float)x, value2, RED));
+
+        ++x;
 #endif
 
-    GraphPane->redraw();
+        GraphPane->redraw();
+    }
 }
 #endif
 
@@ -643,6 +681,46 @@ void GCMUITask::CheckComponentInspectorInput(void)
     }
 }
 
+// Handle click events from Logger tab
+void GCMUITask::CheckLoggerInput(void)
+{
+    if (UI.BrowserProcessLogClicked) {
+        UI.BrowserProcessLogClicked = false;
+        // Get checked state
+        const int index = UI.BrowserProcessLog->value();
+        if (index != 0) {
+            int checked = UI.BrowserProcessLog->checked(index);
+            const std::string processName = UI.BrowserProcessLog->text(index);
+            stdStringVec processNames;
+            processNames.push_back(processName);
+            if (checked == 1) {
+                ManagerComponentServices->EnableLogForwarding(processNames);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Enabling system-wide logging for process \"" << processName << "\"" << std::endl;
+            } else {
+                ManagerComponentServices->DisableLogForwarding(processNames);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Disabling system-wide logging for process \"" << processName << "\"" << std::endl;
+            }
+            return;
+        }
+    }
+
+    if (UI.ButtonLogForwardEnableAllClicked) {
+        UI.BrowserProcessLog->check_all();
+        UI.ButtonLogForwardEnableAllClicked = false;
+        ManagerComponentServices->EnableLogForwarding();
+        CMN_LOG_CLASS_RUN_VERBOSE << "Enabling system-wide logging for all processes" << std::endl;
+        return;
+    }
+
+    if (UI.ButtonLogForwardDisableAllClicked) {
+        UI.BrowserProcessLog->check_none();
+        UI.ButtonLogForwardDisableAllClicked = false;
+        ManagerComponentServices->DisableLogForwarding();
+        CMN_LOG_CLASS_RUN_VERBOSE << "Disabling system-wide logging for all processes" << std::endl;
+        return;
+    }
+}
+
 void GCMUITask::UpdateUI(void)
 {
     UI.BrowserProcesses->clear();
@@ -659,26 +737,48 @@ void GCMUITask::UpdateUI(void)
     UI.OutputFunctionDescription->value("");
     UI.OutputEventHandlerDescription->value("");
 
-    // Periodically fetch process list from GCM
+    UI.BrowserProcessLog->clear();
+
+    // Periodically fetch active process list from GCM
     StringVector names;
     GlobalComponentManager.GetNamesOfProcesses(names);
+
+    // Populate process list UI of the Component Viewer tab
     for (StringVector::size_type i = 0; i < names.size(); ++i) {
         AddLineToBrowser(UI.BrowserProcesses, names[i].c_str());
     }
 
+    // Populate process list UI of the Logger tab
+    stdCharVec logForwardStates;
+    ManagerComponentServices->GetLogForwardingStates(names, logForwardStates);
+
+    for (stdCharVec::size_type i = 0; i < logForwardStates.size(); ++i) {
+        AddLineToBrowser(UI.BrowserProcessLog, names[i].c_str(), logForwardStates[i]);
+    }
+   
     LastIndexClicked.Reset();
 }
 
 void GCMUITask::AddLineToBrowser(Fl_Browser * browser, const char * line, const int fg, const int bg, const char style)
 {
-    char buf[100] = "";
+    char buf[50] = "";
 
+    std::stringstream ss;
     if (style == '0') {
-        sprintf(buf, "@B%d@C%d@.%s", bg, fg, line);
+        ss << "@B" << bg << "@C" << fg << "@.";
+        strncpy(buf, line, sizeof(buf) - 15);
+        ss << buf;
     } else {
-        sprintf(buf, "@B%d@C%d@%c@.%s", bg, fg, style, line);
+        ss << "@B" << bg << "@C" << fg << "@" << style << "@.";
+        strncpy(buf, line, sizeof(buf) - 15);
+        ss << buf;
     }
-    browser->add(buf);
+    browser->add(ss.str().c_str());
+}
+
+void GCMUITask::AddLineToBrowser(Fl_Check_Browser * browser, const char * line, bool checked)
+{
+    browser->add(line, (checked? 1 : 0));
 }
 
 void GCMUITask::AddLineToDescription(Fl_Output * output, const char * msg)
@@ -984,7 +1084,9 @@ void GCMUITask::OnBrowserSelectedSignalsClicked(void)
 
 void GCMUITask::OnButtonRefreshClicked(void)
 {
-    UpdateUI();
+    FLTK_CRITICAL_SECTION {
+        UpdateUI();
+    }
 }
 
 void GCMUITask::VisualizeSignal(SignalSelected & newSignal)
@@ -1084,7 +1186,7 @@ void GCMUITask::OnButtonRemoveClicked(void)
     }
 
     // Get signal data element
-    SignalSelected * data = reinterpret_cast<SignalSelected *>(UI.BrowserSelectedSignals->data(signal->PlotIndex));
+    //SignalSelected * data = reinterpret_cast<SignalSelected *>(UI.BrowserSelectedSignals->data(signal->PlotIndex));
     const unsigned int plotIndex = signal->PlotIndex;
     const unsigned int multiplotIndex = signal->MultiplotIndex;
     //signal->ToStream();
@@ -1139,33 +1241,41 @@ void GCMUITask::OnButtonRemoveClicked(void)
     // If the last signal is removed
     if (UI.BrowserSelectedSignals->size() == 0) {
         GraphPane->clear();
-        ResetDataVisualizerUI();
+        FLTK_CRITICAL_SECTION {
+            ResetDataVisualizerUI();
+        }
     } 
     // Set the first signal to be active
     else {
-        UI.BrowserSelectedSignals->value(1);
-        OnBrowserSelectedSignalsClicked();
+        FLTK_CRITICAL_SECTION {
+            UI.BrowserSelectedSignals->value(1);
+            OnBrowserSelectedSignalsClicked();
+        }
     }
 }
 
 void GCMUITask::OnButtonYScaleUpClicked(void)
 {
-    GraphPane->AdjustYScale(2.0);
+    FLTK_CRITICAL_SECTION {
+        GraphPane->AdjustYScale(2.0);
 
-    GraphPane->SetAutoScale(false);
-    UI.ButtonAutoscale->value(0);
+        GraphPane->SetAutoScale(false);
+        UI.ButtonAutoscale->value(0);
 
-    UpdateMinMaxUI();
+        UpdateMinMaxUI();
+    }
 }
 
 void GCMUITask::OnButtonYScaleDownClicked(void)
 {
-    GraphPane->AdjustYScale(0.5);
+    FLTK_CRITICAL_SECTION {
+        GraphPane->AdjustYScale(0.5);
 
-    GraphPane->SetAutoScale(false);
-    UI.ButtonAutoscale->value(0);
+        GraphPane->SetAutoScale(false);
+        UI.ButtonAutoscale->value(0);
 
-    UpdateMinMaxUI();
+        UpdateMinMaxUI();
+    }
 }
 
 void GCMUITask::OnButtonXScaleUpClicked(void)
@@ -1174,9 +1284,11 @@ void GCMUITask::OnButtonXScaleUpClicked(void)
         return;
     }
 
-    XAxisScaleFactor -= 30;
-    GraphPane->set_scrolling(XAxisScaleFactor);
-    GraphPane->clear(true);
+    FLTK_CRITICAL_SECTION {
+        XAxisScaleFactor -= 30;
+        GraphPane->set_scrolling(XAxisScaleFactor);
+        GraphPane->clear(true);
+    }
 }
 
 void GCMUITask::OnButtonXScaleDownClicked(void)
@@ -1185,39 +1297,45 @@ void GCMUITask::OnButtonXScaleDownClicked(void)
         return;
     }
 
-    XAxisScaleFactor += 30;
-    GraphPane->set_scrolling(XAxisScaleFactor);
-    GraphPane->clear(true);
+    FLTK_CRITICAL_SECTION {
+        XAxisScaleFactor += 30;
+        GraphPane->set_scrolling(XAxisScaleFactor);
+        GraphPane->clear(true);
+    }
 }
 
 void GCMUITask::OnButtonGlobalOffsetIncreaseClicked(void)
 {
-    const float delta = GetGlobalOffsetDelta();
+    FLTK_CRITICAL_SECTION {
+        const float delta = GetGlobalOffsetDelta();
 
-    GraphPane->SetAutoScale(false);
-    GraphPane->SetYOffsetGlobal(GraphPane->GetYOffsetGlobal() + delta);
+        GraphPane->SetAutoScale(false);
+        GraphPane->SetYOffsetGlobal(GraphPane->GetYOffsetGlobal() + delta);
 
-    // Update offset value output window
-    char buf[10] = "";
-    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
-    UI.OutputYOffset->value(buf);
+        // Update offset value output window
+        char buf[10] = "";
+        cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
+        UI.OutputYOffset->value(buf);
 
-    UpdateMinMaxUI();
+        UpdateMinMaxUI();
+    }
 }
 
 void GCMUITask::OnButtonGlobalOffsetDecreaseClicked(void)
 {
-    const float delta = -GetGlobalOffsetDelta();
+    FLTK_CRITICAL_SECTION {
+        const float delta = -GetGlobalOffsetDelta();
 
-    GraphPane->SetAutoScale(false);
-    GraphPane->SetYOffsetGlobal(GraphPane->GetYOffsetGlobal() + delta);
+        GraphPane->SetAutoScale(false);
+        GraphPane->SetYOffsetGlobal(GraphPane->GetYOffsetGlobal() + delta);
 
-    // Update offset value output window
-    char buf[10] = "";
-    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
-    UI.OutputYOffset->value(buf);
+        // Update offset value output window
+        char buf[10] = "";
+        cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
+        UI.OutputYOffset->value(buf);
 
-    UpdateMinMaxUI();
+        UpdateMinMaxUI();
+    }
 }
 
 void GCMUITask::OnSpinnerGlobalOffsetControlClicked(void)
@@ -1227,58 +1345,60 @@ void GCMUITask::OnSpinnerGlobalOffsetControlClicked(void)
 
 void GCMUITask::OnButtonHoldClicked(void)
 {
-    GraphPane->SetHoldDrawing(!GraphPane->GetHoldDrawing());
+    FLTK_CRITICAL_SECTION {
+        GraphPane->SetHoldDrawing(!GraphPane->GetHoldDrawing());
 
-    if (GraphPane->GetHoldDrawing()) {
-        UI.ButtonHold->label("Resume");
-        // Disable all the other control buttons
-        DISABLE_UI(BrowserSelectedSignals);
-        DISABLE_UI(OutputProcessName);
-        DISABLE_UI(OutputComponentName);
-        DISABLE_UI(OutputInterfaceName);
-        DISABLE_UI(OutputCommandName);
-        DISABLE_UI(OutputArgumentName);
-        DISABLE_UI(ButtonRemove);
-        DISABLE_UI(ButtonRemoveAll);
-        DISABLE_UI(ButtonHide);
-        DISABLE_UI(ButtonAutoscale);
-        DISABLE_UI(ButtonSignalOffsetIncrease);
-        DISABLE_UI(ButtonSignalOffsetDecrease);
-        DISABLE_UI(SpinnerSignalOffsetControl);
-        // Update global UI
-        DISABLE_UI(ButtonXScaleUp);
-        DISABLE_UI(ButtonXScaleDown);
-        DISABLE_UI(ButtonYScaleUp);
-        DISABLE_UI(ButtonYScaleDown);
-        DISABLE_UI(ButtonGlobalOffsetIncrease);
-        DISABLE_UI(ButtonGlobalOffsetDecrease);
-        DISABLE_UI(SpinnerGlobalOffsetControl);
-        //DISABLE_UI(ButtonCapture);
-    } else {
-        UI.ButtonHold->label("Hold");
-        // Enable all the other control buttons
-        ENABLE_UI(BrowserSelectedSignals);
-        ENABLE_UI(OutputProcessName);
-        ENABLE_UI(OutputComponentName);
-        ENABLE_UI(OutputInterfaceName);
-        ENABLE_UI(OutputCommandName);
-        ENABLE_UI(OutputArgumentName);
-        ENABLE_UI(ButtonRemove);
-        ENABLE_UI(ButtonRemoveAll);
-        ENABLE_UI(ButtonHide);
-        ENABLE_UI(ButtonAutoscale);
-        ENABLE_UI(ButtonSignalOffsetIncrease);
-        ENABLE_UI(ButtonSignalOffsetDecrease);
-        ENABLE_UI(SpinnerSignalOffsetControl);
-        // Update global UI
-        ENABLE_UI(ButtonXScaleUp);
-        ENABLE_UI(ButtonXScaleDown);
-        ENABLE_UI(ButtonYScaleUp);
-        ENABLE_UI(ButtonYScaleDown);
-        ENABLE_UI(ButtonGlobalOffsetIncrease);
-        ENABLE_UI(ButtonGlobalOffsetDecrease);
-        ENABLE_UI(SpinnerGlobalOffsetControl);
-        //ENABLE_UI(ButtonCapture);
+        if (GraphPane->GetHoldDrawing()) {
+            UI.ButtonHold->label("Resume");
+            // Disable all the other control buttons
+            DISABLE_UI(BrowserSelectedSignals);
+            DISABLE_UI(OutputProcessName);
+            DISABLE_UI(OutputComponentName);
+            DISABLE_UI(OutputInterfaceName);
+            DISABLE_UI(OutputCommandName);
+            DISABLE_UI(OutputArgumentName);
+            DISABLE_UI(ButtonRemove);
+            DISABLE_UI(ButtonRemoveAll);
+            DISABLE_UI(ButtonHide);
+            DISABLE_UI(ButtonAutoscale);
+            DISABLE_UI(ButtonSignalOffsetIncrease);
+            DISABLE_UI(ButtonSignalOffsetDecrease);
+            DISABLE_UI(SpinnerSignalOffsetControl);
+            // Update global UI
+            DISABLE_UI(ButtonXScaleUp);
+            DISABLE_UI(ButtonXScaleDown);
+            DISABLE_UI(ButtonYScaleUp);
+            DISABLE_UI(ButtonYScaleDown);
+            DISABLE_UI(ButtonGlobalOffsetIncrease);
+            DISABLE_UI(ButtonGlobalOffsetDecrease);
+            DISABLE_UI(SpinnerGlobalOffsetControl);
+            //DISABLE_UI(ButtonCapture);
+        } else {
+            UI.ButtonHold->label("Hold");
+            // Enable all the other control buttons
+            ENABLE_UI(BrowserSelectedSignals);
+            ENABLE_UI(OutputProcessName);
+            ENABLE_UI(OutputComponentName);
+            ENABLE_UI(OutputInterfaceName);
+            ENABLE_UI(OutputCommandName);
+            ENABLE_UI(OutputArgumentName);
+            ENABLE_UI(ButtonRemove);
+            ENABLE_UI(ButtonRemoveAll);
+            ENABLE_UI(ButtonHide);
+            ENABLE_UI(ButtonAutoscale);
+            ENABLE_UI(ButtonSignalOffsetIncrease);
+            ENABLE_UI(ButtonSignalOffsetDecrease);
+            ENABLE_UI(SpinnerSignalOffsetControl);
+            // Update global UI
+            ENABLE_UI(ButtonXScaleUp);
+            ENABLE_UI(ButtonXScaleDown);
+            ENABLE_UI(ButtonYScaleUp);
+            ENABLE_UI(ButtonYScaleDown);
+            ENABLE_UI(ButtonGlobalOffsetIncrease);
+            ENABLE_UI(ButtonGlobalOffsetDecrease);
+            ENABLE_UI(SpinnerGlobalOffsetControl);
+            //ENABLE_UI(ButtonCapture);
+        }
     }
 }
 
@@ -1294,24 +1414,26 @@ void GCMUITask::OnButtonAutoScaleClicked(void)
     }
 
     char buf[10] = "";
-    if (UI.ButtonAutoscale->value() == 0) {
-        GraphPane->SetAutoScale(false);
-        UI.ButtonAutoscale->value(0);
-    } else {
-        GraphPane->SetAutoScale(true);
-        UI.ButtonAutoscale->value(1);
-        GraphPane->SetYOffsetGlobal(0.0f);
+    FLTK_CRITICAL_SECTION {
+        if (UI.ButtonAutoscale->value() == 0) {
+            GraphPane->SetAutoScale(false);
+            UI.ButtonAutoscale->value(0);
+        } else {
+            GraphPane->SetAutoScale(true);
+            UI.ButtonAutoscale->value(1);
+            GraphPane->SetYOffsetGlobal(0.0f);
 
-        // Update offset value output window
-        cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
-        UI.OutputYOffset->value(buf);
+            // Update offset value output window
+            cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
+            UI.OutputYOffset->value(buf);
+        }
+
+        // Reset per-signal offset when autoscale operates
+        GraphPane->SetYOffsetSignal(signal->MultiplotIndex, 0.0f);
+        cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetSignal(signal->MultiplotIndex));
+
+        UpdateMinMaxUI();
     }
-    
-    // Reset per-signal offset when autoscale operates
-    GraphPane->SetYOffsetSignal(signal->MultiplotIndex, 0.0f);
-    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetSignal(signal->MultiplotIndex));
-
-    UpdateMinMaxUI();
 }
 
 void GCMUITask::OnButtonHideClicked(void)
@@ -1323,23 +1445,25 @@ void GCMUITask::OnButtonHideClicked(void)
 
     signal->State.Show = !signal->State.Show;
 
-    GraphPane->ShowSignal(signal->MultiplotIndex, signal->State.Show);
+    FLTK_CRITICAL_SECTION {
+        GraphPane->ShowSignal(signal->MultiplotIndex, signal->State.Show);
 
-    UpdateButtonHide(signal->State.Show);
+        UpdateButtonHide(signal->State.Show);
 
-    // If no signal is being plotted, disable global offset buttons
-    bool isAnySignalShown = false;
-    std::list<SignalSelected*>::const_iterator it = SignalsBeingPlotted.begin();
-    for (; it != SignalsBeingPlotted.end(); ++it) {
-        isAnySignalShown |= (*it)->State.Show;
-    }
-    if (!isAnySignalShown) {
-        UI.ButtonGlobalOffsetIncrease->deactivate();
-        UI.ButtonGlobalOffsetDecrease->deactivate();
-        return;
-    } else {
-        UI.ButtonGlobalOffsetIncrease->activate();
-        UI.ButtonGlobalOffsetDecrease->activate();
+        // If no signal is being plotted, disable global offset buttons
+        bool isAnySignalShown = false;
+        std::list<SignalSelected*>::const_iterator it = SignalsBeingPlotted.begin();
+        for (; it != SignalsBeingPlotted.end(); ++it) {
+            isAnySignalShown |= (*it)->State.Show;
+        }
+        if (!isAnySignalShown) {
+            UI.ButtonGlobalOffsetIncrease->deactivate();
+            UI.ButtonGlobalOffsetDecrease->deactivate();
+            return;
+        } else {
+            UI.ButtonGlobalOffsetIncrease->activate();
+            UI.ButtonGlobalOffsetDecrease->activate();
+        }
     }
 }
 
@@ -1362,9 +1486,11 @@ void GCMUITask::OnButtonSignalOffsetIncreaseClicked(void)
         // Update offset value output window
         char buf[10] = "";
         cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetSignal(index));
-        UI.OutputYOffsetSignal->value(buf);
+        FLTK_CRITICAL_SECTION {
+            UI.OutputYOffsetSignal->value(buf);
 
-        UpdateMinMaxUI();
+            UpdateMinMaxUI();
+        }
     }
 }
 
@@ -1387,9 +1513,11 @@ void GCMUITask::OnButtonSignalOffsetDecreaseClicked(void)
         // Update offset value output window
         char buf[10] = "";
         cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetSignal(index));
-        UI.OutputYOffsetSignal->value(buf);
+        FLTK_CRITICAL_SECTION {
+            UI.OutputYOffsetSignal->value(buf);
 
-        UpdateMinMaxUI();
+            UpdateMinMaxUI();
+        }
     }
 }
 
@@ -1434,7 +1562,9 @@ void GCMUITask::FetchCurrentValues(void)
             // Draw graph                
             const double relativeTime = TimeServer->AbsoluteToRelative(values[0][0].Timestamp);
             SetTimeOrigin(relativeTime);
-            DrawGraph(values, *signal);
+            FLTK_CRITICAL_SECTION {
+                DrawGraph(values, *signal);
+            }
 
             // Set timer
             signal->Refresh();
@@ -1443,7 +1573,9 @@ void GCMUITask::FetchCurrentValues(void)
     }
     MutexSignal.Unlock();
 
-    GraphPane->redraw();
+    FLTK_CRITICAL_SECTION {
+        GraphPane->redraw();
+    }
 }
 
 void GCMUITask::SetTimeOrigin(const double firstTimeStamp)
@@ -1511,17 +1643,21 @@ void GCMUITask::UpdateMinMaxUI(void)
     // Show min/max Y values
     char buf[10] = "";
     cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymin);
-    UI.OutputMinValue->value(buf);
-    cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymax);
-    UI.OutputMaxValue->value(buf);
+    FLTK_CRITICAL_SECTION {
+        UI.OutputMinValue->value(buf);
+        cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymax);
+        UI.OutputMaxValue->value(buf);
+    }
 }
 
 void GCMUITask::UpdateButtonHide(const bool isShow)
 {
-    if (isShow) {
-        UI.ButtonHide->label("Hide");
-    } else {
-        UI.ButtonHide->label("Show");
+    FLTK_CRITICAL_SECTION {
+        if (isShow) {
+            UI.ButtonHide->label("Hide");
+        } else {
+            UI.ButtonHide->label("Show");
+        }
     }
 }
 
@@ -1572,4 +1708,23 @@ GCMUITask::SignalSelected * GCMUITask::GetCurrentSignal(void) const
 
     const int currentIndex = UI.BrowserSelectedSignals->value();
     return reinterpret_cast<SignalSelected *>(UI.BrowserSelectedSignals->data(currentIndex));
+}
+
+void GCMUITask::Log(const mtsLogMessage & log)
+{
+    std::string s(log.Message, log.Length);
+
+    FLTK_CRITICAL_SECTION {
+        UI.Log->move_down();
+        UI.Log->insert(s.c_str());
+        UI.Log->show_insert_position();
+    }
+
+    if (SystemLogFile.is_open())
+        SystemLogFile << s << std::flush;
+}
+
+bool GCMUITask::UIOpened(void) const
+{
+    return UI.Opened;
 }

@@ -87,8 +87,13 @@ public:
         }
         mtsExecutionResult result;
         if (NetworkProxyServer) {
-            if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID,
-                                                                               result, argument1, argument2)) {
+            if (NetworkProxyServer->IsActiveProxy()) {
+                if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID, result, argument1, argument2)) {
+                    NetworkProxyServer->StopProxy();
+                    return mtsExecutionResult::NETWORK_ERROR;
+                }
+            } else {
+                // inactive proxy cannot send message
                 return mtsExecutionResult::NETWORK_ERROR;
             }
         }

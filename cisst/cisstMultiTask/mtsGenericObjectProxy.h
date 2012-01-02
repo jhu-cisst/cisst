@@ -714,40 +714,35 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
 
+// Define stream out operator for types based on std::vector
+#define IMPLEMENT_STDVEC_STREAM_OUT(_typeName)\
+inline std::ostream & operator << (std::ostream & output,\
+                                   const _typeName & object) {\
+    output << "[";\
+    for (size_t i = 0; i < object.size(); i++) {\
+        output << object[i];\
+        if (i < object.size()-1)\
+            output << ", ";\
+    }\
+    output << "]";\
+    return output;\
+}
+
 typedef std::vector<std::string> stdStringVec;
 // Add Proxy to name to distinguish this from mtsVector<std::string>
 typedef mtsGenericObjectProxy<stdStringVec> mtsStdStringVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVecProxy);
-
-// Define stream out operator for stdStringVec
-inline std::ostream & operator << (std::ostream & output,
-                            const stdStringVec & object) {
-    output << "[";
-    for (size_t i = 0; i < object.size(); i++) {
-        output << object[i];
-        if (i < object.size()-1)
-            output << ", ";
-    }
-    output << "]";
-    return output;
-}
+IMPLEMENT_STDVEC_STREAM_OUT(stdStringVec);
 
 typedef std::vector<double> stdDoubleVec;
 typedef mtsGenericObjectProxy<stdDoubleVec> mtsStdDoubleVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
+IMPLEMENT_STDVEC_STREAM_OUT(stdDoubleVec);
 
-// Define stream out operator for stdDoubleVec
-inline std::ostream & operator << (std::ostream & output,
-                            const stdDoubleVec & object) {
-    output << "[";
-    for (size_t i = 0; i < object.size(); i++) {
-        output << object[i];
-        if (i < object.size()-1)
-            output << ", ";
-    }
-    output << "]";
-    return output;
-}
+typedef std::vector<char> stdCharVec;
+typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
+IMPLEMENT_STDVEC_STREAM_OUT(stdCharVec);
 
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,

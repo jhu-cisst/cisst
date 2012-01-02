@@ -143,8 +143,11 @@ public:
         // Logging
         const static std::string PrintLog;
         const static std::string SetLogForwarding;
+        const static std::string GetLogForwardingStateInternal;
         const static std::string EnableLogForwarding;
         const static std::string DisableLogForwarding;
+        const static std::string GetLogForwardingState;
+        const static std::string GetLogForwardingStates;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;

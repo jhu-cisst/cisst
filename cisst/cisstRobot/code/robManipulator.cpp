@@ -145,7 +145,7 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
   ifs.open( filename.data() );
   if(!ifs){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Couln't open configuration file " << filename 
+		      << " Couldn't open configuration file " << filename 
 		      << std::endl;
     return robManipulator::EFAILURE;
   }

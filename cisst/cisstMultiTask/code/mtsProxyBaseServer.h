@@ -113,8 +113,7 @@ protected:
     IceConnectionIDMapType IceConnectionIDMap;
 
     /*! Mutex */
-    osaMutex ClientIDMapChange;
-    osaMutex ConnectionIDMapChange;
+    osaMutex ClientMapChange;
 
     /*! Add proxy client connecting to this proxy server (key: connection id) */
     bool AddProxyClient(const std::string & clientName, const ClientIDType & clientID,
@@ -336,12 +335,10 @@ bool mtsProxyBaseServerType::AddProxyClient(const std::string & clientName, cons
     client.ConnectionID = iceConnectionID;
     client.ClientProxy = clientProxy;
 
-    ClientIDMapChange.Lock();
-    ConnectionIDMapChange.Lock();
+    ClientMapChange.Lock();
         ClientIDMap.insert(std::make_pair(clientID, client));
         IceConnectionIDMap.insert(std::make_pair(iceConnectionID, client));
-    ConnectionIDMapChange.Unlock();
-    ClientIDMapChange.Unlock();
+    ClientMapChange.Unlock();
 
     return ((FindClientByClientID(clientID) && FindClientByConnectionID(iceConnectionID)));
 }
@@ -349,21 +346,23 @@ bool mtsProxyBaseServerType::AddProxyClient(const std::string & clientName, cons
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
 bool mtsProxyBaseServerType::RemoveClientByConnectionID(const IceConnectionIDType & iceConnectionID)
 {
+    ClientMapChange.Lock();
+
     typename IceConnectionIDMapType::iterator it1 = IceConnectionIDMap.find(iceConnectionID);
     if (it1 == IceConnectionIDMap.end()) {
+        ClientMapChange.Unlock();
         return false;
     }
     typename ClientIDMapType::iterator it2 = ClientIDMap.find(it1->second.ClientID);
     if (it2 == ClientIDMap.end()) {
+        ClientMapChange.Unlock();
         return false;
     }
 
-    ClientIDMapChange.Lock();
-    ConnectionIDMapChange.Lock();
-        ClientIDMap.erase(it2);
-        IceConnectionIDMap.erase(it1);
-    ConnectionIDMapChange.Unlock();
-    ClientIDMapChange.Unlock();
+    ClientIDMap.erase(it2);
+    IceConnectionIDMap.erase(it1);
+
+    ClientMapChange.Unlock();
 
     return true;
 }
@@ -371,21 +370,23 @@ bool mtsProxyBaseServerType::RemoveClientByConnectionID(const IceConnectionIDTyp
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
 bool mtsProxyBaseServerType::RemoveClientByClientID(const ClientIDType & clientID)
 {
+    ClientMapChange.Lock();
+
     typename ClientIDMapType::iterator it1 = ClientIDMap.find(clientID);
     if (it1 == ClientIDMap.end()) {
+        ClientMapChange.Unlock();
         return false;
     }
     typename IceConnectionIDMapType::iterator it2 = IceConnectionIDMap.find(it1->second.ConnectionID);
     if (it2 == IceConnectionIDMap.end()) {
+        ClientMapChange.Unlock();
         return false;
     }
 
-    ClientIDMapChange.Lock();
-    ConnectionIDMapChange.Lock();
-        ClientIDMap.erase(it1);
-        IceConnectionIDMap.erase(it2);
-    ConnectionIDMapChange.Unlock();
-    ClientIDMapChange.Unlock();
+    ClientIDMap.erase(it1);
+    IceConnectionIDMap.erase(it2);
+
+    ClientMapChange.Unlock();
 
     return true;
 }
@@ -412,11 +413,13 @@ bool mtsProxyBaseServerType::CloseClient(const ClientIDType & clientID, const bo
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
 void mtsProxyBaseServerType::Monitor(void)
 {
+    if (IceConnectionIDMap.size() == 0) return;
     if (!this->IsActiveProxy()) return;
+
+    ClientMapChange.Lock();
 
     typename IceConnectionIDMapType::iterator it = IceConnectionIDMap.begin();
     while (it != IceConnectionIDMap.end()) {
-        if (IceConnectionIDMap.size() == 0) return; // MJ TEMP: shouldn't be outside while loop?
         try {
             it->second.ClientProxy->ice_ping();
             ++it;
@@ -427,12 +430,18 @@ void mtsProxyBaseServerType::Monitor(void)
             std::string s = ss.str();
             this->IceLogger->warning(s);
 
-            OnClientDisconnect(it->second.ClientID);
+            ClientIDType clientID = it->second.ClientID;
+
+            ClientMapChange.Unlock();
+                OnClientDisconnect(clientID);
+            ClientMapChange.Lock();
 
             // Reset iterator (iterator may get invalidated by OnClientDisconnect())
             it = IceConnectionIDMap.begin();
         }
     }
+
+    ClientMapChange.Unlock();
 }
 
 #endif // _mtsProxyBaseServer_h

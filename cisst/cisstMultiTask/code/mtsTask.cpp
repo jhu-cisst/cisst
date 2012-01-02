@@ -165,13 +165,17 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
             }
             timeout = endTime - curTime;
         }
+
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         if (this->State == desiredState) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
-                                       << " seconds." << std::endl;
+            if (LCM->IsLogAllowed())
+                CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
+                                        << " seconds." << std::endl;
         } else {
-            CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
-                                     << "\" did not reach state \"" << desiredState
-                                     << "\", current state is \"" << this->State << "\"" << std::endl;
+            if (LCM->IsLogAllowed())
+                CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
+                                        << "\" did not reach state \"" << desiredState
+                                        << "\", current state is \"" << this->State << "\"" << std::endl;
         }
     }
     return (this->State == desiredState);

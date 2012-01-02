@@ -29,13 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstCommon/cmnUnits.h>
 
-//#define SYSTEM_LOG_TEST_MCC
-#ifdef SYSTEM_LOG_TEST_MCC
-#include <iostream>
-#include <fstream>
-std::ofstream logfileMCC;
-#endif
-
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
 mtsManagerComponentClient::mtsManagerComponentClient(const std::string & componentName)
@@ -43,17 +36,11 @@ mtsManagerComponentClient::mtsManagerComponentClient(const std::string & compone
       MCSReady(false),
       InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
-#ifdef SYSTEM_LOG_TEST_MCC
-    logfileMCC.open("MCC.txt");
-#endif
     InterfaceComponentFunctionMap.SetOwner(*this);
 }
 
 mtsManagerComponentClient::~mtsManagerComponentClient()
 {
-#ifdef SYSTEM_LOG_TEST_MCC
-    logfileMCC.close();
-#endif
 }
 
 void mtsManagerComponentClient::Startup(void)
@@ -509,6 +496,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::EnableLogForwarding);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_DisableLogForwarding,
                               this, mtsManagerComponentBase::CommandNames::DisableLogForwarding);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetLogForwardingStates,
+                              this, mtsManagerComponentBase::CommandNames::GetLogForwardingStates);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetAbsoluteTimeDiffs,
                                       this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs);
 
@@ -585,6 +574,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.EnableLogForwarding);
     required->AddFunction(mtsManagerComponentBase::CommandNames::DisableLogForwarding,
                           InterfaceLCMFunction.DisableLogForwarding);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetLogForwardingStates,
+                          InterfaceLCMFunction.GetLogForwardingStates);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs,
                           InterfaceLCMFunction.GetAbsoluteTimeDiffs);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
@@ -647,6 +638,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                              this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_SetLogForwarding,
                              this, mtsManagerComponentBase::CommandNames::SetLogForwarding);
+    provided->AddCommandRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetLogForwardingState,
+                             this, mtsManagerComponentBase::CommandNames::GetLogForwardingState);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceLCMCommands_GetAbsoluteTimeInSeconds,
                              this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds);
     provided->AddEventWrite(this->InterfaceLCMEvents_ChangeState,
@@ -719,10 +712,6 @@ bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
         return false;
     }
     
-#ifdef SYSTEM_LOG_TEST_MCC
-    logfileMCC << std::string(log.Message, log.Length);
-#endif
-
     return true;
 }
 
@@ -1046,6 +1035,25 @@ void mtsManagerComponentClient::InterfaceComponentCommands_DisableLogForwarding(
         InterfaceLCMFunction.DisableLogForwarding(processNames);
     else
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_DisableLogForwarding: function not bound to command" << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const
+{
+    states.clear();
+
+    // Special case handling
+    if (processNames.size() == 1) {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+        if (LCM->GetProcessName() == processNames[0]) {
+            states.push_back(LCM->GetLogForwardingState());
+            return;
+        }
+    }
+
+    if (InterfaceLCMFunction.GetLogForwardingStates.IsValid())
+        InterfaceLCMFunction.GetLogForwardingStates(processNames, states);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetLogForwardingStates: function not bound to command" << std::endl;
 }
 
 void mtsManagerComponentClient::InterfaceComponentCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames,
@@ -1384,6 +1392,11 @@ void mtsManagerComponentClient::InterfaceLCMCommands_SetLogForwarding(const bool
     mtsManagerLocal::SetLogForwarding(state);
     if (state)
         CMN_LOG_CLASS_RUN_VERBOSE << "Enabled log forwarding" << std::endl;
+}
+
+void mtsManagerComponentClient::InterfaceLCMCommands_GetLogForwardingState(bool & state) const
+{
+    mtsManagerLocal::GetLogForwardingState(state);
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_GetAbsoluteTimeInSeconds(double &time) const
