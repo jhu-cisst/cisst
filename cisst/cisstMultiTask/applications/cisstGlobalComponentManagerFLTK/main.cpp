@@ -100,6 +100,8 @@ int main(void)
     taskManager->KillAll();
     taskManager->WaitForStateAll(mtsComponentState::FINISHED, 5.0 * cmn_s);
 
+    delete GCMUITaskObject;
+
     taskManager->Cleanup();
 
     return 0;
