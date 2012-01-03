@@ -424,14 +424,16 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
         count = 0;
         for (LogQueueType::iterator it = LogQueue.begin(); 
              it != LogQueue.end(); 
-             // MJ: after 30 log messages forwarded, give other threads a chance to queue
-             // logs by releasing the lock (30 is arbitrary)
-             count++ < 30) 
+             ++count) 
         {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
                 LogQueue.pop_front(); // FIFO
             }
+            // MJ: after 30 log messages forwarded, give other threads a chance to queue
+            // logs by releasing the lock (30 is arbitrary)
+            if (count == 30) 
+                break;
         }
         LogMutex.Unlock();
     }
