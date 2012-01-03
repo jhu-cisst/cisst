@@ -235,7 +235,6 @@ set (CISST_LIBRARIES_DEFAULT
 
 set (CISST_LIBRARIES_OPTIONAL
      cisstInteractive
-     cisstDevices
      cisst3DUserInterface
      )
 
@@ -249,8 +248,7 @@ set (CISST_LIBS_WITH_QT
      cisstCommon
      cisstVector
      cisstMultiTask
-     cisstStereoVision
-     cisstDevices)
+     cisstStereoVision)
 
 # Which librairies have FLTK Widgets
 set (CISST_LIBS_WITH_FLTK
