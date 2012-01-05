@@ -41,8 +41,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 
-class mtsManagerGlobal;
-
 class mtsManagerComponentServer : public mtsManagerComponentBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -52,7 +50,7 @@ class mtsManagerComponentServer : public mtsManagerComponentBase
 protected:
     /*! Global component manager instance to directly use the services it 
         provides */
-    mtsManagerGlobal * GCM;
+    mtsManagerGlobal & GCM;
 
     /*! Add InterfaceGCM */
     bool AddInterfaceGCM(void);
@@ -126,7 +124,7 @@ protected:
     void HandleChangeStateEvent(const mtsComponentStateChange &stateChange);
 
     /*! Protected constructor to prevent users from createing this component */
-    mtsManagerComponentServer(mtsManagerGlobal * gcm);
+    mtsManagerComponentServer(mtsManagerGlobal & gcm);
     ~mtsManagerComponentServer();
 
 public:
