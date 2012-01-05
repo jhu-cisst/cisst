@@ -7,7 +7,7 @@ $Id$
 Author(s): Anton Deguet
 Created on: 2009-06-18
 
-(C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+(C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
 Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,5 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // Using ICE
 #cmakedefine01 CISST_MTS_HAS_ICE
+
+// Using fault tolerant features
+#cmakedefine01 CISST_MTS_SUPPORT_FDD
 
 #endif // _mtsConfig_h

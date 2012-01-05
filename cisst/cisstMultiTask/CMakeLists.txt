@@ -40,6 +40,9 @@ else (CISST_MTS_HAS_ICE)
   cisst_unset_all_package_settings (cisstMultiTask ZeroCIce)
 endif (CISST_MTS_HAS_ICE)
 
+# support for fault detection and diagnosis
+option (CISST_MTS_SUPPORT_FDD "Enable fault detection and diagnosis features of cisstMultiTask" OFF)
+
 add_subdirectory (code)
 
 # Applications
