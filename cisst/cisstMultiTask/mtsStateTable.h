@@ -457,6 +457,11 @@ public:
     void DataCollectionStart(const mtsDouble & delay);
     void DataCollectionStop(const mtsDouble & delay);
     //@}
+
+    /*! Returns the name of provided interface to access state table */
+    static const std::string GetNameOfStateTableInterface(const std::string & stateTableName) {
+        return "StateTable" + stateTableName;
+    }
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable);

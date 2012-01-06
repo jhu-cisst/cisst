@@ -146,7 +146,7 @@ class mtsManagerLocalInterface;
 class mtsManagerGlobal;
 class mtsManagerGlobalInterface;
 typedef unsigned int ConnectionIDType;
-// MJ: Slice only supports int type (-2^31 to 2^31-1)
+// MJ: Ice Slice only supports int type (-2^31 to 2^31-1)
 // See http://www.zeroc.com/doc/Ice-3.4.1/manual/Slice.5.8.html for details
 const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_limits<int>::max();
 
@@ -154,6 +154,9 @@ const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_lim
 class mtsManagerComponentServices;
 class mtsManagerComponentClient;
 class mtsManagerComponentServer;
+
+// monitoring for fault detection and diagnosis
+class mtsMonitorComponent;
 
 // global function to retrieve object name if available
 inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {

@@ -300,12 +300,12 @@ endif (CISST_MTS_HAS_ICE)
 # files to support fault detection and diagnosis
 if (CISST_MTS_SUPPORT_FDD)
   set (SOURCE_FILES ${SOURCE_FILES}
-       #
+       mtsMonitorComponent.cpp
        )
 
   set (HEADER_FILES
        ${HEADER_FILES}
-       #
+       mtsMonitorComponent.h
        )
 endif (CISST_MTS_SUPPORT_FDD)
 
