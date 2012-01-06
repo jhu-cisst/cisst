@@ -71,8 +71,30 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // loop until 'q' is pressed
     int key = ' ';
     std::cout << "Press 'q' to quit" << std::endl;
+    std::cout << "Press 't' to print time synchronization statistics" << std::endl;
     while (key != 'q') {
         key = cmnGetChar();
+        if (key == 't') {
+            std::vector<std::string> procNames;
+            std::vector<double> offsets;
+            if (!localManager->GetGCMProcTimeSyncInfo(procNames,offsets)) {
+               std::cout<< " Could not retrieve process time sync info " <<std::endl; 
+            }
+            else {
+
+                std::cout<< " The system has " <<procNames.size() << " processes "<<std::endl; 
+                if (procNames.size() == 0)
+                      continue;
+
+                std::cout<< "  -- n --  Process Name : time offset wrt GCM " <<std::endl; 
+                for (unsigned int i = 0; i < procNames.size(); i++) {
+                        std::cout << "  -- "<< i << " -- " <<procNames[i] << " : "
+                        <<std::setprecision(8) <<std::setprecision(4) << std::setiosflags(std::ios::fixed | std::ios::showpoint)<< offsets[i] * 1000.0 << " milliSeconds"
+                                              << std::endl;
+                }
+            }
+        }
+            
     }
     std::cout << "Quitting ..." << std::endl;
     // cleanup
