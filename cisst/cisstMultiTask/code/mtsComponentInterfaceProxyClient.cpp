@@ -642,7 +642,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
     }
 #else
     while (IsActiveProxy()) {
-        IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
+        osaSleep(mtsProxyConfig::RefreshPeriodForInterfaces);
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
@@ -651,7 +651,6 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
                 ComponentInterfaceProxyClient->OnServerDisconnect(ex);
             }
         }
-        osaSleep(mtsProxyConfig::RefreshPeriodForInterfaces);
     }
 #endif
 
