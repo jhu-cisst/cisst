@@ -73,14 +73,18 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    typedef struct StateTableAccessorStruct {
+    class StateTableAccessor
+    {
+    public:
         mtsFunctionRead GetPeriod;
         // more to come ...
-    } StateTableAccessor;
+    };
 
+    /*! List of StateTableAccessor */
     typedef cmnNamedMap<StateTableAccessor> StateTableAccessorType;
     StateTableAccessorType * StateTableAccessors;
 
+    /*! List of required interfaces */
     typedef cmnNamedMap<mtsInterfaceRequired> StateTableAccessInterfaceType;
     StateTableAccessInterfaceType * StateTableAccessInterfaces;
 
@@ -96,7 +100,7 @@ public:
 
     void Configure(const std::string & CMN_UNUSED(filename) = ""){}
     void Startup(void) {};
-    void Run(void) {};
+    void Run(void);
     void Cleanup(void) {};
 
     //
