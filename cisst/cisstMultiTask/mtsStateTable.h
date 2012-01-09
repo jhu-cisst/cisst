@@ -462,6 +462,20 @@ public:
     static const std::string GetNameOfStateTableInterface(const std::string & stateTableName) {
         return "StateTable" + stateTableName;
     }
+
+    /*! Names of default elements */
+    class NamesOfDefaultElements {
+    public:
+        static const std::string Tic;
+        static const std::string Toc;
+        static const std::string Period;
+        static const std::string PeriodStatistics;
+    };
+
+#if CISST_MTS_SUPPORT_FDD
+    /*! Add filter */
+    bool AddFilter(mtsMonitorFilterBase * filter);
+#endif
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable);

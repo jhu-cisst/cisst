@@ -156,7 +156,10 @@ class mtsManagerComponentClient;
 class mtsManagerComponentServer;
 
 // monitoring for fault detection and diagnosis
+#if CISST_MTS_SUPPORT_FDD
 class mtsMonitorComponent;
+class mtsMonitorFilterBase;
+#endif
 
 // global function to retrieve object name if available
 inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {

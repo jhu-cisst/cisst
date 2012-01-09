@@ -301,11 +301,15 @@ endif (CISST_MTS_HAS_ICE)
 if (CISST_MTS_SUPPORT_FDD)
   set (SOURCE_FILES ${SOURCE_FILES}
        mtsMonitorComponent.cpp
+       mtsMonitorFilterBase.cpp
+       mtsMonitorFilterBasics.cpp
        )
 
   set (HEADER_FILES
        ${HEADER_FILES}
        mtsMonitorComponent.h
+       mtsMonitorFilterBase.h
+       mtsMonitorFilterBasics.h
        )
 endif (CISST_MTS_SUPPORT_FDD)
 

@@ -29,6 +29,9 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#if CISST_MTS_SUPPORT_FDD
+#include <cisstMultiTask/mtsMonitorFilterBasics.h>
+#endif
 
 #include <iostream>
 
@@ -203,10 +206,20 @@ mtsTask::mtsTask(const std::string & name,
     this->AddStateTable(&this->StateTable);
 #if CISST_MTS_SUPPORT_FDD
     this->AddStateTable(&this->StateTableMonitor);
+
     // Expose Period of the monitor state table to its provided interface
-    mtsInterfaceProvided * provided = GetInterfaceProvided(mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
+    mtsInterfaceProvided * provided = GetInterfaceProvided(
+        mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
     CMN_ASSERT(provided);
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
+
+    // Create and add filters
+    mtsMonitorFilterBase * filter;
+    // Bypass filter (for testing purpose) MJ: remove this later
+    filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period);
+    if (!StateTableMonitor.AddFilter(filter))
+        cmnThrow(std::string("mtsTask: failed to add filter to monitor state table.  Filter name: ") + filter->GetFilterName());
+    // More to come ...
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);

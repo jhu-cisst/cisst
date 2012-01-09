@@ -25,7 +25,8 @@ CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 const std::string NameOfMonitorComponent = "cisstMonitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
-    : mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
+    //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
+    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s)
 {
     StateTableAccessors = new StateTableAccessorType(true);
     StateTableAccessInterfaces = new StateTableAccessInterfaceType(true);
@@ -38,6 +39,23 @@ mtsMonitorComponent::~mtsMonitorComponent()
 
     delete StateTableAccessors;
     delete StateTableAccessInterfaces;
+}
+
+void mtsMonitorComponent::Run(void)
+{
+    // For debugging
+#if 0
+    StateTableAccessor * accessor;
+    StateTableAccessorType::const_iterator it = StateTableAccessors->begin();
+    const StateTableAccessorType::const_iterator itEnd = StateTableAccessors->end();
+    for (; it != itEnd; ++it) {
+        accessor = StateTableAccessors->GetItem(it->first);
+        CMN_ASSERT(accessor);
+        double period = 0;
+        accessor->GetPeriod(period);
+        std::cout << it->first << ": " << period << std::endl;
+    }
+#endif
 }
 
 bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
