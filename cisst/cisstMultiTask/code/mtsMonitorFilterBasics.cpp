@@ -18,6 +18,7 @@
   --- end cisst license ---
 */
 
+#include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 
 //-----------------------------------------------------------------------------
@@ -35,27 +36,45 @@ CMN_IMPLEMENT_SERVICES(mtsMonitorFilterBypass);
 
 // DO NOT USE DEFAULT CONSTRUCTOR
 mtsMonitorFilterBypass::mtsMonitorFilterBypass()
-    : mtsMonitorFilterBase(NameOfFilterBypass)
+    : mtsMonitorFilterBase(::NameOfFilterBypass)
 {
     this->Enable(false);
 }
 
 mtsMonitorFilterBypass::mtsMonitorFilterBypass(const std::string & inputName)
-    : mtsMonitorFilterBase(NameOfFilterBypass)
+    : mtsMonitorFilterBase(::NameOfFilterBypass)
 {
-    this->InputNames.push_back(inputName);
+    // Define inputs
+    this->AddInputSignal(inputName);
 
-    std::string outputName("BypassOf");
-    outputName += inputName;
-    this->OutputNames.push_back(outputName);
-
-    this->OutputSignals = new double;
+    // Define outputs
+    std::string outputName(inputName);
+    outputName += ":Bypass";
+    this->AddOutputSignal(outputName);
 }
 
 mtsMonitorFilterBypass::~mtsMonitorFilterBypass()
 {
-    if (this->OutputSignals)
-        delete this->OutputSignals;
+}
+
+void mtsMonitorFilterBypass::DoFiltering(void)
+{
+    if (!this->IsEnabled()) return;
+
+    // Fetch new value from state table
+    InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId());
+
+    // Update output value (bypass)
+    OutputSignals[0]->Placeholder = InputSignals[0]->Placeholder;
+
+#if 1 // MJ TEST
+    static int a = 0;
+    std::cout << a << ": " << GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled") << std::endl;
+
+    for (size_t i = 0; i < OutputSignals.size(); ++i) {
+        std::cout << "[" << i << "] " << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
+    }
+#endif
 }
 
 void mtsMonitorFilterBypass::ToStream(std::ostream & outputStream) const

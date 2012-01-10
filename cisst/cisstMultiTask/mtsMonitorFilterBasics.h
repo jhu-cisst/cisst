@@ -49,9 +49,11 @@ public:
         cmnGenericObject.  Do not use this -- Bypass filter with no input has 
         no meaning. */
     mtsMonitorFilterBypass(); // DO NOT USE
-
     mtsMonitorFilterBypass(const std::string & inputName);
     ~mtsMonitorFilterBypass();
+
+    /*! Implements bypass */
+    void DoFiltering(void);
 
     void ToStream(std::ostream & outputStream) const;
 };

@@ -92,6 +92,8 @@ protected:
         diagnosis purpose */
 #if CISST_MTS_SUPPORT_FDD
     mtsStateTable StateTableMonitor;
+
+    bool AddFilter(mtsMonitorFilterBase * filter);
 #endif
 
     /*! True if the task took more time to do computation than allocated time.
@@ -217,18 +219,22 @@ public:
         return StateTable.GetName();
     }
 
-    /*! Return the name of monitoring state table. */
-#if CISST_MTS_SUPPORT_FDD
-    inline const std::string GetMonitoringStateTableName(void) const {
-        return StateTableMonitor.GetName();
-    }
-#endif
-
     /*! Return a pointer to the default state table.  See
       GetStateTable and GetDefaultStateTableName. */
     inline mtsStateTable * GetDefaultStateTable(void) {
         return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
+
+#if CISST_MTS_SUPPORT_FDD
+    /*! Return the name of monitoring state table. */
+    inline const std::string GetMonitoringStateTableName(void) const {
+        return StateTableMonitor.GetName();
+    }
+    /*! Return a pointer to the monitoring state table */
+    inline mtsStateTable * GetMonitoringStateTable(void) {
+        return this->StateTables.GetItem(this->GetMonitoringStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
+    }
+#endif
 
     /********************* Methods to manage interfaces *******************/
 

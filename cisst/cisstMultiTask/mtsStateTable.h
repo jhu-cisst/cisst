@@ -39,7 +39,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
-
 #include <vector>
 #include <iostream>
 
@@ -473,8 +472,14 @@ public:
     };
 
 #if CISST_MTS_SUPPORT_FDD
+    /*! List of filters attached to this state table */
+    std::vector<mtsMonitorFilterBase*> MonitorFilters;
+
     /*! Add filter */
     bool AddFilter(mtsMonitorFilterBase * filter);
+
+    // MJ TEMP
+    double GetNewValue(mtsStateDataId id) const;
 #endif
 };
 
