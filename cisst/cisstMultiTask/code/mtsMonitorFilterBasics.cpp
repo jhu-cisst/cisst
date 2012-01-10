@@ -21,19 +21,28 @@
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 
+CMN_IMPLEMENT_SERVICES(mtsMonitorFilterBypass);
+CMN_IMPLEMENT_SERVICES(mtsMonitorFilterTrendVel);
+
 //-----------------------------------------------------------------------------
 //  Filter Name Definitions
 //
 #define DEFINE_MONITOR_FILTER_NAMES(_filterName)\
 const std::string NameOfFilter##_filterName = #_filterName;
 DEFINE_MONITOR_FILTER_NAMES(Bypass);
+/*
+DEFINE_MONITOR_FILTER_NAMES(Sampling);
+DEFINE_MONITOR_FILTER_NAMES(Min);
+DEFINE_MONITOR_FILTER_NAMES(Max);
+DEFINE_MONITOR_FILTER_NAMES(Avg);
+DEFINE_MONITOR_FILTER_NAMES(Std);
+*/
+DEFINE_MONITOR_FILTER_NAMES(TrendVel);
 #undef DEFINE_MONITOR_FILTER_NAMES
 
 //-----------------------------------------------------------------------------
 //  Bypass Filter
 //
-CMN_IMPLEMENT_SERVICES(mtsMonitorFilterBypass);
-
 // DO NOT USE DEFAULT CONSTRUCTOR
 mtsMonitorFilterBypass::mtsMonitorFilterBypass()
     : mtsMonitorFilterBase(::NameOfFilterBypass)
@@ -57,7 +66,7 @@ mtsMonitorFilterBypass::~mtsMonitorFilterBypass()
 {
 }
 
-void mtsMonitorFilterBypass::DoFiltering(void)
+void mtsMonitorFilterBypass::DoFiltering(bool debug)
 {
     if (!this->IsEnabled()) return;
 
@@ -67,18 +76,74 @@ void mtsMonitorFilterBypass::DoFiltering(void)
     // Update output value (bypass)
     OutputSignals[0]->Placeholder = InputSignals[0]->Placeholder;
 
-#if 1 // MJ TEST
-    static int a = 0;
-    std::cout << a << ": " << GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled") << std::endl;
-
-    for (size_t i = 0; i < OutputSignals.size(); ++i) {
-        std::cout << "[" << i << "] " << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
-    }
+    if (debug) {
+        std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
+                  << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
+#if 0
+        std::cout << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
+                  << "\t[in]: " << InputSignals[0]->GetName() << "\t[out]: " << OutputSignals[0]->GetName() << std::endl << std::flush;
 #endif
+    }
 }
 
 void mtsMonitorFilterBypass::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled");
+    outputStream << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
+                 << "\tInput: " << InputSignals[0]->GetName() << "\tOutput: " << OutputSignals[0]->GetName();
+}
+
+//-----------------------------------------------------------------------------
+//  Trend Velocity Filter
+//
+// DO NOT USE DEFAULT CONSTRUCTOR
+mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel()
+    : mtsMonitorFilterBase(::NameOfFilterTrendVel),
+      OldValue(0.0), Delta(0.1)
+{
+    this->Enable(false);
+}
+
+mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(const std::string & inputName, double period)
+    : mtsMonitorFilterBase(::NameOfFilterTrendVel),
+      OldValue(0.0), Delta(period)
+{
+    // Define inputs
+    this->AddInputSignal(inputName);
+
+    // Define outputs
+    std::string outputName(inputName);
+    outputName += ":Vel";
+    this->AddOutputSignal(outputName);
+}
+
+mtsMonitorFilterTrendVel::~mtsMonitorFilterTrendVel()
+{
+}
+
+void mtsMonitorFilterTrendVel::DoFiltering(bool debug)
+{
+    if (!this->IsEnabled()) return;
+
+    // Fetch new value from state table
+    InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId());
+
+    // Update output value (velocity)
+    OutputSignals[0]->Placeholder = (InputSignals[0]->Placeholder - OldValue) / Delta;
+    OldValue = InputSignals[0]->Placeholder;
+
+    if (debug) {
+        std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
+                  << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
+#if 0
+        std::cout << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
+                  << "\t[in]: " << InputSignals[0]->GetName() << "\t[out]: " << OutputSignals[0]->GetName() << std::endl << std::flush;
+#endif
+    }
+}
+
+void mtsMonitorFilterTrendVel::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
+                 << "\tInput: " << InputSignals[0]->GetName() << "\tOutput: " << OutputSignals[0]->GetName();
 }
 

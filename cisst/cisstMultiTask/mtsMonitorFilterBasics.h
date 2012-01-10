@@ -53,12 +53,44 @@ public:
     ~mtsMonitorFilterBypass();
 
     /*! Implements bypass */
-    void DoFiltering(void);
+    void DoFiltering(bool debug);
 
     void ToStream(std::ostream & outputStream) const;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterBypass)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterBypass);
+
+//-----------------------------------------------------------------------------
+//  Trend Velocity Filter (1st-order differentiator)
+//
+//  Output Y = (x(t+1) - x(t)) / (delta_t)
+//
+//  delta_t: Period of monitoring component.  Normally sampling rate of 
+//           the monitoring component (mtsMonitorComponent) can be used.
+//
+class mtsMonitorFilterTrendVel : public mtsMonitorFilterBase
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+protected:
+    mtsMonitorFilterBase::PlaceholderType OldValue;
+    double Delta;
+
+public:
+    /*! Default constructor is provided only to satisfy the requirement of 
+        cmnGenericObject.  Do not use this -- Bypass filter with no input has 
+        no meaning. */
+    mtsMonitorFilterTrendVel(); // DO NOT USE
+    mtsMonitorFilterTrendVel(const std::string & inputName, double period);
+    ~mtsMonitorFilterTrendVel();
+
+    /*! Implements 1st-order differentiator */
+    void DoFiltering(bool debug);
+
+    void ToStream(std::ostream & outputStream) const;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterTrendVel);
 
 #endif // _mtsMonitorFilterBasics_h
 

@@ -43,6 +43,8 @@ class mtsStateTable;
 class mtsMonitorFilterBase : public cmnGenericObject
 {
 public:
+    typedef double PlaceholderType;
+
     /*! Names of input signals.  A filter may need more than one signal to run 
         its filtering algorithm. */
     class SignalElement {
@@ -52,7 +54,7 @@ public:
     public:
         // MJ TEMP: Use only one output of type double for now.  Can be extended to 
         // arbitrary type later
-        double Placeholder;
+        PlaceholderType Placeholder;
 
         SignalElement() : Name("NONAME"), Placeholder(0.0) {}
         SignalElement(const std::string & name) : Name(name), Placeholder(0.0) {}
@@ -112,7 +114,7 @@ public:
     bool AddOutput(const std::string & signalName); 
 #endif
     /*! Core filtering function */
-    virtual void DoFiltering(void) = 0;
+    virtual void DoFiltering(bool debug = false) = 0;
 
     /*! Getters and setters */
     //@{
