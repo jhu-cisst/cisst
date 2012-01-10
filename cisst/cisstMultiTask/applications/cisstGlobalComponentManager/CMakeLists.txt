@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -26,7 +26,7 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   add_executable (cisstGlobalComponentManager main.cpp)
-
+  set_property (TARGET cisstGlobalComponentManager PROPERTY FOLDER "cisstMultiTask/applications")
   cisst_target_link_libraries (cisstGlobalComponentManager ${REQUIRED_CISST_LIBRARIES})
 
   install (TARGETS cisstGlobalComponentManager

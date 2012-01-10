@@ -36,7 +36,7 @@ add_executable (mtsExPeriodicTaskQt
                 displayQtWidget.cpp
                 displayQtWidget.h
                 main.cpp)
-
+set_property (TARGET mtsExPeriodicTaskQt PROPERTY FOLDER "cisstMultiTask/examples")
 target_link_libraries (mtsExPeriodicTaskQt
                        mtsExPeriodicTaskComponents)
 cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})

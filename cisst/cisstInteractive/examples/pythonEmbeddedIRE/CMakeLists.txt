@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -23,6 +23,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
+  set_property (TARGET SineGenerator PROPERTY FOLDER "cisstInteractive/examples")
   cisst_target_link_libraries (SineGenerator ${REQUIRED_CISST_LIBRARIES})
 
   # If OS Abstraction is compiled, offer a choice
@@ -40,9 +41,11 @@ if (cisst_FOUND_AS_REQUIRED)
   # Run SWIG on the interface file
   cisst_add_swig_module (MODULE SineGenerator
                          INTERFACE_FILENAME SineGeneratorPython.i
+                         FOLDER "cisstMultiTask/examples"
                          MODULE_LINK_LIBRARIES SineGenerator)
 
   add_executable (pythonEmbeddedIRE pythonEmbeddedIRE.cpp)
+  set_property (TARGET pythonEmbeddedIRE PROPERTY FOLDER "cisstInteractive/examples")
 
   # if (EXAMPLE_IRE_USE_OSATHREAD)
   add_definitions (-DCISST_OSATHREAD)

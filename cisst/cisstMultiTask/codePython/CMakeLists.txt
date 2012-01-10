@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -19,6 +19,7 @@ project (cisstMultiTaskPython)
 # create wrappers using swig
 cisst_add_swig_module (MODULE cisstMultiTask
                        INTERFACE_DIRECTORY ..
+                       FOLDER cisstMultiTask
                        HEADER_FILES ../mtsPython.h
                        MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon
                        INSTALL_FILES 1)

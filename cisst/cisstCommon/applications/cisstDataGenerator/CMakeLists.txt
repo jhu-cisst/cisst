@@ -48,6 +48,8 @@ if (cisst_FOUND_AS_REQUIRED)
                   cdgFile.cpp
                   )
 
+  set_property (TARGET cisstDataGenerator PROPERTY FOLDER "cisstCommon/applications")
+
   cisst_target_link_libraries (cisstDataGenerator ${REQUIRED_CISST_LIBRARIES})
 
   install (TARGETS cisstDataGenerator

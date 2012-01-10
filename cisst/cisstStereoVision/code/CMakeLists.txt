@@ -1341,6 +1341,7 @@ set (ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 # Finally create the library
 cisst_add_library (
   LIBRARY cisstStereoVision
+  FOLDER cisstStereoVision
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}

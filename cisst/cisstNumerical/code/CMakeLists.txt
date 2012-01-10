@@ -101,6 +101,7 @@ set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_NMR_CONFIG_FILE}
 
 # Finally, create main library
 cisst_add_library (LIBRARY cisstNumerical
+                   FOLDER cisstNumerical
                    DEPENDENCIES cisstCommon cisstVector
                    HEADER_FILES ${HEADER_FILES}
                    SOURCE_FILES ${SOURCE_FILES}

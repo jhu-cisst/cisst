@@ -2,7 +2,7 @@
 # $Id$
 #
 
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # --- begin cisst license - do not edit ---
@@ -25,6 +25,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 # We are using C++ code
 cisst_add_swig_module (MODULE cisstVectorPythonTest
+                       FOLDER "cisstVector/tests"
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector)
 
 # Copy the .py file generated to wherever the libraries are
@@ -53,6 +54,7 @@ endif (CMAKE_CONFIGURATION_TYPES)
 add_custom_target (cisstVector_CREATE_PYTHON_TESTS_LIST ALL
                    COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
                    SOURCES ${TEST_PROGRAMS})
+set_property (TARGET cisstVector_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisstVector/tests")
 
 add_dependencies (cisstVector_CREATE_PYTHON_TESTS_LIST
                   cisstCommon

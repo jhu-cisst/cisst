@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -321,6 +321,7 @@ install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstMultiTaskBuild.cmake
 
 # Finally add the library
 cisst_add_library (LIBRARY cisstMultiTask
+                   FOLDER cisstMultiTask
                    DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}

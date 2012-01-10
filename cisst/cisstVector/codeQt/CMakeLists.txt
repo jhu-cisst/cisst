@@ -31,6 +31,7 @@ cisst_set_directories (cisstQt)
 cisst_add_library (
   LIBRARY cisstVectorQt
   LIBRARY_DIR cisstVector
+  FOLDER cisstVector
   DEPENDENCIES cisstCommon
                cisstVector
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp

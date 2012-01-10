@@ -22,4 +22,5 @@ set (REQUIRED_CISST_LIBRARIES
 cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 
 add_executable (cisstForwardKinematics ForwardKinematics.cpp)
+set_property (TARGET cisstForwardKinematics PROPERTY FOLDER "cisstRobot/applications")
 cisst_target_link_libraries (cisstForwardKinematics ${REQUIRED_CISST_LIBRARIES})

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-20 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -33,6 +33,7 @@ add_library (ui3ExBehaviors
              VideoViewer3D.h
              VideoViewer3D.cpp
              )
+set_property (TARGET ui3ExBehaviors PROPERTY FOLDER "cisst3DUserInterface/examples")
 
 cisst_target_link_libraries (ui3ExBehaviors
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask

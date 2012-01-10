@@ -34,6 +34,7 @@ if (cisst_FOUND)
     endif (CISST_HAS_QT)
 
     add_executable (svlExCameraViewer cameraviewer.cpp)
+    set_property (TARGET svlExCameraViewer PROPERTY FOLDER "cisstStereoVision/examples")
     cisst_target_link_libraries (svlExCameraViewer ${USED_CISST_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)

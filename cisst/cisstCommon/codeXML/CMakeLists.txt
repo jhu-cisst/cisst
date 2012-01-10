@@ -61,6 +61,7 @@ set_source_files_properties ("${CISST_CMN_XML_CONFIG_FILE}"
 
 cisst_add_library (LIBRARY cisstCommonXML
                    LIBRARY_DIR cisstCommon
+                   FOLDER cisstCommon
                    DEPENDENCIES cisstCommon
                    SOURCE_FILES cmnXMLPath.cpp
                    HEADER_FILES cmnExportXML.h cmnXMLPath.h

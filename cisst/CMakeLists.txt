@@ -16,9 +16,9 @@
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
 
-# message ("----------- modify cisst-config.cmake to set CISST_BINARY_DIR based on current dir")
-# message ("----------- what to do with DOXYGEN_DIR and LIBRARY_DIR in cisst-config.cmake, needed?")
-# message ("----------- get rid of CISST_ROOT_DIR in cisstConfig.h, Simon uses it a lot, should provide short function to help")
+# todo: modify cisst-config.cmake to set CISST_BINARY_DIR based on current dir
+# todo: what to do with DOXYGEN_DIR and LIBRARY_DIR in cisst-config.cmake, needed?
+# todo: get rid of CISST_ROOT_DIR in cisstConfig.h, Simon uses it a lot, should provide short function to help
 
 # cisst libraries (Computer Integrated Surgical Systems and Technology)
 project (cisst)
@@ -50,9 +50,10 @@ include_directories (${CISST_INCLUDE_DIR})
 # Try to find SVN version number
 find_package (Subversion QUIET)
 set (CISST_WC_REVISION "undefined")
-if (Subversion_FOUND AND EXISTS "${cisst_saw_SOURCE_DIR}/.svn/")
-  Subversion_WC_INFO ("${cisst_SOURCE_DIR}" CISST)
-endif (Subversion_FOUND AND EXISTS "${cisst_saw_SOURCE_DIR}/.svn/")
+set (CISST_REVISION_SVN_DIR "${cisst_saw_SOURCE_DIR}")
+if (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
+  Subversion_WC_INFO ("${CISST_REVISION_SVN_DIR}" CISST)
+endif (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
 message ("Configuring cisst ${CISST_VERSION} from \"${cisst_SOURCE_DIR}\", revision: ${CISST_WC_REVISION}")
 
 # Generate cisstRevision.h
@@ -64,7 +65,11 @@ configure_file ("${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
 add_custom_target (cisstRevision ALL
                    COMMAND ${CMAKE_COMMAND} -P "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
                    COMMENT "Generating ${CISST_REVISION_HEADER} from ${CISST_REVISION_HEADER_SRC}"
-                   SOURCES "${CISST_REVISION_HEADER_SRC}")
+                   SOURCES "${CISST_REVISION_HEADER_SRC}"
+                           "${CISST_REVISION_HEADER}"
+                           "${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                           "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake")
+set_property (TARGET cisstRevision PROPERTY FOLDER "cisstCommon")
 
 # Install cisstRevision.h
 set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)

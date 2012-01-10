@@ -28,5 +28,5 @@ add_executable (prmExQt
                 TestComponent.h
                 TestComponent.cpp
                 main.cpp)
-
+set_property (TARGET prmExQt PROPERTY FOLDER "cisstParameterTypes/examples")
 cisst_target_link_libraries (prmExQt ${REQUIRED_CISST_LIBRARIES})

@@ -2,7 +2,7 @@
 # $Id$
 #
 
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # --- begin cisst license - do not edit ---
@@ -39,6 +39,7 @@ endif (CMAKE_CONFIGURATION_TYPES)
 add_custom_target (cisstNumerical_CREATE_PYTHON_TESTS_LIST ALL
                    ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstNumericalTests.py
                    -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO})
+set_property (TARGET cisstNumerical_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisstNumerical/tests")
 
 add_dependencies (cisstNumerical_CREATE_PYTHON_TESTS_LIST
                   cisstCommon

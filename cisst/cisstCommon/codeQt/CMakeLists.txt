@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -24,6 +24,7 @@ cisst_set_directories (cisstQt)
 cisst_add_library (
   LIBRARY cisstCommonQt
   LIBRARY_DIR cisstCommon
+  FOLDER cisstCommon
   DEPENDENCIES cisstCommon
   SOURCE_FILES cmnClassServicesQt.cpp
                cmnLoggerQtWidget.cpp

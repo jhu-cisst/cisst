@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -189,6 +189,7 @@ endmacro (cisst_extract_settings)
 # following parameters
 #
 # - PROJECT (cisst by default)
+# - FOLDER empty by default, used only to organize projects in IDE when supported by CMake
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
@@ -213,6 +214,7 @@ macro (cisst_add_library ...)
        LIBRARY
        LIBRARY_DIR
        PROJECT
+       FOLDER
        DEPENDENCIES
        SOURCE_FILES HEADER_FILES
        ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
@@ -315,6 +317,11 @@ macro (cisst_add_library ...)
            DESTINATION include
            COMPONENT ${LIBRARY})
 
+  # if a folder has been provided
+  if (FOLDER)
+    set_property (TARGET ${LIBRARY} PROPERTY FOLDER "${FOLDER}")
+  endif (FOLDER)
+
 endmacro (cisst_add_library)
 
 
@@ -400,6 +407,7 @@ endmacro (cisst_target_link_libraries)
 # - MODULE is the prefix of the main .i file.  The module name will be <MODULE>Python
 # - INTERFACE_FILENAME is the filename of the .i file (if not specified, defaults to <MODULE>.i)
 # - INTERFACE_DIRECTORY is the directory containing the .i file (use relative path from current source dir)
+# - FOLDER is used for IDE that support the CMake target property FOLDER
 # - MODULE_LINK_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
 #
 function (cisst_add_swig_module ...)
@@ -411,6 +419,7 @@ function (cisst_add_swig_module ...)
        MODULE
        INTERFACE_FILENAME
        INTERFACE_DIRECTORY
+       FOLDER
        HEADER_FILES
        MODULE_LINK_LIBRARIES
        INSTALL_FILES)
@@ -476,6 +485,10 @@ function (cisst_add_swig_module ...)
                         ARGS -E copy_if_different
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${MODULE_NAME}.py)
+    if (FOLDER)
+      set_property (TARGET _${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
+    endif (FOLDER)
+
     # create a cisstCommon.py as CMake assumes one should be created
     # this is a bug that should be fixed in future releases of CMake.
     add_custom_command (TARGET _${MODULE_NAME}

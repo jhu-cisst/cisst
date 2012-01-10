@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -18,6 +18,7 @@ project (cisstNumericalPython)
 
 cisst_add_swig_module (MODULE cisstNumerical
                        INTERFACE_DIRECTORY ..
+                       FOLDER cisstNumerical
                        HEADER_FILES ../nmrPython.h
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstNumerical
                        INSTALL_FILES 1)

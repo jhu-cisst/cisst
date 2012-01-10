@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -17,6 +17,7 @@ project (cisstCommonPython)
 # create wrappers using swig
 cisst_add_swig_module (MODULE cisstCommon
                        INTERFACE_DIRECTORY ..
+                       FOLDER cisstCommon
                        HEADER_FILES ../cmnPython.h
                        MODULE_LINK_LIBRARIES cisstCommon
                        INSTALL_FILES 1)

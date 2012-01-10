@@ -117,6 +117,7 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 
 # Add executable for C++ tests
 add_executable (cisstVectorTests ${SOURCE_FILES} ${HEADER_FILES})
+set_property (TARGET cisstVectorTests PROPERTY FOLDER "cisstVector/tests")
 target_link_libraries (cisstVectorTests cisstTestsDriver)
 cisst_target_link_libraries (cisstVectorTests cisstCommon cisstVector)
 

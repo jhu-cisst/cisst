@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -16,6 +16,7 @@ project (cisstParameterTypesPython)
 
 cisst_add_swig_module (MODULE cisstParameterTypes
                        INTERFACE_DIRECTORY ..
+                       FOLDER cisstParameterTypes
                        HEADER_FILES ../prmPython.h
                        MODULE_LINK_LIBRARIES cisstParameterTypes
                                              cisstMultiTask

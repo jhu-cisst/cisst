@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -89,6 +89,7 @@ endif (VTK_FOUND)
 
 
 cisst_add_library (LIBRARY cisst3DUserInterface
+                   FOLDER cisst3DUserInterface
                    DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstStereoVision cisstMultiTask cisstParameterTypes
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}

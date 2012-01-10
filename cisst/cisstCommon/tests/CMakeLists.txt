@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -62,6 +62,7 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES})
+set_property (TARGET cisstCommonTests PROPERTY FOLDER "cisstCommon/tests")
 target_link_libraries (cisstCommonTests cisstTestsDriver)
 cisst_target_link_libraries (cisstCommonTests cisstCommon)
 
@@ -69,6 +70,7 @@ cisst_target_link_libraries (cisstCommonTests cisstCommon)
 add_library (cmnClassRegisterTestStatic
              STATIC
              cmnClassRegisterTestStatic.cpp cmnClassRegisterTestStatic.h)
+set_property (TARGET cmnClassRegisterTestStatic PROPERTY FOLDER "cisstCommon/tests")
 target_link_libraries (cisstCommonTests cmnClassRegisterTestStatic)
 
 # Add a dynamic library with some classes registered
@@ -78,6 +80,7 @@ else (NOT CISST_BUILD_SHARED_LIBS)
   add_library (cmnClassRegisterTestDynamic
                SHARED
                cmnClassRegisterTestDynamic.cpp cmnClassRegisterTestDynamic.h)
+  set_property (TARGET cmnClassRegisterTestDynamic PROPERTY FOLDER "cisstCommon/tests")
   target_link_libraries (cisstCommonTests cmnClassRegisterTestDynamic)
   cisst_target_link_libraries (cmnClassRegisterTestDynamic cisstCommon)
 endif (NOT CISST_BUILD_SHARED_LIBS)

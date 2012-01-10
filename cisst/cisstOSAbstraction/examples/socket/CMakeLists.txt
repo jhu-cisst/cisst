@@ -21,15 +21,19 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   add_executable (osaExSocketUDPServer UDPServer.cpp)
+  set_property (TARGET osaExSocketUDPServer PROPERTY FOLDER "cisstOSAbstraction/examples")
   cisst_target_link_libraries (osaExSocketUDPServer ${REQUIRED_CISST_LIBRARIES})
 
   add_executable (osaExSocketUDPClient UDPClient.cpp)
+  set_property (TARGET osaExSocketUDPClient PROPERTY FOLDER "cisstOSAbstraction/examples")
   cisst_target_link_libraries (osaExSocketUDPClient ${REQUIRED_CISST_LIBRARIES})
 
   add_executable (osaExSocketTCPServer TCPServer.cpp)
+  set_property (TARGET osaExSocketTCPServer PROPERTY FOLDER "cisstOSAbstraction/examples")
   cisst_target_link_libraries (osaExSocketTCPServer ${REQUIRED_CISST_LIBRARIES})
 
   add_executable (osaExSocketTCPClient TCPClient.cpp)
+  set_property (TARGET osaExSocketTCPClient PROPERTY FOLDER "cisstOSAbstraction/examples")
   cisst_target_link_libraries (osaExSocketTCPClient ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)

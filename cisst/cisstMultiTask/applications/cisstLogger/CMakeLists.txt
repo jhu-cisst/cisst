@@ -30,6 +30,8 @@ if (cisst_FOUND_AS_REQUIRED)
   # name the main executable and specifies with source files to use
   add_executable (cisstLogger main.cpp)
 
+  set_property (TARGET cisstLogger PROPERTY FOLDER "cisstMultiTask/applications")
+
   # link with the cisst libraries
   cisst_target_link_libraries (cisstLogger ${REQUIRED_CISST_LIBRARIES})
 

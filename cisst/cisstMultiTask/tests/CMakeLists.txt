@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask tests
 #
-# (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -25,7 +25,7 @@ add_library (cisstMultiTaskTestsLib
              mtsMacrosTestClasses.cpp
              mtsTestComponents.h
              mtsTestComponents.cpp)
-
+set_property (TARGET cisstMultiTaskTestsLib PROPERTY FOLDER "cisstMultiTask/tests")
 cisst_target_link_libraries (cisstMultiTaskTestsLib cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
 # all source files
@@ -82,6 +82,7 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 
 # add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
+set_property (TARGET cisstMultiTaskTests PROPERTY FOLDER "cisstMultiTask/tests")
 target_link_libraries (cisstMultiTaskTests cisstTestsDriver cisstMultiTaskTestsLib)
 cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
@@ -91,14 +92,17 @@ if (CISST_MTS_HAS_ICE)
   # create our own component manager with special IOs for pipe communication
   add_executable (cisstMultiTaskTestsComponentManager
                   mtsTestComponentManager.cpp)
+  set_property (TARGET cisstMultiTaskTestsComponentManager PROPERTY FOLDER "cisstMultiTask/tests")
   cisst_target_link_libraries (cisstMultiTaskTestsComponentManager cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
   # create an empty process usable to dynamically create components and connect
   add_executable (cisstMultiTaskTestsProcess
                   mtsTestProcess.cpp)
+  set_property (TARGET cisstMultiTaskTestsProcess PROPERTY FOLDER "cisstMultiTask/tests")
   cisst_target_link_libraries (cisstMultiTaskTestsProcess cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
   # create a program to configure multiple processes to be tested, also triggers creation and connection of components
   add_executable (cisstMultiTaskTestsConfigurationManager
                   mtsTestConfigurationManager.cpp)
+  set_property (TARGET cisstMultiTaskTestsConfigurationManager PROPERTY FOLDER "cisstMultiTask/tests")               
   cisst_target_link_libraries (cisstMultiTaskTestsConfigurationManager cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
   # make sure these programs are compiled before the test program

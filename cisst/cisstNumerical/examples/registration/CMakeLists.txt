@@ -20,9 +20,11 @@ if (cisst_FOUND_AS_REQUIRED)
 
   if (CISST_HAS_CISSTNETLIB)
     add_executable (nmrExRegistrationAccuracy Accuracy.cpp DataSet.cpp DataSet.h)
+    set_property (TARGET nmrExRegistrationAccuracy PROPERTY FOLDER "cisstNumerical/examples")
     cisst_target_link_libraries (nmrExRegistrationAccuracy ${REQUIRED_CISST_LIBRARIES})
 
     add_executable (nmrExRegistrationDistances Distances.cpp DataSet.cpp DataSet.h)
+    set_property (TARGET nmrExRegistrationDistances PROPERTY FOLDER "cisstNumerical/examples")
     cisst_target_link_libraries (nmrExRegistrationDistances ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)

@@ -102,6 +102,7 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 
 # Add executable for C++ tests
 add_executable (cisstNumericalTests ${SOURCE_FILES} ${HEADER_FILES})
+set_property (TARGET cisstNumericalTests PROPERTY FOLDER "cisstNumerical/tests")
 target_link_libraries (cisstNumericalTests cisstTestsDriver)
 
 # If cisstOSAbstraction is compiled, compile multithreaded tests

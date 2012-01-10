@@ -17,7 +17,7 @@ find_package (cisst COMPONENTS cisstCommon)
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
   add_executable (cmnExPortability portability.cpp)
-
+  set_property (TARGET cmnExPortability PROPERTY FOLDER "cisstCommon/examples")
   cisst_target_link_libraries (cmnExPortability cisstCommon)
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")

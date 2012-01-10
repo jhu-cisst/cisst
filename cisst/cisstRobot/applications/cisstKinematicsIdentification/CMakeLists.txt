@@ -22,4 +22,5 @@ set (REQUIRED_CISST_LIBRARIES
 cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 
 add_executable (cisstKinematicsIdentification KinematicsIdentification.cpp)
+set_property (TARGET cisstKinematicsIdentification PROPERTY FOLDER "cisstRobot/applications")
 cisst_target_link_libraries (cisstKinematicsIdentification ${REQUIRED_CISST_LIBRARIES})

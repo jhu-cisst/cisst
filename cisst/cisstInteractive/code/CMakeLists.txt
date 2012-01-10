@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # CMakeLists for cisstInteractive
@@ -33,6 +33,7 @@ cisst_library_use_settings (cisstInteractive cisstPython)
 cisst_set_directories (cisstPython)
 
 cisst_add_library (LIBRARY cisstInteractive
+                   FOLDER cisstInteractive
                    DEPENDENCIES ${DEPENDENCIES}
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
@@ -44,6 +45,7 @@ add_custom_target (cisstInteractive_COMPILE_IREPY ALL
                    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/makeIrepy.py
                    ${CMAKE_CURRENT_SOURCE_DIR}/irepy  # src-dir
                    ${LIBRARY_OUTPUT_PATH}/irepy)   # dest-dir
+set_property (TARGET cisstInteractive_COMPILE_IREPY PROPERTY FOLDER "cisstInteractive")
 
 install (DIRECTORY ${LIBRARY_OUTPUT_PATH}/irepy
          DESTINATION lib

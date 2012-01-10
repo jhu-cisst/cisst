@@ -77,6 +77,7 @@ set (HEADER_FILES
      )
 
 cisst_add_library (LIBRARY cisstParameterTypes
+                   FOLDER cisstParameterTypes
                    DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}

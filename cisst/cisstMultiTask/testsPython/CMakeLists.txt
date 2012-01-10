@@ -2,7 +2,7 @@
 # $Id$
 #
 
-# (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # --- begin cisst license - do not edit ---
@@ -30,6 +30,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 # We are using C++ code that needs to be wrapped
 add_library (cisstMultiTaskPythonTest SHARED
              mtsPeriodicTaskTest.h mtsPeriodicTaskTest.cpp)
+set_property (TARGET cisstMultiTaskPythonTest PROPERTY FOLDER "cisstMultiTask/tests")
 cisst_target_link_libraries (cisstMultiTaskPythonTest ${CISST_LIBRARIES_NEEDED})
 
 
@@ -38,6 +39,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 # We are using C++ code
 cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
+                       FOLDER "cisstMultiTask/tests"
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstMultiTaskPythonTest)
 
 # Copy the .py file generated to wherever the libraries are
@@ -66,6 +68,7 @@ endif (CMAKE_CONFIGURATION_TYPES)
 add_custom_target (cisstMultiTask_CREATE_PYTHON_TESTS_LIST ALL
                    COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskTests.py -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
                    SOURCES ${TEST_PROGRAMS})
+set_property (TARGET cisstMultiTask_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisstMultiTask/tests")
 
 add_dependencies (cisstMultiTask_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
