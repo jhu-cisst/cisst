@@ -27,71 +27,71 @@ const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
     //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s)
+    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s) // MJ TEMP
 {
-    StateTableAccessors = new StateTableAccessorType(true);
-    StateTableAccessInterfaces = new StateTableAccessInterfaceType(true);
-
-    // Create and add filters
-    mtsMonitorFilterBase * filter;
-    // Bypass filter (for testing purpose) MJ: remove this later
-    filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period);
-    if (!this->StateTableMonitor.AddFilter(filter))
-        cmnThrow(std::string("mtsTask: failed to add filter to monitor state table.  Filter name: ") + filter->GetFilterName());
-    // More to come ...
+    TargetComponents = new TargetComponentsType(true);
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
 {
-    StateTableAccessors->DeleteAll();
-    StateTableAccessInterfaces->DeleteAll();
-
-    delete StateTableAccessors;
-    delete StateTableAccessInterfaces;
+    TargetComponents->DeleteAll();
+    delete TargetComponents;
 }
 
 void mtsMonitorComponent::Run(void)
 {
-    // For debugging
-#if 0
-    StateTableAccessor * accessor;
-    StateTableAccessorType::const_iterator it = StateTableAccessors->begin();
-    const StateTableAccessorType::const_iterator itEnd = StateTableAccessors->end();
+    PrintTargetComponents();
+}
+
+void mtsMonitorComponent::PrintTargetComponents(void)
+{
+    TargetComponentsType::const_iterator it = TargetComponents->begin();
+    const TargetComponentsType::const_iterator itEnd = TargetComponents->end();
     for (; it != itEnd; ++it) {
-        accessor = StateTableAccessors->GetItem(it->first);
-        CMN_ASSERT(accessor);
-        double period = 0;
-        accessor->GetPeriod(period);
-        std::cout << it->first << ": " << period << std::endl;
+        TargetComponent * target = it->second;
+        CMN_ASSERT(target);
+        target->GetPeriod(target->Period);
+        std::cout << target->Name << ": " << target->Period << std::endl;
     }
-#endif
 }
 
 bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
 {
     const std::string taskName = task->GetName();
 
-    if (StateTableAccessInterfaces->FindItem(taskName) || StateTableAccessors->FindItem(taskName)) {
+    if (TargetComponents->FindItem(taskName)) {
         CMN_LOG_CLASS_RUN_WARNING << "AddTargetComponent: task \"" << taskName << "\" is already registered" << std::endl;
         return true;
     }
 
-    StateTableAccessor * accessor = new StateTableAccessor;
-    CMN_ASSERT(accessor);
-    mtsInterfaceRequired * required = AddInterfaceRequired(GetNameOfStateTableAccessInterface(taskName));
-    CMN_ASSERT(required);
-
-    required->AddFunction("GetPeriod", accessor->GetPeriod);
-    // more to come ...
-
-    if (!StateTableAccessInterfaces->AddItem(taskName, required)) {
+    // Add new target component
+    TargetComponent * newTargetComponent = new TargetComponent;
+    newTargetComponent->Name = taskName;
+    newTargetComponent->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(taskName));
+    newTargetComponent->InterfaceRequired->AddFunction("GetPeriod", newTargetComponent->GetPeriod);
+    // FIXME Add more default filters
+    if (!TargetComponents->AddItem(taskName, newTargetComponent)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddTargetComponent: Failed to add state table access interface for task \"" << taskName << "\"" << std::endl;
         return false;
     }
-    if (!StateTableAccessors->AddItem(taskName, accessor)) {
-        StateTableAccessInterfaces->RemoveItem(taskName);
-        CMN_LOG_CLASS_RUN_ERROR << "AddTargetComponent: Failed to add state table accessor for task \"" << taskName << "\"" << std::endl;
-        return false;
+
+    // Add "Period" state to the monitoring state table of this component with the name of
+    // (component name)+"Period".  Default filters will run on this state variable.
+    std::string stateName(taskName);
+    stateName += "Period";
+    // MJ TEMP: Adding a new element to state table on the fly is not thread safe -- need to fix this.
+    this->StateTableMonitor.NewElement(stateName, &newTargetComponent->Period);
+
+    // Create default filters and add them to the monitor state table of this component (mtsMonitorComponent)
+    mtsMonitorFilterBase * filter;
+    // Bypass filter (for testing purpose) MJ: remove this later
+    //filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period); // for self-monitoring
+    filter = new mtsMonitorFilterBypass(stateName);
+    if (!this->StateTableMonitor.AddFilter(filter)) {
+        std::stringstream ss;
+        ss << "mtsMonitorComponent::AddTargetComponent: Failed to add filter \"" << filter->GetFilterName()
+           << "\" to monitor a target component \"" << taskName << "\"";
+        cmnThrow(ss.str());
     }
 
     return true;
@@ -99,16 +99,12 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
 
 bool mtsMonitorComponent::RemoveTargetComponent(const std::string & taskName)
 {
-    if (!StateTableAccessInterfaces->FindItem(taskName) || !StateTableAccessors->FindItem(taskName)) {
+    if (!TargetComponents->FindItem(taskName)) {
         CMN_LOG_CLASS_RUN_WARNING << "RemoveTargetComponent: task \"" << taskName << "\" is not found" << std::endl;
-        return true;
+        return false;
     }
 
-    bool success = true;
-    success &= StateTableAccessInterfaces->RemoveItem(taskName);
-    success &= StateTableAccessors->RemoveItem(taskName);
-
-    return success;
+    return TargetComponents->RemoveItem(taskName);
 }
 
 //-----------------------------------------------

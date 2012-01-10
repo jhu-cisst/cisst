@@ -612,6 +612,7 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
         ss << outputSignal->GetName() << filterUID;
         newElementName = ss.str();
 
+        // MJ: adding a new element on the fly may not be thread-safe -- need double check.
         outputElementId = NewElement(newElementName, &outputSignal->Placeholder);
         outputSignal->SetStateDataId(outputElementId);
 

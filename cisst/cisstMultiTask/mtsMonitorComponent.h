@@ -73,20 +73,25 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    class StateTableAccessor
-    {
+    class TargetComponent {
     public:
+        // Name of target component
+        std::string Name;
+        // Required interface to connect to the target component
+        mtsInterfaceRequired * InterfaceRequired;
+        // Function to read state variables from target component
         mtsFunctionRead GetPeriod;
-        // more to come ...
+        // Placeholders to register state variable to the monitoring state table of this
+        // component (i.e., working copy of Period of the target component)
+        double Period;
     };
 
-    /*! List of StateTableAccessor */
-    typedef cmnNamedMap<StateTableAccessor> StateTableAccessorType;
-    StateTableAccessorType * StateTableAccessors;
+    /*! List of TargetComponent structure */
+    typedef cmnNamedMap<TargetComponent> TargetComponentsType;
+    TargetComponentsType * TargetComponents;
 
-    /*! List of required interfaces */
-    typedef cmnNamedMap<mtsInterfaceRequired> StateTableAccessInterfaceType;
-    StateTableAccessInterfaceType * StateTableAccessInterfaces;
+    /*! Print list of target components */
+    void PrintTargetComponents(void);
 
 public:
     mtsMonitorComponent();
