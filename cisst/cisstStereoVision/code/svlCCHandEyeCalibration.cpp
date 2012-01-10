@@ -706,7 +706,7 @@ bool svlCCHandEyeCalibration::getDualQuaternion(CvMat* matrix, CvMat* q, CvMat* 
     //r = rodrigues(R);
     cvRodrigues2(rmatrix,rvec);
     //theta = norm(r);
-    rvecNormDouble = cv::norm(rvec);
+    rvecNormDouble = cvNorm(rvec);
     cvAddS(rvecNorm,cvScalar(rvecNormDouble),rvecNorm);
     
     //l = r/norm(theta);
