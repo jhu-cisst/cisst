@@ -90,6 +90,9 @@ protected:
     typedef cmnNamedMap<TargetComponent> TargetComponentsType;
     TargetComponentsType * TargetComponents;
 
+    /*! Fetch new values from target components and update local copies */
+    void FetchNewValues(void);
+
     /*! Print list of target components */
     void PrintTargetComponents(void);
 

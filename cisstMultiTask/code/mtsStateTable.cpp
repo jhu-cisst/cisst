@@ -323,7 +323,8 @@ void mtsStateTable::Advance(void) {
 
 #if CISST_MTS_SUPPORT_FDD
     for (size_t i = 0; i < MonitorFilters.size(); ++i) {
-        MonitorFilters[i]->DoFiltering();
+        //MonitorFilters[i]->DoFiltering();
+        MonitorFilters[i]->DoFiltering(true); // print debug messages to std
     }
 #endif
 }

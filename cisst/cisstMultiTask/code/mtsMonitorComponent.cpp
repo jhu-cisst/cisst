@@ -40,7 +40,19 @@ mtsMonitorComponent::~mtsMonitorComponent()
 
 void mtsMonitorComponent::Run(void)
 {
-    PrintTargetComponents();
+    FetchNewValues();
+    //PrintTargetComponents();
+}
+
+void mtsMonitorComponent::FetchNewValues(void)
+{
+    TargetComponentsType::const_iterator it = TargetComponents->begin();
+    const TargetComponentsType::const_iterator itEnd = TargetComponents->end();
+    for (; it != itEnd; ++it) {
+        TargetComponent * target = it->second;
+        CMN_ASSERT(target);
+        target->GetPeriod(target->Period);
+    }
 }
 
 void mtsMonitorComponent::PrintTargetComponents(void)
@@ -86,13 +98,16 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
     mtsMonitorFilterBase * filter;
     // Bypass filter (for testing purpose) MJ: remove this later
     //filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period); // for self-monitoring
-    filter = new mtsMonitorFilterBypass(stateName);
-    if (!this->StateTableMonitor.AddFilter(filter)) {
-        std::stringstream ss;
-        ss << "mtsMonitorComponent::AddTargetComponent: Failed to add filter \"" << filter->GetFilterName()
-           << "\" to monitor a target component \"" << taskName << "\"";
-        cmnThrow(ss.str());
+#define CHECK_ERROR( _filterName )\
+    if (!this->StateTableMonitor.AddFilter(filter)) {\
+        std::stringstream ss;\
+        ss << "mtsMonitorComponent::AddTargetComponent: Failed to add filter \"" << filter->GetFilterName()\
+           << "\" to monitor a target component \"" << taskName << "\"";\
+        cmnThrow(ss.str());\
     }
+    filter = new mtsMonitorFilterBypass(stateName); CHECK_ERROR();
+    filter = new mtsMonitorFilterTrendVel(stateName, this->Period); CHECK_ERROR();
+#undef CHECK_ERROR
 
     return true;
 }
