@@ -57,6 +57,9 @@ namespace svlDraw
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, svlTriangle & tri, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, svlPoint2D corner1, svlPoint2D corner2, svlPoint2D corner3, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Triangle(svlSampleImage* image, unsigned int videoch, int x1, int y1, int x2, int y2, int x3, int y3, svlRGB color, svlDraw::Internals& internals);
+    void CISST_EXPORT Quad(svlSampleImage* image, unsigned int videoch, svlQuad & quad, svlRGB color, svlDraw::Internals& internals);
+    void CISST_EXPORT Quad(svlSampleImage* image, unsigned int videoch, svlPoint2D corner1, svlPoint2D corner2, svlPoint2D corner3, svlPoint2D corner4, svlRGB color, svlDraw::Internals& internals);
+    void CISST_EXPORT Quad(svlSampleImage* image, unsigned int videoch, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, svlRGB color, svlDraw::Internals& internals);
     void CISST_EXPORT Poly(svlSampleImage* image, unsigned int videoch, const vctDynamicVectorRef<svlPoint2D> points, svlRGB color, unsigned int thickness, unsigned int start);
     void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, svlPoint2D center, vctInt2 radii, svlRGB color, double from_angle = 0.0, double to_angle = 360.0, double rotation = 0.0, int thickness = 1);
     void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, svlRGB color, unsigned int radius = 5);
@@ -68,6 +71,10 @@ namespace svlDraw
                                    svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
                                    svlDraw::Internals& internals,
                                    unsigned int alpha = 256);
+    void CISST_EXPORT WarpQuad(svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & in_quad,
+                               svlSampleImage* out_img, unsigned int out_vch, svlQuad & out_quad,
+                               svlDraw::Internals& internals,
+                               unsigned int alpha = 256);
 };
 
 #endif // _svlDraw_h

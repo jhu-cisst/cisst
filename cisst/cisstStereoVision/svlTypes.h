@@ -158,7 +158,6 @@ struct CISST_EXPORT svlBlob
     unsigned int label;
 };
 
-
 #pragma pack()
 
 
@@ -229,6 +228,23 @@ struct CISST_EXPORT svlTriangle
     int y2;
     int x3;
     int y3;
+};
+
+struct CISST_EXPORT svlQuad
+{
+    svlQuad();
+    svlQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+    void Assign(const svlQuad & quad);
+    void Assign(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int x3;
+    int y3;
+    int x4;
+    int y4;
 };
 
 struct CISST_EXPORT svlPoint2D

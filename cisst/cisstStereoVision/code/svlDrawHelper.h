@@ -47,20 +47,22 @@ public:
 
 namespace svlDrawHelper
 {
-    //////////////////////
-    // Triangle Drawing //
-    //////////////////////
+    ///////////////////
+    // Shape Drawing //
+    ///////////////////
 
-    class TriangleInternals : public svlDrawInternals
+    class ShapeInternals : public svlDrawInternals
     {
     public:
-        TriangleInternals();
+        ShapeInternals();
 
         bool SetImage(svlSampleImage* image, unsigned int channel = 0);
         void Draw(int x1, int y1, int x2, int y2, int x3, int y3, svlRGB color);
+        void Draw(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, svlRGB color);
 
     private:
         void SampleLine(vctDynamicVector<int>& samples, int x1, int y1, int x2, int y2);
+        void SampleLine(int x1, int y1, int x2, int y2);
 
     private:
         svlSampleImage* Image;
@@ -72,20 +74,23 @@ namespace svlDrawHelper
     };
 
 
-    //////////////////////
-    // Triangle Warping //
-    //////////////////////
+    /////////////
+    // Warping //
+    /////////////
 
-    class TriangleWarpInternals : public svlDrawInternals
+    class WarpInternals : public svlDrawInternals
     {
     public:
-        TriangleWarpInternals();
-        ~TriangleWarpInternals();
+        WarpInternals(unsigned int vertices);
+        ~WarpInternals();
 
         bool SetInputImage(svlSampleImage* image, unsigned int channel = 0);
         bool SetOutputImage(svlSampleImage* image, unsigned int channel = 0);
         void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
                   int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
+                  unsigned int alpha = 256);
+        void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
+                  int ox1, int oy1, int ox2, int oy2, int ox3, int oy3, int ox4, int oy4,
                   unsigned int alpha = 256);
 
     private:
@@ -97,10 +102,13 @@ namespace svlDrawHelper
                                int ox1, int oy1, int ox2, int oy2,
                                unsigned int alpha);
 
-        void AllocateBuffers(const unsigned int size);
+        void AllocateBuffers(unsigned int vertices, unsigned int size);
         void ReleaseBuffers();
 
     private:
+        // Default constructor is disabled
+        WarpInternals();
+
         unsigned char* Input;
         int InWidth;
         int InHeight;
@@ -109,9 +117,8 @@ namespace svlDrawHelper
         int OutWidth;
         int OutHeight;
 
-        vctInt3 _ilen;
-        vctInt3 _olen;
-
+        int* _ilen;
+        int* _olen;
         int* _in_idxs;
         int* _out_idxs;
         int* _lm_x;
@@ -121,10 +128,10 @@ namespace svlDrawHelper
         int* _lm_pos;
         int* _rm_pos;
 
-        vctFixedSizeVector<int*, 3> _ixs;
-        vctFixedSizeVector<int*, 3> _iys;
-        vctFixedSizeVector<int*, 3> _oxs;
-        vctFixedSizeVector<int*, 3> _oys;
+        vctDynamicVector<int*> _ixs;
+        vctDynamicVector<int*> _iys;
+        vctDynamicVector<int*> _oxs;
+        vctDynamicVector<int*> _oys;
     };
 };
 

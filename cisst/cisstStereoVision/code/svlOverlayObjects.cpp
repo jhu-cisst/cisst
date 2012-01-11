@@ -1443,8 +1443,7 @@ void svlOverlayStaticRect::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
         }
         else {
             if (!DrawInternals) DrawInternals = new svlDraw::Internals;
-            svlDraw::Triangle(bgimage, VideoCh, x1, y1, x2, y2, x3, y3, Color, DrawInternals[0]);
-            svlDraw::Triangle(bgimage, VideoCh, x1, y1, x3, y3, x4, y4, Color, DrawInternals[0]);
+            svlDraw::Quad(bgimage, VideoCh, x1, y1, x2, y2, x3, y3, x4, y4, Color, DrawInternals[0]);
         }
     }
     else {
@@ -2321,8 +2320,7 @@ void svlOverlayStaticBar::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_U
             y14 = static_cast<int>(x * m10 + y * m11 + m12);
 
             if (!DrawInternals) DrawInternals = new svlDraw::Internals;
-            svlDraw::Triangle(bgimage, VideoCh, x11, y11, x12, y12, x13, y13, BorderColor, DrawInternals[0]);
-            svlDraw::Triangle(bgimage, VideoCh, x11, y11, x13, y13, x14, y14, BorderColor, DrawInternals[0]);
+            svlDraw::Quad(bgimage, VideoCh, x11, y11, x12, y12, x13, y13, x14, y14, BorderColor, DrawInternals[0]);
         }
 
         double range;
@@ -2390,10 +2388,8 @@ void svlOverlayStaticBar::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_U
         }
 
         if (!DrawInternals) DrawInternals = new svlDraw::Internals;
-        svlDraw::Triangle(bgimage, VideoCh, x11, y11, x12, y12, x13, y13, Color,   DrawInternals[0]);
-        svlDraw::Triangle(bgimage, VideoCh, x11, y11, x13, y13, x14, y14, Color,   DrawInternals[0]);
-        svlDraw::Triangle(bgimage, VideoCh, x21, y21, x22, y22, x23, y23, BGColor, DrawInternals[0]);
-        svlDraw::Triangle(bgimage, VideoCh, x21, y21, x23, y23, x24, y24, BGColor, DrawInternals[0]);
+        svlDraw::Quad(bgimage, VideoCh, x11, y11, x12, y12, x13, y13, x14, y14, Color,   DrawInternals[0]);
+        svlDraw::Quad(bgimage, VideoCh, x21, y21, x22, y22, x23, y23, x24, y24, BGColor, DrawInternals[0]);
     }
     else {
         svlRect rect1, rect2;
