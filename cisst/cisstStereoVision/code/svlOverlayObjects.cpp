@@ -597,17 +597,55 @@ void svlOverlayBlobs::DrawInternal(svlSampleImage* bgimage, svlSample* input)
     svlBlob *blob = ovrlblobs->GetBlobsPointer(InputCh);
     const unsigned int maxblobs = ovrlblobs->GetBufferUsed(InputCh);
 
-    for (unsigned int j = 0; j < maxblobs; j ++) {
-        if (blob->used) {
-            svlDraw::Rectangle(bgimage, VideoCh,
-                               blob->left   - 1,
-                               blob->top    - 1,
-                               blob->right  + 1,
-                               blob->bottom + 1,
-                               20, 128, 20,
-                               false);
+    if (Transformed) {
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+        int x1, y1, x2, y2, x3, y3, x4, y4;
+        double x, y;
+
+        for (unsigned int j = 0; j < maxblobs; j ++) {
+            if (blob->used) {
+                x = blob->left - 1; y = blob->top - 1;
+                x1 = static_cast<int>(x * m00 + y * m01 + m02);
+                y1 = static_cast<int>(x * m10 + y * m11 + m12);
+
+                x = blob->right + 1; y = blob->top - 1;
+                x2 = static_cast<int>(x * m00 + y * m01 + m02);
+                y2 = static_cast<int>(x * m10 + y * m11 + m12);
+
+                x = blob->right + 1; y = blob->bottom + 1;
+                x3 = static_cast<int>(x * m00 + y * m01 + m02);
+                y3 = static_cast<int>(x * m10 + y * m11 + m12);
+
+                x = blob->left - 1; y = blob->bottom + 1;
+                x4 = static_cast<int>(x * m00 + y * m01 + m02);
+                y4 = static_cast<int>(x * m10 + y * m11 + m12);
+
+                svlDraw::Line(bgimage, VideoCh, x1, y1, x2, y2, 20, 128, 20);
+                svlDraw::Line(bgimage, VideoCh, x2, y2, x3, y3, 20, 128, 20);
+                svlDraw::Line(bgimage, VideoCh, x3, y3, x4, y4, 20, 128, 20);
+                svlDraw::Line(bgimage, VideoCh, x4, y4, x1, y1, 20, 128, 20);
+            }
+            blob ++;
         }
-        blob ++;
+    }
+    else {
+        for (unsigned int j = 0; j < maxblobs; j ++) {
+            if (blob->used) {
+                svlDraw::Rectangle(bgimage, VideoCh,
+                                   blob->left   - 1,
+                                   blob->top    - 1,
+                                   blob->right  + 1,
+                                   blob->bottom + 1,
+                                   20, 128, 20,
+                                   false);
+            }
+            blob ++;
+        }
     }
 }
 
@@ -1303,7 +1341,8 @@ svlOverlayStaticRect::svlOverlayStaticRect() :
     svlOverlay(),
     Rect(0, 0, 10, 10),
     Color(255, 255, 255),
-    Fill(true)
+    Fill(true),
+    DrawInternals(0)
 {
 }
 
@@ -1315,12 +1354,14 @@ svlOverlayStaticRect::svlOverlayStaticRect(unsigned int videoch,
     svlOverlay(videoch, visible),
     Rect(rect),
     Color(color),
-    Fill(fill)
+    Fill(fill),
+    DrawInternals(0)
 {
 }
 
 svlOverlayStaticRect::~svlOverlayStaticRect()
 {
+    if (DrawInternals) delete DrawInternals;
 }
 
 void svlOverlayStaticRect::SetRect(svlRect rect)
@@ -1368,7 +1409,47 @@ bool svlOverlayStaticRect::GetFill() const
 
 void svlOverlayStaticRect::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
-    svlDraw::Rectangle(bgimage, VideoCh, Rect, Color, Fill);
+    if (Transformed) {
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+        int x1, y1, x2, y2, x3, y3, x4, y4;
+        double x, y;
+
+        x = Rect.left; y = Rect.top;
+        x1 = static_cast<int>(x * m00 + y * m01 + m02);
+        y1 = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = Rect.right; y = Rect.top;
+        x2 = static_cast<int>(x * m00 + y * m01 + m02);
+        y2 = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = Rect.right; y = Rect.bottom;
+        x3 = static_cast<int>(x * m00 + y * m01 + m02);
+        y3 = static_cast<int>(x * m10 + y * m11 + m12);
+
+        x = Rect.left; y = Rect.bottom;
+        x4 = static_cast<int>(x * m00 + y * m01 + m02);
+        y4 = static_cast<int>(x * m10 + y * m11 + m12);
+
+        if (!Fill) {
+            svlDraw::Line(bgimage, VideoCh, x1, y1, x2, y2, Color.r, Color.g, Color.b);
+            svlDraw::Line(bgimage, VideoCh, x2, y2, x3, y3, Color.r, Color.g, Color.b);
+            svlDraw::Line(bgimage, VideoCh, x3, y3, x4, y4, Color.r, Color.g, Color.b);
+            svlDraw::Line(bgimage, VideoCh, x4, y4, x1, y1, Color.r, Color.g, Color.b);
+        }
+        else {
+            if (!DrawInternals) DrawInternals = new svlDraw::Internals;
+            svlDraw::Triangle(bgimage, VideoCh, x1, y1, x2, y2, x3, y3, Color, DrawInternals[0]);
+            svlDraw::Triangle(bgimage, VideoCh, x1, y1, x3, y3, x4, y4, Color, DrawInternals[0]);
+        }
+    }
+    else {
+        svlDraw::Rectangle(bgimage, VideoCh, Rect, Color, Fill);
+    }
 }
 
 
@@ -1501,6 +1582,8 @@ void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* C
         double norm = rot.Norm();
         rx = static_cast<int>(norm * RadiusHoriz);
         ry = static_cast<int>(norm * RadiusVert);
+
+        // TO DO: need to take care of rotation as well!
     }
     else {
         cx = Center.x;    cy = Center.y;
@@ -1833,6 +1916,13 @@ svlOverlayStaticPoly::~svlOverlayStaticPoly()
 {
 }
 
+void svlOverlayStaticPoly::SetPoints()
+{
+    CS.Enter();
+        Poly.SetSize(0);
+    CS.Leave();
+}
+
 void svlOverlayStaticPoly::SetPoints(const TypeRef points)
 {
     CS.Enter();
@@ -1996,7 +2086,8 @@ svlOverlayStaticBar::svlOverlayStaticBar() :
     Color(255, 255, 255),
     BGColor(128, 128, 128),
     BorderWidth(1),
-    BorderColor(0, 0, 0)
+    BorderColor(0, 0, 0),
+    DrawInternals(0)
 {
 }
 
@@ -2018,7 +2109,8 @@ svlOverlayStaticBar::svlOverlayStaticBar(unsigned int videoch,
     Color(color),
     BGColor(bgcolor),
     BorderWidth(borderwidth),
-    BorderColor(bordercolor)
+    BorderColor(bordercolor),
+    DrawInternals(0)
 {
     Rect.Normalize();
 }
@@ -2039,13 +2131,15 @@ svlOverlayStaticBar::svlOverlayStaticBar(unsigned int videoch,
     Color(color),
     BGColor(bgcolor),
     BorderWidth(0),
-    BorderColor(0, 0, 0)
+    BorderColor(0, 0, 0),
+    DrawInternals(0)
 {
     Rect.Normalize();
 }
 
 svlOverlayStaticBar::~svlOverlayStaticBar()
 {
+    if (DrawInternals) delete DrawInternals;
 }
 
 void svlOverlayStaticBar::SetRange(const vct2 range)
@@ -2198,52 +2292,157 @@ int svlOverlayStaticBar::GetImagePosInValue(int imagepos, double & value) const
 
 void svlOverlayStaticBar::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
-    svlRect rect1, rect2;
+    if (Transformed) {
+        const double m00 = Transform.Element(0, 0);
+        const double m01 = Transform.Element(0, 1);
+        const double m02 = Transform.Element(0, 2);
+        const double m10 = Transform.Element(1, 0);
+        const double m11 = Transform.Element(1, 1);
+        const double m12 = Transform.Element(1, 2);
+        int x11, y11, x12, y12, x13, y13, x14, y14;
+        int x21, y21, x22, y22, x23, y23, x24, y24;
+        double x, y;
 
-    if (BorderWidth > 0) {
-        rect1.left = Rect.left - BorderWidth;
-        rect1.right = Rect.right + BorderWidth;
-        rect1.top = Rect.top - BorderWidth;
-        rect1.bottom = Rect.bottom + BorderWidth;
+        if (BorderWidth > 0) {
+            x = Rect.left - BorderWidth; y = Rect.top - BorderWidth;
+            x11 = static_cast<int>(x * m00 + y * m01 + m02);
+            y11 = static_cast<int>(x * m10 + y * m11 + m12);
 
-        if (rect1.left <= rect1.right &&
-            rect1.top  <= rect1.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect1, BorderColor, true);
-    }
+            x = Rect.right + BorderWidth; y = Rect.top - BorderWidth;
+            x12 = static_cast<int>(x * m00 + y * m01 + m02);
+            y12 = static_cast<int>(x * m10 + y * m11 + m12);
 
-    double range;
-    if (Range[0] != Range[1]) range = Range[1] - Range[0];
-    else range = 100.0;
-    double position = (Value - Range[0]) / range;
-    if (position < 0.0) position = 0.0;
-    else if (position > 1.0) position = 1.0;
+            x = Rect.right + BorderWidth; y = Rect.bottom + BorderWidth;
+            x13 = static_cast<int>(x * m00 + y * m01 + m02);
+            y13 = static_cast<int>(x * m10 + y * m11 + m12);
 
-    if (Vertical) {
-        rect1.left = Rect.left;
-        rect1.right = Rect.right;
-        rect1.top =  Rect.bottom - static_cast<int>(static_cast<double>(Rect.bottom - Rect.top) * position);
-        rect1.bottom = Rect.bottom;
+            x = Rect.left - BorderWidth; y = Rect.bottom + BorderWidth;
+            x14 = static_cast<int>(x * m00 + y * m01 + m02);
+            y14 = static_cast<int>(x * m10 + y * m11 + m12);
 
-        rect2.left = Rect.left;
-        rect2.right = Rect.right;
-        rect2.top = Rect.top;
-        rect2.bottom = rect1.top;
+            if (!DrawInternals) DrawInternals = new svlDraw::Internals;
+            svlDraw::Triangle(bgimage, VideoCh, x11, y11, x12, y12, x13, y13, BorderColor, DrawInternals[0]);
+            svlDraw::Triangle(bgimage, VideoCh, x11, y11, x13, y13, x14, y14, BorderColor, DrawInternals[0]);
+        }
+
+        double range;
+        if (Range[0] != Range[1]) range = Range[1] - Range[0];
+        else range = 100.0;
+        double position = (Value - Range[0]) / range;
+        if (position < 0.0) position = 0.0;
+        else if (position > 1.0) position = 1.0;
+
+        if (Vertical) {
+            x = Rect.left; y = Rect.bottom - static_cast<int>(static_cast<double>(Rect.bottom - Rect.top) * position);
+            x11 = static_cast<int>(x * m00 + y * m01 + m02);
+            y11 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.right; // y is unchanged
+            x12 = static_cast<int>(x * m00 + y * m01 + m02);
+            y12 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.right; y = Rect.bottom;
+            x13 = static_cast<int>(x * m00 + y * m01 + m02);
+            y13 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.left; y = Rect.bottom;
+            x14 = static_cast<int>(x * m00 + y * m01 + m02);
+            y14 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.left; y = Rect.top;
+            x21 = static_cast<int>(x * m00 + y * m01 + m02);
+            y21 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.right; y = Rect.top;
+            x22 = static_cast<int>(x * m00 + y * m01 + m02);
+            y22 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x23 = x12; y23 = y12;
+            x24 = x11; y24 = y11;
+        }
+        else {
+            x = Rect.left; y = Rect.top;
+            x11 = static_cast<int>(x * m00 + y * m01 + m02);
+            y11 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.left + static_cast<int>(static_cast<double>(Rect.right - Rect.left) * position); y = Rect.top;
+            x12 = static_cast<int>(x * m00 + y * m01 + m02);
+            y12 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            y = Rect.bottom; // x is unchanged
+            x13 = static_cast<int>(x * m00 + y * m01 + m02);
+            y13 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.left; y = Rect.bottom;
+            x14 = static_cast<int>(x * m00 + y * m01 + m02);
+            y14 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.right; y = Rect.top;
+            x22 = static_cast<int>(x * m00 + y * m01 + m02);
+            y22 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x = Rect.right; y = Rect.bottom;
+            x23 = static_cast<int>(x * m00 + y * m01 + m02);
+            y23 = static_cast<int>(x * m10 + y * m11 + m12);
+
+            x21 = x12; y21 = y12;
+            x24 = x13; y24 = y13;
+        }
+
+        if (!DrawInternals) DrawInternals = new svlDraw::Internals;
+        svlDraw::Triangle(bgimage, VideoCh, x11, y11, x12, y12, x13, y13, Color,   DrawInternals[0]);
+        svlDraw::Triangle(bgimage, VideoCh, x11, y11, x13, y13, x14, y14, Color,   DrawInternals[0]);
+        svlDraw::Triangle(bgimage, VideoCh, x21, y21, x22, y22, x23, y23, BGColor, DrawInternals[0]);
+        svlDraw::Triangle(bgimage, VideoCh, x21, y21, x23, y23, x24, y24, BGColor, DrawInternals[0]);
     }
     else {
-        rect1.left = Rect.left;
-        rect1.right = Rect.left + static_cast<int>(static_cast<double>(Rect.right - Rect.left) * position);
-        rect1.top = Rect.top;
-        rect1.bottom = Rect.bottom;
+        svlRect rect1, rect2;
 
-        rect2.left = rect1.right;
-        rect2.right = Rect.right;
-        rect2.top = Rect.top;
-        rect2.bottom = Rect.bottom;
+        if (BorderWidth > 0) {
+            rect1.left = Rect.left - BorderWidth;
+            rect1.right = Rect.right + BorderWidth;
+            rect1.top = Rect.top - BorderWidth;
+            rect1.bottom = Rect.bottom + BorderWidth;
+
+            if (rect1.left <= rect1.right &&
+                rect1.top  <= rect1.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect1, BorderColor, true);
+        }
+
+        double range;
+        if (Range[0] != Range[1]) range = Range[1] - Range[0];
+        else range = 100.0;
+        double position = (Value - Range[0]) / range;
+        if (position < 0.0) position = 0.0;
+        else if (position > 1.0) position = 1.0;
+
+        if (Vertical) {
+            rect1.left = Rect.left;
+            rect1.right = Rect.right;
+            rect1.top =  Rect.bottom - static_cast<int>(static_cast<double>(Rect.bottom - Rect.top) * position);
+            rect1.bottom = Rect.bottom;
+
+            rect2.left = Rect.left;
+            rect2.right = Rect.right;
+            rect2.top = Rect.top;
+            rect2.bottom = rect1.top;
+        }
+        else {
+            rect1.left = Rect.left;
+            rect1.right = Rect.left + static_cast<int>(static_cast<double>(Rect.right - Rect.left) * position);
+            rect1.top = Rect.top;
+            rect1.bottom = Rect.bottom;
+
+            rect2.left = rect1.right;
+            rect2.right = Rect.right;
+            rect2.top = Rect.top;
+            rect2.bottom = Rect.bottom;
+        }
+
+        if (rect1.left <= rect1.right &&
+            rect1.top  <= rect1.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect1, Color, true);
+        if (rect2.left <= rect2.right &&
+            rect2.top  <= rect2.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect2, BGColor, true);
     }
-
-    if (rect1.left <= rect1.right &&
-        rect1.top  <= rect1.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect1, Color, true);
-    if (rect2.left <= rect2.right &&
-        rect2.top  <= rect2.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect2, BGColor, true);
 }
 
 

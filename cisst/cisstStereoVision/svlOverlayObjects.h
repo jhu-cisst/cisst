@@ -422,6 +422,7 @@ private:
     svlRect Rect;
     svlRGB Color;
     bool Fill;
+    svlDraw::Internals* DrawInternals;
 };
 
 
@@ -580,6 +581,7 @@ public:
                          unsigned int start);
     virtual ~svlOverlayStaticPoly();
 
+    void SetPoints();
     void SetPoints(const TypeRef points);
     void SetPoints(const TypeRef points, unsigned int start);
     void SetColor(svlRGB color);
@@ -674,6 +676,7 @@ private:
     svlRGB BGColor;
     unsigned int BorderWidth;
     svlRGB BorderColor;
+    svlDraw::Internals* DrawInternals;
 };
 
 
