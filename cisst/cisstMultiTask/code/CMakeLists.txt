@@ -327,7 +327,7 @@ cisst_add_library (LIBRARY cisstMultiTask
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
                    ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
-
+#set_target_properties(cisstMultiTask PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 
 # Add linking to external libraries
 if (CISST_MTS_HAS_ICE)
@@ -348,3 +348,7 @@ if (WIN32 AND CISST_MTS_HAS_ICE)
   install (FILES ${ICE_BIN}/bzip2.dll DESTINATION bin COMPONENT cisstMultiTask)
   install (FILES ${ICE_CONFIG_FILES} DESTINATION share/cisstMultiTask COMPONENT cisstMultiTask)
 endif (WIN32 AND CISST_MTS_HAS_ICE)
+
+if (WIN32 AND CMAKE_CL_64) 
+	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} "/bigobj")
+endif (WIN32 AND CMAKE_CL_64)

@@ -1271,6 +1271,8 @@ if (CISST_SVL_HAS_BM_DECKLINK)
         cisst_set_package_settings (cisstStereoVision decklink INCLUDE_DIRECTORIES DeckLink_INCLUDE_DIR)
         cisst_set_package_settings (cisstStereoVision decklink LIBRARIES           DeckLink_LIBRARIES)
     endif (DeckLink_FOUND)
+else (CISST_SVL_HAS_BM_DECKLINK)
+ cisst_unset_all_package_settings (cisstStereoVision decklink)	
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
