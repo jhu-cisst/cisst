@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsQtWidgetGenericObjectProxy.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsStateIndex.h>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -29,6 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
+#include <QTableWidget>
+#include <QHeaderView>
 
 // -- mtsInt
 mtsQtWidgetIntRead::mtsQtWidgetIntRead(void):
@@ -37,6 +40,7 @@ mtsQtWidgetIntRead::mtsQtWidgetIntRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetIntRead::SetValue(const mtsGenericObject & value)
@@ -56,6 +60,7 @@ mtsQtWidgetIntWrite::mtsQtWidgetIntWrite(void):
 {
     SpinBox = new QSpinBox();
     Layout->addWidget(SpinBox);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetIntWrite::SetValue(const mtsGenericObject & value)
@@ -86,6 +91,7 @@ mtsQtWidgetBoolRead::mtsQtWidgetBoolRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetBoolRead::SetValue(const mtsGenericObject & value)
@@ -105,6 +111,7 @@ mtsQtWidgetBoolWrite::mtsQtWidgetBoolWrite(void):
     ComboBox->addItem("True");
     ComboBox->addItem("False");
     Layout->addWidget(ComboBox);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetBoolWrite::SetValue(const mtsGenericObject & value)
@@ -135,6 +142,7 @@ mtsQtWidgetDoubleRead::mtsQtWidgetDoubleRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetDoubleRead::SetValue(const mtsGenericObject & value)
@@ -155,6 +163,7 @@ mtsQtWidgetDoubleWrite::mtsQtWidgetDoubleWrite(void):
     DoubleSpinBox = new QDoubleSpinBox();
     DoubleSpinBox->setDecimals(5);
     Layout->addWidget(DoubleSpinBox);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetDoubleWrite::SetValue(const mtsGenericObject & value)
@@ -185,6 +194,7 @@ mtsQtWidgetStdStringRead::mtsQtWidgetStdStringRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetStdStringRead::SetValue(const mtsGenericObject & value)
@@ -202,6 +212,7 @@ mtsQtWidgetStdStringWrite::mtsQtWidgetStdStringWrite(void):
 {
     LineEdit = new QLineEdit();
     Layout->addWidget(LineEdit);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetStdStringWrite::SetValue(const mtsGenericObject & value)
@@ -222,4 +233,106 @@ bool mtsQtWidgetStdStringWrite::GetValue(mtsGenericObject & placeHolder) const
         return true;
     }
     return false;
+}
+
+
+// -- mtsStateIndex
+
+mtsQtWidgetStateIndexRead::mtsQtWidgetStateIndexRead(void):
+    mtsQtWidgetGenericObjectRead()
+{
+    Label = new QLabel();
+    Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    Layout->addWidget(Label);
+    Layout->addStretch();
+}
+
+bool mtsQtWidgetStateIndexRead::SetValue(const mtsGenericObject & value)
+{
+    const mtsStateIndex * stateIndexData = dynamic_cast<const mtsStateIndex *>(&value);
+    if (stateIndexData) {
+        Label->setText(stateIndexData->ToString().c_str());
+        return true;
+    }
+    return false;
+}
+
+QWidget * mtsQtWidgetStateIndexWrite::MakeSpinBox() {
+    return new QSpinBox();
+}
+
+QWidget * mtsQtWidgetStateIndexWrite::MakeDoubleSpinBox() {
+    return new QDoubleSpinBox();
+}
+
+mtsQtWidgetStateIndexWrite::mtsQtWidgetStateIndexWrite(void):
+    mtsQtWidgetGenericObjectWrite()
+{
+    QStringList members;
+    members << "Index" << "Ticks" << "Length";
+
+    QList<StructEdit::WidgetCreatorCallback> widgetCreators;
+    widgetCreators << &MakeSpinBox << &MakeDoubleSpinBox << &MakeDoubleSpinBox;
+
+    TableWidget = new StructEdit(members, widgetCreators);
+
+    Layout->addWidget(TableWidget);
+    Layout->addStretch();
+}
+
+bool mtsQtWidgetStateIndexWrite::SetValue(const mtsGenericObject & value)
+{
+    const mtsStateIndex * stateIndexData = dynamic_cast<const mtsStateIndex *>(&value);
+    if (stateIndexData) {
+        TableWidget->item(0, 0)->setData(Qt::EditRole, stateIndexData->Index());
+        TableWidget->item(0, 1)->setData(Qt::EditRole, stateIndexData->Ticks());
+        TableWidget->item(0, 2)->setData(Qt::EditRole, stateIndexData->Length());
+        return true;
+    }
+    return false;
+}
+
+bool mtsQtWidgetStateIndexWrite::GetValue(mtsGenericObject & placeHolder) const
+{
+    mtsStateIndex * stateIndexData = dynamic_cast<mtsStateIndex *>(&placeHolder);
+    if (stateIndexData) {
+        mtsStateIndex newStateIndexData(
+            0.0,
+            TableWidget->item(0, 0)->data(Qt::EditRole).toInt(),
+            TableWidget->item(0, 1)->data(Qt::EditRole).toDouble(),
+            TableWidget->item(0, 2)->data(Qt::EditRole).toDouble()
+        );
+        stateIndexData->ReconstructFrom(newStateIndexData);
+        return true;
+    }
+    return false;
+}
+
+StructEdit::StructEdit(const QStringList & labels, const QList<WidgetCreatorCallback> & widgets, int rows)
+    : QTableWidget(rows, labels.size())
+{
+    setHorizontalHeaderLabels(labels);
+
+    int cols = labels.size();
+
+    for(int i = 0; i < rows; ++i) {
+        for(int j = 0; j < cols; ++j) {
+            setItem(i, j, new QTableWidgetItem());
+        }
+    }
+
+    for(int i = 0; i < rows; ++i) {
+        for(int j = 0; j < cols; ++j) {
+            setCellWidget(i, j, widgets[j]());
+        }
+    }
+
+    horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    verticalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    if(rows < 2) verticalHeader()->setVisible(false);
+
+    int verticalHeight = horizontalHeader()->sizeHint().height() + verticalHeader()->sizeHint().height();
+
+    setFixedHeight(verticalHeight);
 }

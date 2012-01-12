@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsQtWidgetGenericObject_h
 #define _mtsQtWidgetGenericObject_h
 
+class QHBoxLayout;
 #include <QWidget>
 
 #include <cisstMultiTask/mtsGenericObject.h>
@@ -37,7 +38,7 @@ class mtsQtWidgetGenericObjectRead: public QWidget, public cmnGenericObject
     Q_OBJECT;
 
 protected:
-    QLayout * Layout;
+    QHBoxLayout * Layout;
 
 public:
     mtsQtWidgetGenericObjectRead(void);

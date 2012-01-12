@@ -33,7 +33,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 
 #include <QVBoxLayout>
-#include <QToolBox>
 
 
 mtsQtWidgetInterfaceRequired::mtsQtWidgetInterfaceRequired(mtsInterfaceProvided * interface,
@@ -41,8 +40,10 @@ mtsQtWidgetInterfaceRequired::mtsQtWidgetInterfaceRequired(mtsInterfaceProvided 
     QWidget(),
     ExecutionInterface(executionInterface)
 {
-    FunctionsWidget = new QToolBox();
+    FunctionsWidget = new mtsQtFunctionListContainerWidget();
     QLayout* layout = new QVBoxLayout();
+    layout->setSpacing(1);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(FunctionsWidget);
     setLayout(layout);
     CreateWidgets(*interface, *ExecutionInterface);

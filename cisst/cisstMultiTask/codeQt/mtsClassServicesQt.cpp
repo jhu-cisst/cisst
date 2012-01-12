@@ -48,3 +48,6 @@ MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStdString, mtsQtWidgetStdStri
 #include <cisstMultiTask/mtsVector.h>
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDoubleVec, mtsQtWidgetDoubleVecRead, mtsQtWidgetDoubleVecWrite);
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBoolVec, mtsQtWidgetBoolVecRead, mtsQtWidgetBoolVecWrite);
+
+#include <cisstMultiTask/mtsStateIndex.h>
+MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStateIndex, mtsQtWidgetStateIndexRead, mtsQtWidgetStateIndexWrite);

@@ -31,8 +31,95 @@ http://www.cisst.org/cisst/license.txt.
 #include <QFormLayout>
 #include <QObject>
 #include <QLabel>
+#include <QFrame>
 #include <QPushButton>
+#include <QToolButton>
 #include <QDoubleSpinBox>
+
+#include <QDebug>
+
+
+mtsQtFunctionContainerWidget::mtsQtFunctionContainerWidget():
+    QFrame()
+{
+    setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+
+    FunctionWidgetContainer = new QWidget();
+
+    TitleBar = new QWidget();
+    QHBoxLayout * layout = new QHBoxLayout();
+    layout->setSpacing(1);
+    layout->setContentsMargins(0, 0, 0, 0);
+    TitleBar->setLayout(layout);
+
+    ToggleButton = new QToolButton();
+    ToggleButton->setArrowType(Qt::RightArrow);
+    ToggleButton->setAutoRaise(true);
+    connect(ToggleButton, SIGNAL(clicked()), this, SLOT(ToggleCollapsed()));
+    layout->addWidget(ToggleButton);
+
+    TitleLabel = new QLabel();
+    layout->addWidget(TitleLabel);
+
+    layout = new QHBoxLayout();
+    layout->setSpacing(1);
+    layout->setContentsMargins(0, 0, 0, 0);
+    setLayout(layout);
+    layout->addWidget(TitleBar);
+    layout->addWidget(FunctionWidgetContainer);
+
+    layout->addStretch();
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+}
+
+void mtsQtFunctionContainerWidget::ToggleCollapsed()
+{
+    if(FunctionWidgetContainer->isVisible()) {
+        ToggleButton->setArrowType(Qt::RightArrow);
+        FunctionWidgetContainer->hide();
+    } else {
+        ToggleButton->setArrowType(Qt::LeftArrow);
+        FunctionWidgetContainer->show();
+    }
+}
+
+void mtsQtFunctionContainerWidget::SetFunctionWidget(QWidget * widget, const QString& name)
+{
+    this->layout()->removeWidget(FunctionWidgetContainer);
+    delete FunctionWidgetContainer;
+
+    TitleLabel->setText(name);
+
+    FunctionWidgetContainer = new QWidget();
+    QVBoxLayout * layout = new QVBoxLayout();
+    layout->setSpacing(1);
+    layout->setContentsMargins(0, 0, 0, 0);
+ 
+    FunctionWidgetContainer->setLayout(layout);
+    layout->addWidget(widget);
+
+    this->layout()->addWidget(FunctionWidgetContainer);
+    FunctionWidgetContainer->hide();
+    layout->addStretch();
+}
+
+
+mtsQtFunctionListContainerWidget::mtsQtFunctionListContainerWidget():
+    QWidget()
+{
+    QVBoxLayout * layout = new QVBoxLayout();
+    layout->setSpacing(1);
+    layout->setContentsMargins(0, 0, 0, 0);    
+    setLayout(layout);
+}
+
+
+void mtsQtFunctionListContainerWidget::addItem(QWidget * widget, const QString& name)
+{
+    mtsQtFunctionContainerWidget * containerWidget = new mtsQtFunctionContainerWidget();
+    containerWidget->SetFunctionWidget(widget, name);
+    layout()->addWidget(containerWidget);
+}
 
 
 mtsQtWidgetFunction::mtsQtWidgetFunction(void):
@@ -41,10 +128,12 @@ mtsQtWidgetFunction::mtsQtWidgetFunction(void):
     Enabled(true)
 {
     MainLayout = new QVBoxLayout();
+    MainLayout->setSpacing(1);
     MainLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(MainLayout);
 
     ControlLayout = new QHBoxLayout();
+    ControlLayout->setSpacing(1);
     ControlLayout->setContentsMargins(0, 0, 0, 0);
     MainLayout->addLayout(ControlLayout);
 
@@ -68,10 +157,17 @@ mtsQtWidgetFunction::mtsQtWidgetFunction(void):
     ExecutionResultLabel = new QLabel();
     ExecutionResultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     ControlLayout->addWidget(ExecutionResultLabel);
+    ControlLayout->addStretch();
 
     ResultLayout = new QFormLayout;
+    ResultLayout->setSpacing(1);
     ResultLayout->setContentsMargins(0, 0, 0, 0);
+    ResultLayout->setRowWrapPolicy(QFormLayout::DontWrapRows);
+    ResultLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    ResultLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    ResultLayout->setLabelAlignment(Qt::AlignLeft);
     MainLayout->addLayout(ResultLayout);
+    MainLayout->addStretch();
 }
 
 
@@ -268,7 +364,7 @@ mtsQtWidgetFunctionRead::mtsQtWidgetFunctionRead(mtsFunctionRead * function):
 void mtsQtWidgetFunctionRead::CreateArgumentsWidgets(void)
 {
     ReadValue = dynamic_cast<mtsGenericObject *>(Function->GetArgumentPrototype()->Services()->Create());
-SetReadWidget("Result:", *(Function->GetArgumentPrototype()));
+    SetReadWidget("Result:", *(Function->GetArgumentPrototype()));
 }
 
 void mtsQtWidgetFunctionRead::Execute(void)

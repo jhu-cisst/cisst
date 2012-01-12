@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsQtWidgetInterfaceRequired_h
 
 #include <QWidget>
-class QToolBox;
+class mtsQtFunctionListContainerWidget;
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
@@ -42,7 +42,7 @@ class CISST_EXPORT mtsQtWidgetInterfaceRequired: public QWidget, public cmnGener
 
  private:
     mtsInterfaceRequired * ExecutionInterface;
-    QToolBox * FunctionsWidget;
+    mtsQtFunctionListContainerWidget * FunctionsWidget;
 
     void CreateWidgets(mtsInterfaceProvided & interface, mtsInterfaceRequired & executionInterface);
 };

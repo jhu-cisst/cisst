@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 vctQtWidgetDynamicVectorDoubleRead::vctQtWidgetDynamicVectorDoubleRead(void):
     QTableWidget()
 {
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
 }
@@ -58,6 +59,7 @@ bool vctQtWidgetDynamicVectorDoubleRead::SetValue(const vctDynamicVector<double>
 vctQtWidgetDynamicVectorDoubleWrite::vctQtWidgetDynamicVectorDoubleWrite(void):
     QTableWidget()
 {
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
 }
@@ -77,6 +79,7 @@ bool vctQtWidgetDynamicVectorDoubleWrite::GetValue(vctDynamicVector<double> & pl
 vctQtWidgetDynamicVectorIntRead::vctQtWidgetDynamicVectorIntRead(void):
     QTableWidget()
 {
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
 }
@@ -106,6 +109,7 @@ bool vctQtWidgetDynamicVectorIntRead::SetValue(const vctDynamicVector<int> & vec
 vctQtWidgetDynamicVectorIntWrite::vctQtWidgetDynamicVectorIntWrite(void):
     QTableWidget()
 {
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
 }
@@ -125,6 +129,7 @@ bool vctQtWidgetDynamicVectorIntWrite::GetValue(vctDynamicVector<int> & placeHol
 vctQtWidgetDynamicVectorBoolRead::vctQtWidgetDynamicVectorBoolRead(void):
     QTableWidget()
 {
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
 }
@@ -154,6 +159,7 @@ bool vctQtWidgetDynamicVectorBoolRead::SetValue(const vctDynamicVector<bool> & v
 vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
     QTableWidget()
 {
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
 }
