@@ -674,7 +674,7 @@ private:
     svlRect Rect;
     svlRGB Color;
     svlRGB BGColor;
-    unsigned int BorderWidth;
+    int BorderWidth;
     svlRGB BorderColor;
     svlDraw::Internals* DrawInternals;
 };

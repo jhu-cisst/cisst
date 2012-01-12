@@ -2107,7 +2107,7 @@ svlOverlayStaticBar::svlOverlayStaticBar(unsigned int videoch,
     Rect(rect),
     Color(color),
     BGColor(bgcolor),
-    BorderWidth(borderwidth),
+    BorderWidth(static_cast<int>(borderwidth)),
     BorderColor(bordercolor),
     DrawInternals(0)
 {
@@ -2185,7 +2185,7 @@ void svlOverlayStaticBar::SetBackgroundColor(svlRGB bgcolor)
 
 void svlOverlayStaticBar::SetBorderWidth(const unsigned int pixels)
 {
-    BorderWidth = pixels;
+    BorderWidth = static_cast<int>(pixels);
 }
 
 void svlOverlayStaticBar::SetBorderColor(svlRGB bordercolor)
@@ -2239,7 +2239,7 @@ svlRGB svlOverlayStaticBar::GetBackgroundColor() const
 
 unsigned int svlOverlayStaticBar::GetBorderWidth() const
 {
-    return BorderWidth;
+    return static_cast<unsigned int>(BorderWidth);
 }
 
 svlRGB svlOverlayStaticBar::GetBorderColor() const
