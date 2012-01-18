@@ -395,8 +395,10 @@ install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
          COMPONENT cisstCommon)
 
 # Use CPack package generator
-set (CPACK_PACKAGE_NAME "cisst")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
+if (NOT UNIX)
+  set (CPACK_PACKAGE_NAME "cisst")
+  set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
+endif (NOT UNIX)
 # For now, enable all default libraries (even if not compiled)
 set (CPACK_COMPONENTS_ALL ${CISST_LIBRARIES_DEFAULT})
 if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is activated
