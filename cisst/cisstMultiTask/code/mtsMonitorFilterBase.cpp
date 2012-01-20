@@ -23,6 +23,8 @@
 
 int mtsMonitorFilterBase::UID = 0;
 
+const std::string InvalidSignalName = "INVALID";
+
 mtsMonitorFilterBase::mtsMonitorFilterBase(void)
     : FilterUID(-1), // MJ: invalid uid: don't use default constructor
       FilterName("NONAME"), 
@@ -77,6 +79,26 @@ bool mtsMonitorFilterBase::AddOutputSignal(const std::string & signalName)
     return true;
 }
 
+const std::string & mtsMonitorFilterBase::GetInputSignalName(size_t index) const
+{
+    if (index >= InputSignals.size()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetInputSignalName: index out of range (input signal count: " << InputSignals.size() << ")" << std::endl;
+        return InvalidSignalName;
+    }
+
+    return InputSignals[index]->GetName();
+}
+
+const std::string & mtsMonitorFilterBase::GetOutputSignalName(size_t index) const
+{
+    if (index >= OutputSignals.size()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetOutputSignalName: index out of range (output signal count: " << OutputSignals.size() << ")" << std::endl;
+        return InvalidSignalName;
+    }
+
+    return OutputSignals[index]->GetName();
+}
+
 mtsMonitorFilterBase::SignalNamesType mtsMonitorFilterBase::GetInputSignalNames(void) const
 {
     SignalNamesType names;
@@ -95,14 +117,14 @@ mtsMonitorFilterBase::SignalNamesType mtsMonitorFilterBase::GetOutputSignalNames
     return names;
 }
 
-mtsMonitorFilterBase::SignalElement * mtsMonitorFilterBase::GetOutputSignal(size_t index) const
+mtsMonitorFilterBase::SignalElement * mtsMonitorFilterBase::GetOutputSignalElement(size_t index) const
 {
     if (index >= OutputSignals.size()) return 0;
 
     return OutputSignals[index];
 }
 
-mtsMonitorFilterBase::SignalElement * mtsMonitorFilterBase::GetInputSignal(size_t index) const
+mtsMonitorFilterBase::SignalElement * mtsMonitorFilterBase::GetInputSignalElement(size_t index) const
 {
     if (index >= InputSignals.size()) return 0;
 

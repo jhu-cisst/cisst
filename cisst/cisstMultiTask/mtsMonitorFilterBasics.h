@@ -45,9 +45,19 @@ class mtsMonitorFilterBypass : public mtsMonitorFilterBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
+    typedef enum { 
+        INPUT_0 = 0,  // Input X
+        INPUT_NUM     // Total number of inputs (=1)
+    } INPUT;
+
+    typedef enum { 
+        OUTPUT_0 = 0, // Output Y = X
+        OUTPUT_NUM    // Total number of outputs (=1)
+    } OUTPUT;
+
+public:
     /*! Default constructor is provided only to satisfy the requirement of 
-        cmnGenericObject.  Do not use this -- Bypass filter with no input has 
-        no meaning. */
+        cmnGenericObject.  DO NOT USE THIS. */
     mtsMonitorFilterBypass(); // DO NOT USE
     mtsMonitorFilterBypass(const std::string & inputName);
     ~mtsMonitorFilterBypass();
@@ -65,23 +75,36 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterBypass);
 //
 //  Output Y = (x(t+1) - x(t)) / (delta_t)
 //
-//  delta_t: Period of monitoring component.  Normally sampling rate of 
-//           the monitoring component (mtsMonitorComponent) can be used.
+//  delta_t: Period of monitoring component.  Usually sampling rate of 
+//           the monitoring component (mtsMonitorComponent).
+//  MJ: delta_t can be also calculated as actual time difference between 
+//      two samples but this requires samples to contain timestamp information.
 //
 class mtsMonitorFilterTrendVel : public mtsMonitorFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+public:
+    typedef enum { 
+        INPUT_0 = 0,  // Input X
+        INPUT_NUM     // Total number of inputs (=1)
+    } INPUT;
+
+    typedef enum { 
+        OUTPUT_0 = 0, // Output Y =  (X(t+1) - X(t)) / (delta_t)
+        OUTPUT_NUM    // Total number of outputs (=1)
+    } OUTPUT;
+
 protected:
     mtsMonitorFilterBase::PlaceholderType OldValue;
-    double Delta;
+    double OldTimestamp;
 
 public:
     /*! Default constructor is provided only to satisfy the requirement of 
         cmnGenericObject.  Do not use this -- Bypass filter with no input has 
         no meaning. */
     mtsMonitorFilterTrendVel(); // DO NOT USE
-    mtsMonitorFilterTrendVel(const std::string & inputName, double period);
+    mtsMonitorFilterTrendVel(const std::string & inputName);
     ~mtsMonitorFilterTrendVel();
 
     /*! Implements 1st-order differentiator */

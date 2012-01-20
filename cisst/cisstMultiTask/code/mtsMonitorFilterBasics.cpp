@@ -71,7 +71,8 @@ void mtsMonitorFilterBypass::DoFiltering(bool debug)
     if (!this->IsEnabled()) return;
 
     // Fetch new value from state table
-    InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId());
+    static double timestamp = 0;
+    InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
 
     // Update output value (bypass)
     OutputSignals[0]->Placeholder = InputSignals[0]->Placeholder;
@@ -98,14 +99,14 @@ void mtsMonitorFilterBypass::ToStream(std::ostream & outputStream) const
 // DO NOT USE DEFAULT CONSTRUCTOR
 mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel()
     : mtsMonitorFilterBase(::NameOfFilterTrendVel),
-      OldValue(0.0), Delta(0.1)
+      OldValue(0.0)
 {
     this->Enable(false);
 }
 
-mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(const std::string & inputName, double period)
+mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(const std::string & inputName)
     : mtsMonitorFilterBase(::NameOfFilterTrendVel),
-      OldValue(0.0), Delta(period)
+      OldValue(0.0)
 {
     // Define inputs
     this->AddInputSignal(inputName);
@@ -125,11 +126,20 @@ void mtsMonitorFilterTrendVel::DoFiltering(bool debug)
     if (!this->IsEnabled()) return;
 
     // Fetch new value from state table
-    InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId());
+    double timestamp = 0.0;
+    InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
 
     // Update output value (velocity)
-    OutputSignals[0]->Placeholder = (InputSignals[0]->Placeholder - OldValue) / Delta;
+    double deltaT = timestamp - OldTimestamp;
+    if (deltaT == 0.0) {
+        OutputSignals[0]->Placeholder = 0.0;
+    } else {
+        OutputSignals[0]->Placeholder = (InputSignals[0]->Placeholder - OldValue) / deltaT;
+    }
+
+    // Remember last values
     OldValue = InputSignals[0]->Placeholder;
+    OldTimestamp = timestamp;
 
     if (debug) {
         std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 

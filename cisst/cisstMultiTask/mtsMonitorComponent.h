@@ -72,6 +72,17 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+public:
+    // FIXME: smmy ?????????????????
+    //
+    typedef struct FeatureVectorElementStruct {
+        mtsMonitorFilterBase * Filter;
+        int mask;
+    } FeatureVectorElement;
+
+    // Feature vectors
+    typedef std::vector<FeatureVectorElement> FeatureVectorsType;
+
 protected:
     class TargetComponent {
     public:
@@ -90,8 +101,23 @@ protected:
     typedef cmnNamedMap<TargetComponent> TargetComponentsType;
     TargetComponentsType * TargetComponents;
 
-    /*! Fetch new values from target components and update local copies */
-    void FetchNewValues(void);
+    /*! List of feature vectors */
+    FeatureVectorsType FeatureVectors;
+
+    /*! Define feature vector using filter instance and output mask */
+    bool AddFeatureVector(const std::string & featureVectorName, const std::vector<std::string> & signalNames);
+
+    //------------------------------------------------------
+    // Steps to generate symptom vectors
+    //
+    /*! Step 1. Fetch new values from each target component */
+    void UpdateFeatures(void);
+    /*! Step 2. Generate feature vectors based on new features */
+    void UpdateFeatureVectors(void);
+    /*! Step 3. Update symptoms based on new feature vectors */
+    //void UpdateSymptoms(void);
+    /*! Step 4. Generate symptom vectors based on new symptoms */
+    //void UpdateSymptomVectors(void);
 
     /*! Print list of target components */
     void PrintTargetComponents(void);
@@ -100,10 +126,8 @@ public:
     mtsMonitorComponent();
     ~mtsMonitorComponent();
 
-    /*! Add target component to monitor */
-    bool AddTargetComponent(mtsTask * task);
-
-    /*! Remove target component to monitor */
+    /*! Add and remove target component to monitor */
+    bool AddTargetComponent(mtsTask * task); // MJ: task name can be used instead
     bool RemoveTargetComponent(const std::string & taskName);
 
     void Configure(const std::string & CMN_UNUSED(filename) = ""){}
