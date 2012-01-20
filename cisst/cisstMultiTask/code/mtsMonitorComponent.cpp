@@ -27,7 +27,7 @@ const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
     //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s) // MJ TEMP
+    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s, false, 5000) // MJ TEMP
 {
     TargetComponents = new TargetComponentsType(true);
 }
@@ -40,11 +40,16 @@ mtsMonitorComponent::~mtsMonitorComponent()
 
 void mtsMonitorComponent::Run(void)
 {
-    FetchNewValues();
+    UpdateFeatures();
+    UpdateFeatureVectors();
+    //UpdateSymptoms();
+    //UpdateSymptomVectors();
+
+    // for test
     //PrintTargetComponents();
 }
 
-void mtsMonitorComponent::FetchNewValues(void)
+void mtsMonitorComponent::UpdateFeatures(void)
 {
     TargetComponentsType::const_iterator it = TargetComponents->begin();
     const TargetComponentsType::const_iterator itEnd = TargetComponents->end();
@@ -54,6 +59,23 @@ void mtsMonitorComponent::FetchNewValues(void)
         target->GetPeriod(target->Period);
     }
 }
+
+void mtsMonitorComponent::UpdateFeatureVectors(void)
+{
+    // TODO
+}
+
+#if 0
+void mtsMonitorComponent::UpdateSymptoms(void)
+{
+    // TODO
+}
+
+void mtsMonitorComponent::UpdateSymptomVectors(void)
+{
+    // TODO
+}
+#endif
 
 void mtsMonitorComponent::PrintTargetComponents(void)
 {
@@ -81,7 +103,6 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
     newTargetComponent->Name = taskName;
     newTargetComponent->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(taskName));
     newTargetComponent->InterfaceRequired->AddFunction("GetPeriod", newTargetComponent->GetPeriod);
-    // FIXME Add more default filters
     if (!TargetComponents->AddItem(taskName, newTargetComponent)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddTargetComponent: Failed to add state table access interface for task \"" << taskName << "\"" << std::endl;
         return false;
@@ -98,16 +119,30 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
     mtsMonitorFilterBase * filter;
     // Bypass filter (for testing purpose) MJ: remove this later
     //filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period); // for self-monitoring
-#define CHECK_ERROR( _filterName )\
+
+    // MJ TODO: add clean up codes when error happens
+#define ADD_FILTER \
     if (!this->StateTableMonitor.AddFilter(filter)) {\
-        std::stringstream ss;\
-        ss << "mtsMonitorComponent::AddTargetComponent: Failed to add filter \"" << filter->GetFilterName()\
-           << "\" to monitor a target component \"" << taskName << "\"";\
-        cmnThrow(ss.str());\
+        CMN_LOG_CLASS_RUN_ERROR\
+           << "AddTargetComponent: Failed to add filter \"" << filter->GetFilterName()\
+           << "\" to monitor target component \"" << taskName << "\"";\
+        return false;\
     }
-    filter = new mtsMonitorFilterBypass(stateName); CHECK_ERROR();
-    filter = new mtsMonitorFilterTrendVel(stateName, this->Period); CHECK_ERROR();
-#undef CHECK_ERROR
+
+#define CREATE_FEATURE_VECTOR( _name )\
+    if (!AddFeatureVector(_name, signalNames)) {\
+        CMN_LOG_CLASS_RUN_ERROR << "AddTargetComponent: Failed to create feature vector: \"" << _name << "\"";\
+        return false;\
+    } else {\
+        signalNames.clear();\
+    }
+
+    //filter = new mtsMonitorFilterBypass(stateName); ADD_FILTER;
+    filter = new mtsMonitorFilterTrendVel(stateName); ADD_FILTER;
+    //CREATE_FEATURE_VECTOR("PeriodVelocity");
+
+#undef CREATE_FEATURE_VECTOR
+#undef ADD_FILTER 
 
     return true;
 }
@@ -120,6 +155,13 @@ bool mtsMonitorComponent::RemoveTargetComponent(const std::string & taskName)
     }
 
     return TargetComponents->RemoveItem(taskName);
+}
+
+bool mtsMonitorComponent::AddFeatureVector(const std::string & featureVectorName, 
+                                           const std::vector<std::string> & signalNames)
+{
+    // FIXME
+    return true;
 }
 
 //-----------------------------------------------

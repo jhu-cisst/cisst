@@ -479,7 +479,7 @@ public:
     bool AddFilter(mtsMonitorFilterBase * filter);
 
     // MJ TEMP
-    double GetNewValue(mtsStateDataId id) const;
+    double GetNewValue(const mtsStateDataId id, double & timeStamp) const;
 #endif
 };
 

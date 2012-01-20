@@ -538,7 +538,7 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
     mtsStateDataId inputElementId;
     const size_t numOfInputs = filter->GetNumberOfInputs();
     for (size_t i = 0; i < numOfInputs; ++i) {
-        mtsMonitorFilterBase::SignalElement * inputSignal = filter->GetInputSignal(i);
+        mtsMonitorFilterBase::SignalElement * inputSignal = filter->GetInputSignalElement(i);
         inputElementId = GetStateVectorID(inputSignal->GetName());
         if (inputElementId == INVALID_STATEVECTOR_ID) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Input element \"" << inputSignal->GetName() << "\" required by filter \""
@@ -558,11 +558,13 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
     mtsStateDataId outputElementId;
     const size_t numOfOutputs = filter->GetNumberOfOutputs();
     for (size_t i = 0; i < numOfOutputs; ++i) {
-        mtsMonitorFilterBase::SignalElement * outputSignal = filter->GetOutputSignal(i);
+        mtsMonitorFilterBase::SignalElement * outputSignal = filter->GetOutputSignalElement(i);
+        CMN_ASSERT(outputSignal);
+
         ss << outputSignal->GetName() << filterUID;
         newElementName = ss.str();
 
-        // MJ: adding a new element on the fly may not be thread-safe -- need double check.
+        // MJ TODO: adding a new element on the fly may not be thread-safe -- need double check.
         outputElementId = NewElement(newElementName, &outputSignal->Placeholder);
         outputSignal->SetStateDataId(outputElementId);
 
@@ -582,10 +584,12 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
 }
 
 // MJ TEMP
-double mtsStateTable::GetNewValue(mtsStateDataId id) const
+double mtsStateTable::GetNewValue(const mtsStateDataId id, double & timeStamp) const
 {
     mtsDouble value;
     StateVector[id]->Get(IndexReader, value);
+    value.GetTimestamp(timeStamp);
+
     return value.Data;
 }
 

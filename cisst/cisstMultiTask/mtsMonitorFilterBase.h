@@ -61,7 +61,7 @@ public:
 
         const std::string & GetName(void) const { return Name; }
         inline mtsStateDataId GetStateDataId(void) const { return StateDataId; }
-        inline void SetStateDataId(mtsStateDataId id)  { StateDataId = id; }
+        inline void SetStateDataId(mtsStateDataId id) { StateDataId = id; }
     };
 
     typedef std::vector<SignalElement*> SignalElementsType;
@@ -108,9 +108,9 @@ public:
     bool AddInput(const std::string & componentName, const std::string & signalName);
     // TODO: push_back (name), prepare placeholder to fetch new input values from state table
 
-    // TODO: add an option to add this output to standardized provided interface (if filter is
-    // attached to the source component and monitoring component wants to fetch the output
-    // values, this feature is required)
+    // TODO: add an option to expose an output to the standardized provided interface.
+    // This can be useful if the monitoring component wants to fetch output values when a filter 
+    // is attached to the source component.
     bool AddOutput(const std::string & signalName); 
 #endif
     /*! Core filtering function */
@@ -139,11 +139,15 @@ public:
         return OutputSignals.size();
     }
 
+    const std::string & GetInputSignalName(size_t index) const;
+    const std::string & GetOutputSignalName(size_t index) const;
+
     SignalNamesType GetInputSignalNames(void) const;
     SignalNamesType GetOutputSignalNames(void) const;
 
-    SignalElement * GetInputSignal(size_t index) const;
-    SignalElement * GetOutputSignal(size_t index) const;
+    // MJ: returns reference instead???
+    SignalElement * GetInputSignalElement(size_t index) const;
+    SignalElement * GetOutputSignalElement(size_t index) const;
 
     inline void SetStateTableInstance(mtsStateTable * stateTable) {
         StateTable = stateTable;
