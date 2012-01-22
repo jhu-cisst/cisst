@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Ofri Sadowsky
   Created on: 2004-11-04
-  
+
   (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -44,12 +44,14 @@ public:
                                typename _rotationType1::value_type tolerance
                                = cmnTypeTraits<typename _rotationType1::value_type>::Tolerance())
     {
+        std::string message;
         CPPUNIT_ASSERT(initialRotation.IsNormalized());
         secondRotation.From(initialRotation);
         secondRotation.NormalizedSelf();
         _rotationType1 finalRotation(secondRotation);
         finalRotation.NormalizedSelf();
-        CPPUNIT_ASSERT(finalRotation.AlmostEquivalent(initialRotation, tolerance));
+        message = std::string("finalRotation:\n") + finalRotation.ToString() + std::string("\ninitialRotation:\n") + initialRotation.ToString();
+        CPPUNIT_ASSERT_MESSAGE(message, finalRotation.AlmostEquivalent(initialRotation, tolerance));
         CPPUNIT_ASSERT(initialRotation.AlmostEquivalent(finalRotation, tolerance));
         finalRotation.From(secondRotation);
         finalRotation.NormalizedSelf();
@@ -82,7 +84,7 @@ public:
         try {
             toRotation.From(fromRotationNormalized);
         } catch (std::runtime_error exception) {
-            gotException = true;            
+            gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
         convertBack.From(toRotation);
@@ -92,7 +94,7 @@ public:
         try {
             toRotation.FromNormalized(fromRotationNormalized);
         } catch (std::runtime_error exception) {
-            gotException = true;            
+            gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
         convertBack.From(toRotation);
@@ -102,7 +104,7 @@ public:
         try {
             toRotation.FromRaw(fromRotationNormalized);
         } catch (std::runtime_error exception) {
-            gotException = true;            
+            gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
         convertBack.From(toRotation);
@@ -118,7 +120,7 @@ public:
         convertBack.From(toRotation);
         CPPUNIT_ASSERT(convertBack.AlmostEquivalent(fromRotationNotNormalized.Normalized(),
                                                     value_type(tolerance * 100.0)));
- 
+
         gotException = false;
         if (inputAlwaysNormalized) {
             try {
@@ -149,7 +151,7 @@ public:
       The tolerance for identity test is zero.
     */
     template <class _rotationType, class _vectorType>
-    static void TestIdentity(const _rotationType & rotation, 
+    static void TestIdentity(const _rotationType & rotation,
                              const _vectorType & vector,
                              _vectorType & rotatedVector,
                              typename _rotationType::value_type tolerance
@@ -181,7 +183,7 @@ public:
       Also test that Equal, AlmostEqual and AlmostEquivalent exist and
       are not completely incorrect. */
     template <class _rotationType>
-    static void TestDefaultConstructor(const _rotationType & CMN_UNUSED(rotation), 
+    static void TestDefaultConstructor(const _rotationType & CMN_UNUSED(rotation),
                                        typename _rotationType::value_type tolerance
                                        = cmnTypeTraits<typename _rotationType::value_type>::Tolerance())
     {
@@ -195,12 +197,12 @@ public:
 
 
     /*!  Assert that r and rInverse are mutual inverses of one another.  The
-     validations include comparing the product of the two to the identity, and 
+     validations include comparing the product of the two to the identity, and
      applying each one's inverse to the indeity to obtain the other.
     */
     template <class _rotationType>
     static void ValidateInverse(const _rotationType & rotation,
-                                const _rotationType & rotationInverse, 
+                                const _rotationType & rotationInverse,
                                 typename _rotationType::value_type tolerance
                                 = cmnTypeTraits<typename _rotationType::value_type>::Tolerance())
     {
@@ -213,7 +215,7 @@ public:
         _rotationType rInv_r;
         rotationInverse.ApplyTo(rotation, rInv_r);
         CPPUNIT_ASSERT(identity.AlmostEquivalent(rInv_r, tolerance));
-        
+
         _rotationType rInv;
         rotation.ApplyInverseTo(identity, rInv);
         CPPUNIT_ASSERT(rotationInverse.AlmostEquivalent(rInv, tolerance));
@@ -238,20 +240,20 @@ public:
         rotationInverse.FromRaw(rotation);
         rotationInverse.InverseSelf();
         ValidateInverse(rotation, rotationInverse, tolerance);
-        
+
         rotationInverse.InverseOf(rotation);
         ValidateInverse(rotation, rotationInverse, tolerance);
-        
+
         rotationInverse = rotation.Inverse();
         ValidateInverse(rotation, rotationInverse, tolerance);
     }
-    
+
 
 
     /*! Let R1, R2 be random rotations. Let v be a random vector.
       1. Compute u1=R2*(R1*v), u2=(R2*R1)*v. Assert that u1=u2 up to tolerance.
       2. Compute w1=R1^{-1}*(R2^{-1}*u1), w2=(R1^{-1}*R2^{-1})*u2, w3=(R2*R1)^{-1}*u1, w4=(R2*R1)^{-1})*u2.
-      Assert that all these results are equal to v, up to tolerance. 
+      Assert that all these results are equal to v, up to tolerance.
     */
     template <class _rotationType, class _vectorType>
     static void TestComposition(const _rotationType & rotation1,
@@ -261,19 +263,19 @@ public:
                                 = cmnTypeTraits<typename _rotationType::value_type>::Tolerance())
     {
         _vectorType tmpVector(inputVector);
-        
+
         rotation1.ApplyTo(inputVector, tmpVector);
         _vectorType u1(inputVector);
         rotation2.ApplyTo(tmpVector, u1);
-        
+
         _rotationType rotation2_rotation1;
         rotation2.ApplyTo(rotation1, rotation2_rotation1);
         CPPUNIT_ASSERT(rotation2_rotation1.IsNormalized());
         _vectorType u2(inputVector);
         rotation2_rotation1.ApplyTo(inputVector, u2);
-        
+
         CPPUNIT_ASSERT(u1.AlmostEqual(u2, tolerance));
-        
+
         _rotationType rotation2Inv = rotation2.Inverse();
         _rotationType rotation1Inv = rotation1.Inverse();
         _rotationType rotation1Inv_rotation2Inv;
@@ -281,18 +283,18 @@ public:
         CPPUNIT_ASSERT(rotation1Inv_rotation2Inv.IsNormalized());
         _rotationType rotation2_rotation1_Inv = rotation2_rotation1.Inverse();
         CPPUNIT_ASSERT(rotation2_rotation1_Inv.IsNormalized());
-        
+
         CPPUNIT_ASSERT(rotation1Inv_rotation2Inv.AlmostEquivalent(rotation2_rotation1_Inv, tolerance));
-        
+
         rotation2Inv.ApplyTo(u1, tmpVector);
         _vectorType w1(inputVector);
         rotation1Inv.ApplyTo(tmpVector, w1);
         CPPUNIT_ASSERT(w1.AlmostEqual(inputVector, tolerance));
-        
+
         _vectorType w2(inputVector);
         rotation1Inv_rotation2Inv.ApplyTo(u2, w2);
         CPPUNIT_ASSERT(w2.AlmostEqual(inputVector, tolerance));
-        
+
         _vectorType w3(inputVector);
         rotation2_rotation1_Inv.ApplyTo(u1, w3);
         CPPUNIT_ASSERT(w3.AlmostEqual(inputVector, tolerance));
@@ -340,12 +342,12 @@ public:
         rotation.ApplyTo(vector1, rotatedVector1);
         NormType rotatedVector1Norm = (rotatedVector1 - rotatedOrigin).Norm();
         CPPUNIT_ASSERT(((rotatedVector1Norm - vector1Norm) < tolerance) && ((vector1Norm - rotatedVector1Norm) < tolerance));
-        
+
         _vectorType rotatedVector2(vector1);
         rotation.ApplyTo(vector2, rotatedVector2);
         NormType rotatedVector2Norm = (rotatedVector2 - rotatedOrigin).Norm();
         CPPUNIT_ASSERT(((rotatedVector2Norm - vector2Norm) < tolerance) && ((vector2Norm - rotatedVector2Norm) < tolerance));
-        
+
         NormType vector1_vector2 = vctDotProduct(vector1, vector2);
         NormType rvector1_rvector2 = vctDotProduct((rotatedVector1 - rotatedOrigin), (rotatedVector2 - rotatedOrigin));
         CPPUNIT_ASSERT(((rvector1_rvector2 - vector1_vector2) < tolerance) && ((vector1_vector2 - rvector1_rvector2) < tolerance));
@@ -371,18 +373,18 @@ public:
         rotation.ApplyTo(vector1, rotatedVector1);
         NormType rotatedVector1Norm = rotatedVector1.Norm();
         CPPUNIT_ASSERT(((rotatedVector1Norm - vector1Norm) < tolerance) && ((vector1Norm - rotatedVector1Norm) < tolerance));
-        
+
         _vectorType rotatedVector2(vector1);
         rotation.ApplyTo(vector2, rotatedVector2);
         NormType rotatedVector2Norm = rotatedVector2.Norm();
         CPPUNIT_ASSERT(((rotatedVector2Norm - vector2Norm) < tolerance) && ((vector2Norm - rotatedVector2Norm) < tolerance));
-        
+
         NormType vector1_vector2 = vctDotProduct(vector1, vector2);
         NormType rvector1_rvector2 = vctDotProduct(rotatedVector1, rotatedVector2);
         CPPUNIT_ASSERT(((rvector1_rvector2 - vector1_vector2) < tolerance) && ((vector1_vector2 - rvector1_rvector2) < tolerance));
     }
 
-    
+
     /*! Test the various methods that apply rotation to a vector.  This includes
       ApplyTo, operator *, ApplyInverseOf, ...
     */
@@ -398,7 +400,7 @@ public:
         CPPUNIT_ASSERT(result2.AlmostEquivalent(result1, tolerance));
         result2 = rotation * whatever;
         CPPUNIT_ASSERT(result2.AlmostEquivalent(result1, tolerance));
-        
+
         rotation.ApplyInverseTo(whatever, result1);
         result2 = rotation.ApplyInverseTo(whatever);
         CPPUNIT_ASSERT(result2.AlmostEquivalent(result1, tolerance));
