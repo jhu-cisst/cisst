@@ -675,8 +675,8 @@ void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int 
         id1 = _lm_id[i];
         id2 = _rm_id[i];
 
-        pos1 = (_lm_pos[i] * ratio[id1]) >> 10;
-        pos2 = (_rm_pos[i] * ratio[id2]) >> 10;
+        pos1 = (_lm_pos[i] * ratio[id1] + 1023) >> 10;
+        pos2 = (_rm_pos[i] * ratio[id2] + 1023) >> 10;
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {
@@ -767,8 +767,8 @@ void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int 
         id1 = _lm_id[i];
         id2 = _rm_id[i];
 
-        pos1 = (_lm_pos[i] * ratio[id1]) >> 10;
-        pos2 = (_rm_pos[i] * ratio[id2]) >> 10;
+        pos1 = (_lm_pos[i] * ratio[id1] + 1023) >> 10;
+        pos2 = (_rm_pos[i] * ratio[id2] + 1023) >> 10;
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {
@@ -797,6 +797,35 @@ int svlDrawHelper::WarpInternals::GetLinePixels(int* xs, int* ys, int x1, int y1
     }
 
     int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
+
+    if (y1 == y2) {
+    // Horizontal line
+        if (x2 > x1) {
+            for (x = x1; x <= x2; x ++) {
+                *xs = x; *ys = y1; xs ++; ys ++; len ++;
+            }
+        }
+        else {
+            for (x = x1; x >= x2; x --) {
+                *xs = x; *ys = y1; xs ++; ys ++; len ++;
+            }
+        }
+        return len;
+    }
+    else if (x1 == x2) {
+    // Vertical line
+        if (y2 > y1) {
+            for (y = y1; y <= y2; y ++) {
+                *xs = x1; *ys = y; xs ++; ys ++; len ++;
+            }
+        }
+        else {
+            for (y = y1; y >= y2; y --) {
+                *xs = x1; *ys = y; xs ++; ys ++; len ++;
+            }
+        }
+        return len;
+    }
 
     if (x1 < x2) {
 
@@ -921,6 +950,43 @@ int svlDrawHelper::WarpInternals::GetLinePixels(int* idxs, int x1, int y1, int x
     }
 
     int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
+
+    if (y1 == y2) {
+    // Horizontal line
+        if (x2 > x1) {
+            for (x = x1; x <= x2; x ++) {
+                if (x >= 0 && x < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        else {
+            for (x = x1; x >= x2; x --) {
+                if (x >= 0 && x < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        return len;
+    }
+    else if (x1 == x2) {
+    // Vertical line
+        if (y2 > y1) {
+            for (y = y1; y <= y2; y ++) {
+                if (x1 >= 0 && x1 < w && y >= 0 && y < h) *idxs = y * stride + x1 * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        else {
+            for (y = y1; y >= y2; y --) {
+                if (x1 >= 0 && x1 < w && y >= 0 && y < h) *idxs = y * stride + x1 * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        return len;
+    }
 
     if (x1 < x2) {
 
@@ -1057,7 +1123,7 @@ int svlDrawHelper::WarpInternals::GetLinePixels(int* idxs, int x1, int y1, int x
 }
 
 void svlDrawHelper::WarpInternals::ResampleLine(int ix1, int iy1, int ix2, int iy2,
-                                                        int ox1, int oy1, int ox2, int oy2)
+                                                int ox1, int oy1, int ox2, int oy2)
 {
     int ilen = GetLinePixels(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
     int olen = GetLinePixels(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);
@@ -1153,8 +1219,8 @@ void svlDrawHelper::WarpInternals::ResampleLine(int ix1, int iy1, int ix2, int i
 }
 
 void svlDrawHelper::WarpInternals::ResampleLineAlpha(int ix1, int iy1, int ix2, int iy2,
-                                                             int ox1, int oy1, int ox2, int oy2,
-                                                             unsigned int alpha)
+                                                     int ox1, int oy1, int ox2, int oy2,
+                                                     unsigned int alpha)
 {
     int ilen = GetLinePixels(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
     int olen = GetLinePixels(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);

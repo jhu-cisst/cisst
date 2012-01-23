@@ -581,12 +581,14 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
 
 void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
 {
-    if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
+    if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
-    const int kernel_size = static_cast<int>(kernel.cols());
-    const int kernel_rad = kernel_size / 2;
+    const int kernel_width  = static_cast<int>(kernel.cols());
+    const int kernel_height = static_cast<int>(kernel.rows());
+    const int kernel_h_rad = kernel_width  / 2;
+    const int kernel_v_rad = kernel_height / 2;
     const int rowstride = width * 3;
-    const int rowstride_short = rowstride - kernel_size * 3;
+    const int rowstride_short = rowstride - kernel_width * 3;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride;
     int sum1, sum2, sum3;
     unsigned char *input2;
@@ -600,12 +602,12 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
             kernelstride = 0;
             kernelptr = kernel.Pointer();
 
-            l = kernel_size;
-            l_from = j - kernel_rad;
-            l_to   = l_from + kernel_size;
+            l = kernel_height;
+            l_from = j - kernel_v_rad;
+            l_to   = l_from + kernel_height;
             if (l_from < 0) {
                 l += l_from;
-                kernelptr -= l_from * kernel_size;
+                kernelptr -= l_from * kernel_width;
 
                 l_from = 0;
             }
@@ -614,9 +616,9 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
                 l_to = height;
             }
 
-            k = kernel_size;
-            k_from = i - kernel_rad;
-            k_to   = k_from + kernel_size;
+            k = kernel_width;
+            k_from = i - kernel_h_rad;
+            k_to   = k_from + kernel_width;
             if (k_from < 0) {
                 k += k_from;
                 kernelptr -= k_from;
@@ -667,12 +669,14 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
 
 void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
 {
-    if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
+    if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
-    const int kernel_size = static_cast<int>(kernel.cols());
-    const int kernel_rad = kernel_size / 2;
+    const int kernel_width  = static_cast<int>(kernel.cols());
+    const int kernel_height = static_cast<int>(kernel.rows());
+    const int kernel_h_rad = kernel_width  / 2;
+    const int kernel_v_rad = kernel_height / 2;
     const int rowstride = width * 4;
-    const int rowstride_short = rowstride - kernel_size * 4;
+    const int rowstride_short = rowstride - kernel_width * 4;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride;
     int sum1, sum2, sum3, sum4;
     unsigned char *input2;
@@ -686,12 +690,12 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
             kernelstride = 0;
             kernelptr = kernel.Pointer();
 
-            l = kernel_size;
-            l_from = j - kernel_rad;
-            l_to   = l_from + kernel_size;
+            l = kernel_height;
+            l_from = j - kernel_v_rad;
+            l_to   = l_from + kernel_height;
             if (l_from < 0) {
                 l += l_from;
-                kernelptr -= l_from * kernel_size;
+                kernelptr -= l_from * kernel_width;
 
                 l_from = 0;
             }
@@ -700,9 +704,9 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
                 l_to = height;
             }
 
-            k = kernel_size;
-            k_from = i - kernel_rad;
-            k_to   = k_from + kernel_size;
+            k = kernel_width;
+            k_from = i - kernel_h_rad;
+            k_to   = k_from + kernel_width;
             if (k_from < 0) {
                 k += k_from;
                 kernelptr -= k_from;
@@ -756,11 +760,13 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
 
 void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
 {
-    if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
+    if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
-    const int kernel_size = static_cast<int>(kernel.cols());
-    const int kernel_rad = kernel_size / 2;
-    const int rowstride_short = width - kernel_size;
+    const int kernel_width  = static_cast<int>(kernel.cols());
+    const int kernel_height = static_cast<int>(kernel.rows());
+    const int kernel_h_rad = kernel_width  / 2;
+    const int kernel_v_rad = kernel_height / 2;
+    const int rowstride_short = width - kernel_width;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
     unsigned char *input2;
     int *kernelptr;
@@ -773,12 +779,12 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
             kernelstride = 0;
             kernelptr = kernel.Pointer();
 
-            l = kernel_size;
-            l_from = j - kernel_rad;
-            l_to   = l_from + kernel_size;
+            l = kernel_height;
+            l_from = j - kernel_v_rad;
+            l_to   = l_from + kernel_height;
             if (l_from < 0) {
                 l += l_from;
-                kernelptr -= l_from * kernel_size;
+                kernelptr -= l_from * kernel_width;
 
                 l_from = 0;
             }
@@ -787,9 +793,9 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
                 l_to = height;
             }
 
-            k = kernel_size;
-            k_from = i - kernel_rad;
-            k_to   = k_from + kernel_size;
+            k = kernel_width;
+            k_from = i - kernel_h_rad;
+            k_to   = k_from + kernel_width;
             if (k_from < 0) {
                 k += k_from;
                 kernelptr -= k_from;
@@ -834,11 +840,13 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
 
 void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
 {
-    if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
+    if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
-    const int kernel_size = static_cast<int>(kernel.cols());
-    const int kernel_rad = kernel_size / 2;
-    const int rowstride_short = width - kernel_size;
+    const int kernel_width  = static_cast<int>(kernel.cols());
+    const int kernel_height = static_cast<int>(kernel.rows());
+    const int kernel_h_rad = kernel_width  / 2;
+    const int kernel_v_rad = kernel_height / 2;
+    const int rowstride_short = width - kernel_width;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
     unsigned short *input2;
     int *kernelptr;
@@ -851,12 +859,12 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
             kernelstride = 0;
             kernelptr = kernel.Pointer();
 
-            l = kernel_size;
-            l_from = j - kernel_rad;
-            l_to   = l_from + kernel_size;
+            l = kernel_height;
+            l_from = j - kernel_v_rad;
+            l_to   = l_from + kernel_height;
             if (l_from < 0) {
                 l += l_from;
-                kernelptr -= l_from * kernel_size;
+                kernelptr -= l_from * kernel_width;
 
                 l_from = 0;
             }
@@ -865,9 +873,9 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
                 l_to = height;
             }
 
-            k = kernel_size;
-            k_from = i - kernel_rad;
-            k_to   = k_from + kernel_size;
+            k = kernel_width;
+            k_from = i - kernel_h_rad;
+            k_to   = k_from + kernel_width;
             if (k_from < 0) {
                 k += k_from;
                 kernelptr -= k_from;
@@ -912,11 +920,13 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 
 void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
 {
-    if (!input || !output || kernel.rows() < 1 || kernel.rows() != kernel.cols()) return;
+    if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
-    const int kernel_size = static_cast<int>(kernel.cols());
-    const int kernel_rad = kernel_size / 2;
-    const int rowstride_short = width - kernel_size;
+    const int kernel_width  = static_cast<int>(kernel.cols());
+    const int kernel_height = static_cast<int>(kernel.rows());
+    const int kernel_h_rad = kernel_width  / 2;
+    const int kernel_v_rad = kernel_height / 2;
+    const int rowstride_short = width - kernel_width;
     int i, j, k, k_, l, l_from, l_to, k_from, k_to, k_val, kernelstride, sum;
     unsigned int *input2;
     int *kernelptr;
@@ -929,13 +939,13 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
             kernelstride = 0;
             kernelptr = kernel.Pointer();
 
-            l = kernel_size;
-            l_from = j - kernel_rad;
-            l_to   = l_from + kernel_size;
+            l = kernel_height;
+            l_from = j - kernel_v_rad;
+            l_to   = l_from + kernel_height;
             if (l_from < 0) {
                 l += l_from;
-                kernelptr -= l_from * kernel_size;
-                
+                kernelptr -= l_from * kernel_width;
+
                 l_from = 0;
             }
             if (l_to > height) {
@@ -943,21 +953,21 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
                 l_to = height;
             }
 
-            k = kernel_size;
-            k_from = i - kernel_rad;
-            k_to   = k_from + kernel_size;
+            k = kernel_width;
+            k_from = i - kernel_h_rad;
+            k_to   = k_from + kernel_width;
             if (k_from < 0) {
                 k += k_from;
                 kernelptr -= k_from;
                 kernelstride -= k_from;
-                
+
                 k_from = 0;
             }
             if (k_to > width) {
                 k_ = k_to - width;
                 k -= k_;
                 kernelstride += k_;
-                
+
                 k_to = width;
             }
 
