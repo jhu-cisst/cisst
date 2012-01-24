@@ -24,9 +24,7 @@ set (CISST_VERSION "@CISST_VERSION@")
 set (CISST_REVISION_SVN_DIR "@CISST_REVISION_SVN_DIR@")
 set (CISST_REVISION_HEADER_SRC "@CISST_REVISION_HEADER_SRC@")
 set (CISST_REVISION_HEADER "@CISST_REVISION_HEADER@")
-set (Subversion_FOUND "@Subversion_FOUND@")
 set (Subversion_SVN_EXECUTABLE "@Subversion_SVN_EXECUTABLE@")
-set (CISST_WC_REVISION "@CISST_WC_REVISION@")
 
 # To make sure the Subversion_WC_INFO macro is defined
 find_package (Subversion QUIET)
