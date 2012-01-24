@@ -493,6 +493,8 @@ public:
         static const std::string PeriodStatistics;
     };
 
+    static const mtsStateDataId INVALID_STATEVECTOR_ID;
+
 #if CISST_MTS_SUPPORT_FDD
     /*! List of filters attached to this state table */
     std::vector<mtsMonitorFilterBase*> MonitorFilters;

@@ -127,24 +127,31 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
     // Create filters
     // Bypass filter for self monitoring (testing purpose) MJ: remove this later
     mtsMonitorFilterBypass * filterBypass = 
-        new mtsMonitorFilterBypass(mtsMonitorFilterBase::FEATURE, mtsStateTable::NamesOfDefaultElements::Period);
+        new mtsMonitorFilterBypass(mtsMonitorFilterBase::FEATURE, 
+                                   mtsStateTable::NamesOfDefaultElements::Period,
+                                   mtsMonitorFilterBase::SignalElement::SCALAR);
     ADD_FILTER(filterBypass);
     // 1-st order differentiation filter
     mtsMonitorFilterTrendVel * filterTrendVel = 
-        new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::FEATURE, periodName);
+        new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::FEATURE, 
+                                     periodName, 
+                                     mtsMonitorFilterBase::SignalElement::SCALAR);
     ADD_FILTER(filterTrendVel);
 
     // Create filters to define feature vectors
     // Vectorize filter
     mtsMonitorFilterBase::SignalNamesType inputNames;
     inputNames.push_back(periodName);
-    inputNames.push_back(filterTrendVel->GetOutputSignalName(mtsMonitorFilterTrendVel::OUTPUT_0));
+    inputNames.push_back(filterTrendVel->GetOutputSignalName(0));
     mtsMonitorFilterVectorize * filterVectorize = 
         new mtsMonitorFilterVectorize(mtsMonitorFilterBase::FEATURE_VECTOR, inputNames);
     ADD_FILTER(filterVectorize);
 
     // Create filters to define symptoms
+    // FIXME
+    //mtsMonitorFilterNorm
     //filter = new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::SYMPTOM, periodName); ADD_FILTER;
+    //norm
 
     // Create filters to define symptom vectors
     //filter = new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::SYMPTOM_VECTOR, periodName); ADD_FILTER;

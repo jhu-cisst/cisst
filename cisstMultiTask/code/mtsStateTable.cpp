@@ -34,7 +34,7 @@ const std::string mtsStateTable::NamesOfDefaultElements::Toc = "Toc";
 const std::string mtsStateTable::NamesOfDefaultElements::Period = "Period";
 const std::string mtsStateTable::NamesOfDefaultElements::PeriodStatistics = "PeriodStatistics";
 
-const int INVALID_STATEVECTOR_ID = -1;
+const mtsStateDataId mtsStateTable::INVALID_STATEVECTOR_ID = -1;
 
 void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const char delimiter,
                                             bool headerOnly, const std::string & headerPrefix) const
