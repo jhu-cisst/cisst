@@ -46,22 +46,16 @@ class mtsMonitorFilterBypass : public mtsMonitorFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-public:
-    typedef enum { 
-        INPUT_0 = 0,  // Input X
-        INPUT_NUM     // Total number of inputs (=1)
-    } INPUT;
-
-    typedef enum { 
-        OUTPUT_0 = 0, // Output Y = X
-        OUTPUT_NUM    // Total number of outputs (=1)
-    } OUTPUT;
+protected:
+    BaseType::SignalElement::SIGNAL_TYPE SignalType;
 
 public:
     /*! Default constructor is provided only to satisfy the requirement of 
         cmnGenericObject.  DO NOT USE THIS. */
-    mtsMonitorFilterBypass(); // DO NOT USE
-    mtsMonitorFilterBypass(BaseType::FILTER_TYPE filterType, const std::string & inputName);
+    mtsMonitorFilterBypass();
+    mtsMonitorFilterBypass(BaseType::FILTER_TYPE filterType, 
+                           const std::string & inputName,
+                           BaseType::SignalElement::SIGNAL_TYPE signalType);
     ~mtsMonitorFilterBypass();
 
     /*! Implements bypass */
@@ -87,26 +81,20 @@ class mtsMonitorFilterTrendVel : public mtsMonitorFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-public:
-    typedef enum { 
-        INPUT_0 = 0,  // Input X
-        INPUT_NUM     // Total number of inputs (=1)
-    } INPUT;
-
-    typedef enum { 
-        OUTPUT_0 = 0, // Output Y =  (X(t+1) - X(t)) / (delta_t)
-        OUTPUT_NUM    // Total number of outputs (=1)
-    } OUTPUT;
-
 protected:
-    BaseType::PlaceholderType OldValue;
+    BaseType::SignalElement::SIGNAL_TYPE SignalType;
+    BaseType::PlaceholderType OldValueScalar;
+    BaseType::PlaceholderVectorType OldValueVector;
     double OldTimestamp;
+    bool OldValueVectorInitialized;
 
 public:
     /*! Default constructor is provided only to satisfy the requirement of 
         cmnGenericObject.  DO NOT USE THIS. */
     mtsMonitorFilterTrendVel();
-    mtsMonitorFilterTrendVel(BaseType::FILTER_TYPE filterType, const std::string & inputName);
+    mtsMonitorFilterTrendVel(BaseType::FILTER_TYPE filterType, 
+                             const std::string & inputName,
+                             BaseType::SignalElement::SIGNAL_TYPE signalType);
     ~mtsMonitorFilterTrendVel();
 
     /*! Implements 1st-order differentiator */
@@ -147,6 +135,48 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterVectorize);
+
+
+//-----------------------------------------------------------------------------
+//  Norm Filter
+//
+//  Output Y = (norm of X)
+//
+//  Three types of norm are supported: L1 norm, L2 norm, Linfinity norm
+//
+//  L1 Norm: Weisstein, Eric W. "L1-Norm." From MathWorld--A Wolfram Web Resource. 
+//           http://mathworld.wolfram.com/L1-Norm.html
+//  L2 Norm: Weisstein, Eric W. "L2-Norm." From MathWorld--A Wolfram Web Resource. 
+//           http://mathworld.wolfram.com/L2-Norm.html
+//  Linf Norm: Weisstein, Eric W. "Linfty-Norm." From MathWorld--A Wolfram Web Resource. 
+//             http://mathworld.wolfram.com/L-Infinity-Norm.html
+//
+class mtsMonitorFilterNorm: public mtsMonitorFilterBase
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    typedef enum { L1NORM, L2NORM, LINFNORM } NORM_TYPE;
+
+protected:
+    NORM_TYPE NormType;
+
+public:
+    /*! Default constructor is provided only to satisfy the requirement of 
+        cmnGenericObject.  DO NOT USE THIS. */
+    mtsMonitorFilterNorm();
+    mtsMonitorFilterNorm(BaseType::FILTER_TYPE filterType, 
+                         const std::string & inputName,
+                         NORM_TYPE normType);
+    ~mtsMonitorFilterNorm();
+
+    /*! Calculate norm of input */
+    void DoFiltering(bool debug);
+
+    void ToStream(std::ostream & outputStream) const;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterNorm);
 
 #endif // _mtsMonitorFilterBasics_h
 

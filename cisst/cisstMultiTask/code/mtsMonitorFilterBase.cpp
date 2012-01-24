@@ -51,7 +51,8 @@ mtsMonitorFilterBase::~mtsMonitorFilterBase()
     }
 }
 
-bool mtsMonitorFilterBase::AddInputSignal(const std::string & signalName)
+bool mtsMonitorFilterBase::AddInputSignal(const std::string & signalName, 
+                                          BaseType::SignalElement::SIGNAL_TYPE signalType)
 {
     for (size_t i = 0; i < InputSignals.size(); ++i) {
         if (InputSignals[i]->GetName() == signalName) {
@@ -60,13 +61,14 @@ bool mtsMonitorFilterBase::AddInputSignal(const std::string & signalName)
         }
     }
 
-    SignalElement * newSignal = new SignalElement(signalName);
+    SignalElement * newSignal = new SignalElement(signalName, signalType);
     InputSignals.push_back(newSignal);
 
     return true;
 }
 
-bool mtsMonitorFilterBase::AddOutputSignal(const std::string & signalName)
+bool mtsMonitorFilterBase::AddOutputSignal(const std::string & signalName,
+                                          BaseType::SignalElement::SIGNAL_TYPE signalType)
 {
     for (size_t i = 0; i < OutputSignals.size(); ++i) {
         if (OutputSignals[i]->GetName() == signalName) {
@@ -75,7 +77,7 @@ bool mtsMonitorFilterBase::AddOutputSignal(const std::string & signalName)
         }
     }
 
-    SignalElement * newSignal = new SignalElement(signalName);
+    SignalElement * newSignal = new SignalElement(signalName, signalType);
     OutputSignals.push_back(newSignal);
 
     return true;
