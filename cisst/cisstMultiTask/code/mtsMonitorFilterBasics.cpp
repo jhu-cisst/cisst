@@ -79,20 +79,20 @@ void mtsMonitorFilterBypass::DoFiltering(bool debug)
     // Fetch new value from state table and update output value
     double timestamp;
     if (SignalType == BaseType::SignalElement::SCALAR) {
-        InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
+        InputSignals[0]->Placeholder = StateTable->GetNewValueScalar(InputSignals[0]->GetStateDataId(), timestamp);
         OutputSignals[0]->Placeholder = InputSignals[0]->Placeholder; // bypass
     } else {
-        InputSignals[0]->PlaceholderVector = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
+        InputSignals[0]->PlaceholderVector = StateTable->GetNewValueVector(InputSignals[0]->GetStateDataId(), timestamp);
         OutputSignals[0]->PlaceholderVector = InputSignals[0]->PlaceholderVector;
     }
 
     if (debug) {
         if (SignalType == BaseType::SignalElement::SCALAR) {
             std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
-                << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
+                << InputSignals[0]->Placeholder << " => " << OutputSignals[0]->Placeholder << std::endl;
         } else {
             std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
-                << InputSignals[0]->PlaceholderVector << ", " << OutputSignals[0]->PlaceholderVector << std::endl;
+                << InputSignals[0]->PlaceholderVector << " => " << OutputSignals[0]->PlaceholderVector << std::endl;
         }
     }
 }
@@ -146,7 +146,7 @@ void mtsMonitorFilterTrendVel::DoFiltering(bool debug)
 
     if (SignalType == BaseType::SignalElement::SCALAR) {
         // Fetch new value from state table
-        InputSignals[0]->Placeholder = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
+        InputSignals[0]->Placeholder = StateTable->GetNewValueScalar(InputSignals[0]->GetStateDataId(), timestamp);
 
         // Update output value (velocity)
         deltaT = timestamp - OldTimestamp;
@@ -161,7 +161,7 @@ void mtsMonitorFilterTrendVel::DoFiltering(bool debug)
         OldTimestamp = timestamp;
     } else {
         // Fetch new values from state table
-        InputSignals[0]->PlaceholderVector = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
+        InputSignals[0]->PlaceholderVector = StateTable->GetNewValueVector(InputSignals[0]->GetStateDataId(), timestamp);
 
         // Update output values (velocity)
         deltaT = timestamp - OldTimestamp;
@@ -183,10 +183,10 @@ void mtsMonitorFilterTrendVel::DoFiltering(bool debug)
     if (debug) {
         if (SignalType == BaseType::SignalElement::SCALAR) {
             std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
-                    << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
+                    << InputSignals[0]->Placeholder << " => " << OutputSignals[0]->Placeholder << std::endl;
         } else {
             std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
-                    << InputSignals[0]->PlaceholderVector << ", " << OutputSignals[0]->PlaceholderVector << std::endl;
+                    << InputSignals[0]->PlaceholderVector << " => " << OutputSignals[0]->PlaceholderVector << std::endl;
         }
     }
 }
@@ -242,14 +242,17 @@ void mtsMonitorFilterVectorize::DoFiltering(bool debug)
     double timestamp;
     for (size_t i = 0; i < InputSize; ++i) {
         // Fetch new values from state table
-        InputSignals[i]->Placeholder = StateTable->GetNewValue(InputSignals[i]->GetStateDataId(), timestamp);
+        InputSignals[i]->Placeholder = StateTable->GetNewValueScalar(InputSignals[i]->GetStateDataId(), timestamp);
         // Update output vector
         OutputSignals[0]->PlaceholderVector(i) = InputSignals[i]->Placeholder;
     }
 
     if (debug) {
-        std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
-                  << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->PlaceholderVector << std::endl;
+        std::cout << this->GetFilterName() << "\t";
+        for (size_t i = 0; i < InputSize; ++i) {
+            std::cout << InputSignals[i]->GetName() << ": " << InputSignals[i]->Placeholder << ", ";
+        }
+        std::cout << " => " << OutputSignals[0]->PlaceholderVector << std::endl;
     }
 }
 
@@ -302,14 +305,14 @@ void mtsMonitorFilterNorm::DoFiltering(bool debug)
 
     // Fetch new values from state table
     double timestamp;
-    InputSignals[0]->PlaceholderVector = StateTable->GetNewValue(InputSignals[0]->GetStateDataId(), timestamp);
+    InputSignals[0]->PlaceholderVector = StateTable->GetNewValueVector(InputSignals[0]->GetStateDataId(), timestamp);
     // Update output vector
     switch (NormType) {
     case mtsMonitorFilterNorm::L1NORM:
         OutputSignals[0]->Placeholder = InputSignals[0]->PlaceholderVector.L1Norm();
         break;
     case mtsMonitorFilterNorm::L2NORM:
-        OutputSignals[0]->Placeholder = InputSignals[0]->Placeholder; // MJ FIXME: Implement L2Norm
+        OutputSignals[0]->Placeholder = sqrt(InputSignals[0]->PlaceholderVector.DotProduct(InputSignals[0]->PlaceholderVector));
         break;
     case mtsMonitorFilterNorm::LINFNORM:
         OutputSignals[0]->Placeholder = InputSignals[0]->PlaceholderVector.LinfNorm();

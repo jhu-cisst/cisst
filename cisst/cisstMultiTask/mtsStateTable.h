@@ -480,8 +480,9 @@ public:
     /*! Add filter */
     bool AddFilter(mtsMonitorFilterBase * filter);
 
-    // MJ TEMP
-    double GetNewValue(const mtsStateDataId id, double & timeStamp) const;
+    /*! Fetch new value from state table */
+    double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
+    mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
 #endif
 };
 
