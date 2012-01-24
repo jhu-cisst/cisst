@@ -104,9 +104,6 @@ protected:
     /*! List of feature vectors */
     FeatureVectorsType FeatureVectors;
 
-    /*! Define feature vector using filter instance and output mask */
-    bool AddFeatureVector(const std::string & featureVectorName, const std::vector<std::string> & signalNames);
-
     //------------------------------------------------------
     // Steps to generate symptom vectors
     //
