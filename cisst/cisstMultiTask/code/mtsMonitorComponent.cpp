@@ -124,7 +124,7 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
         return false;\
     }
 
-    // Create filters
+    // Create bypass and 1st order differentiator filters
     // Bypass filter for self monitoring (testing purpose) MJ: remove this later
     mtsMonitorFilterBypass * filterBypass = 
         new mtsMonitorFilterBypass(mtsMonitorFilterBase::FEATURE, 
@@ -138,8 +138,7 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
                                      mtsMonitorFilterBase::SignalElement::SCALAR);
     ADD_FILTER(filterTrendVel);
 
-    // Create filters to define feature vectors
-    // Vectorize filter
+    // Create vectorize filter to define feature vector
     mtsMonitorFilterBase::SignalNamesType inputNames;
     inputNames.push_back(periodName);
     inputNames.push_back(filterTrendVel->GetOutputSignalName(0));
@@ -147,14 +146,12 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
         new mtsMonitorFilterVectorize(mtsMonitorFilterBase::FEATURE_VECTOR, inputNames);
     ADD_FILTER(filterVectorize);
 
-    // Create filters to define symptoms
-    // FIXME
-    //mtsMonitorFilterNorm
-    //filter = new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::SYMPTOM, periodName); ADD_FILTER;
-    //norm
-
-    // Create filters to define symptom vectors
-    //filter = new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::SYMPTOM_VECTOR, periodName); ADD_FILTER;
+    // Create norm filter to define symptom
+    mtsMonitorFilterNorm * filterNorm =
+        new mtsMonitorFilterNorm(mtsMonitorFilterBase::SYMPTOM,
+                                 filterVectorize->GetOutputSignalName(0),
+                                 mtsMonitorFilterNorm::L2NORM);
+    ADD_FILTER(filterNorm);
 #undef ADD_FILTER 
 
     return true;

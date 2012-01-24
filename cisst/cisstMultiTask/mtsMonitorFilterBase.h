@@ -78,8 +78,10 @@ public:
               SignalType(type),
               Placeholder(0.0) {}
 
-        const std::string & GetName(void) const { return Name; }
+        const std::string & GetName(void) const          { return Name; }
+        SIGNAL_TYPE GetSignalType(void) const            { return SignalType; }
         inline mtsStateDataId GetStateDataId(void) const { return StateDataId; }
+
         inline void SetStateDataId(mtsStateDataId id) { StateDataId = id; }
     };
 
