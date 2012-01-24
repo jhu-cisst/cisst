@@ -40,6 +40,8 @@
 //-----------------------------------------------------------------------------
 //  Bypass Filter
 //
+//  Output Y = X
+//
 class mtsMonitorFilterBypass : public mtsMonitorFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -59,7 +61,7 @@ public:
     /*! Default constructor is provided only to satisfy the requirement of 
         cmnGenericObject.  DO NOT USE THIS. */
     mtsMonitorFilterBypass(); // DO NOT USE
-    mtsMonitorFilterBypass(const std::string & inputName);
+    mtsMonitorFilterBypass(BaseType::FILTER_TYPE filterType, const std::string & inputName);
     ~mtsMonitorFilterBypass();
 
     /*! Implements bypass */
@@ -69,6 +71,7 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterBypass);
+
 
 //-----------------------------------------------------------------------------
 //  Trend Velocity Filter (1st-order differentiator)
@@ -96,15 +99,14 @@ public:
     } OUTPUT;
 
 protected:
-    mtsMonitorFilterBase::PlaceholderType OldValue;
+    BaseType::PlaceholderType OldValue;
     double OldTimestamp;
 
 public:
     /*! Default constructor is provided only to satisfy the requirement of 
-        cmnGenericObject.  Do not use this -- Bypass filter with no input has 
-        no meaning. */
-    mtsMonitorFilterTrendVel(); // DO NOT USE
-    mtsMonitorFilterTrendVel(const std::string & inputName);
+        cmnGenericObject.  DO NOT USE THIS. */
+    mtsMonitorFilterTrendVel();
+    mtsMonitorFilterTrendVel(BaseType::FILTER_TYPE filterType, const std::string & inputName);
     ~mtsMonitorFilterTrendVel();
 
     /*! Implements 1st-order differentiator */
@@ -114,6 +116,37 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterTrendVel);
+
+
+//-----------------------------------------------------------------------------
+//  Vectorize Filter
+//
+//  Output Y_n = (X1, X2, ..., Xn)
+//
+//  Y_n: vector of size n (of type mtsDoubleVec)
+//   Xi: i-th scalar input
+//
+class mtsMonitorFilterVectorize: public mtsMonitorFilterBase
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+protected:
+    unsigned int InputSize;
+
+public:
+    /*! Default constructor is provided only to satisfy the requirement of 
+        cmnGenericObject.  DO NOT USE THIS. */
+    mtsMonitorFilterVectorize();
+    mtsMonitorFilterVectorize(BaseType::FILTER_TYPE filterType, const BaseType::SignalNamesType & inputNames);
+    ~mtsMonitorFilterVectorize();
+
+    /*! Convert n scalars into one vector of size n */
+    void DoFiltering(bool debug);
+
+    void ToStream(std::ostream & outputStream) const;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterVectorize);
 
 #endif // _mtsMonitorFilterBasics_h
 

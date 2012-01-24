@@ -43,7 +43,17 @@ class mtsStateTable;
 class mtsMonitorFilterBase : public cmnGenericObject
 {
 public:
+    /*! Type of filter */
+    typedef enum {
+        INVALID,        // invalid filter is not processed
+        FEATURE,        // =f(measurement)
+        FEATURE_VECTOR, // =sum_of(FEATURE)
+        SYMPTOM,        // =f(FEATURE_VECTOR) 
+        SYMPTOM_VECTOR  // =sum_of(SYMPTOM)
+    } FILTER_TYPE;
+
     typedef double PlaceholderType;
+    typedef mtsDoubleVec PlaceholderVectorType;
 
     /*! Names of input signals.  A filter may need more than one signal to run 
         its filtering algorithm. */
@@ -52,9 +62,8 @@ public:
         std::string Name;
         mtsStateDataId StateDataId;
     public:
-        // MJ TEMP: Use only one output of type double for now.  Can be extended to 
-        // arbitrary type later
         PlaceholderType Placeholder;
+        PlaceholderVectorType PlaceholderVector;
 
         SignalElement() : Name("NONAME"), Placeholder(0.0) {}
         SignalElement(const std::string & name) : Name(name), Placeholder(0.0) {}
@@ -73,8 +82,13 @@ private:
     static int UID;
 
 protected:
+    typedef mtsMonitorFilterBase BaseType;
+
     /*! UID of this filter */
     int FilterUID;
+    
+    /*! Type of this filter */
+    const FILTER_TYPE FilterType;
 
     /*! Name of this filter.  Set by derived filter */
     const std::string FilterName;
@@ -99,7 +113,7 @@ protected:
 public:
     /*! Constructors and destructor */
     mtsMonitorFilterBase(void); 
-    mtsMonitorFilterBase(const std::string & filterName);
+    mtsMonitorFilterBase(FILTER_TYPE filterType, const std::string & filterName);
     virtual ~mtsMonitorFilterBase();
 
 #if 0 // MJ: future improvements
@@ -139,8 +153,8 @@ public:
         return OutputSignals.size();
     }
 
-    const std::string & GetInputSignalName(size_t index) const;
-    const std::string & GetOutputSignalName(size_t index) const;
+    std::string GetInputSignalName(size_t index, bool withUID = false) const;
+    std::string GetOutputSignalName(size_t index, bool withUID = false) const;
 
     SignalNamesType GetInputSignalNames(void) const;
     SignalNamesType GetOutputSignalNames(void) const;

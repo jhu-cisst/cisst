@@ -27,13 +27,15 @@ const std::string InvalidSignalName = "INVALID";
 
 mtsMonitorFilterBase::mtsMonitorFilterBase(void)
     : FilterUID(-1), // MJ: invalid uid: don't use default constructor
+      FilterType(mtsMonitorFilterBase::INVALID),
       FilterName("NONAME"), 
       Enabled(false)
 {
 }
 
-mtsMonitorFilterBase::mtsMonitorFilterBase(const std::string & filterName)
+mtsMonitorFilterBase::mtsMonitorFilterBase(FILTER_TYPE filterType, const std::string & filterName)
     : FilterUID(UID++),
+      FilterType(filterType),
       FilterName(filterName),
       Enabled(true)
 {
@@ -79,24 +81,36 @@ bool mtsMonitorFilterBase::AddOutputSignal(const std::string & signalName)
     return true;
 }
 
-const std::string & mtsMonitorFilterBase::GetInputSignalName(size_t index) const
+std::string mtsMonitorFilterBase::GetInputSignalName(size_t index, bool withUID) const
 {
     if (index >= InputSignals.size()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetInputSignalName: index out of range (input signal count: " << InputSignals.size() << ")" << std::endl;
         return InvalidSignalName;
     }
 
-    return InputSignals[index]->GetName();
+    if (!withUID)
+        return InputSignals[index]->GetName();
+    else {
+        std::stringstream ss;
+        ss << InputSignals[index]->GetName() << FilterUID;
+        return ss.str();
+    }
 }
 
-const std::string & mtsMonitorFilterBase::GetOutputSignalName(size_t index) const
+std::string mtsMonitorFilterBase::GetOutputSignalName(size_t index, bool withUID) const
 {
     if (index >= OutputSignals.size()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetOutputSignalName: index out of range (output signal count: " << OutputSignals.size() << ")" << std::endl;
         return InvalidSignalName;
     }
 
-    return OutputSignals[index]->GetName();
+    if (!withUID)
+        return OutputSignals[index]->GetName();
+    else {
+        std::stringstream ss;
+        ss << OutputSignals[index]->GetName() << FilterUID;
+        return ss.str();
+    }
 }
 
 mtsMonitorFilterBase::SignalNamesType mtsMonitorFilterBase::GetInputSignalNames(void) const

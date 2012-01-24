@@ -108,40 +108,46 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
         return false;
     }
 
-    // Add "Period" state to the monitoring state table of this component with the name of
-    // (component name)+"Period".  Default filters will run on this state variable.
-    std::string stateName(taskName);
-    stateName += "Period";
+    // Add "Period" to the monitoring state table of this component with the name of
+    // (component name)+"Period"
+    std::string periodName(taskName);
+    periodName += "Period";
     // MJ TEMP: Adding a new element to state table on the fly is not thread safe -- need to fix this.
-    this->StateTableMonitor.NewElement(stateName, &newTargetComponent->Period);
-
-    // Create default filters and add them to the monitor state table of this component (mtsMonitorComponent)
-    mtsMonitorFilterBase * filter;
-    // Bypass filter (for testing purpose) MJ: remove this later
-    //filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period); // for self-monitoring
+    this->StateTableMonitor.NewElement(periodName, &newTargetComponent->Period);
 
     // MJ TODO: add clean up codes when error happens
-#define ADD_FILTER \
-    if (!this->StateTableMonitor.AddFilter(filter)) {\
+#define ADD_FILTER( _filter )\
+    if (!this->StateTableMonitor.AddFilter(_filter)) {\
         CMN_LOG_CLASS_RUN_ERROR\
-           << "AddTargetComponent: Failed to add filter \"" << filter->GetFilterName()\
-           << "\" to monitor target component \"" << taskName << "\"";\
+           << "AddTargetComponent: Failed to add filter \"" << _filter->GetFilterName()\
+           << "\" for task \"" << taskName << "\"";\
         return false;\
     }
 
-#define CREATE_FEATURE_VECTOR( _name )\
-    if (!AddFeatureVector(_name, signalNames)) {\
-        CMN_LOG_CLASS_RUN_ERROR << "AddTargetComponent: Failed to create feature vector: \"" << _name << "\"";\
-        return false;\
-    } else {\
-        signalNames.clear();\
-    }
+    // Create filters
+    // Bypass filter for self monitoring (testing purpose) MJ: remove this later
+    mtsMonitorFilterBypass * filterBypass = 
+        new mtsMonitorFilterBypass(mtsMonitorFilterBase::FEATURE, mtsStateTable::NamesOfDefaultElements::Period);
+    ADD_FILTER(filterBypass);
+    // 1-st order differentiation filter
+    mtsMonitorFilterTrendVel * filterTrendVel = 
+        new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::FEATURE, periodName);
+    ADD_FILTER(filterTrendVel);
 
-    //filter = new mtsMonitorFilterBypass(stateName); ADD_FILTER;
-    filter = new mtsMonitorFilterTrendVel(stateName); ADD_FILTER;
-    //CREATE_FEATURE_VECTOR("PeriodVelocity");
+    // Create filters to define feature vectors
+    // Vectorize filter
+    mtsMonitorFilterBase::SignalNamesType inputNames;
+    inputNames.push_back(periodName);
+    inputNames.push_back(filterTrendVel->GetOutputSignalName(mtsMonitorFilterTrendVel::OUTPUT_0));
+    mtsMonitorFilterVectorize * filterVectorize = 
+        new mtsMonitorFilterVectorize(mtsMonitorFilterBase::FEATURE_VECTOR, inputNames);
+    ADD_FILTER(filterVectorize);
 
-#undef CREATE_FEATURE_VECTOR
+    // Create filters to define symptoms
+    //filter = new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::SYMPTOM, periodName); ADD_FILTER;
+
+    // Create filters to define symptom vectors
+    //filter = new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::SYMPTOM_VECTOR, periodName); ADD_FILTER;
 #undef ADD_FILTER 
 
     return true;
@@ -155,13 +161,6 @@ bool mtsMonitorComponent::RemoveTargetComponent(const std::string & taskName)
     }
 
     return TargetComponents->RemoveItem(taskName);
-}
-
-bool mtsMonitorComponent::AddFeatureVector(const std::string & featureVectorName, 
-                                           const std::vector<std::string> & signalNames)
-{
-    // FIXME
-    return true;
 }
 
 //-----------------------------------------------

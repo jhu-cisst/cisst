@@ -23,6 +23,7 @@
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterBypass);
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterTrendVel);
+CMN_IMPLEMENT_SERVICES(mtsMonitorFilterVectorize);
 
 //-----------------------------------------------------------------------------
 //  Filter Name Definitions
@@ -38,6 +39,7 @@ DEFINE_MONITOR_FILTER_NAMES(Avg);
 DEFINE_MONITOR_FILTER_NAMES(Std);
 */
 DEFINE_MONITOR_FILTER_NAMES(TrendVel);
+DEFINE_MONITOR_FILTER_NAMES(Vectorize);
 #undef DEFINE_MONITOR_FILTER_NAMES
 
 //-----------------------------------------------------------------------------
@@ -45,13 +47,14 @@ DEFINE_MONITOR_FILTER_NAMES(TrendVel);
 //
 // DO NOT USE DEFAULT CONSTRUCTOR
 mtsMonitorFilterBypass::mtsMonitorFilterBypass()
-    : mtsMonitorFilterBase(::NameOfFilterBypass)
+    : mtsMonitorFilterBase(BaseType::INVALID, ::NameOfFilterBypass)
 {
     this->Enable(false);
 }
 
-mtsMonitorFilterBypass::mtsMonitorFilterBypass(const std::string & inputName)
-    : mtsMonitorFilterBase(::NameOfFilterBypass)
+mtsMonitorFilterBypass::mtsMonitorFilterBypass(
+    BaseType::FILTER_TYPE filterType, const std::string & inputName)
+    : mtsMonitorFilterBase(filterType, ::NameOfFilterBypass)
 {
     // Define inputs
     this->AddInputSignal(inputName);
@@ -80,32 +83,30 @@ void mtsMonitorFilterBypass::DoFiltering(bool debug)
     if (debug) {
         std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
                   << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
-#if 0
-        std::cout << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
-                  << "\t[in]: " << InputSignals[0]->GetName() << "\t[out]: " << OutputSignals[0]->GetName() << std::endl << std::flush;
-#endif
     }
 }
 
 void mtsMonitorFilterBypass::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
-                 << "\tInput: " << InputSignals[0]->GetName() << "\tOutput: " << OutputSignals[0]->GetName();
+    outputStream << "Filter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
+                 << ", Input: \"" << InputSignals[0]->GetName() << "\", Output: \"" << OutputSignals[0]->GetName() << "\"";
 }
+
 
 //-----------------------------------------------------------------------------
 //  Trend Velocity Filter
 //
 // DO NOT USE DEFAULT CONSTRUCTOR
 mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel()
-    : mtsMonitorFilterBase(::NameOfFilterTrendVel),
+    : mtsMonitorFilterBase(BaseType::INVALID, ::NameOfFilterTrendVel),
       OldValue(0.0)
 {
     this->Enable(false);
 }
 
-mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(const std::string & inputName)
-    : mtsMonitorFilterBase(::NameOfFilterTrendVel),
+mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(
+    BaseType::FILTER_TYPE filterType, const std::string & inputName)
+    : mtsMonitorFilterBase(filterType, ::NameOfFilterTrendVel),
       OldValue(0.0)
 {
     // Define inputs
@@ -144,16 +145,75 @@ void mtsMonitorFilterTrendVel::DoFiltering(bool debug)
     if (debug) {
         std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
                   << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->Placeholder << std::endl;
-#if 0
-        std::cout << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
-                  << "\t[in]: " << InputSignals[0]->GetName() << "\t[out]: " << OutputSignals[0]->GetName() << std::endl << std::flush;
-#endif
     }
 }
 
 void mtsMonitorFilterTrendVel::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "mtsFilter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
-                 << "\tInput: " << InputSignals[0]->GetName() << "\tOutput: " << OutputSignals[0]->GetName();
+    outputStream << "Filter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled")
+                 << ", Input: \"" << InputSignals[0]->GetName() << "\", Output: \"" << OutputSignals[0]->GetName() << "\"";
+}
+
+
+//-----------------------------------------------------------------------------
+//  Vectorize Filter
+//
+// DO NOT USE DEFAULT CONSTRUCTOR
+mtsMonitorFilterVectorize::mtsMonitorFilterVectorize()
+    : mtsMonitorFilterBase(BaseType::INVALID, ::NameOfFilterVectorize)
+{
+    this->Enable(false);
+}
+
+mtsMonitorFilterVectorize::mtsMonitorFilterVectorize(
+    BaseType::FILTER_TYPE filterType, const BaseType::SignalNamesType & inputNames)
+    : mtsMonitorFilterBase(filterType, ::NameOfFilterVectorize)
+{
+    InputSize = inputNames.size();
+
+    // Define inputs
+    for (size_t i = 0; i < InputSize; ++i) {
+        this->AddInputSignal(inputNames[i]);
+    }
+
+    // Define outputs
+    std::stringstream ss;
+    ss << "Vector" << this->FilterUID;
+    AddOutputSignal(ss.str());
+    GetOutputSignalElement(0)->PlaceholderVector.SetSize(InputSize);
+    GetOutputSignalElement(0)->PlaceholderVector.SetAll(0.0);
+}
+
+mtsMonitorFilterVectorize::~mtsMonitorFilterVectorize()
+{
+}
+
+void mtsMonitorFilterVectorize::DoFiltering(bool debug)
+{
+    if (!this->IsEnabled()) return;
+
+    double newTimeStamp;
+    for (size_t i = 0; i < InputSize; ++i) {
+        // Fetch new values from state table
+        InputSignals[i]->Placeholder = StateTable->GetNewValue(InputSignals[i]->GetStateDataId(), newTimeStamp);
+        // Update output vector
+        OutputSignals[0]->PlaceholderVector(i) = InputSignals[i]->Placeholder;
+    }
+
+    if (debug) {
+        std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
+                  << InputSignals[0]->Placeholder << ", " << OutputSignals[0]->PlaceholderVector << std::endl;
+    }
+}
+
+void mtsMonitorFilterVectorize::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Filter Name: " << this->GetFilterName() << ", " << (this->IsEnabled() ? "Enabled" : "Disabled");
+    outputStream << ", Input (" << InputSize << "): ";
+    for (size_t i = 0; i < InputSize; ++i) {
+        outputStream << "\"" << InputSignals[i]->GetName() << "\", ";
+    }
+    outputStream << "Output: ";
+    outputStream << "\"" << OutputSignals[0]->GetName() << "\"";
 }
 
