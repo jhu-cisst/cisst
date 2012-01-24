@@ -322,10 +322,16 @@ void mtsStateTable::Advance(void) {
     }
 
 #if CISST_MTS_SUPPORT_FDD
-    for (size_t i = 0; i < MonitorFilters.size(); ++i) {
-        //MonitorFilters[i]->DoFiltering();
-        MonitorFilters[i]->DoFiltering(true); // print debug messages to std
-    }
+#define PROCESS_FILTERS( _name )\
+    if (!MonitorFilters._name.empty())\
+        for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
+            MonitorFilters._name[i]->DoFiltering(true);
+    // Process filters sequentially
+    PROCESS_FILTERS(Features);
+    PROCESS_FILTERS(FeatureVectors);
+    PROCESS_FILTERS(Symptoms);
+    PROCESS_FILTERS(SymptomVectors);
+#undef PROCESS_FILTERS
 #endif
 }
 
@@ -358,11 +364,17 @@ void mtsStateTable::Cleanup(void) {
     }
 
 #if CISST_MTS_SUPPORT_FDD
-    // Clean up monitor filters
-    for (size_t i = 0; i < MonitorFilters.size(); ++i) {
-        delete MonitorFilters[i];
-    }
-    MonitorFilters.clear();
+#define CLEANUP_FILTERS( _name )\
+    if (!MonitorFilters._name.empty())\
+        for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
+            delete MonitorFilters._name[i];\
+    MonitorFilters._name.clear();
+    // Process filters sequentially
+    CLEANUP_FILTERS(Features);
+    CLEANUP_FILTERS(FeatureVectors);
+    CLEANUP_FILTERS(Symptoms);
+    CLEANUP_FILTERS(SymptomVectors);
+#undef CLEANUP_FILTERS
 #endif
 }
 
@@ -578,9 +590,16 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 #if CISST_MTS_SUPPORT_FDD
 bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
 {
+    // Filter validity check
     if (!filter) {
         CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter" << std::endl;
         return false;
+    } else {
+        mtsMonitorFilterBase::FILTER_TYPE filterType = filter->GetFilterType();
+        if (filterType < mtsMonitorFilterBase::FEATURE || filterType > mtsMonitorFilterBase::SYMPTOM_VECTOR) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
+            return false;
+        }
     }
 
     const std::string filterName = filter->GetFilterName();
@@ -628,9 +647,22 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
                                 << std::endl;
     }
 
-    MonitorFilters.push_back(filter);
+    switch (filter->GetFilterType()) {
+    case mtsMonitorFilterBase::FEATURE:
+        MonitorFilters.Features.push_back(filter);
+        break;
+    case mtsMonitorFilterBase::FEATURE_VECTOR:
+        MonitorFilters.FeatureVectors.push_back(filter);
+        break;
+    case mtsMonitorFilterBase::SYMPTOM:
+        MonitorFilters.Symptoms.push_back(filter);
+        break;
+    case mtsMonitorFilterBase::SYMPTOM_VECTOR:
+        MonitorFilters.SymptomVectors.push_back(filter);
+        break;
+    }
 
-    // Remember this state table
+    // Remember where the filter is attached to
     filter->SetStateTableInstance(this);
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: added new filter: " << filterName << std::endl;

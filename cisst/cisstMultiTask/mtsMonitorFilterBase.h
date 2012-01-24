@@ -140,7 +140,10 @@ public:
     /*! Getters and setters */
     //@{
     inline int GetFilterUID(void) const {
-        return FilterUID;
+        return this->FilterUID;
+    }
+    inline const FILTER_TYPE GetFilterType(void) const {
+        return this->FilterType;
     }
     inline const std::string & GetFilterName(void) const {
         return this->FilterName;
