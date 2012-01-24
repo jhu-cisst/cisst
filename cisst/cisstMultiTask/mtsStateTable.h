@@ -474,8 +474,17 @@ public:
     static const mtsStateDataId INVALID_STATEVECTOR_ID;
 
 #if CISST_MTS_SUPPORT_FDD
-    /*! List of filters attached to this state table */
-    std::vector<mtsMonitorFilterBase*> MonitorFilters;
+    typedef std::vector<mtsMonitorFilterBase*> MonitorFiltersType;
+    struct MonitorFiltersStruct {
+        /*! List of filters attached to this state table to define features */
+        MonitorFiltersType Features;
+        /*! List of filters attached to this state table to define feature vectors */
+        MonitorFiltersType FeatureVectors;
+        /*! List of filters attached to this state table to define symptoms */
+        MonitorFiltersType Symptoms;
+        /*! List of filters attached to this state table to define symptom vectors */
+        MonitorFiltersType SymptomVectors;
+    } MonitorFilters;
 
     /*! Add filter */
     bool AddFilter(mtsMonitorFilterBase * filter);
