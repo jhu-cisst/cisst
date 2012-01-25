@@ -386,6 +386,7 @@ macro (cisst_target_link_libraries TARGET ...)
     endforeach (required)
 
     # Second, create a list of libraries in the right order
+    unset (_CISST_LIBRARIES_TO_USE)
     foreach (existing ${CISST_LIBRARIES})
       if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
         set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
