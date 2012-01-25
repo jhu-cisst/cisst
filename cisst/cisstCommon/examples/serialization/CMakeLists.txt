@@ -30,6 +30,11 @@ if (cisst_FOUND_AS_REQUIRED)
   cisst_target_link_libraries (cmnExSerializationRead cisstCommon)
   target_link_libraries (cmnExSerializationRead cmnExSerializationClasses)
 
+  add_executable (cmnExSerializationStringStream writeStringStream.cpp)
+  set_property (TARGET cmnExSerializationStringStream PROPERTY FOLDER "cisstCommon/examples")
+  cisst_target_link_libraries (cmnExSerializationStringStream cisstCommon)
+  target_link_libraries (cmnExSerializationStringStream cmnExSerializationClasses)
+
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
 endif (cisst_FOUND_AS_REQUIRED)

@@ -3,10 +3,10 @@
 
 /*
   $Id$
-
+  
   Author(s):  Anton Deguet
   Created on: 2007-04-08
-
+  
   (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 // main function
 int main(void) {
     // create the output stream in binary mode
-    std::ofstream outputStream("out.dat", std::ofstream::binary);
+    std::stringstream outputStream;
     cmnSerializer serialization(outputStream);
 
     // create objects to serialize
@@ -64,18 +64,19 @@ int main(void) {
     serialization.Serialize(pi);
     serialization.Serialize(twoTen);
 
-    // close the stream
-    outputStream.close();
-
     // now try to read within the same execution
-    std::ifstream inputStream("out.dat", std::ifstream::binary);
+    std::stringstream inputStream;
+
+    // copy data from one stream to the other
+    inputStream.write(outputStream.str().c_str(), outputStream.str().size());
     cmnDeSerializer deSerialization(inputStream);
 
     // get object A1 using its base class
     cmnGenericObject * objectA1base = 0;
     objectA1base = deSerialization.DeSerialize();
+    std::cerr << "here" << std::endl;
     std::cout << objectA1base->Services()->GetName() << std::endl;
-
+    std::cerr << "there" << std::endl;
     // use dynamic cast to manipulate the object, this assumes that
     // the reader knows what to expect
     classA * objectA2pointer = 0;
@@ -88,9 +89,9 @@ int main(void) {
     deSerialization.DeSerialize(objectA3copy);
     std::cout << objectA3copy.Value << std::endl;
 
-    // deserialize the "string" objects
+    // deserialize the "string" objects 
     deSerialization.DeSerialize(objectB1);
-
+    
     // re-use our object pointer for the useless classA object
     delete objectA2pointer;
     objectA2pointer = dynamic_cast<classA *>(deSerialization.DeSerialize());
@@ -115,7 +116,20 @@ int main(void) {
               << "\n2^11: " << twoEleven
               << std::endl;
 
-    inputStream.close();
-
+    // write and read again
+    cmnDouble newValue, newValueAgain;
+    newValue = 0.0;
+    for (unsigned int index = 0;
+         index < 10;
+         ++index) {
+        newValue += 1.1111;
+        outputStream.str("");
+        serialization.Serialize(newValue);
+        
+        // copy from stream to stream
+        inputStream << outputStream.str();
+        deSerialization.DeSerialize(newValueAgain);
+        std::cout << newValue << " == " << newValueAgain << std::endl;
+    }
     return 0;
 }
