@@ -372,9 +372,10 @@ macro (cisst_target_link_libraries TARGET ...)
   else (NOT CISST_LIBRARIES)
 
     # If cisst has been compile as shared libraries, need to import symbols
-    if (CISST_BUILD_SHARED_LIBS)
+    if (WIN32 AND CISST_BUILD_SHARED_LIBS)
+      remove_definitions (-DCISST_DLL)
       add_definitions (-DCISST_DLL)
-    endif (CISST_BUILD_SHARED_LIBS)
+    endif (WIN32 AND CISST_BUILD_SHARED_LIBS)
 
     # First test that all libraries should have been compiled
     foreach (required ${_REQUIRED_CISST_LIBRARIES})
