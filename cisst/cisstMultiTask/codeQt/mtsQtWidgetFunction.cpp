@@ -59,6 +59,7 @@ mtsQtFunctionContainerWidget::mtsQtFunctionContainerWidget():
     layout->addWidget(ToggleButton);
 
     TitleLabel = new QLabel();
+    TitleLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     layout->addWidget(TitleLabel);
 
     layout = new QHBoxLayout();
@@ -94,7 +95,7 @@ void mtsQtFunctionContainerWidget::SetFunctionWidget(QWidget * widget, const QSt
     QVBoxLayout * layout = new QVBoxLayout();
     layout->setSpacing(1);
     layout->setContentsMargins(0, 0, 0, 0);
- 
+
     FunctionWidgetContainer->setLayout(layout);
     layout->addWidget(widget);
 
@@ -109,7 +110,7 @@ mtsQtFunctionListContainerWidget::mtsQtFunctionListContainerWidget():
 {
     QVBoxLayout * layout = new QVBoxLayout();
     layout->setSpacing(1);
-    layout->setContentsMargins(0, 0, 0, 0);    
+    layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
 }
 

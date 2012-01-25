@@ -24,19 +24,24 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 
 // -- for doubles
 vctQtWidgetDynamicVectorDoubleRead::vctQtWidgetDynamicVectorDoubleRead(void):
     QTableWidget()
 {
-    this->setContentsMargins(0, 0, 0, 0);
+    this->setRowCount(1);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
 
 bool vctQtWidgetDynamicVectorDoubleRead::SetValue(const vctDynamicVector<double> & vector)
 {
-    this->setRowCount(1);
     size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
@@ -59,18 +64,45 @@ bool vctQtWidgetDynamicVectorDoubleRead::SetValue(const vctDynamicVector<double>
 vctQtWidgetDynamicVectorDoubleWrite::vctQtWidgetDynamicVectorDoubleWrite(void):
     QTableWidget()
 {
+    this->setRowCount(1);
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
 
 bool vctQtWidgetDynamicVectorDoubleWrite::SetValue(const vctDynamicVector<double> & vector)
 {
+    size_t size = vector.size();
+    if (this->columnCount() != size) {
+        this->setColumnCount(size);
+    }
+    QDoubleSpinBox * spinBox;
+    for (unsigned int index = 0; index < size; ++index) {
+        spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, index));
+        if(spinBox == 0) {
+            spinBox = new QDoubleSpinBox();
+            this->setCellWidget(0, index, spinBox);
+            spinBox->setDecimals(5);
+        }
+        spinBox->setValue(vector.Element(index));
+    }
     return true;
 }
 
 bool vctQtWidgetDynamicVectorDoubleWrite::GetValue(vctDynamicVector<double> & placeHolder) const
 {
+    int columns = this->columnCount();
+    vctDynamicVector<double> newVector(columns);
+    QDoubleSpinBox * spinBox;
+    for(int column = 0; column < columns; ++column) {
+        spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(1, column));
+        newVector.Element(column) = spinBox->value();
+    }
+    placeHolder.Assign(newVector);
     return true;
 }
 
@@ -79,14 +111,17 @@ bool vctQtWidgetDynamicVectorDoubleWrite::GetValue(vctDynamicVector<double> & pl
 vctQtWidgetDynamicVectorIntRead::vctQtWidgetDynamicVectorIntRead(void):
     QTableWidget()
 {
-    this->setContentsMargins(0, 0, 0, 0);
+    this->setRowCount(1);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
 
 bool vctQtWidgetDynamicVectorIntRead::SetValue(const vctDynamicVector<int> & vector)
 {
-    this->setRowCount(1);
     size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
@@ -109,18 +144,43 @@ bool vctQtWidgetDynamicVectorIntRead::SetValue(const vctDynamicVector<int> & vec
 vctQtWidgetDynamicVectorIntWrite::vctQtWidgetDynamicVectorIntWrite(void):
     QTableWidget()
 {
-    this->setContentsMargins(0, 0, 0, 0);
+    this->setRowCount(1);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
 
 bool vctQtWidgetDynamicVectorIntWrite::SetValue(const vctDynamicVector<int> & vector)
 {
+    size_t size = vector.size();
+    if (this->columnCount() != size) {
+        this->setColumnCount(size);
+    }
+    QSpinBox * spinBox;
+    for (unsigned int index = 0; index < size; ++index) {
+        spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, index));
+        if(spinBox == 0) {
+            spinBox = new QSpinBox();
+            this->setCellWidget(0, index, spinBox);
+        }
+        spinBox->setValue(vector.Element(index));
+    }
     return true;
 }
 
 bool vctQtWidgetDynamicVectorIntWrite::GetValue(vctDynamicVector<int> & placeHolder) const
 {
+    int columns = this->columnCount();
+    vctDynamicVector<double> newVector(columns);
+    QSpinBox * spinBox;
+    for(int column = 0; column < columns; ++column) {
+        spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(1, column));
+        newVector.Element(column) = spinBox->value();
+    }
+    placeHolder.Assign(newVector);
     return true;
 }
 
@@ -129,14 +189,17 @@ bool vctQtWidgetDynamicVectorIntWrite::GetValue(vctDynamicVector<int> & placeHol
 vctQtWidgetDynamicVectorBoolRead::vctQtWidgetDynamicVectorBoolRead(void):
     QTableWidget()
 {
-    this->setContentsMargins(0, 0, 0, 0);
+    this->setRowCount(1);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
 
 bool vctQtWidgetDynamicVectorBoolRead::SetValue(const vctDynamicVector<bool> & vector)
 {
-    this->setRowCount(1);
     size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
@@ -159,17 +222,44 @@ bool vctQtWidgetDynamicVectorBoolRead::SetValue(const vctDynamicVector<bool> & v
 vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
     QTableWidget()
 {
-    this->setContentsMargins(0, 0, 0, 0);
+    this->setRowCount(1);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
 
 bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const vctDynamicVector<bool> & vector)
 {
+    size_t size = vector.size();
+    if (this->columnCount() != size) {
+        this->setColumnCount(size);
+    }
+    QSpinBox * spinBox;
+    for (unsigned int index = 0; index < size; ++index) {
+        spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, index));
+        if(spinBox == 0) {
+            spinBox = new QSpinBox();
+            this->setCellWidget(0, index, spinBox);
+            spinBox->setMinimum(0);
+            spinBox->setMaximum(1);
+        }
+        spinBox->setValue(vector.Element(index));
+    }
     return true;
 }
 
 bool vctQtWidgetDynamicVectorBoolWrite::GetValue(vctDynamicVector<bool> & placeHolder) const
 {
+    int columns = this->columnCount();
+    vctDynamicVector<double> newVector(columns);
+    QSpinBox * spinBox;
+    for(int column = 0; column < columns; ++column) {
+        spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(1, column));
+        newVector.Element(column) = (bool)spinBox->value();
+    }
+    placeHolder.Assign(newVector);
     return true;
 }

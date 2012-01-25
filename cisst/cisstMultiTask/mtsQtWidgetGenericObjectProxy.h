@@ -32,15 +32,6 @@ class QDoubleSpinBox;
 class QLineEdit;
 class QTableWidget;
 
-#include <QTableWidget>
-class StructEdit : public QTableWidget {
-    Q_OBJECT;
-public:
-    typedef QWidget * (*WidgetCreatorCallback) (void);
-
-    StructEdit(const QStringList & labels, const QList<WidgetCreatorCallback> & widgets, int rows = 1);
-};
-
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
@@ -171,6 +162,9 @@ class CISST_EXPORT mtsQtWidgetStateIndexWrite: public mtsQtWidgetGenericObjectWr
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
  private:
     QTableWidget * TableWidget;
+    QSpinBox * IndexSpinBox;
+    QDoubleSpinBox * TicksSpinBox;
+    QDoubleSpinBox * LengthSpinBox;
     static QWidget * MakeSpinBox();
     static QWidget * MakeDoubleSpinBox();
  public:

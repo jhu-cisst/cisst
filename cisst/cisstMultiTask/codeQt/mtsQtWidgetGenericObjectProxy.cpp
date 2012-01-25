@@ -257,24 +257,34 @@ bool mtsQtWidgetStateIndexRead::SetValue(const mtsGenericObject & value)
     return false;
 }
 
-QWidget * mtsQtWidgetStateIndexWrite::MakeSpinBox() {
-    return new QSpinBox();
-}
-
-QWidget * mtsQtWidgetStateIndexWrite::MakeDoubleSpinBox() {
-    return new QDoubleSpinBox();
-}
-
 mtsQtWidgetStateIndexWrite::mtsQtWidgetStateIndexWrite(void):
     mtsQtWidgetGenericObjectWrite()
 {
+    TableWidget = new QTableWidget();
+
+    TableWidget->setRowCount(1);
+    TableWidget->setColumnCount(3);
+
     QStringList members;
     members << "Index" << "Ticks" << "Length";
 
-    QList<StructEdit::WidgetCreatorCallback> widgetCreators;
-    widgetCreators << &MakeSpinBox << &MakeDoubleSpinBox << &MakeDoubleSpinBox;
+    TableWidget->setHorizontalHeaderLabels(members);
 
-    TableWidget = new StructEdit(members, widgetCreators);
+    IndexSpinBox = new QSpinBox();
+    TicksSpinBox = new QDoubleSpinBox();
+    LengthSpinBox = new QDoubleSpinBox();
+
+    TableWidget->setCellWidget(0, 0, IndexSpinBox);
+    TableWidget->setCellWidget(0, 1, TicksSpinBox);
+    TableWidget->setCellWidget(0, 2, LengthSpinBox);
+
+    TableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    TableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    TableWidget->verticalHeader()->hide();
+
+    int verticalHeight = TableWidget->horizontalHeader()->sizeHint().height() + TableWidget->verticalHeader()->sizeHint().height();
+
+    TableWidget->setFixedHeight(verticalHeight);
 
     Layout->addWidget(TableWidget);
     Layout->addStretch();
@@ -284,9 +294,9 @@ bool mtsQtWidgetStateIndexWrite::SetValue(const mtsGenericObject & value)
 {
     const mtsStateIndex * stateIndexData = dynamic_cast<const mtsStateIndex *>(&value);
     if (stateIndexData) {
-        TableWidget->item(0, 0)->setData(Qt::EditRole, stateIndexData->Index());
-        TableWidget->item(0, 1)->setData(Qt::EditRole, stateIndexData->Ticks());
-        TableWidget->item(0, 2)->setData(Qt::EditRole, stateIndexData->Length());
+        IndexSpinBox->setValue(stateIndexData->Index());
+        TicksSpinBox->setValue(stateIndexData->Ticks());
+        LengthSpinBox->setValue(stateIndexData->Length());
         return true;
     }
     return false;
@@ -297,42 +307,13 @@ bool mtsQtWidgetStateIndexWrite::GetValue(mtsGenericObject & placeHolder) const
     mtsStateIndex * stateIndexData = dynamic_cast<mtsStateIndex *>(&placeHolder);
     if (stateIndexData) {
         mtsStateIndex newStateIndexData(
-            0.0,
-            TableWidget->item(0, 0)->data(Qt::EditRole).toInt(),
-            TableWidget->item(0, 1)->data(Qt::EditRole).toDouble(),
-            TableWidget->item(0, 2)->data(Qt::EditRole).toDouble()
-        );
+                                        0.0,
+                                        IndexSpinBox->value(),
+                                        TicksSpinBox->value(),
+                                        LengthSpinBox->value()
+                                        );
         stateIndexData->ReconstructFrom(newStateIndexData);
         return true;
     }
     return false;
-}
-
-StructEdit::StructEdit(const QStringList & labels, const QList<WidgetCreatorCallback> & widgets, int rows)
-    : QTableWidget(rows, labels.size())
-{
-    setHorizontalHeaderLabels(labels);
-
-    int cols = labels.size();
-
-    for(int i = 0; i < rows; ++i) {
-        for(int j = 0; j < cols; ++j) {
-            setItem(i, j, new QTableWidgetItem());
-        }
-    }
-
-    for(int i = 0; i < rows; ++i) {
-        for(int j = 0; j < cols; ++j) {
-            setCellWidget(i, j, widgets[j]());
-        }
-    }
-
-    horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    verticalHeader()->setResizeMode(QHeaderView::Stretch);
-
-    if(rows < 2) verticalHeader()->setVisible(false);
-
-    int verticalHeight = horizontalHeader()->sizeHint().height() + verticalHeader()->sizeHint().height();
-
-    setFixedHeight(verticalHeight);
 }

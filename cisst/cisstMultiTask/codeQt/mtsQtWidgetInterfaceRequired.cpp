@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 
 #include <QVBoxLayout>
+#include <QScrollArea>
 
 
 mtsQtWidgetInterfaceRequired::mtsQtWidgetInterfaceRequired(mtsInterfaceProvided * interface,
@@ -41,10 +42,13 @@ mtsQtWidgetInterfaceRequired::mtsQtWidgetInterfaceRequired(mtsInterfaceProvided 
     ExecutionInterface(executionInterface)
 {
     FunctionsWidget = new mtsQtFunctionListContainerWidget();
+    QScrollArea* scrollArea = new QScrollArea();
+    scrollArea->setWidget(FunctionsWidget);
+    scrollArea->setWidgetResizable(true);
     QLayout* layout = new QVBoxLayout();
     layout->setSpacing(1);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(FunctionsWidget);
+    layout->addWidget(scrollArea);
     setLayout(layout);
     CreateWidgets(*interface, *ExecutionInterface);
 }
@@ -78,7 +82,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionVoid(functionVoid);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
-        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for void function \"" << stdName << "\"" << std::endl; 
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for void function \"" << stdName << "\"" << std::endl;
     }
 
     // void return functions
@@ -92,7 +96,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionVoidReturn(functionVoidReturn);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
-        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for void return function \"" << stdName << "\"" << std::endl; 
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for void return function \"" << stdName << "\"" << std::endl;
     }
 
     // write functions
@@ -106,7 +110,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionWrite(functionWrite);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
-        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for write function \"" << stdName << "\"" << std::endl; 
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for write function \"" << stdName << "\"" << std::endl;
     }
 
     // write return functions
@@ -120,7 +124,7 @@ void mtsQtWidgetInterfaceRequired::CreateWidgets(mtsInterfaceProvided & interfac
         functionWidget = new mtsQtWidgetFunctionWriteReturn(functionWriteReturn);
         FunctionsWidget->addItem(functionWidget, stdName.c_str());
         functionWidgets.push_back(functionWidget);
-        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for write return function \"" << stdName << "\"" << std::endl; 
+        CMN_LOG_CLASS_INIT_DEBUG << "CreateWidgets: created widget for write return function \"" << stdName << "\"" << std::endl;
     }
 
     // read functions
