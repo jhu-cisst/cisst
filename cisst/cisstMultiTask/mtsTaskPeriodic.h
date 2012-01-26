@@ -162,7 +162,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
     /********************* Methods for task period and overrun ************/
 
     /*! Return the periodicity of the task, in seconds */
-    double GetPeriodicity(void) const;
+    double GetPeriodicity(bool nominalPeriod = false) const;
 
     /*! Return true if thread is periodic.  Currently, returns true if
       the thread was created with a period > 0. */

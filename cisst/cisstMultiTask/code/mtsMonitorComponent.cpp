@@ -40,16 +40,10 @@ mtsMonitorComponent::~mtsMonitorComponent()
 
 void mtsMonitorComponent::Run(void)
 {
-    UpdateFeatures();
-    UpdateFeatureVectors();
-    //UpdateSymptoms();
-    //UpdateSymptomVectors();
-
-    // for test
-    //PrintTargetComponents();
+    UpdateFilters();
 }
 
-void mtsMonitorComponent::UpdateFeatures(void)
+void mtsMonitorComponent::UpdateFilters(void)
 {
     TargetComponentsType::const_iterator it = TargetComponents->begin();
     const TargetComponentsType::const_iterator itEnd = TargetComponents->end();
@@ -59,23 +53,6 @@ void mtsMonitorComponent::UpdateFeatures(void)
         target->GetPeriod(target->Period);
     }
 }
-
-void mtsMonitorComponent::UpdateFeatureVectors(void)
-{
-    // TODO
-}
-
-#if 0
-void mtsMonitorComponent::UpdateSymptoms(void)
-{
-    // TODO
-}
-
-void mtsMonitorComponent::UpdateSymptomVectors(void)
-{
-    // TODO
-}
-#endif
 
 void mtsMonitorComponent::PrintTargetComponents(void)
 {
@@ -95,6 +72,12 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
 
     if (TargetComponents->FindItem(taskName)) {
         CMN_LOG_CLASS_RUN_WARNING << "AddTargetComponent: task \"" << taskName << "\" is already registered" << std::endl;
+        return true;
+    }
+
+    mtsTaskPeriodic * periodicTask = dynamic_cast<mtsTaskPeriodic*>(task);
+    if (periodicTask == 0) {
+        CMN_LOG_CLASS_RUN_WARNING << "AddTargetComponent: task \"" << taskName << "\" is not periodic." << std::endl;
         return true;
     }
 
@@ -146,10 +129,24 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
         new mtsMonitorFilterVectorize(mtsMonitorFilterBase::FEATURE_VECTOR, inputNames);
     ADD_FILTER(filterVectorize);
 
+    // Create subtraction filter to define feature vector
+    mtsMonitorFilterBase::PlaceholderVectorType vecExpected(2);
+    vecExpected(0) = periodicTask->GetPeriodicity(true); // Get nominal period
+    vecExpected(1) = 0.0;
+    mtsMonitorFilterArithmetic * filterArithmetic = 
+        new mtsMonitorFilterArithmetic(mtsMonitorFilterBase::FEATURE_VECTOR,
+                                       mtsMonitorFilterArithmetic::SUBTRACTION,
+                                       // in 1: actual
+                                       filterVectorize->GetOutputSignalName(0),
+                                       mtsMonitorFilterBase::SignalElement::VECTOR,
+                                       // in 2: expected
+                                       vecExpected);
+    ADD_FILTER(filterArithmetic);
+
     // Create norm filter to define symptom
     mtsMonitorFilterNorm * filterNorm =
         new mtsMonitorFilterNorm(mtsMonitorFilterBase::SYMPTOM,
-                                 filterVectorize->GetOutputSignalName(0),
+                                 filterArithmetic->GetOutputSignalName(0),
                                  mtsMonitorFilterNorm::L2NORM);
     ADD_FILTER(filterNorm);
 #undef ADD_FILTER 

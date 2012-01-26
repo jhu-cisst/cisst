@@ -229,9 +229,9 @@ void mtsTaskPeriodic::Suspend(void)
 }
 
 
-double mtsTaskPeriodic::GetPeriodicity(void) const
+double mtsTaskPeriodic::GetPeriodicity(bool nominalPeriod) const
 {
-    return AbsoluteTimePeriod.ToSeconds();
+    return (nominalPeriod ? Period : AbsoluteTimePeriod.ToSeconds());
 }
 
 /*! Return true if thread is periodic.  Currently, returns true if
