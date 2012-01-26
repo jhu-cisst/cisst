@@ -660,6 +660,10 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
     case mtsMonitorFilterBase::SYMPTOM_VECTOR:
         MonitorFilters.SymptomVectors.push_back(filter);
         break;
+    case mtsMonitorFilterBase::INVALID:
+    default:
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
+        return false;
     }
 
     // Remember where the filter is attached to

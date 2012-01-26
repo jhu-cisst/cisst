@@ -104,17 +104,8 @@ protected:
     /*! List of feature vectors */
     FeatureVectorsType FeatureVectors;
 
-    //------------------------------------------------------
-    // Steps to generate symptom vectors
-    //
-    /*! Step 1. Fetch new values from each target component */
-    void UpdateFeatures(void);
-    /*! Step 2. Generate feature vectors based on new features */
-    void UpdateFeatureVectors(void);
-    /*! Step 3. Update symptoms based on new feature vectors */
-    //void UpdateSymptoms(void);
-    /*! Step 4. Generate symptom vectors based on new symptoms */
-    //void UpdateSymptomVectors(void);
+    /*! Fetch new values from each target component */
+    void UpdateFilters(void);
 
     /*! Print list of target components */
     void PrintTargetComponents(void);

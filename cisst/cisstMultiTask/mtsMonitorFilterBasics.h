@@ -178,5 +178,90 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterNorm);
 
+
+//-----------------------------------------------------------------------------
+//  Arithmetic Operation Filter
+//
+//  Output Y = X_1 [+,-,*,/] X_2
+//
+//  X_1 and X_2 can be either scalar or vector.
+//
+class mtsMonitorFilterArithmetic: public mtsMonitorFilterBase
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    typedef enum { INVALID, SUBTRACTION } OPERATION_TYPE;
+
+protected:
+    const OPERATION_TYPE OperationType;
+    const BaseType::PlaceholderVectorType Offset;
+
+public:    
+    /*! Default constructor is provided only to satisfy the requirement of 
+        cmnGenericObject.  DO NOT USE THIS. */
+    mtsMonitorFilterArithmetic();
+    mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
+                               OPERATION_TYPE operationType,
+                               const std::string & input1Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input1Type,
+                               const BaseType::PlaceholderVectorType input2);
+    ~mtsMonitorFilterArithmetic();
+
+#if 0 // TODO later
+public:
+    typedef enum { INVALID, ADDITION, SUBTRACTION, MULTIPLICATION, DIVISION } OPERATION_TYPE;
+
+protected:
+    const OPERATION_TYPE OperationType;
+    const BaseType::PlaceholderType ConstPlaceholder;
+    const BaseType::PlaceholderVectorType ConstPlaceholderVector;
+    const bool ConstPlaceholderValid;
+    const bool ConstPlaceholderVectorValid;
+    const bool Input1Const;
+    const bool Input2Const;
+
+public:
+    /*! Default constructor is provided only to satisfy the requirement of 
+        cmnGenericObject.  DO NOT USE THIS. */
+    mtsMonitorFilterArithmetic();
+    mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
+                               OPERATION_TYPE operationType,
+                               const std::string & input1Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input1Type,
+                               const std::string & input2Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input2Type);
+    mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
+                               OPERATION_TYPE operationType,
+                               const BaseType::PlaceholderType input1,
+                               const std::string & input2Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input2Type);
+    mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
+                               OPERATION_TYPE operationType,
+                               const BaseType::PlaceholderVectorType input1,
+                               const std::string & input2Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input2Type);
+    mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
+                               OPERATION_TYPE operationType,
+                               const std::string & input1Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input1Type,
+                               const BaseType::PlaceholderType input2);
+    mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
+                               OPERATION_TYPE operationType,
+                               const std::string & input1Name,
+                               BaseType::SignalElement::SIGNAL_TYPE input1Type,
+                               const BaseType::PlaceholderVectorType input2);
+    ~mtsMonitorFilterArithmetic();
+#endif
+
+    /*! Calculate norm of input */
+    void DoFiltering(bool debug);
+
+    void ToStream(std::ostream & outputStream) const;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterArithmetic);
+
+
 #endif // _mtsMonitorFilterBasics_h
 
