@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2008-01-17
 
-  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -63,6 +63,12 @@ http://www.cisst.org/cisst/license.txt.
 
 %ignore *::AddCommandVoid;
 %ignore *::AddEventVoid;
+%ignore mtsComponent::AddRequiredInterface;
+%ignore mtsComponent::AddProvidedInterface;
+%ignore mtsManagerLocal::AddTask;
+%ignore mtsManagerLocal::GetTask;
+%ignore mtsManagerLocal::AddDevice;
+%ignore mtsManagerLocal::GetDevice;
 
 #define CISST_EXPORT
 #define CISST_DEPRECATED
