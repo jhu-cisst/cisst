@@ -36,6 +36,7 @@ set (SOURCE_FILES
      mtsCommandWriteReturn.cpp
 
      mtsComponent.cpp
+     mtsComponentAddLatency.cpp
      mtsComponentState.cpp
      mtsComponentViewer.cpp
      mtsConnection.cpp
@@ -123,6 +124,7 @@ set (HEADER_FILES
      mtsCommandWriteReturn.h
 
      mtsComponent.h
+     mtsComponentAddLatency.h
      mtsComponentDispatcher.h
      mtsComponentGeneratorMacros.h
      mtsComponentState.h

@@ -43,6 +43,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     HistoryLength(size),
     IndexWriter(0),
     IndexReader(0),
+    IndexDelayed(0),
     AutomaticAdvanceFlag(true),
     StateVector(0),
     StateVectorDataNames(0),
@@ -92,6 +93,17 @@ mtsStateTable::~mtsStateTable()
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     size_t tmp = IndexReader;
     return mtsStateIndex(this->Tic, tmp, Ticks[tmp], HistoryLength);
+}
+
+mtsStateIndex mtsStateTable::GetIndexDelayed(void) const {
+    size_t tmp = IndexDelayed;
+    return mtsStateIndex(this->Tic, tmp, Ticks[tmp], HistoryLength);
+}
+
+size_t mtsStateTable::SetDelay(size_t newDelay) {
+    size_t currentDelay = this->Delay;
+    this->Delay = newDelay;
+    return currentDelay;
 }
 
 
@@ -212,6 +224,11 @@ void mtsStateTable::Advance(void) {
     // move index reader to recently written data
     IndexReader = tmpIndex;
 
+    // compute index delayed, ideally a valid index
+    if (IndexReader > Delay) {
+        IndexDelayed = IndexReader - Delay;
+    }
+
     // data collection, test if we are currently collecting
     if (!this->DataCollection.Collecting) {
         // check if a start time is set and has arrived
@@ -316,9 +333,9 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
                     << " : ";
             }
         }
-        if (i==IndexReader)
+        if (i == IndexReader)
             out << "<-- Index for Reader";
-        if (i==IndexWriter)
+        if (i == IndexWriter)
             out << "<== Index for Writer";
         out << std::endl;
     }

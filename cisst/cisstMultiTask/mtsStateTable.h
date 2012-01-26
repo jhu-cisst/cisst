@@ -209,6 +209,12 @@ public:
             return Get(Table.GetIndexReader(), data);
         }
 
+        bool GetDelayed(value_type & data) const {
+            return Get(Table.GetIndexDelayed(), data);
+        }
+        bool GetDelayed(mtsGenericObject & data) const {
+            return Get(Table.GetIndexDelayed(), data);
+        }
         void SetCurrent(const value_type & data) {
             *Current = data;
         }
@@ -245,6 +251,13 @@ public:
 
 	/*! The index of the reader in the table. */
 	size_t IndexReader;
+
+    /*! The index of the delayed reader in the table. */
+    size_t IndexDelayed;
+
+    /*! Delay used for GetIndexDelayed and GetDelayed.  In number of
+      rows in state tables. */
+    size_t Delay;
 
     /*! Automatic advance flag.  This flag is used by the method
       AdvanceIfAutomatic to decide if this state table should advance
@@ -330,6 +343,14 @@ public:
         timeIndex = GetIndexReader();
     }
 
+    /*! Get a handle for data to be used by a reader with a given
+      delay.  All the const methods, that can be called from a reader
+      and writer. */
+    mtsStateIndex GetIndexDelayed(void) const;
+
+    /*! Set delay in number of rows. */
+    size_t SetDelay(size_t newDelay);
+
     /*! Verifies if the data is valid. */
     inline bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
         return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
@@ -363,7 +384,7 @@ public:
 
     /*! Return pointer to the state data element specified by the id.
       This element is the same type as the state data table entry. */
-    template<class _elementType>
+    template <class _elementType>
     _elementType * GetStateDataElement(mtsStateDataId id) const {
         return StateVectorElements[id]; // WEIRD???
     }
@@ -374,15 +395,15 @@ public:
         \note This method is overloaded to accept the element pointer or string name.
     */
     template<class _elementType>
-    mtsStateTable::AccessorBase *GetAccessor(const _elementType &element) const;
+    mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const;
 
     /*! Return pointer to accessor functions for the state data element.
         \param name Name of state data element
         \returns Pointer to accessor class (0 if not found)
         \note This method is overloaded to accept the element pointer or string name.
     */
-    mtsStateTable::AccessorBase *GetAccessor(const std::string &name) const;
-    mtsStateTable::AccessorBase *GetAccessor(const char *name) const;
+    mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const;
+    mtsStateTable::AccessorBase * GetAccessor(const char * name) const;
 
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
@@ -493,7 +514,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
 }
 
 template <class _elementType>
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType &element) const
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & element) const
 {
     for (size_t i = 0; i < StateVectorElements.size(); i++) {
         if (mtsGenericTypes<_elementType>::IsEqual(element, *StateVectorElements[i]))

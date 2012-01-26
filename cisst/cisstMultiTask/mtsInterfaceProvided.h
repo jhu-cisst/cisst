@@ -101,6 +101,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     friend class mtsComponent;
     friend class mtsManagerComponentClient;
 
+    // to allow adding command write generic ...
+    friend class mtsComponentAddLatency;
+
  public:
     /*! This type */
     typedef mtsInterfaceProvided ThisType;
@@ -381,6 +384,15 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     template <class _elementType>
     mtsCommandRead * AddCommandReadState(const mtsStateTable & stateTable,
                                          const _elementType & stateData, const std::string & commandName);
+
+    /*! Adds command objects to read from the state table with a
+      delay.  The commands created ('read' and 'qualified read') are
+      similar to the commands added using AddCommandReadState except
+      that instead of reading from the head, these commands read from
+      head - delay. */
+    template <class _elementType>
+    mtsCommandRead * AddCommandReadStateDelayed(const mtsStateTable & stateTable,
+                                                const _elementType & stateData, const std::string & commandName);
 
     /*! Adds command object to read history (i.e., vector of data)
       from the state table. */
@@ -708,6 +720,25 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
     return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
                                 commandName, new FinalType(stateData));
 }
+
+
+template <class _elementType>
+mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsStateTable & stateTable,
+                                                                  const _elementType & stateData, const std::string & commandName)
+{
+    typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
+    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
+
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
+        return 0;
+    }
+    // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
+    return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetDelayed, stateAccessor),
+                                commandName, new FinalType(stateData));
+}
+
 
 template <class _elementType>
 mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandReadHistory(const mtsStateTable & stateTable,
