@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-04-29
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -84,6 +84,10 @@ public:
     /*! Direct execute can be used for mtsMulticastCommandWrite. */
     inline mtsExecutionResult Execute(const mtsGenericObject & argument,
                                       mtsBlockingType blocking) {
+        if (!this->ArgumentsSupported()) {
+            return mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+        }
+
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
@@ -100,7 +104,7 @@ public:
                 // inactive proxy cannot send message
                 return mtsExecutionResult::NETWORK_ERROR;
             }
-        } 
+        }
         // Event write execution: server (event generator) -> client (event handler)
         else {
             if (NetworkProxyClient->IsActiveProxy()) {

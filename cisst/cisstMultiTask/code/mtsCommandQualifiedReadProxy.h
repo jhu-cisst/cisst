@@ -82,6 +82,10 @@ public:
 
     /*! The execute method. */
     mtsExecutionResult Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2) {
+        if (!this->ArgumentsSupported()) {
+            return mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+        }
+
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
