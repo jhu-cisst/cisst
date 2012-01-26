@@ -25,10 +25,9 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   # shared components used by either example
-  if (CISST_HAS_FLTK OR CISST_HAS_QT)
-    add_subdirectory (components)
-    include_directories (${CMAKE_CURRENT_SOURCE_DIR})
-  endif (CISST_HAS_FLTK OR CISST_HAS_QT)
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+  add_subdirectory (components)
+  add_subdirectory (collector)
 
   # FLTK examples
   if (CISST_HAS_FLTK)

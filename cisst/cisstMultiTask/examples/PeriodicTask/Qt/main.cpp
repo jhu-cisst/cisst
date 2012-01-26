@@ -173,7 +173,9 @@ int main(int argc, char *argv[])
 
     // create and start all tasks
     componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY);
     componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // run Qt user interface
     mainWidget->resize(NumSineTasks * 220, 360);
@@ -182,6 +184,8 @@ int main(int argc, char *argv[])
 
     // kill all tasks and perform cleanup
     componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
+
     componentManager->Cleanup();
 
     // stop all logs
