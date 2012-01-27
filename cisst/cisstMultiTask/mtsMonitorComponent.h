@@ -115,7 +115,7 @@ public:
     ~mtsMonitorComponent();
 
     /*! Add and remove target component to monitor */
-    bool AddTargetComponent(mtsTask * task); // MJ: task name can be used instead
+    bool AddTargetComponent(mtsTaskPeriodic * task); // MJ: task name can be used instead
     bool RemoveTargetComponent(const std::string & taskName);
 
     void Configure(const std::string & CMN_UNUSED(filename) = ""){}

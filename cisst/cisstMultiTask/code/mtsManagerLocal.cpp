@@ -1126,7 +1126,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     // If a new component is not of type mtsMonitorComponent, create a required interface
     // and add it to the monitor component so that it can access the monitor state table.
 #if CISST_MTS_SUPPORT_FDD
-    mtsTask * task = dynamic_cast<mtsTask*>(component);
+    mtsTaskPeriodic * task = dynamic_cast<mtsTaskPeriodic*>(component);
     if (task && !MonitorComponents.empty()) {
         mtsMonitorComponent * monitor = MonitorComponents[0];
         // monitor can be NULL in case of either MCS or MCC being added.

@@ -286,7 +286,7 @@ void mtsStateTable::Advance(void) {
 #define PROCESS_FILTERS( _name )\
     if (!MonitorFilters._name.empty())\
         for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
-            MonitorFilters._name[i]->DoFiltering(true);
+            MonitorFilters._name[i]->DoFiltering(false);
     // Process filters sequentially
     PROCESS_FILTERS(Features);
     PROCESS_FILTERS(FeatureVectors);
