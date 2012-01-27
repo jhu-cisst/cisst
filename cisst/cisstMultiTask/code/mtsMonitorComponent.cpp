@@ -27,7 +27,7 @@ const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
     //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s, false, 5000) // MJ TEMP
+    : mtsTaskPeriodic(NameOfMonitorComponent, 0.1 * cmn_s, false, 100) // MJ TEMP
 {
     TargetComponents = new TargetComponentsType(true);
 }
@@ -40,6 +40,9 @@ mtsMonitorComponent::~mtsMonitorComponent()
 
 void mtsMonitorComponent::Run(void)
 {
+    ProcessQueuedCommands();
+    ProcessQueuedEvents();
+
     UpdateFilters();
 }
 
@@ -66,18 +69,12 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     }
 }
 
-bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
+bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
 {
     const std::string taskName = task->GetName();
 
     if (TargetComponents->FindItem(taskName)) {
         CMN_LOG_CLASS_RUN_WARNING << "AddTargetComponent: task \"" << taskName << "\" is already registered" << std::endl;
-        return true;
-    }
-
-    mtsTaskPeriodic * periodicTask = dynamic_cast<mtsTaskPeriodic*>(task);
-    if (periodicTask == 0) {
-        CMN_LOG_CLASS_RUN_WARNING << "AddTargetComponent: task \"" << taskName << "\" is not periodic." << std::endl;
         return true;
     }
 
@@ -131,7 +128,7 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTask * task)
 
     // Create subtraction filter to define feature vector
     mtsMonitorFilterBase::PlaceholderVectorType vecExpected(2);
-    vecExpected(0) = periodicTask->GetPeriodicity(true); // Get nominal period
+    vecExpected(0) = task->GetPeriodicity(true); // Get nominal period
     vecExpected(1) = 0.0;
     mtsMonitorFilterArithmetic * filterArithmetic = 
         new mtsMonitorFilterArithmetic(mtsMonitorFilterBase::FEATURE_VECTOR,
@@ -170,7 +167,6 @@ bool mtsMonitorComponent::RemoveTargetComponent(const std::string & taskName)
 const std::string  mtsMonitorComponent::GetNameOfStateTableAccessInterface(const std::string & taskName) const {
     return "Monitor" + taskName;
 }
-
 const std::string & mtsMonitorComponent::GetNameOfMonitorComponent(void) {
     return NameOfMonitorComponent;
 }
