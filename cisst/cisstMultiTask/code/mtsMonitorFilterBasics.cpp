@@ -65,9 +65,9 @@ mtsMonitorFilterBypass::mtsMonitorFilterBypass(
     this->AddInputSignal(inputName, signalType);
 
     // Define outputs
-    std::string outputName(inputName);
-    outputName += ":Bypass";
-    this->AddOutputSignal(outputName, signalType);
+    std::stringstream ss;
+    ss << inputName << ":Bypass" << this->FilterUID;
+    AddOutputSignal(ss.str(), signalType);
 }
 
 mtsMonitorFilterBypass::~mtsMonitorFilterBypass()
@@ -131,9 +131,9 @@ mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(
     this->AddInputSignal(inputName, signalType);
 
     // Define outputs
-    std::string outputName(inputName);
-    outputName += ":Vel";
-    this->AddOutputSignal(outputName, signalType);
+    std::stringstream ss;
+    ss << inputName << ":Vel" << this->FilterUID;
+    AddOutputSignal(ss.str(), signalType);
 }
 
 mtsMonitorFilterTrendVel::~mtsMonitorFilterTrendVel()
@@ -226,7 +226,7 @@ mtsMonitorFilterVectorize::mtsMonitorFilterVectorize(
 
     // Define outputs
     std::stringstream ss;
-    ss << "Vector" << this->FilterUID;
+    ss << "Vector[" << inputNames.size() << ":1]" << this->FilterUID;
     AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
 
     GetOutputSignalElement(0)->PlaceholderVector.SetSize(InputSize);
@@ -293,7 +293,7 @@ mtsMonitorFilterNorm::mtsMonitorFilterNorm(
 
     // Define outputs
     std::stringstream ss;
-    ss << "Norm" << this->FilterUID;
+    ss << inputName << ":Norm" << this->FilterUID;
     AddOutputSignal(ss.str(), BaseType::SignalElement::SCALAR);
 }
 
@@ -342,83 +342,31 @@ void mtsMonitorFilterNorm::ToStream(std::ostream & outputStream) const
 // DO NOT USE DEFAULT CONSTRUCTOR
 mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic()
     : mtsMonitorFilterBase(BaseType::INVALID, ::NameOfFilterArithmetic),
-      OperationType(INVALID)
-#if 0
-      ConstPlaceholder(0.0), ConstPlaceholderVector(),
-      ConstPlaceholderValid(false), ConstPlaceholderVectorValid(false),
-      Input1Const(false), Input2Const(false)
-#endif
+      OperationType(INVALID),
+      IsOffsetScalar(true), OffsetScalar(0.0), OffsetVector()
 {
     this->Enable(false);
 }
 
-#if 0
 mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
                                                        OPERATION_TYPE operationType,
                                                        const std::string & input1Name,
                                                        BaseType::SignalElement::SIGNAL_TYPE input1Type,
-                                                       const std::string & input2Name,
-                                                       BaseType::SignalElement::SIGNAL_TYPE input2Type)
+                                                       const BaseType::PlaceholderVectorType input2)
     : mtsMonitorFilterBase(filterType, ::NameOfFilterArithmetic),
       OperationType(operationType),
-      ConstPlaceholder(0.0), ConstPlaceholderVector(),
-      ConstPlaceholderValid(false), ConstPlaceholderVectorValid(false),
-      Input1Const(false), Input2Const(false)
+      IsOffsetScalar(false), OffsetScalar(0.0), OffsetVector(input2)
 {
     // Define inputs
     this->AddInputSignal(input1Name, input1Type);
-    this->AddInputSignal(input2Name, input2Type);
-
-    // Define outputs
-    std::stringstream ss;
-    ss << "Arithmetic" << this->FilterUID;
-    if (input1Type == BaseType::SignalElement::SCALAR && input2Type == BaseType::SignalElement::SCALAR)
-        AddOutputSignal(ss.str(), BaseType::SignalElement::SCALAR);
-    else
-        AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
-}
-
-mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
-                                                       OPERATION_TYPE operationType,
-                                                       const BaseType::PlaceholderType input1,
-                                                       const std::string & input2Name,
-                                                       BaseType::SignalElement::SIGNAL_TYPE input2Type)
-    : mtsMonitorFilterBase(filterType, ::NameOfFilterArithmetic),
-      OperationType(operationType),
-      ConstPlaceholder(input1), ConstPlaceholderVector(),
-      ConstPlaceholderValid(true), ConstPlaceholderVectorValid(false),
-      Input1Const(true), Input2Const(false)
-{
-    // Define inputs
-    this->AddInputSignal(input2Name, input2Type);
-
-    // Define outputs
-    std::stringstream ss;
-    ss << "Arithmetic" << this->FilterUID;
-    if (input2Type == BaseType::SignalElement::SCALAR)
-        AddOutputSignal(ss.str(), BaseType::SignalElement::SCALAR);
-    else
-        AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
-}
-
-mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
-                                                       OPERATION_TYPE operationType,
-                                                       const BaseType::PlaceholderVectorType input1,
-                                                       const std::string & input2Name,
-                                                       BaseType::SignalElement::SIGNAL_TYPE input2Type)
-    : mtsMonitorFilterBase(filterType, ::NameOfFilterArithmetic),
-      OperationType(operationType),
-      ConstPlaceholder(0.0), ConstPlaceholderVector(input1),
-      ConstPlaceholderValid(false), ConstPlaceholderVectorValid(true),
-      Input1Const(true), Input2Const(false)
-{
-    // Define inputs
-    this->AddInputSignal(input2Name, input2Type);
 
     // Define outputs
     std::stringstream ss;
     ss << "Arithmetic" << this->FilterUID;
     AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
+
+    IsInputScalar = (input1Type == BaseType::SignalElement::SCALAR);
+    IsOutputScalar = false;
 }
 
 mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
@@ -428,9 +376,7 @@ mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE fil
                                                        const BaseType::PlaceholderType input2)
     : mtsMonitorFilterBase(filterType, ::NameOfFilterArithmetic),
       OperationType(operationType),
-      ConstPlaceholder(input2), ConstPlaceholderVector(),
-      ConstPlaceholderValid(true), ConstPlaceholderVectorValid(false),
-      Input1Const(false), Input2Const(true)
+      IsOffsetScalar(true), OffsetScalar(input2), OffsetVector()
 {
     // Define inputs
     this->AddInputSignal(input1Name, input1Type);
@@ -439,32 +385,10 @@ mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE fil
     std::stringstream ss;
     ss << "Arithmetic" << this->FilterUID;
     AddOutputSignal(ss.str(), input1Type);
+
+    IsInputScalar = (input1Type == BaseType::SignalElement::SCALAR);
+    IsOutputScalar = IsInputScalar;
 }
-#endif
-
-mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE filterType, 
-                                                       OPERATION_TYPE operationType,
-                                                       const std::string & input1Name,
-                                                       BaseType::SignalElement::SIGNAL_TYPE input1Type,
-                                                       const BaseType::PlaceholderVectorType input2)
-    : mtsMonitorFilterBase(filterType, ::NameOfFilterArithmetic),
-      OperationType(operationType),
-      Offset(input2)
-#if 0
-      ConstPlaceholder(0.0), ConstPlaceholderVector(input2),
-      ConstPlaceholderValid(false), ConstPlaceholderVectorValid(true),
-      Input1Const(false), Input2Const(true)
-#endif
-{
-    // Define inputs
-    this->AddInputSignal(input1Name, input1Type);
-
-    // Define outputs
-    std::stringstream ss;
-    ss << "Arithmetic" << this->FilterUID;
-    AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
-}
-
 
 mtsMonitorFilterArithmetic::~mtsMonitorFilterArithmetic()
 {
@@ -476,14 +400,40 @@ void mtsMonitorFilterArithmetic::DoFiltering(bool debug)
 
     // Fetch new values from state table
     double timestamp;
-    InputSignals[0]->PlaceholderVector = StateTable->GetNewValueVector(InputSignals[0]->GetStateDataId(), timestamp);
+    if (IsInputScalar)
+        InputSignals[0]->Placeholder = StateTable->GetNewValueScalar(InputSignals[0]->GetStateDataId(), timestamp);
+    else
+        InputSignals[0]->PlaceholderVector = StateTable->GetNewValueVector(InputSignals[0]->GetStateDataId(), timestamp);
 
     // Update output vector
-    OutputSignals[0]->PlaceholderVector = InputSignals[0]->PlaceholderVector - Offset;
+    if (IsOutputScalar) {
+        CMN_ASSERT(IsInputScalar);
+        CMN_ASSERT(IsOffsetScalar);
+        OutputSignals[0]->Placeholder = InputSignals[0]->Placeholder - OffsetScalar;
+    } else {
+        if (IsInputScalar) {
+            CMN_ASSERT(!IsOffsetScalar);
+            OutputSignals[0]->PlaceholderVector = InputSignals[0]->Placeholder - OffsetVector;
+        } else {
+            if (IsOffsetScalar)
+                OutputSignals[0]->PlaceholderVector = InputSignals[0]->PlaceholderVector - OffsetScalar;
+            else
+                OutputSignals[0]->PlaceholderVector = InputSignals[0]->PlaceholderVector - OffsetVector;
+        }
+    }
 
     if (debug) {
-        std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
-                  << InputSignals[0]->PlaceholderVector << " => " << OutputSignals[0]->PlaceholderVector << std::endl;
+        std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": "; 
+        if (IsInputScalar)
+            std::cout << InputSignals[0]->Placeholder;
+        else
+            std::cout << InputSignals[0]->PlaceholderVector;
+        std::cout << " => ";
+        if (IsOutputScalar)
+            std::cout << OutputSignals[0]->Placeholder;
+        else
+            std::cout << OutputSignals[0]->PlaceholderVector;
+        std::cout << std::endl;
     }
 }
 

@@ -72,17 +72,6 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-public:
-    // FIXME: smmy ?????????????????
-    //
-    typedef struct FeatureVectorElementStruct {
-        mtsMonitorFilterBase * Filter;
-        int mask;
-    } FeatureVectorElement;
-
-    // Feature vectors
-    typedef std::vector<FeatureVectorElement> FeatureVectorsType;
-
 protected:
     class TargetComponent {
     public:
@@ -100,9 +89,6 @@ protected:
     /*! List of TargetComponent structure */
     typedef cmnNamedMap<TargetComponent> TargetComponentsType;
     TargetComponentsType * TargetComponents;
-
-    /*! List of feature vectors */
-    FeatureVectorsType FeatureVectors;
 
     /*! Fetch new values from each target component */
     void UpdateFilters(void);
@@ -123,9 +109,7 @@ public:
     void Run(void);
     void Cleanup(void) {};
 
-    //
     //  Getters
-    //
     /*! Return the name of required interface to access a given task's state table */
     const std::string GetNameOfStateTableAccessInterface(const std::string & taskName) const;
 

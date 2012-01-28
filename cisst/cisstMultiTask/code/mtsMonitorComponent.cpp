@@ -106,11 +106,14 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
 
     // Create bypass and 1st order differentiator filters
     // Bypass filter for self monitoring (testing purpose) MJ: remove this later
+#if 0
     mtsMonitorFilterBypass * filterBypass = 
         new mtsMonitorFilterBypass(mtsMonitorFilterBase::FEATURE, 
-                                   mtsStateTable::NamesOfDefaultElements::Period,
+                                   //mtsStateTable::NamesOfDefaultElements::Period,
+                                   periodName, // period of target component
                                    mtsMonitorFilterBase::SignalElement::SCALAR);
     ADD_FILTER(filterBypass);
+
     // 1-st order differentiation filter
     mtsMonitorFilterTrendVel * filterTrendVel = 
         new mtsMonitorFilterTrendVel(mtsMonitorFilterBase::FEATURE, 
@@ -139,13 +142,28 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
                                        // in 2: expected
                                        vecExpected);
     ADD_FILTER(filterArithmetic);
+#endif
+    // Create subtraction filter to define feature vector
+    mtsMonitorFilterBase::PlaceholderType periodExpected = task->GetPeriodicity(true); // Get nominal period
+    mtsMonitorFilterArithmetic * filterArithmetic = 
+        new mtsMonitorFilterArithmetic(mtsMonitorFilterBase::FEATURE,
+                                       mtsMonitorFilterArithmetic::SUBTRACTION,
+                                       // in 1: actual
+                                       //filterBypass->GetOutputSignalName(0),
+                                       periodName,
+                                       mtsMonitorFilterBase::SignalElement::SCALAR,
+                                       // in 2: expected
+                                       periodExpected);
+    ADD_FILTER(filterArithmetic);
 
     // Create norm filter to define symptom
+#if 0
     mtsMonitorFilterNorm * filterNorm =
         new mtsMonitorFilterNorm(mtsMonitorFilterBase::SYMPTOM,
                                  filterArithmetic->GetOutputSignalName(0),
-                                 mtsMonitorFilterNorm::L2NORM);
+                                 mtsMonitorFilterNorm::L1NORM);
     ADD_FILTER(filterNorm);
+#endif
 #undef ADD_FILTER 
 
     return true;
