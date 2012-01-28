@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Peter Kazanzides
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -59,7 +59,8 @@ class CISST_EXPORT cmnClassServicesBase
     */
     cmnClassServicesBase(const std::string & className,
                          const std::type_info * typeInfo,
-                         const cmnClassServicesBase *parentServices,
+                         const cmnClassServicesBase * parentServices,
+                         const std::string & libraryName,
                          cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT);
 
 
@@ -176,7 +177,7 @@ class CISST_EXPORT cmnClassServicesBase
         SetLogMask(mask);
     }
 
-    const cmnClassServicesBase *GetParentServices(void) const {
+    const cmnClassServicesBase * GetParentServices(void) const {
         return ParentServices;
     }
 
@@ -187,6 +188,9 @@ class CISST_EXPORT cmnClassServicesBase
         return IsDerivedFrom(_Parent::ClassServices());
     }
 
+    /*! Get the name of library likely to contain the symbol. */
+    const std::string & GetLibraryName(void) const;
+
 private:
     /*! The name of the class. */
     const std::string * NameMember;
@@ -194,7 +198,12 @@ private:
     const std::type_info * TypeInfoMember;
 
     /*! Class services of parent class (0 if no parent, or not known) */
-    const cmnClassServicesBase *ParentServices;
+    const cmnClassServicesBase * ParentServices;
+
+    /*! Name of library likely to contain the symbol.  This is known
+      by the compiler and passed using the definition
+      LIBRARY_NAME_FOR_CISST_REGISTER. */
+    const std::string LibraryName;
 
     /*! The log Level of Detail. */
     cmnLogMask LogMask;

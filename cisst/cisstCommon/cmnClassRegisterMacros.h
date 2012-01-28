@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2006-10-30
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -245,6 +245,11 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
   \param className The name of the class being registered, without any
   quote.
 */
+
+#ifndef LIBRARY_NAME_FOR_CISST_REGISTER
+#define LIBRARY_NAME_FOR_CISST_REGISTER ""
+#endif
+
 //@{
 #ifdef CMN_IMPLEMENT_SERVICES
 #undef CMN_IMPLEMENT_SERVICES
@@ -260,7 +265,7 @@ template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
     static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
-           classServices(#className, &typeid(className), parentServices, className::InitialLoD); \
+        classServices(#className, &typeid(className), parentServices, LIBRARY_NAME_FOR_CISST_REGISTER, className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
@@ -293,7 +298,7 @@ template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
     static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
-           classServices(#className, &typeid(className), parentServices, className::InitialLoD); \
+        classServices(#className, &typeid(className), parentServices, LIBRARY_NAME_FOR_CISST_REGISTER, className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();

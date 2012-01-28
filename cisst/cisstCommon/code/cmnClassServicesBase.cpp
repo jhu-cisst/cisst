@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Peter Kazanzides
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,10 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 
 cmnClassServicesBase::cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo,
-                                           const cmnClassServicesBase *parentServices,
+                                           const cmnClassServicesBase * parentServices,
+                                           const std::string & libraryName,
                                            cmnLogMask mask):
     TypeInfoMember(typeInfo),
     ParentServices(parentServices),
+    LibraryName(libraryName),
     LogMask(mask)
 {
     NameMember = cmnClassRegister::Register(this, className);
@@ -59,14 +61,21 @@ void cmnClassServicesBase::SetLogMask(cmnLogMask mask)
     LogMask = mask;
 }
 
-bool cmnClassServicesBase::IsDerivedFrom(const cmnClassServicesBase *parentServices) const
+
+bool cmnClassServicesBase::IsDerivedFrom(const cmnClassServicesBase * parentServices) const
 {
-    const cmnClassServicesBase *curServices = this;
+    const cmnClassServicesBase * curServices = this;
     while (curServices->ParentServices) {
-        if (curServices->ParentServices == parentServices)
+        if (curServices->ParentServices == parentServices) {
             return true;
+        }
         curServices = curServices->ParentServices;
     }
     return false;
 }
 
+
+const std::string & cmnClassServicesBase::GetLibraryName(void) const
+{
+    return this->LibraryName;
+}

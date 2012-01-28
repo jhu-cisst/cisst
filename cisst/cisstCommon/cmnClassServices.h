@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -231,7 +231,7 @@ public:
         if (argTyped)
             return new value_type(*argTyped);
         else {
-            CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg: failed to dynamic cast from " 
+            CMN_LOG_INIT_WARNING << "cmnConditionalObjectFactoryOneArg: failed to dynamic cast from "
                                  << arg.Services()->GetName() << " to "
                                  << _argType::ClassServices()->GetName() << std::endl;
             return 0;
@@ -338,9 +338,10 @@ class cmnClassServices: public cmnClassServicesBase {
       \param mask The log mask to be used with this class.
     */
     cmnClassServices(const std::string & className, const std::type_info * typeInfo,
-                     const cmnClassServicesBase *parentServices,
+                     const cmnClassServicesBase * parentServices,
+                     const std::string & libraryName,
                      cmnLogMask mask = CMN_LOG_ALLOW_DEFAULT):
-        BaseType(className, typeInfo, parentServices, mask)
+        BaseType(className, typeInfo, parentServices, libraryName, mask)
     {}
 
     /* documented in base class */

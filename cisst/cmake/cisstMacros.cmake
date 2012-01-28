@@ -276,6 +276,7 @@ macro (cisst_add_library ...)
   list (SORT ADDITIONAL_SOURCE_FILES)
   list (SORT ADDITIONAL_HEADER_FILES)
   cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCE_FILES} ${HEADERS}")
+
   add_library (${LIBRARY}
                ${IS_SHARED}
                ${SOURCE_FILES}
@@ -284,6 +285,10 @@ macro (cisst_add_library ...)
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
                )
+
+  # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
+  set_target_properties (${LIBRARY}
+                         PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${LIBRARY}\"")
 
   # Install the library
   install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
@@ -397,6 +402,10 @@ macro (cisst_target_link_libraries TARGET ...)
     # Finally, link with the required libraries
     target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
     cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
+
+    # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
+    set_target_properties (${_WHO_REQUIRES}
+                           PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${_WHO_REQUIRES}\"")
 
   endif (NOT CISST_LIBRARIES)
 
@@ -529,7 +538,6 @@ function (cisst_add_swig_module ...)
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
 endfunction (cisst_add_swig_module)
-
 
 
 # Function to use cisstComponentGenerator, this function assumes input
