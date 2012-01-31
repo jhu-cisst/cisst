@@ -354,7 +354,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
         if (!argumentPrototype) {
             CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create write command proxy: " << commandName << std::endl;
-            newCommandWrite->ArgumentNotSupported();
+            newCommandWrite->SetArgumentPrototypeSerialized(itWrite->ArgumentPrototypeSerialized);
+            newCommandWrite->SetArgumentSupported(false);
         } else {
             newCommandWrite->SetArgumentPrototype(argumentPrototype);
         }
@@ -386,7 +387,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
         if (!argumentPrototype) {
             CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create read command proxy: " << commandName << std::endl;
-            newCommandRead->ArgumentNotSupported();
+            newCommandRead->SetArgumentPrototypeSerialized(itRead->ArgumentPrototypeSerialized);
+            newCommandRead->SetArgumentSupported(false);
         } else {
             newCommandRead->SetArgumentPrototype(argumentPrototype);
         }
@@ -427,7 +429,9 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
         if (!argument1Prototype || !argument2Prototype) {
             CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create qualified read command proxy: " << commandName << std::endl;
-            newCommandQualifiedRead->ArgumentNotSupported();
+            newCommandQualifiedRead->SetArgumentPrototypeSerialized(itQualifiedRead->Argument1PrototypeSerialized,
+                                                                    itQualifiedRead->Argument2PrototypeSerialized);
+            newCommandQualifiedRead->SetArgumentSupported(false);
         } else {
             newCommandQualifiedRead->SetArgumentPrototype(argument1Prototype, argument2Prototype);
         }
@@ -458,11 +462,13 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         }
 
         if (!resultPrototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create void return command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create void return command proxy: " << commandName << std::endl;
+            newCommandVoidReturn->SetResultPrototypeSerialized(itVoidReturn->ResultPrototypeSerialized);
+            newCommandVoidReturn->SetArgumentSupported(false);
+        } else {
+            newCommandVoidReturn->SetResultPrototype(resultPrototype);
         }
-        newCommandVoidReturn->SetResultPrototype(resultPrototype);
+
     }
 
     // Create write return command proxies
@@ -502,12 +508,14 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         }
 
         if (!argumentPrototype || !resultPrototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write return command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create write return command proxy: " << commandName << std::endl;
+            newCommandWriteReturn->SetArgumentPrototypeSerialized(itWriteReturn->ArgumentPrototypeSerialized);
+            newCommandWriteReturn->SetResultPrototypeSerialized(itWriteReturn->ResultPrototypeSerialized);
+            newCommandWriteReturn->SetArgumentSupported(false);
+        } else {
+            newCommandWriteReturn->SetArgumentPrototype(argumentPrototype);
+            newCommandWriteReturn->SetResultPrototype(resultPrototype);
         }
-        newCommandWriteReturn->SetArgumentPrototype(argumentPrototype);
-        newCommandWriteReturn->SetResultPrototype(resultPrototype);
     }
 
     // Create event generator proxies

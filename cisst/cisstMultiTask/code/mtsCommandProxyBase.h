@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -81,8 +81,8 @@ public:
     }
 
     /*! Indicate that one or more argument is not supported. */
-    inline void ArgumentNotSupported(void) {
-        this->ArgumentsSupportedFlag = false;
+    inline void SetArgumentSupported(bool argumentSupported) {
+        this->ArgumentsSupportedFlag = argumentSupported;
     }
 
     /*! Generate human readable description of this object */

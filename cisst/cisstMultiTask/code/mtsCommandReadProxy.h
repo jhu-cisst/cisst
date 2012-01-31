@@ -46,6 +46,13 @@ protected:
     /*! Per-command serializer and deserializer */
     mtsProxySerializer Serializer;
 
+    /*! Argument prototype serialized.  This is used only if argument
+      prototype de-serialization fails when the proxy component is
+      created.  It is saved for later attempt to de-serialize,
+      assuming more symbols are available (e.g. after dynamic
+      loading). */
+    std::string ArgumentPrototypeSerialized;
+
 public:
     /*! Typedef for base type */
     typedef mtsCommandRead BaseType;
@@ -74,6 +81,11 @@ public:
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
         ArgumentPrototype = argumentPrototype;
+    }
+
+    /*! Set the serialized version of argument prototype. */
+    void SetArgumentPrototypeSerialized(const std::string & argumentPrototypeSerialized) {
+        this->ArgumentPrototypeSerialized = argumentPrototypeSerialized;
     }
 
     /*! The execute method. */
