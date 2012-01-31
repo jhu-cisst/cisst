@@ -145,11 +145,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     find_package(XENOMAI)
     # add /usr/xenomai/include/posix. This is a *must* since we want to
     # to use xenomai/include/posix/pthread.h
-    set (CISST_XENOMAI_INCLUDE_DIRECTORIES ${XENOMAI_INCLUDE_DIR} ${XENOMAI_INCLUDE_POSIX_DIR})
+    set (CISST_XENOMAI_INCLUDE_DIRECTORIES ${XENOMAI_INCLUDE_DIR} )#${XENOMAI_INCLUDE_POSIX_DIR})
     cisst_set_package_settings (cisstCommon Xenomai INCLUDE_DIRECTORIES CISST_XENOMAI_INCLUDE_DIRECTORIES)
     # add libnative libxenomai librtdm libpthread_rt
     set (CISST_XENOMAI_LIBRARIES ${XENOMAI_LIBRARY_NATIVE}
-                                 ${XENOMAI_LIBRARY_PTHREAD_RT}
+#                                 ${XENOMAI_LIBRARY_PTHREAD_RT}
                                  ${XENOMAI_LIBRARY_RTDM}
                                  ${XENOMAI_LIBRARY_XENOMAI})
     cisst_set_package_settings (cisstCommon Xenomai LIBRARIES CISST_XENOMAI_LIBRARIES)
