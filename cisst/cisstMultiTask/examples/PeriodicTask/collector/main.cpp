@@ -78,6 +78,14 @@ int main(void)
     // run for 10 seconds
     osaSleep(10.0 * cmn_s);
 
+    // stop the collection, this is important.  If not stop properly,
+    // you will miss the last batch of data collection.
+    stateCollector->StopCollection(0.0);
+    eventCollector->StopCollection(0.0);
+
+    // leave some time for the data collection to be finalized
+    osaSleep(2.0 * cmn_s);
+
     // kill all tasks and perform cleanup
     componentManager->KillAll();
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
