@@ -26,24 +26,68 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsComponentAddLatency::DelayedVoid::Method(void)
 {
-    std::cerr << CMN_LOG_DETAILS << " void delayed " << std::endl;
-    // todo: add tests on mtsExecutionResult and log?
-    this->Function();
+    const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
+    History.push_back(time);
+}
+
+
+mtsExecutionResult mtsComponentAddLatency::DelayedVoid::ProcessQueuedCommands(double time)
+{
+    mtsExecutionResult executionResult;
+    mtsComponentAddLatency::VoidHistoryType::iterator iter = History.begin();
+    // look in history for all commands with timestamp lower than time
+    while ((iter != History.end())
+           && ((*iter) < time)) {
+        executionResult = this->Function();
+        History.erase(iter);
+        iter = History.begin();
+        // if the first queued command fails, just quit
+        if (!executionResult.IsOK()) {
+            return executionResult;
+        }
+    }
+    return executionResult;
 }
 
 
 void mtsComponentAddLatency::DelayedWrite::Method(const mtsGenericObject & data)
 {
-    std::cerr << CMN_LOG_DETAILS << " write delayed " << std::endl;
-    // todo: add tests on mtsExecutionResult and log?
-    this->Function(data);
+    const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
+    // push copy of parameter to history
+    mtsGenericObject * parameter = dynamic_cast<mtsGenericObject *>(data.Services()->Create(data));
+    if (parameter) {
+        History.push_back(std::pair<double, mtsGenericObject *>(time, parameter));
+    } else {
+        std::cerr << CMN_LOG_DETAILS << " oops, can't create a copy of parameter" << std::endl;
+    }
+}
+
+
+mtsExecutionResult mtsComponentAddLatency::DelayedWrite::ProcessQueuedCommands(double time)
+{
+    mtsExecutionResult executionResult;
+    mtsComponentAddLatency::WriteHistoryType::iterator iter = History.begin();
+    // look in history for all commands with timestamp lower than time
+    while ((iter != History.end())
+           && ((*iter).first < time)) {
+        mtsGenericObject * parameter = (*iter).second;
+        executionResult = this->Function(*parameter);
+        delete parameter;
+        History.erase(iter);
+        iter = History.begin();
+        // if the first queued command fails, just quit
+        if (!executionResult.IsOK()) {
+            return executionResult;
+        }
+    }
+    return executionResult;
 }
 
 
 mtsComponentAddLatency::mtsComponentAddLatency(const std::string & componentName,
                                                double periodInSeconds):
     mtsTaskPeriodic(componentName, periodInSeconds, false /* real time */, 100 /* state table size */),
-    LatencyStateTable(10000, "Data")
+    LatencyStateTable(10000, "DataWithLatency")
 {
 }
 
@@ -106,9 +150,28 @@ void mtsComponentAddLatency::Run(void)
          readIterator != readEnd;
          ++readIterator) {
         result = (*readIterator)->Function(*((*readIterator)->PlaceHolder));
-        // std::cerr << "Run: " << (*readIterator)->Name << ": " << result << " --- " << *((*readIterator)->PlaceHolder) << std::endl;
     }
     this->LatencyStateTable.Advance();
+
+    // see if we have some old void/write commands
+    const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime() - this->Latency;
+    DelayedVoidList::iterator voidIterator = DelayedVoids.begin();
+    const DelayedVoidList::iterator voidEnd = DelayedVoids.end();
+    this->LatencyStateTable.Start();
+    for (;
+         voidIterator != voidEnd;
+         ++voidIterator) {
+        (*voidIterator)->ProcessQueuedCommands(time);
+    }
+
+    DelayedWriteList::iterator writeIterator = DelayedWrites.begin();
+    const DelayedWriteList::iterator writeEnd = DelayedWrites.end();
+    this->LatencyStateTable.Start();
+    for (;
+         writeIterator != writeEnd;
+         ++writeIterator) {
+        (*writeIterator)->ProcessQueuedCommands(time);
+    }
 }
 
 
@@ -142,6 +205,7 @@ bool mtsComponentAddLatency::AddCommandVoidDelayed(mtsInterfaceRequired * interf
     interfaceRequired->AddFunction(commandRequiredName, delayedVoid->Function, MTS_REQUIRED);
     interfaceProvided->AddCommandVoid(&DelayedVoid::Method, delayedVoid,
                                       commandProvidedName == "" ? commandRequiredName : commandProvidedName);
+    DelayedVoids.push_back(delayedVoid);
     return true;
 }
 
@@ -159,6 +223,7 @@ bool mtsComponentAddLatency::AddCommandWriteDelayedInternal(const mtsGenericObje
                                                                      commandProvidedName == "" ? commandRequiredName : commandProvidedName,
                                                                      &data);
     interfaceProvided->AddCommandWrite(delayedWrite->Command);
+    DelayedWrites.push_back(delayedWrite);
     return true;
 }
 

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         // add delay, just for the second graph
         if (i == 1) {
             sineWithDelay = new sineTaskWithDelay("SIN-DELAY" + index.str(), 5.0 * cmn_ms);
-            sineWithDelay->SetLatency(1.0 * cmn_s);
+            sineWithDelay->SetLatency(2.0 * cmn_s);
             componentManager->AddComponent(sineWithDelay);
             componentManager->Connect(sineWithDelay->GetName(), "MainInterface",
                                       sine->GetName(), "MainInterface");

@@ -64,26 +64,36 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
 
  protected:
 
-    struct DelayedRead
+    typedef std::list<std::pair<double, mtsGenericObject *> > WriteHistoryType;
+    typedef std::list<double> VoidHistoryType;
+
+    class DelayedRead
     {
+    public:
         bool Valid;
         std::string Name;
         mtsFunctionRead Function;
         mtsGenericObject * PlaceHolder;
     };
 
-    struct DelayedVoid
+    class DelayedVoid
     {
+    public:
+        VoidHistoryType History;
         std::string Name;
         mtsFunctionVoid Function;
+        mtsExecutionResult ProcessQueuedCommands(double time);
         void Method(void);
     };
 
-    struct DelayedWrite
+    class DelayedWrite
     {
+    public:
+        WriteHistoryType History;
         std::string Name;
         mtsFunctionWrite Function;
         mtsCommandWriteBase * Command;
+        mtsExecutionResult ProcessQueuedCommands(double time);
         void Method(const mtsGenericObject & data);
     };
 
