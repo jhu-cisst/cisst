@@ -50,6 +50,36 @@ mtsComponentAddLatency::mtsComponentAddLatency(const std::string & componentName
 
 mtsComponentAddLatency::~mtsComponentAddLatency()
 {
+    DelayedReadList::iterator readIterator = DelayedReads.begin();
+    const DelayedReadList::iterator readEnd = DelayedReads.end();
+    this->LatencyStateTable.Start();
+    for (;
+         readIterator != readEnd;
+         ++readIterator) {
+        delete (*readIterator)->PlaceHolder;
+        delete (*readIterator);
+    }
+    DelayedReads.clear();
+
+    DelayedVoidList::iterator voidIterator = DelayedVoids.begin();
+    const DelayedVoidList::iterator voidEnd = DelayedVoids.end();
+    this->LatencyStateTable.Start();
+    for (;
+         voidIterator != voidEnd;
+         ++voidIterator) {
+        delete (*voidIterator);
+    }
+    DelayedVoids.clear();
+
+    DelayedWriteList::iterator writeIterator = DelayedWrites.begin();
+    const DelayedWriteList::iterator writeEnd = DelayedWrites.end();
+    this->LatencyStateTable.Start();
+    for (;
+         writeIterator != writeEnd;
+         ++writeIterator) {
+        delete (*writeIterator);
+    }
+    DelayedWrites.clear();
 }
 
 
@@ -87,9 +117,9 @@ void mtsComponentAddLatency::Cleanup(void)
 }
 
 
-bool mtsComponentAddLatency::AddCommandReadInternal(mtsGenericObject & data,
-                                                    mtsInterfaceRequired * interfaceRequired,
-                                                    const std::string & commandRequiredName)
+bool mtsComponentAddLatency::AddCommandReadDelayedInternal(mtsGenericObject & data,
+                                                           mtsInterfaceRequired * interfaceRequired,
+                                                           const std::string & commandRequiredName)
 {
     // create, add to required interface and keep in list
     DelayedRead * delayedRead = new DelayedRead;
@@ -116,11 +146,11 @@ bool mtsComponentAddLatency::AddCommandVoidDelayed(mtsInterfaceRequired * interf
 }
 
 
-bool mtsComponentAddLatency::AddCommandWriteDelayed(const mtsGenericObject & data,
-                                                    mtsInterfaceRequired * interfaceRequired,
-                                                    const std::string & commandRequiredName,
-                                                    mtsInterfaceProvided * interfaceProvided,
-                                                    const std::string & commandProvidedName)
+bool mtsComponentAddLatency::AddCommandWriteDelayedInternal(const mtsGenericObject & data,
+                                                            mtsInterfaceRequired * interfaceRequired,
+                                                            const std::string & commandRequiredName,
+                                                            mtsInterfaceProvided * interfaceProvided,
+                                                            const std::string & commandProvidedName)
 {
     DelayedWrite * delayedWrite = new DelayedWrite;
     delayedWrite->Name = commandRequiredName;

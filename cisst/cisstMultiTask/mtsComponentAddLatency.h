@@ -29,6 +29,35 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+/*!
+  \ingroup cisstMultiTask
+
+  Base class for component with latency.  This class can be used to
+  create a component that delays all commands and events.  For
+  example, one might want to simulate the latency introduced by the
+  network between a master and a slave for a tele-operation task.  The
+  delay component can then be inserted between the client and server.
+  It must replicate the server provided interface(s) so that the
+  client will connect its required interface(s) as if it was the
+  server itself.  Let Cs the server component, Cc the client component
+  and Cd the delay component.  Cd will need to be created with the
+  same provided interfaces as Cs.  Then, instead of connecting Cc to
+  Cs, we will connect Cc to Cd and Cd to Cs.
+
+  The derived component needs to create it's required and provided
+  interfaces using the methods AddInterfaceRequired and
+  AddInterfaceProvided.  Once the interfaces are created, commands can
+  be added using AddCommandVoidDelayed, AddCommandReadDelayed, ...
+
+  At runtime, the delay component will continuously read from the
+  server and buffer the results in a state table.  It is important to
+  set the periodicity of the delay component so that enough data is
+  collected but make sure the frequency is not too high either.  For
+  void and write commands as well as events, the component buffers all
+  requests and periodically check which commands/events should be
+  forwarded.  Therefore the actual latency will be impacted by the
+  period used be the delay component.
+ */
 class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -61,6 +90,12 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
     typedef std::list<DelayedRead *> DelayedReadList;
     DelayedReadList DelayedReads;
 
+    typedef std::list<DelayedVoid *> DelayedVoidList;
+    DelayedVoidList DelayedVoids;
+
+    typedef std::list<DelayedWrite *> DelayedWriteList;
+    DelayedWriteList DelayedWrites;
+
  public:
     // constructor
     mtsComponentAddLatency(const std::string & componentName, double periodInSeconds);
@@ -76,38 +111,25 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
 
  protected:
 
-    /*! Add the following data to the state table used to store all
-      data and introduce the latency.  The provided and required
+    /*! Add a read command with latency.  The provided and required
       interfaces must be created before using the methods
       AddInterfaceRequired and AddInterfaceProvided.  The command name
       should match the command name from the source component provided
       interface.  By default the provided interface with delay will
-      use the same command name.  The data object must not be deleted
-      for the life of the component, i.e. make sure this is not a
-      local variable. */
+      use the same command name. */
     template <class _elementType>
-    bool AddCommandReadDelayed(_elementType & data,
-                               mtsInterfaceRequired * interfaceRequired,
+    bool AddCommandReadDelayed(mtsInterfaceRequired * interfaceRequired,
                                const std::string & commandRequiredName,
                                mtsInterfaceProvided * interfaceProvided,
-                               const std::string & commandProvidedName = "") {
-        this->LatencyStateTable.AddData(data);
-        interfaceProvided->AddCommandReadStateDelayed(this->LatencyStateTable,
-                                                      data,
-                                                      commandProvidedName == "" ? commandRequiredName : commandProvidedName);
-        this->AddCommandReadInternal(data, interfaceRequired, commandRequiredName);
-        return true;
-    }
+                               const std::string & commandProvidedName = "");
 
     bool AddCommandVoidDelayed(mtsInterfaceRequired * interfaceRequired,
                                const std::string & commandRequiredName,
                                mtsInterfaceProvided * interfaceProvided,
                                const std::string & commandProvidedName = "");
 
-    /*! Data object is provided just creation of an argument
-      prototype.  It can be a locally defined object. */
-    bool AddCommandWriteDelayed(const mtsGenericObject & data,
-                                mtsInterfaceRequired * interfaceRequired,
+    template <class _elementType>
+    bool AddCommandWriteDelayed(mtsInterfaceRequired * interfaceRequired,
                                 const std::string & commandRequiredName,
                                 mtsInterfaceProvided * interfaceProvided,
                                 const std::string & commandProvidedName = "");
@@ -121,10 +143,59 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
     mtsStateTable LatencyStateTable;
 
  private:
-    bool AddCommandReadInternal(mtsGenericObject & data,
-                                mtsInterfaceRequired * interfaceRequired,
-                                const std::string & commandRequiredName);
+    bool AddCommandReadDelayedInternal(mtsGenericObject & data,
+                                       mtsInterfaceRequired * interfaceRequired,
+                                       const std::string & commandRequiredName);
+
+    bool AddCommandWriteDelayedInternal(const mtsGenericObject & data,
+                                        mtsInterfaceRequired * interfaceRequired,
+                                        const std::string & commandRequiredName,
+                                        mtsInterfaceProvided * interfaceProvided,
+                                        const std::string & commandProvidedName);
+
 };
+
+
+
+template <class _elementType>
+bool mtsComponentAddLatency::AddCommandReadDelayed(mtsInterfaceRequired * interfaceRequired,
+                                                   const std::string & commandRequiredName,
+                                                   mtsInterfaceProvided * interfaceProvided,
+                                                   const std::string & commandProvidedName)
+{
+    // data object is used later to store the result of function
+    // reads, state teble will keep a pointer on that object so it
+    // must not be deleted until the task is killed.
+    _elementType * data = new _elementType;
+    this->LatencyStateTable.AddData(*data);
+    interfaceProvided->AddCommandReadStateDelayed(this->LatencyStateTable,
+                                                  *data,
+                                                  commandProvidedName == ""
+                                                  ? commandRequiredName
+                                                  : commandProvidedName);
+    return
+        this->AddCommandReadDelayedInternal(*data, interfaceRequired, commandRequiredName);
+}
+
+
+template <class _elementType>
+bool mtsComponentAddLatency::AddCommandWriteDelayed(mtsInterfaceRequired * interfaceRequired,
+                                                    const std::string & commandRequiredName,
+                                                    mtsInterfaceProvided * interfaceProvided,
+                                                    const std::string & commandProvidedName)
+{
+    // data object is used to create an argument prototype but won't
+    // be used afterwards
+    _elementType data;
+    return
+        this->AddCommandWriteDelayedInternal(data,
+                                             interfaceRequired,
+                                             commandRequiredName,
+                                             interfaceProvided,
+                                             commandProvidedName == ""
+                                             ? commandRequiredName
+                                             : commandProvidedName);
+}
 
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentAddLatency)

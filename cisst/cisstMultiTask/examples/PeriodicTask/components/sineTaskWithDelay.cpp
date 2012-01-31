@@ -30,15 +30,12 @@ sineTaskWithDelay::sineTaskWithDelay(const std::string & componentName, double p
 {
     mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("MainInterface");
     mtsInterfaceProvided * interfaceProvided = this->AddInterfaceProvided("MainInterface");
-    this->AddCommandWriteDelayed(mtsDouble(),
-                                 interfaceRequired, "SetAmplitude",
-                                 interfaceProvided);
-    this->AddCommandReadDelayed(SineData,
-                                interfaceRequired, "GetData",
-                                interfaceProvided);
-    this->AddCommandWriteDelayed(mtsDouble(),
-                                 interfaceRequired, "SetTriggerThreshold",
-                                 interfaceProvided);
+    this->AddCommandWriteDelayed<mtsDouble>(interfaceRequired, "SetAmplitude",
+                                            interfaceProvided);
+    this->AddCommandReadDelayed<mtsDouble>(interfaceRequired, "GetData",
+                                           interfaceProvided);
+    this->AddCommandWriteDelayed<mtsDouble>(interfaceRequired, "SetTriggerThreshold",
+                                            interfaceProvided);
     this->AddCommandVoidDelayed(interfaceRequired, "ResetTrigger",
                                 interfaceProvided);
     this->AddEventVoidDelayed(interfaceRequired, "TriggerEvent",
