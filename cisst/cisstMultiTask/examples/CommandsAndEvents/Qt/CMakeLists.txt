@@ -49,6 +49,8 @@ if (cisst_FOUND_AS_REQUIRED)
                   serverQtComponent.h
                   ${QT_SERVER_WRAPPED_UI}
                   ${QT_SERVER_WRAPPED_CPP}
+                  serverWithDelay.h
+                  serverWithDelay.cpp
                  )
   set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
   cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})

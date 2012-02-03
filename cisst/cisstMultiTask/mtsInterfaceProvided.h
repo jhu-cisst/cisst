@@ -475,6 +475,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     template <class __argumentType>
     bool AddEventWrite(mtsFunctionWrite & eventTrigger, const std::string & eventName,
                        const __argumentType & argumentPrototype);
+
+    mtsCommandWriteBase * AddEventWriteGeneric(const std::string & eventName,
+                                               const mtsGenericObject & argumentPrototype);
+
+    bool AddEventWriteGeneric(mtsFunctionWrite & eventTrigger, const std::string & eventName,
+                              const mtsGenericObject & argumentPrototype);
     //@}
 
     /*! Add an observer for the specified event.  These methods are
@@ -651,7 +657,7 @@ protected:
 
     mtsCommandVoidReturn * AddCommandVoidReturn(mtsCallableVoidReturnBase * callable,
                                                 const std::string & name,
-                                                mtsGenericObject * resultPrototype,
+                                                const mtsGenericObject * resultPrototype,
                                                 mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
     mtsCommandWriteBase * AddCommandWrite(mtsCommandWriteBase * command,
@@ -659,8 +665,8 @@ protected:
 
     mtsCommandWriteReturn * AddCommandWriteReturn(mtsCallableWriteReturnBase * callable,
                                                   const std::string & name,
-                                                  mtsGenericObject * argumentPrototype,
-                                                  mtsGenericObject * resultPrototype,
+                                                  const mtsGenericObject * argumentPrototype,
+                                                  const mtsGenericObject * resultPrototype,
                                                   mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
     mtsCommandWriteBase * AddCommandFilteredWrite(mtsCommandQualifiedRead * filter,
@@ -669,12 +675,12 @@ protected:
 
     mtsCommandRead * AddCommandRead(mtsCallableReadBase * callable,
                                     const std::string & name,
-                                    mtsGenericObject * argumentPrototype);
+                                    const mtsGenericObject * argumentPrototype);
 
     mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
                                                       const std::string & name,
-                                                      mtsGenericObject * argument1Prototype,
-                                                      mtsGenericObject * argument2Prototype);
+                                                      const mtsGenericObject * argument1Prototype,
+                                                      const mtsGenericObject * argument2Prototype);
 
     /*! Methods to add an existing command to the interface.  These
       methods will not check the queueing policy of the interface nor

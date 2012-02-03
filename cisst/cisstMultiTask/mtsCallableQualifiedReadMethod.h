@@ -239,4 +239,72 @@ public:
     }
 };
 
+
+
+
+template <class _classType>
+class mtsCallableQualifiedReadMethodGeneric: public mtsCallableQualifiedReadBase {
+
+public:
+    typedef mtsCallableQualifiedReadBase BaseType;
+
+    /*! Typedef for the specific interface. */
+    typedef _classType ClassType;
+
+    /*! This type. */
+    typedef mtsCallableQualifiedReadMethodGeneric<ClassType> ThisType;
+
+    /*! Typedef for pointer to member function (method) of a specific
+      class (_classType). */
+    typedef bool(_classType::*ActionType)(const mtsGenericObject & argument, mtsGenericObject & result) const;
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCallableQualifiedReadMethodGeneric(const ThisType & CMN_UNUSED(other)) {}
+
+protected:
+    /*! The pointer to member function of the receiver class that
+      is to be invoked for a particular instance of the command. */
+    ActionType Action;
+
+    /*! Stores the receiver object of the command. */
+    ClassType * ClassInstantiation;
+
+public:
+    /*! The constructor. Does nothing. */
+    mtsCallableQualifiedReadMethodGeneric(void): BaseType(), ClassInstantiation(0) {}
+
+    /*! The constructor.
+      \param action Pointer to the member function that is to be called
+      by the invoker of the command
+      \param classInstantiation Pointer to the receiver of the command
+    */
+    mtsCallableQualifiedReadMethodGeneric(ActionType action, ClassType * classInstantiation):
+        BaseType(),
+        Action(action),
+        ClassInstantiation(classInstantiation)
+    {}
+
+    /*! The destructor. Does nothing */
+    virtual ~mtsCallableQualifiedReadMethodGeneric() {}
+
+    /* documented in base class */
+    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsGenericObject & result) {
+        if ((ClassInstantiation->*Action)(argument, result) ) {
+            return mtsExecutionResult::COMMAND_SUCCEEDED;
+        }
+        return mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
+    }
+
+    /* documented in base class */
+    void ToStream(std::ostream & outputStream) const {
+        if (this->ClassInstantiation) {
+            outputStream << "method based callable write return object using class/object \""
+                         << mtsObjectName(this->ClassInstantiation) << "\"";
+        } else {
+            outputStream << "invalid method based callable object";
+        }
+    }
+};
+
 #endif // _mtsCallableQualifiedReadMethod_h

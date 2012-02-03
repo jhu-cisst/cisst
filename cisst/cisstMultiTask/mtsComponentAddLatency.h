@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2011-12-15
@@ -28,6 +28,12 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
+
+// forward declarations for internal types
+class mtsComponentAddLatencyDelayedRead;
+class mtsComponentAddLatencyDelayedQualifiedRead;
+class mtsComponentAddLatencyDelayedVoid;
+class mtsComponentAddLatencyDelayedWrite;
 
 /*!
   \ingroup cisstMultiTask
@@ -64,46 +70,16 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
 
  protected:
 
-    typedef std::list<std::pair<double, mtsGenericObject *> > WriteHistoryType;
-    typedef std::list<double> VoidHistoryType;
-
-    class DelayedRead
-    {
-    public:
-        bool Valid;
-        std::string Name;
-        mtsFunctionRead Function;
-        mtsGenericObject * PlaceHolder;
-    };
-
-    class DelayedVoid
-    {
-    public:
-        VoidHistoryType History;
-        std::string Name;
-        mtsFunctionVoid Function;
-        mtsExecutionResult ProcessQueuedCommands(double time);
-        void Method(void);
-    };
-
-    class DelayedWrite
-    {
-    public:
-        WriteHistoryType History;
-        std::string Name;
-        mtsFunctionWrite Function;
-        mtsCommandWriteBase * Command;
-        mtsExecutionResult ProcessQueuedCommands(double time);
-        void Method(const mtsGenericObject & data);
-    };
-
-    typedef std::list<DelayedRead *> DelayedReadList;
+    typedef std::list<mtsComponentAddLatencyDelayedRead *> DelayedReadList;
     DelayedReadList DelayedReads;
 
-    typedef std::list<DelayedVoid *> DelayedVoidList;
+    typedef std::list<mtsComponentAddLatencyDelayedQualifiedRead *> DelayedQualifiedReadList;
+    DelayedQualifiedReadList DelayedQualifiedReads;
+
+    typedef std::list<mtsComponentAddLatencyDelayedVoid *> DelayedVoidList;
     DelayedVoidList DelayedVoids;
 
-    typedef std::list<DelayedWrite *> DelayedWriteList;
+    typedef std::list<mtsComponentAddLatencyDelayedWrite *> DelayedWriteList;
     DelayedWriteList DelayedWrites;
 
  public:
@@ -133,6 +109,13 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
                                mtsInterfaceProvided * interfaceProvided,
                                const std::string & commandProvidedName = "");
 
+    template <class _element1Type, class _element2Type>
+    bool AddCommandQualifiedReadDelayed(mtsInterfaceRequired * interfaceRequired,
+                                        const std::string & commandRequiredName,
+                                        mtsInterfaceProvided * interfaceProvided,
+                                        const std::string & commandProvidedName = "");
+
+
     bool AddCommandVoidDelayed(mtsInterfaceRequired * interfaceRequired,
                                const std::string & commandRequiredName,
                                mtsInterfaceProvided * interfaceProvided,
@@ -149,6 +132,12 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
                              mtsInterfaceProvided * interfaceProvided,
                              const std::string & eventProvidedName = "");
 
+    template <class _elementType>
+    bool AddEventWriteDelayed(mtsInterfaceRequired * interfaceRequired,
+                              const std::string & eventRequiredName,
+                              mtsInterfaceProvided * interfaceProvided,
+                              const std::string & eventProvidedName = "");
+
     double Latency;
     mtsStateTable LatencyStateTable;
 
@@ -157,11 +146,24 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
                                        mtsInterfaceRequired * interfaceRequired,
                                        const std::string & commandRequiredName);
 
+    bool AddCommandQualifiedReadDelayedInternal(const mtsGenericObject & qualifier,
+                                                const mtsGenericObject & placeHolder,
+                                                mtsInterfaceRequired * interfaceRequired,
+                                                const std::string & commandRequiredName,
+                                                mtsInterfaceProvided * interfaceProvided,
+                                                const std::string & commandProvidedName);
+
     bool AddCommandWriteDelayedInternal(const mtsGenericObject & data,
                                         mtsInterfaceRequired * interfaceRequired,
                                         const std::string & commandRequiredName,
                                         mtsInterfaceProvided * interfaceProvided,
                                         const std::string & commandProvidedName);
+
+    bool AddEventWriteDelayedInternal(const mtsGenericObject & data,
+                                      mtsInterfaceRequired * interfaceRequired,
+                                      const std::string & eventRequiredName,
+                                      mtsInterfaceProvided * interfaceProvided,
+                                      const std::string & eventProvidedName = "");
 
 };
 
@@ -188,6 +190,26 @@ bool mtsComponentAddLatency::AddCommandReadDelayed(mtsInterfaceRequired * interf
 }
 
 
+template <class _element1Type, class _element2Type>
+bool mtsComponentAddLatency::AddCommandQualifiedReadDelayed(mtsInterfaceRequired * interfaceRequired,
+                                                            const std::string & commandRequiredName,
+                                                            mtsInterfaceProvided * interfaceProvided,
+                                                            const std::string & commandProvidedName)
+{
+    _element1Type qualifier;
+    _element2Type placeHolder;
+    return
+        this->AddCommandQualifiedReadDelayedInternal(qualifier,
+                                                     placeHolder,
+                                                     interfaceRequired,
+                                                     commandRequiredName,
+                                                     interfaceProvided,
+                                                     commandProvidedName == ""
+                                                     ? commandRequiredName
+                                                     : commandProvidedName);
+}
+
+
 template <class _elementType>
 bool mtsComponentAddLatency::AddCommandWriteDelayed(mtsInterfaceRequired * interfaceRequired,
                                                     const std::string & commandRequiredName,
@@ -205,6 +227,26 @@ bool mtsComponentAddLatency::AddCommandWriteDelayed(mtsInterfaceRequired * inter
                                              commandProvidedName == ""
                                              ? commandRequiredName
                                              : commandProvidedName);
+}
+
+
+template <class _elementType>
+bool mtsComponentAddLatency::AddEventWriteDelayed(mtsInterfaceRequired * interfaceRequired,
+                                                  const std::string & eventRequiredName,
+                                                  mtsInterfaceProvided * interfaceProvided,
+                                                  const std::string & eventProvidedName)
+{
+    // data object is used to create an argument prototype but won't
+    // be used afterwards
+    _elementType data;
+    return
+        this->AddEventWriteDelayedInternal(data,
+                                           interfaceRequired,
+                                           eventRequiredName,
+                                           interfaceProvided,
+                                           eventProvidedName == ""
+                                           ? eventRequiredName
+                                           : eventProvidedName);
 }
 
 
