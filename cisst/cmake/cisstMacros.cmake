@@ -754,3 +754,24 @@ macro (cisst_information_message_missing_libraries ...)
   endforeach (lib)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
 endmacro (cisst_information_message_missing_libraries)
+
+# Macro to find a package via CMake's normal mechanism, but then to fix the
+# set variables if cisst has been installed
+macro (cisst_find_component _cfc_COMPONENT_NAME _cfc_IS_REQUIRED)
+
+  message("looking for cisst component: ${_cfc_COMPONENT_NAME}")
+
+  # First, look in the install path for SAW components
+  find_package(${_cfc_COMPONENT_NAME} QUIET HINTS "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components" )
+
+  if(${_cfc_COMPONENT_NAME}_FOUND)
+    # If this is an installed version, re-set the libdir and include directories
+    message("Found package \"${_cfc_COMPONENT_NAME}\" in cisst install path.")
+    set(${_cfc_COMPONENT_NAME}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
+    set(${_cfc_COMPONENT_NAME}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
+  else()
+    message("Did not find package \"${_cfc_COMPONENT_NAME}\" in cisst install path, looking in source path: ${sawComponents_BINARY_DIR}")
+    find_package(${_cfc_COMPONENT_NAME} HINTS "${sawComponents_BINARY_DIR}")
+  endif()
+endmacro (cisst_find_component)
+

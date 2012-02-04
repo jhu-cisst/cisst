@@ -28,22 +28,25 @@ set (CISST_INCLUDE_DIR "@CISST_INCLUDE_DIR_FOR_CONFIG@")
 set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
 set (CISST_CMAKE_DIRS "@CISST_CMAKE_DIRS_FOR_CONFIG@")
 set (CISST_CMAKE_INSTALL_SUFFIX "@CISST_CMAKE_INSTALL_SUFFIX@")
+set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "@CISST_CMAKE_MODULES_INSTALL_SUFFIX@")
 set (CISST_LIBRARY_INSTALL_SUFFIX "@CISST_LIBRARY_INSTALL_SUFFIX@")
 
 # Check that paths are set.  If CISST_BINARY_DIR is not set, we are
 # using cisst-config from the installed tree and all paths are
 # relative to this file.
 if ("${CISST_BINARY_DIR}" STREQUAL "") 
-  # retrieve the path where cisst was installed
+  # retrieve the path where cisst-config.cmake was installed
   set (cisst_CONFIG_FILE ${CMAKE_CURRENT_LIST_FILE})
   get_filename_component (CISST_CMAKE_DIRS
                           ${cisst_CONFIG_FILE}
                           PATH)
+
   # find root of install be removing the CISST_CMAKE_INSTALL_SUFFIX
   string (REPLACE "${CISST_CMAKE_INSTALL_SUFFIX}" ""
                   CISST_BINARY_DIR
                   ${CISST_CMAKE_DIRS})
   set (CISST_INCLUDE_DIR "${CISST_BINARY_DIR}/include")
+
   # simple check to make sure cisst has indeed been found
   find_file (CISST_HEADER_FILE_FOUND
              NAMES cisstConfig.h
