@@ -228,5 +228,51 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterArithmetic);
 
 
+//-----------------------------------------------------------------------------
+//  Mean (Moving Average) Filter
+//
+//  Output Y(t+1) = lambda * x(t) + (1 - ramda) * Y(t)
+//  
+//  where Y(t): moving average at time t 
+//        x(t): sample at time t
+//      lambda: filter constant (0 < lambda <= 1, determines degree of filtering)
+//              (smaller value is more useful for detecting small shifts)
+//
+//  MJ: Moving average can be defined in various ways: simple moving average, 
+//  cumulative moving average, weighted moving average, exponential moving 
+//  average (EMA) (a.k.a, exponentially weighted moving average (EWMA)),
+//  modified moving average (MMA), running moving average (RMA), or smoothed 
+//  moving average.  For now, only EWMA is implemented.
+//
+class mtsMonitorFilterAverage: public mtsMonitorFilterBase
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+protected:
+    const BaseType::SignalElement::SIGNAL_TYPE SignalType;
+    const double Lambda;
+
+    bool OldValueInitialized;
+    BaseType::PlaceholderType       OldValueScalar;
+    BaseType::PlaceholderVectorType OldValueVector;
+
+public:
+    /*! Default constructor is provided only to satisfy the requirement of 
+        cmnGenericObject.  DO NOT USE THIS. */
+    mtsMonitorFilterAverage();
+    mtsMonitorFilterAverage(BaseType::FILTER_TYPE filterType, 
+                            const std::string & inputName,
+                            BaseType::SignalElement::SIGNAL_TYPE inputType,
+                            double Lambda);
+    ~mtsMonitorFilterAverage();
+
+    /*! Implements 1st-order differentiator */
+    void DoFiltering(bool debug);
+
+    void ToStream(std::ostream & outputStream) const;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorFilterAverage);
+
 #endif // _mtsMonitorFilterBasics_h
 
