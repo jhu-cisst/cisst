@@ -37,14 +37,16 @@ set (CISST_LIBRARY_INSTALL_SUFFIX "@CISST_LIBRARY_INSTALL_SUFFIX@")
 if ("${CISST_BINARY_DIR}" STREQUAL "") 
   # retrieve the path where cisst-config.cmake was installed
   set (cisst_CONFIG_FILE ${CMAKE_CURRENT_LIST_FILE})
-  get_filename_component (CISST_CMAKE_DIRS
+  get_filename_component (CISST_CONFIG_PATH
                           ${cisst_CONFIG_FILE}
                           PATH)
+  # add installed module path to CISST_CMAKE_DIRS
+  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} "${CISST_CONFIG_PATH}/Modules" )
 
   # find root of install be removing the CISST_CMAKE_INSTALL_SUFFIX
   string (REPLACE "${CISST_CMAKE_INSTALL_SUFFIX}" ""
                   CISST_BINARY_DIR
-                  ${CISST_CMAKE_DIRS})
+                  ${CISST_CONFIG_PATH})
   set (CISST_INCLUDE_DIR "${CISST_BINARY_DIR}/include")
 
   # simple check to make sure cisst has indeed been found
@@ -54,7 +56,7 @@ if ("${CISST_BINARY_DIR}" STREQUAL "")
   if (CISST_HEADER_FILE_FOUND)
     message ("Information: cisst has been found in \"${CISST_BINARY_DIR}\", headers are in \"${CISST_INCLUDE_DIR}\"")
   else (CISST_HEADER_FILE_FOUND)
-    message (WARNING "cisst-config was found in \"${CISST_CMAKE_DIRS}\", the cisst install root is assumed to be \"${CISST_BINARY_DIR}\" but we can't find \"cisstConfig.h\" in \"${CISST_INCLUDE_DIR}\".  This is alarming!")
+    message (WARNING "cisst-config was found in \"${CISST_CONFIG_PATH}\", the cisst install root is assumed to be \"${CISST_BINARY_DIR}\" but we can't find \"cisstConfig.h\" in \"${CISST_INCLUDE_DIR}\".  This is alarming!")
   endif (CISST_HEADER_FILE_FOUND)
   # no need to preserve this in cache (find_file does by default)
   unset (CISST_HEADER_FILE_FOUND CACHE)
