@@ -27,7 +27,7 @@ const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
     //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 0.1 * cmn_s, false, 100) // MJ TEMP
+    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s, false, 100) // MJ TEMP
 {
     TargetComponents = new TargetComponentsType(true);
 }
@@ -143,6 +143,15 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
                                        vecExpected);
     ADD_FILTER(filterArithmetic);
 #endif
+
+    // Create moving average filter to define feature
+    mtsMonitorFilterAverage * filterAverage = 
+        new mtsMonitorFilterAverage(mtsMonitorFilterBase::FEATURE,
+                                    periodName,
+                                    mtsMonitorFilterBase::SignalElement::SCALAR,
+                                    0.25);
+    ADD_FILTER(filterAverage);
+
     // Create subtraction filter to define feature vector
     mtsMonitorFilterBase::PlaceholderType periodExpected = task->GetPeriodicity(true); // Get nominal period
     mtsMonitorFilterArithmetic * filterArithmetic = 
@@ -156,8 +165,8 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
                                        periodExpected);
     ADD_FILTER(filterArithmetic);
 
-    // Create norm filter to define symptom
 #if 0
+    // Create norm filter to define symptom
     mtsMonitorFilterNorm * filterNorm =
         new mtsMonitorFilterNorm(mtsMonitorFilterBase::SYMPTOM,
                                  filterArithmetic->GetOutputSignalName(0),

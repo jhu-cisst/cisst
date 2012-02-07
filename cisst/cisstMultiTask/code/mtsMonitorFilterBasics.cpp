@@ -26,6 +26,7 @@ CMN_IMPLEMENT_SERVICES(mtsMonitorFilterTrendVel);
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterVectorize);
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterNorm);
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterArithmetic);
+CMN_IMPLEMENT_SERVICES(mtsMonitorFilterAverage);
 
 //-----------------------------------------------------------------------------
 //  Filter Name Definitions
@@ -37,6 +38,7 @@ DEFINE_MONITOR_FILTER_NAMES(TrendVel);
 DEFINE_MONITOR_FILTER_NAMES(Vectorize);
 DEFINE_MONITOR_FILTER_NAMES(Norm);
 DEFINE_MONITOR_FILTER_NAMES(Arithmetic);
+DEFINE_MONITOR_FILTER_NAMES(Average);
 /*
 DEFINE_MONITOR_FILTER_NAMES(Sampling);
 DEFINE_MONITOR_FILTER_NAMES(Min);
@@ -438,6 +440,93 @@ void mtsMonitorFilterArithmetic::DoFiltering(bool debug)
 }
 
 void mtsMonitorFilterArithmetic::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Filter Name: " << this->GetFilterName()
+                 << ", " << (this->IsEnabled() ? "Enabled" : "Disabled") << ", "
+                 << ", Input: \"" << InputSignals[0]->GetName() << "\""
+                 << ", Output: \"" << OutputSignals[0]->GetName() << "\"";
+}
+
+
+//-----------------------------------------------------------------------------
+//  Mean (Moving Average) Filter
+//
+// DO NOT USE DEFAULT CONSTRUCTOR
+mtsMonitorFilterAverage::mtsMonitorFilterAverage()
+    : mtsMonitorFilterBase(BaseType::INVALID, ::NameOfFilterAverage),
+      SignalType(BaseType::SignalElement::SCALAR),
+      Lambda(0.0), OldValueInitialized(false)
+{
+    this->Enable(false);
+}
+
+mtsMonitorFilterAverage::mtsMonitorFilterAverage(
+    BaseType::FILTER_TYPE filterType, 
+    const std::string & inputName,
+    BaseType::SignalElement::SIGNAL_TYPE inputType,
+    double lambda)
+    : mtsMonitorFilterBase(filterType, ::NameOfFilterAverage),
+      SignalType(inputType),
+      Lambda(lambda), OldValueInitialized(false)
+{
+    // Define inputs
+    this->AddInputSignal(inputName, inputType);
+
+    // Define outputs
+    std::stringstream ss;
+    ss << inputName << ":Avg" << this->FilterUID;
+    AddOutputSignal(ss.str(), inputType);
+}
+
+mtsMonitorFilterAverage::~mtsMonitorFilterAverage()
+{
+}
+
+void mtsMonitorFilterAverage::DoFiltering(bool debug)
+{
+    if (!this->IsEnabled()) return;
+
+    // Fetch new values from state table
+    double timestamp;
+    if (SignalType == BaseType::SignalElement::SCALAR) {
+        // Fetch new value from state table
+        InputSignals[0]->Placeholder = StateTable->GetNewValueScalar(InputSignals[0]->GetStateDataId(), timestamp);
+
+        // Update output value (EWMA)
+        if (!OldValueInitialized) {
+            OldValueScalar = InputSignals[0]->Placeholder;
+            OutputSignals[0]->Placeholder = OldValueScalar;
+            OldValueInitialized = true;
+        } else {
+            OutputSignals[0]->Placeholder = Lambda * InputSignals[0]->Placeholder + (1.0 - Lambda) * OldValueScalar;
+            OldValueScalar = OutputSignals[0]->Placeholder;
+        }
+    } else {
+        // Fetch new values from state table
+        InputSignals[0]->PlaceholderVector = StateTable->GetNewValueVector(InputSignals[0]->GetStateDataId(), timestamp);
+
+        // Update output values (EWMA)
+        if (!OldValueInitialized) {
+            OldValueVector = InputSignals[0]->PlaceholderVector;
+            OutputSignals[0]->PlaceholderVector = OldValueVector;
+            OldValueInitialized = true;
+        } else {
+            OutputSignals[0]->PlaceholderVector = Lambda * OldValueVector + (1.0 - Lambda) * InputSignals[0]->PlaceholderVector;
+            OldValueVector = OutputSignals[0]->PlaceholderVector;
+        }
+    }
+
+    if (debug) {
+        if (SignalType == BaseType::SignalElement::SCALAR)
+            std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
+                      << InputSignals[0]->Placeholder << " => " << OutputSignals[0]->Placeholder << std::endl;
+        else
+            std::cout << this->GetFilterName() << "\t" << InputSignals[0]->GetName() << ": " 
+                      << InputSignals[0]->PlaceholderVector << " => " << OutputSignals[0]->PlaceholderVector << std::endl;
+    }
+}
+
+void mtsMonitorFilterAverage::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Filter Name: " << this->GetFilterName()
                  << ", " << (this->IsEnabled() ? "Enabled" : "Disabled") << ", "
