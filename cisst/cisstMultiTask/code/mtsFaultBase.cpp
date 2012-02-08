@@ -20,11 +20,64 @@
 
 #include <cisstMultiTask/mtsFaultBase.h>
 
-CMN_IMPLEMENT_SERVICES(mtsFaultBase)
+CMN_IMPLEMENT_SERVICES(mtsFaultElementNames);
+CMN_IMPLEMENT_SERVICES(mtsFaultBase);
 
+//
+// mtsFaultElementNames
+//
+void mtsFaultElementNames::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << " Process: \""        << this->Process << "\","
+                 << " Component: \""      << this->Component << "\", "
+                 << " Interface: \""      << this->Interface << "\", "
+                 << " Command: \""        << this->Command << "\", "
+                 << " Function: \""       << this->Function << "\", "
+                 << " EventGenerator: \"" << this->EventGenerator << "\", "
+                 << " EventHandler: \""   << this->EventHandler << std::endl;
+}
+
+void mtsFaultElementNames::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, Process);
+    cmnSerializeRaw(outputStream, Component);
+    cmnSerializeRaw(outputStream, Interface);
+    cmnSerializeRaw(outputStream, Command);
+    cmnSerializeRaw(outputStream, Function);
+    cmnSerializeRaw(outputStream, EventGenerator);
+    cmnSerializeRaw(outputStream, EventHandler);
+}
+
+void mtsFaultElementNames::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, Process);
+    cmnDeSerializeRaw(inputStream, Component);
+    cmnDeSerializeRaw(inputStream, Interface);
+    cmnDeSerializeRaw(inputStream, Command);
+    cmnDeSerializeRaw(inputStream, Function);
+    cmnDeSerializeRaw(inputStream, EventGenerator);
+    cmnDeSerializeRaw(inputStream, EventHandler);
+}
+
+//
+// mtsFaultBase
+//
 mtsFaultBase::mtsFaultBase(void) : mtsGenericObject(),
-    Layer(mtsFaultBase::INVALID), Timestamp(0.0),
-    Type(mtsFaultBase::FAULT_INVALID), Magnitude(0.0)
+    FaultName("NONAME"),
+    LayerType(mtsFaultBase::LAYER_INVALID), Timestamp(0.0),
+    FaultType(mtsFaultBase::FAULT_INVALID), FaultMagnitude(0.0)
+{
+}
+
+mtsFaultBase::mtsFaultBase(const std::string & faultName, 
+                           LayerTypes layerType, 
+                           FaultTypes faultType) : mtsGenericObject(),
+    FaultName(faultName),
+    LayerType(layerType), Timestamp(0.0),
+    FaultType(faultType), FaultMagnitude(0.0)
 {
 }
 
@@ -35,30 +88,83 @@ mtsFaultBase::~mtsFaultBase()
 void mtsFaultBase::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
-    /* FIXME
-    outputStream << ", Message: \"" << std::string(this->Message, this->Length)
-                 << "\", Length: " << Length
-                 << ", Process: \"" << ProcessName << "\"";
-                 */
+
+    outputStream << " Name: \"" << this->FaultName << "\"";
+    outputStream << " Layer: ";
+    switch (this->LayerType) {
+        case mtsFaultBase::LAYER_SYSTEM:    outputStream << "SYSTEM"; break;
+        case mtsFaultBase::LAYER_PROCESS:   outputStream << "PROCESS"; break;
+        case mtsFaultBase::LAYER_COMPONENT: outputStream << "COMPONENT"; break;
+        case mtsFaultBase::LAYER_INTERFACE: outputStream << "INTERFACE"; break;
+        case mtsFaultBase::LAYER_EXECUTION: outputStream << "EXECUTION"; break;
+        case mtsFaultBase::LAYER_INVALID:   
+        default:                            outputStream << "INVALID";
+    }
+    outputStream << ", Elements: [" << this->ElementNames << "]";
+    outputStream << ", Timestamp: " << this->Timestamp;
+    outputStream << ", Fault type: ";
+    switch (this->FaultType) {
+        case mtsFaultBase::FAULT_SYSTEM_PROCESS: 
+            outputStream << "System/Process"; break;
+        case mtsFaultBase::FAULT_SYSTEM_CONNECTION: 
+            outputStream << "System/Connection"; break;
+        case mtsFaultBase::FAULT_SYSTEM_NETWORK: 
+            outputStream << "System/Network"; break;
+        case mtsFaultBase::FAULT_SYSTEM_FROM_PROCESS_LAYER: 
+            outputStream << "System/FromSubLayer"; break;
+        // Process layer
+        case mtsFaultBase::FAULT_PROCESS_COMPONENT:
+            outputStream << "Process/Component"; break;
+        case mtsFaultBase::FAULT_PROCESS_FROM_COMPONENT_LAYER:
+            outputStream << "Process/FromSubLayer"; break;
+        // Component layer
+        case mtsFaultBase::FAULT_COMPONENT_FUNCTIONAL:
+            outputStream << "Component/Functional"; break;
+        case mtsFaultBase::FAULT_COMPONENT_NONFUNCTIONAL:
+            outputStream << "Component/Nonfunctional"; break;
+        case mtsFaultBase::FAULT_COMPONENT_FROM_INTERFACE_LAYER:
+            outputStream << "Component/FromSubLayer"; break;
+        // Interface layer
+        case mtsFaultBase::FAULT_INTERFACE_ONCONNECT:
+            outputStream << "Interface/OnConnect"; break;
+        case mtsFaultBase::FAULT_INTERFACE_POSTCONNECT:
+            outputStream << "Interface/PostConnect"; break;
+        // Execution layer
+        case mtsFaultBase::FAULT_EXECUTION_PERFORMANCE:
+            outputStream << "Execution/Performance"; break;
+        case mtsFaultBase::FAULT_EXECUTION_NETWORK:
+            outputStream << "Execution/Network"; break;
+        case mtsFaultBase::FAULT_EXECUTION_INVALID_PAYLOAD:
+            outputStream << "Execution/InvalidPayload"; break;
+        // INVALID
+        case mtsFaultBase::FAULT_INVALID:
+        default:
+            outputStream << "Invalid";
+    }
+    outputStream << ", Fault magnitude: " << this->FaultMagnitude;
 }
 
 void mtsFaultBase::SerializeRaw(std::ostream & outputStream) const
 {
     mtsGenericObject::SerializeRaw(outputStream);
-    /* FIXME
-    cmnSerializeRaw(outputStream, this->Length);
-    cmnSerializeRaw(outputStream, this->Message);
-    cmnSerializeRaw(outputStream, this->ProcessName);
-    */
+
+    cmnSerializeRaw(outputStream, this->FaultName);
+    cmnSerializeRaw(outputStream, this->LayerType);
+    this->ElementNames.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->Timestamp);
+    cmnSerializeRaw(outputStream, this->FaultType);
+    cmnSerializeRaw(outputStream, this->FaultMagnitude);
 }
 
 void mtsFaultBase::DeSerializeRaw(std::istream & inputStream)
 {
     mtsGenericObject::DeSerializeRaw(inputStream);
-    /* FIXME
-    cmnDeSerializeRaw(inputStream, this->Length);
-    cmnDeSerializeRaw(inputStream, this->Message);
-    cmnDeSerializeRaw(inputStream, this->ProcessName);
-    */
+
+    cmnDeSerializeRaw(inputStream, this->FaultName);
+    cmnDeSerializeRaw(inputStream, this->LayerType);
+    this->ElementNames.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->Timestamp);
+    cmnDeSerializeRaw(inputStream, this->FaultType);
+    cmnDeSerializeRaw(inputStream, this->FaultMagnitude);
 }
 

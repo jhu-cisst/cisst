@@ -88,7 +88,7 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
     if (LCL <= x && x <= UCL)
         return;
 
-    // out of control
+    // fault occurs: out of control sample found
     CMN_LOG_CLASS_RUN_WARNING << "CheckFault: OUT OF LIMIT SAMPLE!!! input: " << x << ", time: " << timestamp << std::endl;
 }
 
