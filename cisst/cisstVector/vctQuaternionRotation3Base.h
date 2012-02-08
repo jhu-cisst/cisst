@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2005-08-24
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -401,6 +401,16 @@ public:
     */
     //@{
 
+    /*! Conversion from another quaternion.  This method actually performs an
+      assignement and then normalize the quaternion (\c this). */
+    template <class __containerType>
+    inline ThisType &
+    FromNormalized(const vctQuaternionRotation3Base<__containerType> & other) {
+        this->Assign(other);
+        this->NormalizedSelf();
+        return *this;
+    }
+
     /*! Conversion from 4 numbers.  This method actually performs an
       assignement and then normalize the quaternion (\c this). */
     inline ThisType &
@@ -453,6 +463,13 @@ public:
       normalized.
     */
     //@{
+
+    template <class __containerType>
+    inline ThisType &
+    FromRaw(const vctQuaternionRotation3Base<__containerType> & other) {
+        this->Assign(other);
+        return *this;
+    }
 
     inline ThisType &
     FromRaw(value_type x, value_type y, value_type z, value_type r) {
@@ -1023,4 +1040,3 @@ inline void vctQuaternionVectorProductByElements(
 }
 
 #endif  // _vctQuaternionRotation3Base_h
-

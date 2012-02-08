@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2004-01-13
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -80,14 +80,14 @@ vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<_elementType> & axisAngleRota
     const NormType xSin = matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2); // 2 * x * sin(angle)
     const NormType ySin = matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0); // 2 * y * sin(angle)
     const NormType zSin = matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1); // 2 * z * sin(angle)
-    const NormType normSquare = xSin * xSin + ySin * ySin + zSin * zSin; 
+    const NormType normSquare = xSin * xSin + ySin * ySin + zSin * zSin;
     NormType norm;
     if (normSquare < normTolerance) {
         norm = 0.0;
     } else {
         norm = sqrt(normSquare); // 2 * |sin(angle)|
     }
-    
+
     // either 0 or PI
     if (norm == 0.0) {
         const NormType traceMinus3 = trace - NormType(3);
@@ -130,7 +130,7 @@ vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<_elementType> & axisAngleRota
         axisAngleRotation.Angle() = _elementType(cmnPI);
         return;
     }
-    
+
     const AngleType angle = atan2(norm / 2, (trace - 1) / 2);
     axisAngleRotation.Axis().Assign(_elementType(xSin), _elementType(ySin), _elementType(zSin));
     axisAngleRotation.Axis().NormalizedSelf();
@@ -142,7 +142,7 @@ template <class _elementType, class _containerType>
 void
 vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<_elementType> & axisAngleRotation,
                              const vctRodriguezRotation3Base<_containerType> & rodriguezRotation) {
-    
+
     typedef vctAxisAngleRotation3<_elementType> AxisAngleRotationType;
     typedef typename AxisAngleRotationType::value_type value_type;
     typedef typename AxisAngleRotationType::NormType NormType;
@@ -202,4 +202,3 @@ vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<double> & axisAngleRotation,
 template void
 vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<float> & axisAngleRotation,
                              const vctRodriguezRotation3Base<vctFixedSizeVector<float, 3> > & rodriguezRotation);
-

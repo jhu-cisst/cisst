@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-02-11
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -78,10 +78,34 @@ public:
         TranslationMember(translation)
     {}
 
+    /*! Constructor from a vctFrame4x4.  This constructor uses the
+      method From which will test if the input is normalized.  If
+      the input is not normalized it will throw an exception of type
+      std::runtime_error. */
+    template <class __containerType>
+    explicit inline
+    vctFrameBase(const vctFrame4x4ConstBase<__containerType> & other) {
+        From(other);
+    }
+
+    /*! Constructor from a vctFrame4x4.  This constructor uses the
+      method FromNormalized or FromRaw based on the second argument
+      (use VCT_NORMALIZE or VCT_DO_NOT_NORMALIZE). */
+    template <class __containerType>
+    inline
+    vctFrameBase(const vctFrame4x4ConstBase<__containerType> & other,
+                 bool normalizeInput) {
+        if (normalizeInput) {
+            this->FromNormalized(other);
+        } else {
+            this->FromRaw(other);
+        }
+    }
+
     /*! Const reference to the identity.  In this case, the
-        translation is set to <tt>(0, 0, 0)</tt> and the rotation is
-        set to identity using its own method
-        <tt>RotationType::Identity()</tt>. */
+      translation is set to <tt>(0, 0, 0)</tt> and the rotation is
+      set to identity using its own method
+      <tt>RotationType::Identity()</tt>. */
     static CISST_EXPORT const ThisType & Identity();
 
 
@@ -99,6 +123,69 @@ public:
         return *this;
     }
 
+
+    /*! Conversion methods from another frame derived from
+      vctFrameBase (i.e. composed of rotation and translation).  As
+      for rotation, From will throw and exception if the input
+      rotation is not normalized.  FromNormalized will normalized the
+      result and FromRaw will use the input as is. */
+    //@{
+    template <class __rotationType>
+    inline ThisType & From(const vctFrameBase<__rotationType> & other)
+        throw (std::runtime_error)
+    {
+        this->Rotation().From(other.Rotation());
+        this->Translation().Assign(other.Translation());
+        return *this;
+    }
+
+    template <class __rotationType>
+    inline ThisType & FromNormalized(const vctFrameBase<__rotationType> & other) {
+        this->Rotation().FromNormalized(other.Rotation());
+        this->Translation().Assign(other.Translation());
+        return *this;
+    }
+
+    template <class __rotationType>
+    inline ThisType & FromRaw(const vctFrameBase<__rotationType> & other) {
+        this->Rotation().FromRaw(other.Rotation());
+        this->Translation().Assign(other.Translation());
+        return *this;
+    }
+    //@}
+
+
+    /*! Conversion methods from another frame derived from
+      vctFrame4x4Base (i.e. homogeneous matrix).  As
+      for rotation, From will throw and exception if the input
+      rotation is not normalized.  FromNormalized will normalized the
+      result and FromRaw will use the input as is. */
+    //@{
+    template <class __containerType>
+    inline ThisType & From(const vctFrame4x4ConstBase<__containerType> & other)
+        throw (std::runtime_error)
+    {
+        this->Rotation().From(other.Rotation());
+        this->Translation().Assign(other.Translation());
+        return *this;
+    }
+
+    template <class __containerType>
+    inline ThisType & FromNormalized(const vctFrame4x4ConstBase<__containerType> & other) {
+        this->Rotation().FromNormalized(other.Rotation());
+        this->Translation().Assign(other.Translation());
+        return *this;
+    }
+
+    template <class __containerType>
+    inline ThisType & FromRaw(const vctFrame4x4ConstBase<__containerType> & other) {
+        this->Rotation().FromRaw(other.Rotation());
+        this->Translation().Assign(other.Translation());
+        return *this;
+    }
+    //@}
+
+
     inline const TranslationType & Translation(void) const {
         return TranslationMember;
     }
@@ -115,6 +202,18 @@ public:
         return RotationMember;
     }
 
+    /*! Test if the frame is normalized.  This methods checks if the
+      rotation part of the frame is normalized. */
+    inline bool IsNormalized(value_type tolerance = TypeTraits::Tolerance()) const {
+        return this->Rotation().IsNormalized(tolerance);
+    }
+
+    /*! Normalizes this frame.  This method normalizes the rotation
+      part of the matrix. */
+    ThisType & NormalizedSelf(void) {
+        this->Rotation().NormalizedSelf();
+        return *this;
+    }
 
     /*! Inverse this frame. */
     inline ThisType & InverseSelf(void) {

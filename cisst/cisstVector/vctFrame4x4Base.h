@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-09-13
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -112,12 +112,86 @@ public:
     }
 
 
-    template <class _rotationType, class _translationType>
-    ThisType & From(const _rotationType & rotation,
-                    const _translationType & translation)
+    /*! Create from a rotation and a translation.  From will throw an
+      exception if the rotation is not normalized.  FromNormalized
+      will ensure the rotation part is normalized after assignment
+      while FromRaw will not check nor normalize the rotation
+      component. */
+    //@{
+    template <class __rotationType, class __translationType>
+    ThisType & From(const __rotationType & rotation,
+                    const __translationType & translation)
+        throw (std::runtime_error)
     {
         this->RotationRef.From(rotation);
         this->TranslationRef.Assign(translation);
+        this->PerspectiveRef.SetAll(static_cast<value_type>(0.0));
+        this->Element(DIMENSION, DIMENSION) = static_cast<value_type>(1.0);
+        return *this;
+    }
+
+    template <class __rotationType, class __translationType>
+    ThisType & FromNormalized(const __rotationType & rotation,
+                              const __translationType & translation)
+    {
+        this->RotationRef.FromNormalized(rotation);
+        this->TranslationRef.Assign(translation);
+        this->PerspectiveRef.SetAll(static_cast<value_type>(0.0));
+        this->Element(DIMENSION, DIMENSION) = static_cast<value_type>(1.0);
+        return *this;
+    }
+
+    template <class __rotationType, class __translationType>
+    ThisType & FromRaw(const __rotationType & rotation,
+                       const __translationType & translation)
+    {
+        this->RotationRef.FromRaw(rotation);
+        this->TranslationRef.Assign(translation);
+        this->PerspectiveRef.SetAll(static_cast<value_type>(0.0));
+        this->Element(DIMENSION, DIMENSION) = static_cast<value_type>(1.0);
+        return *this;
+    }
+    //@}
+
+
+    /*! Create from a frame derived from vctFrameBase
+      (i.e. represented by a rotation and translation).  From will
+      throw an exception if the rotation is not normalized.
+      FromNormalized will ensure the rotation part is normalized after
+      assignment while FromRaw will not check nor normalize the
+      rotation component. */
+    //@{
+    template <class __rotationType>
+    ThisType & From(const vctFrameBase<__rotationType> & frame)
+        throw (std::runtime_error)
+    {
+        this->From(frame.Rotation(), frame.Translation());
+        return *this;
+    }
+
+    template <class __rotationType>
+    ThisType & FromNormalized(const vctFrameBase<__rotationType> & frame)
+    {
+        this->FromNormalized(frame.Rotation(), frame.Translation());
+        return *this;
+    }
+
+    template <class __rotationType>
+    ThisType & FromRaw(const vctFrameBase<__rotationType> & frame)
+    {
+        this->FromRaw(frame.Rotation(), frame.Translation());
+        return *this;
+    }
+    //@}
+
+
+    /*! Normalizes this frame.  This method normalizes the rotation
+      part of the matrix and resets the last row to [0 0 0 1].  For
+      the rotation normalization, this method relies on
+      vctMatrixRotation3Base normalization method, which converts to
+      a unit quaternion to normalize. */
+    ThisType & NormalizedSelf(void) {
+        this->Rotation().NormalizedSelf();
         this->PerspectiveRef.SetAll(static_cast<value_type>(0.0));
         this->Element(DIMENSION, DIMENSION) = static_cast<value_type>(1.0);
         return *this;
@@ -149,4 +223,3 @@ public:
 
 
 #endif  // _vctFrame4x4Base_h
-

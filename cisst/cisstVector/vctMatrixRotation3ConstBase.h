@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2005-08-19
 
-  (C) Copyright 2005-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---

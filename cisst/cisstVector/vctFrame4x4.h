@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-09-13
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -136,6 +136,33 @@ public:
         this->From(rotation, translation);
     }
 
+    /*! Constructor from a vctFrameBase.  This constructor uses the
+      method From which will test if the input is normalized.  If
+      the input is not normalized it will throw an exception of type
+      std::runtime_error. */
+    template <class __containerType>
+    explicit inline
+    vctFrame4x4(const vctFrameBase<__containerType> & other):
+        BaseType()
+    {
+        From(other);
+    }
+
+    /*! Constructor from a vctFrameBase.  This constructor uses the
+      method FromNormalized or FromRaw based on the second argument
+      (use VCT_NORMALIZE or VCT_DO_NOT_NORMALIZE). */
+    template <class __containerType>
+    inline
+    vctFrame4x4(const vctFrameBase<__containerType> & other,
+                bool normalizeInput):
+        BaseType()
+    {
+        if (normalizeInput) {
+            this->FromNormalized(other);
+        } else {
+            this->FromRaw(other);
+        }
+    }
 };
 
 
@@ -182,4 +209,3 @@ operator * (const vctFrame4x4ConstBase<_containerType> & frame,
 
 
 #endif  // _vctFrame4x4_h
-

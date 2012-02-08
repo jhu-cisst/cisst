@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-01-12
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctMatrixRotation3Ref_h
 #define _vctMatrixRotation3Ref_h
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of vctMatrixRotation3Ref
  */
 
@@ -66,16 +66,14 @@ class vctMatrixRotation3Ref: public vctMatrixRotation3Base<vctFixedSizeMatrixRef
     inline vctMatrixRotation3Ref(void):
         BaseType()
     {}
-    
 
-    // #if 0 // default one works?
+
     inline vctMatrixRotation3Ref(const ThisType & other):
         BaseType()
     {
         this->SetRef(other);
     }
-    // #endif
-    
+
     inline vctMatrixRotation3Ref(const BaseType & other):
         BaseType()
     {
@@ -87,7 +85,7 @@ class vctMatrixRotation3Ref: public vctMatrixRotation3Base<vctFixedSizeMatrixRef
       operator uses the Assign() method inherited from the BaseType.
       This operator (as well as the Assign method) allows to set a
       rotation matrix to whatever value without any further validity
-      checking.  It is recommended to use it with caution. */ 
+      checking.  It is recommended to use it with caution. */
     inline ThisType & operator = (const ContainerType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
@@ -104,4 +102,3 @@ class vctMatrixRotation3Ref: public vctMatrixRotation3Base<vctFixedSizeMatrixRef
 
 
 #endif  // _vctMatrixRotation3Ref_h
-

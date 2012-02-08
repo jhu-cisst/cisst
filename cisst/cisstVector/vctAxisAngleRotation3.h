@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -183,7 +183,8 @@ public:
 
     /*! Constructor from a vctQuaternionRotation3. */
     template <class _containerType>
-    inline vctAxisAngleRotation3(const vctQuaternionRotation3Base<_containerType> & quaternionRotation)
+    explicit inline
+    vctAxisAngleRotation3(const vctQuaternionRotation3Base<_containerType> & quaternionRotation)
         throw(std::runtime_error)
     {
         From(quaternionRotation);
@@ -191,7 +192,8 @@ public:
 
     /*! Constructor from a vctMatrixRotation3. */
     template <class _containerType>
-    inline vctAxisAngleRotation3(const vctMatrixRotation3Base<_containerType> & matrixRotation)
+    explicit inline
+    vctAxisAngleRotation3(const vctMatrixRotation3Base<_containerType> & matrixRotation)
         throw(std::runtime_error)
     {
         From(matrixRotation);
@@ -199,7 +201,8 @@ public:
 
     /*! Constructor from a vctRodriguezRotation3. */
     template <class _containerType>
-    inline vctAxisAngleRotation3(const vctRodriguezRotation3Base<_containerType> & rodriguezRotation)
+    explicit inline
+    vctAxisAngleRotation3(const vctRodriguezRotation3Base<_containerType> & rodriguezRotation)
         throw(std::runtime_error)
     {
         From(rodriguezRotation);
@@ -692,4 +695,3 @@ std::ostream & operator << (std::ostream & output,
 
 
 #endif  // _vctAxisAngleRotation3_h
-

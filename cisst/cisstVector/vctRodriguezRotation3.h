@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -93,7 +93,8 @@ public:
       \param axis A vector of size 3, its norm represents the angle.
     */
     template <stride_type __stride, class __dataPtrType>
-    inline vctRodriguezRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis)
+    explicit inline
+    vctRodriguezRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis)
         throw(std::runtime_error)
     {
         this->From(axis);
@@ -110,7 +111,8 @@ public:
 
     /*! Constructor from a vctQuaternionRotation3. */
     template <class __containerType>
-    inline vctRodriguezRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
+    explicit inline
+    vctRodriguezRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
         throw(std::runtime_error)
     {
         this->From(quaternionRotation);
@@ -118,14 +120,16 @@ public:
 
     /*! Constructor from a vctMatrixRotation3. */
     template <class __containerType>
-    inline vctRodriguezRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
+    explicit inline
+    vctRodriguezRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
         throw(std::runtime_error)
     {
         this->From(matrixRotation);
     }
 
     /*! Constructor from a vctAxisAngleRotation3. */
-    inline vctRodriguezRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
+    explicit inline
+    vctRodriguezRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
         throw(std::runtime_error)
     {
         this->From(axisAngleRotation);
@@ -227,4 +231,3 @@ public:
 
 
 #endif  // _vctRodriguezRotation3_h
-

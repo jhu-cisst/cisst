@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-01-12
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -75,7 +75,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
         this->Assign(other);
     }
 
-    inline vctMatrixRotation3(const BaseType & other):
+    explicit inline vctMatrixRotation3(const BaseType & other):
         BaseType()
     {
         this->Assign(other);
@@ -173,7 +173,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     }
 
     /*! Construction from a vctAxisAngleRotation3. */
-    inline vctMatrixRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
+    explicit inline vctMatrixRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
         throw(std::runtime_error)
     {
         this->From(axisAngleRotation);
@@ -187,7 +187,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       \param quaternionRotation A unit quaternion
     */
     template <class __containerType>
-    inline vctMatrixRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
+    explicit inline vctMatrixRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
         throw(std::runtime_error)
     {
         this->From(quaternionRotation);
@@ -195,7 +195,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
 
     /*! Constructor from a vctRodriguezRotation3. */
     template <class __containerType>
-    inline vctMatrixRotation3(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
+    explicit inline vctMatrixRotation3(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
         throw(std::runtime_error)
     {
         this->From(rodriguezRotation);
@@ -203,7 +203,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
 
     /*! Constructor from a vctEulerRotation3. */
     template <vctEulerRotation3Order::OrderType __order>
-    inline vctMatrixRotation3(const vctEulerRotation3<__order> & eulerRotation)
+    explicit inline vctMatrixRotation3(const vctEulerRotation3<__order> & eulerRotation)
         throw(std::runtime_error)
     {
         this->From(eulerRotation);
@@ -397,4 +397,3 @@ vctMatrixRotation3ConstBase<_containerType>::Inverse(void) const {
 
 
 #endif  // _vctMatrixRotation3_h
-
