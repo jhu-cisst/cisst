@@ -54,11 +54,50 @@
 
 #include <cisstMultiTask/mtsExport.h>
 
+//
+// mtsFaultElementNames
+//
+class CISST_EXPORT mtsFaultElementNames: public mtsGenericObject 
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    std::string Process;
+    std::string Component;
+    std::string Interface;
+    std::string Command;
+    std::string Function;
+    std::string EventGenerator;
+    std::string EventHandler;
+
+    mtsFaultElementNames() : mtsGenericObject() {} 
+    ~mtsFaultElementNames() {}
+
+    void ToStream(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsFaultElementNames);
+
+
+//
+// mtsFaultBase
+//
 class CISST_EXPORT mtsFaultBase: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
+    typedef enum { 
+        LAYER_SYSTEM, 
+        LAYER_PROCESS, 
+        LAYER_COMPONENT, 
+        LAYER_INTERFACE, 
+        LAYER_EXECUTION,
+        LAYER_INVALID
+    } LayerTypes;
+
     typedef enum {
         // System layer
         FAULT_SYSTEM_PROCESS,
@@ -69,8 +108,8 @@ public:
         FAULT_PROCESS_COMPONENT,
         FAULT_PROCESS_FROM_COMPONENT_LAYER,
         // Component layer
-        FAULT_COMPONENT_STRUCTURAL,
-        FAULT_COMPONENT_NONSTRUCTURAL,
+        FAULT_COMPONENT_FUNCTIONAL,
+        FAULT_COMPONENT_NONFUNCTIONAL,
         FAULT_COMPONENT_FROM_INTERFACE_LAYER,
         // Interface layer
         FAULT_INTERFACE_ONCONNECT,
@@ -83,33 +122,23 @@ public:
         FAULT_INVALID
     } FaultTypes;
 
-    typedef enum { INVALID, SYSTEM, PROCESS, COMPONENT, INTERFACE, EXECUTION } LayerTypes;
-
-    typedef struct _ElementNames {
-        std::string Process;
-        std::string Component;
-        std::string Interface;
-        std::string Command;
-        std::string Function;
-        std::string EventGenerator;
-        std::string EventHandler;
-    } ElementNamesType;
-
 protected:
-    /*! Location of fault and its timestamp (for fault isolation) */
-    LayerTypes       Layer;
-    ElementNamesType ElementNames;
-    double           Timestamp;
+    typedef mtsFaultBase BaseType;
+
+    /*! Name, location, and timestamp of fault (for fault isolation) */
+    std::string FaultName;
+    LayerTypes LayerType;
+    mtsFaultElementNames ElementNames;
+    double Timestamp;
 
     /*! Type of fault and degree (magnitude) of fault (for fault identification and diagnosis) */
-    FaultTypes Type;
-    double     Magnitude;
+    FaultTypes FaultType;
+    double     FaultMagnitude;
 
 public:
-    // MJ TODO: Add getter/setter/more constructors
-
     /*! Constructors and destructor */
-    mtsFaultBase(void);
+    mtsFaultBase();
+    mtsFaultBase(const std::string & faultName, LayerTypes layerType, FaultTypes faultType);
     virtual ~mtsFaultBase();
 
     void ToStream(std::ostream & outputStream) const;
