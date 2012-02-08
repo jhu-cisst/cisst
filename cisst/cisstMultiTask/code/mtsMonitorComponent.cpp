@@ -19,7 +19,9 @@
 */
 
 #include <cisstMultiTask/mtsMonitorComponent.h>
+#include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
+
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 
@@ -158,21 +160,19 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
         new mtsMonitorFilterArithmetic(mtsMonitorFilterBase::FEATURE,
                                        mtsMonitorFilterArithmetic::SUBTRACTION,
                                        // in 1: actual
-                                       //filterBypass->GetOutputSignalName(0),
                                        periodName,
                                        mtsMonitorFilterBase::SignalElement::SCALAR,
                                        // in 2: expected
                                        periodExpected);
     ADD_FILTER(filterArithmetic);
 
-#if 0
-    // Create norm filter to define symptom
-    mtsMonitorFilterNorm * filterNorm =
-        new mtsMonitorFilterNorm(mtsMonitorFilterBase::SYMPTOM,
-                                 filterArithmetic->GetOutputSignalName(0),
-                                 mtsMonitorFilterNorm::L1NORM);
-    ADD_FILTER(filterNorm);
-#endif
+    // Create fault detector based on thresholding filter
+    const double nominalPeriod = task->GetPeriodicity(true); // nominal (expected) period as avg
+    mtsFaultDetectorThresholding * detectorThresholding = 
+        new mtsFaultDetectorThresholding(filterAverage->GetOutputSignalName(0),
+                                         nominalPeriod, 
+                                         (size_t)(1.0 / nominalPeriod) * 5.0);
+    ADD_FILTER(detectorThresholding);
 #undef ADD_FILTER 
 
     return true;

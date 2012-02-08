@@ -20,6 +20,7 @@
 
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
+#include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterBypass);
 CMN_IMPLEMENT_SERVICES(mtsMonitorFilterTrendVel);
@@ -43,7 +44,6 @@ DEFINE_MONITOR_FILTER_NAMES(Average);
 DEFINE_MONITOR_FILTER_NAMES(Sampling);
 DEFINE_MONITOR_FILTER_NAMES(Min);
 DEFINE_MONITOR_FILTER_NAMES(Max);
-DEFINE_MONITOR_FILTER_NAMES(Avg);
 DEFINE_MONITOR_FILTER_NAMES(Std);
 */
 #undef DEFINE_MONITOR_FILTER_NAMES
@@ -68,7 +68,7 @@ mtsMonitorFilterBypass::mtsMonitorFilterBypass(
 
     // Define outputs
     std::stringstream ss;
-    ss << inputName << ":Bypass" << this->FilterUID;
+    ss << "Bypass:" << inputName << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), signalType);
 }
 
@@ -134,7 +134,7 @@ mtsMonitorFilterTrendVel::mtsMonitorFilterTrendVel(
 
     // Define outputs
     std::stringstream ss;
-    ss << inputName << ":Vel" << this->FilterUID;
+    ss << "TrendVel:" << inputName << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), signalType);
 }
 
@@ -228,7 +228,7 @@ mtsMonitorFilterVectorize::mtsMonitorFilterVectorize(
 
     // Define outputs
     std::stringstream ss;
-    ss << "Vector[" << inputNames.size() << ":1]" << this->FilterUID;
+    ss << "Vectorize:" << inputNames.size() << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
 
     GetOutputSignalElement(0)->PlaceholderVector.SetSize(InputSize);
@@ -295,7 +295,7 @@ mtsMonitorFilterNorm::mtsMonitorFilterNorm(
 
     // Define outputs
     std::stringstream ss;
-    ss << inputName << ":Norm" << this->FilterUID;
+    ss << "Norm:" << inputName << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), BaseType::SignalElement::SCALAR);
 }
 
@@ -364,7 +364,7 @@ mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE fil
 
     // Define outputs
     std::stringstream ss;
-    ss << "Arithmetic" << this->FilterUID;
+    ss << "Arithmetic:" << input1Name << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), BaseType::SignalElement::VECTOR);
 
     IsInputScalar = (input1Type == BaseType::SignalElement::SCALAR);
@@ -385,7 +385,7 @@ mtsMonitorFilterArithmetic::mtsMonitorFilterArithmetic(BaseType::FILTER_TYPE fil
 
     // Define outputs
     std::stringstream ss;
-    ss << "Arithmetic" << this->FilterUID;
+    ss << "Arithmetic:" << input1Name << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), input1Type);
 
     IsInputScalar = (input1Type == BaseType::SignalElement::SCALAR);
@@ -474,7 +474,7 @@ mtsMonitorFilterAverage::mtsMonitorFilterAverage(
 
     // Define outputs
     std::stringstream ss;
-    ss << inputName << ":Avg" << this->FilterUID;
+    ss << "Avg:" << inputName << ":" << this->FilterUID;
     AddOutputSignal(ss.str(), inputType);
 }
 

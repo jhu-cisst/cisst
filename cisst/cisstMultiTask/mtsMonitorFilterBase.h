@@ -49,7 +49,8 @@ public:
         FEATURE,        // =f(measurement)
         FEATURE_VECTOR, // =sum_of(FEATURE)
         SYMPTOM,        // =f(FEATURE_VECTOR) 
-        SYMPTOM_VECTOR  // =sum_of(SYMPTOM)
+        SYMPTOM_VECTOR, // =sum_of(SYMPTOM)
+        FAULT_DETECTOR  // fault detector
     } FILTER_TYPE;
 
     typedef double PlaceholderType;
