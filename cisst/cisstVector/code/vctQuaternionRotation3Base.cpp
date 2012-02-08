@@ -112,32 +112,32 @@ vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<_quaternionType> & 
     NormType ratio;
     switch (index) {
     case 0:
-        quaternionRotation.R() = sqrt(a0) * 0.5;
+        quaternionRotation.R() = static_cast<value_type>(sqrt(a0) * 0.5);
         ratio = 0.25 / quaternionRotation.R();
-        quaternionRotation.X() = (matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2)) * ratio;
-        quaternionRotation.Y() = (matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0)) * ratio;
-        quaternionRotation.Z() = (matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1)) * ratio;
+        quaternionRotation.X() = static_cast<value_type>((matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2)) * ratio);
+        quaternionRotation.Y() = static_cast<value_type>((matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0)) * ratio);
+        quaternionRotation.Z() = static_cast<value_type>((matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1)) * ratio);
         break;
     case 1:
-        quaternionRotation.X() = sqrt(a1) * 0.5;
+        quaternionRotation.X() = static_cast<value_type>(sqrt(a1) * 0.5);
         ratio = 0.25 / quaternionRotation.X();
-        quaternionRotation.R() = (matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2)) * ratio;
-        quaternionRotation.Y() = (matrixRotation.Element(1, 0) + matrixRotation.Element(0, 1)) * ratio;
-        quaternionRotation.Z() = (matrixRotation.Element(2, 0) + matrixRotation.Element(0, 2)) * ratio;
+        quaternionRotation.R() = static_cast<value_type>((matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2)) * ratio);
+        quaternionRotation.Y() = static_cast<value_type>((matrixRotation.Element(1, 0) + matrixRotation.Element(0, 1)) * ratio);
+        quaternionRotation.Z() = static_cast<value_type>((matrixRotation.Element(2, 0) + matrixRotation.Element(0, 2)) * ratio);
         break;
     case 2:
-        quaternionRotation.Y() = sqrt(a2) * 0.5;
+        quaternionRotation.Y() = static_cast<value_type>(sqrt(a2) * 0.5);
         ratio = 0.25 / quaternionRotation.Y();
-        quaternionRotation.R() = (matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0)) * ratio;
-        quaternionRotation.X() = (matrixRotation.Element(1, 0) + matrixRotation.Element(0, 1)) * ratio;
-        quaternionRotation.Z() = (matrixRotation.Element(2, 1) + matrixRotation.Element(1, 2)) * ratio;
+        quaternionRotation.R() = static_cast<value_type>((matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0)) * ratio);
+        quaternionRotation.X() = static_cast<value_type>((matrixRotation.Element(1, 0) + matrixRotation.Element(0, 1)) * ratio);
+        quaternionRotation.Z() = static_cast<value_type>((matrixRotation.Element(2, 1) + matrixRotation.Element(1, 2)) * ratio);
         break;
     case 3:
-        quaternionRotation.Z() = sqrt(a3) * 0.5;
+        quaternionRotation.Z() = static_cast<value_type>(sqrt(a3) * 0.5);
         ratio = 0.25 / quaternionRotation.Z();
-        quaternionRotation.R() = (matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1)) * ratio;
-        quaternionRotation.X() = (matrixRotation.Element(0, 2) + matrixRotation.Element(2, 0)) * ratio;
-        quaternionRotation.Y() = (matrixRotation.Element(2, 1) + matrixRotation.Element(1, 2)) * ratio;
+        quaternionRotation.R() = static_cast<value_type>((matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1)) * ratio);
+        quaternionRotation.X() = static_cast<value_type>((matrixRotation.Element(0, 2) + matrixRotation.Element(2, 0)) * ratio);
+        quaternionRotation.Y() = static_cast<value_type>((matrixRotation.Element(2, 1) + matrixRotation.Element(1, 2)) * ratio);
         break;
     default:
         break;
