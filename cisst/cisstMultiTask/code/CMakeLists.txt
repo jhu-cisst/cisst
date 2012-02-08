@@ -300,16 +300,28 @@ endif (CISST_MTS_HAS_ICE)
 # files to support fault detection and diagnosis
 if (CISST_MTS_SUPPORT_FDD)
   set (SOURCE_FILES ${SOURCE_FILES}
+       # monitors
        mtsMonitorComponent.cpp
        mtsMonitorFilterBase.cpp
        mtsMonitorFilterBasics.cpp
+       # faults
+       mtsFaultBase.cpp
+       # fault detection and diagnosis
+       mtsFaultDetectorBase.cpp
+       mtsFaultDetectorThresholding.cpp
        )
 
   set (HEADER_FILES
        ${HEADER_FILES}
+       # monitors
        mtsMonitorComponent.h
        mtsMonitorFilterBase.h
        mtsMonitorFilterBasics.h
+       # faults
+       mtsFaultBase.h
+       # fault detection and diagnosis
+       mtsFaultDetectorBase.h
+       mtsFaultDetectorThresholding.h
        )
 endif (CISST_MTS_SUPPORT_FDD)
 
