@@ -26,11 +26,20 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#include <native/task.h>
+#endif
+
 // Enable or disable system-wide thread-safe logging
 #define MTS_LOGGING
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    mlockall(MCL_CURRENT|MCL_FUTURE);
+#endif
+
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
