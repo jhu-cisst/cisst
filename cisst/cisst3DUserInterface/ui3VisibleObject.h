@@ -7,7 +7,7 @@
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -70,9 +70,30 @@ public:
 
     void Hide(void);
 
+    void SetMatrixElement(unsigned int i, unsigned int j, double value);
+
     void SetPosition(const vctDouble3 & position, bool useLock = true);
 
-    void SetOrientation(const vctDoubleMatRot3 & rotationMatrix, bool useLock = true);
+    template <class _containerType>
+    void SetOrientation(const vctMatrixRotation3ConstBase<_containerType> & rotationMatrix, bool useLock = true) {
+        CMN_LOG_CLASS_RUN_DEBUG << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
+        if (this->Created()) {
+            unsigned int i, j;
+            if (useLock) {
+                this->Lock();
+            }
+            for (i = 0; i < 3; i++) {
+                for (j = 0; j < 3; j++) {
+                    this->SetMatrixElement(i, j, rotationMatrix.Element(i, j));
+                }
+            }
+            if (useLock) {
+                this->Unlock();
+            }
+        } else {
+            CMN_LOG_CLASS_RUN_VERBOSE << "SetOrientation: called on object \"" << this->Name() << "\" not yet created" << std::endl;
+        }
+    }
 
     void SetScale(const double & scale, bool useLock = true);
 
