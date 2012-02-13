@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  
+
 
 =========================================================================*/
 // .NAME CSOpenGLStippleActor - OpenGL actor
@@ -18,29 +18,31 @@ class vtkOpenGLRenderer;
 class VTK_RENDERING_EXPORT CSOpenGLStippleActor : public vtkOpenGLActor
 {
 protected:
-  
+
 public:
-  static CSOpenGLStippleActor *New();
-//  vtkTypeRevisionMacro(CSOpenGLStippleActor,vtkOpenGLActor);
-  virtual void PrintSelf(ostream& os, vtkIndent indent);
+	static CSOpenGLStippleActor *New();
+	//  vtkTypeRevisionMacro(CSOpenGLStippleActor,vtkOpenGLActor);
+	virtual void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Description:
-  // Actual actor render method.
-  void Render(vtkRenderer *ren, vtkMapper *mapper);
-  void SetStipplePattern(int mode);
-  
+	// Description:
+	// Actual actor render method.
+	void Render(vtkRenderer *ren, vtkMapper *mapper);
+	void SetStipplePattern(int mode);
+	void SetStipplePercentage(int percentage);
+
 protected:
-  CSOpenGLStippleActor();
-  ~CSOpenGLStippleActor() {};
+	CSOpenGLStippleActor();
+	~CSOpenGLStippleActor();
 
-    vtkRenderer     *ren1;
-    vtkMapper       *map1;
+	vtkRenderer     *ren1;
+	vtkMapper       *map1;
 
-    int pattern;
+	int pattern;
+	int StipplePercentage;
 
-    unsigned char StipplePattern[32*4];
+	unsigned char StipplePattern[32*4];
 
-
+	bool debug;
 
 };
 
