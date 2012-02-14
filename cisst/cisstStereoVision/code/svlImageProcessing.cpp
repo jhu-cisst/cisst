@@ -31,7 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_videoch,
                                     svlSampleImage* dst_img, unsigned int dst_videoch,
                                     vctDynamicVector<double> kernel_horiz,
-                                    vctDynamicVector<double> kernel_vert)
+                                    vctDynamicVector<double> kernel_vert,
+                                    bool absres)
 {
     if (!src_img || src_img->GetVideoChannels() <= src_videoch ||
         !dst_img || dst_img->GetVideoChannels() <= dst_videoch) return SVL_FAIL;
@@ -55,55 +56,55 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
             svlImageProcessingHelper::ConvolutionRGB(src_img->GetUCharPointer(src_videoch),
                                                      dst_img->GetUCharPointer(dst_videoch),
                                                      width, height,
-                                                     fp_kernel_horiz, true);
+                                                     fp_kernel_horiz, true, absres);
             svlImageProcessingHelper::ConvolutionRGB(dst_img->GetUCharPointer(dst_videoch),
                                                      src_img->GetUCharPointer(src_videoch),
                                                      width, height,
-                                                     fp_kernel_vert, false);
+                                                     fp_kernel_vert, false, absres);
         break;
 
         case svlPixelRGBA:
             svlImageProcessingHelper::ConvolutionRGBA(src_img->GetUCharPointer(src_videoch),
                                                       dst_img->GetUCharPointer(dst_videoch),
                                                       width, height,
-                                                      fp_kernel_horiz, true);
+                                                      fp_kernel_horiz, true, absres);
             svlImageProcessingHelper::ConvolutionRGBA(dst_img->GetUCharPointer(dst_videoch),
                                                       src_img->GetUCharPointer(src_videoch),
                                                       width, height,
-                                                      fp_kernel_vert, false);
+                                                      fp_kernel_vert, false, absres);
         break;
 
         case svlPixelMono8:
             svlImageProcessingHelper::ConvolutionMono8(src_img->GetUCharPointer(src_videoch),
                                                        dst_img->GetUCharPointer(dst_videoch),
                                                        width, height,
-                                                       fp_kernel_horiz, true);
+                                                       fp_kernel_horiz, true, absres);
             svlImageProcessingHelper::ConvolutionMono8(dst_img->GetUCharPointer(dst_videoch),
                                                        src_img->GetUCharPointer(src_videoch),
                                                        width, height,
-                                                       fp_kernel_vert, false);
+                                                       fp_kernel_vert, false, absres);
         break;
 
         case svlPixelMono16:
             svlImageProcessingHelper::ConvolutionMono16(reinterpret_cast<unsigned short*>(src_img->GetUCharPointer(src_videoch)),
                                                         reinterpret_cast<unsigned short*>(dst_img->GetUCharPointer(dst_videoch)),
                                                         width, height,
-                                                        fp_kernel_horiz, true);
+                                                        fp_kernel_horiz, true, absres);
             svlImageProcessingHelper::ConvolutionMono16(reinterpret_cast<unsigned short*>(dst_img->GetUCharPointer(dst_videoch)),
                                                         reinterpret_cast<unsigned short*>(src_img->GetUCharPointer(src_videoch)),
                                                         width, height,
-                                                        fp_kernel_vert, false);
+                                                        fp_kernel_vert, false, absres);
         break;
 
         case svlPixelMono32:
             svlImageProcessingHelper::ConvolutionMono32(reinterpret_cast<unsigned int*>(src_img->GetUCharPointer(src_videoch)),
                                                         reinterpret_cast<unsigned int*>(dst_img->GetUCharPointer(dst_videoch)),
                                                         width, height,
-                                                        fp_kernel_horiz, true);
+                                                        fp_kernel_horiz, true, absres);
             svlImageProcessingHelper::ConvolutionMono32(reinterpret_cast<unsigned int*>(dst_img->GetUCharPointer(dst_videoch)),
                                                         reinterpret_cast<unsigned int*>(src_img->GetUCharPointer(src_videoch)),
                                                         width, height,
-                                                        fp_kernel_vert, false);
+                                                        fp_kernel_vert, false, absres);
         break;
 
         default:
@@ -119,7 +120,8 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
 
 int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_videoch,
                                     svlSampleImage* dst_img, unsigned int dst_videoch,
-                                    vctDynamicMatrix<double> kernel)
+                                    vctDynamicMatrix<double> kernel,
+                                    bool absres)
 {
     if (!src_img || src_img->GetVideoChannels() <= src_videoch ||
         !dst_img || dst_img->GetVideoChannels() <= dst_videoch) return SVL_FAIL;
@@ -141,28 +143,28 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
             svlImageProcessingHelper::ConvolutionRGB(src_img->GetUCharPointer(src_videoch),
                                                      dst_img->GetUCharPointer(dst_videoch),
                                                      width, height,
-                                                     fp_kernel);
+                                                     fp_kernel, absres);
         break;
 
         case svlPixelRGBA:
             svlImageProcessingHelper::ConvolutionRGBA(src_img->GetUCharPointer(src_videoch),
                                                       dst_img->GetUCharPointer(dst_videoch),
                                                       width, height,
-                                                      fp_kernel);
+                                                      fp_kernel, absres);
         break;
 
         case svlPixelMono8:
             svlImageProcessingHelper::ConvolutionMono8(src_img->GetUCharPointer(src_videoch),
                                                        dst_img->GetUCharPointer(dst_videoch),
                                                        width, height,
-                                                       fp_kernel);
+                                                       fp_kernel, absres);
         break;
 
         case svlPixelMono16:
             svlImageProcessingHelper::ConvolutionMono16(reinterpret_cast<unsigned short*>(src_img->GetUCharPointer(src_videoch)),
                                                         reinterpret_cast<unsigned short*>(dst_img->GetUCharPointer(dst_videoch)),
                                                         width, height,
-                                                        fp_kernel);
+                                                        fp_kernel, absres);
         break;
 
         default:

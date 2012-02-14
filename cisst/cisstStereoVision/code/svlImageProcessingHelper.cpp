@@ -50,7 +50,8 @@ svlImageProcessingInternals::~svlImageProcessingInternals()
 /*** svlImageProcessingHelper namespace ***/
 /******************************************/
 
-void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal)
+void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height,
+                                              vctDynamicVector<int> & kernel, bool horizontal, bool absres)
 {
     if (!input || !output || kernel.size() < 1) return;
 
@@ -100,12 +101,22 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
 
                 sum1 >>= 10; sum2 >>= 10; sum3 >>= 10;
 
-                if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
-                *output = static_cast<unsigned char>(sum1); output ++;
-                if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
-                *output = static_cast<unsigned char>(sum2); output ++;
-                if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
-                *output = static_cast<unsigned char>(sum3); output ++;
+                if (absres) {
+                    if (sum1 < 0) sum1 = -sum1; if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = -sum2; if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = -sum3; if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                }
+                else {
+                    if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                }
             }
         }
 
@@ -151,19 +162,30 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
 
                 sum1 >>= 10; sum2 >>= 10; sum3 >>= 10;
 
-                if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
-                *output = static_cast<unsigned char>(sum1); output ++;
-                if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
-                *output = static_cast<unsigned char>(sum2); output ++;
-                if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
-                *output = static_cast<unsigned char>(sum3); output ++;
+                if (absres) {
+                    if (sum1 < 0) sum1 = -sum1; if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = -sum2; if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = -sum3; if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                }
+                else {
+                    if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                }
             }
         }
 
     }
 }
 
-void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal)
+void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height,
+                                               vctDynamicVector<int> & kernel, bool horizontal, bool absres)
 {
     if (!input || !output || kernel.size() < 1) return;
 
@@ -214,14 +236,26 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
 
                 sum1 >>= 10; sum2 >>= 10; sum3 >>= 10; sum4 >>= 10;
 
-                if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
-                *output = static_cast<unsigned char>(sum1); output ++;
-                if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
-                *output = static_cast<unsigned char>(sum2); output ++;
-                if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
-                *output = static_cast<unsigned char>(sum3); output ++;
-                if (sum4 < 0) sum4 = 0; else if (sum4 > 255) sum4 = 255;
-                *output = static_cast<unsigned char>(sum4); output ++;
+                if (absres) {
+                    if (sum1 < 0) sum1 = -sum1; if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = -sum2; if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = -sum3; if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                    if (sum4 < 0) sum4 = -sum4; if (sum4 > 255) sum4 = 255;
+                    *output = static_cast<unsigned char>(sum4); output ++;
+                }
+                else {
+                    if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                    if (sum4 < 0) sum4 = 0; else if (sum4 > 255) sum4 = 255;
+                    *output = static_cast<unsigned char>(sum4); output ++;
+                }
             }
         }
 
@@ -268,21 +302,34 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
 
                 sum1 >>= 10; sum2 >>= 10; sum3 >>= 10; sum4 >>= 10;
 
-                if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
-                *output = static_cast<unsigned char>(sum1); output ++;
-                if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
-                *output = static_cast<unsigned char>(sum2); output ++;
-                if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
-                *output = static_cast<unsigned char>(sum3); output ++;
-                if (sum4 < 0) sum4 = 0; else if (sum4 > 255) sum4 = 255;
-                *output = static_cast<unsigned char>(sum4); output ++;
+                if (absres) {
+                    if (sum1 < 0) sum1 = -sum1; if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = -sum2; if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = -sum3; if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                    if (sum4 < 0) sum4 = -sum4; if (sum4 > 255) sum4 = 255;
+                    *output = static_cast<unsigned char>(sum4); output ++;
+                }
+                else {
+                    if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
+                    *output = static_cast<unsigned char>(sum1); output ++;
+                    if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
+                    *output = static_cast<unsigned char>(sum2); output ++;
+                    if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
+                    *output = static_cast<unsigned char>(sum3); output ++;
+                    if (sum4 < 0) sum4 = 0; else if (sum4 > 255) sum4 = 255;
+                    *output = static_cast<unsigned char>(sum4); output ++;
+                }
             }
         }
 
     }
 }
 
-void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal)
+void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height,
+                                                vctDynamicVector<int> & kernel, bool horizontal, bool absres)
 {
     if (!input || !output || kernel.size() < 1) return;
 
@@ -328,8 +375,14 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
 
                 sum >>= 10;
 
-                if (sum < 0) sum = 0; else if (sum > 255) sum = 255;
-                *output = static_cast<unsigned char>(sum); output ++;
+                if (absres) {
+                    if (sum < 0) sum = -sum; if (sum > 255) sum = 255;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
+                else {
+                    if (sum < 0) sum = 0; else if (sum > 255) sum = 255;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
             }
         }
 
@@ -373,15 +426,22 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
                 
                 sum >>= 10;
                 
-                if (sum < 0) sum = 0; else if (sum > 255) sum = 255;
-                *output = static_cast<unsigned char>(sum); output ++;
+                if (absres) {
+                    if (sum < 0) sum = -sum; if (sum > 255) sum = 255;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
+                else {
+                    if (sum < 0) sum = 0; else if (sum > 255) sum = 255;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
             }
         }
         
     }
 }
 
-void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal)
+void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height,
+                                                 vctDynamicVector<int> & kernel, bool horizontal, bool absres)
 {
     if (!input || !output || kernel.size() < 1) return;
 
@@ -427,8 +487,14 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 
                 sum >>= 10;
 
-                if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
-                *output = static_cast<unsigned short>(sum); output ++;
+                if (absres) {
+                    if (sum < 0) sum = -sum; if (sum > 65535) sum = 65535;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
+                else {
+                    if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
             }
         }
 
@@ -472,15 +538,22 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 
                 sum >>= 10;
 
-                if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
-                *output = static_cast<unsigned short>(sum); output ++;
+                if (absres) {
+                    if (sum < 0) sum = -sum; if (sum > 65535) sum = 65535;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
+                else {
+                    if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
             }
         }
 
     }
 }
 
-void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal)
+void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height,
+                                                 vctDynamicVector<int> & kernel, bool horizontal, bool absres)
 {
     if (!input || !output || kernel.size() < 1) return;
 
@@ -526,8 +599,14 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
 
                 sum >>= 10;
 
-                if (sum < 0) sum = 0;
-                *output = static_cast<unsigned int>(sum); output ++;
+                if (absres) {
+                    if (sum < 0) sum = -sum;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
+                else {
+                    if (sum < 0) sum = 0;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
             }
         }
 
@@ -571,15 +650,22 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
 
                 sum >>= 10;
 
-                if (sum < 0) sum = 0;
-                *output = static_cast<unsigned int>(sum); output ++;
+                if (absres) {
+                    if (sum < 0) sum = -sum;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
+                else {
+                    if (sum < 0) sum = 0;
+                    *output = static_cast<unsigned char>(sum); output ++;
+                }
             }
         }
 
     }
 }
 
-void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
+void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height,
+                                              vctDynamicMatrix<int> & kernel, bool absres)
 {
     if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
@@ -657,17 +743,28 @@ void svlImageProcessingHelper::ConvolutionRGB(unsigned char* input, unsigned cha
 
             sum1 >>= 10; sum2 >>= 10; sum3 >>= 10;
 
-            if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
-            *output = static_cast<unsigned char>(sum1); output ++;
-            if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
-            *output = static_cast<unsigned char>(sum2); output ++;
-            if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
-            *output = static_cast<unsigned char>(sum3); output ++;
+            if (absres) {
+                if (sum1 < 0) sum1 = -sum1; if (sum1 > 255) sum1 = 255;
+                *output = static_cast<unsigned char>(sum1); output ++;
+                if (sum2 < 0) sum2 = -sum2; if (sum2 > 255) sum2 = 255;
+                *output = static_cast<unsigned char>(sum2); output ++;
+                if (sum3 < 0) sum3 = -sum3; if (sum3 > 255) sum3 = 255;
+                *output = static_cast<unsigned char>(sum3); output ++;
+            }
+            else {
+                if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
+                *output = static_cast<unsigned char>(sum1); output ++;
+                if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
+                *output = static_cast<unsigned char>(sum2); output ++;
+                if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
+                *output = static_cast<unsigned char>(sum3); output ++;
+            }
         }
     }
 }
 
-void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
+void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height,
+                                               vctDynamicMatrix<int> & kernel, bool absres)
 {
     if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
@@ -746,19 +843,32 @@ void svlImageProcessingHelper::ConvolutionRGBA(unsigned char* input, unsigned ch
 
             sum1 >>= 10; sum2 >>= 10; sum3 >>= 10; sum4 >>= 10;
 
-            if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
-            *output = static_cast<unsigned char>(sum1); output ++;
-            if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
-            *output = static_cast<unsigned char>(sum2); output ++;
-            if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
-            *output = static_cast<unsigned char>(sum3); output ++;
-            if (sum4 < 0) sum4 = 0; else if (sum4 > 255) sum4 = 255;
-            *output = static_cast<unsigned char>(sum4); output ++;
+            if (absres) {
+                if (sum1 < 0) sum1 = -sum1; if (sum1 > 255) sum1 = 255;
+                *output = static_cast<unsigned char>(sum1); output ++;
+                if (sum2 < 0) sum2 = -sum2; if (sum2 > 255) sum2 = 255;
+                *output = static_cast<unsigned char>(sum2); output ++;
+                if (sum3 < 0) sum3 = -sum3; if (sum3 > 255) sum3 = 255;
+                *output = static_cast<unsigned char>(sum3); output ++;
+                if (sum4 < 0) sum4 = -sum4; if (sum4 > 255) sum4 = 255;
+                *output = static_cast<unsigned char>(sum4); output ++;
+            }
+            else {
+                if (sum1 < 0) sum1 = 0; else if (sum1 > 255) sum1 = 255;
+                *output = static_cast<unsigned char>(sum1); output ++;
+                if (sum2 < 0) sum2 = 0; else if (sum2 > 255) sum2 = 255;
+                *output = static_cast<unsigned char>(sum2); output ++;
+                if (sum3 < 0) sum3 = 0; else if (sum3 > 255) sum3 = 255;
+                *output = static_cast<unsigned char>(sum3); output ++;
+                if (sum4 < 0) sum4 = 0; else if (sum4 > 255) sum4 = 255;
+                *output = static_cast<unsigned char>(sum4); output ++;
+            }
         }
     }
 }
 
-void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
+void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height,
+                                                vctDynamicMatrix<int> & kernel, bool absres)
 {
     if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
@@ -832,13 +942,20 @@ void svlImageProcessingHelper::ConvolutionMono8(unsigned char* input, unsigned c
 
             sum >>= 10;
 
-            if (sum < 0) sum = 0; else if (sum > 255) sum = 255;
-            *output = static_cast<unsigned char>(sum); output ++;
+            if (absres) {
+                if (sum < 0) sum = -sum; if (sum > 255) sum = 255;
+                *output = static_cast<unsigned char>(sum); output ++;
+            }
+            else {
+                if (sum < 0) sum = 0; else if (sum > 255) sum = 255;
+                *output = static_cast<unsigned char>(sum); output ++;
+            }
         }
     }
 }
 
-void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
+void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height,
+                                                 vctDynamicMatrix<int> & kernel, bool absres)
 {
     if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
@@ -912,13 +1029,20 @@ void svlImageProcessingHelper::ConvolutionMono16(unsigned short* input, unsigned
 
             sum >>= 10;
 
-            if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
-            *output = static_cast<unsigned short>(sum); output ++;
+            if (absres) {
+                if (sum < 0) sum = -sum; if (sum > 65535) sum = 65535;
+                *output = static_cast<unsigned char>(sum); output ++;
+            }
+            else {
+                if (sum < 0) sum = 0; else if (sum > 65535) sum = 65535;
+                *output = static_cast<unsigned char>(sum); output ++;
+            }
         }
     }
 }
 
-void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicMatrix<int> & kernel)
+void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height,
+                                                 vctDynamicMatrix<int> & kernel, bool absres)
 {
     if (!input || !output || kernel.rows() < 1 || kernel.cols() < 1) return;
 
@@ -992,8 +1116,14 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
 
             sum >>= 10;
 
-            if (sum < 0) sum = 0;
-            *output = static_cast<unsigned int>(sum); output ++;
+            if (absres) {
+                if (sum < 0) sum = -sum;
+                *output = static_cast<unsigned char>(sum); output ++;
+            }
+            else {
+                if (sum < 0) sum = 0;
+                *output = static_cast<unsigned char>(sum); output ++;
+            }
         }
     }
 }
