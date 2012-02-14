@@ -12,6 +12,7 @@
 #
 # --- end cisst license ---
 
+add_subdirectory (dataGenerator)
 add_subdirectory (getChar)
 add_subdirectory (portability)
 add_subdirectory (serialization)

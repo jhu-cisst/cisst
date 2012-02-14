@@ -3,7 +3,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -38,12 +38,14 @@ if (cisst_FOUND_AS_REQUIRED)
                   cdgGlobal.cpp
                   cdgClass.h
                   cdgClass.cpp
+                  cdgBaseClass.h
+                  cdgBaseClass.cpp
                   cdgMember.h
                   cdgMember.cpp
                   cdgTypedef.h
                   cdgTypedef.cpp
-                  cdgCode.h
-                  cdgCode.cpp
+                  cdgInline.h
+                  cdgInline.cpp
                   cdgFile.h
                   cdgFile.cpp
                   )

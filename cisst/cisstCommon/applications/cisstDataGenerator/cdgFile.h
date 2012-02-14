@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -28,31 +28,27 @@
 
 #include "cdgGlobal.h"
 
-/*
-  \todo strip space at end of value
-  \todo add method SetValue(keyword, value) for all data types to remove logic from parser
-  \todo add method ParsingDone to all data types to check which values have been set, set default for optional and complain for required field
-  \todo support member::accessors flag
-  \todo support member::scope flag
-  \todo support member::default flag
-  \todo support class::code snippets
- */
-
 class cdgFile {
 
     cdgGlobal * Global;
 
 public:
+    void SetHeader(const std::string & header);
+
     bool ParseFile(std::ifstream & input,
                    const std::string & filename);
 
     void GenerateHeader(std::ostream & outputStream) const;
 
-    void GenerateCode(std::ostream & outputStream,
-                      const std::string & header) const;
+    void GenerateCode(std::ostream & outputStream) const;
 
 protected:
     static void RemoveTrailingSpaces(std::string & value);
+    void GenerateMessage(std::ostream & outputStream) const;
+
+    std::string Filename;
+    std::string Header;
+    std::string HeaderGuard;
 };
 
 #endif // _cdgFile_h

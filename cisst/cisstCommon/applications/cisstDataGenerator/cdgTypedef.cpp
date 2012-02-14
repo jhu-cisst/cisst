@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,6 +23,11 @@ http://www.cisst.org/cisst/license.txt.
 #include "cdgTypedef.h"
 
 CMN_IMPLEMENT_SERVICES(cdgTypedef);
+
+
+cdgTypedef::cdgTypedef(unsigned int lineNumber):
+    cdgScope(lineNumber)
+{}
 
 
 cdgScope::Type cdgTypedef::GetScope(void) const
@@ -42,7 +47,8 @@ bool cdgTypedef::HasKeyword(const std::string & keyword) const
 
 
 bool cdgTypedef::HasScope(const std::string & CMN_UNUSED(keyword),
-                          cdgScope::Stack & CMN_UNUSED(scopes))
+                          cdgScope::Stack & CMN_UNUSED(scopes),
+                          unsigned int CMN_UNUSED(lineNumber))
 {
     return false;
 }

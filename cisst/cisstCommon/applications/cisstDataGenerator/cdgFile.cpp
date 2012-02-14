@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -22,8 +22,33 @@
 
 #include "cdgFile.h"
 
+size_t cmnQueryReplace(std::string & userString, const std::string & queryString, const std::string & replaceString)
+{
+    size_t counter = 0;
+    size_t position = 0;
+    while ((position = userString.find(queryString, position)) != std::string::npos) {
+        userString.replace(position, queryString.length(), replaceString);
+        position += replaceString.length();
+        counter++;
+    }
+    return counter;
+}
+
+
+void cdgFile::SetHeader(const std::string & filename)
+{
+    Header = filename;
+    HeaderGuard = filename;
+    cmnQueryReplace(HeaderGuard, "/", "_");
+    cmnQueryReplace(HeaderGuard, ".", "_");
+    cmnQueryReplace(HeaderGuard, "\\", "_");
+}
+
+
 bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 {
+    Filename = filename;
+
     bool errorFound = false; // any error found, stop parsing and return false
     std::string errorMessage;
     std::stringstream parsedOutput; // for debug
@@ -34,10 +59,10 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     bool semiColumn, curlyOpen, curlyClose; // special characters
     std::string keyword, value; // parses "keyword <value .....>;"
     bool curlyOpenExpected = false;
-    size_t curlyCounter = 0; // for code snippets, need to balance {};
+    size_t curlyCounter = 0; // for inline code, need to balance {};
     // global initialization
     cdgScope::Stack scopes; // scope being parsed
-    this->Global = new cdgGlobal;
+    this->Global = new cdgGlobal(lineNumber);
     scopes.push_back(this->Global);
     keyword.clear();
     value.clear();
@@ -69,7 +94,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         case ' ':
         case '\t':
             wordFinished = true;
-        break;
+            break;
         case ';':
             semiColumn = true;
             wordFinished = true;
@@ -115,6 +140,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                 switch (scopes.back()->GetScope()) {
                 case cdgScope::CDG_GLOBAL:
                 case cdgScope::CDG_CLASS:
+                case cdgScope::CDG_BASECLASS:
                 case cdgScope::CDG_MEMBER:
                 case cdgScope::CDG_TYPEDEF:
                     // first define the current step, either find new keyword or new scope
@@ -122,7 +148,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                         value.clear();
                         if (scopes.back()->HasKeyword(word)) {
                             keyword = word;
-                        } else if (scopes.back()->HasScope(word, scopes)) {
+                        } else if (scopes.back()->HasScope(word, scopes, lineNumber)) {
                             keyword.clear();
                             if (!curlyOpen) {
                                 curlyOpenExpected = true;
@@ -175,6 +201,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                 // if we found some code to be parsed
                 if (scopes.back()->GetScope() == cdgScope::CDG_CODE) {
                     if (curlyOpenExpected) {
+                        lineNumber++;
                         curlyCounter = 0;
                     } else {
                         curlyCounter = 1;
@@ -182,24 +209,36 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     value.clear();
                     while (input.get(currentChar) && (curlyOpenExpected || (curlyCounter > 0))) {
                         switch (currentChar) {
+                        case '\n':
+                            lineNumber++;
+                            value += currentChar;
+                            break;
                         case '{':
                             curlyCounter++;
                             if (curlyOpenExpected) {
                                 curlyOpenExpected = false;
+                            } else {
+                                value += currentChar;
                             }
                             break;
                         case '}':
                             curlyCounter--;
                             if (curlyCounter == 0) {
+                                errorMessage.clear();
+                                if (!scopes.back()->SetValue(keyword, value, errorMessage)) {
+                                    std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
+                                              << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
+                                    errorFound = true;
+                                }
                                 scopes.pop_back();
-                                std::cout << keyword << " -> " << value << std::endl;
                                 keyword.clear();
                             }
+                            value += currentChar;
                             break;
                         default:
+                            value += currentChar;
                             break;
                         }
-                        value += currentChar;
                         parsedOutput << currentChar;
                     }
                     if (curlyOpenExpected) {
@@ -208,7 +247,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                                   << scopes.back()->GetScopeName() << "\""  << std::endl;
                         errorFound = true;
                     }
-                } // end of code snippet parsing
+                } // end of inline code parsing
             }
         }
 
@@ -228,7 +267,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     // some sanity checks
     if (scopes.back()->GetScope() != cdgScope::CDG_GLOBAL) {
         std::cerr << filename << ":" << lineNumber << ": error: invalid scope ("
-                  << scopes.back()->GetScope() << ")" << std::endl;
+                  << scopes.back()->GetScopeName() << ")" << std::endl;
         errorFound = true;
     }
     if (curlyCounter != 0) {
@@ -254,15 +293,34 @@ void cdgFile::RemoveTrailingSpaces(std::string & value)
 }
 
 
-void cdgFile::GenerateHeader(std::ostream & outputStream) const
+void cdgFile::GenerateMessage(std::ostream & outputStream) const
 {
-    this->Global->GenerateHeader(outputStream);
+    outputStream << "// file automatically generated, do not modify" << std::endl
+                 << "// cisst version: " << CISST_VERSION << std::endl
+                 << "// source file: " << Filename << std::endl << std::endl;
 }
 
 
-void cdgFile::GenerateCode(std::ostream & outputStream,
-                             const std::string & header) const
+void cdgFile::GenerateHeader(std::ostream & outputStream) const
 {
-    this->Global->GenerateCode(outputStream,
-                               header);
+    GenerateMessage(outputStream);
+
+    outputStream << "#ifndef _" << HeaderGuard << std::endl
+                 << "#define _" << HeaderGuard << std::endl << std::endl;
+
+    this->Global->GenerateHeader(outputStream);
+
+    outputStream << std::endl << "#endif // _" << HeaderGuard << std::endl;
+}
+
+
+void cdgFile::GenerateCode(std::ostream & outputStream) const
+{
+    GenerateMessage(outputStream);
+
+    outputStream << "#include <" << Header << ">" << std::endl << std::endl
+                 << "#include <cisstCommon/cmnSerializer.h>" << std::endl
+                 << "#include <cisstCommon/cmnDeSerializer.h>" << std::endl << std::endl;
+
+    this->Global->GenerateCode(outputStream);
 }

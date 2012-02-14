@@ -20,12 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cdgMember_h
-#define _cdgMember_h
+#ifndef _cdgBaseClass_h
+#define _cdgBaseClass_h
 
 #include "cdgScope.h"
 
-class cdgMember: public cdgScope
+class cdgBaseClass: public cdgScope
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -33,14 +33,10 @@ class cdgMember: public cdgScope
     friend class cdgClass;
 
     std::string Type;
-    bool UsesClassTypedef;
-    std::string Name;
-    std::string Description;
     std::string Visibility;
-    std::string ClassName;
-
+    std::string IsData;
 public:
-    cdgMember(unsigned int lineNumber);
+    cdgBaseClass(unsigned int lineNumber);
 
     cdgScope::Type GetScope(void) const;
     bool HasKeyword(const std::string & keyword) const;
@@ -56,9 +52,9 @@ public:
     void GenerateCode(std::ostream & outputStream) const;
 
 private:
-    cdgMember(void); // make sure constructor with line number is always used.
+    cdgBaseClass(void); // make sure constructor with line number is always used.
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cdgMember);
+CMN_DECLARE_SERVICES_INSTANTIATION(cdgBaseClass);
 
-#endif // _cdgMember_h
+#endif // _cdgBaseClass_h
