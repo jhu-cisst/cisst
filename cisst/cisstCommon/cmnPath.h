@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -126,7 +126,16 @@ public:
     void Add(const std::string & path, bool head = HEAD);
 
     /*! Add one or more directories to the path using an environment variable. */
-    void AddFromEnvironment(const std::string & variableName, bool head = HEAD);
+    bool AddFromEnvironment(const std::string & variableName, bool head = HEAD);
+
+    /*! Add path relative to the CISST_ROOT environment variable.
+      This can be useful to find shared libraries.  To find data
+      files, use AddRelativeToShare. */
+    bool AddRelativeToRoot(const std::string & relativePath, bool head = HEAD);
+
+    /*! Add path relative to the shared cisst directory,
+      i.e. CISST_ROOT/share/cisst<version>. */
+    bool AddRelativeToShare(const std::string & relativePath, bool head = HEAD);
 
     /*! Find the full name for a given file.
       \return The full path including the filename or an empty string.

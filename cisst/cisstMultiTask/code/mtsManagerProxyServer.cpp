@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -54,10 +54,10 @@ mtsManagerProxyServer::~mtsManagerProxyServer()
     StopProxy();
 }
 
-std::string mtsManagerProxyServer::GetConfigFullName(const std::string &propertyFileName)
+std::string mtsManagerProxyServer::GetConfigFullName(const std::string & propertyFileName)
 {
     cmnPath path;
-    path.Add(ICE_PROPERTY_FILE_ROOT);
+    path.AddRelativeToShare("cisstMultiTask/Ice");
     path.AddFromEnvironment("PATH", cmnPath::TAIL);
     return path.Find(propertyFileName);
 }
@@ -1521,7 +1521,7 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
         notify();
 
         callbackSenderThread = SenderThreadPtr;
-        
+
         // Prevent sender thread from sending any further message
         SenderThreadPtr->StopSend();
         SenderThreadPtr = 0; // Resolve cyclic dependency.

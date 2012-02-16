@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-04-10
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -347,13 +347,13 @@ public:
 
 
 template<class _proxyOwner>
-mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string& propertyFileName,
-                                                    const ProxyTypes& CMN_UNUSED(proxyType))
+mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string & propertyFileName,
+                                                    const ProxyTypes & CMN_UNUSED(proxyType))
 {
     ProxyBaseInitialize();
 
     cmnPath path;
-    path.Add(ICE_PROPERTY_FILE_ROOT);
+    path.AddRelativeToShare("cisstMultiTask/Ice");
     path.AddFromEnvironment("PATH", cmnPath::TAIL);
     IcePropertyFileName = path.Find(propertyFileName);
 }

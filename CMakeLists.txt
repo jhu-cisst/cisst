@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -45,6 +45,7 @@ option (CISST_BUILD_APPLICATIONS "Build cisst applications." ON)
 mark_as_advanced (CISST_BUILD_APPLICATIONS)
 
 option (CISST_BUILD_SAW "Build SAW." OFF)
+option (CISST_BUILD_DATA "Build data." ON)
 if (UNIX)
   option (CISST_BUILD_DOC "Build the documentation." OFF)
 endif (UNIX)
@@ -93,6 +94,10 @@ add_subdirectory (cisst)
 if (CISST_BUILD_SAW)
   add_subdirectory (saw)
 endif (CISST_BUILD_SAW)
+
+if (CISST_BUILD_DATA)
+  add_subdirectory (data)
+endif (CISST_BUILD_DATA)
 
 if (CISST_BUILD_DOC)
   add_subdirectory (doc)

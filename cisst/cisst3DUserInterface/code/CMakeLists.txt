@@ -100,6 +100,7 @@ set (CISST_UI3_ICONS_DIR "${cisst3DUserInterfaceLibs_SOURCE_DIR}/share/icons")
 file (GLOB CISST_UI3_ICONS RELATIVE ${CISST_UI3_ICONS_DIR} ${CISST_UI3_ICONS_DIR}/*.png)
 
 # post build command to copy icons in build tree
+unset (CISST_UI3_ICONS_WITH_DIR)
 foreach (icon ${CISST_UI3_ICONS})
   add_custom_command (TARGET cisst3DUserInterface
                       POST_BUILD
@@ -107,4 +108,6 @@ foreach (icon ${CISST_UI3_ICONS})
                       ARGS -E copy_if_different
                              ${CISST_UI3_ICONS_DIR}/${icon}
                              ${CISST_SHARE_DIR}/cisst3DUserInterface/icons/${icon})
+  set (CISST_UI3_ICONS_WITH_DIR ${CISST_UI3_ICONS_WITH_DIR} "${CISST_UI3_ICONS_DIR}/${icon}")
 endforeach (icon)
+install (FILES ${CISST_UI3_ICONS_WITH_DIR} DESTINATION ${CISST_SHARE_INSTALL_SUFFIX}/cisst3DUserInterface/icons COMPONENT cisst3DUserInterface)

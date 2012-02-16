@@ -7,7 +7,7 @@
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-06-10
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -42,7 +42,7 @@ bool ui3MenuButton::CreateVTKObjects(void)
     CMN_ASSERT(this->PNGReader);
     cmnPath path;
     // this is were the icons have been copied by CMake post build rule
-    path.Add(std::string(CISST_BUILD_ROOT) + "/share/cisst-1.0/cisst3DUserInterface/icons");
+    path.AddRelativeToShare("cisst3DUserInterface/icons");
     // in case the user provided a full path, search from / as well
     path.Add("/", cmnPath::TAIL);
     std::string iconFullName = path.Find(this->IconFile, cmnPath::READ);
@@ -51,7 +51,7 @@ bool ui3MenuButton::CreateVTKObjects(void)
                              << "\" in path: " << path << std::endl;
     }
     this->PNGReader->SetFileName(iconFullName.c_str());
-    
+
     // Create a texture object for the button.
     this->Texture = vtkTexture::New();
     CMN_ASSERT(this->Texture);

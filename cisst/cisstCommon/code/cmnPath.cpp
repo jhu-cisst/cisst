@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -82,7 +82,7 @@ void cmnPath::Add(const std::string & path, bool head) {
 }
 
 
-void cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
+bool cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path defined by the environment variable \""
                                << variableName << "\" at the "
                                << (head ? "beginning" : "end") << std::endl;
@@ -91,11 +91,45 @@ void cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
     if (environmentVariable) {
         std::string path = environmentVariable;
         this->Add(FromNative(path), head);
-    } else {
-        CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"" << variableName
-                                 << "\" doesn't seem to be defined" << std::endl;
-        return;
+        return true;
     }
+    CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"" << variableName
+                             << "\" doesn't seem to be defined" << std::endl;
+    return false;
+}
+
+
+bool cmnPath::AddRelativeToRoot(const std::string & relativePath, bool head) {
+    CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
+                               << relativePath << "\" relative to CISST_ROOT at the "
+                               << (head ? "beginning" : "end") << std::endl;
+    char * environmentVariable = 0;
+    environmentVariable = getenv("CISST_ROOT");
+    if (environmentVariable) {
+        std::string path = environmentVariable;
+        path = path + "/" + relativePath;
+        this->Add(FromNative(path), head);
+        return true;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
+    return false;
+}
+
+
+bool cmnPath::AddRelativeToShare(const std::string & relativePath, bool head) {
+    CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
+                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION << "/ at the "
+                               << (head ? "beginning" : "end") << std::endl;
+    char * environmentVariable = 0;
+    environmentVariable = getenv("CISST_ROOT");
+    if (environmentVariable) {
+        std::string path = environmentVariable;
+        path = path + "/share/cisst-" + CISST_VERSION + "/" + relativePath;
+        this->Add(FromNative(path), head);
+        return true;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
+    return false;
 }
 
 
@@ -180,7 +214,7 @@ std::string cmnPath::GetWorkingDirectory(void)
 #if (CISST_OS == CISST_WINDOWS)
     buffer = _getcwd(0, 0);
 #else
-    buffer = getcwd(0, 0);    
+    buffer = getcwd(0, 0);
 #endif
     std::string result(buffer);
     // remember to free buffer

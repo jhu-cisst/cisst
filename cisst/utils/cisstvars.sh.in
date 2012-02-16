@@ -5,7 +5,7 @@
 # Author(s): Anton Deguet
 # Created on: 2006-05-02
 
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # Always edit the source file: cisstvars.sh.in
@@ -20,50 +20,52 @@
 # --- end cisst license ---
 
 
-CISST_DIR="@cisst_saw_BINARY_DIR@"
+CISST_SAW_DIR="@cisst_saw_BINARY_DIR@"
 CISST_BUILD_SAW=@CISST_BUILD_SAW@
 
 OS=`uname`
 
-PATH="${CISST_DIR}/cisst/bin:${PATH}"
+PATH="${CISST_SAW_DIR}/cisst/bin:${PATH}"
+CISST_ROOT="${CISST_SAW_DIR}/cisst"
 
 # Path to dynamic libraries
 if [ "${OS}" == "Darwin" ]
 then
     if [ -z "${DYLD_LIBRARY_PATH}" ]
     then
-        LIBRARY_PATH="${CISST_DIR}/cisst/lib"
+        LIBRARY_PATH="${CISST_SAW_DIR}/cisst/lib"
     else
-        LIBRARY_PATH="${CISST_DIR}/cisst/lib:${DYLD_LIBRARY_PATH}"
+        LIBRARY_PATH="${CISST_SAW_DIR}/cisst/lib:${DYLD_LIBRARY_PATH}"
     fi
 else
     if [ -z "${LD_LIBRARY_PATH}" ]
     then
-        LIBRARY_PATH="${CISST_DIR}/cisst/lib"
+        LIBRARY_PATH="${CISST_SAW_DIR}/cisst/lib"
     else
-        LIBRARY_PATH="${CISST_DIR}/cisst/lib:${LD_LIBRARY_PATH}"
+        LIBRARY_PATH="${CISST_SAW_DIR}/cisst/lib:${LD_LIBRARY_PATH}"
     fi
 fi
 
 # Path to Python extensions
 if [ -z "${PYTHONPATH}" ]
 then
-    PYTHONPATH="${CISST_DIR}/cisst/lib"
+    PYTHONPATH="${CISST_SAW_DIR}/cisst/lib"
 else
-    PYTHONPATH="${CISST_DIR}/cisst/lib:${PYTHONPATH}"
+    PYTHONPATH="${CISST_SAW_DIR}/cisst/lib:${PYTHONPATH}"
 fi
 
 # Add path to SAW code
 if [ "${CISST_BUILD_SAW}" == "ON" ]
 then
-    PATH="${CISST_DIR}/saw/bin:${PATH}"
-    LIBRARY_PATH="${CISST_DIR}/saw/lib:${LIBRARY_PATH}"
-    PYTHONPATH="${CISST_DIR}/saw/lib:${PYTHONPATH}"
+    PATH="${CISST_SAW_DIR}/saw/bin:${PATH}"
+    LIBRARY_PATH="${CISST_SAW_DIR}/saw/lib:${LIBRARY_PATH}"
+    PYTHONPATH="${CISST_SAW_DIR}/saw/lib:${PYTHONPATH}"
 fi
 
 
 # Export all
 export PATH
+export CISST_ROOT
 
 if [ "${OS}" == "Darwin" ]
 then
