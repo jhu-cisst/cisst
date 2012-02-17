@@ -175,7 +175,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     svlInitialize();
 
     // instantiating SVL stream and filters
-    svlStreamManager stream(8);
+    svlStreamManager stream(4);
     svlFilterSourceVideoCapture source(2);
     svlFilterVideoExposureManager exposure;
     svlFilterImageExposureCorrection gamma;
@@ -203,6 +203,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     exposure.SetSaturationThreshold(230);
     exposure.SetMaxShutter(1305);
     exposure.SetMaxGain(1000);
+    exposure.SetEnable(false);
 
     // setup gamma correction
     gamma.SetGamma(0.0);
@@ -298,14 +299,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     stream.SetSourceFilter(&source);
         output = source.GetOutput();
 
-    // Add exposure correction
+        // Add exposure correction
     output->Connect(exposure.GetInput());
         output = exposure.GetOutput();
-
+#if 0
     // Add gamma correction
     output->Connect(gamma.GetInput());
         output = gamma.GetOutput();
-
+#endif
     // Add splitter
     output->Connect(splitter.GetInput());
         output = splitter.GetOutput();
@@ -369,6 +370,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         cerr << "  In command window:" << endl;
         cerr << "    '1'   - Adjust LEFT image properties" << endl;
         cerr << "    '2'   - Adjust RIGHT image properties" << endl;
+        cerr << "    'e'   - Auto exposure OFF/ON" << endl;
         cerr << "    'q'   - Quit" << endl << endl;
 
         ch = cmnGetChar();
@@ -386,12 +388,26 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
                 cerr << endl;
             break;
 
+            case 'e':
+            {
+                bool autoexposure;
+                exposure.GetEnable(autoexposure);
+                autoexposure = autoexposure ? 0 : 1;
+                exposure.SetEnable(autoexposure);
+                cerr << "Auto exposure = " << (autoexposure ? "ON" : "OFF") << endl;
+            }
+            break;
+
             default:
             break;
         }
     } while (ch != 'q');
 
     cerr << endl;
+
+    if (save == true) {
+        splitteroutput->SetBlock(false);
+    }
 
     // stop stream
     stream.Stop();
@@ -403,7 +419,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     stream.Release();
 
     if (save == true) {
-        splitter.GetOutput("output2")->Disconnect(); // Workaround: to avoid crash
+        splitteroutput->Disconnect(); // Workaround: to avoid crash
     }
 
 labError:
