@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include <cisstCommon/cmnPath.h>
 #include <cisstRobot/robDH.h>
 
 #include "robDHTest.h"
@@ -26,10 +27,12 @@ void robDHTest::TestRandomFKWAM7( size_t i, const robDH& dh ){
 void robDHTest::TestForwardKinematicsWAM7(){
 
   std::ifstream ifs;
-  std::string fname( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/wam7.rob" );
+    cmnPath path;
+    path.AddRelativeToShare("/models/WAM");
+    std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
-  if( !ifs ){ 
+  if( !ifs ){
     std::cout << "Failed to open the file: " << fname << std::endl;
   }
 
@@ -49,7 +52,7 @@ void robDHTest::TestForwardKinematicsWAM7(){
     std::string line;
     getline( ifs, line );
     std::istringstream stringstream(line);
-    
+
     // Find the type of kinematics convention
     std::string convention;
     stringstream >> convention;
@@ -58,11 +61,11 @@ void robDHTest::TestForwardKinematicsWAM7(){
     robKinematics* kinematics = NULL;
     kinematics = robKinematics::Instantiate( convention );
     CPPUNIT_ASSERT( kinematics );
-    
+
     // cast to DH
     robDH* dh = dynamic_cast<robDH*>( kinematics );
     CPPUNIT_ASSERT( dh );
-    
+
     // Read
     dh->Read( stringstream );
 
@@ -79,10 +82,12 @@ void robDHTest::TestForwardKinematicsWAM7(){
 void robDHTest::TestForwardKinematicsPUMA560(){
 
   std::ifstream ifs;
-  std::string fname(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/PUMA560/puma560.rob");
+    cmnPath path;
+    path.AddRelativeToShare("/models/PUMA560");
+    std::string fname = path.Find("puma560.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
-  if( !ifs ){ 
+  if( !ifs ){
     std::cout << "Failed to open the file: " << fname << std::endl;
   }
 
@@ -102,7 +107,7 @@ void robDHTest::TestForwardKinematicsPUMA560(){
     std::string line;
     getline( ifs, line );
     std::istringstream stringstream(line);
-    
+
     // Find the type of kinematics convention
     std::string convention;
     stringstream >> convention;
@@ -111,11 +116,11 @@ void robDHTest::TestForwardKinematicsPUMA560(){
     robKinematics* kinematics = NULL;
     kinematics = robKinematics::Instantiate( convention );
     CPPUNIT_ASSERT( kinematics );
-    
+
     // cast to DH
     robDH* dh = dynamic_cast<robDH*>( kinematics );
     CPPUNIT_ASSERT( dh );
-    
+
     // Read
     dh->Read( stringstream );
 
@@ -132,10 +137,12 @@ void robDHTest::TestForwardKinematicsPUMA560(){
 void robDHTest::TestReadWAM7(){
 
   std::ifstream ifs;
-  std::string fname( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/wam7.rob" );
+    cmnPath path;
+    path.AddRelativeToShare("/models/WAM");
+    std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
-  if( !ifs ){ 
+  if( !ifs ){
     std::cout << "Failed to open the file: " << fname << std::endl;
   }
 
@@ -154,7 +161,7 @@ void robDHTest::TestReadWAM7(){
     std::string line;
     getline( ifs, line );
     std::istringstream stringstream(line);
-    
+
     // Find the type of kinematics convention
     std::string convention;
     stringstream >> convention;
@@ -163,11 +170,11 @@ void robDHTest::TestReadWAM7(){
     robKinematics* kinematics = NULL;
     kinematics = robKinematics::Instantiate( convention );
     CPPUNIT_ASSERT( kinematics );
-    
+
     // Convert to DH
     robDH* dh = dynamic_cast<robDH*>( kinematics );
     CPPUNIT_ASSERT( dh );
-    
+
     // Read
     dh->Read( stringstream );
 
@@ -186,10 +193,12 @@ void robDHTest::TestReadWAM7(){
 void robDHTest::TestReadPUMA560(){
 
   std::ifstream ifs;
-  std::string fname(CISST_SOURCE_ROOT"/libs/etc/cisstRobot/PUMA560/puma560.rob");
+    cmnPath path;
+    path.AddRelativeToShare("/models/PUMA560");
+    std::string fname = path.Find("puma560.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
-  if( !ifs ){ 
+  if( !ifs ){
     std::cout << "Failed to open the file: " << fname << std::endl;
   }
 
@@ -208,7 +217,7 @@ void robDHTest::TestReadPUMA560(){
     std::string line;
     getline( ifs, line );
     std::istringstream stringstream(line);
-    
+
     // Find the type of kinematics convention
     std::string convention;
     stringstream >> convention;
@@ -217,11 +226,11 @@ void robDHTest::TestReadPUMA560(){
     robKinematics* kinematics = NULL;
     kinematics = robKinematics::Instantiate( convention );
     CPPUNIT_ASSERT( kinematics );
-    
+
     // Convert to DH
     robDH* dh = dynamic_cast<robDH*>( kinematics );
     CPPUNIT_ASSERT( dh );
-    
+
     // Read
     dh->Read( stringstream );
 

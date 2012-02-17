@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include <cisstCommon/cmnPath.h>
 #include <cisstRobot/robManipulator.h>
 #include "robManipulatorTest.h"
 
@@ -23,8 +24,12 @@ vctDynamicVector<double> robManipulatorTest::RandomWAMVector() const {
 }
 
 void robManipulatorTest::TestForwardKinematics(){
-  
-  robManipulator WAM7( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/wam7.rob" );
+
+    cmnPath path;
+    path.AddRelativeToShare("/models/WAM");
+    std::string fname = path.Find("wam7.rob", cmnPath::READ);
+
+  robManipulator WAM7( fname );
 
   for( size_t i=0; i<1; i++ ){
 
@@ -33,7 +38,7 @@ void robManipulatorTest::TestForwardKinematics(){
     vctFrame4x4<double> Rt;
     for( size_t i=0; i<7; i++ ){
       vctFrame4x4<double> Rts =  WAM7.ForwardKinematics( q, i+1 );
-      Rt = Rt * FKineWAM7( i, q[i] ); 
+      Rt = Rt * FKineWAM7( i, q[i] );
       CPPUNIT_ASSERT( Rts.AlmostEqual( Rt ) );
     }
 
@@ -42,26 +47,32 @@ void robManipulatorTest::TestForwardKinematics(){
 }
 
 void robManipulatorTest::TestInverseKinematics(){
+    cmnPath path;
+    path.AddRelativeToShare("/models/WAM");
+    std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
-  robManipulator WAM7( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/wam7.rob" );
+    robManipulator WAM7( fname );
 
   for( size_t i=0; i<10; i++ ){
 
     vctDynamicVector<double> q = RandomWAMVector();
     vctFrame4x4<double> Rtq =  WAM7.ForwardKinematics( q );
-    
+
     vctDynamicVector<double> qs( q );
     for( size_t i=0; i<7; i++ ) { qs[i] += 0.2; }
     WAM7.InverseKinematics( qs, Rtq );
-    CPPUNIT_ASSERT( Rtq.AlmostEqual( WAM7.ForwardKinematics( qs ) ) );    
+    CPPUNIT_ASSERT( Rtq.AlmostEqual( WAM7.ForwardKinematics( qs ) ) );
   }
 
 }
 
 void robManipulatorTest::TestInverseDynamics(){
+    cmnPath path;
+    path.AddRelativeToShare("/models/WAM");
+    std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
-  robManipulator WAM7( CISST_SOURCE_ROOT"/libs/etc/cisstRobot/WAM/wam7.rob" );
-  
+    robManipulator WAM7( fname );
+
   vctDynamicVector<double> q(7, 0.0), qd(7, 1.0), qdd(7, 1.0);
   vctFixedSizeVector<double, 6> ft(0.0);
   vctDynamicVector<double> tau = WAM7.RNE( q, qd, qdd, ft );
