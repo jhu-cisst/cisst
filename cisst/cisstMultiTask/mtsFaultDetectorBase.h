@@ -29,19 +29,30 @@
 #define _mtsFaultDetectorBase_h
 
 #include <cisstMultiTask/mtsMonitorFilterBase.h>
+#include <cisstMultiTask/mtsFaultBase.h>
 
 class mtsFaultDetectorBase: public mtsMonitorFilterBase
 {
+protected:
+    // MJ: Only a single type of fault can be registered but this could be extended to
+    // multiple faults later.
+    mtsFaultBase * TargetFault;
+
+    /*! Check if fault occurs */
+    virtual void CheckFault(bool debug = false) = 0;
+
 public:
     /*! Constructors and destructor */
-    mtsFaultDetectorBase(const std::string & detectorName) 
-        : mtsMonitorFilterBase(mtsMonitorFilterBase::FAULT_DETECTOR, detectorName) {}
-    virtual ~mtsFaultDetectorBase() {}
+    mtsFaultDetectorBase(const std::string & detectorName);
+    virtual ~mtsFaultDetectorBase();
+
+    /*! Determine which type of fault will be monitored and reported by this detector */
+    // MJ: Only a single type of fault can be registered but this could be extended to
+    // multiple faults later.
+    bool RegisterFault(mtsFaultBase * targetFault);
 
     /*! Required by base class */
     void DoFiltering(bool debug = false);
-    /*! Check if fault occurs */
-    virtual void CheckFault(bool debug = false) = 0;
 };
 
 #endif // _mtsFaultDetectorBase_h

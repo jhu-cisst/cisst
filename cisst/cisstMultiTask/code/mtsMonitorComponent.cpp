@@ -172,10 +172,14 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
         new mtsFaultDetectorThresholding(filterAverage->GetOutputSignalName(0),
                                          nominalPeriod, 
                                          (size_t)(1.0 / nominalPeriod) * 5.0);
-    // Associate thread periodicity fault with the fault detector
-    mtsFaultComponentThreadPeriodicity * fault = new mtsFaultComponentThreadPeriodicity;
-    //detectorThresholding->
     ADD_FILTER(detectorThresholding);
+
+    // Associate thread periodicity fault with the fault detector to make the fault
+    // detector monitor and generate the specified fault.
+    mtsFaultComponentThreadPeriodicity * fault = 
+        new mtsFaultComponentThreadPeriodicity(mtsManagerLocal::GetInstance()->GetProcessName(), taskName);
+    detectorThresholding->RegisterFault(fault);
+
 #undef ADD_FILTER 
 
     return true;

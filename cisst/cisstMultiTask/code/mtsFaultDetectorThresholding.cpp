@@ -20,6 +20,7 @@
 
 #include <cisstCommon/cmnThrow.h>
 #include <cisstMultiTask/mtsFaultDetectorThresholding.h>
+#include <cisstMultiTask/mtsFaultBase.h>
 
 CMN_IMPLEMENT_SERVICES(mtsFaultDetectorThresholding);
 
@@ -84,21 +85,19 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
         return;
     }
 
-    // in control
+    // In control
     if (LCL <= x && x <= UCL)
         return;
 
-    // fault occurs: out of control sample found
+    // Fault occurs - out of control sample found
     CMN_LOG_CLASS_RUN_WARNING << "CheckFault: OUT OF LIMIT SAMPLE!!! input: " << x << ", time: " << timestamp << std::endl;
 
-    // fault identification
+    // Fault identification: only timestamp needs to be identified (an instance of
+    // mtsFault associated with this fault detector already contains information 
+    // about fault location).
+    TargetFault->SetFaultTimestamp(timestamp);
 
-    // TODO: generate mtsFault to contain all information about the FaultDetector
-    // TODO: fault event propataion/generation
-
-    // TODO: fault event handler (visualizer or task-manager-like numbers)
-    // TODO: performance viewer(?) <- text/numeric output
-
+    // Generate event for fault propataion via manager component service
 }
 
 void mtsFaultDetectorThresholding::ToStream(std::ostream & outputStream) const
