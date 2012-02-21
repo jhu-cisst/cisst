@@ -143,9 +143,6 @@ protected:
     FaultTypes       FaultType;
     double           FaultMagnitude;
 
-    /*! Define fault location information */
-    void SetFaultLocation(void);
-
 public:
     /*! Constructors and destructor */
     mtsFaultBase();
@@ -154,8 +151,8 @@ public:
 
     /*! Fault isolation */
     mtsFaultLocation & GetFaultLocation(void);
-    void   SetFaultTimestamp(double timestamp);
-    double GetFaultTimestamp(void);
+    void               SetFaultTimestamp(double timestamp);
+    double             GetFaultTimestamp(void);
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
