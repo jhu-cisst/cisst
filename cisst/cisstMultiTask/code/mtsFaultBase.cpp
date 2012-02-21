@@ -20,13 +20,13 @@
 
 #include <cisstMultiTask/mtsFaultBase.h>
 
-CMN_IMPLEMENT_SERVICES(mtsFaultElementNames);
+CMN_IMPLEMENT_SERVICES(mtsFaultLocation);
 CMN_IMPLEMENT_SERVICES(mtsFaultBase);
 
 //
-// mtsFaultElementNames
+// mtsFaultLocation
 //
-void mtsFaultElementNames::ToStream(std::ostream & outputStream) const
+void mtsFaultLocation::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
     outputStream << " Process: \""        << this->Process << "\","
@@ -38,7 +38,7 @@ void mtsFaultElementNames::ToStream(std::ostream & outputStream) const
                  << " EventHandler: \""   << this->EventHandler << std::endl;
 }
 
-void mtsFaultElementNames::SerializeRaw(std::ostream & outputStream) const
+void mtsFaultLocation::SerializeRaw(std::ostream & outputStream) const
 {
     mtsGenericObject::SerializeRaw(outputStream);
     cmnSerializeRaw(outputStream, Process);
@@ -50,7 +50,7 @@ void mtsFaultElementNames::SerializeRaw(std::ostream & outputStream) const
     cmnSerializeRaw(outputStream, EventHandler);
 }
 
-void mtsFaultElementNames::DeSerializeRaw(std::istream & inputStream)
+void mtsFaultLocation::DeSerializeRaw(std::istream & inputStream)
 {
     mtsGenericObject::DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream, Process);
@@ -67,18 +67,29 @@ void mtsFaultElementNames::DeSerializeRaw(std::istream & inputStream)
 //
 mtsFaultBase::mtsFaultBase(void) : mtsGenericObject(),
     FaultName("NONAME"),
-    LayerType(mtsFaultBase::LAYER_INVALID), Timestamp(0.0),
+    FaultLayer(mtsFaultBase::LAYER_INVALID), FaultTimestamp(0.0),
     FaultType(mtsFaultBase::FAULT_INVALID), FaultMagnitude(0.0)
 {
 }
 
-mtsFaultBase::mtsFaultBase(const std::string & faultName, 
-                           LayerTypes layerType, 
-                           FaultTypes faultType) : mtsGenericObject(),
-    FaultName(faultName),
-    LayerType(layerType), Timestamp(0.0),
-    FaultType(faultType), FaultMagnitude(0.0)
+mtsFaultBase::mtsFaultBase(const std::string & faultName, FaultTypes faultType) 
+    : mtsGenericObject(),
+      FaultName(faultName),
+      FaultTimestamp(0.0),
+      FaultType(faultType), 
+      FaultMagnitude(0.0)
 {
+    if (faultType & FAULT_SYSTEM_MASK)         FaultLayer = LAYER_SYSTEM;
+    else if (faultType & FAULT_PROCESS_MASK)   FaultLayer = LAYER_PROCESS;
+    else if (faultType & FAULT_COMPONENT_MASK) FaultLayer = LAYER_COMPONENT;
+    else if (faultType & FAULT_INTERFACE_MASK) FaultLayer = LAYER_INTERFACE;
+    else if (faultType & FAULT_EXECUTION_MASK) FaultLayer = LAYER_EXECUTION;
+    else {
+        std::stringstream ss;
+        ss << "mtsFaultBase: invalid fault type for fault \"" << faultName << "\"";
+        CMN_LOG_CLASS_INIT_ERROR << ss << std::endl;
+        cmnThrow(std::string(ss.str()));
+    }
 }
 
 mtsFaultBase::~mtsFaultBase()
@@ -91,7 +102,7 @@ void mtsFaultBase::ToStream(std::ostream & outputStream) const
 
     outputStream << " Name: \"" << this->FaultName << "\"";
     outputStream << " Layer: ";
-    switch (this->LayerType) {
+    switch (FaultLayer) {
         case mtsFaultBase::LAYER_SYSTEM:    outputStream << "SYSTEM"; break;
         case mtsFaultBase::LAYER_PROCESS:   outputStream << "PROCESS"; break;
         case mtsFaultBase::LAYER_COMPONENT: outputStream << "COMPONENT"; break;
@@ -100,8 +111,8 @@ void mtsFaultBase::ToStream(std::ostream & outputStream) const
         case mtsFaultBase::LAYER_INVALID:   
         default:                            outputStream << "INVALID";
     }
-    outputStream << ", Elements: [" << this->ElementNames << "]";
-    outputStream << ", Timestamp: " << this->Timestamp;
+    outputStream << ", Location: [" << this->FaultLocation << "]";
+    outputStream << ", Timestamp: " << this->FaultTimestamp;
     outputStream << ", Fault type: ";
     switch (this->FaultType) {
         case mtsFaultBase::FAULT_SYSTEM_PROCESS: 
@@ -149,9 +160,9 @@ void mtsFaultBase::SerializeRaw(std::ostream & outputStream) const
     mtsGenericObject::SerializeRaw(outputStream);
 
     cmnSerializeRaw(outputStream, this->FaultName);
-    cmnSerializeRaw(outputStream, this->LayerType);
-    this->ElementNames.SerializeRaw(outputStream);
-    cmnSerializeRaw(outputStream, this->Timestamp);
+    cmnSerializeRaw(outputStream, this->FaultLayer);
+    FaultLocation.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->FaultTimestamp);
     cmnSerializeRaw(outputStream, this->FaultType);
     cmnSerializeRaw(outputStream, this->FaultMagnitude);
 }
@@ -161,9 +172,9 @@ void mtsFaultBase::DeSerializeRaw(std::istream & inputStream)
     mtsGenericObject::DeSerializeRaw(inputStream);
 
     cmnDeSerializeRaw(inputStream, this->FaultName);
-    cmnDeSerializeRaw(inputStream, this->LayerType);
-    this->ElementNames.DeSerializeRaw(inputStream);
-    cmnDeSerializeRaw(inputStream, this->Timestamp);
+    cmnDeSerializeRaw(inputStream, this->FaultLayer);
+    FaultLocation.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->FaultTimestamp);
     cmnDeSerializeRaw(inputStream, this->FaultType);
     cmnDeSerializeRaw(inputStream, this->FaultMagnitude);
 }

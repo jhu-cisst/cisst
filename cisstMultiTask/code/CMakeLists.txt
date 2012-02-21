@@ -341,6 +341,7 @@ if (CISST_MTS_SUPPORT_FDD)
        mtsMonitorFilterBasics.cpp
        # faults
        mtsFaultBase.cpp
+       mtsFaultTypes.cpp
        # fault detection and diagnosis
        mtsFaultDetectorBase.cpp
        mtsFaultDetectorThresholding.cpp
@@ -354,6 +355,7 @@ if (CISST_MTS_SUPPORT_FDD)
        mtsMonitorFilterBasics.h
        # faults
        mtsFaultBase.h
+       mtsFaultTypes.h
        # fault detection and diagnosis
        mtsFaultDetectorBase.h
        mtsFaultDetectorThresholding.h

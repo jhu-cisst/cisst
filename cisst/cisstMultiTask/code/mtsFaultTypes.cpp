@@ -23,9 +23,7 @@
 CMN_IMPLEMENT_SERVICES(mtsFaultComponentThreadPeriodicity)
 
 mtsFaultComponentThreadPeriodicity::mtsFaultComponentThreadPeriodicity(void) 
-    : mtsFaultBase("Thread Periodicity", 
-                   BaseType::LAYER_COMPONENT, 
-                   BaseType::FAULT_COMPONENT_FUNCTIONAL)
+    : mtsFaultBase("Thread Periodicity", BaseType::FAULT_COMPONENT_FUNCTIONAL)
 {
 }
 
@@ -45,6 +43,6 @@ void mtsFaultComponentThreadPeriodicity::SerializeRaw(std::ostream & outputStrea
 
 void mtsFaultComponentThreadPeriodicity::DeSerializeRaw(std::istream & inputStream)
 {
-    BaseType::DeSerializeRaw(outputStream);
+    BaseType::DeSerializeRaw(inputStream);
 }
 

@@ -55,9 +55,9 @@
 #include <cisstMultiTask/mtsExport.h>
 
 //
-// mtsFaultElementNames
+// mtsFaultLocation
 //
-class CISST_EXPORT mtsFaultElementNames: public mtsGenericObject 
+class CISST_EXPORT mtsFaultLocation: public mtsGenericObject 
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -70,15 +70,15 @@ public:
     std::string EventGenerator;
     std::string EventHandler;
 
-    mtsFaultElementNames() : mtsGenericObject() {} 
-    ~mtsFaultElementNames() {}
+    mtsFaultLocation() : mtsGenericObject() {} 
+    ~mtsFaultLocation() {}
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsFaultElementNames);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsFaultLocation);
 
 
 //
@@ -99,37 +99,42 @@ public:
     } LayerTypes;
 
     typedef enum {
-        // System layer
-        FAULT_SYSTEM_PROCESS,
-        FAULT_SYSTEM_CONNECTION,
-        FAULT_SYSTEM_NETWORK,
-        FAULT_SYSTEM_FROM_PROCESS_LAYER,
-        // Process layer
-        FAULT_PROCESS_COMPONENT,
-        FAULT_PROCESS_FROM_COMPONENT_LAYER,
-        // Component layer
-        FAULT_COMPONENT_FUNCTIONAL,
-        FAULT_COMPONENT_NONFUNCTIONAL,
-        FAULT_COMPONENT_FROM_INTERFACE_LAYER,
-        // Interface layer
-        FAULT_INTERFACE_ONCONNECT,
-        FAULT_INTERFACE_POSTCONNECT,
-        // Execution layer
-        FAULT_EXECUTION_PERFORMANCE,
-        FAULT_EXECUTION_NETWORK,
-        FAULT_EXECUTION_INVALID_PAYLOAD,
         // INVALID
-        FAULT_INVALID
+        FAULT_INVALID                        = 0x00000,
+        // System layer
+        FAULT_SYSTEM_PROCESS                 = 0x00001,
+        FAULT_SYSTEM_CONNECTION              = 0x00002,
+        FAULT_SYSTEM_NETWORK                 = 0x00004,
+        FAULT_SYSTEM_FROM_PROCESS_LAYER      = 0x00008,
+        FAULT_SYSTEM_MASK                    = 0x0000F,
+        // Process layer
+        FAULT_PROCESS_COMPONENT              = 0x00010,
+        FAULT_PROCESS_FROM_COMPONENT_LAYER   = 0x00020,
+        FAULT_PROCESS_MASK                   = 0x000F0,
+        // Component layer
+        FAULT_COMPONENT_FUNCTIONAL           = 0x00100,
+        FAULT_COMPONENT_NONFUNCTIONAL        = 0x00200,
+        FAULT_COMPONENT_FROM_INTERFACE_LAYER = 0x00400,
+        FAULT_COMPONENT_MASK                 = 0x00F00,
+        // Interface layer
+        FAULT_INTERFACE_ONCONNECT            = 0x01000,
+        FAULT_INTERFACE_POSTCONNECT          = 0x02000,
+        FAULT_INTERFACE_MASK                 = 0x0F000,
+        // Execution layer
+        FAULT_EXECUTION_PERFORMANCE          = 0x10000,
+        FAULT_EXECUTION_NETWORK              = 0x20000,
+        FAULT_EXECUTION_INVALID_PAYLOAD      = 0x40000,
+        FAULT_EXECUTION_MASK                 = 0xF0000
     } FaultTypes;
 
 protected:
     typedef mtsFaultBase BaseType;
 
     /*! Name, location, and timestamp of fault (for fault isolation) */
-    std::string FaultName;
-    LayerTypes LayerType;
-    mtsFaultElementNames ElementNames;
-    double Timestamp;
+    std::string      FaultName;
+    LayerTypes       FaultLayer;
+    mtsFaultLocation FaultLocation;
+    double           FaultTimestamp;
 
     /*! Type of fault and degree (magnitude) of fault (for fault identification and diagnosis) */
     FaultTypes FaultType;
@@ -138,7 +143,7 @@ protected:
 public:
     /*! Constructors and destructor */
     mtsFaultBase();
-    mtsFaultBase(const std::string & faultName, LayerTypes layerType, FaultTypes faultType);
+    mtsFaultBase(const std::string & faultName, FaultTypes faultType);
     virtual ~mtsFaultBase();
 
     void ToStream(std::ostream & outputStream) const;

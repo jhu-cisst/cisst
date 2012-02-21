@@ -41,6 +41,7 @@ protected:
     double SumOfSamples;
     double SumOfSquaredSamples;
     size_t SampleCount;
+    size_t CollectedSampleCount;
 
     /*! Sampled std */
     double Sigma;
@@ -56,7 +57,7 @@ public:
     mtsFaultDetectorThresholding();
     mtsFaultDetectorThresholding(const std::string & signalName, 
                                  double average, 
-                                 size_t samplingCount = 500, 
+                                 size_t sampleCount = 500, 
                                  size_t k = 3);
     ~mtsFaultDetectorThresholding();
 
