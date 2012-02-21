@@ -21,7 +21,7 @@
 #include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
-
+#include <cisstMultiTask/mtsFaultTypes.h>
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 
@@ -172,6 +172,9 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
         new mtsFaultDetectorThresholding(filterAverage->GetOutputSignalName(0),
                                          nominalPeriod, 
                                          (size_t)(1.0 / nominalPeriod) * 5.0);
+    // Associate thread periodicity fault with the fault detector
+    mtsFaultComponentThreadPeriodicity * fault = new mtsFaultComponentThreadPeriodicity;
+    //detectorThresholding->
     ADD_FILTER(detectorThresholding);
 #undef ADD_FILTER 
 

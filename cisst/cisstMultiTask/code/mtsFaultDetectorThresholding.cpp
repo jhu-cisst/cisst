@@ -25,7 +25,8 @@ CMN_IMPLEMENT_SERVICES(mtsFaultDetectorThresholding);
 
 mtsFaultDetectorThresholding::mtsFaultDetectorThresholding(void)
     : mtsFaultDetectorBase("FaultDetector-Thresholding"),
-      SumOfSamples(0.0), SumOfSquaredSamples(0.0), SampleCount(0),
+      SumOfSamples(0.0), SumOfSquaredSamples(0.0), 
+      SampleCount(0), CollectedSampleCount(0),
       Sigma(0.0), Mean(0.0), K(0),
       UCL(0.0), LCL(0.0)
 {
@@ -34,10 +35,11 @@ mtsFaultDetectorThresholding::mtsFaultDetectorThresholding(void)
 
 mtsFaultDetectorThresholding::mtsFaultDetectorThresholding(const std::string & signalName, 
                                                            double average, 
-                                                           size_t samplingCount,
+                                                           size_t sampleCount,
                                                            size_t k)
     : mtsFaultDetectorBase("FaultDetector-Thresholding"),
-      SumOfSamples(0.0), SumOfSquaredSamples(0.0), SampleCount(samplingCount),
+      SumOfSamples(0.0), SumOfSquaredSamples(0.0), 
+      SampleCount(sampleCount), CollectedSampleCount(sampleCount),
       Sigma(0.0), Mean(average), K(k),
       UCL(0.0), LCL(0.0)
 {
@@ -62,12 +64,10 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
     double timestamp;
     double x = StateTable->GetNewValueScalar(InputSignals[0]->GetStateDataId(), timestamp);
 
-    static size_t samplingCount = SampleCount;
-
-    if (samplingCount > 0) {
+    if (CollectedSampleCount > 0) {
         SumOfSamples += x;
         SumOfSquaredSamples += x * x;
-        if (--samplingCount == 0) {
+        if (--CollectedSampleCount == 0) {
             double avg = SumOfSamples / (double) SampleCount;
             // Determine statistic variables for thresholding
             Sigma = sqrt( (SumOfSquaredSamples / (double) SampleCount) - (avg * avg) );
@@ -78,8 +78,8 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
             CMN_LOG_CLASS_RUN_VERBOSE << "avg = " << avg << ", sigma = " << Sigma << ", UCL = " << UCL << ", LCL = " << LCL << std::endl;
 
             if (debug)
-                std::cout << "sampling: " << samplingCount << " / " << SampleCount << std::endl
-                        << ", avg = " << avg << ", std = " << Sigma << std::endl;
+                std::cout << "Finished collecting " << SampleCount << " samples: "
+                          << "avg = " << avg << ", std = " << Sigma << std::endl;
         }
         return;
     }
@@ -90,6 +90,15 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
 
     // fault occurs: out of control sample found
     CMN_LOG_CLASS_RUN_WARNING << "CheckFault: OUT OF LIMIT SAMPLE!!! input: " << x << ", time: " << timestamp << std::endl;
+
+    // fault identification
+
+    // TODO: generate mtsFault to contain all information about the FaultDetector
+    // TODO: fault event propataion/generation
+
+    // TODO: fault event handler (visualizer or task-manager-like numbers)
+    // TODO: performance viewer(?) <- text/numeric output
+
 }
 
 void mtsFaultDetectorThresholding::ToStream(std::ostream & outputStream) const
