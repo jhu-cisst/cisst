@@ -96,6 +96,18 @@ mtsFaultBase::~mtsFaultBase()
 {
 }
 
+mtsFaultLocation & mtsFaultBase::GetFaultLocation(void) {
+    return FaultLocation;
+}
+
+void mtsFaultBase::SetFaultTimestamp(double timestamp) {
+    FaultTimestamp = timestamp;
+}
+
+double mtsFaultBase::GetFaultTimestamp(void) {
+    return FaultTimestamp;
+}
+
 void mtsFaultBase::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);

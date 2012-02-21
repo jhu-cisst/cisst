@@ -20,6 +20,36 @@
 
 #include <cisstMultiTask/mtsFaultDetectorBase.h>
 
+mtsFaultDetectorBase::mtsFaultDetectorBase(const std::string & detectorName) 
+    : mtsMonitorFilterBase(mtsMonitorFilterBase::FAULT_DETECTOR, detectorName),
+      TargetFault(0)
+{
+}
+
+mtsFaultDetectorBase::~mtsFaultDetectorBase()
+{
+    if (TargetFault)
+        delete TargetFault;
+}
+
+bool mtsFaultDetectorBase::RegisterFault(mtsFaultBase * targetFault)
+{
+    if (!targetFault) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterFault: invalid target fault instance" << std::endl;
+        return false;
+    }
+    if (TargetFault) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterFault: Target fault already registered: \"" << TargetFault << "\"" << std::endl;
+        return false;
+    }
+
+    TargetFault = targetFault;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RegisterFault: target fault associated: \"" << TargetFault << "\"" << std::endl;
+
+    return true;
+}
+
 void mtsFaultDetectorBase::DoFiltering(bool debug)
 {
     CheckFault(debug);

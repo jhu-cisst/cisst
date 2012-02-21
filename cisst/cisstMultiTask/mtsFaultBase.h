@@ -119,6 +119,7 @@ public:
         // Interface layer
         FAULT_INTERFACE_ONCONNECT            = 0x01000,
         FAULT_INTERFACE_POSTCONNECT          = 0x02000,
+        FAULT_INTERFACE_FROM_EXECUTION_LAYER = 0x04000,
         FAULT_INTERFACE_MASK                 = 0x0F000,
         // Execution layer
         FAULT_EXECUTION_PERFORMANCE          = 0x10000,
@@ -130,21 +131,31 @@ public:
 protected:
     typedef mtsFaultBase BaseType;
 
-    /*! Name, location, and timestamp of fault (for fault isolation) */
+    /*! Basic information about fault */
     std::string      FaultName;
     LayerTypes       FaultLayer;
+
+    /*! Location and timestamp of fault (for fault isolation) */
     mtsFaultLocation FaultLocation;
     double           FaultTimestamp;
 
     /*! Type of fault and degree (magnitude) of fault (for fault identification and diagnosis) */
-    FaultTypes FaultType;
-    double     FaultMagnitude;
+    FaultTypes       FaultType;
+    double           FaultMagnitude;
+
+    /*! Define fault location information */
+    void SetFaultLocation(void);
 
 public:
     /*! Constructors and destructor */
     mtsFaultBase();
     mtsFaultBase(const std::string & faultName, FaultTypes faultType);
     virtual ~mtsFaultBase();
+
+    /*! Fault isolation */
+    mtsFaultLocation & GetFaultLocation(void);
+    void   SetFaultTimestamp(double timestamp);
+    double GetFaultTimestamp(void);
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
