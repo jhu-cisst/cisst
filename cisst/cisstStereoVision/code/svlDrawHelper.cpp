@@ -769,6 +769,8 @@ void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int 
 
         pos1 = (_lm_pos[i] * ratio[id1] + 1023) >> 10;
         pos2 = (_rm_pos[i] * ratio[id2] + 1023) >> 10;
+        if (pos1 >= _ilen[id1]) pos1 = _ilen[id1] - 1;
+        if (pos2 >= _ilen[id2]) pos2 = _ilen[id2] - 1;
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {

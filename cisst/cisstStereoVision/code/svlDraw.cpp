@@ -347,6 +347,44 @@ void svlDraw::Poly(svlSampleImage* image,
     }
 }
 
+void svlDraw::Ellipse(svlSampleImage* image,
+                      unsigned int videoch,
+                      int cx,
+                      int cy,
+                      int rx,
+                      int ry,
+                      unsigned char r,
+                      unsigned char g,
+                      unsigned char b,
+                      double from_angle,
+                      double to_angle,
+                      double rotation,
+                      int thickness)
+{
+    vctInt2 radii;
+    radii[0] = rx;
+    radii[1] = ry;
+    Ellipse(image, videoch, svlPoint2D(cx, cy), radii, svlRGB(r, g, b), from_angle, to_angle, rotation, thickness);
+}                      
+
+void svlDraw::Ellipse(svlSampleImage* image,
+                      unsigned int videoch,
+                      int cx,
+                      int cy,
+                      int rx,
+                      int ry,
+                      svlRGB color,
+                      double from_angle,
+                      double to_angle,
+                      double rotation,
+                      int thickness)
+{
+    vctInt2 radii;
+    radii[0] = rx;
+    radii[1] = ry;
+    Ellipse(image, videoch, svlPoint2D(cx, cy), radii, color, from_angle, to_angle, rotation, thickness);
+}                      
+
 #if CISST_SVL_HAS_OPENCV
 
 void svlDraw::Ellipse(svlSampleImage* image,
