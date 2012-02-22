@@ -17,7 +17,17 @@
 cmake_minimum_required (VERSION 2.6.2)
 
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
+# saw (Surgical Assistant Workstation): www.cisst.org/saw
 project (cisst_saw)
+
+# To organize targets in folders
+option (CISST_USE_FOLDERS "Use folder to organize cisst and saw in IDE (Visual Studio, ...)" OFF)
+mark_as_advanced (CISST_USE_FOLDERS)
+if (CISST_USE_FOLDERS)
+  set_property (GLOBAL PROPERTY USE_FOLDERS ON)
+else (CISST_USE_FOLDERS)
+  set_property (GLOBAL PROPERTY USE_FOLDERS OFF)
+endif (CISST_USE_FOLDERS)
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
 set (cisst_DIR "${cisst_saw_BINARY_DIR}/cisst")
@@ -54,6 +64,7 @@ if (CISST_BUILD_SHARED_LIBS)
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)
   if (WIN32)
+    remove_definitions (-DCISST_DLL)
     add_definitions (-DCISST_DLL)
   endif (WIN32)
 else (CISST_BUILD_SHARED_LIBS)

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,9 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 
 #include "cdgScope.h"
+#include "cdgBaseClass.h"
 #include "cdgMember.h"
 #include "cdgTypedef.h"
-#include "cdgCode.h"
+#include "cdgInline.h"
 
 /*
 
@@ -42,11 +43,8 @@ class cdgClass: public cdgScope
     /*! Name of the data type to be created. */
     std::string Name;
 
-    /*! Default Log LoD for the class generated.  See also
-      cmnGenericObject.  Corresponds to "default-log-lod" in cisst
-      data description file.  If not found, the default is
-      CMN_LOG_LOD_RUN_ERROR. */ 
-    std::string DefaultLogLoD;
+    /*! For declspec, CISST_EXPORT */
+    std::string Attribute;
 
     /*! List of header files to include.  Corresponds to keyword
       "include" in cisst data description file. */
@@ -63,38 +61,45 @@ class cdgClass: public cdgScope
     TypedefsType Typedefs;
     //@}
 
-    typedef std::vector<cdgCode *> CodesType;
-    CodesType Codes;
-
     /*! List of data members.  Corresponds to keyword "member" in
       cisst data description file. */
     typedef std::vector<cdgMember *> MembersType;
     MembersType Members;
 
+    typedef std::vector<cdgBaseClass *> BaseClassesType;
+    BaseClassesType BaseClasses;
+
+    typedef std::vector<cdgScope *> ScopesType;
+    ScopesType Scopes;
+
 public:
+
+    cdgClass(unsigned int lineNumber);
 
     cdgScope::Type GetScope(void) const;
     bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes);
+                  cdgScope::Stack & scopes,
+                  unsigned int lineNumber);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void GenerateHeader(std::ostream & output) const;
-    void GenerateCode(std::ostream & output) const;
+    void FillInDefaults(void) {};
+    void GenerateHeader(std::ostream & outputStream) const;
+    void GenerateCode(std::ostream & outputStream) const;
 
 protected:
 
-    void GenerateStandardMethodsHeader(std::ostream & output) const;
+    void GenerateStandardMethodsHeader(std::ostream & outputStream) const;
+    void GenerateConstructorsCode(std::ostream & outputStream) const;
+    void GenerateSerializeRawCode(std::ostream & outputStream) const;
+    void GenerateDeSerializeRawCode(std::ostream & outputStream) const;
+    void GenerateToStreamCode(std::ostream & outputStream) const;
+    void GenerateToStreamRawCode(std::ostream & outputStream) const;
 
-    void GenerateSerializeRawCode(std::ostream & output) const;
-
-    void GenerateDeSerializeRawCode(std::ostream & output) const;
-
-    void GenerateToStreamCode(std::ostream & output) const;
-
-    void GenerateToStreamRawCode(std::ostream & output) const;
+private:
+    cdgClass(void); // make sure constructor with line number is always used.
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdgClass);

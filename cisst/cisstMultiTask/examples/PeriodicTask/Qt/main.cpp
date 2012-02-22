@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-10-22
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "displayQtComponent.h"
 #include <components/sineTask.h>
+#include <components/sineTaskWithDelay.h>
 
 const unsigned int NumSineTasks = 2;
 
@@ -74,7 +75,6 @@ int main(int argc, char *argv[])
     tab1Layout->setContentsMargins(0, 0, 0, 0);
     tabs->addTab(tab1Widget, "Main");
 
-
     // second tab for data collection
     QWidget * tab2Widget = new QWidget();
     QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
     sineTask * sine;
+    sineTaskWithDelay * sineWithDelay;
     displayQtComponent * display;
     mtsCollectorState * stateCollector;
     mtsCollectorQtComponent * collectorQtComponent;
@@ -116,8 +117,19 @@ int main(int argc, char *argv[])
         display = new displayQtComponent("DISP" + index.str());
         componentManager->AddComponent(display);
         tab1Layout->addWidget(display->GetWidget(), 1, i);
-        componentManager->Connect(display->GetName(), "DataGenerator",
-                                  sine->GetName(), "MainInterface");
+        // add delay, just for the second graph
+        if (i == 1) {
+            sineWithDelay = new sineTaskWithDelay("SIN-DELAY" + index.str(), 5.0 * cmn_ms);
+            sineWithDelay->SetLatency(2.0 * cmn_s);
+            componentManager->AddComponent(sineWithDelay);
+            componentManager->Connect(sineWithDelay->GetName(), "MainInterface",
+                                      sine->GetName(), "MainInterface");
+            componentManager->Connect(display->GetName(), "DataGenerator",
+                                      sineWithDelay->GetName(), "MainInterface");
+        } else {
+            componentManager->Connect(display->GetName(), "DataGenerator",
+                                      sine->GetName(), "MainInterface");
+        }
 
         // create the state collector and connect it to the generator
         stateCollector = new mtsCollectorState(sine->GetName(),
@@ -161,7 +173,9 @@ int main(int argc, char *argv[])
 
     // create and start all tasks
     componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY);
     componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // run Qt user interface
     mainWidget->resize(NumSineTasks * 220, 360);
@@ -170,6 +184,8 @@ int main(int argc, char *argv[])
 
     // kill all tasks and perform cleanup
     componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
+
     componentManager->Cleanup();
 
     // stop all logs

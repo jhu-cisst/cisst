@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,7 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdgMember);
 
 
-cdgMember::cdgMember():
+cdgMember::cdgMember(unsigned int lineNumber):
+    cdgScope(lineNumber),
     UsesClassTypedef(false)
 {
 }
@@ -44,7 +45,7 @@ bool cdgMember::HasKeyword(const std::string & keyword) const
         || (keyword == "description")
         || (keyword == "default")
         || (keyword == "accessors")
-        || (keyword == "scope")) {
+        || (keyword == "visibility")) {
         return true;
     }
     return false;
@@ -52,7 +53,8 @@ bool cdgMember::HasKeyword(const std::string & keyword) const
 
 
 bool cdgMember::HasScope(const std::string & CMN_UNUSED(keyword),
-                         cdgScope::Stack & CMN_UNUSED(scopes))
+                         cdgScope::Stack & CMN_UNUSED(scopes),
+                         unsigned int CMN_UNUSED(lineNumber))
 {
     return false;
 }
@@ -95,9 +97,20 @@ bool cdgMember::SetValue(const std::string & keyword,
         std::cerr << "------------ accessors not handled yet ---------" << std::endl;
         return true;
     }
-    if (keyword == "scope") {
-        std::cerr << "------------ scope not handled yet ---------" << std::endl;
-        return true;
+    if (keyword == "visibility") {
+        if (!this->Visibility.empty()) {
+            errorMessage = "visibility already set";
+            return false;
+        }
+        if ((value == "public")
+            || (value == "private")
+            || (value == "protected")) {
+            this->Visibility = value;
+            return true;
+        } else {
+            errorMessage = "visibility must be \"public\", \"protected\" or \"private\", not \"" + keyword + "\"";
+            return false;
+        }
     }
     errorMessage = "unhandled keyword \"" + keyword + "\"";
     return false;
@@ -120,36 +133,35 @@ bool cdgMember::IsValid(std::string & errorMessage) const
 }
 
 
-void cdgMember::GenerateHeaderDeclaration(std::ostream & output) const
+void cdgMember::GenerateHeader(std::ostream & outputStream) const
 {
-    output << "    " << Type << " " << Name << "; // " << Description << std::endl;    
+    GenerateLineComment(outputStream);
+    outputStream << " protected:" << std::endl
+                 << "    " << Type << " " << Name << "; // " << Description << std::endl
+                 << " public:" << std::endl
+                 << "    const " << Type << " & Get" << Name << "(void) const;" << std::endl
+                 << "    void Set" << Name << "(const " << Type << " & newValue);" << std::endl;
 }
 
 
-void cdgMember::GenerateHeaderAccessors(std::ostream & output) const
+void cdgMember::GenerateCode(std::ostream & outputStream) const
 {
-    output << "    const " << Type << " & Get" << Name << "(void) const;" << std::endl
-           << "    void Set" << Name << "(const " << Type << " & newValue);" << std::endl;
-}
-
-
-void cdgMember::GenerateCodeAccessors(std::ostream & output, const std::string & className) const
-{
+    GenerateLineComment(outputStream);
     std::string returnType;
     if (UsesClassTypedef) {
-        returnType = className + "::" + Type;
+        returnType = ClassName + "::" + Type;
     } else {
         returnType = Type;
     }
-    output << std::endl
-           << "const " << returnType << " & " << className << "::Get" << Name << "(void) const" << std::endl
-           << "{" << std::endl
-           << "    return this->" << Name << ";" << std::endl
-           << "}" << std::endl
-           << std::endl
-           << "void " << className << "::Set" << Name << "(const " << Type << " & newValue)" << std::endl
-           << "{" << std::endl
-           << "    this->" << Name << " = newValue;" << std::endl
-           << "}" << std::endl
-           << std::endl;
+    outputStream << std::endl
+                 << "const " << returnType << " & " << ClassName << "::Get" << Name << "(void) const" << std::endl
+                 << "{" << std::endl
+                 << "    return this->" << Name << ";" << std::endl
+                 << "}" << std::endl
+                 << std::endl
+                 << "void " << ClassName << "::Set" << Name << "(const " << Type << " & newValue)" << std::endl
+                 << "{" << std::endl
+                 << "    this->" << Name << " = newValue;" << std::endl
+                 << "}" << std::endl
+                 << std::endl;
 }

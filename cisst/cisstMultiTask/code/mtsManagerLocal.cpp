@@ -3089,6 +3089,27 @@ ConnectClientSideInterfaceError:
     return false;
 }
 
+bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets) {
+
+    if (!IsGCMActive())
+        return false;
+    
+    if (ManagerComponent.Server){
+        ManagerComponent.Server->GetNamesOfProcesses(processNames);
+        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        return true;
+    }
+    else if (ManagerComponent.Client) {  
+        ManagerComponent.Client->GetNamesOfProcesses(processNames);
+        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        return true;
+    }
+    
+    else
+        return false;
+}
+
+
 #ifdef CISST_MTS_SUPPORT_FDD
 bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
 {

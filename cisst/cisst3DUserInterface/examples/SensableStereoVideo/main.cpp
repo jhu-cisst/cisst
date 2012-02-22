@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstDevices/devSensableHD.h>
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
 

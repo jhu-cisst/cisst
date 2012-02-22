@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -38,6 +38,7 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
 
 cisst_add_library (LIBRARY cisstMultiTaskQt
                    LIBRARY_DIR cisstMultiTask
+                   FOLDER cisstMultiTask
                    DEPENDENCIES cisstCommon
                                 cisstOSAbstraction
                                 cisstVector

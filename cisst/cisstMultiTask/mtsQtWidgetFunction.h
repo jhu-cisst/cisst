@@ -38,6 +38,7 @@ class mtsQtWidgetGenericObjectWrite;
 #include <cisstMultiTask/mtsGenericObject.h>
 
 #include <QWidget>
+#include <QFrame>
 #include <QTime>
 
 class QLabel;
@@ -46,6 +47,7 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QFormLayout;
 class QDoubleSpinBox;
+class QToolButton;
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
@@ -91,19 +93,14 @@ class CISST_EXPORT mtsQtWidgetFunction: public QWidget, public cmnGenericObject
        @param label The text to put in the QLabel associated with the widget.
        @param prototype An instance of the datatype that the widget should handle.
     */
-
     void SetWriteWidget(const std::string & label, const mtsGenericObject & prototype);
+
     /* ! Add a display widget to the mtsQtWidgetFunction. The display widget can be used
        to show the result of executing an mtsCommand.
        @param label The text to put in the QLabel associated with the widget.
        @param prototype An instance of the datatype that the widget should handle.
     */
-
     void SetReadWidget(const std::string & label, const mtsGenericObject & prototype);
-    /* ! Add a set of widgets that allow the user to execute an mtsCommand to the
-       mtsQtWidgetFunction.
-       @param allowPeriodicExecution If true, add a PeriodicExecutionWidget.
-    */
 
     /* ! Add an EventInformationWidget to the mtsQtWidgetFunction. */
     void AddEventWidgets(void);
@@ -201,6 +198,33 @@ class CISST_EXPORT mtsQtWidgetFunctionQualifiedRead: public mtsQtWidgetFunction
  public:
     explicit mtsQtWidgetFunctionQualifiedRead(mtsFunctionQualifiedRead * function);
     void CreateArgumentsWidgets(void);
+};
+
+
+class CISST_EXPORT mtsQtFunctionContainerWidget: public QFrame
+{
+    Q_OBJECT;
+private:
+    QWidget * TitleBar;
+    QLabel * TitleLabel;
+    QToolButton * ToggleButton;
+    QWidget * FunctionWidgetContainer;
+
+private slots:
+    void ToggleCollapsed();
+
+public:
+    mtsQtFunctionContainerWidget();
+    void SetFunctionWidget(QWidget * widget, const QString & name = "");
+};
+
+
+class CISST_EXPORT mtsQtFunctionListContainerWidget: public QWidget
+{
+    Q_OBJECT;
+public:
+    mtsQtFunctionListContainerWidget();
+    void addItem(QWidget * widget, const QString & name);
 };
 
 

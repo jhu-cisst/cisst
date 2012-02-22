@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -28,6 +28,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # name the main executable and specifies with source files to use
   add_executable (cisstIREComponent main.cpp)
+  set_property (TARGET cisstIREComponent PROPERTY FOLDER "cisstMultiTask/applications")
 
   # link with the cisst libraries
   cisst_target_link_libraries (cisstIREComponent ${REQUIRED_CISST_LIBRARIES})

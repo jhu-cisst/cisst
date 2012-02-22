@@ -39,27 +39,27 @@ http://www.cisst.org/cisst/license.txt.
 #endif // _MSC_VER
 
 #if CISST_SVL_HAS_OPENCV2
-    #include <core_c.h>
-    #include <core.hpp>
-    #include <wimage.hpp>
-//    #include <eigen.hpp>
-    #include <internal.hpp>
-    #include <imgproc_c.h>
-    #include <imgproc.hpp>
-    #include <features2d.hpp>
-    #include <flann.hpp>
-    #include <calib3d.hpp>
-    #include <objdetect.hpp>
-    #include <compat.hpp>
-    #include <legacy.hpp>
-    #include <blobtrack.hpp>
-    #include <contrib.hpp>
-    #include <highgui_c.h>
-    #include <highgui.hpp>
-    #include <ml.hpp>
-    #include <tracking.hpp>
-    #include <background_segm.hpp>
-    #include <gpu.hpp>
+    #include <opencv2/core/core_c.h>
+    #include <opencv2/core/core.hpp>
+    #include <opencv2/core/wimage.hpp>
+//    #include <opencv2/eigen.hpp>
+    #include <opencv2/core/internal.hpp>
+    #include <opencv2/imgproc/imgproc_c.h>
+    #include <opencv2/imgproc/imgproc.hpp>
+    #include <opencv2/features2d/features2d.hpp>
+    #include <opencv2/flann/flann.hpp>
+    #include <opencv2/calib3d/calib3d.hpp>
+    #include <opencv2/objdetect/objdetect.hpp>
+    #include <opencv2/legacy/compat.hpp>
+    #include <opencv2/legacy/legacy.hpp>
+    #include <opencv2/legacy/blobtrack.hpp>
+    #include <opencv2/contrib/contrib.hpp>
+    #include <opencv2/highgui/highgui_c.h>
+    #include <opencv2/highgui/highgui.hpp>
+    #include <opencv2/ml/ml.hpp>
+    #include <opencv2/video/tracking.hpp>
+    #include <opencv2/video/background_segm.hpp>
+    #include <opencv2/gpu/gpu.hpp>
 #else // CISST_SVL_HAS_OPENCV2
     #if CISST_SVL_HAS_OPENCV
         #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
@@ -158,7 +158,6 @@ struct CISST_EXPORT svlBlob
     unsigned int label;
 };
 
-
 #pragma pack()
 
 
@@ -229,6 +228,23 @@ struct CISST_EXPORT svlTriangle
     int y2;
     int x3;
     int y3;
+};
+
+struct CISST_EXPORT svlQuad
+{
+    svlQuad();
+    svlQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+    void Assign(const svlQuad & quad);
+    void Assign(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int x3;
+    int y3;
+    int x4;
+    int y4;
 };
 
 struct CISST_EXPORT svlPoint2D

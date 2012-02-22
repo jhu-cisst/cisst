@@ -259,14 +259,54 @@ void svlDraw::Triangle(svlSampleImage* image,
                        svlRGB color,
                        svlDraw::Internals& internals)
 {
-    svlDrawHelper::TriangleInternals* triangledrawer = dynamic_cast<svlDrawHelper::TriangleInternals*>(internals.Get());
+    svlDrawHelper::ShapeInternals* triangledrawer = dynamic_cast<svlDrawHelper::ShapeInternals*>(internals.Get());
     if (triangledrawer == 0) {
-        triangledrawer = new svlDrawHelper::TriangleInternals;
+        triangledrawer = new svlDrawHelper::ShapeInternals;
         internals.Set(triangledrawer);
     }
     if (!triangledrawer->SetImage(image, videoch)) return;
 
     triangledrawer->Draw(x1, y1, x2, y2, x3, y3, color);
+}
+
+void svlDraw::Quad(svlSampleImage* image,
+                   unsigned int videoch,
+                   svlQuad & quad,
+                   svlRGB color,
+                   svlDraw::Internals& internals)
+{
+    Quad(image, videoch, quad.x1, quad.y1, quad.x2, quad.y2, quad.x3, quad.y3, quad.x4, quad.y4, color, internals);
+}
+
+void svlDraw::Quad(svlSampleImage* image,
+                   unsigned int videoch,
+                   svlPoint2D corner1,
+                   svlPoint2D corner2,
+                   svlPoint2D corner3,
+                   svlPoint2D corner4,
+                   svlRGB color,
+                   svlDraw::Internals& internals)
+{
+    Quad(image, videoch, corner1.x, corner1.y, corner2.x, corner2.y, corner3.x, corner3.y, corner4.x, corner4.y, color, internals);
+}
+
+void svlDraw::Quad(svlSampleImage* image,
+                   unsigned int videoch,
+                   int x1, int y1,
+                   int x2, int y2,
+                   int x3, int y3,
+                   int x4, int y4,
+                   svlRGB color,
+                   svlDraw::Internals& internals)
+{
+    svlDrawHelper::ShapeInternals* quaddrawer = dynamic_cast<svlDrawHelper::ShapeInternals*>(internals.Get());
+    if (quaddrawer == 0) {
+        quaddrawer = new svlDrawHelper::ShapeInternals;
+        internals.Set(quaddrawer);
+    }
+    if (!quaddrawer->SetImage(image, videoch)) return;
+
+    quaddrawer->Draw(x1, y1, x2, y2, x3, y3, x4, y4, color);
 }
 
 void svlDraw::Poly(svlSampleImage* image,
@@ -446,9 +486,9 @@ void svlDraw::WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTri
                            svlDraw::Internals& internals,
                            unsigned int alpha)
 {
-    svlDrawHelper::TriangleWarpInternals* trianglewarper = dynamic_cast<svlDrawHelper::TriangleWarpInternals*>(internals.Get());
+    svlDrawHelper::WarpInternals* trianglewarper = dynamic_cast<svlDrawHelper::WarpInternals*>(internals.Get());
     if (trianglewarper == 0) {
-        trianglewarper = new svlDrawHelper::TriangleWarpInternals;
+        trianglewarper = new svlDrawHelper::WarpInternals(3);
         internals.Set(trianglewarper);
     }
     if (!trianglewarper->SetInputImage(in_img, in_vch) ||
@@ -457,6 +497,24 @@ void svlDraw::WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTri
     trianglewarper->Draw(in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
                          out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3,
                          alpha);
+}
+
+void svlDraw::WarpQuad(svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & in_quad,
+                       svlSampleImage* out_img, unsigned int out_vch, svlQuad & out_quad,
+                       svlDraw::Internals& internals,
+                       unsigned int alpha)
+{
+    svlDrawHelper::WarpInternals* quadwarper = dynamic_cast<svlDrawHelper::WarpInternals*>(internals.Get());
+    if (quadwarper == 0) {
+        quadwarper = new svlDrawHelper::WarpInternals(4);
+        internals.Set(quadwarper);
+    }
+    if (!quadwarper->SetInputImage(in_img, in_vch) ||
+        !quadwarper->SetOutputImage(out_img, out_vch)) return;
+
+    quadwarper->Draw(in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
+                     out_quad.x1, out_quad.y1, out_quad.x2, out_quad.y2, out_quad.x3, out_quad.y3, out_quad.x4, out_quad.y4,
+                     alpha);
 }
 
 

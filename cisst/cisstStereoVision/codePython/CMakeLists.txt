@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -19,6 +19,7 @@ project (cisstStereoVisionPython)
 # create wrappers using swig
 cisst_add_swig_module (MODULE cisstStereoVision
                        INTERFACE_DIRECTORY ..
+                       FOLDER cisstStereoVision
                        HEADER_FILES ../svlPython.h
                        MODULE_LINK_LIBRARIES cisstStereoVision
                                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask

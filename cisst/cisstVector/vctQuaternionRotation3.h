@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-01-15
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -72,10 +72,11 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
         BaseType(quaternionRotation)
     {}
 
-    template <class _containerType>
-    inline vctQuaternionRotation3(const _containerType & vector4)
+    template <class __containerType>
+    inline
+    vctQuaternionRotation3(const vctQuaternionRotation3Base<__containerType> & other)
         throw(std::runtime_error):
-        BaseType(vector4)
+        BaseType(other)
     {}
 
     inline
@@ -86,20 +87,20 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
     {}
 
     template <class __containerType>
-    inline explicit
+    explicit inline
     vctQuaternionRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
         throw(std::runtime_error):
         BaseType(matrixRotation)
     {}
 
-    inline
+    explicit inline
     vctQuaternionRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
         throw(std::runtime_error):
         BaseType(axisAngleRotation)
     {}
 
     template <class __containerType>
-    inline
+    explicit inline
     vctQuaternionRotation3(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
         throw(std::runtime_error):
         BaseType(rodriguezRotation)
@@ -152,7 +153,8 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
       Assign method) allows to set a rotation quaternion to whatever
       value without any further validity checking.  It is recommended
       to use it with caution. */
-    inline ThisType & operator = (const BaseType & other) {
+    template <class __containerType>
+    inline ThisType & operator = (const vctQuaternionRotation3Base<__containerType> & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
 
@@ -160,4 +162,3 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
 
 
 #endif  // _vctQuaternionRotation3_h
-

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -36,21 +36,27 @@ class cdgMember: public cdgScope
     bool UsesClassTypedef;
     std::string Name;
     std::string Description;
+    std::string Visibility;
+    std::string ClassName;
 
 public:
-    cdgMember(void);
+    cdgMember(unsigned int lineNumber);
 
     cdgScope::Type GetScope(void) const;
     bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes);
+                  cdgScope::Stack & scopes,
+                  unsigned int lineNumber);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void GenerateHeaderDeclaration(std::ostream & output) const;
-    void GenerateHeaderAccessors(std::ostream & output) const;
-    void GenerateCodeAccessors(std::ostream & output, const std::string & className) const;
+    void FillInDefaults(void) {};
+    void GenerateHeader(std::ostream & outputStream) const;
+    void GenerateCode(std::ostream & outputStream) const;
+
+private:
+    cdgMember(void); // make sure constructor with line number is always used.
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdgMember);

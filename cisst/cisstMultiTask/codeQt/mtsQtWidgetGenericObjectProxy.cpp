@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsQtWidgetGenericObjectProxy.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsStateIndex.h>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -29,6 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
+#include <QTableWidget>
+#include <QHeaderView>
 
 // -- mtsInt
 mtsQtWidgetIntRead::mtsQtWidgetIntRead(void):
@@ -37,6 +40,7 @@ mtsQtWidgetIntRead::mtsQtWidgetIntRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetIntRead::SetValue(const mtsGenericObject & value)
@@ -56,6 +60,7 @@ mtsQtWidgetIntWrite::mtsQtWidgetIntWrite(void):
 {
     SpinBox = new QSpinBox();
     Layout->addWidget(SpinBox);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetIntWrite::SetValue(const mtsGenericObject & value)
@@ -86,6 +91,7 @@ mtsQtWidgetBoolRead::mtsQtWidgetBoolRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetBoolRead::SetValue(const mtsGenericObject & value)
@@ -105,6 +111,7 @@ mtsQtWidgetBoolWrite::mtsQtWidgetBoolWrite(void):
     ComboBox->addItem("True");
     ComboBox->addItem("False");
     Layout->addWidget(ComboBox);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetBoolWrite::SetValue(const mtsGenericObject & value)
@@ -135,6 +142,7 @@ mtsQtWidgetDoubleRead::mtsQtWidgetDoubleRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetDoubleRead::SetValue(const mtsGenericObject & value)
@@ -155,6 +163,7 @@ mtsQtWidgetDoubleWrite::mtsQtWidgetDoubleWrite(void):
     DoubleSpinBox = new QDoubleSpinBox();
     DoubleSpinBox->setDecimals(5);
     Layout->addWidget(DoubleSpinBox);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetDoubleWrite::SetValue(const mtsGenericObject & value)
@@ -185,6 +194,7 @@ mtsQtWidgetStdStringRead::mtsQtWidgetStdStringRead(void):
     Label = new QLabel();
     Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     Layout->addWidget(Label);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetStdStringRead::SetValue(const mtsGenericObject & value)
@@ -202,6 +212,7 @@ mtsQtWidgetStdStringWrite::mtsQtWidgetStdStringWrite(void):
 {
     LineEdit = new QLineEdit();
     Layout->addWidget(LineEdit);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetStdStringWrite::SetValue(const mtsGenericObject & value)
@@ -219,6 +230,89 @@ bool mtsQtWidgetStdStringWrite::GetValue(mtsGenericObject & placeHolder) const
     mtsStdString * stdStringData = dynamic_cast<mtsStdString *>(&placeHolder);
     if (stdStringData) {
         stdStringData->Data = std::string(LineEdit->text().toAscii());
+        return true;
+    }
+    return false;
+}
+
+
+// -- mtsStateIndex
+
+mtsQtWidgetStateIndexRead::mtsQtWidgetStateIndexRead(void):
+    mtsQtWidgetGenericObjectRead()
+{
+    Label = new QLabel();
+    Label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    Layout->addWidget(Label);
+    Layout->addStretch();
+}
+
+bool mtsQtWidgetStateIndexRead::SetValue(const mtsGenericObject & value)
+{
+    const mtsStateIndex * stateIndexData = dynamic_cast<const mtsStateIndex *>(&value);
+    if (stateIndexData) {
+        Label->setText(stateIndexData->ToString().c_str());
+        return true;
+    }
+    return false;
+}
+
+mtsQtWidgetStateIndexWrite::mtsQtWidgetStateIndexWrite(void):
+    mtsQtWidgetGenericObjectWrite()
+{
+    TableWidget = new QTableWidget();
+
+    TableWidget->setRowCount(1);
+    TableWidget->setColumnCount(3);
+
+    QStringList members;
+    members << "Index" << "Ticks" << "Length";
+
+    TableWidget->setHorizontalHeaderLabels(members);
+
+    IndexSpinBox = new QSpinBox();
+    TicksSpinBox = new QDoubleSpinBox();
+    LengthSpinBox = new QDoubleSpinBox();
+
+    TableWidget->setCellWidget(0, 0, IndexSpinBox);
+    TableWidget->setCellWidget(0, 1, TicksSpinBox);
+    TableWidget->setCellWidget(0, 2, LengthSpinBox);
+
+    TableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    TableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    TableWidget->verticalHeader()->hide();
+
+    int verticalHeight = TableWidget->horizontalHeader()->sizeHint().height() + TableWidget->verticalHeader()->sizeHint().height();
+
+    TableWidget->setFixedHeight(verticalHeight);
+
+    Layout->addWidget(TableWidget);
+    Layout->addStretch();
+}
+
+bool mtsQtWidgetStateIndexWrite::SetValue(const mtsGenericObject & value)
+{
+    const mtsStateIndex * stateIndexData = dynamic_cast<const mtsStateIndex *>(&value);
+    if (stateIndexData) {
+        IndexSpinBox->setValue(stateIndexData->Index());
+        TicksSpinBox->setValue(stateIndexData->Ticks());
+        LengthSpinBox->setValue(stateIndexData->Length());
+        return true;
+    }
+    return false;
+}
+
+bool mtsQtWidgetStateIndexWrite::GetValue(mtsGenericObject & placeHolder) const
+{
+    mtsStateIndex * stateIndexData = dynamic_cast<mtsStateIndex *>(&placeHolder);
+    if (stateIndexData) {
+        mtsStateIndex newStateIndexData(
+                                        0.0,
+                                        IndexSpinBox->value(),
+                                        TicksSpinBox->value(),
+                                        LengthSpinBox->value()
+                                        );
+        stateIndexData->ReconstructFrom(newStateIndexData);
         return true;
     }
     return false;

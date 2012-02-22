@@ -69,14 +69,14 @@ void svlQtObjectFactory::Delete(cmnGenericObject* obj)
 void svlQtObjectFactory::QSlotCreate()
 {
     Object = cmnClassRegister::Create(ClassName);
-    std::cerr << "svlQtObjectFactory::Create(\"" << ClassName << "\") executed" << std::endl;
+    CMN_LOG_INIT_DEBUG << "svlQtObjectFactory::Create(\"" << ClassName << "\") executed" << std::endl;
 }
 
 void svlQtObjectFactory::QSlotDelete()
 {
     delete Object;
     Object = 0;
-    std::cerr << "svlQtObjectFactory::Delete() executed" << std::endl;
+    CMN_LOG_INIT_DEBUG << "svlQtObjectFactory::Delete() executed" << std::endl;
 }
 
 svlQtObjectFactory* svlQtObjectFactory::GetInstance()

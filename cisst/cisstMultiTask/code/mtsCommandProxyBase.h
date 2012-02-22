@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -45,9 +45,19 @@ protected:
     mtsComponentInterfaceProxyClient * NetworkProxyClient;
     mtsComponentInterfaceProxyServer * NetworkProxyServer;
 
+
+    /*! Indicate if all arguments are supported, i.e. if the program
+      has access to the argument(s) class services in
+      cmnClassServices.  The client process might not be linked to the
+      library that defines the argument symbol.  One can also use
+      dynamic loading to make sure all symbols are available.  This is
+      assumed to be true unless the method ArgumentNotSupported is
+      called. */
+    bool ArgumentsSupportedFlag;
+
 public:
     /*! Constructor */
-    mtsCommandProxyBase() : CommandID(0), ClientID(0), NetworkProxy(0), NetworkProxyClient(0), NetworkProxyServer(0)
+    mtsCommandProxyBase() : CommandID(0), ClientID(0), NetworkProxy(0), NetworkProxyClient(0), NetworkProxyServer(0), ArgumentsSupportedFlag(true)
     {}
 
     /*! Set network proxy */
@@ -63,6 +73,16 @@ public:
     /*! Set command id */
     virtual void SetCommandID(const mtsCommandIDType & commandID) {
         CommandID = commandID;
+    }
+
+    /*! Test if all arguments are supported.  See ArgumentsSupportedFlag. */
+    inline bool ArgumentsSupported(void) const {
+        return this->ArgumentsSupportedFlag;
+    }
+
+    /*! Indicate that one or more argument is not supported. */
+    inline void SetArgumentSupported(bool argumentSupported) {
+        this->ArgumentsSupportedFlag = argumentSupported;
     }
 
     /*! Generate human readable description of this object */

@@ -38,6 +38,7 @@ if( CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
   # Add executable for C++ tests
   add_executable (cisstRobotTests ${SOURCE_FILES} ${HEADER_FILES})
+  set_property (TARGET cisstRobotTests PROPERTY FOLDER "cisstRobot/tests")
   target_link_libraries (cisstRobotTests cisstTestsDriver)
   cisst_target_link_libraries (cisstRobotTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstRobot)
 

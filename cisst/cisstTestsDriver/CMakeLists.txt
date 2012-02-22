@@ -21,7 +21,7 @@ add_library (cisstTestsDriver STATIC
              cisstTestMain.cpp
              cisstTestParameters.cpp
              cisstTestParameters.h)
-
+set_property (TARGET cisstTestsDriver PROPERTY FOLDER "cisstCommon/tests")
 target_link_libraries (cisstTestsDriver
                        optimized ${CPPUNIT_LIBRARIES}
                        debug ${CPPUNIT_DEBUG_LIBRARIES})

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-18
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -348,16 +348,17 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to deserialize write command argument: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to deserialize write command argument: " << e.what() << std::endl;
             argumentPrototype = 0;
         }
 
         if (!argumentPrototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create write command proxy: " << commandName << std::endl;
+            newCommandWrite->SetArgumentPrototypeSerialized(itWrite->ArgumentPrototypeSerialized);
+            newCommandWrite->SetArgumentSupported(false);
+        } else {
+            newCommandWrite->SetArgumentPrototype(argumentPrototype);
         }
-        newCommandWrite->SetArgumentPrototype(argumentPrototype);
     }
 
     // Create read command proxies
@@ -380,16 +381,17 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: read command argument deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: read command argument deserialization failed: " << e.what() << std::endl;
             argumentPrototype = 0;
         }
 
         if (!argumentPrototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create read command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create read command proxy: " << commandName << std::endl;
+            newCommandRead->SetArgumentPrototypeSerialized(itRead->ArgumentPrototypeSerialized);
+            newCommandRead->SetArgumentSupported(false);
+        } else {
+            newCommandRead->SetArgumentPrototype(argumentPrototype);
         }
-        newCommandRead->SetArgumentPrototype(argumentPrototype);
     }
 
     // Create qualified read command proxies
@@ -412,7 +414,7 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argument1Prototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: qualified read command argument 1 deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: qualified read command argument 1 deserialization failed: " << e.what() << std::endl;
             argument1Prototype = 0;
         }
         // argument2 deserialization
@@ -421,16 +423,18 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argument2Prototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: qualified read command argument 2 deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: qualified read command argument 2 deserialization failed: " << e.what() << std::endl;
             argument2Prototype = 0;
         }
 
         if (!argument1Prototype || !argument2Prototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create qualified read command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create qualified read command proxy: " << commandName << std::endl;
+            newCommandQualifiedRead->SetArgumentPrototypeSerialized(itQualifiedRead->Argument1PrototypeSerialized,
+                                                                    itQualifiedRead->Argument2PrototypeSerialized);
+            newCommandQualifiedRead->SetArgumentSupported(false);
+        } else {
+            newCommandQualifiedRead->SetArgumentPrototype(argument1Prototype, argument2Prototype);
         }
-        newCommandQualifiedRead->SetArgumentPrototype(argument1Prototype, argument2Prototype);
     }
 
     // Create void return command proxies
@@ -458,11 +462,13 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         }
 
         if (!resultPrototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create void return command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create void return command proxy: " << commandName << std::endl;
+            newCommandVoidReturn->SetResultPrototypeSerialized(itVoidReturn->ResultPrototypeSerialized);
+            newCommandVoidReturn->SetArgumentSupported(false);
+        } else {
+            newCommandVoidReturn->SetResultPrototype(resultPrototype);
         }
-        newCommandVoidReturn->SetResultPrototype(resultPrototype);
+
     }
 
     // Create write return command proxies
@@ -502,12 +508,14 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         }
 
         if (!argumentPrototype || !resultPrototype) {
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write return command proxy: " << commandName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create write return command proxy: " << commandName << std::endl;
+            newCommandWriteReturn->SetArgumentPrototypeSerialized(itWriteReturn->ArgumentPrototypeSerialized);
+            newCommandWriteReturn->SetResultPrototypeSerialized(itWriteReturn->ResultPrototypeSerialized);
+            newCommandWriteReturn->SetArgumentSupported(false);
+        } else {
+            newCommandWriteReturn->SetArgumentPrototype(argumentPrototype);
+            newCommandWriteReturn->SetResultPrototype(resultPrototype);
         }
-        newCommandWriteReturn->SetArgumentPrototype(argumentPrototype);
-        newCommandWriteReturn->SetResultPrototype(resultPrototype);
     }
 
     // Create event generator proxies

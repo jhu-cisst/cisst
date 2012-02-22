@@ -438,7 +438,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCommandVoid * command)
 
 mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoidReturnBase * callable,
                                                                   const std::string & name,
-                                                                  mtsGenericObject * resultPrototype,
+                                                                  const mtsGenericObject * resultPrototype,
                                                                   mtsCommandQueueingPolicy queueingPolicy)
 {
     // check that the input is valid
@@ -520,8 +520,8 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
 
 mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableWriteReturnBase * callable,
                                                                     const std::string & name,
-                                                                    mtsGenericObject * argumentPrototype,
-                                                                    mtsGenericObject * resultPrototype,
+                                                                    const mtsGenericObject * argumentPrototype,
+                                                                    const mtsGenericObject * resultPrototype,
                                                                     mtsCommandQueueingPolicy queueingPolicy)
 {
     // check that the input is valid
@@ -572,7 +572,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCommandWr
 
 mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * callable,
                                                       const std::string & name,
-                                                      mtsGenericObject * argumentPrototype)
+                                                      const mtsGenericObject * argumentPrototype)
 {
     // check that the input is valid
     if (callable) {
@@ -608,8 +608,8 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 
 mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
                                                                         const std::string & name,
-                                                                        mtsGenericObject * argument1Prototype,
-                                                                        mtsGenericObject * argument2Prototype)
+                                                                        const mtsGenericObject * argument1Prototype,
+                                                                        const mtsGenericObject * argument2Prototype)
 {
     // check that the input is valid
     if (callable) {
@@ -854,6 +854,36 @@ bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
 {
     mtsCommandVoid * command;
     command = this->AddEventVoid(eventName);
+    if (command) {
+        eventTrigger.Bind(command);
+        return true;
+    }
+    return false;
+}
+
+
+mtsCommandWriteBase * mtsInterfaceProvided::AddEventWriteGeneric(const std::string & eventName,
+                                                                 const mtsGenericObject & argumentPrototype) {
+    mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWriteGeneric(eventName, argumentPrototype);
+    if (eventMulticastCommand) {
+        if (AddEvent(eventName, eventMulticastCommand)) {
+            return eventMulticastCommand;
+        }
+        delete eventMulticastCommand;
+        CMN_LOG_CLASS_INIT_ERROR << "AddEventWriteGeneric: unable to add event \""
+                                 << eventName << "\"" << std::endl;
+        return 0;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "AddEventWriteGeneric: unable to create multi-cast command for event \""
+                             << eventName << "\"" << std::endl;
+    return 0;
+}
+
+
+bool mtsInterfaceProvided::AddEventWriteGeneric(mtsFunctionWrite & eventTrigger, const std::string & eventName,
+                                                const mtsGenericObject & argumentPrototype) {
+    mtsCommandWriteBase * command;
+    command = this->AddEventWriteGeneric(eventName, argumentPrototype);
     if (command) {
         eventTrigger.Bind(command);
         return true;

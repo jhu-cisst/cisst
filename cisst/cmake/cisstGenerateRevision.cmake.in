@@ -21,19 +21,20 @@ set (CISST_VERSION_MAJOR "@CISST_VERSION_MAJOR@")
 set (CISST_VERSION_MINOR "@CISST_VERSION_MINOR@")
 set (CISST_VERSION "@CISST_VERSION@")
 
+set (CISST_REVISION_SVN_DIR "@CISST_REVISION_SVN_DIR@")
 set (CISST_REVISION_HEADER_SRC "@CISST_REVISION_HEADER_SRC@")
 set (CISST_REVISION_HEADER "@CISST_REVISION_HEADER@")
-set (Subversion_FOUND "@Subversion_FOUND@")
 set (Subversion_SVN_EXECUTABLE "@Subversion_SVN_EXECUTABLE@")
-set (CISST_WC_REVISION "@CISST_WC_REVISION@")
 
 # To make sure the Subversion_WC_INFO macro is defined
 find_package (Subversion QUIET)
 
-set (CISST_WC_REVISION "undefined (SVN executable not found)")
-if (Subversion_FOUND AND EXISTS "${cisst_SOURCE_DIR}/.svn/")
-  Subversion_WC_INFO ("${cisst_SOURCE_DIR}" CISST)
-endif (Subversion_FOUND AND EXISTS "${cisst_SOURCE_DIR}/.svn/")
+set (CISST_WC_REVISION "undefined")
+if (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
+  Subversion_WC_INFO ("${CISST_REVISION_SVN_DIR}" CISST)
+endif (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
+
+message ("Found revision: ${CISST_WC_REVISION}")
 
 configure_file ("${CISST_REVISION_HEADER_SRC}"
                 "${CISST_REVISION_HEADER}")

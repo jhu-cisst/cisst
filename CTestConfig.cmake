@@ -88,10 +88,6 @@ if (CISST_cisstStereoVision)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Sv)
 endif (CISST_cisstStereoVision)
 
-if (CISST_cisstDevices)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Dv)
-endif (CISST_cisstDevices)
-
 # Tells if Python was used
 if (CISST_HAS_SWIG_PYTHON)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Py)

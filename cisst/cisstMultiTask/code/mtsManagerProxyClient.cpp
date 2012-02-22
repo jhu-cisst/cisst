@@ -991,7 +991,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
     }
 #else
     while (IsActiveProxy()) {
-        IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
+        osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
@@ -1000,7 +1000,6 @@ void mtsManagerProxyClient::ManagerClientI::Run()
                 ManagerProxyClient->OnServerDisconnect(ex);
             }
         }
-        osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
     }
 #endif
 

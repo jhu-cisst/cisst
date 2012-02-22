@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2007-09-13
-  
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,37 +27,40 @@ http://www.cisst.org/cisst/license.txt.
 class vctFrame4x4Test : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(vctFrame4x4Test);
+    {
+        CPPUNIT_TEST(TestConstructorsDouble);
+        CPPUNIT_TEST(TestConstructorsFloat);
 
-    CPPUNIT_TEST(TestConstructorsDouble);
-    CPPUNIT_TEST(TestConstructorsFloat);
+        CPPUNIT_TEST(TestApplyToDouble);
+        CPPUNIT_TEST(TestApplyToFloat);
 
-    CPPUNIT_TEST(TestApplyToDouble);
-    CPPUNIT_TEST(TestApplyToFloat);
+        CPPUNIT_TEST(TestInverseDouble);
+        CPPUNIT_TEST(TestInverseFloat);
 
-    CPPUNIT_TEST(TestInverseDouble);
-    CPPUNIT_TEST(TestInverseFloat);
+        CPPUNIT_TEST(TestCompositionDouble);
+        CPPUNIT_TEST(TestCompositionFloat);
 
-    CPPUNIT_TEST(TestCompositionDouble);
-    CPPUNIT_TEST(TestCompositionFloat);
+        CPPUNIT_TEST(TestRigidityDouble);
+        CPPUNIT_TEST(TestRigidityFloat);
 
-    CPPUNIT_TEST(TestRigidityDouble);
-    CPPUNIT_TEST(TestRigidityFloat);
+        CPPUNIT_TEST(TestIdentityDouble);
+        CPPUNIT_TEST(TestIdentityFloat);
 
-    CPPUNIT_TEST(TestIdentityDouble);
-    CPPUNIT_TEST(TestIdentityFloat);
+        CPPUNIT_TEST(TestApplyMethodsOperatorsDouble);
+        CPPUNIT_TEST(TestApplyMethodsOperatorsFloat);
 
-    CPPUNIT_TEST(TestApplyMethodsOperatorsDouble);
-    CPPUNIT_TEST(TestApplyMethodsOperatorsFloat);
-
+        CPPUNIT_TEST(TestConversionFrame3MatrixDouble);
+        CPPUNIT_TEST(TestConversionFrame3MatrixFloat);
+    }
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
     /*! Test the constructors. */
     template <class _elementType, bool _rowMajor> void TestConstructors(void);
     void TestConstructorsDouble(void);
@@ -93,6 +96,10 @@ class vctFrame4x4Test : public CppUnit::TestFixture
     void TestApplyMethodsOperatorsDouble(void);
     void TestApplyMethodsOperatorsFloat(void);
 
+    /*! Test conversion methods from a vctFrm3 (translation + rotation) */
+    template <class _elementType> void TestConversionFrame3Matrix(void);
+    void TestConversionFrame3MatrixDouble(void);
+    void TestConversionFrame3MatrixFloat(void);
 };
 
 

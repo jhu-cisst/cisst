@@ -22,4 +22,5 @@ set (REQUIRED_CISST_LIBRARIES
 cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 
 add_executable (cisstRandomJoints RandomJoints.cpp)
+set_property (TARGET cisstRandomJoints PROPERTY FOLDER "cisstRobot/applications")
 cisst_target_link_libraries (cisstRandomJoints ${REQUIRED_CISST_LIBRARIES})

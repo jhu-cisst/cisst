@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -23,6 +23,11 @@
 #include "cdgGlobal.h"
 
 CMN_IMPLEMENT_SERVICES(cdgGlobal);
+
+
+cdgGlobal::cdgGlobal(unsigned int lineNumber):
+    cdgScope(lineNumber)
+{}
 
 
 cdgScope::Type cdgGlobal::GetScope(void) const
@@ -42,12 +47,24 @@ bool cdgGlobal::HasKeyword(const std::string & keyword) const
 
 
 bool cdgGlobal::HasScope(const std::string & keyword,
-                         cdgScope::Stack & scopes)
+                         cdgScope::Stack & scopes,
+                         unsigned int lineNumber)
 {
     if (keyword == "class") {
-        cdgClass * newClass = new cdgClass;
+        cdgClass * newClass = new cdgClass(lineNumber);
         scopes.push_back(newClass);
+        Scopes.push_back(newClass);
         Classes.push_back(newClass);
+        return true;
+    } else if (keyword == "inline-header") {
+        cdgInline * newCode = new cdgInline(lineNumber, cdgInline::CDG_INLINE_HEADER);
+        scopes.push_back(newCode);
+        Scopes.push_back(newCode);
+        return true;
+    } else if (keyword == "inline-code") {
+        cdgInline * newCode = new cdgInline(lineNumber, cdgInline::CDG_INLINE_CODE);
+        scopes.push_back(newCode);
+        Scopes.push_back(newCode);
         return true;
     }
     return false;
@@ -55,65 +72,37 @@ bool cdgGlobal::HasScope(const std::string & keyword,
 
 
 bool cdgGlobal::SetValue(const std::string & keyword,
-                        const std::string & value,
-                        std::string & errorMessage)
+                         const std::string & CMN_UNUSED(value),
+                         std::string & errorMessage)
 {
-    errorMessage.clear();
-    if (keyword == "name") {
-        if (!this->Name.empty()) {
-            errorMessage = "name already set";
-            return false;
-        }
-        this->Name = value;
-        return true;
-    }
-    if (keyword == "include") {
-        this->Includes.push_back(value);
-        return true;
-    }
     errorMessage = "unhandled keyword \"" + keyword + "\"";
     return false;
 }
 
 
-bool cdgGlobal::IsValid(std::string & errorMessage) const
+bool cdgGlobal::IsValid(std::string & CMN_UNUSED(errorMessage)) const
 {
-    errorMessage.clear();
-    bool isValid = true;
-    if (this->Name.empty()) {
-        isValid = false;
-        errorMessage += " [no name defined] ";
-    }
-    return isValid;
+    return true;
 }
 
 
 void cdgGlobal::GenerateHeader(std::ostream & outputStream) const
 {
     size_t index;
-    outputStream << "#ifndef _" << Name << "_h" << std::endl
-                 << "#define _" << Name << "_h" << std::endl
-                 << "#include <cisstMultiTask/mtsGenericObject.h>" << std::endl;
-
-    for (index = 0; index < Includes.size(); index++) {
-        outputStream << "#include " << Includes[index] << std::endl;
+    GenerateLineComment(outputStream);
+    for (index = 0; index < Scopes.size(); index++) {
+        Scopes[index]->GenerateHeader(outputStream);
+        outputStream << std::endl;
     }
-    for (index = 0; index < Classes.size(); index++) {
-        Classes[index]->GenerateHeader(outputStream);
-    }
-    outputStream << "#endif // _" << Name << "_h" << std::endl;
 }
 
 
-void cdgGlobal::GenerateCode(std::ostream & outputStream,
-                             const std::string & header) const
+void cdgGlobal::GenerateCode(std::ostream & outputStream) const
 {
     size_t index;
-    outputStream << "#include <" << header << ">" << std::endl
-                 << "#include <cisstCommon/cmnSerializer.h>" << std::endl
-                 << "#include <cisstCommon/cmnDeSerializer.h>" << std::endl;
-    
-    for (index = 0; index < Classes.size(); index++) {
-        Classes[index]->GenerateCode(outputStream);
+    GenerateLineComment(outputStream);
+    for (index = 0; index < Scopes.size(); index++) {
+        Scopes[index]->GenerateCode(outputStream);
+        outputStream << std::endl;
     }
 }

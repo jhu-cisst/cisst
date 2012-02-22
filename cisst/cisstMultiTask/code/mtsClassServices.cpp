@@ -29,6 +29,9 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorState, mtsCollectorBase)   // derives
 #include <cisstMultiTask/mtsComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsComponent)
 
+#include <cisstMultiTask/mtsComponentAddLatency.h>
+CMN_IMPLEMENT_SERVICES(mtsComponentAddLatency)
+
 #include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 CMN_IMPLEMENT_SERVICES(mtsInterfaceProvidedOrOutput)
 

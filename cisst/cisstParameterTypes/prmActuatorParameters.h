@@ -1,10 +1,10 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
 /*
 
-Author(s):	Marcin Balicki
-Created on:	2008-08-07
+Author(s):  Marcin Balicki
+Created on: 2008-08-07
 
 (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
 Reserved.
@@ -18,18 +18,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _prmGalilActuator_h
-#define _prmGalilActuator_h
+#ifndef _prmActuatorParameters_h
+#define _prmActuatorParameters_h
 
-// Avoid Windows inconsistent DLL linkage warning (C4273)
-// due to CMN_DECLARE_SERVICES_INSTANTIATION
-#undef CISST_EXPORT
-#define CISST_EXPORT
-
-/*! 
-\file 
+/*!
+\file
 \brief Holds parameters of an actuator (currently includes current values also)
-\this might not be parameter class (ask anton for his opinion)
+\note This might not be parameter class (ask anton for his opinion)
 */
 
 #include <cisstVector/vctDynamicVectorTypes.h>
@@ -45,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 Only use getters unless you know what you are doing.
 
 //TODO: add internal size to specify the size of each member in this class
-//      so the user does not have to have a 
+//      so the user does not have to have a
 // this is not a great software engineering approach but for now it might be the most usefull
 //cisst vector of this class caused compilation errors
 //it is possible to resize each memeber so it is better to test each member for size
@@ -68,12 +63,12 @@ public:
     typedef unsigned int size_type;
 
 
-    /*!default constructor*/	
+    /*!default constructor*/
     prmActuatorParameters() {};
     //initial size
     inline prmActuatorParameters(size_type size) { SetSize(size);};
 
-    void SetSize(size_type size); 
+    void SetSize(size_type size);
 
     /*!destructor
     */
@@ -102,7 +97,7 @@ public:
     CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, ReverseLimit);
     //@}
 
-    /*! Set and Get methods for velocity limit, use accelerationMax to accelerate until this limit. 
+    /*! Set and Get methods for velocity limit, use accelerationMax to accelerate until this limit.
     Can used this in velocity control mode.
     */
     //@{
@@ -142,25 +137,25 @@ public:
     //@}
 
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kd);	//Derivative
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kd); //Derivative
     //@}
 
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Ki);	  //Integral
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Ki); //Integral
     //@}
 
     //@{
     //if IL is positive, Ki works all the time, otherwise IL works only after move is finished
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, IL);	 //Integrator limit
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, IL); //Integrator limit
     //@}
 
 
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FV);	//FeedForward Velocity Parameters
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FV); //FeedForward Velocity Parameters
     //@}
 
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FA);	 //FeedForward Acceleration Parameters
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FA); //FeedForward Acceleration Parameters
     //@}
 
     //@{
@@ -172,10 +167,10 @@ public:
     //@}
 
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueOffset);		//Torque offset parameter, used for break.
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueOffset); //Torque offset parameter, used for break.
     //@}
 
-}; // _prmGalilActuator_h
+}; // _prmActuatorParameters_h
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmActuatorParameters)
 

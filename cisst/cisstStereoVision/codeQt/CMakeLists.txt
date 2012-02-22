@@ -96,6 +96,7 @@ endforeach (UI)
 
 cisst_add_library (LIBRARY cisstStereoVisionQt
                    LIBRARY_DIR cisstStereoVision
+                   FOLDER cisstStereoVision
                    DEPENDENCIES cisstCommon
                                 cisstVector
                                 cisstMultiTask

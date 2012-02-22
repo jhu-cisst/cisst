@@ -32,7 +32,8 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageConvolution, svlFilterBase)
 svlFilterImageConvolution::svlFilterImageConvolution() :
     svlFilterBase(),
     OutputImage(0),
-    KernelSeparable(true)
+    KernelSeparable(true),
+    AbsoluteResults(false)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -62,15 +63,20 @@ svlFilterImageConvolution::svlFilterImageConvolution() :
 
 void svlFilterImageConvolution::SetKernel(const vctDynamicMatrix<double> & kernel)
 {
-    Kernel.Assign(kernel);
+    Kernel.ForceAssign(kernel);
     KernelSeparable = false;
 }
 
 void svlFilterImageConvolution::SetKernel(const vctDynamicVector<double> & kernel_horiz, const vctDynamicVector<double> & kernel_vert)
 {
-    KernelHoriz.Assign(kernel_horiz);
-    KernelVert.Assign(kernel_vert);
+    KernelHoriz.ForceAssign(kernel_horiz);
+    KernelVert.ForceAssign(kernel_vert);
     KernelSeparable = true;
+}
+
+void svlFilterImageConvolution::SetAbsoluteResults(bool absres)
+{
+    AbsoluteResults = absres;
 }
 
 int svlFilterImageConvolution::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -94,10 +100,10 @@ int svlFilterImageConvolution::Process(svlProcInfo* procInfo, svlSample* syncInp
     _ParallelLoop(procInfo, idx, videochannels)
     {
         if (KernelSeparable) {
-            svlImageProcessing::Convolution(img, idx, OutputImage, idx, KernelHoriz, KernelVert);
+            svlImageProcessing::Convolution(img, idx, OutputImage, idx, KernelHoriz, KernelVert, AbsoluteResults);
         }
         else {
-            svlImageProcessing::Convolution(img, idx, OutputImage, idx, Kernel);
+            svlImageProcessing::Convolution(img, idx, OutputImage, idx, Kernel, AbsoluteResults);
         }
     }
 

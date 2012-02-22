@@ -86,5 +86,46 @@ public:
 };
 
 
+
+class mtsMulticastCommandWriteGeneric: public mtsMulticastCommandWriteBase
+{
+public:
+    typedef mtsMulticastCommandWriteBase BaseType;
+
+public:
+    /*! Default constructor. Does nothing. */
+    mtsMulticastCommandWriteGeneric(const std::string & name,
+                                    const mtsGenericObject & argumentPrototype):
+        BaseType(name)
+    {
+        this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create(argumentPrototype));
+    }
+
+    /*! Default destructor. Does nothing. */
+    ~mtsMulticastCommandWriteGeneric() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
+
+    /*! Execute all the commands in the composite. */
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsBlockingType CMN_UNUSED(blocking)) {
+        // cast argument first
+        
+        if (typeid(argument) != typeid(*(this->ArgumentPrototype))) {
+            return mtsExecutionResult::INVALID_INPUT_TYPE;
+        }
+        // if cast succeeded call using actual type
+        size_t index;
+        const size_t commandsSize = Commands.size();
+        for (index = 0; index < commandsSize; index++) {
+            Commands[index]->Execute(argument, MTS_NOT_BLOCKING);
+        }
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+};
+
+
 #endif // _mtsMulticastCommandWrite_h
 

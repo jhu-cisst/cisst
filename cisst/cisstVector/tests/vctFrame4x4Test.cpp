@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2007-09-13
-  
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -53,7 +53,7 @@ void vctFrame4x4Test::TestConstructors(void) {
             CPPUNIT_ASSERT(&(frame.Rotation().Element(i, j)) == &(frame.Element(i, j)));
         }
     }
-    
+
     /* test constructor from rotation matrix and translation */
     vctMatrixRotation3<value_type> rotation;
     vctFixedSizeVector<value_type, 3> translation;
@@ -107,7 +107,7 @@ void vctFrame4x4Test::TestApplyTo(void) {
     CPPUNIT_ASSERT((z - result).Norm() < tolerance);
     composed.ApplyTo(z, result);
     CPPUNIT_ASSERT((y + result).Norm() < tolerance);
-    
+
     testRotation.Rotation().From(vctAxisAngleRotation3<value_type>(y, value_type(cmnPI_2)));
     testRotation.ApplyTo(z, result);
     CPPUNIT_ASSERT((x - result).Norm() < tolerance);
@@ -118,7 +118,7 @@ void vctFrame4x4Test::TestApplyTo(void) {
     CPPUNIT_ASSERT((x - result).Norm() < tolerance);
     testRotation.ApplyTo(x, result);
     CPPUNIT_ASSERT((z + result).Norm() < tolerance);
-    
+
     testRotation.Rotation().From(vctAxisAngleRotation3<value_type>(z, value_type(cmnPI_2)));
     testRotation.ApplyTo(x, result);
     CPPUNIT_ASSERT((y - result).Norm() < tolerance);
@@ -158,11 +158,11 @@ void vctFrame4x4Test::TestInverse(void) {
 
     vectorType result, temp;
     FrameType test, product;
-    
+
     _elementType angle = 0.0;
 
     int counter = 0;
-    // try different angles and axis  
+    // try different angles and axis
     while (angle <= _elementType(2.0 * cmnPI)) {
         angle = _elementType(counter * cmnPI / 10.0);
         axis[counter % 3] += _elementType(counter / 10.0);
@@ -331,7 +331,22 @@ void vctFrame4x4Test::TestApplyMethodsOperatorsFloat(void) {
     TestApplyMethodsOperators<float, VCT_COL_MAJOR>();
 }
 
+template <class _elementType>
+void vctFrame4x4Test::TestConversionFrame3Matrix(void) {
+    vctFrameBase<vctMatrixRotation3<_elementType> > frame3;
+    vctFrame4x4<_elementType> frame4x4;
+    vctRandom(frame3.Rotation());
+    vctRandom(frame3.Translation(), static_cast<_elementType>(-1.0), static_cast<_elementType>(1.0));
+    vctGenericRotationTest::TestConversion(frame3, frame4x4);
+}
+
+void vctFrame4x4Test::TestConversionFrame3MatrixDouble(void) {
+    TestConversionFrame3Matrix<double>();
+}
+
+void vctFrame4x4Test::TestConversionFrame3MatrixFloat(void) {
+    TestConversionFrame3Matrix<float>();
+}
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctFrame4x4Test);
-

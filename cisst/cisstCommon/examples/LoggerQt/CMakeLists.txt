@@ -20,6 +20,7 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
   add_executable (cmnExLoggerQt main.cpp)
+  set_property (TARGET cmnExLoggerQt PROPERTY FOLDER "cisstCommon/examples")
   cisst_target_link_libraries (cmnExLoggerQt ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)

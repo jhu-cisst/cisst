@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 /*!
-  \file prmTransformation.h
   \brief Support classes for transformation manager.
   \sa prmTransformationManager
 */

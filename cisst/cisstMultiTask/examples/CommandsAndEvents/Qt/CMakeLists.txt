@@ -49,8 +49,10 @@ if (cisst_FOUND_AS_REQUIRED)
                   serverQtComponent.h
                   ${QT_SERVER_WRAPPED_UI}
                   ${QT_SERVER_WRAPPED_CPP}
+                  serverWithDelay.h
+                  serverWithDelay.cpp
                  )
-
+  set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
   cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
 
   # compile network version if ICE is available
@@ -63,6 +65,7 @@ if (cisst_FOUND_AS_REQUIRED)
                     ${QT_SERVER_WRAPPED_UI}
                     ${QT_SERVER_WRAPPED_CPP}
                    )
+    set_property (TARGET mtsExCommandsAndEventsQtServer PROPERTY FOLDER "cisstMultiTask/examples")
     cisst_target_link_libraries (mtsExCommandsAndEventsQtServer ${REQUIRED_CISST_LIBRARIES})
 
     add_executable (mtsExCommandsAndEventsQtClient
@@ -72,6 +75,7 @@ if (cisst_FOUND_AS_REQUIRED)
                     ${QT_CLIENT_WRAPPED_UI}
                     ${QT_CLIENT_WRAPPED_CPP}
                    )
+    set_property (TARGET mtsExCommandsAndEventsQtClient PROPERTY FOLDER "cisstMultiTask/examples")
     cisst_target_link_libraries (mtsExCommandsAndEventsQtClient ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_MTS_HAS_ICE)

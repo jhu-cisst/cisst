@@ -51,11 +51,11 @@ svlDrawInternals::~svlDrawInternals()
 /*******************************/
 
 
-/**********************************************/
-/*** svlDrawHelper::TriangleInternals class ***/
-/**********************************************/
+/*******************************************/
+/*** svlDrawHelper::ShapeInternals class ***/
+/*******************************************/
 
-svlDrawHelper::TriangleInternals::TriangleInternals() :
+svlDrawHelper::ShapeInternals::ShapeInternals() :
     svlDrawInternals(),
     Image(0),
     Channel(0),
@@ -64,7 +64,7 @@ svlDrawHelper::TriangleInternals::TriangleInternals() :
 {
 }
 
-bool svlDrawHelper::TriangleInternals::SetImage(svlSampleImage* image, unsigned int channel)
+bool svlDrawHelper::ShapeInternals::SetImage(svlSampleImage* image, unsigned int channel)
 {
     if (!image || channel >= image->GetVideoChannels()) return false;
 
@@ -83,7 +83,7 @@ bool svlDrawHelper::TriangleInternals::SetImage(svlSampleImage* image, unsigned 
     return true;
 }
 
-void svlDrawHelper::TriangleInternals::SampleLine(vctDynamicVector<int>& samples, int x1, int y1, int x2, int y2)
+void svlDrawHelper::ShapeInternals::SampleLine(vctDynamicVector<int>& samples, int x1, int y1, int x2, int y2)
 {
     if (x1 == x2 && y1 == y2) {
         if (y1 >= 0 && y1 < Height) samples[y1] = x1;
@@ -141,7 +141,105 @@ void svlDrawHelper::TriangleInternals::SampleLine(vctDynamicVector<int>& samples
     }
 }
 
-void svlDrawHelper::TriangleInternals::Draw(int x1, int y1, int x2, int y2, int x3, int y3, const svlRGB color)
+void svlDrawHelper::ShapeInternals::SampleLine(int x1, int y1, int x2, int y2)
+{
+    if (x1 == x2 && y1 == y2) {
+        if (y1 >= 0 && y1 < Height) {
+            if (LeftSamples[y1] == __SMALL_NUMBER) {
+                LeftSamples[y1] = RightSamples[y1] = x1;
+            }
+            else {
+                if (x1 < LeftSamples[y1])  LeftSamples[y1]  = x1;
+                if (x1 > RightSamples[y1]) RightSamples[y1] = x1;
+            }
+        }
+        return;
+    }
+
+    int x = x1, y = y1;
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    int eps = 0;
+
+    if (dy > 0) {
+        if (dx >= dy) {
+            for (x = x1; x <= x2; x ++) {
+                if (y >= 0 && y < Height) {
+                    if (LeftSamples[y] == __SMALL_NUMBER) {
+                        LeftSamples[y] = RightSamples[y] = x;
+                    }
+                    else {
+                        if (x < LeftSamples[y])  LeftSamples[y]  = x;
+                        if (x > RightSamples[y]) RightSamples[y] = x;
+                    }
+                }
+                eps += dy;
+                if ((eps << 1) >= dx) {
+                    y ++;
+                    eps -= dx;
+                }
+            }
+        }
+        else {
+            for (y = y1; y <= y2; y ++) {
+                if (y >= 0 && y < Height) {
+                    if (LeftSamples[y] == __SMALL_NUMBER) {
+                        LeftSamples[y] = RightSamples[y] = x;
+                    }
+                    else {
+                        if (x < LeftSamples[y])  LeftSamples[y]  = x;
+                        if (x > RightSamples[y]) RightSamples[y] = x;
+                    }
+                }
+                eps += dx;
+                if ((eps << 1) >= dy) {
+                    x ++;
+                    eps -= dy;
+                }
+            }
+        }
+    }
+    else {
+        if (dx >= abs(dy)) {
+            for (x = x1; x <= x2; x ++) {
+                if (y >= 0 && y < Height) {
+                    if (LeftSamples[y] == __SMALL_NUMBER) {
+                        LeftSamples[y] = RightSamples[y] = x;
+                    }
+                    else {
+                        if (x < LeftSamples[y])  LeftSamples[y]  = x;
+                        if (x > RightSamples[y]) RightSamples[y] = x;
+                    }
+                }
+                eps += dy;
+                if ((eps << 1) <= -dx) {
+                    y --;
+                    eps += dx;
+                }
+            }
+        }
+        else {
+            for (y = y1; y >= y2; y --) {
+                if (y >= 0 && y < Height) {
+                    if (LeftSamples[y] == __SMALL_NUMBER) {
+                        LeftSamples[y] = RightSamples[y] = x;
+                    }
+                    else {
+                        if (x < LeftSamples[y])  LeftSamples[y]  = x;
+                        if (x > RightSamples[y]) RightSamples[y] = x;
+                    }
+                }
+                eps += dx;
+                if ((eps << 1) >= -dy) {
+                    x ++;
+                    eps -= -dy;
+                }
+            }
+        }
+    }
+}
+
+void svlDrawHelper::ShapeInternals::Draw(int x1, int y1, int x2, int y2, int x3, int y3, const svlRGB color)
 {
     if (!Image || Width == 0 || Height == 0) return;
 
@@ -344,15 +442,126 @@ void svlDrawHelper::TriangleInternals::Draw(int x1, int y1, int x2, int y2, int 
     }
 }
 
+void svlDrawHelper::ShapeInternals::Draw(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, const svlRGB color)
+{
+    if (!Image || Width == 0 || Height == 0) return;
 
-/**************************************************/
-/*** svlDrawHelper::TriangleWarpInternals class ***/
-/**************************************************/
+    svlRGB *tdata, *tdata2, *imgdata = reinterpret_cast<svlRGB*>(Image->GetUCharPointer(Channel));
+    int i, top, bottom, left, right, len;
 
-svlDrawHelper::TriangleWarpInternals::TriangleWarpInternals() :
+    // If quad is a horizontal line
+    if (y1 == y2 && y2 == y3 && y3 == y4) {
+        if (y1 < 0 || y1 >= Height) return;
+
+        // If quad is one pixel
+        if (x1 == x2 && x2 == x3 && x3 == x4 && x1 >= 0 && x1 < Width) {
+            imgdata[y1 * Width + x1] = color;
+            return;
+        }
+
+        // Find leftmost corner
+        left = x1;
+        if (x2 < left) left = x2;
+        if (x3 < left) left = x3;
+        if (x4 < left) left = x4;
+        // Find rightmost corner
+        right = x1;
+        if (x2 > right) right = x2;
+        if (x3 > right) right = x3;
+        if (x4 > right) right = x4;
+
+        if (left < 0) left = 0;
+        if (right >= Width) right = Width - 1;
+
+        len = right - left;
+        if (len < 0) return;
+
+        // Draw horizontal line
+        tdata = imgdata + (y1 * Width + left);
+        while (len >= 0) {
+            *tdata = color; tdata ++; len --;
+        }
+        return;
+    }
+
+    // Find topmost corner
+    top = y1;
+    if (y2 < top) top = y2;
+    if (y3 < top) top = y3;
+    if (y4 < top) top = y4;
+    // Find bottommost corner
+    bottom = y1;
+    if (y2 > bottom) bottom = y2;
+    if (y3 > bottom) bottom = y3;
+    if (y4 > bottom) bottom = y4;
+
+    // If quad is a vertical line
+    if (x1 == x2 && x2 == x3 && x3 == x4) {
+        if (x1 < 0 || x1 >= Width) return;
+
+        if (top < 0) top = 0;
+        if (bottom >= Height) bottom = Height - 1;
+
+        len = bottom - top;
+        if (len < 0) return;
+
+        // Draw vertical line
+        tdata = imgdata + (top * Width + x1);
+        while (len >= 0) {
+            *tdata = color; tdata += Width; len --;
+        }
+        return;
+    }
+
+    if (top < 0) top = 0;
+    if (bottom >= Height) bottom = Height - 1;
+
+    // Initialize line sampling table
+    for (i = top; i <= bottom; i ++) {
+        LeftSamples[i] = __SMALL_NUMBER;
+    }
+
+    if (x1 < x2) SampleLine(x1, y1, x2, y2);
+    else SampleLine(x2, y2, x1, y1);
+    if (x2 < x3) SampleLine(x2, y2, x3, y3);
+    else SampleLine(x3, y3, x2, y2);
+    if (x3 < x4) SampleLine(x3, y3, x4, y4);
+    else SampleLine(x4, y4, x3, y3);
+    if (x4 < x1) SampleLine(x4, y4, x1, y1);
+    else SampleLine(x1, y1, x4, y4);
+
+    // Fill quad
+    tdata = imgdata + (top * Width);
+    for (i = top; i <= bottom; i ++) {
+
+        // Find left and right end points
+        left = LeftSamples[i];
+        right = RightSamples[i];
+        if (left < 0) left = 0;
+        if (right >= Width) right = Width - 1;
+
+        // Set image pointer
+        tdata2 = tdata + left; tdata += Width;
+
+        // Draw horizontal line
+        len = right - left;
+        while (len >= 0) {
+            *tdata2 = color; tdata2 ++; len --;
+        }
+    }
+}
+
+
+/******************************************/
+/*** svlDrawHelper::WarpInternals class ***/
+/******************************************/
+
+svlDrawHelper::WarpInternals::WarpInternals(unsigned int vertices) :
     svlDrawInternals(),
     Input(0),
     Output(0),
+    _ilen(0),
+    _olen(0),
     _in_idxs(0),
     _out_idxs(0),
     _lm_x(0),
@@ -360,21 +569,17 @@ svlDrawHelper::TriangleWarpInternals::TriangleWarpInternals() :
     _lm_id(0),
     _rm_id(0),
     _lm_pos(0),
-    _rm_pos(0),
-    _ixs(0),
-    _iys(0),
-    _oxs(0),
-    _oys(0)
+    _rm_pos(0)
 {
-    AllocateBuffers(MAX_DIMENSION);
+    AllocateBuffers(vertices, MAX_DIMENSION);
 }
 
-svlDrawHelper::TriangleWarpInternals::~TriangleWarpInternals()
+svlDrawHelper::WarpInternals::~WarpInternals()
 {
     ReleaseBuffers();
 }
 
-bool svlDrawHelper::TriangleWarpInternals::SetInputImage(svlSampleImage* image, unsigned int channel)
+bool svlDrawHelper::WarpInternals::SetInputImage(svlSampleImage* image, unsigned int channel)
 {
     if (!image || channel >= image->GetVideoChannels()) return false;
 
@@ -391,7 +596,7 @@ bool svlDrawHelper::TriangleWarpInternals::SetInputImage(svlSampleImage* image, 
     return true;
 }
 
-bool svlDrawHelper::TriangleWarpInternals::SetOutputImage(svlSampleImage* image, unsigned int channel)
+bool svlDrawHelper::WarpInternals::SetOutputImage(svlSampleImage* image, unsigned int channel)
 {
     if (!image || channel >= image->GetVideoChannels()) return false;
 
@@ -408,10 +613,11 @@ bool svlDrawHelper::TriangleWarpInternals::SetOutputImage(svlSampleImage* image,
     return true;
 }
 
-void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
-                                                int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
-                                                unsigned int alpha)
+void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
+                                        int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
+                                        unsigned int alpha)
 {
+    if (_ixs.size() < 3) return;
     if (!Input || !Output || alpha == 0) return;
 
     int miny = MIN3(oy1, oy2, oy3);
@@ -469,8 +675,8 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
         id1 = _lm_id[i];
         id2 = _rm_id[i];
 
-        pos1 = (_lm_pos[i] * ratio[id1]) >> 10;
-        pos2 = (_rm_pos[i] * ratio[id2]) >> 10;
+        pos1 = (_lm_pos[i] * ratio[id1] + 1023) >> 10;
+        pos2 = (_rm_pos[i] * ratio[id2] + 1023) >> 10;
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {
@@ -491,7 +697,99 @@ void svlDrawHelper::TriangleWarpInternals::Draw(int ix1, int iy1, int ix2, int i
     }
 }
 
-int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1, int y1, int x2, int y2)
+void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
+                                        int ox1, int oy1, int ox2, int oy2, int ox3, int oy3, int ox4, int oy4,
+                                        unsigned int alpha)
+{
+    if (_ixs.size() < 4) return;
+    if (!Input || !Output || alpha == 0) return;
+
+    int miny = oy1, maxy = oy1;
+    if (oy2 < miny) miny = oy2;
+    if (oy3 < miny) miny = oy3;
+    if (oy4 < miny) miny = oy4;
+    if (oy2 > maxy) maxy = oy2;
+    if (oy3 > maxy) maxy = oy3;
+    if (oy4 > maxy) maxy = oy4;
+    if (miny < 0) miny = 0;
+    if (maxy >= OutHeight) maxy = OutHeight - 1;
+
+    int i, j, x, y, len;
+    int *xs, *ys;
+
+    // Trace source and destination quad contours
+    _ilen[0] = GetLinePixels(_ixs[0], _iys[0], ix1, iy1, ix2, iy2);
+    _ilen[1] = GetLinePixels(_ixs[1], _iys[1], ix2, iy2, ix3, iy3);
+    _ilen[2] = GetLinePixels(_ixs[2], _iys[2], ix3, iy3, ix4, iy4);
+    _ilen[3] = GetLinePixels(_ixs[3], _iys[3], ix4, iy4, ix1, iy1);
+    _olen[0] = GetLinePixels(_oxs[0], _oys[0], ox1, oy1, ox2, oy2);
+    _olen[1] = GetLinePixels(_oxs[1], _oys[1], ox2, oy2, ox3, oy3);
+    _olen[2] = GetLinePixels(_oxs[2], _oys[2], ox3, oy3, ox4, oy4);
+    _olen[3] = GetLinePixels(_oxs[3], _oys[3], ox4, oy4, ox1, oy1);
+
+    for (i = miny; i <= maxy; i ++) {
+        _lm_x[i] = __LARGE_NUMBER;
+        _rm_x[i] = __SMALL_NUMBER;
+    }
+
+    for (j = 0; j < 4; j ++) {
+        len = _olen[j];
+        xs = _oxs[j];
+        ys = _oys[j];
+
+        for (i = 0; i < len; i ++) {
+            x = *xs; xs ++;
+            y = *ys; ys ++;
+            if (y < 0 || y >= OutHeight) continue;
+
+            if (x < _lm_x[y]) {
+                _lm_x[y] = x;
+                _lm_id[y] = j;
+                _lm_pos[y] = i;
+            }
+            if (x > _rm_x[y]) {
+                _rm_x[y] = x;
+                _rm_id[y] = j;
+                _rm_pos[y] = i;
+            }
+        }
+    }
+
+    vctInt4 ratio;
+    ratio[0] = (_ilen[0] << 10) / _olen[0];
+    ratio[1] = (_ilen[1] << 10) / _olen[1];
+    ratio[2] = (_ilen[2] << 10) / _olen[2];
+    ratio[3] = (_ilen[3] << 10) / _olen[3];
+
+    int id1, id2, pos1, pos2;
+
+    for (i = miny; i <= maxy; i ++) {
+        id1 = _lm_id[i];
+        id2 = _rm_id[i];
+
+        pos1 = (_lm_pos[i] * ratio[id1] + 1023) >> 10;
+        pos2 = (_rm_pos[i] * ratio[id2] + 1023) >> 10;
+
+        if (_lm_x[i] != __LARGE_NUMBER &&
+            _rm_x[i] != __SMALL_NUMBER) {
+            if (alpha == 256) {
+                ResampleLine(_ixs[id1][pos1], _iys[id1][pos1],
+                             _ixs[id2][pos2], _iys[id2][pos2],
+                             _lm_x[i], i,
+                             _rm_x[i], i);
+            }
+            else {
+                ResampleLineAlpha(_ixs[id1][pos1], _iys[id1][pos1],
+                                  _ixs[id2][pos2], _iys[id2][pos2],
+                                  _lm_x[i], i,
+                                  _rm_x[i], i,
+                                  alpha);
+            }
+        }
+    }
+}
+
+int svlDrawHelper::WarpInternals::GetLinePixels(int* xs, int* ys, int x1, int y1, int x2, int y2)
 {
     if (x1 == x2 && y1 == y2) {
         *xs = x1; *ys = y1;
@@ -499,6 +797,35 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
     }
 
     int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
+
+    if (y1 == y2) {
+    // Horizontal line
+        if (x2 > x1) {
+            for (x = x1; x <= x2; x ++) {
+                *xs = x; *ys = y1; xs ++; ys ++; len ++;
+            }
+        }
+        else {
+            for (x = x1; x >= x2; x --) {
+                *xs = x; *ys = y1; xs ++; ys ++; len ++;
+            }
+        }
+        return len;
+    }
+    else if (x1 == x2) {
+    // Vertical line
+        if (y2 > y1) {
+            for (y = y1; y <= y2; y ++) {
+                *xs = x1; *ys = y; xs ++; ys ++; len ++;
+            }
+        }
+        else {
+            for (y = y1; y >= y2; y --) {
+                *xs = x1; *ys = y; xs ++; ys ++; len ++;
+            }
+        }
+        return len;
+    }
 
     if (x1 < x2) {
 
@@ -610,7 +937,7 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* xs, int* ys, int x1
     return len;
 }
 
-int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h)
+int svlDrawHelper::WarpInternals::GetLinePixels(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h)
 {
     const int stride = w * 3;
 
@@ -624,6 +951,43 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* idxs, int x1, int y
 
     int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
 
+    if (y1 == y2) {
+    // Horizontal line
+        if (x2 > x1) {
+            for (x = x1; x <= x2; x ++) {
+                if (x >= 0 && x < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        else {
+            for (x = x1; x >= x2; x --) {
+                if (x >= 0 && x < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        return len;
+    }
+    else if (x1 == x2) {
+    // Vertical line
+        if (y2 > y1) {
+            for (y = y1; y <= y2; y ++) {
+                if (x1 >= 0 && x1 < w && y >= 0 && y < h) *idxs = y * stride + x1 * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        else {
+            for (y = y1; y >= y2; y --) {
+                if (x1 >= 0 && x1 < w && y >= 0 && y < h) *idxs = y * stride + x1 * 3;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        return len;
+    }
+
     if (x1 < x2) {
 
         dx = x2 - x1;
@@ -758,8 +1122,8 @@ int svlDrawHelper::TriangleWarpInternals::GetLinePixels(int* idxs, int x1, int y
     return len;
 }
 
-void svlDrawHelper::TriangleWarpInternals::ResampleLine(int ix1, int iy1, int ix2, int iy2,
-                                                        int ox1, int oy1, int ox2, int oy2)
+void svlDrawHelper::WarpInternals::ResampleLine(int ix1, int iy1, int ix2, int iy2,
+                                                int ox1, int oy1, int ox2, int oy2)
 {
     int ilen = GetLinePixels(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
     int olen = GetLinePixels(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);
@@ -854,9 +1218,9 @@ void svlDrawHelper::TriangleWarpInternals::ResampleLine(int ix1, int iy1, int ix
     }
 }
 
-void svlDrawHelper::TriangleWarpInternals::ResampleLineAlpha(int ix1, int iy1, int ix2, int iy2,
-                                                             int ox1, int oy1, int ox2, int oy2,
-                                                             unsigned int alpha)
+void svlDrawHelper::WarpInternals::ResampleLineAlpha(int ix1, int iy1, int ix2, int iy2,
+                                                     int ox1, int oy1, int ox2, int oy2,
+                                                     unsigned int alpha)
 {
     int ilen = GetLinePixels(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
     int olen = GetLinePixels(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);
@@ -951,10 +1315,12 @@ void svlDrawHelper::TriangleWarpInternals::ResampleLineAlpha(int ix1, int iy1, i
     }
 }
 
-void svlDrawHelper::TriangleWarpInternals::AllocateBuffers(const unsigned int size)
+void svlDrawHelper::WarpInternals::AllocateBuffers(unsigned int vertices, unsigned int size)
 {
     ReleaseBuffers();
 
+    _ilen     = new int[vertices];
+    _olen     = new int[vertices];
     _in_idxs  = new int[size];
     _out_idxs = new int[size];
     _lm_x     = new int[size];
@@ -964,7 +1330,12 @@ void svlDrawHelper::TriangleWarpInternals::AllocateBuffers(const unsigned int si
     _lm_pos   = new int[size];
     _rm_pos   = new int[size];
 
-    for (unsigned int i = 0; i < 3; i ++) {
+    _ixs.SetSize(vertices);
+    _iys.SetSize(vertices);
+    _oxs.SetSize(vertices);
+    _oys.SetSize(vertices);
+
+    for (unsigned int i = 0; i < vertices; i ++) {
         _ixs[i] = new int[size];
         _iys[i] = new int[size];
         _oxs[i] = new int[size];
@@ -972,8 +1343,16 @@ void svlDrawHelper::TriangleWarpInternals::AllocateBuffers(const unsigned int si
     }
 }
 
-void svlDrawHelper::TriangleWarpInternals::ReleaseBuffers()
+void svlDrawHelper::WarpInternals::ReleaseBuffers()
 {
+    if (_ilen) {
+        delete [] _ilen;
+        _ilen = 0;
+    }
+    if (_olen) {
+        delete [] _olen;
+        _olen = 0;
+    }
     if (_in_idxs) {
         delete [] _in_idxs;
         _in_idxs = 0;
@@ -1007,19 +1386,25 @@ void svlDrawHelper::TriangleWarpInternals::ReleaseBuffers()
         _rm_pos = 0;
     }
 
-    for (unsigned int i = 0; i < 3; i ++) {
+    for (unsigned int i = 0; i < _ixs.size(); i ++) {
         if (_ixs[i]) {
             delete [] _ixs[i];
             _ixs[i] = 0;
         }
+    }
+    for (unsigned int i = 0; i < _iys.size(); i ++) {
         if (_iys[i]) {
             delete [] _iys[i];
             _iys[i] = 0;
         }
+    }
+    for (unsigned int i = 0; i < _oxs.size(); i ++) {
         if (_oxs[i]) {
             delete [] _oxs[i];
             _oxs[i] = 0;
         }
+    }
+    for (unsigned int i = 0; i < _oys.size(); i ++) {
         if (_oys[i]) {
             delete [] _oys[i];
             _oys[i] = 0;

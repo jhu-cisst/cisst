@@ -160,6 +160,7 @@ endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
 cisst_add_library (
   LIBRARY cisstVector
+  FOLDER cisstVector
   DEPENDENCIES cisstCommon
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})

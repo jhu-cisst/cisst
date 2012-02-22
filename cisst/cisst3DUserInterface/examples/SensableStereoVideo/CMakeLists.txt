@@ -21,4 +21,4 @@ target_link_libraries (cisst3DUserInterfaceSensableStereoVideo cisst3DUserInterf
 
 cisst_target_link_libraries (3DUserInterfaceTutorialExample2
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                             cisstStereoVision cisstDevices cisstParameterTypes cisst3DUserInterface)
+                             cisstStereoVision cisstParameterTypes cisst3DUserInterface)

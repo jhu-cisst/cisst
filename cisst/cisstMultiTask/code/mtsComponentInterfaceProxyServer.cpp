@@ -756,6 +756,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
     }
 #else
     while (IsActiveProxy()) {
+        osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         try {
             if (ComponentInterfaceProxyServer) {
@@ -764,7 +765,6 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         } catch (const Ice::Exception & ex) {
             LogPrint(mtsComponentInterfaceProxyServer::ManagerServerI, "Server component disconnection detected: " << ex.what());
         }
-        osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
     }
 #endif
 }

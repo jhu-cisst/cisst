@@ -33,6 +33,7 @@ if (cisst_FOUND_AS_REQUIRED)
                  serverTask.h
                  configuration.h
                  )
+  set_property (TARGET mtsExBenchmark1 PROPERTY FOLDER "cisstMultiTask/examples")
 
   # link with the cisst libraries
   cisst_target_link_libraries(mtsExBenchmark1 ${REQUIRED_CISST_LIBRARIES})
@@ -46,7 +47,8 @@ if (cisst_FOUND_AS_REQUIRED)
                    serverMain.cpp
                    serverTask.h
                    configuration.h
-                   )          
+                   )
+    set_property (TARGET mtsExBenchmark1Server PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
     cisst_target_link_libraries(mtsExBenchmark1Server ${REQUIRED_CISST_LIBRARIES})
@@ -58,6 +60,7 @@ if (cisst_FOUND_AS_REQUIRED)
                    clientTask.h
                    configuration.h
                    )
+    set_property (TARGET mtsExBenchmark1Client PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
     cisst_target_link_libraries(mtsExBenchmark1Client ${REQUIRED_CISST_LIBRARIES})

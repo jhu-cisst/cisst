@@ -1,12 +1,12 @@
 #
 # $Id$
 #
-# Cmake configuration file for the installed version of cisstDevices
+# CMake configuration file for the installed version of cisstQt
 #
 # Author(s):  Anton Deguet
 # Created on: 2011-09-11 
 #
-# (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---

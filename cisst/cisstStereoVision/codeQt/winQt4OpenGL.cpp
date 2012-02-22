@@ -362,10 +362,10 @@ void svlWindowManagerQt4OpenGL::QSlotCreateWindows()
 void svlWindowManagerQt4OpenGL::QSlotDestroyWindows()
 {
     for (unsigned int i = 0; i < Windows.size(); i ++) {
-        delete ParentWidgets[i];
         delete Windows[i];
-        ParentWidgets[i] = 0;
         Windows[i] = 0;
+        delete ParentWidgets[i];
+        ParentWidgets[i] = 0;
     }
 }
 

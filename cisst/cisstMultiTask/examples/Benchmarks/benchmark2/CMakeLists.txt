@@ -33,6 +33,7 @@ if (cisst_FOUND_AS_REQUIRED)
                  serverTask.h
                  configuration.h
                  )
+  set_property (TARGET mtsExBenchmark2 PROPERTY FOLDER "cisstMultiTask/examples")
 
   # link with the cisst libraries
   cisst_target_link_libraries(mtsExBenchmark2 ${REQUIRED_CISST_LIBRARIES})
@@ -47,17 +48,19 @@ if (cisst_FOUND_AS_REQUIRED)
                    serverTask.h
                    configuration.h
                    )	    
+    set_property (TARGET mtsExBenchmark2Server PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
     cisst_target_link_libraries(mtsExBenchmark2Server ${REQUIRED_CISST_LIBRARIES})
 
-  # name the main executable and specifies with source files to use
+    # name the main executable and specifies with source files to use
     add_executable(mtsExBenchmark2Client
                    clientTask.cpp
                    clientMain.cpp
                    clientTask.h
                    configuration.h
                    )
+    set_property (TARGET mtsExBenchmark2Client PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
     cisst_target_link_libraries(mtsExBenchmark2Client ${REQUIRED_CISST_LIBRARIES})

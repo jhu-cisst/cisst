@@ -26,6 +26,7 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   add_executable (svlExVideoConverter videoconverter.cpp)
+  set_property (TARGET svlExVideoConverter PROPERTY FOLDER "cisstStereoVision/examples")
   cisst_target_link_libraries (svlExVideoConverter ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)

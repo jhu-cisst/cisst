@@ -39,6 +39,7 @@ mtsQtWidgetDoubleVecRead::mtsQtWidgetDoubleVecRead(void):
 {
     VectorWidget = new vctQtWidgetDynamicVectorDoubleRead();
     Layout->addWidget(VectorWidget);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetDoubleVecRead::SetValue(const mtsGenericObject & value)
@@ -55,6 +56,7 @@ mtsQtWidgetDoubleVecWrite::mtsQtWidgetDoubleVecWrite(void):
 {
     VectorWidget = new vctQtWidgetDynamicVectorDoubleWrite();
     Layout->addWidget(VectorWidget);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetDoubleVecWrite::SetValue(const mtsGenericObject & value)
@@ -82,6 +84,7 @@ mtsQtWidgetBoolVecRead::mtsQtWidgetBoolVecRead(void):
 {
     VectorWidget = new vctQtWidgetDynamicVectorBoolRead();
     Layout->addWidget(VectorWidget);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetBoolVecRead::SetValue(const mtsGenericObject & value)
@@ -98,6 +101,7 @@ mtsQtWidgetBoolVecWrite::mtsQtWidgetBoolVecWrite(void):
 {
     VectorWidget = new vctQtWidgetDynamicVectorBoolWrite();
     Layout->addWidget(VectorWidget);
+    Layout->addStretch();
 }
 
 bool mtsQtWidgetBoolVecWrite::SetValue(const mtsGenericObject & value)

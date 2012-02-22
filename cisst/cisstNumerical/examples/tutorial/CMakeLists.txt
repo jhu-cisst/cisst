@@ -34,6 +34,7 @@ if (cisst_FOUND_AS_REQUIRED)
                     ExampleIsOrthonormal.h
                     ExampleGaussJordanInverse.h
                     )
+    set_property (TARGET nmrExTutorial PROPERTY FOLDER "cisstNumerical/examples")
     cisst_target_link_libraries(nmrExTutorial ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)

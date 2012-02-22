@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "clientQtComponent.h"
 #include "serverQtComponent.h"
-
+#include "serverWithDelay.h"
 
 int main(int argc, char *argv[])
 {
@@ -42,15 +42,21 @@ int main(int argc, char *argv[])
 
     // create the components with their respective UIs
     serverQtComponent * server = new serverQtComponent("Server");
+    serverWithDelay * serverDelay = new serverWithDelay("ServerDelay", 10.0 * cmn_ms);
+    serverDelay->SetLatency(1.0 * cmn_s);
+    std::cout << "This example uses a delay component, all commands and events are delayed by 1 second" << std::endl;
     clientQtComponent * client = new clientQtComponent("Client");
 
     // add the components to the component manager
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-    componentManager->AddComponent(client);
     componentManager->AddComponent(server);
+    componentManager->AddComponent(serverDelay);
+    componentManager->AddComponent(client);
 
     // connect the components, e.g. RequiredInterface -> ProvidedInterface
     componentManager->Connect("Client", "Required",
+                              "ServerDelay", "Provided");
+    componentManager->Connect("ServerDelay", "Required",
                               "Server", "Provided");
 
     // create and start all components

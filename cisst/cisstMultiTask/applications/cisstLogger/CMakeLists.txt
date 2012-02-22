@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 3034 2011-10-09 01:53:36Z adeguet1 $
+# $Id$
 #
 # (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
 #
@@ -29,6 +29,8 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # name the main executable and specifies with source files to use
   add_executable (cisstLogger main.cpp)
+
+  set_property (TARGET cisstLogger PROPERTY FOLDER "cisstMultiTask/applications")
 
   # link with the cisst libraries
   cisst_target_link_libraries (cisstLogger ${REQUIRED_CISST_LIBRARIES})

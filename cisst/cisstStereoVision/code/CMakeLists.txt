@@ -1271,6 +1271,8 @@ if (CISST_SVL_HAS_BM_DECKLINK)
         cisst_set_package_settings (cisstStereoVision decklink INCLUDE_DIRECTORIES DeckLink_INCLUDE_DIR)
         cisst_set_package_settings (cisstStereoVision decklink LIBRARIES           DeckLink_LIBRARIES)
     endif (DeckLink_FOUND)
+else (CISST_SVL_HAS_BM_DECKLINK)
+ cisst_unset_all_package_settings (cisstStereoVision decklink)	
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
@@ -1341,6 +1343,7 @@ set (ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 # Finally create the library
 cisst_add_library (
   LIBRARY cisstStereoVision
+  FOLDER cisstStereoVision
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}

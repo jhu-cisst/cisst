@@ -37,6 +37,8 @@ if (cisst_FOUND_AS_REQUIRED)
                   ExampleSTL.h
                   ExampleMatrix.h
                   )
+  set_property (TARGET vctExTutorial PROPERTY FOLDER "cisstVector/examples")
+
   # link against cisst libraries (and dependencies)
   cisst_target_link_libraries (vctExTutorial ${REQUIRED_CISST_LIBRARIES})
 

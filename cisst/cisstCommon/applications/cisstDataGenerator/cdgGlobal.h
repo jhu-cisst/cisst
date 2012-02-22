@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 
 #include "cdgClass.h"
+#include "cdgInline.h"
 
 /*
 
@@ -36,13 +37,12 @@ class cdgGlobal: public cdgScope
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-    /*! Name used for include guards */
-    std::string Name;
+    /*! Keep a list of all scopes to preserve order */
+    typedef std::vector<cdgScope *> ScopesType;
+    ScopesType Scopes;
 
-    /*! List of header files to include.  Corresponds to keyword
-      "include" in cisst data description file. */
-    typedef std::vector<std::string> IncludesType;
-    IncludesType Includes;
+    typedef std::vector<cdgInline *> CodesType;
+    CodesType CodeCodes;
 
     /*! List of classes.  Corresponds to keyword "class" in
       cisst data description file. */
@@ -50,17 +50,22 @@ class cdgGlobal: public cdgScope
     ClassesType Classes;
 
 public:
+    cdgGlobal(unsigned int lineNumber);
     cdgScope::Type GetScope(void) const;
     bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes);
+                  cdgScope::Stack & scopes,
+                  unsigned int lineNumber);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
+    void FillInDefaults(void) {};
     void GenerateHeader(std::ostream & output) const;
-    void GenerateCode(std::ostream & output,
-                      const std::string & header) const;
+    void GenerateCode(std::ostream & output) const;
+
+private:
+    cdgGlobal(void); // make sure constructor with line number is always used.
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdgGlobal);

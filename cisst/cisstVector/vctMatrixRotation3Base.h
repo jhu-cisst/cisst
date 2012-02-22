@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2005-08-19
 
-  (C) Copyright 2005-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -117,6 +117,18 @@ public:
 
     */
     //@{
+
+    /*! Conversion from another rotation matrix. */
+    template <class __containerType>
+    inline ThisType &
+    From(const vctMatrixRotation3Base<__containerType> & other)
+        throw(std::runtime_error)
+    {
+        this->FromRaw(other);
+        this->ThrowUnlessIsNormalized();
+        return *this;
+    }
+
 
     /*! Conversion from 9 elements. */
     inline ThisType &
@@ -232,6 +244,18 @@ public:
     */
     //@{
 
+    /*! Conversion from another rotation matrix. */
+    template <class __containerType>
+    inline ThisType &
+    FromNormalized(const vctMatrixRotation3Base<__containerType> & other)
+        throw(std::runtime_error)
+    {
+        this->FromRaw(other);
+        this->NormalizeSelf();
+        return *this;
+    }
+
+
     /*! Conversion from 9 elements. */
     inline ThisType &
     FromNormalized(const value_type & element00, const value_type & element01, const value_type & element02,
@@ -339,6 +363,16 @@ public:
       normalized.
     */
     //@{
+
+    /*! Conversion from another rotation matrix. */
+    template <class __containerType>
+    inline ThisType &
+    FromRaw(const vctMatrixRotation3Base<__containerType> & other)
+        throw(std::runtime_error)
+    {
+        this->Assign(other);
+        return *this;
+    }
 
 
     /*! Conversion from 9 elements. */
@@ -516,4 +550,3 @@ public:
 
 
 #endif  // _vctMatrixRotation3Base_h
-

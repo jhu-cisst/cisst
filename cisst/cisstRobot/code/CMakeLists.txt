@@ -99,6 +99,7 @@ if (CISST_HAS_CISSTNETLIB )
       )
 
   cisst_add_library (LIBRARY cisstRobot
+                     FOLDER cisstRobot
                      DEPENDENCIES ${DEPENDENCIES}
                      SOURCE_FILES ${SOURCE_FILES}
                      HEADER_FILES ${HEADER_FILES})

@@ -142,4 +142,36 @@ class CISST_EXPORT mtsQtWidgetStdStringWrite: public mtsQtWidgetGenericObjectWri
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStdStringWrite);
 
+
+// -- mtsStateIndex
+class CISST_EXPORT mtsQtWidgetStateIndexRead: public mtsQtWidgetGenericObjectRead
+{
+    Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+ private:
+    QLabel * Label;
+ public:
+    mtsQtWidgetStateIndexRead(void);
+    virtual bool SetValue(const mtsGenericObject & value);
+};
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStateIndexRead);
+
+class CISST_EXPORT mtsQtWidgetStateIndexWrite: public mtsQtWidgetGenericObjectWrite
+{
+    Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+ private:
+    QTableWidget * TableWidget;
+    QSpinBox * IndexSpinBox;
+    QDoubleSpinBox * TicksSpinBox;
+    QDoubleSpinBox * LengthSpinBox;
+    static QWidget * MakeSpinBox();
+    static QWidget * MakeDoubleSpinBox();
+ public:
+    mtsQtWidgetStateIndexWrite(void);
+    virtual bool SetValue(const mtsGenericObject & value);
+    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+};
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStateIndexWrite);
+
 #endif // _mtsQtWidgetGenericObject_h

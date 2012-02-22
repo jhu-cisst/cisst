@@ -61,7 +61,7 @@ class CISST_EXPORT robMass{
      with the principal moment of inertia. The three axes are defined with 
      respect to the body's coordinate frame. The axes represent a similarity 
      transformation that diagonalizes a moment of inertia tensor. Given a moment
-     of inertia tensor \f$ I \$, the principal axes define a similarity 
+     of inertia tensor \f$ I \f$, the principal axes define a similarity 
      transformation \f$V\f$ that diagonalizes \f$ I \f$ with 
      \f$ D = V^T I V \f$, where \f$ V\f$ are the eigenvectors of \f$ I\f$ given 
      by \f$ IV = VD\f$. The matrix \f$ V\f$ refpresents the principal axes as 

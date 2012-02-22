@@ -28,6 +28,7 @@ if (cisst_FOUND_AS_REQUIRED)
   if (CISST_SVL_HAS_X11 OR WIN32)
 
     add_executable (svlExComputeStereo computestereo.cpp)
+    set_property (TARGET svlExComputeStereo PROPERTY FOLDER "cisstStereoVision/examples")
     cisst_target_link_libraries (svlExComputeStereo ${REQUIRED_CISST_LIBRARIES})
 
     # Copy example images to the build tree

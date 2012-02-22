@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cdgCode_h
-#define _cdgCode_h
+#ifndef _cdgInline_h
+#define _cdgInline_h
 
 #include <iostream>
 #include <vector>
@@ -32,29 +32,34 @@ http://www.cisst.org/cisst/license.txt.
 
  */
 
-class cdgCode: public cdgScope
+class cdgInline: public cdgScope
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
+    friend class cdgGlobal;
+    friend class cdgClass;
+
 public:
-    enum Type {CDG_HEADER, CDG_CODE};
-    cdgCode(const Type & type);
+    typedef enum {CDG_INLINE_HEADER, CDG_INLINE_CODE} InlineType;
+    cdgInline(unsigned int lineNumber, InlineType type);
 
     cdgScope::Type GetScope(void) const;
     bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes);
+                  cdgScope::Stack & scopes,
+                  unsigned int lineNumber);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void GenerateHeader(std::ostream & output) const;
-    void GenerateCode(std::ostream & output) const;
-
+    void FillInDefaults(void);
+    void GenerateHeader(std::ostream & outputStream) const;
+    void GenerateCode(std::ostream & outputStream) const;
 protected:
-    Type TypeMember;
+    std::string Value;
+    InlineType Type;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cdgCode);
+CMN_DECLARE_SERVICES_INSTANTIATION(cdgInline);
 
-#endif // _cdgCode_h
+#endif // _cdgInline_h

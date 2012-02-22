@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-04-29
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,6 +46,13 @@ protected:
     /*! Per-command serializer and deserializer */
     mtsProxySerializer Serializer;
 
+    /*! Argument prototype serialized.  This is used only if argument
+      prototype de-serialization fails when the proxy component is
+      created.  It is saved for later attempt to de-serialize,
+      assuming more symbols are available (e.g. after dynamic
+      loading). */
+    std::string ArgumentPrototypeSerialized;
+
 public:
     /*! Typedef for base type */
     typedef mtsCommandRead BaseType;
@@ -76,11 +83,21 @@ public:
         ArgumentPrototype = argumentPrototype;
     }
 
+    /*! Set the serialized version of argument prototype. */
+    void SetArgumentPrototypeSerialized(const std::string & argumentPrototypeSerialized) {
+        this->ArgumentPrototypeSerialized = argumentPrototypeSerialized;
+    }
+
     /*! The execute method. */
     virtual mtsExecutionResult Execute(mtsGenericObject & placeHolder) {
+        if (!this->ArgumentsSupported()) {
+            return mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+        }
+
         if (IsDisabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
         }
+
         mtsExecutionResult result;
         if (NetworkProxyServer) {
             if (NetworkProxyServer->IsActiveProxy()) {

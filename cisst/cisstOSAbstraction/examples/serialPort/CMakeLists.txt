@@ -19,9 +19,11 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   add_executable (osaExSerialPortServer server.cpp)
+  set_property (TARGET osaExSerialPortServer PROPERTY FOLDER "cisstOSAbstraction/examples")
   cisst_target_link_libraries (osaExSerialPortServer ${REQUIRED_CISST_LIBRARIES})
 
   add_executable (osaExSerialPortClient client.cpp)
+  set_property (TARGET osaExSerialPortClient PROPERTY FOLDER "cisstOSAbstraction/examples")
   cisst_target_link_libraries (osaExSerialPortClient ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)

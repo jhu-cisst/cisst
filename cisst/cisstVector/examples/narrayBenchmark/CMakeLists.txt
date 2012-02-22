@@ -26,18 +26,22 @@ if (cisst_FOUND_AS_REQUIRED)
   if (ITK_FOUND)
     include (${ITK_USE_FILE})
 
-    add_executable (vctExSubarrayITKBenchmark Subarray_ITK_Benchmark.cpp )
+    add_executable (vctExSubarrayITKBenchmark Subarray_ITK_Benchmark.cpp)
+    set_property (TARGET vctExSubarrayITKBenchmark PROPERTY FOLDER "cisstVector/examples")
     cisst_target_link_libraries (vctExSubarrayITKBenchmark ${REQUIRED_CISST_LIBRARIES})
     target_link_libraries (vctExSubarrayITKBenchmark ITKCommon)
 
     add_executable (vctExSubarrayNArrayBenchmark Subarray_nArray_Benchmark.cpp)
+    set_property (TARGET vctExSubarrayNArrayBenchmark PROPERTY FOLDER "cisstVector/examples")
     cisst_target_link_libraries (vctExSubarrayNArrayBenchmark ${REQUIRED_CISST_LIBRARIES})
 
     add_executable (vctExImageAddITKBenchmark ImageAdd_ITK_Benchmark.cpp)
+    set_property (TARGET vctExImageAddITKBenchmark PROPERTY FOLDER "cisstVector/examples")
     cisst_target_link_libraries (vctExImageAddITKBenchmark ${REQUIRED_CISST_LIBRARIES})
     target_link_libraries (vctExImageAddITKBenchmark ITKCommon)
 
     add_executable (vctExImageAddNArrayBenchmark ImageAdd_nArray_Benchmark.cpp)
+    set_property (TARGET vctExImageAddNArrayBenchmark PROPERTY FOLDER "cisstVector/examples")
     cisst_target_link_libraries (vctExImageAddNArrayBenchmark ${REQUIRED_CISST_LIBRARIES})
 
   else (ITK_FOUND)
@@ -46,6 +50,7 @@ if (cisst_FOUND_AS_REQUIRED)
   endif (ITK_FOUND)
 
   add_executable (vctExOptimizedEngines optimizedEngines.cpp)
+  set_property (TARGET vctExOptimizedEngines PROPERTY FOLDER "cisstVector/examples")
   cisst_target_link_libraries (vctExOptimizedEngines ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)

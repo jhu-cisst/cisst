@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 const std::string cdgScopeNames[] = {"global",
                                      "class",
+                                     "base-class",
                                      "typedef",
                                      "member",
                                      "code"};
@@ -31,4 +32,16 @@ const std::string cdgScopeNames[] = {"global",
 const std::string & cdgScope::GetScopeName(void) const
 {
     return cdgScopeNames[this->GetScope()];
+}
+
+
+cdgScope::cdgScope(unsigned int lineNumber):
+    LineNumber(lineNumber)
+{
+}
+
+
+void cdgScope::GenerateLineComment(std::ostream & outputStream) const
+{
+    outputStream << "/* source line: " << LineNumber << " */" << std::endl;
 }

@@ -7,7 +7,7 @@
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-06-10
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -64,11 +64,11 @@ bool ui3VisibleObject::Update(ui3SceneManager * sceneManager)
                                   << "\" created" << std::endl;
         // this is an object, i.e. a leaf
         result = this->CreateVTKObjects();
-                
+
         // set vtk handle on visible object
         objectVTKProp = this->GetVTKProp();
         CMN_ASSERT(objectVTKProp);
-                
+
         // convert pointer to (void *)
         propHandle = reinterpret_cast<VTKHandleType>(objectVTKProp);
         this->SetVTKHandle(propHandle);
@@ -91,7 +91,7 @@ vtkProp3D * ui3VisibleObject::GetVTKProp(void)
 
 void ui3VisibleObject::Show(void)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "Show: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "Show: called for object \"" << this->Name() << "\"" << std::endl;
     this->SetVisible(true);
     this->PropagateVisibility(true);
 }
@@ -99,9 +99,15 @@ void ui3VisibleObject::Show(void)
 
 void ui3VisibleObject::Hide(void)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "Hide: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "Hide: called for object \"" << this->Name() << "\"" << std::endl;
     this->SetVisible(false);
     this->PropagateVisibility(false);
+}
+
+
+void ui3VisibleObject::SetMatrixElement(unsigned int i, unsigned int j, double value)
+{
+    this->Matrix->SetElement(i, j, value);
 }
 
 
@@ -140,7 +146,7 @@ void ui3VisibleObject::PropagateVisibility(bool visible)
 
 void ui3VisibleObject::SetPosition(const vctDouble3 & position, bool useLock)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "SetPosition: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "SetPosition: called for object \"" << this->Name() << "\"" << std::endl;
     if (this->Created()) {
         if (useLock) {
             this->Lock();
@@ -157,31 +163,9 @@ void ui3VisibleObject::SetPosition(const vctDouble3 & position, bool useLock)
 }
 
 
-void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix, bool useLock)
-{
-    CMN_LOG_CLASS_RUN_DEBUG << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
-    if (this->Created()) {
-        unsigned int i, j;
-        if (useLock) {
-            this->Lock();
-        }
-        for (i = 0; i < 3; i++) {
-            for (j = 0; j < 3; j++) {
-                this->Matrix->SetElement(i, j, rotationMatrix.Element(i, j));
-            }
-        }
-        if (useLock) {
-            this->Unlock();
-        }
-    } else {
-        CMN_LOG_CLASS_RUN_VERBOSE << "SetOrientation: called on object \"" << this->Name() << "\" not yet created" << std::endl;
-    }
-}
-
-
 void ui3VisibleObject::SetScale(const double & scale, bool useLock)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "SetScale: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_RUN_DEBUG << "SetScale: called for object \"" << this->Name() << "\"" << std::endl;
     if (this->Created()) {
         if (useLock) {
             this->Lock();

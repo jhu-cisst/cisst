@@ -117,12 +117,10 @@ private:
 
 public:
     /*! The constructor.
-    //
-    // FIXME: this needs to be updated.
-    //
+
       \param action Pointer to the member function that is to be called
       by the invoker of the command
-      \param interface Pointer to the receiver of the command
+      \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
     mtsCommandWrite(ActionType action, ClassType * classInstantiation, const std::string & name,
                     const ArgumentType & argumentPrototype):
@@ -130,8 +128,6 @@ public:
         Action(action),
         ClassInstantiation(classInstantiation)
     {
-        //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
-        //this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
         this->ArgumentPrototype = mtsGenericTypes<ArgumentType>::ConditionalCreate(argumentPrototype, name);
     }
 
@@ -151,7 +147,6 @@ public:
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
                                        mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
-            //const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
             return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::IS_DERIVED
                                   >::CallMethod(ClassInstantiation, Action, argument);
         }
@@ -221,12 +216,10 @@ private:
 
 public:
     /*! The constructor.
-    //
-    // FIXME: this needs to be updated.
-    //
+
       \param action Pointer to the member function that is to be called
       by the invoker of the command
-      \param interface Pointer to the receiver of the command
+      \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
     mtsCommandWriteGeneric(ActionType action, ClassType * classInstantiation, const std::string & name,
                            const mtsGenericObject * argumentPrototype):

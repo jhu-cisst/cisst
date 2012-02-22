@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2007-04-08
-  
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -88,9 +88,9 @@ int main(void) {
     deSerialization.DeSerialize(objectA3copy);
     std::cout << objectA3copy.Value << std::endl;
 
-    // deserialize the "string" objects 
+    // deserialize the "string" objects
     deSerialization.DeSerialize(objectB1);
-    
+
     // re-use our object pointer for the useless classA object
     delete objectA2pointer;
     objectA2pointer = dynamic_cast<classA *>(deSerialization.DeSerialize());
@@ -114,6 +114,8 @@ int main(void) {
               << "\n0: " << piAgain
               << "\n2^11: " << twoEleven
               << std::endl;
+
+    inputStream.close();
 
     return 0;
 }

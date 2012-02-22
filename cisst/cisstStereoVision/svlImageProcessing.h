@@ -64,13 +64,15 @@ namespace svlImageProcessing
                                  svlSampleImage* dst_img,
                                  unsigned int dst_videoch,
                                  vctDynamicVector<double> kernel_horiz,
-                                 vctDynamicVector<double> kernel_vert);
+                                 vctDynamicVector<double> kernel_vert,
+                                 bool absres = false);
 
     int CISST_EXPORT Convolution(svlSampleImage* src_img,
                                  unsigned int src_videoch,
                                  svlSampleImage* dst_img,
                                  unsigned int dst_videoch,
-                                 vctDynamicMatrix<double> kernel);
+                                 vctDynamicMatrix<double> kernel,
+                                 bool absres = false);
 
     int CISST_EXPORT Crop(svlSampleImage* src_img,
                           unsigned int src_videoch,

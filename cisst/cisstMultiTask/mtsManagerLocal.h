@@ -633,6 +633,9 @@ public:
 
     /*! Set endpoint access information */
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
+    
+    //returns the list or processes in the system and their absolute time differences relative to GCM
+    bool GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets);
 
     /*! For debugging. Dumps to stream the maps maintained by the manager. */
     void /*CISST_DEPRECATED*/ ToStream(std::ostream & outputStream) const;

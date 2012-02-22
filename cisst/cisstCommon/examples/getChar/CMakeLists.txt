@@ -18,6 +18,7 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
   add_executable (cmnExGetChar
                   getChar.cpp)
+  set_property (TARGET cmnExGetChar PROPERTY FOLDER "cisstCommon/examples")
 
   cisst_target_link_libraries (cmnExGetChar cisstCommon)
 else (cisst_FOUND_AS_REQUIRED)

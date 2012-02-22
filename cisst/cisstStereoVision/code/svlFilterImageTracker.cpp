@@ -880,9 +880,8 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
     const int wx4 = static_cast<int>(sc * (c * (x4 - cx) - s * (y4 - cy))) + cx;
     const int wy4 = static_cast<int>(sc * (s * (x4 - cx) + c * (y4 - cy))) + cy;
 
-    svlTriangle tri_in, tri_out;
-
     if (threadid >= 0) {
+        svlTriangle tri_in, tri_out;
         if (threadid & 1) {
             tri_in.Assign(x1, y1, x3, y3, x4, y4);
             tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
@@ -894,12 +893,9 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
         svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[threadid]);
     }
     else {
-        tri_in.Assign(x1, y1, x3, y3, x4, y4);
-        tri_out.Assign(wx1, wy1, wx3, wy3, wx4, wy4);
-        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
-        tri_in.Assign(x1, y1, x2, y2, x3, y3);
-        tri_out.Assign(wx1, wy1, wx2, wy2, wx3, wy3);
-        svlDraw::WarpTriangle(image, videoch, tri_in, WarpedImage, videoch, tri_out, WarpInternals[videoch]);
+        svlQuad quad_in (x1,  y1,  x2,  y2,  x3,  y3,  x4,  y4);
+        svlQuad quad_out(wx1, wy1, wx2, wy2, wx3, wy3, wx4, wy4);
+        svlDraw::WarpQuad(image, videoch, quad_in, WarpedImage, videoch, quad_out, WarpInternals[videoch]);
     }
 }
 

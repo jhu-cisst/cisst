@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -189,6 +189,7 @@ endmacro (cisst_extract_settings)
 # following parameters
 #
 # - PROJECT (cisst by default)
+# - FOLDER empty by default, used only to organize projects in IDE when supported by CMake
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
@@ -213,6 +214,7 @@ macro (cisst_add_library ...)
        LIBRARY
        LIBRARY_DIR
        PROJECT
+       FOLDER
        DEPENDENCIES
        SOURCE_FILES HEADER_FILES
        ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
@@ -274,6 +276,7 @@ macro (cisst_add_library ...)
   list (SORT ADDITIONAL_SOURCE_FILES)
   list (SORT ADDITIONAL_HEADER_FILES)
   cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCE_FILES} ${HEADERS}")
+
   add_library (${LIBRARY}
                ${IS_SHARED}
                ${SOURCE_FILES}
@@ -282,6 +285,10 @@ macro (cisst_add_library ...)
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
                )
+
+  # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
+  set_target_properties (${LIBRARY}
+                         PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${LIBRARY}\"")
 
   # Install the library
   install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
@@ -314,6 +321,11 @@ macro (cisst_add_library ...)
   install (FILES ${LIBRARY_MAIN_HEADER}
            DESTINATION include
            COMPONENT ${LIBRARY})
+
+  # if a folder has been provided
+  if (FOLDER)
+    set_property (TARGET ${LIBRARY} PROPERTY FOLDER "${FOLDER}")
+  endif (FOLDER)
 
 endmacro (cisst_add_library)
 
@@ -365,9 +377,10 @@ macro (cisst_target_link_libraries TARGET ...)
   else (NOT CISST_LIBRARIES)
 
     # If cisst has been compile as shared libraries, need to import symbols
-    if (CISST_BUILD_SHARED_LIBS)
+    if (WIN32 AND CISST_BUILD_SHARED_LIBS)
+      remove_definitions (-DCISST_DLL)
       add_definitions (-DCISST_DLL)
-    endif (CISST_BUILD_SHARED_LIBS)
+    endif (WIN32 AND CISST_BUILD_SHARED_LIBS)
 
     # First test that all libraries should have been compiled
     foreach (required ${_REQUIRED_CISST_LIBRARIES})
@@ -379,6 +392,7 @@ macro (cisst_target_link_libraries TARGET ...)
     endforeach (required)
 
     # Second, create a list of libraries in the right order
+    unset (_CISST_LIBRARIES_TO_USE)
     foreach (existing ${CISST_LIBRARIES})
       if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
         set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
@@ -388,6 +402,10 @@ macro (cisst_target_link_libraries TARGET ...)
     # Finally, link with the required libraries
     target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
     cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
+
+    # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
+    set_target_properties (${_WHO_REQUIRES}
+                           PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${_WHO_REQUIRES}\"")
 
   endif (NOT CISST_LIBRARIES)
 
@@ -400,6 +418,7 @@ endmacro (cisst_target_link_libraries)
 # - MODULE is the prefix of the main .i file.  The module name will be <MODULE>Python
 # - INTERFACE_FILENAME is the filename of the .i file (if not specified, defaults to <MODULE>.i)
 # - INTERFACE_DIRECTORY is the directory containing the .i file (use relative path from current source dir)
+# - FOLDER is used for IDE that support the CMake target property FOLDER
 # - MODULE_LINK_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
 #
 function (cisst_add_swig_module ...)
@@ -411,6 +430,7 @@ function (cisst_add_swig_module ...)
        MODULE
        INTERFACE_FILENAME
        INTERFACE_DIRECTORY
+       FOLDER
        HEADER_FILES
        MODULE_LINK_LIBRARIES
        INSTALL_FILES)
@@ -476,6 +496,10 @@ function (cisst_add_swig_module ...)
                         ARGS -E copy_if_different
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${MODULE_NAME}.py)
+    if (FOLDER)
+      set_property (TARGET _${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
+    endif (FOLDER)
+
     # create a cisstCommon.py as CMake assumes one should be created
     # this is a bug that should be fixed in future releases of CMake.
     add_custom_command (TARGET _${MODULE_NAME}
@@ -514,7 +538,6 @@ function (cisst_add_swig_module ...)
   endif (EXISTS ${SWIG_INTERFACE_FILE})
 
 endfunction (cisst_add_swig_module)
-
 
 
 # Function to use cisstComponentGenerator, this function assumes input
@@ -731,3 +754,24 @@ macro (cisst_information_message_missing_libraries ...)
   endforeach (lib)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
 endmacro (cisst_information_message_missing_libraries)
+
+# Macro to find a package via CMake's normal mechanism, but then to fix the
+# set variables if cisst has been installed
+macro (cisst_find_component _cfc_COMPONENT_NAME _cfc_IS_REQUIRED)
+
+  message("looking for cisst component: ${_cfc_COMPONENT_NAME}")
+
+  # First, look in the install path for SAW components
+  find_package(${_cfc_COMPONENT_NAME} QUIET HINTS "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components" )
+
+  if(${_cfc_COMPONENT_NAME}_FOUND)
+    # If this is an installed version, re-set the libdir and include directories
+    message("Found package \"${_cfc_COMPONENT_NAME}\" in cisst install path.")
+    set(${_cfc_COMPONENT_NAME}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
+    set(${_cfc_COMPONENT_NAME}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
+  else()
+    message("Did not find package \"${_cfc_COMPONENT_NAME}\" in cisst install path, looking in source path: ${sawComponents_BINARY_DIR}")
+    find_package(${_cfc_COMPONENT_NAME} HINTS "${sawComponents_BINARY_DIR}")
+  endif()
+endmacro (cisst_find_component)
+

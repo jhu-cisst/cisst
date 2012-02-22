@@ -39,6 +39,7 @@ public:
 
     void SetKernel(const vctDynamicMatrix<double> & kernel);
     void SetKernel(const vctDynamicVector<double> & kernel_horiz, const vctDynamicVector<double> & kernel_vert);
+    void SetAbsoluteResults(bool absres);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -50,6 +51,7 @@ private:
     vctDynamicVector<double> KernelHoriz;
     vctDynamicVector<double> KernelVert;
     bool KernelSeparable;
+    bool AbsoluteResults;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageConvolution)

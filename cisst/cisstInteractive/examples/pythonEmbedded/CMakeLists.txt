@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -23,10 +23,12 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
+  set_property (TARGET myDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
   cisst_target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
 
   # Create myReDerivedClass as a shared library
   add_library (myReDerivedClass SHARED myReDerivedClass.cpp myReDerivedClass.h)
+  set_property (TARGET myReDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
   cisst_target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES})
   target_link_libraries (myReDerivedClass myDerivedClass)
 
@@ -39,14 +41,17 @@ if (cisst_FOUND_AS_REQUIRED)
   # Run SWIG on the interface file
   cisst_add_swig_module (MODULE myDerivedClass
                          INTERFACE_FILENAME myDerivedClassPython.i
+                         FOLDER "cisstInteractive/examples"
                          MODULE_LINK_LIBRARIES myDerivedClass)
 
   cisst_add_swig_module (MODULE myReDerivedClass
                          INTERFACE_FILENAME myReDerivedClassPython.i
+                         FOLDER "cisstInteractive/examples"
                          MODULE_LINK_LIBRARIES myReDerivedClass myDerivedClass)
 
   # Built executable with embedding
   add_executable (pythonEmbedded pythonEmbedded.cpp)
+  set_property (TARGET pythonEmbedded PROPERTY FOLDER "cisstInteractive/examples")
   cisst_target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES})
   target_link_libraries (pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
 

@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-09-13
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -62,6 +62,8 @@ public:
 
     enum {ROWSTRIDE = ContainerType::ROWSTRIDE, COLSTRIDE = ContainerType::COLSTRIDE};
 
+    typedef typename BaseType::RowValueType RowValueType;
+    typedef typename BaseType::ColumnValueType ColumnValueType;
     typedef typename BaseType::RowRefType RowRefType;
     typedef typename BaseType::ColumnRefType ColumnRefType;
     typedef typename BaseType::ConstRowRefType ConstRowRefType;
@@ -132,15 +134,21 @@ public:
     FrameValueType Inverse(void) const;  // implemented in vctFrame4x4.h
 
 
-    /*! Test if the rotation part is normalized.  See
-        vctMatrixRotation3ConstRef::IsNormalized.
+    /*! Test if the rotation part is normalized and the last row is
+      almost equal to [0 0 0 1].  See
+      vctMatrixRotation3ConstBase::IsNormalized and
+      vctFixedSizeConstVectorBase::AlmostEqual.
 
       \param tolerance Tolerance for the norm and scalar product tests.
     */
-    inline bool IsNormalized(value_type CMN_UNUSED(tolerance) = TypeTraits::Tolerance()) const {
-        return this->RotationRef.IsNormalized();
+    inline bool IsNormalized(value_type tolerance = TypeTraits::Tolerance()) const {
+        return (this->Row(DIMENSION).AlmostEqual(RowValueType(static_cast<value_type>(0.0),
+                                                              static_cast<value_type>(0.0),
+                                                              static_cast<value_type>(0.0),
+                                                              static_cast<value_type>(1.0)),
+                                                 tolerance)
+                && this->RotationRef.IsNormalized(tolerance));
     }
-
 
     /*! Apply the transformation to a vector of fixed size DIMENSION. The
       result is stored into a vector of size DIMENSION provided by the caller
