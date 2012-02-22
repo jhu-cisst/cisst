@@ -506,6 +506,8 @@ public:
         MonitorFiltersType Symptoms;
         /*! List of filters attached to this state table to define symptom vectors */
         MonitorFiltersType SymptomVectors;
+        /*! List of filters attached to this state table for fault detection */
+        MonitorFiltersType FaultDetectors;
     } MonitorFilters;
 
     /*! Add filter */

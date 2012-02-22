@@ -331,6 +331,7 @@ void mtsStateTable::Advance(void) {
     PROCESS_FILTERS(FeatureVectors);
     PROCESS_FILTERS(Symptoms);
     PROCESS_FILTERS(SymptomVectors);
+    PROCESS_FILTERS(FaultDetectors);
 #undef PROCESS_FILTERS
 #endif
 }
@@ -374,6 +375,7 @@ void mtsStateTable::Cleanup(void) {
     CLEANUP_FILTERS(FeatureVectors);
     CLEANUP_FILTERS(Symptoms);
     CLEANUP_FILTERS(SymptomVectors);
+    CLEANUP_FILTERS(FaultDetectors);
 #undef CLEANUP_FILTERS
 #endif
 }
@@ -596,7 +598,7 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
         return false;
     } else {
         mtsMonitorFilterBase::FILTER_TYPE filterType = filter->GetFilterType();
-        if (filterType < mtsMonitorFilterBase::FEATURE || filterType > mtsMonitorFilterBase::SYMPTOM_VECTOR) {
+        if (filterType < mtsMonitorFilterBase::FEATURE || filterType > mtsMonitorFilterBase::FAULT_DETECTOR) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
             return false;
         }
@@ -648,22 +650,25 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
     }
 
     switch (filter->GetFilterType()) {
-    case mtsMonitorFilterBase::FEATURE:
-        MonitorFilters.Features.push_back(filter);
-        break;
-    case mtsMonitorFilterBase::FEATURE_VECTOR:
-        MonitorFilters.FeatureVectors.push_back(filter);
-        break;
-    case mtsMonitorFilterBase::SYMPTOM:
-        MonitorFilters.Symptoms.push_back(filter);
-        break;
-    case mtsMonitorFilterBase::SYMPTOM_VECTOR:
-        MonitorFilters.SymptomVectors.push_back(filter);
-        break;
-    case mtsMonitorFilterBase::INVALID:
-    default:
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
-        return false;
+        case mtsMonitorFilterBase::FEATURE:
+            MonitorFilters.Features.push_back(filter);
+            break;
+        case mtsMonitorFilterBase::FEATURE_VECTOR:
+            MonitorFilters.FeatureVectors.push_back(filter);
+            break;
+        case mtsMonitorFilterBase::SYMPTOM:
+            MonitorFilters.Symptoms.push_back(filter);
+            break;
+        case mtsMonitorFilterBase::SYMPTOM_VECTOR:
+            MonitorFilters.SymptomVectors.push_back(filter);
+            break;
+        case mtsMonitorFilterBase::FAULT_DETECTOR:
+            MonitorFilters.FaultDetectors.push_back(filter);
+            break;
+        case mtsMonitorFilterBase::INVALID:
+        default:
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
+            return false;
     }
 
     // Remember where the filter is attached to

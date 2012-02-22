@@ -149,10 +149,14 @@ public:
     mtsFaultBase(const std::string & faultName, FaultTypes faultType);
     virtual ~mtsFaultBase();
 
-    /*! Fault isolation */
+    /*! Fault isolation and identification */
+    void SetFaultTimestamp(double timestamp);
+    void SetFaultMagnitude(double magnitude);
+
+    /*! Getters */
     mtsFaultLocation & GetFaultLocation(void);
-    void               SetFaultTimestamp(double timestamp);
     double             GetFaultTimestamp(void);
+    double             GetFaultMagnitude(void);
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
