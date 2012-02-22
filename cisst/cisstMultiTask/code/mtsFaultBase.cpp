@@ -28,14 +28,14 @@ CMN_IMPLEMENT_SERVICES(mtsFaultBase);
 //
 void mtsFaultLocation::ToStream(std::ostream & outputStream) const
 {
-    mtsGenericObject::ToStream(outputStream);
+    //mtsGenericObject::ToStream(outputStream);
     outputStream << " Process: \""        << this->Process << "\","
                  << " Component: \""      << this->Component << "\", "
                  << " Interface: \""      << this->Interface << "\", "
                  << " Command: \""        << this->Command << "\", "
                  << " Function: \""       << this->Function << "\", "
                  << " EventGenerator: \"" << this->EventGenerator << "\", "
-                 << " EventHandler: \""   << this->EventHandler << std::endl;
+                 << " EventHandler: \""   << this->EventHandler << "\"";
 }
 
 void mtsFaultLocation::SerializeRaw(std::ostream & outputStream) const
@@ -96,24 +96,12 @@ mtsFaultBase::~mtsFaultBase()
 {
 }
 
-mtsFaultLocation & mtsFaultBase::GetFaultLocation(void) {
-    return FaultLocation;
-}
-
-void mtsFaultBase::SetFaultTimestamp(double timestamp) {
-    FaultTimestamp = timestamp;
-}
-
-double mtsFaultBase::GetFaultTimestamp(void) {
-    return FaultTimestamp;
-}
-
 void mtsFaultBase::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
 
     outputStream << " Name: \"" << this->FaultName << "\"";
-    outputStream << " Layer: ";
+    outputStream << ", Layer: ";
     switch (FaultLayer) {
         case mtsFaultBase::LAYER_SYSTEM:    outputStream << "SYSTEM"; break;
         case mtsFaultBase::LAYER_PROCESS:   outputStream << "PROCESS"; break;
@@ -189,5 +177,21 @@ void mtsFaultBase::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->FaultTimestamp);
     cmnDeSerializeRaw(inputStream, this->FaultType);
     cmnDeSerializeRaw(inputStream, this->FaultMagnitude);
+}
+
+void mtsFaultBase::SetFaultTimestamp(double timestamp) {
+    FaultTimestamp = timestamp;
+}
+
+void mtsFaultBase::SetFaultMagnitude(double magnitude) {
+    FaultMagnitude = magnitude;
+}
+
+mtsFaultLocation & mtsFaultBase::GetFaultLocation(void) {
+    return FaultLocation;
+}
+
+double mtsFaultBase::GetFaultTimestamp(void) {
+    return FaultTimestamp;
 }
 

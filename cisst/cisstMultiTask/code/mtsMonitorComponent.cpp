@@ -144,7 +144,6 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
                                        // in 2: expected
                                        vecExpected);
     ADD_FILTER(filterArithmetic);
-#endif
 
     // Create moving average filter to define feature
     mtsMonitorFilterAverage * filterAverage = 
@@ -153,6 +152,7 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
                                     mtsMonitorFilterBase::SignalElement::SCALAR,
                                     0.25);
     ADD_FILTER(filterAverage);
+#endif
 
     // Create subtraction filter to define feature vector
     mtsMonitorFilterBase::PlaceholderType periodExpected = task->GetPeriodicity(true); // Get nominal period
@@ -167,11 +167,12 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
     ADD_FILTER(filterArithmetic);
 
     // Create fault detector based on thresholding filter
-    const double nominalPeriod = task->GetPeriodicity(true); // nominal (expected) period as avg
     mtsFaultDetectorThresholding * detectorThresholding = 
-        new mtsFaultDetectorThresholding(filterAverage->GetOutputSignalName(0),
-                                         nominalPeriod, 
-                                         (size_t)(1.0 / nominalPeriod) * 5.0);
+        new mtsFaultDetectorThresholding(//filterAverage->GetOutputSignalName(0),
+                                         periodName,
+                                         periodExpected, 
+                                         10, 1); // MJTEMP
+                                         //(size_t)(1.0 / periodExpected) * 5.0);
     ADD_FILTER(detectorThresholding);
 
     // Associate thread periodicity fault with the fault detector to make the fault

@@ -80,24 +80,34 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
 
             if (debug)
                 std::cout << "Finished collecting " << SampleCount << " samples: "
-                          << "avg = " << avg << ", std = " << Sigma << std::endl;
+                          << "avg = " << avg << ", std = " << Sigma
+                          << ", UCL = " << UCL << ", LCL = " << LCL << std::endl;
+
         }
         return;
     }
 
-    // In control
+    // Check if new sample is in control range
     if (LCL <= x && x <= UCL)
         return;
 
     // Fault occurs - out of control sample found
     CMN_LOG_CLASS_RUN_WARNING << "CheckFault: OUT OF LIMIT SAMPLE!!! input: " << x << ", time: " << timestamp << std::endl;
 
-    // Fault identification: only timestamp needs to be identified because the fault
-    // associated with this fault detector already has all the other information such as
-    // fault location.
+    // Fault identification: only fault magnitude and timestamp need to be identified 
+    // because the fault associated with this fault detector already has all the other 
+    // information such as fault location.
+    if (!TargetFault) {
+        CMN_LOG_CLASS_RUN_ERROR << "CheckFault: invalid target fault" << std::endl;
+        return;
+    }
     TargetFault->SetFaultTimestamp(timestamp);
+    TargetFault->SetFaultMagnitude(x - Mean);
 
     // Generate event for fault propataion via manager component service
+    if (!mtsManagerLocal::GetInstance()->FaultPropagate(*TargetFault)) {
+        CMN_LOG_CLASS_RUN_ERROR << "CheckFault: Failed to propagate detected fault to the system: " << *TargetFault << std::endl;
+    }
 }
 
 void mtsFaultDetectorThresholding::ToStream(std::ostream & outputStream) const
