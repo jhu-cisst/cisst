@@ -42,6 +42,9 @@ class vtkSphereSource;
 class vtkTexture;
 class vtkVolumeReader;
 class vtkVolume16Reader;
+class vtkUnsignedCharArray;
+class vtkPropPicker;
+class vtkPicker;
 
 #endif // _ui3VTKForwardDeclarations_h
 

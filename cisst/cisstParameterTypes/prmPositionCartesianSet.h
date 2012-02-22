@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
-  Created on:	2008-03-12
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on: 2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Cartesian position move parameters.
 */
 
@@ -64,7 +64,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! vector of rate of orientation change (single value about a
       screw axis) */
     vctDouble3 VelocityAngular;
-    
+
     /*! desired time derivative of linear velocity */
     vctDouble3 Acceleration;
 
@@ -73,17 +73,17 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
 
     /*! two tuple, masks position/orientation parts of the Cartesian motion*/
     vctBool2 Mask;
-    
+
  public:
     /*! default constructor */
     prmPositionCartesianSet():
         MovingFrame(NULL),
         ReferenceFrame(NULL)
     {}
-    
+
     /*!constructor with all parameters */
-    prmPositionCartesianSet(const prmTransformationBasePtr & movingFrame, 
-                            const prmTransformationBasePtr & referenceFrame, 
+    prmPositionCartesianSet(const prmTransformationBasePtr & movingFrame,
+                            const prmTransformationBasePtr & referenceFrame,
                             const vctDoubleFrm3 & goal,
                             const vctDouble3 & velocity,
                             const vctDouble3 & velocityAngular,
@@ -99,13 +99,13 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
         AccelerationAngular(accelerationAngular),
         Mask(mask)
     {}
-    
+
     /*!destructor
      */
     virtual ~prmPositionCartesianSet();
-    
+
     /*! Set Target position and  mask
-      \param goal cartesian position 
+      \param goal cartesian position
       \param mask mask for position/orientation or both
       \return void
     */
@@ -113,7 +113,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     {
         this->GoalMember = goal;
         this->Mask = mask;
-    }  
+    }
 
     /*! Reference to the goal frame
       \param goal cartesian position
@@ -124,18 +124,23 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
         return GoalMember;
     }
 
-    
+    const vctFrm3 & Goal(void) const
+    {
+        return GoalMember;
+    }
+
+
     /*! Set Target frame
-      \param goal cartesian position 
+      \param goal cartesian position
       \return void
     */
     void SetGoal(const vctDoubleFrm3 & goal)
     {
         this->GoalMember = goal;
-    }  
+    }
 
     /*! Set Target position only
-      \param position target position 
+      \param position target position
       \return void
     */
     void SetGoal(const vctDouble3 & position)
@@ -151,7 +156,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     {
        this->GoalMember.Rotation().Assign(orientation);
     }
-	
+
     /*! Set target to a node in the transformation tree
       \param target node in the tree
       \return void
@@ -159,12 +164,12 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetGoal(const prmTransformationBasePtr & target)
     {
         this->GoalMember = prmWRTReference(target, this->ReferenceFrame);
-    } 
+    }
 
     /*! Get current goal parameter
       \return prmCartesianPosition current goal parameter
     */
-    vctDoubleFrm3 GetGoal(void) const 
+    vctDoubleFrm3 GetGoal(void) const
     {
         return this->GoalMember;
     }
@@ -176,8 +181,8 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetReferenceFrame(const prmTransformationBasePtr & referenceFrame)
     {
         this->ReferenceFrame = referenceFrame;
-    } 
-    
+    }
+
     /*! Get the reference frame for current move
       \return prmTransformationBasePtr reference frame node in the tree
     */
@@ -193,8 +198,8 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetMovingFrame(const prmTransformationBasePtr  & movingFrame)
     {
         this->MovingFrame =  movingFrame;
-    } 
-    
+    }
+
     /*! Get the moving frame for current move
       \return prmTransformationBasePtr reference frame node in the tree
     */
@@ -202,7 +207,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     {
         return this->MovingFrame;
     }
-    
+
     /*! Set the velocity parameter
       \param velocity planned velocity
       \return void
@@ -210,7 +215,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetVelocity(const vctDouble3 & velocity)
     {
         this->Velocity = velocity;
-    } 
+    }
 
     /*! Get the velocity parameter
       \return prmCartesianVelocity current planned velocity
@@ -227,8 +232,8 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetAngularVelocity(const vctDouble3 & velocityAngular)
     {
         this->VelocityAngular = velocityAngular;
-    } 
-    
+    }
+
     /*! Get the angular velocity parameter
       \return  prmCartesianVelocity current planned angular velocity
     */
@@ -256,7 +261,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
 
     /*! Set the deceleration parameters only
       \param accelerationAngular angular acceleration
-      \return void 
+      \return void
     */
     inline void SetAngularAcceleration(const vctDouble3 & accelerationAngular)
     {
@@ -283,7 +288,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get the current mask parameter
       \return prmBoolVec current mask
     */
-    inline vctBool2 GetMask(void) const 
+    inline vctBool2 GetMask(void) const
     {
         return this->Mask;
     }
@@ -294,7 +299,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream);
 
-    
+
 }; // _prmPositionCartesianSet_h
 
 

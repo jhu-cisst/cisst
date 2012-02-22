@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):  Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on: 2008-05-23
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,11 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3Manager.h>
 #include <cisst3DUserInterface/ui3Selectable.h>
 
+#include <cisstParameterTypes/prmPositionCartesianSet.h>
+
 CMN_IMPLEMENT_SERVICES(ui3MasterArm)
 
 
 ui3MasterArm::ui3MasterArm(const std::string & name):
-    Name(name),
+Name(name),
     Cursor(0),
     ButtonPressed(false),
     ButtonReleased(false),
@@ -74,10 +76,10 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
     // add required interface for master arm to Manager
     mtsInterfaceRequired * requiredInterface;
 
-    // setup master arm required interface 
+    // setup master arm required interface
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name);
     if (requiredInterface) {
-        // bound the mtsFunction to the command provided by the interface 
+        // bound the mtsFunction to the command provided by the interface
         requiredInterface->AddFunction("GetPositionCartesian", this->GetCartesianPosition, MTS_REQUIRED);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetInput: failed to add \""
@@ -90,7 +92,7 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
     this->Manager->ComponentManager->Connect(this->Manager->GetName(), this->Name,
                                              positionDevice, positionInterface);
 
-    // setup master select button required interface 
+    // setup master select button required interface
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name + "Select");
     if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&ui3MasterArm::ButtonEventHandler, this,
@@ -106,7 +108,7 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
     this->Manager->ComponentManager->Connect(this->Manager->GetName(), this->Name + "Select",
                                              buttonDevice, buttonInterface);
 
-    // setup master clutch button required interface 
+    // setup master clutch button required interface
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name + "Clutch");
     if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&ui3MasterArm::ClutchEventHandler, this,
@@ -135,6 +137,11 @@ bool ui3MasterArm::SetTransformation(const vctFrm3 & transformation,
     return true;
 }
 
+
+void ui3MasterArm::SetCursorPosition(const prmPositionCartesianSet & position)
+{
+    SetCursorPosition(position.Goal().Translation());
+}
 
 
 void ui3MasterArm::SetCursorPosition(const vctDouble3 & desiredCursorPosition)

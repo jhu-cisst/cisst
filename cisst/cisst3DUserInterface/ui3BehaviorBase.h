@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):  Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on: 2008-05-23
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -38,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3Export.h>
 
 /*!
- Provides a default behavior and common interface for derived behavior classes.
+  Provides a default behavior and common interface for derived behavior classes.
 */
 class CISST_EXPORT ui3BehaviorBase: public mtsTaskContinuous
 {
@@ -49,10 +49,10 @@ class CISST_EXPORT ui3BehaviorBase: public mtsTaskContinuous
     friend class ui3MasterArm;
     friend class ui3VideoInterfaceFilter;
 
-private:
+ private:
     void Run(void);
 
-public:
+ public:
     /*!
       Typedef for pointer to member function for button callbacks
     */
@@ -64,126 +64,126 @@ public:
     typedef enum {
         Foreground, // running, receives GUI events
         Background, // running, doesn't receive events
-        Idle // not running 
+        Idle // not running
     } StateType;
-    
-public:
+
+ public:
     /*!
-     Constructor: called when instantiating behaviors
+      Constructor: called when instantiating behaviors
     */
     ui3BehaviorBase(const std::string & name,
                     ui3Manager * manager);
 
     /*!
-     Destructor
+      Destructor
     */
     virtual ~ui3BehaviorBase();
 
     /*!
-     Returns the user interface state of the behavior.
+      Returns the user interface state of the behavior.
 
-     \return                Behavior state
+      \return                Behavior state
     */
     StateType GetState(void) const;
 
     /*!
-     Returns a pointer to the main user interface manager object.
+      Returns a pointer to the main user interface manager object.
 
-     \return                Pointer to the main user interface manager
+      \return                Pointer to the main user interface manager
     */
     virtual ui3Manager * GetManager(void);
 
     /*!
-     Returns a pointer to the 3D scene manager object.
+      Returns a pointer to the 3D scene manager object.
 
-     \return                Pointer to the 3D scene manager
+      \return                Pointer to the 3D scene manager
     */
     virtual ui3SceneManager * GetSceneManager(void);
 
     virtual void ConfigureMenuBar(void) = 0;
 
     /*!
-     This method shall perform all the necessary resource initialization and memory
-     allocation that is to be done before running the behavior.
-     Menu bar buttons should be created in this method.
-     The resources initialized and memory allocated in this function shall be released
-     in the ui3BehaviorBase::Release method.
+      This method shall perform all the necessary resource initialization and memory
+      allocation that is to be done before running the behavior.
+      Menu bar buttons should be created in this method.
+      The resources initialized and memory allocated in this function shall be released
+      in the ui3BehaviorBase::Release method.
 
-     \return                Success flag: true=success, false=error
+      \return                Success flag: true=success, false=error
     */
     virtual void Startup(void) = 0;
 
     /*!
-     This method shall release all resources initialized and memory allocated in the
-     ui3BehaviorBase::Initialize method.
+      This method shall release all resources initialized and memory allocated in the
+      ui3BehaviorBase::Initialize method.
     */
     virtual void Cleanup(void) = 0;
 
     /*!
-     This method is called once for every video frame when the user interface
-     manager is in master-as-mouse mode and the behavior is the active behavior
-     (is in foreground).
-     It shall perform interface related actions in the behavior.
-     \note
-     This method should handle only user interface related actions that do not block
-     the calling thread for a long period of time. Implement all computationally
-     intensive tasks on an asynchronous thread/task instead.
+      This method is called once for every video frame when the user interface
+      manager is in master-as-mouse mode and the behavior is the active behavior
+      (is in foreground).
+      It shall perform interface related actions in the behavior.
+      \note
+      This method should handle only user interface related actions that do not block
+      the calling thread for a long period of time. Implement all computationally
+      intensive tasks on an asynchronous thread/task instead.
 
-     \return                Success flag: true=success, false=error
+      \return                Success flag: true=success, false=error
     */
     virtual bool RunForeground(void) = 0;
 
     /*!
-     This method is called once for every video frame when the user interface
-     manager is in master-as-mouse mode and the behavior is not active (is in
-     background).
-     It shall perform interface related actions in the behavior.
-     \note
-     This method should handle only user interface related actions that do not block
-     the calling thread for a long period of time. Implement all computationally
-     intensive tasks on an asynchronous thread/task instead.
+      This method is called once for every video frame when the user interface
+      manager is in master-as-mouse mode and the behavior is not active (is in
+      background).
+      It shall perform interface related actions in the behavior.
+      \note
+      This method should handle only user interface related actions that do not block
+      the calling thread for a long period of time. Implement all computationally
+      intensive tasks on an asynchronous thread/task instead.
 
-     \return                Success flag: true=success, false=error
+      \return                Success flag: true=success, false=error
     */
     virtual bool RunBackground(void) = 0;
 
     /*!
-     This method is called once for every video frame when the user interface
-     manager is not in master-as-mouse mode (is in tele-operated mode). In this
-     state no user inputs will be dispatched to the behavior.
-     \note
-     This method should handle only user interface related actions that do not block
-     the calling thread for a long period of time. Implement all computationally
-     intensive tasks on an asynchronous thread/task instead.
+      This method is called once for every video frame when the user interface
+      manager is not in master-as-mouse mode (is in tele-operated mode). In this
+      state no user inputs will be dispatched to the behavior.
+      \note
+      This method should handle only user interface related actions that do not block
+      the calling thread for a long period of time. Implement all computationally
+      intensive tasks on an asynchronous thread/task instead.
 
-     \return                Success flag: true=success, false=error
+      \return                Success flag: true=success, false=error
     */
     virtual bool RunNoInput(void) = 0;
 
     /*!
-     Tis method shall oad the parameters of the behavior from the specified file.
-     It is called automatically by ui3Manager::LoadConfiguration.
+      Tis method shall oad the parameters of the behavior from the specified file.
+      It is called automatically by ui3Manager::LoadConfiguration.
 
-     \param configfile      Configuration file
-     \return                Success flag: true=success, false=error
+      \param configfile      Configuration file
+      \return                Success flag: true=success, false=error
     */
     virtual void Configure(const std::string & configFile);
 
     /*!
-     This method shall save the parameters of the behavior to the specified file.
-     It is called automatically by ui3Manager::SaveConfiguration.
+      This method shall save the parameters of the behavior to the specified file.
+      It is called automatically by ui3Manager::SaveConfiguration.
 
-     \param configfile      Configuration file
-     \return                Success flag: true=success, false=error
+      \param configfile      Configuration file
+      \return                Success flag: true=success, false=error
     */
     virtual bool SaveConfiguration(const std::string & configFile);
 
 
     virtual ui3VisibleObject * GetVisibleObject(void) = 0;
 
-protected:
+ protected:
     /*!
-     Stores user interface buttons.
+      Stores user interface buttons.
     */
     ui3MenuBar * MenuBar;
 
@@ -195,11 +195,11 @@ protected:
     virtual void OnQuit(void) {};
     virtual void OnStart(void) {};
 
-public:
+ public:
     /*!
-     If there are any video sources connected to the behavior, this method is
-     called by SVL pipelines every time a new stream sample arrives.
-     Attention:
+      If there are any video sources connected to the behavior, this method is
+      called by SVL pipelines every time a new stream sample arrives.
+      Attention:
       This method is heavily multithreaded. It is used by all asynchronous
       streams attached to the behavior. It may be called from several
       independent stream threads simultaneously.
@@ -207,30 +207,30 @@ public:
     virtual void OnStreamSample(svlSample* sample, int streamindex);
 
     /*!
-     Adds a new SVL source interface to the behavior and
-     returns the stream index for the new interface.
+      Adds a new SVL source interface to the behavior and
+      returns the stream index for the new interface.
     */
     int AddStream(svlStreamType type, const std::string & streamname);
 
     /*!
-     Returns image width if the specified stream is of image type.
-     Otherwise or if the SVL pipeline is not yet initialized,
-     the return value is 0.
+      Returns image width if the specified stream is of image type.
+      Otherwise or if the SVL pipeline is not yet initialized,
+      the return value is 0.
     */
     unsigned int GetStreamWidth(const int streamindex, unsigned int channel = 0);
     unsigned int GetStreamWidth(const std::string & streamname, unsigned int channel = 0);
 
     /*!
-     Returns image height if the specified stream is of image type.
-     Otherwise or if the SVL pipeline is not yet initialized,
-     the return value is 0.
+      Returns image height if the specified stream is of image type.
+      Otherwise or if the SVL pipeline is not yet initialized,
+      the return value is 0.
     */
     unsigned int GetStreamHeight(const int streamindex, unsigned int channel = 0);
     unsigned int GetStreamHeight(const std::string & streamname, unsigned int channel = 0);
 
     /*!
-     Returns the index of the first stream named as the specified string.
-     If no matching stream is found, the return value is negative.
+      Returns the index of the first stream named as the specified string.
+      If no matching stream is found, the return value is negative.
     */
     int GetStreamIndexFromName(const std::string & streamname);
 
@@ -238,11 +238,11 @@ public:
     vctDynamicVector<std::string> StreamNames;
 
     /*!
-     Returns a pointer to the filter that interfaces the behavior
-     with StereoVision pipelines. Using the its pointer, the filter
-     can be connected to a pipeline.
+      Returns a pointer to the filter that interfaces the behavior
+      with StereoVision pipelines. Using the its pointer, the filter
+      can be connected to a pipeline.
     */
-    svlFilterBase* GetStreamSamplerFilter(const std::string & streamname);
+    svlFilterBase * GetStreamSamplerFilter(const std::string & streamname);
 
 
     // list of ui3 widgets
@@ -267,18 +267,19 @@ public:
     virtual void SetStateBackgroundCallback(void);
 
     /*!
-     State variable for storing the current UI state of the behavior.
+      State variable for storing the current UI state of the behavior.
     */
     StateType State;
     /*!
-     Pointer to the main user interface manager object.
-     This member is set by the UI manager upon creating the behavior.
+      Pointer to the main user interface manager object.
+      This member is set by the UI manager upon creating the behavior.
     */
     ui3Manager * Manager;
 
     mtsFunctionRead GetPrimaryMasterPosition, GetSecondaryMasterPosition;
+    mtsFunctionWrite SetPrimaryMasterPosition, SetSecondaryMasterPosition;
 
-private:
+ private:
     /*! Event triggers, used by ui3Manager only */
     mtsFunctionWrite PrimaryMasterButtonEvent, SecondaryMasterButtonEvent;
 };

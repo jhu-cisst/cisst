@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-$Id: PNGViewer3D.cpp 2394 2011-03-17 01:08:57Z adeguet1 $
+$Id$
 
 Author(s):	Anton Deguet
 Created on:	2011-04-25

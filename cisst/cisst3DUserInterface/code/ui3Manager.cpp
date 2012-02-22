@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):  Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on: 2008-05-23
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -39,13 +39,15 @@ CMN_IMPLEMENT_SERVICES(ui3Manager)
 
 
 ui3Manager::ui3Manager(const std::string & name):
-    ui3BehaviorBase(name, 0),
+ui3BehaviorBase(name, 0),
     Initialized(false),
     Running(false),
     ActiveBehavior(0),
     SceneManager(0),
     RendererThread(0),
-    HasMaMDevice(false)
+    IsOverMenu(0),
+    HasMaMDevice(false),
+    PickRequested(false)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB,       "MonoVideo");
@@ -91,7 +93,7 @@ bool ui3Manager::SetupMaM(const std::string & mamDevice, const std::string & mam
     // connect the left master device to the right master required interface
     this->ComponentManager->Connect(this->GetName(), "MaM",
                                     mamDevice, mamInterface);
-    
+
     // update flag
     this->HasMaMDevice = true;
     return true;
@@ -147,7 +149,6 @@ bool ui3Manager::SetRenderTargetToRenderer(const std::string & renderername, svl
     }
     return false;
 }
-
 
 bool ui3Manager::AddVideoBackgroundToRenderer(const std::string & renderername, const std::string & streamname, unsigned int videochannel)
 {
@@ -218,7 +219,7 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     behavior->PrimaryMasterButtonEvent.Bind(providedInterface->AddEventWrite("PrimaryMasterButton", prmEventButton()));
     behavior->SecondaryMasterButtonEvent.Bind(providedInterface->AddEventWrite("SecondaryMasterButton", prmEventButton()));
 
-    // add the task to the task manager (mts) code 
+    // add the task to the task manager (mts) code
     this->ComponentManager->AddComponent(behavior);
     this->ComponentManager->Connect(behavior->GetName(), "ManagerInterface" + behavior->GetName(),
                                     this->GetName(), "BehaviorInterface" + behavior->GetName());
@@ -278,7 +279,7 @@ void ui3Manager::ConnectAll(void)
         CMN_ASSERT(requiredInterface);
     }
 
-    mtsInterfaceProvided * behaviorsInterface = 
+    mtsInterfaceProvided * behaviorsInterface =
         this->AddInterfaceProvided("BehaviorsInterface");
     if (behaviorsInterface) {
         MasterArmList::iterator armIterator;
@@ -298,11 +299,14 @@ void ui3Manager::ConnectAll(void)
                 CMN_LOG_CLASS_INIT_ERROR << "ConnectAll: unknown arm role" << std::endl;
             }
             CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added state data \""
-                                     << commandName << "\" using master arm \"" 
+                                     << commandName << "\" using master arm \""
                                      << ((*armIterator).second)->Name << "\"" << std::endl;
             this->StateTable.AddData(((*armIterator).second)->CartesianPosition, commandName);
             behaviorsInterface->AddCommandReadState(this->StateTable, ((*armIterator).second)->CartesianPosition,
                                                     commandName);
+            behaviorsInterface->AddCommandWrite(&ui3MasterArm::SetCursorPosition,
+                                                armIterator->second, commandName, prmPositionCartesianSet());
+
             for (iterator = this->Behaviors.begin();
                  iterator != end;
                  iterator++) {
@@ -313,16 +317,22 @@ void ui3Manager::ConnectAll(void)
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetPrimaryMasterPosition,
                                                    MTS_REQUIRED);
+                    requiredInterface->AddFunction(commandName,
+                                                   (*iterator)->SetPrimaryMasterPosition,
+                                                   MTS_REQUIRED);
                     CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added required command \""
-                                             << commandName << "\" to required interface \"ManagerInterface\" of behavior \"" 
+                                             << commandName << "\" to required interface \"ManagerInterface\" of behavior \""
                                              << (*iterator)->GetName() << "\" to be bound to \"GetPrimaryMasterPosition\"" << std::endl;
                     break;
                 case ui3MasterArm::SECONDARY:
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetSecondaryMasterPosition,
                                                    MTS_REQUIRED);
+                    requiredInterface->AddFunction(commandName,
+                                                   (*iterator)->SetSecondaryMasterPosition,
+                                                   MTS_REQUIRED);
                     CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added required command \""
-                                             << commandName << "\" to required interface \"ManagerInterface\" of behavior \"" 
+                                             << commandName << "\" to required interface \"ManagerInterface\" of behavior \""
                                              << (*iterator)->GetName() << "\" to be bound to \"GetSecondaryMasterPosition\"" << std::endl;
                     break;
                 default:
@@ -344,15 +354,17 @@ void ui3Manager::ConnectAll(void)
 
 void ui3Manager::DispatchButtonEvent(const ui3MasterArm::RoleType & armRole, const prmEventButton & buttonEvent)
 {
-    switch (armRole) {
-    case ui3MasterArm::PRIMARY:
-        this->Manager->ActiveBehavior->PrimaryMasterButtonEvent(buttonEvent);
-        break;
-    case ui3MasterArm::SECONDARY:
-        this->Manager->ActiveBehavior->SecondaryMasterButtonEvent(buttonEvent);
-        break;
-    default:
-        CMN_LOG_CLASS_RUN_ERROR << "DispatchButtonEvent: unknown role" << std::endl;
+    if (!IsOverMenu) {
+        switch (armRole) {
+        case ui3MasterArm::PRIMARY:
+            this->Manager->ActiveBehavior->PrimaryMasterButtonEvent(buttonEvent);
+            break;
+        case ui3MasterArm::SECONDARY:
+            this->Manager->ActiveBehavior->SecondaryMasterButtonEvent(buttonEvent);
+            break;
+        default:
+            CMN_LOG_CLASS_RUN_ERROR << "DispatchButtonEvent: unknown role" << std::endl;
+        }
     }
 }
 
@@ -398,10 +410,10 @@ void ui3Manager::Startup(void)
     for (iterator = this->Behaviors.begin();
          iterator != end;
          iterator++) {
-             this->SceneManager->Add((*iterator)->MenuBar);
-             this->SceneManager->Add((*iterator)->GetVisibleObject());
-             (*iterator)->SetState(Idle);
-             (*iterator)->GetVisibleObject()->Hide();
+        this->SceneManager->Add((*iterator)->MenuBar);
+        this->SceneManager->Add((*iterator)->GetVisibleObject());
+        (*iterator)->SetState(Idle);
+        (*iterator)->GetVisibleObject()->Hide();
     }
 
     // current active behavior is this
@@ -483,150 +495,151 @@ void ui3Manager::Run(void)
     const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
 
     if (this->MaM) {
-    // init all selectable objects
-    for (behaviorIterator = this->Behaviors.begin();
-         behaviorIterator != behaviorEnd;
-         behaviorIterator++) {
-        // test if the behavior is running
-        if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
-            || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-            
-            // go through all the selectable objects
-            const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
-            for (selectableIterator = (*behaviorIterator)->Selectables.begin();
-                 selectableIterator != selectableEnd;
-                 selectableIterator++) {
-                (*selectableIterator)->ResetOverallIntention();
+        // init all selectable objects
+        for (behaviorIterator = this->Behaviors.begin();
+             behaviorIterator != behaviorEnd;
+             behaviorIterator++) {
+            // test if the behavior is running
+            if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+                || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+
+                // go through all the selectable objects
+                const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
+                for (selectableIterator = (*behaviorIterator)->Selectables.begin();
+                     selectableIterator != selectableEnd;
+                     selectableIterator++) {
+                    (*selectableIterator)->ResetOverallIntention();
+                }
             }
         }
     }
-    }
-    
+
     // process events
+    this->ProcessQueuedCommands();
     this->ProcessQueuedEvents();
 
+
     if (this->MaM) {
-    // for all cursors, update position
-    double averageDepth = 0.0;
-    for (armIterator = this->MasterArms.begin();
-         armIterator != armEnd;
-         armIterator++) {
-        ((*armIterator).second)->UpdateCursorPosition();
-        averageDepth += ((*armIterator).second)->CursorPosition.Translation().Z();
-    }
-
-    if (MasterArms.size() > 0) {
-        averageDepth /= static_cast<double>(MasterArms.size());
-    } else {
-        averageDepth = -100.0; // should be camera focal distance?
-    }
-
-    // set depth for current menu, take the average depth of all master arms
-    this->ActiveBehavior->MenuBar->SetDepth(averageDepth); // rightCursorPosition.Translation().Z());
-
-
-    // menu bar refresh and events
-    this->ActiveBehavior->MenuBar->SetAllButtonsUnselected();
-
-    ui3MenuButton * selectedButton = 0;
-    bool isOverMenu;
-    ui3MasterArm * armPointer;
-
-    for (armIterator = this->MasterArms.begin();
-         armIterator != armEnd;
-         armIterator++) {
-        bool transitionDetected;
-        armPointer = (*armIterator).second;
-
-        // see if this cursor is over the menu and if so returns the current button -- Buttons should be ui3Selectable and code below could be used.
-        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(armPointer->CursorPosition.Translation(),
-                                                                     selectedButton);
-        armPointer->Cursor->Set2D(isOverMenu);
-        if (selectedButton) {
-            if (armPointer->ButtonReleased) {
-                // todo, add error code check
-                selectedButton->Callable->Execute();
-            }
+        // for all cursors, update position
+        double averageDepth = 0.0;
+        for (armIterator = this->MasterArms.begin();
+             armIterator != armEnd;
+             armIterator++) {
+            ((*armIterator).second)->UpdateCursorPosition();
+            averageDepth += ((*armIterator).second)->CursorPosition.Translation().Z();
         }
 
-        // test if this arm already has something selected
-        if (armPointer->Selected) {
-			armPointer->Selected->PreviousPosition.Assign(armPointer->Selected->CurrentPosition);
-            armPointer->Selected->CurrentPosition.Assign(armPointer->CursorPosition);
+        if (MasterArms.size() > 0) {
+            averageDepth /= static_cast<double>(MasterArms.size());
         } else {
-            BehaviorList::iterator behaviorIterator;
-            const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
-            vctDouble3 position;
-            for (behaviorIterator = this->Behaviors.begin();
-                 behaviorIterator != behaviorEnd;
-                 behaviorIterator++) {
-                // test if the behavior is running
-                if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
-                    || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-                    // go through all the selectable objects
-                    const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
-                    for (selectableIterator = (*behaviorIterator)->Selectables.begin();
-                         selectableIterator != selectableEnd;
-                         selectableIterator++) {
-                        armPointer->UpdateIntention((*selectableIterator));
+            averageDepth = -100.0; // should be camera focal distance?
+        }
+
+        // set depth for current menu, take the average depth of all master arms
+        this->ActiveBehavior->MenuBar->SetDepth(averageDepth); // rightCursorPosition.Translation().Z());
+
+
+        // menu bar refresh and events
+        this->ActiveBehavior->MenuBar->SetAllButtonsUnselected();
+
+        ui3MenuButton * selectedButton = 0;
+        ui3MasterArm * armPointer;
+
+        for (armIterator = this->MasterArms.begin();
+             armIterator != armEnd;
+             armIterator++) {
+            bool transitionDetected;
+            armPointer = (*armIterator).second;
+
+            // see if this cursor is over the menu and if so returns the current button -- Buttons should be ui3Selectable and code below could be used.
+            IsOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(armPointer->CursorPosition.Translation(),
+                                                                         selectedButton);
+            armPointer->Cursor->Set2D(IsOverMenu);
+            if (selectedButton) {
+                if (armPointer->ButtonReleased) {
+                    // todo, add error code check
+                    selectedButton->Callable->Execute();
+                }
+            }
+
+            // test if this arm already has something selected
+            if (armPointer->Selected) {
+                armPointer->Selected->PreviousPosition.Assign(armPointer->Selected->CurrentPosition);
+                armPointer->Selected->CurrentPosition.Assign(armPointer->CursorPosition);
+            } else {
+                BehaviorList::iterator behaviorIterator;
+                const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
+                vctDouble3 position;
+                for (behaviorIterator = this->Behaviors.begin();
+                     behaviorIterator != behaviorEnd;
+                     behaviorIterator++) {
+                    // test if the behavior is running
+                    if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+                        || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+                        // go through all the selectable objects
+                        const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
+                        for (selectableIterator = (*behaviorIterator)->Selectables.begin();
+                             selectableIterator != selectableEnd;
+                             selectableIterator++) {
+                            armPointer->UpdateIntention((*selectableIterator));
+                        }
                     }
+                }
+            }
+
+            // now figure out which selectable callback if any
+            transitionDetected = false;
+            if (armPointer->ButtonPressed) {
+                if (armPointer->ToBeSelected) {
+                    transitionDetected = true;
+                    armPointer->Selected = armPointer->ToBeSelected;
+                    armPointer->SetCursorPosition(armPointer->Selected->GetAbsoluteTransformation().Translation());
+                    armPointer->Selected->Select(armPointer->CursorPosition);
+                }
+            } else if (armPointer->ButtonReleased) {
+                if (armPointer->Selected) {
+                    transitionDetected = true;
+                    armPointer->Selected->Release(armPointer->CursorPosition);
+                    armPointer->Selected = 0;
                 }
             }
         }
 
-        // now figure out which selectable callback if any
-        transitionDetected = false;
-        if (armPointer->ButtonPressed) {
-            if (armPointer->ToBeSelected) {
-                transitionDetected = true;
-                armPointer->Selected = armPointer->ToBeSelected;
-                armPointer->SetCursorPosition(armPointer->Selected->GetAbsoluteTransformation().Translation());
-                armPointer->Selected->Select(armPointer->CursorPosition);
-            }
-        } else if (armPointer->ButtonReleased) {
-            if (armPointer->Selected) {
-                transitionDetected = true;
-                armPointer->Selected->Release(armPointer->CursorPosition);
-                armPointer->Selected = 0;
+        // show intention for all selectable objects
+        for (behaviorIterator = this->Behaviors.begin();
+             behaviorIterator != behaviorEnd;
+             behaviorIterator++) {
+            // test if the behavior is running
+            if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+                || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+                // go through all the selectable objects
+                const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
+                for (selectableIterator = (*behaviorIterator)->Selectables.begin();
+                     selectableIterator != selectableEnd;
+                     selectableIterator++) {
+                    (*selectableIterator)->ShowIntention();
+                }
             }
         }
-    }
 
-    // show intention for all selectable objects
-    for (behaviorIterator = this->Behaviors.begin();
-         behaviorIterator != behaviorEnd;
-         behaviorIterator++) {
-        // test if the behavior is running
-        if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
-            || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-            // go through all the selectable objects
-            const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
-            for (selectableIterator = (*behaviorIterator)->Selectables.begin();
-                 selectableIterator != selectableEnd;
-                 selectableIterator++) {
-                (*selectableIterator)->ShowIntention();
+        // based on callbacks, update position/orientation of 3D Widgets
+        // TODO, add test to see if any arm is selected before doing all of this
+        for (behaviorIterator = this->Behaviors.begin();
+             behaviorIterator != behaviorEnd;
+             behaviorIterator++) {
+            // test if the behavior is running
+            if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+                || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+                Widget3DList::iterator widgetIterator;
+                // go through all the 3D widgets
+                const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
+                for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
+                     widgetIterator != widgetEnd;
+                     widgetIterator++) {
+                    (*widgetIterator)->UpdatePosition();
+                }
             }
         }
-    }
-     
-    // based on callbacks, update position/orientation of 3D Widgets
-    // TODO, add test to see if any arm is selected before doing all of this
-    for (behaviorIterator = this->Behaviors.begin();
-         behaviorIterator != behaviorEnd;
-         behaviorIterator++) {
-        // test if the behavior is running
-        if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
-            || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-            Widget3DList::iterator widgetIterator;
-            // go through all the 3D widgets
-            const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
-            for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
-                 widgetIterator != widgetEnd;
-                 widgetIterator++) {
-                (*widgetIterator)->UpdatePosition();
-            }
-        }
-    }
     }
     // this needs to change to a parameter
     osaSleep(20.0 * cmn_ms);
@@ -767,7 +780,7 @@ void ui3Manager::RecenterMasterCursors(const vctDouble3 & lowerCorner, const vct
          armIterator++) {
         currentLowerCorner.ElementwiseMinOf(currentLowerCorner, ((*armIterator).second)->CartesianPosition.Position().Translation());
         currentUpperCorner.ElementwiseMaxOf(currentUpperCorner, ((*armIterator).second)->CartesianPosition.Position().Translation());
-    }    
+    }
 
     // compute size and translation between two bounding boxes
     vctDouble3 center, currentCenter;
@@ -801,7 +814,7 @@ void ui3Manager::RecenterMasterCursors(const vctDouble3 & lowerCorner, const vct
         relativePosition.Multiply(ratio);
         newPosition.SumOf(center, relativePosition);
         ((*armIterator).second)->SetCursorPosition(newPosition);
-    }    
+    }
 }
 
 
@@ -881,22 +894,37 @@ void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
     // update once before starting so we can use the Show method
     baseref->SceneManager->VisibleObjects->Update(baseref->SceneManager);
     baseref->SceneManager->VisibleObjects->Show();
-    
-	// rendering loop
+
+    // rendering loop
     while (!KillThread) {
 
         // update VTK objects if needed
         baseref->SceneManager->VisibleObjects->Update(baseref->SceneManager);
         baseref->SceneManager->VisibleObjects->UpdateVTKObjects();
+        ui3Manager::_RendererStruct* renderer = 0;
 
         // signal renderers
         for (i = 0; i < renderercount; i ++) {
-            // asynchronous call to render the current view; returns immediately
-            baseref->Renderers[i]->renderer->Render();
+            renderer = baseref->Renderers[i];
+            if ((baseref->Renderers[i]->name == baseref->PickRendererName) && baseref->PickRequested) {
+                std::cerr << "ui3ManagerCVTKRendererProc::Proc: found renderer!: " << baseref->PickRendererName << std::endl;
+                renderer->renderer->Render(true,baseref->PickPosition);
+            } else {
+                if (baseref->PickRequested) {
+                    std::cerr << "ERROR: Pick requested but can't find renderer: " << baseref->PickRendererName << std::endl;
+                }
+                // asynchronous call to render the current view; returns immediately
+                renderer->renderer->Render(false, baseref->PickPosition);
+            }
+        }
+
+        if (baseref->PickRequested) {
+            baseref->PickRequested = false;
+            baseref->PickSignal->Raise();
         }
 
         // display framerate
-        if (framecount == 0) { 
+        if (framecount == 0) {
             time = stopwatch.GetElapsedTime();
             printf("Framerate = %.1ffps   \r", 10.0 / (time - prevtime));
             fflush(stdout);
@@ -916,3 +944,20 @@ void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
     return this;
 }
 
+
+void ui3Manager::RequestPick(osaThreadSignal * pickSignal, vtkPropPicker * picker,
+                             const std::string & rendererName, const vct3 & pickerPoint)
+{
+    if (PickRequested) {
+        std::cerr << "WARNING: Already picking!!!" <<std::endl;
+        return;
+    }
+    std::cerr << "ui3ManagerProc::RequestPick() " << rendererName << std::endl;
+    PickSignal = pickSignal;
+    Picker = picker;
+    PickRendererName = rendererName;
+    PickPosition = pickerPoint;
+    // PickRequested should be set last!
+    PickRequested = true;
+    PickSignal->Wait();
+}
