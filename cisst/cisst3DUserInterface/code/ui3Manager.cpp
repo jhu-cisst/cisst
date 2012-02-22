@@ -304,8 +304,8 @@ void ui3Manager::ConnectAll(void)
             this->StateTable.AddData(((*armIterator).second)->CartesianPosition, commandName);
             behaviorsInterface->AddCommandReadState(this->StateTable, ((*armIterator).second)->CartesianPosition,
                                                     commandName);
-            behaviorsInterface->AddCommandWrite(&ui3MasterArm::SetCursorPosition,
-                                                armIterator->second, commandName, prmPositionCartesianSet());
+            behaviorsInterface->AddCommandWrite<ui3MasterArm, prmPositionCartesianSet>(&ui3MasterArm::SetCursorPosition,
+                                                                                       armIterator->second, commandName);
 
             for (iterator = this->Behaviors.begin();
                  iterator != end;

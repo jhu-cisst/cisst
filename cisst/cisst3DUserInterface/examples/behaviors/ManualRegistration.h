@@ -52,6 +52,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkTextActor3D.h>
 #include <vtkTextProperty.h>
 
+// Always include last!
+#include <ui3BehaviorsExport.h>
+
 class ManualRegistrationSurfaceVisibleStippleObject;
 
 class ManualRegistrationVTKCallback: public vtkCommand
@@ -90,7 +93,7 @@ private:
 };
 
 
-class ManualRegistration: public ui3BehaviorBase
+class CISST_EXPORT ManualRegistration: public ui3BehaviorBase
 {
 public:
     enum VisibleObjectType {MODEL = 0};
