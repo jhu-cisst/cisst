@@ -18,16 +18,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
-#include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaDynamicLoader.h>
-#include <cisstCommon/cmnUnits.h>
+#ifdef CISST_MTS_SUPPORT_FDD
+#include <cisstMultiTask/mtsFaultBase.h>
+#endif
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
@@ -592,6 +595,10 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetInterfaceProvidedDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                           InterfaceLCMFunction.GetInterfaceRequiredDescription);
+#ifdef CISST_MTS_SUPPORT_FDD
+    required->AddFunction(mtsManagerComponentBase::CommandNames::FaultPropagate,
+                          InterfaceLCMFunction.FaultPropagate);
+#endif
     // It is not necessary to queue the events because we are just passing them along (it would not
     // hurt to queue them, either).
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleAddComponentEvent, this,
@@ -714,6 +721,19 @@ bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
     
     return true;
 }
+
+#ifdef CISST_MTS_SUPPORT_FDD
+bool mtsManagerComponentClient::FaultPropagate(const mtsFaultBase & fault) const
+{
+    mtsExecutionResult ret = InterfaceLCMFunction.FaultPropagate(fault);
+    if (ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED) {
+        CMN_LOG_CLASS_RUN_ERROR << "FaultPropagate: fault is not reported to the system" << std::endl;
+        return false;
+    }
+    
+    return true;
+}
+#endif
 
 bool mtsManagerComponentClient::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)

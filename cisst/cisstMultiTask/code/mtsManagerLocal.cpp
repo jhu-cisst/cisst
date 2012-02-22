@@ -3088,3 +3088,15 @@ ConnectClientSideInterfaceError:
 #endif
     return false;
 }
+
+#ifdef CISST_MTS_SUPPORT_FDD
+bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
+{
+    if (!ManagerComponent.Client) {
+        CMN_LOG_CLASS_RUN_ERROR << "FaultPropagate: MCC not yet created" << std::endl;
+        return false;
+    }
+
+    return ManagerComponent.Client->FaultPropagate(fault);
+}
+#endif

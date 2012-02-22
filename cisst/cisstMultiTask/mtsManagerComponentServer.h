@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,6 +40,9 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsManagerComponentServer_h
 
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#ifdef CISST_MTS_SUPPORT_FDD
+#include <cisstMultiTask/mtsFaultBase.h>
+#endif
 
 class mtsManagerComponentServer : public mtsManagerComponentBase
 {
@@ -112,6 +115,9 @@ protected:
                                                    std::vector<double> & processTimes) const;
     void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName, 
                                                         std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
+#ifdef CISST_MTS_SUPPORT_FDD
+    void InterfaceGCMCommands_FaultPropage(const mtsFaultBase & fault);
+#endif
 
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;
