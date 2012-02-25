@@ -4,10 +4,10 @@
 /*
 $Id$
 
-Author(s):  Anton Deguet, Simon DiMaio
-Created on: 2009-09-13
+Author(s):  Wen P. Liu, Anton Deguet
+Created on: 2012-01-27
 
-(C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+(C) Copyright 2012 Johns Hopkins University (JHU), All Rights
 Reserved.
 
 --- begin cisst license - do not edit ---
@@ -32,15 +32,17 @@ http://www.cisst.org/cisst/license.txt.
 
 #define CUBE_DEMO 1
 #define IMPORT_VIRTUAL_FIDUCIALS 1
+#define FIDUCIAL_COUNT_MAX 30
 
 class ManualRegistrationSurfaceVisibleStippleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     enum GeometryType {NONE=0,CUBE=1,SPHERE=2};
-    inline ManualRegistrationSurfaceVisibleStippleObject(const std::string & inputFile, const GeometryType & geometry=NONE, bool hasOutline = false):
+    inline ManualRegistrationSurfaceVisibleStippleObject(const std::string & inputFile, const GeometryType & geometry=NONE, int size = 0, bool hasOutline = false):
         ui3VisibleObject(),
         Visible(true),
+        Valid(true),
         InputFile(inputFile),
         SurfaceReader(0),
         SurfaceMapper(0),
@@ -49,7 +51,8 @@ public:
         OutlineData(0),
         OutlineMapper(0),
         OutlineActor(0),
-        Geometry(geometry)
+        Geometry(geometry),
+        Size(size)
     {
     }
 
@@ -84,7 +87,7 @@ public:
     inline bool CreateVTKObjectCube()
     {
         vtkCubeSource *source = vtkCubeSource::New();
-        source->SetBounds(-25,25,-25,25,-25,25);
+        source->SetBounds(-1*this->Size,this->Size,-1*this->Size,this->Size,-1*this->Size,this->Size);
         SurfaceMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(SurfaceMapper);
         SurfaceMapper->SetInputConnection(source->GetOutputPort());
@@ -103,11 +106,7 @@ public:
     inline bool CreateVTKObjectSphere(void) {
         vtkSphereSource *source = vtkSphereSource::New();
         CMN_ASSERT(source);
-        source->SetRadius(5.0);
-
-        vtkTextActor3D *textActor = vtkTextActor3D::New();
-        textActor->GetTextProperty()->SetFontSize(5);
-        textActor->SetInput(InputFile.c_str());
+        source->SetRadius(this->Size);
 
         SurfaceMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(SurfaceMapper);
@@ -117,10 +116,28 @@ public:
         SurfaceActor = ui3VTKStippleActor::New();
         CMN_ASSERT(SurfaceActor);
         SurfaceActor->SetMapper(SurfaceMapper);
+        
+	    // Create a vector text
+	    vtkVectorText* vecText = vtkVectorText::New();
+	    vecText->SetText(InputFile.c_str());
 
-        // Add the actor
+	    vtkLinearExtrusionFilter* extrude = vtkLinearExtrusionFilter::New();
+        extrude->SetInputConnection( vecText->GetOutputPort());
+	    extrude->SetExtrusionTypeToNormalExtrusion();
+	    extrude->SetVector(0, 0, 1 );
+	    extrude->SetScaleFactor (0.5);
+
+	    vtkPolyDataMapper* txtMapper = vtkPolyDataMapper::New();
+	    txtMapper->SetInputConnection( extrude->GetOutputPort());
+        ui3VTKStippleActor * textActor = ui3VTKStippleActor::New();
+        CMN_ASSERT(textActor);
+	    textActor->SetMapper(txtMapper);
+
+        // Add the actor(s)
         this->AddPart(SurfaceActor);
         this->AddPart(textActor);
+
+
         return true;
     }
 
@@ -226,7 +243,7 @@ public:
         return center;
     }
 
-    vctFrm3 PositionECMRCM;//warning: this is not always updated
+    bool Valid;
     bool Visible;
     vctFrm3 HomePositionUI3;
     typedef std::map<int,vctFrm3> vctFrm3MapType;
@@ -244,6 +261,7 @@ protected:
     vtkActor  * OutlineActor;
 
     GeometryType Geometry;
+    int Size;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ManualRegistrationSurfaceVisibleStippleObject);
@@ -252,22 +270,24 @@ CMN_IMPLEMENT_SERVICES(ManualRegistrationSurfaceVisibleStippleObject);
 ManualRegistration::ManualRegistration(const std::string & name):
     ui3BehaviorBase(std::string("ManualRegistration::") + name, 0),
     VisibleList(0),
+    VisibleListECM(0),
+    VisibleListECMRCM(0),
     VisibleListVirtual(0),
     VisibleListReal(0)
 {
-    //Rotate by pi in y to be aligned to console
-    ECMtoUI3.Rotation().From(vctAxAnRot3(vctDouble3(0.0,1.0,0.0), cmnPI));
-    UI3toECM = ECMtoUI3.Inverse();
     VisibleList = new ui3VisibleList("ManualRegistration");
+    VisibleListECM = new ui3VisibleList("ManualRegistrationECM");
+    VisibleListECMRCM = new ui3VisibleList("ManualRegistrationECMRCM");
     VisibleListVirtual = new ui3VisibleList("ManualRegistrationVirtual");
     VisibleListReal = new ui3VisibleList("ManualRegistrationReal");
 
     ManualRegistrationSurfaceVisibleStippleObject * model;
 #if CUBE_DEMO
-    model = new ManualRegistrationSurfaceVisibleStippleObject("",ManualRegistrationSurfaceVisibleStippleObject::CUBE);
+    model = new ManualRegistrationSurfaceVisibleStippleObject("",ManualRegistrationSurfaceVisibleStippleObject::CUBE,25);
 #else
-    model = new ManualRegistrationSurfaceVisibleStippleObject("E:/Users/wliu25/MyCommon/data/TORS_tongue.vtk");
+    model = new ManualRegistrationSurfaceVisibleStippleObject("E:/Users/wliu25/MyCommon/data/TORS/TORS_tongue.vtk");
 #endif
+
     VisibleObjects[MODEL] = model;
 
     for (ManualRegistrationType::iterator iter = VisibleObjects.begin();
@@ -276,20 +296,18 @@ ManualRegistration::ManualRegistration(const std::string & name):
         VisibleListVirtual->Add(iter->second);
     }
 
-    VisibleList->Add(VisibleListVirtual);
-    VisibleList->Add(VisibleListReal);
+    VisibleListECMRCM->Add(VisibleListVirtual);
+    VisibleListECMRCM->Add(VisibleListReal);
+    VisibleListECM->Add(VisibleListECMRCM);
+    VisibleList->Add(VisibleListECM);
 
-    // Initialize all flags to false
+    // Initialize boolean flags
     this->BooleanFlags[DEBUG] = true;
     this->BooleanFlags[VISIBLE] = true;
     this->BooleanFlags[PREVIOUS_MAM] = false;
-    this->BooleanFlags[RIGHT_BUTTON] = false;
-    this->BooleanFlags[LEFT_BUTTON] = false;
     this->BooleanFlags[CAMERA_PRESSED] = false;
-    this->BooleanFlags[BOTH_BUTTON_PRESSED] = false;
-    this->BooleanFlags[ADD_FIDUCIALS] = false;
-    this->BooleanFlags[RIGHT_BUTTON_RELEASED] = false;
-    this->BooleanFlags[LEFT_BUTTON_RELEASED] = false;
+    this->BooleanFlags[UPDATE_FIDUCIALS] = false;
+    ResetButtonEvents();
 }
 
 
@@ -308,7 +326,7 @@ void ManualRegistration::PositionDepth(void)
 
     std::cout << "PositionDepth" << std::endl;
     // compute depth of model
-    vctFrm3 positionUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse() * (foundModel->second)->PositionECMRCM;
+    vctFrm3 positionUI3 = (foundModel->second)->GetAbsoluteTransformation();
     prmPositionCartesianGet currentPosition;
     prmPositionCartesianSet newPosition;
 
@@ -339,18 +357,18 @@ void ManualRegistration::PositionDepth(void)
 void ManualRegistration::UpdatePreviousPosition()
 {
     // get current position in UI3
-    vctFrm3 previousPositionUI3;
     ManualRegistrationType::iterator foundModel;
     foundModel = VisibleObjects.find(MODEL);
     if (foundModel == VisibleObjects.end()) {
         return;
     }
-    previousPositionUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse() * (foundModel->second)->PositionECMRCM;
-    (foundModel->second)->PreviousPositions[(foundModel->second)->PreviousPositions.size()+1] = previousPositionUI3;
+    //previous positions saved in ECMRCM
+    (foundModel->second)->PreviousPositions[(foundModel->second)->PreviousPositions.size()+1] = (foundModel->second)->GetAbsoluteTransformation();
     (foundModel->second)->PreviousIndex = (foundModel->second)->PreviousPositions.size();
     if (this->BooleanFlags[DEBUG]) {
         std::cout << "Previous Index:" << (foundModel->second)->PreviousIndex << std::endl;
     }
+  
 }
 
 void ManualRegistration::PositionBack(void)
@@ -362,9 +380,7 @@ void ManualRegistration::PositionBack(void)
     ManualRegistrationSurfaceVisibleStippleObject::vctFrm3MapType::iterator foundPosition;
     foundPosition = (foundModel->second)->PreviousPositions.find((foundModel->second)->PreviousIndex);
     if (foundPosition != (foundModel->second)->PreviousPositions.end()) {
-        UpdateECMtoECMRCM();
-        foundModel->second->PositionECMRCM = ECMtoECMRCM * UI3toECM * (foundModel->second)->PreviousPositions[(foundModel->second)->PreviousIndex];
-        UpdateVisibleList(false);
+        this->VisibleListVirtual->SetTransformation(this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse() * (foundModel->second)->PreviousPositions[(foundModel->second)->PreviousIndex]);
         if (this->BooleanFlags[DEBUG]) {
             std::cout << "Setting back to index:" << (foundModel->second)->PreviousIndex << std::endl;
         }
@@ -373,35 +389,30 @@ void ManualRegistration::PositionBack(void)
             (foundModel->second)->PreviousIndex = 0;
         }
     }
-    UpdateVisibleList(false);
 }
 
 
 void ManualRegistration::PositionHome(void)
 {
-    UpdateECMtoECMRCM();
     ManualRegistrationType::iterator foundModel;
     foundModel = VisibleObjects.find(MODEL);
-    if (foundModel == VisibleObjects.end()) {
-        return;
-    }
-    (foundModel->second)->PositionECMRCM = ECMtoECMRCM * UI3toECM * (foundModel->second)->HomePositionUI3;
-    UpdateVisibleList(false);
+    if (foundModel != VisibleObjects.end())
+        this->VisibleListVirtual->SetTransformation(this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse()*(foundModel->second)->HomePositionUI3);
 }
 
-void ManualRegistration::ToggleAddFiducials()
+void ManualRegistration::ToggleUpdateFiducials()
 {
-    if (this->BooleanFlags[ADD_FIDUCIALS]) {
+    if (this->BooleanFlags[UPDATE_FIDUCIALS]) {
         if (this->BooleanFlags[DEBUG]) {
-            std::cerr << "Toggle Adding fiducials: Off" << std::endl;
+            std::cerr << "Toggle update fiducials: Off" << std::endl;
         }
-        this->BooleanFlags[ADD_FIDUCIALS] = false;
+        this->BooleanFlags[UPDATE_FIDUCIALS] = false;
     }
     else {
         if (this->BooleanFlags[DEBUG]) {
-            std::cerr << "Toggle Adding fiducials: On" << std::endl;
+            std::cerr << "Toggle update fiducials: On" << std::endl;
         }
-        this->BooleanFlags[ADD_FIDUCIALS] = true;
+        this->BooleanFlags[UPDATE_FIDUCIALS] = true;
     }
 }
 
@@ -414,7 +425,8 @@ void ManualRegistration::ToggleVisibility(void)
         this->BooleanFlags[VISIBLE] = true;
         std::cout << "Toggling Visible - ON" << std::endl;
     }
-    UpdateVisibleList(false);
+
+   UpdateVisibleList();
 }
 
 
@@ -430,10 +442,10 @@ void ManualRegistration::ConfigureMenuBar(void)
                                   "triangle.png",
                                   &ManualRegistration::PositionHome,
                                   this);
-    this->MenuBar->AddClickButton("ToggleAddFiducials",
+    this->MenuBar->AddClickButton("ToggleUpdateFiducials",
                                   2,
                                   "map.png",
-                                  &ManualRegistration::ToggleAddFiducials,
+                                  &ManualRegistration::ToggleUpdateFiducials,
                                   this);
     this->MenuBar->AddClickButton("Register",
                                   3,
@@ -452,78 +464,73 @@ void ManualRegistration::ConfigureMenuBar(void)
                                   this);
 }
 
-
-bool ManualRegistration::RunForeground(void)
+void ManualRegistration::UpdateFiducials(void)
 {
-    if (this->Manager->MastersAsMice() != this->BooleanFlags[PREVIOUS_MAM]) {
-        this->BooleanFlags[PREVIOUS_MAM] = this->Manager->MastersAsMice();
-        this->BooleanFlags[BOTH_BUTTON_PRESSED] = false;
-        this->BooleanFlags[LEFT_BUTTON] = false;
-        this->BooleanFlags[RIGHT_BUTTON] = false;
-        this->BooleanFlags[LEFT_BUTTON_RELEASED] = false;
-        this->BooleanFlags[RIGHT_BUTTON_RELEASED] = false;
-    }
-
-    // detect transition, should that be handled as an event?
-    // State is used by multiple threads ...
-    if (this->State != this->PreviousState) {
-        std::cerr << "Entering RunForeground" << std::endl;
-        this->PreviousState = this->State;
-        this->BooleanFlags[LEFT_BUTTON_RELEASED] = false;
-        this->BooleanFlags[RIGHT_BUTTON_RELEASED] = false;
-    }
-
-    // detect active mice
     prmPositionCartesianGet positionLeft, positionRight;
     this->GetPrimaryMasterPosition(positionRight);
     this->GetSecondaryMasterPosition(positionLeft);
+    ManualRegistrationSurfaceVisibleStippleObject* closestFiducial = NULL;
 
-    if (this->BooleanFlags[ADD_FIDUCIALS]) {
-        if (this->BooleanFlags[LEFT_BUTTON] && this->BooleanFlags[LEFT_BUTTON_RELEASED])
-            AddFiducial(positionLeft.Position(),false);
-        else if (this->BooleanFlags[RIGHT_BUTTON] && this->BooleanFlags[RIGHT_BUTTON_RELEASED])
-            AddFiducial(positionRight.Position(),true);
-    } else if (this->BooleanFlags[LEFT_BUTTON] || this->BooleanFlags[RIGHT_BUTTON]) {
-        FollowMaster();
+    if (!this->BooleanFlags[BOTH_BUTTON_PRESSED]
+        && this->BooleanFlags[RIGHT_BUTTON]
+        && !this->BooleanFlags[LEFT_BUTTON]) {
+            closestFiducial = FindClosestFiducial(positionRight.Position(),false);
+        if(closestFiducial != NULL)
+        {
+            closestFiducial->Valid = false;
+            ResetButtonEvents();
+            UpdateVisibleList();
+        }else
+        {
+            AddFiducial(positionRight.Position(),false);
+        }
     }
-
-    return true;
+    else if (!this->BooleanFlags[BOTH_BUTTON_PRESSED]
+             && !this->BooleanFlags[RIGHT_BUTTON]
+             && this->BooleanFlags[LEFT_BUTTON]) {
+            closestFiducial = FindClosestFiducial(positionLeft.Position(),true);
+        if(closestFiducial != NULL)
+        {
+            closestFiducial->Valid = false;
+            ResetButtonEvents();
+            UpdateVisibleList();
+        }
+        else
+        {
+            AddFiducial(positionLeft.Position(),true);
+        }
+    } 
 }
-
 
 void ManualRegistration::FollowMaster(void)
 {
     prmPositionCartesianGet positionLeft, positionRight;
     vctFrm3 displacementUI3, displacementUI3T, displacementUI3R;
-    vctFrm3 currentTransformation;
-    ManualRegistrationType::iterator foundModel;
-    foundModel = VisibleObjects.find(MODEL);
-    if (foundModel == VisibleObjects.end()) {
-        return;
-    }
-
+    vctFrm3 visibleListVirtualPositionUI3, visibleListVirtualPositionUI3New;
+    vctFrm3 displacementECMRCM, displacementECMRCMT, displacementECMRCMR;
+    
     this->GetPrimaryMasterPosition(positionRight);
     this->GetSecondaryMasterPosition(positionLeft);
 
-    // get current position in UI3
-    vctFrm3 positionUI3, positionUI3New;
-    positionUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse() * (foundModel->second)->PositionECMRCM;
-
-    //vtk picking NOT USED
-    //Manager->RequestPick(&PickSignal, 0, "RightEyeView", positionRight.Position().Translation());
+    vctFrm3 currentUI3toECMRCM = this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse();
+    vctDouble3 initialMasterRightECMRCM = currentUI3toECMRCM * InitialMasterRight;
+    vctDouble3 initialMasterLeftECMRCM = currentUI3toECMRCM * InitialMasterLeft;
+    vctDouble3 positionRightECMRCM = currentUI3toECMRCM * positionRight.Position().Translation();
+    vctDouble3 positionLeftECMRCM = currentUI3toECMRCM * positionLeft.Position().Translation();
 
     if (!this->BooleanFlags[BOTH_BUTTON_PRESSED]
         && this->BooleanFlags[RIGHT_BUTTON]
         && !this->BooleanFlags[LEFT_BUTTON]) {
         //translation only using right
-        displacementUI3.Translation() = positionRight.Position().Translation() - InitialMasterRight;
+        displacementECMRCM.Translation() = positionRightECMRCM - initialMasterRightECMRCM;
     }
     else if (!this->BooleanFlags[BOTH_BUTTON_PRESSED]
              && !this->BooleanFlags[RIGHT_BUTTON]
              && this->BooleanFlags[LEFT_BUTTON]) {
         //translation only using left
-        displacementUI3.Translation() = positionLeft.Position().Translation() - InitialMasterLeft;
+        displacementECMRCM.Translation() = positionLeftECMRCM - initialMasterLeftECMRCM;
     } else if (this->BooleanFlags[BOTH_BUTTON_PRESSED]) {
+
         //rotation using both
         vctDouble3 axis;
         axis.Assign(1.0,0.0,0.0);
@@ -533,42 +540,46 @@ void ManualRegistration::FollowMaster(void)
         vctDouble3 translation, translationInWorld;
         vctDouble3 axisInWorld;
 
-        vctFrm3 modelToHandleCenter;
-        modelToHandleCenter.Translation().SumOf(InitialMasterRight,InitialMasterLeft);
-        modelToHandleCenter.Translation().Divide(2.0);
-        modelToHandleCenter.Translation().Subtract(positionUI3.Translation());
+        vctFrm3 handleCenterECMRCM;
+        handleCenterECMRCM.Translation().SumOf(initialMasterRightECMRCM, initialMasterLeftECMRCM);
+        handleCenterECMRCM.Translation().Divide(2.0);
 
-        ComputeTransform(InitialMasterRight.Pointer(),
-                         InitialMasterLeft.Pointer(),
-                         positionRight.Position().Translation().Pointer(),
-                         positionLeft.Position().Translation().Pointer(),
+        ComputeTransform(initialMasterRightECMRCM.Pointer(),
+                         initialMasterLeftECMRCM.Pointer(),
+                         positionRightECMRCM.Pointer(),
+                         positionLeftECMRCM.Pointer(),
                          object_displacement, object_rotation);
 
         // Set the Translation.
         translation.Assign(object_displacement);
-        positionUI3.Rotation().ApplyInverseTo(translation, translationInWorld);
-        displacementUI3T.Translation()= translationInWorld;
+        // visibleListVirtualPositionUI3.Rotation().ApplyInverseTo(translation, translationInWorld);
+        //displacementUI3T.Translation()= translation /*InWorld*/;
+        displacementECMRCMT.Translation()= translation;
+        // hard coded scale
+        translation *= 0.1;
 
         // Set the Rotation.
         angle = object_rotation[0];
+        // hard coded scale
+        angle *= 0.5;
         axis.Assign(object_rotation+1);
-        positionUI3.Rotation().ApplyInverseTo(axis, axisInWorld);
-        displacementUI3R.Rotation().From(vctAxAnRot3(axisInWorld, angle));
+        // visibleListVirtualPositionUI3.Rotation().ApplyInverseTo(axis, axisInWorld);
+        //displacementUI3R.Rotation().From(vctAxAnRot3(axis /*InWorld*/, angle));
+        displacementECMRCMR.Rotation().From(vctAxAnRot3(axis, angle));
 
-        displacementUI3 = displacementUI3T * modelToHandleCenter.Inverse() * displacementUI3R * modelToHandleCenter;
+        // so we apply rotation on center of handles
+        displacementECMRCM = displacementECMRCMT * handleCenterECMRCM * displacementECMRCMR * handleCenterECMRCM.Inverse();
 
     }
-    // apply delta in UI3
-    positionUI3New = positionUI3 * displacementUI3;
 
-    // go back to ECMRCM
-    (foundModel->second)->PositionECMRCM = ECMtoECMRCM * UI3toECM * positionUI3New;
-
+    // save cursor positions
     InitialMasterRight = positionRight.Position().Translation();
     InitialMasterLeft = positionLeft.Position().Translation();
 
-    // this will transform to UI3
-    UpdateVisibleList();
+    // apply transformation in ECMRCM
+    this->VisibleListVirtual->SetTransformation(displacementECMRCM * this->VisibleListVirtual->GetTransformation());
+    //if(this->BooleanFlags[DEBUG])
+    //    std::cerr << "VisibleListVirtual " << this->VisibleListVirtual->GetAbsoluteTransformation().Translation() << " rel " << this->VisibleListVirtual->GetTransformation().Translation() << std::endl;
 
 }
 
@@ -581,6 +592,7 @@ void ManualRegistration::FollowMaster(void)
   @param point2               Left cursor pos.
   @param object_displacement  [dx, dy, dz]
   @param object_rotation      [angle, axis_x, axis_y, axis_z]
+  Author(s):  Simon DiMaio
 */
 void ManualRegistration::ComputeTransform(double pointa[3], double pointb[3],
                                           double point1[3], double point2[3],
@@ -655,6 +667,29 @@ void ManualRegistration::ComputeTransform(double pointa[3], double pointb[3],
     object_rotation[3] = w[2];
 }
 
+bool ManualRegistration::RunForeground(void)
+{
+    if (this->Manager->MastersAsMice() != this->BooleanFlags[PREVIOUS_MAM]) {
+        this->BooleanFlags[PREVIOUS_MAM] = this->Manager->MastersAsMice();
+        ResetButtonEvents();
+    }
+
+    // detect transition, should that be handled as an event?
+    // State is used by multiple threads ...
+    if (this->State != this->PreviousState) {
+        std::cerr << "Entering RunForeground" << std::endl;
+        this->PreviousState = this->State;
+    }
+
+    // detect active mice
+    if (this->BooleanFlags[UPDATE_FIDUCIALS]) {
+        UpdateFiducials();
+    } else if (this->BooleanFlags[LEFT_BUTTON] || this->BooleanFlags[RIGHT_BUTTON]) {
+        FollowMaster();
+    }
+
+    return true;
+}
 
 bool ManualRegistration::RunBackground(void)
 {
@@ -669,71 +704,29 @@ bool ManualRegistration::RunNoInput(void)
 {
     if (this->Manager->MastersAsMice() != this->BooleanFlags[PREVIOUS_MAM]) {
         this->BooleanFlags[PREVIOUS_MAM] = this->Manager->MastersAsMice();
+        ResetButtonEvents();
     }
 
-#if 1
-
-    this->GetJointPositionECM(this->JointsECM);
+    // detect transition
+    if (this->State != this->PreviousState) {
+        this->PreviousState = this->State;
+    }
 
     //check if the objects should be updated
     if (this->BooleanFlags[CAMERA_PRESSED]) {
-        //Update when the camera is clutched
-        UpdateECMtoECMRCM();
-        this->UpdateVisibleList(true);
+        UpdateCameraPressed();
     }
-#endif
+
     return true;
 }
 
 
-void ManualRegistration::UpdateVisibleList(bool updateAll)
+void ManualRegistration::UpdateCameraPressed()
 {
-    vctFrm3 ECMRCMtoUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse();
-    ManualRegistrationType::iterator foundModel;
-    foundModel = VisibleObjects.find(MODEL);
-    if (foundModel == VisibleObjects.end())
-        return;
-
-    if (updateAll) {
-        VisibleListReal->SetTransformation(ECMRCMtoUI3 * this->PositionECMRCM);
-        VisibleListVirtual->SetTransformation(ECMRCMtoUI3 * (foundModel->second)->PositionECMRCM);
-        (foundModel->second)->PositionECMRCM = ECMRCMtoUI3.Inverse()*(foundModel->second)->GetAbsoluteTransformation();
-    }
-    else {
-        VisibleListVirtual->SetTransformation(ECMRCMtoUI3 * (foundModel->second)->PositionECMRCM);
-    }
-
-    for (ManualRegistrationType::iterator iter = VisibleObjects.begin();
-         iter != VisibleObjects.end();
-         iter++) {
-        (iter->second)->PositionECMRCM = ECMRCMtoUI3.Inverse()*(iter->second)->GetAbsoluteTransformation();
-        if (this->BooleanFlags[VISIBLE] && (iter->second)->Visible) {
-            (iter->second)->Show();
-        } else {
-            (iter->second)->Hide();
-        }
-    }
-
-    for (ManualRegistrationType::iterator iter = VisibleObjectsVirtualFiducials.begin();
-         iter != VisibleObjectsVirtualFiducials.end();
-         iter++) {
-        (iter->second)->PositionECMRCM = ECMRCMtoUI3.Inverse()*(iter->second)->GetAbsoluteTransformation();
-        if (this->BooleanFlags[VISIBLE] && (iter->second)->Visible) {
-            (iter->second)->Show();
-        } else {
-            (iter->second)->Hide();
-        }
-    }
-    for (ManualRegistrationType::iterator iter = VisibleObjectsRealFiducials.begin();
-         iter != VisibleObjectsRealFiducials.end();
-         iter++) {
-        (iter->second)->PositionECMRCM = ECMRCMtoUI3.Inverse()*(iter->second)->GetAbsoluteTransformation();
-        if (this->BooleanFlags[VISIBLE] && (iter->second)->Visible) {
-            (iter->second)->Show();
-        } else {
-            (iter->second)->Hide();
-        }
-    }
+    vctFrm3 currentECMtoECMRCM = GetCurrentECMtoECMRCM();
+    this->VisibleListECMRCM->SetTransformation(currentECMtoECMRCM);
+    //if(this->BooleanFlags[DEBUG])
+    //    std::cerr << "VisibleListECMRCM " << this->VisibleListECMRCM->GetAbsoluteTransformation().Translation() << " rel " << this->VisibleListECMRCM->GetTransformation().Translation() << std::endl;
 }
 
 
@@ -744,22 +737,31 @@ void ManualRegistration::OnQuit(void)
 
 void ManualRegistration::OnStart(void)
 {
-    vctFrm3 homePositionUI3, modelHomePositionUI3;
-    modelHomePositionUI3.Translation().Assign(0.0,0.0,-200.0);
-
-    UpdateECMtoECMRCM();
+    vctFrm3 homePosition, modelHomePosition, currentECMtoECMRCM, staticECMtoUI3;
     ManualRegistrationType::iterator foundModel;
-    foundModel = VisibleObjects.find(MODEL);
-    if (foundModel != VisibleObjects.end()) {
-        (foundModel->second)->PositionECMRCM = ECMtoECMRCM * UI3toECM * modelHomePositionUI3;
-        (foundModel->second)->HomePositionUI3 = modelHomePositionUI3;
-    }
-    homePositionUI3.Translation().Assign(0.0,0.0,0.0);
-    this->PositionECMRCM = ECMtoECMRCM * UI3toECM * homePositionUI3;
 
+    // VirtualList - Set root transformation at origin
+    homePosition.Translation().Assign(0.0,0.0,0.0);
+    this->VisibleList->SetTransformation(homePosition);
+
+    // VisibleListECM - Rotate by pi in y to be aligned to console
+    staticECMtoUI3.Rotation().From(vctAxAnRot3(vctDouble3(0.0,1.0,0.0), cmnPI));
+    this->VisibleListECM->SetTransformation(staticECMtoUI3.Inverse());
+
+    // VisibleListECMRCM
+    currentECMtoECMRCM = GetCurrentECMtoECMRCM();
+    this->VisibleListECMRCM->SetTransformation(currentECMtoECMRCM);
+ 
+    // VisibleListVirtual
+    // VTK meshes harded coded start location at (0,0,-200)
+    modelHomePosition.Translation().Assign(0.0,0.0,-200.0);
+    this->VisibleListVirtual->SetTransformation(this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse()*modelHomePosition);
+
+    // setup VTK model
     foundModel = VisibleObjects.find(MODEL);
     if (foundModel != VisibleObjects.end()) {
-        foundModel->second->SetColor(1.0, 0.49, 0.25);
+        (foundModel->second)->SetColor(1.0, 0.49, 0.25);
+        (foundModel->second)->HomePositionUI3 = modelHomePosition;
     }
 
     for (ManualRegistrationType::iterator iter = VisibleObjects.begin();
@@ -767,16 +769,16 @@ void ManualRegistration::OnStart(void)
          iter++) {
         (iter->second)->SetStipplePercentage(50);
         (iter->second)->SetOpacity(0.7);
+        (iter->second)->Visible = true;
+        (iter->second)->Valid = true;
+        (iter->second)->Show();
     }
 
-#if IMPORT_VIRTUAL_FIDUCIALS
+#if CUBE_DEMO && IMPORT_VIRTUAL_FIDUCIALS
     bool valid = ImportFiducialFile("E:/Users/wliu25/MyCommon/data/TORS/CTFids.fcsv");
 #endif
-
-    UpdateVisibleList(false);
-
-    std::cout << "OnStart Finished" << std::endl;
-}
+    UpdateVisibleList();
+ }
 
 
 void ManualRegistration::Startup(void) {
@@ -809,13 +811,13 @@ void ManualRegistration::PrimaryMasterButtonCallback(const prmEventButton & even
 {
     if (event.Type() == prmEventButton::PRESSED) {
         this->BooleanFlags[RIGHT_BUTTON] = true;
+        this->BooleanFlags[RIGHT_BUTTON_RELEASED] = false;
         UpdatePreviousPosition();
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->BooleanFlags[RIGHT_BUTTON] = false;
         this->BooleanFlags[RIGHT_BUTTON_RELEASED] = true;
-        //CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following ended" << std::endl;
     }
-    UpdateFollowing();
+    UpdateButtonEvents();
 }
 
 
@@ -823,17 +825,17 @@ void ManualRegistration::SecondaryMasterButtonCallback(const prmEventButton & ev
 {
     if (event.Type() == prmEventButton::PRESSED) {
         this->BooleanFlags[LEFT_BUTTON] = true;
+        this->BooleanFlags[LEFT_BUTTON_RELEASED] = false;
         UpdatePreviousPosition();
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->BooleanFlags[LEFT_BUTTON] = false;
         this->BooleanFlags[LEFT_BUTTON_RELEASED] = true;
-        //CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following ended" << std::endl;
     }
-    UpdateFollowing();
+    UpdateButtonEvents();
 }
 
 
-void ManualRegistration::UpdateFollowing(void)
+void ManualRegistration::UpdateButtonEvents(void)
 {
     prmPositionCartesianGet position;
     if (this->BooleanFlags[RIGHT_BUTTON]) {
@@ -861,8 +863,11 @@ void ManualRegistration::UpdateFollowing(void)
   @return the frame of the tool wrt to the ECM RCM
 
 */
-void ManualRegistration::UpdateECMtoECMRCM(void)
+vctFrm3 ManualRegistration::GetCurrentECMtoECMRCM(void)
 {
+    prmPositionJointGet jointsECM;
+    vctFrm3 currentECMRCMtoECM;
+
     vctDouble3 Xaxis;
     Xaxis.Assign(1.0,0.0,0.0);
     vctDouble3 Yaxis;
@@ -871,7 +876,7 @@ void ManualRegistration::UpdateECMtoECMRCM(void)
     Zaxis.Assign(0.0,0.0,1.0);
 
     // get joint values for ECM
-    mtsExecutionResult result = this->GetJointPositionECM(this->JointsECM);
+    mtsExecutionResult result = this->GetJointPositionECM(jointsECM);
     if (!result.IsOK()) {
         std::cout << "GetECMtoECMRCM(): ERROR" << result << std::endl;
     }
@@ -880,10 +885,10 @@ void ManualRegistration::UpdateECMtoECMRCM(void)
     // [2] = scope insertion
     // [3] = scope roll
 
-    double yaw0 = JointsECM.Position()[0];
-    double pitch1 = JointsECM.Position()[1];
-    double insert2 = JointsECM.Position()[2]*1000.0;//convert to mm
-    double roll3 = JointsECM.Position()[3];
+    double yaw0 = jointsECM.Position()[0];
+    double pitch1 = jointsECM.Position()[1];
+    double insert2 = jointsECM.Position()[2]*1000.0;//convert to mm
+    double roll3 = jointsECM.Position()[3];
     double angle = 30.0*cmnPI/180.0;
 
     //create frame for yaw
@@ -905,7 +910,8 @@ void ManualRegistration::UpdateECMtoECMRCM(void)
     vctFrm3 T_to_horiz;
     T_to_horiz.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, angle));
 
-    ECMtoECMRCM = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3;
+    currentECMRCMtoECM = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3;
+    return currentECMRCMtoECM.Inverse();
 
 }
 
@@ -925,15 +931,6 @@ void ManualRegistration::CameraControlPedalCallback(const prmEventButton & paylo
     }
 }
 
-ui3VisibleObject* ManualRegistration::GetVisibleObjectAtIndex(int index)
-{
-    ManualRegistrationType::iterator found = VisibleObjects.find(index);
-    if (found != VisibleObjects.end())
-        return found->second;
-    else
-        return NULL;
-}
-
 bool ManualRegistration::ImportFiducialFile(const std::string & inputFile)
 {
     vct3 positionFromFile;
@@ -945,7 +942,6 @@ bool ManualRegistration::ImportFiducialFile(const std::string & inputFile)
     foundModel = VisibleObjects.find(MODEL);
     if (foundModel == VisibleObjects.end())
         return false;
-    modelPositionUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse() * (foundModel->second)->PositionECMRCM;
 
     if (this->BooleanFlags[DEBUG]) {
         std::cerr << "Importing fiducials from: " << inputFile << std::endl;
@@ -962,12 +958,13 @@ bool ManualRegistration::ImportFiducialFile(const std::string & inputFile)
         if (token.at(0).compare(0,1,"#")) {
             if (token.size() < 4)
                 return false;
+            //assume fiducials are given wrt to model
             positionFromFile =  vct3(strtod(token.at(1).c_str(), NULL),strtod(token.at(2).c_str(), NULL),strtod(token.at(3).c_str(), NULL));
-            fiducialPositionUI3.Translation().Assign(modelPositionUI3 * positionFromFile);
+            fiducialPositionUI3.Translation().Assign((foundModel->second)->GetAbsoluteTransformation() * positionFromFile);
             AddFiducial(fiducialPositionUI3, true);
-            ////COMPLETE HACK TO TEST REGISTRATION WITH STATIC REAL FIDUCIALS - REMOVE ASAP!!!
-            fiducialPositionUI3.Translation().Assign(altPositionUI3 * positionFromFile);
-            AddFiducial(fiducialPositionUI3, false);
+            ////HACK TO TEST REGISTRATION WITH STATIC REAL FIDUCIALS - REMOVE!!!
+            //fiducialPositionUI3.Translation().Assign(altPositionUI3 * positionFromFile);
+            //AddFiducial(fiducialPositionUI3, false);
         }
         token.clear();
     }
@@ -992,20 +989,16 @@ void ManualRegistration::Tokenize(const std::string& str, std::vector<std::strin
     }
 }
 
-
 void ManualRegistration::Register(void)
 {
     double fre;
-    vctFrm3 displacementUI3, modelPositionUI3, positionUI3, modelPositionUI3New;
-    vctDoubleFrm3 fiducialAbsolutePosition;
+    vctFrm3 displacementECMRCM, currentUI3toECMRCM;
     ManualRegistrationType::iterator foundModel;
     foundModel = VisibleObjects.find(MODEL);
     if (foundModel == VisibleObjects.end())
         return;
 
-    // get current position in UI3
-    positionUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse() * this->PositionECMRCM;
-    modelPositionUI3 = ECMtoUI3 * ECMtoECMRCM.Inverse() * (foundModel->second)->PositionECMRCM;
+    // get current of ECMRCM
     vctDynamicVector<vct3> virtualFiducials;
     vctDynamicVector<vct3> realFiducials;
     int fiducialIndex = 0;
@@ -1013,40 +1006,41 @@ void ManualRegistration::Register(void)
     for (ManualRegistrationType::iterator iter = VisibleObjectsVirtualFiducials.begin();
          iter != VisibleObjectsVirtualFiducials.end();
          iter++) {
-        virtualFiducials.resize(fiducialIndex + 1);
-        virtualFiducials[fiducialIndex] = (iter->second)->GetAbsoluteTransformation().Translation();//(modelPositionUI3*(iter->second)->GetTransformation()).Translation();
-        if (this->BooleanFlags[DEBUG])
-            std::cerr << "Register virtual fiducial " << fiducialIndex << " at abs positionUI3 " << ((iter->second)->GetAbsoluteTransformation()).Translation()
-                      << " position: " << ((iter->second)->GetTransformation()).Translation()
-                      << " using " << virtualFiducials[fiducialIndex] << std::endl;
-        fiducialIndex++;
+        if((iter->second)->Valid)
+        {
+            virtualFiducials.resize(fiducialIndex + 1);
+            virtualFiducials[fiducialIndex] = this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse() *(iter->second)->GetAbsoluteTransformation().Translation();
+            if (this->BooleanFlags[DEBUG])
+                std::cerr << "Register virtual fiducial " << fiducialIndex << " at abs positionUI3 " << ((iter->second)->GetAbsoluteTransformation()).Translation()
+                          << " relative position: " << ((iter->second)->GetTransformation()).Translation()
+                          << " using " << virtualFiducials[fiducialIndex] << std::endl;
+            fiducialIndex++;
+        }
     }
     fiducialIndex = 0;
     for (ManualRegistrationType::iterator iter = VisibleObjectsRealFiducials.begin();
          iter != VisibleObjectsRealFiducials.end();
          iter++) {
-        realFiducials.resize(fiducialIndex + 1);
-        realFiducials[fiducialIndex] = (iter->second)->GetAbsoluteTransformation().Translation();//(positionUI3*(iter->second)->GetTransformation()).Translation();
-        if (this->BooleanFlags[DEBUG])
-            std::cerr << "Register real fiducial " << fiducialIndex << " at abs positionUI3 " << ((iter->second)->GetAbsoluteTransformation()).Translation()
-                      << " position: " << ((iter->second)->GetTransformation()).Translation()
-                      << " using " << realFiducials[fiducialIndex] << std::endl;
-        fiducialIndex++;
+        if((iter->second)->Valid)
+        {
+            realFiducials.resize(fiducialIndex + 1);
+            realFiducials[fiducialIndex] = this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse() *(iter->second)->GetAbsoluteTransformation().Translation();
+            if (this->BooleanFlags[DEBUG])
+                std::cerr << "Register real fiducial " << fiducialIndex << " at abs positionUI3 " << ((iter->second)->GetAbsoluteTransformation()).Translation()
+                          << " relative position: " << ((iter->second)->GetTransformation()).Translation()
+                          << " using " << realFiducials[fiducialIndex] << std::endl;
+            fiducialIndex++;
+        }
     }
-    bool valid = nmrRegistrationRigid(virtualFiducials, realFiducials, displacementUI3,&fre);
+    bool valid = nmrRegistrationRigid(virtualFiducials, realFiducials, displacementECMRCM,&fre);
     if (valid) {
-        UpdateECMtoECMRCM();
-        // apply delta in UI3
-        modelPositionUI3New = modelPositionUI3 * displacementUI3;
-        // go back to ECMRCM
-        (foundModel->second)->PositionECMRCM = ECMtoECMRCM * UI3toECM * modelPositionUI3New;
-        UpdateVisibleList(false);
+        // apply transformation in ECMRCM
+        this->VisibleListVirtual->SetTransformation(displacementECMRCM * this->VisibleListVirtual->GetTransformation());
         std::cerr << "Registered using # " << realFiducials.size() << " fiducials with fre: "<< fre << std::endl;
     } else {
         std::cerr << "ERROR:ManualRegistration::Register() error, see log" << std::endl;
-    }
+    }    
 }
-
 
 void ManualRegistration::AddFiducial(vctFrm3 positionUI3, bool virtualFlag)
 {
@@ -1070,8 +1064,7 @@ void ManualRegistration::AddFiducial(vctFrm3 positionUI3, bool virtualFlag)
     char buffer[33];
 
     sprintf(buffer, "%d", fiducialIndex);
-    // itoa(fiducialIndex, buffer, 10);
-    newFiducial = new ManualRegistrationSurfaceVisibleStippleObject(buffer,ManualRegistrationSurfaceVisibleStippleObject::SPHERE);
+    newFiducial = new ManualRegistrationSurfaceVisibleStippleObject(buffer,ManualRegistrationSurfaceVisibleStippleObject::SPHERE,3);
 
     // add visibleObject to visibleList and visibleObjects
     if (virtualFlag) {
@@ -1086,28 +1079,128 @@ void ManualRegistration::AddFiducial(vctFrm3 positionUI3, bool virtualFlag)
     newFiducial->SetOpacity(0.7);
     newFiducial->Show();
     newFiducial->Visible = true;
-    newFiducial->PositionECMRCM = ECMtoECMRCM * UI3toECM * positionUI3;
+    newFiducial->Valid = true;
 
     if (virtualFlag) {
         newFiducial->SetColor(0.0,0.0,1.0);
-        // set position wrt first virtualObject, i.e. Model
-        newFiducial->SetPosition((foundModel->second)->PositionECMRCM.Inverse()*newFiducial->PositionECMRCM.Translation());
+        // set position wrt model
+        newFiducial->SetTransformation((foundModel->second)->GetAbsoluteTransformation().Inverse()*positionUI3);
         CMN_LOG_CLASS_RUN_VERBOSE << "PrimaryMasterButtonCallback: added virtual fiducial: " << fiducialIndex << " "
-                                  << newFiducial->PositionECMRCM.Translation() << std::endl;
+                                  << newFiducial->GetAbsoluteTransformation().Translation() << std::endl;
         if (this->BooleanFlags[DEBUG])
-            std::cerr << "Adding virtual fiducial " << fiducialIndex << " at positionUI3 " << (ECMtoUI3 * ECMtoECMRCM.Inverse() * newFiducial->PositionECMRCM).Translation() << std::endl;
+            std::cerr << "Adding virtual fiducial " << fiducialIndex << " at positionUI3 " << newFiducial->GetAbsoluteTransformation().Translation() << std::endl;
     } else {
         newFiducial->SetColor(1.0,0.0,0.0);
-        // set position wrt visibleList
-        newFiducial->SetPosition(this->PositionECMRCM.Inverse()*newFiducial->PositionECMRCM.Translation());
+        // set position wrt visibleListECMRCM
+        newFiducial->SetTransformation(this->VisibleListECMRCM->GetAbsoluteTransformation().Inverse()*positionUI3);
         CMN_LOG_CLASS_RUN_VERBOSE << "PrimaryMasterButtonCallback: added virtual fiducial: " << fiducialIndex << " "
-                                  << newFiducial->PositionECMRCM.Translation() << std::endl;
+                                  << newFiducial->GetAbsoluteTransformation().Translation() << std::endl;
         if (this->BooleanFlags[DEBUG])
-            std::cerr << "Adding real fiducial " << fiducialIndex << " at positionUI3 " << (ECMtoUI3 * ECMtoECMRCM.Inverse()*newFiducial->PositionECMRCM).Translation() << std::endl;
+            std::cerr << "Adding real fiducial " << fiducialIndex << " at positionUI3 " << newFiducial->GetAbsoluteTransformation().Translation() << std::endl;
     }
 
-    this->BooleanFlags[RIGHT_BUTTON_RELEASED] = false;
-    this->BooleanFlags[LEFT_BUTTON_RELEASED] = false;
-    this->UpdateVisibleList(false);
-    return;
+    ResetButtonEvents();
+    UpdateVisibleList();
+    return;   
+}
+
+/*!
+find the closest marker to the cursor
+*/
+
+ManualRegistrationSurfaceVisibleStippleObject* ManualRegistration::FindClosestFiducial(vctFrm3 positionUI3, bool virtualFlag)
+{
+    vctFrm3 pos;
+    double closestDist = cmnTypeTraits<double>::MaxPositiveValue();
+    vctDouble3 dist;
+    double abs;
+    int currentCount = 0;
+    ManualRegistrationSurfaceVisibleStippleObject* closestFiducial = NULL;
+
+    if(virtualFlag)
+    {
+        for (ManualRegistrationType::iterator iter = VisibleObjectsVirtualFiducials.begin();
+            iter != VisibleObjectsVirtualFiducials.end();
+            iter++) {
+                dist.DifferenceOf(positionUI3.Translation(), (iter->second)->GetAbsoluteTransformation().Translation());
+                abs = dist.Norm();
+                if(abs < closestDist)
+                {
+                    currentCount++;
+                    closestDist = abs;
+                    closestFiducial = (iter->second);
+                }
+        }
+    }else{
+        for (ManualRegistrationType::iterator iter = VisibleObjectsRealFiducials.begin();
+            iter != VisibleObjectsRealFiducials.end();
+            iter++) {
+                dist.DifferenceOf(positionUI3.Translation(), (iter->second)->GetAbsoluteTransformation().Translation());
+                abs = dist.Norm();
+                if(abs < closestDist)
+                {
+                    currentCount++;
+                    closestDist = abs;
+                    closestFiducial = (iter->second);
+                }
+        }
+    }
+
+    //if there is one close to the cursor, turn it red
+    //return value is that markers count
+    //for(iter2 = Markers.begin(); iter2 !=end; iter2++)
+    //{
+    //    if(closestDist < 2.0 && (*iter2)->count == currentCount)
+    //    {
+    //        (*iter2)->VisibleObject->SetColor(255.0/255.0, 0.0/255.0, 51.0/255.0);
+    //        returnValue = currentCount;
+    //    }else{
+    //         //otherwise, all the markers should be green, return an invalid number
+    //        (*iter2)->VisibleObject->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0);
+    //    }
+    //}
+
+    if(closestDist > 2.0)
+    {
+        closestFiducial = NULL;
+    }
+    else{
+        if(this->BooleanFlags[DEBUG])
+        std::cerr << "Found existing marker at index: " << currentCount << std::endl;
+    }
+
+    return closestFiducial;
+
+}
+
+void ManualRegistration::UpdateVisibleList()
+{
+    for (ManualRegistrationType::iterator iter = VisibleObjects.begin();
+         iter != VisibleObjects.end();
+         iter++) {
+        if (this->BooleanFlags[VISIBLE] && (iter->second)->Valid && (iter->second)->Visible) {
+            (iter->second)->Show();
+        } else {
+            (iter->second)->Hide();
+        }
+    }
+
+    for (ManualRegistrationType::iterator iter = VisibleObjectsVirtualFiducials.begin();
+         iter != VisibleObjectsVirtualFiducials.end();
+         iter++) {
+        if (this->BooleanFlags[VISIBLE] && (iter->second)->Valid && (iter->second)->Visible) {
+            (iter->second)->Show();
+        } else {
+            (iter->second)->Hide();
+        }
+    }
+    for (ManualRegistrationType::iterator iter = VisibleObjectsRealFiducials.begin();
+         iter != VisibleObjectsRealFiducials.end();
+         iter++) {
+        if (this->BooleanFlags[VISIBLE] && (iter->second)->Valid && (iter->second)->Visible) {
+            (iter->second)->Show();
+        } else {
+            (iter->second)->Hide();
+        }
+    }
 }
