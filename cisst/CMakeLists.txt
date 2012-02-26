@@ -397,8 +397,13 @@ install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
 
 # Install auxiliary Find*.cmake files
 install ( DIRECTORY ${CISST_CMAKE_SOURCE_DIR}/
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}/Modules
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
          COMPONENT cisstCommon
+         FILES_MATCHING PATTERN "Find*.cmake"
+         PATTERN ".svn" EXCLUDE)
+
+file ( COPY ${CISST_CMAKE_SOURCE_DIR}/
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
          FILES_MATCHING PATTERN "Find*.cmake"
          PATTERN ".svn" EXCLUDE)
 
