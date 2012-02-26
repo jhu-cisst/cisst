@@ -41,7 +41,7 @@ if ("${CISST_BINARY_DIR}" STREQUAL "")
                           ${cisst_CONFIG_FILE}
                           PATH)
   # add installed module path to CISST_CMAKE_DIRS
-  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} )
+  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} "${CISST_CONFIG_PATH}/Modules")
 
   # find root of install be removing the CISST_CMAKE_INSTALL_SUFFIX
   string (REPLACE "${CISST_CMAKE_INSTALL_SUFFIX}" ""
