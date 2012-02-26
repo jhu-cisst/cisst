@@ -42,13 +42,13 @@ vctQtWidgetDynamicVectorDoubleRead::vctQtWidgetDynamicVectorDoubleRead(void):
 
 bool vctQtWidgetDynamicVectorDoubleRead::SetValue(const vctDynamicVector<double> & vector)
 {
-    size_t size = vector.size();
+    const size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
     QString itemValue;
-    for (unsigned int index = 0; index < size; ++index) {
+    for (size_t index = 0; index < size; ++index) {
         tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
@@ -76,12 +76,12 @@ vctQtWidgetDynamicVectorDoubleWrite::vctQtWidgetDynamicVectorDoubleWrite(void):
 
 bool vctQtWidgetDynamicVectorDoubleWrite::SetValue(const vctDynamicVector<double> & vector)
 {
-    size_t size = vector.size();
+    const size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
     }
     QDoubleSpinBox * spinBox;
-    for (unsigned int index = 0; index < size; ++index) {
+    for (size_t index = 0; index < size; ++index) {
         spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, index));
         if(spinBox == 0) {
             spinBox = new QDoubleSpinBox();
@@ -122,13 +122,13 @@ vctQtWidgetDynamicVectorIntRead::vctQtWidgetDynamicVectorIntRead(void):
 
 bool vctQtWidgetDynamicVectorIntRead::SetValue(const vctDynamicVector<int> & vector)
 {
-    size_t size = vector.size();
+    const size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
     QString itemValue;
-    for (unsigned int index = 0; index < size; ++index) {
+    for (size_t index = 0; index < size; ++index) {
         tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
@@ -155,12 +155,12 @@ vctQtWidgetDynamicVectorIntWrite::vctQtWidgetDynamicVectorIntWrite(void):
 
 bool vctQtWidgetDynamicVectorIntWrite::SetValue(const vctDynamicVector<int> & vector)
 {
-    size_t size = vector.size();
+    const size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
     }
     QSpinBox * spinBox;
-    for (unsigned int index = 0; index < size; ++index) {
+    for (size_t index = 0; index < size; ++index) {
         spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, index));
         if(spinBox == 0) {
             spinBox = new QSpinBox();
@@ -200,13 +200,13 @@ vctQtWidgetDynamicVectorBoolRead::vctQtWidgetDynamicVectorBoolRead(void):
 
 bool vctQtWidgetDynamicVectorBoolRead::SetValue(const vctDynamicVector<bool> & vector)
 {
-    size_t size = vector.size();
+    const size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
     QString itemValue;
-    for (unsigned int index = 0; index < size; ++index) {
+    for (size_t index = 0; index < size; ++index) {
         tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
@@ -233,12 +233,12 @@ vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
 
 bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const vctDynamicVector<bool> & vector)
 {
-    size_t size = vector.size();
+    const size_t size = vector.size();
     if (this->columnCount() != size) {
         this->setColumnCount(size);
     }
     QSpinBox * spinBox;
-    for (unsigned int index = 0; index < size; ++index) {
+    for (size_t index = 0; index < size; ++index) {
         spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, index));
         if(spinBox == 0) {
             spinBox = new QSpinBox();

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -19,6 +19,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               ../vctPlot2DOpenGLQtWidget.h
               ../vctQtWidgetDynamicVector.h
+              ../vctQtWidgetDynamicMatrix.h
+              ../vctQtWidgetFrame4x4.h
               )
 
 # cisstVectorQt relies on cisstQt settings (for future use)
@@ -36,8 +38,12 @@ cisst_add_library (
                cisstVector
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
                vctQtWidgetDynamicVector.cpp
+               vctQtWidgetDynamicMatrix.cpp
+               vctQtWidgetFrame4x4.cpp
   HEADER_FILES vctPlot2DOpenGLQtWidget.h
                vctQtWidgetDynamicVector.h
+               vctQtWidgetDynamicMatrix.h
+               vctQtWidgetFrame4x4.h
                vctExportQt.h
   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 

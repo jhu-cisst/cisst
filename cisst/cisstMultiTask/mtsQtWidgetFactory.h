@@ -41,7 +41,8 @@ class mtsQtTypeInfoComparator
 {
 public:
     inline bool operator()(const std::type_info* a, const std::type_info* b) const {
-        return a->before(*b);
+        // Visual Studio (some versions) have "int before()"
+        return (a->before(*b)) == 0 ? false : true;
     }
 };
 
