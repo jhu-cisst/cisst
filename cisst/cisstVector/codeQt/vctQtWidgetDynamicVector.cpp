@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-12-08
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,39 +27,60 @@ http://www.cisst.org/cisst/license.txt.
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 
-// -- for doubles
-vctQtWidgetDynamicVectorDoubleRead::vctQtWidgetDynamicVectorDoubleRead(void):
-    QTableWidget()
+
+
+template <class _elementType>
+vctQtWidgetDynamicVectorRead<_elementType>::vctQtWidgetDynamicVectorRead(void):
+    Table(0)
 {
-    this->setRowCount(1);
-    this->verticalHeader()->hide();
-    this->horizontalHeader()->hide();
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+    this->Table = new QTableWidget();
+    this->Table->setRowCount(1);
+    this->Table->verticalHeader()->hide();
+    this->Table->horizontalHeader()->hide();
+    this->Table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->Table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    int verticalHeight =
+        this->Table->horizontalHeader()->sizeHint().height()
+        + this->Table->verticalHeader()->sizeHint().height();
+    this->Table->setFixedHeight(verticalHeight);
 }
 
-bool vctQtWidgetDynamicVectorDoubleRead::SetValue(const vctDynamicVector<double> & vector)
+template <class _elementType>
+QWidget * vctQtWidgetDynamicVectorRead<_elementType>::GetWidget(void)
+{
+    return this->Table;
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorRead<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
 {
     const size_t size = vector.size();
-    if (this->columnCount() != size) {
-        this->setColumnCount(size);
+    if (this->Table->columnCount() != size) {
+        this->Table->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
     QString itemValue;
     for (size_t index = 0; index < size; ++index) {
-        tableItem = this->item(0, index);
+        tableItem = this->Table->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
             tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-            this->setItem(0, index, tableItem);
+            this->Table->setItem(0, index, tableItem);
         }
         itemValue.setNum(vector.Element(index));
         tableItem->setText(itemValue);
     }
     return true;
 }
+
+
+template class vctQtWidgetDynamicVectorRead<double>;
+template class vctQtWidgetDynamicVectorRead<float>;
+template class vctQtWidgetDynamicVectorRead<int>;
+template class vctQtWidgetDynamicVectorRead<unsigned int>;
+template class vctQtWidgetDynamicVectorRead<bool>;
+
+
 
 vctQtWidgetDynamicVectorDoubleWrite::vctQtWidgetDynamicVectorDoubleWrite(void):
     QTableWidget()
@@ -108,38 +129,6 @@ bool vctQtWidgetDynamicVectorDoubleWrite::GetValue(vctDynamicVector<double> & pl
 
 
 // -- for ints
-vctQtWidgetDynamicVectorIntRead::vctQtWidgetDynamicVectorIntRead(void):
-    QTableWidget()
-{
-    this->setRowCount(1);
-    this->verticalHeader()->hide();
-    this->horizontalHeader()->hide();
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
-}
-
-bool vctQtWidgetDynamicVectorIntRead::SetValue(const vctDynamicVector<int> & vector)
-{
-    const size_t size = vector.size();
-    if (this->columnCount() != size) {
-        this->setColumnCount(size);
-    }
-    QTableWidgetItem * tableItem;
-    QString itemValue;
-    for (size_t index = 0; index < size; ++index) {
-        tableItem = this->item(0, index);
-        if (tableItem == 0) {
-            tableItem = new QTableWidgetItem();
-            tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-            this->setItem(0, index, tableItem);
-        }
-        itemValue.setNum(vector.Element(index));
-        tableItem->setText(itemValue);
-    }
-    return true;
-}
 
 vctQtWidgetDynamicVectorIntWrite::vctQtWidgetDynamicVectorIntWrite(void):
     QTableWidget()
@@ -152,6 +141,7 @@ vctQtWidgetDynamicVectorIntWrite::vctQtWidgetDynamicVectorIntWrite(void):
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
+
 
 bool vctQtWidgetDynamicVectorIntWrite::SetValue(const vctDynamicVector<int> & vector)
 {
@@ -184,40 +174,6 @@ bool vctQtWidgetDynamicVectorIntWrite::GetValue(vctDynamicVector<int> & placeHol
     return true;
 }
 
-
-// -- for bools
-vctQtWidgetDynamicVectorBoolRead::vctQtWidgetDynamicVectorBoolRead(void):
-    QTableWidget()
-{
-    this->setRowCount(1);
-    this->verticalHeader()->hide();
-    this->horizontalHeader()->hide();
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
-}
-
-bool vctQtWidgetDynamicVectorBoolRead::SetValue(const vctDynamicVector<bool> & vector)
-{
-    const size_t size = vector.size();
-    if (this->columnCount() != size) {
-        this->setColumnCount(size);
-    }
-    QTableWidgetItem * tableItem;
-    QString itemValue;
-    for (size_t index = 0; index < size; ++index) {
-        tableItem = this->item(0, index);
-        if (tableItem == 0) {
-            tableItem = new QTableWidgetItem();
-            tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-            this->setItem(0, index, tableItem);
-        }
-        itemValue.setNum(vector.Element(index));
-        tableItem->setText(itemValue);
-    }
-    return true;
-}
 
 vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
     QTableWidget()
