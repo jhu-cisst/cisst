@@ -32,10 +32,11 @@ CMN_IMPLEMENT_SERVICES(ui3MasterArm)
 
 
 ui3MasterArm::ui3MasterArm(const std::string & name):
-Name(name),
+    Name(name),
     Cursor(0),
     ButtonPressed(false),
     ButtonReleased(false),
+    ScaleFactor(1.0),
     Clutched(false),
     Manager(0),
     Selected(0)
@@ -152,11 +153,11 @@ void ui3MasterArm::SetCursorPosition(const vctDouble3 & desiredCursorPosition)
     // apply transformation and scale
     vctDouble3 actualCursorPosition;
     this->Transformation.ApplyTo(armPosition.Position().Translation(), actualCursorPosition);
-    actualCursorPosition.Multiply(this->Scale);
+    actualCursorPosition.Multiply(this->Scale * this->ScaleFactor);
     // compute difference and apply to inverse of transformation
     vctDouble3 differenceInScene;
     differenceInScene.DifferenceOf(desiredCursorPosition, actualCursorPosition);
-    differenceInScene.Divide(this->Scale);
+    differenceInScene.Divide(this->Scale * this->ScaleFactor);
     // create a transformation corresponding to the difference
     vctFrm3 cursorTransformation;
     cursorTransformation.Translation().Assign(differenceInScene);
@@ -166,7 +167,7 @@ void ui3MasterArm::SetCursorPosition(const vctDouble3 & desiredCursorPosition)
     this->Transformation.Assign(newTransformation);
     // apply transformation and scale
     this->Transformation.ApplyTo(armPosition.Position(), this->CursorPosition);
-    this->CursorPosition.Translation().Multiply(this->Scale);
+    this->CursorPosition.Translation().Multiply(this->Scale * this->ScaleFactor);
 }
 
 
@@ -179,18 +180,32 @@ bool ui3MasterArm::SetCursor(ui3CursorBase * cursor)
 
 
 
+void ui3MasterArm::SetScaleFactor(const mtsDouble & factor)
+{
+    const vctDouble3 currentPosition = this->CursorPosition.Translation();
+    this->ScaleFactor = factor;
+    this->SetCursorPosition(currentPosition);
+}
+
+
+
 void ui3MasterArm::ButtonEventHandler(const prmEventButton & buttonEvent)
 {
     if (buttonEvent.Type() == prmEventButton::PRESSED) {
         this->Cursor->SetPressed(true);
         this->ButtonPressed = true;
+        this->PressedOverMenu = IsOverMenu;
     } else {
         this->Cursor->SetPressed(false);
         this->ButtonReleased = true;
     }
 
     if (this->Manager->ActiveBehavior != this->Manager) {
-        this->Manager->DispatchButtonEvent(this->Role, buttonEvent);
+        bool blockEvent = ((buttonEvent.Type() == prmEventButton::RELEASED) && PressedOverMenu)
+                           || ((buttonEvent.Type() == prmEventButton::PRESSED) && IsOverMenu);
+        if (!blockEvent) {
+            this->Manager->DispatchButtonEvent(this->Role, buttonEvent);
+        }
     }
 }
 
@@ -240,7 +255,7 @@ void ui3MasterArm::UpdateCursorPosition(void)
         this->GetCartesianPosition(armPosition);
         // apply transformation and scale
         this->Transformation.ApplyTo(armPosition.Position(), this->CursorPosition);
-        this->CursorPosition.Translation().Multiply(this->Scale);
+        this->CursorPosition.Translation().Multiply(this->Scale * this->ScaleFactor);
     }
     // store position for state table
     this->CartesianPosition.Position().Assign(this->CursorPosition);

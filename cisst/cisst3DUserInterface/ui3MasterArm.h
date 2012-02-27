@@ -73,6 +73,8 @@ class CISST_EXPORT ui3MasterArm: public cmnGenericObject
 
     virtual bool SetCursor(ui3CursorBase * cursor);
 
+    void SetScaleFactor(const mtsDouble & factor);
+
  protected:
 
     // arm name
@@ -95,6 +97,7 @@ class CISST_EXPORT ui3MasterArm: public cmnGenericObject
     // transformation between inputs and scene
     vctFrm3 Transformation;
     double Scale;
+    double ScaleFactor;
 
     // positions in the state table, for behaviors to read
     prmPositionCartesianGet CartesianPosition;
@@ -128,7 +131,9 @@ class CISST_EXPORT ui3MasterArm: public cmnGenericObject
 
     void UpdateIntention(ui3Selectable * selectable);
 
-
+    // check if we are currently over a menu and if pressed over menu
+    bool IsOverMenu;
+    bool PressedOverMenu;
 };
 
 

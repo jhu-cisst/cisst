@@ -354,8 +354,7 @@ void ui3Manager::ConnectAll(void)
 
 void ui3Manager::DispatchButtonEvent(const ui3MasterArm::RoleType & armRole, const prmEventButton & buttonEvent)
 {
-    if (!IsOverMenu) {
-        switch (armRole) {
+    switch (armRole) {
         case ui3MasterArm::PRIMARY:
             this->Manager->ActiveBehavior->PrimaryMasterButtonEvent(buttonEvent);
             break;
@@ -364,7 +363,6 @@ void ui3Manager::DispatchButtonEvent(const ui3MasterArm::RoleType & armRole, con
             break;
         default:
             CMN_LOG_CLASS_RUN_ERROR << "DispatchButtonEvent: unknown role" << std::endl;
-        }
     }
 }
 
@@ -555,11 +553,15 @@ void ui3Manager::Run(void)
             IsOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(armPointer->CursorPosition.Translation(),
                                                                          selectedButton);
             armPointer->Cursor->Set2D(IsOverMenu);
+            armPointer->IsOverMenu = IsOverMenu;
             if (selectedButton) {
-                if (armPointer->ButtonReleased) {
+                armPointer->SetScaleFactor(0.2);
+                if (armPointer->ButtonReleased && armPointer->PressedOverMenu) {
                     // todo, add error code check
                     selectedButton->Callable->Execute();
                 }
+            } else {
+                armPointer->SetScaleFactor(1.0);
             }
 
             // test if this arm already has something selected
