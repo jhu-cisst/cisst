@@ -38,20 +38,13 @@ class CISST_EXPORT ui3VTKStippleActor : public vtkOpenGLActor
     // Description:
     // Actual actor render method.
     void Render(vtkRenderer * renderer, vtkMapper * mapper);
-    void SetStipplePattern(int mode);
     void SetStipplePercentage(int percentage);
 
  protected:
     ui3VTKStippleActor();
     ~ui3VTKStippleActor();
 
-    // vtkRenderer * Renderer;
-    // vtkMapper * Mapper;
-
-    int Pattern;
     int StipplePercentage;
-
-    unsigned char StipplePattern[32*4];
 
     bool Debug;
 };
