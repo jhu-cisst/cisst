@@ -37,17 +37,20 @@ option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake"
 mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 
 # Options
-option (CISST_BUILD_TESTS "Build cisst tests." OFF)
-option (CISST_BUILD_EXAMPLES "Build cisst examples." OFF)
+option (CISST_BUILD_TESTS "Build cisst tests (when turned ON, all tests are to be compiled by default)." OFF)
+option (CISST_BUILD_EXAMPLES "Build cisst examples (when turned ON, user will be asked to select which examples to build)." OFF)
 
 # Applications should be compiled by default
-option (CISST_BUILD_APPLICATIONS "Build cisst applications." ON)
+option (CISST_BUILD_APPLICATIONS "Build cisst applications (when turned ON, all applications are to be compile by default)." ON)
 mark_as_advanced (CISST_BUILD_APPLICATIONS)
 
-option (CISST_BUILD_SAW "Build SAW." OFF)
-option (CISST_BUILD_DATA "Build data." ON)
+option (CISST_BUILD_SAW "Build SAW components and applications." OFF)
+
+option (CISST_BUILD_SHARE "Build share (i.e. copy data from /share directory to build tree).  This should be left ON for most users." ON)
+mark_as_advanced (CISST_BUILD_SHARE)
+
 if (UNIX)
-  option (CISST_BUILD_DOC "Build the documentation." OFF)
+  option (CISST_BUILD_DOC "Build the documentation (Doxygen reference manual)." OFF)
 endif (UNIX)
 
 # Activate tests before any directory is added
@@ -95,9 +98,9 @@ if (CISST_BUILD_SAW)
   add_subdirectory (saw)
 endif (CISST_BUILD_SAW)
 
-if (CISST_BUILD_DATA)
-  add_subdirectory (data)
-endif (CISST_BUILD_DATA)
+if (CISST_BUILD_SHARE)
+  add_subdirectory (share)
+endif (CISST_BUILD_SHARE)
 
 if (CISST_BUILD_DOC)
   add_subdirectory (doc)
