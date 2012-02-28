@@ -350,7 +350,7 @@ mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string & property
     ProxyBaseInitialize();
 
     cmnPath path;
-    path.AddRelativeToShare("cisstMultiTask/Ice");
+    path.AddRelativeToCisstShare("cisstMultiTask/Ice");
     path.AddFromEnvironment("PATH", cmnPath::TAIL);
     IcePropertyFileName = path.Find(propertyFileName);
 }

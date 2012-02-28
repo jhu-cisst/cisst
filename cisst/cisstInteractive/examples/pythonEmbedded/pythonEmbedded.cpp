@@ -58,21 +58,25 @@ int main(void) {
               << ptr << std::endl;
     std::cout << "*** List from C: " << cmnObjectRegister::ToString() << std::endl;
 
+    std::string cisstRoot;
+    if (!cmnPath::GetCisstRoot(cisstRoot)) {
+        std::cout << "Can't find environment variable CISST_ROOT" << std::endl;
+        exit(0);
+    }
     Py_Initialize();
     PyRun_SimpleString("import sys; sys.path.append(\".\");");
-    std::string command = std::string("sys.path.append(\"") + CISST_BUILD_LINK_DIRECTORIES + "\");";
-    std::cout << "*** Path for cisst libraries: " << CISST_BUILD_LINK_DIRECTORIES << std::endl;
+    std::string command = std::string("sys.path.append(\"") +  cisstRoot + "/lib\");";
+    std::cout << "*** Path for cisst libraries: " << cisstRoot << std::endl;
     PyRun_SimpleString(const_cast<char*>(command.c_str()));
 #if (CISST_OS == CISST_WINDOWS)
 #ifdef _DEBUG
-    command = std::string("sys.path.append(\"") + CISST_BUILD_LINK_DIRECTORIES + "/debug\");";
-    std::cout << "*** Path for cisst libraries: " << CISST_BUILD_LINK_DIRECTORIES << "/debug" << std::endl;
-    PyRun_SimpleString(const_cast<char*>(command.c_str()));
+    command = std::string("sys.path.append(\"") + cisstRoot + "/lib/debug\");";
+    std::cout << "*** Path for cisst libraries: " << cisstRoot << "/lib/debug" << std::endl;
 #else
-    command = std::string("sys.path.append(\"") + CISST_BUILD_LINK_DIRECTORIES + "/release\");";
-    std::cout << "*** Path for cisst libraries: " << CISST_BUILD_LINK_DIRECTORIES << "/release" << std::endl;
-    PyRun_SimpleString(const_cast<char*>(command.c_str()));
+    command = std::string("sys.path.append(\"") + cisstRoot + "/lib/release\");";
+    std::cout << "*** Path for cisst libraries: " << cisstRoot << "/lib/release" << std::endl;
 #endif
+    PyRun_SimpleString(const_cast<char*>(command.c_str()));
 #endif
 
     std::cout << "*** Import cisstCommonPython and cisstVectorPython" << std::endl;
@@ -102,15 +106,20 @@ int main(void) {
 
     std::cout << "*** Load a Python script and execute it" << std::endl;
     bool FileFound = true;
-    FILE *fp = NULL;
+    FILE * fp = NULL;
     cmnPath path;
-    path.Add(std::string(CISST_SOURCE_ROOT) + "/examples/interactiveTutorial/pythonEmbedded");
+    path.AddRelativeToCisstRoot("/bin");
     std::string fullName = path.Find("pythonEmbedded.py");
-    fp = fopen(fullName.c_str(), "r");
-    if (fp == NULL) {
-        std::cout << "*** Can't open pythonEmbedded.py" << std::endl;
-		FileFound = false;
-	}
+    if (fullName == "") {
+        std::cout << "*** Can't find file \"pythonEmbedded.py\" in path " << path << std::endl;
+        FileFound = false;
+    } else {
+        fp = fopen(fullName.c_str(), "r");
+        if (fp == NULL) {
+            std::cout << "*** Can't open \"" << fullName << "\"" << std::endl;
+            FileFound = false;
+        }
+    }
 
     if (FileFound) {
 #if (CISST_OS != CISST_WINDOWS)

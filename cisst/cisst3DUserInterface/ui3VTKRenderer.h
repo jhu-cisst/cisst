@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):  Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on: 2008-05-23
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -34,23 +34,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 
-#include <vtkUnsignedCharArray.h>
-
 // Always include last!
 #include <cisst3DUserInterface/ui3Export.h>
 
 /*!
- Class that implements the interface between VTK and the SAW framework.
- It provides methods for creating and manipulating 3D objects and rendering
- scenes on the screen and/or on a frame buffer.
+  Class that implements the interface between VTK and the SAW framework.
+  It provides methods for creating and manipulating 3D objects and rendering
+  scenes on the screen and/or on a frame buffer.
 */
 class CISST_EXPORT ui3VTKRenderer: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-public:
+ public:
     /*!
-     Constructor
+      Constructor
     */
     ui3VTKRenderer(ui3SceneManager* scene,
                    unsigned int width, unsigned int height,
@@ -59,20 +57,20 @@ public:
                    svlRenderTargetBase* target = 0);
 
     /*!
-     Destructor
+      Destructor
     */
     ~ui3VTKRenderer();
 
-    void Start(void);
+    void StartInteractor(void);
     void Stop(void);
 
-    void Render(void);
+    void Render(bool pickRequested, const vct3& pickerPoint);
 
     void SetWindowPosition(int x, int y);
 
     void Add(ui3VisibleObject * object);
 
-private:
+ private:
     ui3SceneManager* SceneManager;
 
     vtkRenderer * Renderer;
@@ -80,13 +78,14 @@ private:
     vtkRenderWindowInteractor * RenderWindowInteractor;
     vtkCamera * Camera;
     vtkUnsignedCharArray * OffScreenBuffer;
+    vtkPropPicker * PropPicker;
 
     unsigned int Width;
     unsigned int Height;
     svlCameraGeometry CameraGeometry;
     unsigned int CameraID;
     vctDouble2 OpticalCenterOffset;
-    svlRenderTargetBase* Target;
+    svlRenderTargetBase * Target;
 };
 
 

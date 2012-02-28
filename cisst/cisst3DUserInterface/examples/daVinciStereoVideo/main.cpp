@@ -37,8 +37,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <ImageViewer.h>
 #include <ImageViewerKidney.h>
 #include <PNGViewer3D.h>
+#include <ManualRegistration.h>
 
 #define HAS_ULTRASOUDS 0
+#define TORS 1
 
 int main()
 {
@@ -76,11 +78,17 @@ int main()
     guiManager.AddBehavior(&imageViewer,
                            3,
                            "move.png");
-
+#if TORS
+	ManualRegistration manualRegistration("manualRegistration");
+    guiManager.AddBehavior(&manualRegistration,
+                           4,
+                           "move.png");
+#else	
     ImageViewerKidney imageViewerKidney("imageKidney");
     guiManager.AddBehavior(&imageViewerKidney,
                            4,
                            "move.png");
+#endif
 
     // this is were the icons have been copied by CMake post build rule
     cmnPath path;

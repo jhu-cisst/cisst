@@ -757,21 +757,27 @@ endmacro (cisst_information_message_missing_libraries)
 
 # Macro to find a package via CMake's normal mechanism, but then to fix the
 # set variables if cisst has been installed
-macro (cisst_find_component _cfc_COMPONENT_NAME _cfc_IS_REQUIRED)
+macro (cisst_find_component ...)
+  set(_INSTALLED_PATH "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components")#/${ARGV0}")
 
-  message("looking for cisst component: ${_cfc_COMPONENT_NAME}")
+  message("-- Looking for cisst component: ${ARGV0} in: ${_INSTALLED_PATH}")
+
 
   # First, look in the install path for SAW components
-  find_package(${_cfc_COMPONENT_NAME} QUIET HINTS "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components" )
-
-  if(${_cfc_COMPONENT_NAME}_FOUND)
-    # If this is an installed version, re-set the libdir and include directories
-    message("Found package \"${_cfc_COMPONENT_NAME}\" in cisst install path.")
-    set(${_cfc_COMPONENT_NAME}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
-    set(${_cfc_COMPONENT_NAME}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
+  if("${ARGV1}" STREQUAL "REQUIRED")
+    find_package(${ARGV0} REQUIRED HINTS ${_INSTALLED_PATH} ${sawComponents_BINARY_DIR})
   else()
-    message("Did not find package \"${_cfc_COMPONENT_NAME}\" in cisst install path, looking in source path: ${sawComponents_BINARY_DIR}")
-    find_package(${_cfc_COMPONENT_NAME} HINTS "${sawComponents_BINARY_DIR}")
+    find_package(${ARGV0} QUIET HINTS ${_INSTALLED_PATH} ${sawComponents_BINARY_DIR})
+  endif()
+
+  if(${ARGV0}_FOUND)
+    if(${${ARGV0}_DIR} STREQUAL ${_INSTALLED_PATH})
+      # If this is an installed version, re-set the libdir and include directories
+      message("-- Found package \"${ARGV0}\" in cisst install path: " ${${ARGV0}_DIR})
+      set(${ARGV0}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
+      set(${ARGV0}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
+    endif()
+      message("-- Found package \"${ARGV0}\" in cisst non-install path: " ${${ARGV0}_DIR})
   endif()
 endmacro (cisst_find_component)
 

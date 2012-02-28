@@ -99,14 +99,12 @@ bool cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
 }
 
 
-bool cmnPath::AddRelativeToRoot(const std::string & relativePath, bool head) {
+bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
                                << relativePath << "\" relative to CISST_ROOT at the "
                                << (head ? "beginning" : "end") << std::endl;
-    char * environmentVariable = 0;
-    environmentVariable = getenv("CISST_ROOT");
-    if (environmentVariable) {
-        std::string path = environmentVariable;
+    std::string path;
+    if (cmnPath::GetCisstRoot(path)) {
         path = path + "/" + relativePath;
         this->Add(FromNative(path), head);
         return true;
@@ -116,14 +114,12 @@ bool cmnPath::AddRelativeToRoot(const std::string & relativePath, bool head) {
 }
 
 
-bool cmnPath::AddRelativeToShare(const std::string & relativePath, bool head) {
+bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
                                << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION << "/ at the "
                                << (head ? "beginning" : "end") << std::endl;
-    char * environmentVariable = 0;
-    environmentVariable = getenv("CISST_ROOT");
-    if (environmentVariable) {
-        std::string path = environmentVariable;
+    std::string path;
+    if (cmnPath::GetCisstRoot(path)) {
         path = path + "/share/cisst-" + CISST_VERSION + "/" + relativePath;
         this->Add(FromNative(path), head);
         return true;
@@ -133,11 +129,26 @@ bool cmnPath::AddRelativeToShare(const std::string & relativePath, bool head) {
 }
 
 
-std::string cmnPath::Find(const std::string & filename, short mode) const {
+std::string cmnPath::Find(const std::string & filename, short mode) const
+{
+    return this->FindWithSubdirectory(filename, "", mode);
+}
+
+
+std::string cmnPath::FindWithSubdirectory(const std::string & filename,
+                                          const std::string & subdirectory,
+                                          short mode) const
+{
     std::string fullName("");
     const_iterator iter = Path.begin();
     const const_iterator end = Path.end();
     while (iter != end) {
+        if (subdirectory != "") {
+            fullName = (*iter) + "/" + subdirectory + filename;
+            if (access(fullName.c_str(), mode) == 0) {
+                break;
+            }
+        }
         fullName = (*iter) + "/" + filename;
         if (access(fullName.c_str(), mode) == 0) {
             break;
@@ -224,3 +235,14 @@ std::string cmnPath::GetWorkingDirectory(void)
     return result;
 }
 
+
+bool cmnPath::GetCisstRoot(std::string & result)
+{
+    char * environmentVariable = 0;
+    environmentVariable = getenv("CISST_ROOT");
+    if (environmentVariable) {
+        result = environmentVariable;
+        return true;
+    }
+    return false;
+}

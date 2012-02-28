@@ -28,6 +28,7 @@ set (SOURCE_FILES
      ui3Selectable.cpp
      ui3SlaveArm.cpp
      ui3VTKRenderer.cpp
+     ui3VTKStippleActor.cpp
      ui3VideoInterfaceFilter.cpp
      ui3VisibleList.cpp
      ui3VisibleObject.cpp
@@ -52,6 +53,7 @@ set (HEADER_FILES
      ui3SceneManager.h
      ui3Selectable.h
      ui3VTKRenderer.h
+     ui3VTKStippleActor.h
      ui3VTKForwardDeclarations.h
      ui3VideoInterfaceFilter.h
      ui3VisibleList.h

@@ -38,7 +38,7 @@ mtsQtWidgetDoubleVecRead::mtsQtWidgetDoubleVecRead(void):
     mtsQtWidgetGenericObjectRead()
 {
     VectorWidget = new vctQtWidgetDynamicVectorDoubleRead();
-    Layout->addWidget(VectorWidget);
+    Layout->addWidget(VectorWidget->GetWidget());
     Layout->addStretch();
 }
 
@@ -83,7 +83,7 @@ mtsQtWidgetBoolVecRead::mtsQtWidgetBoolVecRead(void):
     mtsQtWidgetGenericObjectRead()
 {
     VectorWidget = new vctQtWidgetDynamicVectorBoolRead();
-    Layout->addWidget(VectorWidget);
+    Layout->addWidget(VectorWidget->GetWidget());
     Layout->addStretch();
 }
 

@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2008-06-10
+  Author(s):  Anton Deguet
+  Created on: 2008-06-10
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -42,18 +42,18 @@ ui3Widget3DHandle::ui3Widget3DHandle(unsigned int handleNumber,
     Mapper(0),
     Actor(0)
 {}
-    
-    
+
+
 ui3Widget3DHandle::~ui3Widget3DHandle()
 {
     if (this->Source) {
         this->Source->Delete();
     }
-    
+
     if (this->Mapper) {
         this->Mapper->Delete();
     }
-    
+
     if (this->Actor) {
         this->Actor->Delete();
     }
@@ -65,16 +65,16 @@ bool ui3Widget3DHandle::CreateVTKObjects(void)
     this->Source = vtkSphereSource::New();
     CMN_ASSERT(this->Source);
     this->Source->SetRadius(0.5);
-    
+
     this->Mapper = vtkPolyDataMapper::New();
     CMN_ASSERT(this->Mapper);
     this->Mapper->SetInputConnection(this->Source->GetOutputPort());
     this->Mapper->ImmediateModeRenderingOn();
-    
+
     this->Actor = vtkActor::New();
     CMN_ASSERT(this->Actor);
     this->Actor->SetMapper(this->Mapper);
-    
+
     this->AddPart(this->Actor);
     return true;
 }
@@ -124,7 +124,7 @@ double ui3Widget3DHandle::GetIntention(const vctFrm3 & cursorPosition) const
         return 0.0;
     } else {
         return (1.0 - (distance / threshold)); // normalized between 0 and 1
-    } 
+    }
 }
 
 
@@ -215,14 +215,14 @@ void ui3Widget3D::SetHandlesActive(bool handlesActive)
              handleCounter++) {
             this->SideHandles[handleCounter]->SetActivated(true);
             this->CornerHandles[handleCounter]->SetActivated(true);
-        }        
+        }
     } else {
         for (handleCounter = 0;
              handleCounter < 4;
              handleCounter++) {
             this->SideHandles[handleCounter]->SetActivated(false);
             this->CornerHandles[handleCounter]->SetActivated(false);
-        }        
+        }
     }
 }
 
@@ -270,7 +270,7 @@ void ui3Widget3D::UpdatePosition(void)
             //this->SetTransformation(newPosition, false);
             //this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
             //this->Handles->SetPosition(vct3(0.0));
-			//this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
+            //this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
             // this->Handles->SetTransformation(vctFrm3::Identity(), false);
             // this->PositionBeforeManipulation.Assign(this->GetAbsoluteTransformation());
         } else if ((secondSideHandle == -1) && (cornerHandle == -1)){
@@ -292,95 +292,80 @@ void ui3Widget3D::UpdatePosition(void)
         this->GetTransformation().Rotation().ApplyInverseTo(translation, translationInWorld);
         CurrentTransformation.Translation().Assign(translationInWorld);
         CurrentTransformation.Rotation().Assign(vctFrm3::RotationType::Identity());
-        this->UserObjects->SetTransformation(CurrentTransformation);
-        this->Handles->SetTransformation(CurrentTransformation);
 
-		// apply last known transformation to whole widget but keep the handles in place
-		vctFrm3 newPosition;
+        // apply last known transformation to whole widget but keep the handles in place
+        vctFrm3 newPosition;
         this->GetTransformation().ApplyTo(this->CurrentTransformation, newPosition);
         this->SetTransformation(newPosition, false);
-        this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
+        // this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
         this->Handles->SetPosition(vct3(0.0));
-		this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
+        this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
     }
     if (firstSideHandle != -1) {
-		vctDouble3 axis;
-		double angle;
-		axis.Assign(1.0,0.0,0.0);
-		angle = 0.0;
+        vctDouble3 axis;
+        double angle;
+        axis.Assign(1.0,0.0,0.0);
+        angle = 0.0;
 
         if (secondSideHandle == -1) {
-			/*
+            /*
             // one handed manipulation
 
             // get handle displacement
             vctDouble3 center, initial, current;
             center.Assign(this->GetAbsoluteTransformation().Translation());
             initial.DifferenceOf(this->SideHandles[firstSideHandle]->PreviousPosition.Translation(),
-                                 center);
+            center);
             initial.NormalizedSelf();
             current.DifferenceOf(this->SideHandles[firstSideHandle]->CurrentPosition.Translation(),
-                                 center);
+            center);
             current.NormalizedSelf();
 
             double initialAngle, currentAngle;
             // rotation along Y
             if ((firstSideHandle == 0) || (firstSideHandle == 2)) {
-                initialAngle = atan2(initial.X(), initial.Z());
-                currentAngle = atan2(current.X(), current.Z());
-                angle = currentAngle - initialAngle;
-                axis.Assign(0.0, 1.0, 0.0);
+            initialAngle = atan2(initial.X(), initial.Z());
+            currentAngle = atan2(current.X(), current.Z());
+            angle = currentAngle - initialAngle;
+            axis.Assign(0.0, 1.0, 0.0);
             } else {
-                // rotation along X
-                initialAngle = atan2(initial.Y(), initial.Z());
-                currentAngle = atan2(current.Y(), current.Z());
-                angle = initialAngle - currentAngle;
-                axis.Assign(1.0, 0.0, 0.0);
+            // rotation along X
+            initialAngle = atan2(initial.Y(), initial.Z());
+            currentAngle = atan2(current.Y(), current.Z());
+            angle = initialAngle - currentAngle;
+            axis.Assign(1.0, 0.0, 0.0);
             }
-			*/
+            */
         } else {
             // two handed manipulation
             //std::cerr << "Two handles manipulation not yet implemented. Why" << std::endl;
-			double object_displacement[3], object_rotation[4];
-			ComputeTransform(this->SideHandles[firstSideHandle]->PreviousPosition.Translation().Pointer(), 
-				             this->SideHandles[secondSideHandle]->PreviousPosition.Translation().Pointer(),
-                             this->SideHandles[firstSideHandle]->CurrentPosition.Translation().Pointer(), 
-				             this->SideHandles[secondSideHandle]->CurrentPosition.Translation().Pointer(), 
+            double object_displacement[3], object_rotation[4];
+            ComputeTransform(this->SideHandles[firstSideHandle]->PreviousPosition.Translation().Pointer(),
+                             this->SideHandles[secondSideHandle]->PreviousPosition.Translation().Pointer(),
+                             this->SideHandles[firstSideHandle]->CurrentPosition.Translation().Pointer(),
+                             this->SideHandles[secondSideHandle]->CurrentPosition.Translation().Pointer(),
                              object_displacement, object_rotation);
-			
-			// Set the Translation.
-			vctDouble3 translation, translationInWorld;
-			translation.Assign(object_displacement);
-			//memcpy(translation.Pointer(), object_displacement, 3*sizeof(double));
-			this->GetTransformation().Rotation().ApplyInverseTo(translation, translationInWorld);
-			CurrentTransformation.Translation().Assign(translationInWorld);
-			//CurrentTransformation.Rotation().Assign(vctFrm3::RotationType::Identity());
-			this->UserObjects->SetTransformation(CurrentTransformation);
-			this->Handles->SetTransformation(CurrentTransformation);
 
-			// Set the Rotation.
-			angle = object_rotation[0];
-			axis.Assign(object_rotation+1);
-			//memcpy(axis.Pointer(), object_rotation+1, 3*sizeof(double));
-			// cout << "angle: " << angle << " axis X: " << axis.X() << " axis Y: " << axis.Y() << " axis Z: " << axis.Z() << endl; 
-			
-			vctDouble3 axisInWorld;
-			this->GetTransformation().Rotation().ApplyInverseTo(axis, axisInWorld);
+            // Set the Translation.
+            vctDouble3 translation, translationInWorld;
+            translation.Assign(object_displacement);
+            this->GetTransformation().Rotation().ApplyInverseTo(translation, translationInWorld);
+            CurrentTransformation.Translation().Assign(translationInWorld);
 
-			//CurrentTransformation.Translation().SetAll(0.0);
-			CurrentTransformation.Rotation().From(vctAxAnRot3(axisInWorld, angle));
-			this->UserObjects->SetTransformation(CurrentTransformation);
-			//            vctFrm3 handlesTransformation;
-			// this->GetTransformation().Rotation().ApplyInverseTo(CurrentTransformation.Rotation(), handlesTransformation.Rotation());
-			this->Handles->SetTransformation(CurrentTransformation);
+            // Set the Rotation.
+            angle = object_rotation[0];
+            axis.Assign(object_rotation+1);
+            vctDouble3 axisInWorld;
+            this->GetTransformation().Rotation().ApplyInverseTo(axis, axisInWorld);
+            CurrentTransformation.Rotation().From(vctAxAnRot3(axisInWorld, angle));
 
-			// apply last known transformation to whole widget but keep the handles in place
-			vctFrm3 newPosition;
-			this->GetTransformation().ApplyTo(this->CurrentTransformation, newPosition);
-			this->SetTransformation(newPosition, false);
-			this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
-			this->Handles->SetPosition(vct3(0.0));
-			this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
+            // apply last known transformation to whole widget but keep the handles in place
+            vctFrm3 newPosition;
+            this->GetTransformation().ApplyTo(this->CurrentTransformation, newPosition);
+            this->SetTransformation(newPosition, false);
+            // this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
+            this->Handles->SetPosition(vct3(0.0));
+            this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
         }
     }
 
@@ -394,76 +379,76 @@ void ui3Widget3D::UpdatePosition(void)
 
 
 /*!
-    Compute the object transform from the motion of two grabbed control points.
-    @param pointa               Right control position.
-	@param pointb               Left control position.
-    @param point1               Right cursor pos.
-    @param point2               Left cursor pos.
-	@param object_displacement  [dx, dy, dz]
-	@param object_rotation      [angle, axis_x, axis_y, axis_z]
- */
+  Compute the object transform from the motion of two grabbed control points.
+  @param pointa               Right control position.
+  @param pointb               Left control position.
+  @param point1               Right cursor pos.
+  @param point2               Left cursor pos.
+  @param object_displacement  [dx, dy, dz]
+  @param object_rotation      [angle, axis_x, axis_y, axis_z]
+*/
 void ui3Widget3D::ComputeTransform(double pointa[3], double pointb[3],
-                                   double point1[3], double point2[3], 
+                                   double point1[3], double point2[3],
                                    double object_displacement[3],
-								   double object_rotation[4])
+                                   double object_rotation[4])
 {
-    double v1[3], v2[3], v1norm, v2norm, wnorm, vnorm2;
+    double v1[3], v2[3], v1norm, v2norm, wnorm;
     double w[3], angle, dotarg;
 
     //cout << "pointa: " << pointa[0] << " " << pointa[1] << " " << pointa[2] << endl;
     //cout << "pointb: " << pointb[0] << " " << pointb[1] << " " << pointb[2] << endl;
-    
+
     // v1 = ((pb-pa)/norm(pb-pa))
     v1[0] = pointb[0]-pointa[0];
     v1[1] = pointb[1]-pointa[1];
     v1[2] = pointb[2]-pointa[2];
     v1norm = sqrt(v1[0]*v1[0]+v1[1]*v1[1]+v1[2]*v1[2]);
-	if(v1norm>cmnTypeTraits<double>::Tolerance())
-	{
-		v1[0] /= v1norm;
-		v1[1] /= v1norm;
-		v1[2] /= v1norm;
-	}
+    if(v1norm>cmnTypeTraits<double>::Tolerance())
+        {
+            v1[0] /= v1norm;
+            v1[1] /= v1norm;
+            v1[2] /= v1norm;
+        }
 
     // v2 = ((p2-p1)/norm(p2-p1))
     v2[0] = point2[0]-point1[0];
     v2[1] = point2[1]-point1[1];
     v2[2] = point2[2]-point1[2];
     v2norm = sqrt(v2[0]*v2[0]+v2[1]*v2[1]+v2[2]*v2[2]);
-	if(v2norm>cmnTypeTraits<double>::Tolerance())
-	{
-		v2[0] /= v2norm;
-		v2[1] /= v2norm;
-		v2[2] /= v2norm;
-	}
+    if(v2norm>cmnTypeTraits<double>::Tolerance())
+        {
+            v2[0] /= v2norm;
+            v2[1] /= v2norm;
+            v2[2] /= v2norm;
+        }
 
     // w = (v1 x v2)/norm(v1 x v2)
     w[0] = v1[1]*v2[2] - v1[2]*v2[1];
     w[1] = v1[2]*v2[0] - v1[0]*v2[2];
     w[2] = v1[0]*v2[1] - v1[1]*v2[0];
     wnorm = sqrt(w[0]*w[0]+w[1]*w[1]+w[2]*w[2]);
-	if(wnorm> cmnTypeTraits<double>::Tolerance())
-    {
-        w[0] /= wnorm;
-        w[1] /= wnorm;
-        w[2] /= wnorm;
+    if(wnorm> cmnTypeTraits<double>::Tolerance())
+        {
+            w[0] /= wnorm;
+            w[1] /= wnorm;
+            w[2] /= wnorm;
+        }
+    else {
+        w[0] = 1.0;
+        w[1] = w[2] = 0.0;
     }
-	else {
-		    w[0] = 1.0;
-			w[1] = w[2] = 0.0;
-	}
 
     // theta = arccos(v1.v2/(norm(v1)*norm(v2))
-	dotarg = v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2];
-	if(dotarg>-1.0 && dotarg<1.0)
-		angle = acos(dotarg);
-	else 
-		angle = 0.0;
-	//if(CMN_ISNAN(angle)) angle=0.0;
+    dotarg = v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2];
+    if(dotarg>-1.0 && dotarg<1.0)
+        angle = acos(dotarg);
+    else
+        angle = 0.0;
+    //if(CMN_ISNAN(angle)) angle=0.0;
 
-    //cout << "v1: " << v1[0] << " " << v1[1] << " " << v1[2] << endl;
-    //cout << "v2: " << v2[0] << " " << v2[1] << " " << v2[2] << endl;
-    //cout << "w: " << w[0] << " " << w[1] << " " << w[2] << " angle: " << angle*180.0/cmnPI << endl;
+    cout << "v1: " << v1[0] << " " << v1[1] << " " << v1[2] << endl;
+    cout << "v2: " << v2[0] << " " << v2[1] << " " << v2[2] << endl;
+    cout << "w: " << w[0] << " " << w[1] << " " << w[2] << " angle: " << angle*180.0/cmnPI << endl;
 
     // Set object pose updates.
     object_displacement[0] = (point1[0]+point2[0])/2 - (pointa[0]+pointb[0])/2;

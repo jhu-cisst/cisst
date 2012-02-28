@@ -45,12 +45,16 @@ mtsQtFunctionContainerWidget::mtsQtFunctionContainerWidget():
     setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
     FunctionWidgetContainer = new QWidget();
+    FunctionWidgetContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
     TitleBar = new QWidget();
     QHBoxLayout * layout = new QHBoxLayout();
     layout->setSpacing(1);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setAlignment(Qt::AlignLeft);
     TitleBar->setLayout(layout);
+    TitleBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    TitleBar->setMinimumWidth(250);
 
     ToggleButton = new QToolButton();
     ToggleButton->setArrowType(Qt::RightArrow);
@@ -65,11 +69,12 @@ mtsQtFunctionContainerWidget::mtsQtFunctionContainerWidget():
     layout = new QHBoxLayout();
     layout->setSpacing(1);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setAlignment(Qt::AlignLeft);
     setLayout(layout);
+
     layout->addWidget(TitleBar);
     layout->addWidget(FunctionWidgetContainer);
 
-    layout->addStretch();
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 

@@ -42,7 +42,7 @@ if ("${CISST_BINARY_DIR}" STREQUAL "")
                           ${cisst_CONFIG_FILE}
                           PATH)
   # add installed module path to CISST_CMAKE_DIRS
-  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} "${CISST_CONFIG_PATH}/Modules" )
+  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} "${CISST_CONFIG_PATH}/Modules")
 
   # find root of install be removing the CISST_CMAKE_INSTALL_SUFFIX
   string (REPLACE "${CISST_CMAKE_INSTALL_SUFFIX}" ""
@@ -82,6 +82,7 @@ set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
 
 # Which flags have been set and include path/libs
 set (CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@)
+set (CISST_HAS_LINUX_XENOMAI @CISST_HAS_LINUX_XENOMAI@)
 set (CISST_HAS_SWIG_PYTHON @CISST_HAS_SWIG_PYTHON@)
 set (CISST_HAS_XML @CISST_HAS_XML@)
 set (CISST_HAS_OPENGL @CISST_HAS_OPENGL@)

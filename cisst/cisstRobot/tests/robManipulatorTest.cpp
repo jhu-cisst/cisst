@@ -26,7 +26,7 @@ vctDynamicVector<double> robManipulatorTest::RandomWAMVector() const {
 void robManipulatorTest::TestForwardKinematics(){
 
     cmnPath path;
-    path.AddRelativeToShare("/models/WAM");
+    path.AddRelativeToCisstShare("/models/WAM");
     std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
   robManipulator WAM7( fname );
@@ -48,7 +48,7 @@ void robManipulatorTest::TestForwardKinematics(){
 
 void robManipulatorTest::TestInverseKinematics(){
     cmnPath path;
-    path.AddRelativeToShare("/models/WAM");
+    path.AddRelativeToCisstShare("/models/WAM");
     std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
     robManipulator WAM7( fname );
@@ -68,7 +68,7 @@ void robManipulatorTest::TestInverseKinematics(){
 
 void robManipulatorTest::TestInverseDynamics(){
     cmnPath path;
-    path.AddRelativeToShare("/models/WAM");
+    path.AddRelativeToCisstShare("/models/WAM");
     std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
     robManipulator WAM7( fname );

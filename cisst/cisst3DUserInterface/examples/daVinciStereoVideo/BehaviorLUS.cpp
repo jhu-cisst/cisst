@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
+#include <cisst3DUserInterface/ui3VTKStippleActor.h>
 #include "BehaviorLUS.h"
 
 #include <vtkActor.h>
@@ -38,12 +39,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "vtkTextSource.h"
 #include "vtkTextMapper.h"
 #include "vtkTextActor3D.h"
-#include "CSOpenGLStippleActor.h"
 #include "vtkVectorText.h"
 #include "vtkFollower.h"
 #include "vtkTextActor.h"
 #include "vtkCubeSource.h"
-#include "CSOpenGLStippleActor.h"
 #include "vtkMatrix4x4.h"
 #include "vtkAxesActor.h"
 #include "string.h"
@@ -87,7 +86,7 @@ public:
             partMapper->ImmediateModeRenderingOn();
 
 
-            probeActorS = CSOpenGLStippleActor::New();
+            probeActorS = ui3VTKStippleActor::New();
             CMN_ASSERT(probeActorS);
             probeActorS -> SetMapper(partMapper);
 
@@ -116,7 +115,7 @@ protected:
     vtkSTLReader            *reader;
     vtkSphereSource         *sphere;
     vtkPolyDataMapper       *partMapper;
-    CSOpenGLStippleActor    *probeActorS;
+    ui3VTKStippleActor    *probeActorS;
 
     vctFrm3 Position; // initial position
 };
@@ -167,7 +166,7 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
         jointMapper->ImmediateModeRenderingOn();
 
 
-        joint = CSOpenGLStippleActor::New();
+        joint = ui3VTKStippleActor::New();
         CMN_ASSERT(joint);
         joint->SetMapper(jointMapper);
             //joint1 -> SetStipplePattern(2);
@@ -192,7 +191,7 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
     protected:
         vtkCylinderSource *jCylinder;
         vtkPolyDataMapper *jointMapper;
-        CSOpenGLStippleActor *joint;
+        ui3VTKStippleActor *joint;
     public:
         vctFrm3 Position; // initial position
 
@@ -244,7 +243,7 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
             shaftMapper->ImmediateModeRenderingOn();
 
             //vtkActor *shaftActor = vtkActor::New();
-            shaftActor = CSOpenGLStippleActor::New();
+            shaftActor = ui3VTKStippleActor::New();
             CMN_ASSERT(shaftActor);
             shaftActor->SetMapper( shaftMapper );
             shaftActor->SetScale(SCALE);
@@ -269,7 +268,7 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
     protected:
         vtkCylinderSource *shaftSource;
         vtkPolyDataMapper *shaftMapper;
-        CSOpenGLStippleActor *shaftActor;
+        ui3VTKStippleActor *shaftActor;
     public:
         vctFrm3 Position;  // initial position
 
@@ -401,7 +400,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
             cubePlaneMapper->SetInputConnection(cubeSource->GetOutputPort());
             cubePlaneMapper->ImmediateModeRenderingOn();
 
-            cubePlane = CSOpenGLStippleActor::New();
+            cubePlane = ui3VTKStippleActor::New();
             CMN_ASSERT(cubePlane);
             cubePlane->SetMapper(cubePlaneMapper);
             cubePlane->GetProperty()->SetColor(1,1,1);
@@ -423,7 +422,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
  
         vtkCubeSource           *cubeSource;
         vtkPolyDataMapper       *cubePlaneMapper;
-        CSOpenGLStippleActor    *cubePlane;
+        ui3VTKStippleActor    *cubePlane;
         vctFrm3 Position;  // initial position
 };
 
@@ -468,7 +467,7 @@ public:
         mapOutline->SetInputConnection(outlineSource->GetOutputPort());
         mapOutline->ImmediateModeRenderingOn();
 
-        outline = CSOpenGLStippleActor::New();
+        outline = ui3VTKStippleActor::New();
         CMN_ASSERT(outline);
         outline->SetMapper(mapOutline);
         outline->GetProperty()->SetColor(1,1,1);
@@ -488,7 +487,7 @@ protected:
 
     vtkOutlineSource        *outlineSource;
     vtkPolyDataMapper       *mapOutline;
-    CSOpenGLStippleActor    *outline;
+    ui3VTKStippleActor    *outline;
     vtkMatrix4x4            *outlineXform;
     vctFrm3 Position;  // initial position
 };

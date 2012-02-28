@@ -87,7 +87,8 @@ private:
       tokenizer. */
     void ConfigureTokenizer(void);
 
-    /*! Private methods to convert from native format to internal format */
+    /*! Private methods to convert from native format to internal
+      format, i.e. convert directory separator from ":" to ";" */
     static std::string FromNative(const std::string & nativePath);
 
 public:
@@ -130,17 +131,29 @@ public:
 
     /*! Add path relative to the CISST_ROOT environment variable.
       This can be useful to find shared libraries.  To find data
-      files, use AddRelativeToShare. */
-    bool AddRelativeToRoot(const std::string & relativePath, bool head = HEAD);
+      files, use AddRelativeToCisstShare. */
+    bool AddRelativeToCisstRoot(const std::string & relativePath, bool head = HEAD);
 
     /*! Add path relative to the shared cisst directory,
-      i.e. CISST_ROOT/share/cisst<version>. */
-    bool AddRelativeToShare(const std::string & relativePath, bool head = HEAD);
+      i.e. CISST_ROOT/share/cisst-<version>. */
+    bool AddRelativeToCisstShare(const std::string & relativePath, bool head = HEAD);
 
     /*! Find the full name for a given file.
       \return The full path including the filename or an empty string.
     */
     std::string Find(const std::string & filename, short mode = READ) const;
+
+    /*! Find the full name for a given file using all directories in
+      path as well as given "sub directory" in each directory.  E.g
+      if the path contains /bin and /usr/bin and the sub-directory
+      provided is "Release", the full search path if /bin/Release,
+      /bin, /usr/bin/Release, /usr/bin.
+
+      \return The full path including the filename or an empty string.
+    */
+    std::string FindWithSubdirectory(const std::string & filename,
+                                     const std::string & subdirectory,
+                                     short mode = READ) const;
 
     /*! Remove the first occurence of a directory from the search list. */
     bool Remove(const std::string & directory);
@@ -159,6 +172,9 @@ public:
 
     /*! Get working directory */
     static std::string GetWorkingDirectory(void);
+
+    /*! Get CISST_ROOT from the environment variable */
+    static bool GetCisstRoot(std::string & result);
 };
 
 

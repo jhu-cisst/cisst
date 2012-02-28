@@ -28,7 +28,7 @@ void robDHTest::TestForwardKinematicsWAM7(){
 
   std::ifstream ifs;
     cmnPath path;
-    path.AddRelativeToShare("/models/WAM");
+    path.AddRelativeToCisstShare("/models/WAM");
     std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
@@ -83,7 +83,7 @@ void robDHTest::TestForwardKinematicsPUMA560(){
 
   std::ifstream ifs;
     cmnPath path;
-    path.AddRelativeToShare("/models/PUMA560");
+    path.AddRelativeToCisstShare("/models/PUMA560");
     std::string fname = path.Find("puma560.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
@@ -138,7 +138,7 @@ void robDHTest::TestReadWAM7(){
 
   std::ifstream ifs;
     cmnPath path;
-    path.AddRelativeToShare("/models/WAM");
+    path.AddRelativeToCisstShare("/models/WAM");
     std::string fname = path.Find("wam7.rob", cmnPath::READ);
 
   ifs.open( fname.data() );
@@ -194,7 +194,7 @@ void robDHTest::TestReadPUMA560(){
 
   std::ifstream ifs;
     cmnPath path;
-    path.AddRelativeToShare("/models/PUMA560");
+    path.AddRelativeToCisstShare("/models/PUMA560");
     std::string fname = path.Find("puma560.rob", cmnPath::READ);
 
   ifs.open( fname.data() );

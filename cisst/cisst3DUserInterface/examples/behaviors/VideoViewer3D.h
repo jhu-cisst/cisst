@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: VideoViewer.h 2448 2011-04-09 15:31:41Z adeguet1 $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:	2011-04-25
