@@ -221,13 +221,6 @@ public:
         SurfaceActor->GetProperty()->SetOpacity(opacity);
     }
 
-    inline void SetStipplePattern(int mode) {
-        while (!this->Created()) {
-            osaSleep(0.1 * cmn_s);
-        }
-        SurfaceActor->SetStipplePattern(mode);
-    }
-
     inline void SetStipplePercentage(int percentage) {
         while (!this->Created()) {
             osaSleep(0.1 * cmn_s);
