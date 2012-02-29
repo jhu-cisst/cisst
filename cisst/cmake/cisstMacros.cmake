@@ -755,29 +755,32 @@ macro (cisst_information_message_missing_libraries ...)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
 endmacro (cisst_information_message_missing_libraries)
 
-# Macro to find a package via CMake's normal mechanism, but then to fix the
-# set variables if cisst has been installed
+
+# Macro to find a package via CMake's normal mechanism, but then to
+# fix the set variables if cisst has been installed and provide a hint
+# to find the packages
 macro (cisst_find_component ...)
-  set(_INSTALLED_PATH "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components")#/${ARGV0}")
+  set (_cfc_INSTALLED_PATH "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components")
 
-  message("-- Looking for cisst component: ${ARGV0} in: ${_INSTALLED_PATH}")
+  set (_cfc_PARAMETERS ${ARGV})
+  list (FIND _cfc_PARAMETERS "QUIET" _cfc_QUIET)
 
+  if (${_cfc_QUIET} EQUAL -1)
+    message ("-- Looking for cisst component: ${ARGV0} in: ${_cfc_INSTALLED_PATH}")
+  endif ()
 
-  # First, look in the install path for SAW components
-  if("${ARGV1}" STREQUAL "REQUIRED")
-    find_package(${ARGV0} REQUIRED HINTS ${_INSTALLED_PATH} ${sawComponents_BINARY_DIR})
-  else()
-    find_package(${ARGV0} QUIET HINTS ${_INSTALLED_PATH} ${sawComponents_BINARY_DIR})
-  endif()
+  # Search using user arguments with our hints
+  find_package(${ARGV} HINTS ${_cfc_INSTALLED_PATH} ${sawComponents_BINARY_DIR})
 
-  if(${ARGV0}_FOUND)
-    if(${${ARGV0}_DIR} STREQUAL ${_INSTALLED_PATH})
+  if (${ARGV0}_FOUND)
+    if (${${ARGV0}_DIR} STREQUAL ${_cfc_INSTALLED_PATH})
       # If this is an installed version, re-set the libdir and include directories
-      message("-- Found package \"${ARGV0}\" in cisst install path: " ${${ARGV0}_DIR})
-      set(${ARGV0}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
-      set(${ARGV0}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
-    endif()
-      message("-- Found package \"${ARGV0}\" in cisst non-install path: " ${${ARGV0}_DIR})
-  endif()
+      message ("-- Found package \"${ARGV0}\" in cisst install path: " ${${ARGV0}_DIR})
+      set (${ARGV0}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
+      set (${ARGV0}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
+    endif ()
+    if (${_cfc_QUIET} EQUAL -1)
+      message ("-- Found package \"${ARGV0}\" in cisst non-install path: " ${${ARGV0}_DIR})
+    endif ()
+  endif ()
 endmacro (cisst_find_component)
-
