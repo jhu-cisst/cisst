@@ -1578,7 +1578,7 @@ void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
 
     mtsConnection * connection = 0;
     ConnectionMapType::iterator it = ConnectionMap.begin();
-    while (it != ConnectionMap.end()) {
+    while (it != ConnectionMap.end() && ThreadDisconnectRunning) {
         connection = &it->second;
 
         // Skip timeout check if connection was already confirmed
