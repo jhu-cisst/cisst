@@ -159,7 +159,7 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
         double endTime = startTime + timeout;
         while (timeout > 0) {
 #if (CISST_OS == CISST_LINUX_XENOMAI)
-            osaSleep(0.1 * cmn_ms);
+            osaSleep(1 * cmn_ms);
 #endif
             StateChangeSignal.Wait(timeout);
             curTime = osaGetTime();
