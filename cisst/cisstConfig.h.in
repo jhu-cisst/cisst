@@ -30,6 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_VERSION_MINOR ${CISST_VERSION_MINOR}
 #define CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}"
 
+// Deprecated paths/macros
+#define CISST_SOURCE_ROOT                       CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_BUILD_ROOT                         CISST_BUILD_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_BUILD_LINK_DIRECTORIES CISST_BUILD_LINK_DIRECTORIES_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+
 // Was cisst compiled as shared libraries or static
 #cmakedefine01 CISST_BUILD_SHARED_LIBS
 

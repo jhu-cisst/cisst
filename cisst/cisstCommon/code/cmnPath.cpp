@@ -109,7 +109,7 @@ bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head
         this->Add(FromNative(path), head);
         return true;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddRelativeToCisstRoot: the environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
     return false;
 }
 
@@ -119,12 +119,12 @@ bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool hea
                                << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION << "/ at the "
                                << (head ? "beginning" : "end") << std::endl;
     std::string path;
-    if (cmnPath::GetCisstRoot(path)) {
-        path = path + "/share/cisst-" + CISST_VERSION + "/" + relativePath;
+    if (cmnPath::GetCisstShare(path)) {
+        path = path + "/" + relativePath;
         this->Add(FromNative(path), head);
         return true;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddRelativeToCisstShare: the environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
     return false;
 }
 
@@ -144,7 +144,7 @@ std::string cmnPath::FindWithSubdirectory(const std::string & filename,
     const const_iterator end = Path.end();
     while (iter != end) {
         if (subdirectory != "") {
-            fullName = (*iter) + "/" + subdirectory + filename;
+            fullName = (*iter) + "/" + subdirectory + "/" + filename;
             if (access(fullName.c_str(), mode) == 0) {
                 break;
             }
@@ -242,6 +242,16 @@ bool cmnPath::GetCisstRoot(std::string & result)
     environmentVariable = getenv("CISST_ROOT");
     if (environmentVariable) {
         result = environmentVariable;
+        return true;
+    }
+    return false;
+}
+
+
+bool cmnPath::GetCisstShare(std::string & result)
+{
+    if (cmnPath::GetCisstRoot(result)) {
+        result = result + "/share/cisst-" + CISST_VERSION;
         return true;
     }
     return false;

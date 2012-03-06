@@ -144,10 +144,11 @@ public:
     std::string Find(const std::string & filename, short mode = READ) const;
 
     /*! Find the full name for a given file using all directories in
-      path as well as given "sub directory" in each directory.  E.g
-      if the path contains /bin and /usr/bin and the sub-directory
+      path as well as given "sub directory" in each directory.  E.g if
+      the path contains /bin and /usr/bin and the sub-directory
       provided is "Release", the full search path if /bin/Release,
-      /bin, /usr/bin/Release, /usr/bin.
+      /bin, /usr/bin/Release, /usr/bin.  One can also #include
+      <cisstBuildType.h> which defines the string CISST_BUILD_SUFFIX.
 
       \return The full path including the filename or an empty string.
     */
@@ -175,6 +176,10 @@ public:
 
     /*! Get CISST_ROOT from the environment variable */
     static bool GetCisstRoot(std::string & result);
+
+    /*! Get cisst shared directory based on CISST_ROOT from the
+      environment variable */
+    static bool GetCisstShare(std::string & result);
 };
 
 
