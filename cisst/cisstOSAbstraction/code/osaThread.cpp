@@ -218,17 +218,27 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata)
     typedef void (*CB_FuncType)(void *);
     int retval = 0;
     retval = rt_task_spawn( &INTERNALS(Task),
-                            name,
+                            0,
                             0,
                             89,
                             T_FPU | T_JOINABLE,
                             (CB_FuncType)cb,
                             (void*)userdata );
     if( retval != 0 ){
+#if 0
         CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                           << "rt_task_spawn failed. "
                           << strerror(retval) << ": " << retval
                           << std::endl;
+#endif
+        std::string err;
+        switch (-retval) {
+        case ENOMEM: err = "ENOMEM: the system fails to get enough dynamic memory from the global real-time heap in order to create the new task's stack space or register the task."; break;
+        case EEXIST: err = "EEXIST: the name is already in use by some registered object."; break;
+        case EPERM: err = "EPERM: this service was called from an asynchronous context."; break;
+        }
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "rt_task_spawn failed: " << err << std::endl;
     }
     // copy the address
     reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->Task = &INTERNALS(Task);
