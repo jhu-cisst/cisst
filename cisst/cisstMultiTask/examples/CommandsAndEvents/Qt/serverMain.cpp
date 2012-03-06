@@ -25,9 +25,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "serverQtComponent.h"
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#endif
 
 int main(int argc, char * argv[])
 {
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    mlockall(MCL_CURRENT | MCL_FUTURE);
+#endif
+
     // set global component manager IP
     std::string globalComponentManagerIP;
     if (argc == 1) {

@@ -26,9 +26,23 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "clientQtComponent.h"
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#endif
 
 int main(int argc, char * argv[])
 {
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    mlockall(MCL_CURRENT | MCL_FUTURE);
+#endif
+
+    // log configuration
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("clientQtComponent", CMN_LOG_ALLOW_ALL);
+
     // set global component manager IP
     std::string globalComponentManagerIP;
     if (argc == 1) {
@@ -40,13 +54,6 @@ int main(int argc, char * argv[])
         std::cerr << "Usage: " << argv[0] << " (global component manager IP)" << std::endl;
         return -1;
     }
-
-    // log configuration
-    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClass("clientQtComponent", CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);

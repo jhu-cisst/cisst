@@ -218,7 +218,7 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata)
     typedef void (*CB_FuncType)(void *);
     int retval = 0;
     retval = rt_task_spawn( &INTERNALS(Task),
-                            NULL,
+                            name,
                             0,
                             89,
                             T_FPU | T_JOINABLE,
