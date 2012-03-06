@@ -108,142 +108,165 @@ endif (CISST_BUILD_DOC)
 
 
 # Environment variables for Windows
-IF(WIN32)
+if (WIN32)
   # Script to set cisst environment variables
-  FILE(TO_NATIVE_PATH ${cisst_saw_BINARY_DIR} cisst_saw_BINARY_DIR_NATIVE)
-  CONFIGURE_FILE(${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvars.bat.in
-                 ${cisst_saw_BINARY_DIR}/cisstvars.bat)
+  file (TO_NATIVE_PATH ${cisst_saw_BINARY_DIR} cisst_saw_BINARY_DIR_NATIVE)
+  configure_file (${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvars.bat.in
+                  ${cisst_saw_BINARY_DIR}/cisstvars.bat)
   # Script to set Microsoft compiler environment variables
-  GET_FILENAME_COMPONENT(BUILD_TOOL_DIRECTORY ${CMAKE_MAKE_PROGRAM} PATH)
-  FIND_PROGRAM(VSVARS32_BAT
-               NAMES vsvars32.bat
-               PATHS ${BUILD_TOOL_DIRECTORY}/../../Common7/Tools)
-  MARK_AS_ADVANCED(VSVARS32_BAT)
-  CONFIGURE_FILE(${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvsvars.bat.in
-                 ${cisst_saw_BINARY_DIR}/cisstvsvars.bat)
+  get_filename_component (BUILD_TOOL_DIRECTORY ${CMAKE_MAKE_PROGRAM} PATH)
+  find_program (VSVARS32_BAT
+                NAMES vsvars32.bat
+                PATHS ${BUILD_TOOL_DIRECTORY}/../../Common7/Tools)
+  mark_as_advanced (VSVARS32_BAT)
+  configure_file (${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvsvars.bat.in
+                  ${cisst_saw_BINARY_DIR}/cisstvsvars.bat)
 
   # If Visual Studio
-  IF(CMAKE_GENERATOR MATCHES "Visual Studio*" )
-    FOREACH(config ${CMAKE_CONFIGURATION_TYPES})
-      CONFIGURE_FILE(${cisst_saw_SOURCE_DIR}/cisst/utils/visual-studio.bat.in
-                     ${cisst_saw_BINARY_DIR}/visual-studio-${config}.bat)
-    ENDFOREACH(config)
-  ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio*" )
+  if (CMAKE_GENERATOR MATCHES "Visual Studio*" )
+    foreach (config ${CMAKE_CONFIGURATION_TYPES})
+      configure_file (${cisst_saw_SOURCE_DIR}/cisst/utils/visual-studio.bat.in
+                      ${cisst_saw_BINARY_DIR}/visual-studio-${config}.bat)
+    endforeach (config)
+  endif (CMAKE_GENERATOR MATCHES "Visual Studio*" )
 
   # Offer to register the cisst paths
-  OPTION(CISST_PATH_REGISTER "Register the paths to cisst libraries" OFF)
-  IF(CISST_PATH_REGISTER)
+  option (CISST_PATH_REGISTER "Register the paths to cisst libraries" OFF)
+  if (CISST_PATH_REGISTER)
 
     # Set and test configuration (i.e. Debug, Release, ...)
-    SET(CISST_PATH_CONFIGURATION CACHE STRING "Configuration used for the paths")
-    SET(CISST_PATH_CONFIGURATION_VALID FALSE)
+    set (CISST_PATH_CONFIGURATION CACHE STRING "Configuration used for the paths")
+    set (CISST_PATH_CONFIGURATION_VALID FALSE)
 
-    FOREACH(config ${CMAKE_CONFIGURATION_TYPES})
-      IF("${config}" STREQUAL "CISST_PATH_CONFIGURATION")
-        SET(CISST_PATH_CONFIGURATION_VALID TRUE)
-      ENDIF("${config}" STREQUAL "CISST_PATH_CONFIGURATION")
-    ENDFOREACH(config)
+    foreach (config ${CMAKE_CONFIGURATION_TYPES})
+      if ("${config}" STREQUAL "CISST_PATH_CONFIGURATION")
+        set (CISST_PATH_CONFIGURATION_VALID TRUE)
+      endif ("${config}" STREQUAL "CISST_PATH_CONFIGURATION")
+    endforeach (config)
 
     # Configuration is valid, build the path and compare it to the current one
-    IF(CISST_PATH_CONFIGURATION_VALID)
+    if (CISST_PATH_CONFIGURATION_VALID)
 
       # Initial settings for paths
-      SET(CISST_PATH_CMAKE_FORMAT
-          "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
-          "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
-      SET(CISST_PYTHONPATH_CMAKE_FORMAT
-          "${cisst_saw_BINARY_DIR}/cisst/lib" "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
-          "${cisst_saw_BINARY_DIR}/cisst/bin" "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
-
-      # To find components (libraries) and example programs
-      IF(CISST_BUILD_SAW)
-        SET(CISST_PATH_CMAKE_FORMAT
-            ${CISST_PATH_CMAKE_FORMAT}
-            "${cisst_saw_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_saw_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
-        SET(CISST_PYTHONPATH_CMAKE_FORMAT
-            ${CISST_PYTHONPATH_CMAKE_FORMAT}
-            "${cisst_saw_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
-            "${cisst_saw_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
-      ENDIF(CISST_BUILD_SAW)
+      set (CISST_PATH_CMAKE_FORMAT
+           "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
+           "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
+      set (CISST_PYTHONPATH_CMAKE_FORMAT
+           "${cisst_saw_BINARY_DIR}/cisst/lib" "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
+           "${cisst_saw_BINARY_DIR}/cisst/bin" "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
+      set (CISST_ROOT_CMAKE_FORMAT
+           "${cisst_saw_BINARY_DIR}/cisst")
 
       # Convert to native format to be able to compare
-      FILE(TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)
-      FILE(TO_NATIVE_PATH "${CISST_PYTHONPATH_CMAKE_FORMAT}" CISST_PYTHONPATH)
+      file (TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)
+      file (TO_NATIVE_PATH "${CISST_PYTHONPATH_CMAKE_FORMAT}" CISST_PYTHONPATH)
+      file (TO_NATIVE_PATH "${CISST_ROOT_CMAKE_FORMAT}" CISST_ROOT)
 
       # Retrieve current path, little trick to read register key/value
-      SET(CISST_PATH_REG_KEY "HKEY_CURRENT_USER\\Environment;CISST_PATH")
-      GET_FILENAME_COMPONENT(CURRENT_CISST_PATH_CMAKE_FORMAT
-                             "[HKEY_CURRENT_USER\\Environment;CISST_PATH]\\dummy.dum"
-                             PATH)
-      FILE(TO_NATIVE_PATH "${CURRENT_CISST_PATH_CMAKE_FORMAT}" CURRENT_CISST_PATH)
+      set (CISST_PATH_REG_KEY "HKEY_CURRENT_USER\\Environment;CISST_PATH")
+      get_filename_component (CURRENT_CISST_PATH_CMAKE_FORMAT
+                              "[HKEY_CURRENT_USER\\Environment;CISST_PATH]\\dummy.dum"
+                              PATH)
+      file (TO_NATIVE_PATH "${CURRENT_CISST_PATH_CMAKE_FORMAT}" CURRENT_CISST_PATH)
 
-      SET(CISST_PYTHONPATH_REG_KEY "HKEY_CURRENT_USER\\Environment;CISST_PYTHONPATH")
-      GET_FILENAME_COMPONENT(CURRENT_CISST_PYTHONPATH_CMAKE_FORMAT
-                             "[HKEY_CURRENT_USER\\Environment;CISST_PYTHONPATH]\\dummy.dum"
-                             PATH)
-      FILE(TO_NATIVE_PATH "${CURRENT_CISST_PYTHONPATH_CMAKE_FORMAT}" CURRENT_CISST_PYTHONPATH)
+      set (CISST_PYTHONPATH_REG_KEY "HKEY_CURRENT_USER\\Environment;CISST_PYTHONPATH")
+      get_filename_component (CURRENT_CISST_PYTHONPATH_CMAKE_FORMAT
+                              "[HKEY_CURRENT_USER\\Environment;CISST_PYTHONPATH]\\dummy.dum"
+                              PATH)
+      file (TO_NATIVE_PATH "${CURRENT_CISST_PYTHONPATH_CMAKE_FORMAT}" CURRENT_CISST_PYTHONPATH)
+
+      set (CISST_ROOT_REG_KEY "HKEY_CURRENT_USER\\Environment;CISST_ROOT")
+      get_filename_component (CURRENT_CISST_ROOT_CMAKE_FORMAT
+                              "[HKEY_CURRENT_USER\\Environment;CISST_ROOT]\\dummy.dum"
+                              PATH)
+      file (TO_NATIVE_PATH "${CURRENT_CISST_ROOT_CMAKE_FORMAT}" CURRENT_CISST_ROOT)
 
       # If there is no existing path, add it
-      IF("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
+      if ("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
         # not defined, add it to register using cmake -E
-        EXEC_PROGRAM(${CMAKE_COMMAND}
-                     ARGS "-E write_regv \"${CISST_PATH_REG_KEY}\" \"${CISST_PATH}\"")
-      ELSE("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
-        IF("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
-          # MESSAGE("CISST_PATH is the same")
-        ELSE("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
+        exec_program (${CMAKE_COMMAND}
+                      ARGS "-E write_regv \"${CISST_PATH_REG_KEY}\" \"${CISST_PATH}\"")
+      else ("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
+        if ("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
+          # message ("CISST_PATH is the same")
+        else ("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
           # The variable already exists and is different
-          OPTION(CISST_PATH_OVERWRITE "Overwrite existing CISST_PATH" OFF)
-          IF(CISST_PATH_OVERWRITE)
+          option (CISST_PATH_OVERWRITE "Overwrite existing CISST_PATH" OFF)
+          if (CISST_PATH_OVERWRITE)
             # add it to register using cmake -E
-            EXEC_PROGRAM(${CMAKE_COMMAND}
-                         ARGS "-E write_regv \"${CISST_PATH_REG_KEY}\" \"${CISST_PATH}\"")
+            exec_program (${CMAKE_COMMAND}
+                          ARGS "-E write_regv \"${CISST_PATH_REG_KEY}\" \"${CISST_PATH}\"")
             # Set overwrite back to OFF by default.
-            SET(CISST_PATH_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_PATH" FORCE)
-          ELSE(CISST_PATH_OVERWRITE)
+            set (CISST_PATH_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_PATH" FORCE)
+          else (CISST_PATH_OVERWRITE)
             # Display a message of information
-            MESSAGE("A different CISST_PATH exists:\n  ${CURRENT_CISST_PATH}\nTurn CISST_PATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
-          ENDIF(CISST_PATH_OVERWRITE)
-        ENDIF("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
+            message ("A different CISST_PATH exists:\n  ${CURRENT_CISST_PATH}\nTurn CISST_PATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
+          endif (CISST_PATH_OVERWRITE)
+        endif ("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
 
-      ENDIF("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
+      endif ("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
 
       # Do the same for PYTHONPATH if wrappers are compiled
-      IF(CISST_HAS_SWIG_PYTHON)
+      if (CISST_HAS_SWIG_PYTHON)
         # If there is no existing path, add it
-        IF("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
+        if ("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
           # not defined, add it to register using cmake -E
-          EXEC_PROGRAM(${CMAKE_COMMAND}
-                       ARGS "-E write_regv \"${CISST_PYTHONPATH_REG_KEY}\" \"${CISST_PYTHONPATH}\"")
-        ELSE("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
-          IF("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
-            # MESSAGE("CISST_PATH is the same")
-          ELSE("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
+          exec_program (${CMAKE_COMMAND}
+                        ARGS "-E write_regv \"${CISST_PYTHONPATH_REG_KEY}\" \"${CISST_PYTHONPATH}\"")
+        else ("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
+          if ("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
+            # message ("CISST_PATH is the same")
+          else ("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
             # The variable already exists and is different
-            OPTION(CISST_PYTHONPATH_OVERWRITE "Overwrite existing CISST_PYTHONPATH" OFF)
-            IF(CISST_PYTHONPATH_OVERWRITE)
+            option (CISST_PYTHONPATH_OVERWRITE "Overwrite existing CISST_PYTHONPATH" OFF)
+            if (CISST_PYTHONPATH_OVERWRITE)
               # Add it to register using cmake -E
-              EXEC_PROGRAM(${CMAKE_COMMAND}
-                           ARGS "-E write_regv \"${CISST_PYTHONPATH_REG_KEY}\" \"${CISST_PYTHONPATH}\"")
+              exec_program (${CMAKE_COMMAND}
+                            ARGS "-E write_regv \"${CISST_PYTHONPATH_REG_KEY}\" \"${CISST_PYTHONPATH}\"")
               # Set overwrite back to OFF by default.
-              SET(CISST_PYTHONPATH_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_PYTHONPATH" FORCE)
-            ELSE(CISST_PYTHONPATH_OVERWRITE)
+              set (CISST_PYTHONPATH_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_PYTHONPATH" FORCE)
+            else (CISST_PYTHONPATH_OVERWRITE)
               # Display a message of information
-              MESSAGE("A different CISST_PYTHONPATH exists:\n  ${CURRENT_CISST_PYTHONPATH}\nTurn CISST_PYTHONPATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
-            ENDIF(CISST_PYTHONPATH_OVERWRITE)
-          ENDIF("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
+              message ("A different CISST_PYTHONPATH exists:\n  ${CURRENT_CISST_PYTHONPATH}\nTurn CISST_PYTHONPATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
+            endif (CISST_PYTHONPATH_OVERWRITE)
+          endif ("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
 
-        ENDIF("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
-      ENDIF(CISST_HAS_SWIG_PYTHON)
+        endif ("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
+      endif (CISST_HAS_SWIG_PYTHON)
 
-    ELSE(CISST_PATH_CONFIGURATION_VALID)
-      MESSAGE("CISST_PATH_CONFIGURATION must be one of ${CMAKE_CONFIGURATION_TYPES}")
-    ENDIF(CISST_PATH_CONFIGURATION_VALID)
 
-  ENDIF(CISST_PATH_REGISTER)
+      # If there is no CISST_ROOT
+      if ("${CURRENT_CISST_ROOT}" STREQUAL "\\registry")
+        # not defined, add it to register using cmake -E
+        exec_program (${CMAKE_COMMAND}
+                      ARGS "-E write_regv \"${CISST_ROOT_REG_KEY}\" \"${CISST_ROOT}\"")
+      else ("${CURRENT_CISST_ROOT}" STREQUAL "\\registry")
+        if ("${CISST_ROOT}" STREQUAL "${CURRENT_CISST_ROOT}")
+          # message ("CISST_ROOT is the same")
+        else ("${CISST_ROOT}" STREQUAL "${CURRENT_CISST_ROOT}")
+          # The variable already exists and is different
+          option (CISST_ROOT_OVERWRITE "Overwrite existing CISST_ROOT" OFF)
+          if (CISST_ROOT_OVERWRITE)
+            # add it to register using cmake -E
+            exec_program (${CMAKE_COMMAND}
+                          ARGS "-E write_regv \"${CISST_ROOT_REG_KEY}\" \"${CISST_ROOT}\"")
+            # Set overwrite back to OFF by default.
+            set (CISST_ROOT_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_ROOT" FORCE)
+          else (CISST_ROOT_OVERWRITE)
+            # Display a message of information
+            message ("A different CISST_ROOT exists:\n  ${CURRENT_CISST_ROOT}\nTurn CISST_ROOT_OVERWRITE \"ON\" or CISST_ROOT_REGISTER \"OFF\"")
+          endif (CISST_ROOT_OVERWRITE)
+        endif ("${CISST_ROOT}" STREQUAL "${CURRENT_CISST_ROOT}")
 
-ENDIF(WIN32)
+      endif ("${CURRENT_CISST_ROOT}" STREQUAL "\\registry")
+
+    else (CISST_PATH_CONFIGURATION_VALID)
+      message ("CISST_PATH_CONFIGURATION must be one of ${CMAKE_CONFIGURATION_TYPES}")
+    endif (CISST_PATH_CONFIGURATION_VALID)
+
+  endif (CISST_PATH_REGISTER)
+
+endif (WIN32)
 
 # Environment variables for Unix
 if (UNIX)
