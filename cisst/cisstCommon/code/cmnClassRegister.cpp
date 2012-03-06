@@ -213,6 +213,7 @@ void cmnClassRegister::ToStreamInstance(std::ostream & outputStream) const
     for (iterator = ServicesContainer.begin(); iterator != end; iterator++) {
         outputStream << " - " << iterator->first
                      << " (typeid name \"" << iterator->second->TypeInfoPointer()->name()
+                     << " from library \"" << iterator->second->GetLibraryName()
                      << "\", LoD \"" << cmnLogLevelToString(iterator->second->GetLoD()) << "\")" << std::endl;
     }
 }

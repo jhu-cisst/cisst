@@ -240,7 +240,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 // Define CISST_DATA_MODEL, i.e. either CISST_LLP64 (Windows) or CISST_LP64 (Unix, most of them).  Also use ILP32.
-#if CISST_COMPILER == CISST_GCC
+#if (CISST_COMPILER == CISST_GCC)
   #ifdef _LP64
     #define CISST_DATA_MODEL CISST_LP64
   #else
@@ -253,7 +253,7 @@ http://www.cisst.org/cisst/license.txt.
   #endif
 #endif // CISST_COMPILER == CISST_GCC
 
-#if CISST_COMPILER == CISST_CLANG
+#if (CISST_COMPILER == CISST_CLANG)
   #if defined(__LP64__) && __LP64__
     #define CISST_DATA_MODEL CISST_LP64
   #endif // __LP64__

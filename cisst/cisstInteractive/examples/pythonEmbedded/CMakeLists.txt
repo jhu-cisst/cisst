@@ -68,7 +68,7 @@ if (cisst_FOUND_AS_REQUIRED)
                       ARGS -E copy
                            ${CMAKE_CURRENT_SOURCE_DIR}/pythonEmbedded.py
                            ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/pythonEmbedded.py
-                      COMMENT "Copy of pythonEmbedded.py to the executable directory")
+                      COMMENT "pythonEmbedded: copy pythonEmbedded.py to the executable directory")
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

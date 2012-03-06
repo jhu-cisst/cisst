@@ -78,6 +78,31 @@ install (FILES "${cisst_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)
 
+# Generate cisstBuildType.h
+set (CISST_BUILDTYPE_HEADER_SRC "${cisst_SOURCE_DIR}/cisstBuildType.h.in")
+set (CISST_BUILDTYPE_HEADER "${cisst_BINARY_DIR}/include/cisstBuildType.h")
+# Script to be executed everytime
+configure_file ("${cisst_SOURCE_DIR}/cmake/cisstGenerateBuildType.cmake.in"
+                "${cisst_BINARY_DIR}/cisstGenerateBuildType.cmake"
+                @ONLY)
+add_custom_target (cisstBuildType ALL
+                   COMMAND ${CMAKE_COMMAND}
+                           -DCISST_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"
+                           -DCISST_CFG_INTDIR:STRING="${CMAKE_CFG_INTDIR}"
+                           -P "${cisst_BINARY_DIR}/cisstGenerateBuildType.cmake"
+                   COMMENT "Generating ${CISST_BUILDTYPE_HEADER} from ${CISST_BUILDTYPE_HEADER_SRC}"
+                   SOURCES "${CISST_BUILDTYPE_HEADER_SRC}"
+                           "${CISST_BUILDTYPE_HEADER}"
+                           "${cisst_SOURCE_DIR}/cmake/cisstGenerateBuildType.cmake.in"
+                           "${cisst_BINARY_DIR}/cisstGenerateBuildType.cmake")
+set_property (TARGET cisstBuildType PROPERTY FOLDER "cisstCommon")
+
+# Install cisstBuildType.h
+set_source_files_properties ("${CISST_BUILDTYPE_HEADER}" GENERATED)
+install (FILES "${cisst_BINARY_DIR}/include/cisstBuildType.h"
+         DESTINATION include
+         COMPONENT cisstCommon)
+
 
 # Create some variables so that find_package (cisst) can be used in subdirectories (examples)
 set (CURRENT_PROJECT_IS_CISST ON)

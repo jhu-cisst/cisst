@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-04-10
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -52,9 +52,6 @@ typedef ::Ice::Long mtsIceCommandIDType;
 
 /*! Enable/disable detailed log. This affects all proxy objects. */
 //#define ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-
-/*! Path to Ice property files */
-#define ICE_PROPERTY_FILE_ROOT CISST_SOURCE_ROOT"/cisstMultiTask/share/Ice/"
 
 //-----------------------------------------------------------------------------
 //  Common Base Class Definitions
@@ -347,13 +344,13 @@ public:
 
 
 template<class _proxyOwner>
-mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string& propertyFileName,
-                                                    const ProxyTypes& CMN_UNUSED(proxyType))
+mtsProxyBaseCommon<_proxyOwner>::mtsProxyBaseCommon(const std::string & propertyFileName,
+                                                    const ProxyTypes & CMN_UNUSED(proxyType))
 {
     ProxyBaseInitialize();
 
     cmnPath path;
-    path.Add(ICE_PROPERTY_FILE_ROOT);
+    path.AddRelativeToCisstShare("cisstMultiTask/Ice");
     path.AddFromEnvironment("PATH", cmnPath::TAIL);
     IcePropertyFileName = path.Find(propertyFileName);
 }

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Martin Kelly
+  Author(s): Martin Kelly, Anton Deguet
   Created on: 2010-09-23
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,7 +33,7 @@ void osaPipeExecTest::TestPipe(void)
 {
     osaPipeExec pipe1, pipe2;
     std::string command =
-        std::string(CISST_BUILD_ROOT) + std::string("/cisst/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
+        std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
         + std::string("/cisstOSAbstractionTestsPipeExecUtility");
 
     /* Test opening twice, make sure it fails the second time */

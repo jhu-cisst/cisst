@@ -92,7 +92,7 @@ int main()
 
     // this is were the icons have been copied by CMake post build rule
     cmnPath path;
-    path.Add(std::string(CISST_BUILD_ROOT) + "/share/cisst-1.0/cisst3DUserInterface/icons");
+    path.AddRelativeToCisstShare("/cisst3DUserInterface/icons");
     std::string fileName = path.Find("move.png", cmnPath::READ);
     PNGViewer3D pngViewer("PGNViewer", fileName);
     guiManager.AddBehavior(&pngViewer,

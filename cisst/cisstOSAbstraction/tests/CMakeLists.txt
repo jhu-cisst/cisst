@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstOSAbstraction tests
 #
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -61,3 +61,7 @@ cisst_add_test (cisstOSAbstractionTests INSTANCES 2 ITERATIONS 2)
 target_link_libraries (cisstOSAbstractionTests
                        optimized ${CPPUNIT_LIBRARIES}
                        debug ${CPPUNIT_DEBUG_LIBRARIES})
+
+# To find generated executables
+set_target_properties (cisstOSAbstractionTests
+                       PROPERTIES COMPILE_DEFINITIONS "CISST_BINARY_DIR=\"${cisst_BINARY_DIR}/\"")

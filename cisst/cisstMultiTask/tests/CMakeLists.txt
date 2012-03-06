@@ -120,3 +120,7 @@ cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)
 target_link_libraries (cisstMultiTaskTests
                        optimized ${CPPUNIT_LIBRARIES}
                        debug ${CPPUNIT_DEBUG_LIBRARIES})
+
+# To find generated executables
+set_target_properties (cisstMultiTaskTests
+                       PROPERTIES COMPILE_DEFINITIONS "CISST_BINARY_DIR=\"${cisst_BINARY_DIR}/\"")
