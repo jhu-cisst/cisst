@@ -332,11 +332,13 @@ void svlDraw::Poly(svlSampleImage* image,
         }
         else {
 #if CISST_SVL_HAS_OPENCV
-            cvLine(image->IplImageRef(videoch),
-                   cvPoint(points[start].x, points[start].y),
-                   cvPoint(points[end].x,   points[end].y),
-                   cvScalar(color.r, color.g, color.b),
-                   thickness);
+            if (thickness >= 0 && thickness <= 255) {
+                cvLine(image->IplImageRef(videoch),
+                       cvPoint(points[start].x, points[start].y),
+                       cvPoint(points[end].x,   points[end].y),
+                       cvScalar(color.r, color.g, color.b),
+                       thickness);
+            }
 #else // CISST_SVL_HAS_OPENCV
             // TO DO: line thickness to be implemented
             Line(image, videoch, points[start], points[end], color);
@@ -398,6 +400,7 @@ void svlDraw::Ellipse(svlSampleImage* image,
                       int thickness)
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
+    if (radii[0] < 0 || radii[1] < 0 || thickness > 255) return;
 
     cvEllipse(image->IplImageRef(videoch),
               cvPoint(center.x, center.y),
@@ -477,14 +480,13 @@ void svlDraw::Text(svlSampleImage* image,
                    svlRGB color)
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
-    
+
     CvFont font;
     cvInitFont(&font,
                CV_FONT_HERSHEY_PLAIN,
                fontsize / SVL_OCV_FONT_SCALE,
                fontsize / SVL_OCV_FONT_SCALE,
                0, 1, 4);
-
     cvPutText(image->IplImageRef(videoch),
               text.c_str(),
               cvPoint(pos.x, pos.y),

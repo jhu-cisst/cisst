@@ -61,6 +61,22 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
 
 svlFilterImageOverlay::~svlFilterImageOverlay()
 {
+    _TransformCacheMap::iterator iterxform;
+    // Release all blocking threads
+    for (iterxform = TransformCache.begin();
+         iterxform != TransformCache.end();
+         iterxform ++) {
+        if (iterxform->second.signal) iterxform->second.signal->Raise();
+    }
+    // Delete signals
+    for (iterxform = TransformCache.begin();
+         iterxform != TransformCache.end();
+         iterxform ++) {
+        if (iterxform->second.signal) {
+            delete iterxform->second.signal;
+            iterxform->second.signal = 0;
+        }
+    }
     // TO DO: this needs to be fixed sometime
 /*
     while (FirstOverlay) {
@@ -211,7 +227,10 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     syncOutput = syncInput;
     _SkipIfDisabled();
 
-    _OnSingleThread(procInfo) {
+    _OnSingleThread(procInfo)
+    {
+        double current_time = syncInput->GetTimestamp();
+
         // Add queued inputs and overlays in a thread safe manner
         if (ImageInputsToAddUsed  ||
             MatrixInputsToAddUsed ||
@@ -225,10 +244,33 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             svlOverlay* overlay = FirstOverlay;
             for (; overlay; overlay = overlay->Next) {
                 if (overlay->TransformID >= 0) {
+
                     _TransformCacheMap::iterator iterxform;
                     iterxform = TransformCache.find(overlay->TransformID);
                     if (iterxform != TransformCache.end()) {
-                        overlay->SetTransform(iterxform->second);
+
+                        if (!overlay->GetTransformSynchronized()) {
+                            overlay->SetTransform(iterxform->second.frame, iterxform->second.timestamp);
+                        }
+                        else {
+                            while (overlay->GetTransformSynchronized() &&
+                                   (iterxform->second.timestamp < current_time)) {
+
+                                // Transform is not recent
+                                bool success = false;
+                                TransformCS.Leave();
+                                    // Wait for new transform
+                                    while (!success &&
+                                           overlay->GetVisible() &&
+                                           IsRunning() &&
+                                           iterxform->second.signal) {
+                                        success = iterxform->second.signal->Wait(0.1);
+                                    }
+                                TransformCS.Enter();
+                                if (!success) break;
+                            }
+                            overlay->SetTransform(iterxform->second.frame, iterxform->second.timestamp);
+                        }
                     }
                     else {
                         CMN_LOG_CLASS_RUN_DEBUG << "Process: failed to find transformation: " << overlay->TransformID << std::endl;
@@ -242,7 +284,6 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         svlOverlayInput* overlayinput = 0;
         svlFilterInput* input = 0;
         svlSample* ovrlsample = 0;
-        double current_time = syncInput->GetTimestamp();
 
         for (overlay = FirstOverlay; overlay; overlay = overlay->Next) {
 
@@ -309,10 +350,17 @@ void svlFilterImageOverlay::SetTransform(const ThisType::ImageTransform & transf
         _TransformCacheMap::iterator iterxform;
         iterxform = TransformCache.find(transform.ID);
         if (iterxform != TransformCache.end()) {
-            iterxform->second = transform.frame;
+            iterxform->second.frame     = transform.frame;
+            iterxform->second.timestamp = transform.timestamp;
+            if (iterxform->second.signal) iterxform->second.signal->Raise();
         }
         else {
-            TransformCache[transform.ID] = transform.frame;
+            TransformInternal transform_internal;
+            transform_internal.frame     = transform.frame;
+            transform_internal.timestamp = transform.timestamp;
+            transform_internal.signal    = new osaThreadSignal;
+            TransformCache[transform.ID] = transform_internal;
+            if (transform_internal.signal) transform_internal.signal->Raise();
             CMN_LOG_CLASS_RUN_DEBUG << "SetTransform - new transformation added: " << transform.ID << std::endl;
         }
     TransformCS.Leave();
@@ -322,13 +370,20 @@ void svlFilterImageOverlay::SetTransforms(const vctDynamicVector<ThisType::Image
 {
     TransformCS.Enter();
         for (unsigned int i = 0; i < transforms.size(); i ++) {
+            TransformInternal transform_internal;
             _TransformCacheMap::iterator iterxform;
             iterxform = TransformCache.find(transforms[i].ID);
             if (iterxform != TransformCache.end()) {
-                iterxform->second = transforms[i].frame;
+                iterxform->second.frame     = transforms[i].frame;
+                iterxform->second.timestamp = transforms[i].timestamp;
+                if (iterxform->second.signal) iterxform->second.signal->Raise();
             }
             else {
-                TransformCache[transforms[i].ID] = transforms[i].frame;
+                transform_internal.frame     = transforms[i].frame;
+                transform_internal.timestamp = transforms[i].timestamp;
+                transform_internal.signal    = new osaThreadSignal;
+                TransformCache[transforms[i].ID] = transform_internal;
+                if (transform_internal.signal) transform_internal.signal->Raise();
                 CMN_LOG_CLASS_RUN_DEBUG << "SetTransforms - new transformation added: " << transforms[i].ID << std::endl;
             }
         }
@@ -428,14 +483,14 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
 
 std::ostream & operator << (std::ostream & stream, const svlFilterImageOverlay::ImageTransform & objref)
 {
-    stream << "ID=" << objref.ID << std::endl << objref.frame << std::endl;
+    stream << "ID=" << objref.ID << " (timestamp=" << std::fixed << objref.timestamp << ")" << std::endl << objref.frame << std::endl;
     return stream;
 }
 
 std::ostream & operator << (std::ostream & stream, const vctDynamicVector<svlFilterImageOverlay::ImageTransform> & objref)
 {
     for (unsigned int i = 0; i < objref.size(); i ++) {
-        stream << "ID=" << objref[i].ID << std::endl << objref[i].frame << std::endl;
+        stream << "ID=" << objref[i].ID << " (timestamp=" << std::fixed << objref[i].timestamp << ")" << std::endl << objref[i].frame << std::endl;
     }
     return stream;
 }
