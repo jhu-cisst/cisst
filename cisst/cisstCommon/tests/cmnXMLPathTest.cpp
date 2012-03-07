@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-05-26
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -63,7 +63,7 @@ void cmnXMLPathTest::TestReadExistingFile(void)
 {
     // find original file and test
     cmnPath filePath;
-    filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
+    filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
     std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
@@ -80,7 +80,7 @@ void cmnXMLPathTest::TestCopyReadExistingFile(void)
 {
     // find original file
     cmnPath filePath;
-    filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
+    filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
     std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
@@ -196,7 +196,7 @@ void cmnXMLPathTest::TestWrite(void)
 {
     // find original file and test
     cmnPath filePath;
-    filePath.Add(std::string(CISST_SOURCE_ROOT) + "/tests/cisstCommon");
+    filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
     std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
     std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
     CPPUNIT_ASSERT(!(testFile == ""));
@@ -236,7 +236,7 @@ void cmnXMLPathTest::TestWrite(void)
     TestModifiedFile1(xmlPathCopy, schemaFile);
 }
 
- 
+
 void cmnXMLPathTest::TestModifiedFile1(cmnXMLPath & xmlPath, const std::string & schemaFile)
 {
     // validate with schema
