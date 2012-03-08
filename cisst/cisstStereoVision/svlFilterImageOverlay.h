@@ -39,13 +39,20 @@ class CISST_EXPORT svlFilterImageOverlay : public svlFilterBase
 public:
     typedef svlFilterImageOverlay ThisType;
     typedef struct _ImageTransform {
-	    int ID;
+	    int    ID;
         vct3x3 frame;
+        double timestamp;
     } ImageTransform;
 
 protected:
+    typedef struct _TransformInternal {
+        vct3x3           frame;
+        double           timestamp;
+        osaThreadSignal* signal;
+    } TransformInternal;
+
     typedef std::map<svlFilterInput*, svlSample*> _SampleCacheMap;
-    typedef std::map<int, vct3x3> _TransformCacheMap;
+    typedef std::map<int, TransformInternal> _TransformCacheMap;
 
 public:
     svlFilterImageOverlay();
