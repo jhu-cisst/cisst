@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Wen P. Liu
   Created on: 2011
 
@@ -23,9 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageCameraCalibrationOpenCV_h
 #define _svlFilterImageCameraCalibrationOpenCV_h
 
-#include <cisstStereoVision.h>
 #include <cisstStereoVision/svlTypes.h>
-#include <cisstCommon/cmnGetChar.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterImageRectifier.h>
 #include <cisstStereoVision/svlCCCalibrationGrid.h>
@@ -39,7 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-
 class CISST_EXPORT svlFilterImageCameraCalibrationOpenCV : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -50,7 +47,7 @@ public:
 
     bool ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
     bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
-    void Reset();    
+    void Reset();
     bool RunCameraCalibration(bool runHandEye);
     void SetBoardSize(int width, int height){ BoardSize = cv::Size(width,height);};
     void SetSquareSize(float size){ SquareSize = size;};
