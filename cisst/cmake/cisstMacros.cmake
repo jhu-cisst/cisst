@@ -760,8 +760,9 @@ endmacro (cisst_information_message_missing_libraries)
 # CMake mechanism with a hint re. the path to search assuming saw
 # packages are installed along cisst.  Once a saw component is found,
 # it checks if this is an "installed" version.  In this case, both
-# include and link directories are automatically replaced to match the
-# install root.  This substition is performed so that
+# include and link directories are automatically modified to match the
+# install root, i.e. the install directories are added at the
+# beginning ot paths.  This change is performed so that
 # saw<component>Config.cmake files can be generated once for the build
 # tree only.
 macro (cisst_find_saw_component ...)
@@ -779,10 +780,11 @@ macro (cisst_find_saw_component ...)
 
   if (${ARGV0}_FOUND)
     if (${${ARGV0}_DIR} STREQUAL ${_cfc_INSTALLED_PATH})
-      # If this is an installed version, re-set the libdir and include directories
+      # If this is an installed version, add installed dir in front of
+      # libdir and include directories
       message ("-- Found saw component \"${ARGV0}\" in cisst install path: " ${${ARGV0}_DIR})
-      set (${ARGV0}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
-      set (${ARGV0}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
+      set (${ARGV0}_INCLUDE_DIR ${CISST_INCLUDE_DIR} ${${ARGV0}_INCLUDE_DIR})
+      set (${ARGV0}_LIBRARY_DIR ${CISST_LIBRARY_DIR} ${${ARGV0}_LIBRARY_DIR})
     endif ()
     if (${_cfc_QUIET} EQUAL -1)
       message ("-- Found saw component \"${ARGV0}\" in cisst non-install path: " ${${ARGV0}_DIR})
