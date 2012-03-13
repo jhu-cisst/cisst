@@ -21,7 +21,7 @@ cmake_minimum_required (VERSION 2.6.2)
 project (cisst_saw)
 
 # To organize targets in folders
-option (CISST_USE_FOLDERS "Use folder to organize cisst and saw in IDE (Visual Studio, ...)" ON)
+option (CISST_USE_FOLDERS "Use folder to organize cisst and saw in IDE (Visual Studio, ...)" OFF)
 mark_as_advanced (CISST_USE_FOLDERS)
 if (CISST_USE_FOLDERS)
   set_property (GLOBAL PROPERTY USE_FOLDERS ON)
