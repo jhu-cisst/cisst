@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -30,11 +30,11 @@ if (cisst_FOUND_AS_REQUIRED)
   add_subdirectory (behaviors)
 
   # sawSensablePhantom has been compiled within cisst, we should find it automatically
-  find_package (sawSensablePhantom HINTS "${cisst_saw_BINARY_DIR}/saw/components" QUIET)
-  find_package (sawKeyboard HINTS "${cisst_saw_BINARY_DIR}/saw/components" QUIET)
+  cisst_find_saw_component (sawSensablePhantom QUIET)
+  cisst_find_saw_component (sawKeyboard QUIET)
 
   if (sawSensablePhantom_FOUND AND sawKeyboard_FOUND)
-    add_subdirectory(SensableNoVideo)
+    add_subdirectory (SensableNoVideo)
   endif (sawSensablePhantom_FOUND AND sawKeyboard_FOUND)
 
 #     add_subdirectory(SensableStereoVideo)
@@ -44,10 +44,10 @@ if (cisst_FOUND_AS_REQUIRED)
 #   endif (CISST_DEV_HAS_SENSABLEHD)
 
   # sawIntuitiveDaVinci has been compiled within cisst, we should find it automatically
-  find_package (sawIntuitiveDaVinci HINTS "${cisst_saw_BINARY_DIR}/saw/components" QUIET)
+  cisst_find_saw_component (sawIntuitiveDaVinci QUIET)
 
   if (sawIntuitiveDaVinci_FOUND)
-    add_subdirectory(daVinciStereoVideo)
+    add_subdirectory (daVinciStereoVideo)
   endif (sawIntuitiveDaVinci_FOUND)
 
 else (cisst_FOUND_AS_REQUIRED)
