@@ -18,11 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
+
 // include what is needed from cisst
-//#include <cisstConfig.h>
-//#include <cisstCommon.h>
-#include <cisstVector.h>
-//#include <cisstNumerical.h>
 
 // system includes
 #include <iostream>
