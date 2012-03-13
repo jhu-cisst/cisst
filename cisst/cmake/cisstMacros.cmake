@@ -775,8 +775,8 @@ macro (cisst_find_saw_component ...)
     message ("-- Looking for saw component: ${ARGV0} in: ${_cfc_INSTALLED_PATH}")
   endif ()
 
-  # Search using user arguments with our hints
-  find_package(${ARGV} HINTS ${_cfc_INSTALLED_PATH} ${sawComponents_BINARY_DIR})
+   # Search using user arguments with our hints
+  find_package(${ARGV} HINTS ${_cfc_INSTALLED_PATH} "${CISST_BINARY_DIR}/../saw/components/")
 
   if (${ARGV0}_FOUND)
     if (${${ARGV0}_DIR} STREQUAL ${_cfc_INSTALLED_PATH})
