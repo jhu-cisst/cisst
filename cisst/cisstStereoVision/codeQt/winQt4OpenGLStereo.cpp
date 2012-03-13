@@ -332,14 +332,18 @@ void svlWindowManagerQt4OpenGLStereo::QSlotCreateWindow()
     Qt::WindowFlags style = Qt::Window;
     if (argFullscreen) style = Qt::FramelessWindowHint|Qt::WindowSystemMenuHint;
     ParentWidget = new svlParentWidgetQt4Stereo(style);
-    ParentWidget->showFullScreen();
+    if (argFullscreen) {
+        ParentWidget->showFullScreen();
+        ParentWidget->setStyleSheet("background-color: black");
+    }
     ParentWidget->setWindowTitle(QString::fromStdString(Title));
 
     Window = new svlWidgetQt4OpenGLStereo(ParentWidget);
     Window->Create(ImageBuffer, Width[0], Height[0], this);
     Window->show();
 
-    ParentWidget->move(PosX[0], PosY[0]);
+    if (argFullscreen) Window->move(PosX[0], PosY[0]);
+    else ParentWidget->move(PosX[0], PosY[0]);
 
     if (argShow) {
         ParentWidget->show();
