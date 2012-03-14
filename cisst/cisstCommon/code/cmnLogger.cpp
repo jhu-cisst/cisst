@@ -127,14 +127,26 @@ bool cmnLogger::SetMaskClassMatching(const std::string & stringToMatch, cmnLogMa
     return cmnClassRegister::SetLogMaskClassMatching(stringToMatch, mask);
 }
 
-
 const char * cmnLogger::ExtractFileName(const char * file)
 {
     const char * p1 = strrchr(file, '/');
 #if (CISST_OS == CISST_WINDOWS)
     const char * p2 = strrchr(file, '\\');
-    if (p2 > p1) return p2+1;
+    if (p2 > p1) {
+        return p2 + 1;
+    }
 #endif
-    if (p1) return p1+1;
-    else return file;
+    if (p1) {
+        return p1 + 1;
+    }
+    return file;
+}
+
+
+void cmnLogger::KillInstance(void)
+{
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_NONE);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_NONE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
+    LoDMultiplexerStreambuf.RemoveAllChannels();
 }

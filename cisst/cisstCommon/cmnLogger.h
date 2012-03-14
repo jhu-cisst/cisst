@@ -293,6 +293,9 @@ class CISST_EXPORT cmnLogger {
     /*! Instance specific implementation of RemoveChannel */
     void RemoveChannelInstance(std::ostream & outputStream);
 
+    /*! Instance specific implementation of Kill */
+    void KillInstance(void);
+
  protected:
     /*! Constructor.  The only constructor must be private in order to
       ensure that the class register is a singleton. */
@@ -434,6 +437,13 @@ class CISST_EXPORT cmnLogger {
     }
 
     static const char * ExtractFileName(const char * file);
+
+    /*! Kill the logger.  Set all masks to disable logs and remove all
+      output streams. */
+    static inline void Kill(void) {
+        Instance()->KillInstance();
+    }
+
 };
 
 
