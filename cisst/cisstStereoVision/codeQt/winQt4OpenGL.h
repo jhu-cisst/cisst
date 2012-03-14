@@ -48,6 +48,8 @@ public:
     bool Create(svlBufferImage* imagebuffer, svlWindowManagerQt4OpenGL* manager, unsigned int winid);
     void Destroy();
     void UpdateImage();
+    enum ByteOrder {RGB_Order, BGR_Order};
+    void SetByteOrderRGB(ByteOrder &order);
 
 protected:
     void initializeGL();
@@ -59,7 +61,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event);
     void keyPressEvent(QKeyEvent* event);
 
-    void CheckGLError(const std::string & functionName);
+    void CheckGLError(const std::string & functionName); 
 
 private:
     svlWindowManagerQt4OpenGL* Manager;
@@ -70,6 +72,7 @@ private:
 
     int WindowWidth;
     int WindowHeight;
+    GLint ByteOrderVersion;
 
 signals:
     void QSignalUpdateGL();
@@ -107,6 +110,7 @@ public:
     void DrawImages();
     void DestroyThreadSafe();
 
+
 protected slots:
     void QSlotCreateWindows();
     void QSlotDestroyWindows();
@@ -128,6 +132,7 @@ private:
     vctDynamicVector<svlBufferImage*> ImageBuffers;
     bool LButtonDown;
     bool RButtonDown;
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlWindowManagerQt4OpenGL)

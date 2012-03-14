@@ -62,6 +62,9 @@ class CISST_EXPORT svlFilterImageOpenGLQtWidget: public QGLWidget, public svlFil
  signals:
     void QSignalUpdateGL();
 
+ public slots:
+    void QSlotSwapRGB();
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOpenGLQtWidget)

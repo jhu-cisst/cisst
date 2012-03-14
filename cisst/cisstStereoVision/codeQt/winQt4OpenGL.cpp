@@ -49,7 +49,8 @@ svlWidgetQt4OpenGL::svlWidgetQt4OpenGL(QWidget* parent) :
     ImageBuffer(0),
     LatestImage(0),
     WindowWidth(0),
-    WindowHeight(0)
+    WindowHeight(0),
+    ByteOrderVersion(_RGB_VERSION_)
 {
     QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(updateGL()));
 }
@@ -112,7 +113,7 @@ void svlWidgetQt4OpenGL::paintGL()
     glBindTexture(GL_TEXTURE_2D, 8);
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
                  ImageBuffer->GetWidth(), ImageBuffer->GetHeight(),
-                 0, _RGB_VERSION_, GL_UNSIGNED_BYTE,
+                 0, ByteOrderVersion, GL_UNSIGNED_BYTE,
                  LatestImage->Pointer());
 
     glPushMatrix();
@@ -221,6 +222,16 @@ void svlWidgetQt4OpenGL::CheckGLError(const std::string & functionName)
                 CMN_LOG_INIT_ERROR << "svlFilterImageOpenGL::CheckGLError - invalid OpenGL something: "
                                    << gl_error << " for function " << functionName << std::endl;
         }
+    }
+}
+void svlWidgetQt4OpenGL::SetByteOrderRGB(ByteOrder &order){
+
+    if (order == RGB_Order) {
+        ByteOrderVersion = GL_RGB;
+
+    }
+    else if (order == BGR_Order){
+        ByteOrderVersion = GL_BGR;
     }
 }
 
@@ -496,4 +507,6 @@ void svlWindowManagerQt4OpenGL::QSlotKeyPress(QKeyEvent* event, unsigned int win
         }
     }
 }
+
+
 

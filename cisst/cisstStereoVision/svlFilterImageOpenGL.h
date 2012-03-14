@@ -35,6 +35,10 @@ class CISST_EXPORT svlFilterImageOpenGL: public svlFilterBase
 
  public:
     svlFilterImageOpenGL();
+    enum ByteOrder {RGB_Order, BGR_Order};
+    void SetByteOrderRGB(ByteOrder order);
+    ByteOrder GetByteOrderRGB();
+
     virtual ~svlFilterImageOpenGL();
 
  protected:
@@ -59,6 +63,7 @@ class CISST_EXPORT svlFilterImageOpenGL: public svlFilterBase
     svlSampleImage * Image;
     int Height;
     int Width;
+    int ByteOrderVersion;
 
  protected:
     // svl derived methods
