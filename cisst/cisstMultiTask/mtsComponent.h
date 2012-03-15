@@ -127,6 +127,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsInterfaceOutput * AddInterfaceOutputExisting(const std::string & interfaceOutputName,
                                                     mtsInterfaceOutput * interfaceOutput);
 
+    /*! Kill all separate log, if any.  This method should be used in
+      the destructor.  Once it has been called, any call to log might crash. */
+    void KillSeparateLogFile(void);
+
  public:
 
     typedef mtsComponent ThisType;

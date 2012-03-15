@@ -286,11 +286,15 @@ void mtsManagerLocal::Cleanup(void)
     }
 
     if (ManagerComponent.Client) {
+        ManagerComponent.Client->Kill();
+        ManagerComponent.Client->WaitForState(mtsComponentState::FINISHED, 30.0 * cmn_s);
         delete ManagerComponent.Client;
         ManagerComponent.Client = 0;
     }
 
     if (ManagerComponent.Server) {
+        ManagerComponent.Server->Kill();
+        ManagerComponent.Server->WaitForState(mtsComponentState::FINISHED, 30.0 * cmn_s);
         delete ManagerComponent.Server;
         ManagerComponent.Server = 0;
     }
@@ -1765,6 +1769,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
 {
     // wait for all components to be started if timeout is positive
     bool allAtState = true;
+    mtsManagerComponentBase * isManager;
     if (timeout > 0.0) {
         // will iterate on all components
         ComponentMapType::const_iterator iterator = ComponentMap.begin();
@@ -1775,10 +1780,13 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             // compute how much time do we have left based on when we started
             double timeLeft = timeEnd - TimeServer.GetRelativeTime();
-            allAtState = iterator->second->WaitForState(desiredState, timeLeft);
-            if (!allAtState) {
-                CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << iterator->first << "\" failed to reach state \""
-                                         << desiredState << "\"" << std::endl;
+            isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
+            if (!isManager) {
+                allAtState = iterator->second->WaitForState(desiredState, timeLeft);
+                if (!allAtState) {
+                    CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << iterator->first << "\" failed to reach state \""
+                                             << desiredState << "\"" << std::endl;
+                }
             }
             if (TimeServer.GetRelativeTime() > timeEnd) {
                 // looks like we don't have any time left to start the remaining components.
@@ -1876,14 +1884,19 @@ void mtsManagerLocal::StartAll(void)
 
 void mtsManagerLocal::KillAll(void)
 {
-    ComponentMapChange.Lock();
-
-    ComponentMapType::const_iterator iterator = ComponentMap.begin();
-    const ComponentMapType::const_iterator end = ComponentMap.end();
-    for (; iterator != end; ++iterator) {
-        iterator->second->Kill();
+    mtsManagerComponentBase * isManager;
+    ComponentMapChange.Lock(); {
+        ComponentMapType::const_iterator iterator = ComponentMap.begin();
+        const ComponentMapType::const_iterator end = ComponentMap.end();
+        for (; iterator != end; ++iterator) {
+            isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
+            if (!isManager) {
+              iterator->second->Kill();
+            } else {
+                CMN_LOG_CLASS_INIT_DEBUG << "KillAll: skip manager component: " << iterator->second->GetName() << std::endl;
+            }
+        }
     }
-
     ComponentMapChange.Unlock();
 
     // Block further logs 

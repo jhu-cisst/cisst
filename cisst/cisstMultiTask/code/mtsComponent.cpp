@@ -75,15 +75,7 @@ mtsComponent::mtsComponent(const mtsComponent & other):
 
 mtsComponent::~mtsComponent()
 {
-    if (this->LoDMultiplexerStreambuf) {
-        this->LoDMultiplexerStreambuf->RemoveAllChannels();
-        delete this->LoDMultiplexerStreambuf;
-        this->LoDMultiplexerStreambuf = 0;
-    }
-    if (this->LogFile) {
-        this->LogFile->close();
-        delete this->LogFile;
-    }
+    KillSeparateLogFile();
 
     if (ManagerComponentServices) {
         delete ManagerComponentServices;
@@ -777,6 +769,21 @@ cmnLogger::StreamBufType * mtsComponent::GetLogMultiplexer(void) const
         return nonConstThis->LoDMultiplexerStreambuf;
     }
     return cmnGenericObject::GetLogMultiplexer();
+}
+
+
+void mtsComponent::KillSeparateLogFile(void)
+{
+    if (this->LoDMultiplexerStreambuf) {
+        this->LoDMultiplexerStreambuf->RemoveAllChannels();
+        delete this->LoDMultiplexerStreambuf;
+        this->LoDMultiplexerStreambuf = 0;
+    }
+    if (this->LogFile) {
+        this->LogFile->close();
+        delete this->LogFile;
+        this->LogFile = 0;
+    }
 }
 
 

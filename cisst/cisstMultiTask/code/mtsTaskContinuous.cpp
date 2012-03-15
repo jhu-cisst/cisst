@@ -143,13 +143,15 @@ mtsTaskContinuous::~mtsTaskContinuous() {
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
 
-    Kill();
-    WaitToTerminate(1.0 * cmn_s);   // Wait 1 second for it to terminate
-    if (!IsTerminated()) {
-        // If thread not dead, delete it.
-        if (NewThread) {
-            Thread.Delete();
-            CMN_LOG_CLASS_INIT_VERBOSE << "mtsTaskContinuous destructor: Deleting thread for " << this->GetName() << std::endl;
+    if (!this->IsTerminated()) {
+        Kill();
+        WaitToTerminate(1.0 * cmn_s);   // Wait 1 second for it to terminate
+        if (!IsTerminated()) {
+            // If thread not dead, delete it.
+            if (NewThread) {
+                Thread.Delete();
+                CMN_LOG_CLASS_INIT_VERBOSE << "mtsTaskContinuous destructor: Deleting thread for " << this->GetName() << std::endl;
+            }
         }
     }
 }
