@@ -38,6 +38,10 @@ svlVidCapSrcMILRenderTarget::svlVidCapSrcMILRenderTarget(unsigned int deviceID, 
     KillThread(false),
     ThreadKilled(true)
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::constructor()" << std::endl;
+#endif
+
     SystemID = deviceID;
     DigitizerID = displayID;
     if (SystemID >= MIL_MAX_SYS) SystemID = 0;
@@ -66,6 +70,10 @@ svlVidCapSrcMILRenderTarget::svlVidCapSrcMILRenderTarget(unsigned int deviceID, 
 
 svlVidCapSrcMILRenderTarget::~svlVidCapSrcMILRenderTarget()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::destructor()" << std::endl;
+#endif
+
     KillThread = true;
     if (ThreadKilled == false) Thread->Wait();
     delete Thread;
@@ -75,6 +83,10 @@ svlVidCapSrcMILRenderTarget::~svlVidCapSrcMILRenderTarget()
 
 bool svlVidCapSrcMILRenderTarget::SetImage(unsigned char* buffer, int offsetx, int offsety, bool vflip)
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::SetImage()" << std::endl;
+#endif
+
     if (SystemID < 0) return false;
 
     // Wait for thread to finish previous transfer
@@ -102,18 +114,30 @@ bool svlVidCapSrcMILRenderTarget::SetImage(unsigned char* buffer, int offsetx, i
 
 unsigned int svlVidCapSrcMILRenderTarget::GetWidth()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::GetWidth()" << std::endl;
+#endif
+
     if (SystemID < 0) return 0;
     return svlVidCapSrcMIL::GetInstance()->MilWidth[SystemID][DigitizerID];
 }
 
 unsigned int svlVidCapSrcMILRenderTarget::GetHeight()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::GetHeight()" << std::endl;
+#endif
+
     if (SystemID < 0) return 0;
     return svlVidCapSrcMIL::GetInstance()->MilHeight[SystemID][DigitizerID];
 }
 
 void* svlVidCapSrcMILRenderTarget::ThreadProc(void* CMN_UNUSED(param))
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::ThreadProc()" << std::endl;
+#endif
+
     ThreadKilled = false;
     ThreadReadySignal.Raise();
 
@@ -133,6 +157,10 @@ void* svlVidCapSrcMILRenderTarget::ThreadProc(void* CMN_UNUSED(param))
 
 void svlVidCapSrcMILRenderTarget::TranslateImage(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert, bool vflip)
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlVidCapSrcMILRenderTarget::TranslateImage()" << std::endl;
+#endif
+
     int abs_h = std::abs(trhoriz);
     int abs_v = std::abs(trvert);
 
