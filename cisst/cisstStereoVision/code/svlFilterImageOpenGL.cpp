@@ -220,6 +220,11 @@ int svlFilterImageOpenGL::GetImageWidth() {
     else return 0;
 }
 
+// for older GL
+#ifndef GL_BGR
+#define GL_BGR GL_BGR_EXT
+#endif
+
 void svlFilterImageOpenGL::SetByteOrderRGB(ByteOrder order){
 
     if (order == RGB_Order) {

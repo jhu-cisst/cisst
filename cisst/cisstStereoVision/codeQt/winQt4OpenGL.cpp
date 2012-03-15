@@ -224,6 +224,12 @@ void svlWidgetQt4OpenGL::CheckGLError(const std::string & functionName)
         }
     }
 }
+
+// for older GL
+#ifndef GL_BGR
+#define GL_BGR GL_BGR_EXT
+#endif
+
 void svlWidgetQt4OpenGL::SetByteOrderRGB(ByteOrder &order){
 
     if (order == RGB_Order) {

@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>
 
-
 // Forward declarations
 class svlWindowManagerQt4OpenGLStereo;
 class svlWindowEventHandlerBase;

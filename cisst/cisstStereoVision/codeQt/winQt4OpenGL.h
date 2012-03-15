@@ -35,8 +35,10 @@ class svlBufferImage;
 class osaThreadSignal;
 class svlWindowManagerQt4OpenGL;
 
+// Always include last
+#include <cisstStereoVision/svlExportQt.h>
 
-class svlWidgetQt4OpenGL : public QGLWidget
+class CISST_EXPORT svlWidgetQt4OpenGL : public QGLWidget
 {
     Q_OBJECT
 
@@ -79,7 +81,7 @@ signals:
 };
 
 
-class svlParentWidgetQt4 : public QWidget
+class CISST_EXPORT svlParentWidgetQt4 : public QWidget
 {
     Q_OBJECT
 
@@ -91,7 +93,7 @@ protected:
 };
 
 
-class svlWindowManagerQt4OpenGL : public QObject, public cmnGenericObject, public svlWindowManagerBase
+class CISST_EXPORT svlWindowManagerQt4OpenGL : public QObject, public cmnGenericObject, public svlWindowManagerBase
 {
     Q_OBJECT
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
@@ -138,4 +140,3 @@ private:
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlWindowManagerQt4OpenGL)
 
 #endif // _winQt4OpenGL_h
-
