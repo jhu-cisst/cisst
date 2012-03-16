@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <ManualRegistration.h>
 
 #define HAS_ULTRASOUDS 0
-#define TORS 1
+#define TORS 0
 
 int main()
 {
@@ -48,9 +48,7 @@ int main()
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    // add a log per thread
-    osaThreadedLogFile threadedLog("example1-");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClassMatching("ui3", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
@@ -91,13 +89,18 @@ int main()
 #endif
 
     // this is were the icons have been copied by CMake post build rule
-    cmnPath path;
+    cmnPath path;;
     path.AddRelativeToCisstShare("/cisst3DUserInterface/icons");
     std::string fileName = path.Find("move.png", cmnPath::READ);
-    PNGViewer3D pngViewer("PGNViewer", fileName);
-    guiManager.AddBehavior(&pngViewer,
-                           5,
-                           "square.png");
+    PNGViewer3D * pngViewer;
+    if (fileName != "") {
+        pngViewer = new PNGViewer3D("PGNViewer", fileName);
+        guiManager.AddBehavior(pngViewer,
+                               5,
+                               "square.png");
+    } else {
+        std::cerr << "PNG viewer not added, can't find \"move.png\" in path: " << path << std::endl;
+    }
 
 #if HAS_ULTRASOUDS
     svlInitialize();
@@ -263,9 +266,13 @@ int main()
 
     std::cout << "Stopping components" << std::endl;
     componentManager->KillAll();
-    componentManager->WaitForStateAll(mtsComponentState::READY, 10.0 * cmn_s);
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 30.0 * cmn_s);
+    componentManager->Cleanup();
 
-    // this seems to crash the video: componentManager->Cleanup();
+    cmnLogger::Kill();
+
+    // Balazs: Clean-up before the destructor.
+    svlRenderTargets::ReleaseAll();
+
     return 0;
 }
-

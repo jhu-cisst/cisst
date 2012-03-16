@@ -385,6 +385,7 @@ void ui3Manager::Startup(void)
     }
     else {
         // If it takes longer than 10 sec, don't execute
+        CMN_LOG_CLASS_INIT_VERBOSE << "Startup: set kill render thread to true" << std::endl;
         RendererProc.KillThread = true;
         Initialized = false;
     }
@@ -444,12 +445,15 @@ void ui3Manager::Cleanup(void)
     Initialized = false;
 
     if (RendererThread) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "Cleanup: set kill render thread to true" << std::endl;
         RendererProc.KillThread = true;
-        if (RendererProc.ThreadKilled == false) RendererThread->Wait();
+        if (RendererProc.ThreadKilled == false) {
+            RendererThread->Wait();
+        }
+        CMN_LOG_CLASS_INIT_VERBOSE << "Cleanup: render thread killed" << std::endl;
         delete RendererThread;
         RendererThread = 0;
     }
-
     // Release UI manager
     // TO DO
 }
@@ -733,6 +737,7 @@ bool ui3Manager::SetupRenderers()
 
 void ui3Manager::ReleaseRenderers()
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "ReleaseRenderers: start" << std::endl;
     const unsigned int renderercount = this->Renderers.size();
 
     for (unsigned int i = 0; i < renderercount; i ++) {
@@ -747,6 +752,7 @@ void ui3Manager::ReleaseRenderers()
             }
         }
     }
+    CMN_LOG_CLASS_INIT_VERBOSE << "ReleaseRenderers: end" << std::endl;
 }
 
 
@@ -942,7 +948,6 @@ void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
     // signal waiting threads that rendering thread is killed
     ThreadKilled = true;
     ThreadReadySignal.Raise();
-
     return this;
 }
 
