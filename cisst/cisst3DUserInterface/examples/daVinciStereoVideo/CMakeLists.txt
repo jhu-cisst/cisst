@@ -24,6 +24,8 @@ add_executable (ui3ExDaVinciStereoVideo
                 BehaviorLUS.cpp
                 BehaviorLUS.h)
 
+set_property (TARGET ui3ExDaVinciStereoVideo PROPERTY FOLDER "cisst3DUserInterface/examples")
+
 target_link_libraries (ui3ExDaVinciStereoVideo
                        ui3ExBehaviors
                        ${sawIntuitiveDaVinci_LIBRARIES})
