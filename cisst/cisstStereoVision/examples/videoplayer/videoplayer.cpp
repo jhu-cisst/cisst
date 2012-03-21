@@ -176,7 +176,7 @@ int VideoPlayer(std::string pathname)
     cerr << "    'p'   - Pause/Resume playback" << endl;
     cerr << "    'n'   - Seek 100 frames back" << endl;
     cerr << "    'm'   - Seek 100 frames forward" << endl;
-    cerr << "    'q'   - Quit" << endl << endl;
+    cerr << "    'q'   - Quit" << endl;
 
     // initialize and start stream
     if (stream.Play() != SVL_OK) return 0;
@@ -188,6 +188,7 @@ int VideoPlayer(std::string pathname)
 
     // stop and release stream
     stream.Release();
+    stream.DisconnectAll();
 
     return 0;
 }
@@ -239,6 +240,7 @@ int my_main(int argc, char** argv)
     else VideoPlayer("");
 
     cerr << "Quit" << endl << endl;
+
     return 1;
 }
 

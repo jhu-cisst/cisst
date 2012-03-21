@@ -388,10 +388,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // release stream
     stream.Release();
-
-    if (save == true) {
-        splitter.GetOutput("output2")->Disconnect(); // Workaround: to avoid crash
-    }
+    stream.DisconnectAll();
 
     cerr << "Stream released" << endl;
 
