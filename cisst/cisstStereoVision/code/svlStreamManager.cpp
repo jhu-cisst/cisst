@@ -679,6 +679,47 @@ int svlStreamManager::GetStreamStatus(void) const
     return StreamStatus;
 }
 
+void svlStreamManager::DisconnectAll(void)
+{
+    // First make sure that the stream is released
+    Release();
+
+    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    svlFilterOutput * output;
+    svlFilterInput * input;
+
+    // Disconnect all filters
+    svlFilterBase *filter = StreamSource;
+    while (filter) {
+
+        // Disconnect non-trunk filter outputs
+        for (iteroutputs = filter->InterfacesOutput.begin();
+             iteroutputs != filter->InterfacesOutput.end();
+             iteroutputs ++) {
+            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            if (output) {
+                if (!output->IsTrunk()) {
+                    // Call DisconnectAll() on branch recursively
+                    if (output->Stream) output->Stream->DisconnectAll();
+                    // Disconnect async output
+                    output->Disconnect();
+                }
+            }
+        }
+
+        // Get next filter in the trunk
+        output = filter->GetOutput();
+        filter = 0;
+        // Check if trunk output exists
+        if (output) {
+            input = output->Connection;
+            // Check if trunk output is connected to a trunk input
+            if (input && input->Trunk) filter = input->Filter;
+            output->Disconnect();
+        }
+    }
+}
+
 void svlStreamManager::CreateInterfaces(void)
 {
     mtsInterfaceProvided * interfaceProvided = this->AddInterfaceProvided("Control", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);

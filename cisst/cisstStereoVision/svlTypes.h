@@ -247,6 +247,20 @@ struct CISST_EXPORT svlQuad
     int y4;
 };
 
+struct CISST_EXPORT svlEllipse
+{
+    svlEllipse();
+    svlEllipse(int cx, int cy, int rx, int ry, double angle);
+    void Assign(const svlEllipse & ellipse);
+    void Assign(int cx, int cy, int rx, int ry, double angle);
+
+    int cx;
+    int cy;
+    int rx;
+    int ry;
+    double angle;
+};
+
 struct CISST_EXPORT svlPoint2D
 {
     svlPoint2D();

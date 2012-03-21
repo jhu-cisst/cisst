@@ -26,14 +26,15 @@ http://www.cisst.org/cisst/license.txt.
 #include "time.h"
 
 
-/*************************************/
-/*** svlFilterSourceDummy class ******/
-/*************************************/
+/**********************************/
+/*** svlFilterSourceDummy class ***/
+/**********************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceDummy, svlFilterSourceBase)
 
 svlFilterSourceDummy::svlFilterSourceDummy() :
     svlFilterSourceBase(),
+    StoredSample(0),
     OutputSample(0),
     Width(320),
     Height(240),
@@ -46,6 +47,7 @@ svlFilterSourceDummy::svlFilterSourceDummy() :
 
 svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
     svlFilterSourceBase(),
+    StoredSample(0),
     OutputSample(0),
     Width(320),
     Height(240),
@@ -59,6 +61,7 @@ svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
 
 svlFilterSourceDummy::svlFilterSourceDummy(const svlSampleImage & image) :
     svlFilterSourceBase(),
+    StoredSample(0),
     OutputSample(0),
     Width(320),
     Height(240),
@@ -72,6 +75,7 @@ svlFilterSourceDummy::svlFilterSourceDummy(const svlSampleImage & image) :
 
 svlFilterSourceDummy::~svlFilterSourceDummy()
 {
+    if (StoredSample) delete StoredSample;
     if (OutputSample) delete OutputSample;
 }
 
@@ -83,13 +87,19 @@ int svlFilterSourceDummy::SetType(svlStreamType type)
     // Other types may be added in the future
     if (type != svlTypeImageRGB && type != svlTypeImageRGBStereo) return SVL_FAIL;
 
+    if (StoredSample && StoredSample->GetType() != type) {
+        delete StoredSample;
+        StoredSample = svlSample::GetNewFromType(type);
+    }
+    else if (!StoredSample) StoredSample = svlSample::GetNewFromType(type);
+
     if (OutputSample && OutputSample->GetType() != type) {
         delete OutputSample;
         OutputSample = svlSample::GetNewFromType(type);
     }
     else if (!OutputSample) OutputSample = svlSample::GetNewFromType(type);
 
-    if (Width > 0 && Height > 0) dynamic_cast<svlSampleImage*>(OutputSample)->SetSize(Width, Height);
+    if (Width > 0 && Height > 0) SetDimensions(Width, Height);
 
     GetOutput()->SetType(type);
 
@@ -101,13 +111,13 @@ int svlFilterSourceDummy::SetImage(const svlSampleImage & image)
     if (IsInitialized() == true) {
         if (OutputSample->GetType() != image.GetType()) return SVL_FAIL;
 
-        svlSampleImage* outimg = dynamic_cast<svlSampleImage*>(OutputSample);
+        svlSampleImage* outimg = dynamic_cast<svlSampleImage*>(StoredSample);
         for (unsigned int i = 0; i < outimg->GetVideoChannels(); i ++) {
             if (outimg->GetWidth(i)  != image.GetWidth(i) ||
                 outimg->GetHeight(i) != image.GetHeight(i)) return SVL_FAIL;
         }
 
-        OutputSample->CopyOf(image);
+        StoredSample->CopyOf(image);
 
         return SVL_OK;
     }
@@ -117,13 +127,20 @@ int svlFilterSourceDummy::SetImage(const svlSampleImage & image)
     // Other types may be added in the future
     if (type != svlTypeImageRGB && type != svlTypeImageRGBStereo) return SVL_FAIL;
 
+    if (StoredSample && StoredSample->GetType() != type) {
+        delete StoredSample;
+        StoredSample = svlSample::GetNewFromType(type);
+    }
+    else if (!StoredSample) StoredSample = svlSample::GetNewFromType(type);
+
     if (OutputSample && OutputSample->GetType() != type) {
         delete OutputSample;
         OutputSample = svlSample::GetNewFromType(type);
     }
     else if (!OutputSample) OutputSample = svlSample::GetNewFromType(type);
 
-    OutputSample->CopyOf(image);
+    StoredSample->CopyOf(image);
+    OutputSample->SetSize(image);
 
     GetOutput()->SetType(type);
 
@@ -140,8 +157,20 @@ int svlFilterSourceDummy::SetDimensions(unsigned int width, unsigned int height)
     Width = width;
     Height = height;
 
-    if (OutputSample) {
-        dynamic_cast<svlSampleImage*>(OutputSample)->SetSize(width, height);
+    svlSampleImage* image;
+
+    image = dynamic_cast<svlSampleImage*>(StoredSample);
+    if (image) {
+        for (unsigned int i = 0; i < image->GetVideoChannels(); i ++) {
+            image->SetSize(i, width, height);
+            memset(image->GetUCharPointer(i), 0, image->GetDataSize(i));
+        }
+    }
+    image = dynamic_cast<svlSampleImage*>(OutputSample);
+    if (image) {
+        for (unsigned int i = 0; i < image->GetVideoChannels(); i ++) {
+            image->SetSize(i, width, height);
+        }
     }
 
     return SVL_OK;
@@ -196,6 +225,9 @@ int svlFilterSourceDummy::Process(svlProcInfo* procInfo, svlSample* &syncOutput)
                 ptr[idx] = static_cast<unsigned char>(rand());
             }
         }
+    }
+    else {
+        OutputSample->CopyOf(StoredSample);
     }
 
     return SVL_OK;

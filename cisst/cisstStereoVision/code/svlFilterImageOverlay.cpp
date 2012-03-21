@@ -49,7 +49,9 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
     TargetInputsToAdd(10),
     BlobInputsToAdd(10),
     TextInputsToAdd(10),
-    OverlaysToAdd(10)
+    OverlaysToAdd(10),
+    EnableInputSync(true),
+    EnableTransformSync(true)
 {
     svlFilterBase::AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -216,6 +218,26 @@ int svlFilterImageOverlay::AddQueuedItems()
     return SVL_OK;
 }
 
+void svlFilterImageOverlay::SetEnableInputSync(bool enabled)
+{
+    EnableInputSync = enabled;
+}
+
+bool svlFilterImageOverlay::GetEnableInputSync() const
+{
+    return EnableInputSync;
+}
+
+void svlFilterImageOverlay::SetEnableTransformSync(bool enabled)
+{
+    EnableTransformSync = enabled;
+}
+
+bool svlFilterImageOverlay::GetEnableTransformSync() const
+{
+    return EnableTransformSync;
+}
+
 int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
@@ -249,11 +271,13 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                     iterxform = TransformCache.find(overlay->TransformID);
                     if (iterxform != TransformCache.end()) {
 
-                        if (!overlay->GetTransformSynchronized()) {
+                        if (!EnableTransformSync ||
+                            !overlay->GetTransformSynchronized()) {
                             overlay->SetTransform(iterxform->second.frame, iterxform->second.timestamp);
                         }
                         else {
-                            while (overlay->GetTransformSynchronized() &&
+                            while (EnableTransformSync &&
+                                   overlay->GetTransformSynchronized() &&
                                    (iterxform->second.timestamp < current_time)) {
 
                                 // Transform is not recent
@@ -263,6 +287,8 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                                     while (!success &&
                                            overlay->GetVisible() &&
                                            IsRunning() &&
+                                           EnableTransformSync &&
+                                           overlay->GetTransformSynchronized() &&
                                            iterxform->second.signal) {
                                         success = iterxform->second.signal->Wait(0.1);
                                     }
@@ -301,7 +327,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                         if (ovrlsample) itersample->second = ovrlsample;
                         else ovrlsample = itersample->second;
                         if (ovrlsample) {
-                            if (overlayinput->GetInputSynchronized()) {
+                            if (EnableInputSync && overlayinput->GetInputSynchronized()) {
                                 if (ovrlsample->GetTimestamp() >= current_time) {
                                 // Sample is most recent
                                     overlay->Draw(src_image, ovrlsample);
@@ -313,6 +339,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                                         if (ovrlsample) itersample->second = ovrlsample;
                                     }
                                     while (IsRunning() &&
+                                           EnableInputSync &&
                                            overlayinput->GetInputSynchronized() &&
                                            (!ovrlsample || ovrlsample->GetTimestamp() < current_time));
                                     if (IsRunning()) overlay->Draw(src_image, ovrlsample);

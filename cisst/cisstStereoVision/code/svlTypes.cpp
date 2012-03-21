@@ -297,6 +297,47 @@ void svlQuad::Assign(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int
 
 
 /************************/
+/*** svlEllipse class ***/
+/************************/
+
+svlEllipse::svlEllipse() :
+    cx(0),
+    cy(0),
+    rx(0),
+    ry(0),
+    angle(0.0)
+{
+}
+
+svlEllipse::svlEllipse(int _cx, int _cy, int _rx, int _ry, double _angle) :
+    cx(_cx),
+    cy(_cy),
+    rx(_rx),
+    ry(_ry),
+    angle(_angle)
+{
+}
+
+void svlEllipse::Assign(const svlEllipse & ellipse)
+{
+    cx    = ellipse.cx;
+    cy    = ellipse.cy;
+    rx    = ellipse.rx;
+    ry    = ellipse.ry;
+    angle = ellipse.angle;
+}
+
+void svlEllipse::Assign(int cx, int cy, int rx, int ry, double angle)
+{
+    this->cx    = cx;
+    this->cy    = cy;
+    this->rx    = rx;
+    this->ry    = ry;
+    this->angle = angle;
+}
+
+
+/************************/
 /*** svlPoint2D class ***/
 /************************/
 

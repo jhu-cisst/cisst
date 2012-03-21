@@ -3059,3 +3059,359 @@ bool svlImageProcessingHelper::BlobDetectorInternals::GetBlobsInternal(svlSample
     return true;
 }
 
+/**************************************************************/
+/*** svlImageProcessingHelper::EllipseFitterInternals class ***/
+/**************************************************************/
+
+#if CISST_SVL_HAS_CISSTNETLIB
+
+svlImageProcessingHelper::EllipseFitterInternals::EllipseFitterInternals() :
+    svlImageProcessingInternals()
+{
+    S.SetSize(6, 6);
+    C.SetSize(6, 6);
+    A.SetSize(3, 2);
+}
+
+bool svlImageProcessingHelper::EllipseFitterInternals::InvertMatrix(const vct3x3 & matrix, vct3x3 & inverse)
+{
+    double m00, m01, m02, m10, m11, m12, m20, m21, m22, det, detinv;
+
+    m00 = matrix.Element(0, 0);
+    m01 = matrix.Element(0, 1);
+    m02 = matrix.Element(0, 2);
+    m10 = matrix.Element(1, 0);
+    m11 = matrix.Element(1, 1);
+    m12 = matrix.Element(1, 2);
+    m20 = matrix.Element(2, 0);
+    m21 = matrix.Element(2, 1);
+    m22 = matrix.Element(2, 2);
+
+    det = m00 * (m11 * m22 - m21 * m12) -
+          m01 * (m10 * m22 - m12 * m20) +
+          m02 * (m10 * m21 - m11 * m20);
+    if (det == 0.0) return false;
+    detinv = 1.0 / det;
+
+	inverse.Element(0, 0) =  (m11 * m22 - m21 * m12) * detinv;
+	inverse.Element(0, 1) = -(m01 * m22 - m02 * m21) * detinv;
+	inverse.Element(0, 2) =  (m01 * m12 - m02 * m11) * detinv;
+	inverse.Element(1, 0) = -(m10 * m22 - m12 * m20) * detinv;
+	inverse.Element(1, 1) =  (m00 * m22 - m02 * m20) * detinv;
+	inverse.Element(1, 2) = -(m00 * m12 - m10 * m02) * detinv;
+	inverse.Element(2, 0) =  (m10 * m21 - m20 * m11) * detinv;
+	inverse.Element(2, 1) = -(m00 * m21 - m20 * m01) * detinv;
+	inverse.Element(2, 2) =  (m00 * m11 - m10 * m01) * detinv;
+
+    return true;
+}
+
+bool svlImageProcessingHelper::EllipseFitterInternals::FitEllipse(vctDynamicVectorRef<int> & xs, vctDynamicVectorRef<int> & ys, svlEllipse & ellipse)
+{
+    if (xs.size() != ys.size() || xs.size() < 6) return false;
+
+    const unsigned int size = xs.size();
+
+    // Re-allocate work buffers if needed
+    if (size > Xs.size()) {
+        Xs.SetSize(size);
+        Ys.SetSize(size);
+        XX.SetSize(size);
+        XY.SetSize(size);
+        YY.SetSize(size);
+        D.SetSize(size, 6);
+    }
+
+/*
+    %
+    function a = fitellipse(X,Y)
+
+    % FITELLIPSE  Least-squares fit of ellipse to 2D points.
+    %        A = FITELLIPSE(X,Y) returns the parameters of the best-fit
+    %        ellipse to 2D points (X,Y).
+    %        The returned vector A contains the center, radii, and orientation
+    %        of the ellipse, stored as (Cx, Cy, Rx, Ry, theta_radians)
+    %
+    % Authors: Andrew Fitzgibbon, Maurizio Pilu, Bob Fisher
+    % Reference: "Direct Least Squares Fitting of Ellipses", IEEE T-PAMI, 1999
+    %
+    %  @Article{Fitzgibbon99,
+    %   author = "Fitzgibbon, A.~W.and Pilu, M. and Fisher, R.~B.",
+    %   title = "Direct least-squares fitting of ellipses",
+    %   journal = pami,
+    %   year = 1999,
+    %   volume = 21,
+    %   number = 5,
+    %   month = may,
+    %   pages = "476--480"
+    %  }
+    % 
+    % This is a more bulletproof version than that in the paper, incorporating
+    % scaling to reduce roundoff error, correction of behaviour when the input 
+    % data are on a perfect hyperbola, and returns the geometric parameters
+    % of the ellipse, rather than the coefficients of the quadratic form.
+
+    % normalize data
+    mx = mean(X);
+    my = mean(Y);
+    sx = (max(X)-min(X))/2;
+    sy = (max(Y)-min(Y))/2; 
+*/
+
+    vct3x3 tmpA, tmpB, tmpC, tmpCi, tmpD, tmpDi, tmpE, tmpF, _A, _U, _Vt;
+    vct3 _S, tmpG, tmpH;
+
+    vct3 evWR, evWI;
+    vctFixedSizeMatrix<double, 3, 3, VCT_COL_MAJOR> evA, evVL, evVR;
+
+    double mx = static_cast<double>(xs.SumOfElements()) / size;
+    double my = static_cast<double>(ys.SumOfElements()) / size;
+    double sx = 0.5 * (xs.MaxElement() - xs.MinElement());
+    double sy = 0.5 * (ys.MaxElement() - ys.MinElement());
+
+    r_Xs.SetRef(Xs, 0, size);
+    r_Ys.SetRef(Ys, 0, size);
+    r_XX.SetRef(XX, 0, size);
+    r_XY.SetRef(XY, 0, size);
+    r_YY.SetRef(YY, 0, size);
+    r_D.SetRef(D, 0, 0, size, 6);
+
+/*
+    x = (X-mx)/sx;
+    y = (Y-my)/sy;
+*/
+
+    r_Xs.Assign(xs); r_Xs.Subtract(mx); r_Xs.Divide(sx);
+    r_Ys.Assign(ys); r_Ys.Subtract(my); r_Ys.Divide(sy);
+
+/*
+    % Force to column vectors
+    x = x(:);
+    y = y(:);
+    % Build design matrix
+    D = [ x.*x  x.*y  y.*y  x  y  ones(size(x)) ];
+*/
+
+    r_XX.Assign(r_Xs); r_XX.ElementwiseMultiply(r_Xs);
+    r_XY.Assign(r_Xs); r_XY.ElementwiseMultiply(r_Ys);
+    r_YY.Assign(r_Ys); r_YY.ElementwiseMultiply(r_Ys);
+    r_D.Column(0).Assign(r_XX);
+    r_D.Column(1).Assign(r_XY);
+    r_D.Column(2).Assign(r_YY);
+    r_D.Column(3).Assign(r_Xs);
+    r_D.Column(4).Assign(r_Ys);
+    r_D.Column(5).SetAll(1.0);
+
+/*
+    % Build scatter matrix
+    S = D'*D;
+*/
+
+    S.ProductOf(r_D.TransposeRef(), r_D);
+
+/*
+    % Build 6x6 constraint matrix
+    C(6,6) = 0; C(1,3) = -2; C(2,2) = 1; C(3,1) = -2;
+*/
+
+    C.Zeros();
+    C.Element(0, 2) = -2.0;
+    C.Element(1, 1) =  1.0;
+    C.Element(2, 0) = -2.0;
+
+/*
+    % Solve eigensystem
+    % Break into blocks
+    tmpA = S(1:3,1:3); 
+    tmpB = S(1:3,4:6); 
+    tmpC = S(4:6,4:6); 
+    tmpD = C(1:3,1:3);
+    tmpE = inv(tmpC)*tmpB';
+    [evec_x, eval_x] = eig(inv(tmpD) * (tmpA - tmpB*tmpE));
+*/
+
+    tmpA.Assign(vctDynamicMatrixRef<double>(S, 0, 0, 3, 3));
+    tmpB.Assign(vctDynamicMatrixRef<double>(S, 0, 3, 3, 3));
+    tmpC.Assign(vctDynamicMatrixRef<double>(S, 3, 3, 3, 3));
+    tmpD.Assign(vctDynamicMatrixRef<double>(C, 0, 0, 3, 3));
+    if (!InvertMatrix(tmpC, tmpCi) || !InvertMatrix(tmpD, tmpDi)) return false;
+    tmpE.ProductOf(tmpCi, tmpB.TransposeRef());
+    tmpF.ProductOf(tmpB, tmpE);
+    tmpA.Subtract(tmpF);
+    _A.ProductOf(tmpDi, tmpA);
+    vct3x3 _A_t_inv;
+    InvertMatrix(_A.Transpose(), _A_t_inv);
+    evA.Assign(_A_t_inv);
+    nmrEigenVectors(evA, evWR, evWI, evVL, evVR);
+    _U.Assign(evVL);
+
+/*
+    % Find the negative (as det(tmpD) < 0) eigenvalue
+    I = find(real(diag(eval_x)) < 1e-8 & ~isinf(diag(eval_x)));
+*/
+
+    vct3 cond(_U.Row(0)), tmpsq(_U.Row(1));
+    cond.Multiply(4);
+    cond.ElementwiseMultiply(_U.Row(2));
+    tmpsq.ElementwiseMultiply(_U.Row(1));
+    cond.Subtract(tmpsq);
+
+    unsigned int I = 0;
+    double maxval = 0.0;
+    for (unsigned int i = 0; i < 3; i ++) {
+        if (cond[i] > maxval) {
+            I = i;
+            maxval = cond[i];
+        }
+    }
+
+/*
+    % Extract eigenvector corresponding to negative eigenvalue
+    A = real(evec_x(:,I));
+    % Recover the bottom half...
+    evec_y = -tmpE * A;
+    A = [A; evec_y];
+*/
+
+    tmpG.Assign(_U.Column(I));
+    tmpH.ProductOf(-tmpE, tmpG);
+    double a1 = tmpG[0];
+    double a2 = tmpG[1];
+    double a3 = tmpG[2];
+    double a4 = tmpH[0];
+    double a5 = tmpH[1];
+    double a6 = tmpH[2];
+
+/*
+    % unnormalize
+    par = [
+    A(1)*sy*sy,   ...
+    A(2)*sx*sy,   ...
+    A(3)*sx*sx,   ...
+    -2*A(1)*sy*sy*mx - A(2)*sx*sy*my + A(4)*sx*sy*sy,   ...
+    -A(2)*sx*sy*mx - 2*A(3)*sx*sx*my + A(5)*sx*sx*sy,   ...
+    A(1)*sy*sy*mx*mx + A(2)*sx*sy*mx*my + A(3)*sx*sx*my*my   ...
+    - A(4)*sx*sy*sy*mx - A(5)*sx*sx*sy*my   ...
+    + A(6)*sx*sx*sy*sy   ...
+    ]';
+*/
+
+    double p1 = a1 * sy * sy;
+    double p2 = a2 * sx * sy;
+    double p3 = a3 * sx * sx;
+    double p4 = a4 * sx * sy * sy - p1 * mx * 2.0 - p2 * my;
+    double p5 = a5 * sx * sx * sy - p2 * mx - p3 * my * 2.0;
+    double p6 = a6 * sx * sx * sy * sy -
+                a4 * sx * sy * sy * mx -
+                a5 * sx * sx * sy * my +
+                p1 * mx * mx +
+                p2 * mx * my +
+                p3 * my * my;
+
+/*
+    % Convert to geometric radii, and centers
+    thetarad = 0.5*atan2(par(2),par(1) - par(3));
+    cost = cos(thetarad);
+    sint = sin(thetarad);
+    sin_squared = sint.*sint;
+    cos_squared = cost.*cost;
+    cos_sin = sint .* cost;
+    Ao = par(6);
+    Au =   par(4) .* cost + par(5) .* sint;
+    Av = - par(4) .* sint + par(5) .* cost;
+    Auu = par(1) .* cos_squared + par(3) .* sin_squared + par(2) .* cos_sin;
+    Avv = par(1) .* sin_squared + par(3) .* cos_squared - par(2) .* cos_sin;
+*/
+
+    double thetarad    = 0.5 * atan2(p2, p1 - p3);
+    double cost        = cos(thetarad);
+    double sint        = sin(thetarad);
+    double sin_squared = sint * sint;
+    double cos_squared = cost * cost;
+    double cos_sin     = sint * cost;
+    double Ao          = p6;
+    double Au          =  p4 * cost + p5 * sint;
+    double Av          = -p4 * sint + p5 * cost;
+    double Auu         = p1 * cos_squared + p3 * sin_squared + p2 * cos_sin;
+    double Avv         = p1 * sin_squared + p3 * cos_squared - p2 * cos_sin;
+
+/*
+    % ROTATED = [Ao Au Av Auu Avv]
+    tuCentre = - Au./(2.*Auu);
+    tvCentre = - Av./(2.*Avv);
+    wCentre = Ao - Auu.*tuCentre.*tuCentre - Avv.*tvCentre.*tvCentre;
+    uCentre = tuCentre .* cost - tvCentre .* sint;
+    vCentre = tuCentre .* sint + tvCentre .* cost;
+    Ru = -wCentre./Auu;
+    Rv = -wCentre./Avv;
+    Ru = sqrt(abs(Ru)).*sign(Ru);
+    Rv = sqrt(abs(Rv)).*sign(Rv);
+*/
+
+    double tuCentre = -Au / (Auu * 2.0);
+    double tvCentre = -Av / (Avv * 2.0);
+    double wCentre  = Ao - Auu * tuCentre * tuCentre - Avv * tvCentre * tvCentre;
+    double uCentre  = tuCentre * cost - tvCentre * sint;
+    double vCentre  = tuCentre * sint + tvCentre * cost;
+    double Ru       = sqrt(abs(wCentre / Auu));
+    double Rv       = sqrt(abs(wCentre / Avv));
+
+/*
+    a = [uCentre, vCentre, Ru, Rv, thetarad];
+*/
+
+    ellipse.cx    = static_cast<int>(uCentre + 0.5);
+    ellipse.cy    = static_cast<int>(vCentre + 0.5);
+    ellipse.rx    = static_cast<int>(Ru + 0.5);
+    ellipse.ry    = static_cast<int>(Rv + 0.5);
+    ellipse.angle = thetarad;
+
+    return true;
+}
+
+#elif CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
+svlImageProcessingHelper::EllipseFitterInternals::EllipseFitterInternals() :
+    svlImageProcessingInternals(),
+    BufferSize(0),
+    PointBuffer(0)
+{
+}
+
+svlImageProcessingHelper::EllipseFitterInternals::~EllipseFitterInternals()
+{
+    if (PointBuffer) free(PointBuffer);
+}
+
+bool svlImageProcessingHelper::EllipseFitterInternals::FitEllipse(vctDynamicVectorRef<int> & xs, vctDynamicVectorRef<int> & ys, svlEllipse & ellipse)
+{
+    if (xs.size() != ys.size() || xs.size() < 6) return false;
+
+    const unsigned int size = xs.size();
+
+    // Re-allocate work buffers if needed
+    if (size > BufferSize) {
+        if (PointBuffer) free(PointBuffer);
+        PointBuffer = reinterpret_cast<CvPoint2D32f*>(malloc(size * sizeof(CvPoint2D32f)));
+        BufferSize = size;
+    }
+
+    for (unsigned int i = 0; i < size; i ++) {
+        PointBuffer[i].x = static_cast<float>(xs[i]);
+        PointBuffer[i].y = static_cast<float>(ys[i]);
+    }
+
+    CvBox2D32f res;
+    cvFitEllipse(PointBuffer, size, &res);
+
+    ellipse.cx    = cvRound(res.center.x);
+    ellipse.cy    = cvRound(res.center.y);
+    ellipse.rx    = cvRound(res.size.width  * 0.5);
+    ellipse.ry    = cvRound(res.size.height * 0.5);
+    ellipse.angle = res.angle * 3.14159265358979f / 180.0f;
+
+    return true;
+}
+
+#endif // CISST_SVL_HAS_CISSTNETLIB
+

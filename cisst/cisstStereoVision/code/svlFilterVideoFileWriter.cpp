@@ -36,9 +36,9 @@ CMN_IMPLEMENT_SERVICES(svlFilterVideoFileWriter)
 svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     svlFilterBase(),
     Action(false),
-    IsRecording(false),
     ActionTime(0.0),
     TargetActionTime(0.0),
+    IsRecording(false),
     TargetCaptureLength(-1), // Continuous saving by default?
     CaptureLength(-1),
     CodecsMultithreaded(false)

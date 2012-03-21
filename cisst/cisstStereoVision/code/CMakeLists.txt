@@ -227,6 +227,7 @@ SET(HEADER_FILES
 
 # cisstNumerical dependency
 IF(CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+    SET(CISST_SVL_HAS_CISSTNETLIB "ON" CACHE INTERNAL "SVL cisstNetlib status")
     SET(DEPENDENCIES
         ${DEPENDENCIES}
         cisstNumerical

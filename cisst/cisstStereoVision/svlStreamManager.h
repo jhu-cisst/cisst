@@ -60,6 +60,7 @@ public:
     bool IsRunning(void) const;
     int WaitForStop(double timeout = -1.0);
     int GetStreamStatus(void) const;
+    void DisconnectAll(void);
 
     // Virtual methods from mtsComponent (these are temporary measures until 
     // ticket #67 is resolved)

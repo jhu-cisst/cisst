@@ -66,6 +66,11 @@ public:
     void AddOverlay(svlOverlay & overlay);
     int AddQueuedItems();
 
+    void SetEnableInputSync(bool enabled);
+    bool GetEnableInputSync() const;
+    void SetEnableTransformSync(bool enabled);
+    bool GetEnableTransformSync() const;
+
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
@@ -96,6 +101,9 @@ private:
     vctDynamicVector<std::string> BlobInputsToAdd;
     vctDynamicVector<std::string> TextInputsToAdd;
     vctDynamicVector<svlOverlay*> OverlaysToAdd;
+
+    bool EnableInputSync;
+    bool EnableTransformSync;
 
     bool IsInputAlreadyQueued(const std::string &name);
     void AddQueuedItemsInternal();

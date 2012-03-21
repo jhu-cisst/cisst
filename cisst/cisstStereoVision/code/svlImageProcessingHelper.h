@@ -30,6 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <string>
 
+#if CISST_SVL_HAS_CISSTNETLIB
+    #include <cisstNumerical/nmrNetlib.h>
+#endif // CISST_SVL_HAS_CISSTNETLIB
+
 
 class svlImageProcessingInternals
 {
@@ -37,12 +41,12 @@ protected:
     // Protected default constructor:
     //   Class can only be instantiated by derived class
     svlImageProcessingInternals();
-    
+
 private:
     // Private copy constructor:
     //   No one else will be able to call it
     svlImageProcessingInternals(const svlImageProcessingInternals& internals);
-    
+
 public:
     // Virtual destructor:
     //   Will force the compiler to create the virtual function table
@@ -52,6 +56,65 @@ public:
 
 namespace svlImageProcessingHelper
 {
+#if CISST_SVL_HAS_CISSTNETLIB
+
+    ///////////////////////////////////////////////
+    // Additional numerical routines from LAPACK //
+    ///////////////////////////////////////////////
+
+    extern "C" {
+        void dgeev_( char* JOBVL,
+                    char* JOBVR,
+                    CISSTNETLIB_INTEGER* N,
+                    CISSTNETLIB_DOUBLE* A,
+                    CISSTNETLIB_INTEGER* LDA,
+                    CISSTNETLIB_DOUBLE* WR,
+                    CISSTNETLIB_DOUBLE* WI,
+                    CISSTNETLIB_DOUBLE* VL,
+                    CISSTNETLIB_INTEGER* LDVL,
+                    CISSTNETLIB_DOUBLE* VR,
+                    CISSTNETLIB_INTEGER* LDVR,
+                    CISSTNETLIB_DOUBLE* WORK,
+                    CISSTNETLIB_INTEGER* LWORK,
+                    CISSTNETLIB_INTEGER* INFO );
+    }
+
+    template <vct::size_type _n>
+    CISSTNETLIB_INTEGER nmrEigenVectors(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _n, _n, VCT_COL_MAJOR> & A, 
+                                        vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> & WR,
+                                        vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> & WI,
+                                        vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _n, _n, VCT_COL_MAJOR> & VL,
+                                        vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _n, _n, VCT_COL_MAJOR> & VR)
+    {
+        vctFixedSizeVector<CISSTNETLIB_DOUBLE, 4 * _n> WORK;
+        CISSTNETLIB_INTEGER LWORK = 4 * _n;
+
+        char jobl = 'V';
+        char jobr = 'V';
+
+        CISSTNETLIB_INTEGER N = _n;
+        CISSTNETLIB_INTEGER INFO;
+
+        dgeev_(&jobl,
+               &jobr,
+               &N,
+               A.Pointer(),
+               &N,
+               WR.Pointer(),
+               WI.Pointer(),
+               VL.Pointer(),
+               &N,
+               VR.Pointer(),
+               &N,
+               WORK.Pointer(),
+               &LWORK,
+               &INFO);
+
+        return INFO;
+    }
+
+#endif // CISST_SVL_HAS_CISSTNETLIB
+
     /////////////////
     // Convolution //
     /////////////////
@@ -216,6 +279,58 @@ namespace svlImageProcessingHelper
                               const double min_compactness,
                               const double max_compactness);
     };
+
+    ///////////////////
+    // EllipseFitter //
+    ///////////////////
+
+#if CISST_SVL_HAS_CISSTNETLIB
+
+    class EllipseFitterInternals : public svlImageProcessingInternals
+    {
+    public:
+        EllipseFitterInternals();
+
+        bool FitEllipse(vctDynamicVectorRef<int> & xs, vctDynamicVectorRef<int> & ys, svlEllipse & ellipse);
+
+    private:
+        vctDynamicVector<double> Xs;
+        vctDynamicVector<double> Ys;
+        vctDynamicVector<double> XX;
+        vctDynamicVector<double> XY;
+        vctDynamicVector<double> YY;
+        vctDynamicMatrix<double> D;
+        vctDynamicMatrix<double> S;
+        vctDynamicMatrix<double> C;
+        vctDynamicMatrix<double> A;
+
+        vctDynamicVectorRef<double> r_Xs;
+        vctDynamicVectorRef<double> r_Ys;
+        vctDynamicVectorRef<double> r_XX;
+        vctDynamicVectorRef<double> r_XY;
+        vctDynamicVectorRef<double> r_YY;
+        vctDynamicMatrixRef<double> r_D;
+
+        bool InvertMatrix(const vct3x3 & matrix, vct3x3 & inverse);
+    };
+
+#elif CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
+    class EllipseFitterInternals : public svlImageProcessingInternals
+    {
+    public:
+        EllipseFitterInternals();
+        ~EllipseFitterInternals();
+
+        bool FitEllipse(vctDynamicVectorRef<int> & xs, vctDynamicVectorRef<int> & ys, svlEllipse & ellipse);
+
+    private:
+        unsigned int BufferSize;
+        CvPoint2D32f* PointBuffer;
+    };
+
+#endif // CISST_SVL_HAS_CISSTNETLIB
+
 };
 
 #endif // _svlImageProcessingHelper_h

@@ -53,6 +53,7 @@ protected:
     virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
 
 private:
+    svlSample* StoredSample;
     svlSample* OutputSample;
     unsigned int Width;
     unsigned int Height;
