@@ -71,7 +71,8 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
         if (!loadcodec || writer.LoadCodec("codec.dat") != SVL_OK) {
             writer.DialogCodec(dst_path);
         }
-        writer.OpenFile(dst_path);
+        writer.SetFilePath(dst_path);
+        writer.OpenFile();
     }
     if (loadcodec) {
         writer.SaveCodec("codec.dat");
@@ -134,6 +135,7 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
 
     // release pipeline
     stream.Release();
+    stream.DisconnectAll();
 
 labError:
     return 0;

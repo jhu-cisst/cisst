@@ -977,6 +977,8 @@ int svlImageProcessing::GetBlobsFromLabels(const svlSampleImageMono8Stereo* imag
     return SVL_OK;
 }
 
+#if CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
 int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
                                    svlEllipse & ellipse,
                                    Internals& internals)
@@ -988,7 +990,9 @@ int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
     }
     vctDynamicVectorRef<int> xs(points.size(), &((points[0])[0]), points.stride());
     vctDynamicVectorRef<int> ys(points.size(), &((points[0])[1]), points.stride());
-    return fitter->FitEllipse(xs, ys, ellipse);
+
+    if (fitter->FitEllipse(xs, ys, ellipse)) return SVL_OK;
+    return SVL_FAIL;
 }
 
 int svlImageProcessing::FitEllipse(vctDynamicVectorRef<int> & xs,
@@ -1001,8 +1005,30 @@ int svlImageProcessing::FitEllipse(vctDynamicVectorRef<int> & xs,
         fitter = new svlImageProcessingHelper::EllipseFitterInternals;
         internals.Set(fitter);
     }
-    return fitter->FitEllipse(xs, ys, ellipse);
+
+    if (fitter->FitEllipse(xs, ys, ellipse)) return SVL_OK;
+    return SVL_FAIL;
 }
+
+#else // CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
+int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    return SVL_FAIL;
+}
+
+int svlImageProcessing::FitEllipse(vctDynamicVectorRef<int> & xs,
+                                   vctDynamicVectorRef<int> & ys,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    return SVL_FAIL;
+}
+
+#endif // CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
 
 /*******************************************/
 /*** svlImageProcessing::Internals class ***/
