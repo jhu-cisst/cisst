@@ -24,6 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageCenterFinder_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlDraw.h>
+#include <cisstStereoVision/svlImageProcessing.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -45,30 +47,53 @@ public:
     void SetTrajectorySmoothing(double smoothing);
     void SetThreshold(unsigned char thresholdlevel);
     void SetMassRatio(unsigned int ratio);
-    void SetMask(bool enablemask);
     void SetHorizontalLink(bool enable);
     void SetVerticalLink(bool enable);
 
     double GetTrajectorySmoothing() const;
     unsigned char GetThreshold() const;
     unsigned int GetMassRatio() const;
-    bool GetMask() const;
     bool GetHorizontalLink() const;
     bool GetVerticalLink() const;
+
+    int  SetEnableEllipseFitting(bool enable);
+    int  SetEnableEllipseMask(bool enable);
+    void SetEllipseMaskTransition(int start, int end);
+
+    bool GetEnableEllipseFitting() const;
+    bool GetEnableEllipseMask() const;
+    void GetEllipseMaskTransition(int & start, int & end) const;
 
     void AddReceiver(svlFilterImageCenterFinderInterface* receiver);
 
 protected:
+    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Release();
 
 private:
-    double Smoothing;
+    bool FindEllipse(svlSampleImage* image, unsigned int videoch, const int cx, const int cy, svlEllipse & ellipse);
+    void CreateTransitionImage();
+    void UpdateMaskImage(unsigned int videoch, svlEllipse & ellipse);
+    unsigned int sqrt_uint32(unsigned int value);
+
+    double       Smoothing;
     unsigned int ThresholdLevel;
     unsigned int MassRatio;
-    bool MaskEnabled;
-    bool LinkHorizontally;
-    bool LinkVertically;
+    bool         LinkHorizontally;
+    bool         LinkVertically;
+    bool         EllipseFittingEnabled;
+    bool         EllipseFittingDrawEllipse;
+    int          EllipseFittingSlices;
+    int          EllipseFittingMode;
+    int          EllipseFittingEdgeThreshold;
+    int          EllipseFittingErrorThreshold;
+    bool         EllipseMaskEnabled;
+    int          EllipseMaskSlices;
+    int          EllipseMaskTransitionStart;
+    int          EllipseMaskTransitionEnd;
+
     vctDynamicVector<svlFilterImageCenterFinderInterface*> Receivers;
 
     vctDynamicVector<int> CenterX;
@@ -82,6 +107,25 @@ private:
 
     vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionV;
     vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionH;
+
+    // Ellipse fitting
+    vctDynamicVector< vctDynamicMatrix<int> > RadialProfiles;
+    vctDynamicVector< vctDynamicVector<int> > TempProfile;
+    vctDynamicVector< vctDynamicVector<int> > StepX;
+    vctDynamicVector< vctDynamicVector<int> > StepY;
+    vctDynamicVector< vctDynamicVector<int> > EdgeX;
+    vctDynamicVector< vctDynamicVector<int> > EdgeY;
+    vctDynamicVector< vctDynamicVector<int> > EdgeRad;
+    vctDynamicVector< vctDynamicVector<int> > EdgeRadSmooth;
+    vctDynamicVector<svlImageProcessing::Internals> EllipseFittingInternals;
+
+    // Mask generation
+    svlSampleImage* MaskImage;
+    svlSampleImageMono8* TransitionImage;
+    vctDynamicVector<svlDraw::Internals> TriangleInternals;
+    vctDynamicVector<svlDraw::Internals> WarpInternals;
+    vctDynamicVector< vctDynamicVector<vctInt2> > EllipseSamplesIn;
+    vctDynamicVector< vctDynamicVector<vctInt2> > EllipseSamplesOut;
 };
 
 class CISST_EXPORT svlFilterImageCenterFinderInterface
