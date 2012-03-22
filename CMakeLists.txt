@@ -154,6 +154,17 @@ if (WIN32)
       set (CISST_PYTHONPATH_CMAKE_FORMAT
            "${cisst_saw_BINARY_DIR}/cisst/lib" "${cisst_saw_BINARY_DIR}/cisst/lib/${CISST_PATH_CONFIGURATION}"
            "${cisst_saw_BINARY_DIR}/cisst/bin" "${cisst_saw_BINARY_DIR}/cisst/bin/${CISST_PATH_CONFIGURATION}")
+      if (CISST_BUILD_SAW)
+        set (CISST_PATH_CMAKE_FORMAT
+             ${CISST_PATH_CMAKE_FORMAT}
+             "${cisst_saw_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
+             "${cisst_saw_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
+        set (CISST_PYTHONPATH_CMAKE_FORMAT
+             ${CISST_PYTHONPATH_CMAKE_FORMAT}
+             "${cisst_saw_BINARY_DIR}/saw/lib" "${cisst_saw_BINARY_DIR}/saw/lib/${CISST_PATH_CONFIGURATION}"
+             "${cisst_saw_BINARY_DIR}/saw/bin" "${cisst_saw_BINARY_DIR}/saw/bin/${CISST_PATH_CONFIGURATION}")
+      endif (CISST_BUILD_SAW)
+
       set (CISST_ROOT_CMAKE_FORMAT
            "${cisst_saw_BINARY_DIR}/cisst")
 
@@ -200,7 +211,7 @@ if (WIN32)
             set (CISST_PATH_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_PATH" FORCE)
           else (CISST_PATH_OVERWRITE)
             # Display a message of information
-            message ("A different CISST_PATH exists:\n  ${CURRENT_CISST_PATH}\nTurn CISST_PATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
+            message (SEND_ERROR "A different CISST_PATH exists:\n-- current: ${CURRENT_CISST_PATH}\n-- new: ${CISST_PATH}\n-- turn CISST_PATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
           endif (CISST_PATH_OVERWRITE)
         endif ("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
 
@@ -227,7 +238,7 @@ if (WIN32)
               set (CISST_PYTHONPATH_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_PYTHONPATH" FORCE)
             else (CISST_PYTHONPATH_OVERWRITE)
               # Display a message of information
-              message ("A different CISST_PYTHONPATH exists:\n  ${CURRENT_CISST_PYTHONPATH}\nTurn CISST_PYTHONPATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
+              message (SEND_ERROR "A different CISST_PYTHONPATH exists:\n-- current: ${CURRENT_CISST_PYTHONPATH}\n-- new: ${CISST_PYTHONPATH}\n-- turn CISST_PYTHONPATH_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
             endif (CISST_PYTHONPATH_OVERWRITE)
           endif ("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
 
@@ -254,14 +265,14 @@ if (WIN32)
             set (CISST_ROOT_OVERWRITE OFF CACHE BOOL "Overwrite existing CISST_ROOT" FORCE)
           else (CISST_ROOT_OVERWRITE)
             # Display a message of information
-            message ("A different CISST_ROOT exists:\n  ${CURRENT_CISST_ROOT}\nTurn CISST_ROOT_OVERWRITE \"ON\" or CISST_ROOT_REGISTER \"OFF\"")
+            message (SEND_ERROR "A different CISST_ROOT exists:\n-- current: ${CURRENT_CISST_ROOT}\n-- new: ${CISST_ROOT}\n-- turn CISST_ROOT_OVERWRITE \"ON\" or CISST_PATH_REGISTER \"OFF\"")
           endif (CISST_ROOT_OVERWRITE)
         endif ("${CISST_ROOT}" STREQUAL "${CURRENT_CISST_ROOT}")
 
       endif ("${CURRENT_CISST_ROOT}" STREQUAL "\\registry")
 
     else (CISST_PATH_CONFIGURATION_VALID)
-      message ("CISST_PATH_CONFIGURATION must be one of ${CMAKE_CONFIGURATION_TYPES}")
+      message (SEND_ERROR "CISST_PATH_CONFIGURATION must be one of ${CMAKE_CONFIGURATION_TYPES}")
     endif (CISST_PATH_CONFIGURATION_VALID)
 
   endif (CISST_PATH_REGISTER)
