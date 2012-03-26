@@ -927,7 +927,8 @@ bool svlDrawHelper::WarpInternals::SetOutputImage(svlSampleImage* image, unsigne
     return true;
 }
 
-void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
+void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int thread_id,
+                                        int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
                                         int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
                                         unsigned int alpha)
 {
@@ -1009,7 +1010,16 @@ void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int 
 
     int id1, id2, pos1, pos2;
 
-    for (i = miny + 1; i <= maxy; i += 2) {
+    // Calculate range for multithreaded processing
+    int full_range = maxy - miny;
+    int _to = full_range / thread_count + 1;
+    int _from = thread_id * _to;
+    _to += _from;
+    if (_to > full_range) _to = full_range;
+    _from += miny + 1;
+    _to += miny + 1;
+
+    for (i = _from; i < _to; i += 2) {
         id1 = _lm_id[i];
         id2 = _rm_id[i];
 
@@ -1054,7 +1064,8 @@ void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int 
     }
 }
 
-void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
+void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int thread_id,
+                                        int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
                                         int ox1, int oy1, int ox2, int oy2, int ox3, int oy3, int ox4, int oy4,
                                         unsigned int alpha)
 {
@@ -1150,7 +1161,16 @@ void svlDrawHelper::WarpInternals::Draw(int ix1, int iy1, int ix2, int iy2, int 
 
     int id1, id2, pos1, pos2;
 
-    for (i = miny + 1; i <= maxy; i += 2) {
+    // Calculate range for multithreaded processing
+    int full_range = maxy - miny;
+    int _to = full_range / thread_count + 1;
+    int _from = thread_id * _to;
+    _to += _from;
+    if (_to > full_range) _to = full_range;
+    _from += miny + 1;
+    _to += miny + 1;
+
+    for (i = _from; i < _to; i += 2) {
         id1 = _lm_id[i];
         id2 = _rm_id[i];
 

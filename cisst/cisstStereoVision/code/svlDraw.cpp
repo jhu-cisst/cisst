@@ -621,7 +621,8 @@ void svlDraw::WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTri
     if (!trianglewarper->SetInputImage(in_img, in_vch) ||
         !trianglewarper->SetOutputImage(out_img, out_vch)) return;
 
-    trianglewarper->Draw(in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
+    trianglewarper->Draw(1, 0,
+                         in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
                          out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3,
                          alpha);
 }
@@ -639,7 +640,8 @@ void svlDraw::WarpQuad(svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & 
     if (!quadwarper->SetInputImage(in_img, in_vch) ||
         !quadwarper->SetOutputImage(out_img, out_vch)) return;
 
-    quadwarper->Draw(in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
+    quadwarper->Draw(1, 0,
+                     in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
                      out_quad.x1, out_quad.y1, out_quad.x2, out_quad.y2, out_quad.x3, out_quad.y3, out_quad.x4, out_quad.y4,
                      alpha);
 }
@@ -674,5 +676,64 @@ void svlDraw::Internals::Release()
 {
     if (Ptr) delete Ptr;
     Ptr = 0;
+}
+
+
+/*****************************/
+/*** svlDraw::WarpMT class ***/
+/*****************************/
+
+svlDraw::WarpMT::WarpMT(unsigned int thread_count)
+{
+    SetThreadCount(thread_count);
+}
+
+void svlDraw::WarpMT::SetThreadCount(unsigned int thread_count)
+{
+    if (thread_count > Internals.size()) Internals.SetSize(thread_count);
+}
+
+void svlDraw::WarpMT::WarpTriangle(unsigned int thread_id,
+                                   svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
+                                   svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
+                                   unsigned int alpha)
+{
+    const unsigned int thread_count = static_cast<unsigned int>(Internals.size());
+    if (thread_id >= thread_count) return;
+
+    svlDrawHelper::WarpInternals* trianglewarper = dynamic_cast<svlDrawHelper::WarpInternals*>(Internals[thread_id].Get());
+    if (trianglewarper == 0) {
+        trianglewarper = new svlDrawHelper::WarpInternals(3);
+        Internals[thread_id].Set(trianglewarper);
+    }
+    if (!trianglewarper->SetInputImage(in_img, in_vch) ||
+        !trianglewarper->SetOutputImage(out_img, out_vch)) return;
+
+    trianglewarper->Draw(thread_count, thread_id,
+                         in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
+                         out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3,
+                         alpha);
+}
+
+void svlDraw::WarpMT::WarpQuad(unsigned int thread_id,
+                               svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & in_quad,
+                               svlSampleImage* out_img, unsigned int out_vch, svlQuad & out_quad,
+                               unsigned int alpha)
+{
+    const unsigned int thread_count = static_cast<unsigned int>(Internals.size());
+    if (thread_id >= thread_count) return;
+
+    svlDrawHelper::WarpInternals* quadwarper = dynamic_cast<svlDrawHelper::WarpInternals*>(Internals[thread_id].Get());
+    if (quadwarper == 0) {
+        quadwarper = new svlDrawHelper::WarpInternals(4);
+        Internals[thread_id].Set(quadwarper);
+    }
+    if (!quadwarper->SetInputImage(in_img, in_vch) ||
+        !quadwarper->SetOutputImage(out_img, out_vch)) return;
+
+    quadwarper->Draw(thread_count, thread_id,
+                     in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
+                     out_quad.x1, out_quad.y1, out_quad.x2, out_quad.y2, out_quad.x3, out_quad.y3, out_quad.x4, out_quad.y4,
+                     alpha);
 }
 

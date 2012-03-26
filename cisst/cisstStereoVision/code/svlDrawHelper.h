@@ -90,10 +90,12 @@ namespace svlDrawHelper
 
         bool SetInputImage(svlSampleImage* image, unsigned int channel = 0);
         bool SetOutputImage(svlSampleImage* image, unsigned int channel = 0);
-        void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
+        void Draw(unsigned int thread_count, unsigned int thread_id,
+                  int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
                   int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
                   unsigned int alpha = 256);
-        void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
+        void Draw(unsigned int thread_count, unsigned int thread_id,
+                  int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
                   int ox1, int oy1, int ox2, int oy2, int ox3, int oy3, int ox4, int oy4,
                   unsigned int alpha = 256);
 
