@@ -84,8 +84,6 @@ svlFilterBase* svlFilterInput::GetConnectedFilter(void)
 int svlFilterInput::AddType(svlStreamType type)
 {
     // TO DO: figure out if filter needs to be initialized
-    if (!Filter/* || Filter->IsInitialized()*/) return SVL_FAIL;
-
     unsigned int size = static_cast<unsigned int>(SupportedTypes.size());
     SupportedTypes.resize(size + 1);
     SupportedTypes[size] = type;
@@ -119,7 +117,7 @@ int svlFilterInput::DisconnectInternal(void)
 
 int svlFilterInput::PushSample(const svlSample* sample)
 {
-    if (!sample || !Filter || Trunk || Connected) return SVL_FAIL;
+    if (!sample || Trunk || Connected) return SVL_FAIL;
 
     svlStreamType type = sample->GetType();
 
@@ -127,7 +125,7 @@ int svlFilterInput::PushSample(const svlSample* sample)
         if (Type != type) return SVL_FAIL;
     }
     else {
-        if (Filter->AutoType) {
+        if (!Filter || Filter->AutoType) {
             // Automatic setup
             if (!IsTypeSupported(type)) return SVL_FAIL;
             Type = type;
@@ -152,7 +150,7 @@ int svlFilterInput::PushSample(const svlSample* sample)
 
 svlSample* svlFilterInput::PullSample(bool waitfornew, double timeout)
 {
-    if (!Filter || !Filter->IsInitialized() || !Buffer) return 0;
+    if (!Buffer) return 0;
     return Buffer->Pull(waitfornew, timeout);
 }
 
@@ -160,3 +158,4 @@ double svlFilterInput::GetTimestamp(void)
 {
     return Timestamp;
 }
+

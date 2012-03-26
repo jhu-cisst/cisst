@@ -147,10 +147,6 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
         CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): null input pointer passed to this method" << std::endl;
         return SVL_FAIL;
     }
-    if (!input->Filter) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input passed to this method is not associated to any filter" << std::endl;
-        return SVL_FAIL;
-    }
     if (this->Connected) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): this output is already connected" << std::endl;
         return SVL_FAIL;
@@ -163,26 +159,28 @@ int svlFilterOutput::ConnectInternal(svlFilterInput *input)
         CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): filter associated to this output is already initialized" << std::endl;
         return SVL_FAIL;
     }
-    if (input->Filter->Initialized) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): filter associated to the input is already initialized" << std::endl;
-        return SVL_FAIL;
-    }
 
-    // Setup output types in the connected filter
-    if (input->Trunk && input->Filter->AutoType) {
-        // Automatic setup
-        if (!input->IsTypeSupported(Type)) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input doesn't support output type (auto)" << std::endl;
+    if (input->Filter) {
+        if (input->Filter->Initialized) {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): filter associated to the input is already initialized" << std::endl;
             return SVL_FAIL;
         }
-        svlFilterOutput* output = input->Filter->GetOutput();
-        if (output) output->SetType(Type);
-    }
-    else {
-        // Manual setup
-        if (input->Filter->OnConnectInput(*input, Type) != SVL_OK) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input doesn't support output type (manual)" << std::endl;
-            return SVL_FAIL;
+        // Setup output types in the connected filter
+        if (input->Trunk && input->Filter->AutoType) {
+            // Automatic setup
+            if (!input->IsTypeSupported(Type)) {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input doesn't support output type (auto)" << std::endl;
+                return SVL_FAIL;
+            }
+            svlFilterOutput* output = input->Filter->GetOutput();
+            if (output) output->SetType(Type);
+        }
+        else {
+            // Manual setup
+            if (input->Filter->OnConnectInput(*input, Type) != SVL_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect (\"" << Filter->GetName() << "\"): input doesn't support output type (manual)" << std::endl;
+                return SVL_FAIL;
+            }
         }
     }
 
@@ -221,11 +219,14 @@ int svlFilterOutput::Connect(svlFilterInput *input)
         CMN_LOG_CLASS_INIT_ERROR << "Connect: null input pointer passed to this method" << std::endl;
         return SVL_FAIL;
     }
+
+    if (!input->Filter) return ConnectInternal(input);
+/*
     if (!input->Filter) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is not associated to any filter" << std::endl;
         return SVL_FAIL;
     }
-
+*/
     mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
     if (LCM->FindComponent(input->Filter->GetName())) {
         CMN_LOG_CLASS_INIT_DEBUG << "Connect (\"" << input->Filter->GetName() << "\"): component already added to LCM" << std::endl;
