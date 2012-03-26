@@ -199,7 +199,8 @@ public:
     InverseKinematics( vctDynamicVector<double>& q, 
 		       const vctFrame4x4<double>& Rts, 
 		       double tolerance=1e-12, 
-		       size_t Niteration=1000 );
+		       size_t Niteration=1000,
+		       double LAMBDA=0.001 );
   
 
   virtual 

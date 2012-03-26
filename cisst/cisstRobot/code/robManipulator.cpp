@@ -254,6 +254,142 @@ robManipulator::Errno
 robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
 				   const vctFrame4x4<double>& Rts,
 				   double tolerance, 
+				   size_t Niterations,
+				   double LAMBDA ){
+
+  if( q.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Expected " << links.size() << " joints values. "
+		      << " Got " << q.size() 
+		      << std::endl;
+    return robManipulator::EFAILURE;
+  }
+
+  if( links.size() == 0 ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": The manipulator has no links."
+		      << std::endl;
+    return robManipulator::EFAILURE;
+  }
+
+  // A is a pointer to the 6xN spatial Jacobian
+  int M = 6;                  // The number or rows of matrix A
+  int N = links.size();       // The number of columns of matrix A
+  int NRHS = 1;               // The number of right hand side vectors
+
+  int LDA = M;                // The leading dimension of the array A.
+
+  // B is a pointer the the N vector containing the solution
+  double* B = new double[N];  // The N-by-NRHS matrix of right hand side matrix
+  int LDB = N;                // The leading dimension of the array B.
+
+  // These values are used for the SVD computation
+  int INFO;                   // The info code
+  int INC = 1;                // The index increment 
+
+  double ndq=1;               // norm of the iteration error
+  size_t i;                   // the iteration counter
+  char TRANSN = 'N';          // "N"ormal
+  char TRANST = 'T';          // "T"transpose
+  double ALPHA = 1.0;
+  double* dq = new double[links.size()];
+
+  // loop until Niter are executed or the error is bellow the tolerance
+  for( i=0; i<Niterations && tolerance<ndq; i++ ){
+
+    // Evaluate the forward kinematics
+    vctFrame4x4<double,VCT_ROW_MAJOR> Rt = ForwardKinematics( q );
+    // Evaluate the spatial Jacobian (also evaluate the forward kin)
+    JacobianSpatial( q );
+
+    // compute the translation error
+    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],   
+				     Rts[1][3]-Rt[1][3],  
+				     Rts[2][3]-Rt[2][3] );
+    
+    // compute the orientation error 
+    // first build the [ n o a ] vectors
+    vctFixedSizeVector<double,3> n1( Rt[0][0],  Rt[1][0],  Rt[2][0] );
+    vctFixedSizeVector<double,3> o1( Rt[0][1],  Rt[1][1],  Rt[2][1] );
+    vctFixedSizeVector<double,3> a1( Rt[0][2],  Rt[1][2],  Rt[2][2] );
+    vctFixedSizeVector<double,3> n2( Rts[0][0], Rts[1][0], Rts[2][0] );
+    vctFixedSizeVector<double,3> o2( Rts[0][1], Rts[1][1], Rts[2][1] );
+    vctFixedSizeVector<double,3> a2( Rts[0][2], Rts[1][2], Rts[2][2] );
+
+    // This is the orientation error
+    vctFixedSizeVector<double,3> dr = 0.5*( (n1%n2) + (o1%o2) + (a1%a2) );
+
+    // combine both errors in one R^6 vector
+    double e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
+
+    // 
+    for( int j=0; j<N; j++ )
+      { B[j] = 0.0; }
+    for( int j=0; j<6; j++ )
+      { B[j] = e[j]; }
+
+    // weights
+    double I[6][6] = { { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
+		       { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 },
+		       { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 },
+		       { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 },
+		       { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 },
+		       { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 } };
+
+    // We need to solve dq = J' ( JJ' + lambda I )^-1 e
+
+    // I = JJ' + lambda I 
+    gemm( &TRANSN, &TRANST, &M, &M, &N, 
+	  &ALPHA, 
+	  &Js[0][0], &LDA, 
+	  &Js[0][0], &LDA,
+	  &LAMBDA,
+	  &(I[0][0]), &M );
+
+    // solve B = I\B
+    int IPIV[6];
+    LDB=6;
+    gesv( &M, &NRHS, 
+	  &(I[0][0]), &LDA,
+	  &(IPIV[0]),
+	  &(B[0]), &LDB,
+	  &INFO );
+    // should check the pivots
+
+    // dq = J'B
+    double GAMMA = 0.0;
+    gemv( &TRANST, &M, &N, &ALPHA,
+	  &(Js[0][0]), &LDA,
+	  &(B[0]), &INC,
+	  &GAMMA,
+	  dq, &INC );
+
+    // compute the L2 norm of the error
+    ndq = nrm2(&N, dq, &INC);
+
+    // update the solution
+    for(size_t j=0; j<links.size(); j++) q[j] += dq[j];
+  }
+  
+  // copy the joint values and 
+  for(size_t j=0; j<links.size(); j++){
+    q[j] = fmod((double)q[j], (double)2.0*cmnPI);
+    if(cmnPI < q[j])
+      q[j] = q[j] - 2.0*cmnPI;
+  }
+
+  delete[] B;
+  delete[] dq;
+
+  if( i==Niterations ) return robManipulator::EFAILURE;
+  else return robManipulator::ESUCCESS;;
+}
+
+#if 0
+robManipulator::Errno 
+robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
+				   const vctFrame4x4<double>& Rts,
+				   double tolerance, 
 				   size_t Niterations ){
 
   if( q.size() != links.size() ){
@@ -370,6 +506,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   if( i==Niterations ) return robManipulator::EFAILURE;
   else return robManipulator::ESUCCESS;;
 }
+#endif
 
 /*
  * Body manipulator Jacobian
