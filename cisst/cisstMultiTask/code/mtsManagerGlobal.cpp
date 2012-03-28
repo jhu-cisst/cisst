@@ -1579,6 +1579,9 @@ void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
     mtsConnection * connection = 0;
     ConnectionMapType::iterator it = ConnectionMap.begin();
     while (it != ConnectionMap.end() && ThreadDisconnectRunning) {
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+        osaSleep(10 * cmn_ms); // protective sleep on Xenomai
+#endif
         connection = &it->second;
 
         // Skip timeout check if connection was already confirmed
@@ -1607,7 +1610,7 @@ void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
                 << connection->GetConnectionID() << std::endl;
         }
 
-        // Reset iterator since Disconnect above invalidates ConnectionMap
+        // Reset iterator because internal thread for disconnection and clean-ups can invalidate ConnectionMap
         it = ConnectionMap.begin();
     }
 #else
@@ -2059,7 +2062,7 @@ bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
 
     ConnectionMapType::iterator it = ConnectionMap.find(connectionID);
     if (it == ConnectionMap.end()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: invalid connection id: " << connectionID << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: invalid connection id: " << connectionID << std::endl;
         return false;
     }
 
