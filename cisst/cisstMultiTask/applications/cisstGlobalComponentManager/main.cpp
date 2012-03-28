@@ -28,11 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (CISST_OS == CISST_LINUX_XENOMAI)
 #include <sys/mman.h>
-#include <native/task.h>
 #endif
-
-// Enable or disable system-wide thread-safe logging
-#define MTS_LOGGING
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
@@ -48,9 +44,6 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     // enable system-wide thread-safe logging
-#ifdef MTS_LOGGING
-    mtsManagerLocal::SetLogForwarding(true);
-#endif
 
     // Create and start global component manager
     mtsManagerGlobal * globalComponentManager = new mtsManagerGlobal;
@@ -110,6 +103,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     localManager->KillAll();
     localManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
     localManager->Cleanup();
+
+    delete globalComponentManager;
 
     return 0;
 }
