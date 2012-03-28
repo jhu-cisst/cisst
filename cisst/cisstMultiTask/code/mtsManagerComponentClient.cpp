@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -159,7 +160,16 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 return false;
             }
             mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceRequiredName);
+
+#if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
+            {
+                // See void mtsComponent::InterfaceInternalCommands_GetEndUserInterface()
+                endUserInterfaceArg.EndUserInterface = endUserInterfaceArg.OriginalInterface->GetEndUserInterface(clientInterfaceRequiredName);
+            }
+#else
             serverFunctionSet->GetEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
+#endif
+
             mtsInterfaceProvided *endUserInterface = endUserInterfaceArg.EndUserInterface;
             if (!endUserInterface) {
                 CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get end-user interface for " << serverComponentName << std::endl;
@@ -168,7 +178,21 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
             success = clientInterfaceRequired->BindCommands(endUserInterface);
             mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
+
+#if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
+            {
+                // From void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
+                size_t i;
+                for (i = 0; i < eventList.VoidEvents.size(); i++) {
+                    eventList.VoidEvents[i].Result = eventList.Provided->AddObserver(eventList.VoidEvents[i].EventName, eventList.VoidEvents[i].HandlerPointer);
+                }
+                for (i = 0; i < eventList.WriteEvents.size(); i++) {
+                    eventList.WriteEvents[i].Result = eventList.Provided->AddObserver(eventList.WriteEvents[i].EventName, eventList.WriteEvents[i].HandlerPointer);
+                }
+            }
+#else
             serverFunctionSet->AddObserverList(eventList, eventList);
+#endif
             if (!clientInterfaceRequired->CheckEventList(eventList))
                 success = false;
         }

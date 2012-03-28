@@ -1528,7 +1528,7 @@ void mtsManagerProxyServer::ManagerServerI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
-#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyServer::ManagerServerI,
         "Stopped and destroyed callback thread to communicate with clients");
 #endif

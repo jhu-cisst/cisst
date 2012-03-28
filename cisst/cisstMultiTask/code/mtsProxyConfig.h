@@ -48,6 +48,12 @@ namespace mtsProxyConfig
     // Connection check period to see if interface client proxies connected (of 
     // type mtsComponentInterfaceProxyClient) are valid
     const double CheckPeriodForInterfaceConnections = 1.5 * RefreshPeriodForInterfaces;
+
+    // Globally disable connection monitoring thread.  
+    // MJ: Use this option at your own risk because this is the bare minimum 
+    // to guarantee "healthy" connections.  Also note that setting this flag 
+    // true will disables the entire disconnection detection mechanisms as well.
+    const bool DisableConnectionMonitoring = false;
 };
 
 #endif // _mtsProxyConfig_h

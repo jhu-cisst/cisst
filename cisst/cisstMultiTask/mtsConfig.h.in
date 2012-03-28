@@ -28,4 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 // Using ICE
 #cmakedefine01 CISST_MTS_HAS_ICE
 
+#cmakedefine01 CISST_MTS_64BIT
+
 #endif // _mtsConfig_h

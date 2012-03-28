@@ -15,6 +15,13 @@
 # All cisstMultiTask libraries
 project (cisstMultiTaskLibs)
 
+# Determine 32 or 64 bit
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set (CISST_MTS_64BIT TRUE)
+else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set (CISST_MTS_64BIT FALSE)
+endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+
 # try to find ZeroC Ice
 find_package (Ice)
 if (ICE_FOUND)
@@ -60,3 +67,4 @@ endif (CISST_HAS_QT)
 # build examples and tests, add an option to skip them
 cisst_offer_examples (cisstMultiTask)
 cisst_offer_tests (cisstMultiTask)
+

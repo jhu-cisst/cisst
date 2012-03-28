@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsProxyBaseServer_h
 
 #include <cisstOSAbstraction/osaMutex.h>
+#include "mtsProxyConfig.h"
 #include "mtsProxyBaseCommon.h"
 
 #include <cisstMultiTask/mtsExport.h>
@@ -413,6 +414,7 @@ bool mtsProxyBaseServerType::CloseClient(const ClientIDType & clientID, const bo
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
 void mtsProxyBaseServerType::Monitor(void)
 {
+    if (mtsProxyConfig::DisableConnectionMonitoring) return;
     if (IceConnectionIDMap.size() == 0) return;
     if (!this->IsActiveProxy()) return;
 
