@@ -24,16 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "cdgFile.h"
 
 /*
-  \todo preserve order of definition for scopes in code generated
-  \todo add lines to all values for debugging
   \todo use global keyword name to set include guards - maybe used for something else?
-  \todo implement default values ...
   \todo strip space at end of value
   \todo add method SetValue(keyword, value) for all data types to remove logic from parser
   \todo add method ParsingDone to all data types to check which values have been set, set default for optional and complain for required field
-  \todo support member::accessors flag
-  \todo support member::scope flag
-  \todo support member::default flag
 */
 
 int main(int argc, char* argv[])

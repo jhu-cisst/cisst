@@ -278,6 +278,9 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     // provides a parsed view which might help debug
     if (errorFound) {
         std::cerr << parsedOutput.str() << std::endl;
+    } else {
+        // fill in dafault values
+        scopes.back()->FillInDefaults();
     }
 
     return !errorFound;

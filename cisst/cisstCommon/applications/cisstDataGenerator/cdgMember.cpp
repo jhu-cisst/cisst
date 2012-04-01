@@ -90,12 +90,27 @@ bool cdgMember::SetValue(const std::string & keyword,
         return true;
     }
     if (keyword == "default") {
-        std::cerr << "------------ default not handled yet ---------" << std::endl;
+        if (!this->Default.empty()) {
+            errorMessage = "default already set";
+            return false;
+        }
+        this->Default = value;
         return true;
     }
     if (keyword == "accessors") {
-        std::cerr << "------------ accessors not handled yet ---------" << std::endl;
-        return true;
+        if (!this->Accessors.empty()) {
+            errorMessage = "accessor type already set (" + value + ")";
+            return false;
+        }
+        if ((value == "none")
+            || (value == "references")
+            || (value == "set-get")
+            || (value == "all")) {
+            this->Accessors = value;
+            return true;
+        }
+        errorMessage = "accessor must be \"none\", \"references\", \"set-get\" or \"all\", not \"" + value + "\'";
+        return false;
     }
     if (keyword == "visibility") {
         if (!this->Visibility.empty()) {
@@ -107,10 +122,9 @@ bool cdgMember::SetValue(const std::string & keyword,
             || (value == "protected")) {
             this->Visibility = value;
             return true;
-        } else {
-            errorMessage = "visibility must be \"public\", \"protected\" or \"private\", not \"" + keyword + "\"";
-            return false;
         }
+        errorMessage = "visibility must be \"public\", \"protected\" or \"private\", not \"" + value + "\"";
+        return false;
     }
     errorMessage = "unhandled keyword \"" + keyword + "\"";
     return false;
@@ -133,14 +147,37 @@ bool cdgMember::IsValid(std::string & errorMessage) const
 }
 
 
+void cdgMember::FillInDefaults(void)
+{
+    if (this->Accessors.empty()) {
+        this->Accessors = "all";
+    }
+    if (this->Visibility.empty()) {
+        this->Visibility = "protected";
+    }
+}
+
+
 void cdgMember::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
     outputStream << " protected:" << std::endl
-                 << "    " << Type << " " << Name << "; // " << Description << std::endl
-                 << " public:" << std::endl
-                 << "    const " << Type << " & Get" << Name << "(void) const;" << std::endl
-                 << "    void Set" << Name << "(const " << Type << " & newValue);" << std::endl;
+                 << "    " << Type << " " << Name << "Member; // " << Description << std::endl;
+    if (this->Accessors != "none") {
+        outputStream << " public:" << std::endl;
+    }
+    if ((this->Accessors == "all")
+        || (this->Accessors == "set-get")) {
+        outputStream << "    /* accessor is: " << this->Accessors << "*/" << std::endl
+                     << "    void Get" << Name << "(" << Type << " & placeHolder) const;" << std::endl
+                     << "    void Set" << Name << "(const " << Type << " & newValue);" << std::endl;
+    }
+    if ((this->Accessors == "all")
+        || (this->Accessors == "references")) {
+        outputStream << "    /* accessor is: " << this->Accessors << "*/" << std::endl
+                     << "    const " << Type << " & " << Name << "(void) const;" << std::endl
+                     << "    " << Type << " & " << Name << "(void);" << std::endl;
+    }
 }
 
 
@@ -153,15 +190,36 @@ void cdgMember::GenerateCode(std::ostream & outputStream) const
     } else {
         returnType = Type;
     }
-    outputStream << std::endl
-                 << "const " << returnType << " & " << ClassName << "::Get" << Name << "(void) const" << std::endl
-                 << "{" << std::endl
-                 << "    return this->" << Name << ";" << std::endl
-                 << "}" << std::endl
-                 << std::endl
-                 << "void " << ClassName << "::Set" << Name << "(const " << Type << " & newValue)" << std::endl
-                 << "{" << std::endl
-                 << "    this->" << Name << " = newValue;" << std::endl
-                 << "}" << std::endl
-                 << std::endl;
+
+    if ((this->Accessors == "all")
+        || (this->Accessors == "set-get")) {
+        outputStream << std::endl
+                     << "/* accessor is: " << this->Accessors << "*/" << std::endl
+                     << "void " << ClassName << "::Get" << Name << "(" << Type << " & placeHolder) const" << std::endl
+                     << "{" << std::endl
+                     << "    placeHolder = this->" << Name << "Member;" << std::endl
+                     << "}" << std::endl
+                     << std::endl
+                     << "void " << ClassName << "::Set" << Name << "(const " << Type << " & newValue)" << std::endl
+                     << "{" << std::endl
+                     << "    this->" << Name << "Member = newValue;" << std::endl
+                     << "}" << std::endl
+                     << std::endl;
+    }
+
+    if ((this->Accessors == "all")
+        || (this->Accessors == "references")) {
+        outputStream << std::endl
+                     << "/* accessor is: " << this->Accessors << "*/" << std::endl
+                     << "const " << Type << " & " << ClassName << "::" << Name << "(void) const" << std::endl
+                     << "{" << std::endl
+                     << "    return this->" << Name << "Member;" << std::endl
+                     << "}" << std::endl
+                     << std::endl
+                     << Type << " & " << ClassName << "::" << Name << "(void)" << std::endl
+                     << "{" << std::endl
+                     << "    return this->" << Name << "Member;" << std::endl
+                     << "}" << std::endl
+                     << std::endl;
+    }
 }

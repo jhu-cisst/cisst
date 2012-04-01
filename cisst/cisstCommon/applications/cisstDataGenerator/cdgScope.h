@@ -38,7 +38,8 @@ public:
                CDG_MEMBER,
                CDG_CODE};
 
-    typedef std::list<cdgScope *> Stack;
+    typedef std::vector<cdgScope *> ScopesList;
+    typedef ScopesList Stack; // for parser to manage nested scopes
 
     cdgScope(unsigned int lineNumber);
 
@@ -52,11 +53,12 @@ public:
                           const std::string & value,
                           std::string & errorMessage) = 0;
     virtual bool IsValid(std::string & errorMessage) const = 0;
-    virtual void FillInDefaults(void) = 0;
+    virtual void FillInDefaults(void);
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
 
 protected:
+    ScopesList Scopes; // list of "scopes" found in this scope
     unsigned int LineNumber;
     void GenerateLineComment(std::ostream & outputStream) const;
 
