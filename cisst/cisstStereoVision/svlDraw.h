@@ -111,14 +111,14 @@ namespace svlDraw
         WarpMT(unsigned int thread_count);
         void SetThreadCount(unsigned int thread_count);
 
-        void CISST_EXPORT WarpTriangle(unsigned int thread_id,
-                                       svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
-                                       svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
-                                       unsigned int alpha = 256);
-        void CISST_EXPORT WarpQuad(unsigned int thread_id,
-                                   svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & in_quad,
-                                   svlSampleImage* out_img, unsigned int out_vch, svlQuad & out_quad,
-                                   unsigned int alpha = 256);
+        void WarpTriangle(unsigned int thread_id,
+                          svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
+                          svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
+                          unsigned int alpha = 256);
+        void WarpQuad(unsigned int thread_id,
+                      svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & in_quad,
+                      svlSampleImage* out_img, unsigned int out_vch, svlQuad & out_quad,
+                      unsigned int alpha = 256);
 
     private:
         WarpMT(const WarpMT & other);
