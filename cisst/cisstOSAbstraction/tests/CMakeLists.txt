@@ -23,6 +23,7 @@ set (SOURCE_FILES
      osaPipeExecTest.cpp
      osaSocketTest.cpp
      osaThreadTest.cpp
+     osaThreadSignalTest.cpp
      osaTripleBufferTest.cpp
      )
 
@@ -32,6 +33,7 @@ set (HEADER_FILES
      osaPipeExecTest.h
      osaSocketTest.h
      osaThreadTest.h
+     osaThreadSignalTest.h
      osaTripleBufferTest.h
      )
 
