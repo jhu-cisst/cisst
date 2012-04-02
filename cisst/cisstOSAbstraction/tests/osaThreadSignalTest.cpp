@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h>
 
 
-void osaThreadSignalTest::TestThreadSignalInternalsSize(void) {
+void osaThreadSignalTest::TestInternalsSize(void) {
     CPPUNIT_ASSERT(osaThreadSignal::INTERNALS_SIZE >= osaThreadSignal::SizeOfInternals());
 }
 
@@ -72,7 +72,7 @@ public:
 };
 
 
-void osaThreadSignalTest::TestThreadSignalWaitBlocks(void) {
+void osaThreadSignalTest::TestWaitBlocks(void) {
     // all time intervals are in milli seconds!
     osaStopwatch overallTimer;
     overallTimer.Reset();

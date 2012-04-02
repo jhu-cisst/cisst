@@ -5,9 +5,9 @@
   $Id$
 
   Author(s):  Anton Deguet
-  Created on: 2008-01-30
+  Created on: 2012-04-02
 
-  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,12 +22,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-class osaThreadSignalTest: public CppUnit::TestFixture
+class osaTimeServerTest: public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(osaThreadSignalTest);
+    CPPUNIT_TEST_SUITE(osaTimeServerTest);
     {
         CPPUNIT_TEST(TestInternalsSize);
-        CPPUNIT_TEST(TestWaitBlocks);
+        CPPUNIT_TEST(TestMultipleServersSingleThread);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -41,6 +41,7 @@ public:
     /*! Test that structure for internal size is large enough */
     void TestInternalsSize(void);
 
-    /*! Check that waits do block */
-    void TestWaitBlocks(void);
+    /*! Check that multiple server on a single thread have more or
+      less the same origin */
+    void TestMultipleServersSingleThread(void);
 };

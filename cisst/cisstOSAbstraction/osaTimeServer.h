@@ -75,6 +75,8 @@ class CISST_EXPORT osaTimeServer: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+    friend class osaTimeServerTest;
+
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 32};
     char Internals[INTERNALS_SIZE];
