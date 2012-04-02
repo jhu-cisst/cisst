@@ -225,7 +225,10 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
 
                 _SynchronizeThreads(procInfo);
 
-                if (Status == SVL_STOP_REQUEST) break;
+                if (Status == SVL_STOP_REQUEST) {
+                    ret = SVL_STOP_REQUEST;
+                    break;
+                }
 
                 // Manage looped playback and frame timing
                 _OnSingleThread(procInfo)
