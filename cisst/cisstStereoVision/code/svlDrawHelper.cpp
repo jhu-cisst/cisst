@@ -1174,7 +1174,7 @@ void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int 
         id1 = _lm_id[i];
         id2 = _rm_id[i];
 
-        pos1 = (_lm_pos[i] * ratio[id1] + 512) >> 10;
+        pos1 = (_lm_pos[i] * ratio[id1] + 512) >> 10;        
         pos2 = (_rm_pos[i] * ratio[id2] + 512) >> 10;
         if (pos1 >= _ilen[id1]) pos1 = _ilen[id1] - 1;
         if (pos2 >= _ilen[id2]) pos2 = _ilen[id2] - 1;
