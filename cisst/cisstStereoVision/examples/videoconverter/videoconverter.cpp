@@ -69,6 +69,7 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
     }
     else {
         if (!loadcodec || writer.LoadCodec("codec.dat") != SVL_OK) {
+            writer.DialogFramerate();
             writer.DialogCodec(dst_path);
         }
         writer.SetFilePath(dst_path);
