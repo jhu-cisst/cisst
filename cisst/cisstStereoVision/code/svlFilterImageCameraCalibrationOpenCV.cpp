@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 const static int MINCORNERTHRESHOLD = 5;
 const static int MAXCALIBRATIONITERATION = 10;
-const static int MAXNUMBEROFGRIDS = 25;
+const static int MAXNUMBEROFGRIDS = 50;
 const static bool DEBUG = false;
 
 /***************************************************/
@@ -79,7 +79,7 @@ int svlFilterImageCameraCalibrationOpenCV::Process(svlProcInfo* procInfo, svlSam
     return SVL_OK;
 }
 
-bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index)
+bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index, vctDynamicVector<vctInt2>& originIndicators)
 {
     std::stringstream path;
     std::string currentFileName;
@@ -89,8 +89,8 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirect
     svlCCCornerDetector* calCornerDetector;
     calCornerDetector = new svlCCCornerDetector(BoardSize.width,BoardSize.height);
     calOriginDetector = new svlCCOriginDetector();
-
-    bool ok = false;
+    vctDynamicVector<vctDynamicVector<vctInt2>> localOriginIndicators;
+    unsigned int ok = 0;
 
     // image file
     path << imageDirectory;
@@ -114,10 +114,32 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirect
         std::cout << "ERROR: cv::Mat Failed to convert image: " << path.str() << std::endl;
         return false;
     }
+    if(originIndicators.empty())
+    {
+        // tracker coords file
+        path.str(std::string());
+        path << imageDirectory;
+        path << imagePrefix;
+        path.fill('0');
+        path << std::setw(3) << index << std::setw(1);
+        path << ".colorpts";
+        currentFileName = path.str();
+
+        if(DEBUG)
+            std::cout << "Reading origin indicators for " << currentFileName << std::endl;
+        localOriginIndicators.resize(1);
+        ImportOriginsFile(path.str(),localOriginIndicators);
+    }
 
     // find origin must preceed corners, additional draws throws off threshold
-    calOriginDetector->detectOrigin(image.IplImageRef());
-
+    if(!localOriginIndicators.empty())
+    {
+        std::cout << "using origin indicators: " << localOriginIndicators << std::endl;
+        calOriginDetector->detectOrigin(image.IplImageRef(),localOriginIndicators[0]);
+    }else
+    {
+        calOriginDetector->detectOrigin(image.IplImageRef(),originIndicators);
+    }
     // find corners
     calCornerDetector->detectCorners(matImage,image.IplImageRef());
 
@@ -150,6 +172,7 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirect
 
     //save images and calibration grids
     Images.push_back(image);
+
     if(calibrationGrid->valid)
     {
         CalibrationGrids.push_back(calibrationGrid);
@@ -175,12 +198,27 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirect
 *	bool											- Success indicator
 *
 ***********************************************************************************************************/
-bool svlFilterImageCameraCalibrationOpenCV::ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex)
+bool svlFilterImageCameraCalibrationOpenCV::ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, bool loadOrigins)
 {
     bool valid = false;
+    vctDynamicVector<vctDynamicVector<vctInt2>> origins;
+
+    if(loadOrigins)
+    {
+        std::stringstream path;
+        // image file
+        path << imageDirectory;
+        path << "origins.txt";
+        origins.resize(stopIndex-startIndex+1);
+        loadOrigins = ImportOriginsFile(path.str(),origins);
+        std::cout << "use origins file: "<< loadOrigins << " " << path.str() << std::endl;
+    }
 
     for(int i=startIndex;i<stopIndex+1;i++){
-        valid = ProcessImage(imageDirectory, imagePrefix, imageType, i) || valid;
+        if(loadOrigins)
+            valid = ProcessImage(imageDirectory, imagePrefix, imageType, i, origins[i]) || valid;
+        else
+            valid = ProcessImage(imageDirectory, imagePrefix, imageType, i) || valid;
     }
 
     if (!valid)
@@ -190,6 +228,60 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImages(std::string imageDirec
 
     return valid;
 }
+
+bool svlFilterImageCameraCalibrationOpenCV::ImportOriginsFile(const std::string & inputFile, vctDynamicVector<vctDynamicVector<vctInt2>>& origins)
+{
+    vct3 positionFromFile;
+
+    std::string tempLine = "aaaa";
+    std::vector <std::string> token;
+    std::ifstream inf(inputFile.c_str());
+    int i=0;
+    while(1) {
+        tempLine = "aaaa";
+        std::vector <std::string> token;
+        std::getline(inf, tempLine);
+        Tokenize(tempLine, token, ",");
+        if (inf.eof() || token.size() <= 0)
+            break;
+        std::cerr << token << std::endl;
+        if (token.at(0).compare(0,1,"#")) {
+            //assume format is name,point1X,point1Y,point2X,point2Y,point3X,point3Y
+            if (token.size() < 7)
+            {
+                std::cout << "ERROR: ImportOriginsfiles: " << token << std::endl;
+                return false;
+            }
+            //assume 3 points
+            origins[i].resize(3);
+            origins[i][0] = vctInt2((int)strtod(token.at(1).c_str(), NULL),(int)strtod(token.at(2).c_str(), NULL));
+            origins[i][1] = vctInt2((int)strtod(token.at(3).c_str(), NULL),(int)strtod(token.at(4).c_str(), NULL));
+            origins[i][2] = vctInt2((int)strtod(token.at(5).c_str(), NULL),(int)strtod(token.at(6).c_str(), NULL));
+            i++;
+        }
+        token.clear();
+    }
+    return true;
+}
+
+
+void svlFilterImageCameraCalibrationOpenCV::Tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters)
+{
+    // Skip delimiters at beginning.
+    std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+    // Find first "non-delimiter".
+    std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+    while (std::string::npos != pos || std::string::npos != lastPos) {
+        // Found a token, add it to the vector.
+        tokens.push_back(str.substr(lastPos, pos - lastPos));
+        // Skip delimiters.  Note the "not_of"
+        lastPos = str.find_first_not_of(delimiters, pos);
+        // Find next "non-delimiter"
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+}
+
 
 bool svlFilterImageCameraCalibrationOpenCV::RunCameraCalibration(bool runHandEye)
 {
@@ -246,13 +338,13 @@ double svlFilterImageCameraCalibrationOpenCV::OptimizeCalibration()
     std::vector<cv::Mat> originalDistCoeffs;
     std::vector<cv::Mat> originalRvecs;
     std::vector<cv::Mat> originalTvecs;
-    int* originalThresholds = new int[MAXNUMBEROFGRIDS];
+    float* originalThresholds = new float[MAXNUMBEROFGRIDS];
     int* prevVisibility = new int[MAXNUMBEROFGRIDS];
     int* pPrevVisibility = new int[MAXNUMBEROFGRIDS];
-    int prevThreshold, pPrevThreshold;
+    float prevThreshold, pPrevThreshold;
     int validIndex = 0;
     int maxPointsCount = 0;
-    int refineThreshold = 2;
+    float refineThreshold = 2.0;
     int rootMeanSquaredThreshold = 1;
     int pointsCount;
 
@@ -311,13 +403,13 @@ double svlFilterImageCameraCalibrationOpenCV::OptimizeCalibration()
         if(iteration > 1)
             refineThreshold = 2;
 
-        if(rms > prevRMS && pointsCount > (maxPointsCount + MINCORNERTHRESHOLD*CalibrationGrids.size()))
+        if(rms > prevRMS && pointsCount > (int)(maxPointsCount + MINCORNERTHRESHOLD*CalibrationGrids.size()))
         {
             refineThreshold = 1;
             pointIncreaseIteration++;
         }
 
-        if(rms < prevRMS || (pointsCount > (maxPointsCount + pointIncreaseIteration*MINCORNERTHRESHOLD*CalibrationGrids.size())))
+        if(rms < prevRMS || (pointsCount > (int)(maxPointsCount + pointIncreaseIteration*MINCORNERTHRESHOLD*CalibrationGrids.size())))
         {
             std::cout << "Iteration: " << iteration << " rms delta: " << prevRMS-rms << " count delta: " <<  pointsCount-maxPointsCount << " pointIteration " << pointIncreaseIteration <<std::endl;
             pPrevCameraMatrix = prevCameraMatrix;
@@ -363,7 +455,7 @@ double svlFilterImageCameraCalibrationOpenCV::OptimizeCalibration()
     {
         CameraMatrix = pPrevCameraMatrix;
         DistCoeffs = pPrevDistCoeffs;
-       Rvecs = pPrevRvecs;
+        Rvecs = pPrevRvecs;
         Tvecs = pPrevTvecs;
         refineThreshold = pPrevThreshold;
 
@@ -440,7 +532,7 @@ double svlFilterImageCameraCalibrationOpenCV::Calibrate(bool projected, bool gro
                     points2D = CalibrationGrids.at(i)->getGoodImagePoints();
                     points3D = CalibrationGrids.at(i)->getGoodCalibrationGridPoints3D();
                 }
-                if (points2D.size() > CalibrationGrids.at(i)->minGridPoints && points3D.size() > CalibrationGrids.at(i)->minGridPoints && points2D.size() == points3D.size())
+                if ((int)points2D.size() > CalibrationGrids.at(i)->minGridPoints && (int)points3D.size() > CalibrationGrids.at(i)->minGridPoints && points2D.size() == points3D.size())
                 {
                     std::cout << "image " << i << " using " << points2D.size() <<" points." << std::endl;
                     ImagePoints.push_back(points2D);
@@ -566,7 +658,7 @@ double svlFilterImageCameraCalibrationOpenCV::RunOpenCVCalibration(bool projecte
     return rms;
 }
 
-void svlFilterImageCameraCalibrationOpenCV::RefineGrids(int localThreshold)
+void svlFilterImageCameraCalibrationOpenCV::RefineGrids(float localThreshold)
 {
     //refine
     int validIndex = 0;
@@ -665,7 +757,9 @@ void svlFilterImageCameraCalibrationOpenCV::UpdateCameraGeometry()
     double alpha = 0.0;//assumed to be square pixels
     vct2 f = vct2(CameraMatrix.at<double>(0,0),CameraMatrix.at<double>(1,1));
     vct2 c = vct2(CameraMatrix.at<double>(0,2),CameraMatrix.at<double>(1,2));
-    vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),DistCoeffs.at<double>(4,0),0.0,0.0);
+    //reduced camera model set kc(5)=0; Zhang sets last 3 to zero
+    vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),0.0,0.0,0.0);
+    //vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),DistCoeffs.at<double>(4,0),0.0,0.0);
     CameraGeometry->SetIntrinsics(f,c,alpha,k);
 
 //    std::cout << "==========setRectifier==============" << std::endl;
@@ -684,22 +778,34 @@ void svlFilterImageCameraCalibrationOpenCV::UpdateCameraGeometry()
     //int result= rectifier->GetInput("calibration")->PushSample(CameraGeometry);
     //SHOULD NOT BE USING SetTableFromCameraCalibration() DIRECTLY
     //int result = rectifier->SetTableFromCameraCalibration(imageSize.height,imageSize.width, vct3x3::Eye(),f,c,k,0,0);
+}
+
+svlSampleCameraGeometry* svlFilterImageCameraCalibrationOpenCV::GetCameraGeometry(int index)
+{
+    if(index == -1)
+    {
+        return CameraGeometry;
+    }
+    else if(index < (CalibrationGrids.size()-1))
+    {
+        return CalibrationGrids.at(index)->GetCameraGeometry();
+    }
 
 }
 
 void svlFilterImageCameraCalibrationOpenCV::PrintCalibrationParameters()
 {
-    for(int i=0;i<CameraMatrix.rows;i++)
+    for(int i=0;i<(int)CameraMatrix.rows;i++)
     {
-        for(int j=0;j<CameraMatrix.cols;j++)
+        for(int j=0;j<(int)CameraMatrix.cols;j++)
         {
             std::cout << "Camera matrix: " << CameraMatrix.at<double>(i,j) << std::endl;
         }
     }
 
-    for(int i=0;i<DistCoeffs.rows;i++)
+    for(int i=0;i<(int)DistCoeffs.rows;i++)
     {
-        for(int j=0;j<DistCoeffs.cols;j++)
+        for(int j=0;j<(int)DistCoeffs.cols;j++)
         {
             std::cout << "Distortion _coefficients: " << DistCoeffs.at<double>(i,j) << std::endl;
         }
@@ -717,7 +823,9 @@ void svlFilterImageCameraCalibrationOpenCV::WriteToFileCalibrationParameters(std
     path << "calibration.dat";
     vct2 f = vct2(CameraMatrix.at<double>(0,0),CameraMatrix.at<double>(1,1));
     vct2 c = vct2(CameraMatrix.at<double>(0,2),CameraMatrix.at<double>(1,2));
-    vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),DistCoeffs.at<double>(4,0),0.0,0.0);
+    //reduced camera model set kc(5)=0; Zhang sets last 3 to zero
+    vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),0.0,0.0,0.0);
+    //vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),DistCoeffs.at<double>(4,0),0.0,0.0);
 
     std::ofstream outputStream(path.str().c_str(), std::ofstream::binary);
     cmnSerializer serialization(outputStream);

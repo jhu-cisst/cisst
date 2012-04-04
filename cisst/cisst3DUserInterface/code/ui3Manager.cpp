@@ -968,3 +968,15 @@ void ui3Manager::RequestPick(osaThreadSignal * pickSignal, vtkPropPicker * picke
     PickRequested = true;
     PickSignal->Wait();
 }
+
+ui3VTKRenderer* ui3Manager::GetRenderer(unsigned int camid)
+{
+    for (unsigned int i = 0; i < Renderers.size(); i ++) {
+        if (Renderers[i] &&
+            Renderers[i]->camid == camid)
+        {
+            return Renderers[i]->renderer;
+        }
+    }
+    return NULL;
+}

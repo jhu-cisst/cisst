@@ -70,6 +70,11 @@ class CISST_EXPORT ui3VTKRenderer: public cmnGenericObject
 
     void Add(ui3VisibleObject * object);
 
+    svlCameraGeometry GetCameraGeometry(void)
+    {
+        return this->CameraGeometry;
+    };
+
  private:
     ui3SceneManager* SceneManager;
 

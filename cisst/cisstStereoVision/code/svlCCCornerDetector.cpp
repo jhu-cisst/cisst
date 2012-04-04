@@ -57,9 +57,9 @@ void svlCCCornerDetector::findGoodFeatures(cv::Mat matImage)
 
     // Tune these parameters for goodFeaturesToTrack, cornerSubPix
     double quality_level = 0.3;
-    double min_distance = 5;
+    int min_distance = 5;
     int eig_block_size = 5;
-    int use_harris = false;
+    bool use_harris = false;
     int maxCorners = 200;
     double subPixTermEpsilon = 0.0001;
 
@@ -123,7 +123,7 @@ bool svlCCCornerDetector::nearestCorner(IplImage* iplImage, cv::Point2f targetPo
     switch(cornerDetectionFlag)
     {
     case FEATURES:
-        for(int i = 0; i < chessboardCorners.size(); i++ )
+        for(int i=0;i<(int) chessboardCorners.size(); i++ )
         {
             currentMinDistance = distanceBetweenTwoPoints(targetPoint.x,targetPoint.y, chessboardCorners.at(i).x, chessboardCorners.at(i).y);
             if(currentMinDistance < minDistance)
@@ -170,7 +170,7 @@ void svlCCCornerDetector::drawCorners(IplImage* iplImage)
     switch(cornerDetectionFlag)
     {
     case FEATURES:
-        for(int i = 0; i < chessboardCorners.size(); i++ )
+        for(int i=0;i<(int) chessboardCorners.size(); i++ )
         {
             cvCircle( iplImage, cvPoint(cvRound(chessboardCorners.at(i).x),cvRound(chessboardCorners.at(i).y)), 3, cvScalar(255,255,0), 1, 8, 0 );
         }

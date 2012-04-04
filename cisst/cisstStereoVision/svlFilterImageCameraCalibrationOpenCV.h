@@ -45,14 +45,14 @@ public:
     svlFilterImageCameraCalibrationOpenCV();
     virtual ~svlFilterImageCameraCalibrationOpenCV();
 
-    bool ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
-    bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
+    bool ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, bool loadOrigins=false);
+    bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index, vctDynamicVector<vctInt2>& originIndicators = vctDynamicVector<vctInt2>());
     void Reset();
     bool RunCameraCalibration(bool runHandEye);
     void SetBoardSize(int width, int height){ BoardSize = cv::Size(width,height);};
     void SetSquareSize(float size){ SquareSize = size;};
     std::vector<svlSampleImageRGB> GetImages(){return Images;};
-    svlSampleCameraGeometry* GetCameraGeometry(){return CameraGeometry;};
+    svlSampleCameraGeometry* GetCameraGeometry(int index=-1);
     void SetCameraGeometry(vct2 f, vct2 c, double alpha, vctFixedSizeVector<double,7> k) { CameraGeometry->SetIntrinsics(f,c,alpha,k);};
     void PrintCalibrationParameters();
     void WriteToFileCalibrationParameters(std::string directory);
@@ -65,7 +65,7 @@ protected:
 
 private:
     double OptimizeCalibration();
-    void RefineGrids(int localThreshold);
+    void RefineGrids(float localThreshold);
     double Calibrate(bool projected, bool groundTruthTest, int *pointsCount);
     bool CheckCalibration(bool projected);
     double RunOpenCVCalibration(bool projected);
@@ -77,6 +77,8 @@ private:
         std::vector<float>& perViewErrors, bool projected );
     void UpdateCalibrationGrids();
     void UpdateCameraGeometry();
+    bool ImportOriginsFile(const std::string & inputFile, vctDynamicVector<vctDynamicVector<vctInt2>>& origins);
+    void Tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters);
 
     //Camera Calibration
     std::vector<svlSampleImageRGB> Images;

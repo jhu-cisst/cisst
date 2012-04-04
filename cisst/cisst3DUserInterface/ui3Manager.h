@@ -377,6 +377,8 @@ class CISST_EXPORT ui3Manager: public ui3BehaviorBase
     inline bool MastersAsMice(void) const {
         return this->MaM;
     }
+    
+    ui3VTKRenderer * GetRenderer(unsigned int camid);
 
  private:
 

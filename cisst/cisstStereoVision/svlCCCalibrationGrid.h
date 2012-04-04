@@ -44,6 +44,7 @@ public:
     void setGroundTruthTransformation(CvMat* groundTruthCameraTransformation);
     void compareGroundTruth();
     void printCalibrationParameters();
+    svlSampleCameraGeometry* GetCameraGeometry();
 
     ////////// Parameters //////////
     cv::Point2f** calibrationGridPoints;
@@ -66,13 +67,13 @@ public:
     bool valid;
     bool validGroundTruth;
     bool hasTracking;
-    int refineThreshold;
+    float refineThreshold;
     int minGridPoints;
 
 private:
     int findGridPointIndex(cv::Point3f point);
     void create2DChessboardCorners(bool visible);
-    void homographyCorrelation(double threshold);
+    void homographyCorrelation(float threshold);
     int applyHomography(double homography[], float threshold);
     bool updateHomography(float threshold);
     float distanceBetweenTwoPoints ( float x1, float y1, float x2, float y2);

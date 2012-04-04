@@ -74,14 +74,14 @@ void svlCCPointsFileIO::repackData(IplImage* iplImage)
     switch(fileFormat)
     {
     case ORIGINAL:
-        pointsCount = data[10][0];
-        cv::Size(data[7][0],data[7][1]);
+        pointsCount = (int)data[10][0];
+        cv::Size((int)data[7][0],(int)data[7][1]);
         worldToTCPOffset = 2;
         offset = 13;
         break;
 		case IMPROVED:
-        pointsCount = data[9][0];
-        imageSize = cv::Size(data[6][0],data[6][1]);
+        pointsCount = (int)data[9][0];
+        imageSize = cv::Size((int)data[6][0],(int)data[6][1]);
         worldToTCPOffset = 3;
         offset = 12;
         break;
@@ -96,9 +96,9 @@ void svlCCPointsFileIO::repackData(IplImage* iplImage)
     cv::Mat rvect(1,3,CV_64F,worldToTCPRVector);
     cv::Mat rmatrix;
     cv::Rodrigues(rvect,rmatrix);
-    float dataMatrix[4][4] = {{rmatrix.at<double>(0,0),rmatrix.at<double>(0,1),rmatrix.at<double>(0,2),worldToTCPTVector[0][0]},
-                              {rmatrix.at<double>(1,0),rmatrix.at<double>(1,1),rmatrix.at<double>(1,2),worldToTCPTVector[0][1]},
-                              {rmatrix.at<double>(2,0),rmatrix.at<double>(2,1),rmatrix.at<double>(2,2),worldToTCPTVector[0][2]},
+    float dataMatrix[4][4] = {{(float)rmatrix.at<double>(0,0),(float)rmatrix.at<double>(0,1),(float)rmatrix.at<double>(0,2),worldToTCPTVector[0][0]},
+                              {(float)rmatrix.at<double>(1,0),(float)rmatrix.at<double>(1,1),(float)rmatrix.at<double>(1,2),worldToTCPTVector[0][1]},
+                              {(float)rmatrix.at<double>(2,0),(float)rmatrix.at<double>(2,1),(float)rmatrix.at<double>(2,2),worldToTCPTVector[0][2]},
                               {0,0,0,1}};
     worldToTCP = cvCreateMat(4,4,CV_64F);
     worldToTCP->data.fl[0] = dataMatrix[0][0];
@@ -121,7 +121,7 @@ void svlCCPointsFileIO::repackData(IplImage* iplImage)
     //imagePoints;
     //calibrationGridPoints;
     int index;
-    for(int i=0;i<pointsCount;i++)
+    for(int i=0;i<(int)pointsCount;i++)
     {
         index = i + offset;
         //calibrationGridPoints.push_back(cv::Point3f(imageSize.width/2+data[index][0]/20*30,imageSize.height/2+data[index][1]/20*30,data[index][2]));
@@ -203,7 +203,7 @@ void svlCCDLRCalibrationFileIO::repackData(int numImages)
     std::cout<<"tcpToCamera1 " << tcpToCamera.at<double>(2,0) <<","<< tcpToCamera.at<double>(2,1) <<","<< tcpToCamera.at<double>(2,2) <<","<< tcpToCamera.at<double>(2,3)<< std::endl;
 
     int index = 28;
-    for(int i=0;i<numImages;i++)
+    for(int i=0;i<(int)numImages;i++)
     {
         float cameraParameters[3][4] = {{data[index][0], data[index][1],data[index][2], data[index][3]},
                                         {data[index+1][0], data[index+1][1],data[index+1][2], data[index+1][3]},
@@ -235,7 +235,7 @@ void svlCCDLRCalibrationFileIO::repackData(int numImages)
 
 void svlCCDLRCalibrationFileIO::printCameraMatrix()
 {
-    for(int i=0;i<numImages;i++)
+    for(int i=0;i<(int)numImages;i++)
     {
         CvMat* m = (CvMat*) cameraMatrices[i];
         std::cout<<"CameraMatrix # " << i << " " << m->data.fl[0]<<","<< m->data.fl[1] <<","<< m->data.fl[2] <<","<< m->data.fl[3]<< std::endl;

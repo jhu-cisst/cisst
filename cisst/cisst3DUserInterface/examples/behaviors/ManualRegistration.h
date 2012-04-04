@@ -22,10 +22,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrRegistrationRigid.h>
 #include <cisstParameterTypes/prmPositionJointGet.h>
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
+#include <cisst3DUserInterface/ui3VisibleAxes.h>
 #include <cisst3DUserInterface/ui3VTKStippleActor.h>
+#include <cisst3DUserInterface/ui3VTKRenderer.h>
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>
+#include <vtkAxesActor.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
@@ -42,6 +45,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkPolyDataReader.h>
 #include <vtkCellArray.h>
 #include <vtkCubeSource.h>
+#include <vtkCylinderSource.h>
 #include <vtkFloatArray.h>
 #include <vtkPointData.h>
 #include <vtkRenderer.h>
@@ -62,9 +66,10 @@ class ManualRegistrationSurfaceVisibleStippleObject;
 class CISST_EXPORT ManualRegistration: public ui3BehaviorBase
 {
 public:
-    enum VisibleObjectType {MODEL = 0};
+    enum VisibleObjectType {ALL = 0, NO_FIDUCIALS, MODEL, TUMOR, CURSOR, TARGETS_REAL, TARGETS_VIRTUAL, FIDUCIALS_REAL, FIDUCIALS_VIRTUAL, CALIBRATION_REAL, CALIBRATION_VIRTUAL};
     enum BooleanFlagTypes {DEBUG = 0, VISIBLE, PREVIOUS_MAM, LEFT_BUTTON, RIGHT_BUTTON,
-                           CAMERA_PRESSED, BOTH_BUTTON_PRESSED, UPDATE_FIDUCIALS, LEFT_BUTTON_RELEASED, RIGHT_BUTTON_RELEASED};
+                           CAMERA_PRESSED, CLUTCH_PRESSED, BOTH_BUTTON_PRESSED, UPDATE_FIDUCIALS, LEFT_BUTTON_RELEASED, RIGHT_BUTTON_RELEASED};
+    enum Frame {ECM=0, UI3, ECMRCM};
 
     ManualRegistration(const std::string & name);
     ~ManualRegistration();
@@ -86,6 +91,7 @@ public:
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
     void SecondaryMasterButtonCallback(const prmEventButton & event);
+    void MasterClutchPedalCallback(const prmEventButton & payload);
     void UpdateButtonEvents(void);
     void ResetButtonEvents(void)
     {
@@ -101,20 +107,27 @@ protected:
                           double object_displacement[3],
                           double object_rotation[4]);
     void CameraControlPedalCallback(const prmEventButton & payload);
+    void UpdateCameraPressed(void);
+
+private:
     void PositionDepth(void);
     void PositionBack(void);
     void PositionHome(void);
-    void ToggleUpdateFiducials(void);
+    void ToggleFiducials(void);
     void UpdateFiducials(void);
     void ToggleVisibility(void);
-    void UpdateCameraPressed(void);
+
     vctFrm3 GetCurrentECMtoECMRCM(void);
+    vctFrm3 GetCurrentCartesianPositionSlave(void);
     void UpdatePreviousPosition();
-    bool ImportFiducialFile(const std::string & inputFile);
+    bool ImportFiducialFile(const std::string & inputFile, VisibleObjectType type);
     void Tokenize(const std::string & str, std::vector<std::string> & tokens, const std::string & delimiters);
-    void AddFiducial(vctFrm3 positionUI3, bool virtualFlag);
-    ManualRegistrationSurfaceVisibleStippleObject* FindClosestFiducial(vctFrm3 positionUI3, bool virtualFlag);
+    void AddFiducial(vctFrm3 positionUI3, VisibleObjectType type);
+    ManualRegistrationSurfaceVisibleStippleObject* FindClosestFiducial(vctFrm3 positionUI3, VisibleObjectType type, int& index);
     void Register(void);
+    void ComputeTRE();
+    bool ManualRegistration::RayRayIntersect(vctDouble3 p1,vctDouble3 p2,vctDouble3 p3,vctDouble3 p4,vctDouble3 &pa,vctDouble3 &pb);
+    void GetFiducials(vctDynamicVector<vct3>& fiducialsVirtualECMRCM, vctDynamicVector<vct3>& fiducialsRealECMRCM,VisibleObjectType type, Frame frame);
     void UpdateVisibleList(void);
 
     StateType PreviousState;
@@ -123,9 +136,17 @@ protected:
     typedef std::map<int, bool> FlagType;
     FlagType BooleanFlags;
 
-    vctDouble3 InitialMasterLeft, InitialMasterRight;
+    VisibleObjectType VisibleToggle;
+    VisibleObjectType FiducialToggle;
+    double MeanTRE, MaxTRE, MeanTREProjection, MaxTREProjection, MeanTRETriangulation, MaxTRETriangulation;
+    int TREFiducialCount;
+    FILE *TRE, * TREProjection, *TRETriangulation;
 
+    vctDouble3 InitialMasterLeft, InitialMasterRight;
+    vctFrm3 WristCalibration, WristToTip;
+    ui3VisibleObject * Cursor;
     ui3VisibleList * VisibleList, * VisibleListECM, * VisibleListECMRCM, * VisibleListVirtual, * VisibleListReal;
     typedef std::map<int, ManualRegistrationSurfaceVisibleStippleObject *> ManualRegistrationType;
-    ManualRegistrationType VisibleObjects, VisibleObjectsVirtualFiducials, VisibleObjectsRealFiducials;
+    ManualRegistrationType VisibleObjects, VisibleObjectsVirtualFiducials, VisibleObjectsRealFiducials, VisibleObjectsVirtualTargets, VisibleObjectsRealTargets,
+        VisibleObjectsVirtualCalibration,VisibleObjectsRealCalibration;
 };
