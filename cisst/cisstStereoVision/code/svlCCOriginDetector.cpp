@@ -404,7 +404,7 @@ void svlCCOriginDetector::drawColorBlobs(IplImage* iplImage)
 *	 2). findOriginByCircle
 *
 ***********************************************************************************************************/
-void svlCCOriginDetector::detectOrigin(IplImage* iplImage, vctDynamicVector<vctInt2>& inputBlobs)
+void svlCCOriginDetector::detectOrigin(IplImage* iplImage, vctDynamicVector<vctInt2> inputBlobs)
 {
     reset();
     if(!inputBlobs.empty())

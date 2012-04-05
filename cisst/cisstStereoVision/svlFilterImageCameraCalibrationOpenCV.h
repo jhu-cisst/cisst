@@ -46,7 +46,7 @@ public:
     virtual ~svlFilterImageCameraCalibrationOpenCV();
 
     bool ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, bool loadOrigins=false);
-    bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index, vctDynamicVector<vctInt2>& originIndicators = vctDynamicVector<vctInt2>());
+    bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index, vctDynamicVector<vctInt2> originIndicators = vctDynamicVector<vctInt2>());
     void Reset();
     bool RunCameraCalibration(bool runHandEye);
     void SetBoardSize(int width, int height){ BoardSize = cv::Size(width,height);};
@@ -77,7 +77,7 @@ private:
         std::vector<float>& perViewErrors, bool projected );
     void UpdateCalibrationGrids();
     void UpdateCameraGeometry();
-    bool ImportOriginsFile(const std::string & inputFile, vctDynamicVector<vctDynamicVector<vctInt2>>& origins);
+    bool ImportOriginsFile(const std::string & inputFile, vctDynamicVector<vctDynamicVector<vctInt2> >& origins);
     void Tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters);
 
     //Camera Calibration

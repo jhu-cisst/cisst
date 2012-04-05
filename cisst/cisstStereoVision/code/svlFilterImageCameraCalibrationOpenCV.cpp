@@ -79,7 +79,7 @@ int svlFilterImageCameraCalibrationOpenCV::Process(svlProcInfo* procInfo, svlSam
     return SVL_OK;
 }
 
-bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index, vctDynamicVector<vctInt2>& originIndicators)
+bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index, vctDynamicVector<vctInt2> originIndicators)
 {
     std::stringstream path;
     std::string currentFileName;
@@ -89,7 +89,7 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirect
     svlCCCornerDetector* calCornerDetector;
     calCornerDetector = new svlCCCornerDetector(BoardSize.width,BoardSize.height);
     calOriginDetector = new svlCCOriginDetector();
-    vctDynamicVector<vctDynamicVector<vctInt2>> localOriginIndicators;
+    vctDynamicVector<vctDynamicVector<vctInt2> > localOriginIndicators;
     unsigned int ok = 0;
 
     // image file
@@ -201,7 +201,7 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImage(std::string imageDirect
 bool svlFilterImageCameraCalibrationOpenCV::ProcessImages(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex, bool loadOrigins)
 {
     bool valid = false;
-    vctDynamicVector<vctDynamicVector<vctInt2>> origins;
+    vctDynamicVector<vctDynamicVector<vctInt2> > origins;
 
     if(loadOrigins)
     {
@@ -229,7 +229,7 @@ bool svlFilterImageCameraCalibrationOpenCV::ProcessImages(std::string imageDirec
     return valid;
 }
 
-bool svlFilterImageCameraCalibrationOpenCV::ImportOriginsFile(const std::string & inputFile, vctDynamicVector<vctDynamicVector<vctInt2>>& origins)
+bool svlFilterImageCameraCalibrationOpenCV::ImportOriginsFile(const std::string & inputFile, vctDynamicVector<vctDynamicVector<vctInt2> >& origins)
 {
     vct3 positionFromFile;
 
