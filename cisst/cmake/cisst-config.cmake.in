@@ -121,7 +121,12 @@ if (cisst_FIND_COMPONENTS)
     if (${FOUND_IT} EQUAL -1 )
       # inform user and set variables to not-found/false
       if (NOT cisst_FIND_QUIETLY)
-        message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
+        # check if this is a "virtual" library
+        if (DEFINED ${required}_OPTION_NAME)
+          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
+        else (DEFINED ${required}_OPTION_NAME)
+          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
+        endif (DEFINED ${required}_OPTION_NAME)
       endif (NOT cisst_FIND_QUIETLY)
       set (cisst_FOUND_AS_REQUIRED 0)
       set (cisst_${required}_FOUND 0)

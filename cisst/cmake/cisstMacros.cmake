@@ -16,6 +16,15 @@
 # --- end cisst license ---
 
 
+# set virtual library to CMake option name equivalence
+set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
+mark_as_advanced (cisstFLTK_OPTION_NAME)
+set (cisstQt_OPTION_NAME "CISST_HAS_QT" CACHE STRING "Name of option to use to compile cisstQt")
+mark_as_advanced (cisstQt_OPTION_NAME)
+set (cisstOpenGL_OPTION_NAME "CISST_HAS_OPENGL" CACHE STRING "Name of option to use to compile cisstOpenGL")
+mark_as_advanced (cisstOpenGL_OPTION_NAME)
+
+
 # function used to determine if some extra configuration messages
 # should be displayed
 function (cisst_cmake_debug ...)
@@ -303,7 +312,11 @@ macro (cisst_add_library ...)
       set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
       list (FIND _CISST_LIBRARIES_AND_SETTINGS ${dependency} FOUND_IT)
       if (${FOUND_IT} EQUAL -1 )
-        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+        if (DEFINED ${dependency}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled, use the flag ${${dependency}_OPTION_NAME} to compile it")
+        else (DEFINED ${dependency}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+        endif (DEFINED ${dependency}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (dependency)
     # Set the link flags
@@ -387,7 +400,11 @@ macro (cisst_target_link_libraries TARGET ...)
       set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
       list (FIND _CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
       if (${FOUND_IT} EQUAL -1 )
-        message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+        if (DEFINED ${required}_OPTION_NAME)
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${requires} which doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
+        else (DEFINED ${required}_OPTION_NAME)
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled") 
+        endif (DEFINED ${required}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
 
@@ -753,6 +770,11 @@ macro (cisst_information_message_missing_libraries ...)
     endif (${FOUND_IT} EQUAL -1 )
   endforeach (lib)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
+  foreach (lib ${_cimml_MISSING_LIBRARIES})
+    if (DEFINED ${lib}_OPTION_NAME)
+      message ("Information: to compile ${lib}, you need to use the flag ${${lib}_OPTION_NAME}")
+    endif (DEFINED ${lib}_OPTION_NAME)
+  endforeach (lib)
 endmacro (cisst_information_message_missing_libraries)
 
 
