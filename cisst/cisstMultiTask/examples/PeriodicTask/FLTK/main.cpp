@@ -70,11 +70,15 @@ int main(int argc, char ** argv)
     // cleanup
     componentManager->KillAll();
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 2.0 * cmn_s);
+
     componentManager->Cleanup();
 
     delete uiInstance;
     delete clockInstance;
     delete sineInstance;
+
+    // stop all logs
+    cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);
 
     return 0;
 }

@@ -10,8 +10,8 @@ class displayUI {open : {public mtsTaskFromCallback}
   decl {mtsFunctionWrite SetTriggerThreshold;} {}
   decl {mtsFunctionVoid ResetTrigger;} {}
   decl {mtsFunctionRead GetTime;} {}
-  decl {vctPlot2DBase::Trace * DataTrace;} {}
-  decl {vctPlot2DBase::Trace * TriggerTrace;} {}
+  decl {vctPlot2DBase::Signal * DataSignal;} {}
+  decl {vctPlot2DBase::Signal * TriggerSignal;} {}
   Function {displayUI(const std::string & name): mtsTaskFromCallback(name)} {open
   } {
     Fl_Window DisplayWindow {
@@ -90,10 +90,10 @@ this->Trigger->bounds(-0.9, 0.9);
 this->Trigger->value(0.0);
 this->TriggerValue->value(0.0);
 // plotting
-this->DataTrace = this->Plot->AddTrace("Data");
-this->DataTrace->SetColor(vct3(1.0, 0.9, 0.9));
-this->TriggerTrace = this->Plot->AddTrace("Trigger");
-this->TriggerTrace->SetColor(vct3(0.0, 1.0, 0.0));
+this->DataSignal = this->Plot->AddSignal("Data");
+this->DataSignal->SetColor(vct3(1.0, 0.9, 0.9));
+this->TriggerSignal = this->Plot->AddSignal("Trigger");
+this->TriggerSignal->SetColor(vct3(0.0, 1.0, 0.0));
 this->Plot->SetContinuousFitY(false);
 this->Plot->FitY(-5.0, 5.0); // set Y range} {}
   }
@@ -125,10 +125,10 @@ if (!this->WaitingForTrigger) {
     mtsDouble data;
     this->GetData(data);
     this->Data->value(data);
-    this->DataTrace->AppendPoint(vctDouble2(data.Timestamp(),
-                                            data.Data));
-    this->TriggerTrace->AppendPoint(vctDouble2(data.Timestamp(),
-                                               this->Trigger->value() * this->Amplitude->value()));
+    this->DataSignal->AppendPoint(vctDouble2(data.Timestamp(),
+                                             data.Data));
+    this->TriggerSignal->AppendPoint(vctDouble2(data.Timestamp(),
+                                                this->Trigger->value() * this->Amplitude->value()));
     this->Plot->redraw();
 }} {}
   }
