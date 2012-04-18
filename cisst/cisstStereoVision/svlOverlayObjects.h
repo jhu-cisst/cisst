@@ -41,6 +41,8 @@ class CISST_EXPORT svlOverlay
 {
 friend class svlFilterImageOverlay;
 
+typedef enum { _DoNotRemove, _Remove, _RemoveAndDelete } RemoveState;
+
 public:
     svlOverlay();
     svlOverlay(unsigned int videoch,
@@ -80,6 +82,7 @@ private:
     svlOverlay*  Next;
     svlOverlay*  Prev;
     bool         Used;
+    RemoveState  MarkedForRemoval;
 };
 
 

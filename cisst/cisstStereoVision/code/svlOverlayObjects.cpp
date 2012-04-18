@@ -40,7 +40,8 @@ svlOverlay::svlOverlay() :
     TransformSynchronized(false),
     Next(0),
     Prev(0),
-    Used(false)
+    Used(false),
+    MarkedForRemoval(_DoNotRemove)
 {
 }
 
@@ -55,7 +56,8 @@ svlOverlay::svlOverlay(unsigned int videoch,
     TransformSynchronized(false),
     Next(0),
     Prev(0),
-    Used(false)
+    Used(false),
+    MarkedForRemoval(_DoNotRemove)
 {
 }
 
@@ -296,6 +298,9 @@ bool svlOverlayImage::IsInputTypeValid(svlStreamType inputtype)
 
 void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
 {
+    // Skip drawing if fully transparent
+    if (Alpha == 0) return;
+
     // Get sample from input
     svlSampleImage* ovrlimage = dynamic_cast<svlSampleImage*>(input);
 
@@ -407,7 +412,23 @@ void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
         }
     }
     else {
-        // TO DO
+        const unsigned int w1 = Alpha + 1;
+        const unsigned int w0 = 256 - w1;
+        unsigned char *pbg, *pov;
+
+        for (int j = 0; j < linecount; j ++) {
+            pbg = bgdata;   bgdata   += ws;
+            pov = ovrldata; ovrldata += wo;
+
+            for (i = 0; i < copylen; i ++) {
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+            }
+        }
     }
 }
 
@@ -950,6 +971,9 @@ void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN
 {
     if (!Buffer) return;
 
+    // Skip drawing if fully transparent
+    if (Alpha == 0) return;
+
     svlImageRGB* ovrlimage = Buffer->Pull(false);
     if (!ovrlimage) return;
 
@@ -1062,7 +1086,23 @@ void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN
         }
     }
     else {
-        // TO DO
+        const unsigned int w1 = Alpha + 1;
+        const unsigned int w0 = 256 - w1;
+        unsigned char *pbg, *pov;
+
+        for (int j = 0; j < linecount; j ++) {
+            pbg = bgdata;   bgdata   += ws;
+            pov = ovrldata; ovrldata += wo;
+
+            for (i = 0; i < copylen; i ++) {
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+            }
+        }
     }
 }
 
