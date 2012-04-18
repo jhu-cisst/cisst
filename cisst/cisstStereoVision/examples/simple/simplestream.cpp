@@ -105,7 +105,7 @@ int main()
                                   "image",         // image input name
                                   SVL_LEFT,        // image input channel
                                   vctInt2(20, 60), // position
-                                  255);            // alpha (transparency)
+                                  128);            // alpha (transparency)
     overlay.AddOverlay(image_overlay);
 
     // Add static rectangle overlay
@@ -169,6 +169,8 @@ int main()
                                     2,                           // border width
                                     svlRGB(64, 64, 64));         // border color
     overlay.AddOverlay(bar_overlay);
+    
+    overlay.AddQueuedItems();
 
     // Setup branch window
     window2.SetTitle("Window 2");
