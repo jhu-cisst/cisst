@@ -66,6 +66,9 @@ public:
     void AddOverlay(svlOverlay & overlay);
     int AddQueuedItems();
 
+    int RemoveOverlay(svlOverlay & overlay);
+    int RemoveAndDeleteOverlay(svlOverlay* overlay);
+
     void SetEnableInputSync(bool enabled);
     bool GetEnableInputSync() const;
     void SetEnableTransformSync(bool enabled);
@@ -74,6 +77,7 @@ public:
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
+    virtual void OnStop();
 
 protected:
     virtual void CreateInterfaces();
@@ -107,6 +111,8 @@ private:
 
     bool IsInputAlreadyQueued(const std::string &name);
     void AddQueuedItemsInternal();
+    void RemoveOverlayInternal(svlOverlay* overlay);
+    void RemoveAndDeleteOverlayInternal(svlOverlay* overlay);
 };
 
 typedef mtsGenericObjectProxy<svlFilterImageOverlay::ImageTransform> svlFilterImageOverlay_ImageTransform;

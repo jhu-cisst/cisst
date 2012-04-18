@@ -218,6 +218,104 @@ int svlFilterImageOverlay::AddQueuedItems()
     return SVL_OK;
 }
 
+int svlFilterImageOverlay::RemoveOverlay(svlOverlay & overlay)
+{
+    CS.Enter();
+
+        for (svlOverlay* p_overlay = FirstOverlay;
+             p_overlay;
+             p_overlay = p_overlay->Next) {
+
+            if (p_overlay == &overlay) {
+                if (IsRunning()) {
+                    overlay.MarkedForRemoval = svlOverlay::_Remove;
+                }
+                else {
+                    if (&overlay == FirstOverlay) {
+                        if (overlay.Prev) {
+                            CMN_LOG_CLASS_RUN_WARNING << "RemoveOverlay: FirstOverlay is not first in the overlay queue" << std::endl;
+                        }
+                        // Remove from linked list
+                        FirstOverlay = overlay.Next;
+                        if (overlay.Next) overlay.Next->Prev = 0;
+                    }
+                    else {
+                        if (overlay.Prev == 0) {
+                            CS.Leave();
+
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveOverlay: pointer to previous transformation is zero" << std::endl;
+                            return SVL_FAIL;
+                        }
+                        // Remove from linked list
+                        overlay.Prev->Next = overlay.Next;
+                        if (overlay.Next) overlay.Next->Prev = overlay.Prev;
+                    }
+                    // Reset overlay connections
+                    overlay.Prev = 0;
+                    overlay.Next = 0;
+                    overlay.MarkedForRemoval = svlOverlay::_DoNotRemove;
+                }
+
+                CS.Leave();
+                return SVL_OK;
+            }
+        }
+
+    CS.Leave();
+
+    CMN_LOG_CLASS_RUN_WARNING << "RemoveOverlay: overlay not registered to this overlay filter" << std::endl;
+    return SVL_FAIL;
+}
+
+int svlFilterImageOverlay::RemoveAndDeleteOverlay(svlOverlay* overlay)
+{
+    if (!overlay) return SVL_FAIL;
+
+    CS.Enter();
+
+        for (svlOverlay* p_overlay = FirstOverlay;
+             p_overlay;
+             p_overlay = p_overlay->Next) {
+
+            if (p_overlay == overlay) {
+                if (IsRunning()) {
+                    overlay->MarkedForRemoval = svlOverlay::_RemoveAndDelete;
+                }
+                else {
+                    if (overlay == FirstOverlay) {
+                        if (overlay->Prev) {
+                            CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlay: FirstOverlay is not first in the overlay queue" << std::endl;
+                        }
+                        // Remove from linked list
+                        FirstOverlay = overlay->Next;
+                        if (overlay->Next) overlay->Next->Prev = 0;
+                    }
+                    else {
+                        if (overlay->Prev == 0) {
+                            CS.Leave();
+
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveAndDeleteOverlay: pointer to previous transformation is zero" << std::endl;
+                            return SVL_FAIL;
+                        }
+                        // Remove from linked list
+                        overlay->Prev->Next = overlay->Next;
+                        if (overlay->Next) overlay->Next->Prev = overlay->Prev;
+                    }
+                    // Delete object
+                    delete overlay;
+                }
+
+                CS.Leave();
+                return SVL_OK;
+            }
+        }
+
+    CS.Leave();
+
+    CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlay: overlay not registered to this overlay filter" << std::endl;
+    return SVL_FAIL;
+}
+
 void svlFilterImageOverlay::SetEnableInputSync(bool enabled)
 {
     EnableInputSync = enabled;
@@ -310,8 +408,23 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         svlOverlayInput* overlayinput = 0;
         svlFilterInput* input = 0;
         svlSample* ovrlsample = 0;
+        svlOverlay* t_overlay = 0;
 
-        for (overlay = FirstOverlay; overlay; overlay = overlay->Next) {
+        overlay = FirstOverlay;
+        while (overlay) {
+
+            if (overlay->MarkedForRemoval == svlOverlay::_Remove) {
+                t_overlay = overlay->Next;
+                RemoveOverlayInternal(overlay);
+                overlay = t_overlay;
+                continue;
+            }
+            else if (overlay->MarkedForRemoval == svlOverlay::_RemoveAndDelete) {
+                t_overlay = overlay->Next;
+                RemoveAndDeleteOverlayInternal(overlay);
+                overlay = t_overlay;
+                continue;
+            }
 
             // Cross casting to the input base class
             overlayinput = dynamic_cast<svlOverlayInput*>(overlay);
@@ -356,10 +469,33 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             // Overlays without input
                 overlay->Draw(src_image, 0);
             }
+
+            overlay = overlay->Next;
         }
     }
 
     return SVL_OK;
+}
+
+void svlFilterImageOverlay::OnStop()
+{
+    // Remove overlay objects that we didn't have a chance to remove earlier
+    svlOverlay *overlay = FirstOverlay, *t_overlay = 0;
+    while (overlay) {
+        if (overlay->MarkedForRemoval == svlOverlay::_Remove) {
+            t_overlay = overlay->Next;
+            RemoveOverlayInternal(overlay);
+            overlay = t_overlay;
+            continue;
+        }
+        else if (overlay->MarkedForRemoval == svlOverlay::_RemoveAndDelete) {
+            t_overlay = overlay->Next;
+            RemoveAndDeleteOverlayInternal(overlay);
+            overlay = t_overlay;
+            continue;
+        }
+        overlay = overlay->Next;
+    }
 }
 
 void svlFilterImageOverlay::CreateInterfaces()
@@ -499,6 +635,66 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
     BlobInputsToAddUsed   = 0;
     TextInputsToAddUsed   = 0;
     OverlaysToAddUsed     = 0;
+
+    CS.Leave();
+}
+
+void svlFilterImageOverlay::RemoveOverlayInternal(svlOverlay* overlay)
+{
+    CS.Enter();
+
+        if (overlay == FirstOverlay) {
+            if (overlay->Prev) {
+                CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlayInternal: FirstOverlay is not first in the overlay queue" << std::endl;
+            }
+            // Remove from linked list
+            FirstOverlay = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = 0;
+        }
+        else {
+            if (overlay->Prev == 0) {
+                CS.Leave();
+
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveAndDeleteOverlayInternal: pointer to previous transformation is zero" << std::endl;
+                return;
+            }
+            // Remove from linked list
+            overlay->Prev->Next = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = overlay->Prev;
+        }
+        // Reset overlay connections
+        overlay->Prev = 0;
+        overlay->Next = 0;
+        overlay->MarkedForRemoval = svlOverlay::_DoNotRemove;
+
+    CS.Leave();
+}
+
+void svlFilterImageOverlay::RemoveAndDeleteOverlayInternal(svlOverlay* overlay)
+{
+    CS.Enter();
+
+        if (overlay == FirstOverlay) {
+            if (overlay->Prev) {
+                CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlayInternal: FirstOverlay is not first in the overlay queue" << std::endl;
+            }
+            // Remove from linked list
+            FirstOverlay = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = 0;
+        }
+        else {
+            if (overlay->Prev == 0) {
+                CS.Leave();
+
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveAndDeleteOverlayInternal: pointer to previous transformation is zero" << std::endl;
+                return;
+            }
+            // Remove from linked list
+            overlay->Prev->Next = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = overlay->Prev;
+        }
+        // Delete object
+        delete overlay;
 
     CS.Leave();
 }
