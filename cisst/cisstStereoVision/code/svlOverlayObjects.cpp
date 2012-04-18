@@ -423,10 +423,6 @@ void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
             for (i = 0; i < copylen; i ++) {
                 *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
                 pov ++; pbg ++;
-                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
-                pov ++; pbg ++;
-                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
-                pov ++; pbg ++;
             }
         }
     }
@@ -1095,10 +1091,6 @@ void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN
             pov = ovrldata; ovrldata += wo;
 
             for (i = 0; i < copylen; i ++) {
-                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
-                pov ++; pbg ++;
-                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
-                pov ++; pbg ++;
                 *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
                 pov ++; pbg ++;
             }
