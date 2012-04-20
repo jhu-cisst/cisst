@@ -704,6 +704,7 @@ bool svlVidCapSrcMIL::MILInitializeApplication()
     if (MilApplication == M_NULL) MappAlloc(M_DEFAULT, &MilApplication);
     if (MilApplication == M_NULL) return false;
     MappControl(M_ERROR, M_PRINT_DISABLE);
+//    MappControlMp(MilApplication, M_MP_PRIORITY, M_DEFAULT, M_TIME_CRITICAL, M_NULL);
     return true;
 }
 
@@ -722,7 +723,7 @@ bool svlVidCapSrcMIL::MILInitializeSystem(int system)
     MsysAlloc(M_SYSTEM_DEFAULT, system, M_SETUP, &(MilSystem[system]));
     if (MilSystem[system] == M_NULL) return false;
 
-    MsysControl(system, M_MODIFIED_BUFFER_HOOK_MODE, M_MULTI_THREAD);
+    MsysControl(system, M_MODIFIED_BUFFER_HOOK_MODE, M_MULTI_THREAD + 2/*Max number of threads*/);
 
     MilNumberOfDigitizers[system] = static_cast<unsigned int>(MsysInquire(MilSystem[system], M_DIGITIZER_NUM, M_NULL));
     if (MilNumberOfDigitizers[system] > 0) {

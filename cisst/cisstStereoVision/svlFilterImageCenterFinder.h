@@ -57,17 +57,20 @@ public:
     bool GetVerticalLink() const;
 
     int  SetEnableEllipseFitting(bool enable);
+    int  SetEnableEllipseFittingDrawEllipse(bool enable);
     int  SetEnableEllipseMask(bool enable);
     void SetEllipseMaskTransition(int start, int end);
 
     bool GetEnableEllipseFitting() const;
+    bool GetEnableEllipseFittingDrawEllipse() const;
     bool GetEnableEllipseMask() const;
     void GetEllipseMaskTransition(int & start, int & end) const;
+
+    svlSampleImage* GetEllipseMask();
 
     void AddReceiver(svlFilterImageCenterFinderInterface* receiver);
 
 protected:
-    virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();

@@ -57,8 +57,7 @@ svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
     AddInputType("input", svlTypeImageRGBStereo);
 
     AddOutput("output", true);
-    AddOutput("mask", false);
-    SetAutomaticOutputType(false);
+    SetAutomaticOutputType(true);
 }
 
 int svlFilterImageCenterFinder::GetCenter(int &x, int &y, unsigned int videoch) const
@@ -141,6 +140,12 @@ int svlFilterImageCenterFinder::SetEnableEllipseFitting(bool enable)
     return SVL_OK;
 }
 
+int svlFilterImageCenterFinder::SetEnableEllipseFittingDrawEllipse(bool enable)
+{
+    EllipseFittingDrawEllipse = enable;
+    return SVL_OK;
+}
+
 int svlFilterImageCenterFinder::SetEnableEllipseMask(bool enable)
 {
     if (IsInitialized()) return SVL_FAIL;
@@ -160,6 +165,11 @@ bool svlFilterImageCenterFinder::GetEnableEllipseFitting() const
     return EllipseFittingEnabled;
 }
 
+bool svlFilterImageCenterFinder::GetEnableEllipseFittingDrawEllipse() const
+{
+    return EllipseFittingDrawEllipse;
+}
+
 bool svlFilterImageCenterFinder::GetEnableEllipseMask() const
 {
     return EllipseMaskEnabled;
@@ -171,6 +181,11 @@ void svlFilterImageCenterFinder::GetEllipseMaskTransition(int & start, int & end
     end   = EllipseMaskTransitionEnd;
 }
 
+svlSampleImage* svlFilterImageCenterFinder::GetEllipseMask()
+{
+    return MaskImage;
+}
+
 void svlFilterImageCenterFinder::AddReceiver(svlFilterImageCenterFinderInterface* receiver)
 {
     if (!receiver) return;
@@ -178,25 +193,6 @@ void svlFilterImageCenterFinder::AddReceiver(svlFilterImageCenterFinderInterface
     unsigned int size = static_cast<unsigned int>(Receivers.size());
     Receivers.resize(size + 1);
     Receivers[size] = receiver;
-}
-
-int svlFilterImageCenterFinder::OnConnectInput(svlFilterInput &input, svlStreamType type)
-{
-    // Check if type is on the supported list
-    if (!input.IsTypeSupported(type)) return SVL_FAIL;
-
-    // If all is good, set the trunk output type
-    GetOutput()->SetType(type);
-
-    // Then set the output types of non-trunk outputs
-    if (type == svlTypeImageRGB) {
-        GetOutput("mask")->SetType(svlTypeImageMono8);
-    }
-    else {
-        GetOutput("mask")->SetType(svlTypeImageMono8Stereo);
-    }
-
-    return SVL_OK;
 }
 
 int svlFilterImageCenterFinder::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -256,8 +252,6 @@ int svlFilterImageCenterFinder::Initialize(svlSample* syncInput, svlSample* &syn
             if (videochannels == 1) MaskImage = new svlSampleImageMono8;
             else                    MaskImage = new svlSampleImageMono8Stereo;
             MaskImage->SetSize(image);
-            MaskImage->SetTimestamp(syncInput->GetTimestamp());
-            GetOutput("mask")->SetupSample(MaskImage);
             TransitionImage = new svlSampleImageMono8;
             TransitionImage->SetSize(10, 256);
             CreateTransitionImage();
@@ -434,12 +428,6 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
                 }
             }
         }
-
-        if (EllipseFittingEnabled && EllipseMaskEnabled) {
-            // Push mask sample out through async-output
-            MaskImage->SetTimestamp(syncInput->GetTimestamp());
-            GetOutput("mask")->PushSample(MaskImage);
-        }
     }
 
     return SVL_OK;
@@ -606,7 +594,8 @@ bool svlFilterImageCenterFinder::FindEllipse(svlSampleImage* image, unsigned int
 
     // Eliminate outliers
 
-    int err, errpos, maxerr;
+    int err;
+//    int errpos, maxerr;
 
 //    std::cerr << "***" << std::endl;
 //    while (1) {
@@ -677,12 +666,12 @@ bool svlFilterImageCenterFinder::FindEllipse(svlSampleImage* image, unsigned int
             i --;
         }
     }
-
+/*
     for (i = 0; i < point_count; i ++) {
         tptr = img_buf + (edge_y[i] * width + edge_x[i]) * 3;
         tptr[0] = 255; tptr[1] = 0; tptr[2] = 255;
     }
-
+*/
     // Fit ellipse on point cloud
 
     if (point_count < 6) return false;
@@ -710,6 +699,11 @@ void svlFilterImageCenterFinder::CreateTransitionImage()
 
 void svlFilterImageCenterFinder::UpdateMaskImage(unsigned int videoch, svlEllipse & ellipse)
 {
+    if (ellipse.cx < 0 || ellipse.cx >= static_cast<int>(MaskImage->GetWidth(videoch))  ||
+        ellipse.cy < 0 || ellipse.cy >= static_cast<int>(MaskImage->GetHeight(videoch)) ||
+        ellipse.rx < 1 || ellipse.rx > 1000 ||
+        ellipse.ry < 1 || ellipse.ry > 1000) return;
+
     const double anglestep = (3.14159265358979 * 2) / static_cast<double>(EllipseMaskSlices);
     const double sr = sin(ellipse.angle);
     const double cr = cos(ellipse.angle);
@@ -723,18 +717,26 @@ void svlFilterImageCenterFinder::UpdateMaskImage(unsigned int videoch, svlEllips
     vctDynamicVectorRef<vctInt2> samples_out(EllipseSamplesOut[videoch]);
 
     // Initialize mask
-    memset(MaskImage->GetUCharPointer(), 255, MaskImage->GetDataSize());
+    memset(MaskImage->GetUCharPointer(videoch), 255, MaskImage->GetDataSize(videoch));
 
     // Calculate slice positions
     for (i = 0, a = 0.0; i < EllipseMaskSlices; i ++, a += anglestep) {
         sa = sin(a); ca = cos(a);
 
-        samples_in[i].X()  = ellipse.cx + ca * cr * (ellipse.rx + EllipseMaskTransitionStart) - sa * sr * (ellipse.ry + EllipseMaskTransitionStart);
-        samples_in[i].Y()  = ellipse.cy + ca * sr * (ellipse.rx + EllipseMaskTransitionStart) + sa * cr * (ellipse.ry + EllipseMaskTransitionStart);
+        samples_in[i].X() = ellipse.cx +
+                            static_cast<int>(ca * cr * (ellipse.rx + EllipseMaskTransitionStart) -
+                                             sa * sr * (ellipse.ry + EllipseMaskTransitionStart));
+        samples_in[i].Y() = ellipse.cy +
+                            static_cast<int>(ca * sr * (ellipse.rx + EllipseMaskTransitionStart) +
+                                             sa * cr * (ellipse.ry + EllipseMaskTransitionStart));
 
         if (EllipseMaskTransitionStart < EllipseMaskTransitionEnd) {
-            samples_out[i].X() = ellipse.cx + ca * cr * (ellipse.rx + EllipseMaskTransitionEnd)   - sa * sr * (ellipse.ry + EllipseMaskTransitionEnd);
-            samples_out[i].Y() = ellipse.cy + ca * sr * (ellipse.rx + EllipseMaskTransitionEnd)   + sa * cr * (ellipse.ry + EllipseMaskTransitionEnd);
+            samples_out[i].X() = ellipse.cx +
+                                 static_cast<int>(ca * cr * (ellipse.rx + EllipseMaskTransitionEnd) -
+                                                  sa * sr * (ellipse.ry + EllipseMaskTransitionEnd));
+            samples_out[i].Y() = ellipse.cy +
+                                 static_cast<int>(ca * sr * (ellipse.rx + EllipseMaskTransitionEnd) +
+                                                  sa * cr * (ellipse.ry + EllipseMaskTransitionEnd));
         }
     }
 
