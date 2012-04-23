@@ -100,6 +100,11 @@ public:
         seconds that have elaspsed since this call was made. */
     void SetTimeOrigin(void);
 
+    /*! Set the time origin based on the specified time server.
+        For systems that need to synchronize to the performance counter,
+        this also sets the offset (i.e., does not call Synchronize again). */
+    void SetTimeOriginFrom(const osaTimeServer *other);
+
     /*! Get the time origin that is in effect for the relative time
         measurements.
         \param origin Returns the current origin */

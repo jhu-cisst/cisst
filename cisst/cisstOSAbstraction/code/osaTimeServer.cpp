@@ -339,6 +339,23 @@ void osaTimeServer::SetTimeOrigin(void)
 #endif
 }
 
+void osaTimeServer::SetTimeOriginFrom(const osaTimeServer *other)
+{
+    CMN_LOG_RUN_VERBOSE << "osaTimeServer: setting time origin from existing time server" << std::endl;
+    osaTimeServerInternals *thisInternals = reinterpret_cast<osaTimeServerInternals*>(this->Internals);
+    const osaTimeServerInternals *otherInternals = reinterpret_cast<const osaTimeServerInternals*>(other->Internals);
+    thisInternals->TimeOrigin = otherInternals->TimeOrigin;
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+    thisInternals->CounterOrigin = otherInternals->CounterOrigin;
+#elif (CISST_OS == CISST_WINDOWS)
+    // The counter frequency and resolution should be set in the constructor
+    if ((thisInternals->CounterFrequency != otherInternals->CounterFrequency) ||
+        (thisInternals->CounterResolution != thisInternals->CounterResolution))
+        CMN_LOG_RUN_WARNING << "osaTimeServer: mismatch in counter frequency or resolution" << std::endl;
+    thisInternals->CounterOrigin = otherInternals->CounterOrigin;
+#endif
+}
+
 bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
 {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)|| (CISST_OS == CISST_LINUX_XENOMAI)

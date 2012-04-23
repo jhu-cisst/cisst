@@ -59,11 +59,22 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
         CPPUNIT_ASSERT(servers[index]);
     }
 
+#if 0
+    // This produces synchronization errors on Windows
     for (index = 0;
          index < numberOfServers;
          ++index) {
         servers[index]->SetTimeOrigin();
     }
+#else
+    // This works on Windows
+    servers[0]->SetTimeOrigin();
+    for (index = 1;
+         index < numberOfServers;
+         ++index) {
+        servers[index]->SetTimeOriginFrom(servers[0]);
+    }
+#endif
 
     stopwatch.Start();
 
