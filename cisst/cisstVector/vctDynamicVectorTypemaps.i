@@ -657,4 +657,4 @@ VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(long long int);
 VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(unsigned long long int);
 VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(double);
 
-#endif _vctDynamicVectorTypemapsTest_i
+#endif // _vctDynamicVectorTypemaps_i
