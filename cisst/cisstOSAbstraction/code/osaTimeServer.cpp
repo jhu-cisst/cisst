@@ -377,7 +377,9 @@ bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
     ULARGE_INTEGER tmp;
     tmp.QuadPart = INTERNALS_CONST(TimeOrigin) - OSA_OFFSET_TO_1970;
     origin.sec = (long) (tmp.QuadPart/OSA_100NSEC_PER_SEC);
-    origin.nsec = (long) ((tmp.LowPart)%OSA_100NSEC_PER_SEC)*100L;
+    //origin.nsec = (long) ((tmp.LowPart)%OSA_100NSEC_PER_SEC)*100L;
+    //Following line should be equivalent to the one above
+    origin.nsec = (long) (tmp.QuadPart - origin.sec*OSA_100NSEC_PER_SEC)*100L;
 #endif
     return true;
 }
@@ -463,6 +465,10 @@ void osaTimeServer::RelativeToAbsolute(double relative, osaAbsoluteTime & absolu
     delta_nsec = modf(relative, &delta_sec)/cmn_ns;
     absolute.sec += (long) delta_sec;
     absolute.nsec += (long) delta_nsec;
+    if (absolute.nsec >= 1000000000L) {
+        absolute.sec++;
+        absolute.nsec -= 1000000000L;
+    }
 }
 
 double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
@@ -477,7 +483,7 @@ double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
         delta_sec--;
         delta_nsec += 1000000000L;
     }
-    else if (delta_nsec > 1000000000L) {
+    else if (delta_nsec >= 1000000000L) {
         delta_sec++;
         delta_nsec -= 1000000000L;
     }

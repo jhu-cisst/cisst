@@ -63,14 +63,13 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
     // #define OSA_SHARE_SAME_TIME_ORIGIN
 
 #ifndef OSA_SHARE_SAME_TIME_ORIGIN
-    // This produces synchronization errors on Windows
+    // This tests consistency of synchronization (e.g., on Windows)
     for (index = 0;
          index < numberOfServers;
          ++index) {
         servers[index]->SetTimeOrigin();
     }
 #else
-    // This works on Windows
     servers[0]->SetTimeOrigin();
     for (index = 1;
          index < numberOfServers;
