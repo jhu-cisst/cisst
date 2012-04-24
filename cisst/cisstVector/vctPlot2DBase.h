@@ -58,6 +58,7 @@ class CISST_EXPORT vctPlot2DBase
     class CISST_EXPORT Signal
     {
         friend class vctPlot2DBase;
+        friend class vctPlot2DBase::Scale;
         friend class vctPlot2DOpenGL;
         friend class vctPlot2DVTK;
     public:
