@@ -28,6 +28,7 @@ class osaTimeServerTest: public CppUnit::TestFixture
     {
         CPPUNIT_TEST(TestInternalsSize);
         CPPUNIT_TEST(TestMultipleServersSingleThread);
+        CPPUNIT_TEST(TestMultipleServersMultiThreads);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -44,4 +45,8 @@ public:
     /*! Check that multiple server on a single thread have more or
       less the same origin */
     void TestMultipleServersSingleThread(void);
+
+    /*! Check that multiple server on multiple threads have more or
+      less the same origin */
+    void TestMultipleServersMultiThreads(void);
 };

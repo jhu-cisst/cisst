@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2008-01-30
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -59,7 +59,10 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
         CPPUNIT_ASSERT(servers[index]);
     }
 
-#if 0
+
+    // #define OSA_SHARE_SAME_TIME_ORIGIN
+
+#ifndef OSA_SHARE_SAME_TIME_ORIGIN
     // This produces synchronization errors on Windows
     for (index = 0;
          index < numberOfServers;
@@ -99,16 +102,182 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
         }
     }
 
+    std::cerr << "single thread" << std::endl;
     for (index = 0;
          index < numberOfServers;
          ++index) {
-        std::cerr << cmnInternalTo_ms(currentTimeMax - currentTime[index]) << " ";
+        std::cerr << std::endl
+                  << "server[" << index << "]: " << cmnInternalTo_ms(currentTimeMax - currentTime[index]) << " ";
     }
 
     std::cerr << std::endl
               << "delta in ms: " << cmnInternalTo_ms(currentTimeMax - currentTimeMin) << std::endl
               << "time to get time: " << cmnInternalTo_ms(stopwatch.GetElapsedTime()) << std::endl;
     CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
+}
+
+
+struct osaTimeServerTestThreadData
+{
+    size_t ThreadIndex;
+    osaThread * Thread;
+ 
+    bool * QuitFlag;
+
+    bool SetTimeOriginFlag;
+    bool GetTimeFlag;
+
+    double LastTime;
+    osaTimeServer TimeServer;
+};
+
+
+void * osaTimeServerTestRun(osaTimeServerTestThreadData * data)
+{
+    while (!(*(data->QuitFlag))) {
+        if (data->GetTimeFlag) {
+            data->LastTime = data->TimeServer.GetAbsoluteTimeInSeconds();
+            data->GetTimeFlag = false;
+        }
+        if (data->SetTimeOriginFlag) {
+            data->TimeServer.SetTimeOrigin();
+            data->SetTimeOriginFlag = false;
+        }
+        osaSleep(0.1 * cmn_ms);
+    }
+    return 0;
+}
+
+
+void osaTimeServerTest::TestMultipleServersMultiThreads(void)
+{
+    const size_t numberOfServers = 10;
+    size_t index;
+    osaTimeServerTestThreadData * threadsData[numberOfServers];
+    osaTimeServerTestThreadData * threadData;
+    osaThread * thread;
+    bool quitFlag = false;
+
+    osaStopwatch stopwatch;
+    double currentTimeMax;
+    double currentTimeMin;
+
+
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+
+
+        threadData = new osaTimeServerTestThreadData;
+        threadsData[index] = threadData;
+        
+        threadData->ThreadIndex = index;
+        threadData->QuitFlag = &quitFlag;
+
+        threadData->SetTimeOriginFlag = false;
+        threadData->GetTimeFlag = false;
+
+        thread = new osaThread;
+        threadData->Thread = thread;
+        
+        thread->Create<osaTimeServerTestThreadData*>(&osaTimeServerTestRun,
+                                                     threadsData[index]);
+    }
+
+
+#ifndef OSA_SHARE_SAME_TIME_ORIGIN
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        threadData = threadsData[index];
+        threadData->SetTimeOriginFlag = true;
+        while (threadData->SetTimeOriginFlag) {
+            osaSleep(0.1 * cmn_ms);
+        }
+    }
+#else
+    // This works on Windows
+    threadData = threadsData[0];
+    threadData->SetTimeOriginFlag = true;
+    while (threadData->SetTimeOriginFlag) {
+        osaSleep(0.1 * cmn_ms);
+    }
+
+    for (index = 1;
+         index < numberOfServers;
+         ++index) {
+        threadsData[index]->TimeServer.SetTimeOriginFrom(&(threadsData[0]->TimeServer));
+    }
+#endif
+
+
+    stopwatch.Start();
+
+    // trigger read time
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        threadData = threadsData[index];
+        threadData->GetTimeFlag = true;
+    }
+
+    // make sure all time read
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        threadData = threadsData[index];
+        while (threadData->GetTimeFlag) {
+            osaSleep(0.1 * cmn_ms);
+        }
+    }
+
+    stopwatch.Stop();
+
+    // read all time values
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        threadData = threadsData[index];
+    }
+
+    currentTimeMax = cmnTypeTraits<double>::MinNegativeValue();
+    currentTimeMin = cmnTypeTraits<double>::MaxPositiveValue();
+
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        threadData = threadsData[index];
+        if (threadData->LastTime > currentTimeMax) {
+            currentTimeMax = threadData->LastTime;
+        }
+        if (threadData->LastTime < currentTimeMin) {
+            currentTimeMin = threadData->LastTime;
+        }
+    }
+
+    std::cerr << "multiple threads" << std::endl;
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        std::cerr << std::endl
+                  << "server[" << index << "]: " << cmnInternalTo_ms(currentTimeMax - threadsData[index]->LastTime) << " ";
+    }
+
+    std::cerr << std::endl
+              << "delta in ms: " << cmnInternalTo_ms(currentTimeMax - currentTimeMin) << std::endl
+              << "time to get time: " << cmnInternalTo_ms(stopwatch.GetElapsedTime()) << std::endl;
+    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
+
+    quitFlag = true;
+
+    // to make sure all threads are stopped and data freed
+    for (index = 0;
+         index < numberOfServers;
+         ++index) {
+        threadsData[index]->Thread->Wait();
+        delete threadsData[index]->Thread;
+        delete threadsData[index];
+    }
 }
 
 
