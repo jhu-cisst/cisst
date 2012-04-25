@@ -33,6 +33,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h>
 
 
+#if (CISST_OS == CISST_WINDOWS)
+    const double osaTimeServerTestDelta = 10.0 * cmn_ms;
+#else
+    const double osaTimeServerTestDelta = 5.0 * cmn_ms;
+#endif
+
+
 void osaTimeServerTest::TestInternalsSize(void) {
     CPPUNIT_ASSERT(osaTimeServer::INTERNALS_SIZE >= osaTimeServer::SizeOfInternals());
 }
@@ -42,7 +49,7 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
 {
     osaCPUSetAffinity(OSA_CPU1);
 
-    const size_t numberOfServers = 10;
+    const size_t numberOfServers = 20;
     osaTimeServer * servers[numberOfServers];
 
     size_t index;
@@ -60,7 +67,7 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
     }
 
 
-    // #define OSA_SHARE_SAME_TIME_ORIGIN
+// #define OSA_SHARE_SAME_TIME_ORIGIN
 
 #ifndef OSA_SHARE_SAME_TIME_ORIGIN
     // This tests consistency of synchronization (e.g., on Windows)
@@ -101,17 +108,6 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
         }
     }
 
-    std::cerr << "single thread" << std::endl;
-    for (index = 0;
-         index < numberOfServers;
-         ++index) {
-        std::cerr << std::endl
-                  << "server[" << index << "]: " << cmnInternalTo_ms(currentTimeMax - currentTime[index]) << " ";
-    }
-
-    std::cerr << std::endl
-              << "delta in ms: " << cmnInternalTo_ms(currentTimeMax - currentTimeMin) << std::endl
-              << "time to get time: " << cmnInternalTo_ms(stopwatch.GetElapsedTime()) << std::endl;
     CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
 }
 
@@ -120,7 +116,7 @@ struct osaTimeServerTestThreadData
 {
     size_t ThreadIndex;
     osaThread * Thread;
- 
+
     bool * QuitFlag;
 
     bool SetTimeOriginFlag;
@@ -150,7 +146,7 @@ void * osaTimeServerTestRun(osaTimeServerTestThreadData * data)
 
 void osaTimeServerTest::TestMultipleServersMultiThreads(void)
 {
-    const size_t numberOfServers = 10;
+    const size_t numberOfServers = 20;
     size_t index;
     osaTimeServerTestThreadData * threadsData[numberOfServers];
     osaTimeServerTestThreadData * threadData;
@@ -169,7 +165,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
 
         threadData = new osaTimeServerTestThreadData;
         threadsData[index] = threadData;
-        
+
         threadData->ThreadIndex = index;
         threadData->QuitFlag = &quitFlag;
 
@@ -178,7 +174,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
 
         thread = new osaThread;
         threadData->Thread = thread;
-        
+
         thread->Create<osaTimeServerTestThreadData*>(&osaTimeServerTestRun,
                                                      threadsData[index]);
     }
@@ -254,17 +250,6 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         }
     }
 
-    std::cerr << "multiple threads" << std::endl;
-    for (index = 0;
-         index < numberOfServers;
-         ++index) {
-        std::cerr << std::endl
-                  << "server[" << index << "]: " << cmnInternalTo_ms(currentTimeMax - threadsData[index]->LastTime) << " ";
-    }
-
-    std::cerr << std::endl
-              << "delta in ms: " << cmnInternalTo_ms(currentTimeMax - currentTimeMin) << std::endl
-              << "time to get time: " << cmnInternalTo_ms(stopwatch.GetElapsedTime()) << std::endl;
     CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
 
     quitFlag = true;
