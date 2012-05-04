@@ -1609,8 +1609,8 @@ bool svlImageProcessingHelper::RectificationInternals::Generate(unsigned int wid
         // are assumed to be all zero (i.e. the left camera frame is the world frame).
         // Therefore, the variable `extrinsics_orig` will be zero and `extrinsics` will
         // contain the extrinsics from the CCT file format.
-        const svlSampleCameraGeometry::Extrinsics & extrinsics_orig = geometry.GetExtrinsics(SVL_LEFT);
-        const svlSampleCameraGeometry::Extrinsics & extrinsics      = geometry.GetExtrinsics(SVL_RIGHT);
+//        const svlSampleCameraGeometry::Extrinsics & extrinsics_orig = geometry.GetExtrinsics(SVL_LEFT);
+//        const svlSampleCameraGeometry::Extrinsics & extrinsics      = geometry.GetExtrinsics(SVL_RIGHT);
 
         // `extrinsics.om` is of type `vctRodRot3`
         // `extrinsics.T`  is of type `vct3`
@@ -1848,7 +1848,7 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 
     const unsigned int maxwidth = 1920;
     const unsigned int maxheight = 1200;
-    const unsigned int size = maxwidth * maxheight;
+    //const unsigned int size = maxwidth * maxheight;
     int valcnt, i;
 	vct3x3 KK_new = vct3x3::Eye();
 
@@ -1964,8 +1964,9 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 	x2.Assign(rays2.ElementwiseDivide(rays3));
 
 	//==============Distortion calculation==============//
-#pragma region DISTORTION
-
+#ifdef _MSC_VER
+    #pragma region DISTORTION
+#endif // _MSC_VER
 	vctVec r2, r4, r6, kr2, kr4, kr6, x1squared, x2squared,cdist, ones2x1, a1tangential, a1tangential2, a2tangential, a3tangential, deltaX1, deltaX2;
 
 	vctVec du_TP, dv_TP; //for thisn prism -SS
@@ -2109,7 +2110,9 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 	x2.Add(dv_TP);
 	//~Add
 
-#pragma endregion DISTORTION
+#ifdef _MSC_VER
+    #pragma endregion DISTORTION
+#endif // _MSC_VER
 	//==============Distortion calculation==============//
 
 	px2.SetSize(x1.size());
@@ -2163,7 +2166,7 @@ bool svlImageProcessingHelper::RectificationInternals::SetFromCameraCalibration(
 
 	if(debug)
 	{
-		printf("SetFromCameraCalibration computed %d good points\n", good_points.size());
+		printf("SetFromCameraCalibration computed %d good points\n", static_cast<int>(good_points.size()));
 	}
 
 	//Use good_points

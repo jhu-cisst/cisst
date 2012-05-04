@@ -1071,80 +1071,133 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 	return SVL_OK;
 }
 
-void svlVideoCodecCVI::SetExtension(const std::string & extension)
+void svlVideoCodecCVI::SetExtension(const std::string & CMN_UNUSED(extension))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetExtension - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetEncoderID(const int & encoder_id)
+void svlVideoCodecCVI::SetEncoderID(const int & CMN_UNUSED(encoder_id))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetEncoderID - feature is not supported by the CVI codec" << std::endl;
 }
 
 void svlVideoCodecCVI::SetCompressionLevel(const int & compr_level)
 {
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - codec is already open" << std::endl;
+        return;
+    }
+    if (compr_level < 0 || compr_level > 9) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - argument out of range [0, 9]" << std::endl;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetCompressionLevel - called (" << compr_level << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->Level = compr_level;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
 }
 
-void svlVideoCodecCVI::SetQualityBased(const bool & enabled)
+void svlVideoCodecCVI::SetQualityBased(const bool & CMN_UNUSED(enabled))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetQualityBased - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetTargetQuantizer(const double & target_quant)
+void svlVideoCodecCVI::SetTargetQuantizer(const double & CMN_UNUSED(target_quant))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetTargetQuantizer - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetDatarate(const int & datarate)
+void svlVideoCodecCVI::SetDatarate(const int & CMN_UNUSED(datarate))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetDatarate - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetKeyFrameEvery(const int & key_every)
+void svlVideoCodecCVI::SetKeyFrameEvery(const int & CMN_UNUSED(key_every))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetKeyFrameEvery - feature is not supported by the CVI codec" << std::endl;
 }
 
 void svlVideoCodecCVI::IsCompressionLevelEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsCompressionLevelEnabled - called" << std::endl;
+    enabled = true;
 }
 
 void svlVideoCodecCVI::IsEncoderListEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsEncoderListEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::IsTargetQuantizerEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsTargetQuantizerEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::IsDatarateEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsDatarateEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::IsKeyFrameEveryEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsFramesEveryEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::GetCompressionLevel(int & compr_level) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetCompressionLevel - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    compr_level = data->Level;
+
+    svlVideoIO::ReleaseCompression(compr);
 }
 
 void svlVideoCodecCVI::GetEncoderList(std::string & encoder_list) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetEncoderList - feature is not supported by the CVI codec" << std::endl;
+    encoder_list = "";
 }
 
 void svlVideoCodecCVI::GetEncoderID(int & encoder_id) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetEncoderID - feature is not supported by the CVI codec" << std::endl;
+    encoder_id = -1;
 }
 
 void svlVideoCodecCVI::GetQualityBased(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetQualityBased - feature is not supported by the CVI codec" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::GetTargetQuantizer(double & target_quant) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetTargetQuantizer - feature is not supported by the CVI codec" << std::endl;
+    target_quant = -1.0;
 }
 
 void svlVideoCodecCVI::GetDatarate(int & datarate) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetDatarate - feature is not supported by the CVI codec" << std::endl;
+    datarate = -1;
 }
 
 void svlVideoCodecCVI::GetKeyFrameEvery(int & key_every) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetKeyFrameEvery - feature is not supported by the CVI codec" << std::endl;
+    key_every = -1;
 }
 
 void svlVideoCodecCVI::DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size)

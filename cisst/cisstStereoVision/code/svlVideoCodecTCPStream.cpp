@@ -762,78 +762,158 @@ int svlVideoCodecTCPStream::Write(svlProcInfo* procInfo, const svlSampleImage &i
 
 void svlVideoCodecTCPStream::SetExtension(const std::string & extension)
 {
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetExtension - codec is already open" << std::endl;
+        return;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetExtension - called (\"" << extension << "\")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+
+    memset(&(compr->extension[0]), 0, 16);
+    memcpy(&(compr->extension[0]), extension.c_str(), std::min(static_cast<int>(extension.size()), 15));
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
 }
 
-void svlVideoCodecTCPStream::SetEncoderID(const int & encoder_id)
+void svlVideoCodecTCPStream::SetEncoderID(const int & CMN_UNUSED(encoder_id))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetEncoderID - feature is not supported by the TCP/IP Streamer codec" << std::endl;
 }
 
 void svlVideoCodecTCPStream::SetCompressionLevel(const int & compr_level)
 {
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - codec is already open" << std::endl;
+        return;
+    }
+
+    CompressorType compressor = JPEG;
+    if (Codec) {
+        std::string extension(Codec->extension);
+        if (extension == ".ncvi") compressor = CVI;
+    }
+
+    if (compressor == CVI) {
+        if (compr_level < 0 || compr_level > 9) {
+            CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - argument out of range [0, 9] for CVI compressor" << std::endl;
+            return;
+        }
+    }
+    else {
+        if (compr_level < 0 || compr_level > 100) {
+            CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - argument out of range [0, 100] for JPEG compressor" << std::endl;
+            return;
+        }
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetCompressionLevel - called (" << compr_level << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+
+    compr->data[0] = compr_level;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
 }
 
-void svlVideoCodecTCPStream::SetQualityBased(const bool & enabled)
+void svlVideoCodecTCPStream::SetQualityBased(const bool & CMN_UNUSED(enabled))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetQualityBased - feature is not supported by the TCP/IP Streamer codec" << std::endl;
 }
 
-void svlVideoCodecTCPStream::SetTargetQuantizer(const double & target_quant)
+void svlVideoCodecTCPStream::SetTargetQuantizer(const double & CMN_UNUSED(target_quant))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetTargetQuantizer - feature is not supported by the TCP/IP Streamer codec" << std::endl;
 }
 
-void svlVideoCodecTCPStream::SetDatarate(const int & datarate)
+void svlVideoCodecTCPStream::SetDatarate(const int & CMN_UNUSED(datarate))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetDatarate - feature is not supported by the TCP/IP Streamer codec" << std::endl;
 }
 
-void svlVideoCodecTCPStream::SetKeyFrameEvery(const int & key_every)
+void svlVideoCodecTCPStream::SetKeyFrameEvery(const int & CMN_UNUSED(key_every))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetKeyFrameEvery - feature is not supported by the TCP/IP Streamer codec" << std::endl;
 }
 
 void svlVideoCodecTCPStream::IsCompressionLevelEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsCompressionLevelEnabled - called" << std::endl;
+    enabled = true;
 }
 
 void svlVideoCodecTCPStream::IsEncoderListEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsEncoderListEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecTCPStream::IsTargetQuantizerEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsTargetQuantizerEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecTCPStream::IsDatarateEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsDatarateEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecTCPStream::IsKeyFrameEveryEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsFramesEveryEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecTCPStream::GetCompressionLevel(int & compr_level) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetCompressionLevel - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+
+    compr_level = compr->data[0];
+
+    svlVideoIO::ReleaseCompression(compr);
 }
 
 void svlVideoCodecTCPStream::GetEncoderList(std::string & encoder_list) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetEncoderList - feature is not supported by the TCP/IP Streamer codec" << std::endl;
+    encoder_list = "";
 }
 
 void svlVideoCodecTCPStream::GetEncoderID(int & encoder_id) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetEncoderID - feature is not supported by the TCP/IP Streamer codec" << std::endl;
+    encoder_id = -1;
 }
 
 void svlVideoCodecTCPStream::GetQualityBased(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetQualityBased - feature is not supported by the TCP/IP Streamer codec" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecTCPStream::GetTargetQuantizer(double & target_quant) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetTargetQuantizer - feature is not supported by the TCP/IP Streamer codec" << std::endl;
+    target_quant = -1.0;
 }
 
 void svlVideoCodecTCPStream::GetDatarate(int & datarate) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetDatarate - feature is not supported by the TCP/IP Streamer codec" << std::endl;
+    datarate = -1;
 }
 
 void svlVideoCodecTCPStream::GetKeyFrameEvery(int & key_every) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetKeyFrameEvery - feature is not supported by the TCP/IP Streamer codec" << std::endl;
+    key_every = -1;
 }
 
 void* svlVideoCodecTCPStream::ServerProc(unsigned short port)
@@ -1326,7 +1406,7 @@ int svlVideoCodecTCPStream::Receive()
                     ret -= framestart;
                     buffer += framestart;
 
-                    if (ret < (fsm_len + sizeof(unsigned int) * 3)) {
+                    if (ret < static_cast<int>(fsm_len + sizeof(unsigned int) * 3)) {
                         // Frame start marker found on packet boundary
                         // Receive one more packet to get the whole header
                         leftover_chunk_size = ret;

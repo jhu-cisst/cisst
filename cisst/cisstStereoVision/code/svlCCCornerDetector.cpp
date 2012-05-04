@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlCCOriginDetector.h>
 #include <limits>
 
-svlCCCornerDetector::svlCCCornerDetector(int width, int height)
+svlCCCornerDetector::svlCCCornerDetector(int CMN_UNUSED(width), int CMN_UNUSED(height))
 {
     reset();
 }
@@ -123,7 +123,7 @@ bool svlCCCornerDetector::nearestCorner(IplImage* iplImage, cv::Point2f targetPo
     switch(cornerDetectionFlag)
     {
     case FEATURES:
-        for(int i=0;i<(int) chessboardCorners.size(); i++ )
+        for(unsigned int i = 0; i < chessboardCorners.size(); i++ )
         {
             currentMinDistance = distanceBetweenTwoPoints(targetPoint.x,targetPoint.y, chessboardCorners.at(i).x, chessboardCorners.at(i).y);
             if(currentMinDistance < minDistance)
@@ -170,7 +170,7 @@ void svlCCCornerDetector::drawCorners(IplImage* iplImage)
     switch(cornerDetectionFlag)
     {
     case FEATURES:
-        for(int i=0;i<(int) chessboardCorners.size(); i++ )
+        for(unsigned int i = 0; i < chessboardCorners.size(); i++ )
         {
             cvCircle( iplImage, cvPoint(cvRound(chessboardCorners.at(i).x),cvRound(chessboardCorners.at(i).y)), 3, cvScalar(255,255,0), 1, 8, 0 );
         }

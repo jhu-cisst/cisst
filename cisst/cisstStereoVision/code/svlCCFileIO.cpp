@@ -91,8 +91,8 @@ void svlCCPointsFileIO::repackData(IplImage* iplImage)
     }
 
     //World to TCP
-    float worldToTCPRVector[1][3] = {data[worldToTCPOffset][0],data[worldToTCPOffset][1],data[worldToTCPOffset][2]};
-    float worldToTCPTVector[1][3] = {data[worldToTCPOffset][3],data[worldToTCPOffset][4],data[worldToTCPOffset][5]};
+    float worldToTCPRVector[1][3] = { {data[worldToTCPOffset][0],data[worldToTCPOffset][1],data[worldToTCPOffset][2]} };
+    float worldToTCPTVector[1][3] = { {data[worldToTCPOffset][3],data[worldToTCPOffset][4],data[worldToTCPOffset][5]} };
     cv::Mat rvect(1,3,CV_64F,worldToTCPRVector);
     cv::Mat rmatrix;
     cv::Rodrigues(rvect,rmatrix);

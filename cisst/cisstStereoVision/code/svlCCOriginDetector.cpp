@@ -167,16 +167,18 @@ cv::Point2f svlCCOriginDetector::intersectionByColorBlobs(float point_x, float p
 bool svlCCOriginDetector::findColorBlobs(IplImage* iplImage, float radius, int flag[], int thresholds[])
 {
     int i,j,k;
-    int height,width,step;
-    int temp=0;
-    uchar *data;
+    int height,width,step,channels;
+    //int stepr, channelsr;
+    //int temp=0;
+    uchar *data; //,*datar;
+
     i=j=k=0;
     colorBlobs.resize(4);
 
     height = iplImage->height;
     width = iplImage->width;
     step = iplImage->widthStep;
-    int channels = iplImage->nChannels;
+    channels = iplImage->nChannels;
     data = (uchar *)iplImage->imageData;
 
     int g0, g1, g2;
@@ -351,7 +353,7 @@ void svlCCOriginDetector::drawColorBlobs(IplImage* iplImage)
     if(debug)
         std::cout << "drawColorBlobs start, total: " <<colorBlobs.size() << std::endl;
 
-    for(int i=0;i<(int) colorBlobs.size(); i++ )
+    for(unsigned int i = 0; i < colorBlobs.size(); i++ )
     {
         if(i==0)
         {

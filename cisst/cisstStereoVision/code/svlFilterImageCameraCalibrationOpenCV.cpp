@@ -73,7 +73,7 @@ int svlFilterImageCameraCalibrationOpenCV::Initialize(svlSample* syncInput, svlS
     return SVL_OK;
 }
 
-int svlFilterImageCameraCalibrationOpenCV::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
+int svlFilterImageCameraCalibrationOpenCV::Process(svlProcInfo* CMN_UNUSED(procInfo), svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
     return SVL_OK;
@@ -403,13 +403,15 @@ double svlFilterImageCameraCalibrationOpenCV::OptimizeCalibration()
         if(iteration > 1)
             refineThreshold = 2;
 
-        if(rms > prevRMS && pointsCount > (int)(maxPointsCount + MINCORNERTHRESHOLD*CalibrationGrids.size()))
+        if(rms > prevRMS &&
+           pointsCount > static_cast<int>(maxPointsCount + MINCORNERTHRESHOLD*CalibrationGrids.size()))
         {
             refineThreshold = 1;
             pointIncreaseIteration++;
         }
 
-        if(rms < prevRMS || (pointsCount > (int)(maxPointsCount + pointIncreaseIteration*MINCORNERTHRESHOLD*CalibrationGrids.size())))
+        if(rms < prevRMS ||
+           pointsCount > static_cast<int>(maxPointsCount + pointIncreaseIteration*MINCORNERTHRESHOLD*CalibrationGrids.size()))
         {
             std::cout << "Iteration: " << iteration << " rms delta: " << prevRMS-rms << " count delta: " <<  pointsCount-maxPointsCount << " pointIteration " << pointIncreaseIteration <<std::endl;
             pPrevCameraMatrix = prevCameraMatrix;
@@ -519,7 +521,7 @@ double svlFilterImageCameraCalibrationOpenCV::Calibrate(bool projected, bool gro
         for(int i=0;i<(int)CalibrationGrids.size();i++)
         {
             Visibility[i] = 0;
-            if((!groundTruthTest && CalibrationGrids.at(i)->valid)|| (groundTruthTest && CalibrationGrids.at(i)->validGroundTruth)){
+            if((!groundTruthTest && CalibrationGrids.at(i)->valid) || (groundTruthTest && CalibrationGrids.at(i)->validGroundTruth)){
                 points2D.clear();
                 points3D.clear();
                 if(groundTruthTest)
@@ -532,7 +534,9 @@ double svlFilterImageCameraCalibrationOpenCV::Calibrate(bool projected, bool gro
                     points2D = CalibrationGrids.at(i)->getGoodImagePoints();
                     points3D = CalibrationGrids.at(i)->getGoodCalibrationGridPoints3D();
                 }
-                if ((int)points2D.size() > CalibrationGrids.at(i)->minGridPoints && (int)points3D.size() > CalibrationGrids.at(i)->minGridPoints && points2D.size() == points3D.size())
+                if (static_cast<int>(points2D.size()) > CalibrationGrids.at(i)->minGridPoints &&
+                    static_cast<int>(points3D.size()) > CalibrationGrids.at(i)->minGridPoints &&
+                    points2D.size() == points3D.size())
                 {
                     std::cout << "image " << i << " using " << points2D.size() <<" points." << std::endl;
                     ImagePoints.push_back(points2D);
@@ -786,11 +790,12 @@ svlSampleCameraGeometry* svlFilterImageCameraCalibrationOpenCV::GetCameraGeometr
     {
         return CameraGeometry;
     }
-    else if(index < (CalibrationGrids.size()-1))
+    else if(index < static_cast<int>(CalibrationGrids.size()-1))
     {
         return CalibrationGrids.at(index)->GetCameraGeometry();
     }
 
+    return 0; // Balazs: return value was missing. Is this the intended behavior?
 }
 
 void svlFilterImageCameraCalibrationOpenCV::PrintCalibrationParameters()

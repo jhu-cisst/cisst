@@ -594,8 +594,7 @@ bool svlFilterImageCenterFinder::FindEllipse(svlSampleImage* image, unsigned int
 
     // Eliminate outliers
 
-    int err;
-//    int errpos, maxerr;
+    int err; //, errpos, maxerr;
 
 //    std::cerr << "***" << std::endl;
 //    while (1) {
