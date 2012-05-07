@@ -180,6 +180,34 @@ else (CISST_HAS_SWIG_PYTHON)
 endif (CISST_HAS_SWIG_PYTHON)
 
 
+# Wrapping with swig for Matlab
+option (CISST_HAS_MATLAB "Build the Matlab conversion methods." OFF)
+mark_as_advanced (CISST_HAS_MATLAB)
+if (CISST_HAS_MATLAB)
+  # Find Matlab
+  find_package (Matlab REQUIRED)
+  if (MATLAB_FOUND)
+    # save SWIG settings
+    cisst_set_package_settings (cisstMatlab Matlab INCLUDE_DIRECTORIES MATLAB_INCLUDE_DIR)
+    cisst_set_package_settings (cisstMatlab Matlab LIBRARIES           MATLAB_LIBRARIES)
+    # propagate the fact that SWIG was found
+    set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
+  else (MATLAB_FOUND)
+    # propagate the fact that SWIG was found
+    set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
+  endif (MATLAB_FOUND)
+
+  # Force to use exceptions
+  set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
+  set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
+
+else (CISST_HAS_MATLAB)
+  # propagate the fact that SWIG was not found
+  set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
+  cisst_unset_all_package_settings (cisstMatlab Matlab)
+endif (CISST_HAS_MATLAB)
+
+
 # Support for cisstCommonXML, just to see what is available
 find_package (LibXml2)
 if (LIBXML2_FOUND)

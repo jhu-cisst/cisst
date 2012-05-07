@@ -265,6 +265,7 @@ set (CISST_LIBRARIES_DEFAULT
      )
 
 set (CISST_LIBRARIES_OPTIONAL
+     cisstMatlab
      cisstInteractive
      cisst3DUserInterface
      )
@@ -310,6 +311,15 @@ endif (CISST_cisstInteractive)
 if (CISST_HAS_SWIG_PYTHON)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (CISST_HAS_SWIG_PYTHON)
+
+# Build Matlab wrappers
+if (CISST_cisstMatlab)
+  set (CISST_HAS_MATLAB ON CACHE BOOL "Build the Matlab conversion methods." FORCE)
+endif (CISST_cisstMatlab)
+
+if (CISST_HAS_MATLAB)
+  set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
+endif (CISST_HAS_MATLAB)
 
 
 # List of libraries to be built
@@ -359,6 +369,10 @@ endif (CISST_HAS_FLTK)
 
 if (CISST_HAS_SWIG_PYTHON)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstPython)
+endif (CISST_HAS_SWIG_PYTHON)
+
+if (CISST_HAS_SWIG_PYTHON)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstMatlab)
 endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_HAS_OPENGL)

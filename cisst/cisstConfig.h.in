@@ -56,6 +56,9 @@ http://www.cisst.org/cisst/license.txt.
 // Using IRE (and Swig/Python) or not
 #cmakedefine01 CISST_HAS_IRE
 
+// Using Matlab or not
+#cmakedefine01 CISST_HAS_MATLAB
+
 // Using FLTK or not
 #cmakedefine01 CISST_HAS_FLTK
 

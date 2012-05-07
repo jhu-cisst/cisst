@@ -30,16 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 
 bool cmnGenericObject::ReconstructFrom(const cmnGenericObject & other) {
     const cmnClassServicesBase * services = this->Services();
-#if 0
-    // Following are now done in services->Create(this, other)
-
-    // test that both objects are of the same type
-    if (services != other.Services()) {
-        return false;
-    }
-    // call destructor on the existing object
-    services->Delete(this);
-#endif
     // call copy constructor
     services->Create(this, other);
     return true;
@@ -81,7 +71,20 @@ void cmnGenericObject::DeSerializeRaw(std::istream & CMN_UNUSED(inputStream)) {
 }
 
 
+void cmnGenericObject::ToMatlab(mxArray * placeHolder)
+{
+    placeHolder = 0;
+}
+
+
+bool cmnGenericObject::FromMatlab(const mxArray * CMN_UNUSED(input))
+{
+    return false;
+}
+
+
 cmnLogger::StreamBufType * cmnGenericObject::GetLogMultiplexer(void) const
 {
     return cmnLogger::GetMultiplexer();
+
 }

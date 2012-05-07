@@ -14,6 +14,16 @@
 
 project (cisstCommon)
 
+# Matlab code needs to be added cisstCommon, on the long run we need a
+# better solution and create a separate cisstCommonMatlab
+if (CISST_HAS_MATLAB)
+  # cisstCommon relies on cisstMatlab settings (for future use)
+  cisst_library_use_settings (cisstCommon cisstMatlab)
+  # set directories for this project
+  cisst_set_directories (cisstMatlab)
+endif (CISST_HAS_MATLAB)
+
+
 # all source files
 set (SOURCE_FILES
      cmnClassRegister.cpp

@@ -37,6 +37,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 #include <iostream>
 
+#if CISST_HAS_MATLAB
+#include <matrix.h> // for mxArray.h, could we have a forward declaration?  /todo adeguet1
+#endif // CISST_HAS_MATLAB
+
 
 // Always include last
 #include <cisstCommon/cmnExport.h>
@@ -111,6 +115,11 @@ public:
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
     virtual void DeSerializeRaw(std::istream & inputStream);
+
+#if CISST_HAS_MATLAB
+    virtual void ToMatlab(mxArray * placeHolder);
+    virtual bool FromMatlab(const mxArray * input);
+#endif // CISST_HAS_MATLAB
 
     /*! Get the multiplexer to use for logging.  This is used by the
       macro CMN_LOG_CLASS to determine the log destination.  By
