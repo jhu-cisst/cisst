@@ -99,20 +99,8 @@ mxArray * mtlCreateComponent(const char * componentName)
 
     code << componentName << ".interface1.Zero = @()calllib('libcisstMatlab', 'mtlCallFunctionVoid', '"
          << pointer << "');";
-    mexPrintf("code: %s", code.str().c_str());
     mexEvalString(code.str().c_str());
     code.str("");
-
-#if 0
-
-    code = componentName + std::string(".interface1.Zero = str2func('@() libpointer(''voidPtr'', 2345)');");
-    mexEvalString(code.c_str());
-
-    code = componentName
-        + std::string(".interface1.Zero = str2func('@() calllib(''libcisstMatlab.dylib'', ''mtlCallFunctionVoid'', libpointer(''voidPtr'', ")
-        + std::string("123")
-        + std::string(")');");
-#endif
 
     //    mxArray * result; - to be removed, return bool or string for failure?, or void?
     result = mxCreateStructMatrix(1, 1, 0, 0);

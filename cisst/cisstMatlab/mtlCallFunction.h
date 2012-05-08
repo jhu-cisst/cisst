@@ -25,4 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 
 const char * mtlCallFunctionVoid(char * voidPointerOnFunction);
 
+mxArray * mtlCallFunctionRead(char * voidPointerOnFunction);
+
 #endif // _mtlCallFunction_h

@@ -29,12 +29,12 @@ extern "C" {
 }
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
 
 const char * mtlCallFunctionVoid(char * voidPointerOnFunction)
 {
     unsigned long long int inter;
     sscanf(voidPointerOnFunction, "%llu", &inter);
-    CMN_LOG_INIT_ERROR << "------------------ Pointer value: " << inter << std::endl;
     mtsFunctionVoid * functionPointer = reinterpret_cast<mtsFunctionVoid *>(inter);
     mtsExecutionResult result;
     result = functionPointer->Execute();
@@ -44,4 +44,22 @@ const char * mtlCallFunctionVoid(char * voidPointerOnFunction)
         mexErrMsgTxt(errorMessage.c_str());
     }
     return mtsExecutionResult::ToString(result.GetResult()).c_str();
+}
+
+
+mxArray * mtlCallFunctionRead(char * voidPointerOnFunction)
+{
+    unsigned long long int inter;
+    sscanf(voidPointerOnFunction, "%llu", &inter);
+    mtsFunctionRead * functionPointer = reinterpret_cast<mtsFunctionRead *>(inter);
+    mtsExecutionResult result;
+    mtsGenericObject * placeHolder = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
+    result = functionPointer->Execute(*placeHolder);
+    if (!result.IsOK()) {
+        std::string errorMessage = "mtlCallFunctionVoid: failed, returned \"";
+        errorMessage = errorMessage + mtsExecutionResult::ToString(result.GetResult()) + "\"";
+        mexErrMsgTxt(errorMessage.c_str());
+    }
+    // return mtsExecutionResult::ToString(result.GetResult()).c_str();
+    return placeHolder->ToMatlab();
 }
