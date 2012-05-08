@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtlCallFunction_h
 #define _mtlCallFunction_h
 
+#include <matrix.h>
+
 const char * mtlCallFunctionVoid(char * voidPointerOnFunction);
 
 mxArray * mtlCallFunctionRead(char * voidPointerOnFunction);
