@@ -16,4 +16,4 @@
 #
 # --- end cisst license ---
 
-find . -name "*.h" -o -name "*.cpp" -o -name "*.py" -o -name "*.i" -o -name "*.txt" -o -name "*.in" -o -name "*.sh" -o -name "*.tex" -o -name "*.cmake" -o -name "*.ice" -o -name "*.ui" -o -name "*.java" -o -name "*.dox" | xargs etags
+find . -name "*.h" -o -name "*.cpp" -o -name "*.py" -o -name "*.i" -o -name "*.txt" -o -name "*.in" -o -name "*.sh" -o -name "*.tex" -o -name "*.cmake" -o -name "*.ice" -o -name "*.ui" -o -name "*.java" -o -name "*.dox" -o -name "*.m" | xargs etags
