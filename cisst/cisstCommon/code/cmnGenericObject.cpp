@@ -71,9 +71,9 @@ void cmnGenericObject::DeSerializeRaw(std::istream & CMN_UNUSED(inputStream)) {
 }
 
 
-void cmnGenericObject::ToMatlab(mxArray * placeHolder)
+mxArray * cmnGenericObject::ToMatlab(void) const
 {
-    placeHolder = 0;
+    return 0;
 }
 
 

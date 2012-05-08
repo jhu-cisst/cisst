@@ -120,6 +120,27 @@ public:
         mtsGenericObject::DeSerializeRaw(inputStream);
         VectorType::DeSerializeRaw(inputStream);
     }
+
+    /*! Matlab conversions */
+    mxArray * ToMatlab(void) const
+    {
+        mxArray * result;
+        // create the array with the correct type and size
+
+        // fill the data using this->Pointer()
+
+        return result;
+    }
+
+    bool FromMatlab(const mxArray * input)
+    {
+        // make sure the dimension, size and type match.  If not throw an exception using cmnThrow
+
+        // copy the data to this vector
+
+        return false;
+    }
+
 };
 
 

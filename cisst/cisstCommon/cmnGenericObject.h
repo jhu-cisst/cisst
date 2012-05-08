@@ -117,7 +117,7 @@ public:
     virtual void DeSerializeRaw(std::istream & inputStream);
 
 #if CISST_HAS_MATLAB
-    virtual void ToMatlab(mxArray * placeHolder);
+    virtual mxArray * ToMatlab(void) const;
     virtual bool FromMatlab(const mxArray * input);
 #endif // CISST_HAS_MATLAB
 
