@@ -25,63 +25,96 @@ http://www.cisst.org/cisst/license.txt.
 
 extern "C" {
 #include <cisstMatlab/mtlCreateComponent.h>
+#include <mex.h>
 }
 
+// this is for testing/development
+#include "testComponent.h"
 
-mxArray * mtlCreateComponent(const char * objectName)
+mxArray * mtlCreateComponent(const char * componentName)
 {
-    std::string code;
+    // log configuration
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassAll(CMN_LOG_ALLOW_ALL);
 
-    mexPrintf("\ncmnCreateObject\n");
+    std::ofstream * out = new std::ofstream;
+    out->open("cisstMatlab-log.txt");
+    cmnLogger::AddChannel(*out, CMN_LOG_ALLOW_ALL);
+
+    // create the component, for now use our testComponent class
+    // instead of dynamic loading + creation
+    mtsComponent * component = new testComponent(componentName);
+
+    // add the component to the component manager
+    mtsComponentManager * componentManager = mtsManagerLocal::GetInstance();
+    componentManager->AddComponent(component);
+
+    // create a proxy, for now use hard coded one
+    testComponentProxy * componentProxy = new testComponentProxy(std::string("MatlabProxyFor") + componentName);
+    componentManager->AddComponent(componentProxy);
+
+    if (!componentManager->Connect(componentProxy->GetName(), "interface1",
+                                   component->GetName(), "interface1")) {
+        mexPrintf("failed to connect interface 1");
+    }
+
+    if (!componentManager->Connect(componentProxy->GetName(), "interface2",
+                                   component->GetName(), "interface2")) {
+        mexPrintf("failed to connect interface 2");
+    }
+
+    component->Create();
+    componentProxy->Create();
+    component->Start();
+    componentProxy->Start();
+
+    std::stringstream code;
     mxArray * result;
+
+    // create component proxy
+    code << componentName << " = eval('dynamicprops');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+
+    // create interface proxy
+    code << componentName << ".addprop('interface1');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+    code << componentName << ".interface1 = eval('dynamicprops');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+
+    // create function proxy
+    code << componentName << ".interface1.addprop('Zero');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Zero) << std::endl;
+
+    unsigned long long int inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Zero));
+    // convert to string, this needs tobe replaced by a long long int sent to Matlab
+    char pointer[256];
+    sprintf(pointer, "%llu", inter);
+
+    code << componentName << ".interface1.Zero = @()calllib('libcisstMatlab', 'mtlCallFunctionVoid', '"
+         << pointer << "');";
+    mexPrintf("code: %s", code.str().c_str());
+    mexEvalString(code.str().c_str());
+    code.str("");
+
+#if 0
+
+    code = componentName + std::string(".interface1.Zero = str2func('@() libpointer(''voidPtr'', 2345)');");
+    mexEvalString(code.c_str());
+
+    code = componentName
+        + std::string(".interface1.Zero = str2func('@() calllib(''libcisstMatlab.dylib'', ''mtlCallFunctionVoid'', libpointer(''voidPtr'', ")
+        + std::string("123")
+        + std::string(")');");
+#endif
+
+    //    mxArray * result; - to be removed, return bool or string for failure?, or void?
     result = mxCreateStructMatrix(1, 1, 0, 0);
-
-    int objectField = mxAddField(result, "object");
-
-//     // create object
-//     cmlTestClass * object = new cmlTestClass;
-//     unsigned long long int inter = reinterpret_cast <unsigned long long int>(object);
-//     mexPrintf("set %llu\n", inter);
-//     // convert to string, this needs tobe replaced by a long long int sent to Matlab
-//     char pointer[256];
-//     sprintf(pointer, "%llu", inter);
-//     mxSetFieldByNumber(result, 0, objectField, mxCreateString(pointer));
-
-//     int methodsField = mxAddField(result, "methods");
-//     mxArray * methods = mxCreateCellMatrix(2, 1); // first cell is object pointer, then methods
-//     mxSetFieldByNumber(result, 0, methodsField, methods);
-//     mxArray * method1 = mxCreateCellMatrix(2, 1); // first cell is method name, 
-//     mxSetCell(method1, 0, mxCreateString("Function1"));
-//     //     mxSetCell(method1, 1, mxCreateString);
-//     //     mxSetCell(result, 1, method1);
-//     const std::map<std::string, bool>::iterator found = CreatedClasses.find("classTest");
-//     if (found == CreatedClasses.end()) {
-//         std::ofstream classFile;
-//         classFile.open("classTest.m");
-//         classFile << "classdef classTest;properties;      Name = 'undef';end;methods;function self = set.Name(self, name);         self.Name = name;end;function name = GetName(self);name = self.Name;end;end;end" << std::endl << std::flush;
-//         classFile.close();
-//         mexPrintf("\nCreating class\n");
-//         CreatedClasses["classTest"] = true;
-
-//         // force Matlab to rehash the current directory so it sees the created file
-//         code = "rehash;";
-//         mexEvalString(code.c_str());
-
-//     } else {
-//         mexPrintf("\nClass already exist\n");
-//     }
-    
-//     code = objectName;
-//     code = code + " = classTest;";
-//     mexEvalString(code.c_str());
-//     mexPrintf("\n code is %s\n", code.c_str());
-//     code = "testObject = 'classTest';";
-//     mexEvalString(code.c_str());
-
-//     code = "myCustomObj = eval('dynamicprops');";
-//     mexEvalString(code.c_str());
-
-//     code = "myCustomObj.addprop('mySine')";
-//     mexEvalString("myCustomObj.mySine = @sin"); //  % this could be a function handle to anything.  e.g. calllib
     return result;
 }

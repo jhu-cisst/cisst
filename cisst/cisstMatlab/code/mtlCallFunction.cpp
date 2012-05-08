@@ -30,9 +30,12 @@ extern "C" {
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
-const char * mtlCallFunctionVoid(void * voidPointerOnFunction)
+const char * mtlCallFunctionVoid(char * voidPointerOnFunction)
 {
-    mtsFunctionVoid * functionPointer = reinterpret_cast<mtsFunctionVoid *>(voidPointerOnFunction);
+    unsigned long long int inter;
+    sscanf(voidPointerOnFunction, "%llu", &inter);
+    CMN_LOG_INIT_ERROR << "------------------ Pointer value: " << inter << std::endl;
+    mtsFunctionVoid * functionPointer = reinterpret_cast<mtsFunctionVoid *>(inter);
     mtsExecutionResult result;
     result = functionPointer->Execute();
     if (!result.IsOK()) {

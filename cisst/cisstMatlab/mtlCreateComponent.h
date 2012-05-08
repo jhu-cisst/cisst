@@ -20,28 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cisstMatlab_h
-#define _cisstMatlab_h
+#ifndef _mtlCreateComponent_h
+#define _mtlCreateComponent_h
 
 // Matlab headers
 #include <matrix.h> // for mxArray.h
-#include <mex.h> // for mxPrintf
 
-mxArray * cmlListComponents(void);
+mxArray * mtlCreateComponent(const char * componentName);
 
-mxArray * cmlCreateObject(const char * objectName);
-
-char * cmlCallMethod(char * object, char * method);
-
-#endif // _cisstMatlab_h
-
-
-/* 
-   Matlab code:
-
-[notfound, warns] = loadlibrary('libcisstMatlab.dylib', 'cisstMatlab.h')
-calllib('libcisstMatlab','cmnListComponents',8)
-
-eval to eval a script (for later)
-
-*/
+#endif // _mtlCreateComponent_h

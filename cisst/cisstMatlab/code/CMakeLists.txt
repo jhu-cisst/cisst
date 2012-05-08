@@ -16,6 +16,7 @@ project (cisstMatlab)
 
 # all source files
 set (SOURCE_FILES
+     testComponent.cpp # for development only, to be removed asap
      mtlCreateComponent.cpp
      mtlCallFunction.cpp
      )

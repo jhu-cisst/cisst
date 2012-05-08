@@ -23,6 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtlCallFunction_h
 #define _mtlCallFunction_h
 
-const char * mtlCallFunctionVoid(void * voidPointerOnFunction);
+const char * mtlCallFunctionVoid(char * voidPointerOnFunction);
 
 #endif // _mtlCallFunction_h
