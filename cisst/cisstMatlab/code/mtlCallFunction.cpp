@@ -70,7 +70,7 @@ const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input)
 {
     unsigned long long int inter;
     sscanf(voidPointerOnFunction, "%llu", &inter);
-    mtsFunctionRead * functionPointer = reinterpret_cast<mtsFunctionRead *>(inter);
+    mtsFunctionWrite * functionPointer= reinterpret_cast<mtsFunctionWrite *>(inter);
     mtsExecutionResult result;
     mtsGenericObject * placeHolder = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
     result = functionPointer->Execute(*placeHolder);

@@ -157,7 +157,8 @@ public:
 		double * values = mxGetPr(input);
 		size_t i = 0;
 		for (i=0; i<this->size();i++){
-			this[i] = values[i];
+			CMN_LOG_INIT_ERROR<<"---- current value "<< values[i] << std::endl;
+			this->Element(i) = values[i];
 		}
         return true;
     }

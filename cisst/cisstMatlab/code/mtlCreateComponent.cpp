@@ -110,7 +110,7 @@ mxArray * mtlCreateComponent(const char * componentName)
     code << componentName << ".interface2.addprop('Set');";
     mexEvalString(code.str().c_str());
     code.str("");
-    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Get) << std::endl;
+    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Set) << std::endl;
 	
 	
     unsigned long long int inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Zero));
