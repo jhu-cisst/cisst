@@ -124,7 +124,17 @@ public:
     /*! Matlab conversions */
     mxArray * ToMatlab(void) const
     {
-        mxArray * result;
+		CMN_LOG_INIT_ERROR << "--------- in mtsVector ToMatlab ---------" << std::endl;
+        mxArray * result = mxCreateDoubleMatrix(this->size(),1,mxREAL);
+	//	double * matmatrix=mxCalloc(this->size(), sizeof(double));
+//		memcpy(matmatrix, this->Pointer(), this->size()*sizeof(double));
+//		mxSetPr (result,matmatrix);
+		//mxSetData(result,pointer);
+	/*	
+		for (iterator i =it<ed;it++){
+			double d=(double)*it;
+			mxSetData(result, i , mxCreateDoubleScalar(d);
+		}*/
         // create the array with the correct type and size
 
         // fill the data using this->Pointer()
@@ -134,11 +144,22 @@ public:
 
     bool FromMatlab(const mxArray * input)
     {
+		CMN_LOG_INIT_ERROR << "--------- in mtsVector ToMatlab ---------" << std::endl;
         // make sure the dimension, size and type match.  If not throw an exception using cmnThrow
 
+		if ((mxGetM(input)!=this->size())||(mxGetN(input)!=1)){
+			return false;
+		//	throw new cmnThrow();
+		}
+		
         // copy the data to this vector
-
-        return false;
+		
+		double * values = mxGetPr(input);
+		size_t i = 0;
+		for (i=0; i<this->size();i++){
+			this[i] = values[i];
+		}
+        return true;
     }
 
 };

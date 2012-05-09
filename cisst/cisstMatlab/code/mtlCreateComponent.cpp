@@ -92,6 +92,27 @@ mxArray * mtlCreateComponent(const char * componentName)
     code.str("");
     CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Zero) << std::endl;
 
+	// create interface proxy
+    code << componentName << ".addprop('interface2');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+    code << componentName << ".interface2 = eval('dynamicprops');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+	
+    // create function proxy
+    code << componentName << ".interface2.addprop('Get');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Get) << std::endl;
+	
+	// create function proxy
+    code << componentName << ".interface2.addprop('Set');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Get) << std::endl;
+	
+	
     unsigned long long int inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Zero));
     // convert to string, this needs tobe replaced by a long long int sent to Matlab
     char pointer[256];
@@ -101,6 +122,29 @@ mxArray * mtlCreateComponent(const char * componentName)
          << pointer << "');";
     mexEvalString(code.str().c_str());
     code.str("");
+	
+	///GET
+	inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Get));
+    // convert to string, this needs tobe replaced by a long long int sent to Matlab
+    sprintf(pointer, "%llu", inter);
+	
+    code << componentName << ".interface2.Get = @()calllib('libcisstMatlab', 'mtlCallFunctionRead', '"
+	<< pointer << "');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+	
+	
+	///Set
+	inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Set));
+    // convert to string, this needs tobe replaced by a long long int sent to Matlab
+    sprintf(pointer, "%llu", inter);
+	
+    code << componentName << ".interface2.Set = @(x)calllib('libcisstMatlab', 'mtlCallFunctionWrite', '"
+         << pointer << "', x);";
+    mexEvalString(code.str().c_str());
+    code.str("");
+	
+	
 
     //    mxArray * result; - to be removed, return bool or string for failure?, or void?
     result = mxCreateStructMatrix(1, 1, 0, 0);

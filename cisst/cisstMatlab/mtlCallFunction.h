@@ -29,4 +29,6 @@ const char * mtlCallFunctionVoid(char * voidPointerOnFunction);
 
 mxArray * mtlCallFunctionRead(char * voidPointerOnFunction);
 
+const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input);
+
 #endif // _mtlCallFunction_h
