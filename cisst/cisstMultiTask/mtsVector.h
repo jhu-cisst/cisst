@@ -131,17 +131,7 @@ public:
 		double * matmatrix=(double *) mxCalloc(this->size(), sizeof(double));
 		memcpy(matmatrix, ptr, this->size()*sizeof(double));
 		mxSetPr (result,matmatrix);
-		//mxSetData(result,pointer);
-	/*	
-		for (iterator i =it<ed;it++){
-			double d=(double)*it;
-			mxSetData(result, i , mxCreateDoubleScalar(d);
-		}*/
-        // create the array with the correct type and size
 
-        // fill the data using this->Pointer()
-
-		
         return result;
     }
 
@@ -151,19 +141,20 @@ public:
         // make sure the dimension, size and type match.  If not throw an exception using cmnThrow
 
 		if ((mxGetM(input)!=this->size())||(mxGetN(input)!=1)){
+		//	mexPrintf("size mismatch\n");
 			return false;
 		//	throw new cmnThrow();
 		}
 		
         // copy the data to this vector
-		/*
+		
 		double * values = mxGetPr(input);
 		size_t i = 0;
 		for (i=0; i<this->size();i++){
 			CMN_LOG_INIT_ERROR<<"---- current value "<< values[i] << std::endl;
 			this->Element(i) = values[i];
 		}
-		 */
+		 
         return true;
     }
 
