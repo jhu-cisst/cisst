@@ -126,9 +126,11 @@ public:
     {
 		CMN_LOG_INIT_ERROR << "--------- in mtsVector ToMatlab ---------" << std::endl;
         mxArray * result = mxCreateDoubleMatrix(this->size(),1,mxREAL);
-	//	double * matmatrix=mxCalloc(this->size(), sizeof(double));
-//		memcpy(matmatrix, this->Pointer(), this->size()*sizeof(double));
-//		mxSetPr (result,matmatrix);
+		
+		double * ptr=(double *)this->Pointer();
+		double * matmatrix=(double *) mxCalloc(this->size(), sizeof(double));
+		memcpy(matmatrix, ptr, this->size()*sizeof(double));
+		mxSetPr (result,matmatrix);
 		//mxSetData(result,pointer);
 	/*	
 		for (iterator i =it<ed;it++){
@@ -139,6 +141,7 @@ public:
 
         // fill the data using this->Pointer()
 
+		
         return result;
     }
 
@@ -153,13 +156,14 @@ public:
 		}
 		
         // copy the data to this vector
-		
+		/*
 		double * values = mxGetPr(input);
 		size_t i = 0;
 		for (i=0; i<this->size();i++){
 			CMN_LOG_INIT_ERROR<<"---- current value "<< values[i] << std::endl;
 			this->Element(i) = values[i];
 		}
+		 */
         return true;
     }
 

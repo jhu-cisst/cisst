@@ -69,6 +69,7 @@ mxArray * mtlCallFunctionRead(char * voidPointerOnFunction)
 const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input)
 {
     unsigned long long int inter;
+	/*
     sscanf(voidPointerOnFunction, "%llu", &inter);
     mtsFunctionWrite * functionPointer= reinterpret_cast<mtsFunctionWrite *>(inter);
     mtsExecutionResult result;
@@ -81,5 +82,7 @@ const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input)
     }
 
 	placeHolder->FromMatlab(input);
-    return mtsExecutionResult::ToString(result.GetResult()).c_str();
+	 */
+    //return mtsExecutionResult::ToString(result.GetResult()).c_str();
+	return 0;
 }
