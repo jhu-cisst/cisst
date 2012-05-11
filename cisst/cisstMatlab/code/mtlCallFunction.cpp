@@ -30,6 +30,7 @@ extern "C" {
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 
 const char * mtlCallFunctionVoid(char * voidPointerOnFunction)
 {
@@ -69,20 +70,25 @@ mxArray * mtlCallFunctionRead(char * voidPointerOnFunction)
 const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input)
 {
     unsigned long long int inter;
-	
+
     sscanf(voidPointerOnFunction, "%llu", &inter);
-    mtsFunctionWrite * functionPointer= reinterpret_cast<mtsFunctionWrite *>(inter);
+    mtsFunctionWrite * functionPointer = reinterpret_cast<mtsFunctionWrite *>(inter);
     mtsExecutionResult result;
-    mtsGenericObject * placeHolder = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
-    result = functionPointer->Execute(*placeHolder);
+    mtsGenericObject * inputCisst = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
+
+    try {
+        inputCisst->FromMatlab(input);
+    } catch (std::runtime_error exc) {
+        mexErrMsgTxt(exc.what());
+        return 0;
+    }
+
+    result = functionPointer->Execute(*inputCisst);
     if (!result.IsOK()) {
         std::string errorMessage = "mtlCallFunctionVoid: failed, returned \"";
         errorMessage = errorMessage + mtsExecutionResult::ToString(result.GetResult()) + "\"";
         mexErrMsgTxt(errorMessage.c_str());
     }
 
-	placeHolder->FromMatlab(input);
-	 
     return mtsExecutionResult::ToString(result.GetResult()).c_str();
-	return 0;
 }

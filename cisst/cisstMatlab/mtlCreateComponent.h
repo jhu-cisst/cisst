@@ -26,6 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 // Matlab headers
 #include <matrix.h> // for mxArray.h
 
-mxArray * mtlCreateComponent(const char * componentName);
+const char * mtlCreateComponent(const char * componentName);
 
 #endif // _mtlCreateComponent_h

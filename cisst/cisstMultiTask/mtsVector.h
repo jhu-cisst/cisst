@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
+  Author(s):    Anton Deguet
   Created on:   2008-02-05
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
@@ -124,40 +124,37 @@ public:
     /*! Matlab conversions */
     mxArray * ToMatlab(void) const
     {
-		CMN_LOG_INIT_ERROR << "--------- in mtsVector ToMatlab ---------" << std::endl;
-        mxArray * result = mxCreateDoubleMatrix(this->size(),1,mxREAL);
-		
-		double * ptr=(double *)this->Pointer();
-		double * matmatrix=(double *) mxCalloc(this->size(), sizeof(double));
-		memcpy(matmatrix, ptr, this->size()*sizeof(double));
-		mxSetPr (result,matmatrix);
-
+        CMN_LOG_INIT_ERROR << "--------- in mtsVector ToMatlab ---------" << std::endl;
+        mxArray * result = mxCreateDoubleMatrix(this->size(), 1, mxREAL);
+        double * values = mxGetPr(result);
+        size_t i;
+        for (i = 0; i < this->size(); i++) {
+            // CMN_LOG_INIT_ERROR <<"---- current value "<< Element(i) << std::endl;
+            // ugly hack, very ugly - this needs to be replaced by a templated function to assign based on value_type
+            values[i] = *((double *) const_cast<value_type *>(&(this->Element(i))));
+        }
         return result;
     }
 
     bool FromMatlab(const mxArray * input)
     {
-		CMN_LOG_INIT_ERROR << "--------- in mtsVector ToMatlab ---------" << std::endl;
+        CMN_LOG_INIT_ERROR << "--------- in mtsVector FromMatlab ---------" << std::endl;
         // make sure the dimension, size and type match.  If not throw an exception using cmnThrow
 
-		if ((mxGetM(input)!=this->size())||(mxGetN(input)!=1)){
-		//	mexPrintf("size mismatch\n");
-			return false;
-		//	throw new cmnThrow();
-		}
-		
+        if ((mxGetN(input) != 1)) {
+            cmnThrow("mtsVector: incorrect dimension, expect vector");
+        }
+
         // copy the data to this vector
-		
-		double * values = mxGetPr(input);
-		size_t i = 0;
-		for (i=0; i<this->size();i++){
-			CMN_LOG_INIT_ERROR<<"---- current value "<< values[i] << std::endl;
-			this->Element(i) = values[i];
-		}
-		 
+        this->SetSize(mxGetM(input));
+        double * values = mxGetPr(input);
+        size_t i;
+        for (i = 0; i < this->size(); i++) {
+            CMN_LOG_INIT_ERROR <<"---- current value "<< values[i] << std::endl;
+            this->Element(i) = values[i];
+        }
         return true;
     }
-
 };
 
 
