@@ -100,17 +100,93 @@ void osaGetDateTimeString(std::string & str, const char delimiter)
                 now->tm_hour,
                 now->tm_min,
                 now->tm_sec);
-    } else {
-        sprintf(buffer, "%d-%02d-%02d_%02d-%02d-%02d",
+    }  else {
+        sprintf(buffer, "%d%c%02d%c%02d%c%02d%c%02d%c%02d",
                 now->tm_year + 1900,
+                delimiter,
                 now->tm_mon + 1,
+                delimiter,
                 now->tm_mday,
+                delimiter,
                 now->tm_hour,
+                delimiter,
                 now->tm_min,
+                delimiter,
                 now->tm_sec);
     }
     str = buffer;
 }
+
+void osaGetDateTimeString(std::string & str, double time, const char delimiter){
+
+    time_t tim = static_cast<time_t>(time);
+    tm * now = localtime(&tim);
+    char buffer[50];
+
+    int ms = static_cast<int>( (double)( time - static_cast<int>(time)) * 1000);
+
+    if (delimiter == ':') {
+           sprintf(buffer, "%d-%02d-%02d %02d:%02d:%02d:%03d",
+                   now->tm_year + 1900,
+                   now->tm_mon + 1,
+                   now->tm_mday,
+                   now->tm_hour,
+                   now->tm_min,
+                   now->tm_sec,
+                   ms);
+       } else {
+           sprintf(buffer, "%d%c%02d%c%02d%c%02d%c%02d%c%02d%c%03d",
+                   now->tm_year + 1900,
+                   delimiter,
+                   now->tm_mon + 1,
+                   delimiter,
+                   now->tm_mday,
+                   delimiter,
+                   now->tm_hour,
+                   delimiter,
+                   now->tm_min,
+                   delimiter,
+                   now->tm_sec,
+                   delimiter,
+                   ms);
+       }
+       str = buffer;
+}
+
+void osaGetTimeString(std::string & str, double time, const char delimiter){
+
+    time_t tim = static_cast<time_t>(time);
+    tm * now = localtime(&tim);
+    char buffer[50];
+
+    int ms = static_cast<int>( (double)( time - static_cast<int>(time)) * 1000);
+    sprintf(buffer, "%02d%c%02d%c%02d%c%03d",
+                   now->tm_hour,
+                   delimiter,
+                   now->tm_min,
+                   delimiter,
+                   now->tm_sec,
+                   delimiter,
+                   ms);
+
+   str = buffer;
+}
+
+void osaGetDateString(std::string & str, double time, const char delimiter){
+
+    time_t tim = static_cast<time_t>(time);
+    tm * now = localtime(&tim);
+    char buffer[50];
+
+    sprintf(buffer, "%d%c%02d%c%02d",
+                      now->tm_year + 1900,
+                      delimiter,
+                      now->tm_mon + 1,
+                      delimiter,
+                      now->tm_mday);
+          str = buffer;
+}
+
 
 void osaGetTimeString(std::string & str)
 {
