@@ -45,6 +45,7 @@ void frameConversion(vctFrm3 & result, const floatArray44 & input) {
 
 void mtsStealthTool::Assign(const mtsStealthTool & that)
 {
+    this->SetTimestamp(that.Timestamp());
     this->XForm = that.XForm;
     this->GeometryError = that.GeometryError;
     for (int k = 0; k < NAME_LENGTH; k++) {
@@ -65,6 +66,7 @@ void mtsStealthTool::Assign(const struct tool & griTool)
 
 void mtsStealthTool::Assign(const prmPositionCartesianGet & that)
 {
+    this->SetTimestamp(that.Timestamp());
     this->XForm = that.Position();
     this->GeometryError = 0;
     for (int k = 0; k < NAME_LENGTH; k++) {
@@ -103,7 +105,7 @@ void mtsStealthTool::ToStreamRaw(std::ostream & outputStream, const char delimit
         XForm.ToStreamRaw(outputStream, delimiter);
         outputStream << delimiter;
         outputStream << GeometryError;
-   }
+    }
 }
 
 void mtsStealthTool::SerializeRaw(std::ostream & outputStream) const
@@ -127,6 +129,7 @@ void mtsStealthTool::DeSerializeRaw(std::istream & inputStream)
 
 void mtsStealthFrame::Assign(const mtsStealthFrame & that)
 {
+    this->SetTimestamp(that.Timestamp());
     this->XForm = that.XForm;
     this->GeometryError = that.GeometryError;
     for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = that.Name[k];
@@ -143,6 +146,7 @@ void mtsStealthFrame::Assign (const struct frame & griFrame)
 
 void mtsStealthFrame::Assign(const prmPositionCartesianGet & that)
 {
+    this->SetTimestamp(that.Timestamp());
     this->XForm = that.Position();
     this->GeometryError = 0;
     for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = 'n';
@@ -183,6 +187,7 @@ void mtsStealthFrame::ToStreamRaw(std::ostream & outputStream, const char delimi
 
 void mtsStealthRegistration::Assign(const mtsStealthRegistration & that)
 {
+    this->SetTimestamp(that.Timestamp());
     this->XForm = that.XForm;
     this->predictedAccuracy = that.predictedAccuracy;
     this->Valid() = that.Valid();
@@ -215,7 +220,7 @@ void mtsStealthRegistration::ToStream(std::ostream & outputStream) const
 }
 
 void mtsStealthRegistration::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                             bool headerOnly, const std::string & headerPrefix) const
+                                         bool headerOnly, const std::string & headerPrefix) const
 {
     if (headerOnly) {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
@@ -228,11 +233,12 @@ void mtsStealthRegistration::ToStreamRaw(std::ostream & outputStream, const char
         outputStream << delimiter;
         XForm.ToStreamRaw(outputStream, delimiter);
         outputStream << delimiter << predictedAccuracy;
-     }
+    }
 }
 
 void mtsStealthProbeCal::Assign(const mtsStealthProbeCal & that)
 {
+    this->SetTimestamp(that.Timestamp());
     for (int k = 0; k < NAME_LENGTH; k++) this->Name[k] = that.Name[k];
     this->Valid() = that.Valid();
     this->Tip = that.Tip;
@@ -260,7 +266,7 @@ void mtsStealthProbeCal::ToStream(std::ostream & outputStream) const
 }
 
 void mtsStealthProbeCal::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                         bool headerOnly, const std::string & headerPrefix) const
+                                     bool headerOnly, const std::string & headerPrefix) const
 {
     if (headerOnly) {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);

@@ -55,44 +55,47 @@ class CISST_EXPORT svlCCCameraCalibration
 {
 
 public:
+    svlCCCameraCalibration();
     svlCCCameraCalibration(int boardWidth, int boardHeight, float squareSize, int originDetectorColorModeFlag);
-    void reset();
-    void setCameraGeometry(vct2 f, vct2 c, double alpha, vctFixedSizeVector<double,7> k);
-    bool process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
-    int setRectifier(svlFilterImageRectifier* rectifier);
-    bool processImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index);
-    bool runCameraCalibration(bool runHandEye);
-    vct4x4 getTcpTCamera(){return tcpTCamera;};
-    int setImageVisibility(int index, int visible);
-    std::vector<svlCCCalibrationGrid*> getCalibrationGrids(){return calibrationGrids;};
-    int setFilterSourceDummy(svlFilterSourceDummy* source, int index);
+    void Reset();
+    void SetCameraGeometry(vct2 f, vct2 c, double alpha, vctFixedSizeVector<double,7> k);
+    bool Process(std::string imageDirectory, std::string imagePrefix, std::string imageType, int startIndex, int stopIndex);
+    int SetRectifier(svlFilterImageRectifier* rectifier, int index=-1);
+    bool ProcessImage(std::string imageDirectory, std::string imagePrefix, std::string imageType, int index,
+                      const vctDynamicVector<vctInt2> originIndicators = vctDynamicVector<vctInt2>());
+    bool RunCameraCalibration(bool runHandEye);
+    vct4x4 GetTcpTCamera(){return tcpTCamera;};
+    int SetImageVisibility(int index, int visible);
+    std::vector<svlCCCalibrationGrid*> GetCalibrationGrids(){return calibrationGrids;};
+    int SetFilterSourceDummy(svlFilterSourceDummy* source, int index);
     std::vector<svlSampleImageRGB> images;
     cv::Size imageSize;
     svlSampleCameraGeometry* cameraGeometry;
-    vct2 getFocii(){ return f;};
-    vct2 getCameraCenter(){ return c;};
-    vctFixedSizeVector<double,7> getDistortionCoefficients(){return k;};
-    double getCameraCalibrationReprojectionError() {return avgErr;};
-    double getHandEyeCalibrationError() {return minHandEyeAvgError;};
-    void printCalibrationParameters();
-    void writeToFileCalibrationParameters(std::string directory);
+    vct2 GetFocii(){ return f;};
+    vct2 GetCameraCenter(){ return c;};
+    vctFixedSizeVector<double,7> GetDistortionCoefficients(){return k;};
+    double GetCameraCalibrationReprojectionError() {return avgErr;};
+    double GetHandEyeCalibrationError() {return minHandEyeAvgError;};
+    void PrintCalibrationParameters();
+    void WriteToFileCalibrationParameters(std::string directory);
+    void SetGridValid(int index, bool valid){if(index < calibrationGrids.size())calibrationGrids.at(index)->valid = valid;};
 
 private:
-    double computeReprojectionErrors(
+    double ComputeReprojectionErrors(
             const std::vector<std::vector<cv::Point3f> >& objectPoints,
             const std::vector<std::vector<cv::Point2f> >& imagePoints,
             const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs,
             const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs,
             std::vector<float>& perViewErrors, bool projected );
-    void updateCalibrationGrids();
-    double runOpenCVCalibration(bool projected);
-    bool checkCalibration(bool projected);
-    double calibrate(bool projected, bool groundTruthTest);
-    void refineGrids(int localThreshold);
-    void optimizeCalibration();
-    bool calibration();
-    void updateCameraGeometry();
-    void runTest();
+    void UpdateCalibrationGrids();
+    double RunOpenCVCalibration(bool projected);
+    bool CheckCalibration(bool projected);
+    double Calibrate(bool projected, bool groundTruthTest);
+    void RefineGrids(int localThreshold);
+    void OptimizeCalibration();
+    bool Calibration();
+    void UpdateCameraGeometry();
+    void RunTest();
 
     ////////// Parameters //////////
     //camera parameters

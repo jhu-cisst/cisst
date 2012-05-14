@@ -33,7 +33,7 @@ class svlCCOriginDetector
 		enum colorModeEnum {RGB, RGY};
 
 		svlCCOriginDetector(int colorModeFlag);
-		void detectOrigin(IplImage* iplImage);
+                void detectOrigin(IplImage* iplImage, const vctDynamicVector<vctInt2>& originIndicators = vctDynamicVector<vctInt2>());
 		int getOriginDetectionFlag(){return originDetectionFlag;};
 		int getOriginColorModeFlag(){return originColorModeFlag;};
 		std::vector<cv::Point2f> getColorBlobs() { return colorBlobs;};

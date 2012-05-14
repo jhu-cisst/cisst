@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTransformationTypes.h>
+#include <cisstMultiTask/mtsFixedSizeVectorTypes.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 // data types used for wrapper
@@ -77,12 +78,22 @@ protected:
     class Registration
     {
     public:
-        vctFrm3 Transformation;
+        mtsFrm3 Transformation;
         mtsBool Valid;
         mtsDouble PredictedAccuracy;
     };
-
     Registration RegistrationMember;
+
+    // Class used to store exam info
+    class ExamInformation
+    {
+    public:
+        mtsDouble3 VoxelScale;
+        mtsInt3 Size;
+        bool Valid;
+    };
+    ExamInformation ExamInformationMember;
+    void RequestExamInformation(void);
 
     void RequestSurgicalPlan(void);
     void GetSurgicalPlan(mtsDoubleVec & plan) const;

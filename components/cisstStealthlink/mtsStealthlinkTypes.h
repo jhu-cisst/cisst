@@ -44,7 +44,7 @@ private:
     double GeometryError;
     char Name[NAME_LENGTH];
 public:
-    mtsStealthTool():XForm(), GeometryError(0) {}
+    mtsStealthTool():mtsGenericObject(), XForm(), GeometryError(0) {Name[0]='\0';}
     ~mtsStealthTool() {}
     const vctFrm3 & GetFrame(void) const { return XForm; }
     const char * GetName(void) const { return Name; }
@@ -75,7 +75,7 @@ private:
     double GeometryError;
     char Name[NAME_LENGTH];
 public:
-    mtsStealthFrame():XForm(), GeometryError(0) {};
+    mtsStealthFrame():XForm(), GeometryError(0) { Name[0]='\0';};
     ~mtsStealthFrame() {};
     const vctFrm3 & GetFrame(void) const { return XForm; }
     double GetGeometryError(void) const { return GeometryError; }
@@ -129,7 +129,7 @@ private:
     vct3 Hind;
 public:
 
-    mtsStealthProbeCal() { Name[0] = 0; };
+    mtsStealthProbeCal() { Name[0]='\0'; };
     ~mtsStealthProbeCal() {};
     const char * GetName(void) const { return Name; }
     const vct3 & GetTip(void) const { return Tip; }

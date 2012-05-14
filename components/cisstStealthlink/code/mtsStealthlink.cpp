@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnXMLPath.h>
+#include <cisstMultiTask/mtsFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #ifdef CISST_HAS_STEALTHLINK
@@ -237,6 +238,25 @@ mtsStealthlink::Tool * mtsStealthlink::AddTool(const std::string & stealthName, 
         provided->AddCommandReadState(StateTable, tool->MarkerPosition, "GetMarkerCartesian");
     }
     return tool;
+}
+
+
+void mtsStealthlink::RequestExamInformation(void)
+{
+    if (StealthlinkPresent) {
+        exam_info the_exam_info;
+#ifndef sawMedtronicStealthlink_IS_SIMULATOR
+        this->Client->GetDataForCode(GET_EXAM_INFO,
+                                     reinterpret_cast<void*>(&the_exam_info));
+#endif
+        ExamInformationMember.VoxelScale[0] = the_exam_info.voxel_scale[0];
+        ExamInformationMember.VoxelScale[1] = the_exam_info.voxel_scale[1];
+        ExamInformationMember.VoxelScale[2] = the_exam_info.voxel_scale[2];
+        ExamInformationMember.Size[0] = the_exam_info.size[0];
+        ExamInformationMember.Size[1] = the_exam_info.size[1];
+        ExamInformationMember.Size[2] = the_exam_info.size[2];
+        ExamInformationMember.Valid = the_exam_info.valid;
+    }
 }
 
 

@@ -106,7 +106,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
             return 0;
         }
     }
-
+    osaSleep(1.0 * cmn_s); //Fixes bug in Python wliu25 11/22/11
     while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
         if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();

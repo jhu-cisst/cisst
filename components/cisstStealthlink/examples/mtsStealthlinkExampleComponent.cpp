@@ -63,29 +63,47 @@ void mtsStealthlinkExampleComponent::Run(void)
     mtsStealthTool StealthTool;
     mtsStealthFrame StealthFrame;
     prmPositionCartesianGet prmPos;
-    vctFrm3 vctFrm;
     mtsFrm3 mtsFrm;
     mtsDouble predictedAccuracy;
 
+    bool debug = true;
     bool didOutput = false;
+    bool getValid = false;
     mtsExecutionResult result;
     result = Stealthlink.GetTool(StealthTool);
     if (!result.IsOK()) {
         std::cout << "Stealthlink.GetTool() failed: " << result << std::endl;
     }
-    if (StealthTool.Valid()) {
-        std::cout << "Tool " << StealthTool.GetName() << ": " << StealthTool.GetFrame().Translation() << "; ";
-        didOutput = true;
+    StealthTool.GetValid(getValid);
+    if (!getValid) {
+        std::cout << "Stealthlink.GetTool().GetValid() failed: " << getValid << std::endl;
     }
+
+    if (StealthTool.Valid()) {
+        if(debug)
+        {
+            std::cout << "Tool " << StealthTool.GetName() << ": " << StealthTool.GetFrame().Translation() << "; ";
+            std::cout << StealthTool.GetFrame().Rotation() << "; ";
+        }
+        didOutput = true;
+    }else
+        std::cout << "Stealthlink.Valid() FAILED: " << StealthTool.Valid() << std::endl;
 
     result = Stealthlink.GetFrame(StealthFrame);
     if (!result.IsOK()) {
         std::cout << "Stealthlink.GetFrame() failed: " << result << std::endl;
     }
-    if (StealthFrame.Valid()) {
-        std::cout << "Frame " << StealthFrame.GetName() << ": " << StealthFrame.GetFrame().Translation() << "; ";
-        didOutput = true;
+    StealthFrame.GetValid(getValid);
+    if (!getValid) {
+        std::cout << "Stealthlink.GetFrame().GetValid failed: " << getValid << std::endl;
     }
+
+    if (StealthFrame.Valid()) {
+        if(debug)
+            std::cout << "Frame " << StealthFrame.GetName() << ": " << StealthFrame.GetFrame().Translation() << "; ";
+        didOutput = true;
+    }else
+        std::cout << "Stealthlink.GetFrame().Valid() FAILED: " << StealthTool.Valid() << std::endl;
 
     if (Pointer.GetPositionCartesian.IsValid()) {
         result = Pointer.GetPositionCartesian(prmPos);
@@ -93,7 +111,8 @@ void mtsStealthlinkExampleComponent::Run(void)
             std::cout << "Pointer.GetPositionCartesian() failed: " << result << std::endl;
         }
         if (prmPos.Valid()) {
-            std::cout << "Interface Pointer: " << prmPos.Position().Translation() << "; ";
+            if(debug)
+                std::cout << "Interface Pointer: " << prmPos.Position().Translation() << "; ";
             didOutput = true;
         }
     }
@@ -103,7 +122,8 @@ void mtsStealthlinkExampleComponent::Run(void)
             std::cout << "Pointer.GetMarkerCartesian() failed: " << result << std::endl;
         }
         if (prmPos.Valid()) {
-            std::cout << "Interface PointerM: " << prmPos.Position().Translation() << "; ";
+            if(debug)
+                std::cout << "Interface PointerM: " << prmPos.Position().Translation() << "; ";
             didOutput = true;
         }
     }
@@ -114,10 +134,12 @@ void mtsStealthlinkExampleComponent::Run(void)
             std::cout << "Frame.GetPositionCartesian() failed: " << result << std::endl;
         }
         if (prmPos.Valid()) {
-            std::cout << "Interface Frame: " << prmPos.Position().Translation();
+            if(debug)
+                std::cout << "Interface Frame: " << prmPos.Position().Translation() << "; ";
             didOutput = true;
         } else {
-            std::cerr << "Interface Frame, invalid position" << std::endl;
+            if(debug)
+                std::cerr << "Interface Frame, invalid position" << std::endl;
             didOutput = true;
         }
     }
@@ -127,33 +149,40 @@ void mtsStealthlinkExampleComponent::Run(void)
             std::cout << "Frame.GetMarkerCartesian() failed: " << result << std::endl;
         }
         if (prmPos.Valid()) {
-            std::cout << "Interface FrameM: " << prmPos.Position().Translation();
+            if(debug)
+                std::cout << "Interface FrameM: " << prmPos.Position().Translation() << "; ";;
             didOutput = true;
         } else {
-            std::cerr << "Interface Frame, invalid position" << std::endl;
+            if(debug)
+                std::cerr << "Interface Frame, invalid position" << std::endl;
             didOutput = true;
         }
     }
 
-    mtsBool valid;   
+    mtsBool valid;
     if (Registration.GetValid.IsValid()) {
         result = Registration.GetValid(valid);
         if (!result.IsOK()) {
             std::cout << "Registration.GetValid() failed: " << result << std::endl;
         }
         if (valid) {
-            Registration.GetTransformation(vctFrm);
-            std::cout << "Registration: " << vctFrm.Translation();
+            Registration.GetTransformation(mtsFrm);
+            if(debug)
+                std::cout << "Registration: " << mtsFrm.Translation() << "; ";;
             didOutput = true;
         } else {
-            std::cout << "Registration: invalid" << std::endl;
+            if(debug)
+                std::cout << "Registration: invalid" << std::endl;
             didOutput = true;
         }
-    }
+    }else
+        std::cout << "Registration.GetValid.IsValid() failed: " << result << std::endl;
 
-    if (didOutput) {
+    if (didOutput && debug) {
         std::cout << std::endl;
     } else {
-        std::cout << "." << std::flush;
+        if(debug)
+            std::cout << "." << std::flush;
     }
 }
+

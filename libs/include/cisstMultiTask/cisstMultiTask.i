@@ -423,6 +423,7 @@ http://www.cisst.org/cisst/license.txt.
             interfaceProvidedNoSpace = interfaceProvided.InterfaceProvidedName.replace(' ', '')
             interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
             if not interfaceRequired:
+                print 'Parameter is not required'
                 return
             self.__dict__[interfaceRequired.GetName()] = interfaceRequired
             for command in interfaceProvided.CommandsVoid:
@@ -469,7 +470,9 @@ http://www.cisst.org/cisst/license.txt.
                     if not manager:
                         print 'Could not get manager component services'
                         return
+                    print 'Process ', localProcessName , 'AddInterfaceRequiredAndConnect: ', processName, componentName, interfaceName
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    print 'AddInterfaceRequiredAndConnect.interfaceProvidedName ', interfaceDescription.InterfaceProvidedName
                     if not interfaceDescription.InterfaceProvidedName:
                         print 'No provided interface (empty string)'
                         return
@@ -758,7 +761,7 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct2x2, vct2x2);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct3x3, vct3x3);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct4x4, vct4x4);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctMatRot3, vctMatRot3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsFrm3, vctFrm3);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFrm3, vctFrm3);
 
 
 %include "cisstMultiTask/mtsParameterTypes.h"
@@ -855,6 +858,9 @@ MTS_INSTANTIATE_MATRIX(mtsDoubleMat, double);
 MTS_INSTANTIATE_MATRIX(mtsIntMat, int);
 MTS_INSTANTIATE_MATRIX(mtsShortMat, short);
 MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
+
+%import "cisstMultiTask/mtsMacros.h"
+%include "cisstMultiTask/mtsTransformationTypes.h"
 
 // Wrap mtsStateIndex
 %include "cisstMultiTask/mtsStateIndex.h"

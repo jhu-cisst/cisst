@@ -36,6 +36,8 @@ add_library (cisstStealthlink ${IS_SHARED}
              mtsStealthlink.cpp
              ../mtsStealthlink.h
              ../mtsStealthlinkTypes.h
+	     ../mtsStealthlinkControllerComponent.h
+             mtsStealthlinkControllerComponent.cpp
              mtsStealthlinkTypes.cpp
              mtsStealthlink_AsCL_Stuff.cpp
              mtsStealthlink_AsCL_Stuff.h
@@ -53,6 +55,14 @@ cisst_target_link_libraries (cisstStealthlink ${CISST_LIBRARIES_NEEDED})
 set (cisstStealthlink_INCLUDE_DIR "${cisstComponents_SOURCE_DIR}")
 set (cisstStealthlink_LIBRARY_DIR "${LIBRARY_OUTPUT_PATH}")
 set (cisstStealthlink_LIBRARIES cisstStealthlink ${Stealthlink_LIBRARIES})
+
+  # Python wrappers
+  if (CISST_HAS_SWIG_PYTHON)
+    cisst_add_swig_module(MODULE cisstStealthlink
+                        INTERFACE_DIRECTORY ../
+			CISST_LIBRARIES cisstStealthlink
+                                        ${Stealthlink_LIBRARIES})
+  endif (CISST_HAS_SWIG_PYTHON)
 
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstStealthlinkConfig.cmake.in"
                 "${cisstComponents_BINARY_DIR}/cisstStealthlinkConfig.cmake"
