@@ -112,8 +112,13 @@ http://www.cisst.org/cisst/license.txt.
 
 // Wrap the class register and add required code to generate python iterators
 %newobject cmnClassServicesBase::Create;
+%ignore cmnClassServicesBase::SetLoD;
 %include "cisstCommon/cmnClassServicesBase.h"
+
 %newobject cmnClassRegister::Create;
+%ignore cmnClassRegister::SetLoD;
+%ignore cmnClassRegister::SetLoDForAllClasses;
+%ignore cmnClassRegister::SetLoDForMatchingClasses;
 %include "cisstCommon/cmnClassRegister.h"
 %include "cisstCommon/cmnClassRegisterMacros.h"
 %template() std::pair<std::string, cmnClassServicesBase*>;
@@ -183,6 +188,10 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %include "cisstCommon/cmnCallbackStreambuf.h"
 %template(cmnCallbackStreambufChar) cmnCallbackStreambuf<char>;
 %include "cisstCommon/cmnLogLoD.h"
+
+ // Ignore deprecated methods
+%ignore cmnLogger::SetLoD;
+%ignore cmnLogger::GetLoD;
 %include "cisstCommon/cmnLogger.h"
 
 // Wrap cmnPath
