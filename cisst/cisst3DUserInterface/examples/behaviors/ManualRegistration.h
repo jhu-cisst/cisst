@@ -126,7 +126,7 @@ private:
     ManualRegistrationSurfaceVisibleStippleObject* FindClosestFiducial(vctFrm3 positionUI3, VisibleObjectType type, int& index);
     void Register(void);
     void ComputeTRE();
-    bool ManualRegistration::RayRayIntersect(vctDouble3 p1,vctDouble3 p2,vctDouble3 p3,vctDouble3 p4,vctDouble3 &pa,vctDouble3 &pb);
+    bool RayRayIntersect(vctDouble3 p1,vctDouble3 p2,vctDouble3 p3,vctDouble3 p4,vctDouble3 &pa,vctDouble3 &pb);
     void GetFiducials(vctDynamicVector<vct3>& fiducialsVirtualECMRCM, vctDynamicVector<vct3>& fiducialsRealECMRCM,VisibleObjectType type, Frame frame);
     void UpdateVisibleList(void);
 
