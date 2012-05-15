@@ -586,12 +586,12 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
             argumentPrototype = 0;
         }
         if (!argumentPrototype) {
-            delete eventMulticastCommandWriteProxy;
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write event proxy: " << eventName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create event write proxy: " << eventName << std::endl;
+            eventMulticastCommandWriteProxy->SetArgumentPrototypeSerialized(itEventWrite->ArgumentPrototypeSerialized);
+            eventMulticastCommandWriteProxy->SetArgumentSupported(false);
+        } else {
+            eventMulticastCommandWriteProxy->SetArgumentPrototype(argumentPrototype);
         }
-        eventMulticastCommandWriteProxy->SetArgumentPrototype(argumentPrototype);
 
         if (!providedInterfaceProxy->AddEvent(eventName, eventMulticastCommandWriteProxy)) {
             delete eventMulticastCommandWriteProxy;
