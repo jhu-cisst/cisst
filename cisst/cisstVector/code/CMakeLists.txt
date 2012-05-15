@@ -156,7 +156,6 @@ if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
 endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
-
 cisst_add_library (
   LIBRARY cisstVector
   FOLDER cisstVector

@@ -49,6 +49,15 @@ macro (cisst_load_package_setting ...)
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
     endif (_clps_ADDITIONAL_BUILD_CMAKE)
     unset (_clps_ADDITIONAL_BUILD_CMAKE CACHE) # find_file stores the result in cache
+    # Internal dependency file
+    find_file (_clps_LIBRARIES_FILE
+               NAMES ${lib}Internal.cmake
+               PATHS ${CISST_CMAKE_DIRS}
+               NO_DEFAULT_PATH)
+    if (_clps_LIBRARIES_FILE)
+      include (${_clps_LIBRARIES_FILE})
+    endif (_clps_LIBRARIES_FILE)
+    unset (_clps_LIBRARIES_FILE CACHE) # find_file stores the result in cache
     # External dependency file
     find_file (_clps_SETTINGS_FILE
                NAMES ${lib}External.cmake
@@ -202,6 +211,7 @@ endmacro (cisst_extract_settings)
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
+# - SETTINGS is a list of settings, e.g. cisstQt, cisstFLTK, ...
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
 # - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)
@@ -225,6 +235,7 @@ macro (cisst_add_library ...)
        PROJECT
        FOLDER
        DEPENDENCIES
+       SETTINGS
        SOURCE_FILES HEADER_FILES
        ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
 
@@ -266,7 +277,6 @@ macro (cisst_add_library ...)
   set (FILE_CONTENT ${FILE_CONTENT} "   CMake: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   System: ${CMAKE_SYSTEM}\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   Source: ${CMAKE_SOURCE_DIR} */\n\n")
-  set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}pragma once\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}ifndef _${LIBRARY}_h\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}define _${LIBRARY}_h\n\n")
   foreach (file ${HEADER_FILES})
@@ -309,23 +319,43 @@ macro (cisst_add_library ...)
   if (DEPENDENCIES)
     # Check that dependencies are built
     foreach (dependency ${DEPENDENCIES})
-      set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-      list (FIND _CISST_LIBRARIES_AND_SETTINGS ${dependency} FOUND_IT)
-      if (${FOUND_IT} EQUAL -1 )
-        if (DEFINED ${dependency}_OPTION_NAME)
-          message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled, use the flag ${${dependency}_OPTION_NAME} to compile it")
-        else (DEFINED ${dependency}_OPTION_NAME)
-          message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
-        endif (DEFINED ${dependency}_OPTION_NAME)
-      endif (${FOUND_IT} EQUAL -1 )
+      list (FIND CISST_LIBRARIES ${dependency} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1)
+        # not found
+        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+      else (${FOUND_IT} EQUAL -1)
+        # found
+        cisst_library_use_libraries (${LIBRARY} ${dependency}) 
+      endif (${FOUND_IT} EQUAL -1)
     endforeach (dependency)
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
     cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
   endif (DEPENDENCIES)
 
-  # Link to cisst additional libraries
-  cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES})
+  # Add settings for linking, also check BUILD_xxx for dependencies
+  if (SETTINGS)
+    # Check that dependencies are built
+    foreach (setting ${SETTINGS})
+      list (FIND CISST_SETTINGS ${setting} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1 )
+        # not found
+        if (DEFINED ${setting}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled, use the flag ${${setting}_OPTION_NAME} to compile it")
+        else (DEFINED ${setting}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled")
+        endif (DEFINED ${setting}_OPTION_NAME)
+      else (${FOUND_IT} EQUAL -1 )
+        # found
+        cisst_library_use_settings (${LIBRARY} ${setting})
+      endif (${FOUND_IT} EQUAL -1 )
+    endforeach (setting)
+    # Set the link flags
+    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} uses settings: ${SETTINGS}")
+  endif (SETTINGS)
+
+  # Link to cisst additional libraries and settings
+  cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
 
   # Install all header files
   install (FILES ${HEADERS}

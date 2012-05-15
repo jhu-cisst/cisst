@@ -14,9 +14,6 @@
 
 project (cisstCommonQt)
 
-# cisstCommonQt relies on cisstQt settings (for future use)
-cisst_library_use_settings (cisstCommonQt cisstQt)
-
 # set directories for this project
 cisst_set_directories (cisstQt)
 
@@ -26,6 +23,7 @@ cisst_add_library (
   LIBRARY_DIR cisstCommon
   FOLDER cisstCommon
   DEPENDENCIES cisstCommon
+  SETTINGS     cisstQt
   SOURCE_FILES cmnClassServicesQt.cpp
                cmnLoggerQtWidget.cpp
   HEADER_FILES cmnExportQt.h
