@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-07-28
-  
-  (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -173,20 +173,20 @@ void cmnClassRegisterTest::TestLoD(void) {
 
     /* set the LoD via the class register and check via the class and
        the class register (with macro) */
-    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_INIT_VERBOSE);
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_ALLOW_VERBOSE);
     lod = objectA.ClassServices()->GetLogMask();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_VERBOSE);
     lod = cmnClassRegister::FindClassServices("TestA")->GetLogMask();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_VERBOSE);
 
     /* set the global LoD */
-    cmnLogger::SetMask(CMN_LOG_LOD_RUN_ERROR);
-    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_LOD_RUN_ERROR);
-    cmnLogger::SetMask(CMN_LOG_LOD_RUN_DEBUG);
-    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_LOD_RUN_DEBUG);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_WARNINGS);
+    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_ALLOW_WARNINGS);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_DEFAULT);
+    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_ALLOW_DEFAULT);
 
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_ALLOW_DEFAULT);
 }
 
 
@@ -196,27 +196,29 @@ void cmnClassRegisterTest::TestLog(void) {
     /* set the level of detail for class TestA */
     TestA objectA;
     cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_RUN_WARNING);
-    cmnLogger::SetMask(CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
 
     OutputStream.str("");
     objectA.Message(CMN_LOG_LEVEL_INIT_DEBUG);
     std::string expectedLog =
         std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
-        + " - Function " + objectA.Services()->GetName() + ": 4\n"
+        + " Function " + objectA.Services()->GetName() + ": 4\n"
         + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
-        + " - Class " + objectA.Services()->GetName() + ": 4\n";
+        + " Class " + objectA.Services()->GetName() + ": 4\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
     objectA.Message(CMN_LOG_LEVEL_RUN_ERROR);
     expectedLog =
         std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_ERROR))
-        + " - Function " + objectA.Services()->GetName() + ": 5\n"
+        + " Function " + objectA.Services()->GetName() + ": 5\n"
         + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_ERROR))
-        + " - Class " + objectA.Services()->GetName() + ": 5\n";
+        + " Class " + objectA.Services()->GetName() + ": 5\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     /* global LoD prevails, nothing goes thru */
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ERRORS);
     OutputStream.str("");
     objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     CPPUNIT_ASSERT(OutputStream.str() == "");
@@ -227,16 +229,16 @@ void cmnClassRegisterTest::TestLog(void) {
     objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     expectedLog =
         std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_WARNING))
-        + " - Function " + objectA.Services()->GetName() + ": 6\n"
+        + " Function " + objectA.Services()->GetName() + ": 6\n"
         + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_WARNING))
-        + " - Class " + objectA.Services()->GetName() + ": 6\n";
+        + " Class " + objectA.Services()->GetName() + ": 6\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
     objectA.Message(CMN_LOG_LEVEL_RUN_DEBUG);
     expectedLog =
         std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_DEBUG))
-        + " - Function " + objectA.Services()->GetName() + ": 8\n";
+        + " Function " + objectA.Services()->GetName() + ": 8\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 }
 
@@ -245,16 +247,16 @@ void cmnClassRegisterTest::TestLog(void) {
 void cmnClassRegisterTest::TestDynamicCreation(void) {
     cmnGenericObject* objectA = cmnClassRegister::Create("TestA");
     CPPUNIT_ASSERT(objectA == 0);
-    
+
     cmnGenericObject* objectB = cmnClassRegister::Create("TestB");
     CPPUNIT_ASSERT(objectB == 0);
-    
+
     cmnGenericObject* objectC = cmnClassRegister::Create("TestC");
     CPPUNIT_ASSERT(objectC);
     TestC realObjectC;
     CPPUNIT_ASSERT(typeid(*objectC) == typeid(realObjectC));
 
-    /* if the class does not contain the needed macros, we should not be able to create */    
+    /* if the class does not contain the needed macros, we should not be able to create */
     cmnGenericObject* objectC1 = cmnClassRegister::Create("TestC1");
     CPPUNIT_ASSERT(objectC1 == 0);
 
@@ -319,7 +321,7 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     services->Delete(createdOjectCopyCtor);
     CPPUNIT_ASSERT(pointer == createdOjectCopyCtor);
     CPPUNIT_ASSERT(typeid(*pointer) == typeid(*createdOjectCopyCtor));
-    
+
     /* test the copy constructor with another type */
     createdOjectCopyCtor = createdOjectC2DefaultCtor->ClassServices()->Create(*objectC);
     CPPUNIT_ASSERT(createdOjectCopyCtor == 0);
