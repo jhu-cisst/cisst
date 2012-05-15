@@ -178,10 +178,9 @@ public:
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
             pointer data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
-            pointer dummy;
             size_t index;
             for (index = 0; index < size; index++) {
-                dummy = new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
+                new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
             }
             return data;
         }
