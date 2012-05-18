@@ -238,8 +238,13 @@ int svlConverter::ConvertImage(const svlSampleImage* inimage, const unsigned int
         inchannel >= inimage->GetVideoChannels() || outchannel >= outimage->GetVideoChannels()) return SVL_FAIL;
 
     const unsigned int imgsize = inimage->GetWidth(inchannel) * inimage->GetHeight(inchannel);
-    unsigned int partsize = imgsize / threads;
+
+    unsigned int partsize = imgsize / threads + 1;
     unsigned int offset = partsize * threadid;
+
+    if ((partsize + offset) > imgsize) {
+        partsize = imgsize - offset;
+    }
 
     return Converter(inimage->GetType(),
                      outimage->GetType(),
