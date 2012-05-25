@@ -53,18 +53,10 @@ public:
       loading). */
     std::string ArgumentPrototypeSerialized;
 
-    /*! Indicate if all arguments are supported, i.e. if the program
-      has access to the argument(s) class services in
-      cmnClassServices.  The client process might not be linked to the
-      library that defines the argument symbol.  One can also use
-      dynamic loading to make sure all symbols are available.  This is
-      assumed to be true unless the method ArgumentNotSupported is
-      called. */
-    bool ArgumentsSupportedFlag;
-
 protected:
     /*! The constructor with a name. */
-    mtsMulticastCommandWriteProxy(const std::string & name): BaseType(name)
+    mtsMulticastCommandWriteProxy(const std::string & name):
+        BaseType(name)
     {}
 
     ~mtsMulticastCommandWriteProxy() {
