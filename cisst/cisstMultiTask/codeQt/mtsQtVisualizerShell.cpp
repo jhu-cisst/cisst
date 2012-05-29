@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <QHBoxLayout>
+#include <QSplitter>
 
 #include <cisstMultiTask/mtsQtScaleAndSignalTool.h>
 #include <cisstMultiTask/mtsQtVisualizerShell.h>
@@ -28,12 +29,19 @@ http://www.cisst.org/cisst/license.txt.
 mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerGlobal * managerGlobal, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
     : QWidget(parent), Visualizer(visualizer)
 {
-    QLayout* layout = new QHBoxLayout();
+    QLayout * layout = new QHBoxLayout();
     setLayout(layout);
+
+    QSplitter * splitter = new QSplitter();
+    layout->addWidget(splitter);
+
     if(Visualizer == 0) Visualizer = new vctPlot2DOpenGLQtWidget();
-    layout->addWidget(new mtsQtScaleAndSignalTool(managerGlobal, Visualizer));
-    //CommandSelector = new mtsQtCommandSelector;
-    //layout->addWidget(CommandSelector);
-    //layout->addWidget(Visualizer);
+
+    mtsQtScaleAndSignalTool * scaleAndSignalTool = new mtsQtScaleAndSignalTool(managerGlobal, Visualizer);
+    scaleAndSignalTool->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+    splitter->addWidget(scaleAndSignalTool);
+
+    Visualizer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    splitter->addWidget(Visualizer);
     //connect(CommandSelector, SIGNAL(CommandSelected(QString)), this, SLOT(SelectCommand));
 }

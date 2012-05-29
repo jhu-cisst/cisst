@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <QVBoxLayout>
+#include <QSplitter>
+#include <QTreeWidget>
 
 #include <cisstMultiTask/mtsQtCommandSelector.h>
 #include <cisstMultiTask/mtsQtScaleAndSignalTool.h>
@@ -29,6 +31,13 @@ mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerGlobal * globalManage
     : QWidget(parent), Visualizer(visualizer)
 {
     QLayout * layout = new QVBoxLayout();
-    layout->addWidget(new mtsQtCommandSelector(globalManager));
+    layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
+
+    QSplitter * splitter = new QSplitter();
+    splitter->setOrientation(Qt::Vertical);
+    layout->addWidget(splitter);
+
+    splitter->addWidget(new QTreeWidget());
+    splitter->addWidget(new mtsQtCommandSelector(globalManager));
 }
