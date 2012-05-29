@@ -43,7 +43,7 @@ vctPlot2DBase::Scale::~Scale()
 }
 
 
-std::string vctPlot2DBase::Scale::GetName(void)
+const std::string & vctPlot2DBase::Scale::GetName(void)
 {
     return this->Name;
 }
@@ -348,29 +348,6 @@ vctPlot2DBase::Scale * vctPlot2DBase::Signal::GetParent(void)
 const std::string & vctPlot2DBase::Signal::GetName(void) const
 {
     return this->Name;
-}
-
-
-void vctPlot2DBase::Signal::AddPoint(const vctDouble2 & point)
-{
-    if (!this->Frozen) {
-        // look where to store this point
-        if (!this->Empty) {
-            this->IndexLast++;
-            if (this->IndexLast == this->Data.size()) {
-                this->IndexLast = 0;
-            }
-            if (this->IndexFirst == this->IndexLast ) {
-                this->IndexFirst++;
-                if (this->IndexFirst == this->Data.size()) {
-                    this->IndexFirst = 0;
-                }
-            }
-        } else {
-            this->Empty = false;
-        }
-        this->Data.Element(IndexLast).Assign(point);
-    }
 }
 
 
