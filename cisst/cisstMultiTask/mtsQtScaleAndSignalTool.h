@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsQtScaleAndSignalTool_h
 
 #include <QWidget>
+#include <QTreeWidget>
 
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
@@ -48,6 +49,29 @@ public slots:
 
 private:
     vctPlot2DOpenGLQtWidget * Visualizer;
+};
+
+class mtsQtScaleEditor: public QTreeWidget
+{
+    Q_OBJECT;
+
+public:
+    mtsQtScaleEditor(vctPlot2DOpenGLQtWidget * visualizer, QWidget* parent = 0);
+
+    friend class mtsQtScaleAndSignalTool;
+
+private:
+    vctPlot2DOpenGLQtWidget * Visualizer;
+    int ScaleNameCounter;
+    QString CurrentScale;
+
+    void BuildTree(vctPlot2DOpenGLQtWidget * visualizer);
+
+private slots:
+    void NewScale();
+    void DeleteScale();
+    void RenameScale();
+    void ShowContextMenu(const QPoint & point);
 };
 
 #endif

@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 
 vctPlot2DBase::Scale::Scale(const std::string & name, size_t pointDimension)
@@ -1232,4 +1233,23 @@ vctPlot2DBase::Scale * vctPlot2DBase::FindScale(const std::string & name)
     } else {
         return Scales[found->second];
     }
+}
+
+
+bool vctPlot2DBase::RemoveScale(const std::string & name)
+{
+    const std::string delimiter("-");
+    std::string scaleName;
+    size_t delimiterPosition = name.find(delimiter);
+    Scale * scalePointer = this->FindScale(name);
+
+    scaleName = name.substr(0, delimiterPosition);
+
+    ScaleType::iterator it = std::find(Scales.begin(), Scales.end(), scalePointer);
+
+    if(it == Scales.end()) return false;
+
+    delete *it;
+    Scales.erase(it);
+    return true;
 }

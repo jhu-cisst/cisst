@@ -203,6 +203,9 @@ class CISST_EXPORT vctPlot2DBase
         const std::string & GetName(void);
         vctPlot2DBase::Signal * AddSignal(const std::string & name);
         bool RemoveSignal(const std::string & name);
+        inline const SignalsType & GetSignals() const {
+            return Signals;
+        }
 
         vctPlot2DBase::VerticalLine * AddVerticalLine(const std::string &name);
         void SetColor(const vctDouble3 & colorInRange0To1);
@@ -258,7 +261,10 @@ class CISST_EXPORT vctPlot2DBase
     //Scale Manipulate functions, one plot could have several Scales
     vctPlot2DBase::Scale * AddScale(const std::string & name);
     vctPlot2DBase::Scale * FindScale(const std::string & name);
-    vctPlot2DBase::Scale * RemoveScale(const std::string &name);
+    bool RemoveScale(const std::string &name);
+    inline const ScaleType& GetScales(void) const {
+        return Scales;
+    }
 
     vctPlot2DBase(size_t PointSize = 2);
     virtual ~vctPlot2DBase(void) {};
