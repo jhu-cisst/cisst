@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2005-08-24
+  Author(s):  Anton Deguet
+  Created on: 2005-08-24
 
   (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -36,7 +36,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctExport.h>
 
-
 #ifndef DOXYGEN
 #ifndef SWIG
 
@@ -46,26 +45,6 @@ void
 vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<_quaternionType> & quaternionRotation,
                                   const vctMatrixRotation3Base<_matrixType> & matrixRotation);
 
-#ifdef CISST_COMPILER_IS_MSVC
-template CISST_EXPORT void
-vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<vctFixedSizeVector<double, 4> > & quaternionRotation,
-                                  const vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3> > & matrixRotation);
-template CISST_EXPORT void
-vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<vctFixedSizeVector<double, 4> > & quaternionRotation,
-                                  const vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRotation);
-template CISST_EXPORT void
-vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<vctFixedSizeVector<double, 4> > & quaternionRotation,
-                                  const vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 1, 4> > & matrixRotation);
-template CISST_EXPORT void
-vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation,
-                                  const vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3> > & matrixRotation);
-template CISST_EXPORT void
-vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation,
-                                  const vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRotation);
-template CISST_EXPORT void
-vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation,
-                                  const vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 1, 4> > & matrixRotation);
-#endif
 #endif // SWIG
 #endif // DOXYGEN
 
@@ -950,8 +929,8 @@ public:
     template <stride_type __stride, class __dataPtrType>
     inline CISST_DEPRECATED const ThisType &
     From(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType> & rodriguezRotation) {
-	const value_type axisLength = rodriguezRotation.Norm();
-	const value_type axisTolerance = cmnTypeTraits<value_type>::Tolerance();
+        const value_type axisLength = rodriguezRotation.Norm();
+        const value_type axisTolerance = cmnTypeTraits<value_type>::Tolerance();
         const double angle = (fabs(axisLength) < axisTolerance) ? 0.0 : axisLength;
         const vctFixedSizeVector<value_type,3> defaultAxis(value_type(1), value_type(0), value_type(0));
         const vctFixedSizeVector<value_type,3> axis(  (angle == value_type(0)) ? defaultAxis : (rodriguezRotation / axisLength) );
@@ -1037,6 +1016,71 @@ inline void vctQuaternionVectorProductByElements(
     output.X() = - qR * tX - qX * tR - qY * tZ + qZ * tY;
     output.Y() = - qR * tY - qY * tR - qZ * tX + qX * tZ;
     output.Z() = - qR * tZ - qZ * tR - qX * tY + qY * tX;
+}
+
+
+
+template <class _quaternionType, class _matrixType>
+void
+vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<_quaternionType> & quaternionRotation,
+                                  const vctMatrixRotation3Base<_matrixType> & matrixRotation)
+{
+    typedef typename _quaternionType::value_type value_type;
+    typedef typename _quaternionType::TypeTraits TypeTraits;
+    typedef typename _quaternionType::NormType NormType;
+
+    const NormType a0 = 1.0 + matrixRotation.Element(0, 0) + matrixRotation.Element(1, 1) + matrixRotation.Element(2, 2);
+    const NormType a1 = 1.0 + matrixRotation.Element(0, 0) - matrixRotation.Element(1, 1) - matrixRotation.Element(2, 2);
+    const NormType a2 = 1.0 - matrixRotation.Element(0, 0) + matrixRotation.Element(1, 1) - matrixRotation.Element(2, 2);
+    const NormType a3 = 1.0 - matrixRotation.Element(0, 0) - matrixRotation.Element(1, 1) + matrixRotation.Element(2, 2);
+
+    NormType max = a0;
+    unsigned char index = 0;
+    if (a1 > max) {
+        max = a1;
+        index = 1;
+    }
+    if (a2 > max) {
+        max = a2;
+        index = 2;
+    }
+    if (a3 > max) {
+        index = 3;
+    }
+
+    NormType ratio;
+    switch (index) {
+    case 0:
+        quaternionRotation.R() = static_cast<value_type>(sqrt(a0) * 0.5);
+        ratio = 0.25 / quaternionRotation.R();
+        quaternionRotation.X() = static_cast<value_type>((matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2)) * ratio);
+        quaternionRotation.Y() = static_cast<value_type>((matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0)) * ratio);
+        quaternionRotation.Z() = static_cast<value_type>((matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1)) * ratio);
+        break;
+    case 1:
+        quaternionRotation.X() = static_cast<value_type>(sqrt(a1) * 0.5);
+        ratio = 0.25 / quaternionRotation.X();
+        quaternionRotation.R() = static_cast<value_type>((matrixRotation.Element(2, 1) - matrixRotation.Element(1, 2)) * ratio);
+        quaternionRotation.Y() = static_cast<value_type>((matrixRotation.Element(1, 0) + matrixRotation.Element(0, 1)) * ratio);
+        quaternionRotation.Z() = static_cast<value_type>((matrixRotation.Element(2, 0) + matrixRotation.Element(0, 2)) * ratio);
+        break;
+    case 2:
+        quaternionRotation.Y() = static_cast<value_type>(sqrt(a2) * 0.5);
+        ratio = 0.25 / quaternionRotation.Y();
+        quaternionRotation.R() = static_cast<value_type>((matrixRotation.Element(0, 2) - matrixRotation.Element(2, 0)) * ratio);
+        quaternionRotation.X() = static_cast<value_type>((matrixRotation.Element(1, 0) + matrixRotation.Element(0, 1)) * ratio);
+        quaternionRotation.Z() = static_cast<value_type>((matrixRotation.Element(2, 1) + matrixRotation.Element(1, 2)) * ratio);
+        break;
+    case 3:
+        quaternionRotation.Z() = static_cast<value_type>(sqrt(a3) * 0.5);
+        ratio = 0.25 / quaternionRotation.Z();
+        quaternionRotation.R() = static_cast<value_type>((matrixRotation.Element(1, 0) - matrixRotation.Element(0, 1)) * ratio);
+        quaternionRotation.X() = static_cast<value_type>((matrixRotation.Element(0, 2) + matrixRotation.Element(2, 0)) * ratio);
+        quaternionRotation.Y() = static_cast<value_type>((matrixRotation.Element(2, 1) + matrixRotation.Element(1, 2)) * ratio);
+        break;
+    default:
+        break;
+    }
 }
 
 #endif  // _vctQuaternionRotation3Base_h

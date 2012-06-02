@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-07-28
-  
-  (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -56,15 +56,15 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(TestA);
 
 class TestB : public myGenericObject {
-    /* register this class with mask CMN_LOG_LOD_RUN_VERBOSE */
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_VERBOSE);
+    /* register this class with mask CMN_LOG_ALLOW_VERBOSE */
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_VERBOSE);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestB);
 
 class TestC : public myGenericObject {
-    /* register this class with mask CMN_LOG_LOD_INIT_VERBOSE */
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_INIT_VERBOSE);
+    /* register this class with mask CMN_LOG_ALLOW_DEBUG */
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEBUG);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestC);
@@ -75,8 +75,8 @@ public:
 };
 
 class TestC2: public TestC {
-    /* register this class with a mas CMN_LOG_LOD_RUN_ERROR */
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    /* register this class with a mas CMN_LOG_ALLOW_RUN_ERROR */
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_WARNINGS);
 public:
     unsigned int Size;
     double * Elements;
@@ -134,12 +134,12 @@ class cmnClassRegisterTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestDynamicCreation);
     CPPUNIT_TEST(TestIterators);
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void);
 
     void tearDown(void);
-    
+
     /*! Test the class registration. */
     void TestRegistration(void);
 

@@ -136,7 +136,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_LOG(lod) \
     (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod))?  \
     (void*)0: \
-    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - ")
+    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
 
 /*! Macros defined to use #CMN_LOG for a given level of detail. */

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-06-24
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -46,9 +46,17 @@ public:
     typedef mtsMulticastCommandWriteBase BaseType;
     mtsProxySerializer Serializer;
 
+    /*! Argument prototype serialized.  This is used only if argument
+      prototype de-serialization fails when the proxy component is
+      created.  It is saved for later attempt to de-serialize,
+      assuming more symbols are available (e.g. after dynamic
+      loading). */
+    std::string ArgumentPrototypeSerialized;
+
 protected:
     /*! The constructor with a name. */
-    mtsMulticastCommandWriteProxy(const std::string & name) : BaseType(name)
+    mtsMulticastCommandWriteProxy(const std::string & name):
+        BaseType(name)
     {}
 
     ~mtsMulticastCommandWriteProxy() {
@@ -61,6 +69,10 @@ public:
     /*! Execute all the commands in the composite. */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
                                        mtsBlockingType CMN_UNUSED(blocking)) {
+        if (!this->ArgumentsSupported()) {
+            return mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+        }
+
         size_t index;
         for (index = 0; index < Commands.size(); ++index) {
             Commands[index]->Execute(argument, MTS_NOT_BLOCKING);
@@ -71,6 +83,21 @@ public:
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
         ArgumentPrototype = argumentPrototype;
+    }
+
+    /*! Test if all arguments are supported.  See ArgumentsSupportedFlag. */
+    inline bool ArgumentsSupported(void) const {
+        return this->ArgumentsSupportedFlag;
+    }
+
+    /*! Indicate that one or more argument is not supported. */
+    inline void SetArgumentSupported(bool argumentSupported) {
+        this->ArgumentsSupportedFlag = argumentSupported;
+    }
+
+    /*! Set the serialized version of argument prototype. */
+    void SetArgumentPrototypeSerialized(const std::string & argumentPrototypeSerialized) {
+        this->ArgumentPrototypeSerialized = argumentPrototypeSerialized;
     }
 
     /*! Getter */

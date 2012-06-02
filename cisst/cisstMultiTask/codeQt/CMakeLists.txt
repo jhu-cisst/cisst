@@ -16,9 +16,6 @@
 
 project (cisstMultiTaskQt)
 
-# cisstMultiTaskQt relies on cisstQt settings (for future use)
-cisst_library_use_settings (cisstMultiTaskQt cisstQt)
-
 # set directories for this project
 cisst_set_directories (cisstQt)
 
@@ -47,6 +44,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 cisstVector
                                 cisstVectorQt
                                 cisstMultiTask
+                   SETTINGS     cisstQt
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorQtComponent.cpp
                                 mtsCollectorQtWidget.cpp

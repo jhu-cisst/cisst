@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 
 #if CISST_HAS_QT_XML
-  #include <QtCore/QCoreApplication>
+  #include <QCoreApplication>
   QCoreApplication * GlobalQApplication;
 #endif
 
