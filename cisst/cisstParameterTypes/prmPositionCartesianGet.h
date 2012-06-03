@@ -2,11 +2,11 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
-  Author(s):	Rajesh Kumar, Anton Deguet
-  Created on:	2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on: 2008-03-12
+
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Cartesian position get parameters.
 */
 
@@ -38,10 +38,9 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    typedef mtsGenericObject BaseType;
 
  public:
-    /*! Base type */
-    typedef mtsGenericObject BaseType;
 
     /*! default constructor */
     inline prmPositionCartesianGet(void):
@@ -50,20 +49,20 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
         ReferenceFrameMember(0),
         PositionMember()
     {}
-    
+
     /*! constructor with all parameters */
-    inline prmPositionCartesianGet(const prmTransformationBasePtr & movingFrame, 
-                                   const prmTransformationBasePtr & referenceFrame, 
+    inline prmPositionCartesianGet(const prmTransformationBasePtr & movingFrame,
+                                   const prmTransformationBasePtr & referenceFrame,
                                    const vctFrm3 & position):
         MovingFrameMember(movingFrame),
         ReferenceFrameMember(referenceFrame),
         PositionMember(position)
     {}
-    
+
     /*!destructor
      */
     virtual ~prmPositionCartesianGet();
-    
+
 
     /*! Set and Get methods for the reference frame for current
         position.  This is defined by a node in the transformation
@@ -96,9 +95,9 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
     inline void SetPosition(const prmTransformationBasePtr & newPosition)
     {
         this->PositionMember = prmWRTReference(newPosition, this->ReferenceFrameMember);
-    } 
+    }
 
-    
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
@@ -112,9 +111,9 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream);
 
-    /*! Return a number of data (which can be visualized, i.e., type-casted 
+    /*! Return a number of data (which can be visualized, i.e., type-casted
         to double). */
-    unsigned int GetNumberOfScalar(const bool visualizable = true) const;
+    size_t GetNumberOfScalars(const bool visualizable = true) const;
 
     /*! Return the index-th (zero-based) value of data typecasted to double. */
     double GetScalarAsDouble(const size_t index) const;

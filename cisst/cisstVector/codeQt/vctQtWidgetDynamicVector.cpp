@@ -55,7 +55,7 @@ template <class _elementType>
 bool vctQtWidgetDynamicVectorRead<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
 {
     const size_t size = vector.size();
-    if (this->Table->columnCount() != size) {
+    if (static_cast<size_t>(this->Table->columnCount()) != size) {
         this->Table->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
@@ -98,7 +98,7 @@ vctQtWidgetDynamicVectorDoubleWrite::vctQtWidgetDynamicVectorDoubleWrite(void):
 bool vctQtWidgetDynamicVectorDoubleWrite::SetValue(const vctDynamicVector<double> & vector)
 {
     const size_t size = vector.size();
-    if (this->columnCount() != size) {
+    if (static_cast<size_t>(this->columnCount()) != size) {
         this->setColumnCount(size);
     }
     QDoubleSpinBox * spinBox;
@@ -146,7 +146,7 @@ vctQtWidgetDynamicVectorIntWrite::vctQtWidgetDynamicVectorIntWrite(void):
 bool vctQtWidgetDynamicVectorIntWrite::SetValue(const vctDynamicVector<int> & vector)
 {
     const size_t size = vector.size();
-    if (this->columnCount() != size) {
+    if (static_cast<size_t>(this->columnCount()) != size) {
         this->setColumnCount(size);
     }
     QSpinBox * spinBox;
@@ -190,7 +190,7 @@ vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
 bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const vctDynamicVector<bool> & vector)
 {
     const size_t size = vector.size();
-    if (this->columnCount() != size) {
+    if (static_cast<size_t>(this->columnCount()) != size) {
         this->setColumnCount(size);
     }
     QSpinBox * spinBox;

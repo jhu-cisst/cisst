@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2009-04-13
+  Author(s):  Anton Deguet
+  Created on: 2009-04-13
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,6 +51,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT mtsGenericObject: public cmnGenericObject {
 
+    typedef cmnGenericObject BaseType;
 
     /*! Time stamp.  When used in conjunction with mtsStateTable, the
       time stamp will be automatically updated using
@@ -85,7 +86,7 @@ public:
         AutomaticTimestampMember(automaticTimestamp),
         ValidMember(valid)
     {}
-        
+
     /*! Copy constructor */
     inline mtsGenericObject(const mtsGenericObject & other):
         cmnGenericObject(),
@@ -125,27 +126,14 @@ public:
     /*! Binary deserialization */
     virtual void DeSerializeRaw(std::istream & inputStream);
 
-    /*! Methods for data visualization.  Derived classes should override
-        the following methods in order to be properly processed by the data
-        visualizer of the global component manager. */
+    /* documented in base class */
+    size_t GetNumberOfScalars(const bool visualizable = true) const;
 
-    /*! Return a number of data (which can be visualized, i.e., type-casted
-        to double) */
-    virtual unsigned int GetNumberOfScalar(const bool CMN_UNUSED(visualizable) = true) const {
-        return 0;
-    }
+    /* documented in base class */
+    double GetScalarAsDouble(const size_t index) const;
 
-    /*! Return the index-th (zero-based) value of data typecasted to double. 
-        Note that an index has to be defined such that all indicies are continuous.
-        (This is required by the data visualizer of the GCM UI) */
-    virtual double GetScalarAsDouble(const size_t CMN_UNUSED(index)) const {
-        return 0.0;
-    }
-
-    /*! Return the name of index-th (zero-based) data typecasted to double. */
-    virtual std::string GetScalarName(const size_t CMN_UNUSED(index)) const {
-        return "N/A";
-    }
+    /* documented in base class */
+    std::string GetScalarName(const size_t index) const;
 };
 
 

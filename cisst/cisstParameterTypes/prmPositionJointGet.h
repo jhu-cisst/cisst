@@ -2,11 +2,11 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-Author(s):	Rajesh Kumar, Anton Deguet
-Created on:	2008-04-10
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on: 2008-04-10
 
-(C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-Reserved.
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-\file 
+/*!
+\file
 \brief Joint position query parameters.
 */
 
@@ -39,21 +39,21 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT prmPositionJointGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    typedef mtsGenericObject BaseType;
 
 public:
-    typedef mtsGenericObject BaseType;
+
     typedef prmPositionJointGet ThisType;
-    typedef unsigned int size_type;
 
     /*! default constructor - does nothing for now */
     inline prmPositionJointGet(void) {}
 
     /*! resizes the vector type members */
-    inline prmPositionJointGet(size_type size) { 
+    inline prmPositionJointGet(size_t size) {
         SetSize(size);
     }
 
-    void SetSize(size_type size);
+    void SetSize(size_t size);
 
     /*! constructor with all possible parameters */
     inline prmPositionJointGet(const vctDoubleVec & position):
@@ -97,9 +97,9 @@ public:
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream);
 
-    /*! Return a number of data (which can be visualized, i.e., type-casted 
+    /*! Return a number of data (which can be visualized, i.e., type-casted
         to double). */
-    unsigned int GetNumberOfScalar(const bool visualizable = true) const;
+    size_t GetNumberOfScalars(const bool visualizable = true) const;
 
     /*! Return the index-th (zero-based) value of data typecasted to double. */
     double GetScalarAsDouble(const size_t index) const;

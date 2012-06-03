@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: main.cpp 3223 2011-12-05 22:58:11Z adeguet1 $
+  $Id$
 
   Author(s):  Praneeth Sadda, Anton Deguet
   Created on: 2011-11-11

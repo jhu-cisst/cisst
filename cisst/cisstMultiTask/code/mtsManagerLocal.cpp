@@ -344,7 +344,7 @@ bool mtsManagerLocal::GetLogForwardingState(void) {
     return IsLogForwardingEnabled();
 }
 
-bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 
+bool mtsManagerLocal::MCCReadyForLogForwarding(void) const
 {
     if (!Instance) return false;
 
@@ -402,7 +402,7 @@ void mtsManagerLocal::LogDispatcher(const char * str, int len)
             Instance->ManagerComponent.Client->ForwardLog(log);
         }
     }
-    
+
     if (!deadlockAvoidance) {
         LogMutex.Unlock();
     }
@@ -426,9 +426,9 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin(); 
-             it != LogQueue.end(); 
-             ++count) 
+        for (LogQueueType::iterator it = LogQueue.begin();
+             it != LogQueue.end();
+             ++count)
         {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
@@ -436,7 +436,7 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
             }
             // MJ: after 30 log messages forwarded, give other threads a chance to queue
             // logs by releasing the lock (30 is arbitrary)
-            if (count == 30) 
+            if (count == 30)
                 break;
         }
         LogMutex.Unlock();
@@ -1635,7 +1635,7 @@ void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
     }
 
     // Get signal information
-    const size_t signalCount = argument->GetNumberOfScalar();
+    const size_t signalCount = argument->GetNumberOfScalars();
     for (size_t i = 0; i < signalCount; ++i) {
         signalNames.push_back(argument->GetScalarName(i));
     }
@@ -1678,7 +1678,7 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
     double relativeTime;
     values.clear();
     /*
-    for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
+    for (unsigned int i = 0; i < argument->GetNumberOfScalars(); ++i) {
         value.Value = argument->GetScalarAsDouble(i);
         argument->GetTimestamp(relativeTime);
         TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
@@ -1760,7 +1760,7 @@ bool mtsManagerLocal::CreateManagerComponents(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Successfully created manager components" << std::endl;
 
     ManagerComponent.Client->MCSReady = true;
-    
+
     return true;
 }
 
@@ -1899,7 +1899,7 @@ void mtsManagerLocal::KillAll(void)
     }
     ComponentMapChange.Unlock();
 
-    // Block further logs 
+    // Block further logs
     LogDisabled = true;
     SetLogForwarding(false);
 }
@@ -3058,18 +3058,18 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
 
     if (!IsGCMActive())
         return false;
-    
+
     if (ManagerComponent.Server){
         ManagerComponent.Server->GetNamesOfProcesses(processNames);
-        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
         return true;
     }
-    else if (ManagerComponent.Client) {  
+    else if (ManagerComponent.Client) {
         ManagerComponent.Client->GetNamesOfProcesses(processNames);
-        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
         return true;
     }
-    
+
     else
         return false;
 }

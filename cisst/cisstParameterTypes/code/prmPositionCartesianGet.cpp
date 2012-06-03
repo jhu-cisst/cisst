@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
-  Created on:   2008-03-12
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on: 2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -39,44 +39,52 @@ void prmPositionCartesianGet::ToStreamRaw(std::ostream & outputStream, const cha
     this->PositionMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
 }
 
-void prmPositionCartesianGet::SerializeRaw(std::ostream & outputStream) const 
+void prmPositionCartesianGet::SerializeRaw(std::ostream & outputStream) const
 {
     BaseType::SerializeRaw(outputStream);
     this->PositionMember.SerializeRaw(outputStream);
 }
 
-void prmPositionCartesianGet::DeSerializeRaw(std::istream & inputStream) 
+void prmPositionCartesianGet::DeSerializeRaw(std::istream & inputStream)
 {
     BaseType::DeSerializeRaw(inputStream);
     this->PositionMember.DeSerializeRaw(inputStream);
 }
 
-unsigned int prmPositionCartesianGet::GetNumberOfScalar(const bool CMN_UNUSED(visualizable)) const 
+size_t prmPositionCartesianGet::GetNumberOfScalars(const bool visualizable) const
 {
-    return 12; // 3 for 3D position, 9 for 3x3 rotation matrix
+    return BaseType::GetNumberOfScalars(visualizable) + 12; // 3 for 3D position, 9 for 3x3 rotation matrix
 }
 
-double prmPositionCartesianGet::GetScalarAsDouble(const size_t index) const 
+double prmPositionCartesianGet::GetScalarAsDouble(const size_t index) const
 {
-    if (index >= GetNumberOfScalar()) {
+    if (index >= GetNumberOfScalars()) {
         return 0.0;
     }
-
-    if (index <= 2) {
-        return static_cast<double>(this->PositionMember.Translation().at(index));
+    if (index < BaseType::GetNumberOfScalars()) {
+        return BaseType::GetScalarAsDouble(index);
+    }
+    const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
+    if (offset < 3) {
+        return static_cast<double>(this->PositionMember.Translation().at(offset));
     } else {
-        return static_cast<double>(this->PositionMember.Rotation().at(index - 3));
+        return static_cast<double>(this->PositionMember.Rotation().at(offset - 3));
     }
 }
 
-std::string prmPositionCartesianGet::GetScalarName(const size_t index) const 
+
+std::string prmPositionCartesianGet::GetScalarName(const size_t index) const
 {
-    if (index >= GetNumberOfScalar()) {
-        return "N/A";
+    if (index >= GetNumberOfScalars()) {
+        return "index out of range";
     }
+    if (index < BaseType::GetNumberOfScalars()) {
+        return BaseType::GetScalarName(index);
+    }
+    const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
 
     std::string signalName;
-    switch (index) {
+    switch (offset) {
         case 0:  signalName = "translation x";  break;
         case 1:  signalName = "translation y";  break;
         case 2:  signalName = "translation z";  break;

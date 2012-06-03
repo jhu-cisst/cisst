@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2009-04-13
+  Author(s):  Anton Deguet
+  Created on: 2009-04-13
 
   (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -102,4 +102,50 @@ void mtsGenericObject::DeSerializeRaw(std::istream & inputStream) {
     cmnDeSerializeRaw(inputStream, this->Timestamp());
     cmnDeSerializeRaw(inputStream, this->AutomaticTimestamp());
     cmnDeSerializeRaw(inputStream, this->Valid());
+}
+
+
+size_t mtsGenericObject::GetNumberOfScalars(const bool visualizable) const
+{
+    return BaseType::GetNumberOfScalars(visualizable) + 3;
+}
+
+
+double mtsGenericObject::GetScalarAsDouble(const size_t index) const
+{
+    if (index >= GetNumberOfScalars()) {
+        return 0.0;
+    }
+    if (index < BaseType::GetNumberOfScalars()) {
+        return BaseType::GetScalarAsDouble(index);
+    }
+    const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
+    if (offset == 0) {
+        return this->TimestampMember;
+    }
+    if (offset == 1) {
+        return static_cast<double>(this->AutomaticTimestampMember);
+    }
+    // last case
+    return static_cast<double>(this->ValidMember);
+}
+
+
+std::string mtsGenericObject::GetScalarName(const size_t index) const
+{
+    if (index >= GetNumberOfScalars()) {
+        return "index out of range";
+    }
+    if (index < BaseType::GetNumberOfScalars()) {
+        return BaseType::GetScalarName(index);
+    }
+    const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
+    if (offset == 0) {
+        return "Timestamp";
+    }
+    if (offset == 1) {
+        return "AutomaticTimestamp";
+    }
+    // last case
+    return "Valid";
 }
