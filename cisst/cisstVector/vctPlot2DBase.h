@@ -229,9 +229,9 @@ class CISST_EXPORT vctPlot2DBase
 
     protected:
         // maintain a map to find signal Id by name
-        typedef std::map<std::string, size_t> SignalsIdType;
+        typedef std::map<std::string, Signal*> SignalsIdType;
         SignalsIdType SignalsId;
-        typedef std::map<std::string, size_t> VerticalLinesIdType;
+        typedef std::map<std::string, VerticalLine*> VerticalLinesIdType;
         VerticalLinesIdType VerticalLinesId;
 
         bool ContinuousFitX;
@@ -253,16 +253,16 @@ class CISST_EXPORT vctPlot2DBase
         double LineWidth;
     };
     // keep scale in a vector
-    typedef std::vector<Scale *> ScaleType;
-    ScaleType Scales;
-    typedef std::map<std::string, size_t> ScalesIdType;
+    typedef std::vector<Scale *> ScalesType;
+    ScalesType Scales;
+    typedef std::map<std::string, Scale*> ScalesIdType;
     ScalesIdType ScalesId;
 
     //Scale Manipulate functions, one plot could have several Scales
     vctPlot2DBase::Scale * AddScale(const std::string & name);
     vctPlot2DBase::Scale * FindScale(const std::string & name);
     bool RemoveScale(const std::string &name);
-    inline const ScaleType& GetScales(void) const {
+    inline const ScalesType& GetScales(void) const {
         return Scales;
     }
 
@@ -396,7 +396,7 @@ class CISST_EXPORT vctPlot2DBase
     typedef std::vector<Signal *> SignalsType;
     SignalsType Signals;
     // maintain a map to find signal Id by name
-    typedef std::map<std::string, size_t> SignalsIdType;
+    typedef std::map<std::string, Signal*> SignalsIdType;
     SignalsIdType SignalsId;
 
     // keep vertical lines in a vector
