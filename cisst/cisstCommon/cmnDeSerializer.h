@@ -244,7 +244,9 @@ public:
             } else {
                 cmnClassServicesBase * servicesPointerLocal = iterator->second;
                 if (servicesPointerLocal != object.Services()) {
-                    CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Object types don't match" << std::endl;
+                    CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Object types don't match, local class = "
+                        << servicesPointerLocal->GetName() << ", object class = " << object.Services()->GetName()
+                        << std::endl;
                 } else {
                     if (serializeObject) {
                         object.DeSerializeRaw(this->InputStream);
