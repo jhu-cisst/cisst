@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Praneeth Sadda
-  Created on:	2012-05-24
+  Author(s):  Praneeth Sadda
+  Created on: 2012-05-24
 
   (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -58,11 +58,12 @@ mtsQtScaleEditor::mtsQtScaleEditor(vctPlot2DOpenGLQtWidget * visualizer, QWidget
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(ShowContextMenu(const QPoint &)));
 }
 
-void mtsQtScaleEditor::BuildTree(vctPlot2DOpenGLQtWidget * visualizer) {
-    const vctPlot2DOpenGLQtWidget::ScaleType & scales = visualizer->GetScales();
 
-    vctPlot2DOpenGLQtWidget::ScaleType::const_iterator scalesIt = scales.begin();
-    vctPlot2DOpenGLQtWidget::ScaleType::const_iterator scalesEnd = scales.end();
+void mtsQtScaleEditor::BuildTree(vctPlot2DOpenGLQtWidget * visualizer)
+{
+    const vctPlot2DOpenGLQtWidget::ScalesType & scales = visualizer->GetScales();
+    vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesIt = scales.begin();
+    vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesEnd = scales.end();
     vctPlot2DOpenGLQtWidget::Scale::SignalsType::const_iterator signalsIt;
     vctPlot2DOpenGLQtWidget::Scale::SignalsType::const_iterator signalsEnd;
     QTreeWidgetItem * scaleItem;
@@ -84,7 +85,9 @@ void mtsQtScaleEditor::BuildTree(vctPlot2DOpenGLQtWidget * visualizer) {
     }
 }
 
-void mtsQtScaleEditor::NewScale() {
+
+void mtsQtScaleEditor::NewScale(void)
+{
     std::stringstream ss;
     ss << "Scale " << ++ScaleNameCounter;
     while(Visualizer->FindScale(ss.str()) != 0) {
@@ -99,19 +102,25 @@ void mtsQtScaleEditor::NewScale() {
     addTopLevelItem(scaleItem);
 }
 
-void mtsQtScaleEditor::RenameScale() {
+
+void mtsQtScaleEditor::RenameScale(void)
+{
     vctPlot2DOpenGLQtWidget::Scale * scale = Visualizer->FindScale(CurrentScale.toLocal8Bit().data());
     QTreeWidgetItem * scaleItem = this->findItems(CurrentScale.toLocal8Bit().data(), Qt::MatchCaseSensitive | Qt::MatchFixedString).first();
     this->edit(this->model()->index(this->indexOfTopLevelItem(scaleItem), 0));
 }
 
-void mtsQtScaleEditor::DeleteScale() {
+
+void mtsQtScaleEditor::DeleteScale(void)
+{
     Visualizer->RemoveScale(CurrentScale.toLocal8Bit().data());
     QTreeWidgetItem * scaleItem = this->findItems(CurrentScale.toLocal8Bit().data(), Qt::MatchCaseSensitive | Qt::MatchFixedString).first();
     this->takeTopLevelItem(this->indexOfTopLevelItem(scaleItem));
 }
 
-void mtsQtScaleEditor::ShowContextMenu(const QPoint & point) {
+
+void mtsQtScaleEditor::ShowContextMenu(const QPoint & point)
+{
     QMenu menu(this);
     menu.addAction("&New scale", this, SLOT(NewScale()));
     QTreeWidgetItem * item = this->itemAt(point);

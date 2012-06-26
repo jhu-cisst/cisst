@@ -253,10 +253,10 @@ bool vctPlot2DBase::Scale::RemoveSignal(const std::string & name)
     SignalsIdType::iterator found = this->SignalsId.find(name);
 
     if (found != this->SignalsId.end()){
-      Signal * signalPointer = found->second;
-      this->SignalsId.erase(found);
-      Signals.erase(std::find(Signals.begin(), Signals.end(), signalPointer));
-      delete signalPointer;
+        Signal * signalPointer = found->second;
+        this->SignalsId.erase(found);
+        Signals.erase(std::find(Signals.begin(), Signals.end(), signalPointer));
+        delete signalPointer;
     }
     return false;
 }
@@ -1234,13 +1234,11 @@ bool vctPlot2DBase::RemoveScale(const std::string & name)
     std::string scaleName = name.substr(0, delimiterPosition);
     ScalesIdType::const_iterator found = ScalesId.find(scaleName);
 
-    if(found != ScalesId.end()) {
+    if (found != ScalesId.end()) {
         Scale * scalePointer = found->second;
-        ScalesId.erase(found);
         Scales.erase(std::find(Scales.begin(), Scales.end(), scalePointer));
         delete scalePointer;
         return true;
     }
-
     return false;
 }
