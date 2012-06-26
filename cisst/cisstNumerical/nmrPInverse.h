@@ -277,7 +277,7 @@ public:
     friend class Friend;
 #endif // DOXYGEN
 #endif // SWIG
-    
+
     /*! The default constuctor.
       For dynamic size, there are assigned default values,
       which MUST be changed by calling appropriate methods.
@@ -291,7 +291,7 @@ public:
     {
         AllocateOutputWorkspace(false, false);
     };
-    
+
 
     /*! Constructor where user provides the input matrix to specify size,
       Memory allocation is done for output matrices and vectors as well as
@@ -359,7 +359,7 @@ public:
         this->SetRefOutput(pInverse);
     }
 
-    
+
     /*! This method allocates memory of output matrices and vector
       as well as the workspace.
       This method should be called before the nmrPInverseDynamicData
@@ -407,7 +407,7 @@ public:
         this->ThrowUnlessWorkspaceSizeIsCorrect(workspace);
         this->SetRefSVD(workspace);
     }
-    
+
     /*! This method must be called before the data object
       is passed to nmrPInverse function.
       The user provides the input matrix to specify size,
@@ -457,7 +457,7 @@ public:
     }
 
 
-    
+
 public:
     /*!
       \name Retrieving results
@@ -503,9 +503,14 @@ public:
     typedef vct::size_type size_type;
 #ifndef DOXYGEN
     enum {MIN_MN = (_rows < _cols) ? _rows : _cols};
-    enum {LWORK_1 = 3 * MIN_MN + (_rows > _cols) ? _rows : _cols};
+    enum {LWORK_1 = (3 * MIN_MN + (_rows > _cols)) ? _rows : _cols};
     enum {LWORK_2 = 5 * MIN_MN};
-    enum {LWORK_3 = (static_cast<size_type>(LWORK_1) > static_cast<size_type>(LWORK_2)) ? static_cast<size_type>(LWORK_1) : static_cast<size_type>(LWORK_2)};
+    enum {LWORK_3 =
+          (static_cast<size_type>(LWORK_1) > static_cast<size_type>(LWORK_2))
+          ?
+          static_cast<size_type>(LWORK_1)
+          :
+          static_cast<size_type>(LWORK_2)};
     enum {LWORK = _rows * _rows + _cols * _cols + static_cast<size_type>(MIN_MN) + static_cast<size_type>(LWORK_3) + _rows * _cols};
 #endif // DOXYGEN
 
@@ -543,7 +548,7 @@ private:
     //*}
 
 public:
-    
+
 #ifndef DOXYGEN
     /* This class is not intended to be a top-level API.  It has been
       provided to avoid making the templated PInverse function as a
@@ -583,7 +588,7 @@ public:
     };
     friend class Friend;
 #endif
-    
+
     /*! Default constructor.  This constructor sets all the references
         used to call the SVD routines using a contiguous block of
         memory (aka workspace).  The memory is stack allocated but the
@@ -595,10 +600,10 @@ public:
         SVDWorkspaceReference(WorkspaceMember.Pointer(_rows * _rows + _cols * _cols + MIN_MN)),
         PReference(WorkspaceMember.Pointer(_rows * _rows + _cols * _cols + MIN_MN + LWORK_3))
     {};
-    
+
     /*!
       \name Retrieving results
-      
+
       In order to get access to U, V^t and S, after the have been
       computed by calling nmrPInverse function, use the following
       methods.
@@ -660,11 +665,11 @@ public:
   \endcode
 
   The user can then call the P-Inverse routine
-  
+
   \code
   nmrPInverse(A, PInverse);
   \endcode
-  
+
   The PInverse method verifies that the size of the data objects
   matches the input, and allocates workspace memory, which is
   deallocated when the function ends.  Remember that nmrPInverse
@@ -681,7 +686,7 @@ public:
   \code
   vctDynamicMatrix<CISSTNETLIB_DOUBLE> input(rows, cols , VCT_ROW_MAJOR);
   \endcode
-     
+
   The user creates a data object which could be of type
   nmrPInverseFixedSizeData or nmrPInverseDynamicData corresponding to
   fixed size, dynamic matrix.
@@ -691,15 +696,15 @@ public:
   \endcode
 
   Finally, call the nmrPInverse function:
-  
+
   \code
   nmrPInverse(input, data);
   \endcode
-     
+
   The contents of input matrix is modified by this routine.  The
   matrices U, Vt and vector S are available through the following
   methods:
-     
+
   \code
   std::cout << data.U()
             << data.S()
@@ -732,13 +737,13 @@ public:
   \code
   nmrPInverse(A, PInverse, Work);
   \endcode
-  
+
   For fixed size the above two steps are replaced by
   \code
   nmrPInverseFixedSizeData<4, 3, VCT_COL_MAJOR>::TypeWorkspace Work;
   nmrPInverse<4, 3, VCT_COL_MAJOR>(A, PInverse, Work);
   \endcode
-  
+
   </ol>
 
   nmrPInverse uses ::nmrSVD and returns the error code of ::nmrSVD.
@@ -772,7 +777,7 @@ public:
   \param A A matrix of size MxN, of one of vctDynamicMatrix or vctDynamicMatrixRef
   \param data A data object of one of the types corresponding to
   input matrix
-  
+
   \test nmrPInverseTest::TestDynamicColumnMajor
         nmrPInverseTest::TestDynamicRowMajor
         nmrPInverseTest::TestDynamicColumnMajorUserAlloc
@@ -796,7 +801,7 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerType, CI
     const size_type cols = A.cols();
     const size_type minmn = (rows < cols) ? rows : cols;
     const size_type maxmn = (rows > cols) ? rows : cols;
-    
+
     ret_value = nmrSVD(A, dataFriend.U(), dataFriend.S(),
                        dataFriend.Vt(), dataFriend.Workspace());
     const CISSTNETLIB_DOUBLE eps = cmnTypeTraits<CISSTNETLIB_DOUBLE>::Tolerance() * dataFriend.S().at(0) * maxmn;
@@ -879,7 +884,7 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, C
   \param A Fixed size matrix of size MxN
   \param pInverse The output matrix for pseudo inverse
   \param workspace The workspace for LAPACK.
- 
+
   \test nmrPInverseTest::TestFixedSizeColumnMajorMLeqN_T2
         nmrPInverseTest::TestFixedSizeRowMajorMLeqN_T2
         nmrPInverseTest::TestFixedSizeColumnMajorMGeqN_T2
