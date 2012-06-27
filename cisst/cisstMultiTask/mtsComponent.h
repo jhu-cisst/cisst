@@ -168,6 +168,16 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       processing.  See Start. */
     virtual void Kill(void);
 
+    /*! Virtual method that gets overloaded, and is run before the
+        component is started.
+      */
+    virtual void Startup(void) {}
+
+    /*! Virtual method that gets overloaded, and is run after the
+        component gets killed using Kill() method.
+      */
+    virtual void Cleanup(void) {}
+
     /*! Method to add a provided interface to the component. */
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
                                                 mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);

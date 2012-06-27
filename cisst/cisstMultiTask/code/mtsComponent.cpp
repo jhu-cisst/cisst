@@ -107,6 +107,7 @@ void mtsComponent::Start(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start: default start method for component \""
                                << this->GetName() << "\"" << std::endl;
+    this->Startup();
     this->State = mtsComponentState::ACTIVE;
 }
 
@@ -123,6 +124,7 @@ void mtsComponent::Kill(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Kill: default kill method for component \""
                                << this->GetName() << "\"" << std::endl;
+    this->Cleanup();
     this->State = mtsComponentState::FINISHED;
 }
 
