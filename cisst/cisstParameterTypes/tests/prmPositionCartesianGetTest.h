@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2009-04-29
-  
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,19 +25,21 @@ http://www.cisst.org/cisst/license.txt.
 class prmPositionCartesianGetTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(prmPositionCartesianGetTest);
-
-    CPPUNIT_TEST(TestConstructors);
-    CPPUNIT_TEST(TestSerialize);
-
+    {
+        CPPUNIT_TEST(TestConstructors);
+        CPPUNIT_TEST(TestSerialize);
+        CPPUNIT_TEST(TestScalars);
+    }
     CPPUNIT_TEST_SUITE_END();
-    
+
 public:
     void setUp(void) {}
-    
+
     void tearDown(void) {}
-    
+
     void TestConstructors(void);
     void TestSerialize(void);
+    void TestScalars(void);
 };
 
 

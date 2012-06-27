@@ -83,20 +83,22 @@ std::string prmPositionCartesianGet::GetScalarName(const size_t index) const
     }
     const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
 
+    // adeguet1 todo: move this code to cmnDataGetScalarName overloaded for frame, vector and matrices
+    // adeguet1 todo: in cisstVector, add method to compute indices based on memory position, i.e. matrix.IndexForPosition(0) returns (0,0) - uses strides as well
     std::string signalName;
     switch (offset) {
-        case 0:  signalName = "translation x";  break;
-        case 1:  signalName = "translation y";  break;
-        case 2:  signalName = "translation z";  break;
-        case 3:  signalName = "rotation (1,1)"; break;
-        case 4:  signalName = "rotation (1,2)"; break;
-        case 5:  signalName = "rotation (1,3)"; break;
-        case 6:  signalName = "rotation (2,1)"; break;
-        case 7:  signalName = "rotation (2,2)"; break;
-        case 8:  signalName = "rotation (2,3)"; break;
-        case 9:  signalName = "rotation (3,1)"; break;
-        case 10: signalName = "rotation (3,2)"; break;
-        case 11: signalName = "rotation (3,3)"; break;
+        case 0:  signalName = "Position.Translation[0]"; break;
+        case 1:  signalName = "Position.Translation[1]"; break;
+        case 2:  signalName = "Position.Translation[2]"; break;
+        case 3:  signalName = "Position.Rotation[0,0]"; break;
+        case 4:  signalName = "Position.Rotation[0,1]"; break;
+        case 5:  signalName = "Position.Rotation[0,2]"; break;
+        case 6:  signalName = "Position.Rotation[1,0]"; break;
+        case 7:  signalName = "Position.Rotation[1,1]"; break;
+        case 8:  signalName = "Position.Rotation[1,2]"; break;
+        case 9:  signalName = "Position.Rotation[2,0]"; break;
+        case 10: signalName = "Position.Rotation[2,1]"; break;
+        case 11: signalName = "Position.Rotation[2,2]"; break;
     }
     return signalName;
 }
