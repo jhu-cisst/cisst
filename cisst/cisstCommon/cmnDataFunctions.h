@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):    Anton Deguet
-  Created on:    2011-06-27
+  Author(s):  Anton Deguet
+  Created on: 2011-06-27
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -143,6 +143,12 @@ void cmnDataByteSwap(_elementType & data) {
    std::string
 */
 
+/*! Macro to overload the function cmnDataCopy using the assignement
+  operator to copy from source to destination.  This is a
+  appropriate for data types without any dynamic memory allocations.
+  For types using dynamic memory allocations or large blocks of
+  memory, users should overload the cmnDataCopy function using a
+  more efficient approach (memcpy, ...). */
 #define CMN_DATA_COPY_USING_ASSIGN(_type)                               \
     inline void cmnDataCopy(_type & destination,                        \
                             const _type & source) {                     \
@@ -150,6 +156,12 @@ void cmnDataByteSwap(_elementType & data) {
     }
 
 
+/*! Macro to overload the function cmnDataSerializeBinary using a cast
+  to char pointer and assuming that sizeof reports the real size of
+  the object to be serialized.  Please note that this method will
+  not work with data object relying on dynamic memory allocation
+  (pointers) and might also fail if you are using a struct/class
+  your compiler can pad. */ 
 #define CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(_type)      \
     inline void cmnDataSerializeBinary(std::ostream & outputStream,     \
                                        const _type & data)              \
@@ -240,15 +252,26 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
 }
 
 
+/*! Macro to overload the function cmnDataDescription using the type
+  name itself.  For example, for a double it will return the string
+  "{double}". */
+#define CMN_DATA_DESCRIPTION_USING_TYPE_NAME(_type)                     \
+    inline std::string cmnDataDescription(const _type & CMN_UNUSED(data)) { \
+        return "{"#_type"}";                                            \
+    }
+
+
 #define CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(type)                     \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
-    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type)
+    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type) \
+    CMN_DATA_DESCRIPTION_USING_TYPE_NAME(type)
 
 #define CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(type)                        \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
-    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type)
+    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type) \
+    CMN_DATA_DESCRIPTION_USING_TYPE_NAME(type)
 
 
 CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(bool);

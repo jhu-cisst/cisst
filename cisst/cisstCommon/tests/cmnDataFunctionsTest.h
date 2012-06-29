@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,14 +25,15 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-class cmnDataTest : public CppUnit::TestFixture
+class cmnDataFunctionsTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(cmnDataTest);
+    CPPUNIT_TEST_SUITE(cmnDataFunctionsTest);
     {
         CPPUNIT_TEST(TestCopyNativeTypes);
         CPPUNIT_TEST(TestBinarySerializationStreamNativeTypes);
         CPPUNIT_TEST(TestBinarySerializationCharNativeTypes);
         CPPUNIT_TEST(TestByteSwapMacros);
+        CPPUNIT_TEST(TestDescriptions);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -47,8 +48,8 @@ class cmnDataTest : public CppUnit::TestFixture
     void TestBinarySerializationStreamNativeTypes(void);
     void TestBinarySerializationCharNativeTypes(void);
     void TestByteSwapMacros(void);
+    void TestDescriptions(void);
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(cmnDataTest);
-
+CPPUNIT_TEST_SUITE_REGISTRATION(cmnDataFunctionsTest);
