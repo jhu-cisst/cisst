@@ -152,17 +152,11 @@ public:
     static void ConvertInterfaceRequiredDescription(
         const ::mtsManagerProxy::InterfaceRequiredDescription & src, InterfaceRequiredDescription & dest);
 
-    static void ConvertValuesOfCommand(
-        const ::mtsManagerProxy::SetOfValues & src, mtsManagerLocalInterface::SetOfValues & dest);
-
     static void ConstructInterfaceProvidedDescriptionFrom(
         const InterfaceProvidedDescription & src, ::mtsManagerProxy::InterfaceProvidedDescription & dest);
 
     static void ConstructInterfaceRequiredDescriptionFrom(
         const InterfaceRequiredDescription & src, ::mtsManagerProxy::InterfaceRequiredDescription & dest);
-
-    static void ConstructValuesOfCommand(
-        const mtsManagerLocalInterface::SetOfValues & src, ::mtsManagerProxy::SetOfValues & dest);
 
     //-------------------------------------------------------------------------
     //  Implementation of mtsManagerLocalInterface
@@ -244,20 +238,6 @@ public:
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName,
                                       const std::string & listenerID = "");
-
-    void GetArgumentInformation(std::string & argumentName,
-                                std::vector<std::string> & signalNames,
-                                const std::string & componentName,
-                                const std::string & providedInterfaceName,
-                                const std::string & commandName,
-                                const std::string & listenerID = "");
-
-    void GetValuesOfCommand(SetOfValues & values,
-                            const std::string & componentName,
-                            const std::string & providedInterfaceName,
-                            const std::string & commandName,
-                            const int scalarIndex,
-                            const std::string & listenerID = "");
 
     //-------------------------------------------------------------------------
     //  Event Generators (Event Sender) : Server -> Client
@@ -345,20 +325,6 @@ public:
                                           const std::string & requiredInterfaceName,
                                           const std::string & eventHandlerName,
                                           const std::string & clientID);
-
-    void SendGetArgumentInformation(std::string & argumentName,
-                                    std::vector<std::string> & signalNames,
-                                    const std::string & componentName,
-                                    const std::string & providedInterfaceName,
-                                    const std::string & commandName,
-                                    const std::string & clientID);
-
-    void SendGetValuesOfCommand(SetOfValues & values,
-                                const std::string & componentName,
-                                const std::string & providedInterfaceName,
-                                const std::string & commandName,
-                                const int scalarIndex,
-                                const std::string & clientID);
 
     std::string SendGetProcessName(const std::string & clientID);
 
