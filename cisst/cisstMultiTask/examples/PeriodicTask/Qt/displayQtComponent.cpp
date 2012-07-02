@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "displayQtComponent.h"
 
-CMN_IMPLEMENT_SERVICES(displayQtComponent);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(displayQtComponent, mtsComponent, std::string);
 
 
 displayQtComponent::displayQtComponent(const std::string & componentName) :

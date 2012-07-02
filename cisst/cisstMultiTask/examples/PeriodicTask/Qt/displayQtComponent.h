@@ -30,11 +30,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "displayQtWidget.h"
 
+#ifdef mtsExPeriodicTaskGuiQt_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
+#include <cisstCommon/cmnExportMacros.h>
+#undef CISST_THIS_LIBRARY_AS_DLL
 
-class displayQtComponent : public QObject, public mtsComponent
+class CISST_EXPORT displayQtComponent : public QObject, public mtsComponent
 {
     Q_OBJECT;
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
  public:
     displayQtComponent(const std::string & componentName);
