@@ -234,6 +234,8 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Client = 0;
     ManagerComponent.Server = 0;
 
+    CurrentMainTask = 0;
+
     SetGCMConnected(false);
 
     TimeServer.SetTimeOrigin();
@@ -1204,6 +1206,43 @@ void mtsManagerLocal::GetNamesOfComponents(std::vector<std::string> & namesOfCom
     ComponentMap.GetNames(namesOfComponents);
 }
 
+void mtsManagerLocal::PushCurrentMainTask(mtsTaskContinuous *cur)
+{
+    if (!cur) {
+        CMN_LOG_CLASS_RUN_ERROR << "PushCurrentMainTask: null parameter" << std::endl;
+        return;
+    }
+    if (cur == CurrentMainTask) {
+        CMN_LOG_CLASS_RUN_WARNING << "PushCurrentMainTask: duplicate call to push " << cur->GetName() << std::endl;
+        return;
+    }
+    if (CurrentMainTask)
+         CMN_LOG_CLASS_RUN_WARNING << "CurrentMainTask changing from " << CurrentMainTask->GetName()
+                                      << " to " << cur->GetName() << std::endl;
+    else
+         CMN_LOG_CLASS_RUN_VERBOSE << "Setting CurrentMainTask to " << cur->GetName() << std::endl;
+    CurrentMainTask = cur;
+    MainTaskNames.push(CurrentMainTask->GetName());
+}
+
+mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
+{
+    mtsTaskContinuous *previousMainTask = 0;
+    while (!previousMainTask && !MainTaskNames.empty()) {
+        previousMainTask = dynamic_cast<mtsTaskContinuous *>(GetComponent(MainTaskNames.top()));
+        if (!previousMainTask)
+            CMN_LOG_CLASS_RUN_WARNING << "PopCurrentMainTask: could not find " << MainTaskNames.top() << std::endl;
+        MainTaskNames.pop();
+    }
+    if (previousMainTask)
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to " 
+                                  << previousMainTask->GetName() << std::endl;
+    else
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, no main task remaining" << std::endl;
+    CurrentMainTask = previousMainTask;
+    return CurrentMainTask;
+}
+
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                                          const std::string & componentName,
                                          const std::string & interfaceProvidedName,
@@ -1830,6 +1869,8 @@ void mtsManagerLocal::StartAll(void)
     // Get the current thread id in order to check if any task will use the current thread.
     // If so, start that task last.
     const osaThreadId threadId = osaGetCurrentThreadId();
+    if (threadId != this->MainThreadId)
+        CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
 
     mtsTask * componentTask;
 
@@ -1858,6 +1899,7 @@ void mtsManagerLocal::StartAll(void)
                         CMN_LOG_CLASS_INIT_ERROR << "StartAll: found another task using current thread (\""
                                                  << iterator->first << "\"), only first will be started (\""
                                                  << lastTask->first << "\")." << std::endl;
+                        // PK: I don't think this task should be started if it uses the current thread
                         iterator->second->Start();
                     } else {
                         // set iterator to last task to be started
@@ -1866,6 +1908,10 @@ void mtsManagerLocal::StartAll(void)
                 }
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
+                if (componentTask->Thread.GetId() == MainThreadId) {
+                    if (dynamic_cast<mtsTaskContinuous *>(componentTask))
+                        CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << iterator->first << "???" << std::endl;
+                }
                 iterator->second->Start();  // If task will not use current thread, start it immediately.
             }
         } else {

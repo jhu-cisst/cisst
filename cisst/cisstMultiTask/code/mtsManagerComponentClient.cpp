@@ -58,32 +58,6 @@ void mtsManagerComponentClient::Cleanup(void)
 {
 }
 
-bool mtsManagerComponentClient::CreateAndAddNewComponent(const std::string & className, const std::string & componentName,
-                                                         const std::string & constructorArgSerialized)
-{
-    // Try to create component as requested
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-
-    mtsComponent * newComponent = LCM->CreateComponentDynamically(className, componentName, constructorArgSerialized);
-    if (!newComponent) {
-        CMN_LOG_CLASS_RUN_ERROR << "CreateAndAddNewComponent: failed to create component: "
-            << "\"" << componentName << "\" of type \"" << className << "\"" << std::endl;
-        return false;
-    }
-
-    // Add new component with support for the dynamic component control
-    if (!LCM->AddComponent(newComponent)) {
-        CMN_LOG_CLASS_RUN_ERROR << "CreateAndAddNewComponent: failed to add component: "
-            << "\"" << componentName << "\" of type \"" << className << "\"" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "CreateAndAddNewComponent: successfully added component: "
-        << "\"" << componentName << "\" of type \"" << className << "\"" << std::endl;
-
-    return true;
-}
-
 bool mtsManagerComponentClient::ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                                const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
                                                const std::string & clientProcessName)
@@ -704,6 +678,10 @@ bool mtsManagerComponentClient::AddNewClientComponent(const std::string & client
                           newFunctionSet->RemoveEndUserInterface);
     required->AddFunction(mtsManagerComponentBase::CommandNames::RemoveObserverList,
                           newFunctionSet->RemoveObserverList);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
+                          newFunctionSet->ComponentCreate);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
+                          newFunctionSet->ComponentStartOther);
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleChangeStateFromComponent, this,
                                    mtsManagerComponentBase::EventNames::ChangeState);
 
@@ -1091,24 +1069,28 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetAbsoluteTimeDiffs(
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
-    // Steps to create a component dynamically :
-    // 1. Create a component
-    // 2. Add the created component to the local component manager
-    // 3. Add internal interfaces to the component (InterfaceInternal).
-    // 4. Create InterfaceComponent's required interface which connects to
-    //    InterfaceInternal's provided interface.
-    // 5. Connect InterfaceInternal's interfaces to InterfaceComponent's
-    //    interfaces.
-    if (!CreateAndAddNewComponent(componentDescription.ClassName,
-                                  componentDescription.ComponentName,
-                                  componentDescription.ConstructorArgSerialized)) {
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    if (LCM->GetCurrentMainTask() && (LCM->GetCurrentMainTask() != this)) {
         result = false;
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << componentDescription << std::endl;
-        return;
+        std::string mainTaskName = LCM->GetCurrentMainTask()->GetName();
+        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: planning to call main task " << mainTaskName
+                                  << " to create component " << componentDescription.ComponentName << std::endl;
+        InterfaceComponentFunctionType *functionSet = InterfaceComponentFunctionMap.GetItem(mainTaskName);
+        if (functionSet) {
+            if (functionSet->ComponentCreate.IsValid())
+                functionSet->ComponentCreate(componentDescription, result);
+            else
+                CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to find valid function for main task "
+                                        << mainTaskName << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to find function set for main task "
+                                    << mainTaskName << std::endl;
     }
-
-    result = true;
-    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentCreate: successfully created new component: " << componentDescription << std::endl;
+    else {
+        // Call method in mtsComponent.cpp
+        InterfaceInternalCommands_ComponentCreate(componentDescription, result);
+    }
 }
 
 
@@ -1235,24 +1217,29 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart(const mtsCom
         CMN_LOG_CLASS_RUN_WARNING << "ComponentStart for " << arg.ComponentName << " ignored." << std::endl;
         return;
     }
-    // Create internal thread (if needed)
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    mtsComponent * component = LCM->GetComponent(arg.ComponentName);
-    if (!component) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentStart - no component found: "
-            << arg.ComponentName << std::endl;
-        return;
+    if (LCM->GetCurrentMainTask() && (LCM->GetCurrentMainTask() != this)) {
+        // If there is a main task, we call Start from there. This is really only necessary if we need
+        // to start another task that captures the main thread.
+        std::string mainTaskName = LCM->GetCurrentMainTask()->GetName();
+        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentStart: planning to call main task " << mainTaskName
+                                  << " to start component " << arg.ComponentName << std::endl;
+        InterfaceComponentFunctionType *functionSetMain = InterfaceComponentFunctionMap.GetItem(mainTaskName);
+        if (functionSetMain) {
+            if (functionSetMain->ComponentStartOther.IsValid())
+                functionSetMain->ComponentStartOther(arg);
+            else
+                CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentStart: failed to find valid function for main task "
+                                        << mainTaskName << ", trying to start component " << arg.ComponentName << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentStart: failed to find function set for main task "
+                                    << mainTaskName << std::endl;
     }
-
-    if (component->GetState() == mtsComponentState::CONSTRUCTED) {
-        // Start an internal thread (if needed)
-        component->Create();
-        // Wait for internal thread to be created
-        osaSleep(arg.DelayInSecond);
+    else {
+        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentStart: starting component " << arg.ComponentName << " from MCC" << std::endl;
+        InterfaceInternalCommands_ComponentStartOther(arg);
     }
-
-    // Start the component
-    component->Start();
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg)
@@ -1334,7 +1321,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
     }
     if (!functionSet->ComponentGetState.IsValid()) {
         state = mtsComponentState::INITIALIZING;
-        CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentGetState: failed to execute \"Component GetState\""
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentGetState: failed to execute \"Component GetState\" "
                                   << component << std::endl;
         return;
     }
