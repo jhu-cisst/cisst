@@ -966,9 +966,6 @@ void mtsComponent::InterfaceInternalCommands_ComponentCreate(const mtsDescriptio
             CMN_LOG_CLASS_RUN_VERBOSE << GetName() << ": successfully created and added component: "
                                       << "\"" << componentDescription.ComponentName << "\" of type \""
                                       << componentDescription.ClassName << "\"" << std::endl;
-            // Now, call the component's Create method; for a task that uses its own thread,
-            // this actually creates the new thread.
-            newComponent->Create();
             result = true;
         }
         else {

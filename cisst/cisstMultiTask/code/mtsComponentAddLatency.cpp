@@ -194,8 +194,15 @@ mtsComponentAddLatency::mtsComponentAddLatency(const std::string & componentName
     mtsTaskPeriodic(componentName, periodInSeconds, false /* real time */, 100 /* state table size */),
     LatencyStateTable(10000, "DataWithLatency")
 {
+    SetLatency(1.0);  // default
 }
 
+mtsComponentAddLatency::mtsComponentAddLatency(const mtsTaskPeriodicConstructorArg &arg):
+    mtsTaskPeriodic(arg),
+    LatencyStateTable(10000, "DataWithLatency")
+{
+    SetLatency(1.0);  // default
+}
 
 mtsComponentAddLatency::~mtsComponentAddLatency()
 {
