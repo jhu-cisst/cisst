@@ -29,17 +29,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnExportMacros.h>
 #undef CISST_THIS_LIBRARY_AS_DLL
 
+// Currently hard-coded, but could be added as constructor parameter
 const unsigned int NumSineTasks = 2;
 
 class QWidget;
-class QGridLayout;
 class mtsCollectorQtWidget;
+class displayQtComponent;
 
 class CISST_EXPORT mainQtComponent : public mtsComponent
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
+
     QWidget * mainWidget;
-    QGridLayout * tab1Layout;
     mtsCollectorQtWidget *collectorQtWidget;
+
+    displayQtComponent *display[NumSineTasks];
 
  public:
 
@@ -51,7 +55,8 @@ class CISST_EXPORT mainQtComponent : public mtsComponent
     mtsCollectorQtWidget * GetCollectorQtWidget() const
     { return collectorQtWidget; }
 
-    void AddWidgetTab1(QWidget *widget, int num);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mainQtComponent);
 
 #endif  // _mainQtComponent_h

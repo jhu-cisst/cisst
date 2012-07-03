@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include "mainQtComponent.h"
-#include "displayQtComponent.h"
 #include <components/sineTask.h>
 #include <components/sineTaskWithDelay.h>
 
@@ -41,7 +40,6 @@ int main(int argc, char *argv[])
 
     // set the log level of detail on select tasks
     cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskClass("displayQtComponent", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("mtsManagerLocal", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("mtsManagerGlobal", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("mtsCollectorQtComponent", CMN_LOG_ALLOW_ALL);
@@ -61,7 +59,6 @@ int main(int argc, char *argv[])
 
     sineTask * sine;
     sineTaskWithDelay * sineWithDelay;
-    displayQtComponent * display;
     mtsCollectorState * stateCollector;
     mtsCollectorQtComponent * collectorQtComponent;
 
@@ -85,13 +82,11 @@ int main(int argc, char *argv[])
         std::ostringstream index;
         index << i;
 
-        // create the generator and its widget
+        // create the generator andconnect to its display widget
         sine = new sineTask("SIN" + index.str(), 5.0 * cmn_ms);
         sine->UseSeparateLogFileDefault();
         componentManager->AddComponent(sine);
-        display = new displayQtComponent("DISP" + index.str());
-        componentManager->AddComponent(display);
-        mainQt->AddWidgetTab1(display->GetWidget(), i);
+        std::string displayName("DISP" + index.str());
         // add delay, just for the second graph
         if (i == 1) {
             sineWithDelay = new sineTaskWithDelay("SIN-DELAY" + index.str(), 5.0 * cmn_ms);
@@ -99,10 +94,10 @@ int main(int argc, char *argv[])
             componentManager->AddComponent(sineWithDelay);
             componentManager->Connect(sineWithDelay->GetName(), "MainInterface",
                                       sine->GetName(), "MainInterface");
-            componentManager->Connect(display->GetName(), "DataGenerator",
+            componentManager->Connect(mainQt->GetName(), displayName,
                                       sineWithDelay->GetName(), "MainInterface");
         } else {
-            componentManager->Connect(display->GetName(), "DataGenerator",
+            componentManager->Connect(mainQt->GetName(), displayName,
                                       sine->GetName(), "MainInterface");
         }
 

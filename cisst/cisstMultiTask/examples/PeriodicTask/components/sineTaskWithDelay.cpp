@@ -23,10 +23,21 @@ http://www.cisst.org/cisst/license.txt.
 #include "sineTaskWithDelay.h"
 
 // required to implement the class services, see cisstCommon
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(sineTaskWithDelay, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(sineTaskWithDelay, mtsComponentAddLatency, mtsTaskPeriodicConstructorArg);
 
 sineTaskWithDelay::sineTaskWithDelay(const std::string & componentName, double period):
     mtsComponentAddLatency(componentName, period)
+{
+    Init();
+}
+
+sineTaskWithDelay::sineTaskWithDelay(const mtsTaskPeriodicConstructorArg &arg):
+    mtsComponentAddLatency(arg.Name, arg.Period)
+{
+    Init();
+}
+
+void sineTaskWithDelay::Init(void)
 {
     mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("MainInterface");
     mtsInterfaceProvided * interfaceProvided = this->AddInterfaceProvided("MainInterface");
