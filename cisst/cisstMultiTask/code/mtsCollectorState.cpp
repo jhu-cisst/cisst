@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -41,7 +42,7 @@ static char EndOfHeader[END_OF_HEADER_SIZE] = END_OF_HEADER;
 
 
 //-------------------------------------------------------
-//	Constructor, Destructor, and Initializer
+// Constructor, Destructor, and Initializer
 //-------------------------------------------------------
 mtsCollectorState::mtsCollectorState(const std::string & collectorName):
     mtsCollectorBase(collectorName,
@@ -211,7 +212,7 @@ std::string mtsCollectorState::GetDefaultOutputName(void)
 
 
 //-------------------------------------------------------
-//	Thread Management
+// Thread Management
 //-------------------------------------------------------
 void mtsCollectorState::Startup(void)
 {
@@ -229,15 +230,23 @@ void mtsCollectorState::Run(void)
 
 void mtsCollectorState::StartCollection(const mtsDouble & delay)
 {
-    // maybe check that the function is usable?
-    this->StateTableStartCollection(delay);
+    mtsExecutionResult result = this->StateTableStartCollection(delay);
+    if (!result.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "StartCollection failed for state collector \"" << this->GetName()
+                                << "\", the command might not be connected properly to the state table provided interface: "
+                                << result << std::endl;
+    }
 }
 
 
 void mtsCollectorState::StopCollection(const mtsDouble & delay)
 {
-    // maybe check that the function is usable?
-    this->StateTableStopCollection(delay);
+    mtsExecutionResult result = this->StateTableStopCollection(delay);
+    if (!result.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "StopCollection failed for state collector \"" << this->GetName()
+                                << "\", the command might not be connected properly to the state table provided interface: "
+                                << result << std::endl;
+    }
 }
 
 
@@ -268,7 +277,7 @@ void mtsCollectorState::ProgressHandler(const mtsUInt & count)
 
 
 //-------------------------------------------------------
-//	Signal Management
+// Signal Management
 //-------------------------------------------------------
 bool mtsCollectorState::AddSignal(const std::string & signalName)
 {
@@ -281,9 +290,6 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         if (StateVectorID == -1) {  // 0: Toc, 1: Tic, 2: Period, >3: user
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
                                      << "\", cannot find signal \"" << signalName << "\"" << std::endl;
-
-            //throw mtsCollectorState::mtsCollectorBaseException(
-            //    "Cannot find: signal name = " + signalName);
             return false;
         }
 
@@ -291,9 +297,6 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         if (!AddSignalElement(signalName, StateVectorID)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
                                      << "\", already registered signal \"" << signalName << "\"" << std::endl;
-
-            //throw mtsCollectorState::mtsCollectorBaseException(
-            //    "Already collecting signal: " + signalName);
             return false;
         }
     } else {
@@ -345,7 +348,7 @@ bool mtsCollectorState::AddSignalElement(const std::string & signalName, const u
 
 
 //-------------------------------------------------------
-//	Collecting Data
+// Collecting Data
 //-------------------------------------------------------
 void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 {
@@ -357,7 +360,7 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
         PrintHeader(this->FileFormat);
     }
 
-    const size_t startIndex = range.First.Ticks()  % TableHistoryLength;
+    const size_t startIndex = range.First.Ticks() % TableHistoryLength;
     const size_t endIndex = range.Last.Ticks() % TableHistoryLength;
 
     if (startIndex < endIndex) {
@@ -379,93 +382,89 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
     }
 }
 
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
 {
     std::string currentDateTime;
-    std::ostringstream out;          
+    std::ostringstream out;
     osaGetDateTimeString(currentDateTime);
     mtsTaskManager * componentManager = mtsTaskManager::GetInstance();
     const osaTimeServer & timeServer = componentManager->GetTimeServer();
     osaAbsoluteTime origin;
     timeServer.GetTimeOrigin(origin);
     out.precision(20);
-    if (this->OutputStreamHeader) {        
-        this->OutputStreamHeader->precision(20);
-        //this->OutputStreamHeader = (std::ostream*) &out;
+    if (this->OutputHeaderStream) {
+        this->OutputHeaderStream->precision(20);
         out << "Ticks";
         RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
         for (; it != RegisteredSignalElements.end(); ++it) {
-           out << this->Delimiter;
+            out << this->Delimiter;
             (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*((std::ostream*) &out), this->Delimiter, true,
                                                                       TargetStateTable->StateVectorDataNames[it->ID]);
         }
         out << std::endl;
 
         // process the content and make header file
-        std::cerr << out.str(); 
-        
         std::vector <std::string> fieldNames;
-        std::vector <double> fieldValues;        
+        std::vector <double> fieldValues;
         std::istringstream iss(out.str());
         std::string token;
         // get token
         while (getline(iss, token, this->Delimiter)) {
             fieldNames.push_back(token);
         }
-        
+
         // FileName:
         // Date:
         // Format:
         // Delimiter
         // Number Of Fields:
-        // Number Of Time Fields: 
+        // Number Of Time Fields:
         // Number Of Data Fields:
         // Field 1
         // ...
         // Field N
 
         // File Name
-        *(this->OutputStreamHeader) << this->OutputFileName << std::endl;
+        *(this->OutputHeaderStream) << this->OutputFileName << std::endl;
         // Date
-        *(this->OutputStreamHeader) << currentDateTime << " ";
-        *(this->OutputStreamHeader) << origin.ToSeconds() << std::endl;
-       // Format
+        *(this->OutputHeaderStream) << currentDateTime << " ";
+        *(this->OutputHeaderStream) << origin.ToSeconds() << std::endl;
+        // Format
         if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
-            *(this->OutputStreamHeader) << "Text" << std::endl ;
+            *(this->OutputHeaderStream) << "Text" << std::endl ;
         } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
-            *(this->OutputStreamHeader) << "CSV" << std::endl ;
+            *(this->OutputHeaderStream) << "CSV" << std::endl ;
         } else {
-            *(this->OutputStreamHeader) << "Binary" << std::endl;
+            *(this->OutputHeaderStream) << "Binary" << std::endl;
         }
         // Delimiter
-        *(this->OutputStreamHeader) << this->Delimiter << std::endl;
+        *(this->OutputHeaderStream) << this->Delimiter << std::endl;
 
         // Number Of Fields
-        *(this->OutputStreamHeader) << fieldNames.size() << std::endl;
+        *(this->OutputHeaderStream) << fieldNames.size() << std::endl;
         size_t timeElementsNumber = 0, dtaElementsNumber = 0;
         for (size_t i = 0; i< fieldNames.size(); i++) {
-            std::string element = fieldNames.at(i); 
+            std::string element = fieldNames.at(i);
             if (element.find("time") != std::string::npos) {// this is a time element
                 timeElementsNumber ++;
             } else {
                 dtaElementsNumber ++;
             }
         }
-        // Number Of Time Fields: 
-        *(this->OutputStreamHeader) << timeElementsNumber << std::endl;
+        // Number Of Time Fields:
+        *(this->OutputHeaderStream) << timeElementsNumber << std::endl;
         // Number Of Data Fields:
-        *(this->OutputStreamHeader) << dtaElementsNumber << std::endl;
+        *(this->OutputHeaderStream) << dtaElementsNumber << std::endl;
         // All Fields
         for (size_t i = 0; i< fieldNames.size(); i++) {
-            std::string element = fieldNames.at(i); 
+            std::string element = fieldNames.at(i);
             if (element.find("time") != std::string::npos) {// this is a time element
-                *(this->OutputStreamHeader) << "Time: " << element << std::endl;
+                *(this->OutputHeaderStream) << "Time: " << element << std::endl;
             } else {
-                *(this->OutputStreamHeader) << "Data:  " << element << std::endl;
+                *(this->OutputHeaderStream) << "Data:  " << element << std::endl;
             }
-        }        
+        }
 
     }
     else if (this->OutputStream) {

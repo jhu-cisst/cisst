@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 mtsComponentManager * mtsCollectorBase::ComponentManager;
 
 //-------------------------------------------------------
-//	Constructor, Destructor, and Initializer
+// Constructor, Destructor, and Initializer
 //-------------------------------------------------------
 mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
                                    const CollectorFileFormat fileFormat)
@@ -40,6 +40,8 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     TimeIntervalForProgressEvent(1.0 * cmn_s),
     OutputStream(0),
     OutputFile(0),
+    OutputHeaderStream(0),
+    OutputHeaderFile(0),
     FileOpened(false),
     Serializer(0)
 {
@@ -94,8 +96,9 @@ void mtsCollectorBase::SetupControlInterface(void)
     }
 }
 
+
 void mtsCollectorBase::SetOutput(const std::string & fileName,
-                                  const CollectorFileFormat fileFormat)
+                                 const CollectorFileFormat fileFormat)
 {
     CMN_LOG_CLASS_INIT_DEBUG << "SetOutput: file \"" << fileName
                              << "\" using file format \"" << fileFormat << "\"" << std::endl;
@@ -103,16 +106,19 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     if (this->OutputFile) {
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
         this->OutputFile->close();
-    } else {
-        // create the output file
-        this->OutputFile = new std::ofstream;
-        this->OutputFile->precision(10);
-        this->OutputFile->unsetf(std::ios::floatfield);
-        this->OutputHeaderFile = new std::ofstream;
-        // uses the oftream as our ostream
-        this->OutputStreamHeader = this->OutputHeaderFile;
-        this->OutputStream = this->OutputFile;
     }
+    if (this->OutputHeaderFile) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
+        this->OutputHeaderFile->close();
+    }
+    // create the output file
+    this->OutputFile = new std::ofstream;
+    this->OutputFile->precision(10);
+    this->OutputFile->unsetf(std::ios::floatfield);
+    this->OutputHeaderFile = new std::ofstream;
+    // uses the oftream as our ostream
+    this->OutputHeaderStream = this->OutputHeaderFile;
+    this->OutputStream = this->OutputFile;
 
     this->FileFormat = fileFormat;
     this->SetDelimiter();
@@ -120,6 +126,28 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     this->FirstRunningFlag = true;
     this->SampleCounter = 0;
     this->SampleCounterForEvent = 0;
+
+
+    // currently doesn't store fullpath if not using the default naming.
+    std::string headerFileName;
+    size_t pos = fileName.find_last_of(".");
+    if (pos != std::string::npos) {
+        headerFileName = fileName.substr(0,pos) + ".desc";
+    }
+    else {
+        headerFileName = fileName + ".desc";
+        std::string ext;
+        switch (fileFormat) {
+        case COLLECTOR_FILE_FORMAT_CSV:
+            ext = ".csv";
+        case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
+            ext = ".txt";
+        default:
+            ext = ".cdat";
+        }
+        this->OutputFileName = fileName + ext;
+    }
+    this->OutputHeaderFileName = headerFileName;
 
     // initialize serializer
     if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
@@ -157,14 +185,15 @@ void mtsCollectorBase::OpenFileIfNeeded(void)
     case COLLECTOR_FILE_FORMAT_CSV:
     case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/append mode" << std::endl;
-        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::app);
-        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::app);      
+        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::trunc);
+        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::trunc);
         this->FileOpened = true;
         break;
+        // havnt changed the trunc /app option in the case below!!
     case COLLECTOR_FILE_FORMAT_BINARY:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/append mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::app);
-        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::app);      
+        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::app);
         this->FileOpened = true;
         break;
     default:
@@ -187,7 +216,7 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
         suffix = "txt";
     } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
         suffix = "csv";
-    } 
+    }
     else {
         suffix = "cdat"; // for cisst dat
     }
@@ -280,7 +309,7 @@ void mtsCollectorBase::GetWorkingDirectory(mtsStdString & placeHolder) const
 }
 
 
-void mtsCollectorBase::Init()
+void mtsCollectorBase::Init(void)
 {
     Status = COLLECTOR_STOP;
     ClearTaskMap();
@@ -294,7 +323,7 @@ void mtsCollectorBase::Cleanup(void)
 
 
 //-------------------------------------------------------
-//	Miscellaneous Functions
+// Miscellaneous Functions
 //-------------------------------------------------------
 void mtsCollectorBase::ClearTaskMap(void)
 {
