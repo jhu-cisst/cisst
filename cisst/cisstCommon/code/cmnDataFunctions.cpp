@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon/cmnData.h>
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnAssert.h>
 
 cmnDataFormat::cmnDataFormat(void)
@@ -48,5 +48,35 @@ cmnDataFormat::cmnDataFormat(void)
         this->SizeTSizeMember = CMN_DATA_SIZE_T_SIZE_64;
     } else {
         CMN_ASSERT(false);
+    }
+}
+
+
+
+// std::string specialization
+void cmnDataSerializeBinary(std::ostream & outputStream,
+                            const std::string & data) throw (std::runtime_error)
+{
+    cmnDataSerializeBinary(outputStream, data.size());
+    outputStream.write(data.data(), data.size());
+    if (outputStream.fail()) {
+        cmnThrow("cmnDataSerializeBinary(std::string): error occured with std::ostream::write");
+    }
+}
+
+void cmnDataDeSerializeBinary(std::istream & inputStream,
+                              std::string & data,
+                              const cmnDataFormat & remoteFormat,
+                              const cmnDataFormat & localFormat) throw (std::runtime_error)
+{
+    size_t size;
+    // retrieve size of string
+    cmnDataDeSerializeBinary(inputStream, size, remoteFormat, localFormat);
+    data.resize(size);
+    // this const_cast is a bit alarming, lets be verbose until we are sure this is safe
+    std::cerr << CMN_LOG_DETAILS << " - not really sure about the following const cast" << std::endl;
+    inputStream.read(const_cast<char *>(data.data()), size);
+    if (inputStream.fail()) {
+        cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");
     }
 }
