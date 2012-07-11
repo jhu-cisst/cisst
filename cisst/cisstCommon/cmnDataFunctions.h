@@ -381,7 +381,8 @@ inline size_t cmnDataScalarNumber(const std::string & data) {
     return 0;
 }
 
-inline std::string cmnDataScalarDescription(const std::string & data, const size_t & index) {
+inline std::string cmnDataScalarDescription(const std::string & data, const size_t & index) throw (std::out_of_range) {
+    cmnThrow(std::out_of_range("cmnDataScalarDescription: std::string has no scalar"));
     return "n/a";
 }
 

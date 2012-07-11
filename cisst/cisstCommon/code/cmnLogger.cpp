@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     Mask(CMN_LOG_ALLOW_ALL),
+    FunctionMask(CMN_LOG_ALLOW_ERRORS),
     LoDMultiplexerStreambuf()
 {
     LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);

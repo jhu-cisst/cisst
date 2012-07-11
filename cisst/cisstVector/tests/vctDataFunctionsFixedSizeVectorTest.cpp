@@ -61,12 +61,52 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(vString));
     CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vString));
 
-    size_t index;
-    for (index = 0; index < cmnDataScalarNumber(vvDouble); ++index) {
-        std::cerr << cmnDataScalarDescription(vvDouble, index) << std::endl;
+    size_t index, subIndex, position;
+    bool exceptionReceived = false;
+    std::string description;
+
+    // exception expected if index too high
+    try {
+        description = cmnDataScalarDescription(vInt, cmnDataScalarNumber(vInt) + 1);
+    } catch (std::out_of_range & e) {
+        exceptionReceived = true;
     }
-    // throws an exception
-    std::cerr << cmnDataScalarDescription(vString, 3) << std::endl;
+    CPPUNIT_ASSERT(exceptionReceived);
+
+    exceptionReceived = false;
+    try {
+        description = cmnDataScalarDescription(vvDouble, cmnDataScalarNumber(vvDouble) + 1);
+    } catch (std::out_of_range & e) {
+        exceptionReceived = true;
+    }
+    CPPUNIT_ASSERT(exceptionReceived);
+
+    // exception expected for any index
+    exceptionReceived = false;
+    try {
+        description = cmnDataScalarDescription(vString, cmnDataScalarNumber(vString));
+    } catch (std::out_of_range & e) {
+        exceptionReceived = true;
+    }
+    CPPUNIT_ASSERT(exceptionReceived);
+
+    // get scalar
+    position = 0;
+    for (index = 0; index < vInt.size(); ++index) {
+        vInt.Element(index) = index;
+        CPPUNIT_ASSERT_EQUAL(static_cast<double>(index), cmnDataScalar(vInt, position));
+        position++;
+    }
+
+    position = 0;
+    for (index = 0; index < vvDouble.size(); ++index) {
+        for (subIndex = 0; subIndex < vvDouble.Element(index).size(); ++subIndex) {
+            vvDouble.Element(index).Element(subIndex) = index * 100 + subIndex;
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
+                                 cmnDataScalar(vvDouble, position));
+            position++;
+        }
+    }
 }
 
 
