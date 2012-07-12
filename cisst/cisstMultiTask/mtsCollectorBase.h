@@ -127,8 +127,8 @@ protected:
     std::ostream * OutputStream;
     std::ofstream * OutputFile;
     // add header file stream
+    std::ostream * OutputHeaderStream;
     std::ofstream * OutputHeaderFile;
-    std::ostream * OutputStreamHeader;
 
     /*! Check if the output file is already opened */
     bool FileOpened;

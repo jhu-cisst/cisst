@@ -171,20 +171,11 @@ public:
 
     /********************* Methods to be defined by user *****************/
     /* The Run, Startup, and Cleanup methods could be made protected.    */
+    /* Note that Startup and Cleanup are now defind in mtsComponent.     */
 
     /*! Virtual method that gets overloaded to run the actual task.
       */
     virtual void Run(void) = 0;
-
-    /*! Virtual method that gets overloaded, and is run before the
-        task is started.
-      */
-    virtual void Startup(void) {}
-
-    /*! Virtual method that gets overloaded, and is run after the
-        task gets killed using Kill() method.
-      */
-    virtual void Cleanup(void) {}
 
     /*! Virtual method that gets called when the task/interface needs
       to be configured. Should it take XML info?? */

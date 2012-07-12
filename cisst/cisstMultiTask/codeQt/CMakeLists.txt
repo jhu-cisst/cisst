@@ -59,6 +59,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetInterfaceRequired.cpp
                                 mtsQtWidgetFunction.cpp
                                 mtsQtWidgetEvent.cpp
+                                mtsQtApplication.cpp
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
                                 mtsQtCommandSelector.h
@@ -72,6 +73,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetInterfaceRequired.h
                                 mtsQtWidgetFunction.h
                                 mtsQtWidgetEvent.h
+                                mtsQtApplication.h
                                 mtsExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 

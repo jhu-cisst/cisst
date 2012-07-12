@@ -30,7 +30,7 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorState, mtsCollectorBase)   // derives
 CMN_IMPLEMENT_SERVICES(mtsComponent)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>
-CMN_IMPLEMENT_SERVICES(mtsComponentAddLatency)
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentAddLatency, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
 
 #include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 CMN_IMPLEMENT_SERVICES(mtsInterfaceProvidedOrOutput)
