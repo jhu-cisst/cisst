@@ -46,7 +46,9 @@ set (HEADER_FILES
      vctDeterminant.h
 
      vctDataFunctions.h
+     vctDataFunctionsVector.h
      vctDataFunctionsFixedSizeVector.h
+     vctDataFunctionsDynamicVector.h
 
      vctDynamicConstMatrixBase.h
      vctDynamicConstMatrixRef.h

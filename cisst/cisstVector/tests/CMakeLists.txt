@@ -25,6 +25,7 @@ set (SOURCE_FILES
      vctDouble3Test.cpp
 
      vctDataFunctionsFixedSizeVectorTest.cpp
+     vctDataFunctionsDynamicVectorTest.cpp
 
      vctDynamicMatrixTest.cpp
      vctDynamicMatrixRefTest.cpp
@@ -70,6 +71,7 @@ set (HEADER_FILES
      vctDouble3Test.h
 
      vctDataFunctionsFixedSizeVectorTest.h
+     vctDataFunctionsDynamicVectorTest.h
 
      vctDynamicMatrixTest.h
      vctDynamicMatrixRefTest.h

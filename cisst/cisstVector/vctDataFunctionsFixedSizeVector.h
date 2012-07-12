@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsFixedSizeVector_h
 
 #include <cisstCommon/cmnDataFunctions.h>
+#include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
 
 
@@ -79,7 +80,7 @@ size_t cmnDataScalarNumber(const vctFixedSizeConstVectorBase<_size, _stride, _el
 {
     if (cmnDataScalarNumberIsFixed(data)) {
         return data.size() * cmnDataScalarNumber(data.Element(0));
-    }       
+    }
     size_t result = 0;
     typedef typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::const_iterator const_iterator;
     const const_iterator end = data.end();
@@ -97,23 +98,14 @@ cmnDataScalarDescription(const vctFixedSizeConstVectorBase<_size, _stride, _elem
                          const size_t & index)
     throw (std::out_of_range)
 {
+    size_t elementIndex, inElementIndex;
     std::stringstream result;
-    if (cmnDataScalarNumberIsFixed(data.Element(0))) {
-        const size_t scalarNumberPerElement = cmnDataScalarNumber(data.Element(0));
-        if (scalarNumberPerElement == 0) {
-            cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeVector elements don't have scalars"));
-        }
-        if (index < cmnDataScalarNumber(data)) {
-            const size_t elementIndex = index / scalarNumberPerElement;
-            const size_t inElementIndex = index % scalarNumberPerElement;
-            result << "v[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
-            return result.str();
-        } else {
-            cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeVector index out of range"));
-        }
+    if (vctDataFindInVectorScalarIndex(data, index, elementIndex, inElementIndex)) {
+        result << "v[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
+    } else {
+        cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeVector index out of range"));
     }
-    result << "not implemented yet" << std::endl;
-    return result.str();
+    return result.str(); // unreachable, just to avoid compiler warnings
 }
 
 
@@ -123,20 +115,13 @@ cmnDataScalar(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _d
               const size_t & index)
     throw (std::out_of_range)
 {
-    if (cmnDataScalarNumberIsFixed(data.Element(0))) {
-        const size_t scalarNumberPerElement = cmnDataScalarNumber(data.Element(0));
-        if (scalarNumberPerElement == 0) {
-            cmnThrow(std::out_of_range("cmnDataScalar: vctFixedSizeVector elements don't have scalars"));
-        }
-        if (index < cmnDataScalarNumber(data)) {
-            const size_t elementIndex = index / scalarNumberPerElement;
-            const size_t inElementIndex = index % scalarNumberPerElement;
-            return cmnDataScalar(data.Element(elementIndex), inElementIndex);
-        } else {
-            cmnThrow(std::out_of_range("cmnDataScalar: vctFixedSizeVector index out of range"));
-        }
+    size_t elementIndex, inElementIndex;
+    if (vctDataFindInVectorScalarIndex(data, index, elementIndex, inElementIndex)) {
+        return cmnDataScalar(data.Element(elementIndex), inElementIndex);
+    } else {
+        cmnThrow(std::out_of_range("cmnDataScalar: vctFixedSizeVector index out of range"));
     }
-    return 0.1234567;
+    return 0.123456789; // unreachable, just to avoid compiler warnings
 }
 
 

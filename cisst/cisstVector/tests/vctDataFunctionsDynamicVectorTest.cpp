@@ -19,30 +19,31 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctDataFunctionsFixedSizeVectorTest.h"
-
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
-#include <cisstVector/vctRandomFixedSizeVector.h>
+#include "vctDataFunctionsDynamicVectorTest.h"
 
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctDataFunctionsDynamicVector.h>
 #include <cisstVector/vctRandomDynamicVector.h>
 
-void vctDataFunctionsFixedSizeVectorTest::TestDataCopy(void)
+void vctDataFunctionsDynamicVectorTest::TestDataCopy(void)
 {
-    vctFixedSizeVector<double, 7> source, destination;
+    vctDynamicVector<double> source, destination;
+    source.SetSize(7);
+    destination.SetSize(7);
     vctRandom(source, -1.0, 1.0);
     cmnDataCopy(destination, source);
     CPPUNIT_ASSERT(source.Equal(destination));
 }
 
 
-void vctDataFunctionsFixedSizeVectorTest::TestBinarySerializationStream(void)
+void vctDataFunctionsDynamicVectorTest::TestBinarySerializationStream(void)
 {
     cmnDataFormat local, remote;
     std::stringstream stream;
-    vctFixedSizeVector<double, 12> v1, v2, vReference;
+    vctDynamicVector<double> v1, v2, vReference;
+    v1.SetSize(12);
+    v2.SetSize(12);
+    vReference.SetSize(12);
     vctRandom(vReference, -10.0, 10.0);
     v1 = vReference;
     cmnDataSerializeBinary(stream, v1);
@@ -52,26 +53,26 @@ void vctDataFunctionsFixedSizeVectorTest::TestBinarySerializationStream(void)
 }
 
 
-void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
+void vctDataFunctionsDynamicVectorTest::TestScalar(void)
 {
-    vctFixedSizeVector<int, 6> vInt;
+    vctDynamicVector<int> vInt;
+    vInt.SetSize(6);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6), cmnDataScalarNumber(vInt));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vInt));
+    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(vInt));
 
-    vctFixedSizeVector<vctFixedSizeVector<double, 12>, 4> vvDouble;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(48), cmnDataScalarNumber(vvDouble));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vvDouble));
-
-    vctFixedSizeVector<std::string, 3> vString;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(vString));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vString));
-
-    vctFixedSizeVector<vctDynamicVector<double>, 4> vvMixed;
-    for (size_t i = 0; i < vvMixed.size(); i++) {
-        vvMixed.Element(i).SetSize(10 + i);
+    vctDynamicVector<vctDynamicVector<double> > vvDouble;
+    vvDouble.SetSize(4);
+    for (size_t i = 0; i < vvDouble.size(); ++i) {
+        vvDouble.Element(i).SetSize(10 + i);
     }
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(46), cmnDataScalarNumber(vvMixed));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(vvMixed));
+    // size should be 10 + 11 + 12 + 13
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(46), cmnDataScalarNumber(vvDouble));
+    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(vvDouble));
+
+    vctDynamicVector<std::string> vString;
+    vString.SetSize(3);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(vString));
+    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(vString));
 
     size_t index, subIndex, position;
     bool exceptionReceived = false;
@@ -119,19 +120,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
             position++;
         }
     }
-
-    // try with fixed size vector of dynamic vectors 
-    position = 0;
-    for (index = 0; index < vvMixed.size(); ++index) {
-        for (subIndex = 0; subIndex < vvMixed.Element(index).size(); ++subIndex) {
-            vvMixed.Element(index).Element(subIndex) = index * 100 + subIndex;
-            CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
-                                 cmnDataScalar(vvMixed, position));
-            position++;
-        }
-    }
-
 }
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsFixedSizeVectorTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsDynamicVectorTest);

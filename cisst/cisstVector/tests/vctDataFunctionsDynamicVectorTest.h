@@ -23,9 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-class vctDataFunctionsFixedSizeVectorTest : public CppUnit::TestFixture
+class vctDataFunctionsDynamicVectorTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(vctDataFunctionsFixedSizeVectorTest);
+    CPPUNIT_TEST_SUITE(vctDataFunctionsDynamicVectorTest);
     {
         CPPUNIT_TEST(TestDataCopy);
         CPPUNIT_TEST(TestBinarySerializationStream);
