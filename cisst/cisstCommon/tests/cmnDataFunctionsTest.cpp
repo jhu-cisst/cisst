@@ -197,8 +197,8 @@ void cmnDataFunctionsTest::TestByteSwapMacros(void)
 void cmnDataFunctionsTest::TestDescriptions(void)
 {
     double d1;
-    CPPUNIT_ASSERT_EQUAL(std::string("{double}"), cmnDataDescription(d1));
+    CPPUNIT_ASSERT_EQUAL(std::string("double"), cmnDataScalarDescription(d1, 0));
 
     unsigned long long int ulli1;
-    CPPUNIT_ASSERT_EQUAL(std::string("{unsigned long long int}"), cmnDataDescription(ulli1));
+    CPPUNIT_ASSERT_EQUAL(std::string("unsigned long long int"), cmnDataScalarDescription(ulli1, 0));
 }
