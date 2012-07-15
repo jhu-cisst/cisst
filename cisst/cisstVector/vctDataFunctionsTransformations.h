@@ -22,13 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #pragma once
 
-#ifndef _vctDataFunctionsFixedSizeVector_h
-#define _vctDataFunctionsFixedSizeVector_h
+#ifndef _vctDataFunctionsTransformations_h
+#define _vctDataFunctionsTransformations_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsVector.h>
-#include <cisstVector/vctFixedSizeVectorBase.h>
-
 
 template <vct::size_type _size, class _elementType,
           vct::stride_type _strideDestination, class _dataPtrTypeDestination,
@@ -78,7 +75,7 @@ bool cmnDataScalarNumberIsFixed(const vctFixedSizeConstVectorBase<_size, _stride
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 size_t cmnDataScalarNumber(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & data)
 {
-    if (cmnDataScalarNumberIsFixed(data.Element(0))) {
+    if (cmnDataScalarNumberIsFixed(data)) {
         return data.size() * cmnDataScalarNumber(data.Element(0));
     }
     size_t result = 0;
@@ -125,4 +122,4 @@ cmnDataScalar(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _d
 }
 
 
-#endif // _vctDataFunctionsFixedSizeVector_h
+#endif // _vctDataFunctionsTransformations_h

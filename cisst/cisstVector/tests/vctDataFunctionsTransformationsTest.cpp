@@ -120,7 +120,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
         }
     }
 
-    // try with fixed size vector of dynamic vectors
+    // try with fixed size vector of dynamic vectors 
     position = 0;
     for (index = 0; index < vvMixed.size(); ++index) {
         for (subIndex = 0; subIndex < vvMixed.Element(index).size(); ++subIndex) {
