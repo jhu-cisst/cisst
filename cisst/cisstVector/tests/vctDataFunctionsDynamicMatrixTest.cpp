@@ -19,30 +19,30 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctDataFunctionsFixedSizeMatrixTest.h"
-
-#include <cisstVector/vctFixedSizeMatrix.h>
-#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
-#include <cisstVector/vctRandomFixedSizeMatrix.h>
+#include "vctDataFunctionsDynamicMatrixTest.h"
 
 #include <cisstVector/vctDynamicMatrix.h>
 #include <cisstVector/vctDataFunctionsDynamicMatrix.h>
 #include <cisstVector/vctRandomDynamicMatrix.h>
 
-void vctDataFunctionsFixedSizeMatrixTest::TestDataCopy(void)
+void vctDataFunctionsDynamicMatrixTest::TestDataCopy(void)
 {
-    vctFixedSizeMatrix<double, 7, 3> source, destination;
+    vctDynamicMatrix<double> source, destination;
+    source.SetSize(7, 3);
     vctRandom(source, -1.0, 1.0);
     cmnDataCopy(destination, source);
     CPPUNIT_ASSERT(source.Equal(destination));
 }
 
 
-void vctDataFunctionsFixedSizeMatrixTest::TestBinarySerializationStream(void)
+void vctDataFunctionsDynamicMatrixTest::TestBinarySerializationStream(void)
 {
     cmnDataFormat local, remote;
     std::stringstream stream;
-    vctFixedSizeMatrix<double, 6, 3> m1, m2, mReference;
+    vctDynamicMatrix<double> m1, m2, mReference;
+    m1.SetSize(12, 23);
+    m2.SetSize(12, 23);
+    mReference.SetSize(12, 23);
     vctRandom(mReference, -10.0, 10.0);
     m1 = mReference;
     cmnDataSerializeBinary(stream, m1);
@@ -52,30 +52,29 @@ void vctDataFunctionsFixedSizeMatrixTest::TestBinarySerializationStream(void)
 }
 
 
-void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
+void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
 {
-    vctFixedSizeMatrix<int, 3, 6> mInt;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3 * 6), cmnDataScalarNumber(mInt));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(mInt));
+    vctDynamicMatrix<int> mInt;
+    mInt.SetSize(6, 3);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6 * 3), cmnDataScalarNumber(mInt));
+    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mInt));
 
-    vctFixedSizeMatrix<vctFixedSizeMatrix<double, 3, 4>, 2, 3> mmDouble;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3 * 4 * 2 * 3), cmnDataScalarNumber(mmDouble));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(mmDouble));
-
-    vctFixedSizeMatrix<std::string, 3, 2> mString;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(mString));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(mString));
-
-    vctFixedSizeMatrix<vctDynamicMatrix<double>, 4, 2> mmMixed;
+    vctDynamicMatrix<vctDynamicMatrix<double> > mmDouble;
+    mmDouble.SetSize(4, 5);
     size_t numberOfScalarsExpected = 0;
-    for (size_t i = 0; i < mmMixed.rows(); i++) {
-        for (size_t j = 0; j < mmMixed.cols(); j++) {
-            mmMixed.Element(i, j).SetSize(i + 1, j + 1); // + 1 to make sure we don't have a 0 size matrix
+    for (size_t i = 0; i < mmDouble.rows(); ++i) {
+        for (size_t j = 0; j < mmDouble.cols(); ++j) {
+            mmDouble.Element(i, j).SetSize(i + 1, j + 1); // + 1 to make sure we don't have a 0 size matrix
             numberOfScalarsExpected += ((i + 1) * (j + 1));
         }
     }
-    CPPUNIT_ASSERT_EQUAL(numberOfScalarsExpected, cmnDataScalarNumber(mmMixed));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mmMixed));
+    CPPUNIT_ASSERT_EQUAL(numberOfScalarsExpected, cmnDataScalarNumber(mmDouble));
+    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mmDouble));
+
+    vctDynamicMatrix<std::string> mString;
+    mString.SetSize(3, 2);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(mString));
+    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mString));
 
     size_t row, col, subRow, subCol, position;
     bool exceptionReceived = false;
@@ -129,22 +128,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
             }
         }
     }
-
-    // try with fixed size matrix of dynamic matrices
-    position = 0;
-    for (row = 0; row < mmMixed.rows(); ++row) {
-        for (col = 0; col < mmMixed.cols(); ++col) {
-            for (subRow = 0; subRow < mmMixed.Element(row, col).rows(); ++subRow) {
-                for (subCol = 0; subCol < mmMixed.Element(row, col).cols(); ++subCol) {
-                    mmMixed.Element(row, col).Element(subRow, subCol) = row * col * 100 + subRow * subCol;
-                    CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * col * 100 + subRow * subCol),
-                                         cmnDataScalar(mmMixed, position));
-                    position++;
-                }
-            }
-        }
-    }
 }
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsFixedSizeMatrixTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsDynamicMatrixTest);

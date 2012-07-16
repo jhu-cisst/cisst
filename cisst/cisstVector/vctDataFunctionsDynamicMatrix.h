@@ -54,12 +54,16 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
                             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data)
     throw (std::runtime_error)
 {
-    vct::size_type index;
-    const vct::size_type mySize = data.size();
+    vct::size_type indexRow, indexCol;
+    const vct::size_type myRows = data.rows();
+    const vct::size_type myCols = data.cols();
 
-    cmnDataSerializeBinary(outputStream, mySize);
-    for (index = 0; index < mySize; ++index) {
-        cmnDataSerializeBinary(outputStream, data.Element(index));
+    cmnSerializeSizeRaw(outputStream, myRows);
+    cmnSerializeSizeRaw(outputStream, myCols);
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            cmnDataSerializeBinary(outputStream, data.Element(indexRow, indexCol));
+        }
     }
 }
 
@@ -72,15 +76,19 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
                               const cmnDataFormat & localFormat)
     throw (std::runtime_error)
 {
-    // for matrixs that own memory, we resize the destination based on deserialized "size"
-    vct::size_type mySize = 0;
-    cmnDataDeSerializeBinary(inputStream, mySize, remoteFormat, localFormat);
-    data.SetSize(mySize);
+    // for matrices that own memory, we resize the destination based on deserialized "size"
+    vct::size_type myRows = 0;
+    vct::size_type myCols = 0;
+    cmnDataDeSerializeBinary(inputStream, myRows, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary(inputStream, myCols, remoteFormat, localFormat);
+    data.SetSize(myRows, myCols);
 
     // get data
-    vct::size_type index;
-    for (index = 0; index < mySize; ++index) {
-        cmnDataDeSerializeBinary(inputStream, data.Element(index), remoteFormat, localFormat);
+    vct::size_type indexRow, indexCol;
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            cmnDataDeSerializeBinary(inputStream, data.Element(indexRow, indexCol), remoteFormat, localFormat);
+        }
     }
 }
 
@@ -91,18 +99,23 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
                               const cmnDataFormat & localFormat)
     throw (std::runtime_error)
 {
-    // get and set size
-    vct::size_type mySize;
-    cmnDataDeSerializeBinary(inputStream, mySize, remoteFormat, localFormat);
+    // get and check size
+    vct::size_type myRows = 0;
+    vct::size_type myCols = 0;
+    cmnDataDeSerializeBinary(inputStream, myRows, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary(inputStream, myCols, remoteFormat, localFormat);
 
-    if (mySize != data.size()) {
-        cmnThrow(std::runtime_error("cmnDataDeSerializeBinary: vctDynamicMatrixRef, size of matrixs don't match"));
+    if ((myRows != data.rows())
+        || (myCols != data.cols())) {
+        cmnThrow(std::runtime_error("cmnDataDeSerializeBinary: vctDynamicMatrixRef, size of matrices don't match"));
     }
 
     // get data
-    vct::size_type index;
-    for (index = 0; index < mySize; ++index) {
-        cmnDataDeSerializeBinary(inputStream, data.Element(index), remoteFormat, localFormat);
+    vct::size_type indexRow, indexCol;
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            cmnDataDeSerializeBinary(inputStream, data.Element(indexRow, indexCol), remoteFormat, localFormat);
+        }
     }
 }
 
@@ -137,12 +150,12 @@ cmnDataScalarDescription(const vctDynamicConstMatrixBase<_matrixOwnerType, _elem
                          const size_t & index)
     throw (std::out_of_range)
 {
-    size_t elementIndex, inElementIndex;
+    size_t elementRow, elementCol, inElementIndex;
     std::stringstream result;
-    if (vctDataFindInMatrixScalarIndex(data, index, elementIndex, inElementIndex)) {
-        result << "v[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
+    if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
+        result << "v[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
     } else {
-        cmnThrow(std::out_of_range("cmnDataScalarDescription: vctDynamicMatrix index out of range"));
+        cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeMatrix index out of range"));
     }
     return result.str(); // unreachable, just to avoid compiler warnings
 }
@@ -158,7 +171,7 @@ cmnDataScalar(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & 
     if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
         return cmnDataScalar(data.Element(elementRow, elementCol), inElementIndex);
     } else {
-        cmnThrow(std::out_of_range("cmnDataScalar: vctDynamicMatrix index out of range"));
+        cmnThrow(std::out_of_range("cmnDataScalar: vctFixedSizeMatrix index out of range"));
     }
     return 0.123456789; // unreachable, just to avoid compiler warnings
 }

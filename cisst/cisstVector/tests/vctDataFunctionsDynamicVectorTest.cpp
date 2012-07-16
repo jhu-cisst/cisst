@@ -29,7 +29,6 @@ void vctDataFunctionsDynamicVectorTest::TestDataCopy(void)
 {
     vctDynamicVector<double> source, destination;
     source.SetSize(7);
-    destination.SetSize(7);
     vctRandom(source, -1.0, 1.0);
     cmnDataCopy(destination, source);
     CPPUNIT_ASSERT(source.Equal(destination));
