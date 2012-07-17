@@ -129,6 +129,7 @@ int ExposureCorrection(std::string &src_path)
 
     // release pipeline
     stream.Release();
+    stream.DisconnectAll();
 
 labError:
     return 0;

@@ -253,6 +253,8 @@ if (CISST_MTS_HAS_ICE)
        ${ICE_RESOURCE_DIR}/config.server
        ${ICE_RESOURCE_DIR}/config.LCM
        ${ICE_RESOURCE_DIR}/config.GCM)
+  install (FILES ${ICE_CONFIG_FILES} DESTINATION ${CISST_SHARE_INSTALL_SUFFIX}/cisstMultiTask/Ice COMPONENT cisstMultiTask)
+
   set (ICE_RESOURCE_FILES
        ${ICE_CONFIG_FILES}
        ${ICE_RESOURCE_DIR}/mtsComponentInterfaceProxy.ice
@@ -368,6 +370,19 @@ if (CISST_MTS_HAS_ICE)
   else (WIN32)
     target_link_libraries (cisstMultiTask ${ICE_LIBRARIES})
   endif (WIN32)
+
+  # copy configuration files to build tree
+  file (MAKE_DIRECTORY "${CISST_SHARE_DIR}/cisstMultiTask/Ice")
+  foreach (configFile ${ICE_CONFIG_FILES})
+    add_custom_command (TARGET cisstMultiTask
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND}
+                        ARGS -E copy_if_different
+                               ${configFile}
+                               ${CISST_SHARE_DIR}/cisstMultiTask/Ice)
+
+  endforeach (configFile)
+
 endif (CISST_MTS_HAS_ICE)
 
 # Add installer files (only tested on WIN32)
@@ -378,9 +393,8 @@ if (WIN32 AND CISST_MTS_HAS_ICE)
   file (GLOB iceutildll "${ICE_BIN}/IceUtil??.dll")
   install (FILES ${iceutildll} DESTINATION bin COMPONENT cisstMultiTask)
   install (FILES ${ICE_BIN}/bzip2.dll DESTINATION bin COMPONENT cisstMultiTask)
-  install (FILES ${ICE_CONFIG_FILES} DESTINATION share/cisstMultiTask COMPONENT cisstMultiTask)
 endif (WIN32 AND CISST_MTS_HAS_ICE)
 
-if (WIN32 AND CMAKE_CL_64) 
-	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} "/bigobj")
+if (WIN32 AND CMAKE_CL_64)
+  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} "/bigobj")
 endif (WIN32 AND CMAKE_CL_64)

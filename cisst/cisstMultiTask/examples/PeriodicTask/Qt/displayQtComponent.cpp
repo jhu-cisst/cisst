@@ -18,23 +18,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-
 #include "displayQtComponent.h"
 
-CMN_IMPLEMENT_SERVICES(displayQtComponent);
-
-
-displayQtComponent::displayQtComponent(const std::string & componentName) :
-    mtsComponent(componentName)
+displayQtComponent::displayQtComponent(void)
 {
-    // create the cisstMultiTask interface with commands and events
-    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("DataGenerator");
-    if (interfaceRequired) {
-       interfaceRequired->AddFunction("GetData", Generator.GetData);
-       interfaceRequired->AddFunction("SetAmplitude", Generator.SetAmplitude);
-    }
-
     // connect Qt signals to slots
     QObject::connect(CentralWidget.DialAmplitude, SIGNAL(valueChanged(int)),
                      this, SLOT(SetAmplitudeQSlot(int)));
@@ -47,7 +34,7 @@ void displayQtComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
 {
     Generator.GetData(Data);
     CentralWidget.ValueData->setNum(Data.Data);
-    CentralWidget.DataTrace->AppendPoint(vctDouble2(Data.Timestamp(), Data.Data));
+    CentralWidget.DataSignal->AppendPoint(vctDouble2(Data.Timestamp(), Data.Data));
     CentralWidget.Plot->updateGL();
 }
 

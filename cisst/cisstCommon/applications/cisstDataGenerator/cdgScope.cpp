@@ -41,6 +41,15 @@ cdgScope::cdgScope(unsigned int lineNumber):
 }
 
 
+void cdgScope::FillInDefaults(void)
+{
+    size_t index;
+    for (index = 0; index < Scopes.size(); index++) {
+        Scopes[index]->FillInDefaults();
+    }
+}
+
+
 void cdgScope::GenerateLineComment(std::ostream & outputStream) const
 {
     outputStream << "/* source line: " << LineNumber << " */" << std::endl;

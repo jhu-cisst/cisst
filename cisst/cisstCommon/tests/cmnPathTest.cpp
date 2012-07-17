@@ -43,12 +43,13 @@ void cmnPathTest::TestAdd(void) {
 
 
 void cmnPathTest::TestFind(void) {
+    // CISST_SOURCE_DIR should not be used for regular code, only defined for test programs!
     cmnPath path("/this/directory/is/not/valid;/this/one/either/but/it/helps");
-    path.Add(CISST_BUILD_ROOT, cmnPath::TAIL);
+    path.Add(CISST_SOURCE_DIR"cisstCommon", cmnPath::TAIL);
     // test a file that should exist
-    std::string fullName(CISST_BUILD_ROOT);
-    fullName += "/cisst/include/cisstConfig.h";
-    CPPUNIT_ASSERT(fullName == path.Find("cisst/include/cisstConfig.h", cmnPath::READ));
+    std::string fullName(CISST_SOURCE_DIR);
+    fullName += "cisstCommon/cmnPath.h";
+    CPPUNIT_ASSERT(fullName == path.Find("cmnPath.h", cmnPath::READ));
     // test with a file that shouldn't exist
     std::string thisFileCantExist = "/aBadPath/QwErTy.hohoho";
     CPPUNIT_ASSERT("" == path.Find(thisFileCantExist, cmnPath::READ));

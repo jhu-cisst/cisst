@@ -234,6 +234,45 @@ void svlDraw::Line(svlSampleImage* image,
 void svlDraw::Triangle(svlSampleImage* image,
                        unsigned int videoch,
                        svlTriangle & tri,
+                       unsigned char value,
+                       svlDraw::Internals& internals)
+{
+    Triangle(image, videoch, tri.x1, tri.y1, tri.x2, tri.y2, tri.x3, tri.y3, value, internals);
+}
+
+void svlDraw::Triangle(svlSampleImage* image,
+                       unsigned int videoch,
+                       svlPoint2D corner1,
+                       svlPoint2D corner2,
+                       svlPoint2D corner3,
+                       unsigned char value,
+                       svlDraw::Internals& internals)
+{
+    Triangle(image, videoch, corner1.x, corner1.y, corner2.x, corner2.y, corner3.x, corner3.y, value, internals);
+}
+
+void svlDraw::Triangle(svlSampleImage* image,
+                       unsigned int videoch,
+                       int x1, int y1,
+                       int x2, int y2,
+                       int x3, int y3,
+                       unsigned char value,
+                       svlDraw::Internals& internals)
+{
+    if (image->GetPixelType() != svlPixelMono8) return;
+    svlDrawHelper::ShapeInternals* triangledrawer = dynamic_cast<svlDrawHelper::ShapeInternals*>(internals.Get());
+    if (triangledrawer == 0) {
+        triangledrawer = new svlDrawHelper::ShapeInternals;
+        internals.Set(triangledrawer);
+    }
+    if (!triangledrawer->SetImage(image, videoch)) return;
+
+    triangledrawer->DrawMono8(x1, y1, x2, y2, x3, y3, value);
+}
+
+void svlDraw::Triangle(svlSampleImage* image,
+                       unsigned int videoch,
+                       svlTriangle & tri,
                        svlRGB color,
                        svlDraw::Internals& internals)
 {
@@ -259,6 +298,7 @@ void svlDraw::Triangle(svlSampleImage* image,
                        svlRGB color,
                        svlDraw::Internals& internals)
 {
+    if (image->GetPixelType() != svlPixelRGB) return;
     svlDrawHelper::ShapeInternals* triangledrawer = dynamic_cast<svlDrawHelper::ShapeInternals*>(internals.Get());
     if (triangledrawer == 0) {
         triangledrawer = new svlDrawHelper::ShapeInternals;
@@ -266,7 +306,48 @@ void svlDraw::Triangle(svlSampleImage* image,
     }
     if (!triangledrawer->SetImage(image, videoch)) return;
 
-    triangledrawer->Draw(x1, y1, x2, y2, x3, y3, color);
+    triangledrawer->DrawRGB(x1, y1, x2, y2, x3, y3, color);
+}
+
+void svlDraw::Quad(svlSampleImage* image,
+                   unsigned int videoch,
+                   svlQuad & quad,
+                   unsigned char value,
+                   svlDraw::Internals& internals)
+{
+    Quad(image, videoch, quad.x1, quad.y1, quad.x2, quad.y2, quad.x3, quad.y3, quad.x4, quad.y4, value, internals);
+}
+
+void svlDraw::Quad(svlSampleImage* image,
+                   unsigned int videoch,
+                   svlPoint2D corner1,
+                   svlPoint2D corner2,
+                   svlPoint2D corner3,
+                   svlPoint2D corner4,
+                   unsigned char value,
+                   svlDraw::Internals& internals)
+{
+    Quad(image, videoch, corner1.x, corner1.y, corner2.x, corner2.y, corner3.x, corner3.y, corner4.x, corner4.y, value, internals);
+}
+
+void svlDraw::Quad(svlSampleImage* image,
+                   unsigned int videoch,
+                   int x1, int y1,
+                   int x2, int y2,
+                   int x3, int y3,
+                   int x4, int y4,
+                   unsigned char value,
+                   svlDraw::Internals& internals)
+{
+    if (image->GetPixelType() != svlPixelMono8) return;
+    svlDrawHelper::ShapeInternals* quaddrawer = dynamic_cast<svlDrawHelper::ShapeInternals*>(internals.Get());
+    if (quaddrawer == 0) {
+        quaddrawer = new svlDrawHelper::ShapeInternals;
+        internals.Set(quaddrawer);
+    }
+    if (!quaddrawer->SetImage(image, videoch)) return;
+
+    quaddrawer->DrawMono8(x1, y1, x2, y2, x3, y3, x4, y4, value);
 }
 
 void svlDraw::Quad(svlSampleImage* image,
@@ -299,6 +380,7 @@ void svlDraw::Quad(svlSampleImage* image,
                    svlRGB color,
                    svlDraw::Internals& internals)
 {
+    if (image->GetPixelType() != svlPixelRGB) return;
     svlDrawHelper::ShapeInternals* quaddrawer = dynamic_cast<svlDrawHelper::ShapeInternals*>(internals.Get());
     if (quaddrawer == 0) {
         quaddrawer = new svlDrawHelper::ShapeInternals;
@@ -306,7 +388,7 @@ void svlDraw::Quad(svlSampleImage* image,
     }
     if (!quaddrawer->SetImage(image, videoch)) return;
 
-    quaddrawer->Draw(x1, y1, x2, y2, x3, y3, x4, y4, color);
+    quaddrawer->DrawRGB(x1, y1, x2, y2, x3, y3, x4, y4, color);
 }
 
 void svlDraw::Poly(svlSampleImage* image,
@@ -332,11 +414,13 @@ void svlDraw::Poly(svlSampleImage* image,
         }
         else {
 #if CISST_SVL_HAS_OPENCV
-            cvLine(image->IplImageRef(videoch),
-                   cvPoint(points[start].x, points[start].y),
-                   cvPoint(points[end].x,   points[end].y),
-                   cvScalar(color.r, color.g, color.b),
-                   thickness);
+            if (thickness <= 255) {
+                cvLine(image->IplImageRef(videoch),
+                       cvPoint(points[start].x, points[start].y),
+                       cvPoint(points[end].x,   points[end].y),
+                       cvScalar(color.r, color.g, color.b),
+                       thickness);
+            }
 #else // CISST_SVL_HAS_OPENCV
             // TO DO: line thickness to be implemented
             Line(image, videoch, points[start], points[end], color);
@@ -347,27 +431,71 @@ void svlDraw::Poly(svlSampleImage* image,
     }
 }
 
+void svlDraw::Ellipse(svlSampleImage* image,
+                      unsigned int videoch,
+                      int cx,
+                      int cy,
+                      int rx,
+                      int ry,
+                      unsigned char r,
+                      unsigned char g,
+                      unsigned char b,
+                      double from_angle,
+                      double to_angle,
+                      double angle,
+                      int thickness)
+{
+    Ellipse(image, videoch, svlEllipse(cx, cy, rx, ry, angle), r, g, b, from_angle, to_angle, thickness);
+}                      
+
+void svlDraw::Ellipse(svlSampleImage* image,
+                      unsigned int videoch,
+                      int cx,
+                      int cy,
+                      int rx,
+                      int ry,
+                      svlRGB color,
+                      double from_angle,
+                      double to_angle,
+                      double angle,
+                      int thickness)
+{
+    Ellipse(image, videoch, svlEllipse(cx, cy, rx, ry, angle), color.r, color.g, color.b, from_angle, to_angle, thickness);
+}                      
+
+void svlDraw::Ellipse(svlSampleImage* image,
+                      unsigned int videoch,
+                      const svlEllipse & ellipse,
+                      svlRGB color,
+                      double from_angle,
+                      double to_angle,
+                      int thickness)
+{
+    Ellipse(image, videoch, ellipse, color.r, color.g, color.b, from_angle, to_angle, thickness);
+}
+
 #if CISST_SVL_HAS_OPENCV
 
 void svlDraw::Ellipse(svlSampleImage* image,
                       unsigned int videoch,
-                      svlPoint2D center,
-                      vctInt2 radii,
-                      svlRGB color,
+                      const svlEllipse & ellipse,
+                      unsigned char r,
+                      unsigned char g,
+                      unsigned char b,
                       double from_angle,
                       double to_angle,
-                      double rotation,
                       int thickness)
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
+    if (ellipse.rx < 0 || ellipse.ry < 0 || thickness > 255) return;
 
     cvEllipse(image->IplImageRef(videoch),
-              cvPoint(center.x, center.y),
-              cvSize(radii[0], radii[1]),
-              rotation,
+              cvPoint(ellipse.cx, ellipse.cy),
+              cvSize(ellipse.rx, ellipse.ry),
+              ellipse.angle * 180.0f / 3.14159265358979f,
               from_angle,
               to_angle,
-              cvScalar(color.r, color.g, color.b),
+              cvScalar(r, g, b),
               thickness);
 }
 
@@ -375,12 +503,12 @@ void svlDraw::Ellipse(svlSampleImage* image,
 
 void svlDraw::Ellipse(svlSampleImage* CMN_UNUSED(image),
                       unsigned int CMN_UNUSED(videoch),
-                      svlPoint2D CMN_UNUSED(center),
-                      vctInt2 CMN_UNUSED(radii),
-                      svlRGB CMN_UNUSED(color),
+                      const svlEllipse & CMN_UNUSED(center),
+                      unsigned char CMN_UNUSED(r),
+                      unsigned char CMN_UNUSED(g),
+                      unsigned char CMN_UNUSED(b),
                       double CMN_UNUSED(from_angle),
                       double CMN_UNUSED(to_angle),
-                      double CMN_UNUSED(rotation),
                       int CMN_UNUSED(thickness))
 {
     // To be implemented
@@ -439,14 +567,13 @@ void svlDraw::Text(svlSampleImage* image,
                    svlRGB color)
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
-    
+
     CvFont font;
     cvInitFont(&font,
                CV_FONT_HERSHEY_PLAIN,
                fontsize / SVL_OCV_FONT_SCALE,
                fontsize / SVL_OCV_FONT_SCALE,
                0, 1, 4);
-
     cvPutText(image->IplImageRef(videoch),
               text.c_str(),
               cvPoint(pos.x, pos.y),
@@ -494,7 +621,8 @@ void svlDraw::WarpTriangle(svlSampleImage* in_img,  unsigned int in_vch,  svlTri
     if (!trianglewarper->SetInputImage(in_img, in_vch) ||
         !trianglewarper->SetOutputImage(out_img, out_vch)) return;
 
-    trianglewarper->Draw(in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
+    trianglewarper->Draw(1, 0,
+                         in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
                          out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3,
                          alpha);
 }
@@ -512,7 +640,8 @@ void svlDraw::WarpQuad(svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & 
     if (!quadwarper->SetInputImage(in_img, in_vch) ||
         !quadwarper->SetOutputImage(out_img, out_vch)) return;
 
-    quadwarper->Draw(in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
+    quadwarper->Draw(1, 0,
+                     in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
                      out_quad.x1, out_quad.y1, out_quad.x2, out_quad.y2, out_quad.x3, out_quad.y3, out_quad.x4, out_quad.y4,
                      alpha);
 }
@@ -547,5 +676,64 @@ void svlDraw::Internals::Release()
 {
     if (Ptr) delete Ptr;
     Ptr = 0;
+}
+
+
+/*****************************/
+/*** svlDraw::WarpMT class ***/
+/*****************************/
+
+svlDraw::WarpMT::WarpMT(unsigned int thread_count)
+{
+    SetThreadCount(thread_count);
+}
+
+void svlDraw::WarpMT::SetThreadCount(unsigned int thread_count)
+{
+    if (thread_count > Internals.size()) Internals.SetSize(thread_count);
+}
+
+void svlDraw::WarpMT::WarpTriangle(unsigned int thread_id,
+                                   svlSampleImage* in_img,  unsigned int in_vch,  svlTriangle & in_tri,
+                                   svlSampleImage* out_img, unsigned int out_vch, svlTriangle & out_tri,
+                                   unsigned int alpha)
+{
+    const unsigned int thread_count = static_cast<unsigned int>(Internals.size());
+    if (thread_id >= thread_count) return;
+
+    svlDrawHelper::WarpInternals* trianglewarper = dynamic_cast<svlDrawHelper::WarpInternals*>(Internals[thread_id].Get());
+    if (trianglewarper == 0) {
+        trianglewarper = new svlDrawHelper::WarpInternals(3);
+        Internals[thread_id].Set(trianglewarper);
+    }
+    if (!trianglewarper->SetInputImage(in_img, in_vch) ||
+        !trianglewarper->SetOutputImage(out_img, out_vch)) return;
+
+    trianglewarper->Draw(thread_count, thread_id,
+                         in_tri.x1,  in_tri.y1,  in_tri.x2,  in_tri.y2,  in_tri.x3,  in_tri.y3,
+                         out_tri.x1, out_tri.y1, out_tri.x2, out_tri.y2, out_tri.x3, out_tri.y3,
+                         alpha);
+}
+
+void svlDraw::WarpMT::WarpQuad(unsigned int thread_id,
+                               svlSampleImage* in_img,  unsigned int in_vch,  svlQuad & in_quad,
+                               svlSampleImage* out_img, unsigned int out_vch, svlQuad & out_quad,
+                               unsigned int alpha)
+{
+    const unsigned int thread_count = static_cast<unsigned int>(Internals.size());
+    if (thread_id >= thread_count) return;
+
+    svlDrawHelper::WarpInternals* quadwarper = dynamic_cast<svlDrawHelper::WarpInternals*>(Internals[thread_id].Get());
+    if (quadwarper == 0) {
+        quadwarper = new svlDrawHelper::WarpInternals(4);
+        Internals[thread_id].Set(quadwarper);
+    }
+    if (!quadwarper->SetInputImage(in_img, in_vch) ||
+        !quadwarper->SetOutputImage(out_img, out_vch)) return;
+
+    quadwarper->Draw(thread_count, thread_id,
+                     in_quad.x1,  in_quad.y1,  in_quad.x2,  in_quad.y2,  in_quad.x3,  in_quad.y3,  in_quad.x4,  in_quad.y4,
+                     out_quad.x1, out_quad.y1, out_quad.x2, out_quad.y2, out_quad.x3, out_quad.y3, out_quad.x4, out_quad.y4,
+                     alpha);
 }
 

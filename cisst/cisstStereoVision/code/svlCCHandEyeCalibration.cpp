@@ -43,8 +43,8 @@ double svlCCHandEyeCalibration::calibrate()
     //process calibration grid images
     cv::Mat rmatrix, tvec;
     CvMat* worldToTCP;
-    CvMat *cmatrix, *tcpMatrix, *tcpMatrixTemp;
-    for(int i=0;i<calibrationGrids.size();i++)
+    CvMat *cmatrix, *tcpMatrix; //, *tcpMatrixTemp;
+    for(unsigned int i=0;i<calibrationGrids.size();i++)
     {
         if(calibrationGrids.at(i)->valid)
         {
@@ -104,14 +104,14 @@ double svlCCHandEyeCalibration::calibrate()
     }
     
     valid = new int*[calibrationGrids.size()];
-    for(int i=0;i<calibrationGrids.size();i++)
+    for(unsigned int i=0;i<calibrationGrids.size();i++)
     {
         *(valid+i)=new int[calibrationGrids.size()];
     }
     
-    for(int i=0;i<calibrationGrids.size();i++)
+    for(unsigned int i=0;i<calibrationGrids.size();i++)
     {
-        for(int j=0;j<calibrationGrids.size();j++)
+        for(unsigned int j=0;j<calibrationGrids.size();j++)
         {
             if(i!=j && calibrationGrids.at(i)->hasTracking && calibrationGrids.at(j)->hasTracking &&
                ((!debug && calibrationGrids.at(i)->valid && calibrationGrids.at(j)->valid)||
@@ -157,11 +157,11 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
     double initialHandEyeError;
     vct4x4 minTcpTCamera;
     int* myIndicies = new int[cameraMatrix.size()];
-    for(int j=0;j<cameraMatrix.size();j++)
+    for(unsigned int j=0;j<cameraMatrix.size();j++)
         myIndicies[j] = j;
     
     int* myPermutationIndicies = new int[cameraMatrix.size()];
-    for(int j=0;j<cameraMatrix.size();j++)
+    for(unsigned int j=0;j<cameraMatrix.size();j++)
         myPermutationIndicies[j] = j;
     
     int setIteration = 0;
@@ -174,7 +174,7 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
     if(cameraMatrix.size() < 10)
         maxThreshold = 1.0;
     
-    for(int i=cameraMatrix.size();i>std::max(cameraMatrix.size()/2,(cameraMatrix.size()-5));i--)
+    for(unsigned int i=cameraMatrix.size();i>std::max(cameraMatrix.size()/2,(cameraMatrix.size()-5));i--)
     {
         //combinations
         do
@@ -185,12 +185,12 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
             if(debug)
             {
                 std::cout << "   ||" << cameraMatrix.size() << " choose " << i << "||";            
-                for(int k=0;k<i;k++)
+                for(unsigned int k=0;k<i;k++)
                     std::cout << myIndicies[k];
                 std::cout<< "||";
                 std::cout << "initialHandEyeError - " << initialHandEyeError << "||"  << std::endl;
             }
-            for(int j=0;j<i;j++)
+            for(unsigned int j=0;j<i;j++)
                 myPermutationIndicies[j] = myIndicies[j]; 
             setIteration = 0;
             maxSetIteration = std::min<int>((int)cameraMatrix.size()*cameraMatrix.size()*cameraMatrix.size(),(int)1000);
@@ -209,7 +209,7 @@ double svlCCHandEyeCalibration::optimizeDualQuaternionMethod()
                     {
                         std::cout << "      Iteration: " << totalIteration << " of " <<maxIteration << " perm: " << handEyeError << " using "<<i ;
                         std::cout << " Indicies: ";
-                        for(int k=0;k<i;k++)
+                        for(unsigned int k=0;k<i;k++)
                             std::cout << myPermutationIndicies[k];
                         std::cout << std::endl;
                     }
@@ -256,7 +256,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
     
     //cameraMatrix,worldToTCPMatrix;
     int j = 0;
-    for(int i=0;i<(indiciesSize)*(indiciesSize);i++)
+    for(int i=0;i<(int)(indiciesSize)*(indiciesSize);i++)
     {
         if(runCombination)
         {
@@ -331,7 +331,7 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         T = cvCreateMat(6*aQ.size(),8,CV_64FC1);
     else
         T = cvCreateMat(6,8,CV_64FC1);
-    for(int i=0;i<aQ.size();i++)
+    for(unsigned int i=0;i<aQ.size();i++)
     {
         a3x1->data.db[0] = aQ[i]->data.db[0];
         a3x1->data.db[1] = aQ[i]->data.db[1];
@@ -541,13 +541,13 @@ double svlCCHandEyeCalibration::dualQuaternionMethod(int* indicies, int indicies
         std::cout <<"===============V===============" << std::endl;
         printCvMatDouble(V);
         std::cout <<"===============V7===============" << std::endl;
-        for(int i=0;i<V->rows;i++)
+        for(int i=0;i<(int)V->rows;i++)
         {
             std::cout << V->data.db[i*(V->cols)+6] << std::endl;
         }
         std::cout<<std::endl;
         std::cout <<"===============V8===============" << std::endl;
-        for(int i=0;i<V->rows;i++)
+        for(int i=0;i<(int)V->rows;i++)
         {
             std::cout << V->data.db[i*(V->cols)+7] << std::endl;
         }
@@ -659,8 +659,9 @@ double svlCCHandEyeCalibration::getAvgHandEyeError(std::vector<CvMat*> aMatrix, 
     double avgError = 0;
     double error = 0;
     double totalError = 0;
-    int aIndex, bIndex;
-    int k;
+    //int aIndex, bIndex;
+    unsigned int k;
+
     for(k=0;k<aMatrix.size();k++)
     {
         error = checkAXXB(aMatrix.at(k),bMatrix.at(k));
@@ -831,7 +832,7 @@ void svlCCHandEyeCalibration::populateComplexMatrixST(CvMat* a, CvMat* b, CvMat*
     
     //copy to T
     int tIndex = index*s->rows*s->cols;
-    for(int i=0;i<s->rows*s->cols;i++)
+    for(int i=0;i<(int)s->rows*s->cols;i++)
     {
         T->data.db[tIndex+i] = s->data.db[i];
     }
@@ -894,13 +895,13 @@ void svlCCHandEyeCalibration::solveQuadratic(double a, double b, double c, CvMat
 
 void svlCCHandEyeCalibration::printData()
 {
-    for(int i=0;i<cameraMatrix.size();i++)
+    for(unsigned int i=0;i<cameraMatrix.size();i++)
     {
         std::cout << "==============CameraMatrix "<<i<<" =============="<<std::endl;
         printCvMatDouble(cameraMatrix[i]);
     }
     
-    for(int i=0;i<worldToTCPMatrix.size();i++)
+    for(unsigned int i=0;i<worldToTCPMatrix.size();i++)
     {
         std::cout << "==============WorldToTCP "<<i<<" =============="<<std::endl;
         printCvMatDouble(worldToTCPMatrix[i]);
@@ -910,7 +911,7 @@ void svlCCHandEyeCalibration::printData()
 
 void svlCCHandEyeCalibration::printCvMatDouble(CvMat* matrix)
 {
-    for(int i=0;i<matrix->rows*matrix->cols;i++)
+    for(int i=0;i<(int)matrix->rows*matrix->cols;i++)
     {
         std::cout << matrix->data.db[i];
         if((i+1)%(matrix->cols) == 0)

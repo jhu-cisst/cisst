@@ -38,6 +38,8 @@ http://www.cisst.org/cisst/license.txt.
     #include "svlVidCapSrcMIL.h"
 #endif // CISST_SVL_HAS_MIL
 
+#define __VERBOSE__  0
+
 
 /*************************************/
 /*** svlRenderTargets class **********/
@@ -45,6 +47,10 @@ http://www.cisst.org/cisst/license.txt.
 
 svlRenderTargets::svlRenderTargets()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::constructor()" << std::endl;
+#endif
+
 #if CISST_SVL_HAS_MIL
     svlVidCapSrcMIL *device = svlVidCapSrcMIL::GetInstance();
     svlFilterSourceVideoCapture::DeviceInfo *devlist;
@@ -67,11 +73,19 @@ svlRenderTargets::svlRenderTargets()
 
 svlRenderTargets::~svlRenderTargets()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::destructor()" << std::endl;
+#endif
+
     ReleaseAll();
 }
 
 svlRenderTargets* svlRenderTargets::Instance()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::Instance()" << std::endl;
+#endif
+
     static svlRenderTargets instance;
     return &instance;
 }
@@ -79,6 +93,10 @@ svlRenderTargets* svlRenderTargets::Instance()
 #if CISST_SVL_HAS_MIL
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::Get()" << std::endl;
+#endif
+
     svlRenderTargets* instance = Instance();
     if (instance->Targets.size() > deviceID) {
         if (!instance->Targets[deviceID]) {
@@ -91,12 +109,20 @@ svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 #else // CISST_SVL_HAS_MIL
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int CMN_UNUSED(deviceID))
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::Get()" << std::endl;
+#endif
+
     return 0;
 }
 #endif // CISST_SVL_HAS_MIL
 
 void svlRenderTargets::Release(unsigned int deviceID)
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::Release()" << std::endl;
+#endif
+
     svlRenderTargets* instance = Instance();
     if (instance->Targets.size() > deviceID) {
         if (instance->Targets[deviceID]) {
@@ -108,6 +134,10 @@ void svlRenderTargets::Release(unsigned int deviceID)
 
 void svlRenderTargets::ReleaseAll()
 {
+#if __VERBOSE__ == 1
+    std::cerr << "svlRenderTargets::ReleaseAll()" << std::endl;
+#endif
+
     svlRenderTargets* instance = Instance();
     for (unsigned int i = 0; i < instance->Targets.size(); i ++) {
         if (instance->Targets[i]) {

@@ -47,7 +47,7 @@ public:
 
     void FillInDefaults(void) {};
     void GenerateHeader(std::ostream & outputStream) const;
-    void GenerateCode(std::ostream & outputStream) const {};
+    void GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const {};
 
 private:
     cdgTypedef(void); // make sure constructor with line number is always used.

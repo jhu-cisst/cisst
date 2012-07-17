@@ -35,10 +35,12 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT sineTaskWithDelay: public mtsComponentAddLatency {
     // used to control the log level, "Run Error" by default
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+    void Init(void);
 
  public:
     sineTaskWithDelay(const std::string & componentName, double period); 
+    sineTaskWithDelay(const mtsTaskPeriodicConstructorArg &arg);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(sineTaskWithDelay);

@@ -27,14 +27,22 @@ http://www.cisst.org/cisst/license.txt.
 // Enable or disable system-wide thread-safe logging
 //#define MTS_LOGGING
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#endif
+
 int main(int argc, char * argv[])
 {
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+    mlockall(MCL_CURRENT|MCL_FUTURE);
+#endif
+
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     // get all message to log file
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     // get only errors and warnings to std::cout
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);//CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("serverTask", CMN_LOG_ALLOW_ALL);
@@ -108,8 +116,6 @@ int main(int argc, char * argv[])
         Fl::awake();
 
         GCMActive = componentManager->IsGCMActive();
-
-        osaSleep(5.0 * cmn_ms);
     }
 
     if (!GCMActive) {

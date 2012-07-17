@@ -167,7 +167,6 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
 #if CISST_SVL_HAS_OPENCV
     // setup center finder and zoom
     centerfinder.AddReceiver(&zoom);
-    centerfinder.SetMask(false);
     centerfinder.SetThreshold(40);
     zoom.SetZoom(2.0, SVL_LEFT);
     zoom.SetZoom(2.0, SVL_RIGHT);
@@ -294,6 +293,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
 
     // release stream
     stream.Release();
+    stream.DisconnectAll();
 
 labError:
     return 0;

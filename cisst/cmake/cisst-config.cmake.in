@@ -6,7 +6,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2003-07-31
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -27,6 +27,7 @@ set (CISST_BINARY_DIR "@CISST_BINARY_DIR_FOR_CONFIG@")
 set (CISST_INCLUDE_DIR "@CISST_INCLUDE_DIR_FOR_CONFIG@")
 set (CISST_DOXYGEN_DIR "@CISST_BUILD_DOXYGEN_DIRECTORY@")
 set (CISST_CMAKE_DIRS "@CISST_CMAKE_DIRS_FOR_CONFIG@")
+set (CISST_SHARE_INSTALL_SUFFIX "@CISST_SHARE_INSTALL_SUFFIX@")
 set (CISST_CMAKE_INSTALL_SUFFIX "@CISST_CMAKE_INSTALL_SUFFIX@")
 set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "@CISST_CMAKE_MODULES_INSTALL_SUFFIX@")
 set (CISST_LIBRARY_INSTALL_SUFFIX "@CISST_LIBRARY_INSTALL_SUFFIX@")
@@ -34,14 +35,14 @@ set (CISST_LIBRARY_INSTALL_SUFFIX "@CISST_LIBRARY_INSTALL_SUFFIX@")
 # Check that paths are set.  If CISST_BINARY_DIR is not set, we are
 # using cisst-config from the installed tree and all paths are
 # relative to this file.
-if ("${CISST_BINARY_DIR}" STREQUAL "") 
+if ("${CISST_BINARY_DIR}" STREQUAL "")
   # retrieve the path where cisst-config.cmake was installed
   set (cisst_CONFIG_FILE ${CMAKE_CURRENT_LIST_FILE})
   get_filename_component (CISST_CONFIG_PATH
                           ${cisst_CONFIG_FILE}
                           PATH)
   # add installed module path to CISST_CMAKE_DIRS
-  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} "${CISST_CONFIG_PATH}/Modules" )
+  set( CISST_CMAKE_DIRS ${CISST_CONFIG_PATH} "${CISST_CONFIG_PATH}/Modules")
 
   # find root of install be removing the CISST_CMAKE_INSTALL_SUFFIX
   string (REPLACE "${CISST_CMAKE_INSTALL_SUFFIX}" ""
@@ -60,7 +61,7 @@ if ("${CISST_BINARY_DIR}" STREQUAL "")
   endif (CISST_HEADER_FILE_FOUND)
   # no need to preserve this in cache (find_file does by default)
   unset (CISST_HEADER_FILE_FOUND CACHE)
-endif ("${CISST_BINARY_DIR}" STREQUAL "") 
+endif ("${CISST_BINARY_DIR}" STREQUAL "")
 
 # set CISST_LIBRARY_DIR
 set (CISST_LIBRARY_DIR "${CISST_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
@@ -81,6 +82,7 @@ set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
 
 # Which flags have been set and include path/libs
 set (CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@)
+set (CISST_HAS_LINUX_XENOMAI @CISST_HAS_LINUX_XENOMAI@)
 set (CISST_HAS_SWIG_PYTHON @CISST_HAS_SWIG_PYTHON@)
 set (CISST_HAS_XML @CISST_HAS_XML@)
 set (CISST_HAS_OPENGL @CISST_HAS_OPENGL@)
@@ -119,7 +121,12 @@ if (cisst_FIND_COMPONENTS)
     if (${FOUND_IT} EQUAL -1 )
       # inform user and set variables to not-found/false
       if (NOT cisst_FIND_QUIETLY)
-        message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
+        # check if this is a "virtual" library
+        if (DEFINED ${required}_OPTION_NAME)
+          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
+        else (DEFINED ${required}_OPTION_NAME)
+          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
+        endif (DEFINED ${required}_OPTION_NAME)
       endif (NOT cisst_FIND_QUIETLY)
       set (cisst_FOUND_AS_REQUIRED 0)
       set (cisst_${required}_FOUND 0)

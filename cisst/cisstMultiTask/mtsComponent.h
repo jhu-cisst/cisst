@@ -127,6 +127,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsInterfaceOutput * AddInterfaceOutputExisting(const std::string & interfaceOutputName,
                                                     mtsInterfaceOutput * interfaceOutput);
 
+    /*! Kill all separate log, if any.  This method should be used in
+      the destructor.  Once it has been called, any call to log might crash. */
+    void KillSeparateLogFile(void);
+
  public:
 
     typedef mtsComponent ThisType;
@@ -163,6 +167,16 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Virtual method to stop the computations and message
       processing.  See Start. */
     virtual void Kill(void);
+
+    /*! Virtual method that gets overloaded, and is run before the
+        component is started.
+      */
+    virtual void Startup(void) {}
+
+    /*! Virtual method that gets overloaded, and is run after the
+        component gets killed using Kill() method.
+      */
+    virtual void Cleanup(void) {}
 
     /*! Method to add a provided interface to the component. */
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
@@ -426,6 +440,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
     void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
+    void InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
+    void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
 
  public:
 

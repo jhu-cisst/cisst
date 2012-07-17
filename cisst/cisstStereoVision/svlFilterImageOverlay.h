@@ -39,13 +39,20 @@ class CISST_EXPORT svlFilterImageOverlay : public svlFilterBase
 public:
     typedef svlFilterImageOverlay ThisType;
     typedef struct _ImageTransform {
-	    int ID;
+	    int    ID;
         vct3x3 frame;
+        double timestamp;
     } ImageTransform;
 
 protected:
+    typedef struct _TransformInternal {
+        vct3x3           frame;
+        double           timestamp;
+        osaThreadSignal* signal;
+    } TransformInternal;
+
     typedef std::map<svlFilterInput*, svlSample*> _SampleCacheMap;
-    typedef std::map<int, vct3x3> _TransformCacheMap;
+    typedef std::map<int, TransformInternal> _TransformCacheMap;
 
 public:
     svlFilterImageOverlay();
@@ -59,9 +66,18 @@ public:
     void AddOverlay(svlOverlay & overlay);
     int AddQueuedItems();
 
+    int RemoveOverlay(svlOverlay & overlay);
+    int RemoveAndDeleteOverlay(svlOverlay* overlay);
+
+    void SetEnableInputSync(bool enabled);
+    bool GetEnableInputSync() const;
+    void SetEnableTransformSync(bool enabled);
+    bool GetEnableTransformSync() const;
+
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
+    virtual void OnStop();
 
 protected:
     virtual void CreateInterfaces();
@@ -90,8 +106,13 @@ private:
     vctDynamicVector<std::string> TextInputsToAdd;
     vctDynamicVector<svlOverlay*> OverlaysToAdd;
 
+    bool EnableInputSync;
+    bool EnableTransformSync;
+
     bool IsInputAlreadyQueued(const std::string &name);
     void AddQueuedItemsInternal();
+    void RemoveOverlayInternal(svlOverlay* overlay);
+    void RemoveAndDeleteOverlayInternal(svlOverlay* overlay);
 };
 
 typedef mtsGenericObjectProxy<svlFilterImageOverlay::ImageTransform> svlFilterImageOverlay_ImageTransform;

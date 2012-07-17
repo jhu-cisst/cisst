@@ -57,8 +57,12 @@ namespace svlDrawHelper
         ShapeInternals();
 
         bool SetImage(svlSampleImage* image, unsigned int channel = 0);
-        void Draw(int x1, int y1, int x2, int y2, int x3, int y3, svlRGB color);
-        void Draw(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, svlRGB color);
+
+        void DrawMono8(int x1, int y1, int x2, int y2, int x3, int y3, unsigned char value);
+        void DrawRGB  (int x1, int y1, int x2, int y2, int x3, int y3, svlRGB color);
+
+        void DrawMono8(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, unsigned char value);
+        void DrawRGB  (int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, svlRGB color);
 
     private:
         void SampleLine(vctDynamicVector<int>& samples, int x1, int y1, int x2, int y2);
@@ -86,21 +90,26 @@ namespace svlDrawHelper
 
         bool SetInputImage(svlSampleImage* image, unsigned int channel = 0);
         bool SetOutputImage(svlSampleImage* image, unsigned int channel = 0);
-        void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
+        void Draw(unsigned int thread_count, unsigned int thread_id,
+                  int ix1, int iy1, int ix2, int iy2, int ix3, int iy3,
                   int ox1, int oy1, int ox2, int oy2, int ox3, int oy3,
                   unsigned int alpha = 256);
-        void Draw(int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
+        void Draw(unsigned int thread_count, unsigned int thread_id,
+                  int ix1, int iy1, int ix2, int iy2, int ix3, int iy3, int ix4, int iy4,
                   int ox1, int oy1, int ox2, int oy2, int ox3, int oy3, int ox4, int oy4,
                   unsigned int alpha = 256);
 
     private:
         int GetLinePixels(int* xs, int* ys, int x1, int y1, int x2, int y2);
-        int GetLinePixels(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
-        void ResampleLine(int ix1, int iy1, int ix2, int iy2,
-                          int ox1, int oy1, int ox2, int oy2);
-        void ResampleLineAlpha(int ix1, int iy1, int ix2, int iy2,
-                               int ox1, int oy1, int ox2, int oy2,
-                               unsigned int alpha);
+
+        int  GetLinePixelsMono8(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
+        int  GetLinePixelsRGB  (int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
+
+        void ResampleLineMono8(int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2);
+        void ResampleLineRGB  (int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2);
+
+        void ResampleLineAlphaMono8(int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2, unsigned int alpha);
+        void ResampleLineAlphaRGB  (int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2, unsigned int alpha);
 
         void AllocateBuffers(unsigned int vertices, unsigned int size);
         void ReleaseBuffers();
@@ -110,10 +119,12 @@ namespace svlDrawHelper
         WarpInternals();
 
         unsigned char* Input;
+        svlPixelType InPixelType;
         int InWidth;
         int InHeight;
 
         unsigned char* Output;
+        svlPixelType OutPixelType;
         int OutWidth;
         int OutHeight;
 

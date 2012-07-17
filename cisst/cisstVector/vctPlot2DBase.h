@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,26 +47,29 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT vctPlot2DBase
 {
 
-public:
+ public:
+
+    class Scale;
 
     /*! Storage for a given signal.  Each signal stores the data to
       display in a vector (vctDynamicVector) of points (vctDouble2).
       To prevent dynamic re-allocation, this class uses a "circular
       buffer".  */
-    class CISST_EXPORT Trace
+    class CISST_EXPORT Signal
     {
         friend class vctPlot2DBase;
+        friend class vctPlot2DBase::Scale;
         friend class vctPlot2DOpenGL;
         friend class vctPlot2DVTK;
     public:
-        Trace(const std::string & name, size_t numberOfPoints, size_t pointDimension = 2);
-        ~Trace();
+        Signal(const std::string & name, size_t numberOfPoints, size_t pointDimension = 2);
+        ~Signal();
 
         // see AppendPoint
         CISST_DEPRECATED void AddPoint(const vctDouble2 & point);
         /*! Insert point at last position and move last position
           forward.  If the circular buffer is full, this methods
-          overwrite the first element. */ 
+          overwrite the first element. */
         void AppendPoint(const vctDouble2 & point);
 
         /*! Get point value in the buffer relative to first element.
@@ -85,21 +88,21 @@ public:
           size, index or size of user provided data is incorrect, an
           exception is thrown. */
         void SetArrayAt(size_t index, const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
-        
+
         /*! Prepend user provided data at the beginning of the
           circular buffer.  If the buffer is full or doesn't have
           enough free space, data will be overwritten at the end of
           buffer.  This method will throw an exception if either the
           array size or index is invalid. */
         bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
-        
+
         /*! Append user provided data at the end of the circular
           buffer.  If the buffer is full or doesn't have enough free
           space, data will be overwritten at the beginning of buffer.
           This method will throw an exception if either the array size
           or index is invalid. */
         bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
-        
+
         void Freeze(bool freeze);
 
         /*! Compute min and max over all points to recenter display.  If the buffer contains no point, returns 0. */
@@ -133,8 +136,14 @@ public:
           preserves the data at the end by default. */
         void Resize(size_t numberOfPoints, bool trimOlder = true);
 
+        /* Helper Function */
+        vctPlot2DBase::Signal * AddSignal(const std::string & name);
+        vctPlot2DBase::Scale * GetParent(void);
+        const std::string & GetName(void) const;
+
     protected:
-        /*! Trace name, used for GUI */
+        Scale * Parent;
+        /*! Signal name, used for GUI */
         std::string Name;
         bool Empty;
         bool Visible;
@@ -172,35 +181,113 @@ public:
         double LineWidth;
     };
 
+    class CISST_EXPORT Scale{
+        friend class vctPlot2DBase;
+        friend class vctPlot2DOpenGL;
+        friend class vctPlot2DVTK;
+    public:
+
+        // keep signals in a vector
+        typedef std::vector<Signal *> SignalsType;
+        SignalsType Signals;
+
+        typedef std::vector<VerticalLine *> VerticalLinesType;
+        VerticalLinesType VerticalLines;
+
+        Scale(const std::string & name, size_t pointDimension = 2);
+        ~Scale();
+
+        std::string GetName(void);
+        vctPlot2DBase::Signal * AddSignal(const std::string & name);
+        bool RemoveSignal(const std::string & name);
+
+        vctPlot2DBase::VerticalLine * AddVerticalLine(const std::string &name);
+        void SetColor(const vctDouble3 & colorInRange0To1);
+        void ContinuousUpdate(void);
+        void SetContinuousFitX(bool fit);
+        void SetContinuousFitY(bool fit);
+
+        bool ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false) const;
+        bool ComputeDataRangeY(double & min, double & max);
+        bool ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
+
+
+        // Centering X,Y or XY
+        void FitX(double padding = 0.0);
+        void FitX(double min, double max, double padding = 0.0);
+        void FitY(double padding = 0.1);
+        void FitY(double min, double max, double padding = 0.1);
+        void FitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
+        void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(0.0, 0.1));
+        // void AlignMaxX(void);
+
+    protected:
+        // maintain a map to find signal Id by name
+        typedef std::map<std::string, size_t> SignalsIdType;
+        SignalsIdType SignalsId;
+        typedef std::map<std::string, size_t> VerticalLinesIdType;
+        VerticalLinesIdType VerticalLinesId;
+
+        bool ContinuousFitX;
+        bool ContinuousFitY;
+        bool Continuous;
+
+        // viewport sizes
+        vctDouble2 Viewport;
+        // stores the min and max corresponding to the viewport
+        vctDouble2 ViewingRangeX, ViewingRangeY;
+        vctDouble2 Translation;
+        vctDouble2 ScaleValue;
+
+
+    private:
+        std::string Name;
+        size_t PointSize;
+        vctDouble3 Color;
+        double LineWidth;
+    };
+    // keep scale in a vector
+    typedef std::vector<Scale *> ScaleType;
+    ScaleType Scales;
+    typedef std::map<std::string, size_t> ScalesIdType;
+    ScalesIdType ScalesId;
+
+    //Scale Manipulate functions, one plot could have several Scales
+    vctPlot2DBase::Scale * AddScale(const std::string & name);
+    vctPlot2DBase::Scale * FindScale(const std::string & name);
+    // Scale *RemoveScale(const std::string &name);
+
 
     vctPlot2DBase(size_t PointSize = 2);
     virtual ~vctPlot2DBase(void) {};
 
-    /*! Set the number of points for all traces. */
+    /*! Set the number of points for all signals. */
     void SetNumberOfPoints(size_t numberOfPoints);
 
-    /*! Create a new trace, user needs to provide a placeholder to
-      retrieve the traceId assigned.  This method checks if the name
-      has already been used.  If so, the trace won't be added and the
+    /*! Create a new signal, user needs to provide a placeholder to
+      retrieve the signalId assigned.  This method checks if the name
+      has already been used.  If so, the signal won't be added and the
       method returns a 0 pointer. */
-    Trace * AddTrace(const std::string & name, size_t & traceId);
+    Signal * AddSignal(const std::string & name, size_t & signalId);
 
-    /*! Create a new trace.  This method checks if the name has
-      already been used.  If so, the trace won't be added and the
+    /*! Create a new signal.  This method checks if the name has
+      already been used.  If so, the signal won't be added and the
       method returns a 0 pointer. */
-    Trace * AddTrace(const std::string & name);
+    Signal * AddSignal(const std::string & name);
+
+    bool RemoveSignal(const std::string & name);
 
     /*! Create a new vertical line.  This method checks if the name
       has already been used.  If so, the line won't be added and the
       method returns a 0 pointer. */
     VerticalLine * AddVerticalLine(const std::string & name);
 
-    /*! Add a point to a given trace.  Deprecated, use
-      tracePointer->AddPoint instead. */
-    void CISST_DEPRECATED AddPoint(size_t trace, const vctDouble2 & point);
+    /*! Add a point to a given signal.  Deprecated, use
+      signalPointer->AddPoint instead. */
+    void CISST_DEPRECATED AddPoint(size_t signal, const vctDouble2 & point);
 
     /*! Data recentering, these methods re-align the data once only,
-      based on all traces.  Padding is used to make sure the data is
+      based on all signals.  Padding is used to make sure the data is
       not plotted at the extreme edges of the window.  The padding
       parameter indicates the percentage of space that should be left
       empty.  For example, a 200 pixel window with a padding of 0.1
@@ -214,12 +301,12 @@ public:
     void FitY(double min, double max, double padding = 0.1);
     void FitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
     void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(0.0, 0.1));
-    void AlignMaxX(void);
+    //  void AlignMaxX(void);
     //@}
 
     /*! Freeze the circular buffers, i.e. AddPoint does nothing.  When
       turned off (parameter is false), this is equivalent to starting
-      with an empty data set.  These methods work on all traces at
+      with an empty data set.  These methods work on all signals at
       once. */
     //@{
     void Freeze(bool freeze);
@@ -246,7 +333,7 @@ public:
     //@}
 
     /*! To fit the data in the viewport we need to compute the range
-      for all traces.  To reduce the number of computations, three
+      for all signals.  To reduce the number of computations, three
       methods are provided, one that compute the X range only, one for
       the Y range only and one for both X and Y.  Each method uses a
       single loop. */
@@ -271,9 +358,9 @@ public:
     void SetGridColor(const vctDouble3 & colorInRange0To1);
 #endif
 
-    /*! Set color for a specific trace.  Deprecated, use
-      tracePointer->SetColor. */
-    void CISST_DEPRECATED SetColor(size_t traceId, const vctDouble3 & colorInRange0To1);
+    /*! Set color for a specific signal.  Deprecated, use
+      signalPointer->SetColor. */
+    void CISST_DEPRECATED SetColor(size_t signalId, const vctDouble3 & colorInRange0To1);
 
     /*! Set background color, defined as RGB between 0 and 1. */
     void SetBackgroundColor(const vctDouble3 & colorInRange0To1);
@@ -292,23 +379,23 @@ public:
     virtual void Render(void) = 0;
     //@}
 
-protected:
+ protected:
     /*! Point size in memory, i.e. offset in sizeof(double) between
       points.  Different for OpenGL in 2D, VTK, ... */
     size_t PointSize;
 
-    // keep traces in a vector
-    typedef std::vector<Trace *> TracesType;
-    TracesType Traces;
-    // maintain a map to find trace Id by name
-    typedef std::map<std::string, size_t> TracesIdType;
-    TracesIdType TracesId;
+    // keep signals in a vector
+    typedef std::vector<Signal *> SignalsType;
+    SignalsType Signals;
+    // maintain a map to find signal Id by name
+    typedef std::map<std::string, size_t> SignalsIdType;
+    SignalsIdType SignalsId;
 
     // keep vertical lines in a vector
     typedef cmnNamedMap<VerticalLine> VerticalLinesType;
     VerticalLinesType VerticalLines;
 
-    // default number of points for all traces
+    // default number of points for all signals
     size_t NumberOfPoints;
     bool Frozen;
 
@@ -317,7 +404,7 @@ protected:
     // stores the min and max corresponding to the viewport
     vctDouble2 ViewingRangeX, ViewingRangeY;
     vctDouble2 Translation;
-    vctDouble2 Scale;
+    vctDouble2 ScaleValue;
 
     // continuous computation of scales and offsets
     bool Continuous;

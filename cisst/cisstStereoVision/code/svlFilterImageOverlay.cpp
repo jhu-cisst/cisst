@@ -49,7 +49,9 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
     TargetInputsToAdd(10),
     BlobInputsToAdd(10),
     TextInputsToAdd(10),
-    OverlaysToAdd(10)
+    OverlaysToAdd(10),
+    EnableInputSync(true),
+    EnableTransformSync(true)
 {
     svlFilterBase::AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -61,6 +63,22 @@ svlFilterImageOverlay::svlFilterImageOverlay() :
 
 svlFilterImageOverlay::~svlFilterImageOverlay()
 {
+    _TransformCacheMap::iterator iterxform;
+    // Release all blocking threads
+    for (iterxform = TransformCache.begin();
+         iterxform != TransformCache.end();
+         iterxform ++) {
+        if (iterxform->second.signal) iterxform->second.signal->Raise();
+    }
+    // Delete signals
+    for (iterxform = TransformCache.begin();
+         iterxform != TransformCache.end();
+         iterxform ++) {
+        if (iterxform->second.signal) {
+            delete iterxform->second.signal;
+            iterxform->second.signal = 0;
+        }
+    }
     // TO DO: this needs to be fixed sometime
 /*
     while (FirstOverlay) {
@@ -200,6 +218,124 @@ int svlFilterImageOverlay::AddQueuedItems()
     return SVL_OK;
 }
 
+int svlFilterImageOverlay::RemoveOverlay(svlOverlay & overlay)
+{
+    CS.Enter();
+
+        for (svlOverlay* p_overlay = FirstOverlay;
+             p_overlay;
+             p_overlay = p_overlay->Next) {
+
+            if (p_overlay == &overlay) {
+                if (IsRunning()) {
+                    overlay.MarkedForRemoval = svlOverlay::_Remove;
+                }
+                else {
+                    if (&overlay == FirstOverlay) {
+                        if (overlay.Prev) {
+                            CMN_LOG_CLASS_RUN_WARNING << "RemoveOverlay: FirstOverlay is not first in the overlay queue" << std::endl;
+                        }
+                        // Remove from linked list
+                        FirstOverlay = overlay.Next;
+                        if (overlay.Next) overlay.Next->Prev = 0;
+                    }
+                    else {
+                        if (overlay.Prev == 0) {
+                            CS.Leave();
+
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveOverlay: pointer to previous transformation is zero" << std::endl;
+                            return SVL_FAIL;
+                        }
+                        // Remove from linked list
+                        overlay.Prev->Next = overlay.Next;
+                        if (overlay.Next) overlay.Next->Prev = overlay.Prev;
+                    }
+                    // Reset overlay connections
+                    overlay.Prev = 0;
+                    overlay.Next = 0;
+                    overlay.MarkedForRemoval = svlOverlay::_DoNotRemove;
+                }
+
+                CS.Leave();
+                return SVL_OK;
+            }
+        }
+
+    CS.Leave();
+
+    CMN_LOG_CLASS_RUN_WARNING << "RemoveOverlay: overlay not registered to this overlay filter" << std::endl;
+    return SVL_FAIL;
+}
+
+int svlFilterImageOverlay::RemoveAndDeleteOverlay(svlOverlay* overlay)
+{
+    if (!overlay) return SVL_FAIL;
+
+    CS.Enter();
+
+        for (svlOverlay* p_overlay = FirstOverlay;
+             p_overlay;
+             p_overlay = p_overlay->Next) {
+
+            if (p_overlay == overlay) {
+                if (IsRunning()) {
+                    overlay->MarkedForRemoval = svlOverlay::_RemoveAndDelete;
+                }
+                else {
+                    if (overlay == FirstOverlay) {
+                        if (overlay->Prev) {
+                            CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlay: FirstOverlay is not first in the overlay queue" << std::endl;
+                        }
+                        // Remove from linked list
+                        FirstOverlay = overlay->Next;
+                        if (overlay->Next) overlay->Next->Prev = 0;
+                    }
+                    else {
+                        if (overlay->Prev == 0) {
+                            CS.Leave();
+
+                            CMN_LOG_CLASS_RUN_ERROR << "RemoveAndDeleteOverlay: pointer to previous transformation is zero" << std::endl;
+                            return SVL_FAIL;
+                        }
+                        // Remove from linked list
+                        overlay->Prev->Next = overlay->Next;
+                        if (overlay->Next) overlay->Next->Prev = overlay->Prev;
+                    }
+                    // Delete object
+                    delete overlay;
+                }
+
+                CS.Leave();
+                return SVL_OK;
+            }
+        }
+
+    CS.Leave();
+
+    CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlay: overlay not registered to this overlay filter" << std::endl;
+    return SVL_FAIL;
+}
+
+void svlFilterImageOverlay::SetEnableInputSync(bool enabled)
+{
+    EnableInputSync = enabled;
+}
+
+bool svlFilterImageOverlay::GetEnableInputSync() const
+{
+    return EnableInputSync;
+}
+
+void svlFilterImageOverlay::SetEnableTransformSync(bool enabled)
+{
+    EnableTransformSync = enabled;
+}
+
+bool svlFilterImageOverlay::GetEnableTransformSync() const
+{
+    return EnableTransformSync;
+}
+
 int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
@@ -211,7 +347,10 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     syncOutput = syncInput;
     _SkipIfDisabled();
 
-    _OnSingleThread(procInfo) {
+    _OnSingleThread(procInfo)
+    {
+        double current_time = syncInput->GetTimestamp();
+
         // Add queued inputs and overlays in a thread safe manner
         if (ImageInputsToAddUsed  ||
             MatrixInputsToAddUsed ||
@@ -225,10 +364,37 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             svlOverlay* overlay = FirstOverlay;
             for (; overlay; overlay = overlay->Next) {
                 if (overlay->TransformID >= 0) {
+
                     _TransformCacheMap::iterator iterxform;
                     iterxform = TransformCache.find(overlay->TransformID);
                     if (iterxform != TransformCache.end()) {
-                        overlay->SetTransform(iterxform->second);
+
+                        if (!EnableTransformSync ||
+                            !overlay->GetTransformSynchronized()) {
+                            overlay->SetTransform(iterxform->second.frame, iterxform->second.timestamp);
+                        }
+                        else {
+                            while (EnableTransformSync &&
+                                   overlay->GetTransformSynchronized() &&
+                                   (iterxform->second.timestamp < current_time)) {
+
+                                // Transform is not recent
+                                bool success = false;
+                                TransformCS.Leave();
+                                    // Wait for new transform
+                                    while (!success &&
+                                           overlay->GetVisible() &&
+                                           IsRunning() &&
+                                           EnableTransformSync &&
+                                           overlay->GetTransformSynchronized() &&
+                                           iterxform->second.signal) {
+                                        success = iterxform->second.signal->Wait(0.1);
+                                    }
+                                TransformCS.Enter();
+                                if (!success) break;
+                            }
+                            overlay->SetTransform(iterxform->second.frame, iterxform->second.timestamp);
+                        }
                     }
                     else {
                         CMN_LOG_CLASS_RUN_DEBUG << "Process: failed to find transformation: " << overlay->TransformID << std::endl;
@@ -242,9 +408,23 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         svlOverlayInput* overlayinput = 0;
         svlFilterInput* input = 0;
         svlSample* ovrlsample = 0;
-        double current_time = syncInput->GetTimestamp();
+        svlOverlay* t_overlay = 0;
 
-        for (overlay = FirstOverlay; overlay; overlay = overlay->Next) {
+        overlay = FirstOverlay;
+        while (overlay) {
+
+            if (overlay->MarkedForRemoval == svlOverlay::_Remove) {
+                t_overlay = overlay->Next;
+                RemoveOverlayInternal(overlay);
+                overlay = t_overlay;
+                continue;
+            }
+            else if (overlay->MarkedForRemoval == svlOverlay::_RemoveAndDelete) {
+                t_overlay = overlay->Next;
+                RemoveAndDeleteOverlayInternal(overlay);
+                overlay = t_overlay;
+                continue;
+            }
 
             // Cross casting to the input base class
             overlayinput = dynamic_cast<svlOverlayInput*>(overlay);
@@ -260,7 +440,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                         if (ovrlsample) itersample->second = ovrlsample;
                         else ovrlsample = itersample->second;
                         if (ovrlsample) {
-                            if (overlayinput->GetInputSynchronized()) {
+                            if (EnableInputSync && overlayinput->GetInputSynchronized()) {
                                 if (ovrlsample->GetTimestamp() >= current_time) {
                                 // Sample is most recent
                                     overlay->Draw(src_image, ovrlsample);
@@ -272,6 +452,7 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                                         if (ovrlsample) itersample->second = ovrlsample;
                                     }
                                     while (IsRunning() &&
+                                           EnableInputSync &&
                                            overlayinput->GetInputSynchronized() &&
                                            (!ovrlsample || ovrlsample->GetTimestamp() < current_time));
                                     if (IsRunning()) overlay->Draw(src_image, ovrlsample);
@@ -288,10 +469,33 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             // Overlays without input
                 overlay->Draw(src_image, 0);
             }
+
+            overlay = overlay->Next;
         }
     }
 
     return SVL_OK;
+}
+
+void svlFilterImageOverlay::OnStop()
+{
+    // Remove overlay objects that we didn't have a chance to remove earlier
+    svlOverlay *overlay = FirstOverlay, *t_overlay = 0;
+    while (overlay) {
+        if (overlay->MarkedForRemoval == svlOverlay::_Remove) {
+            t_overlay = overlay->Next;
+            RemoveOverlayInternal(overlay);
+            overlay = t_overlay;
+            continue;
+        }
+        else if (overlay->MarkedForRemoval == svlOverlay::_RemoveAndDelete) {
+            t_overlay = overlay->Next;
+            RemoveAndDeleteOverlayInternal(overlay);
+            overlay = t_overlay;
+            continue;
+        }
+        overlay = overlay->Next;
+    }
 }
 
 void svlFilterImageOverlay::CreateInterfaces()
@@ -309,10 +513,17 @@ void svlFilterImageOverlay::SetTransform(const ThisType::ImageTransform & transf
         _TransformCacheMap::iterator iterxform;
         iterxform = TransformCache.find(transform.ID);
         if (iterxform != TransformCache.end()) {
-            iterxform->second = transform.frame;
+            iterxform->second.frame     = transform.frame;
+            iterxform->second.timestamp = transform.timestamp;
+            if (iterxform->second.signal) iterxform->second.signal->Raise();
         }
         else {
-            TransformCache[transform.ID] = transform.frame;
+            TransformInternal transform_internal;
+            transform_internal.frame     = transform.frame;
+            transform_internal.timestamp = transform.timestamp;
+            transform_internal.signal    = new osaThreadSignal;
+            TransformCache[transform.ID] = transform_internal;
+            if (transform_internal.signal) transform_internal.signal->Raise();
             CMN_LOG_CLASS_RUN_DEBUG << "SetTransform - new transformation added: " << transform.ID << std::endl;
         }
     TransformCS.Leave();
@@ -322,13 +533,20 @@ void svlFilterImageOverlay::SetTransforms(const vctDynamicVector<ThisType::Image
 {
     TransformCS.Enter();
         for (unsigned int i = 0; i < transforms.size(); i ++) {
+            TransformInternal transform_internal;
             _TransformCacheMap::iterator iterxform;
             iterxform = TransformCache.find(transforms[i].ID);
             if (iterxform != TransformCache.end()) {
-                iterxform->second = transforms[i].frame;
+                iterxform->second.frame     = transforms[i].frame;
+                iterxform->second.timestamp = transforms[i].timestamp;
+                if (iterxform->second.signal) iterxform->second.signal->Raise();
             }
             else {
-                TransformCache[transforms[i].ID] = transforms[i].frame;
+                transform_internal.frame     = transforms[i].frame;
+                transform_internal.timestamp = transforms[i].timestamp;
+                transform_internal.signal    = new osaThreadSignal;
+                TransformCache[transforms[i].ID] = transform_internal;
+                if (transform_internal.signal) transform_internal.signal->Raise();
                 CMN_LOG_CLASS_RUN_DEBUG << "SetTransforms - new transformation added: " << transforms[i].ID << std::endl;
             }
         }
@@ -421,6 +639,66 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
     CS.Leave();
 }
 
+void svlFilterImageOverlay::RemoveOverlayInternal(svlOverlay* overlay)
+{
+    CS.Enter();
+
+        if (overlay == FirstOverlay) {
+            if (overlay->Prev) {
+                CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlayInternal: FirstOverlay is not first in the overlay queue" << std::endl;
+            }
+            // Remove from linked list
+            FirstOverlay = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = 0;
+        }
+        else {
+            if (overlay->Prev == 0) {
+                CS.Leave();
+
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveAndDeleteOverlayInternal: pointer to previous transformation is zero" << std::endl;
+                return;
+            }
+            // Remove from linked list
+            overlay->Prev->Next = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = overlay->Prev;
+        }
+        // Reset overlay connections
+        overlay->Prev = 0;
+        overlay->Next = 0;
+        overlay->MarkedForRemoval = svlOverlay::_DoNotRemove;
+
+    CS.Leave();
+}
+
+void svlFilterImageOverlay::RemoveAndDeleteOverlayInternal(svlOverlay* overlay)
+{
+    CS.Enter();
+
+        if (overlay == FirstOverlay) {
+            if (overlay->Prev) {
+                CMN_LOG_CLASS_RUN_WARNING << "RemoveAndDeleteOverlayInternal: FirstOverlay is not first in the overlay queue" << std::endl;
+            }
+            // Remove from linked list
+            FirstOverlay = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = 0;
+        }
+        else {
+            if (overlay->Prev == 0) {
+                CS.Leave();
+
+                CMN_LOG_CLASS_RUN_ERROR << "RemoveAndDeleteOverlayInternal: pointer to previous transformation is zero" << std::endl;
+                return;
+            }
+            // Remove from linked list
+            overlay->Prev->Next = overlay->Next;
+            if (overlay->Next) overlay->Next->Prev = overlay->Prev;
+        }
+        // Delete object
+        delete overlay;
+
+    CS.Leave();
+}
+
 
 /****************************/
 /*** Stream out operators ***/
@@ -428,14 +706,14 @@ void svlFilterImageOverlay::AddQueuedItemsInternal()
 
 std::ostream & operator << (std::ostream & stream, const svlFilterImageOverlay::ImageTransform & objref)
 {
-    stream << "ID=" << objref.ID << std::endl << objref.frame << std::endl;
+    stream << "ID=" << objref.ID << " (timestamp=" << std::fixed << objref.timestamp << ")" << std::endl << objref.frame << std::endl;
     return stream;
 }
 
 std::ostream & operator << (std::ostream & stream, const vctDynamicVector<svlFilterImageOverlay::ImageTransform> & objref)
 {
     for (unsigned int i = 0; i < objref.size(); i ++) {
-        stream << "ID=" << objref[i].ID << std::endl << objref[i].frame << std::endl;
+        stream << "ID=" << objref[i].ID << " (timestamp=" << std::fixed << objref[i].timestamp << ")" << std::endl << objref[i].frame << std::endl;
     }
     return stream;
 }

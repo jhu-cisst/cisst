@@ -7,13 +7,14 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
 no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
+
 
 --- end cisst license ---
 */
@@ -23,9 +24,281 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnAssert.h>
 #include <iostream>
+#include <string>
 
 
-vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints, size_t PointSize):
+vctPlot2DBase::Scale::Scale(const std::string & name, size_t pointDimension)
+{
+    this->PointSize = pointDimension;
+    this->Translation.SetAll(0.0);
+    this->ScaleValue.SetAll(1.0);
+    this->Name = name;
+    SetContinuousFitX(true);
+    SetContinuousFitY(true);
+}
+
+
+vctPlot2DBase::Scale::~Scale()
+{
+}
+
+
+std::string vctPlot2DBase::Scale::GetName(void)
+{
+    return this->Name;
+}
+
+
+void vctPlot2DBase::Scale::FitX(double padding)
+{
+    double min, max;
+    this->ComputeDataRangeX(min, max);
+    this->FitX(min, max, padding);
+}
+
+
+void vctPlot2DBase::Scale::FitX(double min, double max, double padding)
+{
+    this->ViewingRangeX.Assign(min, max);
+    this->ScaleValue.X() = this->Viewport.X() / ((max - min) * (1.0 + padding));
+    this->Translation.X() =
+        - min * this->ScaleValue.X()
+        + 0.5 * padding * this->Viewport.X();
+}
+
+
+void vctPlot2DBase::Scale::FitY(double padding)
+{
+    double min, max;
+    this->ComputeDataRangeY(min, max);
+    this->FitY(min, max, padding);
+}
+
+
+void vctPlot2DBase::Scale::FitY(double min, double max, double padding)
+{
+    this->ViewingRangeY.Assign(min, max);
+    this->ScaleValue.Y() = this->Viewport.Y() / ((max - min) * (1.0 + padding));
+    this->Translation.Y() =
+        - min * this->ScaleValue.Y()
+        + 0.5 * padding * this->Viewport.Y();
+}
+
+void vctPlot2DBase::Scale::FitXY(const vctDouble2 & padding)
+{
+    vctDouble2 min, max;
+    this->ComputeDataRangeXY(min, max);
+    this->FitXY(min, max, padding);
+}
+
+
+void vctPlot2DBase::Scale::FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding)
+{
+    this->ViewingRangeX.Assign(min.X(), max.X());
+    this->ViewingRangeY.Assign(min.Y(), max.Y());
+    // compute scale
+    vctDouble2 dataDiff;
+    dataDiff.DifferenceOf(max, min);
+    this->ScaleValue.ElementwiseRatioOf(this->Viewport, dataDiff);
+    vctDouble2 pad(padding);
+    pad.Add(1.0);
+    this->ScaleValue.ElementwiseDivide(pad);
+    // compute translation
+    this->Translation.ElementwiseProductOf(min, this->ScaleValue);
+    this->Translation.NegationSelf();
+    pad.ElementwiseProductOf(padding, this->Viewport);
+    pad.Multiply(0.5);
+    this->Translation.Add(pad);
+
+}
+
+// call each signal and find the min & max
+bool vctPlot2DBase::Scale::ComputeDataRangeX(double & min, double & max, bool assumesDataSorted) const
+{
+    size_t signalIndex;
+    const size_t numberofSignals = this->Signals.size();
+    double rmin, rmax;
+
+    if (numberofSignals != 0) {
+        min = this->Signals[0]->Data.Element(this->Signals[0]->IndexFirst).X();
+        rmin = rmax = max = min;
+    } else {
+        min = -1;
+        max = 1;
+        return false;
+    }
+
+    for (signalIndex = 0; signalIndex < numberofSignals; signalIndex++) {
+        vctPlot2DBase::Signal * signal = this->Signals[signalIndex];
+        signal->ComputeDataRangeX(min, max, assumesDataSorted);
+        // get Scale[min,max]
+        rmin = (rmin > min) ? min : rmin;
+        rmax = (rmax < max) ? max : rmax;
+    }
+    min = rmin;
+    max = rmax;
+    return true;
+}
+
+
+bool vctPlot2DBase::Scale::ComputeDataRangeY(double & min, double & max)
+{
+    size_t signalIndex;
+    const size_t numberofSignals = this->Signals.size();
+    double rmin, rmax;
+
+    if (numberofSignals != 0) {
+        min = this->Signals[0]->Data.Element(this->Signals[0]->IndexFirst).Y();
+        rmin = rmax = max = min;
+    } else {
+        min = -1;
+        max = 1;
+        return false;
+    }
+
+    for (signalIndex = 0; signalIndex < numberofSignals; signalIndex++) {
+        vctPlot2DBase::Signal * signal = this->Signals[signalIndex];
+        signal->ComputeDataRangeY(min, max);
+        // get Scale[min,max]
+        rmin = (rmin > min) ? min : rmin;
+        rmax = (rmax < max) ? max : rmax;
+    }
+    min = rmin;
+    max = rmax;
+    return true;
+}
+
+
+bool vctPlot2DBase::Scale::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
+{
+    size_t signalIndex;
+    const size_t numberofSignals = this->Signals.size();
+    vctDouble2 rmin, rmax;
+
+    if (numberofSignals != 0){
+        min = this->Signals[0]->Data.Element(this->Signals[0]->IndexFirst);
+        rmin = rmax = max = min;
+    } else {
+        min.SetAll(-1.0);
+        max.SetAll(1.0);
+        return false;
+    }
+
+    for (signalIndex = 0; signalIndex < numberofSignals; signalIndex++) {
+        vctPlot2DBase::Signal * signal = this->Signals[signalIndex];
+        signal->ComputeDataRangeXY(min, max);
+        // get Scale[min,max]
+        rmin.X() = (rmin.X() > min.X()) ? min.X():rmin.X();
+        rmin.Y() = (rmin.Y() > min.Y()) ? min.Y():rmin.Y();
+
+        rmax.X() = (rmax.X() < max.X()) ? max.X() : rmax.X();
+        rmax.Y() = (rmax.Y() < max.Y()) ? max.Y() : rmax.Y();
+    }
+    min = rmin;
+    max = rmax;
+    return true;
+}
+
+
+void vctPlot2DBase::Scale::SetContinuousFitX(bool fit)
+{
+    this->ContinuousFitX = fit;
+    //    this->ContinuousAlignMaxX = false;
+    this->Continuous = (this->ContinuousFitX
+                        || this->ContinuousFitY);
+
+}
+
+
+void vctPlot2DBase::Scale::SetContinuousFitY(bool fit)
+{
+    this->ContinuousFitY = fit;
+    this->Continuous = (this->ContinuousFitX
+                        || this->ContinuousFitY);
+
+}
+
+
+void vctPlot2DBase::Scale::SetColor(const vctDouble3 & colorInRange0To1)
+{
+    vctDouble3 clippedColor;
+    clippedColor.ClippedAboveOf(colorInRange0To1, 1.0);
+    clippedColor.ClippedBelowOf(clippedColor, 0.0);
+    this->Color.Assign(clippedColor);
+}
+
+
+vctPlot2DBase::Signal * vctPlot2DBase::Scale::AddSignal(const std::string & name)
+{
+    // check if the name already exists
+    SignalsIdType::const_iterator found = this->SignalsId.find(name);
+    const SignalsIdType::const_iterator end = this->SignalsId.end();
+    if (found == end) {
+        size_t SignalSize = Signals.size();
+        // new name
+        //set the number of points to default, 100
+        Signal * newSignal = new Signal(name, 100, this->PointSize);
+        newSignal->Parent = this;
+        this->Signals.push_back(newSignal);
+        SignalsId[name] = SignalSize;
+        return newSignal;
+    }
+    return 0;
+}
+
+
+bool vctPlot2DBase::Scale::RemoveSignal(const std::string & name)
+{
+    // check if the name already exists
+    SignalsIdType::iterator found = this->SignalsId.find(name);
+    const SignalsIdType::iterator end = this->SignalsId.end();
+
+    if (found != end){
+        this->SignalsId.erase(found);
+    }
+    for (size_t i = 0; i < Signals.size(); i++) {
+        if (name.find(Signals.at(i)->Name) != std::string::npos) {
+            this->Signals.erase(this->Signals.begin()+i);
+            return true;
+        }
+    }
+    return false;
+}
+
+
+vctPlot2DBase::VerticalLine * vctPlot2DBase::Scale::AddVerticalLine(const std::string & name)
+{
+    VerticalLinesIdType::const_iterator found = this->VerticalLinesId.find(name);
+    const VerticalLinesIdType::const_iterator end = this->VerticalLinesId.end();
+
+    if (found == end) {
+        size_t vLineSize = VerticalLines.size();
+        // new name
+        VerticalLine * newVLine = new VerticalLine(name);
+        this->VerticalLines.push_back(newVLine);
+        VerticalLinesId[name] = vLineSize;
+        return newVLine;
+    }
+
+    return 0;
+}
+
+
+void vctPlot2DBase::Scale::ContinuousUpdate(void)
+{
+    if (this->Continuous) {
+        if (this->ContinuousFitX && this->ContinuousFitY) {
+            this->FitXY();
+        } else if (this->ContinuousFitX) {
+            this->FitX();
+        } else if (this->ContinuousFitY) {
+            this->FitY();
+        }
+    }
+}
+
+
+vctPlot2DBase::Signal::Signal(const std::string & name, size_t numberOfPoints, size_t PointSize):
     Name(name),
     Empty(true),
     Visible(true),
@@ -52,7 +325,7 @@ vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints, siz
 }
 
 
-vctPlot2DBase::Trace::~Trace()
+vctPlot2DBase::Signal::~Signal()
 {
     if (this->Buffer) {
         delete this->Buffer;
@@ -60,7 +333,25 @@ vctPlot2DBase::Trace::~Trace()
 }
 
 
-void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
+vctPlot2DBase::Signal * vctPlot2DBase::Signal::AddSignal(const std::string & name)
+{
+    return Parent->AddSignal(name);
+}
+
+
+vctPlot2DBase::Scale * vctPlot2DBase::Signal::GetParent(void)
+{
+    return Parent;
+}
+
+
+const std::string & vctPlot2DBase::Signal::GetName(void) const
+{
+    return this->Name;
+}
+
+
+void vctPlot2DBase::Signal::AddPoint(const vctDouble2 & point)
 {
     if (!this->Frozen) {
         // look where to store this point
@@ -83,7 +374,7 @@ void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
 }
 
 
-void vctPlot2DBase::Trace::AppendPoint(const vctDouble2 & point)
+void vctPlot2DBase::Signal::AppendPoint(const vctDouble2 & point)
 {
     if (!this->Frozen) {
         // look where to store this point
@@ -106,22 +397,22 @@ void vctPlot2DBase::Trace::AppendPoint(const vctDouble2 & point)
 }
 
 
-vctDouble2 vctPlot2DBase::Trace::GetPointAt(size_t index)
+vctDouble2 vctPlot2DBase::Signal::GetPointAt(size_t index)
     throw (std::runtime_error)
 {
     if (index >= Data.size()) {
-        cmnThrow("vctPlot2DBase::Trace::GetPointAt: index bigger than bufferSize");
+        cmnThrow("vctPlot2DBase::Signal::GetPointAt: index bigger than bufferSize");
     }
     index = ((index + this->IndexFirst) % Data.size());
     return Data.at(index);
 }
 
 
-void vctPlot2DBase::Trace::SetPointAt(size_t index, const vctDouble2 & point)
+void vctPlot2DBase::Signal::SetPointAt(size_t index, const vctDouble2 & point)
     throw (std::runtime_error)
 {
     if (index >= Data.size()) {
-        cmnThrow("vctPlot2DBase::Trace::SetPointAt: index bigger than bufferSize");
+        cmnThrow("vctPlot2DBase::Signal::SetPointAt: index bigger than bufferSize");
     }
     index = ((index + this->IndexFirst) % Data.size());
     this->Data.Element(index).Assign(point);
@@ -129,12 +420,12 @@ void vctPlot2DBase::Trace::SetPointAt(size_t index, const vctDouble2 & point)
 }
 
 
-void vctPlot2DBase::Trace::SetArrayAt(size_t index, const double * pointArray, size_t size, size_t pointDimension)
+void vctPlot2DBase::Signal::SetArrayAt(size_t index, const double * pointArray, size_t size, size_t pointDimension)
     throw (std::runtime_error)
 {
     if (((index + (size/this->PointSize) ) >= Data.size())
         && (pointDimension != this->PointSize)) {
-        cmnThrow("vctPlot2DBase::Trace::SetArrayAt: index + size bigger than bufferSize");
+        cmnThrow("vctPlot2DBase::Signal::SetArrayAt: index + size bigger than bufferSize");
     }
     memcpy((this->Buffer + index * this->PointSize),
            pointArray,
@@ -143,7 +434,7 @@ void vctPlot2DBase::Trace::SetArrayAt(size_t index, const double * pointArray, s
 }
 
 
-bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension)
+bool vctPlot2DBase::Signal::AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension)
     throw (std::runtime_error)
 {
     bool result = false;
@@ -151,7 +442,7 @@ bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySi
     // check if there is enough space for array we want to insert
     if ((arraySize > (Data.size()*this->PointSize))
         || (pointDimension != this->PointSize)) {
-        cmnThrow("vctPlot2DBase::Trace::AppendArray: arraySize invalid or pointDimension not match");
+        cmnThrow("vctPlot2DBase::Signal::AppendArray: arraySize invalid or pointDimension not match");
     }
 
     double * newBuffer = new double [Data.size() * this->PointSize];
@@ -216,8 +507,7 @@ bool vctPlot2DBase::Trace::AppendArray(const double * pointArray, size_t arraySi
 }
 
 
-
-bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension)
+bool vctPlot2DBase::Signal::PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension)
     throw (std::runtime_error)
 {
     // check if there is enough space for array we want to insert
@@ -225,7 +515,7 @@ bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arrayS
 
     if ((arraySize > (Data.size()*this->PointSize))
         || (pointDimension != this->PointSize)) {
-        cmnThrow("vctPlot2DBase::Trace::PrependArray: arraySize invalid or pointDimension not match");
+        cmnThrow("vctPlot2DBase::Signal::PrependArray: arraySize invalid or pointDimension not match");
     }
 
     if (!this->Frozen) {
@@ -288,7 +578,7 @@ bool vctPlot2DBase::Trace::PrependArray(const double * pointArray, size_t arrayS
 }
 
 
-void vctPlot2DBase::Trace::Freeze(bool freeze)
+void vctPlot2DBase::Signal::Freeze(bool freeze)
 {
     if (freeze != this->Frozen) {
         this->Frozen = freeze;
@@ -301,7 +591,7 @@ void vctPlot2DBase::Trace::Freeze(bool freeze)
 }
 
 
-void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max) const
+void vctPlot2DBase::Signal::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max) const
 {
     // using pointer arithmetic
     const PointRef * currentPointer = this->Data.Pointer(0);
@@ -318,8 +608,8 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
 
     // iterate
     double value;
-	max.X() = min.X() = currentPointer->X();
-	max.Y() = min.Y() = currentPointer->Y();
+    max.X() = min.X() = currentPointer->X();
+    max.Y() = min.Y() = currentPointer->Y();
     for (;
          currentPointer <= lastPointer;
          currentPointer += stridePointer) {
@@ -340,7 +630,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
 }
 
 
-void vctPlot2DBase::Trace::GetLeftRightDataX(double & min, double & max) const
+void vctPlot2DBase::Signal::GetLeftRightDataX(double & min, double & max) const
 {
     min = Data.at(this->IndexFirst).X();
     max = Data.at(this->IndexLast).X();
@@ -348,7 +638,7 @@ void vctPlot2DBase::Trace::GetLeftRightDataX(double & min, double & max) const
 }
 
 
-void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max,  bool assumesDataSorted) const
+void vctPlot2DBase::Signal::ComputeDataRangeX(double & min, double & max,  bool assumesDataSorted) const
 {
     const PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
@@ -370,7 +660,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max,  bool a
 
     // iterate
     double value;
-	max = min = currentPointer->X();
+    max = min = currentPointer->X();
     for (;
          currentPointer <= lastPointer;
          currentPointer += stridePointer) {
@@ -384,7 +674,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max,  bool a
 }
 
 
-void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max) const
+void vctPlot2DBase::Signal::ComputeDataRangeY(double & min, double & max) const
 {
     // using pointer arithmetic
     const PointRef * currentPointer = this->Data.Pointer(0);
@@ -401,7 +691,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max) const
 
     // iterate
     double value;
-	min = max = currentPointer->Y();
+    min = max = currentPointer->Y();
     for (;
          currentPointer <= lastPointer;
          currentPointer += stridePointer) {
@@ -415,7 +705,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max) const
 }
 
 
-void vctPlot2DBase::Trace::SetNumberOfPoints(size_t numberOfPoints)
+void vctPlot2DBase::Signal::SetNumberOfPoints(size_t numberOfPoints)
 {
     delete Buffer;
     Buffer = new double[PointSize * numberOfPoints];
@@ -435,13 +725,13 @@ void vctPlot2DBase::Trace::SetNumberOfPoints(size_t numberOfPoints)
 }
 
 
-size_t vctPlot2DBase::Trace::GetSize(void) const
+size_t vctPlot2DBase::Signal::GetSize(void) const
 {
     return Data.size();
 }
 
 
-size_t vctPlot2DBase::Trace::GetNumberOfPoints(void) const
+size_t vctPlot2DBase::Signal::GetNumberOfPoints(void) const
 {
     size_t numberOfPoints = 0;
     if (this->IndexFirst < this->IndexLast) {
@@ -453,7 +743,7 @@ size_t vctPlot2DBase::Trace::GetNumberOfPoints(void) const
 }
 
 
-void vctPlot2DBase::Trace::GetNumberOfPoints(size_t & numberOfPoints, size_t & bufferSize) const
+void vctPlot2DBase::Signal::GetNumberOfPoints(size_t & numberOfPoints, size_t & bufferSize) const
 {
     if (this->IndexFirst < this->IndexLast) {
         numberOfPoints = this->IndexLast - this->IndexFirst + 1;
@@ -465,7 +755,7 @@ void vctPlot2DBase::Trace::GetNumberOfPoints(size_t & numberOfPoints, size_t & b
 }
 
 
-void vctPlot2DBase::Trace::SetSize(size_t numberOfPoints)
+void vctPlot2DBase::Signal::SetSize(size_t numberOfPoints)
 {
     delete Buffer;
     this->Buffer = new double[PointSize * numberOfPoints];
@@ -485,7 +775,7 @@ void vctPlot2DBase::Trace::SetSize(size_t numberOfPoints)
 }
 
 
-void vctPlot2DBase::Trace::Resize(size_t numberOfPoints, bool trimOlder)
+void vctPlot2DBase::Signal::Resize(size_t numberOfPoints, bool trimOlder)
 {
     // same size, do nothing
     if (Data.size() == numberOfPoints) {
@@ -557,7 +847,7 @@ void vctPlot2DBase::Trace::Resize(size_t numberOfPoints, bool trimOlder)
 }
 
 
-void vctPlot2DBase::Trace::SetColor(const vctDouble3 & colorInRange0To1)
+void vctPlot2DBase::Signal::SetColor(const vctDouble3 & colorInRange0To1)
 {
     vctDouble3 clippedColor;
     clippedColor.ClippedAboveOf(colorInRange0To1, 1.0);
@@ -604,45 +894,106 @@ vctPlot2DBase::vctPlot2DBase(size_t pointSize):
     CMN_ASSERT(this->PointSize >= 2);
     SetNumberOfPoints(200);
     Translation.SetAll(0.0);
-    Scale.SetAll(1.0);
+    ScaleValue.SetAll(1.0);
     SetContinuousFitX(true);
     SetContinuousFitY(true);
 }
 
 
-vctPlot2DBase::Trace * vctPlot2DBase::AddTrace(const std::string & name, size_t & traceId)
+// TODO: This must be modified into AddScale + AddSignal
+
+vctPlot2DBase::Signal * vctPlot2DBase::AddSignal(const std::string & name, size_t & signalId)
 {
     // check if the name already exists
-    TracesIdType::const_iterator found = this->TracesId.find(name);
-    const TracesIdType::const_iterator end = this->TracesId.end();
-    if (found == end) {
-        // new name
-        traceId = Traces.size();
-        Trace * newTrace = new Trace(name, this->NumberOfPoints, this->PointSize);
-        Traces.push_back(newTrace);
-        TracesId[name] = traceId;
-        return newTrace;
+    const std::string delimiter("-");
+    std::string scaleName;
+    size_t delimiterPosition = name.find(delimiter);
+    Scale * scalePointer = this->FindScale(name);
+
+    scaleName = name.substr(0, delimiterPosition);
+
+    // no such Scale, create one
+    if (!scalePointer) {
+        scalePointer = this->AddScale(scaleName);
     }
-    return 0;
+
+    return scalePointer->AddSignal(name);
 }
 
 
-vctPlot2DBase::Trace * vctPlot2DBase::AddTrace(const std::string & name)
+bool vctPlot2DBase::RemoveSignal(const std::string & name)
 {
-    size_t traceId;
-    return this->AddTrace(name, traceId);
+    const std::string delimiter("-");
+    std::string scaleName;
+    size_t delimiterPosition = name.find(delimiter);
+    Scale * scalePointer = this->FindScale(name);
+
+    scaleName = name.substr(0, delimiterPosition);
+
+    if(!scalePointer) // not found
+        return false;
+
+    return scalePointer->RemoveSignal(name);
+}
+
+
+// vctPlot2DBase::Signal * vctPlot2DBase::AddSignal(const std::string & name, size_t & signalId)
+// {
+//     // check if the name already exists
+//     SignalsIdType::const_iterator found = this->SignalsId.find(name);
+//     const SignalsIdType::const_iterator end = this->SignalsId.end();
+//     if (found == end) {
+//         // new name
+//         signalId = Signals.size();
+//         Signal * newSignal = new Signal(name, this->NumberOfPoints, this->PointSize);
+//         Signals.push_back(newSignal);
+//         SignalsId[name] = signalId;
+//         return newSignal;
+//     }
+//     return 0;
+// }
+
+
+vctPlot2DBase::Signal * vctPlot2DBase::AddSignal(const std::string & name)
+{
+    size_t signalId;
+    return this->AddSignal(name, signalId);
 }
 
 
 vctPlot2DBase::VerticalLine * vctPlot2DBase::AddVerticalLine(const std::string & name)
 {
-    VerticalLine * newLine = new VerticalLine(name);
-    if (this->VerticalLines.AddItem(name, newLine)) {
-        return newLine;
+    SignalsIdType::const_iterator found;
+    const SignalsIdType::const_iterator end = this->ScalesId.end();
+    const std::string delimiter("-");
+    std::string scaleName;
+    size_t delimiterPosition = name.find(delimiter);
+    Scale * scalePointer = this->FindScale(name);
+
+    scaleName = name.substr(0, delimiterPosition);
+
+    // no such Scale, create one
+    if(!scalePointer){
+        std::cerr<<"AddScale now\n";
+        scalePointer = this->AddScale(scaleName);
     }
-    delete newLine;
-    return 0;
+
+    return scalePointer->AddVerticalLine(name);
+
 }
+
+/*
+  vctPlot2DBase::VerticalLine * vctPlot2DBase::AddVerticalLine(const std::string & name)
+  {
+  VerticalLine * newLine = new VerticalLine(name);
+  if (this->VerticalLines.AddItem(name, newLine)) {
+  return newLine;
+  }
+  delete newLine;
+  return 0;
+  }
+*/
+
 
 void vctPlot2DBase::SetNumberOfPoints(size_t numberOfPoints)
 {
@@ -653,9 +1004,9 @@ void vctPlot2DBase::SetNumberOfPoints(size_t numberOfPoints)
 }
 
 
-void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
+void vctPlot2DBase::AddPoint(size_t signalId, const vctDouble2 & point)
 {
-    this->Traces[traceId]->AppendPoint(point);
+    this->Signals[signalId]->AppendPoint(point);
 }
 
 
@@ -670,10 +1021,16 @@ void vctPlot2DBase::FitX(double padding)
 void vctPlot2DBase::FitX(double min, double max, double padding)
 {
     this->ViewingRangeX.Assign(min, max);
-    this->Scale.X() = this->Viewport.X() / ((max - min) * (1.0 + padding));
+    this->ScaleValue.X() = this->Viewport.X() / ((max - min) * (1.0 + padding));
     this->Translation.X() =
-        - min * this->Scale.X()
+        - min * this->ScaleValue.X()
         + 0.5 * padding * this->Viewport.X();
+
+    size_t scaleIndex;
+    const size_t numberofScales = this->Scales.size();
+
+    for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+        this->Scales[scaleIndex]->FitX(min,max, padding);
 }
 
 
@@ -687,11 +1044,18 @@ void vctPlot2DBase::FitY(double padding)
 
 void vctPlot2DBase::FitY(double min, double max, double padding)
 {
+
     this->ViewingRangeY.Assign(min, max);
-    this->Scale.Y() = this->Viewport.Y() / ((max - min) * (1.0 + padding));
+    this->ScaleValue.Y() = this->Viewport.Y() / ((max - min) * (1.0 + padding));
     this->Translation.Y() =
-        - min * this->Scale.Y()
+        - min * this->ScaleValue.Y()
         + 0.5 * padding * this->Viewport.Y();
+
+    size_t scaleIndex;
+    const size_t numberofScales = this->Scales.size();
+
+    for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+        this->Scales[scaleIndex]->FitY(min, max, padding);
 }
 
 
@@ -705,32 +1069,22 @@ void vctPlot2DBase::FitXY(const vctDouble2 & padding)
 
 void vctPlot2DBase::FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding)
 {
-    this->ViewingRangeX.Assign(min.X(), max.X());
-    this->ViewingRangeY.Assign(min.Y(), max.Y());
-    // compute scale
-    vctDouble2 dataDiff;
-    dataDiff.DifferenceOf(max, min);
-    this->Scale.ElementwiseRatioOf(this->Viewport, dataDiff);
-    vctDouble2 pad(padding);
-    pad.Add(1.0);
-    this->Scale.ElementwiseDivide(pad);
-    // compute translation
-    this->Translation.ElementwiseProductOf(min, this->Scale);
-    this->Translation.NegationSelf();
-    pad.ElementwiseProductOf(padding, this->Viewport);
-    pad.Multiply(0.5);
-    this->Translation.Add(pad);
+    size_t scaleIndex;
+    const size_t numberofScales = this->Scales.size();
+
+    for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+        this->Scales[scaleIndex]->FitXY(min, max, padding);
 }
 
 
 void vctPlot2DBase::Freeze(bool freeze)
 {
-    size_t traceIndex;
-    const size_t numberOfTraces = this->Traces.size();
-    for (traceIndex = 0;
-         traceIndex < numberOfTraces;
-         traceIndex++) {
-        this->Traces[traceIndex]->Freeze(freeze);
+    size_t signalIndex;
+    const size_t numberOfSignals = this->Signals.size();
+    for (signalIndex = 0;
+         signalIndex < numberOfSignals;
+         signalIndex++) {
+        this->Signals[signalIndex]->Freeze(freeze);
     }
     this->Frozen = freeze;
 }
@@ -743,6 +1097,11 @@ void vctPlot2DBase::SetContinuousFitX(bool fit)
     this->Continuous = (this->ContinuousFitX
                         || this->ContinuousFitY
                         || this->ContinuousAlignMaxX);
+    size_t scaleIndex;
+    const size_t numberofScales = this->Scales.size();
+
+    for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+        this->Scales[scaleIndex]->SetContinuousFitX(fit);
 }
 
 
@@ -752,6 +1111,12 @@ void vctPlot2DBase::SetContinuousFitY(bool fit)
     this->Continuous = (this->ContinuousFitX
                         || this->ContinuousFitY
                         || this->ContinuousAlignMaxX);
+    size_t scaleIndex;
+    const size_t numberofScales = this->Scales.size();
+
+    for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+        this->Scales[scaleIndex]->SetContinuousFitY(fit);
+
 }
 
 
@@ -767,83 +1132,83 @@ void vctPlot2DBase::SetContinuousAlignMaxX(bool align)
 
 void vctPlot2DBase::ComputeDataRangeX(double & min, double & max)
 {
-    if (this->Traces.size() == 0) {
+    if(this->Scales.size() == 0){
         min = -1.0;
         max = 1.0;
     } else {
-        size_t traceIndex;
-        const size_t numberOfTraces = this->Traces.size();
-        vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
-        min = trace->Data.Element(trace->IndexFirst).X();
-        max = min;
-        for (traceIndex = 0;
-             traceIndex < numberOfTraces;
-             traceIndex++) {
-            this->Traces[traceIndex]->ComputeDataRangeX(min, max);
-        }
+        size_t scaleIndex;
+        const size_t numberofScales = this->Scales.size();
+
+        for(scaleIndex = 0;
+            scaleIndex < numberofScales;
+            scaleIndex++)
+            this->Scales[scaleIndex]->ComputeDataRangeX(min, max);
     }
 }
 
 
 void vctPlot2DBase::ComputeDataRangeY(double & min, double & max)
 {
-    if (this->Traces.size() == 0) {
+    if(this->Scales.size() == 0){
         min = -1.0;
         max = 1.0;
     } else {
-        size_t traceIndex;
-        const size_t numberOfTraces = this->Traces.size();
-        vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
-        min = trace->Data.Element(trace->IndexFirst).Y();
+        size_t scaleIndex;
+        const size_t numberofScales = this->Scales.size();
 
-        max = min;
-        for (traceIndex = 0;
-             traceIndex < numberOfTraces;
-             traceIndex++) {
-            this->Traces[traceIndex]->ComputeDataRangeY(min, max);
-        }
+        for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+            this->Scales[scaleIndex]->ComputeDataRangeY(min, max);
     }
 }
 
 
 void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 {
-
-    if (this->Traces.size() == 0) {
+    if (this->Signals.size() == 0) {
         min.SetAll(-1.0);
         max.SetAll(1.0);
     } else {
-        size_t traceIndex;
-        const size_t numberOfTraces = this->Traces.size();
-        vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
-        min.Assign(trace->Data.Element(trace->IndexFirst));
-        max.Assign(min);
-        for (traceIndex = 0;
-             traceIndex < numberOfTraces;
-             traceIndex++) {
-            this->Traces[traceIndex]->ComputeDataRangeXY(min, max);
-        }
+
+        size_t scaleIndex;
+        const size_t numberofScales = this->Scales.size();
+
+        for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+            this->Scales[scaleIndex]->ComputeDataRangeXY(min, max);
     }
 }
 
 
 void vctPlot2DBase::ContinuousUpdate(void)
 {
-    if (this->Continuous) {
-        if (this->ContinuousFitX && this->ContinuousFitY) {
-            this->FitXY();
-        } else if (this->ContinuousFitX) {
-            this->FitX();
-        } else if (this->ContinuousFitY) {
-            this->FitY();
-        }
-    }
+    size_t scaleIndex;
+    const size_t numberofScales = this->Scales.size();
+
+    for(scaleIndex = 0; scaleIndex < numberofScales; scaleIndex++)
+        this->Scales[scaleIndex]->ContinuousUpdate();
+
 }
 
 
-void vctPlot2DBase::SetColor(size_t traceId, const vctDouble3 & colorInRange0To1)
+// void vctPlot2DBase::ContinuousUpdate(void)
+// {
+//     if (this->Continuous) {
+//         if (this->ContinuousFitX && this->ContinuousFitY) {
+//             this->FitXY();
+//             std::cerr<<"1\n";
+//         } else if (this->ContinuousFitX) {
+//             this->FitX();
+//             std::cerr<<"2\n";
+//         } else if (this->ContinuousFitY) {
+//             this->FitY();
+//             std::cerr<<"3\n";
+//         }
+//     }
+// }
+
+
+void vctPlot2DBase::SetColor(size_t signalId, const vctDouble3 & colorInRange0To1)
 {
-    this->Traces[traceId]->SetColor(colorInRange0To1);
+    this->Signals[signalId]->SetColor(colorInRange0To1);
 }
 
 
@@ -853,4 +1218,41 @@ void vctPlot2DBase::SetBackgroundColor(const vctDouble3 & colorInRange0To1)
     clippedColor.ClippedAboveOf(colorInRange0To1, 1.0);
     clippedColor.ClippedBelowOf(clippedColor, 0.0);
     this->BackgroundColor.Assign(clippedColor);
+}
+
+
+vctPlot2DBase::Scale * vctPlot2DBase::AddScale(const std::string & name)
+{
+    // check if the name already exists
+    SignalsIdType::const_iterator found = this->ScalesId.find(name);
+    const SignalsIdType::const_iterator end = this->ScalesId.end();
+    if (found == end) {
+        size_t ScaleSize = this->Scales.size();
+        // new name
+        Scale * newScale = new Scale(name);
+        this->Scales.push_back(newScale);
+        ScalesId[name] = ScaleSize;
+        return newScale;
+    }
+    return 0;
+}
+
+
+vctPlot2DBase::Scale * vctPlot2DBase::FindScale(const std::string & name)
+{
+    // check if the name already exists
+    SignalsIdType::const_iterator found;
+    const SignalsIdType::const_iterator end = this->ScalesId.end();
+    const std::string delimiter("-");
+    std::string scaleName;
+    size_t delimiterPosition = name.find(delimiter);
+    scaleName = name.substr(0, delimiterPosition);
+    found = this->ScalesId.find(scaleName);
+
+    // no match
+    if (found == end) {
+        return 0;
+    } else {
+        return Scales[found->second];
+    }
 }

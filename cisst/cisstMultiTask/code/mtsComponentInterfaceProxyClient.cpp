@@ -808,7 +808,7 @@ mtsComponentInterfaceProxyClient
                                      const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoidReturnSerialized: " << commandID << ", " << argumentIn.size());
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoidReturnSerialized: " << commandID << ", " << resultAddress);
 #endif
     mtsExecutionResult executionResult;
     ComponentInterfaceProxyClient->ReceiveExecuteCommandVoidReturnSerialized(commandID, resultAddress, executionResult, result);
@@ -827,7 +827,7 @@ mtsComponentInterfaceProxyClient
                                       const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteReturnSerialized: " << commandID << ", " << argumentIn.size());
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteReturnSerialized: " << commandID << ", " << resultAddress);
 #endif
     mtsExecutionResult executionResult;
     ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteReturnSerialized(commandID, argument, resultAddress, executionResult, result);

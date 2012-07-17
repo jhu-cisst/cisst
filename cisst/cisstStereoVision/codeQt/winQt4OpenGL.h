@@ -35,8 +35,10 @@ class svlBufferImage;
 class osaThreadSignal;
 class svlWindowManagerQt4OpenGL;
 
+// Always include last
+#include <cisstStereoVision/svlExportQt.h>
 
-class svlWidgetQt4OpenGL : public QGLWidget
+class CISST_EXPORT svlWidgetQt4OpenGL : public QGLWidget
 {
     Q_OBJECT
 
@@ -48,6 +50,8 @@ public:
     bool Create(svlBufferImage* imagebuffer, svlWindowManagerQt4OpenGL* manager, unsigned int winid);
     void Destroy();
     void UpdateImage();
+    enum ByteOrder {RGB_Order, BGR_Order};
+    void SetByteOrderRGB(ByteOrder &order);
 
 protected:
     void initializeGL();
@@ -59,7 +63,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event);
     void keyPressEvent(QKeyEvent* event);
 
-    void CheckGLError(const std::string & functionName);
+    void CheckGLError(const std::string & functionName); 
 
 private:
     svlWindowManagerQt4OpenGL* Manager;
@@ -70,13 +74,14 @@ private:
 
     int WindowWidth;
     int WindowHeight;
+    GLint ByteOrderVersion;
 
 signals:
     void QSignalUpdateGL();
 };
 
 
-class svlParentWidgetQt4 : public QWidget
+class CISST_EXPORT svlParentWidgetQt4 : public QWidget
 {
     Q_OBJECT
 
@@ -88,7 +93,7 @@ protected:
 };
 
 
-class svlWindowManagerQt4OpenGL : public QObject, public cmnGenericObject, public svlWindowManagerBase
+class CISST_EXPORT svlWindowManagerQt4OpenGL : public QObject, public cmnGenericObject, public svlWindowManagerBase
 {
     Q_OBJECT
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
@@ -106,6 +111,7 @@ public:
     void SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid);
     void DrawImages();
     void DestroyThreadSafe();
+
 
 protected slots:
     void QSlotCreateWindows();
@@ -128,9 +134,9 @@ private:
     vctDynamicVector<svlBufferImage*> ImageBuffers;
     bool LButtonDown;
     bool RButtonDown;
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlWindowManagerQt4OpenGL)
 
 #endif // _winQt4OpenGL_h
-

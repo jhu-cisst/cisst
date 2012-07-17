@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-11-09
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
 
-class displayQtWidget : public QWidget
+class displayQtWidget: public QWidget
 {
     Q_OBJECT;
 
@@ -39,7 +39,7 @@ class displayQtWidget : public QWidget
     QDial * DialAmplitude;
     QGridLayout * CentralLayout;
     vctPlot2DOpenGLQtWidget * Plot;
-    vctPlot2DBase::Trace * DataTrace;
+    vctPlot2DBase::Signal * DataSignal;
     QLabel * LabelAmplitude;
     QLabel * ValueAmplitude;
     QLabel * LabelData;

@@ -30,13 +30,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <QGLWidget>
 #include <QCloseEvent>
 
+// Always include last!
+#include <cisstStereoVision/svlExportQt.h>
+
 // Forward declarations
 class svlBufferSample;
 class osaThreadSignal;
 class svlWindowManagerQt4OpenGLStereo;
 
 
-class svlWidgetQt4OpenGLStereo : public QGLWidget
+class CISST_EXPORT svlWidgetQt4OpenGLStereo : public QGLWidget
 {
     Q_OBJECT
 
@@ -78,7 +81,7 @@ signals:
 };
 
 
-class svlParentWidgetQt4Stereo : public QWidget
+class CISST_EXPORT svlParentWidgetQt4Stereo : public QWidget
 {
     Q_OBJECT
 
@@ -90,7 +93,7 @@ protected:
 };
 
 
-class svlWindowManagerQt4OpenGLStereo : public QObject, public cmnGenericObject, public svlWindowManagerBase
+class CISST_EXPORT svlWindowManagerQt4OpenGLStereo : public QObject, public cmnGenericObject, public svlWindowManagerBase
 {
     Q_OBJECT
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)

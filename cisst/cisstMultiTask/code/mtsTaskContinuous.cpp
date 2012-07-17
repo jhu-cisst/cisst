@@ -110,6 +110,10 @@ void * mtsTaskContinuous::RunInternal(void *data)
     }
 
     CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: ending task " << this->GetName() << std::endl;
+    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+    if (this == LCM->GetCurrentMainTask())
+        LCM->PopCurrentMainTask();
+
     CleanupInternal();
     return this->ReturnValue;
 }
@@ -143,13 +147,15 @@ mtsTaskContinuous::~mtsTaskContinuous() {
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
 
-    Kill();
-    WaitToTerminate(1.0 * cmn_s);   // Wait 1 second for it to terminate
-    if (!IsTerminated()) {
-        // If thread not dead, delete it.
-        if (NewThread) {
-            Thread.Delete();
-            CMN_LOG_CLASS_INIT_VERBOSE << "mtsTaskContinuous destructor: Deleting thread for " << this->GetName() << std::endl;
+    if (!this->IsTerminated()) {
+        Kill();
+        WaitToTerminate(1.0 * cmn_s);   // Wait 1 second for it to terminate
+        if (!IsTerminated()) {
+            // If thread not dead, delete it.
+            if (NewThread) {
+                Thread.Delete();
+                CMN_LOG_CLASS_INIT_VERBOSE << "mtsTaskContinuous destructor: Deleting thread for " << this->GetName() << std::endl;
+            }
         }
     }
 }
@@ -192,6 +198,9 @@ void mtsTaskContinuous::Start(void)
                 CMN_LOG_CLASS_INIT_ERROR << "Start: cannot start task " << this->GetName() << " (wrong thread)" << std::endl;
                 return;
             }
+            mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+            if (Thread.GetId() == LCM->GetMainThreadId())
+                LCM->PushCurrentMainTask(this);
             CaptureThread = false;
             CMN_LOG_CLASS_INIT_VERBOSE << "Start: started task " << this->GetName() << " with current thread" << std::endl;
             RunInternal(ThreadStartData);

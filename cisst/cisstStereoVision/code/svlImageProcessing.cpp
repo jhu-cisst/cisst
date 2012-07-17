@@ -827,6 +827,68 @@ int svlImageProcessing::Erode(svlSampleImage* src_img, unsigned int src_videoch,
     return SVL_OK;
 }
 
+int svlImageProcessing::Blend(svlSampleImage* src1_img, unsigned int src1_videoch, svlSampleImage* src2_img, unsigned int src2_videoch,
+                              svlSampleImage* mask_img, unsigned int mask_videoch, svlSampleImage* dst_img,  unsigned int dst_videoch)
+{
+    if (!src1_img || src1_img->GetVideoChannels() <= src1_videoch ||
+        !src2_img || src2_img->GetVideoChannels() <= src2_videoch ||
+        !mask_img || mask_img->GetVideoChannels() <= mask_videoch ||
+        !dst_img  || dst_img->GetVideoChannels()  <= dst_videoch) return SVL_FAIL;
+    if (src1_img->GetPixelType() != svlPixelRGB   ||
+        src2_img->GetPixelType() != svlPixelRGB   ||
+        mask_img->GetPixelType() != svlPixelMono8 ||
+        dst_img->GetPixelType()  != svlPixelRGB) return SVL_FAIL;
+
+    const unsigned int width  = src1_img->GetWidth(src1_videoch);
+    const unsigned int height = src1_img->GetHeight(src1_videoch);
+
+    if (width < 1 || height < 1) return SVL_FAIL;
+    if (src2_img->GetWidth(src2_videoch) != width || src2_img->GetHeight(src2_videoch) != height ||
+        mask_img->GetWidth(mask_videoch) != width || mask_img->GetHeight(mask_videoch) != height ||
+        dst_img->GetWidth(dst_videoch)   != width || dst_img->GetHeight(dst_videoch)   != height) return SVL_FAIL;
+
+    unsigned char *src1_buf = src1_img->GetUCharPointer(src1_videoch);
+    unsigned char *src2_buf = src2_img->GetUCharPointer(src2_videoch);
+    unsigned char *mask_buf = mask_img->GetUCharPointer(mask_videoch);
+    unsigned char *dst_buf  = dst_img->GetUCharPointer(dst_videoch);
+    const unsigned int size = width * height;
+    unsigned int w0, w1;
+
+    for (unsigned int i = 0; i < size; i ++) {
+        // Compute blending weights and stretch range to 256 (from 255)
+        w1 = *mask_buf; mask_buf ++;
+        w0 = 256 - static_cast<unsigned int>(w1);
+        if (w0 < 128) w0 --;
+
+        if (w0 == 0) {
+            *dst_buf = *src2_buf;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+            *dst_buf = *src2_buf;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+            *dst_buf = *src2_buf;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+        }
+        else if (w1 == 0) {
+            *dst_buf = *src1_buf;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+            *dst_buf = *src1_buf;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+            *dst_buf = *src1_buf;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+        }
+        else {
+            *dst_buf = (w0 * (*src1_buf) + w1 * (*src2_buf)) >> 8;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+            *dst_buf = (w0 * (*src1_buf) + w1 * (*src2_buf)) >> 8;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+            *dst_buf = (w0 * (*src1_buf) + w1 * (*src2_buf)) >> 8;
+            src1_buf ++; src2_buf ++; dst_buf ++;
+        }
+    }
+
+    return SVL_OK;
+}
+
 int svlImageProcessing::SwapColorChannels(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch)
 {
     if (!src_img || src_img->GetVideoChannels() <= src_videoch ||
@@ -914,6 +976,58 @@ int svlImageProcessing::GetBlobsFromLabels(const svlSampleImageMono8Stereo* imag
     if (!detector || !detector->GetBlobs(image, labels, blobs, videoch, min_area, max_area, min_compactness, max_compactness)) return SVL_FAIL;
     return SVL_OK;
 }
+
+#if CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
+int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    svlImageProcessingHelper::EllipseFitterInternals* fitter = dynamic_cast<svlImageProcessingHelper::EllipseFitterInternals*>(internals.Get());
+    if (fitter == 0) {
+        fitter = new svlImageProcessingHelper::EllipseFitterInternals;
+        internals.Set(fitter);
+    }
+    vctDynamicVectorRef<int> xs(points.size(), &((points[0])[0]), points.stride());
+    vctDynamicVectorRef<int> ys(points.size(), &((points[0])[1]), points.stride());
+
+    if (fitter->FitEllipse(xs, ys, ellipse)) return SVL_OK;
+    return SVL_FAIL;
+}
+
+int svlImageProcessing::FitEllipse(vctDynamicVectorRef<int> & xs,
+                                   vctDynamicVectorRef<int> & ys,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    svlImageProcessingHelper::EllipseFitterInternals* fitter = dynamic_cast<svlImageProcessingHelper::EllipseFitterInternals*>(internals.Get());
+    if (fitter == 0) {
+        fitter = new svlImageProcessingHelper::EllipseFitterInternals;
+        internals.Set(fitter);
+    }
+
+    if (fitter->FitEllipse(xs, ys, ellipse)) return SVL_OK;
+    return SVL_FAIL;
+}
+
+#else // CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
+
+int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    return SVL_FAIL;
+}
+
+int svlImageProcessing::FitEllipse(vctDynamicVectorRef<int> & xs,
+                                   vctDynamicVectorRef<int> & ys,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    return SVL_FAIL;
+}
+
+#endif // CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
 
 
 /*******************************************/

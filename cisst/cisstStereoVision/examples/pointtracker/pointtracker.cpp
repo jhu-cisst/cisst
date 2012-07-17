@@ -119,6 +119,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 
     // release pipeline
     stream.Release();
+    stream.DisconnectAll();
 
     return 1;
 }

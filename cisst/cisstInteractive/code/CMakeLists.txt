@@ -26,15 +26,13 @@ if (CISST_cisstMultiTask)
   set (DEPENDENCIES ${DEPENDENCIES} cisstOSAbstraction cisstMultiTask)
 endif (CISST_cisstMultiTask)
 
-# cisstInteractive relies on cisstPython settings (for future use)
-cisst_library_use_settings (cisstInteractive cisstPython)
-
 # set directories for this project
 cisst_set_directories (cisstPython)
 
 cisst_add_library (LIBRARY cisstInteractive
                    FOLDER cisstInteractive
                    DEPENDENCIES ${DEPENDENCIES}
+                   SETTINGS     cisstPython
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    )

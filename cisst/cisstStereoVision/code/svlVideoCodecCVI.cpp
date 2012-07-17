@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "zlib.h"
 
-//#define READ_CORRUPT_V11_FILE
-
 
 /*************************************/
 /*** svlVideoCodecCVI class **********/
@@ -46,6 +44,7 @@ svlVideoCodecCVI::svlVideoCodecCVI() :
     FrameStartMarker("\r\nFrame\r\n"),
     Version(-1),
     FooterOffset(0),
+    DataOffset(0),
     PartCount(0),
     Width(0),
     Height(0),
@@ -145,61 +144,58 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
                 break;
             }
 
-#ifdef READ_CORRUPT_V11_FILE
-            Version = 0;
-#else
-            if (FooterOffset <= 0) {
-                CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `footer offset`" << std::endl;
-                break;
-            }
+            if (FooterOffset > 0) {
+                // Store file position
+                pos = File.GetPos();
 
-            // Store file position
-            pos = File.GetPos();
-
-            // Seek to footer offset
-            if (File.Seek(FooterOffset) != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to seek to file footer" << std::endl;
-                break;
-            }
-
-            // Read the frame ID of the last frame
-            len = sizeof(int);
-            if (File.Read(reinterpret_cast<char*>(&EndPos), len) != len) {
-                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `end position`" << std::endl;
-                break;
-            }
-            if (EndPos < 0) {
-                CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `end position`" << std::endl;
-                break;
-            }
-
-            // Create frame offsets
-            FrameOffsets.SetSize(EndPos + 1);
-            FrameOffsets.SetAll(0);
-
-            // Read frame offsets
-            len = FrameOffsets.size() * sizeof(long long int);
-            if (File.Read(reinterpret_cast<char*>(FrameOffsets.Pointer()), len) != len) {
-                CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `frame offsets`" << std::endl;
-                break;
-            }
-
-            if (Version > 1) {
-                // Create frame timestamps
-                FrameTimestamps.SetSize(EndPos + 1);
-                FrameTimestamps.SetAll(0.0);
-
-                // Read frame timestamps
-                len = FrameTimestamps.size() * sizeof(double);
-                if (File.Read(reinterpret_cast<char*>(FrameTimestamps.Pointer()), len) != len) {
-                    CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `frame timestamps`" << std::endl;
+                // Seek to footer offset
+                if (File.Seek(FooterOffset) != SVL_OK) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Open: failed to seek to file footer" << std::endl;
                     break;
                 }
-            }
 
-            // Restore file position
-            File.Seek(pos);
-#endif
+                // Read the frame ID of the last frame
+                len = sizeof(int);
+                if (File.Read(reinterpret_cast<char*>(&EndPos), len) != len) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `end position`" << std::endl;
+                    break;
+                }
+                if (EndPos < 0) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `end position`" << std::endl;
+                    break;
+                }
+
+                // Create frame offsets
+                FrameOffsets.SetSize(EndPos + 1);
+                FrameOffsets.SetAll(0);
+
+                // Read frame offsets
+                len = FrameOffsets.size() * sizeof(long long int);
+                if (File.Read(reinterpret_cast<char*>(FrameOffsets.Pointer()), len) != len) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `frame offsets`" << std::endl;
+                    break;
+                }
+
+                if (Version > 1) {
+                    // Create frame timestamps
+                    FrameTimestamps.SetSize(EndPos + 1);
+                    FrameTimestamps.SetAll(0.0);
+
+                    // Read frame timestamps
+                    len = FrameTimestamps.size() * sizeof(double);
+                    if (File.Read(reinterpret_cast<char*>(FrameTimestamps.Pointer()), len) != len) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Open: failed to read `frame timestamps`" << std::endl;
+                        break;
+                    }
+                }
+
+                // Restore file position
+                File.Seek(pos);
+            }
+            else {
+                CMN_LOG_CLASS_INIT_WARNING << "Open: invalid `footer offset`; opening in recovery mode; seeking not supported" << std::endl;
+                Version = 0;
+            }
         }
         else {
             EndPos = 0;
@@ -235,6 +231,8 @@ int svlVideoCodecCVI::Open(const std::string &filename, unsigned int &width, uns
             CMN_LOG_CLASS_INIT_ERROR << "Open: invalid `part count`" << std::endl;
             break;
         }
+
+        DataOffset = File.GetPos();
 
         if (Config.Differential) {
             // Allocate previous YUV buffer if not done yet
@@ -514,6 +512,7 @@ int svlVideoCodecCVI::Close()
 
     Version      = -1;
     FooterOffset = 0;
+    DataOffset   = 0;
     PartCount    = 0;
     Width        = 0;
     Height       = 0;
@@ -832,17 +831,10 @@ int svlVideoCodecCVI::Read(svlProcInfo* procInfo, svlSampleImage &image, const u
     else {
         if (Pos == 0) {
             // Go to the beginning of the data, just after the header
-#ifdef READ_CORRUPT_V11_FILE
-            if (File.Seek(35) != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to seek to position=35" << std::endl;
+            if (File.Seek(DataOffset) != SVL_OK) {
+                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to seek to position=" << DataOffset << std::endl;
                 return SVL_FAIL;
             }
-#else
-            if (File.Seek(27) != SVL_OK) {
-                CMN_LOG_CLASS_INIT_ERROR << "Read: (thread=" << procInfo->ID << ") failed to seek to position=27" << std::endl;
-                return SVL_FAIL;
-            }
-#endif
         }
     }
 
@@ -1079,80 +1071,133 @@ int svlVideoCodecCVI::Write(svlProcInfo* procInfo, const svlSampleImage &image, 
 	return SVL_OK;
 }
 
-void svlVideoCodecCVI::SetExtension(const std::string & extension)
+void svlVideoCodecCVI::SetExtension(const std::string & CMN_UNUSED(extension))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetExtension - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetEncoderID(const int & encoder_id)
+void svlVideoCodecCVI::SetEncoderID(const int & CMN_UNUSED(encoder_id))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetEncoderID - feature is not supported by the CVI codec" << std::endl;
 }
 
 void svlVideoCodecCVI::SetCompressionLevel(const int & compr_level)
 {
+    if (Opened) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - codec is already open" << std::endl;
+        return;
+    }
+    if (compr_level < 0 || compr_level > 9) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetCompressionLevel - argument out of range [0, 9]" << std::endl;
+    }
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "SetCompressionLevel - called (" << compr_level << ")" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    data->Level = compr_level;
+
+    SetCompression(compr);
+    svlVideoIO::ReleaseCompression(compr);
 }
 
-void svlVideoCodecCVI::SetQualityBased(const bool & enabled)
+void svlVideoCodecCVI::SetQualityBased(const bool & CMN_UNUSED(enabled))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetQualityBased - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetTargetQuantizer(const double & target_quant)
+void svlVideoCodecCVI::SetTargetQuantizer(const double & CMN_UNUSED(target_quant))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetTargetQuantizer - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetDatarate(const int & datarate)
+void svlVideoCodecCVI::SetDatarate(const int & CMN_UNUSED(datarate))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetDatarate - feature is not supported by the CVI codec" << std::endl;
 }
 
-void svlVideoCodecCVI::SetKeyFrameEvery(const int & key_every)
+void svlVideoCodecCVI::SetKeyFrameEvery(const int & CMN_UNUSED(key_every))
 {
+    CMN_LOG_CLASS_INIT_ERROR << "SetKeyFrameEvery - feature is not supported by the CVI codec" << std::endl;
 }
 
 void svlVideoCodecCVI::IsCompressionLevelEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsCompressionLevelEnabled - called" << std::endl;
+    enabled = true;
 }
 
 void svlVideoCodecCVI::IsEncoderListEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsEncoderListEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::IsTargetQuantizerEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsTargetQuantizerEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::IsDatarateEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsDatarateEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::IsKeyFrameEveryEnabled(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "IsFramesEveryEnabled - called" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::GetCompressionLevel(int & compr_level) const
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetCompressionLevel - called" << std::endl;
+
+    svlVideoIO::Compression* compr = GetCompression();
+    CompressionData* data = reinterpret_cast<CompressionData*>(&(compr->data[0]));
+
+    compr_level = data->Level;
+
+    svlVideoIO::ReleaseCompression(compr);
 }
 
 void svlVideoCodecCVI::GetEncoderList(std::string & encoder_list) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetEncoderList - feature is not supported by the CVI codec" << std::endl;
+    encoder_list = "";
 }
 
 void svlVideoCodecCVI::GetEncoderID(int & encoder_id) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetEncoderID - feature is not supported by the CVI codec" << std::endl;
+    encoder_id = -1;
 }
 
 void svlVideoCodecCVI::GetQualityBased(bool & enabled) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetQualityBased - feature is not supported by the CVI codec" << std::endl;
+    enabled = false;
 }
 
 void svlVideoCodecCVI::GetTargetQuantizer(double & target_quant) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetTargetQuantizer - feature is not supported by the CVI codec" << std::endl;
+    target_quant = -1.0;
 }
 
 void svlVideoCodecCVI::GetDatarate(int & datarate) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetDatarate - feature is not supported by the CVI codec" << std::endl;
+    datarate = -1;
 }
 
 void svlVideoCodecCVI::GetKeyFrameEvery(int & key_every) const
 {
+    CMN_LOG_CLASS_INIT_ERROR << "GetKeyFrameEvery - feature is not supported by the CVI codec" << std::endl;
+    key_every = -1;
 }
 
 void svlVideoCodecCVI::DiffEncode(unsigned char* input, unsigned char* previous, unsigned char* output, const unsigned int size)

@@ -62,7 +62,7 @@ void svlCCCalibrationGrid::create2DChessboardCorners(bool visible)
     imagePoints = new cv::Point2f*[width];
     visibility = new bool*[width];
 
-    for(int i=0;i<width;i++)
+    for(int i=0;i<(int)width;i++)
     {
         *(calibrationGridPoints+i)=new cv::Point2f[height];
         *(imagePoints+i)=new cv::Point2f[height];
@@ -138,7 +138,7 @@ float svlCCCalibrationGrid::nearestCorner(cv::Point2f targetPoint, cv::Point2f* 
 int svlCCCalibrationGrid::findGridPointIndex(cv::Point3f point)
 {
     int val = -1;
-    for(unsigned int i=0;i<groundTruthCalibrationGridPoints.size();i++)
+    for(int i=0;i<(int)groundTruthCalibrationGridPoints.size();i++)
     {
         if(groundTruthCalibrationGridPoints.at(i).x == point.x && groundTruthCalibrationGridPoints.at(i).y == point.y)
         {
@@ -166,7 +166,7 @@ void svlCCCalibrationGrid::compareGroundTruth()
     std::vector<cv::Point3f> grid = getGoodCalibrationGridPoints3D();
     std::vector<cv::Point2f> image = getGoodImagePoints();
 
-    for(unsigned int i=0;i<grid.size();i++)
+    for(int i=0;i<(int)grid.size();i++)
     {
         index = findGridPointIndex(grid.at(i));
         if(index != -1)
@@ -249,7 +249,7 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
     int numDetectorColorBlobs = 3;
     int index;
 
-    for(unsigned int i=0;i<colorBlobsFromDetector.size();i++)
+    for(int i=0;i<(int)colorBlobsFromDetector.size();i++)
     {
         if(((originColorModeFlag == svlCCOriginDetector::RGB) && (i== svlCCOriginDetector::YELLOW_INDEX))||
            ((originColorModeFlag == svlCCOriginDetector::RGY) && (i== svlCCOriginDetector::BLUE_INDEX)))
@@ -348,7 +348,7 @@ void svlCCCalibrationGrid::findInitialCornerHelper(CvMat* coordsSrc, CvMat* coor
     }
 
     //midpoint corners
-    for(unsigned int i=0;i<colorBlobsFromDetector.size();i++)
+    for(int i=0;i<(int)colorBlobsFromDetector.size();i++)
     {
         if(((originColorModeFlag == svlCCOriginDetector::RGB) && (i== svlCCOriginDetector::YELLOW_INDEX))||
            ((originColorModeFlag == svlCCOriginDetector::RGY) && (i== svlCCOriginDetector::BLUE_INDEX)))
@@ -478,7 +478,7 @@ void svlCCCalibrationGrid::findInitialCorners(CvMat* coordsSrc, CvMat* coordsDst
         corner->y = originFromDetector.y;
     }
     imageOrigin = cv::Point2f(corner->x,corner->y);
-    calibrationGridOrigin = cv::Point2f(iplImage->width/2,iplImage->height/2);
+    calibrationGridOrigin = cv::Point2f((float)iplImage->width/2,(float)iplImage->height/2);
 
     //initial scale
     findInitialCornerHelper(coordsSrc, coordsDst, true);
@@ -490,7 +490,7 @@ void svlCCCalibrationGrid::findInitialCorners(CvMat* coordsSrc, CvMat* coordsDst
     std::cout << "size of grid in pixels: " << gridSizePixel << std::endl;
 }
 
-void svlCCCalibrationGrid::homographyCorrelation(double threshold)
+void svlCCCalibrationGrid::homographyCorrelation(float threshold)
 {
     // we call create2DChessboardCorners at homographyInlierLevel=1 after finding initial corners
     for(homographyInlierLevel = 1; homographyInlierLevel < std::max(boardSize.width/2,boardSize.height/2); homographyInlierLevel++)
@@ -519,7 +519,7 @@ void svlCCCalibrationGrid::correlate(svlCCOriginDetector* originDetector, svlCCC
     originColorModeFlag = originDetector->getOriginColorModeFlag();
     colorBlobsFromDetector = originDetector->getColorBlobs();
     originFromDetector = originDetector->getOrigin();
-    double threshold = 15;
+    float threshold = 15.0;
 
     valid = false;
 
@@ -584,7 +584,7 @@ void svlCCCalibrationGrid::optimizeCalibration()
     cv::Mat prevDistCoeffs;
     cv::Mat prevRvec;
     cv::Mat prevTvec;
-    int prevThreshold, pPrevThreshold;
+    float prevThreshold, pPrevThreshold;
     int numberGoodPointsBeforeOpt, numberGoodPointsAfterOpt;
     numberGoodPointsBeforeOpt = getGoodImagePoints().size();
 
@@ -732,7 +732,8 @@ int svlCCCalibrationGrid::applyHomography(double homography[], float threshold)
 
     int indexX, indexY;
 
-    int countWithinThreshold, adjustment, cornerDistance, pointsCount;
+    int countWithinThreshold, cornerDistance, pointsCount;
+    float adjustment;
     countWithinThreshold = adjustment = cornerDistance = pointsCount = 0;
 
     for(int i=iStart;i<iEnd+1;i++)
@@ -748,7 +749,7 @@ int svlCCCalibrationGrid::applyHomography(double homography[], float threshold)
         Y = (homography[3]*x + homography[4]*y + homography[5])*Z;
         imagePoints[indexX][indexY] = cv::Point2f(X,Y);
 
-        cornerDistance = nearestCorner(cv::Point2f(X,Y), corner,threshold+adjustment);
+        cornerDistance = nearestCorner(cv::Point2f(X,Y), corner,(float)(threshold+adjustment));
         if(cornerDistance < threshold + adjustment || (isHighDefinition() && homographyInlierLevel > 1 && adjustment == 0 && cornerDistance < gridSizePixel/2))
         {
             imagePoints[indexX][indexY] = cv::Point2f(corner->x,corner->y);
@@ -842,7 +843,7 @@ bool svlCCCalibrationGrid::updateHomography(float threshold)
             }
         }
 
-        for(int i=0;i<imageColorBlobs->rows;i++)
+        for(int i=0;i<(int)imageColorBlobs->rows;i++)
         {
             coordsSrc->data.fl[scale*count] = calibrationGridColorBlobs->data.fl[scale*i];
             coordsSrc->data.fl[scale*count+1] = calibrationGridColorBlobs->data.fl[scale*i+1];
@@ -1030,17 +1031,17 @@ double svlCCCalibrationGrid::runCalibration()
 
 void svlCCCalibrationGrid::printCalibrationParameters()
 {
-    for(int i=0;i<cameraMatrix.rows;i++)
+    for(int i=0;i<(int)cameraMatrix.rows;i++)
     {
-        for(int j=0;j<cameraMatrix.cols;j++)
+        for(int j=0;j<(int)cameraMatrix.cols;j++)
         {
             std::cout << "Camera matrix: " << cameraMatrix.at<double>(i,j) << std::endl;
         }
     }
 
-    for(int i=0;i<distCoeffs.rows;i++)
+    for(int i=0;i<(int)distCoeffs.rows;i++)
     {
-        for(int j=0;j<distCoeffs.cols;j++)
+        for(int j=0;j<(int)distCoeffs.cols;j++)
         {
             std::cout << "Distortion _coefficients: " << distCoeffs.at<double>(i,j) << std::endl;
         }
@@ -1049,6 +1050,19 @@ void svlCCCalibrationGrid::printCalibrationParameters()
 
     std::cout << "rvect: " << rvec.at<double>(0,0) <<","<< rvec.at<double>(0,1) <<","<< rvec.at<double>(0,2) <<","<< std::endl;
     std::cout << "tvect: " << tvec.at<double>(0,0) <<","<< tvec.at<double>(0,1) <<","<< tvec.at<double>(0,2) <<","<< std::endl;
+}
+
+svlSampleCameraGeometry* svlCCCalibrationGrid::GetCameraGeometry()
+{
+    svlSampleCameraGeometry* cameraGeometry;
+    double alpha = 0.0;//assumed to be square pixels
+    vct2 f = vct2(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
+    vct2 c = vct2(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));
+    //reduced camera model set kc(5)=0; Zhang sets last 3 to zero
+    vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(distCoeffs.at<double>(0,0),distCoeffs.at<double>(1,0),distCoeffs.at<double>(2,0),distCoeffs.at<double>(3,0),0.0,0.0,0.0);
+    //vctFixedSizeVector<double,7> k = vctFixedSizeVector<double,7>(DistCoeffs.at<double>(0,0),DistCoeffs.at<double>(1,0),DistCoeffs.at<double>(2,0),DistCoeffs.at<double>(3,0),DistCoeffs.at<double>(4,0),0.0,0.0);
+    cameraGeometry->SetIntrinsics(f,c,alpha,k);
+    return cameraGeometry;
 }
 
 

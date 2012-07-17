@@ -77,12 +77,12 @@ public:
 
     inline static cmnGenericObject * CreateArray(size_t size, const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
-        pointer data, dummy;
+        pointer data;
         size_t index;
         if (otherPointer) {
             data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
             for (index = 0; index < size; index++) {
-                dummy = new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
+                new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
             }
             return data;
         }
@@ -90,7 +90,7 @@ public:
         if (otherRefPointer) {
             data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
             for (index = 0; index < size; index++) {
-                dummy = new(&(data[index])) value_type(otherRefPointer->GetData()); // placement new with copy constructor
+                new(&(data[index])) value_type(otherRefPointer->GetData()); // placement new with copy constructor
             }
             return data;
         }

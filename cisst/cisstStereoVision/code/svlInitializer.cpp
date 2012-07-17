@@ -30,6 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 // COM is used by video capture devices
 // and AVI file handlers.
 #if (CISST_OS == CISST_WINDOWS)
+  #if (_MSC_VER >= 1600)
+  // MSVC 2010 or later
+    #include <Objbase.h>
+  #endif
+
   #if (_MSC_VER > 1400)
   // MSVC 2008 or later
     #define _WIN32_DCOM

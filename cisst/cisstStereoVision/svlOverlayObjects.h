@@ -41,6 +41,8 @@ class CISST_EXPORT svlOverlay
 {
 friend class svlFilterImageOverlay;
 
+typedef enum { _DoNotRemove, _Remove, _RemoveAndDelete } RemoveState;
+
 public:
     svlOverlay();
     svlOverlay(unsigned int videoch,
@@ -53,10 +55,13 @@ public:
     bool GetVisible() const;
     bool IsUsed() const;
 
-    void SetTransform(const vct3x3 & transform);
+    void SetTransform(const vct3x3 & transform, const double timestamp = -1.0);
+    double GetTransformTimestamp() const;
     void SetTransformID(int ID);
     int GetTransformID() const;
     bool IsTransformed() const;
+    void SetTransformSynchronized(bool transform_synchronized);
+    bool GetTransformSynchronized() const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input) = 0;
@@ -66,15 +71,18 @@ private:
 
 protected:
     unsigned int VideoCh;
-    bool Visible;
-    vct3x3 Transform;
-    int TransformID;
-    bool Transformed;
+    bool         Visible;
+    vct3x3       Transform;
+    double       TransformTimestamp;
+    int          TransformID;
+    bool         Transformed;
+    bool         TransformSynchronized;
 
 private:
-    svlOverlay* Next;
-    svlOverlay* Prev;
-    bool Used;
+    svlOverlay*  Next;
+    svlOverlay*  Prev;
+    bool         Used;
+    RemoveState  MarkedForRemoval;
 };
 
 
@@ -89,7 +97,7 @@ public:
 
     void SetInputName(const std::string & inputname);
     const std::string& GetInputName() const;
-    void SetInputSynchronized(bool inputsynchronized);
+    void SetInputSynchronized(bool input_synchronized);
     bool GetInputSynchronized() const;
 
 protected:
@@ -452,6 +460,8 @@ public:
     void SetAngle(const double angle);
     void SetColor(svlRGB color);
     void SetFill(bool fill);
+    void SetThickness(unsigned int thickness);
+    unsigned int GetThickness();
 
     svlPoint2D GetCenter() const;
     void GetRadius(int & radius_horiz, int & radius_vert) const;
@@ -469,6 +479,7 @@ private:
     double Angle;
     svlRGB Color;
     bool Fill;
+    unsigned int Thickness;
 };
 
 

@@ -44,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
-////////////////////////////////////////
+/////////////////////////////#///////////
 //     Window event handler class     //
 ////////////////////////////////////////
 
@@ -120,7 +120,7 @@ public:
     svlFilterOutput* SplitterOutput;
     bool Recording;
 };
-
+#
 
 ////////////////////
 //  CameraViewer  //
@@ -139,6 +139,8 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     svlFilterImageExposureCorrection gamma;
     svlFilterSplitter splitter;
     svlFilterImageResizer resizer;
+
+
 #if _USE_QT_ && CISST_HAS_OPENGL
     svlFilterImageWindowQt window;
 #else // _USE_QT_ && CISST_HAS_OPENGL
@@ -260,14 +262,17 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         output = source.GetOutput();
 
 #if 0
+
     svlFilterImageChannelSwapper rgb_swapper;
     output->Connect(rgb_swapper.GetInput());
         output = rgb_swapper.GetOutput();
 #endif
 
+#if 0
     // Add exposure correction
     output->Connect(exposure.GetInput());
         output = exposure.GetOutput();
+#endif
 
     // Add gamma correction
     output->Connect(gamma.GetInput());
@@ -383,10 +388,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // release stream
     stream.Release();
-
-    if (save == true) {
-        splitter.GetOutput("output2")->Disconnect(); // Workaround: to avoid crash
-    }
+    stream.DisconnectAll();
 
     cerr << "Stream released" << endl;
 

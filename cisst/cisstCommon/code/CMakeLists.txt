@@ -84,4 +84,4 @@ cisst_add_library (
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})
 
-add_dependencies (cisstCommon cisstRevision)
+add_dependencies (cisstCommon cisstRevision cisstBuildType)

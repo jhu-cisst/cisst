@@ -34,11 +34,14 @@ svlOverlay::svlOverlay() :
     VideoCh(0),
     Visible(true),
     Transform(vct3x3::Eye()),
+    TransformTimestamp(-1.0),
     TransformID(-1),
     Transformed(false),
+    TransformSynchronized(false),
     Next(0),
     Prev(0),
-    Used(false)
+    Used(false),
+    MarkedForRemoval(_DoNotRemove)
 {
 }
 
@@ -47,11 +50,14 @@ svlOverlay::svlOverlay(unsigned int videoch,
     VideoCh(videoch),
     Visible(visible),
     Transform(vct3x3::Eye()),
+    TransformTimestamp(-1.0),
     TransformID(-1),
     Transformed(false),
+    TransformSynchronized(false),
     Next(0),
     Prev(0),
-    Used(false)
+    Used(false),
+    MarkedForRemoval(_DoNotRemove)
 {
 }
 
@@ -84,11 +90,17 @@ bool svlOverlay::IsUsed() const
     return Used;
 }
 
-void svlOverlay::SetTransform(const vct3x3 & transform)
+void svlOverlay::SetTransform(const vct3x3 & transform, const double timestamp)
 {
     Transform.Assign(transform);
+    TransformTimestamp = timestamp;
     if (Transform != vct3x3::Eye()) Transformed = true;
     else Transformed = false;
+}
+
+double svlOverlay::GetTransformTimestamp() const
+{
+    return TransformTimestamp;
 }
 
 void svlOverlay::SetTransformID(int ID)
@@ -104,6 +116,16 @@ int svlOverlay::GetTransformID() const
 bool svlOverlay::IsTransformed() const
 {
     return Transformed;
+}
+
+void svlOverlay::SetTransformSynchronized(bool transform_synchronized)
+{
+    TransformSynchronized = transform_synchronized;
+}
+
+bool svlOverlay::GetTransformSynchronized() const
+{
+    return TransformSynchronized;
 }
 
 void svlOverlay::Draw(svlSampleImage* bgimage, svlSample* input)
@@ -158,9 +180,9 @@ const std::string& svlOverlayInput::GetInputName() const
     return InputName;
 }
 
-void svlOverlayInput::SetInputSynchronized(bool inputsynchronized)
+void svlOverlayInput::SetInputSynchronized(bool input_synchronized)
 {
-    InputSynchronized = inputsynchronized;
+    InputSynchronized = input_synchronized;
 }
 
 bool svlOverlayInput::GetInputSynchronized() const
@@ -276,6 +298,9 @@ bool svlOverlayImage::IsInputTypeValid(svlStreamType inputtype)
 
 void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
 {
+    // Skip drawing if fully transparent
+    if (Alpha == 0) return;
+
     // Get sample from input
     svlSampleImage* ovrlimage = dynamic_cast<svlSampleImage*>(input);
 
@@ -387,7 +412,19 @@ void svlOverlayImage::DrawInternal(svlSampleImage* bgimage, svlSample* input)
         }
     }
     else {
-        // TO DO
+        const unsigned int w1 = Alpha + 1;
+        const unsigned int w0 = 256 - w1;
+        unsigned char *pbg, *pov;
+
+        for (int j = 0; j < linecount; j ++) {
+            pbg = bgdata;   bgdata   += ws;
+            pov = ovrldata; ovrldata += wo;
+
+            for (i = 0; i < copylen; i ++) {
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+            }
+        }
     }
 }
 
@@ -930,6 +967,9 @@ void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN
 {
     if (!Buffer) return;
 
+    // Skip drawing if fully transparent
+    if (Alpha == 0) return;
+
     svlImageRGB* ovrlimage = Buffer->Pull(false);
     if (!ovrlimage) return;
 
@@ -1042,7 +1082,19 @@ void svlOverlayStaticImage::DrawInternal(svlSampleImage* bgimage, svlSample* CMN
         }
     }
     else {
-        // TO DO
+        const unsigned int w1 = Alpha + 1;
+        const unsigned int w0 = 256 - w1;
+        unsigned char *pbg, *pov;
+
+        for (int j = 0; j < linecount; j ++) {
+            pbg = bgdata;   bgdata   += ws;
+            pov = ovrldata; ovrldata += wo;
+
+            for (i = 0; i < copylen; i ++) {
+                *pbg = (w0 * (*pbg) + w1 * (*pov)) >> 8;
+                pov ++; pbg ++;
+            }
+        }
     }
 }
 
@@ -1244,6 +1296,13 @@ void svlOverlayStaticText::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
     cvrect.width  = _rect.right - _rect.left;
     cvrect.y      = _rect.top + 1;
     cvrect.height = _rect.bottom - _rect.top + 1;
+
+    const int w = static_cast<int>(bgimage->GetWidth(VideoCh));
+    const int h = static_cast<int>(bgimage->GetHeight(VideoCh));
+    if (cvrect.x     <  0 || cvrect.y      < 0  ||
+        cvrect.width <  0 || cvrect.height < 0  ||
+        (cvrect.x + cvrect.width)  >= w ||
+        (cvrect.y + cvrect.height) >= h) return;
 
     IplImage* cvimg = bgimage->IplImageRef(VideoCh);
     cvSetImageROI(cvimg, cvrect);
@@ -1447,7 +1506,8 @@ svlOverlayStaticEllipse::svlOverlayStaticEllipse() :
     RadiusVert(0),
     Angle(0.0),
     Color(255, 255, 255),
-    Fill(true)
+    Fill(true),
+    Thickness(1)
 {
 }
 
@@ -1465,7 +1525,8 @@ svlOverlayStaticEllipse::svlOverlayStaticEllipse(unsigned int videoch,
     RadiusVert(radius_vert),
     Angle(angle),
     Color(color),
-    Fill(fill)
+    Fill(fill),
+    Thickness(1)
 {
 }
 
@@ -1481,7 +1542,8 @@ svlOverlayStaticEllipse::svlOverlayStaticEllipse(unsigned int videoch,
     RadiusVert(radius),
     Angle(0.0),
     Color(color),
-    Fill(fill)
+    Fill(fill),
+    Thickness(1)
 {
 }
 
@@ -1519,6 +1581,14 @@ void svlOverlayStaticEllipse::SetFill(bool fill)
 {
     Fill = fill;
 }
+void svlOverlayStaticEllipse::SetThickness(unsigned int thickness) 
+{
+    Thickness = thickness;
+}
+unsigned int svlOverlayStaticEllipse::GetThickness()
+{
+    return Thickness;
+}
 
 svlPoint2D svlOverlayStaticEllipse::GetCenter() const
 {
@@ -1548,8 +1618,6 @@ bool svlOverlayStaticEllipse::GetFill() const
 
 void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
-#if CISST_SVL_HAS_OPENCV
-
     int cx, cy, rx, ry;
 
     if (Transformed) {
@@ -1573,18 +1641,13 @@ void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* C
         rx = RadiusHoriz; ry = RadiusVert;
     }
 
-    cvEllipse(bgimage->IplImageRef(VideoCh),
-              cvPoint(cx, cy),
-              cvSize(rx, ry),
-              Angle, 0.0, 360.0,
-              cvScalar(Color.r, Color.g, Color.b),
-              (Fill ? -1 : 1));
+    svlDraw::Ellipse(bgimage, VideoCh,
+                     cx, cy, rx, ry,
+                     Color,
+                     0.0, 360.0,
+                     Angle * 57.295779513, // Convert from radians to angle
+                     (Fill ? -1 : Thickness));
 
-#else // CISST_SVL_HAS_OPENCV
-
-    // TO DO: to be implemented
-
-#endif // CISST_SVL_HAS_OPENCV
 }
 
 

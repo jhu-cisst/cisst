@@ -141,6 +141,7 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
 
     // release stream
     stream.Release();
+    stream.DisconnectAll();
 
 labError:
     return 0;

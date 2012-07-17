@@ -87,12 +87,13 @@ private:
     enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
     char Internals[INTERNALS_SIZE];
 
+    /*! Return the size of the actual object used by the OS.  This is
+      used for testing only. */ 
+    static unsigned int SizeOfInternals(void);
+    friend class osaThreadSignalTest;
+
     static void (*PreCallback)(void);
     static void (*PostCallback)(void);
-
-    /*! Return the size of the actual object used by the OS.  This is
-        used for testing only. */
-    static unsigned int SizeOfInternals(void);
 };
 
 /*! Stream operator for a thread Id, see osaThreadId. */

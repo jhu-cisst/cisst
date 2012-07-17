@@ -69,9 +69,6 @@ class cdgClass: public cdgScope
     typedef std::vector<cdgBaseClass *> BaseClassesType;
     BaseClassesType BaseClasses;
 
-    typedef std::vector<cdgScope *> ScopesType;
-    ScopesType Scopes;
-
 public:
 
     cdgClass(unsigned int lineNumber);
@@ -84,8 +81,6 @@ public:
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
-
-    void FillInDefaults(void) {};
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 
@@ -93,10 +88,12 @@ protected:
 
     void GenerateStandardMethodsHeader(std::ostream & outputStream) const;
     void GenerateConstructorsCode(std::ostream & outputStream) const;
-    void GenerateSerializeRawCode(std::ostream & outputStream) const;
-    void GenerateDeSerializeRawCode(std::ostream & outputStream) const;
-    void GenerateToStreamCode(std::ostream & outputStream) const;
-    void GenerateToStreamRawCode(std::ostream & outputStream) const;
+    void GenerateMethodSerializeRawCode(std::ostream & outputStream) const;
+    void GenerateMethodDeSerializeRawCode(std::ostream & outputStream) const;
+    void GenerateMethodToStreamCode(std::ostream & outputStream) const;
+    void GenerateMethodToStreamRawCode(std::ostream & outputStream) const;
+    void GenerateStandardFunctionsHeader(std::ostream & outputStream) const;
+    void GenerateStandardFunctionsCode(std::ostream & outputStream) const;
 
 private:
     cdgClass(void); // make sure constructor with line number is always used.

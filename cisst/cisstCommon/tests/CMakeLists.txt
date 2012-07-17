@@ -17,6 +17,11 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon)
 
+# set path for XML if needed
+if (CISST_HAS_XML)
+  cisst_set_directories (cisstCommonXML)
+endif (CISST_HAS_XML)
+
 # Configure the OS test program
 get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
 get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
@@ -97,3 +102,5 @@ if (CISST_HAS_XML)
   cisst_target_link_libraries (cisstCommonTests cisstCommonXML)
 endif (CISST_HAS_XML)
 
+set_target_properties (cisstCommonTests
+                       PROPERTIES COMPILE_DEFINITIONS "CISST_SOURCE_DIR=\"${cisst_SOURCE_DIR}/\"")

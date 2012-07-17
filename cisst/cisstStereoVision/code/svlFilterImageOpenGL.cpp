@@ -27,18 +27,27 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 #if (CISST_OS == CISST_DARWIN)
-  #include <OpenGL/gl.h>
+   #include <OpenGL/gl.h>
+   #define _RGB_VERSION_   GL_BGR
+
+#elif (CISST_OS == CISST_LINUX)
+    #include <GL/gl.h>
+    #define _RGB_VERSION_   GL_BGR
 #else
-  #include <GL/gl.h>
+    #include <GL/gl.h>
+    #define _RGB_VERSION_   GL_RGB
+
 #endif
+
 
 
 CMN_IMPLEMENT_SERVICES(svlFilterImageOpenGL);
 
 
-svlFilterImageOpenGL::svlFilterImageOpenGL(void):
+svlFilterImageOpenGL::svlFilterImageOpenGL():
     svlFilterBase(),
-    Image(0)
+    Image(0),
+    ByteOrderVersion(_RGB_VERSION_)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -93,7 +102,7 @@ void svlFilterImageOpenGL::Render(void)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 8);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, iw, ih, 0, GL_RGB, GL_UNSIGNED_BYTE, Image->GetUCharPointer());
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, iw, ih, 0, ByteOrderVersion, GL_UNSIGNED_BYTE, Image->GetUCharPointer());
 
     glPushMatrix();
     glRotatef(-90.0, 0.0, 0.0, 1.0);
@@ -210,3 +219,34 @@ int svlFilterImageOpenGL::GetImageWidth() {
     }
     else return 0;
 }
+
+// for older GL
+#ifndef GL_BGR
+#define GL_BGR GL_BGR_EXT
+#endif
+
+void svlFilterImageOpenGL::SetByteOrderRGB(ByteOrder order){
+
+    if (order == RGB_Order) {
+        ByteOrderVersion = GL_RGB;
+    }
+    else if (order == BGR_Order){
+        ByteOrderVersion = GL_BGR;
+    }
+    else
+        CMN_LOG_CLASS_RUN_ERROR<<"Incorrect RGB Order detected"<<std::endl;
+
+}
+
+svlFilterImageOpenGL::ByteOrder svlFilterImageOpenGL::GetByteOrderRGB(){
+
+    if (ByteOrderVersion == GL_RGB) {
+        return RGB_Order;
+    }
+    else if (ByteOrderVersion == GL_BGR){
+        return BGR_Order;
+    }
+    CMN_LOG_CLASS_RUN_ERROR<<"Incorrect RGB Order detected"<<std::endl;
+    return  RGB_Order;
+}
+

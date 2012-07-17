@@ -36,9 +36,9 @@ CMN_IMPLEMENT_SERVICES(svlFilterVideoFileWriter)
 svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     svlFilterBase(),
     Action(false),
-    IsRecording(false),
     ActionTime(0.0),
     TargetActionTime(0.0),
+    IsRecording(false),
     TargetCaptureLength(-1), // Continuous saving by default?
     CaptureLength(-1),
     CodecsMultithreaded(false)
@@ -84,7 +84,8 @@ int svlFilterVideoFileWriter::Initialize(svlSample* syncInput, svlSample* &syncO
 
         // Open file if needed
         if (!Codec[i] && !FilePath[i].empty()) {
-            OpenFile(FilePath[i], i);
+            SetFilePath(FilePath[i], i);
+            OpenFile(i);
         }
         else {
             CMN_LOG_CLASS_INIT_WARNING << "Initialize: missing file information on channel: " << i << std::endl;

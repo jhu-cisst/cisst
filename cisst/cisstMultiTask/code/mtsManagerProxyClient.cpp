@@ -175,7 +175,7 @@ void mtsManagerProxyClient::StopProxy()
     }
 
     IceGUID = "";
-#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "Stopped manager proxy client");
 #endif
 }
@@ -1003,7 +1003,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
     }
 #endif
 
-#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsManagerProxyClient, "mtsManagerProxyClient::ManagerClientI - terminated");
 #endif
 }
@@ -1027,7 +1027,7 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
         SenderThreadPtr = 0;
     }
     callbackSenderThread->getThreadControl().join();
-#if ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ManagerClientI, "Stopped and destroyed callback thread to communicate with server");
 #endif
 }

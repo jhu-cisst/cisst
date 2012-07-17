@@ -128,7 +128,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     for (index = 0; index < Includes.size(); index++) {
         outputStream << "#include " << Includes[index] << std::endl;
     }
-    outputStream << "class " << Attribute << " " << Name;
+    outputStream << "class " << this->Attribute << " " << this->Name;
 
     if (BaseClasses.size() != 0) {
         outputStream << ": ";
@@ -145,9 +145,9 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     // constructors and destructor
     outputStream << " /* default constructors and destructors. */" << std::endl
                  << " public:" << std::endl
-                 << "    " << Name << "(void);" << std::endl
-                 << "    " << Name << "(const " << Name << " & other);" << std::endl
-                 << "    ~" << Name << "();" << std::endl << std::endl;
+                 << "    " << this->Name << "(void);" << std::endl
+                 << "    " << this->Name << "(const " << this->Name << " & other);" << std::endl
+                 << "    ~" << this->Name << "();" << std::endl << std::endl;
 
     for (index = 0; index < Scopes.size(); index++) {
         Scopes[index]->GenerateHeader(outputStream);
@@ -156,12 +156,15 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     GenerateStandardMethodsHeader(outputStream);
 
     outputStream << "};" << std::endl;
+
+    GenerateStandardFunctionsHeader(outputStream);
 }
 
 
 void cdgClass::GenerateStandardMethodsHeader(std::ostream & outputStream) const
 {
     outputStream << "    /* default methods */" << std::endl
+                 << " public:" << std::endl
                  << "    void SerializeRaw(std::ostream & outputStream) const;" << std::endl
                  << "    void DeSerializeRaw(std::istream & inputStream);" << std::endl
                  << "    void ToStream(std::ostream & outputStream) const;" << std::endl
@@ -176,93 +179,105 @@ void cdgClass::GenerateCode(std::ostream & outputStream) const
 
     size_t index;
     GenerateConstructorsCode(outputStream);
-    GenerateSerializeRawCode(outputStream);
-    GenerateDeSerializeRawCode(outputStream);
-    GenerateToStreamCode(outputStream);
-    GenerateToStreamRawCode(outputStream);
+    GenerateMethodSerializeRawCode(outputStream);
+    GenerateMethodDeSerializeRawCode(outputStream);
+    GenerateMethodToStreamCode(outputStream);
+    GenerateMethodToStreamRawCode(outputStream);
 
     for (index = 0; index < Members.size(); index++) {
-        Members[index]->ClassName = Name;
+        Members[index]->ClassName = this->Name;
         Members[index]->GenerateCode(outputStream);
     }
+
+    GenerateStandardFunctionsCode(outputStream);
 }
 
 
 void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 {
     unsigned int index;
-    // default constructor
-    outputStream << Name << "::" << Name << "(void)";
-    if (BaseClasses.size() != 0) {
-        outputStream << ":";
-    }
-    outputStream << std::endl;
-    for (index = 0; index < BaseClasses.size(); index++) {
-        outputStream << "    " << BaseClasses[index]->Type << "()";
-        if (index != (BaseClasses.size() - 1)) {
-            outputStream << ",";
-        }
-        outputStream << std::endl;
-    }
-    outputStream << "{}" << std::endl << std::endl;
 
-    // copy constructor
-    outputStream << Name << "::" << Name << "(const " << Name << " & other)";
-    if (BaseClasses.size() != 0) {
-        outputStream << ":";
+    std::stringstream defaultConstructor;
+    std::stringstream copyConstructor;
+
+    // default constructor
+    defaultConstructor << this->Name << "::" << this->Name << "(void)";
+    copyConstructor    << this->Name << "::" << this->Name << "(const " << this->Name << " & other)";
+    if ((BaseClasses.size() + Members.size())!= 0) {
+        defaultConstructor << ":";
+        copyConstructor    << ":";
     }
-    outputStream << std::endl;
+    defaultConstructor << std::endl;
+    copyConstructor    << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
-        outputStream << "    " << BaseClasses[index]->Type << "(other)";
-        if (index != (BaseClasses.size() - 1)) {
-            outputStream << ",";
+        defaultConstructor << "    " << BaseClasses[index]->Type << "()";
+        copyConstructor    << "    " << BaseClasses[index]->Type << "(other)";
+        if ((index != (BaseClasses.size() - 1)) || (!Members.empty())) {
+            defaultConstructor << ",";
+            copyConstructor    << ",";
         }
-        outputStream << std::endl;
+        defaultConstructor << std::endl;
+        copyConstructor    << std::endl;
     }
-    outputStream << "{}" << std::endl << std::endl;
+    for (index = 0; index < Members.size(); index++) {
+        defaultConstructor << "    " << Members[index]->Name << "Member(" << Members[index]->Default << ")";
+        copyConstructor    << "    " << Members[index]->Name << "Member(other." << Members[index]->Name << "Member)";
+        if (index != (Members.size() - 1)) {
+            defaultConstructor << ",";
+            copyConstructor    << ",";
+        }
+        defaultConstructor << std::endl;
+        copyConstructor    << std::endl;
+    }
+
+    defaultConstructor << "{}" << std::endl << std::endl;
+    copyConstructor    << "{}" << std::endl << std::endl;
+
+    outputStream << defaultConstructor.str();
+    outputStream << copyConstructor.str();
 
     // destructor
-    outputStream << Name << "::~" << Name << "(void)"
+    outputStream << this->Name << "::~" << this->Name << "(void)"
                  << "{}" << std::endl << std::endl;
 
 }
 
 
-void cdgClass::GenerateSerializeRawCode(std::ostream & outputStream) const
+void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
 {
     size_t index;
     outputStream << std::endl
-                 << "void " << Name << "::SerializeRaw(std::ostream & outputStream) const" << std::endl
+                 << "void " << this->Name << "::SerializeRaw(std::ostream & outputStream) const" << std::endl
                  << "{" << std::endl;
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->Name << ");" << std::endl;
+        outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->Name << "Member);" << std::endl;
     }
     outputStream << "}" << std::endl
                  << std::endl;
 }
 
 
-void cdgClass::GenerateDeSerializeRawCode(std::ostream & outputStream) const
+void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) const
 {
     size_t index;
     outputStream << std::endl
-                 << "void " << Name << "::DeSerializeRaw(std::istream & inputStream)" << std::endl
+                 << "void " << this->Name << "::DeSerializeRaw(std::istream & inputStream)" << std::endl
                  << "{" << std::endl;
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->Name << ");" << std::endl;
+        outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->Name << "Member);" << std::endl;
     }
     outputStream << "}" << std::endl
                  << std::endl;
 }
 
 
-void cdgClass::GenerateToStreamCode(std::ostream & outputStream) const
+void cdgClass::GenerateMethodToStreamCode(std::ostream & outputStream) const
 {
     size_t index;
     outputStream << std::endl
-                 << "void " << Name << "::ToStream(std::ostream & outputStream) const" << std::endl
+                 << "void " << this->Name << "::ToStream(std::ostream & outputStream) const" << std::endl
                  << "{" << std::endl
-                 << "    outputStream << \"" << Name << "\" << std::endl;" << std::endl;
+                 << "    outputStream << \"" << this->Name << "\" << std::endl;" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->IsData == "true") {
             outputStream << "    " << BaseClasses[index]->Type << "::ToStream(outputStream);" << std::endl;
@@ -270,7 +285,7 @@ void cdgClass::GenerateToStreamCode(std::ostream & outputStream) const
     }
     outputStream << "    outputStream" << std::endl;
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "        << \"  " << Members[index]->Description << ":\" << this->" << Members[index]->Name;
+        outputStream << "        << \"  " << Members[index]->Description << ":\" << this->" << Members[index]->Name << "Member";
         if (index == (Members.size() - 1)) {
             outputStream << ";";
         }
@@ -280,11 +295,11 @@ void cdgClass::GenerateToStreamCode(std::ostream & outputStream) const
 }
 
 
-void cdgClass::GenerateToStreamRawCode(std::ostream & outputStream) const
+void cdgClass::GenerateMethodToStreamRawCode(std::ostream & outputStream) const
 {
     size_t index;
     outputStream << std::endl
-                 << "void " << Name << "::ToStreamRaw(std::ostream & outputStream, const char delimiter, bool headerOnly, const std::string & headerPrefix) const" << std::endl
+                 << "void " << this->Name << "::ToStreamRaw(std::ostream & outputStream, const char delimiter, bool headerOnly, const std::string & headerPrefix) const" << std::endl
                  << "{" << std::endl
                  << "    if (headerOnly) {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
@@ -308,12 +323,34 @@ void cdgClass::GenerateToStreamRawCode(std::ostream & outputStream) const
     }
     outputStream << "        outputStream" << std::endl;
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "            << delimiter << this->" << Members[index]->Name;
+        outputStream << "            << delimiter << this->" << Members[index]->Name << "Member";
         if (index == (Members.size() - 1)) {
             outputStream << ";";
         }
         outputStream << std::endl;
     }
     outputStream << "    }" << std::endl
+                 << "}" << std::endl;
+}
+
+
+void cdgClass::GenerateStandardFunctionsHeader(std::ostream & outputStream) const
+{
+    outputStream << "/* default functions */" << std::endl
+                 << "void cmnSerializeRaw(std::ostream & outputStream, const " << this->Name << " & object);" << std::endl
+                 << "void cmnDeSerializeRaw(std::istream & inputStream, " << this->Name << " & placeHolder);" << std::endl;
+}
+
+
+void cdgClass::GenerateStandardFunctionsCode(std::ostream & outputStream) const
+{
+    outputStream << "/* default functions */" << std::endl
+                 << "void cmnSerializeRaw(std::ostream & outputStream, const " << this->Name << " & object)" << std::endl
+                 << "{" << std::endl
+                 << "    object.SerializeRaw(outputStream);" << std::endl
+                 << "}" << std::endl
+                 << "void cmnDeSerializeRaw(std::istream & inputStream, " << this->Name << " & placeHolder)" << std::endl
+                 << "{" << std::endl
+                 << "    placeHolder.DeSerializeRaw(inputStream);" << std::endl
                  << "}" << std::endl;
 }

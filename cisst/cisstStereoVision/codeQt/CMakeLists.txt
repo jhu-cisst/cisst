@@ -16,9 +16,6 @@
 
 project (cisstStereoVisionQt)
 
-# cisstStereoVisionQt relies on cisstQt settings (for future use)
-cisst_library_use_settings (cisstStereoVisionQt cisstQt)
-
 # set directories for this project
 cisst_set_directories (cisstQt)
 
@@ -101,6 +98,7 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
                                 cisstVector
                                 cisstMultiTask
                                 cisstStereoVision
+                   SETTINGS     cisstQt
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES} svlExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP}

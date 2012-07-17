@@ -28,7 +28,12 @@ http://www.cisst.org/cisst/license.txt.
 // Using ICE
 #cmakedefine01 CISST_MTS_HAS_ICE
 
+<<<<<<< .working
 // Using fault tolerant features
 #cmakedefine01 CISST_MTS_SUPPORT_FDD
 
+=======
+#cmakedefine01 CISST_MTS_64BIT
+
+>>>>>>> .merge-right.r3732
 #endif // _mtsConfig_h

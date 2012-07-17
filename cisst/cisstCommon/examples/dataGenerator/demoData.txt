@@ -2,7 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctFixedSizeVectorTypes.h>;
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <vector>
+
+    typedef std::vector<int> MyVectorType;
 }
 
 class {
@@ -14,6 +17,12 @@ class {
         type cmnGenericObject;
         visibility public; //default, can also use protected, private
         is-data true;
+    }
+
+    base-class {
+        type MyVectorType;
+        visibility private; //default, can also use protected, private
+        is-data false;
     }
 
     // typedef uses the last token on the line as type name, anything in the middle defined the type
@@ -31,7 +40,7 @@ class {
         // optional but strongly recommended
         description Segment start point;
         // by default the data generator will provide accessors
-        accessors true;
+        accessors references; // options are none, references, set-get, all - default is "all"
         // by default all members are protected, can also use `public` or `private`
         visibility public;
     }
@@ -40,13 +49,14 @@ class {
         name StopPoint;
         type demoData::VectorType;
         description Segment stop point;
+        accessors all;
         default VectorType(0, 0);
     }
 
     member {
         name Length;
         type double;
-        default 0;
+        default 10.0;
     }
 
     member {

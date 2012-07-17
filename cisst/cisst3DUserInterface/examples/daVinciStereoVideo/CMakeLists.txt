@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -22,9 +22,9 @@ link_directories (${sawIntuitiveDaVinci_LIBRARY_DIR})
 add_executable (ui3ExDaVinciStereoVideo
                 main.cpp
                 BehaviorLUS.cpp
-                BehaviorLUS.h
-                CSOpenGLStippleActor.cxx
-                CSOpenGLStippleActor.h)
+                BehaviorLUS.h)
+
+set_property (TARGET ui3ExDaVinciStereoVideo PROPERTY FOLDER "cisst3DUserInterface/examples")
 
 target_link_libraries (ui3ExDaVinciStereoVideo
                        ui3ExBehaviors
@@ -42,4 +42,3 @@ else (WIN32)
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/probeEnd.STL
                     ${EXECUTABLE_OUTPUT_PATH}/probeEnd.STL COPYONLY)
 endif (WIN32)
-

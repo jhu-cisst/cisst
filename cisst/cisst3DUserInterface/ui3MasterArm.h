@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2009-04-03
+  Author(s):  Anton Deguet
+  Created on: 2009-04-03
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstParameterTypes/prmForwardDeclarations.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmPositionCartesianSet.h>
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3CursorBase.h>
 
@@ -39,17 +40,17 @@ class CISST_EXPORT ui3MasterArm: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     friend class ui3Manager;
 
-public:
+ public:
 
     enum RoleType {PRIMARY, SECONDARY};
 
     /*!
-     Constructor
+      Constructor
     */
     ui3MasterArm(const std::string & name);
 
     /*!
-     Destructor
+      Destructor
     */
     virtual ~ui3MasterArm();
 
@@ -57,7 +58,7 @@ public:
                           mtsDevice * buttonDevice, const std::string & buttonInterface,
                           mtsDevice * clutchDevice, const std::string & clutchInterface,
                           const RoleType & role);
-    
+
     virtual bool SetInput(const std::string & positionDeviceInterface, const std::string & positionInterface,
                           const std::string & buttonDeviceInterface, const std::string & buttonInterface,
                           const std::string & clutchDeviceInterface, const std::string & clutchInterface,
@@ -68,13 +69,17 @@ public:
 
     virtual void SetCursorPosition(const vctDouble3 & position);
 
+    virtual void SetCursorPosition(const prmPositionCartesianSet & position);
+
     virtual bool SetCursor(ui3CursorBase * cursor);
 
-protected:
+    void SetScaleFactor(const mtsDouble & factor);
+
+ protected:
 
     // arm name
     std::string Name;
-    
+
     // event handlers
     void ButtonEventHandler(const prmEventButton & buttonEvent);
     void ClutchEventHandler(const prmEventButton & buttonEvent);
@@ -92,6 +97,7 @@ protected:
     // transformation between inputs and scene
     vctFrm3 Transformation;
     double Scale;
+    double ScaleFactor;
 
     // positions in the state table, for behaviors to read
     prmPositionCartesianGet CartesianPosition;
@@ -125,7 +131,9 @@ protected:
 
     void UpdateIntention(ui3Selectable * selectable);
 
-
+    // check if we are currently over a menu and if pressed over menu
+    bool IsOverMenu;
+    bool PressedOverMenu;
 };
 
 

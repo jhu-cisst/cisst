@@ -457,7 +457,7 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             resultPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: void return command result deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: void return command result deserialization failed: " << e.what() << std::endl;
             resultPrototype = 0;
         }
 
@@ -491,8 +491,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: write return command \"" << commandName
-                                     << "\", argument deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: write return command \"" << commandName
+                                       << "\", argument deserialization failed: " << e.what() << std::endl;
             argumentPrototype = 0;
         }
 
@@ -502,8 +502,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             resultPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: write return command \"" << commandName
-                                     << "\", result deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: write return command \"" << commandName
+                                       << "\", result deserialization failed: " << e.what() << std::endl;
             resultPrototype = 0;
         }
 
@@ -582,16 +582,17 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
         try {
             argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (const std::exception &e) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: argument deserialization for event write generator failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: argument deserialization for event write generator failed: "
+                                       << e.what() << std::endl;
             argumentPrototype = 0;
         }
         if (!argumentPrototype) {
-            delete eventMulticastCommandWriteProxy;
-            CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProvidedProxy: failed to create write event proxy: " << eventName << std::endl;
-            return false;
+            CMN_LOG_CLASS_INIT_WARNING << "CreateInterfaceProvidedProxy: failed to create event write proxy: " << eventName << std::endl;
+            eventMulticastCommandWriteProxy->SetArgumentPrototypeSerialized(itEventWrite->ArgumentPrototypeSerialized);
+            eventMulticastCommandWriteProxy->SetArgumentSupported(false);
+        } else {
+            eventMulticastCommandWriteProxy->SetArgumentPrototype(argumentPrototype);
         }
-        eventMulticastCommandWriteProxy->SetArgumentPrototype(argumentPrototype);
 
         if (!providedInterfaceProxy->AddEvent(eventName, eventMulticastCommandWriteProxy)) {
             delete eventMulticastCommandWriteProxy;

@@ -16,6 +16,15 @@
 # --- end cisst license ---
 
 
+# set virtual library to CMake option name equivalence
+set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
+mark_as_advanced (cisstFLTK_OPTION_NAME)
+set (cisstQt_OPTION_NAME "CISST_HAS_QT" CACHE STRING "Name of option to use to compile cisstQt")
+mark_as_advanced (cisstQt_OPTION_NAME)
+set (cisstOpenGL_OPTION_NAME "CISST_HAS_OPENGL" CACHE STRING "Name of option to use to compile cisstOpenGL")
+mark_as_advanced (cisstOpenGL_OPTION_NAME)
+
+
 # function used to determine if some extra configuration messages
 # should be displayed
 function (cisst_cmake_debug ...)
@@ -40,6 +49,15 @@ macro (cisst_load_package_setting ...)
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
     endif (_clps_ADDITIONAL_BUILD_CMAKE)
     unset (_clps_ADDITIONAL_BUILD_CMAKE CACHE) # find_file stores the result in cache
+    # Internal dependency file
+    find_file (_clps_LIBRARIES_FILE
+               NAMES ${lib}Internal.cmake
+               PATHS ${CISST_CMAKE_DIRS}
+               NO_DEFAULT_PATH)
+    if (_clps_LIBRARIES_FILE)
+      include (${_clps_LIBRARIES_FILE})
+    endif (_clps_LIBRARIES_FILE)
+    unset (_clps_LIBRARIES_FILE CACHE) # find_file stores the result in cache
     # External dependency file
     find_file (_clps_SETTINGS_FILE
                NAMES ${lib}External.cmake
@@ -193,6 +211,7 @@ endmacro (cisst_extract_settings)
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
+# - SETTINGS is a list of settings, e.g. cisstQt, cisstFLTK, ...
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
 # - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)
@@ -216,6 +235,7 @@ macro (cisst_add_library ...)
        PROJECT
        FOLDER
        DEPENDENCIES
+       SETTINGS
        SOURCE_FILES HEADER_FILES
        ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
 
@@ -257,7 +277,6 @@ macro (cisst_add_library ...)
   set (FILE_CONTENT ${FILE_CONTENT} "   CMake: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   System: ${CMAKE_SYSTEM}\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   Source: ${CMAKE_SOURCE_DIR} */\n\n")
-  set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}pragma once\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}ifndef _${LIBRARY}_h\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}define _${LIBRARY}_h\n\n")
   foreach (file ${HEADER_FILES})
@@ -300,19 +319,43 @@ macro (cisst_add_library ...)
   if (DEPENDENCIES)
     # Check that dependencies are built
     foreach (dependency ${DEPENDENCIES})
-      set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-      list (FIND _CISST_LIBRARIES_AND_SETTINGS ${dependency} FOUND_IT)
-      if (${FOUND_IT} EQUAL -1 )
+      list (FIND CISST_LIBRARIES ${dependency} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1)
+        # not found
         message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
-      endif (${FOUND_IT} EQUAL -1 )
+      else (${FOUND_IT} EQUAL -1)
+        # found
+        cisst_library_use_libraries (${LIBRARY} ${dependency}) 
+      endif (${FOUND_IT} EQUAL -1)
     endforeach (dependency)
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
     cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
   endif (DEPENDENCIES)
 
-  # Link to cisst additional libraries
-  cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES})
+  # Add settings for linking, also check BUILD_xxx for dependencies
+  if (SETTINGS)
+    # Check that dependencies are built
+    foreach (setting ${SETTINGS})
+      list (FIND CISST_SETTINGS ${setting} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1 )
+        # not found
+        if (DEFINED ${setting}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled, use the flag ${${setting}_OPTION_NAME} to compile it")
+        else (DEFINED ${setting}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled")
+        endif (DEFINED ${setting}_OPTION_NAME)
+      else (${FOUND_IT} EQUAL -1 )
+        # found
+        cisst_library_use_settings (${LIBRARY} ${setting})
+      endif (${FOUND_IT} EQUAL -1 )
+    endforeach (setting)
+    # Set the link flags
+    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} uses settings: ${SETTINGS}")
+  endif (SETTINGS)
+
+  # Link to cisst additional libraries and settings
+  cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
 
   # Install all header files
   install (FILES ${HEADERS}
@@ -387,7 +430,11 @@ macro (cisst_target_link_libraries TARGET ...)
       set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
       list (FIND _CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
       if (${FOUND_IT} EQUAL -1 )
-        message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+        if (DEFINED ${required}_OPTION_NAME)
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${requires} which doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
+        else (DEFINED ${required}_OPTION_NAME)
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled") 
+        endif (DEFINED ${required}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
 
@@ -752,26 +799,52 @@ macro (cisst_information_message_missing_libraries ...)
       set (_cimml_MISSING_LIBRARIES ${_cimml_MISSING_LIBRARIES} ${lib})
     endif (${FOUND_IT} EQUAL -1 )
   endforeach (lib)
-  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
+  # it is possible all libraries are here but cisst-config.cmake was not found
+  if (${_cimml_MISSING_LIBRARIES})
+    message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
+  else (${_cimml_MISSING_LIBRARIES})
+    message ("Information: all libraries and settings have been found for ${CMAKE_CURRENT_SOURCE_DIR}, it is possible cisst-config.cmake has not been found yet,  make sure the CMake configuration is complete first.")
+  endif (${_cimml_MISSING_LIBRARIES})
+  foreach (lib ${_cimml_MISSING_LIBRARIES})
+    if (DEFINED ${lib}_OPTION_NAME)
+      message ("Information: to compile ${lib}, you need to use the flag ${${lib}_OPTION_NAME}")
+    endif (DEFINED ${lib}_OPTION_NAME)
+  endforeach (lib)
 endmacro (cisst_information_message_missing_libraries)
 
-# Macro to find a package via CMake's normal mechanism, but then to fix the
-# set variables if cisst has been installed
-macro (cisst_find_component _cfc_COMPONENT_NAME _cfc_IS_REQUIRED)
 
-  message("looking for cisst component: ${_cfc_COMPONENT_NAME}")
+# Macro to find a saw component This macros uses the find_package
+# CMake mechanism with a hint re. the path to search assuming saw
+# packages are installed along cisst.  Once a saw component is found,
+# it checks if this is an "installed" version.  In this case, both
+# include and link directories are automatically modified to match the
+# install root, i.e. the install directories are added at the
+# beginning ot paths.  This change is performed so that
+# saw<component>Config.cmake files can be generated once for the build
+# tree only.
+macro (cisst_find_saw_component ...)
+  set (_cfc_INSTALLED_PATH "${CISST_BINARY_DIR}/${CISST_CMAKE_INSTALL_SUFFIX}/saw")
 
-  # First, look in the install path for SAW components
-  find_package(${_cfc_COMPONENT_NAME} QUIET HINTS "${CISST_BINARY_DIR}/${CISST_CMAKE_MODULES_INSTALL_SUFFIX}/components" )
+  set (_cfc_PARAMETERS ${ARGV})
+  list (FIND _cfc_PARAMETERS "QUIET" _cfc_QUIET)
 
-  if(${_cfc_COMPONENT_NAME}_FOUND)
-    # If this is an installed version, re-set the libdir and include directories
-    message("Found package \"${_cfc_COMPONENT_NAME}\" in cisst install path.")
-    set(${_cfc_COMPONENT_NAME}_INCLUDE_DIR ${CISST_INCLUDE_DIR})
-    set(${_cfc_COMPONENT_NAME}_LIBRARY_DIR ${CISST_LIBRARY_DIR})
-  else()
-    message("Did not find package \"${_cfc_COMPONENT_NAME}\" in cisst install path, looking in source path: ${sawComponents_BINARY_DIR}")
-    find_package(${_cfc_COMPONENT_NAME} HINTS "${sawComponents_BINARY_DIR}")
-  endif()
-endmacro (cisst_find_component)
+  if (${_cfc_QUIET} EQUAL -1)
+    message ("-- Looking for saw component: ${ARGV0} in: ${_cfc_INSTALLED_PATH}")
+  endif ()
 
+   # Search using user arguments with our hints
+  find_package(${ARGV} HINTS ${_cfc_INSTALLED_PATH} "${CISST_BINARY_DIR}/../saw/components/")
+
+  if (${ARGV0}_FOUND)
+    if (${${ARGV0}_DIR} STREQUAL ${_cfc_INSTALLED_PATH})
+      # If this is an installed version, add installed dir in front of
+      # libdir and include directories
+      message ("-- Found saw component \"${ARGV0}\" in cisst install path: " ${${ARGV0}_DIR})
+      set (${ARGV0}_INCLUDE_DIR ${CISST_INCLUDE_DIR} ${${ARGV0}_INCLUDE_DIR})
+      set (${ARGV0}_LIBRARY_DIR ${CISST_LIBRARY_DIR} ${${ARGV0}_LIBRARY_DIR})
+    endif ()
+    if (${_cfc_QUIET} EQUAL -1)
+      message ("-- Found saw component \"${ARGV0}\" in cisst non-install path: " ${${ARGV0}_DIR})
+    endif ()
+  endif ()
+endmacro (cisst_find_saw_component)

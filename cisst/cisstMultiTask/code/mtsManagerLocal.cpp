@@ -235,6 +235,8 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Client = 0;
     ManagerComponent.Server = 0;
 
+    CurrentMainTask = 0;
+
     SetGCMConnected(false);
 
     TimeServer.SetTimeOrigin();
@@ -291,11 +293,15 @@ void mtsManagerLocal::Cleanup(void)
     }
 
     if (ManagerComponent.Client) {
+        ManagerComponent.Client->Kill();
+        ManagerComponent.Client->WaitForState(mtsComponentState::FINISHED, 30.0 * cmn_s);
         delete ManagerComponent.Client;
         ManagerComponent.Client = 0;
     }
 
     if (ManagerComponent.Server) {
+        ManagerComponent.Server->Kill();
+        ManagerComponent.Server->WaitForState(mtsComponentState::FINISHED, 30.0 * cmn_s);
         delete ManagerComponent.Server;
         ManagerComponent.Server = 0;
     }
@@ -1233,6 +1239,43 @@ void mtsManagerLocal::GetNamesOfComponents(std::vector<std::string> & namesOfCom
     ComponentMap.GetNames(namesOfComponents);
 }
 
+void mtsManagerLocal::PushCurrentMainTask(mtsTaskContinuous *cur)
+{
+    if (!cur) {
+        CMN_LOG_CLASS_RUN_ERROR << "PushCurrentMainTask: null parameter" << std::endl;
+        return;
+    }
+    if (cur == CurrentMainTask) {
+        CMN_LOG_CLASS_RUN_WARNING << "PushCurrentMainTask: duplicate call to push " << cur->GetName() << std::endl;
+        return;
+    }
+    if (CurrentMainTask)
+         CMN_LOG_CLASS_RUN_WARNING << "CurrentMainTask changing from " << CurrentMainTask->GetName()
+                                      << " to " << cur->GetName() << std::endl;
+    else
+         CMN_LOG_CLASS_RUN_VERBOSE << "Setting CurrentMainTask to " << cur->GetName() << std::endl;
+    CurrentMainTask = cur;
+    MainTaskNames.push(CurrentMainTask->GetName());
+}
+
+mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
+{
+    mtsTaskContinuous *previousMainTask = 0;
+    while (!previousMainTask && !MainTaskNames.empty()) {
+        previousMainTask = dynamic_cast<mtsTaskContinuous *>(GetComponent(MainTaskNames.top()));
+        if (!previousMainTask)
+            CMN_LOG_CLASS_RUN_WARNING << "PopCurrentMainTask: could not find " << MainTaskNames.top() << std::endl;
+        MainTaskNames.pop();
+    }
+    if (previousMainTask)
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to " 
+                                  << previousMainTask->GetName() << std::endl;
+    else
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, no main task remaining" << std::endl;
+    CurrentMainTask = previousMainTask;
+    return CurrentMainTask;
+}
+
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                                          const std::string & componentName,
                                          const std::string & interfaceProvidedName,
@@ -1813,6 +1856,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
 {
     // wait for all components to be started if timeout is positive
     bool allAtState = true;
+    mtsManagerComponentBase * isManager;
     if (timeout > 0.0) {
         // will iterate on all components
         ComponentMapType::const_iterator iterator = ComponentMap.begin();
@@ -1823,10 +1867,13 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             // compute how much time do we have left based on when we started
             double timeLeft = timeEnd - TimeServer.GetRelativeTime();
-            allAtState = iterator->second->WaitForState(desiredState, timeLeft);
-            if (!allAtState) {
-                CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << iterator->first << "\" failed to reach state \""
-                                         << desiredState << "\"" << std::endl;
+            isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
+            if (!isManager) {
+                allAtState = iterator->second->WaitForState(desiredState, timeLeft);
+                if (!allAtState) {
+                    CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << iterator->first << "\" failed to reach state \""
+                                             << desiredState << "\"" << std::endl;
+                }
             }
             if (TimeServer.GetRelativeTime() > timeEnd) {
                 // looks like we don't have any time left to start the remaining components.
@@ -1870,6 +1917,8 @@ void mtsManagerLocal::StartAll(void)
     // Get the current thread id in order to check if any task will use the current thread.
     // If so, start that task last.
     const osaThreadId threadId = osaGetCurrentThreadId();
+    if (threadId != this->MainThreadId)
+        CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
 
     mtsTask * componentTask;
 
@@ -1898,6 +1947,7 @@ void mtsManagerLocal::StartAll(void)
                         CMN_LOG_CLASS_INIT_ERROR << "StartAll: found another task using current thread (\""
                                                  << iterator->first << "\"), only first will be started (\""
                                                  << lastTask->first << "\")." << std::endl;
+                        // PK: I don't think this task should be started if it uses the current thread
                         iterator->second->Start();
                     } else {
                         // set iterator to last task to be started
@@ -1906,6 +1956,10 @@ void mtsManagerLocal::StartAll(void)
                 }
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
+                if (componentTask->Thread.GetId() == MainThreadId) {
+                    if (dynamic_cast<mtsTaskContinuous *>(componentTask))
+                        CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << iterator->first << "???" << std::endl;
+                }
                 iterator->second->Start();  // If task will not use current thread, start it immediately.
             }
         } else {
@@ -1924,14 +1978,19 @@ void mtsManagerLocal::StartAll(void)
 
 void mtsManagerLocal::KillAll(void)
 {
-    ComponentMapChange.Lock();
-
-    ComponentMapType::const_iterator iterator = ComponentMap.begin();
-    const ComponentMapType::const_iterator end = ComponentMap.end();
-    for (; iterator != end; ++iterator) {
-        iterator->second->Kill();
+    mtsManagerComponentBase * isManager;
+    ComponentMapChange.Lock(); {
+        ComponentMapType::const_iterator iterator = ComponentMap.begin();
+        const ComponentMapType::const_iterator end = ComponentMap.end();
+        for (; iterator != end; ++iterator) {
+            isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
+            if (!isManager) {
+              iterator->second->Kill();
+            } else {
+                CMN_LOG_CLASS_INIT_DEBUG << "KillAll: skip manager component: " << iterator->second->GetName() << std::endl;
+            }
+        }
     }
-
     ComponentMapChange.Unlock();
 
     // Block further logs 
@@ -3100,7 +3159,7 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
         return true;
     }
     else if (ManagerComponent.Client) {  
-        ManagerComponent.Client->GetNamesOfProcesses(processNames);
+        //ManagerComponent.Client->GetNamesOfProcesses(processNames);
         ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
         return true;
     }

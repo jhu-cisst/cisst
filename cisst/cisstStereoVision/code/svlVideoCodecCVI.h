@@ -99,6 +99,7 @@ protected:
     int Version;
     svlFile File;
     long long int FooterOffset;
+    long long int DataOffset;
     unsigned int PartCount;
     unsigned int Width;
     unsigned int Height;

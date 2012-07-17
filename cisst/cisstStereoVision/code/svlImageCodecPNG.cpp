@@ -93,9 +93,9 @@ typedef struct _PNG_target_mem_info {
 
 void PNG_user_write_data_proc(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-    if (png_ptr && png_ptr->io_ptr && data && length) {
-        PNG_target_mem_info* targetinfo = reinterpret_cast<PNG_target_mem_info*>(png_ptr->io_ptr);
-        if (!targetinfo->error && targetinfo->ptr && targetinfo->size && (targetinfo->size - targetinfo->comprsize) >= length) {
+    PNG_target_mem_info* targetinfo = reinterpret_cast<PNG_target_mem_info*>(png_get_io_ptr(png_ptr));
+    if (targetinfo) {
+        if (targetinfo->error == false && data && length && targetinfo->ptr && targetinfo->size && (targetinfo->size - targetinfo->comprsize) >= length) {
             memcpy(targetinfo->ptr + targetinfo->comprsize, data, length);
             targetinfo->comprsize += static_cast<unsigned int>(length);
             targetinfo->error = false;

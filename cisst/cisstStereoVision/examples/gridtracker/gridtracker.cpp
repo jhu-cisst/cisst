@@ -154,6 +154,7 @@ int main(int argc, char** argv)
 
     // release pipeline
     stream.Release();
+    stream.DisconnectAll();
 
     std::cerr << "Quit" << std::endl;
     return 1;

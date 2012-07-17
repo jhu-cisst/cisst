@@ -50,6 +50,15 @@ void CISST_EXPORT osaGetAbsoluteTime(osaAbsoluteTime & now);
 
 /*! Retrieve the current local date and time. */
 void CISST_EXPORT osaGetDateTimeString(std::string & str, const char delimiter = '-');
+/*! Convert from (epoch) absolute time in seconds to date and time string */
+void CISST_EXPORT osaGetDateTimeString(std::string & str, double time, const char delimiter = '-');
+/*! Convert from (epoch) absolute time in seconds to date  (y:m:d) string */
+void CISST_EXPORT osaGetDateString(std::string & str, double time, const char delimiter = ':');
+/*! Convert from (epoch) absolute time in seconds to time  (h:m:s:ms) string */
+void CISST_EXPORT osaGetTimeString(std::string & str, double time, const char delimiter = ':');
+
+
+
 
 /*! Retrieve the current local time. */
 void CISST_EXPORT osaGetTimeString(std::string & str);

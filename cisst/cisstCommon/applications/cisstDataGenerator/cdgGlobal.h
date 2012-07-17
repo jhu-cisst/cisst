@@ -37,10 +37,6 @@ class cdgGlobal: public cdgScope
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-    /*! Keep a list of all scopes to preserve order */
-    typedef std::vector<cdgScope *> ScopesType;
-    ScopesType Scopes;
-
     typedef std::vector<cdgInline *> CodesType;
     CodesType CodeCodes;
 
@@ -59,8 +55,6 @@ public:
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
-
-    void FillInDefaults(void) {};
     void GenerateHeader(std::ostream & output) const;
     void GenerateCode(std::ostream & output) const;
 

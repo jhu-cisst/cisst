@@ -75,6 +75,8 @@ class CISST_EXPORT osaTimeServer: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+    friend class osaTimeServerTest;
+
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 32};
     char Internals[INTERNALS_SIZE];
@@ -97,6 +99,11 @@ public:
         Subsequent calls to GetRelativeTime will return the number of
         seconds that have elaspsed since this call was made. */
     void SetTimeOrigin(void);
+
+    /*! Set the time origin based on the specified time server.
+        For systems that need to synchronize to the performance counter,
+        this also sets the offset (i.e., does not call Synchronize again). */
+    void SetTimeOriginFrom(const osaTimeServer *other);
 
     /*! Get the time origin that is in effect for the relative time
         measurements.

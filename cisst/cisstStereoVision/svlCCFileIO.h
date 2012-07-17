@@ -124,7 +124,7 @@ protected:
                 inp.getline(buffer,200,delim);
                 std::istringstream inp2(buffer);
                 while(inp2 >> d) {
-                    data[lineNum][numsRead] = d;
+                    data[lineNum][numsRead] = (float)d;
                     numsRead++;
                 }
             }

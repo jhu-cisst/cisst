@@ -39,9 +39,11 @@ endif (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
 # if on, include cisstCommonXML and let parent directory know for cisst-config.cmake
 if (CISST_cisstCommonXML)
   add_subdirectory (codeXML)
-  set (CISST_HAS_XML ON PARENT_SCOPE) 
+  set (CISST_HAS_XML ON PARENT_SCOPE) # to generate cisstConfig.h properly
+  set (CISST_HAS_XML ON) # both seems needed so sub-directory "tests" also knows if CISST_HAS_XML
 else (CISST_cisstCommonXML)
   set (CISST_HAS_XML OFF PARENT_SCOPE)
+  set (CISST_HAS_XML OFF)
 endif (CISST_cisstCommonXML)
 
 # build examples and tests, add an option to skip them

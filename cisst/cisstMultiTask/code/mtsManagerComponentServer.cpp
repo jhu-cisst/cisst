@@ -709,8 +709,8 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetAbsoluteTimeDiffs(const 
         for (unsigned int t = 0; t < numOfTrials; t++) {
             double tic = LCM->GetTimeServer().GetAbsoluteTimeInSeconds();
             result = functionSet->GetAbsoluteTimeInSeconds(time);
-            if (result.IsOK()) {
-                double roundTripTime =  LCM->GetTimeServer().GetAbsoluteTimeInSeconds() - tic;
+            double roundTripTime =  LCM->GetTimeServer().GetAbsoluteTimeInSeconds() - tic;
+            if (result.IsOK()) {  
                 trialTimes[i] = (tic + roundTripTime/2.0) - time;
             }
             else {

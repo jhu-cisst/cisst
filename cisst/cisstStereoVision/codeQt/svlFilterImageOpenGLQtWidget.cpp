@@ -109,3 +109,15 @@ void svlFilterImageOpenGLQtWidget::PostProcess(void)
 {
     emit QSignalUpdateGL();
 }
+
+
+void svlFilterImageOpenGLQtWidget::QSlotSwapRGB(){
+
+    if (GetByteOrderRGB() == RGB_Order)
+        SetByteOrderRGB(BGR_Order);
+    else
+        SetByteOrderRGB(RGB_Order);
+
+    CMN_LOG_CLASS_RUN_VERBOSE<<"Swapped RGB"<<std::endl;
+
+}

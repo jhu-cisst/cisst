@@ -35,7 +35,9 @@ class cdgMember: public cdgScope
     std::string Type;
     bool UsesClassTypedef;
     std::string Name;
+    std::string Default;
     std::string Description;
+    std::string Accessors;
     std::string Visibility;
     std::string ClassName;
 
@@ -51,7 +53,7 @@ public:
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void FillInDefaults(void) {};
+    void FillInDefaults(void);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 
