@@ -23,13 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-class vctDataFunctionsFixedSizeVectorTest : public CppUnit::TestFixture
+class vctDataFunctionsTransformationsTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(vctDataFunctionsFixedSizeVectorTest);
+    CPPUNIT_TEST_SUITE(vctDataFunctionsTransformationsTest);
     {
-        CPPUNIT_TEST(TestDataCopy);
-        CPPUNIT_TEST(TestBinarySerializationStream);
-        CPPUNIT_TEST(TestScalar);
+        CPPUNIT_TEST(TestFrm3DataCopy);
+        CPPUNIT_TEST(TestFrm3BinarySerializationStream);
+        CPPUNIT_TEST(TestFrm3Scalar);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -40,7 +40,7 @@ class vctDataFunctionsFixedSizeVectorTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
 
-    void TestDataCopy(void);
-    void TestBinarySerializationStream(void);
-    void TestScalar(void);
+    void TestFrm3DataCopy(void);
+    void TestFrm3BinarySerializationStream(void);
+    void TestFrm3Scalar(void);
 };

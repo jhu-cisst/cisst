@@ -259,10 +259,10 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
 /*! Macro to overload the function cmnDataScalarDescription using the type
   name itself.  For example, for a double it will return the string
   "double". */
-#define CMN_DATA_SCALAR_DESCRIPTION_USING_TYPE_NAME(_type)                     \
-    inline std::string cmnDataScalarDescription(const _type & CMN_UNUSED(data), size_t CMN_UNUSED(index)) \
+#define CMN_DATA_SCALAR_DESCRIPTION(_type, _description)                \
+    inline std::string cmnDataScalarDescription(const _type & CMN_UNUSED(data), size_t CMN_UNUSED(index), const char * userDescription = #_description) \
         throw (std::out_of_range) {                                     \
-        return #_type;                                                  \
+        return userDescription;                                         \
     }
 
 /*! Macro to overload the function cmnDataScalar using a static_cast. */
@@ -283,35 +283,36 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
         return true;                                                    \
     }
 
-#define CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(type)                     \
+#define CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(type, description)        \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
     CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type) \
-    CMN_DATA_SCALAR_DESCRIPTION_USING_TYPE_NAME(type)                   \
+    CMN_DATA_SCALAR_DESCRIPTION(type, description)                      \
     CMN_DATA_SCALAR_USING_STATIC_CAST(type)                             \
     CMN_DATA_SCALAR_NUMBER_IS_ONE(type)                                 \
     CMN_DATA_SCALAR_NUMBER_IS_FIXED_TRUE(type)
 
-#define CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(type)                        \
+#define CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(type, description)           \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
     CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type) \
-    CMN_DATA_SCALAR_DESCRIPTION_USING_TYPE_NAME(type)                   \
+    CMN_DATA_SCALAR_DESCRIPTION(type, description)                      \
     CMN_DATA_SCALAR_USING_STATIC_CAST(type)                             \
     CMN_DATA_SCALAR_NUMBER_IS_ONE(type)                                 \
     CMN_DATA_SCALAR_NUMBER_IS_FIXED_TRUE(type)
 
-CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(bool);
-CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(char);
-CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(unsigned char);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(short);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned short);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(long long int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned long long int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(float);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double);
+CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(bool, b);
+CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(char, c);
+CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(unsigned char, uc);
+
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(short, s);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned short, us);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(int, i);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned int, ui);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(long long int, lli);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned long long int, ulli);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(float, f);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double, d);
 
 
 // size_t specialization
@@ -373,15 +374,16 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
 
 
 // this should be define as a macro that can be used for all types without scalars
-inline bool cmnDataScalarNumberIsFixed(const std::string & data) {
+inline bool cmnDataScalarNumberIsFixed(const std::string & CMN_UNUSED(data)) {
     return true;
 }
 
-inline size_t cmnDataScalarNumber(const std::string & data) {
+inline size_t cmnDataScalarNumber(const std::string & CMN_UNUSED(data)) {
     return 0;
 }
 
-inline std::string cmnDataScalarDescription(const std::string & data, const size_t & index) throw (std::out_of_range) {
+inline std::string cmnDataScalarDescription(const std::string & CMN_UNUSED(data), const size_t & CMN_UNUSED(index),
+                                            const char * CMN_UNUSED(userDescription) = "") throw (std::out_of_range) {
     cmnThrow(std::out_of_range("cmnDataScalarDescription: std::string has no scalar"));
     return "n/a";
 }

@@ -54,16 +54,16 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
                             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data)
     throw (std::runtime_error)
 {
-    vct::size_type indexRow, indexCol;
     const vct::size_type myRows = data.rows();
     const vct::size_type myCols = data.cols();
 
     cmnSerializeSizeRaw(outputStream, myRows);
     cmnSerializeSizeRaw(outputStream, myCols);
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            cmnDataSerializeBinary(outputStream, data.Element(indexRow, indexCol));
-        }
+
+    typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator iter = data.begin();
+    const typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator end = data.end();
+    for (; iter != end; ++iter) {
+        cmnDataSerializeBinary(outputStream, *iter);
     }
 }
 
@@ -84,11 +84,10 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     data.SetSize(myRows, myCols);
 
     // get data
-    vct::size_type indexRow, indexCol;
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            cmnDataDeSerializeBinary(inputStream, data.Element(indexRow, indexCol), remoteFormat, localFormat);
-        }
+    typename vctDynamicMatrix<_elementType>::iterator iter = data.begin();
+    const typename vctDynamicMatrix<_elementType>::iterator end = data.end();
+    for (; iter != end; ++iter) {
+        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
     }
 }
 
@@ -111,11 +110,10 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     }
 
     // get data
-    vct::size_type indexRow, indexCol;
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            cmnDataDeSerializeBinary(inputStream, data.Element(indexRow, indexCol), remoteFormat, localFormat);
-        }
+    typename vctDynamicMatrixRef<_elementType>::iterator iter = data.begin();
+    const typename vctDynamicMatrixRef<_elementType>::iterator end = data.end();
+    for (; iter != end; ++iter) {
+        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
     }
 }
 
@@ -147,13 +145,14 @@ size_t cmnDataScalarNumber(const vctDynamicConstMatrixBase<_matrixOwnerType, _el
 template <class _matrixOwnerType, typename _elementType>
 std::string
 cmnDataScalarDescription(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data,
-                         const size_t & index)
+                         const size_t & index,
+                         const char * userDescription = "m")
     throw (std::out_of_range)
 {
     size_t elementRow, elementCol, inElementIndex;
     std::stringstream result;
     if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
-        result << "v[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
+        result << userDescription << "[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeMatrix index out of range"));
     }

@@ -54,12 +54,13 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
                             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data)
     throw (std::runtime_error)
 {
-    vct::size_type index;
     const vct::size_type mySize = data.size();
-
     cmnDataSerializeBinary(outputStream, mySize);
-    for (index = 0; index < mySize; ++index) {
-        cmnDataSerializeBinary(outputStream, data.Element(index));
+
+    typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator iter = data.begin();
+    const typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator end = data.end();
+    for (; iter != end; ++iter) {
+        cmnDataSerializeBinary(outputStream, *iter);
     }
 }
 
@@ -78,9 +79,10 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     data.SetSize(mySize);
 
     // get data
-    vct::size_type index;
-    for (index = 0; index < mySize; ++index) {
-        cmnDataDeSerializeBinary(inputStream, data.Element(index), remoteFormat, localFormat);
+    typename vctDynamicVector<_elementType>::iterator iter = data.begin();
+    const typename vctDynamicVector<_elementType>::iterator end = data.end();
+    for (; iter != end; ++iter) {
+        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
     }
 }
 
@@ -100,9 +102,10 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     }
 
     // get data
-    vct::size_type index;
-    for (index = 0; index < mySize; ++index) {
-        cmnDataDeSerializeBinary(inputStream, data.Element(index), remoteFormat, localFormat);
+    typename vctDynamicVectorRef<_elementType>::iterator iter = data.begin();
+    const typename vctDynamicVectorRef<_elementType>::iterator end = data.end();
+    for (; iter != end; ++iter) {
+        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
     }
 }
 
@@ -134,13 +137,14 @@ size_t cmnDataScalarNumber(const vctDynamicConstVectorBase<_vectorOwnerType, _el
 template <class _vectorOwnerType, typename _elementType>
 std::string
 cmnDataScalarDescription(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
-                         const size_t & index)
+                         const size_t & index,
+                         const char * userDescription = "v")
     throw (std::out_of_range)
 {
     size_t elementIndex, inElementIndex;
     std::stringstream result;
     if (vctDataFindInVectorScalarIndex(data, index, elementIndex, inElementIndex)) {
-        result << "v[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
+        result << userDescription << "[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctDynamicVector index out of range"));
     }

@@ -26,9 +26,9 @@ set (SOURCE_FILES
 
      vctDataFunctionsFixedSizeVectorTest.cpp
      vctDataFunctionsDynamicVectorTest.cpp
-
      vctDataFunctionsFixedSizeMatrixTest.cpp
      vctDataFunctionsDynamicMatrixTest.cpp
+     vctDataFunctionsTransformationsTest.cpp
 
      vctDynamicMatrixTest.cpp
      vctDynamicMatrixRefTest.cpp
@@ -75,9 +75,9 @@ set (HEADER_FILES
 
      vctDataFunctionsFixedSizeVectorTest.h
      vctDataFunctionsDynamicVectorTest.h
-
      vctDataFunctionsFixedSizeMatrixTest.h
      vctDataFunctionsDynamicMatrixTest.h
+     vctDataFunctionsTransformationsTest.h
 
      vctDynamicMatrixTest.h
      vctDynamicMatrixRefTest.h

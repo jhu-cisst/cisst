@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 #include <cisstVector/vctDataFunctionsDynamicVector.h>
 #include <cisstVector/vctDataFunctionsDynamicMatrix.h>
-// #include <cisstVector/vctDataFunctionsTransformation.h>
+#include <cisstVector/vctDataFunctionsTransformation.h>
 
 #endif  // _vctDataFunctions_h
 

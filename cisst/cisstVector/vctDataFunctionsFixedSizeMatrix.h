@@ -112,13 +112,14 @@ template <vct::size_type _rows, vct::size_type _cols,
           class _elementType, class _dataPtrType>
 std::string
 cmnDataScalarDescription(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
-                         const size_t & index)
+                         const size_t & index,
+                         const char * userDescription = "m")
     throw (std::out_of_range)
 {
     size_t elementRow, elementCol, inElementIndex;
     std::stringstream result;
     if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
-        result << "v[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
+        result << userDescription << "[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeMatrix index out of range"));
     }

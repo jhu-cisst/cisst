@@ -52,6 +52,7 @@ set (HEADER_FILES
      vctDataFunctionsMatrix.h
      vctDataFunctionsFixedSizeMatrix.h
      vctDataFunctionsDynamicMatrix.h
+     vctDataFunctionsTransformations.h
 
      vctDynamicConstMatrixBase.h
      vctDynamicConstMatrixRef.h

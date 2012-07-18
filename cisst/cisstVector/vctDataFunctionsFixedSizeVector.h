@@ -95,13 +95,14 @@ size_t cmnDataScalarNumber(const vctFixedSizeConstVectorBase<_size, _stride, _el
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 std::string
 cmnDataScalarDescription(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & data,
-                         const size_t & index)
+                         const size_t & index,
+                         const char * userDescription = "v")
     throw (std::out_of_range)
 {
     size_t elementIndex, inElementIndex;
     std::stringstream result;
     if (vctDataFindInVectorScalarIndex(data, index, elementIndex, inElementIndex)) {
-        result << "v[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
+        result << userDescription << "[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeVector index out of range"));
     }
