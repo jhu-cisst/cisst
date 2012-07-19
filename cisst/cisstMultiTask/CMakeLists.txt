@@ -69,9 +69,4 @@ endif (CISST_HAS_QT)
 
 # build examples and tests, add an option to skip them
 cisst_offer_examples (cisstMultiTask)
-<<<<<<< .working
 cisst_offer_tests (cisstMultiTask)
-=======
-cisst_offer_tests (cisstMultiTask)
-
->>>>>>> .merge-right.r3732
