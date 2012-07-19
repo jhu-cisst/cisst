@@ -65,6 +65,7 @@ bool cdgClass::HasScope(const std::string & keyword,
     } else if (keyword == "base-class") {
         cdgBaseClass * newBaseClass = new cdgBaseClass(lineNumber);
         scopes.push_back(newBaseClass);
+        Scopes.push_back(newBaseClass);
         BaseClasses.push_back(newBaseClass);
         return true;
     } else if (keyword == "inline-header") {
@@ -134,7 +135,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
         outputStream << ": ";
     }
     for (index = 0; index < BaseClasses.size(); index++) {
-        BaseClasses[index]->GenerateHeader(outputStream);
+        BaseClasses[index]->GenerateHeaderInheritance(outputStream);
         if (index != (BaseClasses.size() - 1)) {
             outputStream << ", ";
         }
@@ -158,6 +159,8 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     outputStream << "};" << std::endl;
 
     GenerateStandardFunctionsHeader(outputStream);
+
+    GenerateDataFunctionsHeader(outputStream);
 }
 
 
@@ -249,6 +252,11 @@ void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
     outputStream << std::endl
                  << "void " << this->Name << "::SerializeRaw(std::ostream & outputStream) const" << std::endl
                  << "{" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "    " << BaseClasses[index]->Type << "::SerializeRaw(outputStream);" << std::endl;
+        }
+    }
     for (index = 0; index < Members.size(); index++) {
         outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->Name << "Member);" << std::endl;
     }
@@ -263,6 +271,11 @@ void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) con
     outputStream << std::endl
                  << "void " << this->Name << "::DeSerializeRaw(std::istream & inputStream)" << std::endl
                  << "{" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "    " << BaseClasses[index]->Type << "::DeSerializeRaw(inputStream);" << std::endl;
+        }
+    }
     for (index = 0; index < Members.size(); index++) {
         outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->Name << "Member);" << std::endl;
     }
@@ -339,6 +352,21 @@ void cdgClass::GenerateStandardFunctionsHeader(std::ostream & outputStream) cons
     outputStream << "/* default functions */" << std::endl
                  << "void cmnSerializeRaw(std::ostream & outputStream, const " << this->Name << " & object);" << std::endl
                  << "void cmnDeSerializeRaw(std::istream & inputStream, " << this->Name << " & placeHolder);" << std::endl;
+}
+
+
+void cdgClass::GenerateDataFunctionsHeader(std::ostream & outputStream) const
+{
+    outputStream << "/* data functions */" << std::endl
+                 << "void cmnDataCopy(" << this->Name << " & destination, const " << this->Name << " & source);" << std::endl
+                 << "void cmnDataSerializeBinary(std::ostream & outputStream, const " << this->Name << " & data);" << std::endl
+                 << "void cmnDataDeSerializeBinary(std::istream & inputStream, " << this->Name << " & data," << std::endl
+                 << "                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat);"<< std::endl
+                 << "bool cmnDataScalarNumberIsFixed(const " << this->Name << " & data);" << std::endl
+                 << "size_t cmnDataScalarNumber(const " << this->Name << " & data);" << std::endl
+                 << "std::string cmnDataScalarDescription(const " << this->Name << " & data, const size_t & index," << std::endl
+                 << "                                     const char * userDescription = \"" << this->Name << "\");" << std::endl
+                 << " double cmnDataScalar(const " << this->Name << " & data, const size_t & index);" << std::endl;
 }
 
 

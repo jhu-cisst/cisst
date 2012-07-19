@@ -95,6 +95,8 @@ protected:
     void GenerateStandardFunctionsHeader(std::ostream & outputStream) const;
     void GenerateStandardFunctionsCode(std::ostream & outputStream) const;
 
+    void GenerateDataFunctionsHeader(std::ostream & outputStream) const;
+
 private:
     cdgClass(void); // make sure constructor with line number is always used.
 };

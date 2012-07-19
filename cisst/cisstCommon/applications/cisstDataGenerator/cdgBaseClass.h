@@ -48,6 +48,7 @@ public:
     bool IsValid(std::string & errorMessage) const;
 
     void FillInDefaults(void);
+    void GenerateHeaderInheritance(std::ostream & outputStream) const;
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 

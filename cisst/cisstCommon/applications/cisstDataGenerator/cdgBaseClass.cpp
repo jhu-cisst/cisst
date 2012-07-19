@@ -127,12 +127,17 @@ void cdgBaseClass::FillInDefaults(void)
 }
 
 
-void cdgBaseClass::GenerateHeader(std::ostream & outputStream) const
+void cdgBaseClass::GenerateHeaderInheritance(std::ostream & outputStream) const
 {
     outputStream << Visibility << " " << Type;
 }
 
 
-void cdgBaseClass::GenerateCode(std::ostream & outputStream) const
+void cdgBaseClass::GenerateHeader(std::ostream & CMN_UNUSED(outputStream)) const
+{
+}
+
+
+void cdgBaseClass::GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const
 {
 }

@@ -322,8 +322,7 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
     GenerateMessage(outputStream);
 
     outputStream << "#include <" << Header << ">" << std::endl << std::endl
-                 << "#include <cisstCommon/cmnSerializer.h>" << std::endl
-                 << "#include <cisstCommon/cmnDeSerializer.h>" << std::endl << std::endl;
+                 << "#include <cisstCommon/cmnDataFunctions.h>" << std::endl << std::endl;
 
     this->Global->GenerateCode(outputStream);
 }

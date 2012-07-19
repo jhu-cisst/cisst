@@ -136,6 +136,5 @@ public:
     std::string GetScalarName(const size_t index) const;
 };
 
-
 #endif // _mtsGenericObject_h
 

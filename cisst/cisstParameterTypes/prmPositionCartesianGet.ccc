@@ -2,6 +2,7 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
+#include <cisstVector/vctDataFunctions.h>
 #include <cisstParameterTypes/prmTransformationBase.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
 
@@ -34,7 +35,7 @@ class {
     member {
         name Position;
         type vctFrm3;
-        description Pointer to moving frame, unused;
+        description Desired position;
     }
 
     inline-header {
