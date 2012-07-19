@@ -14,6 +14,14 @@
 
 project (cisstParameterTypes)
 
+# create data type using the data generator
+cisst_data_generator (cisstParameterTypes
+                      ../prmPositionCartesianGet.ccc)
+
+# to compile cisst generated code, need to find header file
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+
+
 # all source files
 set (SOURCE_FILES
      prmEventButton.cpp
@@ -25,7 +33,6 @@ set (SOURCE_FILES
      prmVelocityJointSet.cpp
      prmForceTorqueJointSet.cpp
 
-     prmPositionCartesianGet.cpp
      prmPositionCartesianSet.cpp
      prmVelocityCartesianGet.cpp
      prmVelocityCartesianSet.cpp
@@ -57,7 +64,6 @@ set (HEADER_FILES
      prmVelocityJointSet.h
      prmForceTorqueJointSet.h
 
-     prmPositionCartesianGet.h
      prmPositionCartesianSet.h
      prmVelocityCartesianGet.h
      prmVelocityCartesianSet.h
@@ -81,4 +87,5 @@ cisst_add_library (LIBRARY cisstParameterTypes
                    DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
+                   ADDITIONAL_SOURCE_FILES ${cisstParameterTypes_CISST_DG_SRCS}
                    )

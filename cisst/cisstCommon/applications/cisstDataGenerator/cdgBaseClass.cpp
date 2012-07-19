@@ -115,8 +115,15 @@ bool cdgBaseClass::IsValid(std::string & errorMessage) const
 }
 
 
-void FillInDefaults(void)
+void cdgBaseClass::FillInDefaults(void)
 {
+    if (this->IsData.empty()) {
+        this->IsData = "false";
+    }
+    if (this->Visibility.empty()) {
+        this->Visibility = "public";
+    }
+
 }
 
 

@@ -47,7 +47,7 @@ public:
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void FillInDefaults(void) {};
+    void FillInDefaults(void);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 

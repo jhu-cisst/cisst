@@ -677,7 +677,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
     get_filename_component (INPUT_WE "${input}" NAME_WE)
     set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
     # create output name and concatenate to list available in parent scope
-    set (header_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.h")
+    file (MAKE_DIRECTORY "${cisst_BINARY_DIR}/include/${GENERATED_FILES_VAR_PREFIX}")
+    set (header_absolute "${CMAKE_CURRENT_BINARY_DIR}/${GENERATED_FILES_VAR_PREFIX}/${INPUT_WE}.h")
     set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.cpp")
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
     set (GENERATED_FILES ${GENERATED_FILES} ${header_absolute} ${code_absolute})
@@ -686,7 +687,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
                         COMMAND "${CISST_DG_EXECUTABLE}"
-			${input_absolute} ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.h ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
+			${input_absolute} ${cisst_BINARY_DIR}/include "${GENERATED_FILES_VAR_PREFIX}/${INPUT_WE}.h" ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
 			MAIN_DEPENDENCY ${input}
 			DEPENDS ${CISST_DG_EXECUTABLE}
                         COMMENT "cisstDataGenerator for ${INPUT_WE}")
