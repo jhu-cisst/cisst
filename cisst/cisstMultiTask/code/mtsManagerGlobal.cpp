@@ -1577,12 +1577,15 @@ void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
     if (ConnectionMap.empty()) return;
 
     mtsConnection * connection = 0;
+
+    //ConnectionMapChange.Lock();
     ConnectionMapType::iterator it = ConnectionMap.begin();
     while (it != ConnectionMap.end() && ThreadDisconnectRunning) {
 #if (CISST_OS == CISST_LINUX_XENOMAI)
         osaSleep(10 * cmn_ms); // protective sleep on Xenomai
 #endif
         connection = &it->second;
+        if (!connection) continue;
 
         // Skip timeout check if connection was already confirmed
         if (connection->IsConnected()) {
@@ -1613,6 +1616,7 @@ void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
         // Reset iterator because internal thread for disconnection and clean-ups can invalidate ConnectionMap
         it = ConnectionMap.begin();
     }
+    //ConnectionMapChange.Unlock();
 #else
     CMN_LOG_CLASS_INIT_WARNING << "CheckConnectConfirmTimeout called when CISST_MTS_HAS_ICE is false" << std::endl;
 #endif
@@ -1631,13 +1635,19 @@ bool mtsManagerGlobal::ConnectConfirm(const ConnectionIDType connectionID)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "ConnectConfirm: confirmed connection id [ " << connectionID << " ]" << std::endl;
 
-    ShowInternalStructure();
+    // MJ: for testing and debugging 
+    //ShowInternalStructure();
 
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
 void mtsManagerGlobal::AddToDisconnectedProcessCleanup(const std::string & sourceProcessName,
     const std::string & targetProcessName, const std::string & targetComponentProxyName)
+#else
+void mtsManagerGlobal::AddToDisconnectedProcessCleanup(const std::string & CMN_UNUSED(sourceProcessName),
+    const std::string & CMN_UNUSED(targetProcessName), const std::string & CMN_UNUSED(targetComponentProxyName))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     DisconnectedProcessCleanupMapChange.Lock();
@@ -2019,7 +2029,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
                                 << clientComponentName << ":" << clientInterfaceName << "\"" << std::endl;
     }
 
-    ShowInternalStructure();
+    // MJ: for testing and debugging 
+    //ShowInternalStructure();
 }
 
 bool mtsManagerGlobal::Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
@@ -2380,7 +2391,11 @@ bool mtsManagerGlobal::StopServer(void)
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo)
+#else
+bool mtsManagerGlobal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType CMN_UNUSED(connectionID), const std::string & CMN_UNUSED(endpointInfo))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
@@ -2399,7 +2414,11 @@ bool mtsManagerGlobal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDTyp
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo)
+#else
+bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType CMN_UNUSED(connectionID), std::string & CMN_UNUSED(endpointInfo))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
@@ -2415,9 +2434,15 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const ConnectionIDTyp
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
     const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & serverInterfaceProvidedName, std::string & endpointInfo)
+#else
+bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const std::string & CMN_UNUSED(clientProcessName),
+    const std::string & CMN_UNUSED(serverProcessName), const std::string & CMN_UNUSED(serverComponentName),
+    const std::string & CMN_UNUSED(serverInterfaceProvidedName), std::string & CMN_UNUSED(endpointInfo))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     // Iteration may take a while
@@ -2449,7 +2474,11 @@ bool mtsManagerGlobal::GetInterfaceProvidedProxyAccessInfo(const std::string & c
     return false;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::InitiateConnect(const ConnectionIDType connectionID)
+#else
+bool mtsManagerGlobal::InitiateConnect(const ConnectionIDType CMN_UNUSED(connectionID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
@@ -2474,7 +2503,11 @@ bool mtsManagerGlobal::InitiateConnect(const ConnectionIDType connectionID)
 #endif
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerGlobal::ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID)
+#else
+bool mtsManagerGlobal::ConnectServerSideInterfaceRequest(const ConnectionIDType CMN_UNUSED(connectionID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsConnection * connection = GetConnectionInformation(connectionID);
@@ -2517,11 +2550,7 @@ void mtsManagerGlobal::GetListOfConnections(std::vector<mtsDescriptionConnection
 
 void mtsManagerGlobal::ShowInternalStructure(void)
 {
-    return;
-
     std::stringstream ss;
-
-    ss << "======= Process Map ==================" << std::endl;
 
     ProcessMapType::const_iterator itProcess = ProcessMap.begin();
     for (; itProcess != ProcessMap.end(); ++itProcess) {
