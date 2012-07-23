@@ -191,6 +191,21 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+# Support for Safety Framework plug-ins
+option (CISST_HAS_SAFETY_PLUGINS "Support for Safety Framework plug-ins" OFF)
+if (CISST_HAS_SAFETY_PLUGINS)
+  find_package(SafetyFramework REQUIRED)
+  cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIRS)
+  cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARIES)
+  # if SafetyFramework found, include JsonCpp
+  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SF_INCLUDE_DIR}/../cmake)
+  find_package(JSONCPP REQUIRED)
+  cisst_set_package_settings (cisstMultiTask JSONCPP INCLUDE_DIRECTORIES JSONCPP_INCLUDE_DIR)
+  cisst_set_package_settings (cisstMultiTask JSONCPP LIBRARIES JSONCPP_LIBRARIES)
+else (CISST_HAS_SAFETY_PLUGINS)
+  cisst_unset_all_package_settings (cisstMultiTask SafetyFramework)
+  cisst_unset_all_package_settings (cisstMultiTask JSONCPP)
+endif (CISST_HAS_SAFETY_PLUGINS)
 
 # Determine if cmnThrow uses "throw" or "abort"
 option (CISST_CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)

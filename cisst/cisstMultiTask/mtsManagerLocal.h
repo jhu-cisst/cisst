@@ -473,9 +473,17 @@ public:
                     const std::string & serverInterfaceProvidedName);
 
     //-------------------------------------------------------------------------
-    //  Fault Detection
+    //  Safety Framework Plug-ins
     //-------------------------------------------------------------------------
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
+    // Monitoring
+    bool InstallMonitor() { return true; } // FIXME
+
+    // Fault Detection and Diagnosis
+    // TODO
+#endif
+
+#if CISST_MTS_SUPPORT_FDD
     bool FaultPropagate(const mtsFaultBase & fault) const;
 #endif
 

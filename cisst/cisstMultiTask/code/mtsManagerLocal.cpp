@@ -40,6 +40,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 
+#include "common/common.h"
+
 #if CISST_MTS_HAS_ICE
 #include "mtsComponentProxy.h"
 #include "mtsManagerProxyClient.h"
@@ -74,13 +76,21 @@ LogQueueType   LogQueue;
 std::string    ThisProcessName;
 // }}
 
+#include "adapters/cisst/cisstCoordinator.h"
+
 mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
 {
+    SF::Coordinator * SF = new cisstCoordinator;
+
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: STANDALONE mode" << std::endl;
     InitializeLocal();
 }
 
+#if CISST_MTS_HAS_ICE
 mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager) : ComponentMap("ComponentMap")
+#else
+mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & CMN_UNUSED(globalComponentManager)) : ComponentMap("ComponentMap")
+#endif
 {
 #if CISST_MTS_HAS_ICE
     Initialize();
@@ -690,7 +700,11 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
     return Instance;
 }
 
+#if CISST_MTS_HAS_ICE
 mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & globalComponentManager)
+#else
+mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & CMN_UNUSED(globalComponentManager))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     if (!Instance) {
@@ -1835,6 +1849,7 @@ bool mtsManagerLocal::CreateInternalComponents(void)
     
     // Add monitoring components
 #if CISST_MTS_SUPPORT_FDD
+    // smmy
     mtsMonitorComponent * monitor = new mtsMonitorComponent;
     MonitorComponents.push_back(monitor);
     // MJ: For now, keep monitor component only one that monitor all components in the
@@ -1983,9 +1998,13 @@ void mtsManagerLocal::KillAll(void)
         ComponentMapType::const_iterator iterator = ComponentMap.begin();
         const ComponentMapType::const_iterator end = ComponentMap.end();
         for (; iterator != end; ++iterator) {
+            if (!iterator->second) {
+                CMN_LOG_CLASS_INIT_DEBUG << "KillAll: null component" << std::endl;
+                continue;
+            }
             isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
             if (!isManager) {
-              iterator->second->Kill();
+                iterator->second->Kill();
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "KillAll: skip manager component: " << iterator->second->GetName() << std::endl;
             }
@@ -2105,7 +2124,11 @@ bool mtsManagerLocal::Connect(const std::string & clientProcessName,
                               const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                               const std::string & serverProcessName,
                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+#if CISST_MTS_HAS_ICE
                               const unsigned int retryCount)
+#else
+                              const unsigned int CMN_UNUSED(retryCount))
+#endif
 {
     // Prevent this method from being used to connect two local interfaces
     if (clientProcessName == serverProcessName) {
@@ -2545,7 +2568,11 @@ bool mtsManagerLocal::GetInterfaceRequiredDescription(
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
+#else
+bool mtsManagerLocal::CreateComponentProxy(const std::string & CMN_UNUSED(componentProxyName), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     // Create a component proxy
@@ -2570,8 +2597,13 @@ bool mtsManagerLocal::RemoveComponentProxy(const std::string & componentProxyNam
 }
 
 bool mtsManagerLocal::CreateInterfaceProvidedProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & serverComponentProxyName,
     const InterfaceProvidedDescription & interfaceProvidedDescription, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(serverComponentProxyName),
+    const InterfaceProvidedDescription & CMN_UNUSED(interfaceProvidedDescription), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     const std::string interfaceProvidedName = interfaceProvidedDescription.InterfaceProvidedName;
@@ -2621,7 +2653,11 @@ bool mtsManagerLocal::CreateInterfaceProvidedProxy(
 
 
 bool mtsManagerLocal::CreateInterfaceRequiredProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & clientComponentProxyName, const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(clientComponentProxyName), const InterfaceRequiredDescription & CMN_UNUSED(requiredInterfaceDescription), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     const std::string requiredInterfaceName = requiredInterfaceDescription.InterfaceRequiredName;
@@ -2733,7 +2769,11 @@ bool mtsManagerLocal::RemoveInterfaceProvided(const std::string & componentName,
 }
 
 bool mtsManagerLocal::RemoveInterfaceProvidedProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & componentProxyName, const std::string & interfaceProvidedProxyName, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(componentProxyName), const std::string & CMN_UNUSED(interfaceProvidedProxyName), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsComponent * clientComponent = GetComponent(componentProxyName);
@@ -2778,7 +2818,11 @@ bool mtsManagerLocal::RemoveInterfaceProvidedProxy(
 }
 
 bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(componentProxyName), const std::string & CMN_UNUSED(requiredInterfaceProxyName), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsComponent * serverComponent = GetComponent(componentProxyName);
@@ -2831,7 +2875,11 @@ bool mtsManagerLocal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType
     return ManagerGlobal->SetInterfaceProvidedProxyAccessInfo(connectionID, endpointInfo);
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & CMN_UNUSED(listenerID))
+#else
+bool mtsManagerLocal::ConnectServerSideInterface(const mtsDescriptionConnection & CMN_UNUSED(description), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     // This method is called only by the GCM to connect two local interfaces
@@ -2986,7 +3034,11 @@ ConnectServerSideInterfaceError:
     return false;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & CMN_UNUSED(listenerID))
+#else
+bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection & CMN_UNUSED(description), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     std::string endpointAccessInfo, communicatorId;
@@ -3169,7 +3221,7 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
 }
 
 
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_MTS_SUPPORT_FDD
 bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
 {
     if (!ManagerComponent.Client) {
