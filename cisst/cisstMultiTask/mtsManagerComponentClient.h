@@ -94,7 +94,7 @@ protected:
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
         mtsFunctionQualifiedRead GetAbsoluteTimeDiffs;
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
         // Fault detection
         mtsFunctionWrite FaultPropagate;
 #endif
@@ -161,7 +161,7 @@ protected:
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     /*! Fault detection */
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     bool FaultPropagate(const mtsFaultBase & fault) const;
 #endif
 

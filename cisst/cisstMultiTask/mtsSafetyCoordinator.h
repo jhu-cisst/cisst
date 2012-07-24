@@ -35,7 +35,7 @@ public:
     mtsSafetyCoordinator();
     ~mtsSafetyCoordinator();
 
-    bool AddMonitor(const std::string & targetUID, const std::string & monitorJsonSpec);
+    bool AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec);
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;

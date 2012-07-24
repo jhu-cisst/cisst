@@ -32,17 +32,46 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
 {
 }
 
-bool mtsSafetyCoordinator::AddMonitor(const std::string & targetUID, const std::string & monitorJsonSpec)
+bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec)
 {
-    SF::JSON json;
-    json.Read(monitorJsonSpec.c_str());
-
     // Check if same monitoring target is already registered
     if (this->IsDuplicateUID(targetUID)) {
         CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
         return false;
     }
 
+    // Check if json syntax is valid
+    SF::JSON json;
+    if (!json.Read(monitorJsonSpec.c_str())) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: " << targetUID
+            << "\nJSON: " << monitorJsonSpec << std::endl;
+        return false;
+    }
+
+    // Parse the passed json to extract target information with monitoring specification.
+#if 0
+{
+   "Name" : "Period Monitor",
+   "Output" : {
+      "Config" : {
+         "SamplingRate" : 1,
+         "State" : 1
+      },
+      "Target" : null,
+      "Type" : 0
+   },
+   "Target" : {
+      "Identifier" : {
+         "Component" : "aComponent",
+         "Process" : "LCM"
+      },
+      "Type" : {
+         "Component" : 0
+      }
+   }
+}
+#endif
+    
     // TODO: create new monitor with (uid, json)
     // TODO: insert new monitor to monitor list
     // TODO: embed new monitor to cisst system

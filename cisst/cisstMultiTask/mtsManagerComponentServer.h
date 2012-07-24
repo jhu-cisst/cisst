@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsManagerComponentServer_h
 
 #include <cisstMultiTask/mtsManagerComponentBase.h>
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsFaultBase.h>
 #endif
 
@@ -115,7 +115,7 @@ protected:
                                                    std::vector<double> & processTimes) const;
     void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName, 
                                                         std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     void InterfaceGCMCommands_FaultPropage(const mtsFaultBase & fault);
 #endif
 

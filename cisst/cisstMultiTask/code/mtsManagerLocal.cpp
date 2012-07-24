@@ -40,12 +40,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 
-#include "common/common.h"
-
 #if CISST_MTS_HAS_ICE
 #include "mtsComponentProxy.h"
 #include "mtsManagerProxyClient.h"
 #include "mtsManagerProxyServer.h"
+#endif
+
+#if CISST_HAS_SAFETY_PLUGINS
+#include <cisstMultiTask/mtsSafetyCoordinator.h>
 #endif
 
 // Time server used by all tasks
@@ -76,12 +78,8 @@ LogQueueType   LogQueue;
 std::string    ThisProcessName;
 // }}
 
-#include "adapters/cisst/cisstCoordinator.h"
-
 mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
 {
-    SF::Coordinator * SF = new cisstCoordinator;
-
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: STANDALONE mode" << std::endl;
     InitializeLocal();
 }
@@ -253,6 +251,11 @@ void mtsManagerLocal::Initialize(void)
     TimeServerOriginSet = true;
 
     SetupSystemLogger();
+
+    // Create safety coordinator that runs for this process
+#if CISST_HAS_SAFETY_PLUGINS
+    SafetyCoordinator = new mtsSafetyCoordinator;
+#endif
 }
 
 void mtsManagerLocal::InitializeLocal(void)
@@ -316,7 +319,7 @@ void mtsManagerLocal::Cleanup(void)
         ManagerComponent.Server = 0;
     }
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     if (MonitorComponents.size()) {
         for (size_t i = 0; i < MonitorComponents.size(); ++i)
             delete MonitorComponents[i];
@@ -327,6 +330,13 @@ void mtsManagerLocal::Cleanup(void)
         SystemLogMultiplexer->RemoveAllChannels();
         delete SystemLogMultiplexer;
         SystemLogMultiplexer = 0;
+    }
+
+    if (SafetyCoordinator) {
+        // smmy: Prior to deleting the instance, should this notify the safety framework of
+        // this deletion?? (via IceStorm)
+        delete SafetyCoordinator;
+        SafetyCoordinator = 0;
     }
 
     __os_exit();
@@ -1143,9 +1153,9 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         }
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
     // If a new component is not of type mtsMonitorComponent, create a required interface
     // and add it to the monitor component so that it can access the monitor state table.
-#if CISST_MTS_SUPPORT_FDD
     mtsTaskPeriodic * task = dynamic_cast<mtsTaskPeriodic*>(component);
     if (task && !MonitorComponents.empty()) {
         mtsMonitorComponent * monitor = MonitorComponents[0];
@@ -1848,8 +1858,7 @@ bool mtsManagerLocal::CreateInternalComponents(void)
     ManagerComponent.Client->MCSReady = true;
     
     // Add monitoring components
-#if CISST_MTS_SUPPORT_FDD
-    // smmy
+#if CISST_HAS_SAFETY_PLUGINS
     mtsMonitorComponent * monitor = new mtsMonitorComponent;
     MonitorComponents.push_back(monitor);
     // MJ: For now, keep monitor component only one that monitor all components in the
@@ -3221,7 +3230,7 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
 }
 
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
 {
     if (!ManagerComponent.Client) {
@@ -3230,5 +3239,17 @@ bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
     }
 
     return ManagerComponent.Client->FaultPropagate(fault);
+}
+#endif
+
+
+#if CISST_HAS_SAFETY_PLUGINS
+SF::Coordinator & mtsManagerLocal::GetCoordinator(void)
+{
+    // MJ: If more than one monitor needs to be deployed, this method can be an entry
+    // point to make a decision on where/how to distribute monitor objects.
+    CMN_ASSERT(SafetyCoordinator);
+
+    return (*SafetyCoordinator);
 }
 #endif

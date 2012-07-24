@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsFaultBase.h>
 #endif
 
@@ -593,7 +593,7 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetInterfaceProvidedDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                           InterfaceLCMFunction.GetInterfaceRequiredDescription);
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     required->AddFunction(mtsManagerComponentBase::CommandNames::FaultPropagate,
                           InterfaceLCMFunction.FaultPropagate);
 #endif
@@ -724,7 +724,7 @@ bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
     return true;
 }
 
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 bool mtsManagerComponentClient::FaultPropagate(const mtsFaultBase & fault) const
 {
     mtsExecutionResult ret = InterfaceLCMFunction.FaultPropagate(fault);
