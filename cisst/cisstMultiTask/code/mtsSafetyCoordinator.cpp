@@ -21,6 +21,9 @@
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
 
 #include "json.h"
+#include "dict.h"
+
+using namespace SF::Dict;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetyCoordinator);
 
@@ -49,34 +52,33 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
     }
 
     // Parse the passed json to extract target information with monitoring specification.
-#if 0
-{
-   "Name" : "Period Monitor",
-   "Output" : {
-      "Config" : {
-         "SamplingRate" : 1,
-         "State" : 1
-      },
-      "Target" : null,
-      "Type" : 0
-   },
-   "Target" : {
-      "Identifier" : {
-         "Component" : "aComponent",
-         "Process" : "LCM"
-      },
-      "Type" : {
-         "Component" : 0
-      }
-   }
-}
-#endif
-    
+    Json::Value & root = json.GetRoot();
+    // parse monitor name
+    const std::string name = root.get(NAME, "n/a").asString();
+    std::cout << "monitor name: " << name << std::endl;
+    // parse monitor target
+    const std::string processName   = root[TARGET][IDENTIFIER].get(NAME_PROCESS, "n/a").asString();
+    std::cout << "process name: " << processName << std::endl;
+    const std::string componentName = root[TARGET][IDENTIFIER].get(NAME_COMPONENT, "n/a").asString();
+    std::cout << "component name: " << componentName << std::endl;
+    const std::string typeValue     = // MJ TEMP: key value may change depending on fault type
+        root[TARGET][TYPE].get(NAME_COMPONENT, "n/a").asString();
+    std::cout << "type: " << typeValue << std::endl;
+    // parse monitor output specification
+    const int samplingRate          = root[OUTPUT][CONFIG].get(SAMPLING_RATE, "-1").asInt();
+    std::cout << "sampling rate: " << samplingRate<< std::endl;
+    const std::string initState     = root[OUTPUT][CONFIG].get(STATE, "n/a").asString();
+    std::cout << "init state: " << initState << std::endl;
+    const Json::Value outputTargets = root[OUTPUT][TARGET][PUBLISH];
+    for (size_t i = 0; i < outputTargets.size(); ++i) {
+        std::cout << "output target: " << outputTargets[i].asString() << std::endl;
+    }
+
     // TODO: create new monitor with (uid, json)
     // TODO: insert new monitor to monitor list
     // TODO: embed new monitor to cisst system
 
-    std::cout << "SUCCESS: " << targetUID << "\n, JSON: " << json.GetJSON() << std::endl;
+    std::cout << "SUCCESS: " << targetUID << "\nJSON: " << json.GetJSON() << std::endl;
 
     this->MonitorMap[targetUID] = monitorJsonSpec;
 
