@@ -66,7 +66,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 #if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsFaultBase.h>
-#include "coordinator.h"
+#include <cisstMultiTask/mtsSafetyCoordinator.h>
+//#include "coordinator.h"
 #endif
 
 #include <stack>
@@ -364,19 +365,12 @@ protected:
     //-------------------------------------------------------------------------
 #if CISST_HAS_SAFETY_PLUGINS
 protected:
-    /*! Monitoring components for fault detection and diagnosis */
-    typedef std::vector<mtsMonitorComponent*> MonitorComponentList;
-    MonitorComponentList MonitorComponents;
-
-    SF::Coordinator * SafetyCoordinator;
+    mtsSafetyCoordinator * SafetyCoordinator;
 
 public:
-    SF::Coordinator & GetCoordinator(void);
-
-    /*! Generate event for fault propataion via manager component service */
     bool FaultPropagate(const mtsFaultBase & fault) const;
+    SF::Coordinator & GetCoordinator(void);
 #endif
-
 
 public:
     //-------------------------------------------------------------------------

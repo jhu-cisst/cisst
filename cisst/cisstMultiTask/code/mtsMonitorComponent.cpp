@@ -71,12 +71,12 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     }
 }
 
-bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
+bool mtsMonitorComponent::RegisterTargetComponent(mtsTaskPeriodic * task)
 {
     const std::string taskName = task->GetName();
 
     if (TargetComponents->FindItem(taskName)) {
-        CMN_LOG_CLASS_RUN_WARNING << "AddTargetComponent: task \"" << taskName << "\" is already registered" << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "RegisterTargetComponent: task \"" << taskName << "\" is already registered" << std::endl;
         return true;
     }
 
@@ -86,7 +86,7 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
     newTargetComponent->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(taskName));
     newTargetComponent->InterfaceRequired->AddFunction("GetPeriod", newTargetComponent->GetPeriod);
     if (!TargetComponents->AddItem(taskName, newTargetComponent)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddTargetComponent: Failed to add state table access interface for task \"" << taskName << "\"" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterTargetComponent: Failed to add state table access interface for task \"" << taskName << "\"" << std::endl;
         return false;
     }
 
@@ -101,7 +101,7 @@ bool mtsMonitorComponent::AddTargetComponent(mtsTaskPeriodic * task)
 #define ADD_FILTER( _filter )\
     if (!this->StateTableMonitor.AddFilter(_filter)) {\
         CMN_LOG_CLASS_RUN_ERROR\
-           << "AddTargetComponent: Failed to add filter \"" << _filter->GetFilterName()\
+           << "RegisterTargetComponent: Failed to add filter \"" << _filter->GetFilterName()\
            << "\" for task \"" << taskName << "\"";\
         return false;\
     }

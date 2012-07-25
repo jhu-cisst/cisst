@@ -37,7 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
-#include <cisstMultiTask/mtsMonitorComponent.h>
 
 #if CISST_MTS_HAS_ICE
 #include "mtsComponentProxy.h"
@@ -322,13 +321,6 @@ void mtsManagerLocal::Cleanup(void)
         ManagerComponent.Server = 0;
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
-    if (MonitorComponents.size()) {
-        for (size_t i = 0; i < MonitorComponents.size(); ++i)
-            delete MonitorComponents[i];
-    }
-#endif
-
     if (SystemLogMultiplexer) {
         cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
         SystemLogMultiplexer->RemoveAllChannels();
@@ -336,12 +328,14 @@ void mtsManagerLocal::Cleanup(void)
         SystemLogMultiplexer = 0;
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
     if (SafetyCoordinator) {
-        // smmy: Prior to deleting the instance, should this notify the safety framework of
+        // MJ TODO: Prior to deleting the instance, should this notify the safety framework of
         // this deletion?? (via IceStorm)
         delete SafetyCoordinator;
         SafetyCoordinator = 0;
     }
+#endif
 
     __os_exit();
 }
@@ -1158,15 +1152,28 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
+    // smmy
     // If a new component is not of type mtsMonitorComponent, create a required interface
-    // and add it to the monitor component so that it can access the monitor state table.
-    mtsTaskPeriodic * task = dynamic_cast<mtsTaskPeriodic*>(component);
-    if (task && !MonitorComponents.empty()) {
-        mtsMonitorComponent * monitor = MonitorComponents[0];
+    // and add it to the monitor so that the monitor can access the state table of the 
+    // target component.
+
+    // NOP for now.  Instead, all of these codes should be executed when
+    // SF::Coordinator::AddMonitorTarget() gets called.
+
+    //if (!SafetyCoordinator->RegisterComponent(component)) {
+    //    CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to register component to the monitor" << std::endl;
+    //    return false;
+    //}
+#if 0 // MJ TEMP: obsolete codes - remove later
+    //mtsTaskPeriodic * task = dynamic_cast<mtsTaskPeriodic*>(component);
+    //if (task && !SafetyCoordinator->IsMonitorReady()) {
+    if (SafetyCoordinator->IsMonitorReady()) {
+        mtsMonitorComponent * monitor = SafetyCoordinator->GetMonitor();
+        CMN_ASSERT(monitor);
         // monitor can be NULL in case of either MCS or MCC being added.
-        if (monitor && (componentName != mtsMonitorComponent::GetNameOfMonitorComponent())) {
-            if (!monitor->AddTargetComponent(task)) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add component \"" << componentName << "\" to monitor component" << std::endl;
+        if (componentName != mtsMonitorComponent::GetNameOfMonitorComponent()) {
+            if (!monitor->RegisterTargetComponent(task)) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to register component \"" << componentName << "\" to monitor component" << std::endl;
                 return false;
             }
             // Connect new component to monitor component 
@@ -1182,6 +1189,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
             }
         }
     }
+#endif
 #endif
 
     CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
@@ -1754,14 +1762,7 @@ bool mtsManagerLocal::CreateInternalComponents(void)
     
     // Add monitoring components
 #if CISST_HAS_SAFETY_PLUGINS
-    mtsMonitorComponent * monitor = new mtsMonitorComponent;
-    MonitorComponents.push_back(monitor);
-    // MJ: For now, keep monitor component only one that monitor all components in the
-    // same process.  More monitor components can be dynamically deployed later
-    // considering run-time overhead of fault detection and diagnosis methods.
-    CMN_ASSERT(MonitorComponents.size() == 1);
-
-    if (!AddComponent(monitor)) {
+    if (!SafetyCoordinator->CreateMonitor()) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add monitoring component" << std::endl;
         return false;
     }
