@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -17,9 +17,7 @@ project (cisstStereoVisionLibs)
 
 add_subdirectory (code)
 
-if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
-  add_subdirectory (codePython)
-endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+cisst_offer_python (cisstStereoVision)
 
 if (CISST_HAS_QT)
   add_subdirectory (codeQt)
