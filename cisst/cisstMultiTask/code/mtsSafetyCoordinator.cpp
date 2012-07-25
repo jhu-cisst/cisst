@@ -19,8 +19,8 @@
 */
 
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
+#include <cisstMultiTask/mtsMonitorComponent.h>
 
-#include "json.h"
 #include "dict.h"
 
 using namespace SF::Dict;
@@ -33,6 +33,10 @@ mtsSafetyCoordinator::mtsSafetyCoordinator()
 
 mtsSafetyCoordinator::~mtsSafetyCoordinator()
 {
+    if (!Monitors.empty()) {
+        for (size_t i = 0; i < Monitors.size(); ++i)
+            delete Monitors[i];
+    }
 }
 
 bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec)
@@ -51,29 +55,14 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
         return false;
     }
 
-    // Parse the passed json to extract target information with monitoring specification.
-    Json::Value & root = json.GetRoot();
-    // parse monitor name
-    const std::string name = root.get(NAME, "n/a").asString();
-    std::cout << "monitor name: " << name << std::endl;
-    // parse monitor target
-    const std::string processName   = root[TARGET][IDENTIFIER].get(NAME_PROCESS, "n/a").asString();
-    std::cout << "process name: " << processName << std::endl;
-    const std::string componentName = root[TARGET][IDENTIFIER].get(NAME_COMPONENT, "n/a").asString();
-    std::cout << "component name: " << componentName << std::endl;
-    const std::string typeValue     = // MJ TEMP: key value may change depending on fault type
-        root[TARGET][TYPE].get(NAME_COMPONENT, "n/a").asString();
-    std::cout << "type: " << typeValue << std::endl;
-    // parse monitor output specification
-    const int samplingRate          = root[OUTPUT][CONFIG].get(SAMPLING_RATE, "-1").asInt();
-    std::cout << "sampling rate: " << samplingRate<< std::endl;
-    const std::string initState     = root[OUTPUT][CONFIG].get(STATE, "n/a").asString();
-    std::cout << "init state: " << initState << std::endl;
-    const Json::Value outputTargets = root[OUTPUT][TARGET][PUBLISH];
-    for (size_t i = 0; i < outputTargets.size(); ++i) {
-        std::cout << "output target: " << outputTargets[i].asString() << std::endl;
+    // Parse json and extract information of interest
+    SF::cisstMonitor newMonitorTarget;
+    if (!ParseJSON(json, newMonitorTarget)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to extract information from json: " << targetUID
+            << "\nJSON: " << monitorJsonSpec << std::endl;
+        return false;
     }
-
+    
     // TODO: create new monitor with (uid, json)
     // TODO: insert new monitor to monitor list
     // TODO: embed new monitor to cisst system
@@ -81,6 +70,109 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
     std::cout << "SUCCESS: " << targetUID << "\nJSON: " << json.GetJSON() << std::endl;
 
     this->MonitorMap[targetUID] = monitorJsonSpec;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget)
+{
+    /*
+     SUCCESS: <FAULT_COMPONENT_PERIOD["LCM":"aComponent"]>
+JSON: {
+   "Name" : "Period Monitor",
+   "Output" : {
+      "Config" : {
+         "SamplingRate" : 1,
+         "State" : "On"
+      },
+      "Target" : {
+         "Publish" : [ "127.0.0.1", "10.162.34.118" ]
+      },
+      "Type" : "Stream"
+   },
+   "Target" : {
+      "Identifier" : {
+         "Component" : "aComponent",
+         "Process" : "LCM"
+      },
+      //"Type" : {
+      //   "Component" : "FAULT_COMPONENT_PERIOD"
+      //}
+      "Type" : "FAULT_COMPONENT_PERIOD"
+   }
+}
+    */
+    std::string    name;
+    std::string    targetIdProcessName;
+    std::string    targetIdComponentName;
+    std::string    targetFaultType;
+    int            outputConfigSamplingRate;
+    std::string    outputConfigInitState;
+    SF::StrVecType outputTargets;
+    std::string    outputType;
+
+    try {
+        // Parse the passed json to extract target information with monitoring specification.
+        Json::Value & root = json.GetRoot();
+        // parse monitor name
+        name = root.get(NAME, "n/a").asString();
+        // parse monitor target
+        targetIdProcessName = root[TARGET][IDENTIFIER].get(NAME_PROCESS, "n/a").asString();
+        targetIdComponentName = root[TARGET][IDENTIFIER].get(NAME_COMPONENT, "n/a").asString();
+        // MJ TEMP: key value may change depending on fault type
+        targetFaultType = root[TARGET].get(TYPE, "n/a").asString();
+        // parse monitor output specification
+        outputConfigSamplingRate = root[OUTPUT][CONFIG].get(SAMPLING_RATE, "-1").asInt();
+        outputConfigInitState = root[OUTPUT][CONFIG].get(STATE, "n/a").asString();
+
+        Json::Value outputTargetsJson;
+        outputTargetsJson = root[OUTPUT][TARGET][PUBLISH];
+        for (size_t i = 0; i < outputTargetsJson.size(); ++i) {
+            outputTargets.push_back(outputTargetsJson[i].asString());
+        }
+
+        outputType = root[OUTPUT].get(TYPE, "n/a").asString();
+    } catch (...) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json (invalid format)" << std::endl;
+        return false;
+    }
+
+    // Populate information about monitor target 
+    SF::TargetIDType targetID;
+    targetID.ProcessName = targetIdProcessName;
+    targetID.ComponentName = targetIdComponentName;
+    newMonitorTarget.SetTargetId(targetID);
+    newMonitorTarget.SetFaultType(SF::Fault::GetFaultFromString(targetFaultType));
+
+    newMonitorTarget.SetSamplingRate(outputConfigSamplingRate);
+    newMonitorTarget.SetStatus(SF::Monitor::GetStatusFromString(outputConfigInitState));
+    newMonitorTarget.SetAddressesToPublish(outputTargets);
+    newMonitorTarget.SetOutputType(SF::Monitor::GetOutputFromString(outputType));
+
+    std::cout << newMonitorTarget << std::endl;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::CreateMonitor(void)
+{
+    // MJ: For now, keep monitor component only one that monitor all components in the
+    // same process.  More monitor components can be dynamically deployed later
+    // considering run-time overhead of fault detection and diagnosis methods.
+    if (!Monitors.empty()) {
+        CMN_LOG_CLASS_RUN_WARNING << "Monitor was already intialized" << std::endl;
+        return true;
+    }
+
+    mtsMonitorComponent * monitor = new mtsMonitorComponent;
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance(); 
+    if (!componentManager->AddComponent(monitor)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to create monitor" << std::endl;
+        delete monitor;
+        return false;
+    }
+
+    Monitors.push_back(monitor);
 
     return true;
 }
@@ -105,3 +197,4 @@ void mtsSafetyCoordinator::DeSerializeRaw(std::istream & inputStream)
     // MJ: Nothing to deserialize for now
     //cmnDeSerializeRaw(inputStream, Process);
 }
+

@@ -21,9 +21,12 @@
 #ifndef _mtsSafetyCoordinator_h
 #define _mtsSafetyCoordinator_h
 
+#include "json.h"
 #include "coordinator.h"
+#include "cisstMonitor.h"
 
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -32,9 +35,25 @@ class CISST_EXPORT mtsSafetyCoordinator: public mtsGenericObject, public SF::Coo
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
+    /*! Monitoring components for fault detection and diagnosis.  For now, only 
+        one monitor is deployed per process but the number of the instance can be 
+        increased later depending on the run-time performance or overhead. */
+    typedef std::vector<mtsMonitorComponent*> MonitorsType;
+
+protected:
+    MonitorsType Monitors;
+
+    /*! Parse JSON specification and return new monitoring target spec */
+    bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
+
+public:
     mtsSafetyCoordinator();
     ~mtsSafetyCoordinator();
 
+    /*! Create monitor instance */
+    bool CreateMonitor(void);
+
+    /*! Add monitoring target with json spec */
     bool AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec);
 
     void ToStream(std::ostream & outputStream) const;
