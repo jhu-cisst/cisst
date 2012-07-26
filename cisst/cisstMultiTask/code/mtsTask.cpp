@@ -215,6 +215,7 @@ mtsTask::mtsTask(const std::string & name,
         mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
     CMN_ASSERT(provided);
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
+    // [SFUPDATE]
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);

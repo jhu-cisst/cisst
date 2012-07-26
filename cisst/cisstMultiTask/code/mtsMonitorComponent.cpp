@@ -28,8 +28,7 @@ CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
-    //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 1.0 * cmn_s, false, 100) // MJ TEMP
+    : mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms, false, 1000) // MJ TEMP
 {
     TargetComponents = new TargetComponentsType(true);
 }
@@ -38,6 +37,9 @@ mtsMonitorComponent::~mtsMonitorComponent()
 {
     TargetComponents->DeleteAll();
     delete TargetComponents;
+
+    MonitoringTargets->DeleteAll();
+    delete MonitoringTargets;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -48,13 +50,43 @@ void mtsMonitorComponent::Run(void)
     UpdateFilters();
 }
 
+bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
+    // Validity check: process name
+    const std::string thisProcessName = LCM->GetProcessName();
+    const std::string processName = newMonitorTarget.GetTargetID().ProcessName;
+    if (thisProcessName.compare(processName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: different process name "
+            << "(expected: \"" << thisProcessName << "\", actual: \"" << processName << ")" << std::endl;
+        return false;
+    }
+
+    // Make sure if the target component exists.
+    const std::string componentName = newMonitorTarget.GetTargetID().ComponentName;
+    if (!LCM->FindComponent(componentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no component \"" << componentName << "\" found" << std::endl;
+        return false;
+    }
+
+    // Check if the same monitoring target element has already been registered.
+    mtsComponent * targetComponent = LCM->GetComponent(componentName);
+    CMN_ASSERT(targetComponent);
+    if (!targetComponent->AddMonitorTarget(newMonitorTarget)) {
+        return false;
+    }
+
+    return true;
+}
+
 void mtsMonitorComponent::UpdateFilters(void)
 {
     TargetComponentsType::const_iterator it = TargetComponents->begin();
     const TargetComponentsType::const_iterator itEnd = TargetComponents->end();
+    TargetComponent * target;
     for (; it != itEnd; ++it) {
-        TargetComponent * target = it->second;
-        CMN_ASSERT(target);
+        target = it->second;
         target->GetPeriod(target->Period);
     }
 }
@@ -71,31 +103,56 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     }
 }
 
-bool mtsMonitorComponent::RegisterTargetComponent(mtsTaskPeriodic * task)
+bool mtsMonitorComponent::RegisterComponent(const std::string & componentName)
 {
-    const std::string taskName = task->GetName();
+    // MJ TODO: embed all necessary sampling mechanism into component depending on the
+    // type of component (e.g., mtsComponent, mtsTaskPeriodic, ...) and the specification
+    // of monitor target
 
-    if (TargetComponents->FindItem(taskName)) {
-        CMN_LOG_CLASS_RUN_WARNING << "RegisterTargetComponent: task \"" << taskName << "\" is already registered" << std::endl;
+    if (TargetComponents->FindItem(componentName)) {
+        CMN_LOG_CLASS_RUN_WARNING << "RegisterComponent: component \"" << componentName << "\" is already registered" << std::endl;
         return true;
     }
 
     // Add new target component
     TargetComponent * newTargetComponent = new TargetComponent;
-    newTargetComponent->Name = taskName;
-    newTargetComponent->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(taskName));
-    newTargetComponent->InterfaceRequired->AddFunction("GetPeriod", newTargetComponent->GetPeriod);
-    if (!TargetComponents->AddItem(taskName, newTargetComponent)) {
-        CMN_LOG_CLASS_RUN_ERROR << "RegisterTargetComponent: Failed to add state table access interface for task \"" << taskName << "\"" << std::endl;
+    newTargetComponent->Name = componentName;
+    newTargetComponent->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(componentName));
+
+    // [SFUPDATE]
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(componentName));
+    if (taskPeriodic) {
+        newTargetComponent->InterfaceRequired->AddFunction("GetPeriod", newTargetComponent->GetPeriod);
+        if (!InstallFilters(newTargetComponent, taskPeriodic)) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to install filters to periodic task \"" << componentName << "\"" << std::endl;
+            delete newTargetComponent;
+            return false;
+        }
+    }
+
+    if (!TargetComponents->AddItem(componentName, newTargetComponent)) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to add state table access interface for component \"" << componentName << "\"" << std::endl;
         return false;
     }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "RegisterComponent: Successfully registered component: \"" << componentName << "\"" << std::endl;
+
+    return true;
+}
+
+bool mtsMonitorComponent::InstallFilters(TargetComponent * entry, mtsTaskPeriodic * task)
+{
+    CMN_ASSERT(task);
+
+    const std::string taskName = task->GetName();
 
     // Add "Period" to the monitoring state table of this component with the name of
     // (component name)+"Period"
     std::string periodName(taskName);
     periodName += "Period";
     // MJ TEMP: Adding a new element to state table on the fly is not thread safe -- need to fix this.
-    this->StateTableMonitor.NewElement(periodName, &newTargetComponent->Period);
+    this->StateTableMonitor.NewElement(periodName, &entry->Period);
 
     // MJ TODO: add clean up codes when error happens
 #define ADD_FILTER( _filter )\
@@ -186,14 +243,24 @@ bool mtsMonitorComponent::RegisterTargetComponent(mtsTaskPeriodic * task)
     return true;
 }
 
-bool mtsMonitorComponent::RemoveTargetComponent(const std::string & taskName)
+bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)
 {
-    if (!TargetComponents->FindItem(taskName)) {
-        CMN_LOG_CLASS_RUN_WARNING << "RemoveTargetComponent: task \"" << taskName << "\" is not found" << std::endl;
+    // MJ TODO: cancel and clean up all monitoring target that the component has
+
+    if (!TargetComponents->FindItem(componentName)) {
+        CMN_LOG_CLASS_RUN_WARNING << "UnregisterComponent: component \"" << componentName << "\" is not found" << std::endl;
         return false;
     }
 
-    return TargetComponents->RemoveItem(taskName);
+    bool ret = TargetComponents->RemoveItem(componentName);
+    if (!ret) {
+        CMN_LOG_CLASS_RUN_WARNING << "UnregisterComponent: failed to remove component \"" << componentName << "\"" << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "UnregisterComponent: successfully unregistered component \"" << componentName << "\"" << std::endl;
+
+    return true;
 }
 
 //-----------------------------------------------

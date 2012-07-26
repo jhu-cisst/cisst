@@ -1000,3 +1000,18 @@ void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsCompon
         CMN_LOG_CLASS_RUN_ERROR << GetName() << ": could not find component " << arg.ComponentName
                                 << " to start" << std::endl;
 }
+
+//-------------------------------------------------------------------------
+//  Safety Framework Plug-ins
+//-------------------------------------------------------------------------
+#if CISST_HAS_SAFETY_PLUGINS
+bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
+{
+    // MJ TODO: no duplicate entry check for now 
+    MonitorTargets.push_back(newMonitorTarget);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "New monitoring target added: " << newMonitorTarget << std::endl;
+
+    return true;
+}
+#endif
