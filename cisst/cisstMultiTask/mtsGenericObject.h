@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsGenericObject_h
 
 #include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 
@@ -127,14 +128,29 @@ public:
     virtual void DeSerializeRaw(std::istream & inputStream);
 
     /* documented in base class */
-    size_t GetNumberOfScalars(const bool visualizable = true) const;
+    size_t ScalarNumber(void) const;
+    bool ScalarNumberIsFixed(void) const;
 
     /* documented in base class */
-    double GetScalarAsDouble(const size_t index) const;
+    double Scalar(const size_t index) const;
 
     /* documented in base class */
-    std::string GetScalarName(const size_t index) const;
+    std::string ScalarDescription(const size_t index, const char * userDescription = "") const;
 };
+
+
+void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data);
+
+void cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
+                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat);
+
+bool cmnDataScalarNumberIsFixed(const mtsGenericObject & data);
+
+size_t cmnDataScalarNumber(const mtsGenericObject & data);
+
+double cmnDataScalar(const mtsGenericObject & data, const size_t index);
+
+std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription = "");
 
 #endif // _mtsGenericObject_h
 

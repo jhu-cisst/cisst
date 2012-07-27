@@ -2,16 +2,15 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstVector/vctDataFunctions.h>
-#include <cisstParameterTypes/prmTransformationBase.h>
-#include <cisstParameterTypes/prmTransformationManager.h>
-
+#include <cisstMultiTask/mtsGenericObject.h>
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
 
 class {
-    name prmPositionCartesianGet; // required
+    name prmPositionJointGet; // required
 
     attribute CISST_EXPORT;
 
@@ -21,26 +20,21 @@ class {
     }
 
     member {
-        name MovingFrame;
-        type prmTransformationBasePtr;
-        is-data false;
-        description Pointer to moving frame, unused;
-    }
-
-    member {
-        name ReferenceFrame;
-        type prmTransformationBasePtr;
-        is-data false;
-        description Pointer to reference frame, unused;
-    }
-
-    member {
         name Position;
-        type vctFrm3;
+        type vctDoubleVec;
         description Desired position;
     }
 
     inline-header {
+    public:
+        inline prmPositionJointGet(size_t size) {
+            this->SetSize(size);
+        }
+
+        inline void SetSize(size_t size) {
+            this->PositionMember.SetSize(size);
+        }
+
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }
@@ -48,5 +42,5 @@ class {
 
 
 inline-header {
-CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionCartesianGet);
+CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionJointGet);
 }

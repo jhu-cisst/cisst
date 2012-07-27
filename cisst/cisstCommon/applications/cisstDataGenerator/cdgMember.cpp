@@ -45,7 +45,8 @@ bool cdgMember::HasKeyword(const std::string & keyword) const
         || (keyword == "description")
         || (keyword == "default")
         || (keyword == "accessors")
-        || (keyword == "visibility")) {
+        || (keyword == "visibility")
+        || (keyword == "is-data")) {
         return true;
     }
     return false;
@@ -126,6 +127,19 @@ bool cdgMember::SetValue(const std::string & keyword,
         errorMessage = "visibility must be \"public\", \"protected\" or \"private\", not \"" + value + "\"";
         return false;
     }
+    if (keyword == "is-data") {
+        if (!this->Visibility.empty()) {
+            errorMessage = "is-data already set";
+            return false;
+        }
+        if ((value == "true")
+            || (value == "false")) {
+            this->IsData = value;
+            return true;
+        }
+        errorMessage = "is-data must be \"true\" or \"false\", not \"" + value + "\"";
+        return false;
+    }
     errorMessage = "unhandled keyword \"" + keyword + "\"";
     return false;
 }
@@ -154,6 +168,9 @@ void cdgMember::FillInDefaults(void)
     }
     if (this->Visibility.empty()) {
         this->Visibility = "protected";
+    }
+    if (this->IsData.empty()) {
+        this->IsData = "true";
     }
 }
 

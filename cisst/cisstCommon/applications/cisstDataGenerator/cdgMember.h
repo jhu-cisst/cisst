@@ -40,6 +40,7 @@ class cdgMember: public cdgScope
     std::string Accessors;
     std::string Visibility;
     std::string ClassName;
+    std::string IsData;
 
 public:
     cdgMember(unsigned int lineNumber);

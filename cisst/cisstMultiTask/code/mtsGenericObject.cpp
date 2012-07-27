@@ -105,47 +105,88 @@ void mtsGenericObject::DeSerializeRaw(std::istream & inputStream) {
 }
 
 
-size_t mtsGenericObject::GetNumberOfScalars(const bool visualizable) const
+size_t mtsGenericObject::ScalarNumber(void) const
 {
-    return BaseType::GetNumberOfScalars(visualizable) + 3;
+    return cmnDataScalarNumber(*this);
 }
 
 
-double mtsGenericObject::GetScalarAsDouble(const size_t index) const
+bool mtsGenericObject::ScalarNumberIsFixed(void) const
 {
-    if (index >= GetNumberOfScalars()) {
+    return cmnDataScalarNumberIsFixed(*this);
+}
+
+
+double mtsGenericObject::Scalar(const size_t index) const
+{
+    return cmnDataScalar(*this, index);
+}
+
+
+std::string mtsGenericObject::ScalarDescription(const size_t index, const char * userDescription) const
+{
+    return cmnDataScalarDescription(*this, index, userDescription);
+}
+
+
+void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data)
+{
+    std::cerr << CMN_LOG_DETAILS << "mtsGenericObject serialize!" << std::endl;
+    cmnDataSerializeBinary(outputStream, data.Timestamp());
+    cmnDataSerializeBinary(outputStream, data.AutomaticTimestamp());
+    cmnDataSerializeBinary(outputStream, data.Valid());
+}
+
+
+void cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
+                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat)
+{
+    std::cerr << CMN_LOG_DETAILS << "mtsGenericObject de-serialize!" << std::endl;
+    cmnDataDeSerializeBinary(inputStream, data.Timestamp(), remoteFormat, localFormat);
+    cmnDataDeSerializeBinary(inputStream, data.AutomaticTimestamp(), remoteFormat, localFormat);
+    cmnDataDeSerializeBinary(inputStream, data.Valid(), remoteFormat, localFormat);
+}
+
+
+bool cmnDataScalarNumberIsFixed(const mtsGenericObject & CMN_UNUSED(data))
+{
+    return true;
+}
+
+
+size_t cmnDataScalarNumber(const mtsGenericObject & data)
+{
+    return 3;
+}
+
+
+double cmnDataScalar(const mtsGenericObject & data, const size_t index)
+{
+    if (index >= data.ScalarNumber()) {
         return 0.0;
     }
-    if (index < BaseType::GetNumberOfScalars()) {
-        return BaseType::GetScalarAsDouble(index);
+    if (index == 0) {
+        return data.Timestamp();
     }
-    const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
-    if (offset == 0) {
-        return this->TimestampMember;
-    }
-    if (offset == 1) {
-        return static_cast<double>(this->AutomaticTimestampMember);
+    if (index == 1) {
+        return static_cast<double>(data.AutomaticTimestamp());
     }
     // last case
-    return static_cast<double>(this->ValidMember);
+    return static_cast<double>(data.Valid());
 }
 
 
-std::string mtsGenericObject::GetScalarName(const size_t index) const
+std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription)
 {
-    if (index >= GetNumberOfScalars()) {
+    if (index >= data.ScalarNumber()) {
         return "index out of range";
     }
-    if (index < BaseType::GetNumberOfScalars()) {
-        return BaseType::GetScalarName(index);
+    if (index == 0) {
+        return std::string(userDescription) + "Timestamp";
     }
-    const ptrdiff_t offset = index - BaseType::GetNumberOfScalars();
-    if (offset == 0) {
-        return "Timestamp";
-    }
-    if (offset == 1) {
-        return "AutomaticTimestamp";
+    if (index == 1) {
+        return std::string(userDescription) + "AutomaticTimestamp";
     }
     // last case
-    return "Valid";
+    return std::string(userDescription) + "Valid";
 }

@@ -18,7 +18,8 @@ project (cisstParameterTypes)
 cisst_data_generator (cisstParameterTypes
                       "${cisst_BINARY_DIR}/include" # where to save the file
                       "cisstParameterTypes/"        # sub directory for include
-                      ../prmPositionCartesianGet.ccc)
+                      ../prmPositionCartesianGet.ccc
+                      ../prmPositionJointGet.ccc)
 
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -29,7 +30,6 @@ set (SOURCE_FILES
      prmEventButton.cpp
      prmMotionBase.cpp
 
-     prmPositionJointGet.cpp
      prmPositionJointSet.cpp
      prmVelocityJointGet.cpp
      prmVelocityJointSet.cpp
@@ -60,7 +60,6 @@ set (HEADER_FILES
      prmForwardDeclarations.h
      prmMotionBase.h
 
-     prmPositionJointGet.h
      prmPositionJointSet.h
      prmVelocityJointGet.h
      prmVelocityJointSet.h

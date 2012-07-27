@@ -129,6 +129,14 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     for (index = 0; index < Includes.size(); index++) {
         outputStream << "#include " << Includes[index] << std::endl;
     }
+
+    outputStream << "class " << this->Name << ";" << std::endl;
+
+    GenerateStandardFunctionsHeader(outputStream);
+
+    GenerateDataFunctionsHeader(outputStream);
+
+
     outputStream << "class " << this->Attribute << " " << this->Name;
 
     if (BaseClasses.size() != 0) {
@@ -156,11 +164,9 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
 
     GenerateStandardMethodsHeader(outputStream);
 
+    GenerateDataMethodsHeader(outputStream);
+
     outputStream << "};" << std::endl;
-
-    GenerateStandardFunctionsHeader(outputStream);
-
-    GenerateDataFunctionsHeader(outputStream);
 }
 
 
@@ -173,6 +179,31 @@ void cdgClass::GenerateStandardMethodsHeader(std::ostream & outputStream) const
                  << "    void ToStream(std::ostream & outputStream) const;" << std::endl
                  << "    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' '," << std::endl
                  << "                     bool headerOnly = false, const std::string & headerPrefix = \"\") const;" << std::endl;
+}
+
+
+void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
+{
+    outputStream << "    /* default data methods */" << std::endl
+                 << " public:" << std::endl
+                 << "    inline void SerializeBinary(std::ostream & outputStream) const {" << std::endl
+                 << "        cmnDataSerializeBinary(outputStream, *this);" << std::endl
+                 << "    }" << std::endl
+                 << "    inline void DeSerializeBinary(std::istream & inputStream, const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) {" << std::endl
+                 << "        cmnDataDeSerializeBinary(inputStream, *this, remoteFormat, localFormat);" << std::endl
+                 << "    }" << std::endl
+                 << "    inline bool ScalarNumberIsFixed(void) const {" << std::endl
+                 << "        return cmnDataScalarNumberIsFixed(*this);" << std::endl
+                 << "    }" << std::endl
+                 << "    inline size_t ScalarNumber(void) const {" << std::endl
+                 << "        return cmnDataScalarNumber(*this);" << std::endl
+                 << "    }" << std::endl
+                 << "    inline double Scalar(size_t index) const {" << std::endl
+                 << "        return cmnDataScalar(*this, index);" << std::endl
+                 << "    }" << std::endl
+                 << "    inline std::string ScalarDescription(size_t index) const {" << std::endl
+                 << "        return cmnDataScalarDescription(*this, index);" << std::endl
+                 << "    }" << std::endl;
 }
 
 
@@ -193,6 +224,7 @@ void cdgClass::GenerateCode(std::ostream & outputStream) const
     }
 
     GenerateStandardFunctionsCode(outputStream);
+    GenerateDataFunctionsCode(outputStream);
 }
 
 
@@ -258,7 +290,9 @@ void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
         }
     }
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->Name << "Member);" << std::endl;
+        if (Members[index]->IsData == "true") {
+            outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->Name << "Member);" << std::endl;
+        }
     }
     outputStream << "}" << std::endl
                  << std::endl;
@@ -277,7 +311,9 @@ void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) con
         }
     }
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->Name << "Member);" << std::endl;
+        if (Members[index]->IsData == "true") {
+            outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->Name << "Member);" << std::endl;
+        }
     }
     outputStream << "}" << std::endl
                  << std::endl;
@@ -380,5 +416,128 @@ void cdgClass::GenerateStandardFunctionsCode(std::ostream & outputStream) const
                  << "void cmnDeSerializeRaw(std::istream & inputStream, " << this->Name << " & placeHolder)" << std::endl
                  << "{" << std::endl
                  << "    placeHolder.DeSerializeRaw(inputStream);" << std::endl
+                 << "}" << std::endl;
+}
+
+
+void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
+{
+    size_t index;
+
+    outputStream << "/* data functions */" << std::endl;
+
+    outputStream << "void cmnDataCopy(" << this->Name << " & destination, const " << this->Name << " & source) {" << std::endl
+                 << "}" << std::endl;
+
+
+
+    outputStream << "void cmnDataSerializeBinary(std::ostream & outputStream, const " << this->Name << " & data) {" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "    cmnDataSerializeBinary(outputStream, *(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)));" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->IsData == "true") {
+            outputStream << "    cmnDataSerializeBinary(outputStream, data." << Members[index]->Name << "());" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl;
+
+
+
+    outputStream << "void cmnDataDeSerializeBinary(std::istream & inputStream, " << this->Name << " & data," << std::endl
+                 << "                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) {"<< std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "    cmnDataDeSerializeBinary(inputStream, *(dynamic_cast<" << BaseClasses[index]->Type << "*>(&data)), remoteFormat, localFormat);" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->IsData == "true") {
+            outputStream << "    cmnDataDeSerializeBinary(inputStream, data." << Members[index]->Name << "(), remoteFormat, localFormat);" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl;
+
+
+
+    outputStream << "bool cmnDataScalarNumberIsFixed(const " << this->Name << " & data) {" << std::endl
+                 << "    return true" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "           && cmnDataScalarNumberIsFixed(*(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)))" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->IsData == "true") {
+            outputStream << "           && cmnDataScalarNumberIsFixed(data." << Members[index]->Name << "())" << std::endl;
+        }
+    }
+    outputStream << "    ;" << std::endl
+                 << "}" << std::endl;
+
+    outputStream << "size_t cmnDataScalarNumber(const " << this->Name << " & data) {" << std::endl
+                 << "    return 0" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "           + cmnDataScalarNumber(*(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)))" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->IsData == "true") {
+            outputStream << "           + cmnDataScalarNumber(data." << Members[index]->Name << "())" << std::endl;
+        }
+    }
+    outputStream << "    ;" << std::endl
+                 << "}" << std::endl;
+
+    outputStream << "std::string cmnDataScalarDescription(const " << this->Name << " & data, const size_t & index," << std::endl
+                 << "                                     const char * userDescription) {" << std::endl
+                 << "    size_t baseIndex = 0;" << std::endl
+                 << "    size_t currentMaxIndex = 0;" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "    currentMaxIndex += cmnDataScalarNumber(*(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)));" << std::endl
+                         << "    if (index < currentMaxIndex) {" << std::endl
+                         << "        return cmnDataScalarDescription(*(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)), index - baseIndex);" << std::endl
+                         << "    }" << std::endl
+                         << "    baseIndex = currentMaxIndex;" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->IsData == "true") {
+            outputStream << "    currentMaxIndex += cmnDataScalarNumber(data." << Members[index]->Name << "());" << std::endl
+                         << "    if (index < currentMaxIndex) {" << std::endl
+                         << "        return cmnDataScalarDescription(data." << Members[index]->Name << "(), index - baseIndex, \"" << Members[index]->Name << "\");" << std::endl
+                         << "    }" << std::endl
+                         << "    baseIndex = currentMaxIndex;" << std::endl;
+        }
+    }
+    outputStream << "     cmnThrow(std::out_of_range(\"cmnDataScalarDescription: " << this->Name << " index out of range\"));" << std::endl
+                 << "}" << std::endl;
+
+    outputStream << " double cmnDataScalar(const " << this->Name << " & data, const size_t & index) {" << std::endl
+                 << "    size_t baseIndex = 0;" << std::endl
+                 << "    size_t currentMaxIndex = 0;" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->IsData == "true") {
+            outputStream << "    currentMaxIndex += cmnDataScalarNumber(*(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)));" << std::endl
+                         << "    if (index < currentMaxIndex) {" << std::endl
+                         << "        return cmnDataScalar(*(dynamic_cast<const " << BaseClasses[index]->Type << "*>(&data)), index - baseIndex);" << std::endl
+                         << "    }" << std::endl
+                         << "    baseIndex = currentMaxIndex;" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->IsData == "true") {
+            outputStream << "    currentMaxIndex += cmnDataScalarNumber(data." << Members[index]->Name << "());" << std::endl
+                         << "    if (index < currentMaxIndex) {" << std::endl
+                         << "        return cmnDataScalar(data." << Members[index]->Name << "(), index - baseIndex);" << std::endl
+                         << "    }" << std::endl
+                         << "    baseIndex = currentMaxIndex;" << std::endl;
+        }
+    }
+    outputStream << "     cmnThrow(std::out_of_range(\"cmnDataScalarDescription: " << this->Name << " index out of range\"));" << std::endl
                  << "}" << std::endl;
 }
