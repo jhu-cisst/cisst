@@ -28,9 +28,12 @@ CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
-    : mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms, false, 1000) // MJ TEMP
+    // MJ: Maximum monitoring time resolution is 10 msec (somewhat arbitrary but practically
+    // enough to cover most monitoring scenarios)
+    : mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms, false, 1000)
 {
     TargetComponents = new TargetComponentsType(true);
+    MonitoringTargets = new MonitoringTargetsType(true);
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
@@ -93,14 +96,20 @@ void mtsMonitorComponent::UpdateFilters(void)
 
 void mtsMonitorComponent::PrintTargetComponents(void)
 {
+    std::stringstream ss;
+    ss << "Monitoring target component: ";
+
     TargetComponentsType::const_iterator it = TargetComponents->begin();
     const TargetComponentsType::const_iterator itEnd = TargetComponents->end();
+    int i = 0;
     for (; it != itEnd; ++it) {
         TargetComponent * target = it->second;
         CMN_ASSERT(target);
         target->GetPeriod(target->Period);
-        std::cout << target->Name << ": " << target->Period << std::endl;
+        ss << "[" << ++i << "] " << target->Name << ": period = " << target->Period << std::endl;
     }
+
+    CMN_LOG_CLASS_RUN_DEBUG << ss.str() << std::endl;
 }
 
 bool mtsMonitorComponent::RegisterComponent(const std::string & componentName)
@@ -135,6 +144,8 @@ bool mtsMonitorComponent::RegisterComponent(const std::string & componentName)
         CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to add state table access interface for component \"" << componentName << "\"" << std::endl;
         return false;
     }
+
+    PrintTargetComponents();
 
     CMN_LOG_CLASS_RUN_DEBUG << "RegisterComponent: Successfully registered component: \"" << componentName << "\"" << std::endl;
 

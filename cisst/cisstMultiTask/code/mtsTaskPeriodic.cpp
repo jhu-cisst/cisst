@@ -257,7 +257,7 @@ bool mtsTaskPeriodic::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
         return false;
     }
 
-    CMN_LOG_CLASS_RUN_DEBUG << "Adding new monitoring target: " << newMonitorTarget << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "Added new monitoring target: " << newMonitorTarget << std::endl;
 
     return BaseType::AddMonitorTarget(newMonitorTarget);
 }

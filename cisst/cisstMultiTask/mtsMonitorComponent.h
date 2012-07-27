@@ -92,6 +92,13 @@ protected:
         // Placeholders to register state variable to the monitoring state table of this
         // component (i.e., working copy of Period of the target component)
         double Period;
+
+        TargetComponent(): InterfaceRequired(0), Period(0.0) {}
+        ~TargetComponent() {
+            if (InterfaceRequired) {
+                delete InterfaceRequired;
+            }
+        }
     };
 
     /*! List of TargetComponent structure */
