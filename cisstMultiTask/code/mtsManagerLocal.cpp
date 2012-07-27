@@ -1151,46 +1151,6 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         }
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
-    // If a new component is not of type mtsMonitorComponent, create a required interface
-    // and add it to the monitor so that the monitor can access the state table of the 
-    // target component.
-
-    // NOP for now.  Instead, all of these codes should be executed when
-    // SF::Coordinator::AddMonitorTarget() gets called.
-
-    //if (!SafetyCoordinator->RegisterComponent(component)) {
-    //    CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to register component to the monitor" << std::endl;
-    //    return false;
-    //}
-#if 0 // MJ TEMP: obsolete codes - remove later
-    //mtsTaskPeriodic * task = dynamic_cast<mtsTaskPeriodic*>(component);
-    //if (task && !SafetyCoordinator->IsMonitorReady()) {
-    if (SafetyCoordinator->IsMonitorReady()) {
-        mtsMonitorComponent * monitor = SafetyCoordinator->GetMonitor();
-        CMN_ASSERT(monitor);
-        // monitor can be NULL in case of either MCS or MCC being added.
-        if (componentName != mtsMonitorComponent::GetNameOfMonitorComponent()) {
-            if (!monitor->RegisterTargetComponent(task)) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to register component \"" << componentName << "\" to monitor component" << std::endl;
-                return false;
-            }
-            // Connect new component to monitor component 
-            if (!Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), monitor->GetNameOfStateTableAccessInterface(componentName),
-                         componentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
-            {
-                if (!monitor->RemoveTargetComponent(componentName)) {
-                    CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to remove component \"" << componentName << "\" from monitor component" << std::endl;
-                }
-
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to connect component \"" << componentName << "\" to monitor component" << std::endl;
-                return false;
-            }
-        }
-    }
-#endif
-#endif
-
     CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
 
     return true;
