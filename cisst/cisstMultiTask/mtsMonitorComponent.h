@@ -76,12 +76,12 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    /*! Named map of components being monitored */
+    /*! Named map of components being monitored
     typedef cmnNamedMap<mtsComponent> MonitoringTargetsType;
-    MonitoringTargetsType * MonitoringTargets;
+    MonitoringTargetsType * MonitoringTargets; */
 
 
-    class TargetComponent {
+    class TargetComponentAccessor {
     public:
         // Name of target component
         std::string Name;
@@ -93,17 +93,17 @@ protected:
         // component (i.e., working copy of Period of the target component)
         double Period;
 
-        TargetComponent(): InterfaceRequired(0), Period(0.0) {}
-        ~TargetComponent() {
+        TargetComponentAccessor(): InterfaceRequired(0), Period(0.0) {}
+        ~TargetComponentAccessor() {
             if (InterfaceRequired) {
                 delete InterfaceRequired;
             }
         }
     };
 
-    /*! List of TargetComponent structure */
-    typedef cmnNamedMap<TargetComponent> TargetComponentsType;
-    TargetComponentsType * TargetComponents;
+    /*! List of TargetComponentAccessor structure */
+    typedef cmnNamedMap<TargetComponentAccessor> TargetComponentAccessorType;
+    TargetComponentAccessorType * TargetComponentAccessors;
 
     /*! Fetch new values from each target component */
     void UpdateFilters(void);
@@ -118,19 +118,18 @@ protected:
     //bool InstallFilters(mtsTaskContinuous * taskContinuous);
     //bool InstallFilters(mtsTaskFromCallback * taskFromCallback);
     //bool InstallFilters(mtsTaskFromSignal * taskFromSignal);
-    bool InstallFilters(TargetComponent * entry, mtsTaskPeriodic * taskPeriodic);
+    bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
 
 public:
     mtsMonitorComponent();
     ~mtsMonitorComponent();
 
-    /*! Pass monitoring target information to a component which keeps actual 
-        monitoring target specifications (i.e., cisstMonitor instances). */
+    /*! Pass monitoring target information (i.e., cisstMonitor instance) to the 
+        component to be monitored.  The component uses this information to install
+        monitoring and FDD pipelines. */
     bool AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget);
 
-    /*! Register component that has monitoring target */
-    bool RegisterComponent(const std::string & componentName);
-
+    // TODO: replace this with RemoveMonitorTargetFromComponent()
     /*! Unregister component from the registry */
     bool UnregisterComponent(const std::string & componentName);
 

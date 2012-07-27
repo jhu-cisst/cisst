@@ -33,9 +33,9 @@ mtsSafetyCoordinator::mtsSafetyCoordinator()
 
 mtsSafetyCoordinator::~mtsSafetyCoordinator()
 {
-    if (!Supervisors.empty()) {
-        for (size_t i = 0; i < Supervisors.size(); ++i)
-            delete Supervisors[i];
+    if (!Monitors.empty()) {
+        for (size_t i = 0; i < Monitors.size(); ++i)
+            delete Monitors[i];
     }
 }
 
@@ -63,7 +63,7 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
         return false;
     }
     
-    // Monitor which is currently of type mtsTaskPeriodic cannot be monitored(?)
+    // Monitor cannot monitor itself
     const std::string targetComponentName = newMonitorTarget.GetTargetID().ComponentName;
     if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
         CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << newMonitorTarget.GetTargetID().ComponentName << std::endl;
@@ -71,18 +71,15 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
     }
 
     // Add new monitor target to monitor 
-    mtsMonitorComponent * monitor = Supervisors[0];
+    // [SFUPDATE] Use single monitor instance per process
+    mtsMonitorComponent * monitor = Monitors[0];
     if (!monitor->AddMonitorTargetToComponent(newMonitorTarget)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor: " << newMonitorTarget << std::endl;
         return false;
     }
 
-    if (!monitor->RegisterComponent(targetComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to register component \"" << targetComponentName << "\" to supervisor component" << std::endl;
-        return false;
-    }
-
-    // Connect new monitoring target component to supervisor component 
+    /*
+    // Connect new monitoring target component to monitor component 
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     mtsTask * task = LCM->GetComponentAsTask(targetComponentName); 
     if (!task) { // [SFUPDATE]
@@ -99,11 +96,37 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
         CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << targetComponentName << "\" to monitor component" << std::endl;
         return false;
     }
+    */
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: successfully added monitor target: " << targetUID 
         << "\nJSON: " << json.GetJSON() << std::endl;
 
-    this->MonitorMap[targetUID] = monitorJsonSpec;
+    this->MonitorTargetMap[targetUID] = monitorJsonSpec;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
+{
+    /* TODO
+    // Connect new monitoring target component to monitor component 
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsTask * task = LCM->GetComponentAsTask(targetComponentName); 
+    if (!task) { // [SFUPDATE]
+        CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << targetComponentName << "\"" << std::endl;
+        return false;
+    }
+    if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), monitor->GetNameOfStateTableAccessInterface(targetComponentName),
+                      targetComponentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
+    {
+        if (!monitor->UnregisterComponent(targetComponentName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << targetComponentName << "\" from monitor component" << std::endl;
+        }
+
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << targetComponentName << "\" to monitor component" << std::endl;
+        return false;
+    }
+    */
 
     return true;
 }
@@ -191,7 +214,7 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
     // MJ: For now, keep monitor component only one that monitor all components in the
     // same process.  More monitor components can be dynamically deployed later
     // considering run-time overhead of fault detection and diagnosis methods.
-    if (!Supervisors.empty()) {
+    if (!Monitors.empty()) {
         CMN_LOG_CLASS_RUN_WARNING << "Monitor was already intialized" << std::endl;
         return true;
     }
@@ -204,9 +227,9 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
         return false;
     }
 
-    Supervisors.push_back(monitor);
+    Monitors.push_back(monitor);
 
-    CMN_LOG_CLASS_RUN_DEBUG << "CreateMonitor: created monitor instance (total instance count: " << Supervisors.size() << ")" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "CreateMonitor: created monitor instance (total instance count: " << Monitors.size() << ")" << std::endl;
 
     return true;
 }

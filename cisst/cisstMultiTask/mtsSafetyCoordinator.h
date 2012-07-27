@@ -35,14 +35,14 @@ class CISST_EXPORT mtsSafetyCoordinator: public mtsGenericObject, public SF::Coo
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    /*! Supervisor components for fault detection and diagnosis.  For now, only 
-        one supervisor is deployed per process but the number of the instance can be 
+    /*! Monitor components for fault detection and diagnosis.  For now, only 
+        one monitor is deployed per process but the number of the instance can be 
         increased later depending on the run-time performance or overhead. */
-    typedef std::vector<mtsMonitorComponent*> SupervisorsType;
+    typedef std::vector<mtsMonitorComponent*> MonitorsType;
 
 protected:
-    /*! Instance(s) of supervisor monitor */
-    SupervisorsType Supervisors;
+    /*! Instance(s) of monitor */
+    MonitorsType Monitors;
 
     /*! Parse JSON specification and return new monitoring target spec */
     bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
@@ -54,8 +54,11 @@ public:
     /*! Create monitor instance */
     bool CreateMonitor(void);
 
-    /*! Add monitoring target with json spec */
+    /*! Install monitoring target object with JSON spec */
     bool AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec);
+
+    /*! Deploy all monitors and FDDs that are installed so far */
+    bool DeployMonitorsAndFDDs(void);
 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
