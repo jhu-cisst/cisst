@@ -100,7 +100,8 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
         return false;
     }
 
-    std::cout << "SUCCESS: " << targetUID << "\nJSON: " << json.GetJSON() << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: successfully added monitor target: " << targetUID 
+        << "\nJSON: " << json.GetJSON() << std::endl;
 
     this->MonitorMap[targetUID] = monitorJsonSpec;
 
@@ -204,6 +205,8 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
     }
 
     Supervisors.push_back(monitor);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "CreateMonitor: created monitor instance (total instance count: " << Supervisors.size() << ")" << std::endl;
 
     return true;
 }

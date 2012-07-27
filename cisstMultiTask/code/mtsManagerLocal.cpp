@@ -1021,7 +1021,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 
     // If component does not yet have a valid name, assign one now, based on the class
     // name and the pointer value (to ensure that name is unique).
-    if (componentName == "") {
+    if (componentName.size() == 0) {
         componentName.assign(component->Services()->GetName());
         char buf[20];
         sprintf(buf, "_%p", component);
@@ -1152,7 +1152,6 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
-    // smmy
     // If a new component is not of type mtsMonitorComponent, create a required interface
     // and add it to the monitor so that the monitor can access the state table of the 
     // target component.
