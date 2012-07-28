@@ -80,24 +80,37 @@ protected:
     typedef cmnNamedMap<mtsComponent> MonitoringTargetsType;
     MonitoringTargetsType * MonitoringTargets; */
 
-
     class TargetComponentAccessor {
     public:
-        // Name of target component
+        /*! Name of the component being monitored */
         std::string Name;
-        // Required interface to connect to the target component
+        /*! Required interface to connect to the target component */
         mtsInterfaceRequired * InterfaceRequired;
-        // Function to read state variables from target component
+        /*! Function to read state variables from target component */
         mtsFunctionRead GetPeriod;
-        // Placeholders to register state variable to the monitoring state table of this
-        // component (i.e., working copy of Period of the target component)
-        double Period;
+        /*! Placeholder (i.e., copy of samplings of the monitoring targets) */
+        // [SFUPDATE]: TODO: add more placeholders depending on monitoring target types
+        SF::SamplingPeriodType Period;
+        /*! Minimum period that determines when to fetch data from the target
+            component's state table.  This is set as the minimum value of 
+            the "sampling frequency" field in JSON of all monitoring target 
+            elements. */
+        SF::SamplingPeriodType MinimumPeriod;
+        /*! Timestamp of last sampled data */
+        double LastSampledTime;
 
-        TargetComponentAccessor(): InterfaceRequired(0), Period(0.0) {}
+        TargetComponentAccessor(): 
+            InterfaceRequired(0), Period(0.0), MinimumPeriod(1.0), LastSampledTime(0.0) {}
         ~TargetComponentAccessor() {
-            if (InterfaceRequired) {
-                delete InterfaceRequired;
+            if (InterfaceRequired) delete InterfaceRequired;
+        }
+
+        bool UpdateMinimumPeriod(SF::SamplingPeriodType newPeriod) {
+            if (MinimumPeriod > newPeriod) {
+                MinimumPeriod = newPeriod;
+                return true; // minimum period value was updated
             }
+            return false; // minimum period value remains the same
         }
     };
 
@@ -132,6 +145,9 @@ public:
     // TODO: replace this with RemoveMonitorTargetFromComponent()
     /*! Unregister component from the registry */
     bool UnregisterComponent(const std::string & componentName);
+
+    /*! Initialize all accessors (make connections between monitor and target components) */
+    bool InitializeAccessors(void);
 
     void Configure(const std::string & CMN_UNUSED(filename) = ""){}
     void Startup(void) {};

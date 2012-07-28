@@ -78,26 +78,6 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
         return false;
     }
 
-    /*
-    // Connect new monitoring target component to monitor component 
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    mtsTask * task = LCM->GetComponentAsTask(targetComponentName); 
-    if (!task) { // [SFUPDATE]
-        CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << targetComponentName << "\"" << std::endl;
-        return false;
-    }
-    if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), monitor->GetNameOfStateTableAccessInterface(targetComponentName),
-                      targetComponentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
-    {
-        if (!monitor->UnregisterComponent(targetComponentName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << targetComponentName << "\" from monitor component" << std::endl;
-        }
-
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << targetComponentName << "\" to monitor component" << std::endl;
-        return false;
-    }
-    */
-
     CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: successfully added monitor target: " << targetUID 
         << "\nJSON: " << json.GetJSON() << std::endl;
 
@@ -108,25 +88,12 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
 
 bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
 {
-    /* TODO
-    // Connect new monitoring target component to monitor component 
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    mtsTask * task = LCM->GetComponentAsTask(targetComponentName); 
-    if (!task) { // [SFUPDATE]
-        CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << targetComponentName << "\"" << std::endl;
-        return false;
-    }
-    if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), monitor->GetNameOfStateTableAccessInterface(targetComponentName),
-                      targetComponentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
-    {
-        if (!monitor->UnregisterComponent(targetComponentName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << targetComponentName << "\" from monitor component" << std::endl;
+    for (size_t i = 0; i < Monitors.size(); ++i) {
+        if (!Monitors[i]->InitializeAccessors()) {
+            CMN_LOG_CLASS_RUN_ERROR << "DeployMonitorsAndFDDs: failed to initialize accessors in monitor" << std::endl;
+            return false;
         }
-
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << targetComponentName << "\" to monitor component" << std::endl;
-        return false;
     }
-    */
 
     return true;
 }
@@ -163,10 +130,10 @@ JSON: {
     std::string    targetIdProcessName;
     std::string    targetIdComponentName;
     std::string    targetFaultType;
-    int            outputConfigSamplingRate;
     std::string    outputConfigInitState;
-    SF::StrVecType outputTargets;
     std::string    outputType;
+    SF::StrVecType       outputTargets;
+    SF::SamplingRateType outputConfigSamplingRate;
 
     try {
         // Parse the passed json to extract target information with monitoring specification.
@@ -179,7 +146,7 @@ JSON: {
         // MJ TEMP: key value may change depending on fault type
         targetFaultType = root[TARGET].get(TYPE, "n/a").asString();
         // parse monitor output specification
-        outputConfigSamplingRate = root[OUTPUT][CONFIG].get(SAMPLING_RATE, "-1").asInt();
+        outputConfigSamplingRate = root[OUTPUT][CONFIG].get(SAMPLING_RATE, "1.0").asUInt();
         outputConfigInitState = root[OUTPUT][CONFIG].get(STATE, "n/a").asString();
 
         Json::Value outputTargetsJson;

@@ -3167,10 +3167,7 @@ bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
 
     return ManagerComponent.Client->FaultPropagate(fault);
 }
-#endif
 
-
-#if CISST_HAS_SAFETY_PLUGINS
 SF::Coordinator & mtsManagerLocal::GetCoordinator(void)
 {
     // MJ: If more than one monitor needs to be deployed, this method can be an entry
