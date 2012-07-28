@@ -18,6 +18,8 @@
   --- end cisst license ---
 */
 
+#include <cisstCommon/cmnConstants.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
@@ -28,11 +30,16 @@ CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
-    // MJ: Maximum monitoring time resolution is 10 msec (somewhat arbitrary but practically
+    // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
     // enough to cover most monitoring scenarios)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms, false, 1000)
+    : mtsTaskPeriodic(NameOfMonitorComponent, 5.0 * cmn_ms, false, 5000)
 {
     TargetComponentAccessors = new TargetComponentAccessorType(true);
+
+    // monitoring state table doesn't advance automatically.  It only advances when needed 
+    // (because one advancement of the state table involves running all FDD pipelines)
+    // and is controlled by mtsMonitorComponent::UpdateFilters(void).
+    this->StateTableMonitor.SetAutomaticAdvance(false);
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
@@ -69,15 +76,9 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
         return false;
     }
 
-    /*
-    // MJ TODO: embed all necessary sampling mechanism into component depending on the
-    // type of component (e.g., mtsComponent, mtsTaskPeriodic, ...) and the specification
-    // of monitor target
-    if (TargetComponents->FindItem(targetComponentName)) {
-        CMN_LOG_CLASS_RUN_WARNING << "RegisterComponent: component \"" << targetComponentName << "\" is already registered" << std::endl;
-        return true;
-    }
-    */
+    // Embed all necessary sampling mechanism into component depending on the type of 
+    // component (e.g., mtsComponent, mtsTaskPeriodic, ...) and the specification of 
+    // monitor target.
 
     // Fetch target component information if registered already.  If not, create new instance.
     bool newTargetComponent = false;
@@ -87,6 +88,8 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
         targetComponentAccessor = new TargetComponentAccessor;
         targetComponentAccessor->Name = targetComponentName;
         targetComponentAccessor->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName));
+        targetComponentAccessor->MinimumPeriod = newMonitorTarget.GetSamplingPeriod();
+        targetComponentAccessor->LastSampledTime = 0;
         newTargetComponent = true;
     }
 
@@ -98,16 +101,24 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
                 mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
                 if (taskPeriodic) {
                     targetComponentAccessor->InterfaceRequired->AddFunction("GetPeriod", targetComponentAccessor->GetPeriod);
-                    /* TODO
-                    if (!InstallFilters(targetComponent, taskPeriodic)) {
+                    // MJ TODO: this (i.e., definining filters and setting up FDD pipeline) should 
+                    // be done via JSON.  For now, install filters and FDD pipelines by default with
+                    // hard-coded fixed parameters.
+                    if (!InstallFilters(targetComponentAccessor, taskPeriodic)) {
                         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: Failed to install filters to periodic task \"" << targetComponentName << "\"" << std::endl;
-                        delete targetComponent;
+                        delete targetComponentAccessor;
                         return false;
                     }
-                    */
+
+                    // test
+                    SF::SamplingRateType oldSamplingRate = targetComponentAccessor->MinimumPeriod;
+                    if (targetComponentAccessor->UpdateMinimumPeriod(newMonitorTarget.GetSamplingPeriod())) {
+                        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetToComponent: sampling period updated from " 
+                            << oldSamplingRate << " to " << targetComponentAccessor->MinimumPeriod << std::endl;
+                    }
                 } else {
                     CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: " << SF::Fault::GetFaultString(faultType)
-                        << " is only supported for periodic task (of type mtsTaskPeriodic)" << std::endl;
+                        << " is only applicable to periodic task" << std::endl;
                     if (newTargetComponent) delete targetComponentAccessor;
                     return false;
                 }
@@ -122,7 +133,7 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
             return false;
             break;
     }
-    
+
     // Check if the same monitoring target element has already been registered.
     mtsComponent * targetComponent = LCM->GetComponent(targetComponentName);
     CMN_ASSERT(targetComponent);
@@ -143,15 +154,62 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
     return true;
 }
 
-void mtsMonitorComponent::UpdateFilters(void)
+bool mtsMonitorComponent::InitializeAccessors(void)
 {
+    // Connect new monitoring target component to monitor component 
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
     TargetComponentAccessorType::const_iterator it = TargetComponentAccessors->begin();
     const TargetComponentAccessorType::const_iterator itEnd = TargetComponentAccessors->end();
     TargetComponentAccessor * accessor;
     for (; it != itEnd; ++it) {
         accessor = it->second;
-        accessor->GetPeriod(accessor->Period);
+
+        mtsTask * task = LCM->GetComponentAsTask(accessor->Name); 
+        if (!task) { // [SFUPDATE]
+            CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << accessor->Name << "\"" << std::endl;
+            return false; // MJ TODO
+        }
+
+        if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), GetNameOfStateTableAccessInterface(accessor->Name),
+                          accessor->Name, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
+        {
+            if (!UnregisterComponent(accessor->Name)) {
+                CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << accessor->Name << "\" from monitor component" << std::endl;
+            }
+
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << accessor->Name << "\" to monitor component" << std::endl;
+            return false;
+        }
     }
+
+    return true;
+}
+
+void mtsMonitorComponent::UpdateFilters(void)
+{
+    const double currentTick = osaGetTime();
+
+    TargetComponentAccessorType::const_iterator it = TargetComponentAccessors->begin();
+    const TargetComponentAccessorType::const_iterator itEnd = TargetComponentAccessors->end();
+    TargetComponentAccessor * accessor;
+    bool advance = false;
+    for (; it != itEnd; ++it) {
+        accessor = it->second;
+        // Access target component and fetch sampled data only when needed (specified by JSON)
+        if (currentTick - accessor->LastSampledTime > accessor->MinimumPeriod) {
+            // [SFUPDATE]
+            accessor->GetPeriod(accessor->Period);
+            accessor->LastSampledTime = currentTick;
+            std::cout << accessor->Period << std::endl;
+            advance = true;
+        }
+    }
+
+    // Do filtering and run all FDD pipelines (MJ: this can be further optimized such that
+    // only updated samples are processed).
+    if (advance)
+        StateTableMonitor.Advance();
 }
 
 void mtsMonitorComponent::PrintTargetComponents(void)
