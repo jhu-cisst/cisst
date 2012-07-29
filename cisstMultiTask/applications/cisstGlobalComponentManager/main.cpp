@@ -80,7 +80,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         if (key == 't') {
             std::vector<std::string> procNames;
             std::vector<double> offsets;
-            if (!localManager->GetGCMProcTimeSyncInfo(procNames,offsets)) {
+            if (!componentManager->GetGCMProcTimeSyncInfo(procNames,offsets)) {
                std::cout<< " Could not retrieve process time sync info " <<std::endl; 
             }
             else {
