@@ -65,28 +65,6 @@ public:
     /*! destructor */
     virtual ~prmActuatorState() {};
 
-    /*! Allocate memory based on an existing object of the same type.  The
-    object is provided via a cmnGenericObject pointer.  If a dynamic cast
-    to this type is not possible, this method returns false. */
-    bool inline Allocate(const cmnGenericObject * model)
-    {
-        const ThisType * pointer = dynamic_cast<const ThisType *>(model);
-        if (pointer == 0) {
-            return false;
-        }
-        this->PositionMember.SetSize(pointer->Position().size());
-        this->VelocityMember.SetSize(pointer->Velocity().size());
-        this->InMotionMember.SetSize(pointer->InMotion().size());
-        this->MotorOffMember.SetSize(pointer->MotorOff().size());
-        this->SoftFwdLimitHitMember.SetSize(pointer->SoftFwdLimitHit().size());
-        this->SoftRevLimitHitMember.SetSize(pointer->SoftRevLimitHit().size());
-        this->HardFwdLimitHitMember.SetSize(pointer->HardFwdLimitHit().size());
-        this->HardRevLimitHitMember.SetSize(pointer->HardRevLimitHit().size());
-        this->IsHomedMember.SetSize(pointer->IsHomed().size());
-
-        return true;
-    }
-
     /*! Set and Get methods for the the position. */
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsDoubleVec, Position);

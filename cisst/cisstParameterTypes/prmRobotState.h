@@ -70,32 +70,6 @@ public:
     /*! destructor */
     virtual ~prmRobotState() {};
 
-    /*! Allocate memory based on an existing object of the same type.  The
-    object is provided via a cmnGenericObject pointer.  If a dynamic cast
-    to this type is not possible, this method returns false. */
-    bool inline Allocate(const cmnGenericObject * model)
-    {
-        const ThisType * pointer = dynamic_cast<const ThisType *>(model);
-        if (pointer == 0) {
-            return false;
-        }
-
-        this->JointPositionMember.SetSize(pointer->JointPosition().size());
-        this->JointVelocityMember.SetSize(pointer->JointVelocity().size());
-        this->JointPositionGoalMember.SetSize(pointer->JointPositionGoal().size());
-        this->JointVelocityGoalMember.SetSize(pointer->JointVelocityGoal().size());
-        this->JointPositionErrorMember.SetSize(pointer->JointPositionError().size());
-        this->JointVelocityErrorMember.SetSize(pointer->JointVelocityError().size());
-        this->CartesianPositionMember.SetSize(pointer->CartesianPosition().size());
-        this->CartesianVelocityMember.SetSize(pointer->CartesianVelocity().size());
-        this->CartesianPositionGoalMember.SetSize(pointer->CartesianPositionGoal().size());
-        this->CartesianVelocityGoalMember.SetSize(pointer->CartesianVelocityGoal().size());
-        this->CartesianVelocityErrorMember.SetSize(pointer->CartesianVelocityError().size());
-        this->CartesianPositionErrorMember.SetSize(pointer->CartesianPositionError().size());
-
-        return true;
-    }
-
     /*! Binary serialization */
     void SerializeRaw(std::ostream & outputStream) const;
 

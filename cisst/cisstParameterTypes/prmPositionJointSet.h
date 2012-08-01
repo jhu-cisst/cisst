@@ -86,21 +86,6 @@ public:
         DecelerationMember(deceleration)
     {}
 
-    bool inline Allocate(const mtsGenericObject * model)
-    {
-        const ThisType * pointer = dynamic_cast<const ThisType *>(model);
-        if (pointer == 0) {
-            return false;
-        }
-        MaskMember.SetSize(pointer->MaskMember.size());
-        GoalMember.SetSize(pointer->GoalMember.size());
-        VelocityMember.SetSize(pointer->VelocityMember.size());
-        AccelerationMember.SetSize(pointer->AccelerationMember.size());
-        DecelerationMember.SetSize(pointer->DecelerationMember.size());
-        return true;
-    }
-
-
     /*! destructor */
     virtual ~prmPositionJointSet();
 
