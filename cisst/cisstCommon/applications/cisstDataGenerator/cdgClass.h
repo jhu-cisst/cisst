@@ -40,12 +40,6 @@ class cdgClass: public cdgScope
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-    /*! Name of the data type to be created. */
-    std::string Name;
-
-    /*! For declspec, CISST_EXPORT */
-    std::string Attribute;
-
     /*! List of header files to include.  Corresponds to keyword
       "include" in cisst data description file. */
     typedef std::vector<std::string> IncludesType;
@@ -74,13 +68,9 @@ public:
     cdgClass(unsigned int lineNumber);
 
     cdgScope::Type GetScope(void) const;
-    bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
                   unsigned int lineNumber);
-    bool SetValue(const std::string & keyword, const std::string & value,
-                  std::string & errorMessage);
-    bool IsValid(std::string & errorMessage) const;
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 

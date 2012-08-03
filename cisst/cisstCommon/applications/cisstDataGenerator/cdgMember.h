@@ -32,29 +32,18 @@ class cdgMember: public cdgScope
     friend class cdgFile;
     friend class cdgClass;
 
-    std::string Type;
     bool UsesClassTypedef;
-    std::string Name;
-    std::string Default;
-    std::string Description;
-    std::string Accessors;
-    std::string Visibility;
+
     std::string ClassName;
-    std::string IsData;
 
 public:
     cdgMember(unsigned int lineNumber);
 
     cdgScope::Type GetScope(void) const;
-    bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
                   unsigned int lineNumber);
-    bool SetValue(const std::string & keyword, const std::string & value,
-                  std::string & errorMessage);
-    bool IsValid(std::string & errorMessage) const;
 
-    void FillInDefaults(void);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 

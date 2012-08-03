@@ -155,8 +155,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             }
                         } else if (!word.empty()) {
                             std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in scope \"" << scopes.back()->GetScopeName()
-                                      << "\"" << std::endl;
+                                      << word << "\" in " << scopes.back()->GetDescription() << std::endl;
                             errorFound = true;
                         }
                         if (curlyClose) {

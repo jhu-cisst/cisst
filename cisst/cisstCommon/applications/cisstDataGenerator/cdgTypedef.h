@@ -31,21 +31,12 @@ class cdgTypedef: public cdgScope {
     friend class cdgData;
     friend class cdgFile;
 
-    std::string Type;
-    std::string Name;
-
 public:
     cdgTypedef(unsigned int lineNumber);
     cdgScope::Type GetScope(void) const;
-    bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
                   unsigned int lineNumber);
-    bool SetValue(const std::string & keyword, const std::string & value,
-                  std::string & errorMessage);
-    bool IsValid(std::string & errorMessage) const;
-
-    void FillInDefaults(void) {};
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const {};
 
