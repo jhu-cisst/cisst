@@ -28,6 +28,9 @@ if (CISST_HAS_SAFETY_PLUGINS)
   find_package(SafetyFramework REQUIRED)
   cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIRS)
   cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARIES)
+  # MJ TEMP: need to include Safety Framework build tree
+  include_directories ("${SF_INCLUDE_DIR}/../build/include")
+  include_directories ("${SF_INCLUDE_DIR}/../build")
   # if SafetyFramework found, include JsonCpp
   set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SF_INCLUDE_DIR}/../cmake)
   find_package(JSONCPP REQUIRED)
