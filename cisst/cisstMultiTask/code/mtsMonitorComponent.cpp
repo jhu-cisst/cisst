@@ -43,11 +43,11 @@ mtsMonitorComponent::mtsMonitorComponent()
     // and is controlled by mtsMonitorComponent::UpdateFilters(void).
     this->StateTableMonitor.SetAutomaticAdvance(false);
 
-    Publisher = new SF::Publisher("/Users/MJ/project/tools/Ice-3.4.2/cpp/demo/IceStorm/clock/config.pub");
+    Publisher = new SF::Publisher();
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
     ThreadPublisher.ThreadEventBegin.Wait();
 
-    Subscriber = new SF::Subscriber("/Users/MJ/project/tools/Ice-3.4.2/cpp/demo/IceStorm/clock/config.sub");
+    Subscriber = new SF::Subscriber();
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
 }
@@ -60,8 +60,8 @@ mtsMonitorComponent::~mtsMonitorComponent()
     if (ThreadPublisher.Running || ThreadSubscriber.Running)
         Cleanup();
 
-    delete Publisher;
-    delete Subscriber;
+    if (Publisher) delete Publisher;
+    if (Subscriber) delete Subscriber;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -78,10 +78,12 @@ void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
 
     ThreadPublisher.ThreadEventBegin.Raise();
 
+    Publisher->Startup();
     while (ThreadPublisher.Running) {
-        // MJ TODO: this is blocking call and doesn't return
         Publisher->Run();
+        osaSleep(1.0);
     }
+    Publisher->Stop();
 
     ThreadPublisher.ThreadEventEnd.Raise();
 
@@ -94,6 +96,7 @@ void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
 
     ThreadSubscriber.ThreadEventBegin.Raise();
 
+    Subscriber->Startup();
     while (ThreadSubscriber.Running) {
         // MJ TODO: this is blocking call and doesn't return
         Subscriber->Run();
@@ -109,8 +112,12 @@ void mtsMonitorComponent::Cleanup(void)
     ThreadPublisher.Running = false;
     ThreadPublisher.ThreadEventEnd.Wait();
 
-    ThreadSubscriber.Running = false;
-    ThreadSubscriber.ThreadEventEnd.Wait();
+    if (Subscriber) {
+        ThreadSubscriber.Running = false;
+        // Terminating subscriber needs to call shutdown() on the Ice communicator
+        Subscriber->Stop();
+        ThreadSubscriber.ThreadEventEnd.Wait();
+    }
 }
 
 bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget)
