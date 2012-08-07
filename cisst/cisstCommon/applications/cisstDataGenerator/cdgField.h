@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cdgValue_h
-#define _cdgValue_h
+#ifndef _cdgField_h
+#define _cdgField_h
 
 
 #include <cisstCommon/cmnGenericObject.h>
@@ -29,11 +29,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <list>
 
-class cdgValue: public cmnGenericObject {
+class cdgField: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    cdgValue(const std::string & keyword, const std::string & defaultValue, const bool required);
+    cdgField(const std::string & keyword, const std::string & defaultValue, const bool required);
 
     void AddPossibleValue(const std::string & possibleValue);
     const std::string & GetValue(void) const;
@@ -51,9 +51,9 @@ protected:
     ValuesContainer PossibleValues;
 
 private:
-    cdgValue();
+    cdgField();
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cdgValue);
+CMN_DECLARE_SERVICES_INSTANTIATION(cdgField);
 
-#endif // _cdgValue_h
+#endif // _cdgField_h

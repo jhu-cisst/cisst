@@ -28,12 +28,12 @@ CMN_IMPLEMENT_SERVICES(cdgTypedef);
 cdgTypedef::cdgTypedef(unsigned int lineNumber):
     cdgScope(lineNumber)
 {
-    cdgValue * value;
-    value = this->AddValue("name", "", true);
-    CMN_ASSERT(value);
+    cdgField * field;
+    field = this->AddField("name", "", true);
+    CMN_ASSERT(field);
 
-    value = this->AddValue("type", "", true);
-    CMN_ASSERT(value);
+    field = this->AddField("type", "", true);
+    CMN_ASSERT(field);
 }
 
 
@@ -53,5 +53,5 @@ bool cdgTypedef::HasScope(const std::string & CMN_UNUSED(keyword),
 
 void cdgTypedef::GenerateHeader(std::ostream & outputStream) const
 {
-    outputStream << "    typedef " << this->GetValue("type") << " " << this->GetValue("name") << ";" << std::endl;
+    outputStream << "    typedef " << this->GetFieldValue("type") << " " << this->GetFieldValue("name") << ";" << std::endl;
 }

@@ -29,9 +29,9 @@ cdgInline::cdgInline(unsigned int lineNumber, InlineType type):
     cdgScope(lineNumber),
     Type(type)
 {
-    cdgValue * value;
-    value = this->AddValue("", "", false);
-    CMN_ASSERT(value);
+    cdgField * field;
+    field = this->AddField("", "", false);
+    CMN_ASSERT(field);
 }
 
 
@@ -53,7 +53,7 @@ void cdgInline::GenerateHeader(std::ostream & outputStream) const
 {
     if (Type == CDG_INLINE_HEADER) {
         GenerateLineComment(outputStream);
-        outputStream << this->GetValue("");
+        outputStream << this->GetFieldValue("");
     }
 }
 
@@ -62,6 +62,6 @@ void cdgInline::GenerateCode(std::ostream & outputStream) const
 {
     if (Type == CDG_INLINE_CODE) {
         GenerateLineComment(outputStream);
-        outputStream << this->GetValue("");
+        outputStream << this->GetFieldValue("");
     }
 }

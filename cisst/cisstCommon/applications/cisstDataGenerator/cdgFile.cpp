@@ -146,7 +146,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     // first define the current step, either find new keyword or new scope
                     if (keyword.empty()) {
                         value.clear();
-                        if (scopes.back()->HasKeyword(word)) {
+                        if (scopes.back()->HasField(word)) {
                             keyword = word;
                         } else if (scopes.back()->HasScope(word, scopes, lineNumber)) {
                             keyword.clear();
@@ -177,7 +177,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             // we are done for this set keyword/value
                             RemoveTrailingSpaces(value);
                             errorMessage.clear();
-                            if (!scopes.back()->SetValue(keyword, value, errorMessage)) {
+                            if (!scopes.back()->SetFieldValue(keyword, value, errorMessage)) {
                                 std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
                                           << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
                                 errorFound = true;
@@ -224,7 +224,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             curlyCounter--;
                             if (curlyCounter == 0) {
                                 errorMessage.clear();
-                                if (!scopes.back()->SetValue(keyword, value, errorMessage)) {
+                                if (!scopes.back()->SetFieldValue(keyword, value, errorMessage)) {
                                     std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
                                               << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
                                     errorFound = true;

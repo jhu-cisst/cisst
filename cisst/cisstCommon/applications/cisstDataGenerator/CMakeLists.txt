@@ -26,8 +26,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 # name the main executable and specifies with source files to use
 add_executable (cisstDataGenerator
                 cisstDataGenerator.cpp
-                cdgValue.h
-                cdgValue.cpp
+                cdgField.h
+                cdgField.cpp
                 cdgScope.h
                 cdgScope.cpp
                 cdgGlobal.h

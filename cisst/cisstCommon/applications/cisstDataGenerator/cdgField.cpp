@@ -20,11 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include "cdgValue.h"
+#include "cdgField.h"
 
-CMN_IMPLEMENT_SERVICES(cdgValue);
+CMN_IMPLEMENT_SERVICES(cdgField);
 
-cdgValue::cdgValue(const std::string & keyword, const std::string & defaultValue, const bool required):
+cdgField::cdgField(const std::string & keyword, const std::string & defaultValue, const bool required):
     Keyword(keyword),
     Value(""),
     Default(defaultValue),
@@ -33,19 +33,19 @@ cdgValue::cdgValue(const std::string & keyword, const std::string & defaultValue
 }
 
 
-void cdgValue::AddPossibleValue(const std::string & possibleValue)
+void cdgField::AddPossibleValue(const std::string & possibleValue)
 {
     this->PossibleValues.push_back(possibleValue);
 }
 
 
-const std::string & cdgValue::GetValue(void) const
+const std::string & cdgField::GetValue(void) const
 {
     return this->Value;
 }
 
 
-std::string cdgValue::GetDescription(void) const
+std::string cdgField::GetDescription(void) const
 {
     std::string result = "\"" + this->Keyword + "\" can be ";
     if (this->PossibleValues.empty()) {
@@ -72,7 +72,7 @@ std::string cdgValue::GetDescription(void) const
 }
 
 
-bool cdgValue::SetValue(const std::string & value, std::string & errorMessage)
+bool cdgField::SetValue(const std::string & value, std::string & errorMessage)
 {
     if (!this->Value.empty()) {
         errorMessage = Keyword + " already set";
@@ -99,7 +99,7 @@ bool cdgValue::SetValue(const std::string & value, std::string & errorMessage)
 }
 
 
-bool cdgValue::IsValid(std::string & errorMessage) const
+bool cdgField::IsValid(std::string & errorMessage) const
 {
     if (this->Required && (this->Value == "")) {
         errorMessage.append("\"");
@@ -112,7 +112,7 @@ bool cdgValue::IsValid(std::string & errorMessage) const
 }
 
 
-void cdgValue::FillInDefaults(void)
+void cdgField::FillInDefaults(void)
 {
     if ((this->Default != "") && this->Value.empty()) {
         this->Value = this->Default;

@@ -28,20 +28,20 @@ CMN_IMPLEMENT_SERVICES(cdgBaseClass);
 cdgBaseClass::cdgBaseClass(unsigned int lineNumber):
     cdgScope(lineNumber)
 {
-    cdgValue * value;
-    value = this->AddValue("type", "", true);
-    CMN_ASSERT(value);
+    cdgField * field;
+    field = this->AddField("type", "", true);
+    CMN_ASSERT(field);
     
-    value = this->AddValue("visibility", "public", false);
-    CMN_ASSERT(value);
-    value->AddPossibleValue("public");
-    value->AddPossibleValue("private");
-    value->AddPossibleValue("protected");
+    field = this->AddField("visibility", "public", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("public");
+    field->AddPossibleValue("private");
+    field->AddPossibleValue("protected");
 
-    value = this->AddValue("is-data", "true", false);
-    CMN_ASSERT(value);
-    value->AddPossibleValue("true");
-    value->AddPossibleValue("false");
+    field = this->AddField("is-data", "true", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
 }
 
 
@@ -61,7 +61,7 @@ bool cdgBaseClass::HasScope(const std::string & CMN_UNUSED(keyword),
 
 void cdgBaseClass::GenerateHeaderInheritance(std::ostream & outputStream) const
 {
-    outputStream << this->GetValue("visibility") << " " << this->GetValue("type");
+    outputStream << this->GetFieldValue("visibility") << " " << this->GetFieldValue("type");
 }
 
 

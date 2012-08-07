@@ -44,11 +44,11 @@ const std::string & cdgScope::GetScopeName(void) const
 std::string cdgScope::GetDescription(void) const
 {
     std::string result = "Scope \"" + this->GetScopeName() + "\"";
-    if (!this->Values.empty()) {
-        result.append("\nPossible values:");
-        const ValuesContainer::const_iterator end = this->Values.end();
-        ValuesContainer::const_iterator iter;
-        for (iter = this->Values.begin();
+    if (!this->Fields.empty()) {
+        result.append("\nPossible fields:");
+        const FieldsContainer::const_iterator end = this->Fields.end();
+        FieldsContainer::const_iterator iter;
+        for (iter = this->Fields.begin();
              iter != end;
              iter++) {
             result.append("\n- ");
@@ -60,47 +60,47 @@ std::string cdgScope::GetDescription(void) const
 }
 
 
-cdgValue * cdgScope::AddValue(const std::string & keyword, const std::string & defaultValue, const bool required)
+cdgField * cdgScope::AddField(const std::string & fieldName, const std::string & defaultValue, const bool required)
 {
-    if (this->Values.FindItem(keyword)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddValue: keyword \"" << keyword << "\" already defined." << std::endl;
+    if (this->Fields.FindItem(fieldName)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddField: field name \"" << fieldName << "\" already defined." << std::endl;
         return 0;
     }
-    cdgValue * result = new cdgValue(keyword, defaultValue, required);
-    Values.AddItem(keyword, result);
+    cdgField * result = new cdgField(fieldName, defaultValue, required);
+    Fields.AddItem(fieldName, result);
     return result;
 }
 
 
-bool cdgScope::HasKeyword(const std::string & keyword) const
+bool cdgScope::HasField(const std::string & fieldName) const
 {
-    if (Values.FindItem(keyword)) {
+    if (Fields.FindItem(fieldName)) {
         return true;
     }
     return false;
 }
 
 
-bool cdgScope::SetValue(const std::string & keyword,
-                        const std::string & value,
-                        std::string & errorMessage)
+bool cdgScope::SetFieldValue(const std::string & fieldName,
+                             const std::string & value,
+                             std::string & errorMessage)
 {
-    cdgValue * field = this->Values.GetItem(keyword);
+    cdgField * field = this->Fields.GetItem(fieldName);
     if (field) {
         return field->SetValue(value, errorMessage);
     }
-    errorMessage = "unhandled keyword \"" + keyword + "\"";
+    errorMessage = "unhandled field name \"" + fieldName + "\"";
     return false;
 }
 
 
-std::string cdgScope::GetValue(const std::string & keyword) const
+std::string cdgScope::GetFieldValue(const std::string & fieldName) const
 {
-    cdgValue * value = this->Values.GetItem(keyword);
-    if (value) {
-        return value->GetValue();
+    cdgField * field = this->Fields.GetItem(fieldName);
+    if (field) {
+        return field->GetValue();
     }
-    return std::string("can't find keyword \"") + keyword + "\" in scope \"" + this->GetScopeName() + "\"";
+    return std::string("can't find field name \"") + fieldName + "\" in scope \"" + this->GetScopeName() + "\"";
 }
 
 
@@ -108,9 +108,9 @@ bool cdgScope::IsValid(std::string & errorMessage) const
 {
     errorMessage.clear();
     bool isValid = true;
-    const ValuesContainer::const_iterator end = this->Values.end();
-    ValuesContainer::const_iterator iter;
-    for (iter = this->Values.begin();
+    const FieldsContainer::const_iterator end = this->Fields.end();
+    FieldsContainer::const_iterator iter;
+    for (iter = this->Fields.begin();
          iter != end;
          iter++) {
         if (!iter->second->IsValid(errorMessage)) {
@@ -128,9 +128,9 @@ void cdgScope::FillInDefaults(void)
         Scopes[index]->FillInDefaults();
     }
 
-    const ValuesContainer::const_iterator end = this->Values.end();
-    ValuesContainer::const_iterator iter;
-    for (iter = this->Values.begin();
+    const FieldsContainer::const_iterator end = this->Fields.end();
+    FieldsContainer::const_iterator iter;
+    for (iter = this->Fields.begin();
          iter != end;
          iter++) {
         iter->second->FillInDefaults();

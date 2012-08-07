@@ -29,36 +29,36 @@ cdgMember::cdgMember(unsigned int lineNumber):
     cdgScope(lineNumber),
     UsesClassTypedef(false)
 {
-    cdgValue * value;
-    value = this->AddValue("name", "", true);
-    CMN_ASSERT(value);
+    cdgField * field;
+    field = this->AddField("name", "", true);
+    CMN_ASSERT(field);
 
-    value = this->AddValue("type", "", true);
-    CMN_ASSERT(value);
+    field = this->AddField("type", "", true);
+    CMN_ASSERT(field);
 
-    value = this->AddValue("description", "", false);
-    CMN_ASSERT(value);
+    field = this->AddField("description", "", false);
+    CMN_ASSERT(field);
 
-    value = this->AddValue("default", "", false);
-    CMN_ASSERT(value);
+    field = this->AddField("default", "", false);
+    CMN_ASSERT(field);
 
-    value = this->AddValue("accessors", "all", false);
-    CMN_ASSERT(value);
-    value->AddPossibleValue("none");
-    value->AddPossibleValue("references");
-    value->AddPossibleValue("set-get");
-    value->AddPossibleValue("all");
+    field = this->AddField("accessors", "all", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("none");
+    field->AddPossibleValue("references");
+    field->AddPossibleValue("set-get");
+    field->AddPossibleValue("all");
 
-    value = this->AddValue("visibility", "protected", false);
-    CMN_ASSERT(value);
-    value->AddPossibleValue("public");
-    value->AddPossibleValue("protected");
-    value->AddPossibleValue("private");
+    field = this->AddField("visibility", "protected", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("public");
+    field->AddPossibleValue("protected");
+    field->AddPossibleValue("private");
 
-    value = this->AddValue("is-data", "true", false);
-    CMN_ASSERT(value);
-    value->AddPossibleValue("true");
-    value->AddPossibleValue("false");
+    field = this->AddField("is-data", "true", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
 }
 
 
@@ -79,11 +79,11 @@ bool cdgMember::HasScope(const std::string & CMN_UNUSED(keyword),
 void cdgMember::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
-    const std::string type = this->GetValue("type");
-    const std::string name = this->GetValue("name");
-    const std::string accessors = this->GetValue("accessors");
+    const std::string type = this->GetFieldValue("type");
+    const std::string name = this->GetFieldValue("name");
+    const std::string accessors = this->GetFieldValue("accessors");
     outputStream << " protected:" << std::endl
-                 << "    " << type << " " << name << "Member; // " << this->GetValue("description") << std::endl;
+                 << "    " << type << " " << name << "Member; // " << this->GetFieldValue("description") << std::endl;
     if (accessors != "none") {
         outputStream << " public:" << std::endl;
     }
@@ -105,9 +105,9 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
 void cdgMember::GenerateCode(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
-    const std::string type = this->GetValue("type");
-    const std::string name = this->GetValue("name");
-    const std::string accessors = this->GetValue("accessors");
+    const std::string type = this->GetFieldValue("type");
+    const std::string name = this->GetFieldValue("name");
+    const std::string accessors = this->GetFieldValue("accessors");
     std::string returnType;
     if (UsesClassTypedef) {
         returnType = this->ClassName + "::" + type;

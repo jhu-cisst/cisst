@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstCommon/cmnAssert.h>
 
-#include "cdgValue.h"
+#include "cdgField.h"
 
 class cdgScope: public cmnGenericObject {
 
@@ -45,7 +45,7 @@ public:
     typedef std::vector<cdgScope *> ScopesContainer;
     typedef ScopesContainer Stack; // for parser to manage nested scopes
 
-    typedef cmnNamedMap<cdgValue> ValuesContainer;
+    typedef cmnNamedMap<cdgField> FieldsContainer;
 
     cdgScope(unsigned int lineNumber);
 
@@ -54,16 +54,16 @@ public:
     const std::string & GetScopeName(void) const;
     virtual Type GetScope(void) const = 0;
 
-    cdgValue * AddValue(const std::string & keyword, const std::string & defaultValue, const bool required);
-    bool HasKeyword(const std::string & keyword) const;
-    bool SetValue(const std::string & keyword,
-                  const std::string & value,
-                  std::string & errorMessage);
-    std::string GetValue(const std::string & keyword) const;
+    cdgField * AddField(const std::string & fieldName, const std::string & defaultValue, const bool required);
+    bool HasField(const std::string & fieldName) const;
+    bool SetFieldValue(const std::string & fieldName,
+                       const std::string & value,
+                       std::string & errorMessage);
+    std::string GetFieldValue(const std::string & fieldName) const;
     bool IsValid(std::string & errorMessage) const;
     void FillInDefaults(void);
 
-    virtual bool HasScope(const std::string & keyword,
+    virtual bool HasScope(const std::string & fieldName,
                           Stack & scopes,
                           unsigned int lineNumber) = 0;
 
@@ -71,7 +71,7 @@ public:
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
 
 protected:
-    ValuesContainer Values;
+    FieldsContainer Fields;
     ScopesContainer Scopes; // list of "scopes" found in this scope
     unsigned int LineNumber;
     void GenerateLineComment(std::ostream & outputStream) const;
