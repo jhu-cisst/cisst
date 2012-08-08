@@ -36,20 +36,40 @@ mtsMonitorComponent::mtsMonitorComponent()
     : mtsTaskPeriodic(NameOfMonitorComponent, 5.0 * cmn_ms, false, 5000),
       Publisher(0), Subscriber(0)
 {
+    Init();
+}
+
+mtsMonitorComponent::mtsMonitorComponent(double period)
+    // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
+    // enough to cover most monitoring scenarios)
+    : mtsTaskPeriodic(NameOfMonitorComponent, period, false, 5000),
+      Publisher(0), Subscriber(0)
+{
+    Init();
+}
+
+void mtsMonitorComponent::Init(void)
+{
     TargetComponentAccessors = new TargetComponentAccessorType(true);
 
-    // monitoring state table doesn't advance automatically.  It only advances when needed 
-    // (because one advancement of the state table involves running all FDD pipelines)
-    // and is controlled by mtsMonitorComponent::UpdateFilters(void).
+    // The monitoring state table doesn't advance automatically.  It advances only when needed 
+    // to reduce run-time overhead because the advancement of the state table results in 
+    // running all FDD pipelines.  The manual advancement is controlled by 
+    // mtsMonitorComponent::UpdateFilters(void).
     this->StateTableMonitor.SetAutomaticAdvance(false);
 
     Publisher = new SF::Publisher();
+    Publisher->Startup();
+#if 0
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
     ThreadPublisher.ThreadEventBegin.Wait();
+#endif
 
+#if 0
     Subscriber = new SF::Subscriber();
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
+#endif
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
@@ -74,6 +94,7 @@ void mtsMonitorComponent::Run(void)
 
 void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
 {
+#if 0
     ThreadPublisher.Running = true;
 
     ThreadPublisher.ThreadEventBegin.Raise();
@@ -81,11 +102,13 @@ void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
     Publisher->Startup();
     while (ThreadPublisher.Running) {
         Publisher->Run();
+        // smmy
         osaSleep(1.0);
     }
     Publisher->Stop();
 
     ThreadPublisher.ThreadEventEnd.Raise();
+#endif
 
     return 0;
 }
@@ -98,7 +121,6 @@ void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
 
     Subscriber->Startup();
     while (ThreadSubscriber.Running) {
-        // MJ TODO: this is blocking call and doesn't return
         Subscriber->Run();
     }
 
@@ -109,8 +131,12 @@ void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
 
 void mtsMonitorComponent::Cleanup(void)
 {
+#if 0
     ThreadPublisher.Running = false;
     ThreadPublisher.ThreadEventEnd.Wait();
+#endif
+
+    CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Monitor component is cleaned up" << std::endl;
 
     if (Subscriber) {
         ThreadSubscriber.Running = false;
@@ -150,7 +176,8 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
     if (!targetComponentAccessor) {
         // Add new target component
         targetComponentAccessor = new TargetComponentAccessor;
-        targetComponentAccessor->Name = targetComponentName;
+        targetComponentAccessor->ProcessName = thisProcessName;
+        targetComponentAccessor->ComponentName = targetComponentName;
         targetComponentAccessor->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName));
         targetComponentAccessor->MinimumPeriod = newMonitorTarget.GetSamplingPeriod();
         targetComponentAccessor->LastSampledTime = 0;
@@ -228,20 +255,20 @@ bool mtsMonitorComponent::InitializeAccessors(void)
     for (; it != itEnd; ++it) {
         accessor = it->second;
 
-        mtsTask * task = LCM->GetComponentAsTask(accessor->Name); 
+        mtsTask * task = LCM->GetComponentAsTask(accessor->ComponentName); 
         if (!task) { // [SFUPDATE]
-            CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << accessor->Name << "\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << accessor->ComponentName << "\"" << std::endl;
             return false; // MJ TODO
         }
 
-        if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), GetNameOfStateTableAccessInterface(accessor->Name),
-                          accessor->Name, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
+        if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), GetNameOfStateTableAccessInterface(accessor->ComponentName),
+                          accessor->ComponentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
         {
-            if (!UnregisterComponent(accessor->Name)) {
-                CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << accessor->Name << "\" from monitor component" << std::endl;
+            if (!UnregisterComponent(accessor->ComponentName)) {
+                CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << accessor->ComponentName << "\" from monitor component" << std::endl;
             }
 
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << accessor->Name << "\" to monitor component" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << accessor->ComponentName << "\" to monitor component" << std::endl;
             return false;
         }
     }
@@ -263,6 +290,7 @@ void mtsMonitorComponent::UpdateFilters(void)
         if (currentTick - accessor->LastSampledTime > accessor->MinimumPeriod) {
             // [SFUPDATE]
             accessor->GetPeriod(accessor->Period);
+            Publisher->Publish(accessor->ProcessName, accessor->ComponentName, accessor->Period);
             accessor->LastSampledTime = currentTick;
             advance = true;
         }
@@ -286,7 +314,7 @@ void mtsMonitorComponent::PrintTargetComponents(void)
         TargetComponentAccessor * target = it->second;
         CMN_ASSERT(target);
         target->GetPeriod(target->Period);
-        ss << "[" << ++i << "] " << target->Name << ": period = " << target->Period << std::endl;
+        ss << "[" << ++i << "] " << target->ProcessName << " : " << target->ComponentName << ", period = " << target->Period << std::endl;
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << ss.str() << std::endl;

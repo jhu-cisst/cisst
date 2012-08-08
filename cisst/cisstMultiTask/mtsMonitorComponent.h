@@ -79,6 +79,14 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+public:
+    typedef struct {
+        osaThread       Thread;
+        osaThreadSignal ThreadEventBegin;
+        osaThreadSignal ThreadEventEnd;
+        bool            Running;
+    } InternalThreadType;
+
 protected:
     /*! Named map of components being monitored
     typedef cmnNamedMap<mtsComponent> MonitoringTargetsType;
@@ -86,8 +94,10 @@ protected:
 
     class TargetComponentAccessor {
     public:
+        /*! Name of this process */
+        std::string ProcessName;
         /*! Name of the component being monitored */
-        std::string Name;
+        std::string ComponentName;
         /*! Required interface to connect to the target component */
         mtsInterfaceRequired * InterfaceRequired;
         /*! Function to read state variables from target component */
@@ -122,6 +132,9 @@ protected:
     typedef cmnNamedMap<TargetComponentAccessor> TargetComponentAccessorType;
     TargetComponentAccessorType * TargetComponentAccessors;
 
+    /*! Initialize monitor instance */
+    void Init(void);
+
     /*! Fetch new values from each target component */
     void UpdateFilters(void);
 
@@ -144,13 +157,6 @@ protected:
     SF::Publisher *  Publisher;
     SF::Subscriber * Subscriber;
 
-    typedef struct {
-        osaThread       Thread;
-        osaThreadSignal ThreadEventBegin;
-        osaThreadSignal ThreadEventEnd;
-        bool            Running;
-    } InternalThreadType;
-
     InternalThreadType ThreadPublisher;
     InternalThreadType ThreadSubscriber;
 
@@ -159,6 +165,7 @@ protected:
 
 public:
     mtsMonitorComponent();
+    mtsMonitorComponent(double period);
     ~mtsMonitorComponent();
 
     /*! Pass monitoring target information (i.e., cisstMonitor instance) to the 
