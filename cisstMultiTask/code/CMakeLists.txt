@@ -347,6 +347,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        mtsFaultDetectorThresholding.cpp
        # plug-ins for Safety Framework
        mtsSafetyCoordinator.cpp
+       mtsSafetySupervisor.cpp
        )
 
   set (HEADER_FILES
@@ -363,6 +364,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        mtsFaultDetectorThresholding.h
        # plug-ins for Safety Framework
        mtsSafetyCoordinator.h
+       mtsSafetySupervisor.h
        )
 endif (CISST_HAS_SAFETY_PLUGINS)
 
