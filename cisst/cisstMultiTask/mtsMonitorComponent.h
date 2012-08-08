@@ -94,6 +94,8 @@ protected:
 
     class TargetComponentAccessor {
     public:
+        /*! Copy of monitoring target (SF::cisstMonitor instance) */
+        SF::cisstMonitor MonitorTarget;
         /*! Name of this process */
         std::string ProcessName;
         /*! Name of the component being monitored */

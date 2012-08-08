@@ -27,11 +27,11 @@
 //#include "cisstMonitor.h"
 
 #include <cisstMultiTask/mtsMonitorComponent.h>
-#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsSafetySupervisor: public mtsGenericObject, public SF::Supervisor 
+class CISST_EXPORT mtsSafetySupervisor: public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -39,14 +39,13 @@ protected:
     /*! Initialization */
     void Init(void);
 
-    /*! Resource deallocation, clean up */
-    void Cleanup(void);
-
     /*! Ice publisher and subscriber */
-    SF::Publisher *  Publisher;
+    SF::Publisher * Publisher;
     SF::Subscriber * Subscriber;
 
-    mtsMonitorComponent::InternalThreadType ThreadPublisher;
+    /*! Supervisor instance: the brain of the safety framework */
+    SF::Supervisor Supervisor;
+
     mtsMonitorComponent::InternalThreadType ThreadSubscriber;
 
     void * RunSubscriber(unsigned int arg);
@@ -55,9 +54,10 @@ public:
     mtsSafetySupervisor();
     ~mtsSafetySupervisor();
 
-    void ToStream(std::ostream & outputStream) const;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void Configure(const std::string & CMN_UNUSED(filename)) {}
+    void Startup(void);
+    void Run(void);
+    void Cleanup(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSafetySupervisor);
