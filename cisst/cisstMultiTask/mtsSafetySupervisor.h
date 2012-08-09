@@ -26,8 +26,9 @@
 #include "subscriber.h"
 //#include "cisstMonitor.h"
 
-#include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsMonitorComponent.h>
+#include <cisstMultiTask/mtsSubscriberCallback.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -36,17 +37,23 @@ class CISST_EXPORT mtsSafetySupervisor: public mtsTaskPeriodic
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    /*! Initialization */
-    void Init(void);
+    /*! Supervisor instance: the brain of the safety framework */
+    SF::Supervisor Supervisor;
 
     /*! Ice publisher and subscriber */
     SF::Publisher * Publisher;
     SF::Subscriber * Subscriber;
 
-    /*! Supervisor instance: the brain of the safety framework */
-    SF::Supervisor Supervisor;
+    /*! Callback for subscriber */
+    mtsSubscriberCallback * SubscriberCallback;
+
+    /*! Container for messages delivered by subscriber */
+    mtsSubscriberCallback::MessagesType Messages;
 
     mtsMonitorComponent::InternalThreadType ThreadSubscriber;
+
+    /*! Initialization */
+    void Init(void);
 
     void * RunSubscriber(unsigned int arg);
 
