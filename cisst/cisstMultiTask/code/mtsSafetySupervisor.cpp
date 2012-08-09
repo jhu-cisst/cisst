@@ -29,7 +29,7 @@ CMN_IMPLEMENT_SERVICES(mtsSafetySupervisor);
 
 mtsSafetySupervisor::mtsSafetySupervisor()
     : mtsTaskPeriodic(Supervisor::GetSupervisorName(), 10 * cmn_ms),
-      Publisher(0), Subscriber(0)
+      Publisher(0), Subscriber(0), SubscriberCallback(0)
 {
     Init();
 }
@@ -41,12 +41,15 @@ mtsSafetySupervisor::~mtsSafetySupervisor()
 
     if (Publisher) delete Publisher;
     if (Subscriber) delete Subscriber;
+    if (SubscriberCallback) delete SubscriberCallback;
 }
 
 void mtsSafetySupervisor::Init(void)
 {
     Publisher = new SF::Publisher(TopicNames::Supervisor);
-    Subscriber = new SF::Subscriber(TopicNames::Monitor);
+
+    SubscriberCallback = new mtsSubscriberCallback;
+    Subscriber = new SF::Subscriber(TopicNames::Monitor, SubscriberCallback);
 }
 
 void mtsSafetySupervisor::Startup(void)
@@ -62,12 +65,16 @@ void mtsSafetySupervisor::Run(void)
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 
-    if (Publisher) {
-        std::stringstream ss;
-        static int a = 0;
-        ss << "SUPERVISOR's PUBLISHER: " << ++a;
-        Publisher->Publish(ss.str());
-        std::cout << "Published: " << ss.str() << std::endl;
+    // smmy
+    std::stringstream ss;
+    static int a = 0;
+    ss << "SUPERVISOR is publishing: " << ++a;
+    Publisher->Publish(ss.str());
+
+    size_t before = Messages.size();
+    if (!SubscriberCallback->IsEmptyQueue()) {
+        SubscriberCallback->FetchMessages(Messages);
+        std::cout << "SAFETY SUPERVISOR fetched " << Messages.size() - before << " items: " << before << std::endl;
     }
 }
 

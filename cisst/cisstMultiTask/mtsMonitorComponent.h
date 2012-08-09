@@ -32,6 +32,7 @@
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsSubscriberCallback.h>
 
 #include "cisstMonitor.h"
 #include "publisher.h"
@@ -158,6 +159,12 @@ protected:
     /*! Ice publisher and subscriber */
     SF::Publisher *  Publisher;
     SF::Subscriber * Subscriber;
+
+    /*! Callback for subscriber */
+    mtsSubscriberCallback * SubscriberCallback;
+
+    /*! Container for messages delivered by subscriber */
+    mtsSubscriberCallback::MessagesType Messages;
 
     InternalThreadType ThreadPublisher;
     InternalThreadType ThreadSubscriber;

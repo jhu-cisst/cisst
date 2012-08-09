@@ -38,7 +38,7 @@ mtsMonitorComponent::mtsMonitorComponent()
     // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
     // enough to cover most monitoring scenarios)
     : mtsTaskPeriodic(NameOfMonitorComponent, 5.0 * cmn_ms, false, 5000),
-      Publisher(0), Subscriber(0)
+      Publisher(0), Subscriber(0), SubscriberCallback(0)
 {
     Init();
 }
@@ -47,7 +47,7 @@ mtsMonitorComponent::mtsMonitorComponent(double period)
     // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
     // enough to cover most monitoring scenarios)
     : mtsTaskPeriodic(NameOfMonitorComponent, period, false, 5000),
-      Publisher(0), Subscriber(0)
+      Publisher(0), Subscriber(0), SubscriberCallback(0)
 {
     Init();
 }
@@ -69,7 +69,8 @@ void mtsMonitorComponent::Init(void)
     ThreadPublisher.ThreadEventBegin.Wait();
 #endif
 
-    Subscriber = new SF::Subscriber(TopicNames::Supervisor);
+    SubscriberCallback = new mtsSubscriberCallback;
+    Subscriber = new SF::Subscriber(TopicNames::Supervisor, SubscriberCallback);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
 }
@@ -84,6 +85,7 @@ mtsMonitorComponent::~mtsMonitorComponent()
 
     if (Publisher) delete Publisher;
     if (Subscriber) delete Subscriber;
+    if (SubscriberCallback) delete SubscriberCallback;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -92,6 +94,12 @@ void mtsMonitorComponent::Run(void)
     ProcessQueuedEvents();
 
     UpdateFilters();
+
+    size_t before = Messages.size();
+    if (!SubscriberCallback->IsEmptyQueue()) {
+        SubscriberCallback->FetchMessages(Messages);
+        std::cout << "MONITOR COMPONENT fetched " << Messages.size() - before << " items: " << before << std::endl;
+    }
 }
 
 void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))

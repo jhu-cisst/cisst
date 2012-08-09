@@ -317,6 +317,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        # plug-ins for Safety Framework
        mtsSafetyCoordinator.cpp
        mtsSafetySupervisor.cpp
+       mtsSubscriberCallback.cpp
        )
 
   set (HEADER_FILES
@@ -334,6 +335,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        # plug-ins for Safety Framework
        mtsSafetyCoordinator.h
        mtsSafetySupervisor.h
+       mtsSubscriberCallback.h
        )
 endif (CISST_HAS_SAFETY_PLUGINS)
 
