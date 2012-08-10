@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Daniel Li
-  Created on:	2006-06-23
+  Author(s):  Anton Deguet, Daniel Li
+  Created on: 2006-06-23
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -696,6 +696,24 @@ public:
             typename vctUnaryOperations<bool, value_type>::IsNonzero>::
             Run(*this);
     }
+
+    /*! Return true if all the elements of this nArray are finite,
+      false otherwise */
+    inline bool IsFinite(void) const {
+        return vctDynamicNArrayLoopEngines<DIMENSION>::template
+            SoNi< typename vctBinaryOperations<bool>::And,
+            typename vctUnaryOperations<bool, value_type>::IsFinite>::
+            Run(*this);
+    }
+
+    /*! Return true if any element of this nArray is NaN, false
+      otherwise */
+    inline bool HasNaN(void) const {
+        return vctDynamicNArrayLoopEngines<DIMENSION>::template
+            SoNi< typename vctBinaryOperations<bool>::Or,
+            typename vctUnaryOperations<bool, value_type>::IsNaN>::
+            Run(*this);
+    }
     //@}
 
 
@@ -757,7 +775,7 @@ public:
     /* documented above */
     template <class __nArrayOwnerType>
     inline bool AlmostEqual(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray,
-			    value_type tolerance) const
+                            value_type tolerance) const
     {
         return ((*this - otherNArray).LinfNorm() <= tolerance);
     }

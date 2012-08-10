@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky
-  Created on:	2003-11-04
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-11-04
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -590,6 +590,23 @@ class vctFixedSizeConstMatrixBase
             Run(*this);
     }
 
+    /*! Return true if all the elements of this matrix are finite,
+      false otherwise */
+    inline bool IsFinite(void) const {
+        return vctFixedSizeMatrixLoopEngines::
+            SoMi< typename vctBinaryOperations<bool>::And,
+            typename vctUnaryOperations<bool, value_type>::IsFinite>::
+            Run(*this);
+    }
+
+    /*! Return true if any element of this matrix is NaN, false
+      otherwise */
+    inline bool HasNaN(void) const {
+        return vctFixedSizeMatrixLoopEngines::
+            SoMi< typename vctBinaryOperations<bool>::Or,
+            typename vctUnaryOperations<bool, value_type>::IsNaN>::
+            Run(*this);
+    }
     //@}
 
 
@@ -697,15 +714,15 @@ class vctFixedSizeConstMatrixBase
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline bool AlmostEqual(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
-			    value_type, __dataPtrType> & otherMatrix,
-			    value_type tolerance) const {
+                            value_type, __dataPtrType> & otherMatrix,
+                            value_type tolerance) const {
         return ((*this - otherMatrix).LinfNorm() <= tolerance);
     }
 
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline bool AlmostEqual(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
-			    value_type, __dataPtrType> & otherMatrix) const {
+                            value_type, __dataPtrType> & otherMatrix) const {
         return ((*this - otherMatrix).LinfNorm() <= cmnTypeTraits<_elementType>::Tolerance());
     }
 

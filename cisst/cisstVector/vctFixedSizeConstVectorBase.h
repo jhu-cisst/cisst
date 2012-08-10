@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-09-30
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-09-30
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -591,6 +591,23 @@ class vctFixedSizeConstVectorBase
             Unfold(*this);
     }
 
+    /*! Return true if all the elements of this vector are finite,
+      false otherwise */
+    inline bool IsFinite(void) const {
+        return vctFixedSizeVectorRecursiveEngines<_size>::template
+            SoVi< typename vctBinaryOperations<bool>::And,
+            typename vctUnaryOperations<bool, value_type>::IsFinite>::
+            Unfold(*this);
+    }
+
+    /*! Return true if any element of this vector is NaN, false
+      otherwise */
+    inline bool HasNaN(void) const {
+        return vctFixedSizeVectorRecursiveEngines<_size>::template
+            SoVi< typename vctBinaryOperations<bool>::Or,
+            typename vctUnaryOperations<bool, value_type>::IsNaN>::
+            Unfold(*this);
+    }
     //@}
 
 
@@ -637,7 +654,7 @@ class vctFixedSizeConstVectorBase
     template <stride_type __stride, class __dataPtrType>
     inline value_type DotProduct(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
-	    SoViVi<typename vctBinaryOperations<value_type>::Addition,
+            SoViVi<typename vctBinaryOperations<value_type>::Addition,
             typename vctBinaryOperations<value_type>::Multiplication>::
             Unfold(*this, otherVector);
     }
