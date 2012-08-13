@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Anton Deguet
+  Author(s):  Ankur Kapoor, Anton Deguet, Ali Uneri
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -133,7 +133,9 @@ public:
     {
         this->Errors = "";
         QXmlSchema schema;
-        if (!schema.load(QUrl(filename))) {
+        std::string url = "file://";
+        url.append(filename);
+        if (!schema.load(QUrl(url.c_str()))) {
             CMN_LOG_CLASS_INIT_ERROR << "ValidateWithSchema (Qt): the schema cannot be loaded \""
                                      << filename << "\"" << std::endl;
         }
@@ -189,29 +191,34 @@ public:
     // generic string get
     bool GetXMLValueStdString(const char * context, const char * XPath, std::string & storage)
     {
-        QXmlQuery query;
+        std::string query = "data(";
+        query.append(context);
+        query.append("/");
+        query.append(XPath);
+        query.append(")");
+        return this->QueryStdString(query.c_str(), storage);
+    }
+
+    bool QueryStdString(const char * query, std::string & storage)
+    {
+        QXmlQuery qquery;
         QXmlResultItems results;
-        query.setFocus(this->Document->toString());
-        QString path = "data(";
-        path += context;
-        path += "/";
-        path += XPath;
-        path += ")";
-        query.setQuery(path);
-        if (!query.isValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): invalid query for path [" << path.toStdString() << "]" << std::endl;
+        qquery.setFocus(this->Document->toString());
+        qquery.setQuery(query);
+        if (!qquery.isValid()) {
+            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): invalid query [" << query << "]" << std::endl;
             return false;
         }
-        query.evaluateTo(&results);
+        qquery.evaluateTo(&results);
         if (results.hasError()) {
-            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): query result has errors for path [" << path.toStdString() << "]" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "GetXMLValueStdString (Qt): query result has errors [" << query << "]" << std::endl;
             return false;
         }
         bool attributeFound = false;
         for (QXmlItem result = results.next(); !result.isNull(); result = results.next()) {
             storage = result.toAtomicValue().toString().toStdString();
             attributeFound = true;
-            CMN_LOG_CLASS_RUN_VERBOSE << "GetXMLValueStdString (Qt): read path [" << path.toStdString()
+            CMN_LOG_CLASS_RUN_VERBOSE << "GetXMLValueStdString (Qt): query [" << query
                                       << "]  Content [" << storage << "]" << std::endl;
         }
         return attributeFound;
@@ -345,15 +352,21 @@ public:
         /* Evaluate xpath expression */
         /* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
            document root in libxml2 */
-        std::string xpathlibxml("");
+        std::string query("");
         if (context[0] != '\0')
         {
-            xpathlibxml += "/";
-            xpathlibxml += context;
-            xpathlibxml += "/";
+            query += "/";
+            query += context;
+            query += "/";
         }
-        xpathlibxml += XPath;
-        xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(xpathlibxml.c_str()),
+        query += XPath;
+        return this->QueryStdString(query.c_str(), storage);
+    }
+
+    bool QueryStdString(const char * query, std::string & storage)
+    {
+        /* Evaluate xpath expression */
+        xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(query),
                                                             this->XPathContext);
         bool attributeFound = false;
         if (xpathObj != 0) {
@@ -367,26 +380,24 @@ public:
                     currentNode = nodes->nodeTab[i];
                     storage = reinterpret_cast<char *>(xmlNodeGetContent(currentNode));
                     attributeFound = true;
-                    CMN_LOG_CLASS_RUN_VERBOSE << "GetXMLValueStdString (libxml2): read Xpath [" << XPath << "] Node name ["
+                    CMN_LOG_CLASS_RUN_VERBOSE << "QueryStdString (libxml2): query [" << query << "] Node name ["
                                               << currentNode->name << "] Content [" << storage << "]" << std::endl;
                 } else {
                     currentNode = nodes->nodeTab[i];
-                    CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueStdString (libxml2): node is not attribute node [" << XPath
+                    CMN_LOG_CLASS_RUN_WARNING << "QueryStdString (libxml2): node is not attribute node [" << query
                                               << "] Node name [" << currentNode->name << "]" << std::endl;
                 }
             }
-
-            if (size == 0 && xpathObj->type == XPATH_NUMBER){
+            if (size == 0 && xpathObj->type == XPATH_NUMBER) {
                 std::stringstream output;
                 output << xpathObj->floatval;
                 storage = output.str();
                 attributeFound = true;
             }
-
         }
         if (!attributeFound) {
-            CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueStdString (libxml2): unable to match the location path [" << XPath
-                                      << "] in context [" << context << "]" << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "QueryStdString (libxml2): not result for query [" << query
+                                      << "]" << std::endl;
             return false;
         }
         return true;
@@ -549,12 +560,8 @@ void cmnXMLPath::PrintValue(std::ostream & outputStream, const char * context, c
 
 
 // -------------------- methods to set/get bool ---------------------
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & value)
+bool cmnXMLPathConvertFromStdString(std::string & storage, bool & value)
 {
-    std::string storage;
-    if (!this->Data->GetXMLValueStdString(context, XPath, storage)) {
-        return false;
-    }
     std::transform(storage.begin(), storage.end(), storage.begin(), ::toupper);
     if (storage == "FALSE") {
         value = false;
@@ -566,6 +573,15 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & va
         return false;
     }
     return false;
+}
+
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & value)
+{
+    std::string storage;
+    if (!this->Data->GetXMLValueStdString(context, XPath, storage)) {
+        return false;
+    }
+    return cmnXMLPathConvertFromStdString(storage, value);
 }
 
 
@@ -580,6 +596,16 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & va
         value = valueIfMissing;
     }
     return ret_value;
+}
+
+
+bool cmnXMLPath::Query(const char * query, bool & value)
+{
+    std::string storage;
+    if (!this->Data->QueryStdString(query, storage)) {
+        return false;
+    }
+    return cmnXMLPathConvertFromStdString(storage, value);
 }
 
 
@@ -617,6 +643,17 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int & val
 }
 
 
+bool cmnXMLPath::Query(const char * query, int & value)
+{
+    std::string storage;
+    if (this->Data->QueryStdString(query, storage)) {
+        value = atoi(storage.c_str());
+        return true;
+    }
+    return false;
+}
+
+
 bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const int & value)
 {
     std::stringstream storage;
@@ -627,13 +664,8 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const int
 
 
 // -------------------- methods to set/get double ---------------------
-bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value)
+bool cmnXMLPathConvertFromStdString(std::string & storage, double & value)
 {
-    std::string storage;
-    if (!this->Data->GetXMLValueStdString(context, XPath, storage)) {
-        return false;
-    }
-
     // special treatment for select floating points eps, -Inf & Inf
     std::transform(storage.begin(), storage.end(), storage.begin(), ::toupper);
     if ((storage == "INF") || (storage == "1.#INF")) {
@@ -649,6 +681,16 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & 
 }
 
 
+bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value)
+{
+    std::string storage;
+    if (!this->Data->GetXMLValueStdString(context, XPath, storage)) {
+        return false;
+    }
+    return cmnXMLPathConvertFromStdString(storage, value);
+}
+
+
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing)
 {
     bool ret_value;
@@ -660,6 +702,16 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double & 
         value = valueIfMissing;
     }
     return ret_value;
+}
+
+
+bool cmnXMLPath::Query(const char * query, double & value)
+{
+    std::string storage;
+    if (!this->Data->QueryStdString(query, storage)) {
+        return false;
+    }
+    return cmnXMLPathConvertFromStdString(storage, value);
 }
 
 
@@ -702,6 +754,13 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::stri
         value = valueIfMissing;
     }
     return ret_value;
+}
+
+
+bool cmnXMLPath::Query(const char * query, std::string & storage)
+{
+    storage = "";
+    return this->Data->QueryStdString(query, storage);
 }
 
 
