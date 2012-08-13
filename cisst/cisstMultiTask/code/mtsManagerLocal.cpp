@@ -306,6 +306,7 @@ void mtsManagerLocal::Cleanup(void)
     }
 
     if (SystemLogMultiplexer) {
+        cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
         SystemLogMultiplexer->RemoveAllChannels();
         delete SystemLogMultiplexer;
         SystemLogMultiplexer = 0;
