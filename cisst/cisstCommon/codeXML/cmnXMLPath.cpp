@@ -345,9 +345,13 @@ public:
         /* Evaluate xpath expression */
         /* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
            document root in libxml2 */
-        std::string xpathlibxml("/");
-        xpathlibxml += context;
-        xpathlibxml += "/";
+        std::string xpathlibxml("");
+        if (context[0] != '\0')
+        {
+            xpathlibxml += "/";
+            xpathlibxml += context;
+            xpathlibxml += "/";
+        }
         xpathlibxml += XPath;
         xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(xpathlibxml.c_str()),
                                                             this->XPathContext);
@@ -371,6 +375,14 @@ public:
                                               << "] Node name [" << currentNode->name << "]" << std::endl;
                 }
             }
+
+            if (size == 0 && xpathObj->type == XPATH_NUMBER){
+                std::stringstream output;
+                output << xpathObj->floatval;
+                storage = output.str();
+                attributeFound = true;
+            }
+
         }
         if (!attributeFound) {
             CMN_LOG_CLASS_RUN_WARNING << "GetXMLValueStdString (libxml2): unable to match the location path [" << XPath
