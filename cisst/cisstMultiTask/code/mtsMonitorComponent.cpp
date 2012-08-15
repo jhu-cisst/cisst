@@ -94,8 +94,10 @@ void mtsMonitorComponent::Run(void)
     UpdateFilters();
 
     size_t before = Messages.size();
+    // Subscriber received message(s)
     if (!SubscriberCallback->IsEmptyQueue()) {
         SubscriberCallback->FetchMessages(Messages);
+        // smmy
         std::cout << "MONITOR COMPONENT fetched " << Messages.size() - before << " items: " << before << std::endl;
     }
 }

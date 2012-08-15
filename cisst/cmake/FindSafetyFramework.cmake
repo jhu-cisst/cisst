@@ -42,5 +42,6 @@ if(SF_FOUND)
                       ${SF_INCLUDE_DIR}/common
                       ${SF_INCLUDE_DIR}/monitor
                       ${SF_INCLUDE_DIR}/communicator
-                      ${SF_INCLUDE_DIR}/supervisor)
+                      ${SF_INCLUDE_DIR}/supervisor
+                      ${SF_INCLUDE_DIR}/db)
 endif(SF_FOUND)

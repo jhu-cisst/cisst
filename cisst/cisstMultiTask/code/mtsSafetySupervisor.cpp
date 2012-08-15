@@ -21,9 +21,15 @@
 #include <cisstMultiTask/mtsSafetySupervisor.h>
 
 #include "dict.h"
+#include "publisher.h"
+#include "subscriber.h"
+#include "mongodb.h"
 
 using namespace SF;
 using namespace SF::Dict;
+
+/*! Socket to send data to Cube collector */
+osaSocket * UDPSocket = 0;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetySupervisor);
 
@@ -42,6 +48,11 @@ mtsSafetySupervisor::~mtsSafetySupervisor()
     if (Publisher) delete Publisher;
     if (Subscriber) delete Subscriber;
     if (SubscriberCallback) delete SubscriberCallback;
+
+    if (UDPSocket) {
+        UDPSocket->Close();
+        delete UDPSocket;
+    }
 }
 
 void mtsSafetySupervisor::Init(void)
@@ -50,6 +61,14 @@ void mtsSafetySupervisor::Init(void)
 
     SubscriberCallback = new mtsSubscriberCallback;
     Subscriber = new SF::Subscriber(TopicNames::Monitor, SubscriberCallback);
+
+    // Create and initialize UDP socket
+    if (!UDPSocket) {
+        UDPSocket = new osaSocket(osaSocket::UDP);
+        // See Cube collector documentation for default port
+        // : https://github.com/square/cube/wiki/Collector
+        UDPSocket->SetDestination("127.0.0.1", 1180); 
+    }
 }
 
 void mtsSafetySupervisor::Startup(void)
@@ -65,16 +84,12 @@ void mtsSafetySupervisor::Run(void)
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 
-    // smmy
-    std::stringstream ss;
-    static int a = 0;
-    ss << "SUPERVISOR is publishing: " << ++a;
-    Publisher->Publish(ss.str());
-
-    size_t before = Messages.size();
     if (!SubscriberCallback->IsEmptyQueue()) {
         SubscriberCallback->FetchMessages(Messages);
-        std::cout << "SAFETY SUPERVISOR fetched " << Messages.size() - before << " items: " << before << std::endl;
+        if (!Messages.empty()) {
+            for_each(Messages.begin(), Messages.end(), UDPSender);
+            Messages.clear();
+        }
     }
 }
 
@@ -103,4 +118,17 @@ void mtsSafetySupervisor::Cleanup(void)
         Subscriber->Stop();
         ThreadSubscriber.ThreadEventEnd.Wait();
     }
+}
+
+void mtsSafetySupervisor::UDPSenderInternal::operator()(const std::string & message)
+{
+#if 0
+    std::cout << "--------------------------------------------------" << std::endl;
+    std::cout << message << std::endl;
+    std::cout << MongoDB::GetDBEntryFromMonitorTopic(message) << std::endl;
+#endif
+
+    //Publisher->Publish(MongoDB::GetDBEntryFromMonitorTopic(message));
+    if (UDPSocket)
+        UDPSocket->Send(MongoDB::GetDBEntryFromMonitorTopic(message));
 }
