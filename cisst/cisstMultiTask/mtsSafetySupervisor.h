@@ -23,9 +23,9 @@
 
 //#include "json.h"
 #include "supervisor.h"
-#include "subscriber.h"
 //#include "cisstMonitor.h"
 
+#include <cisstOSAbstraction/osaSocket.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsSubscriberCallback.h>
@@ -46,16 +46,22 @@ protected:
 
     /*! Callback for subscriber */
     mtsSubscriberCallback * SubscriberCallback;
+    /*! Internal thread for subscriber */
+    mtsMonitorComponent::InternalThreadType ThreadSubscriber;
 
     /*! Container for messages delivered by subscriber */
     mtsSubscriberCallback::MessagesType Messages;
 
-    mtsMonitorComponent::InternalThreadType ThreadSubscriber;
-
     /*! Initialization */
     void Init(void);
 
+    /*! Internal thread runner for subscriber */
     void * RunSubscriber(unsigned int arg);
+
+    /*! Send received messages to Cube collector */
+    struct UDPSenderInternal {
+        void operator()(const std::string & message);
+    } UDPSender;
 
 public:
     mtsSafetySupervisor();
