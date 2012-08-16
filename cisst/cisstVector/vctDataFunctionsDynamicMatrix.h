@@ -57,8 +57,8 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
     const vct::size_type myRows = data.rows();
     const vct::size_type myCols = data.cols();
 
-    cmnSerializeSizeRaw(outputStream, myRows);
-    cmnSerializeSizeRaw(outputStream, myCols);
+    cmnDataSerializeBinary_size_t(outputStream, myRows);
+    cmnDataSerializeBinary_size_t(outputStream, myCols);
 
     typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator iter = data.begin();
     const typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator end = data.end();
@@ -79,8 +79,8 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     // for matrices that own memory, we resize the destination based on deserialized "size"
     vct::size_type myRows = 0;
     vct::size_type myCols = 0;
-    cmnDataDeSerializeBinary(inputStream, myRows, remoteFormat, localFormat);
-    cmnDataDeSerializeBinary(inputStream, myCols, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, myRows, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, myCols, remoteFormat, localFormat);
     data.SetSize(myRows, myCols);
 
     // get data
@@ -101,8 +101,8 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     // get and check size
     vct::size_type myRows = 0;
     vct::size_type myCols = 0;
-    cmnDataDeSerializeBinary(inputStream, myRows, remoteFormat, localFormat);
-    cmnDataDeSerializeBinary(inputStream, myCols, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, myRows, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, myCols, remoteFormat, localFormat);
 
     if ((myRows != data.rows())
         || (myCols != data.cols())) {

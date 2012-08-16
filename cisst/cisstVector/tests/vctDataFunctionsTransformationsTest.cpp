@@ -57,14 +57,14 @@ void vctDataFunctionsTransformationsTest::TestFrm3Scalar(void)
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(12), cmnDataScalarNumber(f));
     CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(f));
 
-    size_t index, subIndex, position;
+    size_t index;
     bool exceptionReceived = false;
     std::string description;
 
     // exception expected if index too high
     try {
         description = cmnDataScalarDescription(f, cmnDataScalarNumber(f) + 1);
-    } catch (std::out_of_range & e) {
+    } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);

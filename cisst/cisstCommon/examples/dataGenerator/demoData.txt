@@ -66,6 +66,12 @@ class {
         default 0;
     }
 
+    member {
+        name Size;
+        type size_t;
+        is-size_t true;
+    }
+
     inline-header {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

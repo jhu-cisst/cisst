@@ -131,7 +131,6 @@ std::string mtsGenericObject::ScalarDescription(const size_t index, const char *
 
 void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data)
 {
-    std::cerr << CMN_LOG_DETAILS << "mtsGenericObject serialize!" << std::endl;
     cmnDataSerializeBinary(outputStream, data.Timestamp());
     cmnDataSerializeBinary(outputStream, data.AutomaticTimestamp());
     cmnDataSerializeBinary(outputStream, data.Valid());
@@ -141,7 +140,6 @@ void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject 
 void cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
                               const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat)
 {
-    std::cerr << CMN_LOG_DETAILS << "mtsGenericObject de-serialize!" << std::endl;
     cmnDataDeSerializeBinary(inputStream, data.Timestamp(), remoteFormat, localFormat);
     cmnDataDeSerializeBinary(inputStream, data.AutomaticTimestamp(), remoteFormat, localFormat);
     cmnDataDeSerializeBinary(inputStream, data.Valid(), remoteFormat, localFormat);

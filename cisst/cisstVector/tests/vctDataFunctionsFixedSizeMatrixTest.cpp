@@ -84,7 +84,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     // exception expected if index too high
     try {
         description = cmnDataScalarDescription(mInt, cmnDataScalarNumber(mInt) + 1);
-    } catch (std::out_of_range & e) {
+    } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
@@ -92,7 +92,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     exceptionReceived = false;
     try {
         description = cmnDataScalarDescription(mmDouble, cmnDataScalarNumber(mmDouble) + 1);
-    } catch (std::out_of_range & e) {
+    } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
@@ -101,7 +101,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     exceptionReceived = false;
     try {
         description = cmnDataScalarDescription(mString, cmnDataScalarNumber(mString));
-    } catch (std::out_of_range & e) {
+    } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);

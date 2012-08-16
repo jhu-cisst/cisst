@@ -57,7 +57,7 @@ cmnDataFormat::cmnDataFormat(void)
 void cmnDataSerializeBinary(std::ostream & outputStream,
                             const std::string & data) throw (std::runtime_error)
 {
-    cmnDataSerializeBinary(outputStream, data.size());
+    cmnDataSerializeBinary_size_t(outputStream, data.size());
     outputStream.write(data.data(), data.size());
     if (outputStream.fail()) {
         cmnThrow("cmnDataSerializeBinary(std::string): error occured with std::ostream::write");
@@ -71,7 +71,7 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
 {
     size_t size;
     // retrieve size of string
-    cmnDataDeSerializeBinary(inputStream, size, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, size, remoteFormat, localFormat);
     data.resize(size);
     // this const_cast is a bit alarming, lets be verbose until we are sure this is safe
     std::cerr << CMN_LOG_DETAILS << " - not really sure about the following const cast" << std::endl;

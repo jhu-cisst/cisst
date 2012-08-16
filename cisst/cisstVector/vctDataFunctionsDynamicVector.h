@@ -55,7 +55,7 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
     throw (std::runtime_error)
 {
     const vct::size_type mySize = data.size();
-    cmnDataSerializeBinary(outputStream, mySize);
+    cmnDataSerializeBinary_size_t(outputStream, mySize);
 
     typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator iter = data.begin();
     const typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator end = data.end();
@@ -75,7 +75,7 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
 {
     // for vectors that own memory, we resize the destination based on deserialized "size"
     vct::size_type mySize = 0;
-    cmnDataDeSerializeBinary(inputStream, mySize, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, mySize, remoteFormat, localFormat);
     data.SetSize(mySize);
 
     // get data
@@ -95,7 +95,7 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
 {
     // get and set size
     vct::size_type mySize;
-    cmnDataDeSerializeBinary(inputStream, mySize, remoteFormat, localFormat);
+    cmnDataDeSerializeBinary_size_t(inputStream, mySize, remoteFormat, localFormat);
 
     if (mySize != data.size()) {
         cmnThrow(std::runtime_error("cmnDataDeSerializeBinary: vctDynamicVectorRef, size of vectors don't match"));
@@ -167,5 +167,49 @@ cmnDataScalar(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & 
     return 0.123456789; // unreachable, just to avoid compiler warnings
 }
 
+
+// ---------------------- older functions, to be deprecated
+
+
+
+template <typename _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctDynamicVector<_elementType> & vector)
+    throw (std::runtime_error)
+{
+    vector.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctDynamicVectorRef<_elementType> & vector)
+    throw (std::runtime_error)
+{
+    vector.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctDynamicVector<_elementType> & vector)
+    throw (std::runtime_error)
+{
+    vector.SerializeRaw(outputStream);
+}
+
+template <typename _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctDynamicVectorRef<_elementType> & vector)
+    throw (std::runtime_error)
+{
+    vector.SerializeRaw(outputStream);
+}
+
+template <typename _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctDynamicConstVectorRef<_elementType> & vector)
+    throw (std::runtime_error)
+{
+    vector.SerializeRaw(outputStream);
+}
 
 #endif // _vctDataFunctionsDynamicVector_h

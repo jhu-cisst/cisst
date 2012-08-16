@@ -55,7 +55,7 @@ void cmnDataFunctionsTest::TestCopyNativeTypes(void)
     CPPUNIT_ASSERT_EQUAL(ui1, ui2);
 
     float f1, f2;
-    f1 = -1.23456;
+    f1 = -1.23456f;
     cmnDataCopy(f2, f1);
     CPPUNIT_ASSERT_EQUAL(f1, f2);
 
@@ -186,7 +186,7 @@ void cmnDataFunctionsTest::TestByteSwapMacros(void)
     unsigned long long int ulli1 = std::numeric_limits<unsigned long long int>::max() - 1234;
     cmnDataFunctionsTestTestByteSwap(ulli1);
 
-    float f1 = std::numeric_limits<float>::max() - 3.1456;
+    float f1 = std::numeric_limits<float>::max() - 3.1456f;
     cmnDataFunctionsTestTestByteSwap(f1);
 
     double d1 = std::numeric_limits<double>::max() - 3.1456;
@@ -197,8 +197,8 @@ void cmnDataFunctionsTest::TestByteSwapMacros(void)
 void cmnDataFunctionsTest::TestDescriptions(void)
 {
     double d1;
-    CPPUNIT_ASSERT_EQUAL(std::string("double"), cmnDataScalarDescription(d1, 0));
+    CPPUNIT_ASSERT_EQUAL(std::string("d"), cmnDataScalarDescription(d1, 0));
 
     unsigned long long int ulli1;
-    CPPUNIT_ASSERT_EQUAL(std::string("unsigned long long int"), cmnDataScalarDescription(ulli1, 0));
+    CPPUNIT_ASSERT_EQUAL(std::string("ulli"), cmnDataScalarDescription(ulli1, 0));
 }

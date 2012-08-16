@@ -79,7 +79,7 @@ robCubicSO3::SLERP( const vctQuaternionRotation3<double> &q1,
 		    double t ){
 
   double ctheta = q1.X()*q2.X() + q1.Y()*q2.Y() + q1.Z()*q2.Z() + q1.R()*q2.R();
-  double theta = acosf(ctheta);
+  double theta = acos(ctheta);
 
   // if theta = k*pi then result is not fully defined
   // we could rotate around any axis normal to qinitial or qfinal

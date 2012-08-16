@@ -976,7 +976,6 @@ public:
     {
         const size_type mySize = size();
         size_type index;
-
         cmnSerializeSizeRaw(outputStream, mySize);
         for (index = 0; index < mySize; ++index) {
             cmnSerializeRaw(outputStream, this->Element(index));
@@ -1108,6 +1107,7 @@ inline void vctFixedSizeVectorBaseAssignDynamicConstVectorBase(
     vctDynamicVectorRef<_elementType> tempRef(fixedSizeVector);
     tempRef.Assign(dynamicVector);
 }
+
 
 
 #endif // _vctDynamicConstVectorBase_h

@@ -59,6 +59,11 @@ cdgMember::cdgMember(unsigned int lineNumber):
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
+
+    field = this->AddField("is-size_t", "false", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
 }
 
 
