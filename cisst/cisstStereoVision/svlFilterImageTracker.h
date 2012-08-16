@@ -53,7 +53,10 @@ public:
     void SetRigidBodyTransformSmoothing(double weight);
     int SetRigidBody(bool enable);
     void SetRigidBodyConstraints(double angle_low, double angle_high, double scale_low, double scale_high);
-    vct3x3 GetRigidBodyTransform(unsigned int videoch = SVL_LEFT);
+    int SetRigidBodyTransform(const vct3x3 & transform, unsigned int videoch = SVL_LEFT);
+    int GetRigidBodyTransform(vct3x3 & transform, unsigned int videoch = SVL_LEFT);
+    vct3x3 CISST_DEPRECATED GetRigidBodyTransform(unsigned int videoch = SVL_LEFT);
+    void GetRigidBodyError(vctDynamicVector<int> & errors);
 
     int SetROI(const svlRect & rect, unsigned int videoch = SVL_LEFT);
     int SetROI(int left, int top, int right, int bottom, unsigned int videoch = SVL_LEFT);
@@ -62,6 +65,7 @@ public:
     int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT);
 
     int SetMosaicSize(unsigned int width, unsigned int height);
+    const svlSampleImage* GetMosaicImage() const;
 
 protected:
     virtual int OnConnectInput(svlFilterInput &input, svlStreamType type);
@@ -113,6 +117,8 @@ private:
     vctDynamicVector<double> WarpedRigidBodyScale;
     svlSampleImage* WarpedImage;
     vctDynamicVector<svlDraw::Internals> WarpInternals;
+    const unsigned int RigidBodyIterations;
+    vctDynamicVector<int> RigidBodyError;
 
     svlSampleImage* Mosaic;
     vctDynamicVector< vctDynamicVector<unsigned short> > MosaicAccuBuffer;

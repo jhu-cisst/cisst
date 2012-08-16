@@ -41,6 +41,7 @@ public:
     void SetTemplateRadius(unsigned int radius);
     void SetSearchRadius(unsigned int radius);
     void SetOverwriteTemplates(bool enable);
+    void SetTemplateUpdate(bool enable);
     void SetTemplateUpdateWeight(double weight);
     void SetConfidenceThreshold(double threshold);
 
@@ -49,6 +50,7 @@ public:
     unsigned int GetTemplateRadius() const;
     unsigned int GetSearchRadius() const;
     bool GetOverwriteTemplates() const;
+    bool GetTemplateUpdate() const;
     double GetTemplateUpdateWeight() const;
     double GetConfidenceThreshold() const;
 
@@ -67,6 +69,7 @@ protected:
 
     bool TargetsAdded;
     bool OverwriteTemplates;
+    bool TemplateUpdateEnabled;
     unsigned int FrameCounter;
     unsigned int TemplateRadiusRequested;
     unsigned int SearchRadiusRequested;
