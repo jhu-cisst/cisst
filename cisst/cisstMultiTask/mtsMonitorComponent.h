@@ -153,6 +153,10 @@ protected:
     //bool InstallFilters(mtsTaskFromSignal * taskFromSignal);
     bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
 
+    /*! Receive fault event notification from target components and pass it to
+        the Safety Supervisor of Safety Framework. */
+    void HandleFaultEvent(const std::string & json);
+
     //
     // Message exchange with Safety Framework
     //

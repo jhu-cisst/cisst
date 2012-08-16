@@ -119,7 +119,11 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
-                OverranPeriod = true;
+#if CISST_HAS_SAFETY_PLUGINS
+                SetOverranPeriod();
+#else
+                this->OverranPeriod = true;
+#endif
             }
         }
         // Wait for remaining period also handles thread suspension
@@ -261,7 +265,7 @@ bool mtsTaskPeriodic::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
     // Check if the fault specified is supported [SFUPDATE]
     if (newMonitorTarget.GetFaultType() != SF::Fault::FAULT_COMPONENT_PERIOD) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: specified fault is not supported now: "
-            << SF::Fault::GetFaultString(newMonitorTarget.GetFaultType()) << std::endl;
+            << SF::Fault::GetFaultTypeString(newMonitorTarget.GetFaultType()) << std::endl;
         return false;
     }
 

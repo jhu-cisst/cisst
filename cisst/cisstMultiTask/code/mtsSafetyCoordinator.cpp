@@ -166,7 +166,7 @@ JSON: {
     targetID.ProcessName = targetIdProcessName;
     targetID.ComponentName = targetIdComponentName;
     newMonitorTarget.SetTargetId(targetID);
-    newMonitorTarget.SetFaultType(SF::Fault::GetFaultFromString(targetFaultType));
+    newMonitorTarget.SetFaultType(SF::Fault::GetFaultTypeFromString(targetFaultType));
 
     newMonitorTarget.SetSamplingRate(outputConfigSamplingRate);
     newMonitorTarget.SetStatus(SF::Monitor::GetStatusFromString(outputConfigInitState));

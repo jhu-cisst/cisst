@@ -199,6 +199,9 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
         targetComponentAccessor->MinimumPeriod = newMonitorTarget.GetSamplingPeriod();
         targetComponentAccessor->LastSampledTime = 0;
         newTargetComponent = true;
+        // Add fault event handler if new tareget component is to be added.
+        targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
+            &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
     }
 
     // [SFUPDATE]
@@ -208,7 +211,9 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
             {
                 mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
                 if (taskPeriodic) {
+                    // [SFUPDATE]
                     targetComponentAccessor->InterfaceRequired->AddFunction("GetPeriod", targetComponentAccessor->GetPeriod);
+
                     // MJ TODO: this (i.e., definining filters and setting up FDD pipeline) should 
                     // be done via JSON.  For now, install filters and FDD pipelines by default with
                     // hard-coded fixed parameters.
@@ -224,7 +229,7 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
                             << oldSamplingRate << " to " << targetComponentAccessor->MinimumPeriod << std::endl;
                     }
                 } else {
-                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: " << SF::Fault::GetFaultString(faultType)
+                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: " << SF::Fault::GetFaultTypeString(faultType)
                         << " is only applicable to periodic task" << std::endl;
                     if (newTargetComponent) delete targetComponentAccessor;
                     return false;
@@ -437,6 +442,11 @@ bool mtsMonitorComponent::InstallFilters(TargetComponentAccessor * entry, mtsTas
 #undef ADD_FILTER 
 
     return true;
+}
+
+void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
+{
+    std::cout << "####### FAULT REPORTED: " << json << std::endl;
 }
 
 bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)
