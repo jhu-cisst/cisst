@@ -57,7 +57,9 @@ public:
     /*! Install monitoring target object with JSON spec */
     bool AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec);
 
-    /*! Deploy all monitors and FDDs that are installed so far */
+    /*! Deploy all monitors and FDDs that are installed so far.
+        MJ: Right now, this method should be called user's main.cpp but could be moved
+        into either cisst or SF such that users don't necessarily call this method. */
     bool DeployMonitorsAndFDDs(void);
 
     void ToStream(std::ostream & outputStream) const;

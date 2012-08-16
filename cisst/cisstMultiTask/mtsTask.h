@@ -94,6 +94,9 @@ protected:
     mtsStateTable StateTableMonitor;
 
     bool AddFilter(mtsMonitorFilterBase * filter);
+
+    /*! Function to generate a fault event and propagate it to the Safety Supervisor */
+    mtsFunctionWrite GenerateFaultEvent;
 #endif
 
     /*! True if the task took more time to do computation than allocated time.
@@ -283,6 +286,12 @@ public:
         return OverranPeriod;
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
+    /*! Set thread overrun flag and generate a thread overrun fault which gets 
+        propagated to the Safety Supervisor of the safety framework. */
+    void SetOverranPeriod(bool overran = true);
+#endif
+    
     /*! Reset overran period flag. */
     inline virtual void ResetOverranPeriod(void) {
         OverranPeriod = false;

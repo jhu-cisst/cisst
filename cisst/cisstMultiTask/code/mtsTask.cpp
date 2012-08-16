@@ -1,5 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
-/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */ /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
   $Id$
@@ -35,6 +34,9 @@
 
 #include <iostream>
 
+#if CISST_HAS_SAFETY_PLUGINS
+#include "dict.h"
+#endif
 
 /********************* Methods that call user methods *****************/
 
@@ -210,11 +212,13 @@ mtsTask::mtsTask(const std::string & name,
 #if CISST_HAS_SAFETY_PLUGINS
     this->AddStateTable(&this->StateTableMonitor);
 
-    // Expose Period of the monitor state table to its provided interface
     mtsInterfaceProvided * provided = GetInterfaceProvided(
         mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
     CMN_ASSERT(provided);
+    // Make Period available through the command pattern
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
+    // Add fault notification event
+    provided->AddEventWrite(this->GenerateFaultEvent, SF::Dict::FaultNames::FaultEvent, std::string());
     // [SFUPDATE]
 #endif
 
@@ -373,4 +377,24 @@ bool mtsTask::AddFilter(mtsMonitorFilterBase * filter)
 {
     return this->StateTableMonitor.AddFilter(filter);
 }
+
+void mtsTask::SetOverranPeriod(bool overran)
+{
+    this->OverranPeriod = overran;
+
+    // Generate event to inform the safety supervisor of the thread overrun fault
+    // of this component.
+    if (!this->GenerateFaultEvent.IsValid()) {
+        CMN_LOG_CLASS_RUN_WARNING << "Fault event cannot be generated: task \"" << this->GetName() << "\"" << std::endl;
+        return;
+    }
+
+    // smmy
+    std::string jsonFDDResult;
+    // MJ: This FDI result should be generated through monitor automatically.
+    //GenerateFaultEvent(
+    
+    // MJ TODO: How/when to reset overrun flag??
+}
+
 #endif
