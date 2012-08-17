@@ -63,6 +63,10 @@ void mtsComponent::Initialize(void)
     this->StateTables.SetOwner(*this);
 
     InterfaceProvidedToManager = 0;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    MonitorTargetSet = SF::Monitor::TARGET_INVALID;
+#endif
 }
 
 
@@ -1015,7 +1019,6 @@ bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
 
     return true;
 }
-*/
 
 bool mtsComponent::FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const
 {
@@ -1031,5 +1034,6 @@ void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
 {
     MonitorTargetSet &= ~type;
 }
+*/
 
 #endif

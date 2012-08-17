@@ -95,43 +95,39 @@ protected:
 
     class TargetComponentAccessor {
     public:
-        /*! Instance of SF::cisstMonitor.  Should be allocated and deleted externally. */
-        SF::cisstMonitor * MonitorTarget;
-        /*! Name of this process */
+        typedef std::map<SF::Monitor::UIDType, SF::cisstMonitor *> MonitorTargetSetType;
+
+    protected:
+        /*! Set of SF::cisstMonitor instances (each defines one monitoring target element)
+            in the same component */
+        // MJ: SF::cisstMonitor instances should be allocated and deallocated externally.
+        MonitorTargetSetType MonitorTargetSet;
+
+    public:
+        TargetComponentAccessor();
+        ~TargetComponentAccessor();
+
+        /*! Name of process and component which this instance manages */
         std::string ProcessName;
-        /*! Name of the component being monitored */
         std::string ComponentName;
+
         /*! Required interface to connect to the target component */
         mtsInterfaceRequired * InterfaceRequired;
-        /*! Function to read state variables from target component */
-        mtsFunctionRead GetPeriod;
-        /*! Placeholder (i.e., copy of samplings of the monitoring targets) */
-        // [SFUPDATE]: TODO: add more placeholders depending on monitoring target types
-        SF::SamplingPeriodType Period;
-        /*! Minimum period that determines when to fetch data from the target
-            component's state table.  This is set as the minimum value of 
-            the "sampling frequency" field in JSON of all monitoring target 
-            elements. */
-        SF::SamplingPeriodType MinimumPeriod;
-        /*! Timestamp of last sampled data */
-        double LastSampledTime;
 
-        TargetComponentAccessor(SF::cisstMonitor * monitor)
-            : MonitorTarget(monitor), InterfaceRequired(0), Period(0.0), MinimumPeriod(1.0), 
-              LastSampledTime(0.0) 
-        {}
-        ~TargetComponentAccessor() {
-            //if (MonitorTarget) delete MonitorTarget;
-            if (InterfaceRequired) delete InterfaceRequired;
-        }
+        /*! Functions to read state variables from target component */
+        mtsFunctionRead GetPeriod;   // for Monitor::TARGET_THREAD_PERIOD
+        mtsFunctionRead GetExecTime; // for Monitor::TARGET_THREAD_DUTYCYCLE
 
-        bool UpdateMinimumPeriod(SF::SamplingPeriodType newPeriod) {
-            if (MinimumPeriod > newPeriod) {
-                MinimumPeriod = newPeriod;
-                return true; // minimum period value was updated
-            }
-            return false; // minimum period value remains the same
-        }
+        /*! Add new cisstMonitor instance.  Returns false if duplicate. */
+        bool AddMonitorTargetToAccessor(SF::cisstMonitor * monitor);
+        /*! Check if given monitor target is already being monitored. */
+        bool FindMonitorTarget(SF::Monitor::UIDType uid) const;
+        bool FindMonitorTarget(const std::string & uidString) const;
+        /*! Remove cisstMonitor instance.  Returns false if not found. */
+        void RemoveMonitorTargetFromAccessor(SF::Monitor::UIDType uid);
+
+        /*! Get new samples for all monitor targets if necessary */
+        bool RefreshSamples(double currentTick, SF::Publisher * publisher);
     };
 
     /*! List of TargetComponentAccessor structure */
@@ -154,7 +150,11 @@ protected:
     //bool InstallFilters(mtsTaskContinuous * taskContinuous);
     //bool InstallFilters(mtsTaskFromCallback * taskFromCallback);
     //bool InstallFilters(mtsTaskFromSignal * taskFromSignal);
+    // MJ TEMP: this is not being used (replaced by InstallMonitorTarget())
     bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
+
+    /*! Install monitor: add new column to the monitor state table */
+    void InstallMonitorTarget(mtsTaskPeriodic * taskPeriodic, SF::Monitor * monitor);
 
     /*! Receive fault event notification from target components and pass it to
         the Safety Supervisor of Safety Framework. */

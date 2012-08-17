@@ -461,11 +461,6 @@ public:
 */
     /*! Set of monitor targets installed */
     SF::Monitor::TargetSetType MonitorTargetSet;
-
-public:
-    bool FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const;
-    void InstallMonitorTarget(const SF::Monitor::TargetType type);
-    void UninstallMonitorTarget(const SF::Monitor::TargetType type);
 #endif
 
  public:
