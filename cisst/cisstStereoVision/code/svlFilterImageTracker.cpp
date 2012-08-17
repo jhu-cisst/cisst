@@ -144,7 +144,7 @@ void svlFilterImageTracker::SetRigidBodyConstraints(double angle_low, double ang
 
 int svlFilterImageTracker::SetRigidBodyTransform(const vct3x3 & transform, unsigned int videoch)
 {
-    if (videoch >= SVL_MAX_CHANNELS || !Trackers[videoch]) return SVL_FAIL;
+    if (videoch >= SVL_MAX_CHANNELS || !Trackers[videoch] || !WarpedImage) return SVL_FAIL;
 
     RigidBodyTransform[videoch].Assign(transform);
 
@@ -162,8 +162,8 @@ int svlFilterImageTracker::SetRigidBodyTransform(const vct3x3 & transform, unsig
 
     // Translation
     vct2 res1;
-    res1[0] = (transform.Element(0, 2) - 200);
-    res1[1] = (transform.Element(1, 2) - 200);
+    res1[0] = (transform.Element(0, 2) - WarpedImage->GetWidth(videoch)  / 2);
+    res1[1] = (transform.Element(1, 2) - WarpedImage->GetHeight(videoch) / 2);
 
     // Inverse
     double det = mat2x2.Element(0, 0) * mat2x2.Element(1, 1) - mat2x2.Element(0, 1) * mat2x2.Element(1, 0);
@@ -1078,7 +1078,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
 
                 if (dx > dy) weight = dx;
                 else         weight = dy;
-                weight = tmpl_size - dx - dy - 10;
+                weight = tmpl_size - dx - dy - 5;
                 if (weight < 0) weight = 0;
 
                 *mdata += weight * (*tdata); mdata ++; tdata ++;
