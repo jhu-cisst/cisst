@@ -126,7 +126,8 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 protected:
 
 public:
-    bool AddMonitorTarget(SF::cisstMonitor & newMonitorTarget);
+    // smmy
+    //bool AddMonitorTarget(SF::cisstMonitor & newMonitorTarget);
 #endif
 
  public:

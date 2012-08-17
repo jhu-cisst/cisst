@@ -257,6 +257,7 @@ bool mtsTaskPeriodic::IsPeriodic(void) const
 //-------------------------------------------------------------------------
 //  Safety Framework Plug-ins
 //-------------------------------------------------------------------------
+/* smmy
 #if CISST_HAS_SAFETY_PLUGINS
 bool mtsTaskPeriodic::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
 {
@@ -274,3 +275,4 @@ bool mtsTaskPeriodic::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
     return BaseType::AddMonitorTarget(newMonitorTarget);
 }
 #endif
+*/
