@@ -45,7 +45,7 @@ protected:
     MonitorsType Monitors;
 
     /*! Parse JSON specification and return new monitoring target spec */
-    bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
+    //bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
 
 public:
     mtsSafetyCoordinator();
@@ -55,7 +55,7 @@ public:
     bool CreateMonitor(void);
 
     /*! Install monitoring target object with JSON spec */
-    bool AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec);
+    bool AddMonitor(SF::Monitor * monitor);
 
     /*! Deploy all monitors and FDDs that are installed so far.
         MJ: Right now, this method should be called user's main.cpp but could be moved

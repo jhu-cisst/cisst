@@ -162,23 +162,26 @@ void mtsMonitorComponent::Cleanup(void)
     }
 }
 
-bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget)
+bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitorTarget->GetTargetID());
+    CMN_ASSERT(targetID);
 
     // Validity check: process name
     const std::string thisProcessName = LCM->GetProcessName();
-    const std::string processName = newMonitorTarget.GetTargetID().ProcessName;
+    const std::string processName = targetID->ProcessName;
     if (thisProcessName.compare(processName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: different process name "
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: different process name "
             << "(expected: \"" << thisProcessName << "\", actual: \"" << processName << ")" << std::endl;
         return false;
     }
 
     // Make sure if the target component exists.
-    const std::string targetComponentName = newMonitorTarget.GetTargetID().ComponentName;
-    if (!LCM->FindComponent(targetComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: no component \"" << targetComponentName << "\" found" << std::endl;
+    const std::string targetComponentName = targetID->ComponentName;
+    mtsComponent * targetComponent = LCM->GetComponent(targetComponentName);
+    if (!targetComponent) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no component \"" << targetComponentName << "\" found" << std::endl;
         return false;
     }
 
@@ -191,23 +194,34 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
     TargetComponentAccessor * targetComponentAccessor = TargetComponentAccessors->GetItem(targetComponentName);
     if (!targetComponentAccessor) {
         // Add new target component
-        targetComponentAccessor = new TargetComponentAccessor;
-        targetComponentAccessor->MonitorTarget = newMonitorTarget;
+        targetComponentAccessor = new TargetComponentAccessor(monitorTarget);
         targetComponentAccessor->ProcessName = thisProcessName;
         targetComponentAccessor->ComponentName = targetComponentName;
         targetComponentAccessor->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName));
-        targetComponentAccessor->MinimumPeriod = newMonitorTarget.GetSamplingPeriod();
+        targetComponentAccessor->MinimumPeriod = monitorTarget->GetSamplingPeriod();
         targetComponentAccessor->LastSampledTime = 0;
         newTargetComponent = true;
         // Add fault event handler if new tareget component is to be added.
         targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
             &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
+    } else {
+        // Check if the target has already been installed
+        SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+        if (targetComponent->FindMonitorTargetInstalled(targetType)) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to install monitor type " 
+                << SF::Monitor::GetTargetTypeString(targetType) << " to "
+                << targetComponentName << ": already installed" << std::endl;
+            return false;
+        }
+
+        targetComponent->InstallMonitorTarget(targetType);
     }
 
     // [SFUPDATE]
-    const SF::Fault::FaultType faultType = newMonitorTarget.GetFaultType();
-    switch (faultType) {
-        case SF::Fault::FAULT_COMPONENT_PERIOD:
+    const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+    const std::string targetTypeString = SF::Monitor::GetTargetTypeString(targetType);
+    switch (targetType) {
+        case SF::Monitor::TARGET_THREAD_PERIOD:
             {
                 mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
                 if (taskPeriodic) {
@@ -218,27 +232,33 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
                     // be done via JSON.  For now, install filters and FDD pipelines by default with
                     // hard-coded fixed parameters.
                     if (!InstallFilters(targetComponentAccessor, taskPeriodic)) {
-                        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: Failed to install filters to periodic task \"" << targetComponentName << "\"" << std::endl;
+                        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to install filters to periodic task \"" << targetComponentName << "\"" << std::endl;
                         delete targetComponentAccessor;
                         return false;
                     }
 
                     SF::SamplingRateType oldSamplingRate = targetComponentAccessor->MinimumPeriod;
-                    if (targetComponentAccessor->UpdateMinimumPeriod(newMonitorTarget.GetSamplingPeriod())) {
-                        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetToComponent: sampling period updated from " 
+                    if (targetComponentAccessor->UpdateMinimumPeriod(monitorTarget->GetSamplingPeriod())) {
+                        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: sampling period updated from " 
                             << oldSamplingRate << " to " << targetComponentAccessor->MinimumPeriod << std::endl;
                     }
                 } else {
-                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: " << SF::Fault::GetFaultTypeString(faultType)
-                        << " is only applicable to periodic task" << std::endl;
+                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: " << targetTypeString << " is only applicable to periodic task" << std::endl;
                     if (newTargetComponent) delete targetComponentAccessor;
                     return false;
                 }
             }
             break;
-        case SF::Fault::FAULT_INVALID:
+
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE:
+            {
+                // MJ TODO: IMPLEMENT THIS
+            }
+            break;
+
+        case SF::Monitor::TARGET_INVALID:
         default:
-            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: invalid or unsupported fault type: " << newMonitorTarget << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: invalid or unsupported monitor type: " << std::endl;
             if (newTargetComponent) delete targetComponentAccessor;
             // MJ TODO: implement mtsComponent::RemoveMonitorTarget()
             // targetComponent->RemoveMonitorTarget()
@@ -247,16 +267,20 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
     }
 
     // Check if the same monitoring target element has already been registered.
+    /* smmy MJ TODO: How to efficiently access which quantities are being monitored?
     mtsComponent * targetComponent = LCM->GetComponent(targetComponentName);
     CMN_ASSERT(targetComponent);
-    if (!targetComponent->AddMonitorTarget(newMonitorTarget)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetToComponent: duplicate monitoring target element: " << newMonitorTarget << std::endl;
+    if (!targetComponent->AddMonitorTarget(monitorTarget) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: duplicate monitoring target element: " << targetTypeString << std::endl;
         return false;
     }
+    */
 
-    if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
-        CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
-        return false;
+    if (newTargetComponent) {
+        if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
+            return false;
+        }
     }
 
     PrintTargetComponents();
@@ -312,7 +336,8 @@ void mtsMonitorComponent::UpdateFilters(void)
         if (currentTick - accessor->LastSampledTime > accessor->MinimumPeriod) {
             // [SFUPDATE]
             accessor->GetPeriod(accessor->Period);
-            Publisher->Publish(accessor->MonitorTarget.GetJSON(accessor->Period));
+            // smmy MJ TEMP: FIXME
+            Publisher->Publish(accessor->MonitorTarget->GetJSON(accessor->Period));
             accessor->LastSampledTime = currentTick;
             advance = true;
         }
@@ -446,7 +471,7 @@ bool mtsMonitorComponent::InstallFilters(TargetComponentAccessor * entry, mtsTas
 
 void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
 {
-    std::cout << "####### FAULT REPORTED: " << json << std::endl;
+    std::cout << "####### smmyFAULT REPORTED: " << json << std::endl;
 }
 
 bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)

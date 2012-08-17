@@ -1005,6 +1005,7 @@ void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsCompon
 //  Safety Framework Plug-ins
 //-------------------------------------------------------------------------
 #if CISST_HAS_SAFETY_PLUGINS
+/* smmy
 bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
 {
     // MJ TODO: no duplicate entry check for now 
@@ -1014,4 +1015,21 @@ bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
 
     return true;
 }
+*/
+
+bool mtsComponent::FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const
+{
+    return ((MonitorTargetSet & type) > 0);
+}
+
+void mtsComponent::InstallMonitorTarget(const SF::Monitor::TargetType type)
+{
+    MonitorTargetSet |= type;
+}
+
+void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
+{
+    MonitorTargetSet &= ~type;
+}
+
 #endif

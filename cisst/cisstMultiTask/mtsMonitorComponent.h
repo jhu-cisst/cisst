@@ -95,8 +95,8 @@ protected:
 
     class TargetComponentAccessor {
     public:
-        /*! Copy of monitoring target (SF::cisstMonitor instance) */
-        SF::cisstMonitor MonitorTarget;
+        /*! Instance of SF::cisstMonitor.  Should be allocated and deleted externally. */
+        SF::cisstMonitor * MonitorTarget;
         /*! Name of this process */
         std::string ProcessName;
         /*! Name of the component being monitored */
@@ -116,9 +116,12 @@ protected:
         /*! Timestamp of last sampled data */
         double LastSampledTime;
 
-        TargetComponentAccessor(): 
-            InterfaceRequired(0), Period(0.0), MinimumPeriod(1.0), LastSampledTime(0.0) {}
+        TargetComponentAccessor(SF::cisstMonitor * monitor)
+            : MonitorTarget(monitor), InterfaceRequired(0), Period(0.0), MinimumPeriod(1.0), 
+              LastSampledTime(0.0) 
+        {}
         ~TargetComponentAccessor() {
+            //if (MonitorTarget) delete MonitorTarget;
             if (InterfaceRequired) delete InterfaceRequired;
         }
 
@@ -184,7 +187,7 @@ public:
     /*! Pass monitoring target information (i.e., cisstMonitor instance) to the 
         component to be monitored.  The component uses this information to install
         monitoring and FDD pipelines. */
-    bool AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget);
+    bool AddMonitorTarget(SF::cisstMonitor * monitorTarget);
 
     // TODO: replace this with RemoveMonitorTargetFromComponent()
     /*! Unregister component from the registry */

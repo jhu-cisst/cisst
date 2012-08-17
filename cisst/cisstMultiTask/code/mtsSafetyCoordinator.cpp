@@ -23,7 +23,7 @@
 
 #include "dict.h"
 
-using namespace SF::Dict;
+using namespace SF::Dict::Json;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetyCoordinator);
 
@@ -39,8 +39,21 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
     }
 }
 
-bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const std::string & monitorJsonSpec)
+bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
 {
+    if (!baseMonitor) {
+        CMN_LOG_CLASS_RUN_ERROR << "NULL cisstMonitor instance error" << std::endl;
+        return false;
+    }
+
+    SF::cisstMonitor * monitor = dynamic_cast<SF::cisstMonitor*>(baseMonitor);
+    CMN_ASSERT(monitor);
+    SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitor->GetTargetID());
+    CMN_ASSERT(targetID);
+
+    const std::string targetUID = monitor->GetTargetUID();
+    const std::string monitorInJson = monitor->GetMonitorJSON();
+
     // Check if same monitoring target is already registered
     if (this->IsDuplicateUID(targetUID)) {
         CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
@@ -49,39 +62,41 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
 
     // Check if json syntax is valid
     SF::JSON json;
-    if (!json.Read(monitorJsonSpec.c_str())) {
+    if (!json.Read(monitorInJson.c_str())) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: " << targetUID
-            << "\nJSON: " << monitorJsonSpec << std::endl;
+            << "\nJSON: " << monitorInJson << std::endl;
         return false;
     }
 
     // Parse json and extract information of interest
+    /*
     SF::cisstMonitor newMonitorTarget;
     if (!ParseJSON(json, newMonitorTarget)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to extract information from json: " << targetUID
-            << "\nJSON: " << monitorJsonSpec << std::endl;
+            << "\nJSON: " << monitorInJson << std::endl;
         return false;
     }
+    */
     
     // Monitor cannot monitor itself
-    const std::string targetComponentName = newMonitorTarget.GetTargetID().ComponentName;
+    const std::string targetComponentName = targetID->ComponentName;
     if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << newMonitorTarget.GetTargetID().ComponentName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << targetID->ComponentName << std::endl;
         return false;
     }
 
     // Add new monitor target to monitor 
     // [SFUPDATE] Use single monitor instance per process
-    mtsMonitorComponent * monitor = Monitors[0];
-    if (!monitor->AddMonitorTargetToComponent(newMonitorTarget)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor: " << newMonitorTarget << std::endl;
+    mtsMonitorComponent * monitorComponent = Monitors[0];
+    if (!monitorComponent->AddMonitorTarget(monitor)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor component: " << targetUID << std::endl;
         return false;
     }
 
-    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: successfully added monitor target: " << targetUID 
+    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitor: successfully added monitor target: " << targetUID 
         << "\nJSON: " << json.GetJSON() << std::endl;
 
-    this->MonitorTargetMap[targetUID] = monitorJsonSpec;
+    this->MonitorTargetMap[targetUID] = monitorInJson;
 
     return true;
 }
@@ -98,6 +113,7 @@ bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
     return true;
 }
 
+#if 0
 bool mtsSafetyCoordinator::ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget)
 {
     /*
@@ -126,13 +142,12 @@ JSON: {
    }
 }
     */
-    std::string    name;
-    std::string    targetIdProcessName;
-    std::string    targetIdComponentName;
-    std::string    targetFaultType;
-    std::string    outputConfigInitState;
-    std::string    outputType;
-    SF::StrVecType       outputTargets;
+    SF::TargetIDType targetID;
+    std::string name;
+    std::string targetFaultType;
+    std::string outputConfigInitState;
+    std::string outputType;
+    SF::StrVecType outputTargets;
     SF::SamplingRateType outputConfigSamplingRate;
 
     try {
@@ -141,8 +156,8 @@ JSON: {
         // parse monitor name
         name = root.get(NAME, "n/a").asString();
         // parse monitor target
-        targetIdProcessName = root[TARGET][IDENTIFIER].get(NAME_PROCESS, "n/a").asString();
-        targetIdComponentName = root[TARGET][IDENTIFIER].get(NAME_COMPONENT, "n/a").asString();
+        targetID.ProcessName = root[TARGET][IDENTIFIER].get(NAME_PROCESS, "n/a").asString();
+        targetID.ComponentName = root[TARGET][IDENTIFIER].get(NAME_COMPONENT, "n/a").asString();
         // MJ TEMP: key value may change depending on fault type
         targetFaultType = root[TARGET].get(TYPE, "n/a").asString();
         // parse monitor output specification
@@ -162,12 +177,8 @@ JSON: {
     }
 
     // Populate information about monitor target 
-    SF::TargetIDType targetID;
-    targetID.ProcessName = targetIdProcessName;
-    targetID.ComponentName = targetIdComponentName;
     newMonitorTarget.SetTargetId(targetID);
     newMonitorTarget.SetFaultType(SF::Fault::GetFaultTypeFromString(targetFaultType));
-
     newMonitorTarget.SetSamplingRate(outputConfigSamplingRate);
     newMonitorTarget.SetStatus(SF::Monitor::GetStatusFromString(outputConfigInitState));
     newMonitorTarget.SetAddressesToPublish(outputTargets);
@@ -175,6 +186,7 @@ JSON: {
 
     return true;
 }
+#endif
 
 bool mtsSafetyCoordinator::CreateMonitor(void)
 {
