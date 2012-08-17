@@ -1004,13 +1004,12 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     const int targetcount = static_cast<int>(Targets.cols());
     const int tmpl_radius = tracker->GetTemplateRadius();
     const int tmpl_size = tmpl_radius * 2 + 1;
-    const unsigned char default_bg_r = 0;
-    const unsigned char default_bg_g = 0;
-    const unsigned char default_bg_b = 255;
+    const int feather_rounding = 5;
 
     svlTarget2D *target = 0;
     unsigned char *tdata, *count_buffer, *cdata, *out_mos_buffer;
     unsigned short *accu_buffer, *mdata;
+    unsigned char r, g, b;
     int i, k, l, txf, tyf, mxf, mxt, myf, myt, w, h, weight, dx, dy;
     vctDynamicVectorRef<unsigned char> template_ref;
     vctInt2 pos;
@@ -1069,16 +1068,26 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
         const int mosaic_stride = (mosaic_width - w) * 3;
 
         for (l = 0; l < h; l ++) {
-            if (l > tmpl_radius) dy = l - tmpl_radius;
-            else                 dy = tmpl_radius - l;
+
+            if (l > tmpl_radius) {
+                dy = l - tmpl_radius;
+            }
+            else {
+                dy = tmpl_radius - l;
+            }
 
             for (k = 0; k < w; k ++) {
-                if (k > tmpl_radius) dx = k - tmpl_radius;
-                else                 dx = tmpl_radius - k;
 
+                if (k > tmpl_radius) {
+                    dx = k - tmpl_radius;
+                }
+                else {
+                    dx = tmpl_radius - k;
+                }
                 if (dx > dy) weight = dx;
                 else         weight = dy;
-                weight = tmpl_size - dx - dy - 5;
+
+                weight = tmpl_size - dx - dy - feather_rounding;
                 if (weight < 0) weight = 0;
 
                 *mdata += weight * (*tdata); mdata ++; tdata ++;
@@ -1095,14 +1104,18 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     for (i = 0; i < mosaic_pixel_count; i ++) {
         k = *count_buffer; count_buffer ++;
         if (k) {
-            *out_mos_buffer = (*accu_buffer) / k; out_mos_buffer ++; accu_buffer ++;
-            *out_mos_buffer = (*accu_buffer) / k; out_mos_buffer ++; accu_buffer ++;
-            *out_mos_buffer = (*accu_buffer) / k; out_mos_buffer ++; accu_buffer ++;
+            b = (*accu_buffer) / k; accu_buffer ++;
+            g = (*accu_buffer) / k; accu_buffer ++;
+            r = (*accu_buffer) / k; accu_buffer ++;
+            if (r == 0 && g == 0 && b == 0) r = g = b = 1;
+            *out_mos_buffer = b; out_mos_buffer ++;
+            *out_mos_buffer = g; out_mos_buffer ++;
+            *out_mos_buffer = r; out_mos_buffer ++;
         }
         else {
-            *out_mos_buffer = default_bg_b; out_mos_buffer ++;
-            *out_mos_buffer = default_bg_g; out_mos_buffer ++;
-            *out_mos_buffer = default_bg_r; out_mos_buffer ++;
+            *out_mos_buffer = 0; out_mos_buffer ++;
+            *out_mos_buffer = 0; out_mos_buffer ++;
+            *out_mos_buffer = 0; out_mos_buffer ++;
             accu_buffer += 3;
         }
     }
