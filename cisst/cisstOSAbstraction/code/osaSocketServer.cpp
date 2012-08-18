@@ -36,6 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_OS == CISST_QNX)
 #include <sys/select.h>
 #endif
+#if (CISST_OS == CISST_DARWIN)
+#include <unistd.h> // for close
+#endif
 #endif
 
 

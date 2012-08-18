@@ -42,6 +42,8 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     OutputFile(0),
     OutputHeaderStream(0),
     OutputHeaderFile(0),
+    FloatingNotation(COLLECTOR_FILE_FLOATING_NOTATION_NONE),
+    Precision(10),
     FileOpened(false),
     Serializer(0)
 {
@@ -113,8 +115,6 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     }
     // create the output file
     this->OutputFile = new std::ofstream;
-    this->OutputFile->precision(10);
-    this->OutputFile->unsetf(std::ios::floatfield);
     this->OutputHeaderFile = new std::ofstream;
     // uses the oftream as our ostream
     this->OutputHeaderStream = this->OutputHeaderFile;
@@ -260,6 +260,7 @@ void mtsCollectorBase::SetOutput(std::ostream & outputStream, const CollectorFil
     // use whatever format was used before
     this->FileFormat = fileFormat;
     this->SetDelimiter();
+    this->Precision = outputStream.precision();
     this->FirstRunningFlag = true;
     this->SampleCounter = 0;
     this->SampleCounterForEvent = 0;
@@ -308,6 +309,37 @@ void mtsCollectorBase::GetWorkingDirectory(mtsStdString & placeHolder) const
     placeHolder = this->WorkingDirectoryMember;
 }
 
+void mtsCollectorBase::SetOutputStreamFloatingNotation(const CollectorFileFloatingNotation floatingNotation)
+{
+    this->FloatingNotation = floatingNotation;
+    if (this->Status == COLLECTOR_COLLECTING) {
+        CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamFloatingNotation: floating notation modified while collecting, the setting will only be applied to future files" << std::endl;
+    }
+    else {
+        switch (floatingNotation) {
+        case COLLECTOR_FILE_FLOATING_NOTATION_NONE:
+            this->OutputStream->unsetf(std::ios::floatfield);
+            break;
+        case COLLECTOR_FILE_FLOATING_NOTATION_FIXED:
+            this->OutputStream->setf(std::ios::fixed, std::ios::floatfield);
+            break;
+        case COLLECTOR_FILE_FLOATING_NOTATION_SCIENTIFIC:
+            this->OutputStream->setf(std::ios::scientific, std::ios::floatfield);
+            break;
+        }
+    }
+}
+
+void mtsCollectorBase::SetOutputStreamPrecision(const int precision)
+{
+    this->Precision = precision;
+    if (this->Status == COLLECTOR_COLLECTING) {
+        CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamPrecision: precision modified while collecting, the setting will only be applied to future files" << std::endl;
+    }
+    else {
+        this->OutputStream->precision(precision);
+    }
+}
 
 void mtsCollectorBase::Init(void)
 {

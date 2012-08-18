@@ -185,6 +185,22 @@ class vctUnaryOperations
         }
     };
 
+    /*! Return true if the input element is finite */
+    class IsFinite {
+    public:
+        static inline OutputElementType Operate(const InputElementType & input) {
+            return OutputElementType(CMN_ISFINITE(input));
+        }
+    };
+
+    /*! Return true if the input element is NaN */
+    class IsNaN {
+    public:
+        static inline OutputElementType Operate(const InputElementType & input) {
+            return OutputElementType(CMN_ISNAN(input));
+        }
+    };
+
     /*    template<unsigned int EXPONENT>
     class Power {
     public:

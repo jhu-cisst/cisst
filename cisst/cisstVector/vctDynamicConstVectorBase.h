@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -545,6 +545,23 @@ public:
             Run(*this);
     }
 
+    /*! Return true if all the elements of this vector are finite,
+      false otherwise */
+    inline bool IsFinite(void) const {
+        return vctDynamicVectorLoopEngines::
+            SoVi< typename vctBinaryOperations<bool>::And,
+            typename vctUnaryOperations<bool, value_type>::IsFinite>::
+            Run(*this);
+    }
+
+    /*! Return true if any element of this vector is NaN, false
+      otherwise */
+    inline bool HasNaN(void) const {
+        return vctDynamicVectorLoopEngines::
+            SoVi< typename vctBinaryOperations<bool>::Or,
+            typename vctUnaryOperations<bool, value_type>::IsNaN>::
+            Run(*this);
+    }
     //@}
 
 
@@ -629,7 +646,7 @@ public:
     /* documented above */
     template <class __vectorOwnerType>
     inline bool AlmostEqual(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector,
-			    value_type tolerance) const {
+                            value_type tolerance) const {
         return ((*this - otherVector).LinfNorm() <= tolerance);
     }
 

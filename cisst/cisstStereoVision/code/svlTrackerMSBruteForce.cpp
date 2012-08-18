@@ -83,6 +83,7 @@ svlTrackerMSBruteForce::svlTrackerMSBruteForce() :
     svlImageTracker(),
     TargetsAdded(false),
     OverwriteTemplates(false),
+    TemplateUpdateEnabled(true),
     TemplateRadiusRequested(3),
     SearchRadiusRequested(6),
     Metric(svlNCC),
@@ -139,6 +140,11 @@ void svlTrackerMSBruteForce::SetOverwriteTemplates(bool enable)
     OverwriteTemplates = enable;
 }
 
+void svlTrackerMSBruteForce::SetTemplateUpdate(bool enable)
+{
+    TemplateUpdateEnabled = enable;
+}
+
 void svlTrackerMSBruteForce::SetTemplateUpdateWeight(double weight)
 {
     int ival = static_cast<unsigned int>(weight * 255);
@@ -182,6 +188,11 @@ unsigned int svlTrackerMSBruteForce::GetSearchRadius() const
 bool svlTrackerMSBruteForce::GetOverwriteTemplates() const
 {
     return OverwriteTemplates;
+}
+
+bool svlTrackerMSBruteForce::GetTemplateUpdate() const
+{
+    return TemplateUpdateEnabled;
 }
 
 double svlTrackerMSBruteForce::GetTemplateUpdateWeight() const
@@ -354,33 +365,35 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         }
         ptgt->visible = true;
 
-        // Check if this scale already has a template
-        // Acquire target templates if necessary
-        if (ptgt->feature_quality == -1) {
-            ptgt->feature_data.SetSize(templatesize);
+        if (TemplateUpdateEnabled) {
+            // Check if this scale already has a template
+            // Acquire target templates if necessary
+            if (ptgt->feature_quality == -1) {
+                ptgt->feature_data.SetSize(templatesize);
 
-            // Update this scale's template with the
-            // new position estimated by the tracker
-            // filter
-            CopyTemplate(p_img,
-                         OrigTemplates[i],
-                         ptgt->pos.x - TemplateRadius,
-                         ptgt->pos.y - TemplateRadius);
-            CopyTemplate(p_img,
-                         ptgt->feature_data.Pointer(),
-                         ptgt->pos.x - TemplateRadius,
-                         ptgt->pos.y - TemplateRadius);
+                // Update this scale's template with the
+                // new position estimated by the tracker
+                // filter
+                CopyTemplate(p_img,
+                             OrigTemplates[i],
+                             ptgt->pos.x - TemplateRadius,
+                             ptgt->pos.y - TemplateRadius);
+                CopyTemplate(p_img,
+                             ptgt->feature_data.Pointer(),
+                             ptgt->pos.x - TemplateRadius,
+                             ptgt->pos.y - TemplateRadius);
 
-            ptgt->conf            = 255;
-            ptgt->feature_quality = 256;
-        }
-        else if (OverwriteTemplates) {
-            // Overwrite template based on updated position
-            UpdateTemplate(p_img,
-                           OrigTemplates[i],
-                           ptgt->feature_data.Pointer(),
-                           ptgt->pos.x - TemplateRadius,
-                           ptgt->pos.y - TemplateRadius);
+                ptgt->conf            = 255;
+                ptgt->feature_quality = 256;
+            }
+            else if (OverwriteTemplates) {
+                // Overwrite template based on updated position
+                UpdateTemplate(p_img,
+                               OrigTemplates[i],
+                               ptgt->feature_data.Pointer(),
+                               ptgt->pos.x - TemplateRadius,
+                               ptgt->pos.y - TemplateRadius);
+            }
         }
     }
 
@@ -480,7 +493,7 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         cvShowImage(ScaleName.c_str(), image.IplImageRef(videoch));
         cvWaitKey(1);
 #endif
-        if (!OverwriteTemplates) {
+        if (TemplateUpdateEnabled && !OverwriteTemplates) {
             // Update template temporarily based on updated position
             UpdateTemplate(image.GetUCharPointer(videoch),
                            OrigTemplates[i],
@@ -541,34 +554,36 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         }
         ptgt->visible = true;
 
-        // Check if this scale already has a template
-        // Acquire target templates if necessary
-        if (ptgt->feature_quality == -1) {
-            ptgt->feature_data.SetSize(templatesize);
+        if (TemplateUpdateEnabled) {
+            // Check if this scale already has a template
+            // Acquire target templates if necessary
+            if (ptgt->feature_quality == -1) {
+                ptgt->feature_data.SetSize(templatesize);
 
-            // Update this scale's template with the
-            // new position estimated by the tracker
-            // filter
-            CopyTemplate(p_img,
-                         OrigTemplates[i],
-                         ptgt->pos.x - TemplateRadius,
-                         ptgt->pos.y - TemplateRadius);
-            CopyTemplate(p_img,
-                         ptgt->feature_data.Pointer(),
-                         ptgt->pos.x - TemplateRadius,
-                         ptgt->pos.y - TemplateRadius);
+                // Update this scale's template with the
+                // new position estimated by the tracker
+                // filter
+                CopyTemplate(p_img,
+                             OrigTemplates[i],
+                             ptgt->pos.x - TemplateRadius,
+                             ptgt->pos.y - TemplateRadius);
+                CopyTemplate(p_img,
+                             ptgt->feature_data.Pointer(),
+                             ptgt->pos.x - TemplateRadius,
+                             ptgt->pos.y - TemplateRadius);
 
-            ptgt->conf            = 255;
-            ptgt->feature_quality = 256;
-        }
-        else if (OverwriteTemplates) {
-            // Overwrite template based on updated position
-            UpdateTemplate(p_img,
-                           OrigTemplates[i],
-                           ptgt->feature_data.Pointer(),
-                           ptgt->pos.x - TemplateRadius,
-                           ptgt->pos.y - TemplateRadius);
-            memcpy(OrigTemplates[i], ptgt->feature_data.Pointer(), ptgt->feature_data.size());
+                ptgt->conf            = 255;
+                ptgt->feature_quality = 256;
+            }
+            else if (OverwriteTemplates) {
+                // Overwrite template based on updated position
+                UpdateTemplate(p_img,
+                               OrigTemplates[i],
+                               ptgt->feature_data.Pointer(),
+                               ptgt->pos.x - TemplateRadius,
+                               ptgt->pos.y - TemplateRadius);
+                memcpy(OrigTemplates[i], ptgt->feature_data.Pointer(), ptgt->feature_data.size());
+            }
         }
     }
 
@@ -674,7 +689,7 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         cvWaitKey(1);
 #endif
 
-        if (!OverwriteTemplates) {
+        if (TemplateUpdateEnabled && !OverwriteTemplates) {
             // Update template temporarily based on updated position
             UpdateTemplate(image.GetUCharPointer(videoch),
                            OrigTemplates[i],
