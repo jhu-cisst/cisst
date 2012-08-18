@@ -46,7 +46,13 @@ void mtsTask::DoRunInternal(void)
     // Make sure following is called
     if (InterfaceProvidedToManager)
         InterfaceProvidedToManager->ProcessMailBoxes();
+#if CISST_HAS_SAFETY_PLUGINS
+    double tic = osaGetTime();
+#endif
     this->Run();
+#if CISST_HAS_SAFETY_PLUGINS
+    StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
+#endif
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
 }
@@ -217,6 +223,8 @@ mtsTask::mtsTask(const std::string & name,
     CMN_ASSERT(provided);
     // Make Period available through the command pattern
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
+    provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeUser, "GetExecTimeUser");
+    provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeTotal, "GetExecTimeTotal");
     // Add fault notification event
     provided->AddEventWrite(this->GenerateFaultEvent, SF::Dict::FaultNames::FaultEvent, std::string());
     // [SFUPDATE]

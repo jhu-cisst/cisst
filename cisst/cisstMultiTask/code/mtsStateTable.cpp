@@ -34,6 +34,10 @@ const std::string mtsStateTable::NamesOfDefaultElements::Tic = "Tic";
 const std::string mtsStateTable::NamesOfDefaultElements::Toc = "Toc";
 const std::string mtsStateTable::NamesOfDefaultElements::Period = "Period";
 const std::string mtsStateTable::NamesOfDefaultElements::PeriodStatistics = "PeriodStatistics";
+#if CISST_HAS_SAFETY_PLUGINS
+const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeUser = "ExecTimeUser";
+const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeTotal = "ExecTimeTotal";
+#endif
 
 const mtsStateDataId mtsStateTable::INVALID_STATEVECTOR_ID = -1;
 
@@ -63,6 +67,10 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     SumOfPeriods(0.0),
     AveragePeriod(0.0),
     Name(name)
+#if CISST_HAS_SAFETY_PLUGINS
+    , ExecTimeUser(0.0)
+    , ExecTimeTotal(0.0)
+#endif
 {
     // make sure history length is at least 3
     if (this->HistoryLength < 3) {
@@ -91,6 +99,11 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
     // Add statistics
     NewElement(mtsStateTable::NamesOfDefaultElements::PeriodStatistics, &PeriodStats);
+
+#if CISST_HAS_SAFETY_PLUGINS
+    NewElement(mtsStateTable::NamesOfDefaultElements::ExecTimeUser, &ExecTimeUser);
+    NewElement(mtsStateTable::NamesOfDefaultElements::ExecTimeTotal, &ExecTimeTotal);
+#endif
 }
 
 mtsStateTable::~mtsStateTable()
