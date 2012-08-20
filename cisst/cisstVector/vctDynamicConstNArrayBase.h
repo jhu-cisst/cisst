@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet, Daniel Li
+  Author(s):  Anton Deguet, Daniel Li, Ofri Sadowsky
   Created on: 2006-06-23
 
   (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights

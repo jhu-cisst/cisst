@@ -353,7 +353,7 @@ public:
       \param pInverse The output matrix for PInverse
     */
     template <class _matrixOwnerTypeA, class _matrixOwnerTypePInverse>
-    nmrPInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+    nmrPInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & CMN_UNUSED(A),
                            vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse)
     {
         this->SetRefOutput(pInverse);

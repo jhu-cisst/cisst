@@ -97,7 +97,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     exceptionReceived = false;
     try {
         description = cmnDataScalarDescription(vString, cmnDataScalarNumber(vString));
-    } catch (std::out_of_range>) {
+    } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);

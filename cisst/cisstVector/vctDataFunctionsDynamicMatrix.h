@@ -119,7 +119,7 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
 
 
 template <class _matrixOwnerType, typename _elementType>
-bool cmnDataScalarNumberIsFixed(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data)
+bool cmnDataScalarNumberIsFixed(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & CMN_UNUSED(data))
 {
     return false;
 }

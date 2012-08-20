@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Daniel Li
-  Created on:	2006-07-10
+  Author(s):  Daniel Li, Ofri Sadowsky, Anton Deguet
+  Created on: 2006-07-10
 
   (C) Copyright 2006-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -200,7 +200,7 @@ public:
     {
         SetSize(otherNArray.sizes());
         this->Assign(otherNArray);
-		return *this;
+        return *this;
     }
 
     /*!  Equals operator: Assignment from a vctDynamicNArray to this nArray
@@ -213,7 +213,7 @@ public:
     {
         SetSize(otherNArray.sizes());
         this->Assign(otherNArray);
-		return *this;
+        return *this;
     }
 
 
