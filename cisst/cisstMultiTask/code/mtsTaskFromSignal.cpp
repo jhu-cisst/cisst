@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,6 +46,14 @@ void mtsTaskFromSignal::PostCommandQueuedMethod(void) {
 
 
 void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
+
+    if (ExecIn && ExecIn->GetConnectedInterface()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName() 
+                                << " called, even though task receives thread from "
+                                << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
+        return 0;
+    }
+
     CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: begin task " << this->GetName() << std::endl;
     if (this->State == mtsComponentState::INITIALIZING) {
         this->StartupInternal();

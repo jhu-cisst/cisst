@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-10
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -107,7 +107,7 @@ public:
 
         \note See note in mtsTask regarding length of string name.
 
-        \sa mtsTask, mtsTaskContinuous, mtsTaskPeriodic
+        \sa mtsTask, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromSignal
 
      */
     mtsTaskFromCallback(const std::string & name,

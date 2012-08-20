@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -44,6 +44,53 @@ void mtsTask::DoRunInternal(void)
     this->Run();
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
+    RunEvent();
+}
+
+void mtsTask::RunEventHandler(void)
+{
+    if (this->State == mtsComponentState::INITIALIZING && !Thread.IsValid()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RunEventHandler: initializing thread for " << this->GetName() << std::endl;
+        // This is only executed once, to produce same behavior as RunInternal
+        Thread.CreateFromCurrentThread();
+        StartupInternal();
+    }
+    else if (this->State == mtsComponentState::ACTIVE)
+        DoRunInternal();
+    else
+        RunEvent();
+}
+
+// ChangeStateEventHandler
+// This event handler is in the ExecIn required interface, which means that it is only called
+// if this task is getting its thread of execution from another task (via RunEvent).
+// Thus, we do the following:
+//   1) If the other task is initializing (i.e., Create called), we also call Create; this shouldn't
+//      be necessary, since most likely the application code will create this task (either by
+//      calling Create directory, or by calling mtsManagerLocal::CreateAll.
+//   2) If this task is ACTIVE, and the other task is suspended (i.e., state is READY), we
+//      also suspend this task. Note that we could also automatically start this task when
+//      the other task becomes ACTIVE, but for now we are not doing that; instead, the user
+//      will have to manually re-start this task.
+//   3) If the other task is being killed (state is FINISHING) or is already killed (state is
+//      FINISHED), then we also kill this task.
+void mtsTask::ChangeStateEventHandler(const mtsComponentState &newState)
+{
+    if ((this->State == mtsComponentState::CONSTRUCTED) &&
+        (newState == mtsComponentState::INITIALIZING)) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "ChangeStateEventHandler: calling Create for " << this->GetName() << std::endl;
+        this->Create();
+    }
+    else if ((this->State == mtsComponentState::ACTIVE) &&
+             (newState == mtsComponentState::READY)) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "ChangeStateEventHandler: calling Suspend for " << this->GetName() << std::endl;
+        this->Suspend();
+    }
+    else if ((newState == mtsComponentState::FINISHING) ||
+             (newState == mtsComponentState::FINISHED)) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "ChangeStateEventHandler: calling Kill for " << this->GetName() << std::endl;
+        this->Kill();
+    }
 }
 
 void mtsTask::StartupInternal(void) {
@@ -79,6 +126,7 @@ void mtsTask::StartupInternal(void) {
         CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task \"" << this->GetName() << "\" cannot be started." << std::endl;
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
+    RunEvent();
 }
 
 
@@ -130,6 +178,12 @@ void mtsTask::SetThreadReturnValue(void * returnValue) {
 
 void mtsTask::ChangeState(mtsComponentState::Enum newState)
 {
+    if (this->State.GetState() == newState)
+        return;
+
+    // Inform any dependent components
+    ChangeStateEvent(mtsComponentState(newState));
+
     StateChange.Lock();
     this->State = newState;
     StateChange.Unlock();
@@ -200,6 +254,24 @@ mtsTask::mtsTask(const std::string & name,
 {
     this->AddStateTable(&this->StateTable);
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
+    // ExecIn interface is optional; does not need a mailbox
+    ExecIn = this->AddInterfaceRequiredUsingMailbox(mtsManagerComponentBase::InterfaceNames::InterfaceExecIn, 0, MTS_OPTIONAL);
+    if (ExecIn) {
+        // Can add functions to set period, check if hard real-time, etc.
+        ExecIn->AddEventHandlerVoid(&mtsTask::RunEventHandler, this, "RunEvent", MTS_EVENT_NOT_QUEUED);
+        ExecIn->AddEventHandlerWrite(&mtsTask::ChangeStateEventHandler, this, "ChangeStateEvent", MTS_EVENT_NOT_QUEUED);
+    }
+    else 
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecIn interface to " << this->GetName() << std::endl;
+    // ExecOut interface
+    ExecOut = this->AddInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceExecOut);
+    if (ExecOut) {
+        // Can add commands to set period, check if hard real-time, etc.
+        ExecOut->AddEventVoid(RunEvent, "RunEvent");
+        ExecOut->AddEventWrite(ChangeStateEvent, "ChangeStateEvent", this->State);
+    }
+    else 
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecOut interface to " << this->GetName() << std::endl;
 }
 
 
@@ -218,6 +290,9 @@ mtsTask::~mtsTask()
 
 void mtsTask::Kill(void)
 {
+    if (this->State == mtsComponentState::FINISHED)
+        return;
+
     CMN_LOG_CLASS_INIT_VERBOSE << "Kill: task \"" << this->GetName() << "\", current state \"" << this->State << "\"" << std::endl;
 
     // If the task has only been constructed (i.e., no thread created), then we just enter the FINISHED state directly.
