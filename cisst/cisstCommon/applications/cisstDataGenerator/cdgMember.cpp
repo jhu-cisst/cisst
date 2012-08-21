@@ -94,13 +94,13 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     }
     if ((accessors == "all")
         || (accessors == "set-get")) {
-        outputStream << "    /* accessors is: " << accessors << "*/" << std::endl
+        outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
                      << "    void Get" << name << "(" << type << " & placeHolder) const;" << std::endl
                      << "    void Set" << name << "(const " << type << " & newValue);" << std::endl;
     }
     if ((accessors == "all")
         || (accessors == "references")) {
-        outputStream << "    /* accessors is: " << accessors << "*/" << std::endl
+        outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
                      << "    const " << type << " & " << name << "(void) const;" << std::endl
                      << "    " << type << " & " << name << "(void);" << std::endl;
     }
@@ -123,7 +123,7 @@ void cdgMember::GenerateCode(std::ostream & outputStream) const
     if ((accessors == "all")
         || (accessors == "set-get")) {
         outputStream << std::endl
-                     << "/* accessors is: " << accessors << "*/" << std::endl
+                     << "/* accessors is set to: " << accessors << " */" << std::endl
                      << "void " << this->ClassName << "::Get" << name << "(" << type << " & placeHolder) const" << std::endl
                      << "{" << std::endl
                      << "    placeHolder = this->" << name << "Member;" << std::endl
@@ -139,7 +139,7 @@ void cdgMember::GenerateCode(std::ostream & outputStream) const
     if ((accessors == "all")
         || (accessors == "references")) {
         outputStream << std::endl
-                     << "/* accessors is: " << accessors << "*/" << std::endl
+                     << "/* accessors is set to: " << accessors << " */" << std::endl
                      << "const " << type << " & " << this->ClassName << "::" << name << "(void) const" << std::endl
                      << "{" << std::endl
                      << "    return this->" << name << "Member;" << std::endl

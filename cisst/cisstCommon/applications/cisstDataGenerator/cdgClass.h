@@ -64,7 +64,6 @@ class cdgClass: public cdgScope
     BaseClassesType BaseClasses;
 
 public:
-
     cdgClass(unsigned int lineNumber);
 
     cdgScope::Type GetScope(void) const;
