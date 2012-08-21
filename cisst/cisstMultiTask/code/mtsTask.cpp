@@ -205,7 +205,7 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
     if (this->State == desiredState) {
         return true;
     }
-    if (osaGetCurrentThreadId() == Thread.GetId()) {
+    if (CheckForOwnThread()) {
         // This shouldn't happen
         CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << desiredState << "): called from self for task \""
                                    << this->GetName() << "\"" << std::endl;

@@ -20,4 +20,4 @@ http://www.cisst.org/cisst/license.txt.
 // Following needed for Windows; does not seem to matter for Linux
 template int mtsComponentFLTK<displayUI>::StartRunLoop(void);
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(displayTask, mtsTaskFromCallback, std::string);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(displayTask, mtsTaskContinuous, std::string);

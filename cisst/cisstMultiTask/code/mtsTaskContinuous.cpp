@@ -183,6 +183,15 @@ void mtsTaskContinuous::Create(void *data)
         CMN_LOG_CLASS_INIT_VERBOSE << "Create: getting thread from component "
                                    << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
         ChangeState(mtsComponentState::INITIALIZING);
+        // Special case handling: if Create was called from the source task, then we call StartupInternal now.
+        // This case occurs when the source task uses the main thread.
+        const mtsTask *srcTask = dynamic_cast<const mtsTask *>(ExecIn->GetConnectedInterface()->GetComponent());
+        if (srcTask && srcTask->CheckForOwnThread()) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Create: special case initialization from " 
+                                       << srcTask->GetName() << std::endl;
+            Thread.CreateFromCurrentThread();
+            StartupInternal();
+        }
     }
     else {
         // NOTE: still need to update GCM
