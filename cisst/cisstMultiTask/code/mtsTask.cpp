@@ -91,6 +91,8 @@ void mtsTask::ChangeStateEventHandler(const mtsComponentState &newState)
         CMN_LOG_CLASS_RUN_VERBOSE << "ChangeStateEventHandler: calling Kill for " << this->GetName() << std::endl;
         this->Kill();
     }
+    // Forward this to any tasks connected to the ExecOut interface
+    ChangeStateEvent(newState);
 }
 
 void mtsTask::StartupInternal(void) {
@@ -181,8 +183,10 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (this->State.GetState() == newState)
         return;
 
-    // Inform any dependent components
-    ChangeStateEvent(mtsComponentState(newState));
+    // If this component is providing the thread, inform
+    // any dependent components
+    if (!(ExecIn && ExecIn->GetConnectedInterface()))
+        ChangeStateEvent(mtsComponentState(newState));
 
     StateChange.Lock();
     this->State = newState;
