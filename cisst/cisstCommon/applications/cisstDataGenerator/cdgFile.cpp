@@ -52,6 +52,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     bool errorFound = false; // any error found, stop parsing and return false
     std::string errorMessage;
     std::stringstream parsedOutput; // for debug
+    int parsedOutputIndentCounter = 0;
+    std::string parsedOutputIndent;
     size_t lineNumber = 1; // counter for debug messages
     char currentChar, previousChar = ' '; // we read character by character, used to detect //
     std::string word, temp; // each word is created by concatenating characters
@@ -118,9 +120,16 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         }
         if (curlyOpen) {
             parsedOutput << '[';
+            parsedOutputIndentCounter++;
+            parsedOutputIndent.resize(parsedOutputIndentCounter * 4, ' ');
         }
         if (curlyClose) {
             parsedOutput << ']';
+            parsedOutputIndentCounter--;
+            if (parsedOutputIndentCounter < 0) {
+                parsedOutputIndentCounter = 0;
+            }
+            parsedOutputIndent.resize(parsedOutputIndentCounter * 4, ' ');
         }
         if (semiColumn) {
             parsedOutput << '|';
@@ -259,7 +268,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         if (lineFinished) {
             lineNumber++;
             lineFinished = false;
-            parsedOutput << '\n' << lineNumber << ": ";
+            parsedOutput << '\n' << lineNumber << ": " << parsedOutputIndent;
         }
     } // while loop for character
 

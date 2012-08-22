@@ -332,26 +332,28 @@ void cdgClass::GenerateMethodToStreamRawCode(std::ostream & outputStream) const
 
 void cdgClass::GenerateStandardFunctionsHeader(std::ostream & outputStream) const
 {
-    std::string name = this->GetFieldValue("name");
+    const std::string name = this->GetFieldValue("name");
+    const std::string attribute = this->GetFieldValue("attribute");
     outputStream << "/* default functions */" << std::endl
-                 << "void cmnSerializeRaw(std::ostream & outputStream, const " << name << " & object);" << std::endl
-                 << "void cmnDeSerializeRaw(std::istream & inputStream, " << name << " & placeHolder);" << std::endl;
+                 << "void " << attribute << " cmnSerializeRaw(std::ostream & outputStream, const " << name << " & object);" << std::endl
+                 << "void " << attribute << " cmnDeSerializeRaw(std::istream & inputStream, " << name << " & placeHolder);" << std::endl;
 }
 
 
 void cdgClass::GenerateDataFunctionsHeader(std::ostream & outputStream) const
 {
-    std::string name = this->GetFieldValue("name");
+    const std::string name = this->GetFieldValue("name");
+    const std::string attribute = this->GetFieldValue("attribute");
     outputStream << "/* data functions */" << std::endl
-                 << "void cmnDataCopy(" << name << " & destination, const " << name << " & source);" << std::endl
-                 << "void cmnDataSerializeBinary(std::ostream & outputStream, const " << name << " & data) throw (std::runtime_error);" << std::endl
-                 << "void cmnDataDeSerializeBinary(std::istream & inputStream, " << name << " & data," << std::endl
+                 << "void " << attribute << " cmnDataCopy(" << name << " & destination, const " << name << " & source);" << std::endl
+                 << "void " << attribute << " cmnDataSerializeBinary(std::ostream & outputStream, const " << name << " & data) throw (std::runtime_error);" << std::endl
+                 << "void " << attribute << " cmnDataDeSerializeBinary(std::istream & inputStream, " << name << " & data," << std::endl
                  << "                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error);"<< std::endl
-                 << "bool cmnDataScalarNumberIsFixed(const " << name << " & data);" << std::endl
-                 << "size_t cmnDataScalarNumber(const " << name << " & data);" << std::endl
-                 << "std::string cmnDataScalarDescription(const " << name << " & data, const size_t index," << std::endl
+                 << "bool " << attribute << " cmnDataScalarNumberIsFixed(const " << name << " & data);" << std::endl
+                 << "size_t " << attribute << " cmnDataScalarNumber(const " << name << " & data);" << std::endl
+                 << "std::string " << attribute << " cmnDataScalarDescription(const " << name << " & data, const size_t index," << std::endl
                  << "                                     const char * userDescription = \"" << name << "\") throw (std::out_of_range);" << std::endl
-                 << "double cmnDataScalar(const " << name << " & data, const size_t index) throw (std::out_of_range);" << std::endl;
+                 << "double " << attribute << " cmnDataScalar(const " << name << " & data, const size_t index) throw (std::out_of_range);" << std::endl;
 }
 
 
