@@ -139,18 +139,18 @@ public:
 };
 
 
-void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data);
+void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data);
 
-void cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
-                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat);
+void CISST_EXPORT cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
+                                           const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat);
 
-bool cmnDataScalarNumberIsFixed(const mtsGenericObject & data);
+bool CISST_EXPORT cmnDataScalarNumberIsFixed(const mtsGenericObject & data);
 
-size_t cmnDataScalarNumber(const mtsGenericObject & data);
+size_t CISST_EXPORT cmnDataScalarNumber(const mtsGenericObject & data);
 
-double cmnDataScalar(const mtsGenericObject & data, const size_t index);
+double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t index);
 
-std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription = "");
+std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription = "");
 
 #endif // _mtsGenericObject_h
 
