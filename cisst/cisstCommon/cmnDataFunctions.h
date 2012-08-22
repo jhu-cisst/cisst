@@ -394,13 +394,13 @@ inline void cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
 // std::string specialization
 CMN_DATA_COPY_USING_ASSIGN(std::string);
 
-void cmnDataSerializeBinary(std::ostream & outputStream,
-                            const std::string & data) throw (std::runtime_error);
+void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream,
+                                         const std::string & data) throw (std::runtime_error);
 
-void cmnDataDeSerializeBinary(std::istream & inputStream,
-                              std::string & data,
-                              const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat) throw (std::runtime_error);
+void CISST_EXPORT cmnDataDeSerializeBinary(std::istream & inputStream,
+                                           std::string & data,
+                                           const cmnDataFormat & remoteFormat,
+                                           const cmnDataFormat & localFormat) throw (std::runtime_error);
 
 
 // this should be define as a macro that can be used for all types without scalars
