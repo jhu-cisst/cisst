@@ -176,4 +176,45 @@ cmnDataScalar(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & 
 }
 
 
+// ---------------------- older functions, to be deprecated
+template <typename _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctDynamicMatrix<_elementType> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctDynamicMatrixRef<_elementType> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctDynamicMatrix<_elementType> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.SerializeRaw(outputStream);
+}
+
+template <typename _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctDynamicMatrixRef<_elementType> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.SerializeRaw(outputStream);
+}
+
+template <typename _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctDynamicConstMatrixRef<_elementType> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.SerializeRaw(outputStream);
+}
+
 #endif // _vctDataFunctionsDynamicMatrix_h

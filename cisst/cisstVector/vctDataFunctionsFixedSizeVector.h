@@ -126,4 +126,45 @@ cmnDataScalar(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _d
 }
 
 
+// ---------------------- older functions, to be deprecated
+template <typename _elementType, vct::size_type _size>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctFixedSizeVector<_elementType, _size> & vector)
+    throw (std::runtime_error)
+{
+    vector.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType, vct::size_type _size, vct::stride_type _stride>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctFixedSizeVectorRef<_elementType, _size, _stride> & vector)
+    throw (std::runtime_error)
+{
+    vector.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType, vct::size_type _size>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctFixedSizeVector<_elementType, _size> & vector)
+    throw (std::runtime_error)
+{
+    vector.SerializeRaw(outputStream);
+}
+
+template <typename _elementType, vct::size_type _size, vct::stride_type _stride>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctFixedSizeVectorRef<_elementType, _size, _stride> & vector)
+    throw (std::runtime_error)
+{
+    vector.SerializeRaw(outputStream);
+}
+
+template <typename _elementType, vct::size_type _size, vct::stride_type _stride>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctFixedSizeConstVectorRef<_elementType, _size, _stride> & vector)
+    throw (std::runtime_error)
+{
+    vector.SerializeRaw(outputStream);
+}
+
 #endif // _vctDataFunctionsFixedSizeVector_h

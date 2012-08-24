@@ -169,9 +169,6 @@ cmnDataScalar(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & 
 
 
 // ---------------------- older functions, to be deprecated
-
-
-
 template <typename _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctDynamicVector<_elementType> & vector)

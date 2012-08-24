@@ -145,4 +145,48 @@ cmnDataScalar(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colSt
 }
 
 
+// ---------------------- older functions, to be deprecated
+template <typename _elementType, vct::size_type _rows, vct::size_type _cols>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctFixedSizeMatrix<_elementType, _rows, _cols> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
+inline void cmnDeSerializeRaw(std::istream & inputStream,
+                              vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.DeSerializeRaw(inputStream);
+}
+
+template <typename _elementType, vct::size_type _rows, vct::size_type _cols>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctFixedSizeMatrix<_elementType, _rows, _cols> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.SerializeRaw(outputStream);
+}
+
+template <typename _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.SerializeRaw(outputStream);
+}
+
+template <typename _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
+inline void cmnSerializeRaw(std::ostream & outputStream,
+                            const vctFixedSizeConstMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> & matrix)
+    throw (std::runtime_error)
+{
+    matrix.SerializeRaw(outputStream);
+}
+
 #endif // _vctDataFunctionsFixedSizeMatrix_h
