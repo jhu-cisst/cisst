@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
 
 
@@ -92,6 +94,13 @@ bool mtsTaskContinuousConstructorArg::FromStreamRaw(std::istream & inputStream, 
 
 void * mtsTaskContinuous::RunInternal(void *data)
 {
+    if (ExecIn && ExecIn->GetConnectedInterface()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName() 
+                                << " called, even though task receives thread from "
+                                << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
+        return 0;
+    }
+
     if (this->State == mtsComponentState::INITIALIZING) {
         SaveThreadStartData(data);
         this->StartupInternal();
@@ -170,17 +179,36 @@ void mtsTaskContinuous::Create(void *data)
                                  << this->State << std::endl;
         return;
     }
-    if (NewThread) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "Create: creating thread for task " << this->GetName() << std::endl;
+    if (ExecIn && ExecIn->GetConnectedInterface()) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "Create: getting thread from component "
+                                   << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
         ChangeState(mtsComponentState::INITIALIZING);
-        Thread.Create<mtsTaskContinuous, void*>(this, &mtsTaskContinuous::RunInternal, data);
+        // Special case handling: if Create was called from the source task, then we call StartupInternal now.
+        // This case occurs when the source task uses the main thread.
+        const mtsTask *srcTask = dynamic_cast<const mtsTask *>(ExecIn->GetConnectedInterface()->GetComponent());
+        if (srcTask && srcTask->CheckForOwnThread()) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Create: special case initialization from " 
+                                       << srcTask->GetName() << std::endl;
+            Thread.CreateFromCurrentThread();
+            StartupInternal();
+        }
     }
     else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "Create: using current thread for task " << this->GetName() << std::endl;
-        Thread.CreateFromCurrentThread();
-        CaptureThread = true;
-        ChangeState(mtsComponentState::INITIALIZING);
-        RunInternal(data);
+        // NOTE: still need to update GCM
+        RemoveInterfaceRequired("ExecIn", true);
+        ExecIn = 0;
+        if (NewThread) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Create: creating thread for task " << this->GetName() << std::endl;
+            ChangeState(mtsComponentState::INITIALIZING);
+            Thread.Create<mtsTaskContinuous, void*>(this, &mtsTaskContinuous::RunInternal, data);
+        }
+        else {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Create: using current thread for task " << this->GetName() << std::endl;
+            Thread.CreateFromCurrentThread();
+            CaptureThread = true;
+            ChangeState(mtsComponentState::INITIALIZING);
+            RunInternal(data);
+        }
     }
 }
 

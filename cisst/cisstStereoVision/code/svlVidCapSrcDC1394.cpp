@@ -1057,16 +1057,16 @@ int svlVidCapSrcDC1394::CaptureFrame(unsigned int videoch)
     unsigned int yuvorder, rgborder;
     if (Format[videoch]) {
         rgborder = Format[videoch]->rgb_order;
-        
+
         if (Format[videoch]->yuyv_order)
             yuvorder = DC1394_BYTE_ORDER_YUYV;
         else
             yuvorder = DC1394_BYTE_ORDER_UYVY;
     }
     else {
-            // Default conversion settings
+        // Default conversion settings
         yuvorder = DC1394_BYTE_ORDER_UYVY;
-        rgborder = true;
+        rgborder = false;
     }
 
     if (ColorCoding[videoch] == DC1394_COLOR_CODING_RAW8) {
@@ -1091,7 +1091,12 @@ int svlVidCapSrcDC1394::CaptureFrame(unsigned int videoch)
     // Release frame buffer
     dc1394_capture_enqueue(Cameras[DeviceID[videoch]], Frame[videoch]);
 
-    if (rgborder) SwapRGBBuffer(OutputBuffer[videoch]->GetPushBuffer(), Width[videoch] * Height[videoch]);
+    if (rgborder) {
+#if (__verbose__ >= 4)
+        cerr << "svlVidCapSrcDC1394::CaptureFrame - converting between RGB and BGR" << endl;
+#endif
+        SwapRGBBuffer(OutputBuffer[videoch]->GetPushBuffer(), Width[videoch] * Height[videoch]);
+    }
 
     // Add image to the output buffer
     OutputBuffer[videoch]->Push();
@@ -1130,7 +1135,7 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
             validlistsize --;
             continue;
         }
-        templist[i].rgb_order = true;
+        templist[i].rgb_order = false;
         templist[i].yuyv_order = false;
         templist[i].custom_mode = -1;
         templist[i].custom_roileft = 0;
@@ -1166,7 +1171,7 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
             templist[i].width = f7modes.mode[j].size_x;
             templist[i].height = f7modes.mode[j].size_y;
             templist[i].colorspace = GetPixelTypeFromColorCoding(f7modes.mode[j].color_coding);
-            templist[i].rgb_order = true;
+            templist[i].rgb_order = false;
             templist[i].yuyv_order = false;
             templist[i].custom_mode = j;
             templist[i].custom_roileft = f7modes.mode[j].pos_x;

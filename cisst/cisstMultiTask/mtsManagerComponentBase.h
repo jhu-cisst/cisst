@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -125,6 +125,9 @@ public:
         // Interface for system-wide thread-safe logging
         const static std::string InterfaceSystemLoggerProvided;
         const static std::string InterfaceSystemLoggerRequired;
+        // Interfaces for sharing execution threads between tasks
+        const static std::string InterfaceExecIn;
+        const static std::string InterfaceExecOut;
     };
 
     /*! Command name definitions */

@@ -29,13 +29,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (CISST_OS == CISST_DARWIN)
     #include <OpenGL/gl.h>
-
-    #define _RGB_VERSION_   GL_BGR
 #else
     #include <GL/gl.h>
-
-    #define _RGB_VERSION_   GL_RGB
 #endif
+
+//#ifdef GL_BGR
+//    #define _RGB_VERSION_   GL_BGR
+//#else
+    #define _RGB_VERSION_   GL_RGB
+//#endif
 
 
 /**************************************/

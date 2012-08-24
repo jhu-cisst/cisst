@@ -2,7 +2,7 @@
 version 1.0
 header_name {.h} 
 code_name {.cxx}
-class displayUI {open : {public mtsTaskFromCallback}
+class displayUI {open : {public mtsTaskContinuous}
 } {
   decl {bool WaitingForTrigger;} {}
   decl {mtsFunctionRead GetData;} {}
@@ -12,12 +12,12 @@ class displayUI {open : {public mtsTaskFromCallback}
   decl {mtsFunctionRead GetTime;} {}
   decl {vctPlot2DBase::Signal * DataSignal;} {}
   decl {vctPlot2DBase::Signal * TriggerSignal;} {}
-  Function {displayUI(const std::string & name): mtsTaskFromCallback(name)} {open
+  Function {displayUI(const std::string & name): mtsTaskContinuous(name)} {open
   } {
     Fl_Window DisplayWindow {
       label DisplayWindow user_data_type {void*} selected
       private xywh {757 504 579 329} type Double
-      code0 {\#include <cisstMultiTask/mtsTaskFromCallback.h>}
+      code0 {\#include <cisstMultiTask/mtsTaskContinuous.h>}
       code1 {\#include <cisstMultiTask/mtsInterfaceRequired.h>}
       code2 {\#include <cisstVector/vctPlot2DOpenGLFLTK.h>} visible
     } {
