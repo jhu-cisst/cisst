@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -27,12 +27,9 @@ endif (CISST_HAS_CISSTNETLIB)
 
 add_subdirectory (code)
 
-if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
-  add_subdirectory (codePython)
-  if (CISST_BUILD_TESTS)
-    add_subdirectory (testsPython)
-  endif (CISST_BUILD_TESTS)
-endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+# SWIG Python wrappers and tests
+cisst_offer_python (cisstNumerical)
+cisst_offer_tests_python (cisstNumerical)
 
 # build examples and tests, add an option to skip them
 cisst_offer_examples (cisstNumerical)

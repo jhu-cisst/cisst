@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 
 vctPlot2DBase::Scale::Scale(const std::string & name, size_t pointDimension)
@@ -43,7 +44,7 @@ vctPlot2DBase::Scale::~Scale()
 }
 
 
-std::string vctPlot2DBase::Scale::GetName(void)
+const std::string & vctPlot2DBase::Scale::GetName(void)
 {
     return this->Name;
 }
@@ -234,13 +235,12 @@ vctPlot2DBase::Signal * vctPlot2DBase::Scale::AddSignal(const std::string & name
     SignalsIdType::const_iterator found = this->SignalsId.find(name);
     const SignalsIdType::const_iterator end = this->SignalsId.end();
     if (found == end) {
-        size_t SignalSize = Signals.size();
         // new name
         //set the number of points to default, 100
         Signal * newSignal = new Signal(name, 100, this->PointSize);
         newSignal->Parent = this;
         this->Signals.push_back(newSignal);
-        SignalsId[name] = SignalSize;
+        SignalsId[name] = newSignal;
         return newSignal;
     }
     return 0;
@@ -251,16 +251,12 @@ bool vctPlot2DBase::Scale::RemoveSignal(const std::string & name)
 {
     // check if the name already exists
     SignalsIdType::iterator found = this->SignalsId.find(name);
-    const SignalsIdType::iterator end = this->SignalsId.end();
 
-    if (found != end){
+    if (found != this->SignalsId.end()){
+        Signal * signalPointer = found->second;
         this->SignalsId.erase(found);
-    }
-    for (size_t i = 0; i < Signals.size(); i++) {
-        if (name.find(Signals.at(i)->Name) != std::string::npos) {
-            this->Signals.erase(this->Signals.begin()+i);
-            return true;
-        }
+        Signals.erase(std::find(Signals.begin(), Signals.end(), signalPointer));
+        delete signalPointer;
     }
     return false;
 }
@@ -272,11 +268,10 @@ vctPlot2DBase::VerticalLine * vctPlot2DBase::Scale::AddVerticalLine(const std::s
     const VerticalLinesIdType::const_iterator end = this->VerticalLinesId.end();
 
     if (found == end) {
-        size_t vLineSize = VerticalLines.size();
         // new name
         VerticalLine * newVLine = new VerticalLine(name);
         this->VerticalLines.push_back(newVLine);
-        VerticalLinesId[name] = vLineSize;
+        VerticalLinesId[name] = newVLine;
         return newVLine;
     }
 
@@ -348,29 +343,6 @@ vctPlot2DBase::Scale * vctPlot2DBase::Signal::GetParent(void)
 const std::string & vctPlot2DBase::Signal::GetName(void) const
 {
     return this->Name;
-}
-
-
-void vctPlot2DBase::Signal::AddPoint(const vctDouble2 & point)
-{
-    if (!this->Frozen) {
-        // look where to store this point
-        if (!this->Empty) {
-            this->IndexLast++;
-            if (this->IndexLast == this->Data.size()) {
-                this->IndexLast = 0;
-            }
-            if (this->IndexFirst == this->IndexLast ) {
-                this->IndexFirst++;
-                if (this->IndexFirst == this->Data.size()) {
-                    this->IndexFirst = 0;
-                }
-            }
-        } else {
-            this->Empty = false;
-        }
-        this->Data.Element(IndexLast).Assign(point);
-    }
 }
 
 
@@ -963,8 +935,6 @@ vctPlot2DBase::Signal * vctPlot2DBase::AddSignal(const std::string & name)
 
 vctPlot2DBase::VerticalLine * vctPlot2DBase::AddVerticalLine(const std::string & name)
 {
-    SignalsIdType::const_iterator found;
-    const SignalsIdType::const_iterator end = this->ScalesId.end();
     const std::string delimiter("-");
     std::string scaleName;
     size_t delimiterPosition = name.find(delimiter);
@@ -1223,15 +1193,17 @@ void vctPlot2DBase::SetBackgroundColor(const vctDouble3 & colorInRange0To1)
 
 vctPlot2DBase::Scale * vctPlot2DBase::AddScale(const std::string & name)
 {
+    const std::string delimiter("-");
+    size_t delimiterPosition = name.find(delimiter);
+    std::string scaleName = name.substr(0, delimiterPosition);
+
     // check if the name already exists
-    SignalsIdType::const_iterator found = this->ScalesId.find(name);
-    const SignalsIdType::const_iterator end = this->ScalesId.end();
-    if (found == end) {
-        size_t ScaleSize = this->Scales.size();
+    ScalesIdType::const_iterator found = ScalesId.find(scaleName);
+    if (found == ScalesId.end()) {
         // new name
-        Scale * newScale = new Scale(name);
-        this->Scales.push_back(newScale);
-        ScalesId[name] = ScaleSize;
+        Scale * newScale = new Scale(scaleName);
+        Scales.push_back(newScale);
+        ScalesId[scaleName] = newScale;
         return newScale;
     }
     return 0;
@@ -1241,18 +1213,32 @@ vctPlot2DBase::Scale * vctPlot2DBase::AddScale(const std::string & name)
 vctPlot2DBase::Scale * vctPlot2DBase::FindScale(const std::string & name)
 {
     // check if the name already exists
-    SignalsIdType::const_iterator found;
-    const SignalsIdType::const_iterator end = this->ScalesId.end();
     const std::string delimiter("-");
-    std::string scaleName;
     size_t delimiterPosition = name.find(delimiter);
-    scaleName = name.substr(0, delimiterPosition);
-    found = this->ScalesId.find(scaleName);
+    std::string scaleName = name.substr(0, delimiterPosition);
+    ScalesIdType::const_iterator found = ScalesId.find(scaleName);
 
     // no match
-    if (found == end) {
+    if (found == ScalesId.end()) {
         return 0;
     } else {
-        return Scales[found->second];
+        return found->second;
     }
+}
+
+
+bool vctPlot2DBase::RemoveScale(const std::string & name)
+{
+    const std::string delimiter("-");
+    size_t delimiterPosition = name.find(delimiter);
+    std::string scaleName = name.substr(0, delimiterPosition);
+    ScalesIdType::const_iterator found = ScalesId.find(scaleName);
+
+    if (found != ScalesId.end()) {
+        Scale * scalePointer = found->second;
+        Scales.erase(std::find(Scales.begin(), Scales.end(), scalePointer));
+        delete scalePointer;
+        return true;
+    }
+    return false;
 }

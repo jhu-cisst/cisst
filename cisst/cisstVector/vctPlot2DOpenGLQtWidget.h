@@ -32,7 +32,7 @@ class CISST_EXPORT vctPlot2DOpenGLQtWidget: public QGLWidget, public vctPlot2DOp
     Q_OBJECT;
 
 public:
-    vctPlot2DOpenGLQtWidget(QWidget * parent);
+    vctPlot2DOpenGLQtWidget(QWidget * parent = 0);
     ~vctPlot2DOpenGLQtWidget(void) {};
 
 protected:

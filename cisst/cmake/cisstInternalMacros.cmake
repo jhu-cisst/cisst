@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -213,3 +213,33 @@ macro (cisst_offer_tests library)
     unset (${cot_OPTION_NAME} CACHE)
   endif (CISST_BUILD_TESTS)
 endmacro (cisst_offer_tests)
+
+# Offer the option to compile all tests in relative directory "codePython"
+# Default values are hard coded intentionally
+macro (cisst_offer_python library)
+  set (cop_OPTION_NAME CISST_${library}Python)
+  if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+    option (${cop_OPTION_NAME} "Build ${library} Python" ON)
+    mark_as_advanced (${cop_OPTION_NAME})
+    if (${cop_OPTION_NAME})
+      add_subdirectory (codePython)
+    endif (${cop_OPTION_NAME})
+  else (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+    unset (${cop_OPTION_NAME} CACHE)
+  endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+endmacro (cisst_offer_python)
+
+# Offer the option to compile all tests in relative directory "testsPython"
+# Default values are hard coded intentionally
+macro (cisst_offer_tests_python library)
+  set (cotp_OPTION_NAME CISST_${library}Python_TESTS)
+  if (CISST_${library}Python AND CISST_BUILD_TESTS)
+    option (${cotp_OPTION_NAME} "Build ${library} Python tests" ON)
+    mark_as_advanced (${cotp_OPTION_NAME})
+    if (${cotp_OPTION_NAME})
+      add_subdirectory (testsPython)
+    endif (${cotp_OPTION_NAME})
+  else (CISST_${library}Python AND CISST_BUILD_TESTS)
+    unset (${cotp_OPTION_NAME} CACHE)
+  endif (CISST_${library}Python AND CISST_BUILD_TESTS)
+endmacro (cisst_offer_tests_python)

@@ -26,6 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnNamedMap.h>
+#include <cisstCommon/cmnAssert.h>
+
+#include "cdgField.h"
 
 class cdgScope: public cmnGenericObject {
 
@@ -38,27 +42,37 @@ public:
                CDG_MEMBER,
                CDG_CODE};
 
-    typedef std::vector<cdgScope *> ScopesList;
-    typedef ScopesList Stack; // for parser to manage nested scopes
+    typedef std::vector<cdgScope *> ScopesContainer;
+    typedef ScopesContainer Stack; // for parser to manage nested scopes
+
+    typedef cmnNamedMap<cdgField> FieldsContainer;
 
     cdgScope(unsigned int lineNumber);
 
+    std::string GetDescription(void) const;
+
     const std::string & GetScopeName(void) const;
     virtual Type GetScope(void) const = 0;
-    virtual bool HasKeyword(const std::string & keyword) const = 0;
-    virtual bool HasScope(const std::string & keyword,
+
+    cdgField * AddField(const std::string & fieldName, const std::string & defaultValue, const bool required);
+    bool HasField(const std::string & fieldName) const;
+    bool SetFieldValue(const std::string & fieldName,
+                       const std::string & value,
+                       std::string & errorMessage);
+    std::string GetFieldValue(const std::string & fieldName) const;
+    bool IsValid(std::string & errorMessage) const;
+    void FillInDefaults(void);
+
+    virtual bool HasScope(const std::string & fieldName,
                           Stack & scopes,
                           unsigned int lineNumber) = 0;
-    virtual bool SetValue(const std::string & keyword,
-                          const std::string & value,
-                          std::string & errorMessage) = 0;
-    virtual bool IsValid(std::string & errorMessage) const = 0;
-    virtual void FillInDefaults(void);
+
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
 
 protected:
-    ScopesList Scopes; // list of "scopes" found in this scope
+    FieldsContainer Fields;
+    ScopesContainer Scopes; // list of "scopes" found in this scope
     unsigned int LineNumber;
     void GenerateLineComment(std::ostream & outputStream) const;
 

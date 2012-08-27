@@ -45,7 +45,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 
-const long nSecInSec =  1000.0 * 1000.0 * 1000.0;
+const long nSecInSec =  1000 * 1000 * 1000;
 
 void osaSleep(double timeInSeconds) 
 {

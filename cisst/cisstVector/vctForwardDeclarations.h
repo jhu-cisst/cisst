@@ -218,13 +218,7 @@ class vctRodriguezRotation3;
 
 namespace vctEulerRotation3Order {
     //enum OrderType { XZX, XZY, XYX, XYZ, YXY, YXZ, YZY, YZX, ZYZ, ZYX, ZXZ, ZXY };
-#if (CISST_COMPILER == CISST_CLANG)
-    // apparently clang doesn't support templating by enum
-    enum { ZYZ, ZYX };
-    typedef unsigned char OrderType;
-#else
     typedef enum { ZYZ, ZYX } OrderType;
-#endif // CISST_CLANG
 };
 
 template <vctEulerRotation3Order::OrderType _order>

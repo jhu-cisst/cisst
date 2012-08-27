@@ -488,20 +488,6 @@ void mtsManagerProxyClient::ReceiveGetDescriptionOfEventHandler(const std::strin
     ProxyOwner->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName);
 }
 
-void mtsManagerProxyClient::ReceiveGetArgumentInformation(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & argumentName, ::mtsManagerProxy::NamesOfSignals & signalNames) const
-{
-    ProxyOwner->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName);
-}
-
-void mtsManagerProxyClient::ReceiveGetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const int scalarIndex, ::mtsManagerProxy::SetOfValues & values) const
-{
-    mtsManagerLocalInterface::SetOfValues valuesCISSTtype;
-
-    ProxyOwner->GetValuesOfCommand(valuesCISSTtype, componentName, providedInterfaceName, commandName, scalarIndex);
-
-    mtsManagerProxyServer::ConstructValuesOfCommand(valuesCISSTtype, values);
-}
-
 std::string mtsManagerProxyClient::ReceiveGetProcessName()
 {
     return ProxyOwner->GetProcessName();
@@ -1224,24 +1210,4 @@ void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventHandler(const s
 #endif
 
     ManagerProxyClient->ReceiveGetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
-}
-
-void mtsManagerProxyClient::ManagerClientI::GetArgumentInformation(const std::string & componentName, const std::string & providedInterfaceName,
-        const std::string & commandName, std::string & argumentName, ::mtsManagerProxy::NamesOfSignals & signalNames, const ::Ice::Current & CMN_UNUSED(current)) const
-{
-#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ManagerClientI, "<<<<< RECV: GetArgumentInformation: " << componentName << ", " << providedInterfaceName << ", " << commandName);
-#endif
-
-    ManagerProxyClient->ReceiveGetArgumentInformation(componentName, providedInterfaceName, commandName, argumentName, signalNames);
-}
-
-void mtsManagerProxyClient::ManagerClientI::GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName,
-    const std::string & commandName, ::Ice::Int scalarIndex, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & CMN_UNUSED(current)) const
-{
-#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ManagerClientI, "<<<<< RECV: GetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << scalarIndex);
-#endif
-
-    ManagerProxyClient->ReceiveGetValuesOfCommand(componentName, providedInterfaceName, commandName, scalarIndex, values);
 }

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,11 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include "cmnDataTest.h"
+#include "cmnDataFunctionsTest.h"
 
-#include <cisstCommon/cmnData.h>
+#include <cisstCommon/cmnDataFunctions.h>
 
-void cmnDataTest::TestCopyNativeTypes(void)
+void cmnDataFunctionsTest::TestCopyNativeTypes(void)
 {
     bool b1, b2;
     b1 = true;
@@ -55,7 +55,7 @@ void cmnDataTest::TestCopyNativeTypes(void)
     CPPUNIT_ASSERT_EQUAL(ui1, ui2);
 
     float f1, f2;
-    f1 = -1.23456;
+    f1 = -1.23456f;
     cmnDataCopy(f2, f1);
     CPPUNIT_ASSERT_EQUAL(f1, f2);
 
@@ -71,7 +71,7 @@ void cmnDataTest::TestCopyNativeTypes(void)
 }
 
 
-void cmnDataTest::TestBinarySerializationStreamNativeTypes(void)
+void cmnDataFunctionsTest::TestBinarySerializationStreamNativeTypes(void)
 {
     cmnDataFormat local, remote;
 
@@ -109,7 +109,7 @@ void cmnDataTest::TestBinarySerializationStreamNativeTypes(void)
 }
 
 
-void cmnDataTest::TestBinarySerializationCharNativeTypes(void)
+void cmnDataFunctionsTest::TestBinarySerializationCharNativeTypes(void)
 {
     cmnDataFormat local, remote;
     const size_t bufferSize = 1024; 
@@ -154,7 +154,7 @@ void cmnDataTest::TestBinarySerializationCharNativeTypes(void)
 
 
 template <typename _elementType>
-void cmnDataTestTestByteSwap(const _elementType & initialValue)
+void cmnDataFunctionsTestTestByteSwap(const _elementType & initialValue)
 {
     _elementType copy = initialValue;
 
@@ -172,23 +172,33 @@ void cmnDataTestTestByteSwap(const _elementType & initialValue)
 }
 
 
-void cmnDataTest::TestByteSwapMacros(void)
+void cmnDataFunctionsTest::TestByteSwapMacros(void)
 {
     int i1 = std::numeric_limits<int>::max() - 1234;
-    cmnDataTestTestByteSwap(i1);
+    cmnDataFunctionsTestTestByteSwap(i1);
 
     unsigned int ui1;
-    cmnDataTestTestByteSwap(ui1);
+    cmnDataFunctionsTestTestByteSwap(ui1);
 
     long long int lli1 = std::numeric_limits<long long int>::max() - 1234;
-    cmnDataTestTestByteSwap(lli1);
+    cmnDataFunctionsTestTestByteSwap(lli1);
 
     unsigned long long int ulli1 = std::numeric_limits<unsigned long long int>::max() - 1234;
-    cmnDataTestTestByteSwap(ulli1);
+    cmnDataFunctionsTestTestByteSwap(ulli1);
 
-    float f1 = std::numeric_limits<float>::max() - 3.1456;
-    cmnDataTestTestByteSwap(f1);
+    float f1 = std::numeric_limits<float>::max() - 3.1456f;
+    cmnDataFunctionsTestTestByteSwap(f1);
 
     double d1 = std::numeric_limits<double>::max() - 3.1456;
-    cmnDataTestTestByteSwap(d1);
+    cmnDataFunctionsTestTestByteSwap(d1);
+}
+
+
+void cmnDataFunctionsTest::TestDescriptions(void)
+{
+    double d1;
+    CPPUNIT_ASSERT_EQUAL(std::string("d"), cmnDataScalarDescription(d1, 0));
+
+    unsigned long long int ulli1;
+    CPPUNIT_ASSERT_EQUAL(std::string("ulli"), cmnDataScalarDescription(ulli1, 0));
 }

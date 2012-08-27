@@ -98,21 +98,6 @@ public:
         MaskMember( otherVector.Mask() )
     {}
 
-
-    /*! Allocate memory based on an existing object of the same type.  The
-    object is provided via a cmnGenericObject pointer.  If a dynamic cast
-    to this type is not possible, this method returns false. */
-    bool inline Allocate(const mtsGenericObject *model)
-    {
-        const ThisType *pointer = dynamic_cast<const ThisType *>(model);
-        if (pointer == 0) {
-            return false;
-        }
-        MaskMember.SetSize(pointer->Mask().Size());
-        DataMember.SetSize(pointer->Data().Size());
-        return true;
-    }
-    
     /*! Default destructor, will call the destructor of the contained
       vector and free the memory. */
     inline ~prmMaskedVector() {}

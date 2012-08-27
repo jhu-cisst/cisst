@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 template <class _elementType>
-class vctQtWidgetDynamicVectorRead
+class CISST_EXPORT vctQtWidgetDynamicVectorRead
 {
     typedef _elementType value_type;
     QTableWidget * Table;

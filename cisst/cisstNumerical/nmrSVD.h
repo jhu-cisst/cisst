@@ -121,7 +121,7 @@ public:
 protected:
     /*! Memory allocated for Workspace matrices if needed. */
     vctDynamicVector<CISSTNETLIB_DOUBLE> WorkspaceMemory;
-    
+
     /*! Memory allocated for U, Vt Matrices and Vector S if needed.
        This method allocates a single block of memory for these 3
        containers; m x m elements of U followed by n x n elements of
@@ -152,8 +152,8 @@ protected:
       StorageOrder.  This method must be called before
       AllocateOutputWorkspace, ThrowUnlessOutputSizeIsCorrect or
       ThrowUnlessWorkspaceSizeIsCorrect. */
-    inline void SetDimension(size_type m, 
-                             size_type n, 
+    inline void SetDimension(size_type m,
+                             size_type n,
                              bool storageOrder)
     {
         StorageOrderMember = storageOrder;
@@ -180,15 +180,15 @@ protected:
       \endcode
       \note The method SetDimension must have been called before.
     */
-    inline void AllocateOutputWorkspace( bool allocateOutput, 
+    inline void AllocateOutputWorkspace( bool allocateOutput,
                                          bool allocateWorkspace)
     {
 
         // allocate output
         if (allocateOutput) {
             const size_type minmn =(MMember<NMember)? MMember: NMember;
-            const size_type outputLength = ( MMember * MMember + 
-                                             NMember * NMember + 
+            const size_type outputLength = ( MMember * MMember +
+                                             NMember * NMember +
                                              minmn );
             this->OutputMemory.SetSize(outputLength);
             this->UReference.SetRef(MMember, MMember,
@@ -202,16 +202,16 @@ protected:
             this->SReference.SetRef((MMember<NMember)? MMember:NMember,
                                     this->OutputMemory.Pointer(MMember*MMember + NMember*NMember),
                                     1);
-        } 
+        }
         else {
             this->OutputMemory.SetSize(0);
         }
         // allocate workspace
         if (allocateWorkspace) {
-            this->WorkspaceMemory.SetSize( WorkspaceSize( MMember, 
+            this->WorkspaceMemory.SetSize( WorkspaceSize( MMember,
                                                           NMember ) );
             this->WorkspaceReference.SetRef(this->WorkspaceMemory);
-        } 
+        }
         else {
             this->WorkspaceMemory.SetSize(0);
         }
@@ -228,13 +228,13 @@ protected:
     template <typename _matrixOwnerTypeU,
               typename _vectorOwnerTypeS,
               typename _matrixOwnerTypeVt>
-    inline 
+    inline
     void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE>& inU,
                                         vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE>& inS,
                                         vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE>& inVt) const
         throw(std::runtime_error)
     {
-        
+
         // check sizes and storage order
         if (! inU.IsSquare(MMember)) {
             cmnThrow(std::runtime_error("nmrSVDDynamicData: Size of matrix U is incorrect."));
@@ -276,8 +276,8 @@ protected:
     ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE>& inWorkspace) const
         throw(std::runtime_error)
     {
-        
-        const size_type lwork = 
+
+        const size_type lwork =
             nmrSVDDynamicData::WorkspaceSize(MMember, NMember);
 
         if (lwork > inWorkspace.size()) {
@@ -311,7 +311,7 @@ public:
       \param inA The matrix whose SVD needs to be computed
     */
     template <class _matrixOwnerTypeA>
-    static inline 
+    static inline
     size_type WorkspaceSize( vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE>& inA)
     {
         return nmrSVDDynamicData::WorkspaceSize(inA.rows(), inA.cols());
@@ -431,7 +431,7 @@ public:
     {
         this->Allocate(m, n, storageOrder);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for the output matrices and vectors as well as
@@ -449,7 +449,7 @@ public:
     {
         this->Allocate(A);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for the output matrices and vectors only.  This
@@ -458,7 +458,7 @@ public:
       routines.  Please note that since multiple routines can share
       the workspace, these routines must be called in a thread safe
       manner.
-      
+
       \param A input matrix
       \param inWorkspace workspace
 
@@ -470,7 +470,7 @@ public:
     {
         this->SetRefWorkspace(A, inWorkspace);
     }
-    
+
     /*! Constructor where the user provides the matrices U, Vt and
       vectors S as well as the workspace.  The data object now
       acts as a composite container to hold, pass and manipulate a
@@ -479,7 +479,7 @@ public:
       storage order.  Please note that since the workspace and the
       input are now created by the user, special attention must be
       given to thread safety issues.
-      
+
       \param inU, inS, inVt The output matrices and vector
       \param inWorkspace The workspace for LAPACK.
 
@@ -529,12 +529,12 @@ public:
       \param A The matrix for which SVD needs to be computed, size MxN
     */
     template <class _matrixOwnerTypeA>
-    inline 
+    inline
     void Allocate(const vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A.rows(), A.cols(), A.StorageOrder());
     }
-    
+
     /*! This method allocates the memory for the output matrices and
       vector and uses the memory provided by user for workspace.  The
       input matrix A is used to determine the size of the problem as
@@ -547,20 +547,20 @@ public:
       \param inWorkspace The vector used for workspace by LAPACK.
     */
     template <class _matrixOwnerTypeA, class _vectorOwnerTypeWorkspace>
-    inline 
+    inline
     void SetRefWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                          vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
     {
         this->SetDimension(A.rows(), A.cols(), A.StorageOrder());
-        
+
         // allocate output and set references
         this->AllocateOutputWorkspace(true, false);
-        
+
         // set reference on user provided workspace
         this->ThrowUnlessWorkspaceSizeIsCorrect(inWorkspace);
         this->WorkspaceReference.SetRef(inWorkspace);
     }
-    
+
     /*! This method allocates the memory for the output matrices and
       vector as well as the workspace.  This method is not meant to be
       a top-level user API, but is used by other overloaded Allocate
@@ -576,7 +576,7 @@ public:
         this->SetDimension(m, n, storageOrder);
         this->AllocateOutputWorkspace(true, true);
     }
-    
+
     /*! This method doesn't allocate any memory as it relies on user
       provided matrices and vectors for the output as well as the
       workspace.
@@ -603,24 +603,24 @@ public:
         this->AllocateOutputWorkspace(false, false);
         this->ThrowUnlessOutputSizeIsCorrect(inU, inS, inVt);
         this->ThrowUnlessWorkspaceSizeIsCorrect(inWorkspace);
-        
+
         this->SReference.SetRef(inS);
         this->UReference.SetRef(inU);
         this->VtReference.SetRef(inVt);
         this->WorkspaceReference.SetRef(inWorkspace);
     }
-    
-    
+
+
     /*! This method allocates the memory for the workspace.  The
       output memory is provided by the user.  The method computes the
       size of the problem based on the user provided output and
       verifies that the output components (inU, inS, and inVt) are
       consistent with respect to their size and storage order.
- 
+
       \param inU, inS, inVt The output matrices and vector.
     */
     template <typename _matrixOwnerTypeU,
-              typename _vectorOwnerTypeS, 
+              typename _vectorOwnerTypeS,
               typename _matrixOwnerTypeVt>
     void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
                       vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
@@ -629,32 +629,32 @@ public:
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
         this->ThrowUnlessOutputSizeIsCorrect(inU, inS, inVt);
-        
+
         this->SReference.SetRef(inS);
         this->UReference.SetRef(inU);
         this->VtReference.SetRef(inVt);
-        
+
         AllocateOutputWorkspace(false, true);
     }
-    
+
     /*! Const reference to the result vector S.  This method must be
       called after the data has been computed by the nmrSVD
       function. */
-    inline 
-    const vctDynamicVectorRef<CISSTNETLIB_DOUBLE>& S(void) const 
+    inline
+    const vctDynamicVectorRef<CISSTNETLIB_DOUBLE>& S(void) const
     { return SReference; }
 
     /*! Const reference to the result matrix U.  This method must be
       called after the data has been computed by the nmrSVD
       function. */
-    inline 
+    inline
     const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & U(void) const
     { return UReference; }
     /*! Const reference to the result matrix Vt (V transposed).  This
       method must be called after the data has been computed by
       the nmrSVD function. */
-    inline 
-    const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & Vt(void) const 
+    inline
+    const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & Vt(void) const
     { return VtReference; }
 
 };
@@ -663,7 +663,7 @@ public:
 
 
 
-/*! 
+/*!
   \ingroup cisstNumerical
 
   \brief Data of SVD problem (Fixed size).
@@ -677,7 +677,7 @@ public:
   \code
   nmrSVDFixedSizeData<4, 3, VCT_COL_MAJOR> data;
   \endcode
-  
+
   \note An object of type nmrSVDFixedSizeData contains the memory
   required for the output and the workspace, i.e. its actual size will
   be equal to the memory required to store the matrices U and Vt as
@@ -699,10 +699,25 @@ public:
 
     enum {M = (_storageOrder == VCT_COL_MAJOR) ? _rows : _cols};
     enum {N = (_storageOrder == VCT_COL_MAJOR) ? _cols : _rows};
-    enum {MIN_MN = (static_cast<size_type>(M) < static_cast<size_type>(N)) ? static_cast<size_type>(M) : static_cast<size_type>(N)};
-    enum {LWORK_1 = 3 * static_cast<size_type>(MIN_MN) + (static_cast<size_type>(M) > static_cast<size_type>(N)) ? static_cast<size_type>(M) : static_cast<size_type>(N)};
+    enum {MIN_MN =
+          (static_cast<size_type>(M) < static_cast<size_type>(N))
+          ?
+          static_cast<size_type>(M)
+          :
+          static_cast<size_type>(N)};
+    enum {LWORK_1 =
+          (3 * static_cast<size_type>(MIN_MN) + (static_cast<size_type>(M)) > static_cast<size_type>(N))
+          ?
+          static_cast<size_type>(M)
+          :
+          static_cast<size_type>(N)};
     enum {LWORK_2 = 5 * MIN_MN};
-    enum {LWORK = (static_cast<size_type>(LWORK_1) > static_cast<size_type>(LWORK_2)) ? static_cast<size_type>(LWORK_1) : static_cast<size_type>(LWORK_2)};
+    enum {LWORK =
+          (static_cast<size_type>(LWORK_1) > static_cast<size_type>(LWORK_2))
+          ?
+          static_cast<size_type>(LWORK_1)
+          :
+          static_cast<size_type>(LWORK_2)};
 #endif // DOXYGEN
     /*! Type of the input matrix A (size and storage order computed
       from the data template parameters). */
@@ -762,7 +777,7 @@ public:
     /*! Default constructor.  Does nothing since the allocation is
       performed on the stack. */
     nmrSVDFixedSizeData() {};
-    
+
     /*! Const reference to the result vector S.  This method must be
       called after the data has been computed by the nmrSVD
       function. */
@@ -784,7 +799,7 @@ public:
     /*! Fill a matrix from the singular values.  Sets all the elements
       to zero and then replace the diagonal by the singular values
       (provided by vectorS). */
-    static inline 
+    static inline
     MatrixTypeS & UpdateMatrixS( const VectorTypeS & vectorS,
                                  MatrixTypeS & matrixS )
     {
@@ -914,7 +929,7 @@ public:
   \code
   nmrSVD(A, U, S, Vt, workspace);
   \endcode
-     
+
   For fixed size containers, the example above would be:
   \code
   vctFixedSizeMatrix<double, 5, 4> A;
@@ -930,9 +945,9 @@ public:
 
   The functions ::nmrSVD return the status code as defined by LAPACK, i.e.:
   <ol>
-  
+
   <li>0: Successful exit.
-  
+
   <li>Greater than 0: If SBDSQR did not converge, return value
       specifies how many superdiagonals of an intermediate bidiagonal
       form B did not converge to zero. See the description of
@@ -944,7 +959,7 @@ public:
       satisfies \f$A = U * B * V^{T}\f$, so it has the same singular
       values as \f$A\f$, and singular vectors related by \f$U\f$ and
       \f$V^T\f$.
-  
+
   </ol>
 
   \note The SVD functions make use of LAPACK routines.  To activate
@@ -967,7 +982,7 @@ public:
   This function checks for valid input (size, storage order and
   compact) and calls the LAPACK function.  If the input doesn't match
   the data, an exception is thrown (\c std::runtime_error).
-  
+
   This function modifies the input matrix A and stores the results in
   the data.  Each component of the result can be obtained via the
   const methods nmrSVDDynamicData::U(), nmrSVDDynamicData::S()
@@ -982,7 +997,7 @@ public:
         nmrSVDTest::TestDynamicRowMajorUserAlloc
  */
 template <class _matrixOwnerType>
-inline 
+inline
 CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                            nmrSVDDynamicData & data)
     throw (std::runtime_error)
@@ -991,7 +1006,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
     CISSTNETLIB_INTEGER Info;
     char m_Jobu = 'A';
     char m_Jobvt = 'A';
-    CISSTNETLIB_INTEGER m_Lwork = 
+    CISSTNETLIB_INTEGER m_Lwork =
         static_cast<CISSTNETLIB_INTEGER>(nmrSVDDynamicData::WorkspaceSize(dataFriend.M(),
                                                                           dataFriend.N()));
 
@@ -1007,11 +1022,11 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
     if (! A.IsCompact()) {
         cmnThrow(std::runtime_error("nmrSVD: Requires a compact matrix"));
     }
-    
+
     /* Based on storage order, permute U and Vt as well as dimension */
     CISSTNETLIB_DOUBLE *UPtr, *VtPtr;
     CISSTNETLIB_INTEGER m_Lda, m_Ldu, m_Ldvt;
-    
+
     if (A.IsColMajor()) {
         m_Lda = (1 > dataFriend.M()) ? 1 : dataFriend.M();
         m_Ldu = dataFriend.M();
@@ -1055,7 +1070,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
   user (see nmrSVDDynamicData::SetRef).  While the data is
   being build, the consistency of the output and workspace is checked.
   Then, the nmrSVD(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param U, S, Vt The output matrices and vector for SVD
   \param Workspace The workspace for LAPACK.
@@ -1063,12 +1078,12 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
   \test nmrSVDTest::TestDynamicColumnMajorUserAlloc
         nmrSVDTest::TestDynamicRowMajorUserAlloc
  */
-template <class _matrixOwnerTypeA, 
+template <class _matrixOwnerTypeA,
           class _matrixOwnerTypeU,
-          class _vectorOwnerTypeS, 
+          class _vectorOwnerTypeS,
           class _matrixOwnerTypeVt,
           class _vectorOwnerTypeWorkspace>
-inline 
+inline
 CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                            vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & U,
                            vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & S,
@@ -1088,7 +1103,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_D
   user (see nmrSVDDynamicData::SetRefOutput).  While the data
   is being build, the consistency of the output is checked.  Then, the
   nmrSVD(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param U, S, Vt The output matrices and vector for SVD
 
@@ -1100,11 +1115,11 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_D
   called many times.  For a real-time task, the dynamic allocation
   might even break your application.
  */
-template <class _matrixOwnerTypeA, 
+template <class _matrixOwnerTypeA,
           class _matrixOwnerTypeU,
-          class _vectorOwnerTypeS, 
+          class _vectorOwnerTypeS,
           class _matrixOwnerTypeVt>
-inline 
+inline
 CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE>& A,
                            vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE>& U,
                            vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE>& S,
@@ -1130,7 +1145,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_D
   CMN_ASSERT to determine what to do if the sizes don't match.  By
   default CMN_ASSERT calls \c abort() but it can be configured to be
   ignored or to throw an exception (see #CMN_ASSERT for details).
-  
+
   This function modifies the input matrix A and the workspace.  It
   stores the results in U, S and Vt.
 
@@ -1145,21 +1160,21 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_D
  */
 template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn,
           vct::size_type _work, bool _storageOrder>
-inline 
-CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, _storageOrder> & A, 
+inline
+CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, _storageOrder> & A,
                            vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _rows, _storageOrder> & U,
                            vctFixedSizeVector<CISSTNETLIB_DOUBLE, _minmn> & S,
                            vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _cols, _cols, _storageOrder> & Vt,
                            vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> & workspace)
 {
-    const CISSTNETLIB_INTEGER minmn = 
+    const CISSTNETLIB_INTEGER minmn =
         static_cast<CISSTNETLIB_INTEGER>(nmrSVDFixedSizeData<_rows, _cols, _storageOrder>::MIN_MN);
     //Assert if requirement is greater than size provided!
     CMN_ASSERT(minmn <= static_cast<CISSTNETLIB_INTEGER>(_minmn));
     CISSTNETLIB_INTEGER ldu = (_storageOrder == VCT_COL_MAJOR) ? _rows : _cols;
     CISSTNETLIB_INTEGER lda = (1 > ldu) ? 1 : ldu;
     CISSTNETLIB_INTEGER ldvt = (_storageOrder == VCT_COL_MAJOR) ? _cols : _rows;
-    CISSTNETLIB_INTEGER lwork = 
+    CISSTNETLIB_INTEGER lwork =
         static_cast<CISSTNETLIB_INTEGER>(nmrSVDFixedSizeData<_rows, _cols, _storageOrder>::LWORK);
     //Assert if requirement is greater than size provided!
     CMN_ASSERT(lwork <= static_cast<CISSTNETLIB_INTEGER>(_work));
@@ -1213,7 +1228,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
         nmrSVDTest::TestFixedSizeRowMajorMGeqN_T2
  */
 template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn, bool _storageOrder>
-inline 
+inline
 CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, _storageOrder> & A,
                            vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _rows, _storageOrder> & U,
                            vctFixedSizeVector<CISSTNETLIB_DOUBLE, _minmn> & S,
@@ -1251,7 +1266,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
         nmrSVDTest::TestFixedSizeRowMajorMGeqN
  */
 template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
-inline 
+inline
 CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, _storageOrder> & A,
                            nmrSVDFixedSizeData<_rows, _cols, _storageOrder> & data)
 {

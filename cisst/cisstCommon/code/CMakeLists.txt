@@ -19,7 +19,7 @@ set (SOURCE_FILES
      cmnClassRegister.cpp
      cmnClassServicesBase.cpp
      cmnClassServices.cpp
-     # cmnData.cpp
+     cmnDataFunctions.cpp
      cmnDeSerializer.cpp
      cmnGenericObject.cpp
      cmnGetChar.cpp
@@ -47,7 +47,7 @@ set (HEADER_FILES
      cmnClassServicesBase.h
      cmnClassServices.h
      cmnConstants.h
-     # cmnData.h
+     cmnDataFunctions.h
      cmnDeSerializer.h
      cmnExport.h
      cmnExportMacros.h

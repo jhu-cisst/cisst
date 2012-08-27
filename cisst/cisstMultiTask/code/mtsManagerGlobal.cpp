@@ -2301,44 +2301,6 @@ void mtsManagerGlobal::GetDescriptionOfEventHandler(const std::string & processN
     }
 }
 
-void mtsManagerGlobal::GetArgumentInformation(const std::string & processName,
-                                              const std::string & componentName,
-                                              const std::string & providedInterfaceName,
-                                              const std::string & commandName,
-                                              std::string & argumentName,
-                                              std::vector<std::string> & signalNames) const
-{
-    if (LocalManager) {
-        if (LocalManager->GetProcessName() == processName) {
-            LocalManager->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
-            return;
-        }
-    }
-
-    if (LocalManagerConnected) {
-        LocalManagerConnected->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
-    }
-}
-
-void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
-                                          const std::string & componentName,
-                                          const std::string & providedInterfaceName,
-                                          const std::string & commandName,
-                                          const int scalarIndex,
-                                          mtsManagerLocalInterface::SetOfValues & values) const
-{
-    if (LocalManager) {
-        if (LocalManager->GetProcessName() == processName) {
-            LocalManager->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, processName);
-            return;
-        }
-    }
-
-    if (LocalManagerConnected) {
-        LocalManagerConnected->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, processName);
-    }
-}
-
 
 //-------------------------------------------------------------------------
 //  Networking

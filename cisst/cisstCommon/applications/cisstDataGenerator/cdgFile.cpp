@@ -52,6 +52,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     bool errorFound = false; // any error found, stop parsing and return false
     std::string errorMessage;
     std::stringstream parsedOutput; // for debug
+    int parsedOutputIndentCounter = 0;
+    std::string parsedOutputIndent;
     size_t lineNumber = 1; // counter for debug messages
     char currentChar, previousChar = ' '; // we read character by character, used to detect //
     std::string word, temp; // each word is created by concatenating characters
@@ -118,9 +120,16 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         }
         if (curlyOpen) {
             parsedOutput << '[';
+            parsedOutputIndentCounter++;
+            parsedOutputIndent.resize(parsedOutputIndentCounter * 4, ' ');
         }
         if (curlyClose) {
             parsedOutput << ']';
+            parsedOutputIndentCounter--;
+            if (parsedOutputIndentCounter < 0) {
+                parsedOutputIndentCounter = 0;
+            }
+            parsedOutputIndent.resize(parsedOutputIndentCounter * 4, ' ');
         }
         if (semiColumn) {
             parsedOutput << '|';
@@ -146,7 +155,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     // first define the current step, either find new keyword or new scope
                     if (keyword.empty()) {
                         value.clear();
-                        if (scopes.back()->HasKeyword(word)) {
+                        if (scopes.back()->HasField(word)) {
                             keyword = word;
                         } else if (scopes.back()->HasScope(word, scopes, lineNumber)) {
                             keyword.clear();
@@ -155,8 +164,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             }
                         } else if (!word.empty()) {
                             std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in scope \"" << scopes.back()->GetScopeName()
-                                      << "\"" << std::endl;
+                                      << word << "\" in " << scopes.back()->GetDescription() << std::endl;
                             errorFound = true;
                         }
                         if (curlyClose) {
@@ -178,7 +186,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             // we are done for this set keyword/value
                             RemoveTrailingSpaces(value);
                             errorMessage.clear();
-                            if (!scopes.back()->SetValue(keyword, value, errorMessage)) {
+                            if (!scopes.back()->SetFieldValue(keyword, value, errorMessage)) {
                                 std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
                                           << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
                                 errorFound = true;
@@ -225,7 +233,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             curlyCounter--;
                             if (curlyCounter == 0) {
                                 errorMessage.clear();
-                                if (!scopes.back()->SetValue(keyword, value, errorMessage)) {
+                                if (!scopes.back()->SetFieldValue(keyword, value, errorMessage)) {
                                     std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
                                               << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
                                     errorFound = true;
@@ -260,7 +268,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         if (lineFinished) {
             lineNumber++;
             lineFinished = false;
-            parsedOutput << '\n' << lineNumber << ": ";
+            parsedOutput << '\n' << lineNumber << ": " << parsedOutputIndent;
         }
     } // while loop for character
 
@@ -322,8 +330,7 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
     GenerateMessage(outputStream);
 
     outputStream << "#include <" << Header << ">" << std::endl << std::endl
-                 << "#include <cisstCommon/cmnSerializer.h>" << std::endl
-                 << "#include <cisstCommon/cmnDeSerializer.h>" << std::endl << std::endl;
+                 << "#include <cisstCommon/cmnDataFunctions.h>" << std::endl << std::endl;
 
     this->Global->GenerateCode(outputStream);
 }

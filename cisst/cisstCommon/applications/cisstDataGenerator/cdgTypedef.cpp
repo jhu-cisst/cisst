@@ -27,22 +27,19 @@ CMN_IMPLEMENT_SERVICES(cdgTypedef);
 
 cdgTypedef::cdgTypedef(unsigned int lineNumber):
     cdgScope(lineNumber)
-{}
+{
+    cdgField * field;
+    field = this->AddField("name", "", true);
+    CMN_ASSERT(field);
+
+    field = this->AddField("type", "", true);
+    CMN_ASSERT(field);
+}
 
 
 cdgScope::Type cdgTypedef::GetScope(void) const
 {
     return cdgScope::CDG_TYPEDEF;
-}
-
-
-bool cdgTypedef::HasKeyword(const std::string & keyword) const
-{
-    if ((keyword == "name")
-        || (keyword == "type")) {
-        return true;
-    }
-    return false;
 }
 
 
@@ -54,47 +51,7 @@ bool cdgTypedef::HasScope(const std::string & CMN_UNUSED(keyword),
 }
 
 
-bool cdgTypedef::SetValue(const std::string & keyword,
-                          const std::string & value,
-                          std::string & errorMessage)
-{
-    if (keyword == "name") {
-        if (!this->Name.empty()) {
-            errorMessage = "name already set";
-            return false;
-        }
-        this->Name = value;
-        return true;
-    }
-    if (keyword == "type") {
-        if (!this->Type.empty()) {
-            errorMessage = "type already set";
-            return false;
-        }
-        this->Type = value;
-        return true;
-    }
-    errorMessage = "unhandled keyword \"" + keyword + "\"";
-    return false;
-}
-
-
-bool cdgTypedef::IsValid(std::string & errorMessage) const
-{
-    bool isValid = true;
-    if (this->Name.empty()) {
-        isValid = false;
-        errorMessage += " [no name defined] ";
-    }
-    if (this->Type.empty()) {
-        isValid = false;
-        errorMessage += " [no type defined] ";
-    }
-    return isValid;
-}
-
-
 void cdgTypedef::GenerateHeader(std::ostream & outputStream) const
 {
-    outputStream << "    typedef " << Type << " " << Name << ";" << std::endl;
+    outputStream << "    typedef " << this->GetFieldValue("type") << " " << this->GetFieldValue("name") << ";" << std::endl;
 }

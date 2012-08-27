@@ -25,6 +25,9 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               ../mtsCollectorQtComponent.h
               ../mtsCollectorQtWidget.h
+              ../mtsQtCommandSelector.h
+              ../mtsQtScaleAndSignalTool.h
+              ../mtsQtVisualizerShell.h
               ../mtsQtWidgetGenericObject.h
               ../mtsQtWidgetGenericObjectProxy.h
               ../mtsQtWidgetVectorTypes.h
@@ -45,6 +48,9 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorQtComponent.cpp
                                 mtsCollectorQtWidget.cpp
+                                mtsQtCommandSelector.cpp
+                                mtsQtScaleAndSignalTool.cpp
+                                mtsQtVisualizerShell.cpp
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
                                 mtsQtWidgetGenericObjectProxy.cpp
@@ -56,6 +62,9 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtApplication.cpp
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
+                                mtsQtCommandSelector.h
+                                mtsQtScaleAndSignalTool.h
+                                mtsQtVisualizerShell.h
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h
                                 mtsQtWidgetGenericObjectProxy.h

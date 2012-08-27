@@ -58,17 +58,6 @@ class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject
 
 public:
     //-------------------------------------------------------------------------
-    //  Data Structure for Visualization
-    //-------------------------------------------------------------------------
-    /*! List of sampled values of signals */
-    struct ValuePair {
-        double Value;
-        osaAbsoluteTime Timestamp;
-    };
-    typedef std::vector<ValuePair> Values;
-    typedef std::vector<Values> SetOfValues;
-
-    //-------------------------------------------------------------------------
     //  Proxy Object Control (Creation, Removal)
     //-------------------------------------------------------------------------
     /*! Create a component proxy. This should be called before an interface
@@ -182,22 +171,6 @@ public:
                                               const std::string & requiredInterfaceName, 
                                               const std::string & eventHandlerName,
                                               const std::string & listenerID = "") = 0;
-
-    /*! Get parameter information (name, argument count, argument type) */
-    virtual void GetArgumentInformation(std::string & argumentName,
-                                        std::vector<std::string> & signalNames,
-                                        const std::string & componentName, 
-                                        const std::string & providedInterfaceName, 
-                                        const std::string & commandName,
-                                        const std::string & listenerID = "") = 0;
-
-    /*! Get a set of current values with timestamp for data visualization */
-    virtual void GetValuesOfCommand(SetOfValues & values,
-                                    const std::string & componentName,
-                                    const std::string & providedInterfaceName, 
-                                    const std::string & commandName,
-                                    const int scalarIndex,
-                                    const std::string & listenerID = "") = 0;
 
     /*! \brief Extract all information about provided interface such as command
                objects and event generators. Arguments are serialized, if any.

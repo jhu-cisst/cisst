@@ -40,8 +40,8 @@ SignalGenerator::SignalGenerator(const std::string & taskName, double period) : 
 void SignalGenerator::Startup(void)
 {
     // To test
-    std::cout << "Number of data: " << PosGet.GetNumberOfScalar() << std::endl;
-    for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
+    std::cout << "Number of data: " << PosGet.GetNumberOfScalars() << std::endl;
+    for (size_t i = 0; i < PosGet.GetNumberOfScalars(); ++i) {
         std::cout << "Data names: " << PosGet.GetScalarName(i) << std::endl;
     }
 }
@@ -53,18 +53,18 @@ void SignalGenerator::Run(void)
     static int x = 0;
 
     // Read and print out current data
-    //for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
+    //for (unsigned int i = 0; i < PosGet.GetNumberOfScalars(); ++i) {
     //    std::cout << PosGet.GetScalarName(i) << ": " << PosGet.GetDataAsDouble(i) << std::endl;
     //}
 
     // Update the current values
     double newValue;
     std::stringstream ss;
-    for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
+    for (unsigned int i = 0; i < PosGet.GetNumberOfScalars(); ++i) {
         //newValue = sin((double)x) * (100.0 + 10.0 * (double)i) / 100.0;
         newValue = sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 2.0)
             * (100.0 + 10.0 * (double)i) / 100.0;
-        if (i == PosGet.GetNumberOfScalar() - 1) {
+        if (i == PosGet.GetNumberOfScalars() - 1) {
             newValue *= 10; // to test GCM visualizer with a signal of large amplitude
         }
         ss << newValue << " ";

@@ -646,13 +646,15 @@ endfunction (cisst_component_generator)
 
 # Function to use cisstDataGenerator, this function assumes input
 # files are provided using a relative path
-function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
+function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRECTORY GENERATED_INCLUDE_SUB_DIRECTORY ...)
   # debug
   cisst_cmake_debug ("cisst_data_generator called with: ${ARGV}")
-  if (${ARGC} LESS 1)
-    message (SEND_ERROR "cisst_data_generator takes at least one argument.")
-  endif (${ARGC} LESS 1)
-  list (REMOVE_AT ARGV 0) # first one is name of variable
+  if (${ARGC} LESS 3)
+    message (SEND_ERROR "cisst_data_generator takes at least three arguments.")
+  endif (${ARGC} LESS 3)
+  list (REMOVE_AT ARGV 0) # GENERATED_FILES_VAR_PREFIX
+  list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_DIRECTORY
+  list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_SUB_DIRECTORY
 
   # make sure cisstDataGenerator is being build and find it
   # try to figure out if this is build along with cisst
@@ -677,7 +679,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
     get_filename_component (INPUT_WE "${input}" NAME_WE)
     set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
     # create output name and concatenate to list available in parent scope
-    set (header_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.h")
+    file (MAKE_DIRECTORY "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${GENERATED_FILES_VAR_PREFIX}")
+    set (header_absolute "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h")
     set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.cpp")
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
     set (GENERATED_FILES ${GENERATED_FILES} ${header_absolute} ${code_absolute})
@@ -686,7 +689,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
                         COMMAND "${CISST_DG_EXECUTABLE}"
-			${input_absolute} ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.h ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
+			${input_absolute} ${GENERATED_INCLUDE_DIRECTORY} "${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h" ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
 			MAIN_DEPENDENCY ${input}
 			DEPENDS ${CISST_DG_EXECUTABLE}
                         COMMENT "cisstDataGenerator for ${INPUT_WE}")

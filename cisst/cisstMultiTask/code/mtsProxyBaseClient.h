@@ -101,8 +101,7 @@ void mtsProxyBaseClient<_proxyOwner>::IceInitialize(void)
         CreateProxy();
 
         this->InitSuccessFlag = true;
-
-        ChangeProxyState(BaseType::PROXY_STATE_READY);
+        this->ChangeProxyState(BaseType::PROXY_STATE_READY);
 
         this->IceLogger->trace("mtsProxyBaseClient", "ICE init - Client proxy initialization success.");
     } catch (const Ice::ConnectionRefusedException & e) {
@@ -156,8 +155,7 @@ void mtsProxyBaseClient<_proxyOwner>::IceInitialize(void)
 template<class _proxyOwner>
 void mtsProxyBaseClient<_proxyOwner>::IceCleanup(void)
 {
-    ChangeProxyState(BaseType::PROXY_STATE_FINISHING);
-
+    this->ChangeProxyState(BaseType::PROXY_STATE_FINISHING);
     this->InitSuccessFlag = false;
 
     RemoveProxy();

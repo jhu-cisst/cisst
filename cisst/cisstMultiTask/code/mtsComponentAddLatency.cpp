@@ -407,7 +407,7 @@ double mtsComponentAddLatency::SetLatency(double latencyInSeconds)
 {
     double previousLatency = this->Latency;
     this->Latency = latencyInSeconds;
-    const size_t latencyInPeriods = latencyInSeconds / this->GetPeriodicity();
+    const size_t latencyInPeriods = static_cast<size_t>(latencyInSeconds / this->GetPeriodicity());
     LatencyStateTable.SetDelay(latencyInPeriods);
     return previousLatency;
 }

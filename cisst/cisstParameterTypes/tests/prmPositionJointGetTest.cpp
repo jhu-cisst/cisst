@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2009-04-29
-  
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -53,6 +53,5 @@ void prmPositionJointGetTest::TestSerialize(void)
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
-
     CPPUNIT_ASSERT(final.Position().Equal(initial.Position()));
 }

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -17,9 +17,7 @@ project (cisstParameterTypesLibs)
 
 add_subdirectory (code)
 
-if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
-  add_subdirectory (codePython)
-endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+cisst_offer_python (cisstParameterTypes)
 
 # build examples and tests, add an option to skip them
 cisst_offer_examples (cisstParameterTypes)

@@ -145,7 +145,7 @@ public:
     vctFrame4x4(const vctFrameBase<__containerType> & other):
         BaseType()
     {
-        From(other);
+        this->From(other);
     }
 
     /*! Constructor from a vctFrameBase.  This constructor uses the

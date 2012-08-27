@@ -34,7 +34,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 # all source files
 set (SOURCE_FILES
      cmnClassRegisterTest.cpp
-     # cmnDataTest.cpp
+     cmnDataFunctionsTest.cpp
      cmnLogLoDTest.cpp
      cmnObjectRegisterTest.cpp
      cmnPathTest.cpp
@@ -46,7 +46,7 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      cmnClassRegisterTest.h
-     # cmnDataTest.h
+     cmnDataFunctionsTest.h
      cmnLogLoDTest.h
      cmnObjectRegisterTest.h
      cmnPathTest.h

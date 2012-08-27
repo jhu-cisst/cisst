@@ -1528,10 +1528,10 @@ void GCMUITask::OnSpinnerSignalOffsetControlClicked(void)
 
 void GCMUITask::FetchCurrentValues(void)
 {
+#ifdef THIS_NEEDS_TO_BE_UPDATED_TO_USE_A_PROPER_COMMAND
     if (SignalsBeingPlotted.size() == 0) return;
 
     SignalSelected * signal;
-    mtsManagerLocalInterface::SetOfValues values;
 
     MutexSignal.Lock();
     std::list<SignalSelected*>::const_iterator it = SignalsBeingPlotted.begin();
@@ -1576,6 +1576,7 @@ void GCMUITask::FetchCurrentValues(void)
     FLTK_CRITICAL_SECTION {
         GraphPane->redraw();
     }
+#endif // THIS_NEEDS_TO_BE_UPDATED_TO_USE_A_PROPER_COMMAND
 }
 
 void GCMUITask::SetTimeOrigin(const double firstTimeStamp)
@@ -1590,6 +1591,7 @@ double GCMUITask::GetTimeOrigin()
     return TimeOrigin;
 }
 
+#ifdef THIS_NEEDS_TO_BE_UPDATED_TO_USE_A_PROPER_COMMAND
 void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values, const SignalSelected& signal)
 {
     double value;
@@ -1617,6 +1619,7 @@ void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values, 
 
     UpdateMinMaxUI();
 }
+#endif // THIS_NEEDS_TO_BE_UPDATED_TO_USE_A_PROPER_COMMAND
 
 void GCMUITask::UpdateMinMaxUI(void)
 {
@@ -1696,8 +1699,10 @@ void GCMUITask::GetArgumentInformation(const std::string & processName,
                                        std::string & argumentName,
                                        std::vector<std::string> & argumentParameterNames)
 {
+#ifdef THIS_NEEDS_TO_BE_UPDATED_TO_USE_A_PROPER_COMMAND
     GlobalComponentManager.GetArgumentInformation(
         processName, componentName, providedInterfaceName, commandName, argumentName, argumentParameterNames);
+#endif
 }
 
 GCMUITask::SignalSelected * GCMUITask::GetCurrentSignal(void) const
