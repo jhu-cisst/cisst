@@ -31,6 +31,8 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestNoOption);
     CPPUNIT_TEST(TestNoParameter);
     CPPUNIT_TEST(TestOneRequiredString);
+    CPPUNIT_TEST(TestOneRequiredStringFail);
+    CPPUNIT_TEST(TestOneRequiredStringIntDouble);
     CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -43,6 +45,8 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
     void TestNoOption(void);
     void TestNoParameter(void);
     void TestOneRequiredString(void);
+    void TestOneRequiredStringFail(void);
+    void TestOneRequiredStringIntDouble(void);
 };
 
 

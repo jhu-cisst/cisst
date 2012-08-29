@@ -26,8 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cmnCommandLineOptions);
 
 
-cmnCommandLineOptions::OptionNoValue::OptionNoValue(const std::string & shortOption, const std::string & longOption,
-                                                    const std::string & description, RequiredType required):
+cmnCommandLineOptions::OptionBase::OptionBase(const std::string & shortOption, const std::string & longOption,
+                                              const std::string & description, RequiredType required):
     Short(shortOption),
     Long(longOption),
     Description(description),
@@ -37,8 +37,20 @@ cmnCommandLineOptions::OptionNoValue::OptionNoValue(const std::string & shortOpt
 }
 
 
-bool cmnCommandLineOptions::OptionNoValue::SetValue(char * CMN_UNUSED(value))
+cmnCommandLineOptions::OptionNoValue::OptionNoValue(const std::string & shortOption, const std::string & longOption,
+                                                    const std::string & description, RequiredType required, bool * value):
+    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, required),
+    Value(value)
 {
+    // initialize value to false
+    *(this->Value) = false;
+}
+
+
+
+bool cmnCommandLineOptions::OptionNoValue::SetValue(const char * CMN_UNUSED(value))
+{
+    *(this->Value) = true;
     this->Set = true;
     return true;
 }
@@ -46,7 +58,7 @@ bool cmnCommandLineOptions::OptionNoValue::SetValue(char * CMN_UNUSED(value))
 
 cmnCommandLineOptions::OptionOneValueBase::OptionOneValueBase(const std::string & shortOption, const std::string & longOption,
                                                               const std::string & description, RequiredType required):
-    cmnCommandLineOptions::OptionNoValue(shortOption, longOption, description, required)
+    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, required)
 {
 }
 
@@ -57,19 +69,20 @@ cmnCommandLineOptions::cmnCommandLineOptions(void)
 
 
 bool cmnCommandLineOptions::AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
-                                             const std::string & description, cmnCommandLineOptions::RequiredType required)
+                                             const std::string & description, cmnCommandLineOptions::RequiredType required,
+                                             bool * value)
 {
     if (this->GetShortNoDash(shortOption)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddOption: option \"-" << shortOption << "\" already defined" << std::endl;
         return false;
     }
-    OptionNoValue * option = new OptionNoValue(shortOption, longOption, description, required);;
+    OptionNoValue * option = new OptionNoValue(shortOption, longOption, description, required, value);
     this->Options.push_back(option);
     return true;
 }
 
 
-bool cmnCommandLineOptions::Parse(int argc, char * argv[], std::string & errorMessage)
+bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & errorMessage)
 {
     // first, extract program name
     this->ProgramName = argv[0];
@@ -90,46 +103,72 @@ bool cmnCommandLineOptions::Parse(int argc, char * argv[], std::string & errorMe
     }
 
     // parse options
-    OptionNoValue * optionNoValue;
+    OptionBase * option;
     while (argc != 0) {
-        optionNoValue = this->Get(argv[0]);
-        if (!optionNoValue) {
+        option = this->Get(argv[0]);
+        if (!option) {
             errorMessage = "Unknown option: ";
             errorMessage.append(argv[0]);
             return false;
         }
         --argc; // parsed one parameter
         ++argv;
-        if (dynamic_cast<OptionOneValueBase *>(optionNoValue)) {
+
+        // check that the option has not been already set
+        if (option->Set) {
+            errorMessage = "Option --" + option->Long + " already set";
+            return false;
+        }
+
+        // -- no value option
+        if (dynamic_cast<OptionNoValue *>(option)) {
+            option->SetValue(0);
+        }
+        // -- one value option
+        else if (dynamic_cast<OptionOneValueBase *>(option)) {
             if (argc == 0) {
-                errorMessage = "Not enough command line parameters while parsing value for option --" + optionNoValue->Long;
+                errorMessage = "Not enough command line parameters while parsing value for option --" + option->Long;
                 return false;
             }
-            if (optionNoValue->Set) {
-                errorMessage = "Option --" + optionNoValue->Long + " already set";
-                return false;
-            }
-            if (!optionNoValue->SetValue(argv[0])) {
-                errorMessage = "Unable to parse/convert value for option --" + optionNoValue->Long + " (found \"" + argv[0] + "\")";
+            if (!option->SetValue(argv[0])) {
+                errorMessage = "Unable to parse/convert value for option --" + option->Long + " (found \"" + argv[0] + "\")";
                 return false;
             }
             ++argv;
             --argc;
         }
+        else {
+            errorMessage = "Unknown type of option: internal bug";
+            return false;
+        }
     }
 
-    // make sure all required options are set
+    // check required
     const OptionsType::const_iterator end = this->Options.end();
     OptionsType::const_iterator iter = this->Options.begin();
     for (; iter != end; ++iter) {
-        optionNoValue = *iter;
-        if ((optionNoValue->Required == REQUIRED) && !(optionNoValue->Set)) {
-            errorMessage = "Option --" + optionNoValue->Long + " required but not set";
+        option = *iter;
+        if ((option->Required == REQUIRED) && !(option->Set)) {
+            errorMessage = "Option --" + option->Long + " required but not set";
             return false;
         }
     }
 
     return true;
+}
+
+
+bool cmnCommandLineOptions::Parse(int argc, char * argv[], std::string & errorMessage)
+{
+    int index;
+    typedef const char * constCharPtr;
+    constCharPtr * argv_const = new constCharPtr[argc];
+    for (index = 0; index < argc;  index++) {
+        argv_const[index] = argv[index];
+    }
+    bool result = Parse(argc, argv_const, errorMessage);
+    delete argv_const;
+    return result;
 }
 
 
@@ -140,7 +179,7 @@ void cmnCommandLineOptions::PrintUsage(std::ostream & outputStream)
     }
     const OptionsType::const_iterator end = this->Options.end();
     OptionsType::const_iterator iter = this->Options.begin();
-    OptionNoValue * option;
+    OptionBase * option;
     std::string value;
     for (; iter != end; ++iter) {
         option = *iter;
@@ -155,7 +194,7 @@ void cmnCommandLineOptions::PrintUsage(std::ostream & outputStream)
 }
 
 
-cmnCommandLineOptions::OptionNoValue * cmnCommandLineOptions::GetShortNoDash(const std::string & shortOption)
+cmnCommandLineOptions::OptionBase * cmnCommandLineOptions::GetShortNoDash(const std::string & shortOption)
 {
     const OptionsType::const_iterator end = this->Options.end();
     OptionsType::const_iterator iter = this->Options.begin();
@@ -168,7 +207,7 @@ cmnCommandLineOptions::OptionNoValue * cmnCommandLineOptions::GetShortNoDash(con
 }
 
 
-cmnCommandLineOptions::OptionNoValue * cmnCommandLineOptions::Get(const std::string & option)
+cmnCommandLineOptions::OptionBase * cmnCommandLineOptions::Get(const std::string & option)
 {
     const OptionsType::const_iterator end = this->Options.end();
     OptionsType::const_iterator iter = this->Options.begin();

@@ -149,10 +149,10 @@ macro (cisst_find_and_use_packages ...)
           # check for components if needed
           set (_cfup_COMPONENT_VARIABLE_NAME CISST_PACKAGE_COMPONENTS_FOR_${lib}_USING_${package})
           if (${_cfup_COMPONENT_VARIABLE_NAME})
-	    cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})")
+            cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})")
             find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})
           else (${_cfup_COMPONENT_VARIABLE_NAME})
-	    cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)")
+            cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)")
             find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)
           endif (${_cfup_COMPONENT_VARIABLE_NAME})
         endif (${_cfup_VARIABLE_NAME})
@@ -191,7 +191,7 @@ macro (cisst_extract_settings __LIBRARY __KEYWORD __VARIABLE_NAME)
     foreach (package ${${_ces_PACKAGES}})
       set (_ces_VARIABLE_NAME CISST_${__KEYWORD}_FOR_${__LIBRARY}_USING_${package})
       if (${_ces_VARIABLE_NAME})
-	set (${__VARIABLE_NAME} ${${__VARIABLE_NAME}} ${${_ces_VARIABLE_NAME}})
+        set (${__VARIABLE_NAME} ${${__VARIABLE_NAME}} ${${_ces_VARIABLE_NAME}})
       endif (${_ces_VARIABLE_NAME})
     endforeach (package)
   endif (${_ces_PACKAGES})
@@ -325,7 +325,7 @@ macro (cisst_add_library ...)
         message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
       else (${FOUND_IT} EQUAL -1)
         # found
-        cisst_library_use_libraries (${LIBRARY} ${dependency}) 
+        cisst_library_use_libraries (${LIBRARY} ${dependency})
       endif (${FOUND_IT} EQUAL -1)
     endforeach (dependency)
     # Set the link flags
@@ -433,7 +433,7 @@ macro (cisst_target_link_libraries TARGET ...)
         if (DEFINED ${required}_OPTION_NAME)
           message (SEND_ERROR "${_WHO_REQUIRES} requires ${requires} which doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
         else (DEFINED ${required}_OPTION_NAME)
-          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled") 
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
         endif (DEFINED ${required}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
@@ -627,9 +627,9 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
     set_source_files_properties (${output_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${output_absolute}
                         COMMAND "${CISST_CG_EXECUTABLE}"
-			${input_absolute} ${output_absolute}
-			MAIN_DEPENDENCY ${input}
-			DEPENDS ${CISST_CG_EXECUTABLE}
+                        ${input_absolute} ${output_absolute}
+                        MAIN_DEPENDENCY ${input}
+                        DEPENDS ${CISST_CG_EXECUTABLE}
                         COMMENT "cisstComponentGenerator for ${INPUT_WE}")
   endforeach(input)
 
@@ -689,9 +689,12 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
                         COMMAND "${CISST_DG_EXECUTABLE}"
-			${input_absolute} ${GENERATED_INCLUDE_DIRECTORY} "${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h" ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
-			MAIN_DEPENDENCY ${input}
-			DEPENDS ${CISST_DG_EXECUTABLE}
+                        --verbose
+                        --input ${input_absolute}
+                        --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
+                        --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}.cpp
+                        MAIN_DEPENDENCY ${input}
+                        DEPENDS ${CISST_DG_EXECUTABLE}
                         COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 

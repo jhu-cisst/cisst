@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
     std::string codeName;
     options.AddOptionOneValue("c", "code-file", "generated code filename",
                               cmnCommandLineOptions::REQUIRED, &codeName);
-    options.AddOptionNoValue("v", "verbose", "verbose output", cmnCommandLineOptions::OPTIONAL);
+    bool verbose;
+    options.AddOptionNoValue("v", "verbose", "verbose output", cmnCommandLineOptions::OPTIONAL, &verbose);
 
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {
@@ -56,6 +57,10 @@ int main(int argc, char* argv[])
     std::string headerFull = headerDir + "/" + headerName;
     std::string codeFull = codeDir + "/" + codeName;
 
+    if (verbose) {
+        std::cout << "cisstDataGenerator: generating " << headerFull << " and " << codeFull << " from " << inputName << std::endl;
+    }
+
     cdgFile file;
     file.SetHeader(headerName);
     std::ifstream input(inputName.c_str());
@@ -66,6 +71,8 @@ int main(int argc, char* argv[])
         if (!parseSucceeded) {
             std::cout << "Error, failed to parse file \"" << inputName << "\"" << std::endl;
             return -1;
+        } else if (verbose) {
+            std::cout << "cisstDataGenerator: parse succeeded" << std::endl;
         }
     } else {
         std::cout << "Error, can't open file (read mode)\"" << inputName << "\"" << std::endl;
@@ -74,7 +81,9 @@ int main(int argc, char* argv[])
 
     std::ofstream header(headerFull.c_str());
     if (header.is_open()) {
-        std::cout << "Generating header file \"" << headerFull << "\"" << std::endl;
+        if (verbose) {
+            std::cout << "cisstDataGenerator: generating header file \"" << headerFull << "\"" << std::endl;
+        }
         file.GenerateHeader(header);
         header.close();
     } else {
@@ -84,7 +93,9 @@ int main(int argc, char* argv[])
 
     std::ofstream code(codeFull.c_str());
     if (code.is_open()) {
-        std::cout << "Generating code file \"" << codeFull << "\"" << std::endl;
+        if (verbose) {
+            std::cout << "cisstDataGenerator: generating code file \"" << codeFull << "\"" << std::endl;
+        }
         file.GenerateCode(code);
         code.close();
     } else {

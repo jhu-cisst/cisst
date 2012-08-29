@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 void cmnCommandLineOptionsTest::TestNoOption(void) {
     // without option all Parse should fail
     cmnCommandLineOptions options;
-    char * argv[] = {"programName", 0};
+    const char * argv[] = {"programName", 0};
     int argc = 1;
     std::string errorMessage;
     CPPUNIT_ASSERT(!options.Parse(argc, argv, errorMessage));
@@ -36,11 +36,13 @@ void cmnCommandLineOptionsTest::TestNoOption(void) {
 void cmnCommandLineOptionsTest::TestNoParameter(void) {
     // with an optional option, parse an empty list should work
     cmnCommandLineOptions options;
-    CPPUNIT_ASSERT(options.AddOptionNoValue("u", "unused", "for testing purposes", cmnCommandLineOptions::OPTIONAL));
-    char * argv[] = {"programName", 0};
+    bool value = true;
+    CPPUNIT_ASSERT(options.AddOptionNoValue("u", "unused", "for testing purposes", cmnCommandLineOptions::OPTIONAL, &value));
+    const char * argv[] = {"programName", 0};
     int argc = 1;
     std::string errorMessage;
     CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
+    CPPUNIT_ASSERT_EQUAL(value, false); // value has not been set
 }
 
 
@@ -49,9 +51,46 @@ void cmnCommandLineOptionsTest::TestOneRequiredString(void) {
     cmnCommandLineOptions options;
     std::string result;
     CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &result));
-    char * argv[] = {"programName", "-s", "a/strange/string.h", 0};
+    const char * argv[] = {"programName", "-s", "a/strange/string.h", 0};
     int argc = 3;
     std::string errorMessage;
     CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
     CPPUNIT_ASSERT_EQUAL(std::string("a/strange/string.h"), result);
+}
+
+
+void cmnCommandLineOptionsTest::TestOneRequiredStringFail(void) {
+    // add one required string option
+    cmnCommandLineOptions options;
+    std::string result;
+    bool verbose = false;
+    CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes", cmnCommandLineOptions::REQUIRED, &verbose));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &result));
+    const char * argv[] = {"programName", "-v", 0};
+    int argc = 2;
+    std::string errorMessage;
+    CPPUNIT_ASSERT(!options.Parse(argc, argv, errorMessage));
+    CPPUNIT_ASSERT_EQUAL(verbose, true);
+}
+
+
+void cmnCommandLineOptionsTest::TestOneRequiredStringIntDouble(void) {
+    // add one required string option
+    cmnCommandLineOptions options;
+    std::string resultString;
+    int resultInt;
+    double resultDouble;
+    bool verbose = false;
+    CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes", cmnCommandLineOptions::OPTIONAL, &verbose));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultString));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultInt));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultDouble));
+    const char * argv[] = {"programName", "-s", "stringValue", "-i", "99", "-d", "3.14", 0};
+    int argc = 7;
+    std::string errorMessage;
+    CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
+    CPPUNIT_ASSERT_EQUAL(verbose, false); // no set and optional
+    CPPUNIT_ASSERT_EQUAL(std::string("stringValue"), resultString);
+    CPPUNIT_ASSERT_EQUAL(99, resultInt);
+    CPPUNIT_ASSERT_EQUAL(3.14, resultDouble);
 }
