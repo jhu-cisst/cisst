@@ -60,7 +60,7 @@ bool cmnCommandLineOptionsConvert(const char * value, _elementType & element) {
 // template specialization to make sure spaces in strings (\ ) don't
 // act as separators using >>
 template <>
-bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::string & element) {
+inline bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::string & element) {
     element = value;
     return true;
 }
