@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-09-30
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-09-30
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -177,55 +177,55 @@ class vctFixedSizeConstVectorBase
  public:
     /*! Returns a const iterator on the first element (STL
       compatibility). */
-    const_iterator begin() const {
+    const_iterator begin(void) const {
         return const_iterator(Data);
     }
 
 
     /*! Returns a const iterator on the last element (STL
       compatibility). */
-    const_iterator end() const {
+    const_iterator end(void) const {
         return const_iterator(Data + STRIDE * SIZE);
     }
 
 
     /*! Returns a reverse const iterator on the last element (STL
       compatibility). */
-    const_reverse_iterator rbegin() const {
+    const_reverse_iterator rbegin(void) const {
         return const_reverse_iterator(Data + STRIDE * (SIZE - 1));
     }
 
 
     /*! Returns a reverse const iterator on the element before first
       (STL compatibility). */
-    const_reverse_iterator rend() const {
-        return const_reverse_iterator(Data - STRIDE);
+    const_reverse_iterator rend(void) const {
+        return const_reverse_iterator(this->Data - STRIDE);
     }
 
 
     /*! Returns the size of the vector (STL
       compatibility). */
-    size_type size() const {
+    size_type size(void) const {
         return SIZE;
     }
 
 
     /*! Returns the maximum size of the vector (STL compatibility).
       For a fixed size vector, same as the size(). */
-    size_type max_size() const {
+    size_type max_size(void) const {
         return SIZE;
     }
 
 
     /*! Not required by STL but provided for completeness */
-    difference_type stride() const {
+    difference_type stride(void) const {
         return STRIDE;
     }
 
 
     /*! Tell is the vector is empty (STL compatibility).  False unless
       SIZE is zero. */
-    bool empty() const {
+    bool empty(void) const {
         return (SIZE == 0);
     }
 
@@ -399,12 +399,12 @@ class vctFixedSizeConstVectorBase
       return it.
     */
     //@{
-    RowConstMatrixRefType AsRowMatrix() const
+    RowConstMatrixRefType AsRowMatrix(void) const
     {
         return RowConstMatrixRefType(Pointer());
     }
 
-    ColConstMatrixRefType AsColMatrix() const
+    ColConstMatrixRefType AsColMatrix(void) const
     {
         return ColConstMatrixRefType(Pointer());
     }
@@ -416,7 +416,7 @@ class vctFixedSizeConstVectorBase
 
     /*! Return the sum of the elements of the vector.
       \return The sum of all the elements */
-    inline value_type SumOfElements() const {
+    inline value_type SumOfElements(void) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
             SoVi<typename vctBinaryOperations<value_type>::Addition,
             typename vctUnaryOperations<value_type>::Identity>::
@@ -426,7 +426,7 @@ class vctFixedSizeConstVectorBase
 
     /*! Return the product of the elements of the vector.
       \return The product of all the elements */
-    inline value_type ProductOfElements() const {
+    inline value_type ProductOfElements(void) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
             SoVi<typename vctBinaryOperations<value_type>::Multiplication,
             typename vctUnaryOperations<value_type>::Identity>::
@@ -591,6 +591,23 @@ class vctFixedSizeConstVectorBase
             Unfold(*this);
     }
 
+    /*! Return true if all the elements of this vector are finite,
+      false otherwise */
+    inline bool IsFinite(void) const {
+        return vctFixedSizeVectorRecursiveEngines<_size>::template
+            SoVi< typename vctBinaryOperations<bool>::And,
+            typename vctUnaryOperations<bool, value_type>::IsFinite>::
+            Unfold(*this);
+    }
+
+    /*! Return true if any element of this vector is NaN, false
+      otherwise */
+    inline bool HasNaN(void) const {
+        return vctFixedSizeVectorRecursiveEngines<_size>::template
+            SoVi< typename vctBinaryOperations<bool>::Or,
+            typename vctUnaryOperations<bool, value_type>::IsNaN>::
+            Unfold(*this);
+    }
     //@}
 
 
@@ -637,7 +654,7 @@ class vctFixedSizeConstVectorBase
     template <stride_type __stride, class __dataPtrType>
     inline value_type DotProduct(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
-	    SoViVi<typename vctBinaryOperations<value_type>::Addition,
+            SoViVi<typename vctBinaryOperations<value_type>::Addition,
             typename vctBinaryOperations<value_type>::Multiplication>::
             Unfold(*this, otherVector);
     }

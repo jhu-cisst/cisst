@@ -24,6 +24,12 @@ set (SOURCE_FILES
      vctDeterminantTest.cpp
      vctDouble3Test.cpp
 
+     vctDataFunctionsFixedSizeVectorTest.cpp
+     vctDataFunctionsDynamicVectorTest.cpp
+     vctDataFunctionsFixedSizeMatrixTest.cpp
+     vctDataFunctionsDynamicMatrixTest.cpp
+     vctDataFunctionsTransformationsTest.cpp
+
      vctDynamicMatrixTest.cpp
      vctDynamicMatrixRefTest.cpp
 
@@ -66,6 +72,12 @@ set (HEADER_FILES
      vctAxisAngleRotation3Test.h
      vctDeterminantTest.h
      vctDouble3Test.h
+
+     vctDataFunctionsFixedSizeVectorTest.h
+     vctDataFunctionsDynamicVectorTest.h
+     vctDataFunctionsFixedSizeMatrixTest.h
+     vctDataFunctionsDynamicMatrixTest.h
+     vctDataFunctionsTransformationsTest.h
 
      vctDynamicMatrixTest.h
      vctDynamicMatrixRefTest.h

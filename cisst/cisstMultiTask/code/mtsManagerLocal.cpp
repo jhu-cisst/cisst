@@ -333,6 +333,7 @@ void mtsManagerLocal::Cleanup(void)
 #endif
 
     if (SystemLogMultiplexer) {
+        cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
         SystemLogMultiplexer->RemoveAllChannels();
         delete SystemLogMultiplexer;
         SystemLogMultiplexer = 0;
@@ -377,7 +378,7 @@ bool mtsManagerLocal::GetLogForwardingState(void) {
     return IsLogForwardingEnabled();
 }
 
-bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 
+bool mtsManagerLocal::MCCReadyForLogForwarding(void) const
 {
     if (!Instance) return false;
 
@@ -435,7 +436,7 @@ void mtsManagerLocal::LogDispatcher(const char * str, int len)
             Instance->ManagerComponent.Client->ForwardLog(log);
         }
     }
-    
+
     if (!deadlockAvoidance) {
         LogMutex.Unlock();
     }
@@ -459,9 +460,9 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin(); 
-             it != LogQueue.end(); 
-             ++count) 
+        for (LogQueueType::iterator it = LogQueue.begin();
+             it != LogQueue.end();
+             ++count)
         {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
@@ -469,7 +470,7 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
             }
             // MJ: after 30 log messages forwarded, give other threads a chance to queue
             // logs by releasing the lock (30 is arbitrary)
-            if (count == 30) 
+            if (count == 30)
                 break;
         }
         LogMutex.Unlock();
@@ -1654,115 +1655,6 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
     }
 }
 
-void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
-                                             std::vector<std::string> & signalNames,
-                                             const std::string & componentName,
-                                             const std::string & interfaceProvidedName,
-                                             const std::string & commandName,
-                                             const std::string & CMN_UNUSED(listenerID))
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) return;
-
-    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceProvidedName);
-    if (!interfaceProvided) return;
-
-    // Get argument name
-    mtsCommandRead * command;
-    char commandType = *commandName.c_str();
-    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
-
-    switch (commandType) {
-        case 'V':
-            argumentName = "Cannot visualize void command";
-            return;
-        case 'W':
-            argumentName = "Cannot visualize write command";
-            return;
-        case 'Q':
-            argumentName = "Cannot visualize q.read command";
-            return;
-        case 'R':
-            command = interfaceProvided->GetCommandRead(actualCommandName);
-            if (!command) {
-                argumentName = "No read command found";
-                return;
-            }
-            argumentName = command->GetArgumentPrototype()->Services()->GetName();
-            break;
-        default:
-            argumentName = "Failed to get argument information";
-            return;
-    }
-
-    // Get argument prototype
-    const mtsGenericObject * argument = command->GetArgumentPrototype();
-    if (!argument) {
-        argumentName = "Failed to get argument";
-        return;
-    }
-
-    // Get signal information
-    const size_t signalCount = argument->GetNumberOfScalar();
-    for (size_t i = 0; i < signalCount; ++i) {
-        signalNames.push_back(argument->GetScalarName(i));
-    }
-}
-
-void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
-                                         const std::string & componentName,
-                                         const std::string & interfaceProvidedName,
-                                         const std::string & commandName,
-                                         const int scalarIndex,
-                                         const std::string & CMN_UNUSED(listenerID))
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) return;
-
-    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceProvidedName);
-    if (!interfaceProvided) return;
-
-    // Get argument name
-    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
-    mtsCommandRead * command = interfaceProvided->GetCommandRead(actualCommandName);
-    if (!command) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetValuesOfCommand: no command found: " << actualCommandName << std::endl;
-        return;
-    };
-
-    // Get argument prototype
-    mtsGenericObject * argument = dynamic_cast<mtsGenericObject*>(command->GetArgumentPrototype()->Services()->Create());
-    if (!argument) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetValuesOfCommand: failed to create temporary argument" << std::endl;
-        return;
-    }
-
-    // Execute read command
-    command->Execute(*argument);
-
-    // Get current values with timestamps
-    ValuePair value;
-    Values valueSet;
-    double relativeTime;
-    values.clear();
-    /*
-    for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
-        value.Value = argument->GetScalarAsDouble(i);
-        argument->GetTimestamp(relativeTime);
-        TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
-
-        valueSet.push_back(value);
-    }
-    */
-    value.Value = argument->GetScalarAsDouble(scalarIndex);
-    argument->GetTimestamp(relativeTime);
-    TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
-    valueSet.push_back(value);
-    values.push_back(valueSet);
-
-    delete argument;
-}
-
 
 mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
 {
@@ -1828,7 +1720,7 @@ bool mtsManagerLocal::CreateInternalComponents(void)
     }
 
     ManagerComponent.Client->MCSReady = true;
-    
+
     // Add monitoring components
 #if CISST_HAS_SAFETY_PLUGINS
     if (SafetyCoordinator)
@@ -1987,7 +1879,7 @@ void mtsManagerLocal::KillAll(void)
     }
     ComponentMapChange.Unlock();
 
-    // Block further logs 
+    // Block further logs
     LogDisabled = true;
     SetLogForwarding(false);
 }
@@ -3179,18 +3071,18 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
 
     if (!IsGCMActive())
         return false;
-    
+
     if (ManagerComponent.Server){
         ManagerComponent.Server->GetNamesOfProcesses(processNames);
-        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
         return true;
     }
-    else if (ManagerComponent.Client) {  
+    else if (ManagerComponent.Client) {
         //ManagerComponent.Client->GetNamesOfProcesses(processNames);
-        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
         return true;
     }
-    
+
     else
         return false;
 }

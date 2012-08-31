@@ -27,22 +27,13 @@ CMN_IMPLEMENT_SERVICES(cdgGlobal);
 
 cdgGlobal::cdgGlobal(unsigned int lineNumber):
     cdgScope(lineNumber)
-{}
+{
+}
 
 
 cdgScope::Type cdgGlobal::GetScope(void) const
 {
     return cdgScope::CDG_GLOBAL;
-}
-
-
-bool cdgGlobal::HasKeyword(const std::string & keyword) const
-{
-    if ((keyword == "name")
-        || (keyword == "include")) {
-        return true;
-    }
-    return false;
 }
 
 
@@ -77,12 +68,6 @@ bool cdgGlobal::SetValue(const std::string & keyword,
 {
     errorMessage = "unhandled keyword \"" + keyword + "\"";
     return false;
-}
-
-
-bool cdgGlobal::IsValid(std::string & CMN_UNUSED(errorMessage)) const
-{
-    return true;
 }
 
 

@@ -5,9 +5,9 @@
   $Id$
 
   Author(s):  Anton Deguet
-  Created on: 2011-06-27
+  Created on: 2012-07-09
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,16 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-
-
-class cmnDataTest : public CppUnit::TestFixture
+class vctDataFunctionsDynamicMatrixTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(cmnDataTest);
+    CPPUNIT_TEST_SUITE(vctDataFunctionsDynamicMatrixTest);
     {
-        CPPUNIT_TEST(TestCopyNativeTypes);
-        CPPUNIT_TEST(TestBinarySerializationStreamNativeTypes);
-        CPPUNIT_TEST(TestBinarySerializationCharNativeTypes);
-        CPPUNIT_TEST(TestByteSwapMacros);
+        CPPUNIT_TEST(TestDataCopy);
+        CPPUNIT_TEST(TestBinarySerializationStream);
+        CPPUNIT_TEST(TestScalar);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -43,12 +40,7 @@ class cmnDataTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
 
-    void TestCopyNativeTypes(void);
-    void TestBinarySerializationStreamNativeTypes(void);
-    void TestBinarySerializationCharNativeTypes(void);
-    void TestByteSwapMacros(void);
+    void TestDataCopy(void);
+    void TestBinarySerializationStream(void);
+    void TestScalar(void);
 };
-
-
-CPPUNIT_TEST_SUITE_REGISTRATION(cmnDataTest);
-

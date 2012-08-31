@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
-  
+
   (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -55,60 +55,35 @@ module mtsManagerProxy
     sequence<string> NamesOfFunctionsSequence;
     sequence<string> NamesOfEventHandlersSequence;
 
-
-    //
-    // Data visualization
-    //
-    /*! String vector that contains names of signals in read command argument */
-    sequence<string> NamesOfSignals;
-
-    /*! osaAbsoluteTime. Please see osaTimeServer.h for original definition */
-    struct AbsoluteTime {
-        long sec;   // seconds
-        long nsec;  // nano-seconds
-    };
-
-    /*! List of sampled values of signals */
-    struct ValuePair {
-        double Value;
-        AbsoluteTime Timestamp;
-    };
-    sequence<ValuePair> Values;
-
-    // A set of Values. To minimize data exchange between LCM and GCM,
-    // several Values are packed together when trasmitted. The size of this 
-    // sequence is equal to data sampling count.
-    sequence<Values> SetOfValues;
-    
     //-------------------------------------------
     //  Command and Event Objects
     //-------------------------------------------
     struct CommandVoidElement {
 		string Name;
 	};
-	struct CommandWriteElement { 
+	struct CommandWriteElement {
 		string Name;
         string ArgumentPrototypeSerialized;
 	};
-	struct CommandReadElement { 
+	struct CommandReadElement {
 		string Name;
         string ArgumentPrototypeSerialized;
 	};
-	struct CommandQualifiedReadElement { 
+	struct CommandQualifiedReadElement {
 		string Name;
         string Argument1PrototypeSerialized;
         string Argument2PrototypeSerialized;
 	};
-	struct CommandVoidReturnElement { 
+	struct CommandVoidReturnElement {
 		string Name;
         string ResultPrototypeSerialized;
 	};
-	struct CommandWriteReturnElement { 
+	struct CommandWriteReturnElement {
 		string Name;
         string ArgumentPrototypeSerialized;
         string ResultPrototypeSerialized;
 	};
-	struct EventVoidElement { 
+	struct EventVoidElement {
 		string Name;
 	};
 	struct EventWriteElement {
@@ -165,7 +140,7 @@ module mtsManagerProxy
         // Event handlers
         EventHandlerVoidSequence  EventHandlersVoid;
 		EventHandlerWriteSequence EventHandlersWrite;
-    };    
+    };
 
 	interface ManagerClient
 	{
@@ -177,7 +152,7 @@ module mtsManagerProxy
 
         //-----------------------------------------------------------------------------
 	    // Interface for Local Component Manager (Proxy Client)
-        // 
+        //
         // This interface implements APIs defined in mtsManagerLocalInterface.h
         // See mtsManagerLocalInterface.h for detailed comments
 	    //-----------------------------------------------------------------------------
@@ -227,13 +202,6 @@ module mtsManagerProxy
 
         ["cpp:const"] idempotent
         void GetDescriptionOfEventHandler(string componentName, string interfaceRequiredName, string eventHandlerName, out string description);
-        
-        // Getters for data visualization
-        ["cpp:const"] idempotent
-        void GetArgumentInformation(string componentName, string interfaceProvidedName, string commandName, out string argumentName, out NamesOfSignals signalNames);
-
-        ["cpp:const"] idempotent
-        void GetValuesOfCommand(string componentName, string interfaceProvidedName, string commandName, int scalarIndex, out SetOfValues signalValues);
 	};
 
 	interface ManagerServer
@@ -256,7 +224,7 @@ module mtsManagerProxy
 
         //-----------------------------------------------------------------------------
 	    // Interface for Global Component Manager (Proxy Server)
-        // 
+        //
         // This interface implements APIs defined in mtsManagerGlobalInterface.h
         // See mtsManagerGlobalInterface.h for detailed comments
 	    //-----------------------------------------------------------------------------
@@ -282,7 +250,7 @@ module mtsManagerProxy
         bool RemoveInterfaceRequired(string processName, string componentName, string interfaceName);
 
         // Connection Management
-        int Connect(ConnectionStringSet connectionStrings); 
+        int Connect(ConnectionStringSet connectionStrings);
         bool ConnectConfirm(int connectionID);
         bool DisconnectWithID(int connectionID);
         bool Disconnect(ConnectionStringSet connectionStrings);

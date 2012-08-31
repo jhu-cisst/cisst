@@ -626,22 +626,6 @@ public:
                                       const std::string & eventHandlerName,
                                       const std::string & CMN_UNUSED(listenerID) = "");
 
-    /*! Get parameter information (name, argument count, argument type) */
-    void GetArgumentInformation(std::string & argumentName,
-                                std::vector<std::string> & signalNames,
-                                const std::string & componentName,
-                                const std::string & providedInterfaceName,
-                                const std::string & commandName,
-                                const std::string & CMN_UNUSED(listenerID) = "");
-
-    /*! Get a set of current values with timestamp for data visualization */
-    void GetValuesOfCommand(SetOfValues & values,
-                            const std::string & componentName,
-                            const std::string & providedInterfaceName,
-                            const std::string & commandName,
-                            const int scalarIndex,
-                            const std::string & CMN_UNUSED(listenerID) = "");
-
     /*! Return IP address of this process */
     inline const std::string & GetIPAddress(void) const { return ProcessIP; }
 

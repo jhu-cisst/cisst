@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-09-30
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-09-30
 
   (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -117,52 +117,52 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
     /*! Returns an iterator on the first element (STL
       compatibility). */
-    inline iterator begin() {
+    inline iterator begin(void) {
         return iterator(this->Data);
     }
 
 
     /* documented in base class */
-    inline const_iterator begin() const {
+    inline const_iterator begin(void) const {
         return BaseType::begin();
     }
 
 
     /*! Returns an iterator on the last element (STL
       compatibility). */
-    iterator end() {
+    iterator end(void) {
         return iterator(this->Data + STRIDE * SIZE);
     }
 
 
     /* documented in base class */
-    inline const_iterator end() const {
+    inline const_iterator end(void) const {
         return BaseType::end();
     }
 
 
     /*! Returns a reverse iterator on the last element (STL
       compatibility). */
-    reverse_iterator rbegin() {
+    reverse_iterator rbegin(void) {
         return reverse_iterator(this->Data + STRIDE * (SIZE - 1));
     }
 
 
     /* documented in base class */
-    const_reverse_iterator rbegin() const {
+    const_reverse_iterator rbegin(void) const {
         return BaseType::rbegin();
     }
 
 
     /*! Returns a reverse iterator on the element before first
       (STL compatibility). */
-    reverse_iterator rend() {
+    reverse_iterator rend(void) {
         return reverse_iterator(this->Data - STRIDE);
     }
 
 
     /* documented in base class */
-    const_reverse_iterator rend() const {
+    const_reverse_iterator rend(void) const {
         return BaseType::rend();
     }
 
@@ -407,11 +407,11 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
       \return a reference to this object.
     */
-	template <class __vectorOwnerType>
+    template <class __vectorOwnerType>
     inline ThisType & Assign(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & other) {
         vctFixedSizeVectorBaseAssignDynamicConstVectorBase(*this, other);
         return *this;
-	}
+    }
 
 
     /*!  \name Forced assignment operation between vectors of
@@ -437,10 +437,10 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return this->Assign(other);
     }
 
-	template <class __vectorOwnerType>
+    template <class __vectorOwnerType>
     inline ThisType & ForceAssign(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & other) {
         return this->Assign(other);
-	}
+    }
     //@}
 
 

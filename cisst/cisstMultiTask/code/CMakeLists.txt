@@ -291,6 +291,7 @@ if (CISST_MTS_HAS_ICE)
       COMMAND ${CMAKE_COMMAND}
       ARGS -E copy_if_different ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/include/cisstMultiTask
       COMMENT "Compiling ${slice_file}.ice"
+      MAIN_DEPENDENCY ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice/${slice_file}.ice
     )
 
     include_directories (${CMAKE_CURRENT_BINARY_DIR})

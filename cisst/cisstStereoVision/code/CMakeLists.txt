@@ -245,6 +245,8 @@ IF(CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB)
         ${HEADER_FILES}
         svlTrackerCisst.h
         )
+ELSE(CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+    SET(CISST_SVL_HAS_CISSTNETLIB "OFF" CACHE INTERNAL "SVL cisstNetlib status")
 ENDIF(CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
 

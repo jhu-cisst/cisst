@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,6 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -112,6 +113,28 @@ protected:
     /*! Callable object used when queueing. */
     mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
 
+    /******************** ExecIn interface *************************/
+
+    /*! ExecIn required interface. */
+    mtsInterfaceRequired * ExecIn;
+
+    /*! Run event handler. */
+    void RunEventHandler(void);
+
+    /*! Change state event handler. */
+    void ChangeStateEventHandler(const mtsComponentState &newState);
+
+    /******************** ExecOut interface ************************/
+
+    /*! ExecOut provided interface. */
+    mtsInterfaceProvided * ExecOut;
+
+    /*! Event generator used to pass thread of execution to another task. */
+    mtsFunctionVoid RunEvent;
+
+    /*! Event generator used to change state of dependent tasks. */
+    mtsFunctionWrite ChangeStateEvent;
+
     /********************* Methods that call user methods *****************/
 
     /*! The member function that is passed as 'start routine' argument for
@@ -160,8 +183,8 @@ public:
 
     /*! Create a task with name 'name' and set the state table size (see mtsStateTable).
         This is the task base class. Tasks should be derived from one of the
-        existing derived classes:  mtsTaskContinuous, mtsTaskPeriodic, and
-        mtsTaskFromCallback.
+        existing derived classes:  mtsTaskContinuous, mtsTaskPeriodic,
+        mtsTaskFromCallback, and mtsTaskFromSignal.
 
         \param name  The name for the task
         \param sizeStateTable The history size of the state table
@@ -172,7 +195,7 @@ public:
               are used with the thread or thread buddy.  This is an artifact
               of the 6 character limit imposed by RTAI/Linux.
 
-        \sa mtsComponent, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromCallback
+        \sa mtsComponent, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromCallback, mtsTaskFromSignal
      */
     mtsTask(const std::string & name,
             unsigned int sizeStateTable = 256);

@@ -122,7 +122,7 @@ void mtsSafetySupervisor::Cleanup(void)
 
 void mtsSafetySupervisor::UDPSenderInternal::operator()(const std::string & message)
 {
-#if 1
+#if 0
     std::cout << "--------------------------------------------------" << std::endl;
     std::cout << message << std::endl;
     std::cout << MongoDB::GetDBEntryFromMonitorTopic(message) << std::endl;

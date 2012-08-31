@@ -71,18 +71,6 @@ public:
         ForceTorqueMember(forcetorque)
     {}
 
-    bool inline Allocate(const mtsGenericObject * model)
-    {
-        const ThisType * pointer = dynamic_cast<const ThisType *>(model);
-        if (pointer == 0) {
-            return false;
-        }
-        MaskMember.SetSize(pointer->MaskMember.size());
-        ForceTorqueMember.SetSize(pointer->ForceTorqueMember.size());
-        return true;
-    }
-
-
     /*! destructor */
     virtual ~prmForceTorqueJointSet();
 

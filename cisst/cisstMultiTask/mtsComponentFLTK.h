@@ -42,8 +42,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnClassRegisterMacros.h>
-#include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <FL/Fl.H>
 
 template <class BaseClass>
@@ -56,37 +54,24 @@ public:
 
     mtsComponentFLTK(const std::string &name) : BaseClass(name)
     {
-        mtsInterfaceRequired *interfaceRequired = this->AddInterfaceRequired("Dispatcher", MTS_OPTIONAL);
-        if (interfaceRequired) {
-            interfaceRequired->AddEventHandlerVoid(&mtsComponentFLTK<BaseClass>::CheckFLTK, this,
-                                                   "RunEvent", MTS_EVENT_NOT_QUEUED);
-        }
-        this->Thread.CreateFromThreadId(mtsManagerLocal::GetInstance()->GetMainThreadId());
     }
 
     ~mtsComponentFLTK() {}
 
-    static void IdleCallback(void *data)
-    {
-        ThisType * whichUI = reinterpret_cast<ThisType *>(data);
-        whichUI->DoCallback();  // calls Run method
-    }
-
     void Startup(void)
     {
         BaseClass::Startup();
-        Fl::add_idle(mtsComponentFLTK<BaseClass>::IdleCallback, this);
     }
 
     void Run(void)
     {
         BaseClass::Run();
+        Fl::check();
     }
 
     void Cleanup(void)
     {
         BaseClass::Cleanup();
-        Fl::remove_idle(mtsComponentFLTK<BaseClass>::IdleCallback, this);
     }
 
     static int StartRunLoop(void)
@@ -94,11 +79,6 @@ public:
         return Fl::run(); 
     }
 
-    void CheckFLTK(void)
-    {
-        this->DoCallback();
-        Fl::check();
-    }
 };
 
 #endif // _mtsComponentFLTK_h

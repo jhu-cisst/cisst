@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -100,6 +102,13 @@ bool mtsTaskPeriodicConstructorArg::FromStreamRaw(std::istream & inputStream, co
 
 void * mtsTaskPeriodic::RunInternal(void *data)
 {
+    if (ExecIn && ExecIn->GetConnectedInterface()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName() 
+                                << " called, even though task receives thread from "
+                                << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
+        return 0;
+    }
+
     if (this->State == mtsComponentState::INITIALIZING) {
         SaveThreadStartData(data);
         this->StartupInternal();

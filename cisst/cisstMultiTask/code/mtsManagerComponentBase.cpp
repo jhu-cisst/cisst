@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -37,6 +37,8 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided 
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceGCMRequired       = "InterfaceGCMRequired";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided = "InterfaceSystemLoggerProvided";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired = "InterfaceSystemLoggerRequired";
+const std::string mtsManagerComponentBase::InterfaceNames::InterfaceExecIn = "ExecIn";
+const std::string mtsManagerComponentBase::InterfaceNames::InterfaceExecOut = "ExecOut";
 // Names of commands
 const std::string mtsManagerComponentBase::CommandNames::ComponentCreate  = "ComponentCreate";
 const std::string mtsManagerComponentBase::CommandNames::ComponentConfigure  = "ComponentConfigure";
