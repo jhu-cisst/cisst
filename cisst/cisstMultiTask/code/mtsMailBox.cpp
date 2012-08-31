@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,6 +77,8 @@ bool mtsMailBox::ExecuteNext(void)
    mtsCommandQueuedVoidReturn * commandVoidReturn;
    mtsCommandQueuedWriteReturn * commandWriteReturn;
 
+   mtsExecutionResult result;
+
    bool isBlocking = false;
    bool isBlockingReturn = false;
    try {
@@ -86,14 +88,14 @@ bool mtsMailBox::ExecuteNext(void)
                commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
                CMN_ASSERT(commandVoid);
                isBlocking = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
-               commandVoid->GetCallable()->Execute();
+               result = commandVoid->GetCallable()->Execute();
                break;
            case 1:
                commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
                if (commandWrite) {
                    isBlocking = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
                    try {
-                       commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
+                       result = commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }
                    catch (...) {
                        commandWrite->ArgumentGet();  // Remove from parameter queue
@@ -105,7 +107,7 @@ bool mtsMailBox::ExecuteNext(void)
                    CMN_ASSERT(commandWriteGeneric);
                    isBlocking = (commandWriteGeneric->BlockingFlagGet() == MTS_BLOCKING);
                    try {
-                       commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()), MTS_NOT_BLOCKING);
+                       result = commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }
                    catch (...) {
                        commandWriteGeneric->ArgumentGet();  // Remove from parameter queue
@@ -124,14 +126,14 @@ bool mtsMailBox::ExecuteNext(void)
                commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(*command);
                CMN_ASSERT(commandVoidReturn);
                isBlockingReturn = true;
-               commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
+               result = commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
                break;
            case 1:
                commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
                CMN_ASSERT(commandWriteReturn);
                isBlockingReturn = true;
-               commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
-                                                           *(commandWriteReturn->GetResultPointer()) );
+               result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
+                                                                    *(commandWriteReturn->GetResultPointer()) );
                break;
            default:
                CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
@@ -154,6 +156,10 @@ bool mtsMailBox::ExecuteNext(void)
        throw;
    }
    this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
+   if (!result.IsOK()) {
+       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
+                           << "\" failed, execution result is \"" << result << "\"" << std::endl;
+   }
    CommandQueue.Get();  // Remove command from mailbox queue
    return true;
 }
