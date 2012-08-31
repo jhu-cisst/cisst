@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnDataFunctions_h
 #define _cmnDataFunctions_h
 
+#include <string.h> // for memcpy
 #include <iostream>
 #include <limits>
 #include <cisstCommon/cmnThrow.h>

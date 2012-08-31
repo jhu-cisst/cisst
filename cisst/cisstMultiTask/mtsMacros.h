@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*!
-  Author(s):	Anton Deguet
-  Created on:	2008-06-26
+  Author(s):  Anton Deguet
+  Created on: 2008-06-26
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -64,6 +64,9 @@ public:                                                                      \
                                headerOnly, headerPrefix);                    \
     }                                                                        \
     className & Data(void) {                                                 \
+        return *this;                                                        \
+    }                                                                        \
+    const className & Data(void) const {                                     \
         return *this;                                                        \
     }                                                                        \
 };                                                                           \
