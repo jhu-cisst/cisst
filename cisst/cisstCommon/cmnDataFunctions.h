@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <limits>
+#include <string.h> // MJ: for memcpy on Mac
 #include <cisstCommon/cmnThrow.h>
 
 // always include last
