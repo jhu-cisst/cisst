@@ -454,7 +454,7 @@ int osaPipeExec::Write(const char * buffer, int n)
 
 int osaPipeExec::Write(const char * buffer)
 {
-    return Write(buffer, strlen(buffer)+1);
+    return Write(buffer, static_cast<int>(strlen(buffer))+1);
 }
 
 

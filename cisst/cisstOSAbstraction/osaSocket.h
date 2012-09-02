@@ -229,9 +229,7 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
     /*! \brief Send a string via the socket
         \param bufsend String to be sent
         \return Number of bytes sent (-1 if error) */
-    int Send(const std::string & bufsend) {
-        return Send(bufsend.c_str(), bufsend.length());
-    };
+    int Send(const std::string & bufsend);
 
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data

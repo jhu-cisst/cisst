@@ -49,10 +49,10 @@ cisst_target_link_libraries (mtsExPeriodicTaskFLTK ${REQUIRED_CISST_LIBRARIES})
 add_custom_target (mtsExPeriodicTaskFLTK_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskFLTK.cisst
-                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}
+                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/mtsExPeriodicTaskFLTK.cisst
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskNetworkFLTK.cisst
-                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}
+                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/mtsExPeriodicTaskNetworkFLTK.cisst
                    SOURCES mtsExPeriodicTaskFLTK.cisst mtsExPeriodicTaskNetworkFLTK.cisst
                    COMMENT "Copying cisst scripts to the binary directory")
 set_property (TARGET mtsExPeriodicTaskFLTK_Scripts PROPERTY FOLDER "cisstMultiTask/examples")
