@@ -37,7 +37,8 @@ if(SF_FOUND)
   set(SF_LIBRARIES ${SF_LIBRARY})
   set(SF_INCLUDE_DIR ${SF_INCLUDE_DIR})
   set(SF_INCLUDE_DIRS ${SF_INCLUDE_DIR}
-                      ${SF_INCLUDE_DIR}/FDD 
+                      ${SF_INCLUDE_DIR}/fdd
+                      ${SF_INCLUDE_DIR}/fdd/filters
                       ${SF_INCLUDE_DIR}/adapters/cisst
                       ${SF_INCLUDE_DIR}/common
                       ${SF_INCLUDE_DIR}/monitor

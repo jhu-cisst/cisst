@@ -24,6 +24,7 @@
 #include "json.h"
 #include "coordinator.h"
 #include "cisstMonitor.h"
+#include "filterBase.h"
 
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -51,15 +52,26 @@ public:
     mtsSafetyCoordinator();
     ~mtsSafetyCoordinator();
 
+    //-------------------------------------------------- 
+    //  Monitoring
+    //-------------------------------------------------- 
     /*! Create monitor instance */
     bool CreateMonitor(void);
 
-    /*! Install monitoring target object with JSON spec */
+    /*! Install monitoring target object (JSON spec could be used as argument) */
     bool AddMonitor(SF::Monitor * monitor);
+
+    //-------------------------------------------------- 
+    //  Filtering
+    //-------------------------------------------------- 
+    /*! Install filter either on the target component or on the monitor component */
+    bool AddFilters(const std::string & targetComponentName, 
+                    SF::FilterBase * filter,
+                    SF::FilterBase::FilteringType);
 
     /*! Deploy all monitors and FDDs that are installed so far.
         MJ: Right now, this method should be called user's main.cpp but could be moved
-        into either cisst or SF such that users don't necessarily call this method. */
+        into either cisst or SF such that users don't need to directly call this method. */
     bool DeployMonitorsAndFDDs(void);
 
     void ToStream(std::ostream & outputStream) const;

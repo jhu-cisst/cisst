@@ -101,6 +101,67 @@ bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
     return true;
 }
 
+bool mtsSafetyCoordinator::AddFilters(const std::string & targetComponentName, 
+                                      SF::FilterBase * filter,
+                                      SF::FilterBase::FilteringType)
+{
+    //
+    //
+    // TODO: implement this
+    //
+    //
+    /*
+    if (!baseMonitor) {
+        CMN_LOG_CLASS_RUN_ERROR << "NULL cisstMonitor instance error" << std::endl;
+        return false;
+    }
+
+    SF::cisstMonitor * monitor = dynamic_cast<SF::cisstMonitor*>(baseMonitor);
+    CMN_ASSERT(monitor);
+    SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitor->GetTargetID());
+    CMN_ASSERT(targetID);
+
+    const std::string targetUID = monitor->GetUIDAsString();
+    const std::string monitorInJson = monitor->GetMonitorJSON();
+
+    // Check if same monitoring target is already registered
+    if (this->IsDuplicateUID(targetUID)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
+        return false;
+    }
+
+    // Check if json syntax is valid
+    SF::JSON json;
+    if (!json.Read(monitorInJson.c_str())) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: " << targetUID
+            << "\nJSON: " << monitorInJson << std::endl;
+        return false;
+    }
+
+    // Monitor cannot monitor itself
+    const std::string targetComponentName = targetID->ComponentName;
+    if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << targetID->ComponentName << std::endl;
+        return false;
+    }
+
+    // Add new monitor target to monitor 
+    // [SFUPDATE] Use single monitor instance per process
+    mtsMonitorComponent * monitorComponent = Monitors[0];
+    if (!monitorComponent->AddMonitorTarget(monitor)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor component: " << targetUID << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitor: successfully added monitor target: " << targetUID 
+        << "\nJSON: " << json.GetJSON() << std::endl;
+
+    this->MonitorTargetMap[targetUID] = monitorInJson;
+    */
+
+    return true;
+}
+
 bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
 {
     for (size_t i = 0; i < Monitors.size(); ++i) {
