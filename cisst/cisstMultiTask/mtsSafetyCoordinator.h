@@ -41,9 +41,17 @@ public:
         increased later depending on the run-time performance or overhead. */
     typedef std::vector<mtsMonitorComponent*> MonitorsType;
 
+    /*! Filters deployed in the same component */
+    typedef std::list<SF::FilterBase*> FiltersType;
+    /*! Filters deployed in the same process (grouped by component name) */
+    typedef std::map<std::string, FiltersType*> FilterSetType;
+
 protected:
-    /*! Instance(s) of monitor */
+    /*! Monitor instances */
     MonitorsType Monitors;
+    
+    /*! Filter instances.  Grouped by the name of component to which the filter is deployed. */
+    FilterSetType FilterSet;
 
     /*! Parse JSON specification and return new monitoring target spec */
     //bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
@@ -65,9 +73,7 @@ public:
     //  Filtering
     //-------------------------------------------------- 
     /*! Install filter either on the target component or on the monitor component */
-    bool AddFilters(const std::string & targetComponentName, 
-                    SF::FilterBase * filter,
-                    SF::FilterBase::FilteringType);
+    bool AddFilter(SF::FilterBase * filter);
 
     /*! Deploy all monitors and FDDs that are installed so far.
         MJ: Right now, this method should be called user's main.cpp but could be moved

@@ -349,6 +349,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        mtsSafetyCoordinator.cpp
        mtsSafetySupervisor.cpp
        mtsSubscriberCallback.cpp
+       mtsHistoryBuffer.cpp
        )
 
   set (HEADER_FILES
@@ -367,6 +368,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        mtsSafetyCoordinator.h
        mtsSafetySupervisor.h
        mtsSubscriberCallback.h
+       mtsHistoryBuffer.h
        )
 endif (CISST_HAS_SAFETY_PLUGINS)
 

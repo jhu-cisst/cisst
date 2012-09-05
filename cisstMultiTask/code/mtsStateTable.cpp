@@ -692,6 +692,7 @@ bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
 
     return true;
 }
+#endif
 
 // MJ TEMP
 double mtsStateTable::GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const
@@ -711,5 +712,23 @@ mtsDoubleVec mtsStateTable::GetNewValueVector(const mtsStateDataId id, double & 
 
     return vec;
 }
-#endif
+
+void mtsStateTable::GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const
+{
+    StateVector[id]->Get(IndexReader, vec);
+    vec.GetTimestamp(timeStamp);
+}
+
+void mtsStateTable::GetNewValueVector(const mtsStateDataId id, std::vector<double>& vec, double & timeStamp) const
+{
+    double timestamp;
+    mtsDoubleVec _vec;
+    GetNewValueVector(id, _vec, timestamp);
+
+    if (_vec.size() != vec.size()) 
+        vec.clear();
+    for (size_t i = 0; i < _vec.size(); ++i) {
+        vec.push_back(_vec(i));
+    }
+}
 

@@ -499,6 +499,12 @@ public:
 
     static const mtsStateDataId INVALID_STATEVECTOR_ID;
 
+    /*! Fetch new value from state table */
+    double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
+    mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
+    void GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const;
+    void GetNewValueVector(const mtsStateDataId id, std::vector<double> & vec, double & timeStamp) const;
+
 #if CISST_HAS_SAFETY_PLUGINS
     typedef std::vector<mtsMonitorFilterBase*> MonitorFiltersType;
     struct MonitorFiltersStruct {
@@ -516,10 +522,6 @@ public:
 
     /*! Add filter */
     bool AddFilter(mtsMonitorFilterBase * filter);
-
-    /*! Fetch new value from state table */
-    double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
-    mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
 
     // [SFUPDATE]
     /*! Placeholders for monitoring */
