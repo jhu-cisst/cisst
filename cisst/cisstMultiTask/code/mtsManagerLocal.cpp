@@ -3099,7 +3099,7 @@ bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
     return ManagerComponent.Client->FaultPropagate(fault);
 }
 
-SF::Coordinator * mtsManagerLocal::GetCoordinator(void)
+mtsSafetyCoordinator * mtsManagerLocal::GetCoordinator(void)
 {
     // MJ: If more than one monitor needs to be deployed, this method can be an entry
     // point to make a decision on where/how to distribute monitor objects.

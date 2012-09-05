@@ -371,7 +371,8 @@ protected:
 public:
     bool FaultPropagate(const mtsFaultBase & fault) const;
     
-    SF::Coordinator * GetCoordinator(void);
+    //SF::Coordinator * GetCoordinator(void);
+    mtsSafetyCoordinator * GetCoordinator(void);
 
     /*! Instsall the safety coordinator instance.  Used only when the
         supervisor component needs to be installed. */

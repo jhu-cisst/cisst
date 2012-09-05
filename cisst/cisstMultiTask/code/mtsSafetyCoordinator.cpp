@@ -101,63 +101,97 @@ bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
     return true;
 }
 
-bool mtsSafetyCoordinator::AddFilters(const std::string & targetComponentName, 
-                                      SF::FilterBase * filter,
-                                      SF::FilterBase::FilteringType)
+bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
 {
-    //
-    //
-    // TODO: implement this
-    //
-    //
-    /*
-    if (!baseMonitor) {
-        CMN_LOG_CLASS_RUN_ERROR << "NULL cisstMonitor instance error" << std::endl;
+    if (!filter) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: NULL filter error" << std::endl;
         return false;
     }
 
-    SF::cisstMonitor * monitor = dynamic_cast<SF::cisstMonitor*>(baseMonitor);
-    CMN_ASSERT(monitor);
-    SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitor->GetTargetID());
-    CMN_ASSERT(targetID);
+    // Collect arguments
+    const std::string targetComponentName(filter->GetNameOfTargetComponent());
+    const SF::FilterBase::FilteringType filteringType = filter->GetFilteringType();
 
-    const std::string targetUID = monitor->GetUIDAsString();
-    const std::string monitorInJson = monitor->GetMonitorJSON();
-
-    // Check if same monitoring target is already registered
-    if (this->IsDuplicateUID(targetUID)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
+    // Check if target component of type task exists
+    mtsTask * targetTask = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
+    if (!targetTask) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no task-type component \"" << targetComponentName << "\" found" << std::endl;
         return false;
     }
 
-    // Check if json syntax is valid
-    SF::JSON json;
-    if (!json.Read(monitorInJson.c_str())) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: " << targetUID
-            << "\nJSON: " << monitorInJson << std::endl;
-        return false;
+    // Install filter
+    SignalElement * signal;
+    mtsHistoryBuffer * historyBuffer;
+    std::string signalName;
+
+    // Active monitoring: filter is run by the target component
+    if (filteringType == SF::FilterBase::ACTIVE) {
+        // Instantiate history buffer for each input signal
+        const size_t totalInputCount = filter->GetNumberOfInputs();
+        for (size_t i = 0; i < totalInputCount; ++i) {
+            signal = filter->GetInputSignalElement(i);
+            CMN_ASSERT(signal);
+            signalName = signal->GetName();
+
+            // Currently two state tables exist -- default state table and monitoring state table.
+            // Figure out which one has the specified signal
+            mtsStateTable * stateTable = targetTask->GetDefaultStateTable();
+            CMN_ASSERT(stateTable);
+            if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
+                historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+            } else {
+                stateTable = targetTask->GetMonitoringStateTable();
+                if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
+                    historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+                } else {
+                    CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no input signal \"" << signalName << "\" found" << std::endl;
+                    return false;
+                }
+            }
+        }
+        // Instantiate history buffer for each output signal
+        const size_t totalOutputCount = filter->GetNumberOfOutputs();
+        for (size_t i = 0; i < totalOutputCount; ++i) {
+            signal = filter->GetOutputSignalElement(i);
+            CMN_ASSERT(signal);
+            signalName = signal->GetName();
+
+            // Currently two state tables exist -- default state table and monitoring state table.
+            // Figure out which one has the specified signal
+            mtsStateTable * stateTable = targetTask->GetDefaultStateTable();
+            CMN_ASSERT(stateTable);
+            if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
+                historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+            } else {
+                stateTable = targetTask->GetMonitoringStateTable();
+                if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
+                    historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+                } else {
+                    CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no output signal \"" << signalName << "\" found" << std::endl;
+                    return false;
+                }
+            }
+        }
+    }
+    // Passive monitoring: filter is run by the monitoring component
+    else {
+        CMN_ASSERT(false); // MJ TODO: implement later
+        //historyBuffer = new SF::mtsHistoryBuffer(Monitors[0]->GetMonitoringStateTable());
     }
 
-    // Monitor cannot monitor itself
-    const std::string targetComponentName = targetID->ComponentName;
-    if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << targetID->ComponentName << std::endl;
-        return false;
+    // Now all the signals in filter are ready to be used
+#if 0 
+    FilterSetType::iterator it = FilterSet.find(targetComponentName);
+    // First time to install a filter for the target component
+    if (it == FilterSet.end()) {
+        FiltersType * filterList = new FiltersType;
+        filterList->push_back(filter);
     }
+    //typedef std::list<SF::FilterBase*> FiltersType;
+    //typedef std::map<std::string, FiltersType> FilterSetType;
 
-    // Add new monitor target to monitor 
-    // [SFUPDATE] Use single monitor instance per process
-    mtsMonitorComponent * monitorComponent = Monitors[0];
-    if (!monitorComponent->AddMonitorTarget(monitor)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor component: " << targetUID << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitor: successfully added monitor target: " << targetUID 
-        << "\nJSON: " << json.GetJSON() << std::endl;
-
-    this->MonitorTargetMap[targetUID] = monitorInJson;
-    */
+    // update FilterSet
+#endif
 
     return true;
 }
