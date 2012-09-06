@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     options.AddOptionOneValue("c", "code-file", "generated code filename",
                               cmnCommandLineOptions::REQUIRED, &codeName);
     bool verbose;
-    options.AddOptionNoValue("v", "verbose", "verbose output", cmnCommandLineOptions::OPTIONAL, &verbose);
+    options.AddOptionNoValue("v", "verbose", "verbose output");
 
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {
@@ -53,6 +53,7 @@ int main(int argc, char* argv[])
         options.PrintUsage(std::cerr);
         return -1;
     }
+    verbose = options.IsSet("verbose");
 
     std::string headerFull = headerDir + "/" + headerName;
     std::string codeFull = codeDir + "/" + codeName;

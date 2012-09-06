@@ -38,19 +38,15 @@ cmnCommandLineOptions::OptionBase::OptionBase(const std::string & shortOption, c
 
 
 cmnCommandLineOptions::OptionNoValue::OptionNoValue(const std::string & shortOption, const std::string & longOption,
-                                                    const std::string & description, RequiredType required, bool * value):
-    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, required),
-    Value(value)
+                                                    const std::string & description):
+    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, cmnCommandLineOptions::OPTIONAL)
 {
-    // initialize value to false
-    *(this->Value) = false;
 }
 
 
 
 bool cmnCommandLineOptions::OptionNoValue::SetValue(const char * CMN_UNUSED(value))
 {
-    *(this->Value) = true;
     this->Set = true;
     return true;
 }
@@ -69,14 +65,13 @@ cmnCommandLineOptions::cmnCommandLineOptions(void)
 
 
 bool cmnCommandLineOptions::AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
-                                             const std::string & description, cmnCommandLineOptions::RequiredType required,
-                                             bool * value)
+                                             const std::string & description)
 {
-    if (this->GetShortNoDash(shortOption)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddOption: option \"-" << shortOption << "\" already defined" << std::endl;
+    std::string cleanedShort, cleanedLong;
+    if (!this->ValidOptions(shortOption, longOption, cleanedShort, cleanedLong)) {
         return false;
     }
-    OptionNoValue * option = new OptionNoValue(shortOption, longOption, description, required, value);
+    OptionNoValue * option = new OptionNoValue(cleanedShort, cleanedLong, description);
     this->Options.push_back(option);
     return true;
 }
@@ -204,6 +199,72 @@ cmnCommandLineOptions::OptionBase * cmnCommandLineOptions::GetShortNoDash(const 
         }
     }
     return 0;
+}
+
+
+cmnCommandLineOptions::OptionBase * cmnCommandLineOptions::GetLongNoDashDash(const std::string & longOption)
+{
+    const OptionsType::const_iterator end = this->Options.end();
+    OptionsType::const_iterator iter = this->Options.begin();
+    for (; iter != end; ++iter) {
+        if ((*iter)->Long == longOption) {
+            return *iter;
+        }
+    }
+    return 0;
+}
+
+
+bool cmnCommandLineOptions::ValidOptions(const std::string & shortOption, const std::string & longOption,
+                                         std::string & cleanedShort, std::string & cleanedLong)
+{
+    cleanedShort = shortOption;
+    cleanedLong = longOption;
+    size_t position;
+
+    position = cleanedShort.find('-');
+    if (position == 0) {
+        cleanedShort.erase(0, 1);
+        CMN_LOG_CLASS_INIT_WARNING << "AddOption: short option provided with a starting \"-\", it should have just been \""
+                                   << cleanedShort << "\"" << std::endl;
+    }
+    position = cleanedLong.find("--");
+    if (position == 0) {
+        cleanedLong.erase(0, 2);
+        CMN_LOG_CLASS_INIT_WARNING << "AddOption: long option provided with a starting \"--\", it should have just been \""
+                                   << cleanedLong << "\"" << std::endl;
+    }
+    if (this->GetShortNoDash(cleanedShort)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddOption: option \"-" << cleanedShort << "\" already defined" << std::endl;
+        return false;
+    }
+    if (this->GetLongNoDashDash(cleanedLong)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddOption: option \"--" << cleanedLong << "\" already defined" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+bool cmnCommandLineOptions::IsSet(const std::string & option)
+{
+    std::string cleanedOption = option;
+    // remove up to 2 '-' in front of option name
+    if (cleanedOption.find('-') == 0) {
+        cleanedOption.erase(0, 1);
+    }
+    if (cleanedOption.find('-') == 0) {
+        cleanedOption.erase(0, 1);
+    }
+    // try to find the option
+    const OptionsType::const_iterator end = this->Options.end();
+    OptionsType::const_iterator iter = this->Options.begin();
+    for (; iter != end; ++iter) {
+        if (((*iter)->Short == cleanedOption) || ((*iter)->Long == cleanedOption)) {
+            return (*iter)->Set;
+        }
+    }
+    return false;
 }
 
 

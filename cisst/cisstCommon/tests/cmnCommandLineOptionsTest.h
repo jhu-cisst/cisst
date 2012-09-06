@@ -28,11 +28,15 @@ http://www.cisst.org/cisst/license.txt.
 class cmnCommandLineOptionsTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(cmnCommandLineOptionsTest);
-    CPPUNIT_TEST(TestNoOption);
-    CPPUNIT_TEST(TestNoParameter);
-    CPPUNIT_TEST(TestOneRequiredString);
-    CPPUNIT_TEST(TestOneRequiredStringFail);
-    CPPUNIT_TEST(TestOneRequiredStringIntDouble);
+    {
+        CPPUNIT_TEST(TestNoOption);
+        CPPUNIT_TEST(TestNoParameter);
+        CPPUNIT_TEST(TestOneRequiredString);
+        CPPUNIT_TEST(TestOneRequiredStringFail);
+        CPPUNIT_TEST(TestOneRequiredStringIntDouble);
+        CPPUNIT_TEST(TestRepeatedOptions);
+        CPPUNIT_TEST(TestIsSet);
+    }
     CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -47,6 +51,8 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
     void TestOneRequiredString(void);
     void TestOneRequiredStringFail(void);
     void TestOneRequiredStringIntDouble(void);
+    void TestRepeatedOptions(void);
+    void TestIsSet(void);
 };
 
 
