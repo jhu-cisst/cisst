@@ -174,6 +174,18 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     this->FileOpened = false;
 }
 
+void mtsCollectorBase::CloseOutput(void)
+{
+    if (this->FileOpened) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "CloseOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
+        this->OutputFile->close();
+        this->OutputHeaderFile->close();
+        this->FileOpened = false;
+    }
+    else {
+        CMN_LOG_CLASS_INIT_ERROR << "CloseOutput: file not open." << std::endl;
+    }
+}
 
 void mtsCollectorBase::OpenFileIfNeeded(void)
 {
@@ -184,16 +196,16 @@ void mtsCollectorBase::OpenFileIfNeeded(void)
     switch (FileFormat) {
     case COLLECTOR_FILE_FORMAT_CSV:
     case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
-        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/append mode" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/truncated mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::trunc);
         this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::trunc);
         this->FileOpened = true;
         break;
         // havnt changed the trunc /app option in the case below!!
     case COLLECTOR_FILE_FORMAT_BINARY:
-        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/append mode" << std::endl;
-        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::app);
-        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::app);
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/truncated mode" << std::endl;
+        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::trunc);
+        this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::trunc);
         this->FileOpened = true;
         break;
     default:
