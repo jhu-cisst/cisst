@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2005-08-19
+  Author(s):  Anton Deguet
+  Created on: 2005-08-19
 
   (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -45,21 +45,6 @@ void
 vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<_matrixType> & matrixRotation,
                               const vctQuaternionRotation3Base<_quaternionType> & quaternionRotation);
 
-#ifdef CISST_COMPILER_IS_MSVC
-template CISST_EXPORT void
-vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrix<double, 3, 3> > & matrixRotation,
-                              const vctQuaternionRotation3Base<vctFixedSizeVector<double, 4> > & quaternionRotation);
-template CISST_EXPORT void
-vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3> > & matrixRotation,
-                              const vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation);
-
-template CISST_EXPORT void
-vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRotation,
-                              const vctQuaternionRotation3Base<vctFixedSizeVector<double, 4> > & quaternionRotation);
-template CISST_EXPORT void
-vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRotation,
-                              const vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation);
-#endif
 #endif // SWIG
 #endif // DOXYGEN
 
@@ -449,7 +434,7 @@ public:
 
 
     /*! Conversion from an axis/angle rotation */
-    CISST_EXPORT ThisType &
+    ThisType &
     FromRaw(const vctAxisAngleRotation3<value_type> & axisAngleRotation);
 
 
@@ -548,5 +533,59 @@ public:
     }
 };
 
+
+
+template <class _containerType>
+vctMatrixRotation3Base<_containerType> &
+vctMatrixRotation3Base<_containerType>::FromRaw(const vctAxisAngleRotation3<typename _containerType::value_type> & axisAngleRotation) {
+
+    typedef vctAxisAngleRotation3<value_type> AxisAngleType;
+
+    const typename AxisAngleType::AngleType angle = axisAngleRotation.Angle();
+    const typename AxisAngleType::AxisType axis = axisAngleRotation.Axis();
+
+    const AngleType sinAngle = AngleType(sin(angle));
+    const AngleType cosAngle = AngleType(cos(angle));
+    const AngleType CompCosAngle = 1 - cosAngle;
+
+    // first column
+    this->Element(0, 0) = value_type(axis[0] * axis[0] * CompCosAngle + cosAngle);
+    this->Element(1, 0) = value_type(axis[0] * axis[1] * CompCosAngle + axis[2] * sinAngle);
+    this->Element(2, 0) = value_type(axis[0] * axis[2] * CompCosAngle - axis[1] * sinAngle);
+
+    // second column
+    this->Element(0, 1) = value_type(axis[1] * axis[0] * CompCosAngle - axis[2] * sinAngle);
+    this->Element(1, 1) = value_type(axis[1] * axis[1] * CompCosAngle + cosAngle);
+    this->Element(2, 1) = value_type(axis[1] * axis[2] * CompCosAngle + axis[0] * sinAngle);
+
+    // third column
+    this->Element(0, 2) = value_type(axis[2] * axis[0] * CompCosAngle + axis[1] * sinAngle);
+    this->Element(1, 2) = value_type(axis[2] * axis[1] * CompCosAngle - axis[0] * sinAngle);
+    this->Element(2, 2) = value_type(axis[2] * axis[2] * CompCosAngle + cosAngle);
+
+    return *this;
+}
+
+
+template <class _matrixType, class _quaternionType>
+void
+vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<_matrixType> & matrixRotation,
+                              const vctQuaternionRotation3Base<_quaternionType> & quaternionRotation) {
+
+    typedef typename _matrixType::value_type value_type;
+
+    value_type xx = quaternionRotation.X() * quaternionRotation.X();
+    value_type xy = quaternionRotation.X() * quaternionRotation.Y();
+    value_type xz = quaternionRotation.X() * quaternionRotation.Z();
+    value_type xr = quaternionRotation.X() * quaternionRotation.R();
+    value_type yy = quaternionRotation.Y() * quaternionRotation.Y();
+    value_type yz = quaternionRotation.Y() * quaternionRotation.Z();
+    value_type yr = quaternionRotation.Y() * quaternionRotation.R();
+    value_type zz = quaternionRotation.Z() * quaternionRotation.Z();
+    value_type zr = quaternionRotation.Z() * quaternionRotation.R();
+    matrixRotation.Assign(1 - 2 * (yy + zz), 2 * (xy - zr),     2 * (xz + yr),
+                          2 * (xy + zr),     1 - 2 * (xx + zz), 2 * (yz - xr),
+                          2 * (xz - yr),     2 * (yz + xr),     1 - 2 * (xx + yy));
+}
 
 #endif  // _vctMatrixRotation3Base_h

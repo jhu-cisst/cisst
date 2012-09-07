@@ -1643,7 +1643,7 @@ std::string svlVideoCodecFFMPEG::GetExtensionFromEncoderID(unsigned int encoder_
     switch (EncoderIDs[encoder_id]) {
         case CODEC_ID_MPEG1VIDEO:   // MPEG-1 Video
         case CODEC_ID_MPEG2VIDEO:   // MPEG-2 Video
-            extension == "mpg";
+            extension = "mpg";
         break;
 
         case CODEC_ID_H261:         // H.261
@@ -1673,44 +1673,44 @@ std::string svlVideoCodecFFMPEG::GetExtensionFromEncoderID(unsigned int encoder_
         case CODEC_ID_ZMBV:         // Zip Motion Blocks Video
         case CODEC_ID_TARGA:        // Truevision Targa image
         case CODEC_ID_TIFF:         // TIFF image
-            extension == "avi";
+            extension = "avi";
         break;
 
         case CODEC_ID_THEORA:       // libtheora Theora
-            extension == "ogg";
+            extension = "ogg";
         break;
 
         case CODEC_ID_DVVIDEO:      // Digital Video
-            extension == "dv";
+            extension = "dv";
         break;
 
         case CODEC_ID_WMV1:         // Windows Media Video 7
         case CODEC_ID_WMV2:         // Windows Media Video 8
-            extension == "wmv";
+            extension = "wmv";
         break;
 
         case CODEC_ID_FLV1:         // Flash Video (FLV) / Sorenson Spark / Sorenson H.263
         case CODEC_ID_SVQ1:         // Sorenson Vector Quantizer 1
         case CODEC_ID_FLASHSV:      // Flash Screen Video
-            extension == "flv";
+            extension = "flv";
         break;
 
         case CODEC_ID_RV10:         // Real Video 1
         case CODEC_ID_RV20:         // Real Video 2
-            extension == "rv";
+            extension = "rv";
         break;
 
         case CODEC_ID_ASV1:         // ASUS V1
         case CODEC_ID_ASV2:         // ASUS V2
-            extension == "asv";
+            extension = "asv";
         break;
 
         case CODEC_ID_ROQ:         // id RoQ Video
-            extension == "roq";
+            extension = "roq";
         break;
 
         case CODEC_ID_QTRLE:       // QuickTime Animation (RLE) video
-            extension == "mov";
+            extension = "mov";
         break;
 
         default:

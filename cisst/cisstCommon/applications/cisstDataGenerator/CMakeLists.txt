@@ -14,50 +14,57 @@
 #
 # --- end cisst license ---
 
-cmake_minimum_required (VERSION 2.6)
+# this application is needed for cisst and is always compiled along
+# the cisst libraries.  It shouldn't use the usual find_package (cisst ...)
+set (REQUIRED_CISST_LIBRARIES
+     cisstCommon)
 
-# create a list of libraries needed for this project
-set (REQUIRED_CISST_LIBRARIES cisstCommon)
+cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
+include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
-# find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES} QUIET)
+# we intentionally don't link against cisstCommon to make sure we are
+# not hunting for a dll or shared library during the build process.
+# Instead we explicitely include the symbols we need.
+set (SOURCE_FILES_FROM_cisstCommon
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnClassRegister.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnClassServicesBase.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnCommandLineOptions.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnGenericObject.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnLogger.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnLogLoD.cpp
+    )
 
-if (cisst_FOUND_AS_REQUIRED)
+# make sure no cisst symbols is considered "imported" by declspec
+if (WIN32)
+  remove_definitions(-DCISST_DLL)
+endif (WIN32)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
+# name the main executable and specifies with source files to use
+add_executable (cisstDataGenerator
+                cisstDataGenerator.cpp
+                cdgField.h
+                cdgField.cpp
+                cdgScope.h
+                cdgScope.cpp
+                cdgGlobal.h
+                cdgGlobal.cpp
+                cdgClass.h
+                cdgClass.cpp
+                cdgBaseClass.h
+                cdgBaseClass.cpp
+                cdgMember.h
+                cdgMember.cpp
+                cdgTypedef.h
+                cdgTypedef.cpp
+                cdgInline.h
+                cdgInline.cpp
+                cdgFile.h
+                cdgFile.cpp
+                ${SOURCE_FILES_FROM_cisstCommon}
+                )
 
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+set_property (TARGET cisstDataGenerator PROPERTY FOLDER "cisstCommon/applications")
 
-  # name the main executable and specifies with source files to use
-  add_executable (cisstDataGenerator
-                  cisstDataGenerator.cpp
-                  cdgScope.h
-                  cdgScope.cpp
-                  cdgGlobal.h
-                  cdgGlobal.cpp
-                  cdgClass.h
-                  cdgClass.cpp
-                  cdgBaseClass.h
-                  cdgBaseClass.cpp
-                  cdgMember.h
-                  cdgMember.cpp
-                  cdgTypedef.h
-                  cdgTypedef.cpp
-                  cdgInline.h
-                  cdgInline.cpp
-                  cdgFile.h
-                  cdgFile.cpp
-                  )
-
-  set_property (TARGET cisstDataGenerator PROPERTY FOLDER "cisstCommon/applications")
-
-  cisst_target_link_libraries (cisstDataGenerator ${REQUIRED_CISST_LIBRARIES})
-
-  install (TARGETS cisstDataGenerator
-           COMPONENT cisstCommon
-           RUNTIME DESTINATION bin)
-
-else (cisst_FOUND_AS_REQUIRED)
-  cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})
-endif (cisst_FOUND_AS_REQUIRED)
+install (TARGETS cisstDataGenerator
+         COMPONENT cisstCommon
+         RUNTIME DESTINATION bin)

@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -134,7 +134,7 @@ public:
         thread.  In that case, the task does not capture the thread, but just registers
         itself as a callback.
 
-        \sa mtsTask, mtsTaskPeriodic, mtsTaskFromCallback
+        \sa mtsTask, mtsTaskPeriodic, mtsTaskFromSignal, mtsTaskFromCallback
 
 	 */
     mtsTaskContinuous(const std::string & name,

@@ -49,6 +49,15 @@ macro (cisst_load_package_setting ...)
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
     endif (_clps_ADDITIONAL_BUILD_CMAKE)
     unset (_clps_ADDITIONAL_BUILD_CMAKE CACHE) # find_file stores the result in cache
+    # Internal dependency file
+    find_file (_clps_LIBRARIES_FILE
+               NAMES ${lib}Internal.cmake
+               PATHS ${CISST_CMAKE_DIRS}
+               NO_DEFAULT_PATH)
+    if (_clps_LIBRARIES_FILE)
+      include (${_clps_LIBRARIES_FILE})
+    endif (_clps_LIBRARIES_FILE)
+    unset (_clps_LIBRARIES_FILE CACHE) # find_file stores the result in cache
     # External dependency file
     find_file (_clps_SETTINGS_FILE
                NAMES ${lib}External.cmake
@@ -140,10 +149,10 @@ macro (cisst_find_and_use_packages ...)
           # check for components if needed
           set (_cfup_COMPONENT_VARIABLE_NAME CISST_PACKAGE_COMPONENTS_FOR_${lib}_USING_${package})
           if (${_cfup_COMPONENT_VARIABLE_NAME})
-	    cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})")
+            cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})")
             find_package (${${_cfup_VARIABLE_NAME}} REQUIRED ${${_cfup_COMPONENT_VARIABLE_NAME}})
           else (${_cfup_COMPONENT_VARIABLE_NAME})
-	    cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)")
+            cisst_cmake_debug ("cisst_find_and_use_packages: find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)")
             find_package (${${_cfup_VARIABLE_NAME}} REQUIRED)
           endif (${_cfup_COMPONENT_VARIABLE_NAME})
         endif (${_cfup_VARIABLE_NAME})
@@ -182,7 +191,7 @@ macro (cisst_extract_settings __LIBRARY __KEYWORD __VARIABLE_NAME)
     foreach (package ${${_ces_PACKAGES}})
       set (_ces_VARIABLE_NAME CISST_${__KEYWORD}_FOR_${__LIBRARY}_USING_${package})
       if (${_ces_VARIABLE_NAME})
-	set (${__VARIABLE_NAME} ${${__VARIABLE_NAME}} ${${_ces_VARIABLE_NAME}})
+        set (${__VARIABLE_NAME} ${${__VARIABLE_NAME}} ${${_ces_VARIABLE_NAME}})
       endif (${_ces_VARIABLE_NAME})
     endforeach (package)
   endif (${_ces_PACKAGES})
@@ -202,6 +211,7 @@ endmacro (cisst_extract_settings)
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
+# - SETTINGS is a list of settings, e.g. cisstQt, cisstFLTK, ...
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
 # - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)
@@ -225,6 +235,7 @@ macro (cisst_add_library ...)
        PROJECT
        FOLDER
        DEPENDENCIES
+       SETTINGS
        SOURCE_FILES HEADER_FILES
        ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
 
@@ -266,7 +277,6 @@ macro (cisst_add_library ...)
   set (FILE_CONTENT ${FILE_CONTENT} "   CMake: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   System: ${CMAKE_SYSTEM}\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   Source: ${CMAKE_SOURCE_DIR} */\n\n")
-  set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}pragma once\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}ifndef _${LIBRARY}_h\n")
   set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}define _${LIBRARY}_h\n\n")
   foreach (file ${HEADER_FILES})
@@ -309,23 +319,43 @@ macro (cisst_add_library ...)
   if (DEPENDENCIES)
     # Check that dependencies are built
     foreach (dependency ${DEPENDENCIES})
-      set (_CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-      list (FIND _CISST_LIBRARIES_AND_SETTINGS ${dependency} FOUND_IT)
-      if (${FOUND_IT} EQUAL -1 )
-        if (DEFINED ${dependency}_OPTION_NAME)
-          message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled, use the flag ${${dependency}_OPTION_NAME} to compile it")
-        else (DEFINED ${dependency}_OPTION_NAME)
-          message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
-        endif (DEFINED ${dependency}_OPTION_NAME)
-      endif (${FOUND_IT} EQUAL -1 )
+      list (FIND CISST_LIBRARIES ${dependency} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1)
+        # not found
+        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+      else (${FOUND_IT} EQUAL -1)
+        # found
+        cisst_library_use_libraries (${LIBRARY} ${dependency})
+      endif (${FOUND_IT} EQUAL -1)
     endforeach (dependency)
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
     cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
   endif (DEPENDENCIES)
 
-  # Link to cisst additional libraries
-  cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES})
+  # Add settings for linking, also check BUILD_xxx for dependencies
+  if (SETTINGS)
+    # Check that dependencies are built
+    foreach (setting ${SETTINGS})
+      list (FIND CISST_SETTINGS ${setting} FOUND_IT)
+      if (${FOUND_IT} EQUAL -1 )
+        # not found
+        if (DEFINED ${setting}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled, use the flag ${${setting}_OPTION_NAME} to compile it")
+        else (DEFINED ${setting}_OPTION_NAME)
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled")
+        endif (DEFINED ${setting}_OPTION_NAME)
+      else (${FOUND_IT} EQUAL -1 )
+        # found
+        cisst_library_use_settings (${LIBRARY} ${setting})
+      endif (${FOUND_IT} EQUAL -1 )
+    endforeach (setting)
+    # Set the link flags
+    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} uses settings: ${SETTINGS}")
+  endif (SETTINGS)
+
+  # Link to cisst additional libraries and settings
+  cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
 
   # Install all header files
   install (FILES ${HEADERS}
@@ -403,7 +433,7 @@ macro (cisst_target_link_libraries TARGET ...)
         if (DEFINED ${required}_OPTION_NAME)
           message (SEND_ERROR "${_WHO_REQUIRES} requires ${requires} which doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
         else (DEFINED ${required}_OPTION_NAME)
-          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled") 
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
         endif (DEFINED ${required}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
@@ -597,9 +627,9 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
     set_source_files_properties (${output_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${output_absolute}
                         COMMAND "${CISST_CG_EXECUTABLE}"
-			${input_absolute} ${output_absolute}
-			MAIN_DEPENDENCY ${input}
-			DEPENDS ${CISST_CG_EXECUTABLE}
+                        ${input_absolute} ${output_absolute}
+                        MAIN_DEPENDENCY ${input}
+                        DEPENDS ${CISST_CG_EXECUTABLE}
                         COMMENT "cisstComponentGenerator for ${INPUT_WE}")
   endforeach(input)
 
@@ -616,13 +646,15 @@ endfunction (cisst_component_generator)
 
 # Function to use cisstDataGenerator, this function assumes input
 # files are provided using a relative path
-function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
+function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRECTORY GENERATED_INCLUDE_SUB_DIRECTORY ...)
   # debug
   cisst_cmake_debug ("cisst_data_generator called with: ${ARGV}")
-  if (${ARGC} LESS 1)
-    message (SEND_ERROR "cisst_data_generator takes at least one argument.")
-  endif (${ARGC} LESS 1)
-  list (REMOVE_AT ARGV 0) # first one is name of variable
+  if (${ARGC} LESS 3)
+    message (SEND_ERROR "cisst_data_generator takes at least three arguments.")
+  endif (${ARGC} LESS 3)
+  list (REMOVE_AT ARGV 0) # GENERATED_FILES_VAR_PREFIX
+  list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_DIRECTORY
+  list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_SUB_DIRECTORY
 
   # make sure cisstDataGenerator is being build and find it
   # try to figure out if this is build along with cisst
@@ -647,7 +679,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
     get_filename_component (INPUT_WE "${input}" NAME_WE)
     set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
     # create output name and concatenate to list available in parent scope
-    set (header_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.h")
+    file (MAKE_DIRECTORY "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${GENERATED_FILES_VAR_PREFIX}")
+    set (header_absolute "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h")
     set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.cpp")
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
     set (GENERATED_FILES ${GENERATED_FILES} ${header_absolute} ${code_absolute})
@@ -656,9 +689,12 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
                         COMMAND "${CISST_DG_EXECUTABLE}"
-			${input_absolute} ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.h ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
-			MAIN_DEPENDENCY ${input}
-			DEPENDS ${CISST_DG_EXECUTABLE}
+                        --verbose
+                        --input ${input_absolute}
+                        --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
+                        --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}.cpp
+                        MAIN_DEPENDENCY ${input}
+                        DEPENDS ${CISST_DG_EXECUTABLE}
                         COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 
@@ -769,7 +805,12 @@ macro (cisst_information_message_missing_libraries ...)
       set (_cimml_MISSING_LIBRARIES ${_cimml_MISSING_LIBRARIES} ${lib})
     endif (${FOUND_IT} EQUAL -1 )
   endforeach (lib)
-  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
+  # it is possible all libraries are here but cisst-config.cmake was not found
+  if (${_cimml_MISSING_LIBRARIES})
+    message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
+  else (${_cimml_MISSING_LIBRARIES})
+    message ("Information: all libraries and settings have been found for ${CMAKE_CURRENT_SOURCE_DIR}, it is possible cisst-config.cmake has not been found yet,  make sure the CMake configuration is complete first.")
+  endif (${_cimml_MISSING_LIBRARIES})
   foreach (lib ${_cimml_MISSING_LIBRARIES})
     if (DEFINED ${lib}_OPTION_NAME)
       message ("Information: to compile ${lib}, you need to use the flag ${${lib}_OPTION_NAME}")

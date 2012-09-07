@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -234,19 +234,19 @@ public:
     /* Equivalent to Assign.  Please note that this operator performs a data
       copy, not an object copy as understood with a C++ copy constructor.  If
       the size of operands don't match an exception will be thrown. */
-	inline ThisType & operator = (const ThisType & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const ThisType & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 #endif // _cisstVectorPython_EXPORTS
 
-	inline ThisType & operator = (const vctDynamicConstVectorRef<value_type> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const vctDynamicConstVectorRef<value_type> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
     template <class __vectorOwnerType, typename __elementType>
-	inline ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
     //@}
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
@@ -276,7 +276,6 @@ public:
     }
 
 };
-
 
 #endif // _vctDynamicVectorRef_h
 

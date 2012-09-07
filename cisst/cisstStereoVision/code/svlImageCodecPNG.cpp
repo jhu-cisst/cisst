@@ -428,7 +428,7 @@ int svlImageCodecPNG::Read(svlSampleImage &image, const unsigned int videoch, co
                 png_set_gray_1_2_4_to_8(png_ptr);
 #endif
             }
-            break;
+        break;
     }
     if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
         png_set_tRNS_to_alpha(png_ptr);

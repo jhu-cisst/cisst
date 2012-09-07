@@ -50,7 +50,7 @@ class mtsComponentAddLatencyDelayedWrite;
   same provided interfaces as Cs.  Then, instead of connecting Cc to
   Cs, we will connect Cc to Cd and Cd to Cs.
 
-  The derived component needs to create it's required and provided
+  The derived component needs to create its required and provided
   interfaces using the methods AddInterfaceRequired and
   AddInterfaceProvided.  Once the interfaces are created, commands can
   be added using AddCommandVoidDelayed, AddCommandReadDelayed, ...
@@ -60,13 +60,13 @@ class mtsComponentAddLatencyDelayedWrite;
   set the periodicity of the delay component so that enough data is
   collected but make sure the frequency is not too high either.  For
   void and write commands as well as events, the component buffers all
-  requests and periodically check which commands/events should be
+  requests and periodically checks which commands/events should be
   forwarded.  Therefore the actual latency will be impacted by the
-  period used be the delay component.
+  period used by the delay component.
  */
 class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
  protected:
 
@@ -85,6 +85,7 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
  public:
     // constructor
     mtsComponentAddLatency(const std::string & componentName, double periodInSeconds);
+    mtsComponentAddLatency(const mtsTaskPeriodicConstructorArg &arg);
     virtual ~mtsComponentAddLatency();
 
     // methods defined as virtual in base class

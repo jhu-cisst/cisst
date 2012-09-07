@@ -30,17 +30,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
-#include <cisstMultiTask/mtsComponentDispatcher.h>
 
-class MainDispatcher : public mtsComponentDispatcherMain
+class MainDispatcher : public mtsTaskMain
 {
     mtsComponent *Shell;
 public:
     MainDispatcher(const std::string &name, mtsComponent *shell) :
-        mtsComponentDispatcherMain(name), Shell(shell) {}
+        mtsTaskMain(name), Shell(shell) {}
     ~MainDispatcher() {}
     void Run(void) {
-        mtsComponentDispatcherMain::Run();
         osaSleep(0.1);
         if (Shell->IsTerminated())
             Kill();

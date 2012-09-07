@@ -1286,4 +1286,3 @@ public:
 
 
 #endif // _vctDynamicVectorBase_h
-

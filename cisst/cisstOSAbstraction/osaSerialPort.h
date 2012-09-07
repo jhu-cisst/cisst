@@ -211,7 +211,7 @@ public:
     int Write(const char * data, int nBytes);
     int Write(const unsigned char * data, int nBytes);
     inline int Write(const std::string & data) {
-        return this->Write(data.c_str(), data.size());
+        return this->Write(data.c_str(), static_cast<int>(data.size()));
     }
     
     /*! Receive raw data. */

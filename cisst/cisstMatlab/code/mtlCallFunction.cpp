@@ -32,11 +32,9 @@ extern "C" {
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 
-const char * mtlCallFunctionVoid(char * voidPointerOnFunction)
+const char * mtlCallFunctionVoid(uint64_T voidPointerOnFunction)
 {
-    unsigned long long int inter;
-    sscanf(voidPointerOnFunction, "%llu", &inter);
-    mtsFunctionVoid * functionPointer = reinterpret_cast<mtsFunctionVoid *>(inter);
+    mtsFunctionVoid * functionPointer = reinterpret_cast<mtsFunctionVoid *>(voidPointerOnFunction);
     mtsExecutionResult result;
     result = functionPointer->Execute();
     if (!result.IsOK()) {
@@ -48,12 +46,9 @@ const char * mtlCallFunctionVoid(char * voidPointerOnFunction)
 }
 
 
-mxArray * mtlCallFunctionRead(char * voidPointerOnFunction)
+mxArray * mtlCallFunctionRead(uint64_T voidPointerOnFunction)
 {
-    CMN_LOG_INIT_ERROR << "-------- function read wrapper ------" << std::endl;
-    unsigned long long int inter;
-    sscanf(voidPointerOnFunction, "%llu", &inter);
-    mtsFunctionRead * functionPointer = reinterpret_cast<mtsFunctionRead *>(inter);
+    mtsFunctionRead * functionPointer = reinterpret_cast<mtsFunctionRead *>(voidPointerOnFunction);
     mtsExecutionResult result;
     mtsGenericObject * placeHolder = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
     result = functionPointer->Execute(*placeHolder);
@@ -67,12 +62,9 @@ mxArray * mtlCallFunctionRead(char * voidPointerOnFunction)
 }
 
 
-const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input)
+const char * mtlCallFunctionWrite(uint64_T voidPointerOnFunction, mxArray * input)
 {
-    unsigned long long int inter;
-
-    sscanf(voidPointerOnFunction, "%llu", &inter);
-    mtsFunctionWrite * functionPointer = reinterpret_cast<mtsFunctionWrite *>(inter);
+    mtsFunctionWrite * functionPointer = reinterpret_cast<mtsFunctionWrite *>(voidPointerOnFunction);
     mtsExecutionResult result;
     mtsGenericObject * inputCisst = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
 

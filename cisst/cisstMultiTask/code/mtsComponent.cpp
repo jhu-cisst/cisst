@@ -107,6 +107,7 @@ void mtsComponent::Start(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start: default start method for component \""
                                << this->GetName() << "\"" << std::endl;
+    this->Startup();
     this->State = mtsComponentState::ACTIVE;
 }
 
@@ -123,6 +124,7 @@ void mtsComponent::Kill(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Kill: default kill method for component \""
                                << this->GetName() << "\"" << std::endl;
+    this->Cleanup();
     this->State = mtsComponentState::FINISHED;
 }
 
@@ -904,6 +906,10 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
                                     mtsManagerComponentBase::CommandNames::RemoveEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveObserverList, this,
                                     mtsManagerComponentBase::CommandNames::RemoveObserverList);
+    provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_ComponentCreate, this,
+                                    mtsManagerComponentBase::CommandNames::ComponentCreate);
+    provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentStartOther, this,
+                              mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState,
                             mtsComponentStateChange());
 
@@ -943,4 +949,54 @@ void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHa
 {
     CMN_ASSERT(argin.Provided);
     argin.Provided->RemoveObserverList(argin, argout);
+}
+
+// Code was previously in mtsManagerComponentClient::CreateAndAddNewComponent
+void mtsComponent::InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
+{
+    // Try to create component as requested
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
+    mtsComponent * newComponent = LCM->CreateComponentDynamically(componentDescription.ClassName,
+                                                                  componentDescription.ComponentName,
+                                                                  componentDescription.ConstructorArgSerialized);
+    result = false;
+    if (newComponent) {
+        if (LCM->AddComponent(newComponent)) {
+            CMN_LOG_CLASS_RUN_VERBOSE << GetName() << ": successfully created and added component: "
+                                      << "\"" << componentDescription.ComponentName << "\" of type \""
+                                      << componentDescription.ClassName << "\"" << std::endl;
+            result = true;
+        }
+        else {
+            CMN_LOG_CLASS_RUN_ERROR << GetName() << ": failed to add component: "
+                                    << "\"" << componentDescription.ComponentName << "\" of type \"" 
+                                    << componentDescription.ClassName << "\"" << std::endl;
+        }
+    }
+    else {
+        CMN_LOG_CLASS_RUN_ERROR << GetName() << ": failed to create component: "
+                                << "\"" << componentDescription.ComponentName << "\" of type \"" 
+                                << componentDescription.ClassName << "\"" << std::endl;
+    }
+}
+
+void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg)
+{
+    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
+    mtsComponent *component = LCM->GetComponent(arg.ComponentName);
+    if (component) {
+        if (component->GetState() == mtsComponentState::CONSTRUCTED) {
+            // Start an internal thread (if needed)
+            component->Create();
+            // Wait for internal thread to be created
+            osaSleep(arg.DelayInSecond);
+        }
+
+        // Start the component
+        component->Start();
+    }
+    else
+        CMN_LOG_CLASS_RUN_ERROR << GetName() << ": could not find component " << arg.ComponentName
+                                << " to start" << std::endl;
 }

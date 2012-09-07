@@ -28,18 +28,16 @@ CMN_IMPLEMENT_SERVICES(cdgInline);
 cdgInline::cdgInline(unsigned int lineNumber, InlineType type):
     cdgScope(lineNumber),
     Type(type)
-{}
+{
+    cdgField * field;
+    field = this->AddField("", "", false);
+    CMN_ASSERT(field);
+}
 
 
 cdgScope::Type cdgInline::GetScope(void) const
 {
     return cdgScope::CDG_CODE;
-}
-
-
-bool cdgInline::HasKeyword(const std::string & CMN_UNUSED(keyword)) const
-{
-    return false;
 }
 
 
@@ -51,34 +49,11 @@ bool cdgInline::HasScope(const std::string & CMN_UNUSED(keyword),
 }
 
 
-bool cdgInline::SetValue(const std::string & CMN_UNUSED(keyword),
-                         const std::string & value,
-                         std::string & CMN_UNUSED(errorMessage))
-{
-    Value = value;
-    return true;
-}
-
-
-bool cdgInline::IsValid(std::string & CMN_UNUSED(errorMessage)) const
-{
-    return true;
-}
-
-
-void cdgInline::FillInDefaults(void)
-{
-    if (Value.empty()) {
-        Value = "/* this should not happen, cdgInline not set */";
-    }
-}
-
-
 void cdgInline::GenerateHeader(std::ostream & outputStream) const
 {
     if (Type == CDG_INLINE_HEADER) {
         GenerateLineComment(outputStream);
-        outputStream << Value;
+        outputStream << this->GetFieldValue("");
     }
 }
 
@@ -87,6 +62,6 @@ void cdgInline::GenerateCode(std::ostream & outputStream) const
 {
     if (Type == CDG_INLINE_CODE) {
         GenerateLineComment(outputStream);
-        outputStream << Value;
+        outputStream << this->GetFieldValue("");
     }
 }

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):    Anton Deguet
-  Created on:    2011-06-27
+  Author(s):  Anton Deguet
+  Created on: 2011-06-27
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,6 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#pragma once
+#ifndef _cmnDataFunctions_h
+#define _cmnDataFunctions_h
+
+#include <string.h> // for memcpy
 #include <iostream>
 #include <limits>
 #include <cisstCommon/cmnThrow.h>
@@ -143,6 +148,12 @@ void cmnDataByteSwap(_elementType & data) {
    std::string
 */
 
+/*! Macro to overload the function cmnDataCopy using the assignement
+  operator to copy from source to destination.  This is a
+  appropriate for data types without any dynamic memory allocations.
+  For types using dynamic memory allocations or large blocks of
+  memory, users should overload the cmnDataCopy function using a
+  more efficient approach (memcpy, ...). */
 #define CMN_DATA_COPY_USING_ASSIGN(_type)                               \
     inline void cmnDataCopy(_type & destination,                        \
                             const _type & source) {                     \
@@ -150,6 +161,12 @@ void cmnDataByteSwap(_elementType & data) {
     }
 
 
+/*! Macro to overload the function cmnDataSerializeBinary using a cast
+  to char pointer and assuming that sizeof reports the real size of
+  the object to be serialized.  Please note that this method will
+  not work with data object relying on dynamic memory allocation
+  (pointers) and might also fail if you are using a struct/class
+  your compiler can pad. */
 #define CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(_type)      \
     inline void cmnDataSerializeBinary(std::ostream & outputStream,     \
                                        const _type & data)              \
@@ -240,37 +257,102 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
 }
 
 
-#define CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(type)                     \
+/*! Macro to overload the function cmnDataScalarDescription using the type
+  name itself.  For example, for a double it will return the string
+  "double". */
+#define CMN_DATA_SCALAR_DESCRIPTION(_type, _description)                \
+    inline std::string cmnDataScalarDescription(const _type & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const char * userDescription = #_description) \
+        throw (std::out_of_range) {                                     \
+        return userDescription;                                         \
+    }
+
+/*! Macro to overload the function cmnDataScalar using a static_cast. */
+#define CMN_DATA_SCALAR_USING_STATIC_CAST(_type)                        \
+    inline double cmnDataScalar(const _type & data, const size_t CMN_UNUSED(index)) \
+        throw (std::out_of_range) {                                     \
+        return static_cast<double>(data);                               \
+    }
+
+/*! Macro to overload the function cmnDataScalarNumber, returns 1. */
+#define CMN_DATA_SCALAR_NUMBER_IS_ONE(_type)                          \
+    inline size_t cmnDataScalarNumber(const _type & CMN_UNUSED(data)) { \
+        return 1;                                                     \
+    }
+
+#define CMN_DATA_SCALAR_NUMBER_IS_FIXED_TRUE(_type)                     \
+    inline bool cmnDataScalarNumberIsFixed(const _type & CMN_UNUSED(data)) { \
+        return true;                                                    \
+    }
+
+#define CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(type, description)        \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
-    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type)
+    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type) \
+    CMN_DATA_SCALAR_DESCRIPTION(type, description)                      \
+    CMN_DATA_SCALAR_USING_STATIC_CAST(type)                             \
+    CMN_DATA_SCALAR_NUMBER_IS_ONE(type)                                 \
+    CMN_DATA_SCALAR_NUMBER_IS_FIXED_TRUE(type)
 
-#define CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(type)                        \
+#define CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(type, description)           \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
-    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type)
+    CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type) \
+    CMN_DATA_SCALAR_DESCRIPTION(type, description)                      \
+    CMN_DATA_SCALAR_USING_STATIC_CAST(type)                             \
+    CMN_DATA_SCALAR_NUMBER_IS_ONE(type)                                 \
+    CMN_DATA_SCALAR_NUMBER_IS_FIXED_TRUE(type)
+
+CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(bool, b);
+CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(char, c);
+CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(unsigned char, uc);
+
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(short, s);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned short, us);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(int, i);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned int, ui);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(long long int, lli);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned long long int, ulli);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(float, f);
+CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double, d);
 
 
-CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(bool);
-CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(char);
-CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(unsigned char);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(short);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned short);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(long long int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(unsigned long long int);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(float);
-CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double);
+// size_t "specialization", we can't really specialize for size_t as
+// the type is not always a built-in type.  For example the MS
+// compiler uses typedef.  So we create a set of "parallel" functions
+// with the suffix _size_t
+inline std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const char * userDescription = "st")
+    throw (std::out_of_range) {
+    return userDescription;
+}
 
+inline double cmnDataScalar_size_t(const size_t & data, const size_t CMN_UNUSED(index))
+        throw (std::out_of_range) {
+        return static_cast<double>(data);
+    }
 
-// size_t specialization
-CMN_DATA_COPY_USING_ASSIGN(size_t);
-CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(size_t);
-inline void cmnDataDeSerializeBinary(std::istream & inputStream,
-                                     size_t & data,
-                                     const cmnDataFormat & remoteFormat,
-                                     const cmnDataFormat & localFormat) throw (std::runtime_error)
+inline size_t cmnDataScalarNumber_size_t(const size_t & CMN_UNUSED(data)) {
+    return 1;
+}
+
+inline bool cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data)) {
+    return true;
+}
+
+inline void cmnDataSerializeBinary_size_t(std::ostream & outputStream,
+                                          const size_t & data)
+    throw (std::runtime_error)
+{
+        outputStream.write(reinterpret_cast<const char *>(&data),
+                           sizeof(size_t));
+        if (outputStream.fail()) {
+            cmnThrow("cmnDataSerializeBinary(type): error occured with std::ostream::write");
+        }
+}
+
+inline void cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
+                                            size_t & data,
+                                            const cmnDataFormat & remoteFormat,
+                                            const cmnDataFormat & localFormat) throw (std::runtime_error)
 {
     // first case, both use same size
     if (remoteFormat.GetSizeTSize() == localFormat.GetSizeTSize()) {
@@ -304,7 +386,7 @@ inline void cmnDataDeSerializeBinary(std::istream & inputStream,
         if (tmp > std::numeric_limits<size_t>::max()) {
             cmnThrow("cmnDataDeSerializeBinary(size_t): received a size_t larger than what can be handled on 32 bits");
         }
-        data = tmp;
+        data = static_cast<size_t>(tmp); // this should be safe now
         return;
     }
 }
@@ -313,29 +395,28 @@ inline void cmnDataDeSerializeBinary(std::istream & inputStream,
 // std::string specialization
 CMN_DATA_COPY_USING_ASSIGN(std::string);
 
-inline void cmnDataSerializeBinary(std::ostream & outputStream,
-                                   const std::string & data) throw (std::runtime_error)
-{
-    cmnDataSerializeBinary(outputStream, data.size());
-    outputStream.write(data.data(), data.size());
-    if (outputStream.fail()) {
-        cmnThrow("cmnDataSerializeBinary(std::string): error occured with std::ostream::write");
-    }
+void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream,
+                                         const std::string & data) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataDeSerializeBinary(std::istream & inputStream,
+                                           std::string & data,
+                                           const cmnDataFormat & remoteFormat,
+                                           const cmnDataFormat & localFormat) throw (std::runtime_error);
+
+
+// this should be define as a macro that can be used for all types without scalars
+inline bool cmnDataScalarNumberIsFixed(const std::string & CMN_UNUSED(data)) {
+    return true;
 }
 
-inline void cmnDataDeSerializeBinary(std::istream & inputStream,
-                                     std::string & data,
-                                     const cmnDataFormat & remoteFormat,
-                                     const cmnDataFormat & localFormat) throw (std::runtime_error)
-{
-    size_t size;
-    // retrieve size of string
-    cmnDataDeSerializeBinary(inputStream, size, remoteFormat, localFormat);
-    data.resize(size);
-    // this const_cast is a bit alarming, lets be verbose until we are sure this is safe
-    std::cerr << CMN_LOG_DETAILS << " - not really sure about the following const cast" << std::endl;
-    inputStream.read(const_cast<char *>(data.data()), size);
-    if (inputStream.fail()) {
-        cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");
-    }
+inline size_t cmnDataScalarNumber(const std::string & CMN_UNUSED(data)) {
+    return 0;
 }
+
+inline std::string cmnDataScalarDescription(const std::string & CMN_UNUSED(data), const size_t & CMN_UNUSED(index),
+                                            const char * CMN_UNUSED(userDescription) = "") throw (std::out_of_range) {
+    cmnThrow(std::out_of_range("cmnDataScalarDescription: std::string has no scalar"));
+    return "n/a";
+}
+
+#endif // _cmnDataFunctions_h

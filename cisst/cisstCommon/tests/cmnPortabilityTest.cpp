@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-08-09
 
-  (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -76,6 +76,9 @@ void cmnPortabilityTest::TestWithCMake(void) {
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.3"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.4"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.5")));
+    } else if (CISST_COMPILER == CISST_CLANG) {
+        CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == std::string("c++"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++")));
     } else {
         CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_CXX_COMPILER), CMakeCompilerStrings[CISST_COMPILER]);
     }

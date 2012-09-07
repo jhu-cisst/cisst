@@ -66,6 +66,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 
+#include <stack>
+
 #include <cisstMultiTask/mtsExport.h>
 
 // Helper macro (useful to connect interfaces in main.cpp)
@@ -120,6 +122,12 @@ private:
 
     /*! Thread ID of main thread */
     osaThreadId MainThreadId;
+
+    /*! List of main tasks (in chronological order) */
+    std::stack<std::string> MainTaskNames;
+
+    /*! Pointer to task that currently has main thread (set when that task is started) */
+    mtsTaskContinuous * CurrentMainTask;
 
     /*! Flag for unit tests. Enabled only for unit tests (false by default) */
     static bool UnitTestEnabled;
@@ -534,6 +542,15 @@ public:
     /*! Return main thread id. */
     osaThreadId GetMainThreadId(void) const { return MainThreadId; }
 
+    /*! Set active task that has main thread (called by mtsTaskContinuous::Start) */
+    void PushCurrentMainTask(mtsTaskContinuous *cur);
+
+    /*! Restore previous active task that has main thread (called when task is exiting) */
+    mtsTaskContinuous *PopCurrentMainTask();
+
+    /*! Get pointer to active task that has main thread (if none, returns 0) */
+    mtsTaskContinuous *GetCurrentMainTask(void) const { return CurrentMainTask; }
+
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                             const std::string & componentName,
@@ -585,22 +602,6 @@ public:
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName,
                                       const std::string & CMN_UNUSED(listenerID) = "");
-
-    /*! Get parameter information (name, argument count, argument type) */
-    void GetArgumentInformation(std::string & argumentName,
-                                std::vector<std::string> & signalNames,
-                                const std::string & componentName,
-                                const std::string & providedInterfaceName,
-                                const std::string & commandName,
-                                const std::string & CMN_UNUSED(listenerID) = "");
-
-    /*! Get a set of current values with timestamp for data visualization */
-    void GetValuesOfCommand(SetOfValues & values,
-                            const std::string & componentName,
-                            const std::string & providedInterfaceName,
-                            const std::string & commandName,
-                            const int scalarIndex,
-                            const std::string & CMN_UNUSED(listenerID) = "");
 
     /*! Return IP address of this process */
     inline const std::string & GetIPAddress(void) const { return ProcessIP; }

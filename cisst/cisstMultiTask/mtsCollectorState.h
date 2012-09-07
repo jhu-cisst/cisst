@@ -176,11 +176,6 @@ public:
                                     const std::string targetPlainTextLogFileName,
                                     const char delimiter = ',');
 
-    /*! Get the name of log file currently being written. */
-    inline const std::string & GetOutputFileName(void) const {
-        return this->OutputFileName;
-    }
-
     /*! Methods defined as virtual in base class to control stop/start
       collection with delay.  For the state table collection, these
       methods are mainly pass through, i.e. they call the

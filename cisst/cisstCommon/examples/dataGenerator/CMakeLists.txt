@@ -19,6 +19,8 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # create data type using the data generator
   cisst_data_generator (cmnExDataGenerator
+                        ${CMAKE_CURRENT_BINARY_DIR}
+                        ""
                         demoData.txt)
 
   # to compile cisst generated code, need to find header file

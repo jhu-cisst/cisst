@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -587,6 +587,24 @@ public:
             typename vctUnaryOperations<bool, value_type>::IsNonzero>::
             Run(*this);
     }
+
+    /*! Return true if all the elements of this matrix are finite,
+      false otherwise */
+    inline bool IsFinite(void) const {
+        return vctDynamicMatrixLoopEngines::
+            SoMi< typename vctBinaryOperations<bool>::And,
+            typename vctUnaryOperations<bool, value_type>::IsFinite>::
+            Run(*this);
+    }
+
+    /*! Return true if any element of this matrix is NaN, false
+      otherwise */
+    inline bool HasNaN(void) const {
+        return vctDynamicMatrixLoopEngines::
+            SoMi< typename vctBinaryOperations<bool>::Or,
+            typename vctUnaryOperations<bool, value_type>::IsNaN>::
+            Run(*this);
+    }
     //@}
 
 
@@ -692,7 +710,7 @@ public:
     /* documented above */
     template <class __matrixOwnerType>
     inline bool AlmostEqual(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix,
-			    value_type tolerance) const {
+                            value_type tolerance) const {
         return ((*this - otherMatrix).LinfNorm() <= tolerance);
     }
 

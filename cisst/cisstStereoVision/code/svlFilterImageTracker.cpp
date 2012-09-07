@@ -53,6 +53,7 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyScaleHigh(100.0),
     Iterations(1),
     WarpedImage(0),
+    RigidBodyIterations(3),
     Mosaic(0),
     MosaicWidth(1000),
     MosaicHeight(1000)
@@ -73,6 +74,9 @@ svlFilterImageTracker::svlFilterImageTracker() :
 
     Trackers.SetSize(SVL_MAX_CHANNELS);
     Trackers.SetAll(0);
+
+    RigidBodyError.SetSize(RigidBodyIterations);
+    RigidBodyError.SetAll(-1);
 
     ROI.SetSize(SVL_MAX_CHANNELS);
     ROI.SetAll(svlRect(0, 0, 4096, 4096));
@@ -138,9 +142,88 @@ void svlFilterImageTracker::SetRigidBodyConstraints(double angle_low, double ang
     RigidBodyScaleHigh = scale_high;
 }
 
+int svlFilterImageTracker::SetRigidBodyTransform(const vct3x3 & transform, unsigned int videoch)
+{
+    if (videoch >= SVL_MAX_CHANNELS || !Trackers[videoch] || !WarpedImage) return SVL_FAIL;
+
+    RigidBodyTransform[videoch].Assign(transform);
+
+    // Extract rotation matrix from frame and make a copy of it
+    vctFixedSizeConstMatrixRef<double, 2, 2, 3, 1> c_mat2x2(transform);
+    vct2x2 mat2x2(c_mat2x2);
+
+    // Angle
+    vctRot2 rot2(mat2x2);
+    vctAnRot2 anrot2(rot2, false);
+    double angle = anrot2.Angle();
+
+    // Scale
+    double scale = cos(angle) / transform.Element(0, 0);
+
+    // Translation
+    vct2 res1;
+    res1[0] = (transform.Element(0, 2) - WarpedImage->GetWidth(videoch)  / 2);
+    res1[1] = (transform.Element(1, 2) - WarpedImage->GetHeight(videoch) / 2);
+
+    // Inverse
+    double det = mat2x2.Element(0, 0) * mat2x2.Element(1, 1) - mat2x2.Element(0, 1) * mat2x2.Element(1, 0);
+    mat2x2.Element(0, 0) =  mat2x2.Element(1, 1) / det;
+    mat2x2.Element(1, 1) =  mat2x2.Element(0, 0);
+    mat2x2.Element(0, 1) = -mat2x2.Element(0, 1) / det;
+    mat2x2.Element(1, 0) = -mat2x2.Element(0, 1);
+
+    // Transform translation
+    vct2 res2;
+    res2.ProductOf(mat2x2, res1);
+
+    // Store results
+    WarpedRigidBodyScale[videoch] = scale;
+    WarpedRigidBodyAngle[videoch] = angle;
+
+    const unsigned int targetcount = static_cast<unsigned int>(Targets.cols());
+    svlTarget2D *target = Targets.Pointer(videoch, 0);
+    vctDynamicMatrixRef<int> proto_pos;
+    const double ax = res2[0];
+    const double ay = res2[1];
+
+    proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(videoch));
+
+    for (unsigned int i = 0; i < targetcount; i ++) {
+
+        if (target->used) {
+            target->pos.x = static_cast<int>(proto_pos.Element(0, i) + ax);
+            target->pos.y = static_cast<int>(proto_pos.Element(1, i) + ay);
+
+            Trackers[videoch]->SetTarget(i, *target);
+        }
+
+        target ++;
+    }
+
+    return SVL_OK;
+}
+
+int svlFilterImageTracker::GetRigidBodyTransform(vct3x3 & transform, unsigned int videoch)
+{
+    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
+    transform.Assign(RigidBodyTransform[videoch]);
+    return SVL_OK;
+}
+
 vct3x3 svlFilterImageTracker::GetRigidBodyTransform(unsigned int videoch)
 {
+    if (videoch >= SVL_MAX_CHANNELS) {
+        vct3x3 xform = vct3x3::Eye();
+        return xform;
+    }
+
     return RigidBodyTransform[videoch];
+}
+
+void svlFilterImageTracker::GetRigidBodyError(vctDynamicVector<int> & errors)
+{
+    if (errors.size() != RigidBodyIterations) errors.SetSize(RigidBodyIterations);
+    errors.Assign(RigidBodyError);
 }
 
 int svlFilterImageTracker::SetROI(const svlRect & rect, unsigned int videoch)
@@ -191,6 +274,11 @@ int svlFilterImageTracker::SetMosaicSize(unsigned int width, unsigned int height
     MosaicWidth = width;
     MosaicHeight = height;
     return SVL_OK;
+}
+
+const svlSampleImage* svlFilterImageTracker::GetMosaicImage() const
+{
+    return Mosaic;
 }
 
 int svlFilterImageTracker::OnConnectInput(svlFilterInput &input, svlStreamType type)
@@ -247,7 +335,7 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
         MosaicAccuCount.SetSize(VideoChannels);
         for (unsigned int i = 0; i < VideoChannels; i ++) {
             MosaicAccuBuffer[i].SetSize(Mosaic->GetDataSize(i));
-            MosaicAccuCount[i].SetSize(Mosaic->GetDataSize(i));
+            MosaicAccuCount[i].SetSize(Mosaic->GetWidth(i) * Mosaic->GetHeight(i));
         }
     }
 
@@ -429,7 +517,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         if (RigidBody) {
 
             LinkChannelsVertically();
-            for (i = 0; i < 3; i ++) ReconstructRigidBody();
+            for (i = 0; i < RigidBodyIterations; i ++) RigidBodyError[i] = ReconstructRigidBody();
             //ComputeHomography();
             BackprojectRigidBody();
             //BackprojectHomography();
@@ -490,6 +578,8 @@ int svlFilterImageTracker::Release()
     WarpedRigidBodyAngle.SetSize(0);
     WarpedRigidBodyScale.SetSize(0);
     WarpInternals.SetSize(0);
+
+    RigidBodyError.SetAll(-1);
 
     return SVL_OK;
 }
@@ -904,24 +994,23 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     svlTrackerMSBruteForce* tracker = dynamic_cast<svlTrackerMSBruteForce*>(Trackers[videoch]);
     if (!tracker) return SVL_FAIL;
 
-    const int mosaic_size = Mosaic->GetDataSize(videoch);
+    const int mosaic_pixel_count = Mosaic->GetWidth(videoch) * Mosaic->GetHeight(videoch);
     const int mosaic_width  = Mosaic->GetWidth(videoch);
     const int mosaic_height = Mosaic->GetHeight(videoch);
     const int mosaic_center_x = mosaic_width  >> 1;
     const int mosaic_center_y = mosaic_height >> 1;
-    const int mosaic_stride = mosaic_width * 3;
     const int image_center_x = width  >> 1;
     const int image_center_y = height >> 1;
     const int targetcount = static_cast<int>(Targets.cols());
     const int tmpl_radius = tracker->GetTemplateRadius();
     const int tmpl_size = tmpl_radius * 2 + 1;
-    const int tmpl_stride = tmpl_size * 3;
-    const unsigned char default_value = 0;
+    const int feather_rounding = 5;
 
     svlTarget2D *target = 0;
     unsigned char *tdata, *count_buffer, *cdata, *out_mos_buffer;
     unsigned short *accu_buffer, *mdata;
-    int i, k, l, txf, tyf, mxf, mxt, myf, myt, w, h;
+    unsigned char r, g, b;
+    int i, k, l, txf, tyf, mxf, mxt, myf, myt, w, h, weight, dx, dy;
     vctDynamicVectorRef<unsigned char> template_ref;
     vctInt2 pos;
 
@@ -931,7 +1020,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     out_mos_buffer = Mosaic->GetUCharPointer(videoch);
 
     memset(accu_buffer, 0, MosaicAccuBuffer[videoch].size() * sizeof(unsigned short));
-    memset(count_buffer, 0, MosaicAccuCount[videoch].size());
+    memset(count_buffer, 0, MosaicAccuCount[videoch].size() * sizeof(unsigned char));
 
     for (i = 0; i < targetcount; i ++) {
         target = Targets.Pointer(videoch, i);
@@ -966,33 +1055,69 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
         }
         if (myt > mosaic_height) myt = mosaic_height;
 
-        w = (mxt - mxf) * 3;
+        w = mxt - mxf;
         h = myt - myf;
         if (w <= 0 || h <= 0) continue;
 
         tdata += (tyf * tmpl_size + txf) * 3;
-        k = (myf * mosaic_width + mxf) * 3;
-        mdata = accu_buffer + k;
+        k = myf * mosaic_width + mxf;
+        mdata = accu_buffer + k * 3;
         cdata = count_buffer + k;
 
+        const int tmpl_stride = (tmpl_size - w) * 3;
+        const int mosaic_stride = (mosaic_width - w) * 3;
+
         for (l = 0; l < h; l ++) {
+
+            if (l > tmpl_radius) {
+                dy = l - tmpl_radius;
+            }
+            else {
+                dy = tmpl_radius - l;
+            }
+
             for (k = 0; k < w; k ++) {
-                mdata[k] += tdata[k];
-                cdata[k] ++;
+
+                if (k > tmpl_radius) {
+                    dx = k - tmpl_radius;
+                }
+                else {
+                    dx = tmpl_radius - k;
+                }
+                if (dx > dy) weight = dx;
+                else         weight = dy;
+
+                weight = tmpl_size - dx - dy - feather_rounding;
+                if (weight < 0) weight = 0;
+
+                *mdata += weight * (*tdata); mdata ++; tdata ++;
+                *mdata += weight * (*tdata); mdata ++; tdata ++;
+                *mdata += weight * (*tdata); mdata ++; tdata ++;
+                cdata[k] += weight;
             }
             tdata += tmpl_stride;
             mdata += mosaic_stride;
-            cdata += mosaic_stride;
+            cdata += mosaic_width;
         }
     }
 
-    for (i = 0; i < mosaic_size; i ++) {
-        k = *count_buffer;
-        if (k) *out_mos_buffer = (*accu_buffer) / k;
-        else *out_mos_buffer = default_value;
-        accu_buffer ++;
-        count_buffer ++;
-        out_mos_buffer ++;
+    for (i = 0; i < mosaic_pixel_count; i ++) {
+        k = *count_buffer; count_buffer ++;
+        if (k) {
+            b = (*accu_buffer) / k; accu_buffer ++;
+            g = (*accu_buffer) / k; accu_buffer ++;
+            r = (*accu_buffer) / k; accu_buffer ++;
+            if (r == 0 && g == 0 && b == 0) r = g = b = 1;
+            *out_mos_buffer = b; out_mos_buffer ++;
+            *out_mos_buffer = g; out_mos_buffer ++;
+            *out_mos_buffer = r; out_mos_buffer ++;
+        }
+        else {
+            *out_mos_buffer = 0; out_mos_buffer ++;
+            *out_mos_buffer = 0; out_mos_buffer ++;
+            *out_mos_buffer = 0; out_mos_buffer ++;
+            accu_buffer += 3;
+        }
     }
 
     return SVL_OK;

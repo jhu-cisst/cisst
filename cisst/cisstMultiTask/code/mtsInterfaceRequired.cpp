@@ -775,10 +775,11 @@ void mtsInterfaceRequired::EnableAllEvents(void)
 size_t mtsInterfaceRequired::ProcessMailBoxes(void)
 {
     // one of constructor of mtsInterfaceRequired allows a null
-    // pointer to be passed as the second argument.
+    // pointer to be passed as the second argument. This is used
+    // for the ExecIn interface.
     if (!MailBox) {
-        CMN_LOG_CLASS_RUN_WARNING << "ProcessMailBoxes: called on interface \""
-                                  << this->GetFullName() << "\" which doesn't have a mail box." << std::endl;
+        //CMN_LOG_CLASS_RUN_WARNING << "ProcessMailBoxes: called on interface \""
+        //                          << this->GetFullName() << "\" which doesn't have a mail box." << std::endl;
         return 0;
     }
 

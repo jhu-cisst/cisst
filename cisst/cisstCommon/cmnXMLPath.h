@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Anton Deguet
+  Author(s):  Ankur Kapoor, Anton Deguet, Ali Uneri
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -92,6 +92,13 @@ class cmnXMLPathData;
   and axis[@name="x"]/filter/@pgain
   Yes that simple!
 
+  One can also issue direct XPath queries using the Query method.
+  This can be used to count nodes
+  (eg. <code>path.Query("count(/data-1/data-1-2/data-1-2-x)",
+  intValue);</code>).  We strongly recommend using GetXMLValue
+  whenever possible as Qt and LibXml2 queries might slightly differ
+  (e.g. Qt node content queries start with "data(").
+
   \todo Add tests in all methods to make sure input is defined
   \todo Add write Qt
   \todo Add tests to get nodes, not just attributes (might already work on libxml2)
@@ -143,6 +150,7 @@ public:
     bool GetXMLValue(const char * context, const char * XPath, bool & value);
     bool GetXMLValue(const char * context, const char * XPath, bool & value, const bool & valueIfMissing);
     bool SetXMLValue(const char * context, const char * XPath, const bool & value);
+    bool Query(const char * query, bool & value);
     //@}
 
     /*! Get/Set the XPath result and cast it as int */
@@ -150,6 +158,7 @@ public:
     bool GetXMLValue(const char * context, const char * XPath, int & value);
     bool GetXMLValue(const char * context, const char * XPath, int & value, const int & valueIfMissing);
     bool SetXMLValue(const char * context, const char * XPath, const int & value);
+    bool Query(const char * query, int & value);
     //@}
 
     /*! Get/Set the XPath result and cast it as double */
@@ -157,6 +166,7 @@ public:
     bool GetXMLValue(const char * context, const char * XPath, double & value);
     bool GetXMLValue(const char * context, const char * XPath, double & value, const double & valueIfMissing);
     bool SetXMLValue(const char * context, const char * XPath, const double & value);
+    bool Query(const char * query, double & value);
     //@}
 
     /*! Get/Set the XPath result and cast it as string */
@@ -164,8 +174,8 @@ public:
     bool GetXMLValue(const char * context, const char * XPath, std::string & value);
     bool GetXMLValue(const char * context, const char * XPath, std::string & value, const std::string & valueIfMissing);
     bool SetXMLValue(const char * context, const char * XPath, const std::string & value);
+    bool Query(const char * query, std::string & value);
     //@}
-
 
     /*! Templated helpers to define context and path using std::string */
     //@{
@@ -184,7 +194,11 @@ public:
     {
         return this->SetXMLValue(context.c_str(), XPath.c_str(), value);
     }
-    //@}
+
+    template <class __elementType>
+    bool Query(const std::string & query, __elementType & value) {
+        return this->Query(query.c_str(), value);
+    }
 };
 
 

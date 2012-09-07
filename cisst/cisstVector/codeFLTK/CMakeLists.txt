@@ -14,9 +14,6 @@
 
 project (cisstVectorFLTK)
 
-# cisstVectorFTLK relies on cisstFLTK settings (for future use)
-cisst_library_use_settings (cisstVectorFLTK cisstFLTK)
-
 # set directories for this project
 cisst_set_directories (cisstFLTK)
 
@@ -27,6 +24,7 @@ cisst_add_library (
   FOLDER cisstVector
   DEPENDENCIES cisstCommon
                cisstVector
+  SETTINGS     cisstFLTK
   SOURCE_FILES vctPlot2DOpenGLFLTK.cpp
   HEADER_FILES vctPlot2DOpenGLFLTK.h
                vctExportFLTK.h)

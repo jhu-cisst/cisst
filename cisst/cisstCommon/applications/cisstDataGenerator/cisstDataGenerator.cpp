@@ -21,32 +21,46 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <iostream>
+
+#include <cisstCommon/cmnCommandLineOptions.h>
 #include "cdgFile.h"
 
-/*
-  \todo use global keyword name to set include guards - maybe used for something else?
-  \todo strip space at end of value
-  \todo add method SetValue(keyword, value) for all data types to remove logic from parser
-  \todo add method ParsingDone to all data types to check which values have been set, set default for optional and complain for required field
-*/
 
 int main(int argc, char* argv[])
 {
-    if (argc != 6) {
-        std::cout << "Error, " << argv[0]
-                  << " takes 5 arguments, input file, directory and name for generated header file, directory and name for generated code file"
-                  << std::endl;
+    cmnCommandLineOptions options;
+    std::string inputName;
+    options.AddOptionOneValue("i", "input", "input file",
+                              cmnCommandLineOptions::REQUIRED, &inputName);
+    std::string headerDir;
+    options.AddOptionOneValue("d", "header-directory", "destination directory for generated header file",
+                              cmnCommandLineOptions::REQUIRED, &headerDir);
+    std::string headerName;
+    options.AddOptionOneValue("h", "header-file", "generated header filename, can contain a subdirectory (e.g. dir/file.h)",
+                              cmnCommandLineOptions::REQUIRED, &headerName);
+    std::string codeDir;
+    options.AddOptionOneValue("D", "code-directory", "destination directory for generated code file",
+                              cmnCommandLineOptions::REQUIRED, &codeDir);
+    std::string codeName;
+    options.AddOptionOneValue("c", "code-file", "generated code filename",
+                              cmnCommandLineOptions::REQUIRED, &codeName);
+    bool verbose;
+    options.AddOptionNoValue("v", "verbose", "verbose output");
+
+    std::string errorMessage;
+    if (!options.Parse(argc, argv, errorMessage)) {
+        std::cerr << "Error: " << errorMessage << std::endl;
+        options.PrintUsage(std::cerr);
         return -1;
     }
-
-    std::string inputName = argv[1];
-    std::string headerDir = argv[2];
-    std::string headerName = argv[3];
-    std::string codeDir = argv[4];
-    std::string codeName = argv[5];
+    verbose = options.IsSet("verbose");
 
     std::string headerFull = headerDir + "/" + headerName;
     std::string codeFull = codeDir + "/" + codeName;
+
+    if (verbose) {
+        std::cout << "cisstDataGenerator: generating " << headerFull << " and " << codeFull << " from " << inputName << std::endl;
+    }
 
     cdgFile file;
     file.SetHeader(headerName);
@@ -58,6 +72,8 @@ int main(int argc, char* argv[])
         if (!parseSucceeded) {
             std::cout << "Error, failed to parse file \"" << inputName << "\"" << std::endl;
             return -1;
+        } else if (verbose) {
+            std::cout << "cisstDataGenerator: parse succeeded" << std::endl;
         }
     } else {
         std::cout << "Error, can't open file (read mode)\"" << inputName << "\"" << std::endl;
@@ -66,7 +82,9 @@ int main(int argc, char* argv[])
 
     std::ofstream header(headerFull.c_str());
     if (header.is_open()) {
-        std::cout << "Generating header file \"" << headerFull << "\"" << std::endl;
+        if (verbose) {
+            std::cout << "cisstDataGenerator: generating header file \"" << headerFull << "\"" << std::endl;
+        }
         file.GenerateHeader(header);
         header.close();
     } else {
@@ -76,7 +94,9 @@ int main(int argc, char* argv[])
 
     std::ofstream code(codeFull.c_str());
     if (code.is_open()) {
-        std::cout << "Generating code file \"" << codeFull << "\"" << std::endl;
+        if (verbose) {
+            std::cout << "cisstDataGenerator: generating code file \"" << codeFull << "\"" << std::endl;
+        }
         file.GenerateCode(code);
         code.close();
     } else {

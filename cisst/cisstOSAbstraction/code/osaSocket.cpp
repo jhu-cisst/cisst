@@ -36,6 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_OS == CISST_QNX)
 #include <sys/select.h>
 #endif
+#if (CISST_OS == CISST_DARWIN)
+#include <unistd.h> // for gethostname
+#endif
 #endif
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
@@ -443,6 +446,10 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
     return retval;
 }
 
+int osaSocket::Send(const std::string & bufsend)
+{
+    return Send(bufsend.c_str(), static_cast<int>(bufsend.length()));
+}
 
 int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
 {

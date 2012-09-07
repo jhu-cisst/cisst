@@ -33,7 +33,7 @@ class CISST_EXPORT svlFilterSourceTextFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    struct FileInfo
+    struct CISST_EXPORT FileInfo
     {
         FileInfo();
         FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value = -1.0);
@@ -90,7 +90,6 @@ protected:
 
 typedef mtsGenericObjectProxy<svlFilterSourceTextFile::FileInfo> svlFilterSourceTextFile_FileInfo;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile_FileInfo);
-
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile)
 
 

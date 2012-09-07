@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ankur Kapoor, Anton Deguet, Peter Kazanzides
-  Created on:	2006-05-05
+  Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
+  Created on: 2006-05-05
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,29 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstMultiTask/mtsExport.h>
 
+
+// Define stream out operator for types based on std::vector
+#define MTS_IMPLEMENT_STDVEC_STREAM_OUT(_typeName)\
+inline std::ostream & operator << (std::ostream & output,\
+                                   const _typeName & object) {\
+    output << "[";\
+    for (size_t i = 0; i < object.size(); i++) {\
+        output << object[i];\
+        if (i < object.size()-1)\
+            output << ", ";\
+    }\
+    output << "]";\
+    return output;\
+}
+
+typedef std::vector<std::string> stdStringVec;
+MTS_IMPLEMENT_STDVEC_STREAM_OUT(stdStringVec);
+
+typedef std::vector<double> stdDoubleVec;
+MTS_IMPLEMENT_STDVEC_STREAM_OUT(stdDoubleVec);
+
+typedef std::vector<char> stdCharVec;
+MTS_IMPLEMENT_STDVEC_STREAM_OUT(stdCharVec);
 
 // Forward declarations
 template <class _elementType> class mtsGenericObjectProxyBase;
@@ -77,12 +100,12 @@ public:
 
     inline static cmnGenericObject * CreateArray(size_t size, const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
-        pointer data, dummy;
+        pointer data;
         size_t index;
         if (otherPointer) {
             data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
             for (index = 0; index < size; index++) {
-                dummy = new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
+                new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
             }
             return data;
         }
@@ -90,7 +113,7 @@ public:
         if (otherRefPointer) {
             data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
             for (index = 0; index < size; index++) {
-                dummy = new(&(data[index])) value_type(otherRefPointer->GetData()); // placement new with copy constructor
+                new(&(data[index])) value_type(otherRefPointer->GetData()); // placement new with copy constructor
             }
             return data;
         }
@@ -396,11 +419,7 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-#if (CISST_COMPILER == CISST_CLANG)
-#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
-#else
         outputStream << " Value: " << this->Data;
-#endif
     }
 
     /*! To stream raw data. */
@@ -411,11 +430,7 @@ public:
             outputStream << delimiter << headerPrefix << "-data";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-#if (CISST_COMPILER == CISST_CLANG)
-#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
-#else
             outputStream << delimiter << this->Data;
-#endif
         }
     }
 };
@@ -507,11 +522,7 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-#if (CISST_COMPILER == CISST_CLANG)
-#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
-#else
         outputStream << " Value(ref): " << this->rData;
-#endif
     }
 
     /*! To stream raw data. */
@@ -522,11 +533,7 @@ public:
             outputStream << delimiter << headerPrefix << "-data(ref)";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-#if (CISST_COMPILER == CISST_CLANG)
-#  warning "This cisst code doesn't compile with clang, it has been commented out.  Make sure you don't need this feature for your application. "
-#else
             outputStream << delimiter << this->rData;
-#endif
         }
     }
 };
@@ -548,7 +555,7 @@ public:
         const FinalRefType *p2 = dynamic_cast<const FinalRefType *>(&obj2);
         return (p2?(&obj1 == &p2->rData):false); }
     static void ConditionalFree(const FinalRefType *obj) { delete obj;}
-    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &) 
+    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &)
     {
         return new FinalType(arg);
     }
@@ -584,10 +591,10 @@ public:
     static FinalRefType *ConditionalWrap(T &obj) { return &obj; }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return &obj1 == &obj2; }
     static void ConditionalFree(const FinalRefType *) {}
-    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) { 
+    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) {
         if (typeid(T) != *arg.Services()->TypeInfoPointer()) {
             CMN_LOG_INIT_ERROR << "ConditionalCreate: argument prototype is wrong type for command \"" << name << "\" (expected \""
-                               << typeid(T).name() << "\", got \"" 
+                               << typeid(T).name() << "\", got \""
                                << arg.Services()->TypeInfoPointer()->name() << "\")" << std::endl;
         }
         return new FinalType(arg);
@@ -621,14 +628,14 @@ public:
     static FinalRefType *ConditionalWrap(T &obj) { return impl::ConditionalWrap(obj); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return impl::IsEqual(obj1, obj2); }
     static void ConditionalFree(const FinalRefType *obj) { impl::ConditionalFree(obj); }
-    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) { 
+    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) {
         mtsGenericObject *tmp = impl::ConditionalCreate(arg, name);
         if (!tmp)
             CMN_LOG_INIT_ERROR << "ConditionalCreate returning NULL for " << name << " (maybe you should use CMN_DECLARE_SERVICES with CMN_DYNAMIC_CREATION)" << std::endl;
         return tmp;
     }
 
-    static T* CastArg(mtsGenericObject &arg) { 
+    static T* CastArg(mtsGenericObject &arg) {
         return impl::CastArg(arg);
     }
     static const T* CastArg(const mtsGenericObject &arg) {
@@ -714,35 +721,15 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
 
-// Define stream out operator for types based on std::vector
-#define IMPLEMENT_STDVEC_STREAM_OUT(_typeName)\
-inline std::ostream & operator << (std::ostream & output,\
-                                   const _typeName & object) {\
-    output << "[";\
-    for (size_t i = 0; i < object.size(); i++) {\
-        output << object[i];\
-        if (i < object.size()-1)\
-            output << ", ";\
-    }\
-    output << "]";\
-    return output;\
-}
-
-typedef std::vector<std::string> stdStringVec;
 // Add Proxy to name to distinguish this from mtsVector<std::string>
 typedef mtsGenericObjectProxy<stdStringVec> mtsStdStringVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVecProxy);
-IMPLEMENT_STDVEC_STREAM_OUT(stdStringVec);
 
-typedef std::vector<double> stdDoubleVec;
 typedef mtsGenericObjectProxy<stdDoubleVec> mtsStdDoubleVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
-IMPLEMENT_STDVEC_STREAM_OUT(stdDoubleVec);
 
-typedef std::vector<char> stdCharVec;
 typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
-IMPLEMENT_STDVEC_STREAM_OUT(stdCharVec);
 
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,

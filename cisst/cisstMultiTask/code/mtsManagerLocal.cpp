@@ -79,7 +79,11 @@ mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
     InitializeLocal();
 }
 
+#if CISST_MTS_HAS_ICE
 mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & globalComponentManager) : ComponentMap("ComponentMap")
+#else
+mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & CMN_UNUSED(globalComponentManager)) : ComponentMap("ComponentMap")
+#endif
 {
 #if CISST_MTS_HAS_ICE
     Initialize();
@@ -234,6 +238,8 @@ void mtsManagerLocal::Initialize(void)
     ManagerComponent.Client = 0;
     ManagerComponent.Server = 0;
 
+    CurrentMainTask = 0;
+
     SetGCMConnected(false);
 
     TimeServer.SetTimeOrigin();
@@ -300,6 +306,7 @@ void mtsManagerLocal::Cleanup(void)
     }
 
     if (SystemLogMultiplexer) {
+        cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
         SystemLogMultiplexer->RemoveAllChannels();
         delete SystemLogMultiplexer;
         SystemLogMultiplexer = 0;
@@ -344,7 +351,7 @@ bool mtsManagerLocal::GetLogForwardingState(void) {
     return IsLogForwardingEnabled();
 }
 
-bool mtsManagerLocal::MCCReadyForLogForwarding(void) const 
+bool mtsManagerLocal::MCCReadyForLogForwarding(void) const
 {
     if (!Instance) return false;
 
@@ -402,7 +409,7 @@ void mtsManagerLocal::LogDispatcher(const char * str, int len)
             Instance->ManagerComponent.Client->ForwardLog(log);
         }
     }
-    
+
     if (!deadlockAvoidance) {
         LogMutex.Unlock();
     }
@@ -426,9 +433,9 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin(); 
-             it != LogQueue.end(); 
-             ++count) 
+        for (LogQueueType::iterator it = LogQueue.begin();
+             it != LogQueue.end();
+             ++count)
         {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
@@ -436,7 +443,7 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
             }
             // MJ: after 30 log messages forwarded, give other threads a chance to queue
             // logs by releasing the lock (30 is arbitrary)
-            if (count == 30) 
+            if (count == 30)
                 break;
         }
         LogMutex.Unlock();
@@ -675,7 +682,11 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
     return Instance;
 }
 
+#if CISST_MTS_HAS_ICE
 mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & globalComponentManager)
+#else
+mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & CMN_UNUSED(globalComponentManager))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     if (!Instance) {
@@ -1204,6 +1215,43 @@ void mtsManagerLocal::GetNamesOfComponents(std::vector<std::string> & namesOfCom
     ComponentMap.GetNames(namesOfComponents);
 }
 
+void mtsManagerLocal::PushCurrentMainTask(mtsTaskContinuous *cur)
+{
+    if (!cur) {
+        CMN_LOG_CLASS_RUN_ERROR << "PushCurrentMainTask: null parameter" << std::endl;
+        return;
+    }
+    if (cur == CurrentMainTask) {
+        CMN_LOG_CLASS_RUN_WARNING << "PushCurrentMainTask: duplicate call to push " << cur->GetName() << std::endl;
+        return;
+    }
+    if (CurrentMainTask)
+         CMN_LOG_CLASS_RUN_WARNING << "CurrentMainTask changing from " << CurrentMainTask->GetName()
+                                      << " to " << cur->GetName() << std::endl;
+    else
+         CMN_LOG_CLASS_RUN_VERBOSE << "Setting CurrentMainTask to " << cur->GetName() << std::endl;
+    CurrentMainTask = cur;
+    MainTaskNames.push(CurrentMainTask->GetName());
+}
+
+mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
+{
+    mtsTaskContinuous *previousMainTask = 0;
+    while (!previousMainTask && !MainTaskNames.empty()) {
+        previousMainTask = dynamic_cast<mtsTaskContinuous *>(GetComponent(MainTaskNames.top()));
+        if (!previousMainTask)
+            CMN_LOG_CLASS_RUN_WARNING << "PopCurrentMainTask: could not find " << MainTaskNames.top() << std::endl;
+        MainTaskNames.pop();
+    }
+    if (previousMainTask)
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to " 
+                                  << previousMainTask->GetName() << std::endl;
+    else
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, no main task remaining" << std::endl;
+    CurrentMainTask = previousMainTask;
+    return CurrentMainTask;
+}
+
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                                          const std::string & componentName,
                                          const std::string & interfaceProvidedName,
@@ -1586,115 +1634,6 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
     }
 }
 
-void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
-                                             std::vector<std::string> & signalNames,
-                                             const std::string & componentName,
-                                             const std::string & interfaceProvidedName,
-                                             const std::string & commandName,
-                                             const std::string & CMN_UNUSED(listenerID))
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) return;
-
-    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceProvidedName);
-    if (!interfaceProvided) return;
-
-    // Get argument name
-    mtsCommandRead * command;
-    char commandType = *commandName.c_str();
-    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
-
-    switch (commandType) {
-        case 'V':
-            argumentName = "Cannot visualize void command";
-            return;
-        case 'W':
-            argumentName = "Cannot visualize write command";
-            return;
-        case 'Q':
-            argumentName = "Cannot visualize q.read command";
-            return;
-        case 'R':
-            command = interfaceProvided->GetCommandRead(actualCommandName);
-            if (!command) {
-                argumentName = "No read command found";
-                return;
-            }
-            argumentName = command->GetArgumentPrototype()->Services()->GetName();
-            break;
-        default:
-            argumentName = "Failed to get argument information";
-            return;
-    }
-
-    // Get argument prototype
-    const mtsGenericObject * argument = command->GetArgumentPrototype();
-    if (!argument) {
-        argumentName = "Failed to get argument";
-        return;
-    }
-
-    // Get signal information
-    const size_t signalCount = argument->GetNumberOfScalar();
-    for (size_t i = 0; i < signalCount; ++i) {
-        signalNames.push_back(argument->GetScalarName(i));
-    }
-}
-
-void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
-                                         const std::string & componentName,
-                                         const std::string & interfaceProvidedName,
-                                         const std::string & commandName,
-                                         const int scalarIndex,
-                                         const std::string & CMN_UNUSED(listenerID))
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) return;
-
-    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceProvidedName);
-    if (!interfaceProvided) return;
-
-    // Get argument name
-    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
-    mtsCommandRead * command = interfaceProvided->GetCommandRead(actualCommandName);
-    if (!command) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetValuesOfCommand: no command found: " << actualCommandName << std::endl;
-        return;
-    };
-
-    // Get argument prototype
-    mtsGenericObject * argument = dynamic_cast<mtsGenericObject*>(command->GetArgumentPrototype()->Services()->Create());
-    if (!argument) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetValuesOfCommand: failed to create temporary argument" << std::endl;
-        return;
-    }
-
-    // Execute read command
-    command->Execute(*argument);
-
-    // Get current values with timestamps
-    ValuePair value;
-    Values valueSet;
-    double relativeTime;
-    values.clear();
-    /*
-    for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
-        value.Value = argument->GetScalarAsDouble(i);
-        argument->GetTimestamp(relativeTime);
-        TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
-
-        valueSet.push_back(value);
-    }
-    */
-    value.Value = argument->GetScalarAsDouble(scalarIndex);
-    argument->GetTimestamp(relativeTime);
-    TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
-    valueSet.push_back(value);
-    values.push_back(valueSet);
-
-    delete argument;
-}
-
 
 mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
 {
@@ -1760,7 +1699,7 @@ bool mtsManagerLocal::CreateManagerComponents(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Successfully created manager components" << std::endl;
 
     ManagerComponent.Client->MCSReady = true;
-    
+
     return true;
 }
 
@@ -1830,6 +1769,8 @@ void mtsManagerLocal::StartAll(void)
     // Get the current thread id in order to check if any task will use the current thread.
     // If so, start that task last.
     const osaThreadId threadId = osaGetCurrentThreadId();
+    if (threadId != this->MainThreadId)
+        CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
 
     mtsTask * componentTask;
 
@@ -1858,6 +1799,7 @@ void mtsManagerLocal::StartAll(void)
                         CMN_LOG_CLASS_INIT_ERROR << "StartAll: found another task using current thread (\""
                                                  << iterator->first << "\"), only first will be started (\""
                                                  << lastTask->first << "\")." << std::endl;
+                        // PK: I don't think this task should be started if it uses the current thread
                         iterator->second->Start();
                     } else {
                         // set iterator to last task to be started
@@ -1866,6 +1808,10 @@ void mtsManagerLocal::StartAll(void)
                 }
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
+                if (componentTask->Thread.GetId() == MainThreadId) {
+                    if (dynamic_cast<mtsTaskContinuous *>(componentTask))
+                        CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << iterator->first << "???" << std::endl;
+                }
                 iterator->second->Start();  // If task will not use current thread, start it immediately.
             }
         } else {
@@ -1889,9 +1835,13 @@ void mtsManagerLocal::KillAll(void)
         ComponentMapType::const_iterator iterator = ComponentMap.begin();
         const ComponentMapType::const_iterator end = ComponentMap.end();
         for (; iterator != end; ++iterator) {
+            if (!iterator->second) {
+                CMN_LOG_CLASS_INIT_DEBUG << "KillAll: null component" << std::endl;
+                continue;
+            }
             isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
             if (!isManager) {
-              iterator->second->Kill();
+                iterator->second->Kill();
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "KillAll: skip manager component: " << iterator->second->GetName() << std::endl;
             }
@@ -1899,7 +1849,7 @@ void mtsManagerLocal::KillAll(void)
     }
     ComponentMapChange.Unlock();
 
-    // Block further logs 
+    // Block further logs
     LogDisabled = true;
     SetLogForwarding(false);
 }
@@ -2011,7 +1961,11 @@ bool mtsManagerLocal::Connect(const std::string & clientProcessName,
                               const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                               const std::string & serverProcessName,
                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+#if CISST_MTS_HAS_ICE
                               const unsigned int retryCount)
+#else
+                              const unsigned int CMN_UNUSED(retryCount))
+#endif
 {
     // Prevent this method from being used to connect two local interfaces
     if (clientProcessName == serverProcessName) {
@@ -2451,7 +2405,11 @@ bool mtsManagerLocal::GetInterfaceRequiredDescription(
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
+#else
+bool mtsManagerLocal::CreateComponentProxy(const std::string & CMN_UNUSED(componentProxyName), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     // Create a component proxy
@@ -2476,8 +2434,13 @@ bool mtsManagerLocal::RemoveComponentProxy(const std::string & componentProxyNam
 }
 
 bool mtsManagerLocal::CreateInterfaceProvidedProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & serverComponentProxyName,
     const InterfaceProvidedDescription & interfaceProvidedDescription, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(serverComponentProxyName),
+    const InterfaceProvidedDescription & CMN_UNUSED(interfaceProvidedDescription), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     const std::string interfaceProvidedName = interfaceProvidedDescription.InterfaceProvidedName;
@@ -2527,7 +2490,11 @@ bool mtsManagerLocal::CreateInterfaceProvidedProxy(
 
 
 bool mtsManagerLocal::CreateInterfaceRequiredProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & clientComponentProxyName, const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(clientComponentProxyName), const InterfaceRequiredDescription & CMN_UNUSED(requiredInterfaceDescription), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     const std::string requiredInterfaceName = requiredInterfaceDescription.InterfaceRequiredName;
@@ -2639,7 +2606,11 @@ bool mtsManagerLocal::RemoveInterfaceProvided(const std::string & componentName,
 }
 
 bool mtsManagerLocal::RemoveInterfaceProvidedProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & componentProxyName, const std::string & interfaceProvidedProxyName, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(componentProxyName), const std::string & CMN_UNUSED(interfaceProvidedProxyName), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsComponent * clientComponent = GetComponent(componentProxyName);
@@ -2684,7 +2655,11 @@ bool mtsManagerLocal::RemoveInterfaceProvidedProxy(
 }
 
 bool mtsManagerLocal::RemoveInterfaceRequiredProxy(
+#if CISST_MTS_HAS_ICE
     const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & CMN_UNUSED(listenerID))
+#else
+    const std::string & CMN_UNUSED(componentProxyName), const std::string & CMN_UNUSED(requiredInterfaceProxyName), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     mtsComponent * serverComponent = GetComponent(componentProxyName);
@@ -2737,7 +2712,11 @@ bool mtsManagerLocal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType
     return ManagerGlobal->SetInterfaceProvidedProxyAccessInfo(connectionID, endpointInfo);
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & CMN_UNUSED(listenerID))
+#else
+bool mtsManagerLocal::ConnectServerSideInterface(const mtsDescriptionConnection & CMN_UNUSED(description), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     // This method is called only by the GCM to connect two local interfaces
@@ -2892,7 +2871,11 @@ ConnectServerSideInterfaceError:
     return false;
 }
 
+#if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & CMN_UNUSED(listenerID))
+#else
+bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection & CMN_UNUSED(description), const std::string & CMN_UNUSED(listenerID))
+#endif
 {
 #if CISST_MTS_HAS_ICE
     std::string endpointAccessInfo, communicatorId;
@@ -3058,18 +3041,18 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
 
     if (!IsGCMActive())
         return false;
-    
+
     if (ManagerComponent.Server){
         ManagerComponent.Server->GetNamesOfProcesses(processNames);
-        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
         return true;
     }
-    else if (ManagerComponent.Client) {  
+    else if (ManagerComponent.Client) {
         ManagerComponent.Client->GetNamesOfProcesses(processNames);
-        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets); 
+        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
         return true;
     }
-    
+
     else
         return false;
 }

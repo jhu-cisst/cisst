@@ -29,10 +29,11 @@ http://www.cisst.org/cisst/license.txt.
  */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
+#include <cisstVector/vctDynamicMatrixRef.h>
 #include <cisstVector/vctMatrixRotation3Base.h>
 
+// Always include last
 #include <cisstVector/vctExport.h>
-
 
 /*!
   \brief Define a rotation matrix for a space of dimension 3
@@ -81,6 +82,12 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
         this->Assign(other);
     }
 
+    explicit inline vctMatrixRotation3(const vctDynamicMatrixRef<value_type> & other):
+        BaseType()
+    {
+        this->Assign(other);
+    }
+                                       
     /*! The assignment from BaseType (i.e. a 3 by 3 fixed size matrix)
       has to be redefined for this class (C++ restriction).  This
       operator uses the Assign() method inherited from the BaseType.

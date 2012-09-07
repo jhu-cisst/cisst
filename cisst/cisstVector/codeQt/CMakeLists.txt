@@ -22,9 +22,6 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
               ../vctQtWidgetFrame4x4.h
               )
 
-# cisstVectorQt relies on cisstQt settings (for future use)
-cisst_library_use_settings (cisstVectorQt cisstQt cisstOpenGL)
-
 # set directories for this project
 cisst_set_directories (cisstQt)
 
@@ -35,6 +32,8 @@ cisst_add_library (
   FOLDER cisstVector
   DEPENDENCIES cisstCommon
                cisstVector
+  SETTINGS     cisstQt
+               cisstOpenGL
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
                vctQtWidgetDynamicVector.cpp
                vctQtWidgetDynamicMatrix.cpp

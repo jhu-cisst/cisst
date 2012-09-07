@@ -89,8 +89,10 @@ if (CISST_HAS_FLTK)
   # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
-  # FLTK is now required
-  find_package (FLTK REQUIRED)
+  # FLTK is now required, but FindFLTK can't be used twice?
+  if (NOT FLTK_FOUND)
+    find_package (FLTK REQUIRED)
+  endif (NOT FLTK_FOUND)
   cisst_set_package_settings (cisstFLTK FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   cisst_set_package_settings (cisstFLTK FLTK LIBRARIES           FLTK_LIBRARIES)
   if (FLTK_LIBRARY_DIRS)

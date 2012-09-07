@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-02-25
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -60,6 +60,12 @@ public:
         COLLECTOR_FILE_FORMAT_CSV,
         COLLECTOR_FILE_FORMAT_UNDEFINED
     } CollectorFileFormat;
+
+    typedef enum {
+        COLLECTOR_FILE_FLOATING_NOTATION_NONE,
+        COLLECTOR_FILE_FLOATING_NOTATION_FIXED,
+        COLLECTOR_FILE_FLOATING_NOTATION_SCIENTIFIC
+    } CollectorFileFloatingNotation;
 
     //------------------------- Protected Members ---------------------------//
 protected:
@@ -127,8 +133,15 @@ protected:
     std::ostream * OutputStream;
     std::ofstream * OutputFile;
     // add header file stream
+    std::ostream * OutputHeaderStream;
     std::ofstream * OutputHeaderFile;
-    std::ostream * OutputStreamHeader;
+
+    /*! Collector File floating notation enum, default is
+      COLLECTOR_FILE_FLOATING_NOTATION_NONE */
+    CollectorFileFloatingNotation FloatingNotation;
+
+    /*! Collector File precision [DEFAULT = 10] */
+    int Precision;
 
     /*! Check if the output file is already opened */
     bool FileOpened;
@@ -200,19 +213,31 @@ public:
     /*! Define the output using an existing ostream, the collector
       will not open nor close the stream.  If this method is called
       for the first time, the format will be
-      COLLECTOR_FILE_FORMAT_CSV, otherwise it will use the previously
-      used format. */
+      COLLECTOR_FILE_FORMAT_CSV, and the floating point notation will
+      be COLLECTOR_FILE_FLOATING_NOTATION_NONE otherwise it will use
+      the previously used format. */
     void SetOutput(std::ostream & outputStream);
 
     /*! Creates a default file name using the task name, table name
-      and date.  The suffix depends on the file format. */
+      and date.  The suffix depends on the file format. Uses the
+      default floating point notation
+      COLLECTOR_FILE_FLOATING_NOTATION_NONE */
     void SetOutputToDefault(const CollectorFileFormat fileFormat);
 
     /*! Creates a default file name using the task name, table name
       and date.  If this method is called for the first time, the
-      format will be COLLECTOR_FILE_FORMAT_CSV, otherwise it will use
-      the previously used format. */
+      format will be COLLECTOR_FILE_FORMAT_CSV, and the floating point
+      notation would be COLLECTOR_FILE_FLOATING_NOTATION_NONE,
+      otherwise it will use the previously used format. */
     void SetOutputToDefault(void);
+
+    /*! Closes the output file stream */
+    void CloseOutput(void);
+
+    /*! Get the name of log file currently being written. */
+    inline const std::string & GetOutputFileName(void) const {
+        return this->OutputFileName;
+    }
 
     /*! Files are not created or opened when SetOutput is called, this
       method will open the file if needed. */
@@ -241,6 +266,13 @@ public:
     /*! Get working directory, usable with commands as well */
     void GetWorkingDirectory(mtsStdString & placeHolder) const;
 
+    /*! Set floating point notation for the output stream.  This
+      setting will apply to all future files opened. */
+    void SetOutputStreamFloatingNotation(const CollectorFileFloatingNotation floatingNotation);
+
+    /*! Set precision value for the output file.  This setting will
+      apply to all future files. */
+    void SetOutputStreamPrecision(const int precision);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorBase)

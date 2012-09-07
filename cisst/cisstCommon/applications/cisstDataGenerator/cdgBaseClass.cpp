@@ -28,23 +28,26 @@ CMN_IMPLEMENT_SERVICES(cdgBaseClass);
 cdgBaseClass::cdgBaseClass(unsigned int lineNumber):
     cdgScope(lineNumber)
 {
+    cdgField * field;
+    field = this->AddField("type", "", true);
+    CMN_ASSERT(field);
+    
+    field = this->AddField("visibility", "public", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("public");
+    field->AddPossibleValue("private");
+    field->AddPossibleValue("protected");
+
+    field = this->AddField("is-data", "true", false);
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
 }
 
 
 cdgScope::Type cdgBaseClass::GetScope(void) const
 {
     return cdgScope::CDG_BASECLASS;
-}
-
-
-bool cdgBaseClass::HasKeyword(const std::string & keyword) const
-{
-    if ((keyword == "type")
-        || (keyword == "visibility")
-        || (keyword == "is-data")) {
-        return true;
-    }
-    return false;
 }
 
 
@@ -56,76 +59,17 @@ bool cdgBaseClass::HasScope(const std::string & CMN_UNUSED(keyword),
 }
 
 
-bool cdgBaseClass::SetValue(const std::string & keyword,
-                            const std::string & value,
-                            std::string & errorMessage)
+void cdgBaseClass::GenerateHeaderInheritance(std::ostream & outputStream) const
 {
-    errorMessage.clear();
-    if (keyword == "type") {
-        if (!this->Type.empty()) {
-            errorMessage = "type already set";
-            return false;
-        }
-        this->Type = value;
-        return true;
-    }
-    if (keyword == "visibility") {
-        if (!this->Visibility.empty()) {
-            errorMessage = "visibility already set";
-            return false;
-        }
-        if ((value == "public")
-            || (value == "private")
-            || (value == "protected")) {
-            this->Visibility = value;
-            return true;
-        } else {
-            errorMessage = "visibility must be \"public\", \"protected\" or \"private\", not \"" + keyword + "\"";
-            return false;
-        }
-    }
-    if (keyword == "is-data") {
-        if (!this->IsData.empty()) {
-            errorMessage = "is-data already set";
-            return false;
-        }
-        if ((value == "true")
-            || (value == "false")) {
-            this->IsData = value;
-            return true;
-        } else {
-            errorMessage = "is-data must be \"true\" or \"false\", not \"" + keyword + "\"";
-            return false;
-        }
-    }
-    errorMessage = "unhandled keyword \"" + keyword + "\"";
-    return false;
+    outputStream << this->GetFieldValue("visibility") << " " << this->GetFieldValue("type");
 }
 
 
-bool cdgBaseClass::IsValid(std::string & errorMessage) const
-{
-    errorMessage.clear();
-    bool isValid = true;
-    if (this->Type.empty()) {
-        isValid = false;
-        errorMessage += " [no type defined] ";
-    }
-    return isValid;
-}
-
-
-void FillInDefaults(void)
+void cdgBaseClass::GenerateHeader(std::ostream & CMN_UNUSED(outputStream)) const
 {
 }
 
 
-void cdgBaseClass::GenerateHeader(std::ostream & outputStream) const
-{
-    outputStream << Visibility << " " << Type;
-}
-
-
-void cdgBaseClass::GenerateCode(std::ostream & outputStream) const
+void cdgBaseClass::GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const
 {
 }

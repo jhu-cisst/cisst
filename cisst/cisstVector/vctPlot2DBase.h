@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstVector/vctDynamicVector.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
 // Always include last
@@ -67,6 +68,7 @@ class CISST_EXPORT vctPlot2DBase
 
         // see AppendPoint
         CISST_DEPRECATED void AddPoint(const vctDouble2 & point);
+
         /*! Insert point at last position and move last position
           forward.  If the circular buffer is full, this methods
           overwrite the first element. */
@@ -181,7 +183,8 @@ class CISST_EXPORT vctPlot2DBase
         double LineWidth;
     };
 
-    class CISST_EXPORT Scale{
+    class CISST_EXPORT Scale
+    {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
         friend class vctPlot2DVTK;
@@ -197,9 +200,12 @@ class CISST_EXPORT vctPlot2DBase
         Scale(const std::string & name, size_t pointDimension = 2);
         ~Scale();
 
-        std::string GetName(void);
+        const std::string & GetName(void);
         vctPlot2DBase::Signal * AddSignal(const std::string & name);
         bool RemoveSignal(const std::string & name);
+        inline const SignalsType & GetSignals() const {
+            return Signals;
+        }
 
         vctPlot2DBase::VerticalLine * AddVerticalLine(const std::string &name);
         void SetColor(const vctDouble3 & colorInRange0To1);
@@ -223,9 +229,9 @@ class CISST_EXPORT vctPlot2DBase
 
     protected:
         // maintain a map to find signal Id by name
-        typedef std::map<std::string, size_t> SignalsIdType;
+        typedef std::map<std::string, Signal*> SignalsIdType;
         SignalsIdType SignalsId;
-        typedef std::map<std::string, size_t> VerticalLinesIdType;
+        typedef std::map<std::string, VerticalLine*> VerticalLinesIdType;
         VerticalLinesIdType VerticalLinesId;
 
         bool ContinuousFitX;
@@ -247,16 +253,18 @@ class CISST_EXPORT vctPlot2DBase
         double LineWidth;
     };
     // keep scale in a vector
-    typedef std::vector<Scale *> ScaleType;
-    ScaleType Scales;
-    typedef std::map<std::string, size_t> ScalesIdType;
+    typedef std::vector<Scale *> ScalesType;
+    ScalesType Scales;
+    typedef std::map<std::string, Scale*> ScalesIdType;
     ScalesIdType ScalesId;
 
     //Scale Manipulate functions, one plot could have several Scales
     vctPlot2DBase::Scale * AddScale(const std::string & name);
     vctPlot2DBase::Scale * FindScale(const std::string & name);
-    // Scale *RemoveScale(const std::string &name);
-
+    bool RemoveScale(const std::string &name);
+    inline const ScalesType& GetScales(void) const {
+        return Scales;
+    }
 
     vctPlot2DBase(size_t PointSize = 2);
     virtual ~vctPlot2DBase(void) {};
@@ -388,7 +396,7 @@ class CISST_EXPORT vctPlot2DBase
     typedef std::vector<Signal *> SignalsType;
     SignalsType Signals;
     // maintain a map to find signal Id by name
-    typedef std::map<std::string, size_t> SignalsIdType;
+    typedef std::map<std::string, Signal*> SignalsIdType;
     SignalsIdType SignalsId;
 
     // keep vertical lines in a vector

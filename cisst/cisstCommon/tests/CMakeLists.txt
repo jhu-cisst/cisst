@@ -17,6 +17,11 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon)
 
+# set path for XML if needed
+if (CISST_HAS_XML)
+  cisst_set_directories (cisstCommonXML)
+endif (CISST_HAS_XML)
+
 # Configure the OS test program
 get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
 get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
@@ -29,7 +34,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 # all source files
 set (SOURCE_FILES
      cmnClassRegisterTest.cpp
-     # cmnDataTest.cpp
+     cmnCommandLineOptionsTest.cpp
+     cmnDataFunctionsTest.cpp
      cmnLogLoDTest.cpp
      cmnObjectRegisterTest.cpp
      cmnPathTest.cpp
@@ -41,7 +47,8 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      cmnClassRegisterTest.h
-     # cmnDataTest.h
+     cmnCommandLineOptionsTest.h
+     cmnDataFunctionsTest.h
      cmnLogLoDTest.h
      cmnObjectRegisterTest.h
      cmnPathTest.h

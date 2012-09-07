@@ -190,6 +190,15 @@ public:
             return Table.ValidateReadIndex(when);
         }
 
+        //This should be used with caution because
+        //the state table mechanism could override the data that the pointer is pointing to.
+        const value_type * GetPointer(const mtsStateIndex & when) const {
+            if (!Table.ValidateReadIndex(when))
+                return 0;
+            else
+                return  &(History.Element(when.Index()));
+        }
+
         bool Get(const mtsStateIndex & when, mtsGenericObject & data) const {
             value_type* pdata = dynamic_cast<value_type*>(&data);
             if (pdata) {

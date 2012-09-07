@@ -21,8 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _displayQtComponent_h
 #define _displayQtComponent_h
 
-#include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 
@@ -30,29 +28,28 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "displayQtWidget.h"
 
+// This class is not a cisst component, but instances of this class
+// are part of another cisst component (mainQtComponent).
 
-class displayQtComponent : public QObject, public mtsComponent
+class displayQtComponent : public QObject
 {
     Q_OBJECT;
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    displayQtComponent(const std::string & componentName);
+    displayQtComponent(void);
     ~displayQtComponent(void) {};
-
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
     QWidget * GetWidget(void) {
         return &CentralWidget;
     }
 
- protected:
-    displayQtWidget CentralWidget;
-
     struct {
        mtsFunctionRead GetData;
        mtsFunctionWrite SetAmplitude;
     } Generator;
+
+ protected:
+    displayQtWidget CentralWidget;
 
     mtsDouble Data;
     mtsDouble AmplitudeData;
@@ -61,7 +58,5 @@ class displayQtComponent : public QObject, public mtsComponent
     void timerEvent(QTimerEvent * event);
     void SetAmplitudeQSlot(int newValue);
 };
-
-CMN_DECLARE_SERVICES_INSTANTIATION(displayQtComponent);
 
 #endif  // _displayQtComponent_h

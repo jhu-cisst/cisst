@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Anton Deguet
-  Created on:	2004-08-18
+  Author(s):  Anton Deguet
+  Created on: 2004-08-18
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -126,6 +126,32 @@ public:
       default, it uses cmnLogger.  This method can be overloaded to
       define a log file/stream per object. */
     virtual cmnLogger::StreamBufType * GetLogMultiplexer(void) const;
+
+    /*! Methods for data visualization.  Derived classes should override
+        the following methods in order to be properly processed by the data
+        visualizer of the global component manager. */
+
+    /*! Return a number of data (which can be visualized, i.e., type-casted
+        to double) */
+    virtual size_t ScalarNumber(void) const {
+        return 0;
+    }
+
+    virtual bool ScalarNumberIsFixed(void) const {
+        return true;
+    }
+
+    /*! Return the index-th (zero-based) value of data typecasted to double.
+        Note that an index has to be defined such that all indicies are continuous.
+        (This is required by the data visualizer of the GCM UI) */
+    virtual double Scalar(const size_t CMN_UNUSED(index)) const {
+        return 0.0;
+    }
+
+    /*! Return the name of index-th (zero-based) data typecasted to double. */
+    virtual std::string ScalarDescription(const size_t CMN_UNUSED(index), const char * CMN_UNUSED(userDescription)) const {
+        return "index out of range";
+    }
 };
 
 

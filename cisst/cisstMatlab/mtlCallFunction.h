@@ -25,10 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <matrix.h>
 
-const char * mtlCallFunctionVoid(char * voidPointerOnFunction);
+const char * mtlCallFunctionVoid(uint64_T voidPointerOnFunction);
 
-mxArray * mtlCallFunctionRead(char * voidPointerOnFunction);
+mxArray * mtlCallFunctionRead(uint64_T voidPointerOnFunction);
 
-const char * mtlCallFunctionWrite(char * voidPointerOnFunction, mxArray * input);
+const char * mtlCallFunctionWrite(uint64_T voidPointerOnFunction, mxArray * input);
 
 #endif // _mtlCallFunction_h

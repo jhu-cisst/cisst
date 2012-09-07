@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -246,7 +246,7 @@ public:
     ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & otherVector) {
         this->SetSize(otherVector.size());
         this->Assign(otherVector);
-		return *this;
+        return *this;
     }
 
 
@@ -258,7 +258,7 @@ public:
     ThisType & operator = (const ThisType& other) {
         this->SetSize(other.size());
         this->Assign(other);
-		return *this;
+        return *this;
     }
 
     /*!  Assignement from a transitional vctReturnDynamicVector to a
@@ -705,4 +705,3 @@ vctDynamicVectorElementwiseCompareScalar(const vctDynamicConstVectorBase<_vector
 #endif // DOXYGEN
 
 #endif // _vctDynamicVector_h
-

@@ -62,9 +62,8 @@ protected:
         if (this->Size > 0) {
             this->Data = new value_type[this->Size];
             index_type index;
-            pointer dummyPointer;
             for (index = 0; index < this->Size; index++) {
-                dummyPointer = new(&this->Data[index]) value_type(value);
+                new(&this->Data[index]) value_type(value);
             }
         } else {
             this->Data = 0;

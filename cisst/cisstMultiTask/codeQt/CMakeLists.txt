@@ -16,9 +16,6 @@
 
 project (cisstMultiTaskQt)
 
-# cisstMultiTaskQt relies on cisstQt settings (for future use)
-cisst_library_use_settings (cisstMultiTaskQt cisstQt)
-
 # set directories for this project
 cisst_set_directories (cisstQt)
 
@@ -28,6 +25,9 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               ../mtsCollectorQtComponent.h
               ../mtsCollectorQtWidget.h
+              ../mtsQtCommandSelector.h
+              ../mtsQtScaleAndSignalTool.h
+              ../mtsQtVisualizerShell.h
               ../mtsQtWidgetGenericObject.h
               ../mtsQtWidgetGenericObjectProxy.h
               ../mtsQtWidgetVectorTypes.h
@@ -44,9 +44,13 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 cisstVector
                                 cisstVectorQt
                                 cisstMultiTask
+                   SETTINGS     cisstQt
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorQtComponent.cpp
                                 mtsCollectorQtWidget.cpp
+                                mtsQtCommandSelector.cpp
+                                mtsQtScaleAndSignalTool.cpp
+                                mtsQtVisualizerShell.cpp
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
                                 mtsQtWidgetGenericObjectProxy.cpp
@@ -55,8 +59,12 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetInterfaceRequired.cpp
                                 mtsQtWidgetFunction.cpp
                                 mtsQtWidgetEvent.cpp
+                                mtsQtApplication.cpp
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
+                                mtsQtCommandSelector.h
+                                mtsQtScaleAndSignalTool.h
+                                mtsQtVisualizerShell.h
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h
                                 mtsQtWidgetGenericObjectProxy.h
@@ -65,6 +73,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetInterfaceRequired.h
                                 mtsQtWidgetFunction.h
                                 mtsQtWidgetEvent.h
+                                mtsQtApplication.h
                                 mtsExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 

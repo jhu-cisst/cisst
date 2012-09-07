@@ -385,22 +385,6 @@ public:
                                       const std::string & eventHandlerName,
                                       std::string & description) const;
 
-    /*! Get parameter information (name, argument count, argument type) */
-    void GetArgumentInformation(const std::string & processName,
-                                const std::string & componentName,
-                                const std::string & providedInterfaceName,
-                                const std::string & commandName,
-                                std::string & argumentName,
-                                std::vector<std::string> & argumentParameterNames) const;
-
-    /*! Get current values of read commands */
-    void GetValuesOfCommand(const std::string & processName,
-                            const std::string & componentName,
-                            const std::string & providedInterfaceName,
-                            const std::string & commandName,
-                            const int scalarIndex,
-                            mtsManagerLocalInterface::SetOfValues & values) const;
-
     /*! Check if component is proxy based on its name */
     static bool IsProxyComponent(const std::string & componentName);
 

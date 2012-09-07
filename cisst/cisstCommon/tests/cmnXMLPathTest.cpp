@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 
 #if CISST_HAS_QT_XML
-  #include <QtCore/QCoreApplication>
+  #include <QCoreApplication>
   QCoreApplication * GlobalQApplication;
 #endif
 
@@ -127,7 +127,7 @@ void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string &
     CPPUNIT_ASSERT_EQUAL(1.234, doubleValue);
 
     // testing inf and -inf
-    dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@doubleAttributeInf", doubleValue);
+    dataFound = xmlPath.GetXMLValue("data-1", "data-1-1/@doubleAttributeInf", doubleValue);
     CPPUNIT_ASSERT(dataFound);
     CPPUNIT_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), doubleValue);
     dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@doubleAttributeMinusInf", doubleValue);
@@ -143,13 +143,27 @@ void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string &
     dataFound = xmlPath.GetXMLValue("doesnot/exist", "@stringAttribute", stringValue);
     CPPUNIT_ASSERT(!dataFound);
 
+    // testing invalid path
+    dataFound = xmlPath.GetXMLValue("/doesnot/exist", "@stringAttribute", stringValue, "not-found");
+    CPPUNIT_ASSERT(!dataFound);
+    CPPUNIT_ASSERT_EQUAL(std::string("not-found"), stringValue);
+
     // testing invalid attribute
     dataFound = xmlPath.GetXMLValue("data-1/data-1-1", "@notAnAttribute", stringValue);
     CPPUNIT_ASSERT(!dataFound);
+    dataFound = xmlPath.GetXMLValue("/data-1/data-1-1", "@notAnAttribute", stringValue, "still-not-found");
+    CPPUNIT_ASSERT(!dataFound);
+    CPPUNIT_ASSERT_EQUAL(std::string("still-not-found"), stringValue);
 
     // testing search with different context/path - also using std::string for path and context
     std::stringstream context, path;
     std::stringstream value;
+
+    // query to count number of tools
+    dataFound = xmlPath.Query("count(/data-1/data-1-2/data-1-2-x)", intValue);
+    CPPUNIT_ASSERT(dataFound);
+    CPPUNIT_ASSERT_EQUAL(3, intValue);
+
     for (unsigned int index = 1;
          index <= 3;
          index++) {

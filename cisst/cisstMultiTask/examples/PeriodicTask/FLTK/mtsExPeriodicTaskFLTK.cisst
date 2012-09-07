@@ -12,10 +12,9 @@ create sineTask       "Sine 0.005"
 create clockComponent Clock
 create displayTask    Display
 
+connect Main    ExecOut       Display ExecIn
 connect Display DataGenerator Sine MainInterface
 connect Display TimeGenerator Clock MainInterface
-connect Main    Dispatch      Display Dispatcher
-
 sleep 1
 
 start Sine

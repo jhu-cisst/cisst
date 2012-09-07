@@ -3,13 +3,13 @@
 #
 # (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 project (cisstVector)
@@ -24,7 +24,6 @@ set (SOURCE_FILES
      vctMatrixRotation2.cpp
      vctMatrixRotation2Base.cpp
      vctMatrixRotation3.cpp
-     vctMatrixRotation3Base.cpp
      vctMatrixRotation3ConstBase.cpp
      vctPrintf.cpp
      vctQuaternion.cpp
@@ -46,13 +45,22 @@ set (HEADER_FILES
      vctContainerTraits.h
      vctDeterminant.h
 
+     vctDataFunctions.h
+     vctDataFunctionsVector.h
+     vctDataFunctionsFixedSizeVector.h
+     vctDataFunctionsDynamicVector.h
+     vctDataFunctionsMatrix.h
+     vctDataFunctionsFixedSizeMatrix.h
+     vctDataFunctionsDynamicMatrix.h
+     vctDataFunctionsTransformations.h
+
      vctDynamicConstMatrixBase.h
      vctDynamicConstMatrixRef.h
      vctDynamicConstNArrayBase.h
      vctDynamicConstNArrayRef.h
      vctDynamicConstVectorBase.h
      vctDynamicConstVectorRef.h
-     
+
      vctDynamicCompactLoopEngines.h
 
      vctDynamicMatrix.h
@@ -81,12 +89,12 @@ set (HEADER_FILES
      vctEulerRotation3.h
      vctExport.h
      vctFastCopy.h
- 
+
      vctFixedSizeConstVectorBase.h
      vctFixedSizeConstVectorRef.h
      vctFixedSizeConstMatrixBase.h
      vctFixedSizeConstMatrixRef.h
-     
+
      vctFixedSizeMatrix.h
      vctFixedSizeMatrixBase.h
      vctFixedSizeMatrixLoopEngines.h
@@ -156,7 +164,6 @@ if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
   cisst_library_use_settings (cisstVector cisstOpenGL)
 
 endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
-
 
 cisst_add_library (
   LIBRARY cisstVector

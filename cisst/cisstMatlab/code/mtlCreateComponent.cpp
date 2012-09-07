@@ -103,43 +103,31 @@ const char * mtlCreateComponent(const char * componentName)
     code << componentName << ".interface2.addprop('Get');";
     mexEvalString(code.str().c_str());
     code.str("");
-    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Get) << std::endl;
 
     // create function proxy
     code << componentName << ".interface2.addprop('Set');";
     mexEvalString(code.str().c_str());
     code.str("");
-    CMN_LOG_INIT_ERROR << "------------------------------------ " << &(componentProxy->Set) << std::endl;
 
 
-    unsigned long long int inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Zero));
-    // convert to string, this needs tobe replaced by a long long int sent to Matlab
-    char pointer[256];
-    sprintf(pointer, "%llu", inter);
-
-    code << componentName << ".interface1.Zero = @()calllib('libcisstMatlab', 'mtlCallFunctionVoid', '"
-         << pointer << "');";
+    uint64_T inter = reinterpret_cast <uint64_T>(&(componentProxy->Zero));
+    code << componentName << ".interface1.Zero = @()calllib('libcisstMatlab', 'mtlCallFunctionVoid', "
+         << inter << ");";
     mexEvalString(code.str().c_str());
     code.str("");
 
     ///GET
     inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Get));
-    // convert to string, this needs tobe replaced by a long long int sent to Matlab
-    sprintf(pointer, "%llu", inter);
-
-    code << componentName << ".interface2.Get = @()calllib('libcisstMatlab', 'mtlCallFunctionRead', '"
-    << pointer << "');";
+    code << componentName << ".interface2.Get = @()calllib('libcisstMatlab', 'mtlCallFunctionRead', "
+    << inter << ");";
     mexEvalString(code.str().c_str());
     code.str("");
 
 
     ///Set
     inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Set));
-    // convert to string, this needs tobe replaced by a long long int sent to Matlab
-    sprintf(pointer, "%llu", inter);
-
-    code << componentName << ".interface2.Set = @(x)calllib('libcisstMatlab', 'mtlCallFunctionWrite', '"
-         << pointer << "', x);";
+    code << componentName << ".interface2.Set = @(x)calllib('libcisstMatlab', 'mtlCallFunctionWrite', "
+         << inter << ", x);";
     mexEvalString(code.str().c_str());
     code.str("");
 

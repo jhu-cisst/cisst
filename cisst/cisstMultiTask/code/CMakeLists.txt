@@ -291,6 +291,7 @@ if (CISST_MTS_HAS_ICE)
       COMMAND ${CMAKE_COMMAND}
       ARGS -E copy_if_different ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/include/cisstMultiTask
       COMMENT "Compiling ${slice_file}.ice"
+      MAIN_DEPENDENCY ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice/${slice_file}.ice
     )
 
     include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -366,5 +367,5 @@ if (WIN32 AND CISST_MTS_HAS_ICE)
 endif (WIN32 AND CISST_MTS_HAS_ICE)
 
 if (WIN32 AND CMAKE_CL_64)
-  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} "/bigobj")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif (WIN32 AND CMAKE_CL_64)
