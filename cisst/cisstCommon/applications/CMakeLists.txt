@@ -15,4 +15,5 @@
 # All cisstCommon applications
 project (cisstCommonApplications)
 
-cisst_offer_application (cisstCommon DataGenerator ON)
+# data generator should always be compiled so we don't use cisst_offer_application
+add_subdirectory (cisstDataGenerator)
