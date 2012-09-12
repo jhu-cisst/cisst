@@ -294,6 +294,8 @@ void cdgClass::GenerateMethodToStreamCode(std::ostream & outputStream) const
 void cdgClass::GenerateMethodToStreamRawCode(std::ostream & outputStream) const
 {
     size_t index;
+    std::string name;
+    std::string suffix;
     outputStream << std::endl
                  << "void " << this->GetFieldValue("name") << "::ToStreamRaw(std::ostream & outputStream, const char delimiter, bool headerOnly, const std::string & headerPrefix) const" << std::endl
                  << "{" << std::endl
@@ -303,27 +305,26 @@ void cdgClass::GenerateMethodToStreamRawCode(std::ostream & outputStream) const
             outputStream << "        " << BaseClasses[index]->GetFieldValue("type") << "::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);" << std::endl;
         }
     }
-    outputStream << "        outputStream" << std::endl;
+
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "            << delimiter << headerPrefix << \"-" << Members[index]->GetFieldValue("description") << "\"";
-        if (index == (Members.size() - 1)) {
-            outputStream << ";";
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            name = Members[index]->GetFieldValue("name");
+            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            outputStream << "        " << "cmnDataSerializeText" << suffix << "(outputStream, this->" << name << "Member, delimiter);" << std::endl;
         }
-        outputStream << std::endl;
     }
     outputStream << "    } else {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
-            outputStream << "    " << BaseClasses[index]->GetFieldValue("type") << "::ToStreamRaw(outputStream, delimiter);" << std::endl;
+            outputStream << "        " << BaseClasses[index]->GetFieldValue("type") << "::ToStreamRaw(outputStream, delimiter);" << std::endl;
         }
     }
-    outputStream << "        outputStream" << std::endl;
     for (index = 0; index < Members.size(); index++) {
-        outputStream << "            << delimiter << this->" << Members[index]->GetFieldValue("name") << "Member";
-        if (index == (Members.size() - 1)) {
-            outputStream << ";";
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            name = Members[index]->GetFieldValue("name");
+            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            outputStream << "        " << "cmnDataSerializeText" << suffix << "(outputStream, this->" << name << "Member, delimiter);" << std::endl;
         }
-        outputStream << std::endl;
     }
     outputStream << "    }" << std::endl
                  << "}" << std::endl;

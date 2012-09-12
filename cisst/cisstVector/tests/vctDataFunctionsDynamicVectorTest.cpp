@@ -49,6 +49,49 @@ void vctDataFunctionsDynamicVectorTest::TestBinarySerializationStream(void)
     v1.SetAll(0);
     cmnDataDeSerializeBinary(stream, v2, remote, local);
     CPPUNIT_ASSERT_EQUAL(vReference, v2);
+    CPPUNIT_ASSERT(!stream.fail());
+}
+
+
+void vctDataFunctionsDynamicVectorTest::TestTextSerializationStream(void)
+{
+    std::stringstream stream;
+    vctDynamicVector<double> v1, v2, vReference;
+    v1.SetSize(12);
+    v2.SetSize(3); // intentionally different, deserialize should resize
+    vReference.SetSize(12);
+    vctRandom(vReference, -10.0, 10.0);
+    v1 = vReference;
+    cmnDataSerializeText(stream, v1, ',');
+    v1.SetAll(0);
+    cmnDataDeSerializeText(stream, v2, ',');
+    CPPUNIT_ASSERT(vReference.AlmostEqual(v2, 0.01)); // low precision due to stream out loss
+    // try without delimiter, using space
+    CPPUNIT_ASSERT(!stream.fail());
+    stream.clear();
+    vctRandom(vReference, -20.0, 20.0);
+    v1 = vReference;
+    cmnDataSerializeText(stream, v1, ',');
+    v2.SetSize(3);
+    v2.SetAll(0.0);
+    cmnDataDeSerializeText(stream, v2, ',');
+    CPPUNIT_ASSERT(vReference.AlmostEqual(v2, 0.01)); // low precision due to stream out loss
+    CPPUNIT_ASSERT(!stream.fail());
+    // try with the wrong delimiter
+    bool exceptionReceived = false;
+    stream.clear();
+    vctRandom(vReference, -20.0, 20.0);
+    v1 = vReference;
+    cmnDataSerializeText(stream, v1, ',');
+    v2.SetSize(3);
+    v2.SetAll(0.0);
+    try {
+        cmnDataDeSerializeText(stream, v2, '!');
+    } catch (std::runtime_error) {
+        exceptionReceived = true;
+    }
+    CPPUNIT_ASSERT(exceptionReceived);
+
 }
 
 

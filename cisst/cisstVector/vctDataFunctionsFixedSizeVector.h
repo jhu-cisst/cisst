@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsFixedSizeVector_h
 
 #include <cisstCommon/cmnDataFunctions.h>
+#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
 
@@ -45,10 +46,11 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
                             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & data)
     throw (std::runtime_error)
 {
-    vct::size_type index;
-    const vct::size_type mySize = data.size();
-    for (index = 0; index < mySize; ++index) {
-        cmnDataSerializeBinary(outputStream, data.Element(index));
+    typedef typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::const_iterator const_iterator;
+    const const_iterator end = data.end();
+    const_iterator iter = data.begin();
+    for (; iter != end; ++iter) {
+        cmnDataSerializeBinary(outputStream, *iter);
     }
 }
 
@@ -60,10 +62,49 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
                               const cmnDataFormat & localFormat)
     throw (std::runtime_error)
 {
-    vct::size_type index;
-    const vct::size_type mySize = data.size();
-    for (index = 0; index < mySize; ++index) {
-        cmnDataDeSerializeBinary(inputStream, data.Element(index), remoteFormat, localFormat);
+    typedef typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::iterator iterator;
+    const iterator end = data.end();
+    iterator iter = data.begin();
+    for (; iter != end; ++iter) {
+        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
+    }
+}
+
+
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
+void cmnDataSerializeText(std::ostream & outputStream,
+                          const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & data,
+                          const char delimiter)
+    throw (std::runtime_error)
+{
+    typedef typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::const_iterator const_iterator;
+    const const_iterator end = data.end();
+    const const_iterator begin = data.begin();
+    const_iterator iter;
+    for (iter = begin; iter != end; ++iter) {
+        if (iter != begin) {
+            outputStream << delimiter;
+        }
+        cmnDataSerializeText(outputStream, *iter, delimiter);
+    }
+}
+
+
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
+void cmnDataDeSerializeText(std::istream & inputStream,
+                            vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> & data,
+                            const char delimiter)
+    throw (std::runtime_error)
+{
+    typedef typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::iterator iterator;
+    const iterator end = data.end();
+    const iterator begin = data.begin();
+    iterator iter;
+    for (iter = begin; iter != end; ++iter) {
+        if (iter != begin) {
+            vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeVectorBase");
+        }
+        cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }
 }
 

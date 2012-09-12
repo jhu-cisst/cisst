@@ -175,7 +175,7 @@ void cmnDataByteSwap(_elementType & data) {
         outputStream.write(reinterpret_cast<const char *>(&data),       \
                            sizeof(_type));                              \
         if (outputStream.fail()) {                                      \
-            cmnThrow("cmnDataSerializeBinary(type): error occured with std::ostream::write"); \
+            cmnThrow("cmnDataSerializeBinary(" #_type "): error occured with std::ostream::write"); \
         }                                                               \
     }
 
@@ -190,7 +190,7 @@ void cmnDataByteSwap(_elementType & data) {
         inputStream.read(reinterpret_cast<char *>(&data),               \
                          sizeof(_type));                                \
         if (inputStream.fail()) {                                       \
-            cmnThrow("cmnDataDeSerializeBinary(type): error occured with std::istream::read"); \
+            cmnThrow("cmnDataDeSerializeBinary(" #_type "): error occured with std::istream::read"); \
         }                                                               \
     }
 
@@ -205,12 +205,13 @@ void cmnDataByteSwap(_elementType & data) {
         inputStream.read(reinterpret_cast<char *>(&data),               \
                          sizeof(_type));                                \
         if (inputStream.fail()) {                                       \
-            cmnThrow("cmnDataDeSerializeBinary(##_type##): error occured with std::istream::read"); \
+            cmnThrow("cmnDataDeSerializeBinary(" #_type "): error occured with std::istream::read"); \
         }                                                               \
         if (remoteFormat.GetEndianness() != localFormat.GetEndianness()) { \
             cmnDataByteSwap(data);                                      \
         }                                                               \
     }
+
 
 /*! Returns the number of bytes required to serialize the data
   object. */
@@ -257,6 +258,36 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
 }
 
 
+/*! Macro to overload the function cmnDataSerializeText using the C++
+  stream out operator. */
+#define CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(_type)                 \
+    inline void cmnDataSerializeText(std::ostream & outputStream,       \
+                                     const _type & data,                \
+                                     const char CMN_UNUSED(delimiter))  \
+        throw (std::runtime_error)                                      \
+    {                                                                   \
+        outputStream << data;                                           \
+        if (outputStream.fail()) {                                      \
+            cmnThrow("cmnDataSerializeText(" #_type "): error occured with std::ostream::write"); \
+        }                                                               \
+    }
+
+
+/*! Macro to overload the function cmnDataDeSerializeText using the C++
+  stream in operator. */
+#define CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(_type)               \
+    inline void cmnDataDeSerializeText(std::istream & inputStream, \
+                                       _type & data,                    \
+                                       const char CMN_UNUSED(delimiter)) \
+        throw (std::runtime_error)                                      \
+    {                                                                   \
+        inputStream >> data;                                            \
+        if (inputStream.fail()) {                                       \
+            cmnThrow("cmnDataDeSerializeText(" #_type "): error occured with std::istream::read"); \
+        }                                                               \
+    }
+
+
 /*! Macro to overload the function cmnDataScalarDescription using the type
   name itself.  For example, for a double it will return the string
   "double". */
@@ -288,6 +319,8 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
     CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type) \
+    CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(type)                      \
+    CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(type)                    \
     CMN_DATA_SCALAR_DESCRIPTION(type, description)                      \
     CMN_DATA_SCALAR_USING_STATIC_CAST(type)                             \
     CMN_DATA_SCALAR_NUMBER_IS_ONE(type)                                 \
@@ -297,6 +330,8 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
     CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type) \
+    CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(type)                      \
+    CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(type)                    \
     CMN_DATA_SCALAR_DESCRIPTION(type, description)                      \
     CMN_DATA_SCALAR_USING_STATIC_CAST(type)                             \
     CMN_DATA_SCALAR_NUMBER_IS_ONE(type)                                 \
@@ -320,81 +355,35 @@ CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double, d);
 // the type is not always a built-in type.  For example the MS
 // compiler uses typedef.  So we create a set of "parallel" functions
 // with the suffix _size_t
-inline std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const char * userDescription = "st")
-    throw (std::out_of_range) {
-    return userDescription;
-}
+std::string CISST_EXPORT cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data),
+                                                         const size_t CMN_UNUSED(index),
+                                                         const char * userDescription = "st") throw (std::out_of_range);
 
-inline double cmnDataScalar_size_t(const size_t & data, const size_t CMN_UNUSED(index))
-        throw (std::out_of_range) {
-        return static_cast<double>(data);
-    }
+double CISST_EXPORT cmnDataScalar_size_t(const size_t & data,
+                                         const size_t CMN_UNUSED(index)) throw (std::out_of_range);
 
-inline size_t cmnDataScalarNumber_size_t(const size_t & CMN_UNUSED(data)) {
-    return 1;
-}
+size_t CISST_EXPORT cmnDataScalarNumber_size_t(const size_t & CMN_UNUSED(data));
 
-inline bool cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data)) {
-    return true;
-}
+bool CISST_EXPORT cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data));
 
-inline void cmnDataSerializeBinary_size_t(std::ostream & outputStream,
-                                          const size_t & data)
-    throw (std::runtime_error)
-{
-        outputStream.write(reinterpret_cast<const char *>(&data),
-                           sizeof(size_t));
-        if (outputStream.fail()) {
-            cmnThrow("cmnDataSerializeBinary(type): error occured with std::ostream::write");
-        }
-}
+void CISST_EXPORT cmnDataSerializeBinary_size_t(std::ostream & outputStream,
+                                                const size_t & data) throw (std::runtime_error);
 
-inline void cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
-                                            size_t & data,
-                                            const cmnDataFormat & remoteFormat,
-                                            const cmnDataFormat & localFormat) throw (std::runtime_error)
-{
-    // first case, both use same size
-    if (remoteFormat.GetSizeTSize() == localFormat.GetSizeTSize()) {
-        inputStream.read(reinterpret_cast<char *>(&data),
-                         sizeof(size_t));
-        if (inputStream.fail()) {
-            cmnThrow("cmnDataDeSerializeBinary(size_t): error occured with std::istream::read");
-        }
-        return;
-    }
-    // different sizes
-    // local is 64, hence remote is 32
-    if (localFormat.GetSizeTSize() == cmnDataFormat::CMN_DATA_SIZE_T_SIZE_64) {
-        unsigned int tmp;
-        inputStream.read(reinterpret_cast<char *>(&tmp),
-                         sizeof(tmp));
-        if (inputStream.fail()) {
-            cmnThrow("cmnDataDeSerializeBinary(size_t): error occured with std::istream::read");
-        }
-        data = tmp;
-        return;
-    }
-    // local is 32, hence remote is 64
-    if (localFormat.GetSizeTSize() == cmnDataFormat::CMN_DATA_SIZE_T_SIZE_32) {
-        unsigned long long int tmp;
-        inputStream.read(reinterpret_cast<char *>(&tmp),
-                         sizeof(tmp));
-        if (inputStream.fail()) {
-            cmnThrow("cmnDataDeSerializeBinary(size_t): error occured with std::istream::read");
-        }
-        if (tmp > std::numeric_limits<size_t>::max()) {
-            cmnThrow("cmnDataDeSerializeBinary(size_t): received a size_t larger than what can be handled on 32 bits");
-        }
-        data = static_cast<size_t>(tmp); // this should be safe now
-        return;
-    }
-}
+void CISST_EXPORT cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
+                                                  size_t & data,
+                                                  const cmnDataFormat & remoteFormat,
+                                                  const cmnDataFormat & localFormat) throw (std::runtime_error);
 
+void CISST_EXPORT cmnDataSerializeText_size_t(std::ostream & outputStream,
+                                              const size_t & data,
+                                              const char CMN_UNUSED(delimiter)) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataDeSerializeText_size_t(std::istream & inputStream,
+                                                size_t & data,
+                                                const char CMN_UNUSED(delimiter)) throw (std::runtime_error);
 
 // std::string specialization
 CMN_DATA_COPY_USING_ASSIGN(std::string);
-
 void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream,
                                          const std::string & data) throw (std::runtime_error);
 

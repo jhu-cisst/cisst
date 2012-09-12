@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsFixedSizeMatrix_h
 
 #include <cisstCommon/cmnDataFunctions.h>
+#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
 
@@ -74,6 +75,51 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     for (indexRow = 0; indexRow < myRows; ++indexRow) {
         for (indexCol = 0; indexCol < myCols; ++indexCol) {
             cmnDataDeSerializeBinary(inputStream, data.Element(indexRow, indexCol), remoteFormat, localFormat);
+        }
+    }
+}
+
+
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
+void cmnDataSerializeText(std::ostream & outputStream,
+                          const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
+                          const char delimiter)
+    throw (std::runtime_error)
+{
+    const vct::size_type myRows = data.rows();
+    const vct::size_type myCols = data.cols();
+    vct::size_type indexRow, indexCol;
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            if (indexRow != 0 || indexCol != 0) {
+                outputStream << delimiter;
+            }
+            cmnDataSerializeText(outputStream, data.Element(indexRow, indexCol), delimiter);
+        }
+    }
+}
+
+
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
+void cmnDataDeSerializeText(std::istream & inputStream,
+                            vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
+                            const char delimiter)
+    throw (std::runtime_error)
+{
+    const vct::size_type myRows = data.rows();
+    const vct::size_type myCols = data.cols();
+    vct:: size_type indexRow, indexCol;
+
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            if (indexRow != 0 || indexCol != 0) {
+                vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeMatrixBase");
+            }
+            cmnDataDeSerializeText(inputStream, data.Element(indexRow, indexCol), delimiter);
         }
     }
 }

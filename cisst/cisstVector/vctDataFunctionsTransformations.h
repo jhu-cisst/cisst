@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsTransformations_h
 
 #include <cisstCommon/cmnDataFunctions.h>
+#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 
@@ -56,6 +57,30 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
 {
     cmnDataDeSerializeBinary(inputStream, data.Translation(), remoteFormat, localFormat);
     cmnDataDeSerializeBinary(inputStream, data.Rotation(), remoteFormat, localFormat);
+}
+
+
+template <class _rotationType>
+void cmnDataSerializeText(std::ostream & outputStream,
+                          const vctFrameBase<_rotationType> & data,
+                          const char delimiter)
+    throw (std::runtime_error)
+{
+    cmnDataSerializeText(outputStream, data.Translation(), delimiter);
+    outputStream << delimiter;
+    cmnDataSerializeText(outputStream, data.Rotation(), delimiter);
+}
+
+
+template <class _rotationType>
+void cmnDataDeSerializeText(std::istream & inputStream,
+                            vctFrameBase<_rotationType> & data,
+                            const char delimiter)
+    throw (std::runtime_error)
+{
+    cmnDataDeSerializeText(inputStream, data.Translation(), delimiter);
+    vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFrameBase");
+    cmnDataDeSerializeText(inputStream, data.Rotation(), delimiter);
 }
 
 
