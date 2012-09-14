@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsDynamicVector_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctDynamicVectorBase.h>
 
@@ -167,7 +166,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     iterator iter = data.begin();
     const iterator end = data.end();
     for (; iter != end; ++iter) {
-        vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicVector");
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicVector");
         cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }
 }
@@ -191,7 +190,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     iterator iter = data.begin();
     const iterator end = data.end();
     for (; iter != end; ++iter) {
-        vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicVectorRef");
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicVectorRef");
         cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }
 }

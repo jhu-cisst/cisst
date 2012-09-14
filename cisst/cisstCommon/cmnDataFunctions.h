@@ -423,4 +423,10 @@ inline std::string cmnDataScalarDescription(const std::string & CMN_UNUSED(data)
     return "n/a";
 }
 
+
+/*! Utility used to extract delimiter for functions cmnDataDeSerializeText */
+void CISST_EXPORT cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
+    throw (std::runtime_error);
+
+
 #endif // _cmnDataFunctions_h

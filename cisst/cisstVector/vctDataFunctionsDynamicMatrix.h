@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsDynamicMatrix_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctDynamicMatrixBase.h>
 
@@ -183,7 +182,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     vct::size_type myRows = 0;
     vct::size_type myCols = 0;
     cmnDataDeSerializeText_size_t(inputStream, myRows, delimiter);
-    vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrix");
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrix");
     cmnDataDeSerializeText_size_t(inputStream, myCols, delimiter);
     data.SetSize(myRows, myCols);
 
@@ -193,7 +192,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     const iterator end = data.end();
     iterator iter;
     for (iter = begin; iter != end; ++iter) {
-        vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrix");
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrix");
         cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }
 }
@@ -208,7 +207,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     vct::size_type myRows = 0;
     vct::size_type myCols = 0;
     cmnDataDeSerializeText_size_t(inputStream, myRows, delimiter);
-    vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrixRef");
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrixRef");
     cmnDataDeSerializeText_size_t(inputStream, myCols, delimiter);
 
     if ((myRows != data.rows())
@@ -222,7 +221,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     const iterator end = data.end();
     iterator iter;
     for (iter = begin; iter != end; ++iter) {
-        vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrixRef");
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrixRef");
         cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }
 }

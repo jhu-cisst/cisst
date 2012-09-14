@@ -86,7 +86,8 @@ void cmnDataSerializeBinary_size_t(std::ostream & outputStream,
 void cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
                                      size_t & data,
                                      const cmnDataFormat & remoteFormat,
-                                     const cmnDataFormat & localFormat) throw (std::runtime_error)
+                                     const cmnDataFormat & localFormat)
+    throw (std::runtime_error)
 {
     // first case, both use same size
     if (remoteFormat.GetSizeTSize() == localFormat.GetSizeTSize()) {
@@ -157,7 +158,8 @@ void cmnDataDeSerializeText_size_t(std::istream & inputStream,
 
 // std::string specialization
 void cmnDataSerializeBinary(std::ostream & outputStream,
-                            const std::string & data) throw (std::runtime_error)
+                            const std::string & data)
+    throw (std::runtime_error)
 {
     cmnDataSerializeBinary_size_t(outputStream, data.size());
     outputStream.write(data.data(), data.size());
@@ -169,7 +171,8 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
 void cmnDataDeSerializeBinary(std::istream & inputStream,
                               std::string & data,
                               const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat) throw (std::runtime_error)
+                              const cmnDataFormat & localFormat)
+    throw (std::runtime_error)
 {
     size_t size;
     // retrieve size of string
@@ -180,5 +183,32 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     inputStream.read(const_cast<char *>(data.data()), size);
     if (inputStream.fail()) {
         cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");
+    }
+}
+
+
+void cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
+    throw (std::runtime_error)
+{
+    char delimiterRead;
+    // look for the delimiter
+    if (!isspace(delimiter)) {
+        inputStream >> delimiterRead;
+        if (inputStream.fail()) {
+            std::string message("cmnDataDeSerializeTextDelimiter: ");
+            message.append(className);
+            message.append(", error occured with std::istream::read");
+            cmnThrow(message);
+        }
+        if (delimiterRead != delimiter) {
+            std::string message("cmnDataDeSerializeTextDelimiter: ");
+            message.append(className);
+            message.append(", expected delimiter '");
+            message.push_back(delimiter);
+            message.append("', found '");
+            message.push_back(delimiterRead);
+            message.append("'");
+            cmnThrow(message);
+        }
     }
 }

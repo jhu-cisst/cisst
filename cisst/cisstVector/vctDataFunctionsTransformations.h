@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsTransformations_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 
@@ -77,7 +76,7 @@ std::string cmnDataSerializeTextDescription(const vctFrameBase<_rotationType> & 
                                             const char delimiter,
                                             const std::string & userDescription = "frm3")
 {
-    std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
+    const std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
     std::stringstream description;
     description << cmnDataSerializeTextDescription(data.Translation(), delimiter, prefix + "Translation")
                 << delimiter
@@ -93,7 +92,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     throw (std::runtime_error)
 {
     cmnDataDeSerializeText(inputStream, data.Translation(), delimiter);
-    vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFrameBase");
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFrameBase");
     cmnDataDeSerializeText(inputStream, data.Rotation(), delimiter);
 }
 

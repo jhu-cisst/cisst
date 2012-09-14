@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsFixedSizeVector_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
 
@@ -120,7 +119,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     iterator iter;
     for (iter = begin; iter != end; ++iter) {
         if (iter != begin) {
-            vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeVectorBase");
+            cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeVectorBase");
         }
         cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }

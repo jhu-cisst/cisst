@@ -132,6 +132,7 @@ std::string mtsGenericObject::ScalarDescription(const size_t index, const std::s
 
 
 void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data)
+    throw (std::runtime_error)
 {
     cmnDataSerializeBinary(outputStream, data.Timestamp());
     cmnDataSerializeBinary(outputStream, data.AutomaticTimestamp());
@@ -141,10 +142,46 @@ void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject 
 
 void cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
                               const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat)
+    throw (std::runtime_error)
 {
     cmnDataDeSerializeBinary(inputStream, data.Timestamp(), remoteFormat, localFormat);
     cmnDataDeSerializeBinary(inputStream, data.AutomaticTimestamp(), remoteFormat, localFormat);
     cmnDataDeSerializeBinary(inputStream, data.Valid(), remoteFormat, localFormat);
+}
+
+
+void cmnDataSerializeText(std::ostream & outputStream, const mtsGenericObject & data, const char delimiter)
+    throw (std::runtime_error)
+{
+    cmnDataSerializeText(outputStream, data.Timestamp(), delimiter);
+    outputStream << delimiter;
+    cmnDataSerializeText(outputStream, data.AutomaticTimestamp(), delimiter);
+    outputStream << delimiter;
+    cmnDataSerializeText(outputStream, data.Valid(), delimiter);
+}
+
+
+std::string cmnDataSerializeTextDescription(const mtsGenericObject & data, const char delimiter, const std::string & userDescription)
+{
+    const std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
+    std::stringstream description;
+    description << cmnDataSerializeTextDescription(data.Timestamp(), delimiter, prefix + "Timestamp")
+                << delimiter
+                << cmnDataSerializeTextDescription(data.AutomaticTimestamp(), delimiter, prefix + "AutomaticTimestamp")
+                << delimiter
+                << cmnDataSerializeTextDescription(data.Valid(), delimiter, prefix + "Valid");
+    return description.str();
+}
+
+
+void cmnDataDeSerializeText(std::istream & inputStream, mtsGenericObject & data, const char delimiter)
+    throw (std::runtime_error)
+{
+    cmnDataDeSerializeText(inputStream, data.Timestamp(), delimiter);
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "mtsGenericObject");
+    cmnDataDeSerializeText(inputStream, data.AutomaticTimestamp(), delimiter);
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "mtsGenericObject");
+    cmnDataDeSerializeText(inputStream, data.Valid(), delimiter);
 }
 
 

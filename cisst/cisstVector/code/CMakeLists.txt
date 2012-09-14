@@ -46,7 +46,6 @@ set (HEADER_FILES
      vctDeterminant.h
 
      vctDataFunctions.h
-     vctDataFunctionsGeneric.h
      vctDataFunctionsVector.h
      vctDataFunctionsFixedSizeVector.h
      vctDataFunctionsDynamicVector.h

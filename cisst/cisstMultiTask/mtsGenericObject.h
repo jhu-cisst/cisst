@@ -139,10 +139,16 @@ public:
 };
 
 
-void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data);
+void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data) throw (std::runtime_error);
 
 void CISST_EXPORT cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
-                                           const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat);
+                                           const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataSerializeText(std::ostream & outputStream, const mtsGenericObject & data, const char delimiter) throw (std::runtime_error);
+
+std::string CISST_EXPORT cmnDataSerializeTextDescription(const mtsGenericObject & data, const char delimiter, const std::string & userDescription = "");
+
+void CISST_EXPORT cmnDataDeSerializeText(std::istream & inputStream, mtsGenericObject & data, const char delimiter) throw (std::runtime_error);
 
 bool CISST_EXPORT cmnDataScalarNumberIsFixed(const mtsGenericObject & data);
 

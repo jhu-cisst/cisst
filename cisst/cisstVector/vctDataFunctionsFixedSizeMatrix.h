@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsFixedSizeMatrix_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsGeneric.h>
 #include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
 
@@ -142,7 +141,7 @@ void cmnDataDeSerializeText(std::istream & inputStream,
     for (indexRow = 0; indexRow < myRows; ++indexRow) {
         for (indexCol = 0; indexCol < myCols; ++indexCol) {
             if (indexRow != 0 || indexCol != 0) {
-                vctDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeMatrixBase");
+                cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeMatrixBase");
             }
             cmnDataDeSerializeText(inputStream, data.Element(indexRow, indexCol), delimiter);
         }
