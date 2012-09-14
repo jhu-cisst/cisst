@@ -20,8 +20,12 @@
 
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
+#include <cisstMultiTask/mtsHistoryBuffer.h>
+#include <cisstMultiTask/mtsEventPublisher.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #include "dict.h"
+#include "signal.h"
 
 using namespace SF::Dict::Json;
 
@@ -37,6 +41,22 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
         for (size_t i = 0; i < Monitors.size(); ++i)
             delete Monitors[i];
     }
+
+    if (!FilterSet.empty()) {
+        for (FilterSetType::iterator it = FilterSet.begin();
+             it != FilterSet.end(); ++it) 
+        {
+            FiltersType * filters = it->second;
+            if (!filters->empty()) {
+                for (FiltersType::iterator _it = filters->begin();
+                     _it != filters->end(); ++_it)
+                {
+                    delete (*_it);
+                }
+            }
+            delete filters;
+        }
+    }
 }
 
 bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
@@ -48,8 +68,8 @@ bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
 
     SF::cisstMonitor * monitor = dynamic_cast<SF::cisstMonitor*>(baseMonitor);
     CMN_ASSERT(monitor);
-    SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitor->GetTargetID());
-    CMN_ASSERT(targetID);
+    SF::cisstEventLocation * locationID = dynamic_cast<SF::cisstEventLocation*>(monitor->GetLocationID());
+    CMN_ASSERT(locationID);
 
     const std::string targetUID = monitor->GetUIDAsString();
     const std::string monitorInJson = monitor->GetMonitorJSON();
@@ -79,14 +99,19 @@ bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
     */
     
     // Monitor cannot monitor itself
-    const std::string targetComponentName = targetID->ComponentName;
+    const std::string targetComponentName = locationID->GetComponentName();
     if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << targetID->ComponentName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << locationID->GetComponentName() << std::endl;
         return false;
     }
 
     // Add new monitor target to monitor 
-    // [SFUPDATE] Use single monitor instance per process
+    // [SFUPDATE] Use single monitor instance per process.  Should more than one
+    // monitoring component be deployed within the same process, comments of
+    //
+    // bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+    // 
+    // needs to be reviewed.
     mtsMonitorComponent * monitorComponent = Monitors[0];
     if (!monitorComponent->AddMonitorTarget(monitor)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor component: " << targetUID << std::endl;
@@ -120,7 +145,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     }
 
     // Install filter
-    SignalElement * signal;
+    SF::SignalElement * signal;
     mtsHistoryBuffer * historyBuffer;
     std::string signalName;
 
@@ -133,16 +158,29 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             CMN_ASSERT(signal);
             signalName = signal->GetName();
 
-            // Currently two state tables exist -- default state table and monitoring state table.
-            // Figure out which one has the specified signal
+            // Each component has two state tables -- the default state table 
+            // and the monitoring state table (if the SF plug-in option enabled).
+            // Because input signals can be either raw signals from other component
+            // (which is managed by the default one) or output of other filters
+            // (which the monitoring state table maintains), we first
+            // figure out which state table has the input signal being added.
             mtsStateTable * stateTable = targetTask->GetDefaultStateTable();
             CMN_ASSERT(stateTable);
-            if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
-                historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+
+            int stateVectorId = stateTable->GetStateVectorID(signalName);
+            if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
+                historyBuffer = new mtsHistoryBuffer(stateTable);
+                signal->SetHistoryBufferInstance(historyBuffer);
+                // associate output signal with state vector
+                signal->SetHistoryBufferIndex(stateVectorId);
             } else {
                 stateTable = targetTask->GetMonitoringStateTable();
-                if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
-                    historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+                stateVectorId = stateTable->GetStateVectorID(signalName);
+                if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
+                    historyBuffer = new mtsHistoryBuffer(stateTable);
+                    signal->SetHistoryBufferInstance(historyBuffer);
+                    // associate output signal with state vector
+                    signal->SetHistoryBufferIndex(stateVectorId);
                 } else {
                     CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no input signal \"" << signalName << "\" found" << std::endl;
                     return false;
@@ -156,42 +194,109 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             CMN_ASSERT(signal);
             signalName = signal->GetName();
 
-            // Currently two state tables exist -- default state table and monitoring state table.
-            // Figure out which one has the specified signal
-            mtsStateTable * stateTable = targetTask->GetDefaultStateTable();
+            // All output signals are added to the monitoring state table.
+            mtsStateTable * stateTable = targetTask->GetMonitoringStateTable();
             CMN_ASSERT(stateTable);
-            if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
-                historyBuffer = new SF::mtsHistoryBuffer(stateTable);
+            SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
+            // Create new state vector and add it to the monitoring state table.
+            // MJ: adding a new element on the fly may not be thread-safe (?)
+            mtsStateDataId id;
+            if (outputSignalType == SF::SignalElement::SCALAR) {
+                id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
             } else {
-                stateTable = targetTask->GetMonitoringStateTable();
-                if (stateTable->GetStateVectorID(signalName) != INVALID_STATEVECTOR_ID) {
-                    historyBuffer = new SF::mtsHistoryBuffer(stateTable);
-                } else {
-                    CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no output signal \"" << signalName << "\" found" << std::endl;
-                    return false;
-                }
+                id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
             }
+            // associate output signal with state vector
+            id = stateTable->GetStateVectorID(signalName);
+            CMN_ASSERT(id != mtsStateTable::INVALID_STATEVECTOR_ID);
+            signal->SetHistoryBufferInstance(historyBuffer);
+            signal->SetHistoryBufferIndex(id);
         }
+
+        // Register filter to the state table.  Active filters are run by target component.
+        mtsStateTable * stateTable = targetTask->GetMonitoringStateTable();
+        stateTable->RegisterFilter(filter);
     }
     // Passive monitoring: filter is run by the monitoring component
     else {
         CMN_ASSERT(false); // MJ TODO: implement later
-        //historyBuffer = new SF::mtsHistoryBuffer(Monitors[0]->GetMonitoringStateTable());
+        //historyBuffer = new mtsHistoryBuffer(Monitors[0]->GetMonitoringStateTable());
     }
 
-    // Now all the signals in filter are ready to be used
-#if 0 
+    // If this filter is the last one of filtering pipeline, install a new monitor
+    // instance to publish events or faults detected by this filter.
+    if (filter->IsLastFilterOfPipeline()) {
+        // Define target
+        SF::cisstEventLocation * locationID = new SF::cisstEventLocation;
+        locationID->SetProcessName(mtsManagerLocal::GetInstance()->GetProcessName());
+        locationID->SetComponentName(filter->GetNameOfTargetComponent());
+
+        SF::cisstMonitor * monitor = new SF::cisstMonitor(SF::Monitor::TARGET_FILTER_EVENT,
+                                                          locationID,
+                                                          SF::Monitor::STATE_ON,
+                                                          SF::Monitor::OUTPUT_EVENT);
+        if (!AddMonitor(monitor)) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to install new monitor. Filter: [" << *filter << "], Monitor: [" << *monitor << "]" << std::endl;
+            // MJ TODO: undo signal installation above
+            delete monitor;
+            return false;
+        }
+
+        // Create new instance of mtsEventPublisher and install it on this filter.
+        // MJ TODO: Then, the mtsFunction inside the mtsEventPublisher should be added
+        // to the internal monitoring required interface (so that the command can use
+        // mts services for fault report).
+        mtsEventPublisher * eventPublisher = new mtsEventPublisher;
+        filter->SetEventPublisherInstance(eventPublisher);
+
+        // Add event generator of the event publisher to the target component's internal
+        // required interface for monitoring.
+        // First, get target component.
+        mtsComponent * targetComponent = mtsManagerLocal::GetInstance()->GetComponent(targetComponentName);
+        CMN_ASSERT(targetComponent);
+        // Then, get provided interface instance of the target component, which the
+        // monitoring mechanism uses.
+        mtsInterfaceProvided * provided = targetComponent->GetInterfaceProvided(
+            mtsStateTable::GetNameOfStateTableInterface(mtsStateTable::NameOfStateTableForMonitoring));
+        CMN_ASSERT(provided);
+        // Register event generator to the required interface so that filter can publish
+        // events or faults through the monitoring mechanism.
+        provided->AddEventWrite(eventPublisher->GetEventPublisherFunction(),
+                                SF::Dict::FaultNames::FaultEvent, std::string());
+        // MJ: DESIGN REVIEW:  For now, each process has a single instance of
+        // mtsMonitorComponent and thus having an event publisher as an event generator
+        // of the monitoring provided interface of the target component is fine.
+        // Should two or more monitoring components be introduced in the same process,
+        // however, this becomes problematic because a single fault event generation 
+        // would result in multiple instances of the fault and the Safety Supervisor will 
+        // receive multiple reports for the same fault (because of broadcasting mechanism
+        // of mtsInterfaceProvided).
+        // A quick solution to avoid this issue is to set up another internal required 
+        // interface at the target component, to have another internal provided interface 
+        // at the monitoring component, and to use this connection.
+    }
+
+    // Add filter to the list of filters deployed
     FilterSetType::iterator it = FilterSet.find(targetComponentName);
-    // First time to install a filter for the target component
+    // First time to deploy a filter to the target component
     if (it == FilterSet.end()) {
         FiltersType * filterList = new FiltersType;
         filterList->push_back(filter);
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: Installed new filter to component \"" << targetComponentName << "\" for the first time.  Filter info: " << (*filter) << std::endl;
+    } else {
+        it->second->push_back(filter);
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: Installed new filter to component \"" << targetComponentName << "\".  Filter info: " << (*filter) << std::endl;
     }
-    //typedef std::list<SF::FilterBase*> FiltersType;
-    //typedef std::map<std::string, FiltersType> FilterSetType;
 
-    // update FilterSet
-#endif
+    // Set other properties of filter
+    // MJ: Should more fields be required for event localization, middleware-specific class
+    // which is derived from the base class can be defined.
+    SF::cisstEventLocation * location = new SF::cisstEventLocation;
+    location->SetProcessName(mtsManagerLocal::GetInstance()->GetName());
+    location->SetComponentName(targetComponentName);
+    filter->SetEventLocationInstance(location);
+
+    filter->Enable();
 
     return true;
 }
@@ -207,81 +312,6 @@ bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
 
     return true;
 }
-
-#if 0
-bool mtsSafetyCoordinator::ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget)
-{
-    /*
-     SUCCESS: <FAULT_COMPONENT_PERIOD["LCM":"aComponent"]>
-JSON: {
-   "Name" : "Period Monitor",
-   "Output" : {
-      "Config" : {
-         "SamplingRate" : 1,
-         "State" : "On"
-      },
-      "Target" : {
-         "Publish" : [ "127.0.0.1", "10.162.34.118" ]
-      },
-      "Type" : "Stream"
-   },
-   "Target" : {
-      "Identifier" : {
-         "Component" : "aComponent",
-         "Process" : "LCM"
-      },
-      //"Type" : {
-      //   "Component" : "FAULT_COMPONENT_PERIOD"
-      //}
-      "Type" : "FAULT_COMPONENT_PERIOD"
-   }
-}
-    */
-    SF::TargetIDType targetID;
-    std::string name;
-    std::string targetFaultType;
-    std::string outputConfigInitState;
-    std::string outputType;
-    SF::StrVecType outputTargets;
-    SF::SamplingRateType outputConfigSamplingRate;
-
-    try {
-        // Parse the passed json to extract target information with monitoring specification.
-        Json::Value & root = json.GetRoot();
-        // parse monitor name
-        name = root.get(NAME, "n/a").asString();
-        // parse monitor target
-        targetID.ProcessName = root[TARGET][IDENTIFIER].get(NAME_PROCESS, "n/a").asString();
-        targetID.ComponentName = root[TARGET][IDENTIFIER].get(NAME_COMPONENT, "n/a").asString();
-        // MJ TEMP: key value may change depending on fault type
-        targetFaultType = root[TARGET].get(TYPE, "n/a").asString();
-        // parse monitor output specification
-        outputConfigSamplingRate = root[OUTPUT][CONFIG].get(SAMPLING_RATE, "1.0").asUInt();
-        outputConfigInitState = root[OUTPUT][CONFIG].get(STATE, "n/a").asString();
-
-        Json::Value outputTargetsJson;
-        outputTargetsJson = root[OUTPUT][TARGET][PUBLISH];
-        for (size_t i = 0; i < outputTargetsJson.size(); ++i) {
-            outputTargets.push_back(outputTargetsJson[i].asString());
-        }
-
-        outputType = root[OUTPUT].get(TYPE, "n/a").asString();
-    } catch (...) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json (invalid format)" << std::endl;
-        return false;
-    }
-
-    // Populate information about monitor target 
-    newMonitorTarget.SetTargetId(targetID);
-    newMonitorTarget.SetFaultType(SF::Fault::GetFaultTypeFromString(targetFaultType));
-    newMonitorTarget.SetSamplingRate(outputConfigSamplingRate);
-    newMonitorTarget.SetStatus(SF::Monitor::GetStatusFromString(outputConfigInitState));
-    newMonitorTarget.SetAddressesToPublish(outputTargets);
-    newMonitorTarget.SetOutputType(SF::Monitor::GetOutputFromString(outputType));
-
-    return true;
-}
-#endif
 
 bool mtsSafetyCoordinator::CreateMonitor(void)
 {

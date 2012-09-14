@@ -90,56 +90,56 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     SF::cisstMonitor * monitor;
     for (; it != itEnd; ++it) {
         monitor = it->second;
-        if (monitor->IsSamplingNecessary(currentTick)) {
-            // Skip inactive monitor
-            if (!monitor->IsActive()) continue;
+        // Refresh sample only when needed
+        if (!monitor->IsSamplingNecessary(currentTick)) continue;
+        // Skip inactive monitor
+        if (!monitor->IsActive()) continue;
 
-            SF::Monitor::TargetType targetType = monitor->GetTargetType();
-            switch (targetType) {
-                case SF::Monitor::TARGET_THREAD_PERIOD:
-                    // Get new period sample
-                    if (!GetPeriod.IsValid()) {
-                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetPeriod function" << std::endl;
-                    } else {
-                        double period;
-                        this->GetPeriod(period);
-                        publisher->Publish(monitor->GetJsonForPublishingPeriod(period));
-                        monitor->UpdateLastSamplingTick(currentTick);
-                        advance = true;
-                    }
-                    break;
-
-                case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
-                    // Get new duty cycle (user) sample
-                    if (!this->GetExecTimeUser.IsValid()) {
-                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeUser function" << std::endl;
-                    } else {
-                        double execTimeUser;
-                        this->GetExecTimeUser(execTimeUser);
-                        publisher->Publish(monitor->GetJsonForPublishingDutyCycleUser(execTimeUser));
-                        monitor->UpdateLastSamplingTick(currentTick);
-                        advance = true;
-                    }
-                    break;
-
-                case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
-                    // Get new duty cycle (total) sample
-                    if (!this->GetExecTimeTotal.IsValid()) {
-                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeTotal function" << std::endl;
-                    } else {
-                        double execTimeTotal;
-                        this->GetExecTimeTotal(execTimeTotal);
-                        publisher->Publish(monitor->GetJsonForPublishingDutyCycleTotal(execTimeTotal));
-                        monitor->UpdateLastSamplingTick(currentTick);
-                        advance = true;
-                    }
-                    break;
-
-                    // [SFUPDATE]
-
-                default:
-                    CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: not supported monitoring type" << std::endl;
+        SF::Monitor::TargetType targetType = monitor->GetTargetType();
+        switch (targetType) {
+        case SF::Monitor::TARGET_THREAD_PERIOD:
+            // Get new period sample
+            if (!GetPeriod.IsValid()) {
+                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetPeriod function" << std::endl;
+            } else {
+                double period;
+                this->GetPeriod(period);
+                publisher->Publish(monitor->GetJsonForPublishingPeriod(period));
+                monitor->UpdateLastSamplingTick(currentTick);
+                advance = true;
             }
+            break;
+
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+            // Get new duty cycle (user) sample
+            if (!this->GetExecTimeUser.IsValid()) {
+                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeUser function" << std::endl;
+            } else {
+                double execTimeUser;
+                this->GetExecTimeUser(execTimeUser);
+                publisher->Publish(monitor->GetJsonForPublishingDutyCycleUser(execTimeUser));
+                monitor->UpdateLastSamplingTick(currentTick);
+                advance = true;
+            }
+            break;
+
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+            // Get new duty cycle (total) sample
+            if (!this->GetExecTimeTotal.IsValid()) {
+                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeTotal function" << std::endl;
+            } else {
+                double execTimeTotal;
+                this->GetExecTimeTotal(execTimeTotal);
+                publisher->Publish(monitor->GetJsonForPublishingDutyCycleTotal(execTimeTotal));
+                monitor->UpdateLastSamplingTick(currentTick);
+                advance = true;
+            }
+            break;
+
+            // [SFUPDATE]
+
+        default:
+            CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: not supported monitoring type" << std::endl;
         }
     }
 
@@ -279,12 +279,13 @@ void mtsMonitorComponent::Cleanup(void)
 bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitorTarget->GetTargetID());
-    CMN_ASSERT(targetID);
+    SF::cisstEventLocation * locationID = 
+        dynamic_cast<SF::cisstEventLocation*>(monitorTarget->GetLocationID());
+    CMN_ASSERT(locationID);
 
     // Validity check: process name
     const std::string thisProcessName = LCM->GetProcessName();
-    const std::string processName = targetID->ProcessName;
+    const std::string processName = locationID->GetProcessName();
     if (thisProcessName.compare(processName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: different process name "
             << "(expected: \"" << thisProcessName << "\", actual: \"" << processName << ")" << std::endl;
@@ -292,7 +293,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
     }
 
     // Make sure if the target component exists.
-    const std::string targetComponentName = targetID->ComponentName;
+    const std::string targetComponentName = locationID->GetComponentName();
     mtsComponent * targetComponent = LCM->GetComponent(targetComponentName);
     if (!targetComponent) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no component \"" << targetComponentName << "\" found" << std::endl;
@@ -380,7 +381,15 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             }
             break;
 
-        // [SFUPDATE]
+        case SF::Monitor::TARGET_FILTER_EVENT:
+            {
+                // NOP: Do not add function to fetch data sample from target component.
+                // Events generated by filters are propagated to the entire system, i.e., 
+                // safety supervisor, using publish service that this monitor provides.
+            }
+            break;
+
+            // [SFUPDATE]
 
         case SF::Monitor::TARGET_INVALID:
         default:
@@ -486,7 +495,7 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     */
 }
 
-void mtsMonitorComponent::InstallMonitorTarget(mtsTaskPeriodic * task, SF::Monitor * monitor)
+void mtsMonitorComponent::InstallMonitorTarget(mtsTask * task, SF::Monitor * monitor)
 {
     const std::string taskName = task->GetName();
     std::string newElementName(taskName);
@@ -508,6 +517,11 @@ void mtsMonitorComponent::InstallMonitorTarget(mtsTaskPeriodic * task, SF::Monit
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             newElementName += "ExecTimeTotal";
             this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeTotal);
+            break;
+
+        case SF::Monitor::TARGET_FILTER_EVENT:
+            // This should not be called: Output of filter doesn't need to be tracked.
+            CMN_ASSERT(false);
             break;
 
         // [SFUPDATE]
@@ -624,6 +638,7 @@ bool mtsMonitorComponent::InstallFilters(TargetComponentAccessor * CMN_UNUSED(en
 
 void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
 {
+    // Parse JSON and figure out the type of event, which can be event or fault.
     std::cout << "####### smmyFAULT REPORTED: " << json << std::endl;
 }
 

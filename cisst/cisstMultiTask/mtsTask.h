@@ -94,10 +94,8 @@ protected:
 #if CISST_HAS_SAFETY_PLUGINS
     mtsStateTable StateTableMonitor;
 
-    bool AddFilter(mtsMonitorFilterBase * filter);
-
     /*! Function to generate a fault event and propagate it to the Safety Supervisor */
-    mtsFunctionWrite GenerateFaultEvent;
+    //mtsFunctionWrite GenerateFaultEvent;
 #endif
 
     /*! True if the task took more time to do computation than allocated time.

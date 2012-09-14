@@ -29,7 +29,7 @@
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 #if CISST_HAS_SAFETY_PLUGINS
-#include <cisstMultiTask/mtsMonitorFilterBase.h>
+//#include <cisstMultiTask/mtsMonitorFilterBase.h>
 #endif
 
 #include <iostream>
@@ -266,7 +266,7 @@ mtsTask::mtsTask(const std::string & name,
     StateChangeSignal(),
     StateTable(sizeStateTable, "Default"),
 #if CISST_HAS_SAFETY_PLUGINS
-    StateTableMonitor(sizeStateTable, "Monitor"),
+    StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
 #endif
     OverranPeriod(false),
     ThreadStartData(0),
@@ -284,7 +284,7 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeUser, "GetExecTimeUser");
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeTotal, "GetExecTimeTotal");
     // Add fault notification event
-    provided->AddEventWrite(this->GenerateFaultEvent, SF::Dict::FaultNames::FaultEvent, std::string());
+    //provided->AddEventWrite(this->GenerateFaultEvent, SF::Dict::FaultNames::FaultEvent, std::string());
     // [SFUPDATE]
 #endif
 
@@ -460,27 +460,17 @@ void mtsTask::SetInitializationDelay(double delay)
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
-bool mtsTask::AddFilter(mtsMonitorFilterBase * filter)
-{
-    return this->StateTableMonitor.AddFilter(filter);
-}
-
 void mtsTask::SetOverranPeriod(bool overran)
 {
     this->OverranPeriod = overran;
 
     // Generate event to inform the safety supervisor of the thread overrun fault
     // of this component.
-    if (!this->GenerateFaultEvent.IsValid()) {
-        CMN_LOG_CLASS_RUN_WARNING << "Fault event cannot be generated: task \"" << this->GetName() << "\"" << std::endl;
-        return;
-    }
+    //if (!this->GenerateFaultEvent.IsValid()) {
+    //    CMN_LOG_CLASS_RUN_WARNING << "Fault event cannot be generated: task \"" << this->GetName() << "\"" << std::endl;
+    //    return;
+    //}
 
-    // smmy
-    std::string jsonFDDResult;
-    // MJ: This FDI result should be generated through monitor automatically.
-    //GenerateFaultEvent(
-    
     // MJ TODO: How/when to reset overrun flag??
 }
 
