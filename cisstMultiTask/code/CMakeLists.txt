@@ -337,38 +337,40 @@ if (CISST_HAS_SAFETY_PLUGINS)
   set (SOURCE_FILES ${SOURCE_FILES}
        # monitors
        mtsMonitorComponent.cpp
-       mtsMonitorFilterBase.cpp
-       mtsMonitorFilterBasics.cpp
+       #mtsMonitorFilterBase.cpp
+       #mtsMonitorFilterBasics.cpp
        # faults
        mtsFaultBase.cpp
        mtsFaultTypes.cpp
        # fault detection and diagnosis
-       mtsFaultDetectorBase.cpp
-       mtsFaultDetectorThresholding.cpp
+       #mtsFaultDetectorBase.cpp
+       #mtsFaultDetectorThresholding.cpp
        # plug-ins for Safety Framework
        mtsSafetyCoordinator.cpp
        mtsSafetySupervisor.cpp
        mtsSubscriberCallback.cpp
        mtsHistoryBuffer.cpp
+       mtsEventPublisher.cpp
        )
 
   set (HEADER_FILES
        ${HEADER_FILES}
        # monitors
        mtsMonitorComponent.h
-       mtsMonitorFilterBase.h
-       mtsMonitorFilterBasics.h
+       #mtsMonitorFilterBase.h
+       #mtsMonitorFilterBasics.h
        # faults
        mtsFaultBase.h
        mtsFaultTypes.h
        # fault detection and diagnosis
-       mtsFaultDetectorBase.h
-       mtsFaultDetectorThresholding.h
+       #mtsFaultDetectorBase.h
+       #mtsFaultDetectorThresholding.h
        # plug-ins for Safety Framework
        mtsSafetyCoordinator.h
        mtsSafetySupervisor.h
        mtsSubscriberCallback.h
        mtsHistoryBuffer.h
+       mtsEventPublisher.h
        )
 endif (CISST_HAS_SAFETY_PLUGINS)
 

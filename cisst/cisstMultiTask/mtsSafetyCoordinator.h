@@ -43,7 +43,8 @@ public:
 
     /*! Filters deployed in the same component */
     typedef std::list<SF::FilterBase*> FiltersType;
-    /*! Filters deployed in the same process (grouped by component name) */
+    /*! Filters deployed in the same process (grouped by component name)
+        Key: component name, Value: list of filters */
     typedef std::map<std::string, FiltersType*> FilterSetType;
 
 protected:

@@ -155,7 +155,7 @@ protected:
     bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
 
     /*! Install monitor: add new column to the monitor state table */
-    void InstallMonitorTarget(mtsTaskPeriodic * taskPeriodic, SF::Monitor * monitor);
+    void InstallMonitorTarget(mtsTask * task, SF::Monitor * monitor);
 
     /*! Receive fault event notification from target components and pass it to
         the Safety Supervisor of Safety Framework. */

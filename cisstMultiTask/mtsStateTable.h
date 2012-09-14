@@ -506,27 +506,29 @@ public:
     void GetNewValueVector(const mtsStateDataId id, std::vector<double> & vec, double & timeStamp) const;
 
 #if CISST_HAS_SAFETY_PLUGINS
-    typedef std::vector<mtsMonitorFilterBase*> MonitorFiltersType;
-    struct MonitorFiltersStruct {
+    typedef std::list<SF::FilterBase*> FiltersType;
+    struct FiltersStruct {
         /*! List of filters attached to this state table to define features */
-        MonitorFiltersType Features;
+        FiltersType Features;
         /*! List of filters attached to this state table to define feature vectors */
-        MonitorFiltersType FeatureVectors;
+        FiltersType FeatureVectors;
         /*! List of filters attached to this state table to define symptoms */
-        MonitorFiltersType Symptoms;
+        FiltersType Symptoms;
         /*! List of filters attached to this state table to define symptom vectors */
-        MonitorFiltersType SymptomVectors;
+        FiltersType SymptomVectors;
         /*! List of filters attached to this state table for fault detection */
-        MonitorFiltersType FaultDetectors;
-    } MonitorFilters;
+        FiltersType FaultDetectors;
+    } Filters;
 
-    /*! Add filter */
-    bool AddFilter(mtsMonitorFilterBase * filter);
+    /*! Register filter.  Registered filters are executed when this state table is updated. */
+    bool RegisterFilter(SF::FilterBase * filter);
 
     // [SFUPDATE]
     /*! Placeholders for monitoring */
     mtsDouble ExecTimeUser;
     mtsDouble ExecTimeTotal;
+
+    static const std::string NameOfStateTableForMonitoring;
 #endif
 };
 

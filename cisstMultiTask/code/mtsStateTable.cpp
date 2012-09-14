@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 #if CISST_HAS_SAFETY_PLUGINS
-#include <cisstMultiTask/mtsMonitorFilterBase.h>
+//#include <cisstMultiTask/mtsMonitorFilterBase.h>
 #endif
 
 #include <iostream>
@@ -36,6 +36,8 @@ const std::string mtsStateTable::NamesOfDefaultElements::PeriodStatistics = "Per
 #if CISST_HAS_SAFETY_PLUGINS
 const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeUser = "ExecTimeUser";
 const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeTotal = "ExecTimeTotal";
+
+const std::string mtsStateTable::NameOfStateTableForMonitoring = "Monitor";
 #endif
 
 const mtsStateDataId mtsStateTable::INVALID_STATEVECTOR_ID = -1;
@@ -337,11 +339,14 @@ void mtsStateTable::Advance(void) {
 #if CISST_HAS_SAFETY_PLUGINS
 
 #define PROCESS_FILTERS( _name )\
-    if (!MonitorFilters._name.empty())\
-        for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
-            MonitorFilters._name[i]->DoFiltering(false);
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            (*it)->DoFiltering(false);\
+    }
     // Process filters sequentially
-    PROCESS_FILTERS(Features);
+    PROCESS_FILTERS(Features)
     PROCESS_FILTERS(FeatureVectors);
     PROCESS_FILTERS(Symptoms);
     PROCESS_FILTERS(SymptomVectors);
@@ -380,10 +385,13 @@ void mtsStateTable::Cleanup(void) {
 
 #if CISST_HAS_SAFETY_PLUGINS
 #define CLEANUP_FILTERS( _name )\
-    if (!MonitorFilters._name.empty())\
-        for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
-            delete MonitorFilters._name[i];\
-    MonitorFilters._name.clear();
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            delete *it;\
+    }\
+    Filters._name.clear();
     // Process filters sequentially
     CLEANUP_FILTERS(Features);
     CLEANUP_FILTERS(FeatureVectors);
@@ -604,91 +612,32 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
-bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
+bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
 {
-    // Filter validity check
-    if (!filter) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter" << std::endl;
-        return false;
-    } else {
-        mtsMonitorFilterBase::FILTER_TYPE filterType = filter->GetFilterType();
-        if (filterType < mtsMonitorFilterBase::FEATURE || filterType > mtsMonitorFilterBase::FAULT_DETECTOR) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
-            return false;
-        }
-    }
-
-    const std::string filterName = filter->GetFilterName();
-
-    // Check if all inputs of the filter exists
-    std::string inputElementName;
-    mtsStateDataId inputElementId;
-    const size_t numOfInputs = filter->GetNumberOfInputs();
-    for (size_t i = 0; i < numOfInputs; ++i) {
-        inputElementName = filter->GetInputSignalName(i);
-        inputElementId = GetStateVectorID(inputElementName);
-        if (inputElementId == INVALID_STATEVECTOR_ID) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Input element \"" << inputElementName << "\" required by filter \""
-                                    << filterName << "\" is missing from state table \"" << this->GetName() << "\"" 
-                                    << std::endl;
-            return false;
-        } else {
-            mtsMonitorFilterBase::SignalElement * inputSignal = filter->GetInputSignalElement(i);
-            CMN_ASSERT(inputSignal);
-            inputSignal->SetStateDataId(inputElementId);
-        }
-    }
-
-    // Add all outputs of the filter to this state table
-    std::string outputElementName;
-    mtsStateDataId outputElementId;
-    mtsMonitorFilterBase::SignalElement::SIGNAL_TYPE outputSignalType;
-    const size_t numOfOutputs = filter->GetNumberOfOutputs();
-    for (size_t i = 0; i < numOfOutputs; ++i) {
-        mtsMonitorFilterBase::SignalElement * outputSignal = filter->GetOutputSignalElement(i);
-        CMN_ASSERT(outputSignal);
-        outputElementName = filter->GetOutputSignalName(i);
-
-        // MJ TODO: adding a new element on the fly may not be thread-safe -- need double check.
-        outputSignalType = outputSignal->GetSignalType();
-        if (outputSignalType == mtsMonitorFilterBase::SignalElement::SCALAR) {
-            outputElementId = NewElement(outputElementName, &outputSignal->Placeholder);
-        } else {
-            outputElementId = NewElement(outputElementName, &outputSignal->PlaceholderVector);
-        }
-        outputSignal->SetStateDataId(outputElementId);
-
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: Output element \"" << outputElementName << "\" generated by filter \""
-                                << filterName << "\" is added to state table \"" << this->GetName() << "\"" 
-                                << std::endl;
-    }
-
-    switch (filter->GetFilterType()) {
-        case mtsMonitorFilterBase::FEATURE:
-            MonitorFilters.Features.push_back(filter);
+    switch (filter->GetFilterCategory()) {
+        case SF::FilterBase::FEATURE:
+            Filters.Features.push_back(filter);
             break;
-        case mtsMonitorFilterBase::FEATURE_VECTOR:
-            MonitorFilters.FeatureVectors.push_back(filter);
+        case SF::FilterBase::FEATURE_VECTOR:
+            Filters.FeatureVectors.push_back(filter);
             break;
-        case mtsMonitorFilterBase::SYMPTOM:
-            MonitorFilters.Symptoms.push_back(filter);
+        case SF::FilterBase::SYMPTOM:
+            Filters.Symptoms.push_back(filter);
             break;
-        case mtsMonitorFilterBase::SYMPTOM_VECTOR:
-            MonitorFilters.SymptomVectors.push_back(filter);
+        case SF::FilterBase::SYMPTOM_VECTOR:
+            Filters.SymptomVectors.push_back(filter);
             break;
-        case mtsMonitorFilterBase::FAULT_DETECTOR:
-            MonitorFilters.FaultDetectors.push_back(filter);
+        case SF::FilterBase::FAULT_DETECTOR:
+            Filters.FaultDetectors.push_back(filter);
             break;
-        case mtsMonitorFilterBase::INVALID:
+        case SF::FilterBase::INVALID:
         default:
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: invalid filter type: \"" << filter->GetFilterName() << "\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: invalid filter type of filter \"" 
+                << filter->GetFilterName() << "\": " << filter->GetFilterCategory() << std::endl;
             return false;
     }
 
-    // Remember where the filter is attached to
-    filter->SetStateTableInstance(this);
-
-    CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: added new filter: " << filterName << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "RegisterFilter: added new filter: " << filter->GetFilterName() << std::endl;
 
     return true;
 }
@@ -721,9 +670,8 @@ void mtsStateTable::GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & ve
 
 void mtsStateTable::GetNewValueVector(const mtsStateDataId id, std::vector<double>& vec, double & timeStamp) const
 {
-    double timestamp;
     mtsDoubleVec _vec;
-    GetNewValueVector(id, _vec, timestamp);
+    GetNewValueVector(id, _vec, timeStamp);
 
     if (_vec.size() != vec.size()) 
         vec.clear();

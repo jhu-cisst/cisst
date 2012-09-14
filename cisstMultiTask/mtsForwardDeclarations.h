@@ -161,7 +161,6 @@ class mtsManagerComponentServer;
 // monitoring for fault detection and diagnosis
 #if CISST_HAS_SAFETY_PLUGINS
 class mtsMonitorComponent;
-class mtsMonitorFilterBase;
 #endif
 
 // global function to retrieve object name if available
