@@ -147,6 +147,31 @@ void cmnDataSerializeText(std::ostream & outputStream,
 }
 
 
+template <typename _elementType, class _matrixOwnerType>
+std::string cmnDataSerializeTextDescription(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data,
+                                            const char delimiter,
+                                            const std::string & userDescription = "m")
+{
+    std::stringstream description;
+    const vct::size_type myRows = data.rows();
+    const vct::size_type myCols = data.cols();
+    const char separator = (delimiter == ',') ? ':' : ',';
+    // size with user description
+    description << userDescription << ".rows{" << cmnDataSerializeTextDescription_size_t(myRows, delimiter) << "}";
+    description << delimiter;
+    description << userDescription << ".cols{" << cmnDataSerializeTextDescription_size_t(myCols, delimiter) << "}";
+    // elements
+    vct::size_type indexRow, indexCol;
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            description << delimiter;
+            description << userDescription << "[" << indexRow << separator << indexCol << "]{" << cmnDataSerializeTextDescription(data.Element(indexRow, indexCol), delimiter) << "}";
+        }
+    }
+    return description.str();
+}
+
+
 // as for the cmnDataCopy, two different specializations
 template <typename _elementType>
 void cmnDataDeSerializeText(std::istream & inputStream,
@@ -231,17 +256,17 @@ template <class _matrixOwnerType, typename _elementType>
 std::string
 cmnDataScalarDescription(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data,
                          const size_t & index,
-                         const char * userDescription = "m")
+                         const std::string & userDescription = "m")
     throw (std::out_of_range)
 {
     size_t elementRow, elementCol, inElementIndex;
     std::stringstream result;
     if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
-        result << userDescription << "[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
+        result << userDescription << "[" << elementRow << ',' << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeMatrix index out of range"));
     }
-    return result.str(); // unreachable, just to avoid compiler warnings
+    return result.str();
 }
 
 

@@ -118,12 +118,14 @@ bool mtsGenericObject::ScalarNumberIsFixed(void) const
 
 
 double mtsGenericObject::Scalar(const size_t index) const
+    throw (std::out_of_range)
 {
     return cmnDataScalar(*this, index);
 }
 
 
-std::string mtsGenericObject::ScalarDescription(const size_t index, const char * userDescription) const
+std::string mtsGenericObject::ScalarDescription(const size_t index, const std::string & userDescription) const
+    throw (std::out_of_range)
 {
     return cmnDataScalarDescription(*this, index, userDescription);
 }
@@ -159,6 +161,7 @@ size_t cmnDataScalarNumber(const mtsGenericObject & data)
 
 
 double cmnDataScalar(const mtsGenericObject & data, const size_t index)
+    throw (std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
         return 0.0;
@@ -174,7 +177,8 @@ double cmnDataScalar(const mtsGenericObject & data, const size_t index)
 }
 
 
-std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription)
+std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription)
+    throw (std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
         return "index out of range";

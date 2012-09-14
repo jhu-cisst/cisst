@@ -273,6 +273,15 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
     }
 
 
+/*! Macro to overload the function cmnDataSerializeTextDescription. */
+#define CMN_DATA_SERIALIZE_TEXT_DESCRIPTION(_type, _description)    \
+    inline std::string cmnDataSerializeTextDescription(const _type & CMN_UNUSED(data), \
+                                                       const char CMN_UNUSED(delimiter), const std::string & userDescription = #_description) \
+    {                                                                   \
+        return userDescription;                                         \
+    }
+
+
 /*! Macro to overload the function cmnDataDeSerializeText using the C++
   stream in operator. */
 #define CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(_type)               \
@@ -292,7 +301,7 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
   name itself.  For example, for a double it will return the string
   "double". */
 #define CMN_DATA_SCALAR_DESCRIPTION(_type, _description)                \
-    inline std::string cmnDataScalarDescription(const _type & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const char * userDescription = #_description) \
+    inline std::string cmnDataScalarDescription(const _type & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const std::string & userDescription = #_description) \
         throw (std::out_of_range) {                                     \
         return userDescription;                                         \
     }
@@ -318,6 +327,7 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
 #define CMN_DATA_INSTANTIATE_ALL_NO_BYTE_SWAP(type, description)        \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
+    CMN_DATA_SERIALIZE_TEXT_DESCRIPTION(type, description)              \
     CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_NO_BYTE_SWAP(type) \
     CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(type)                      \
     CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(type)                    \
@@ -329,6 +339,7 @@ inline size_t cmnDataSerializeBinary(char * buffer, size_t bufferSize,
 #define CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(type, description)           \
     CMN_DATA_COPY_USING_ASSIGN(type);                                   \
     CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(type)           \
+    CMN_DATA_SERIALIZE_TEXT_DESCRIPTION(type, description)              \
     CMN_DATA_DE_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR_AND_BYTE_SWAP(type) \
     CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(type)                      \
     CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(type)                    \
@@ -357,7 +368,7 @@ CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double, d);
 // with the suffix _size_t
 std::string CISST_EXPORT cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data),
                                                          const size_t CMN_UNUSED(index),
-                                                         const char * userDescription = "st") throw (std::out_of_range);
+                                                         const std::string & userDescription = "s_t") throw (std::out_of_range);
 
 double CISST_EXPORT cmnDataScalar_size_t(const size_t & data,
                                          const size_t CMN_UNUSED(index)) throw (std::out_of_range);
@@ -377,6 +388,10 @@ void CISST_EXPORT cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
 void CISST_EXPORT cmnDataSerializeText_size_t(std::ostream & outputStream,
                                               const size_t & data,
                                               const char CMN_UNUSED(delimiter)) throw (std::runtime_error);
+
+std::string CISST_EXPORT cmnDataSerializeTextDescription_size_t(const size_t & CMN_UNUSED(data),
+                                                                const char CMN_UNUSED(delimiter),
+                                                                const std::string & userDescription = "s_t");
 
 void CISST_EXPORT cmnDataDeSerializeText_size_t(std::istream & inputStream,
                                                 size_t & data,
@@ -403,7 +418,7 @@ inline size_t cmnDataScalarNumber(const std::string & CMN_UNUSED(data)) {
 }
 
 inline std::string cmnDataScalarDescription(const std::string & CMN_UNUSED(data), const size_t & CMN_UNUSED(index),
-                                            const char * CMN_UNUSED(userDescription) = "") throw (std::out_of_range) {
+                                            const std::string & CMN_UNUSED(userDescription) = "") throw (std::out_of_range) {
     cmnThrow(std::out_of_range("cmnDataScalarDescription: std::string has no scalar"));
     return "n/a";
 }

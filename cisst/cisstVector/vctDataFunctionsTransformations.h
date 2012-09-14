@@ -73,6 +73,20 @@ void cmnDataSerializeText(std::ostream & outputStream,
 
 
 template <class _rotationType>
+std::string cmnDataSerializeTextDescription(const vctFrameBase<_rotationType> & data,
+                                            const char delimiter,
+                                            const std::string & userDescription = "frm3")
+{
+    std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
+    std::stringstream description;
+    description << cmnDataSerializeTextDescription(data.Translation(), delimiter, prefix + "Translation")
+                << delimiter
+                << cmnDataSerializeTextDescription(data.Rotation(), delimiter, prefix + "Rotation");
+    return description.str();
+}
+
+
+template <class _rotationType>
 void cmnDataDeSerializeText(std::istream & inputStream,
                             vctFrameBase<_rotationType> & data,
                             const char delimiter)
@@ -102,14 +116,15 @@ template <class _rotationType>
 std::string
 cmnDataScalarDescription(const vctFrameBase<_rotationType> & data,
                          const size_t & index,
-                         const char * userDescription = "f")
+                         const std::string & userDescription = "f")
     throw (std::out_of_range)
 {
+    std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
     const size_t scalarNumberTranslation = cmnDataScalarNumber(data.Translation());
     if (index < scalarNumberTranslation) {
-        return std::string(userDescription) + "." + cmnDataScalarDescription(data.Translation(), index, "Translation");
+        return prefix + cmnDataScalarDescription(data.Translation(), index, "Translation");
     }
-    return std::string(userDescription) + "." + cmnDataScalarDescription(data.Rotation(), index - scalarNumberTranslation, "Rotation");
+    return prefix + cmnDataScalarDescription(data.Rotation(), index - scalarNumberTranslation, "Rotation");
 }
 
 

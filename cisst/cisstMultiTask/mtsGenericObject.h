@@ -132,10 +132,10 @@ public:
     bool ScalarNumberIsFixed(void) const;
 
     /* documented in base class */
-    double Scalar(const size_t index) const;
+    double Scalar(const size_t index) const throw (std::out_of_range);
 
     /* documented in base class */
-    std::string ScalarDescription(const size_t index, const char * userDescription = "") const;
+    std::string ScalarDescription(const size_t index, const std::string & userDescription = "") const throw (std::out_of_range);
 };
 
 
@@ -148,9 +148,9 @@ bool CISST_EXPORT cmnDataScalarNumberIsFixed(const mtsGenericObject & data);
 
 size_t CISST_EXPORT cmnDataScalarNumber(const mtsGenericObject & data);
 
-double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t index);
+double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t index) throw (std::out_of_range);
 
-std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription = "");
+std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription = "") throw (std::out_of_range);
 
 #endif // _mtsGenericObject_h
 

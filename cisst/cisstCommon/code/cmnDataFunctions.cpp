@@ -54,7 +54,7 @@ cmnDataFormat::cmnDataFormat(void)
 
 
 // size_t specializations
-std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const char * userDescription)
+std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const std::string & userDescription)
     throw (std::out_of_range) {
     return userDescription;
 }
@@ -134,6 +134,13 @@ void cmnDataSerializeText_size_t(std::ostream & outputStream,
     if (outputStream.fail()) {
             cmnThrow("cmnDataSerializeText_size_t: error occured with std::ostream::write");
         }
+}
+
+std::string cmnDataSerializeTextDescription_size_t(const size_t & CMN_UNUSED(data),
+                                                   const char CMN_UNUSED(delimiter),
+                                                   const std::string & userDescription)
+{
+    return userDescription;
 }
 
 void cmnDataDeSerializeText_size_t(std::istream & inputStream,

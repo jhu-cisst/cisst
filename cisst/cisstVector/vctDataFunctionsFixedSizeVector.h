@@ -91,6 +91,24 @@ void cmnDataSerializeText(std::ostream & outputStream,
 
 
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
+std::string cmnDataSerializeTextDescription(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & data,
+                                            const char delimiter,
+                                            const std::string & userDescription = "v")
+{
+    std::stringstream description;
+    const vct::size_type size = data.size();
+    vct::size_type index;
+    for (index = 0; index < size; ++index) {
+        if (index != 0) {
+            description << delimiter;
+        }
+        description << userDescription << "[" << index << "]{" << cmnDataSerializeTextDescription(data.Element(index), delimiter) << "}";
+    }
+    return description.str();
+}
+
+
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 void cmnDataDeSerializeText(std::istream & inputStream,
                             vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> & data,
                             const char delimiter)
@@ -137,7 +155,7 @@ template <vct::size_type _size, vct::stride_type _stride, class _elementType, cl
 std::string
 cmnDataScalarDescription(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & data,
                          const size_t & index,
-                         const char * userDescription = "v")
+                         const std::string & userDescription = "v")
     throw (std::out_of_range)
 {
     size_t elementIndex, inElementIndex;

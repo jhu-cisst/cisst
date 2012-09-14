@@ -133,6 +133,23 @@ void cmnDataSerializeText(std::ostream & outputStream,
 }
 
 
+template <typename _elementType, class _vectorOwnerType>
+std::string cmnDataSerializeTextDescription(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
+                                            const char delimiter,
+                                            const std::string & userDescription = "v")
+{
+    std::stringstream description;
+    const vct::size_type mySize = data.size();
+    // size with user description
+    description << userDescription << ".size{" << cmnDataSerializeTextDescription_size_t(mySize, delimiter) << "}";
+    // elements
+    size_t index;
+    for (index = 0; index < mySize; ++index) {
+        description << delimiter << userDescription << "[" << index << "]{" << cmnDataSerializeTextDescription(data.Element(index), delimiter) << "}";
+    }
+    return description.str();
+}
+
 // as for the cmnDataCopy, two different specializations
 template <typename _elementType>
 void cmnDataDeSerializeText(std::istream & inputStream,
@@ -208,7 +225,7 @@ template <class _vectorOwnerType, typename _elementType>
 std::string
 cmnDataScalarDescription(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
                          const size_t & index,
-                         const char * userDescription = "v")
+                         const std::string & userDescription = "v")
     throw (std::out_of_range)
 {
     size_t elementIndex, inElementIndex;
@@ -218,7 +235,7 @@ cmnDataScalarDescription(const vctDynamicConstVectorBase<_vectorOwnerType, _elem
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctDynamicVector index out of range"));
     }
-    return result.str(); // unreachable, just to avoid compiler warnings
+    return result.str();
 }
 
 
