@@ -639,7 +639,7 @@ bool mtsMonitorComponent::InstallFilters(TargetComponentAccessor * CMN_UNUSED(en
 void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
 {
     // Parse JSON and figure out the type of event, which can be event or fault.
-    std::cout << "####### smmyFAULT REPORTED: " << json << std::endl;
+    Publisher->Publish(json);
 }
 
 bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)

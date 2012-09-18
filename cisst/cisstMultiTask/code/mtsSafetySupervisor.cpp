@@ -24,6 +24,7 @@
 #include "publisher.h"
 #include "subscriber.h"
 #include "mongodb.h"
+#include "jsonSerializer.h"
 
 using namespace SF;
 using namespace SF::Dict;
@@ -87,7 +88,9 @@ void mtsSafetySupervisor::Run(void)
     if (!SubscriberCallback->IsEmptyQueue()) {
         SubscriberCallback->FetchMessages(Messages);
         if (!Messages.empty()) {
-            for_each(Messages.begin(), Messages.end(), UDPSender);
+            // Parse all messages fetched
+            for_each(Messages.begin(), Messages.end(), Parse);
+            // Remove all messages processed
             Messages.clear();
         }
     }
@@ -120,7 +123,7 @@ void mtsSafetySupervisor::Cleanup(void)
     }
 }
 
-void mtsSafetySupervisor::UDPSenderInternal::operator()(const std::string & message)
+void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 {
 #if 1
     std::cout << "--------------------------------------------------" << std::endl;
@@ -128,7 +131,42 @@ void mtsSafetySupervisor::UDPSenderInternal::operator()(const std::string & mess
     std::cout << MongoDB::GetDBEntryFromMonitorTopic(message) << std::endl;
 #endif
 
-    //Publisher->Publish(MongoDB::GetDBEntryFromMonitorTopic(message));
+    SF::JSONSerializer json;
+    if (!json.ParseJSON(message)) {
+        CMN_LOG_RUN_ERROR << "Parse: invalid json message: " << std::endl << message << std::endl;
+        return;
+    }
+
+    switch (json.GetTopicType()) {
+        case SF::JSONSerializer::MONITOR:
+            {
+                // TODO: implement this
+            }
+            break;
+        case SF::JSONSerializer::FAULT:
+            {
+                // MJ TEMP: TEST CODE
+                std::cout << "Fault type: " << SF::Fault::GetFaultTypeString(json.GetFaultType()) << std::endl;
+                std::cout << "Detector name: " << json.GetFaultDetectorName() << std::endl;
+                std::cout << "Values: " << json.GetFaultFields() << std::endl;
+            }
+            break;
+        case SF::JSONSerializer::SUPERVISOR:
+            {
+                // TODO: implement this
+            }
+            break;
+        case SF::JSONSerializer::INVALID:
+            {
+                std::cout << "FAULT INVALID" << std::endl;
+            }
+            break;
+    }
+}
+
+void mtsSafetySupervisor::SendMessageToCubeCollector(const std::string & record)
+{
     if (UDPSocket)
-        UDPSocket->Send(MongoDB::GetDBEntryFromMonitorTopic(message));
+        //UDPSocket->Send(MongoDB::GetDBEntryFromMonitorTopic(message));
+        UDPSocket->Send(record);
 }
