@@ -33,8 +33,7 @@ bool mtsEventPublisher::PublishEvent(const std::string & eventDescriptionJSON)
         return false;
     }
 
-    std::cout << EventPublisher(eventDescriptionJSON) << std::endl;
-    std::cout << eventDescriptionJSON << std::endl;
+    EventPublisher(eventDescriptionJSON);
 
     return true;
 }

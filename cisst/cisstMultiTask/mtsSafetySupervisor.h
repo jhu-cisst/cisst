@@ -58,10 +58,13 @@ protected:
     /*! Internal thread runner for subscriber */
     void * RunSubscriber(unsigned int arg);
 
-    /*! Send received messages to Cube collector */
-    struct UDPSenderInternal {
+    /*! Parse received messages which come from different topics */
+    struct ParseInternal {
         void operator()(const std::string & message);
-    } UDPSender;
+    } Parse;
+
+    /*! Send monitoring topic messages to Cube collector */
+    void SendMessageToCubeCollector(const std::string & record);
 
 public:
     mtsSafetySupervisor();
