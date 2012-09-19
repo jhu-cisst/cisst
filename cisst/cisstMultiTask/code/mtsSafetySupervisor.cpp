@@ -125,22 +125,22 @@ void mtsSafetySupervisor::Cleanup(void)
 
 void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 {
-#if 0
-    std::cout << "--------------------------------------------------" << std::endl;
-    std::cout << message << std::endl;
-    std::cout << MongoDB::GetDBEntryFromMonitorTopic(message) << std::endl;
-#endif
-
     SF::JSONSerializer json;
     if (!json.ParseJSON(message)) {
         CMN_LOG_RUN_ERROR << "Parse: invalid json message: " << std::endl << message << std::endl;
         return;
     }
+#if 0
+    std::cout << "--------------------------------------------------" << std::endl;
+    std::cout << message << std::endl;
+    std::cout << MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
+#endif
 
     switch (json.GetTopicType()) {
         case SF::JSONSerializer::MONITOR:
             {
-                // TODO: implement this
+                // MJ TEMP: TEST CODE
+                std::cout << MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
             }
             break;
         case SF::JSONSerializer::FAULT:

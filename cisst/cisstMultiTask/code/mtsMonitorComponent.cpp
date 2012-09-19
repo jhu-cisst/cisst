@@ -90,10 +90,11 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     SF::cisstMonitor * monitor;
     for (; it != itEnd; ++it) {
         monitor = it->second;
-        // Refresh sample only when needed
-        if (!monitor->IsSamplingNecessary(currentTick)) continue;
+
         // Skip inactive monitor
         if (!monitor->IsActive()) continue;
+        // Refresh sample only when needed
+        if (!monitor->IsSamplingNecessary(currentTick)) continue;
 
         SF::Monitor::TargetType targetType = monitor->GetTargetType();
         switch (targetType) {
@@ -104,7 +105,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             } else {
                 double period;
                 this->GetPeriod(period);
-                publisher->Publish(monitor->GetJsonForPublishingPeriod(period));
+                publisher->Publish(monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 advance = true;
             }
@@ -117,7 +118,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             } else {
                 double execTimeUser;
                 this->GetExecTimeUser(execTimeUser);
-                publisher->Publish(monitor->GetJsonForPublishingDutyCycleUser(execTimeUser));
+                publisher->Publish(monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 advance = true;
             }
@@ -130,7 +131,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             } else {
                 double execTimeTotal;
                 this->GetExecTimeTotal(execTimeTotal);
-                publisher->Publish(monitor->GetJsonForPublishingDutyCycleTotal(execTimeTotal));
+                publisher->Publish(monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 advance = true;
             }
@@ -314,9 +315,19 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
         targetComponentAccessor->ProcessName = thisProcessName;
         targetComponentAccessor->ComponentName = targetComponentName;
         targetComponentAccessor->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName));
+        // Add monitor event handler if new tareget component is to be added.
+        targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
+            &mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
         // Add fault event handler if new tareget component is to be added.
+#if 0
         targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
             &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
+#else
+        targetComponentAccessor->InterfaceRequired->AddEventReceiver(
+            FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
+        targetComponentAccessor->FaultEventReceiver.SetHandler(
+            &mtsMonitorComponent::HandleFaultEvent, this);
+#endif
     } else {
         // Check duplicate monitor target
         if (targetComponentAccessor->FindMonitorTarget(monitorTarget->GetUIDAsString())) {
@@ -636,10 +647,32 @@ bool mtsMonitorComponent::InstallFilters(TargetComponentAccessor * CMN_UNUSED(en
     return true;
 }
 
+void mtsMonitorComponent::HandleMonitorEvent(const std::string & json)
+{
+    // If the monitor component receives an event regardless of its type (monitor or
+    // fault), publish the event to the safety framework as is.  The Safety Supervisor
+    // will take care of the event.
+    Publisher->Publish(json);
+
+    // MJ TODO: Depending on the type of event (esp. in case of fault events),
+    // the Safety Coordinator in each process can deal with events or faults locally,
+    // i.e., within the process boundary.
+    // This would be the best-performance-fault-handling case but it loses the
+    // system-wide fault (event) propagation and global coordination by the "brain."
+}
+
 void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
 {
-    // Parse JSON and figure out the type of event, which can be event or fault.
+    // If the monitor component receives an event regardless of its type (monitor or
+    // fault), publish the event to the safety framework as is.  The Safety Supervisor
+    // will take care of the event.
     Publisher->Publish(json);
+
+    // MJ TODO: Depending on the type of event (esp. in case of fault events),
+    // the Safety Coordinator in each process can deal with events or faults locally,
+    // i.e., within the process boundary.
+    // This would be the best-performance-fault-handling case but it loses the
+    // system-wide fault (event) propagation and global coordination by the "brain."
 }
 
 bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)

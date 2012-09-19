@@ -280,11 +280,12 @@ mtsTask::mtsTask(const std::string & name,
         mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
     CMN_ASSERT(provided);
     // Make Period available through the command pattern
+    // MJTODO: Rename exec to dutycycle
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeUser, "GetExecTimeUser");
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeTotal, "GetExecTimeTotal");
     // Add fault notification event
-    //provided->AddEventWrite(this->GenerateFaultEvent, SF::Dict::FaultNames::FaultEvent, std::string());
+    provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
     // [SFUPDATE]
 #endif
 
@@ -466,12 +467,13 @@ void mtsTask::SetOverranPeriod(bool overran)
 
     // Generate event to inform the safety supervisor of the thread overrun fault
     // of this component.
-    //if (!this->GenerateFaultEvent.IsValid()) {
-    //    CMN_LOG_CLASS_RUN_WARNING << "Fault event cannot be generated: task \"" << this->GetName() << "\"" << std::endl;
-    //    return;
-    //}
+    if (!this->GenerateMonitorEvent.IsValid()) {
+        CMN_LOG_CLASS_RUN_WARNING << "Monitor event cannot be generated: task \"" << this->GetName() << "\"" << std::endl;
+        return;
+    }
 
-    // MJ TODO: How/when to reset overrun flag??
+    // MJTODO: How/when to reset overrun flag??
+    std::cout  << "###### MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
 }
 
 #endif

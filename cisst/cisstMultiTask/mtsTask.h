@@ -94,8 +94,8 @@ protected:
 #if CISST_HAS_SAFETY_PLUGINS
     mtsStateTable StateTableMonitor;
 
-    /*! Function to generate a fault event and propagate it to the Safety Supervisor */
-    //mtsFunctionWrite GenerateFaultEvent;
+    /*! Function to generate monitor event and propagate it to the Safety Supervisor */
+    mtsFunctionWrite GenerateMonitorEvent;
 #endif
 
     /*! True if the task took more time to do computation than allocated time.
