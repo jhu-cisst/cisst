@@ -444,7 +444,7 @@ int osaSerialPort::Write(const char * data, int nBytes)
         if (GetLastError() != ERROR_IO_PENDING) {
             CMN_LOG_CLASS_RUN_ERROR << "WriteFile failed (not delayed) for " << PortName << std::endl;
         } else {
-            CMN_LOG_CLASS_RUN_WARNING << "Write is pending for " << PortName << std::endl;
+            CMN_LOG_CLASS_RUN_VERBOSE << "Write is pending for " << PortName << std::endl;
             if (!GetOverlappedResult(PortHandle, &OverlappedStructureWrite, &numBytes, TRUE)) {
                 CMN_LOG_CLASS_RUN_ERROR << "GetOverlappedResult failed for Write on port " << PortName << std::endl;
             } else {
