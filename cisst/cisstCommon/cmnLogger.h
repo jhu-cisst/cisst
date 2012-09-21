@@ -432,6 +432,19 @@ class CISST_EXPORT cmnLogger {
         Instance()->AddChannelInstance(outputStream, mask);
     }
 
+
+    /*! Add std::cout output stream to the logger. Useful when calling
+      from Python, where redirecting sys.stdout to std::cout is nontrivial. */
+    static inline void AddChannelToStdOut(cmnLogMask mask = CMN_LOG_ALLOW_ERRORS_AND_WARNINGS) {
+        Instance()->AddChannelInstance(std::cout, mask);
+    }
+
+    /*! Add std::cerr output stream to the logger. Useful when calling
+      from Python, where redirecting sys.stderr to std::cerr is nontrivial. */
+    static inline void AddChannelToStdErr(cmnLogMask mask = CMN_LOG_ALLOW_ERRORS_AND_WARNINGS) {
+        Instance()->AddChannelInstance(std::cerr, mask);
+    }
+
     static inline void RemoveChannel(std::ostream & outputStream) {
         Instance()->RemoveChannelInstance(outputStream);
     }
