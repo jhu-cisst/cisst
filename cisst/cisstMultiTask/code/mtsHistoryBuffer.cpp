@@ -20,10 +20,13 @@
 
 #include <cisstMultiTask/mtsHistoryBuffer.h>
 
+#include <cisstOSAbstraction/osaGetTime.h>
+
 //CMN_IMPLEMENT_SERVICES(mtsHistoryBuffer);
 
-mtsHistoryBuffer::mtsHistoryBuffer(mtsStateTable * stateTable)
-    : FilteringType(ACTIVE), StateTable(stateTable)
+mtsHistoryBuffer::mtsHistoryBuffer(const SF::FilterBase::FilteringType type,
+                                   mtsStateTable * stateTable)
+    : Type(type), StateTable(stateTable)
 {
     CMN_ASSERT(StateTable);
 }
@@ -32,9 +35,10 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::HistoryBufferIndexTy
                                          SF::SignalElement::ScalarType & value,
                                          SF::SignalElement::TimestampType & timestamp)
 {
-    if (FilteringType == ACTIVE)
+    if (Type == SF::FilterBase::ACTIVE)
         value = StateTable->GetNewValueScalar(index, timestamp);
     else {
+        CMN_LOG_RUN_WARNING << "GetNewValueScalar: Passive filters should not call this method" << std::endl;
         value = 0.0;
         timestamp = 0.0;
     }
@@ -44,9 +48,10 @@ void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexTy
                                          SF::SignalElement::VectorType & value,
                                          SF::SignalElement::TimestampType & timestamp)
 {
-    if (FilteringType == ACTIVE)
+    if (Type == SF::FilterBase::ACTIVE)
         StateTable->GetNewValueVector(index, value, timestamp);
     else {
+        CMN_LOG_RUN_WARNING << "GetNewValueVector: Passive filters should not call this method" << std::endl;
         value.clear();
         timestamp = 0.0;
     }
@@ -55,11 +60,13 @@ void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexTy
 void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
                                          SF::SignalElement::TimestampType & timestamp)
 {
-    if (FilteringType == PASSIVE) {
+    if (Type == SF::FilterBase::PASSIVE) {
         FetchScalarValue(value);
-        // MJ??? : What about timestamp???
+        // MJ FIXME: better way to get timestamp in case of passive filtering???
+        timestamp = osaGetTime();
     }
     else {
+        CMN_LOG_RUN_WARNING << "GetNewValueScalar: Active filters should not call this method" << std::endl;
         value = 0.0;
         timestamp = 0.0;
     }
@@ -68,10 +75,12 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
 void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::VectorType & value,
                                          SF::SignalElement::TimestampType & timestamp)
 {
-    if (FilteringType == PASSIVE) {
+    if (Type == SF::FilterBase::PASSIVE) {
         FetchVectorValue(value);
-        // MJ FIXME: What about timestamp???
+        // MJ FIXME: better way to get timestamp in case of passive filtering???
+        timestamp = osaGetTime();
     } else {
+        CMN_LOG_RUN_WARNING << "GetNewValueVector: Active filters should not call this method" << std::endl;
         value.clear();
         timestamp = 0.0;
     }

@@ -606,6 +606,25 @@ bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
 
     return true;
 }
+
+void mtsStateTable::PrintFilters(std::ostream & outputStream) const
+{
+#define PRINT_FILTERS( _name )\
+    outputStream << #_name << " -------------------------" << std::endl;\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            outputStream << *(*it) << std::endl;\
+    }
+    // Process filters sequentially
+    PRINT_FILTERS(Features);
+    PRINT_FILTERS(FeatureVectors);
+    PRINT_FILTERS(Symptoms);
+    PRINT_FILTERS(SymptomVectors);
+    PRINT_FILTERS(FaultDetectors);
+}
+
 #endif
 
 // MJ TEMP
