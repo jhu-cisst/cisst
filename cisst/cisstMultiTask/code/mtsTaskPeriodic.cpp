@@ -261,26 +261,3 @@ bool mtsTaskPeriodic::IsPeriodic(void) const
     return Period > 0.0;
 }
 
-
-//-------------------------------------------------------------------------
-//  Safety Framework Plug-ins
-//-------------------------------------------------------------------------
-/* smmy
-#if CISST_HAS_SAFETY_PLUGINS
-bool mtsTaskPeriodic::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
-{
-    // MJ: duplicate entry (netMonitorTarget) is not checked now.
-
-    // Check if the fault specified is supported [SFUPDATE]
-    if (newMonitorTarget.GetFaultType() != SF::Fault::FAULT_COMPONENT_PERIOD) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: specified fault is not supported now: "
-            << SF::Fault::GetFaultTypeString(newMonitorTarget.GetFaultType()) << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "Added new monitoring target: " << newMonitorTarget << std::endl;
-
-    return BaseType::AddMonitorTarget(newMonitorTarget);
-}
-#endif
-*/

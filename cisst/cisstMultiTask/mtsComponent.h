@@ -447,22 +447,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
 
-    //-------------------------------------------------------------------------
-    //  Safety Framework Plug-ins
-    //-------------------------------------------------------------------------
-#if CISST_HAS_SAFETY_PLUGINS
-    /* smmy MJ FIXME: why do I need this?? <= As a way to access which quantities are being monitored??
-protected:
-    typedef std::vector<SF::cisstMonitor> MonitorTargetsType;
-    MonitorTargetsType MonitorTargets;
-
-public:
-    virtual bool AddMonitorTarget(SF::cisstMonitor & newMonitorTarget);
-*/
-    /*! Set of monitor targets installed */
-    SF::Monitor::TargetSetType MonitorTargetSet;
-#endif
-
  public:
 
     /*! Send a human readable description of the component. */

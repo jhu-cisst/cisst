@@ -120,17 +120,6 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
     /*! Called from Start */
     void StartInternal(void);
 
-    //-------------------------------------------------------------------------
-    //  Safety Framework Plug-ins
-    //-------------------------------------------------------------------------
-#if CISST_HAS_SAFETY_PLUGINS
-protected:
-
-public:
-    // smmy
-    //bool AddMonitorTarget(SF::cisstMonitor & newMonitorTarget);
-#endif
-
  public:
     /********************* Task constructor and destructor *****************/
 

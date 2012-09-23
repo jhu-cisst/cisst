@@ -33,23 +33,36 @@ class CISST_EXPORT mtsHistoryBuffer: public SF::HistoryBufferBase
 {
     //CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+    friend class mtsSafetyCoordinator;
+
 protected:
+    typedef enum { ACTIVE, PASSIVE } FilteringTypes;
+    FilteringTypes FilteringType;
+
+    // Active filtering
     mtsStateTable * StateTable;
 
+    // Passive filtering
+    mtsFunctionRead FetchScalarValue;
+    mtsFunctionRead FetchVectorValue;
+
 public:
-    mtsHistoryBuffer(); // DO NOT USE DEFAULT CONSTRUCTOR (added only to satisfy the requirements 
-                        // of cisst class services)
     mtsHistoryBuffer(mtsStateTable * stateTable);
     ~mtsHistoryBuffer() {}
 
-    /*! Fetch latest scalar-type value from history buffer */
+    /*! For active filtering: get latest value from history buffer (direct access) */
     void GetNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
                            SF::SignalElement::ScalarType & value,
                            SF::SignalElement::TimestampType & timestamp);
-
-    /*! Fetch latest vector-type value from history buffer */
     void GetNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
                            SF::SignalElement::VectorType & value,
+                           SF::SignalElement::TimestampType & timestamp);
+
+    /*! For passive filtering: fetch latest value from history buffer via
+        mts data exchange mechanism (indirect access) */
+    void GetNewValueScalar(SF::SignalElement::ScalarType & value,
+                           SF::SignalElement::TimestampType & timestamp);
+    void GetNewValueVector(SF::SignalElement::VectorType & value,
                            SF::SignalElement::TimestampType & timestamp);
 
     /*

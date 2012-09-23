@@ -63,10 +63,6 @@ void mtsComponent::Initialize(void)
     this->StateTables.SetOwner(*this);
 
     InterfaceProvidedToManager = 0;
-
-#if CISST_HAS_SAFETY_PLUGINS
-    MonitorTargetSet = SF::Monitor::TARGET_INVALID;
-#endif
 }
 
 
@@ -1005,35 +1001,3 @@ void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsCompon
                                 << " to start" << std::endl;
 }
 
-//-------------------------------------------------------------------------
-//  Safety Framework Plug-ins
-//-------------------------------------------------------------------------
-#if CISST_HAS_SAFETY_PLUGINS
-/* smmy
-bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
-{
-    // MJ TODO: no duplicate entry check for now 
-    MonitorTargets.push_back(newMonitorTarget);
-
-    CMN_LOG_CLASS_RUN_DEBUG << "New monitoring target added: " << newMonitorTarget << std::endl;
-
-    return true;
-}
-
-bool mtsComponent::FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const
-{
-    return ((MonitorTargetSet & type) > 0);
-}
-
-void mtsComponent::InstallMonitorTarget(const SF::Monitor::TargetType type)
-{
-    MonitorTargetSet |= type;
-}
-
-void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
-{
-    MonitorTargetSet &= ~type;
-}
-*/
-
-#endif

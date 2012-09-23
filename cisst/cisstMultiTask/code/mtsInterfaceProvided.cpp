@@ -606,6 +606,57 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 }
 
 
+#if CISST_HAS_SAFETY_PLUGINS
+mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateInternalScalar(const mtsStateTable & stateTable,
+                                                                         const std::string & stateDataName, const std::string & commandName)
+{
+    typedef typename mtsGenericTypes<double>::FinalType FinalType;
+    typedef typename mtsStateTable::Accessor<double> AccessorType;
+
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateDataName));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command \"" << commandName << "\", "
+                                 << "Details: AccessorType * type: " << typeid(AccessorType*).name()
+                                 << ", stateDataName name: " << stateDataName
+                                 << ", stateTableAccessor type: " << typeid(stateTable.GetAccessor(stateDataName)).name()
+                                 << std::endl;
+        return 0;
+    }
+
+    double dummy;
+    // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
+    this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, FinalType>(&AccessorType::Get, stateAccessor),
+                                  commandName, new mtsStateIndex, new FinalType(dummy));
+    return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
+                                commandName, new FinalType(dummy));
+}
+
+mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateInternalVector(const mtsStateTable & stateTable,
+                                                                         const std::string & stateDataName, const std::string & commandName)
+{
+    typedef typename mtsGenericTypes< std::vector<double> >::FinalType FinalType;
+    typedef typename mtsStateTable::Accessor< std::vector<double> > AccessorType;
+
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateDataName));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command \"" << commandName << "\", "
+                                 << "Details: AccessorType * type: " << typeid(AccessorType*).name()
+                                 << ", stateDataName name: " << stateDataName
+                                 << ", stateTableAccessor type: " << typeid(stateTable.GetAccessor(stateDataName)).name()
+                                 << std::endl;
+        return 0;
+    }
+
+    std::vector<double> dummy;
+    // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
+    this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, FinalType>(&AccessorType::Get, stateAccessor),
+                                  commandName, new mtsStateIndex, new FinalType(dummy));
+    return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
+                                commandName, new FinalType(dummy));
+}
+#endif
+
+
 mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
                                                                         const std::string & name,
                                                                         const mtsGenericObject * argument1Prototype,

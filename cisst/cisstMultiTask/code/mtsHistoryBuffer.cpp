@@ -22,14 +22,8 @@
 
 //CMN_IMPLEMENT_SERVICES(mtsHistoryBuffer);
 
-// DO NOT USE DEFAULT CONSTRUCTOR (due to requirement of class services)
-mtsHistoryBuffer::mtsHistoryBuffer(): StateTable(0)
-{
-    CMN_ASSERT(false);
-}
-
 mtsHistoryBuffer::mtsHistoryBuffer(mtsStateTable * stateTable)
-    : StateTable(stateTable)
+    : FilteringType(ACTIVE), StateTable(stateTable)
 {
     CMN_ASSERT(StateTable);
 }
@@ -38,14 +32,49 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::HistoryBufferIndexTy
                                          SF::SignalElement::ScalarType & value,
                                          SF::SignalElement::TimestampType & timestamp)
 {
-    value = StateTable->GetNewValueScalar(index, timestamp);
+    if (FilteringType == ACTIVE)
+        value = StateTable->GetNewValueScalar(index, timestamp);
+    else {
+        value = 0.0;
+        timestamp = 0.0;
+    }
 }
 
 void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
                                          SF::SignalElement::VectorType & value,
                                          SF::SignalElement::TimestampType & timestamp)
 {
-    StateTable->GetNewValueVector(index, value, timestamp);
+    if (FilteringType == ACTIVE)
+        StateTable->GetNewValueVector(index, value, timestamp);
+    else {
+        value.clear();
+        timestamp = 0.0;
+    }
+}
+
+void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
+                                         SF::SignalElement::TimestampType & timestamp)
+{
+    if (FilteringType == PASSIVE) {
+        FetchScalarValue(value);
+        // MJ??? : What about timestamp???
+    }
+    else {
+        value = 0.0;
+        timestamp = 0.0;
+    }
+}
+
+void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::VectorType & value,
+                                         SF::SignalElement::TimestampType & timestamp)
+{
+    if (FilteringType == PASSIVE) {
+        FetchVectorValue(value);
+        // MJ FIXME: What about timestamp???
+    } else {
+        value.clear();
+        timestamp = 0.0;
+    }
 }
 
 #if 0
