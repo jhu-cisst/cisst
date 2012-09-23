@@ -143,7 +143,7 @@ protected:
     void Init(void);
 
     /*! Fetch new values from each target component */
-    void UpdateFilters(void);
+    void RunMonitors(void);
 
     /*! Print list of target components */
     void PrintTargetComponents(void);
@@ -201,7 +201,8 @@ public:
 
     /*! Create target component accessor (useful when creating monitor for filter) */
     TargetComponentAccessor * CreateTargetComponentAccessor(
-        const std::string & targetProcessName, const std::string & targetComponentName, bool isAttachedToFilter);
+        const std::string & targetProcessName, const std::string & targetComponentName,
+        bool attachFaultEventHandler, bool addAccessor);
 
     // TODO: replace this with RemoveMonitorTargetFromComponent()
     /*! Unregister component from the registry */

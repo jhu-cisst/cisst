@@ -522,6 +522,9 @@ public:
 
     /*! Register filter.  Registered filters are executed when this state table is updated. */
     bool RegisterFilter(SF::FilterBase * filter);
+    
+    /*! Print out all filters */
+    void PrintFilters(std::ostream & outputStream) const;
 
     // [SFUPDATE]
     /*! Placeholders for monitoring */

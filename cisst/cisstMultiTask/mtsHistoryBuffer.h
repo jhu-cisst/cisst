@@ -22,6 +22,7 @@
 #define _mtsHistoryBuffer_h
 
 #include "historyBufferBase.h"
+#include "filterBase.h"
 
 //#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsStateTable.h>
@@ -36,18 +37,18 @@ class CISST_EXPORT mtsHistoryBuffer: public SF::HistoryBufferBase
     friend class mtsSafetyCoordinator;
 
 protected:
-    typedef enum { ACTIVE, PASSIVE } FilteringTypes;
-    FilteringTypes FilteringType;
+    /*! Filtering type */
+    SF::FilterBase::FilteringType Type;
 
-    // Active filtering
+    /*! For active filtering */
     mtsStateTable * StateTable;
 
-    // Passive filtering
+    /*! For passive filtering */
     mtsFunctionRead FetchScalarValue;
     mtsFunctionRead FetchVectorValue;
 
 public:
-    mtsHistoryBuffer(mtsStateTable * stateTable);
+    mtsHistoryBuffer(const SF::FilterBase::FilteringType type, mtsStateTable * stateTable);
     ~mtsHistoryBuffer() {}
 
     /*! For active filtering: get latest value from history buffer (direct access) */

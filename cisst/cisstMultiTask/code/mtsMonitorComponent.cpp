@@ -20,10 +20,11 @@
 
 #include "dict.h"
 
+#include <cisstMultiTask/mtsMonitorComponent.h>
+
 #include <cisstCommon/cmnConstants.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 #include <cisstMultiTask/mtsFaultTypes.h>
@@ -86,7 +87,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     MonitorTargetSetType::iterator it = MonitorTargetSet.begin();
     const MonitorTargetSetType::iterator itEnd = MonitorTargetSet.end();
 
-    bool advance = false;
+    //bool advance = false;
     SF::cisstMonitor * monitor;
     for (; it != itEnd; ++it) {
         monitor = it->second;
@@ -107,7 +108,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->GetPeriod(period);
                 publisher->Publish(monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-                advance = true;
+                //advance = true;
             }
             break;
 
@@ -120,7 +121,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->GetExecTimeUser(execTimeUser);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-                advance = true;
+                //advance = true;
             }
             break;
 
@@ -133,7 +134,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->GetExecTimeTotal(execTimeTotal);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-                advance = true;
+                //advance = true;
             }
             break;
 
@@ -144,7 +145,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
         }
     }
 
-    return advance;
+    //return advance;
+    return true;
 }
 
 //-------------------------------------------------- 
@@ -172,11 +174,13 @@ void mtsMonitorComponent::Init(void)
 {
     TargetComponentAccessors = new TargetComponentAccessorType(true);
 
+#if 0
     // The monitoring state table doesn't advance automatically.  It advances only when needed 
     // to reduce run-time overhead because the advancement of the state table results in 
     // running all FDD pipelines.  The manual advancement is controlled by 
-    // mtsMonitorComponent::UpdateFilters(void).
+    // mtsMonitorComponent::RunMonitors(void).
     this->StateTableMonitor.SetAutomaticAdvance(false);
+#endif
 
     Publisher = new SF::Publisher(TopicNames::Monitor);
     Publisher->Startup();
@@ -207,7 +211,7 @@ void mtsMonitorComponent::Run(void)
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 
-    UpdateFilters();
+    RunMonitors();
 
     // Subscriber received message(s)
     if (!SubscriberCallback->IsEmptyQueue()) {
@@ -277,24 +281,34 @@ void mtsMonitorComponent::Cleanup(void)
 }
 
 mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTargetComponentAccessor(
-    const std::string & targetProcessName, const std::string & targetComponentName, bool isAttachedToFilter)
+    const std::string & targetProcessName, const std::string & targetComponentName,
+    bool attachFaultEventHandler, bool addAccessor)
 {   
     TargetComponentAccessor * targetComponentAccessor = new TargetComponentAccessor;
     targetComponentAccessor->ProcessName = targetProcessName;
     targetComponentAccessor->ComponentName = targetComponentName;
     targetComponentAccessor->InterfaceRequired = 
         AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName), MTS_OPTIONAL);
+    // MJ FIXME: can't HandleMonitorEvent be moved to if () down below?
     // Add monitor event handler if new tareget component is to be added.
     targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
         &mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
     // Add fault event handler if new tareget component is to be added.
-    if (isAttachedToFilter) {
+    if (attachFaultEventHandler) {
         //targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
         //    &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
         targetComponentAccessor->InterfaceRequired->AddEventReceiver(
             FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
         targetComponentAccessor->FaultEventReceiver.SetHandler(
             &mtsMonitorComponent::HandleFaultEvent, this);
+    }
+
+    if (addAccessor) {
+        if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
+            CMN_LOG_CLASS_RUN_ERROR << "CreateTargetComponentAccessor: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
+            delete targetComponentAccessor;
+            return 0;
+        }
     }
 
     return targetComponentAccessor;
@@ -335,7 +349,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
         newTargetComponent = true;
         // Create new connection between monitor component and new target component
         targetComponentAccessor = CreateTargetComponentAccessor(
-            thisProcessName, targetComponentName, monitorTarget->IsAttachedToFilter());
+            thisProcessName, targetComponentName, monitorTarget->IsAttachedToActiveFilter(), false);
     } else {
         // Check duplicate monitor target
         if (targetComponentAccessor->FindMonitorTarget(monitorTarget->GetUIDAsString())) {
@@ -420,16 +434,6 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             break;
     }
 
-    // Check if the same monitoring target element has already been registered.
-    /* smmy MJ TODO: How to efficiently access which quantities are being monitored?
-    mtsComponent * targetComponent = LCM->GetComponent(targetComponentName);
-    CMN_ASSERT(targetComponent);
-    if (!targetComponent->AddMonitorTarget(monitorTarget) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: duplicate monitoring target element: " << targetTypeString << std::endl;
-        return false;
-    }
-    */
-
     if (newTargetComponent) {
         if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
             CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
@@ -437,7 +441,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
         }
     }
 
-    PrintTargetComponents();
+    //PrintTargetComponents();
 
     CMN_LOG_CLASS_RUN_DEBUG << "RegisterComponent: Successfully registered component: \"" << targetComponentName << "\"" << std::endl;
 
@@ -476,21 +480,22 @@ bool mtsMonitorComponent::InitializeAccessors(void)
     return true;
 }
 
-void mtsMonitorComponent::UpdateFilters(void)
+void mtsMonitorComponent::RunMonitors(void)
 {
-    const double currentTick = osaGetTime();
+    const double currentTick = this->GetTick(); // osaGetTime();
 
     TargetComponentAccessorType::const_iterator it = TargetComponentAccessors->begin();
     const TargetComponentAccessorType::const_iterator itEnd = TargetComponentAccessors->end();
-    bool advance = false;
+    //bool advance = false;
     for (; it != itEnd; ++it) {
-        advance |= it->second->RefreshSamples(currentTick, Publisher);
+        //advance |= it->second->RefreshSamples(currentTick, Publisher);
+        it->second->RefreshSamples(currentTick, Publisher);
     }
 
     // Do filtering and run all FDD pipelines (MJ: this can be further optimized such that
     // only updated samples are processed).
-    if (advance)
-        StateTableMonitor.Advance();
+    //if (advance)
+    //    StateTableMonitor.Advance();
 }
 
 void mtsMonitorComponent::PrintTargetComponents(void)
