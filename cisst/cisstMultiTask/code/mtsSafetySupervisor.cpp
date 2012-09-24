@@ -30,7 +30,7 @@ using namespace SF;
 using namespace SF::Dict;
 
 /*! Socket to send data to Cube collector */
-osaSocket * UDPSocket = 0;
+static osaSocket * UDPSocket = 0;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetySupervisor);
 
@@ -139,16 +139,25 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
     switch (json.GetTopicType()) {
         case SF::JSONSerializer::MONITOR:
             {
-                // MJ TEMP: TEST CODE
-                std::cout << MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
+                SendMessageToCubeCollector(MongoDB::GetDBEntryFromMonitorTopic(json));
+#if 1 // MJ TEMP for debugging
+                static int count = 0;
+                std::cout << "--------------------------------------- Monitor " << ++count << std::endl;
+                std::cout << SF::MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
+#endif
             }
             break;
         case SF::JSONSerializer::FAULT:
             {
-                // MJ TEMP: TEST CODE
-                std::cout << "Fault type: " << SF::Fault::GetFaultTypeString(json.GetFaultType()) << std::endl;
+                SendMessageToCubeCollector(MongoDB::GetDBEntryFromFaultTopic(json));
+#if 1 // MJ TEMP for debugging
+                static int count = 0;
+                std::cout << "--------------------------------------- Fault" << ++count << std::endl;
+                std::cout << "Fault type   : " << SF::Fault::GetFaultTypeString(json.GetFaultType()) << std::endl;
                 std::cout << "Detector name: " << json.GetFaultDetectorName() << std::endl;
-                std::cout << "Values: " << json.GetFaultFields() << std::endl;
+                std::cout << "Timestamp    : " << std::cout.precision(10) << std::scientific << json.GetTimestamp() << std::endl;
+                std::cout << "Values       : " << json.GetFaultFields() << std::endl;
+#endif
             }
             break;
         case SF::JSONSerializer::SUPERVISOR:
@@ -167,6 +176,7 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 void mtsSafetySupervisor::SendMessageToCubeCollector(const std::string & record)
 {
     if (UDPSocket)
-        //UDPSocket->Send(MongoDB::GetDBEntryFromMonitorTopic(message));
         UDPSocket->Send(record);
+    else
+        CMN_LOG_RUN_WARNING << "SendMessageToCubeCollector: invalid UDP socket, no message is being sent" << std::endl;
 }
