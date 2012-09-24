@@ -77,7 +77,7 @@ inline bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::s
      bool verbose;
      std::string filename;
      int iterations;
-     options.AddOptionNoValue("v", "verbose", "more messages", cmnCommandLineOptions::OPTIONAL, &verbose);
+     options.AddOptionNoValue("v", "verbose", "more messages");
      options.AddOptionOneValue("f", "file", "file name", cmnCommandLineOptions::REQUIRED, &filename));
      options.AddOptionOneValue("i", "iterations", "number of iterations", cmnCommandLineOptions::REQUIRED, &iterations));
 
@@ -87,13 +87,13 @@ inline bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::s
          options.PrintUsage(std::cerr);
          return -1;
      }
+
+     verbose = options.IsSet("v"); // or IsSet("verbose")
   \endcode
 
   In this example, note that the first option added doesn't require a
   value, i.e. the caller should just use the short option (-v) or the
-  long one (--verbose).  The option is set as optional, i.e. the
-  "Parse" call will succeed even if the option has not been provided
-  on the command line.
+  long one (--verbose).
 
   The second and third options are required, i.e. the "Parse" call
   will return false if one or more required option is not found.  Both
@@ -134,9 +134,8 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     class CISST_EXPORT OptionNoValue: public OptionBase {
         friend class cmnCommandLineOptions;
         OptionNoValue(const std::string & shortOption, const std::string & longOption,
-                      const std::string & description, RequiredType required, bool * result);
+                      const std::string & description);
         bool SetValue(const char * value);
-        bool * Value;
     };
 
     class CISST_EXPORT OptionOneValueBase: public OptionBase {
@@ -169,17 +168,17 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     cmnCommandLineOptions(void);
 
     bool AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
-                          const std::string & description, RequiredType required, bool * value);
+                          const std::string & description);
 
     template <typename _elementType>
     bool AddOptionOneValue(const std::string & shortOption, const std::string & longOption,
                            const std::string & description, RequiredType required, _elementType * value) {
-        if (this->GetShortNoDash(shortOption)) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddOptionOneValue: option \"-" << shortOption << "\" already defined" << std::endl;
+        std::string cleanedShort, cleanedLong;
+        if (!this->ValidOptions(shortOption, longOption, cleanedShort, cleanedLong)) {
             return false;
         }
         typedef OptionOneValue<_elementType> OptionType;
-        OptionType * option = new OptionOneValue<_elementType>(shortOption, longOption, description,
+        OptionType * option = new OptionOneValue<_elementType>(cleanedShort, cleanedLong, description,
                                                                required, value);
         this->Options.push_back(option);
         return true;
@@ -201,11 +200,19 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
       For example, `options.PrintUsage(std::cout)`. */
     void PrintUsage(std::ostream & outputStream);
 
+    /*! Check if an option has been set.  This can be used after Parse
+      to check if an optional value has been set or not.  The option
+      name can be either the short or long one. */
+    bool IsSet(const std::string & option);
+
  protected:
     std::string ProgramName;
     typedef std::list<OptionBase *> OptionsType;
     OptionsType Options;
     OptionBase * GetShortNoDash(const std::string & shortOption);
+    OptionBase * GetLongNoDashDash(const std::string & longOption);
+    bool ValidOptions(const std::string & shortOption, const std::string & longOption,
+                      std::string & cleanedShort, std::string & cleanedLong);
     OptionBase * Get(const std::string & option);
 };
 

@@ -51,7 +51,7 @@ cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskQt.cisst
-                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}
+                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/mtsExPeriodicTaskQt.cisst
                    SOURCES mtsExPeriodicTaskQt.cisst
                    COMMENT "Copying cisst scripts to the binary directory")
 set_property (TARGET mtsExPeriodicTaskQt_Scripts PROPERTY FOLDER "cisstMultiTask/examples")

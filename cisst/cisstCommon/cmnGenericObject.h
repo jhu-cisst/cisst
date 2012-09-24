@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnLogger.h>
+#include <cisstCommon/cmnThrow.h>
 
 #include <string>
 #include <iostream>
@@ -99,8 +100,8 @@ public:
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
 
-    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
-      Returns true if successful. */
+    /*! Read from an unformatted text input (e.g., one created by
+      ToStreamRaw).  Returns true if successful. */
     virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
 
     /*! Serialize the content of the object without any extra
@@ -128,19 +129,29 @@ public:
         return 0;
     }
 
+    /*! Indicates if this object has a fixed number of scalars.  This
+      is used for arrays of object in order to optimize random access
+      for a given scalar.  When defining an object with a fixed number
+      of scalars, overloading this method to return true allows some
+      optimizations. */ 
     virtual bool ScalarNumberIsFixed(void) const {
-        return true;
+        return false;
     }
 
-    /*! Return the index-th (zero-based) value of data typecasted to double.
-        Note that an index has to be defined such that all indicies are continuous.
-        (This is required by the data visualizer of the GCM UI) */
-    virtual double Scalar(const size_t CMN_UNUSED(index)) const {
+    /*! Return the index-th (zero-based) value of data typecasted to
+      double.  Note that this method will throw an exception of type
+      std::outputStream if the index exceeds the number of scalars. */
+    virtual double Scalar(const size_t CMN_UNUSED(index)) const throw (std::out_of_range) {
+        cmnThrow(std::out_of_range("cmnGenericObject::Scalar base method called, no scalar"));
         return 0.0;
     }
 
-    /*! Return the name of index-th (zero-based) data typecasted to double. */
-    virtual std::string ScalarDescription(const size_t CMN_UNUSED(index), const char * CMN_UNUSED(userDescription)) const {
+    /*! Return the name of index-th (zero-based) data typecasted to
+      double.  As for the Scalar, this method will throw an
+      exception of type std::out_of_range if the index exceeds the
+      number of scalar. */
+    virtual std::string ScalarDescription(const size_t CMN_UNUSED(index), const std::string & CMN_UNUSED(userDescription)) const {
+        cmnThrow(std::out_of_range("cmnGenericObject::ScalarDescription base method called, no scalar"));
         return "index out of range";
     }
 };

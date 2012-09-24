@@ -191,6 +191,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+# Check on Apple only
+if (APPLE)
+  # User option for IOS
+  option (CISST_HAS_IOS "Compile for IOS." OFF)
+endif (APPLE)
 # Determine if cmnThrow uses "throw" or "abort"
 option (CISST_CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
 mark_as_advanced (CISST_CMN_THROW_DOES_ABORT)

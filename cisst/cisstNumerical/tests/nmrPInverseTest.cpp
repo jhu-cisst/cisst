@@ -88,8 +88,10 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
+#if !CISST_CMAKE_COMPILER_IS_MSVC_64
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+#endif
                 switch (ii) {
                     case 0:
                         CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
@@ -178,8 +180,10 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
+#if !CISST_CMAKE_COMPILER_IS_MSVC_64
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+#endif
                 switch (ii) {
                     case 0:
                         CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
@@ -269,8 +273,10 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
+#if !CISST_CMAKE_COMPILER_IS_MSVC_64
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+#endif
                 switch (ii) {
                     case 0:
                         CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
@@ -359,8 +365,10 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
+#if !CISST_CMAKE_COMPILER_IS_MSVC_64
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+#endif
                 switch (ii) {
                     case 0:
                         CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;

@@ -50,10 +50,6 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
-       nmrLDPSolver.cpp
-#      lsi solver is included in nmrLSqLin
-#      nmrLSISolver.cpp
-       nmrLSqLin.cpp
        nmrPInverse.cpp
        nmrPInverseEconomy.cpp
        nmrRegistrationRigid.cpp
@@ -64,25 +60,38 @@ if (CISST_HAS_CISSTNETLIB)
        ${HEADER_FILES}
        nmrNetlib.h
        nmrInverse.h
-       nmrLDPSolver.h
-#     dgels solver is include in nmrLSqLin
-#      nmrLSSolver.h
-#     lsi solver is include in nmrLSqLin
-#      nmrLSISolver.h
-       nmrLSqLin.h
        nmrLU.h
 #      nmrLUSolver.h
-       nmrHFTISolver.h
-       nmrNNLSSolver.h
-       nmrCallBack.h
        nmrPInverse.h
        nmrPInverseEconomy.h
        nmrRegistrationRigid.h
        nmrSVD.h
        nmrSVDEconomy.h
 #       nmrSVDSolver.h
-       nmrSVDRSSolver.h
        )
+
+if (NOT CMAKE_CL_64)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       nmrLDPSolver.cpp
+#      lsi solver is included in nmrLSqLin
+#      nmrLSISolver.cpp
+       nmrLSqLin.cpp
+      )
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       nmrLDPSolver.h
+#     dgels solver is include in nmrLSqLin
+#      nmrLSSolver.h
+#     lsi solver is include in nmrLSqLin
+#      nmrLSISolver.h
+       nmrLSqLin.h
+       nmrHFTISolver.h
+       nmrNNLSSolver.h
+       nmrCallBack.h
+       nmrSVDRSSolver.h
+      )
+endif (NOT CMAKE_CL_64)
 endif (CISST_HAS_CISSTNETLIB)
 
 # Create the config file

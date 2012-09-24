@@ -54,7 +54,6 @@ void prmPositionCartesianGetTest::TestSerialize(void)
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
-
     CPPUNIT_ASSERT(final.Position().Equal(initial.Position()));
 }
 
@@ -72,6 +71,22 @@ void prmPositionCartesianGetTest::TestBinarySerializationStream(void)
     p1.Position() = p1.Position().Identity();
     cmnDataDeSerializeBinary(stream, p2, remote, local);
     CPPUNIT_ASSERT(pReference.Position().Equal(p2.Position()));
+}
+
+
+void prmPositionCartesianGetTest::TestTextSerializationStream(void)
+{
+    cmnDataFormat local, remote;
+    std::stringstream stream;
+    prmPositionCartesianGet p1, p2, pReference;
+    vctRandom(pReference.Position().Translation(), -10.0, 10.0);
+    vctRandom(pReference.Position().Rotation());
+    pReference.Timestamp() = 3.14;
+    p1 = pReference;
+    cmnDataSerializeText(stream, p1, ',');
+    p1.Position() = p1.Position().Identity();
+    cmnDataDeSerializeText(stream, p2, ',');
+    CPPUNIT_ASSERT(pReference.Position().AlmostEqual(p2.Position(), 0.01)); // precision lost in conversion to/from strings
 }
 
 

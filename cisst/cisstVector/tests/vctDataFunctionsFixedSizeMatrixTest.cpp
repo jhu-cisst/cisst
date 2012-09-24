@@ -52,6 +52,42 @@ void vctDataFunctionsFixedSizeMatrixTest::TestBinarySerializationStream(void)
 }
 
 
+void vctDataFunctionsFixedSizeMatrixTest::TestTextSerializationStream(void)
+{
+    std::stringstream stream;
+    vctFixedSizeMatrix<double, 4, 5> m1, m2, mReference;
+    vctRandom(mReference, -10.0, 10.0);
+    m1 = mReference;
+    cmnDataSerializeText(stream, m1, ',');
+    m1.SetAll(0);
+    cmnDataDeSerializeText(stream, m2, ',');
+    CPPUNIT_ASSERT(mReference.AlmostEqual(m2, 0.01)); // low precision due to stream out loss
+    CPPUNIT_ASSERT(!stream.fail());
+    // try without delimiter, using space
+    stream.clear();
+    vctRandom(mReference, -20.0, 20.0);
+    m1 = mReference;
+    cmnDataSerializeText(stream, m1, ' ');
+    m2.SetAll(0.0);
+    cmnDataDeSerializeText(stream, m2, ' ');
+    CPPUNIT_ASSERT(mReference.AlmostEqual(m2, 0.01)); // low precision due to stream out loss
+    CPPUNIT_ASSERT(!stream.fail());
+    // try with the wrong delimiter
+    bool exceptionReceived = false;
+    stream.clear();
+    vctRandom(mReference, -20.0, 20.0);
+    m1 = mReference;
+    cmnDataSerializeText(stream, m1, '|');
+    m2.SetAll(0.0);
+    try {
+        cmnDataDeSerializeText(stream, m2, ',');
+    } catch (std::runtime_error) {
+        exceptionReceived = true;
+    }
+    CPPUNIT_ASSERT(exceptionReceived);
+}
+
+
 void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
 {
     vctFixedSizeMatrix<int, 3, 6> mInt;

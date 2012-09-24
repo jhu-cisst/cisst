@@ -132,25 +132,31 @@ public:
     bool ScalarNumberIsFixed(void) const;
 
     /* documented in base class */
-    double Scalar(const size_t index) const;
+    double Scalar(const size_t index) const throw (std::out_of_range);
 
     /* documented in base class */
-    std::string ScalarDescription(const size_t index, const char * userDescription = "") const;
+    std::string ScalarDescription(const size_t index, const std::string & userDescription = "") const throw (std::out_of_range);
 };
 
 
-void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data);
+void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data) throw (std::runtime_error);
 
 void CISST_EXPORT cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
-                                           const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat);
+                                           const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataSerializeText(std::ostream & outputStream, const mtsGenericObject & data, const char delimiter) throw (std::runtime_error);
+
+std::string CISST_EXPORT cmnDataSerializeTextDescription(const mtsGenericObject & data, const char delimiter, const std::string & userDescription = "");
+
+void CISST_EXPORT cmnDataDeSerializeText(std::istream & inputStream, mtsGenericObject & data, const char delimiter) throw (std::runtime_error);
 
 bool CISST_EXPORT cmnDataScalarNumberIsFixed(const mtsGenericObject & data);
 
 size_t CISST_EXPORT cmnDataScalarNumber(const mtsGenericObject & data);
 
-double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t index);
+double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t index) throw (std::out_of_range);
 
-std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const char * userDescription = "");
+std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription = "") throw (std::out_of_range);
 
 #endif // _mtsGenericObject_h
 

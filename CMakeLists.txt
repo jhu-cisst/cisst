@@ -119,6 +119,21 @@ if (WIN32)
                 NAMES vsvars32.bat
                 PATHS ${BUILD_TOOL_DIRECTORY}/../../Common7/Tools)
   mark_as_advanced (VSVARS32_BAT)
+  # vcvarsall.bat can be used instead of vsvars32.bat
+  #   vcvarsall  [x86]    -- defaults to x86 (calls vsvars32.bat)
+  #   vcvarsall x86_amd64 -- cross-compile for x64
+  #   vcvarsall x86_ia64  -- cross-compile for Itanium
+  #   vcvarsall amd64     -- set up for x64
+  #   vcvarsall ia64      -- set up for Itanium
+  set (VCVARSALL_CONFIG "x86")
+  if (CMAKE_CL_64)
+     # For now, assume x64. Need to change to also support Itanium
+     set (VCVARSALL_CONFIG "amd64")
+  endif (CMAKE_CL_64)
+  find_program (VCVARSALL_BAT
+                NAMES vcvarsall.bat
+                PATHS ${BUILD_TOOL_DIRECTORY}/../../VC)
+  mark_as_advanced (VCVARSALL_BAT)
   configure_file (${cisst_saw_SOURCE_DIR}/cisst/utils/cisstvsvars.bat.in
                   ${cisst_saw_BINARY_DIR}/cisstvsvars.bat)
 

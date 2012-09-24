@@ -446,6 +446,10 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
     return retval;
 }
 
+int osaSocket::Send(const std::string & bufsend)
+{
+    return Send(bufsend.c_str(), static_cast<int>(bufsend.length()));
+}
 
 int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
 {

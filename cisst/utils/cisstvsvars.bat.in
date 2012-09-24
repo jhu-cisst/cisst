@@ -3,8 +3,7 @@
 @rem Author(s): Anton Deguet
 @rem Created on: 2006-05-02
 
-@rem (C) Copyright 2006-2007 Johns Hopkins University (JHU), All
-@rem Rights Reserved.
+@rem (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 @rem Always edit the source file: cisstvsvars.bat.in
 @rem Do not edit the generated file: cisstvsvars.bat
@@ -17,6 +16,10 @@
 @rem 
 @rem --- end cisst license ---
 
-
-@if exist "${VSVARS32_BAT}" call "${VSVARS32_BAT}"
-
+@if exist "${VCVARSALL_BAT}" (
+  @echo Calling vcvarsall.bat ${VCVARSALL_CONFIG}
+  @call "${VCVARSALL_BAT}" ${VCVARSALL_CONFIG}
+) else (
+  @echo vsvarsall.bat not found - trying vsvars32.bat
+  @if exist "${VSVARS32_BAT}" call "${VSVARS32_BAT}"
+)

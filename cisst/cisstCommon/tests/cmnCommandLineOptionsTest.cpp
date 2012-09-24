@@ -36,13 +36,12 @@ void cmnCommandLineOptionsTest::TestNoOption(void) {
 void cmnCommandLineOptionsTest::TestNoParameter(void) {
     // with an optional option, parse an empty list should work
     cmnCommandLineOptions options;
-    bool value = true;
-    CPPUNIT_ASSERT(options.AddOptionNoValue("u", "unused", "for testing purposes", cmnCommandLineOptions::OPTIONAL, &value));
+    CPPUNIT_ASSERT(options.AddOptionNoValue("u", "unused", "for testing purposes"));
     const char * argv[] = {"programName", 0};
     int argc = 1;
     std::string errorMessage;
     CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
-    CPPUNIT_ASSERT_EQUAL(value, false); // value has not been set
+    CPPUNIT_ASSERT_EQUAL(false, options.IsSet("unused")); // value has not been set
 }
 
 
@@ -63,14 +62,13 @@ void cmnCommandLineOptionsTest::TestOneRequiredStringFail(void) {
     // add one required string option
     cmnCommandLineOptions options;
     std::string result;
-    bool verbose = false;
-    CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes", cmnCommandLineOptions::REQUIRED, &verbose));
+    CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes"));
     CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &result));
     const char * argv[] = {"programName", "-v", 0};
     int argc = 2;
     std::string errorMessage;
     CPPUNIT_ASSERT(!options.Parse(argc, argv, errorMessage));
-    CPPUNIT_ASSERT_EQUAL(verbose, true);
+    CPPUNIT_ASSERT_EQUAL(true, options.IsSet("verbose"));
 }
 
 
@@ -80,8 +78,7 @@ void cmnCommandLineOptionsTest::TestOneRequiredStringIntDouble(void) {
     std::string resultString;
     int resultInt;
     double resultDouble;
-    bool verbose = false;
-    CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes", cmnCommandLineOptions::OPTIONAL, &verbose));
+    CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes"));
     CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultString));
     CPPUNIT_ASSERT(options.AddOptionOneValue("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultInt));
     CPPUNIT_ASSERT(options.AddOptionOneValue("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultDouble));
@@ -89,8 +86,44 @@ void cmnCommandLineOptionsTest::TestOneRequiredStringIntDouble(void) {
     int argc = 7;
     std::string errorMessage;
     CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
-    CPPUNIT_ASSERT_EQUAL(verbose, false); // no set and optional
+    CPPUNIT_ASSERT_EQUAL(false, options.IsSet("verbose")); // no set and optional
     CPPUNIT_ASSERT_EQUAL(std::string("stringValue"), resultString);
     CPPUNIT_ASSERT_EQUAL(99, resultInt);
     CPPUNIT_ASSERT_EQUAL(3.14, resultDouble);
+}
+
+
+void cmnCommandLineOptionsTest::TestRepeatedOptions(void) {
+    // testing repeated options
+    cmnCommandLineOptions options;
+    bool dummy;
+    CPPUNIT_ASSERT(options.AddOptionOneValue("v", "verbose", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    // verbose has been used
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("w", "verbose", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    // v has been used
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("v", "silent", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    // v has been used
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("-v", "noisy", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    // add silent and check again
+    CPPUNIT_ASSERT(options.AddOptionOneValue("-s", "silent", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("f", "--silent", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+}
+
+
+void cmnCommandLineOptionsTest::TestIsSet(void) {
+    cmnCommandLineOptions options;
+    CPPUNIT_ASSERT(options.AddOptionNoValue("s", "set", "value that will be set"));
+    CPPUNIT_ASSERT(options.AddOptionNoValue("n", "not-set", "value that will not be set"));
+    const char * argv[] = {"programName", "-s", 0};
+    int argc = 2;
+    std::string errorMessage;
+    CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
+    CPPUNIT_ASSERT(options.IsSet("s"));
+    CPPUNIT_ASSERT(options.IsSet("set"));
+    CPPUNIT_ASSERT(options.IsSet("-s"));
+    CPPUNIT_ASSERT(options.IsSet("--set"));
+    CPPUNIT_ASSERT(!options.IsSet("n"));
+    CPPUNIT_ASSERT(!options.IsSet("not-set"));
+    CPPUNIT_ASSERT(!options.IsSet("-n"));
+    CPPUNIT_ASSERT(!options.IsSet("--not-set"));
 }

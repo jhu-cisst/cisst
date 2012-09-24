@@ -112,7 +112,7 @@ void cmnDataFunctionsTest::TestBinarySerializationStreamNativeTypes(void)
 void cmnDataFunctionsTest::TestBinarySerializationCharNativeTypes(void)
 {
     cmnDataFormat local, remote;
-    const size_t bufferSize = 1024; 
+    const size_t bufferSize = 1024;
     char buffer[bufferSize];
     char * bufferRead = buffer;
 
@@ -139,14 +139,14 @@ void cmnDataFunctionsTest::TestBinarySerializationCharNativeTypes(void)
     size_t byteWritten = cmnDataSerializeBinary(buffer, bufferSize, s1);
     s1 = "The runaway bunny";
     *(buffer + 10) = '\0';
-    
+
     /*
     cmnDataDeSerializeBinary(stream, b2, remote, local);
     CPPUNIT_ASSERT_EQUAL(bReference, b2);
 
     cmnDataDeSerializeBinary(stream, c2, remote, local);
     CPPUNIT_ASSERT_EQUAL(cReference, c2);
-    
+
     cmnDataDeSerializeBinary(bufferRead, bufferSize, s2, remote, local);
     CPPUNIT_ASSERT_EQUAL(sReference, s2);
     */

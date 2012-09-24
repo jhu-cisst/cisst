@@ -231,6 +231,14 @@ public:
       otherwise it will use the previously used format. */
     void SetOutputToDefault(void);
 
+    /*! Closes the output file stream */
+    void CloseOutput(void);
+
+    /*! Get the name of log file currently being written. */
+    inline const std::string & GetOutputFileName(void) const {
+        return this->OutputFileName;
+    }
+
     /*! Files are not created or opened when SetOutput is called, this
       method will open the file if needed. */
     void OpenFileIfNeeded(void);

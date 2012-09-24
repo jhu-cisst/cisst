@@ -28,10 +28,17 @@ http://www.cisst.org/cisst/license.txt.
 
 
 void nmrLUTest::TestDynamicDataColumnMajor(void) {
+#if CISST_CMAKE_COMPILER_IS_MSVC_64
+    int rows, cols;
+    cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
+    randomSequence.ExtractRandomValue(10, 20, rows);
+    randomSequence.ExtractRandomValue(10, 20, cols);
+#else
     vct::size_type rows, cols;
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
     randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
     randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
+#endif
     vctDynamicMatrix<double> input(rows, cols , VCT_COL_MAJOR);
     vctRandom(input, 0.0, 10.0);
     vctDynamicMatrix<double> output(rows, cols, VCT_COL_MAJOR);
@@ -43,10 +50,17 @@ void nmrLUTest::TestDynamicDataColumnMajor(void) {
 
 
 void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
+#if CISST_CMAKE_COMPILER_IS_MSVC_64
+    int rows, cols;
+    cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
+    randomSequence.ExtractRandomValue(10, 20, rows);
+    randomSequence.ExtractRandomValue(10, 20, cols);
+#else
     vct::size_type rows, cols;
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
     randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
     randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
+#endif
     vctDynamicMatrix<double> input(rows, cols , VCT_COL_MAJOR);
     vctRandom(input, 0.0, 10.0);
     vctDynamicMatrix<double> output(rows, cols, VCT_COL_MAJOR);

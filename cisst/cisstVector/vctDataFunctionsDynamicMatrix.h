@@ -60,8 +60,9 @@ void cmnDataSerializeBinary(std::ostream & outputStream,
     cmnDataSerializeBinary_size_t(outputStream, myRows);
     cmnDataSerializeBinary_size_t(outputStream, myCols);
 
-    typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator iter = data.begin();
-    const typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator end = data.end();
+    typedef typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator const_iterator;
+    const_iterator iter = data.begin();
+    const const_iterator end = data.end();
     for (; iter != end; ++iter) {
         cmnDataSerializeBinary(outputStream, *iter);
     }
@@ -84,8 +85,9 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     data.SetSize(myRows, myCols);
 
     // get data
-    typename vctDynamicMatrix<_elementType>::iterator iter = data.begin();
-    const typename vctDynamicMatrix<_elementType>::iterator end = data.end();
+    typedef typename vctDynamicMatrix<_elementType>::iterator iterator;
+    iterator iter = data.begin();
+    const iterator end = data.end();
     for (; iter != end; ++iter) {
         cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
     }
@@ -110,10 +112,117 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     }
 
     // get data
-    typename vctDynamicMatrixRef<_elementType>::iterator iter = data.begin();
-    const typename vctDynamicMatrixRef<_elementType>::iterator end = data.end();
+    typedef typename vctDynamicMatrixRef<_elementType>::iterator iterator;
+    iterator iter = data.begin();
+    const iterator end = data.end();
     for (; iter != end; ++iter) {
         cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
+    }
+}
+
+
+// there is only one specialization since we only read and there is no size issue
+template <typename _elementType, class _matrixOwnerType>
+void cmnDataSerializeText(std::ostream & outputStream,
+                          const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data,
+                          const char delimiter)
+    throw (std::runtime_error)
+{
+    const vct::size_type myRows = data.rows();
+    const vct::size_type myCols = data.cols();
+
+    cmnDataSerializeText_size_t(outputStream, myRows, delimiter);
+    outputStream << delimiter;
+    cmnDataSerializeText_size_t(outputStream, myCols, delimiter);
+
+    typedef typename vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::const_iterator const_iterator;
+    const const_iterator begin = data.begin();
+    const const_iterator end = data.end();
+    const_iterator iter;
+    for (iter = begin; iter != end; ++iter) {
+        outputStream << delimiter;
+        cmnDataSerializeText(outputStream, *iter, delimiter);
+    }
+}
+
+
+template <typename _elementType, class _matrixOwnerType>
+std::string cmnDataSerializeTextDescription(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data,
+                                            const char delimiter,
+                                            const std::string & userDescription = "m")
+{
+    std::stringstream description;
+    const vct::size_type myRows = data.rows();
+    const vct::size_type myCols = data.cols();
+    const char separator = (delimiter == ',') ? ':' : ',';
+    // size with user description
+    description << userDescription << ".rows{" << cmnDataSerializeTextDescription_size_t(myRows, delimiter) << "}";
+    description << delimiter;
+    description << userDescription << ".cols{" << cmnDataSerializeTextDescription_size_t(myCols, delimiter) << "}";
+    // elements
+    vct::size_type indexRow, indexCol;
+    for (indexRow = 0; indexRow < myRows; ++indexRow) {
+        for (indexCol = 0; indexCol < myCols; ++indexCol) {
+            description << delimiter;
+            description << userDescription << "[" << indexRow << separator << indexCol << "]{" << cmnDataSerializeTextDescription(data.Element(indexRow, indexCol), delimiter) << "}";
+        }
+    }
+    return description.str();
+}
+
+
+// as for the cmnDataCopy, two different specializations
+template <typename _elementType>
+void cmnDataDeSerializeText(std::istream & inputStream,
+                            vctDynamicMatrix<_elementType> & data,
+                            const char delimiter)
+    throw (std::runtime_error)
+{
+    // for matrices that own memory, we resize the destination based on deserialized "size"
+    vct::size_type myRows = 0;
+    vct::size_type myCols = 0;
+    cmnDataDeSerializeText_size_t(inputStream, myRows, delimiter);
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrix");
+    cmnDataDeSerializeText_size_t(inputStream, myCols, delimiter);
+    data.SetSize(myRows, myCols);
+
+    // get data
+    typedef typename vctDynamicMatrix<_elementType>::iterator iterator;
+    const iterator begin = data.begin();
+    const iterator end = data.end();
+    iterator iter;
+    for (iter = begin; iter != end; ++iter) {
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrix");
+        cmnDataDeSerializeText(inputStream, *iter, delimiter);
+    }
+}
+
+template <typename _elementType>
+void cmnDataDeSerializeText(std::istream & inputStream,
+                            vctDynamicMatrixRef<_elementType> & data,
+                            const char delimiter)
+    throw (std::runtime_error)
+{
+    // get and check size
+    vct::size_type myRows = 0;
+    vct::size_type myCols = 0;
+    cmnDataDeSerializeText_size_t(inputStream, myRows, delimiter);
+    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrixRef");
+    cmnDataDeSerializeText_size_t(inputStream, myCols, delimiter);
+
+    if ((myRows != data.rows())
+        || (myCols != data.cols())) {
+        cmnThrow(std::runtime_error("cmnDataDeSerializeText: vctDynamicMatrixRef, size of matrices don't match"));
+    }
+
+    // get data
+    typedef typename vctDynamicMatrixRef<_elementType>::iterator iterator;
+    const iterator begin = data.begin();
+    const iterator end = data.end();
+    iterator iter;
+    for (iter = begin; iter != end; ++iter) {
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicMatrixRef");
+        cmnDataDeSerializeText(inputStream, *iter, delimiter);
     }
 }
 
@@ -146,17 +255,17 @@ template <class _matrixOwnerType, typename _elementType>
 std::string
 cmnDataScalarDescription(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & data,
                          const size_t & index,
-                         const char * userDescription = "m")
+                         const std::string & userDescription = "m")
     throw (std::out_of_range)
 {
     size_t elementRow, elementCol, inElementIndex;
     std::stringstream result;
     if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
-        result << userDescription << "[" << elementRow << "," << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
+        result << userDescription << "[" << elementRow << ',' << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
     } else {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeMatrix index out of range"));
     }
-    return result.str(); // unreachable, just to avoid compiler warnings
+    return result.str();
 }
 
 
