@@ -1043,7 +1043,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
 
     // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
     // defined
-#ifdef CISSTNETLIB_VERSION
+#if defined(CISSTNETLIB_VERSION) || CISST_CMAKE_COMPILER_IS_MSVC_64
     dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
             UPtr, &m_Ldu,
@@ -1192,7 +1192,7 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
 
     // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
     // defined
-#ifdef CISSTNETLIB_VERSION
+#if defined(CISSTNETLIB_VERSION) || CISST_CMAKE_COMPILER_IS_MSVC_64
     /* call the LAPACK C function */
     dgesvd_( &jobu, &jobvt, &ldu, &ldvt,
              A.Pointer(), &lda, S.Pointer(),

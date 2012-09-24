@@ -69,18 +69,27 @@ public:
 #ifdef CISST_HAS_CISSTNETLIB
         // create a random matrix (size and content) to decompose
         // using SVD and then use U and Vt to test nmrIsOrthonormal
+#if CISST_CMAKE_COMPILER_IS_MSVC_64
+        int rows, cols;
+#else
         vct::size_type rows, cols;
+#endif
         bool storageOrder = VCT_ROW_MAJOR;
         vctDynamicMatrix<double> ADynamic;
         vctDynamicVector<double> SDynamic;
         cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
         randomSequence.ExtractRandomValue(storageOrder);
+#if CISST_CMAKE_COMPILER_IS_MSVC_64
+        randomSequence.ExtractRandomValue(10, 20, rows);
+        randomSequence.ExtractRandomValue(10, 20, cols);
+#else
         randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
         randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
+#endif
         ADynamic.SetSize(rows, cols, storageOrder);
         vctRandom(ADynamic, -10.0, 10.0);
         UDynamic.SetSize(rows, rows, storageOrder);
-        SDynamic.SetSize(std::min(rows, cols));
+        SDynamic.SetSize((std::min)(rows, cols));
         VtDynamic.SetSize(cols, cols, storageOrder);
         // Decompose, after this U and Vt can be used
         nmrSVD(ADynamic, UDynamic, SDynamic, VtDynamic);

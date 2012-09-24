@@ -47,37 +47,47 @@ if (CISST_HAS_CISSTNETLIB)
        ${SOURCE_FILES}
        nmrInverseTest.cpp
        nmrIsOrthonormalTest.cpp
-       nmrLDPSolverTest.cpp
-#      nmrLSSolverTest.cpp
-#      nmrLSISolverTest.cpp
-       nmrLSqLinTest.cpp
        nmrLUTest.cpp
 #      nmrLUSolverTest.cpp
-       nmrNNLSSolverTest.cpp
        nmrPInverseTest.cpp
 #      nmrPInverseSolverTest.cpp
        nmrSVDTest.cpp
 #      nmrSVDSolverTest.cpp
-       nmrSVDRSSolverTest.cpp
        )
 
   set (HEADER_FILES
        ${HEADER_FILES}
        nmrInverseTest.h
        nmrIsOrthonormalTest.h
-       nmrLDPSolverTest.h
-#      nmrLSSolverTest.h
-#      nmrLSISolverTest.h
-       nmrLSqLinTest.h
        nmrLUTest.h
 #      nmrLUSolverTest.h
-       nmrNNLSSolverTest.h
        nmrPInverseTest.h
 #      nmrPInverseSolverTest.h
        nmrSVDTest.h
 #      nmrSVDSolverTest.h
+       )
+
+if (NOT CMAKE_CL_64)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       nmrLDPSolverTest.cpp
+#      nmrLSSolverTest.cpp
+#      nmrLSISolverTest.cpp
+       nmrLSqLinTest.cpp
+       nmrNNLSSolverTest.cpp
+       nmrSVDRSSolverTest.cpp
+       )
+
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       nmrLDPSolverTest.h
+#      nmrLSSolverTest.h
+#      nmrLSISolverTest.h
+       nmrLSqLinTest.h
+       nmrNNLSSolverTest.h
        nmrSVDRSSolverTest.h
        )
+endif (NOT CMAKE_CL_64)
 
 endif (CISST_HAS_CISSTNETLIB)
 

@@ -105,7 +105,7 @@ class nmrSVDDynamicTestObject
         double error = (input- product).LinfNorm();
         CPPUNIT_ASSERT(error < cmnTypeTraits<double>::Tolerance());
         /* Make sure that both U and V are orthonormal */
-        const unsigned int size = std::max(U.rows(), Vt.rows());
+        const unsigned int size = (std::max)(U.rows(), Vt.rows());
         nmrIsOrthonormalDynamicData<double> orthoData(size);
         CPPUNIT_ASSERT(nmrIsOrthonormal(U, orthoData));
         CPPUNIT_ASSERT(nmrIsOrthonormal(Vt, orthoData));
