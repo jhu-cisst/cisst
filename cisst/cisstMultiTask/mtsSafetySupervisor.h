@@ -63,9 +63,6 @@ protected:
         void operator()(const std::string & message);
     } Parse;
 
-    /*! Send monitoring topic messages to Cube collector */
-    void SendMessageToCubeCollector(const std::string & record);
-
 public:
     mtsSafetySupervisor();
     ~mtsSafetySupervisor();
@@ -74,6 +71,9 @@ public:
     void Startup(void);
     void Run(void);
     void Cleanup(void);
+
+    /*! Send monitoring topic messages to Cube collector */
+    static void SendMessageToCubeCollector(const std::string & record);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSafetySupervisor);
