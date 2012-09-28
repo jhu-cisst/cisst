@@ -72,7 +72,7 @@ class cmnDataByteSwapClass
 {
     // this method is private to make sure a compilation error will
     // happen if ones try to swap bytes on unsupported sizes
-    inline static void Execute(_elementType & data) throw (std::runtime_error) {
+    inline static void Execute(_elementType & CMN_UNUSED(data)) throw (std::runtime_error) {
         cmnThrow("cmnDataByteSwap: a partial specialization should be called!");
     }
 };
@@ -82,7 +82,7 @@ class cmnDataByteSwapClass<_elementType, 1>
 {
     // this method is private to make sure a compilation error will
     // happen if ones try to swap bytes on a one byte object
-    inline static void Execute(_elementType & data) throw (std::runtime_error) {
+    inline static void Execute(_elementType & CMN_UNUSED(data)) throw (std::runtime_error) {
     }
 };
 

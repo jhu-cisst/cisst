@@ -127,7 +127,7 @@ protected:
 
 private:
     // copy constructor private to prevent any call
-    vctDynamicVectorRefOwner(const ThisType & other) {};
+    vctDynamicVectorRefOwner(const ThisType & CMN_UNUSED(other)) {};
 
 };
 

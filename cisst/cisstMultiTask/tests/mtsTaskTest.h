@@ -35,7 +35,7 @@ public:
 	virtual ~mtsTaskTestTask() {}
 
 	// implementation of four methods that are pure virtual in mtsTask
-    void Configure(const std::string) {}
+    void Configure(const std::string &) {}
 	void Startup(void) {}
 	void Run(void) {}
     void Cleanup(void) {}

@@ -114,7 +114,7 @@ protected:
             if (data2 == 0) {
                 return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
-            if ( (classInstantiation->action)(*data1, *data2) ) {
+            if ( (classInstantiation->*action)(*data1, *data2) ) {
                 return mtsExecutionResult::COMMAND_SUCCEEDED;
             }
             return mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;

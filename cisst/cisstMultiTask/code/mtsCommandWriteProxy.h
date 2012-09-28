@@ -83,11 +83,6 @@ public:
         }
     }
 
-    /*! Set an argument prototype */
-    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        this->ArgumentPrototype = argumentPrototype;
-    }
-
     /*! Set the serialized version of argument prototype. */
     void SetArgumentPrototypeSerialized(const std::string & argumentPrototypeSerialized) {
         this->ArgumentPrototypeSerialized = argumentPrototypeSerialized;

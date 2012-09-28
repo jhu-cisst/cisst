@@ -220,7 +220,7 @@ public:
 
 private:
     // copy constructor private to prevent any call
-    vctDynamicMatrixRefOwner(const ThisType & other) {};
+    vctDynamicMatrixRefOwner(const ThisType & CMN_UNUSED(other)) {};
 
 };
 

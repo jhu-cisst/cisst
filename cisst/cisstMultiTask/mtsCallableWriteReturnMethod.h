@@ -112,7 +112,7 @@ protected:
             if (data2 == 0) {
                 return mtsExecutionResult::INVALID_INPUT_TYPE;
             }
-            (classInstantiation->action)(*data1, *data2);
+            (classInstantiation->*action)(*data1, *data2);
             return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
     };
