@@ -4,11 +4,11 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor, Peter Kazanzides, Balazs Vagvolgyi, Anton Deguet, 
+  Author(s): Ankur Kapoor, Peter Kazanzides, Balazs Vagvolgyi, Anton Deguet,
              Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -167,7 +167,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
 
     int ret = pthread_cond_timedwait(&INTERNALS(Condition), &INTERNALS(Mutex), &timeout);
 
-#if 1   // Cleaner implementation, assuming that AUTOMATIC RESET is not needed 
+#if 1   // Cleaner implementation, assuming that AUTOMATIC RESET is not needed
     pthread_mutex_unlock(&INTERNALS(Mutex));
     return (ret != ETIMEDOUT);
 #else
@@ -183,9 +183,9 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     //pthread_cond_destroy(&gnuCondition);
     // reinitializing condition = resetting state
     //pthread_cond_init(&gnuCondition, 0);
-    //Condition_State = SVL_EVENT_NOT_SIGNALED;
+    //ConditionState = SVL_EVENT_NOT_SIGNALED;
 
-    // This unlock could be moved before the if statement above    
+    // This unlock could be moved before the if statement above
     pthread_mutex_unlock(&INTERNALS(Mutex));
 #endif
 #else
@@ -208,7 +208,7 @@ void osaThreadSignal::Raise(void)
     // Balazs code:
     // pthread_mutex_lock(&gnuMutex);
     // pthread_cond_broadcast(&gnuCondition);
-    // Condition_State = SVL_EVENT_SIGNALED;
+    // ConditionState = SVL_EVENT_SIGNALED;
     // pthread_mutex_unlock(&gnuMutex);
     pthread_cond_signal(&INTERNALS(Condition));
 #endif  // USE_POSIX_SEMAPHORES
@@ -228,7 +228,7 @@ struct osaThreadSignalInternals
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     pthread_mutex_t gnuMutex;
     pthread_cond_t gnuCondition;
-    int Condition_State;
+    int ConditionState;
 #endif
 
 #if (CISST_OS == CISST_LINUX_XENOMAI)
@@ -237,12 +237,10 @@ struct osaThreadSignalInternals
     //int state;
     pthread_mutex_t gnuMutex;
     pthread_cond_t gnuCondition;
-    int Condition_State;
+    int ConditionState;
 #endif
 
 };
-
-#define INTERNALS(A) (reinterpret_cast<osaThreadSignalInternals*>(Internals)->A)
 
 static osaThreadId CallbackThreadId;
 
@@ -255,29 +253,29 @@ void (*osaThreadSignal::PostCallback)(void) = 0;
 
 osaThreadSignal::osaThreadSignal()
 {
-    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
-    memset(&Internals, 0, sizeof(Internals));
+    this->Internals = new osaThreadSignalInternals;
+    memset(Internals, 0, sizeof(*Internals));
 
 #if (CISST_OS == CISST_WINDOWS)
-	INTERNALS(hEvent) = CreateEvent(NULL, FALSE, FALSE, NULL);
+	Internals->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    int retval = pthread_mutex_init(&INTERNALS(gnuMutex), 0);
+    int retval = pthread_mutex_init(&(Internals->gnuMutex), 0);
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_mutex_init failed. "
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
-    retval = pthread_cond_init(&INTERNALS(gnuCondition), 0);
+    retval = pthread_cond_init(&(Internals->gnuCondition), 0);
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_cond_init failed. "
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
-    INTERNALS(Condition_State) = 0;
+    Internals->ConditionState = 0;
 #endif
 
 #if (CISST_OS == CISST_LINUX_XENOMAI)
@@ -303,26 +301,26 @@ osaThreadSignal::osaThreadSignal()
         }
 
         INTERNALS( state ) = 0;
-    }   
+    }
     else{
     */
-        int retval = pthread_mutex_init(&INTERNALS(gnuMutex), 0);
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_mutex_init failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        retval = pthread_cond_init(&INTERNALS(gnuCondition), 0);
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_cond_init failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        INTERNALS(Condition_State) = 0;
-        //}
-        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+    int retval = pthread_mutex_init(&(Internals->gnuMutex), 0);
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_mutex_init failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    retval = pthread_cond_init(&(Internals->gnuCondition), 0);
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_cond_init failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    Internals->ConditionState = 0;
+    //}
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
 
 #endif
 
@@ -331,18 +329,18 @@ osaThreadSignal::osaThreadSignal()
 osaThreadSignal::~osaThreadSignal()
 {
 #if (CISST_OS == CISST_WINDOWS)
-	CloseHandle(INTERNALS(hEvent));
+	CloseHandle(Internals->hEvent);
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    int retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
+    int retval = pthread_cond_destroy(&(Internals->gnuCondition));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_cond_destroy failed. "
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
-    retval = pthread_mutex_destroy(&INTERNALS(gnuMutex));
+    retval = pthread_mutex_destroy(&(Internals->gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_mutex_destroy failed. "
@@ -364,7 +362,7 @@ osaThreadSignal::~osaThreadSignal()
                                << strerror(retval) << ": " << retval
                                << std::endl;
         }
-        
+
         retval = rt_cond_delete( &INTERNALS( condition ) );
         if( retval != 0 ){
             CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -375,53 +373,50 @@ osaThreadSignal::~osaThreadSignal()
     }
     else{
     */
-        int retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_cond_destroy failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        retval = pthread_mutex_destroy(&INTERNALS(gnuMutex));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_mutex_destroy failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        //}
-        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+    int retval = pthread_cond_destroy(&(Internals->gnuCondition));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_cond_destroy failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    retval = pthread_mutex_destroy(&(Internals->gnuMutex));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_mutex_destroy failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    //}
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
 #endif
-
+    delete this->Internals;
 }
 
-unsigned int osaThreadSignal::SizeOfInternals(void) {
-    return sizeof(osaThreadSignalInternals);
-}
 
-void osaThreadSignal::Raise()
+void osaThreadSignal::Raise(void)
 {
 #if (CISST_OS == CISST_WINDOWS)
-    ::SetEvent(INTERNALS(hEvent));
+    ::SetEvent(Internals->hEvent);
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
+    int retval = pthread_mutex_lock(&(Internals->gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_mutex_lock failed. "
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
-    retval = pthread_cond_broadcast(&INTERNALS(gnuCondition));
+    retval = pthread_cond_broadcast(&(Internals->gnuCondition));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_cond_broadcast failed. "
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
-    INTERNALS(Condition_State) = 1;
-    retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
+    Internals->ConditionState = 1;
+    retval = pthread_mutex_unlock(&(Internals->gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_mutex_unlock failed. "
@@ -442,7 +437,7 @@ void osaThreadSignal::Raise()
                                << strerror(retval) << ": " << retval
                                << std::endl;
         }
-        
+
         retval = rt_cond_broadcast( &INTERNALS( condition ) );
         if( retval != 0 ) {
             CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -451,7 +446,7 @@ void osaThreadSignal::Raise()
                                << std::endl;
         }
         INTERNALS( state ) = 1;
-        
+
         retval = rt_mutex_release( &INTERNALS( mutex ) );
         if( retval != 0 ) {
             CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -462,41 +457,41 @@ void osaThreadSignal::Raise()
     }
     else{
     */
-        int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_mutex_lock failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        retval = pthread_cond_broadcast(&INTERNALS(gnuCondition));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_cond_broadcast failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        INTERNALS(Condition_State) = 1;
-        retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_mutex_unlock failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        //}
-        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+    int retval = pthread_mutex_lock(&(Internals->gnuMutex));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_mutex_lock failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    retval = pthread_cond_broadcast(&(Internals->gnuCondition));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_cond_broadcast failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    Internals->ConditionState = 1;
+    retval = pthread_mutex_unlock(&(Internals->gnuMutex));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_mutex_unlock failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    //}
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
 
 #endif
 }
 
-void osaThreadSignal::Wait()
+void osaThreadSignal::Wait(void)
 {
 // Following implementation should be better on Windows (enable after further testing)
 //#if (CISST_OS == CISST_WINDOWS)
 #if 0
-    ResetEvent(INTERNALS(hEvent));
-    //DWORD ret = WaitForSingleObject(INTERNALS(hEvent), INFINITE);
+    ResetEvent(Internals->hEvent);
+    //DWORD ret = WaitForSingleObject(Internals->hEvent, INFINITE);
     HANDLE handles[1] = { INTERNALS(hEvent) };
     bool done = false;
     while (!done) {
@@ -504,18 +499,18 @@ void osaThreadSignal::Wait()
         if (ret == WAIT_OBJECT_0)
             done = true;
         else if (ret == WAIT_OBJECT_0+1) {
-            MSG msg ; 
-            // Read all of the messages in this next loop, 
+            MSG msg ;
+            // Read all of the messages in this next loop,
             // removing each message as we read it.
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) 
-            { 
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            {
                 // If it is a quit message, exit.
                 if (msg.message == WM_QUIT) {
                     CMN_LOG_RUN_WARNING << "osaThreadSignal::Wait got quit message" << std::endl;
                     done = true;
                 }
                 // Otherwise, dispatch the message.
-                DispatchMessage(&msg); 
+                DispatchMessage(&msg);
             } // End of PeekMessage while loop.
         }
         else {
@@ -531,19 +526,24 @@ void osaThreadSignal::Wait()
 bool osaThreadSignal::Wait(double timeoutInSec)
 {
     bool do_callback = false;
-    if (PreCallback && PostCallback && (osaGetCurrentThreadId() == CallbackThreadId))
+    if (PreCallback && PostCallback && (osaGetCurrentThreadId() == CallbackThreadId)) {
         do_callback = true;
-    if (do_callback) PreCallback();
+    }
+    if (do_callback) {
+        PreCallback();
+    }
     unsigned int millisec = (unsigned int)(timeoutInSec * 1000);
 #if (CISST_OS == CISST_WINDOWS)
-    if (WaitForSingleObject(INTERNALS(hEvent), millisec) == WAIT_TIMEOUT) {
-        if (do_callback) PostCallback();
+    if (WaitForSingleObject(Internals->hEvent, millisec) == WAIT_TIMEOUT) {
+        if (do_callback) {
+            PostCallback();
+        }
         return false;
     }
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
+    int retval = pthread_mutex_lock(&(Internals->gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_mutex_lock failed. "
@@ -552,7 +552,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     }
 
     // If the condition state is triggered, then release the thread.
-    if (INTERNALS(Condition_State) == 0) {
+    if (Internals->ConditionState == 0) {
         // getting absolute time timeout
 #if (CISST_OS == CISST_QNX)
         unsigned long ret, sec, nsec;
@@ -582,24 +582,26 @@ bool osaThreadSignal::Wait(double timeoutInSec)
         timeout.tv_sec = sec;
         timeout.tv_nsec = usec * 1000;
 #endif
-        ret = pthread_cond_timedwait(&INTERNALS(gnuCondition), &INTERNALS(gnuMutex), &timeout);
+        ret = pthread_cond_timedwait(&(Internals->gnuCondition), &(Internals->gnuMutex), &timeout);
 
         if (ret == ETIMEDOUT) {
-            retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
+            retval = pthread_mutex_unlock(&(Internals->gnuMutex));
             if( retval != 0 ) {
                 CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                                    << "pthread_mutex_unlock failed. "
                                    << strerror(retval) << ": " << retval
                                    << std::endl;
             }
-            if (do_callback) PostCallback();
+            if (do_callback) {
+                PostCallback();
+            }
             return false;
         }
     }
 
     // AUTOMATIC RESET:
     // condition is not referenced to anymore so it is safe to release it
-    retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
+    retval = pthread_cond_destroy(&(Internals->gnuCondition));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_cond_destroy failed. "
@@ -607,16 +609,16 @@ bool osaThreadSignal::Wait(double timeoutInSec)
                            << std::endl;
     }
     // reinitializing condition = resetting state
-    retval = pthread_cond_init(&INTERNALS(gnuCondition), 0);
+    retval = pthread_cond_init(&(Internals->gnuCondition), 0);
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_cond_init failed. "
                            << strerror(retval) << ": " << retval
                            << std::endl;
     }
-    INTERNALS(Condition_State) = 0;
-    
-    retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
+    Internals->ConditionState = 0;
+
+    retval = pthread_mutex_unlock(&(Internals->gnuMutex));
     if( retval != 0 ) {
         CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
                            << "pthread_mutex_unlock failed. "
@@ -639,11 +641,11 @@ bool osaThreadSignal::Wait(double timeoutInSec)
                                << strerror(retval) << ": " << retval
                                << std::endl;
         }
-        
-        // If the condition state is triggered, then release the thread.                                                                           
+
+        // If the condition state is triggered, then release the thread.
         if( INTERNALS( state ) == 0 ) {
             RTIME timeout = RTIME( timeoutInSec * 1000000000 );
-            retval = rt_cond_wait( &INTERNALS( condition ), 
+            retval = rt_cond_wait( &INTERNALS( condition ),
                                    &INTERNALS( mutex ), timeout );
             if( retval == -ETIMEDOUT ){
                 retval = rt_mutex_release( &INTERNALS( mutex ) );
@@ -657,7 +659,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
                 return false;
             }
         }
-        
+
         // AUTOMATIC RESET:
         // condition is not referenced to anymore so it is safe to release it
         retval = rt_cond_delete( &INTERNALS( condition ) );
@@ -667,7 +669,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
                                << strerror(retval) << ": " << retval
                                << std::endl;
         }
-        
+
         retval = rt_cond_create( &INTERNALS( condition ), NULL );
         if( retval != 0 ){
             CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -676,7 +678,7 @@ bool osaThreadSignal::Wait(double timeoutInSec)
                                << std::endl;
         }
         INTERNALS( state ) = 0;
-        
+
         retval = rt_mutex_release( &INTERNALS( mutex ) );
         if( retval != 0 ) {
             CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -687,94 +689,99 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     }
     else{
     */
-        int retval = pthread_mutex_lock(&INTERNALS(gnuMutex));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_mutex_lock failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        
-        // If the condition state is triggered, then release the thread.
-        if (INTERNALS(Condition_State) == 0) {
-            // getting absolute time timeout
-            int ret, sec, usec;
-            timeval now;
-            timespec timeout;
-            gettimeofday(&now, 0);
-            sec = now.tv_sec + millisec / 1000;
-            usec = now.tv_usec + (millisec % 1000) * 1000;
-            while (usec >= 1000000) {
-                sec ++;
-                usec -= 1000000;
-            }
-            timeout.tv_sec = sec;
-            timeout.tv_nsec = usec * 1000;
+    int retval = pthread_mutex_lock(&(Internals->gnuMutex));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_mutex_lock failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
 
-            ret = pthread_cond_timedwait(&INTERNALS(gnuCondition), &INTERNALS(gnuMutex), &timeout);
-            
-            if (ret == ETIMEDOUT) {
-                retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
-                if( retval != 0 ) {
-                    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                                       << "pthread_mutex_unlock failed. "
-                                       << strerror(retval) << ": " << retval
-                                       << std::endl;
-                }
-                if (do_callback) PostCallback();
-                return false;
-            }
+    // If the condition state is triggered, then release the thread.
+    if (Internals->ConditionState == 0) {
+        // getting absolute time timeout
+        int ret, sec, usec;
+        timeval now;
+        timespec timeout;
+        gettimeofday(&now, 0);
+        sec = now.tv_sec + millisec / 1000;
+        usec = now.tv_usec + (millisec % 1000) * 1000;
+        while (usec >= 1000000) {
+            sec ++;
+            usec -= 1000000;
         }
-        
-        // AUTOMATIC RESET:
-        // condition is not referenced to anymore so it is safe to release it
-        retval = pthread_cond_destroy(&INTERNALS(gnuCondition));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_cond_destroy failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        // reinitializing condition = resetting state
-        retval = pthread_cond_init(&INTERNALS(gnuCondition), 0);
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_cond_init failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
-        INTERNALS(Condition_State) = 0;
-        
-        retval = pthread_mutex_unlock(&INTERNALS(gnuMutex));
-        if( retval != 0 ) {
-            CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                               << "pthread_mutex_unlock failed. "
-                               << strerror(retval) << ": " << retval
-                               << std::endl;
-        }
+        timeout.tv_sec = sec;
+        timeout.tv_nsec = usec * 1000;
 
-        //}
-        //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+        ret = pthread_cond_timedwait(&(Internals->gnuCondition), &(Internals->gnuMutex), &timeout);
+
+        if (ret == ETIMEDOUT) {
+            retval = pthread_mutex_unlock(&(Internals->gnuMutex));
+            if( retval != 0 ) {
+                CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                                   << "pthread_mutex_unlock failed. "
+                                   << strerror(retval) << ": " << retval
+                                   << std::endl;
+            }
+            if (do_callback) {
+                PostCallback();
+            }
+            return false;
+        }
+    }
+
+    // AUTOMATIC RESET:
+    // condition is not referenced to anymore so it is safe to release it
+    retval = pthread_cond_destroy(&(Internals->gnuCondition));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_cond_destroy failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    // reinitializing condition = resetting state
+    retval = pthread_cond_init(&(Internals->gnuCondition), 0);
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_cond_init failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+    Internals->ConditionState = 0;
+
+    retval = pthread_mutex_unlock(&(Internals->gnuMutex));
+    if( retval != 0 ) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
+                           << "pthread_mutex_unlock failed. "
+                           << strerror(retval) << ": " << retval
+                           << std::endl;
+    }
+
+    //}
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
 #endif
 
-    if (do_callback) PostCallback();
+    if (do_callback) {
+        PostCallback();
+    }
     return true;
 }
 
+
 void osaThreadSignal::ToStream(std::ostream & outputStream) const
 {
-    osaThreadSignal * nonConstThis = const_cast<osaThreadSignal *>(this);
     outputStream << "osaThreadSignal: ";
 #if (CISST_OS == CISST_WINDOWS)
-    outputStream << "handle = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->hEvent;
+    outputStream << "handle = " << Internals->hEvent << std::endl;
 #endif
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    outputStream << "condition_state = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->Condition_State;
+    outputStream << "condition_state = " << Internals->ConditionState << std::endl;
 #endif
 #if (CISST_OS == CISST_LINUX_XENOMAI)
-    outputStream << "condition_state = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->Condition_State;
+    outputStream << "condition_state = " << Internals->ConditionState << std::endl;
 #endif
 }
+
 
 void osaThreadSignal::SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void))
 {

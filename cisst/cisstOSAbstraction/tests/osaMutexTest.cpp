@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2008-01-30
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -65,17 +65,6 @@ public:
         CriticalSection.Leave();
     }
 };
-
-
-
-void osaMutexTest::TestMutexInternalsSize(void) {
-    CPPUNIT_ASSERT(osaMutex::INTERNALS_SIZE >= osaMutex::SizeOfInternals());
-}
-
-
-void osaMutexTest::TestCriticalSectionInternalsSize(void) {
-    CPPUNIT_ASSERT(osaCriticalSection::INTERNALS_SIZE >= osaCriticalSection::SizeOfInternals());
-}
 
 
 class MethodArguments {
