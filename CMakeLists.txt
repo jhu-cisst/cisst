@@ -80,18 +80,19 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
-# To have more warnings (mostly for GCC and CLANG
-include (CheckCXXCompilerFlag)
-check_cxx_compiler_flag ("-Wextra" CXX_SUPPORTS_WEXTRA)
-if (CXX_SUPPORTS_WEXTRA)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-endif (CXX_SUPPORTS_WEXTRA)
+# To have more warnings (mostly for GCC and CLANG)
+if (NOT MSVC)
+  include (CheckCXXCompilerFlag)
+  check_cxx_compiler_flag ("-Wextra" CXX_SUPPORTS_WEXTRA)
+  if (CXX_SUPPORTS_WEXTRA)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+  endif (CXX_SUPPORTS_WEXTRA)
 
-check_cxx_compiler_flag ("-Wall" CXX_SUPPORTS_WALL)
-if (CXX_SUPPORTS_WALL)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif (CXX_SUPPORTS_WALL)
-
+  check_cxx_compiler_flag ("-Wall" CXX_SUPPORTS_WALL)
+  if (CXX_SUPPORTS_WALL)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  endif (CXX_SUPPORTS_WALL)
+endif (NOT MSVC)
 
 # Finally, create lib targets
 add_subdirectory (cisst)
