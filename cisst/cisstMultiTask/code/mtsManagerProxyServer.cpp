@@ -57,8 +57,12 @@ mtsManagerProxyServer::~mtsManagerProxyServer()
 std::string mtsManagerProxyServer::GetConfigFullName(const std::string & propertyFileName)
 {
     cmnPath path;
+#if CISST_HAS_IOS
+    path.Add("./");
+#else
     path.AddRelativeToCisstShare("cisstMultiTask/Ice");
     path.AddFromEnvironment("PATH", cmnPath::TAIL);
+#endif
     return path.Find(propertyFileName);
 }
 
