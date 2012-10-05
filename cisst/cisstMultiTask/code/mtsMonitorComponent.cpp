@@ -29,6 +29,10 @@
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 #include <cisstMultiTask/mtsFaultTypes.h>
 
+// For monitoring mechanism (and period example), this flag should be ON.
+// For passive filtering mechanism (and event example), this flag should be OFF.
+#define MANUAL_ADVANCE 1
+
 using namespace SF::Dict;
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
@@ -87,7 +91,9 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     MonitorTargetSetType::iterator it = MonitorTargetSet.begin();
     const MonitorTargetSetType::iterator itEnd = MonitorTargetSet.end();
 
-    //bool advance = false;
+#if MANUAL_ADVANCE
+    bool advance = false;
+#endif
     SF::cisstMonitor * monitor;
     for (; it != itEnd; ++it) {
         monitor = it->second;
@@ -108,7 +114,9 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->GetPeriod(period);
                 publisher->Publish(monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-                //advance = true;
+#if MANUAL_ADVANCE
+                advance = true;
+#endif
             }
             break;
 
@@ -121,7 +129,9 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->GetExecTimeUser(execTimeUser);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-                //advance = true;
+#if MANUAL_ADVANCE
+                advance = true;
+#endif
             }
             break;
 
@@ -134,7 +144,9 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->GetExecTimeTotal(execTimeTotal);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-                //advance = true;
+#if MANUAL_ADVANCE
+                advance = true;
+#endif
             }
             break;
 
@@ -144,8 +156,9 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: not supported monitoring type" << std::endl;
         }
     }
-
-    //return advance;
+#if MANUAL_ADVANCE
+    return advance;
+#endif
     return true;
 }
 
@@ -174,7 +187,7 @@ void mtsMonitorComponent::Init(void)
 {
     TargetComponentAccessors = new TargetComponentAccessorType(true);
 
-#if 0
+#if MANUAL_ADVANCE
     // The monitoring state table doesn't advance automatically.  It advances only when needed 
     // to reduce run-time overhead because the advancement of the state table results in 
     // running all FDD pipelines.  The manual advancement is controlled by 
@@ -482,20 +495,31 @@ bool mtsMonitorComponent::InitializeAccessors(void)
 
 void mtsMonitorComponent::RunMonitors(void)
 {
-    const double currentTick = this->GetTick(); // osaGetTime();
+#if MANUAL_ADVANCE
+    const double currentTick = osaGetTime();
+#else
+    const double currentTick = this->GetTick();
+#endif
 
     TargetComponentAccessorType::const_iterator it = TargetComponentAccessors->begin();
     const TargetComponentAccessorType::const_iterator itEnd = TargetComponentAccessors->end();
-    //bool advance = false;
+#if MANUAL_ADVANCE
+    bool advance = false;
+#endif
     for (; it != itEnd; ++it) {
-        //advance |= it->second->RefreshSamples(currentTick, Publisher);
+#if MANUAL_ADVANCE
+        advance |= it->second->RefreshSamples(currentTick, Publisher);
+#else
         it->second->RefreshSamples(currentTick, Publisher);
+#endif
     }
 
+#if MANUAL_ADVANCE
     // Do filtering and run all FDD pipelines (MJ: this can be further optimized such that
     // only updated samples are processed).
-    //if (advance)
-    //    StateTableMonitor.Advance();
+    if (advance)
+        StateTableMonitor.Advance();
+#endif
 }
 
 void mtsMonitorComponent::PrintTargetComponents(void)
