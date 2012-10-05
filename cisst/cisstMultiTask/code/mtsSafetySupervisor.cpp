@@ -150,7 +150,7 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
         case SF::JSONSerializer::FAULT:
             {
                 SendMessageToCubeCollector(MongoDB::GetDBEntryFromFaultTopic(json));
-#if 1 // MJ TEMP for debugging
+#if 0 // MJ TEMP for debugging
                 static int count = 0;
                 std::cout << "--------------------------------------- Fault" << ++count << std::endl;
                 std::cout << "Fault type   : " << SF::Fault::GetFaultTypeString(json.GetFaultType()) << std::endl;
