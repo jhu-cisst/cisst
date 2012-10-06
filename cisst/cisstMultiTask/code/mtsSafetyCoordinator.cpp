@@ -335,12 +335,16 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
                                                               locationID,
                                                               SF::Monitor::STATE_ON,
                                                               SF::Monitor::OUTPUT_EVENT);
+            // Install fault event handler to target component accessor of the monitor component
+            monitor->SetAttachedToActiveFilter(true);
+
             if (!AddMonitor(monitor)) {
                 CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to install new monitor. Filter: [" << *filter << "], Monitor: [" << *monitor << "]" << std::endl;
                 // MJ TODO: undo signal installation above
                 delete monitor;
                 return false;
             }
+
 
             // Create new instance of mtsEventPublisher and install it on this filter.
             // MJ TODO: Then, the mtsFunction of mtsEventPublisher should be added
