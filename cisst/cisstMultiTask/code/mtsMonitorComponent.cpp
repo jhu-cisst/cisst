@@ -31,7 +31,7 @@
 
 // For monitoring mechanism (and period example), this flag should be ON.
 // For passive filtering mechanism (and event example), this flag should be OFF.
-#define MANUAL_ADVANCE 1
+#define MANUAL_ADVANCE 0
 
 using namespace SF::Dict;
 
@@ -243,7 +243,6 @@ void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
     Publisher->Startup();
     while (ThreadPublisher.Running) {
         Publisher->Run();
-        // smmy
         osaSleep(1.0);
     }
     Publisher->Stop();
