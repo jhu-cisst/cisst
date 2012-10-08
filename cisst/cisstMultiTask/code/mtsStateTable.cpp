@@ -320,7 +320,7 @@ void mtsStateTable::Advance(void) {
         FiltersType::const_iterator it = Filters._name.begin();\
         const FiltersType::const_iterator itEnd = Filters._name.end();\
         for (; it != itEnd; ++it)\
-            (*it)->DoFiltering(false);\
+            (*it)->DoFiltering();\
     }
     // Process filters sequentially
     PROCESS_FILTERS(Features)
@@ -657,10 +657,13 @@ void mtsStateTable::GetNewValueVector(const mtsStateDataId id, std::vector<doubl
     mtsDoubleVec _vec;
     GetNewValueVector(id, _vec, timeStamp);
 
-    if (_vec.size() != vec.size()) 
-        vec.clear();
+    vec.clear();
     for (size_t i = 0; i < _vec.size(); ++i) {
         vec.push_back(_vec(i));
     }
 }
 
+// MJ TODO: Following APIs could be added to access old values for convenience:
+//
+// Fetch the history of old values using index
+//   GetValueHistory(const mtsStateDataId id, size_t historyLength, double & timestamp) const
