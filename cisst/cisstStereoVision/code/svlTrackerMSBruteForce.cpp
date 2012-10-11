@@ -272,7 +272,7 @@ int svlTrackerMSBruteForce::Initialize()
     else {
         // coarsest scale so go by the original parameters
         TemplateRadius = std::max(TemplateRadiusRequested, 1u);
-        SearchRadius = std::max(SearchRadiusRequested, 1u);
+        SearchRadius = std::max(SearchRadiusRequested, 2u);
     }
 
     // create previous image buffer
@@ -287,13 +287,15 @@ int svlTrackerMSBruteForce::Initialize()
     for (i = 0; i < targetcount; i ++) {
         OrigTemplates[i] = new unsigned char[templatesize];
         Targets[i].feature_quality = -1;
+        Targets[i].feature_data.SetAll(0);
     }
 
     MatchMap.SetSize(SearchRadius * 2 + 1, SearchRadius * 2 + 1);
 
-    TargetsAdded = false;
-    Initialized = true;
-    FrameCounter = 0;
+    TargetsAdded  = false;
+    Initialized   = true;
+    FrameCounter  = 0;
+    ThreadCounter = 0;
 
     return SVL_OK;
 }
@@ -305,8 +307,8 @@ void svlTrackerMSBruteForce::ResetTargets()
         Targets[i].feature_quality = -1;
         Targets[i].feature_data.SetAll(0);
     }
-    TargetsAdded = false;
-    FrameCounter = 0;
+    TargetsAdded  = false;
+    FrameCounter  = 0;
 
     if (LowerScale) LowerScale->ResetTargets();
 }
@@ -699,9 +701,13 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         }
     }
 
-    _OnSingleThread(procInfo) {
-        FrameCounter ++;
+    ThreadCounter ++;
+    if (ThreadCounter == procInfo->count) {
+        // The last thread to finish stores the current image for later  use
         memcpy(PreviousImage->GetUCharPointer(), image.GetUCharPointer(videoch), PreviousImage->GetDataSize());
+
+        ThreadCounter = 0;
+        FrameCounter ++;
     }
 
     return SVL_OK;

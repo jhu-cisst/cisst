@@ -71,6 +71,7 @@ protected:
     bool OverwriteTemplates;
     bool TemplateUpdateEnabled;
     unsigned int FrameCounter;
+    unsigned int ThreadCounter;
     unsigned int TemplateRadiusRequested;
     unsigned int SearchRadiusRequested;
     unsigned int TemplateRadius;

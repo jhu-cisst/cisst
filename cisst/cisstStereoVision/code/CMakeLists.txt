@@ -1181,79 +1181,100 @@ ENDMACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
 
 #IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 IF(CISST_SVL_HAS_CUDA)
-    SET(CUDA_OPTIONS
-        CUDA_SDK_ROOT_DIR
-        CUDA_INCLUDE_DIRS
-        CUDA_LIBRARIES
-        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
-        CUDA_BUILD_CUBIN
-        CUDA_BUILD_EMULATION
-        CUDA_TOOLKIT_ROOT_DIR
-        CUDA_VERBOSE_BUILD
-        CACHE INTERNAL "List of CUDA options"
-        )
+#    SET(CUDA_OPTIONS
+#        CUDA_SDK_ROOT_DIR
+#        CUDA_INCLUDE_DIRS
+#        CUDA_LIBRARIES
+#        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
+#        CUDA_BUILD_CUBIN
+#        CUDA_BUILD_EMULATION
+#        CUDA_TOOLKIT_ROOT_DIR
+#        CUDA_VERBOSE_BUILD
+#        CACHE INTERNAL "List of CUDA options"
+#        )
 
     FIND_PACKAGE(CUDA)
     IF(CUDA_FOUND)
-        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
-                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
-        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
-        SET(CUDA_SOURCES
-            cuda/svlCUDACommon.cu
-            )
-        # Add a special target to clean 'nvcc' generated files.
-        CUDA_BUILD_CLEAN_TARGET()
-        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
-                             cisstStereoVisionCUDA
-                             "${CUDA_SOURCES}"
-                             STATIC
-                             OPTIONS ""#-DSTUFF=aaa"
-                             RELEASE --use_fast_math -DNDEBUG
-                             DEBUG -g -DDEBUG
-                             )
+        FIND_LIBRARY(CUDA_CUTIL_LIBRARY cutil "${CUDA_SDK_ROOT_DIR}/C/lib")
 
-        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+        CUDA_ADD_LIBRARY(cisstStereoVisionCUDA
+                         cuda/svlCUDACommon.cu
+#                         ../svlCUDACommon.h
+#                         cuda/svlCUDACommon.cpp
+                         STATIC
+                         )
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${CUDA_SDK_ROOT_DIR}/common/inc"
-            "${CUDA_SDK_ROOT_DIR}/../shared/inc"
-            "${CUDA_INCLUDE_DIRS}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${CUDA_LIBRARIES}"
-#            "${CUDA_GENERATED_LIBRARIES}"
-            )
+        cisst_set_package_settings (cisstStereoVisionCUDA CUDA INCLUDE_DIRECTORIES CUDA_INCLUDE_DIRS)
+        cisst_set_package_settings (cisstStereoVisionCUDA CUDA LIBRARIES CUDA_CUTIL_LIBRARY)
+
+#        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
+#                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
+#        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
+#        SET(CUDA_SOURCES
+#            cuda/svlCUDACommon.cu
+#            )
+#        # Add a special target to clean 'nvcc' generated files.
+#        CUDA_BUILD_CLEAN_TARGET()
+#        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
+#                             cisstStereoVisionCUDA
+#                             "${CUDA_SOURCES}"
+#                             STATIC
+#                             OPTIONS ""#-DSTUFF=aaa"
+#                             RELEASE --use_fast_math -DNDEBUG
+#                             DEBUG -g -DDEBUG
+#                             )
+#
+#        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+#
+#        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+#            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+#            "${CUDA_SDK_ROOT_DIR}/common/inc"
+#            "${CUDA_SDK_ROOT_DIR}/../shared/inc"
+#            "${CUDA_INCLUDE_DIRS}"
+#            )
+#        SET(SVL_ADDITIONAL_LIBRARIES
+#            "${SVL_ADDITIONAL_LIBRARIES}"
+#            "${CUDA_LIBRARIES}"
+##            "${CUDA_GENERATED_LIBRARIES}"
+#            )
+
+#        SET(SVL_ADDITIONAL_LIBRARIES
+#            "${SVL_ADDITIONAL_LIBRARIES}"
+#            cisstStereoVisionCUDA
+#            )
         SET(HEADER_FILES
             ${HEADER_FILES}
             svlSampleCUDAImageTypes.h
             svlSampleCUDAImageCustom.h
             svlSampleCUDAImage.h
             svlFilterCUDATest.h
+#            svlCUDACommon.h
             )
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlSampleCUDAImageTypes.cpp
             svlSampleCUDAImage.cpp
             svlFilterCUDATest.cpp
+#            cuda/svlCUDACommon.cpp
             )
         MESSAGE(STATUS "CUDA found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" ON)
 
     ELSE(CUDA_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVisionCUDA CUDA)
+
         IF(CISST_SVL_HAS_CUDA)
-            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
+#            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
             MESSAGE(FATAL_ERROR "CUDA required. Please specify its location.")
         ELSE(CISST_SVL_HAS_CUDA)
-            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+#            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
             OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
         ENDIF(CISST_SVL_HAS_CUDA)
     ENDIF(CUDA_FOUND)
 
 #ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 ELSE(CISST_SVL_HAS_CUDA)
-    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+#    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
     OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
 #ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 ENDIF(CISST_SVL_HAS_CUDA)
@@ -1354,5 +1375,9 @@ cisst_add_library (
 
 # Link `cisstStereoVision` against CUDA generated libraries
 IF(CISST_SVL_HAS_CUDA)
-    TARGET_LINK_LIBRARIES(cisstStereoVision ${CUDA_GENERATED_LIBRARIES})
+#    TARGET_LINK_LIBRARIES(cisstStereoVision
+#                          ${CUDA_CUTIL_LIBRARY}
+#                          ${CUDA_GENERATED_LIBRARIES}
+#                          )
 ENDIF(CISST_SVL_HAS_CUDA)
+
