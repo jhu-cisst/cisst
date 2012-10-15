@@ -703,6 +703,8 @@ int main(int argc, char * argv[])
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL); // for cisstLog.txt
+    // Enable system-wide thread-safe Logger
+    mtsManagerLocal::SetLogForwarding(true);
 
     mtsManagerGlobal *globalManager = 0;
     mtsManagerLocal * localManager = 0;;
