@@ -143,6 +143,9 @@ protected:
     /*! Collector File precision [DEFAULT = 10] */
     int Precision;
 
+    /*! Collector File fill value [DEFAULT = ' '] */
+    char FillCharacter;
+
     /*! Check if the output file is already opened */
     bool FileOpened;
 
@@ -273,6 +276,10 @@ public:
     /*! Set precision value for the output file.  This setting will
       apply to all future files. */
     void SetOutputStreamPrecision(const int precision);
+
+    /*! Set fill character for the output file. This setting will
+      apply to all future files. */
+    void SetOutputStreamFill(const char fillCharacter);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorBase)
