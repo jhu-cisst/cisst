@@ -81,6 +81,14 @@ public:
         into either cisst or SF such that users don't need to directly call this method. */
     bool DeployMonitorsAndFDDs(void);
 
+    //-------------------------------------------------- 
+    //  State Machine Management
+    //-------------------------------------------------- 
+    // TODO
+
+    //-------------------------------------------------- 
+    //  Misc.
+    //-------------------------------------------------- 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);

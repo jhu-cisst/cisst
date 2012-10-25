@@ -41,6 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_SAFETY_PLUGINS
 #include "cisstMonitor.h"
+#include "statemachine.h"
 #endif
 
 // Always include last
@@ -165,6 +166,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Component state. */
     mtsComponentState State;
+#if CISST_HAS_SAFETY_PLUGINS
+    /*! State machine of Safety Framework */
+    SF::StateMachine FaultState;
+#endif
 
     /*! Provided interface for component management. */
     mtsInterfaceProvided *InterfaceProvidedToManager;

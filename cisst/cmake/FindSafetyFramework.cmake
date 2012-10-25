@@ -19,30 +19,24 @@
 #
 # FindSafetyFramework.cmake
 #
-# Looks for the Safety Framework and defines following cmake variables:
+# Looks for the Safety Framework, loads its configuartions, and defines 
+# following cmake variables:
 #
 #   SF_FOUND
-#   SF_INCLUDE_DIR
-#   SF_INCLUDE_DIRS
-#   SF_LIBRARIES
+#   SF_CONFIG_FILE
+#   SF_LIBRARY_FILE
 #
 
-find_path(SF_INCLUDE_DIR NAMES /usr/local/include DOC "Location of libs folder of the Safety Framework")
-find_library(SF_LIBRARY NAMES SFLib DOC "Path to Safety Framework library")
+find_file(SF_CONFIG_FILE SFConfig.cmake NO_DEFAULT_PATH 
+          DOC "Path to SFConfig.cmake file in the build tree of Safety Framework")
+find_library(SF_LIBRARY_FILE SFLib NO_DEFAULT_PATH
+             DOC "Path to Safety Framework library (SFLib)")
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(SF DEFAULT_MSG SF_LIBRARY SF_INCLUDE_DIR)
+find_package_handle_standard_args(SF DEFAULT_MSG SF_CONFIG_FILE SF_LIBRARY_FILE)
 
-if(SF_FOUND)
-  set(SF_LIBRARIES ${SF_LIBRARY})
-  set(SF_INCLUDE_DIR ${SF_INCLUDE_DIR})
-  set(SF_INCLUDE_DIRS ${SF_INCLUDE_DIR}
-                      ${SF_INCLUDE_DIR}/fdd
-                      ${SF_INCLUDE_DIR}/fdd/filters
-                      ${SF_INCLUDE_DIR}/adapters/cisst
-                      ${SF_INCLUDE_DIR}/common
-                      ${SF_INCLUDE_DIR}/monitor
-                      ${SF_INCLUDE_DIR}/communicator
-                      ${SF_INCLUDE_DIR}/supervisor
-                      ${SF_INCLUDE_DIR}/db)
+if (SF_FOUND)
+    set (SF_CONFIG_FILE ${SF_CONFIG_FILE} PARENT_SCOPE)
+    set (SF_LIBRARY_FILE ${SF_LIBRARY_FILE} PARENT_SCOPE)
+    include(${SF_CONFIG_FILE})
 endif(SF_FOUND)
