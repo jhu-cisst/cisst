@@ -106,7 +106,10 @@ if (ICE_ICE_H_INCLUDE_DIR)
         ${ICE_HOME}/share/Ice-3.4.1/slice
         ${ICE_HOME}/share/Ice-3.4.0/slice
         ${ICE_HOME}/share/Ice-3.3.1/slice
-        ${ICE_HOME}/share/Ice-3.3.0/slice )
+        ${ICE_HOME}/share/Ice-3.3.0/slice
+        # For manual installation (i.e., building Ice from source)
+        ${ICE_HOME}/../slice
+        )
   endif (WIN32)
 
   set(ICE_WIN64 FALSE)

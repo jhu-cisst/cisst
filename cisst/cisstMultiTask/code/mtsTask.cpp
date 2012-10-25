@@ -201,10 +201,23 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
+#if CISST_HAS_SAFETY_PLUGINS
+    mtsComponentState oldState = this->State;
+#endif
+
     StateChange.Lock();
     this->State = newState;
     StateChange.Unlock();
     StateChangeSignal.Raise();
+
+#if CISST_HAS_SAFETY_PLUGINS
+    // If state transition occurs to/from ACTIVE state, notify SF of the transition.
+    if (oldState == mtsComponentState::ACTIVE || newState == mtsComponentState::ACTIVE) {
+        //
+        // MJ TODO: state transition
+        //
+    }
+#endif
 
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
@@ -473,7 +486,7 @@ void mtsTask::SetOverranPeriod(bool overran)
     }
 
     // MJTODO: How/when to reset overrun flag??
-    std::cout  << "###### MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
+    std::cout  << "mtsTask::SetOverranPeriod() ---- MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
 }
 
 #endif
