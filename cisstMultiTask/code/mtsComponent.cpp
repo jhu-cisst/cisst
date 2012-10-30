@@ -37,6 +37,9 @@ mtsComponent::mtsComponent(const std::string & componentName):
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
     StateTables("StateTables")
+#if CISST_HAS_SAFETY_PLUGINS
+    , FaultState(0)
+#endif
 
 {
     Initialize();
@@ -49,6 +52,9 @@ mtsComponent::mtsComponent(void):
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
     StateTables("StateTables")
+#if CISST_HAS_SAFETY_PLUGINS
+    , FaultState(0)
+#endif
 {
     Initialize();
 }
@@ -91,6 +97,11 @@ mtsComponent::~mtsComponent()
     if (ManagerComponentServices) {
         delete ManagerComponentServices;
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (FaultState)
+        delete FaultState;
+#endif
 }
 
 

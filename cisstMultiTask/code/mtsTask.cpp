@@ -34,6 +34,7 @@
 
 #if CISST_HAS_SAFETY_PLUGINS
 #include "dict.h"
+#include "statemachine.h"
 #endif
 
 std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
@@ -244,11 +245,11 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     StateChangeSignal.Raise();
 
 #if CISST_HAS_SAFETY_PLUGINS
-    // If state transition occurs to/from ACTIVE state, notify SF of the transition.
-    if (oldState == mtsComponentState::ACTIVE || newState == mtsComponentState::ACTIVE) {
-        //
-        // MJ TODO: state transition
-        //
+    // If state transition involves the ACTIVE state, notify Safety Framework of the transition.
+    if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
+        this->FaultState->ProcessEvent(SF::State::ON_EXIT);
+    } else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
+        this->FaultState->ProcessEvent(SF::State::ON_ENTRY);
     }
 #endif
 
@@ -334,6 +335,13 @@ mtsTask::mtsTask(const std::string & name,
     // Add fault notification event
     provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
     // [SFUPDATE]
+
+    // Create SF state machine with new instance of state transition event handler and
+    // associate the instance with the SF state machine.
+    // The event handler will be removed when the state machine is destroyed and thus
+    // it should not be removed outside the state machine of Safety Framework.
+    SF::StateEventHandler * eventHandler = new SF::StateEventHandler;
+    this->FaultState = new SF::StateMachine(eventHandler);
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);

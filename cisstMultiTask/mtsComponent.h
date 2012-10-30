@@ -167,8 +167,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Component state. */
     mtsComponentState State;
 #if CISST_HAS_SAFETY_PLUGINS
-    /*! State machine of Safety Framework */
-    SF::StateMachine FaultState;
+    /*! State machine of Safety Framework.  Instantiated in the constructor of mtsTask. */
+    SF::StateMachine * FaultState;
 #endif
 
     /*! Provided interface for component management. */
