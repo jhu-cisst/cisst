@@ -33,12 +33,12 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsComponent::mtsComponent(const std::string & componentName):
     Name(componentName),
+#if CISST_HAS_SAFETY_PLUGINS
+    FaultState(0),
+#endif
     InterfacesProvidedOrOutput("InterfacesProvided"),
     InterfacesRequiredOrInput("InterfacesRequiredOrInput"),
     StateTables("StateTables")
-#if CISST_HAS_SAFETY_PLUGINS
-    , FaultState(0)
-#endif
 
 {
     Initialize();
@@ -46,12 +46,12 @@ mtsComponent::mtsComponent(const std::string & componentName):
 
 
 mtsComponent::mtsComponent(void):
+#if CISST_HAS_SAFETY_PLUGINS
+    FaultState(0),
+#endif
     InterfacesProvidedOrOutput("InterfacesProvided"),
     InterfacesRequiredOrInput("InterfacesRequiredOrInput"),
     StateTables("StateTables")
-#if CISST_HAS_SAFETY_PLUGINS
-    , FaultState(0)
-#endif
 {
     Initialize();
 }
@@ -93,6 +93,23 @@ mtsComponent::~mtsComponent()
 #endif
 }
 
+#if CISST_HAS_SAFETY_PLUGINS
+SF::State::StateType mtsComponent::GetFaultState(void) const
+{
+    if (FaultState) {
+        return FaultState->GetState();
+    } else {
+        return SF::State::INVALID;
+    }
+}
+
+void mtsComponent::SetStateEventHandler(SF::StateEventHandler * instance)
+{
+    if (FaultState) {
+        return FaultState->SetStateEventHandler(instance);
+    }
+}
+#endif
 
 const std::string & mtsComponent::GetName(void) const
 {
