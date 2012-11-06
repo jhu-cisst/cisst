@@ -76,9 +76,9 @@ else (CISST_BUILD_SHARED_LIBS)
 endif (CISST_BUILD_SHARED_LIBS)
 
 # To allow mixing static and dynamic libraries
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
 
 # To have more warnings (mostly for GCC and CLANG)
 if (NOT MSVC)
