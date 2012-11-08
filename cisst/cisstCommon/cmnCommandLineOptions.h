@@ -143,6 +143,10 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
 
     class CISST_EXPORT OptionOneValueBase: public OptionBase {
         friend class cmnCommandLineOptions;
+#if (CISST_COMPILER == CISST_DOTNET2003)
+        // Workaround for Visual Studio.NET 2003
+    public:
+#endif
         OptionOneValueBase(const std::string & shortOption, const std::string & longOption,
                            const std::string & description, RequiredType required);
     };
