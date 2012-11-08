@@ -119,10 +119,7 @@ http://www.cisst.org/cisst/license.txt.
       enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
       enum {InitialLoD = lod}; \
       static cmnClassServicesBase * ClassServices(void); \
-      virtual const cmnClassServicesBase * Services(void) const \
-      { \
-          return this->ClassServices(); \
-      } \
+      virtual const cmnClassServicesBase * Services(void) const; \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
 
@@ -136,10 +133,7 @@ http://www.cisst.org/cisst/license.txt.
       enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
       enum {InitialLoD = lod}; \
       CISST_EXPORT static cmnClassServicesBase * ClassServices(void); \
-      virtual const cmnClassServicesBase * Services(void) const \
-      { \
-          return this->ClassServices(); \
-      } \
+      virtual const cmnClassServicesBase * Services(void) const; \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
 
@@ -152,10 +146,7 @@ http://www.cisst.org/cisst/license.txt.
       enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
       enum {InitialLoD = lod}; \
       _declspec(dllexport) static cmnClassServicesBase * ClassServices(void); \
-      virtual const cmnClassServicesBase * Services(void) const \
-      { \
-          return this->ClassServices(); \
-      } \
+      virtual const cmnClassServicesBase * Services(void) const; \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
 #else
@@ -261,6 +252,10 @@ cmnClassServicesBase * className::ClassServices(void) \
     return classServices; \
 } \
 cmnClassServicesBase * className::ClassServicesPointer = className::ClassServices(); \
+const cmnClassServicesBase * className::Services(void) const    \
+{ \
+    return this->ClassServices(); \
+} \
 template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
