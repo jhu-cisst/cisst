@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -121,6 +120,10 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
  protected:
     class OptionBase {
         friend class cmnCommandLineOptions;
+#if (CISST_COMPILER == CISST_DOTNET2003)
+        // Workaround for Visual Studio.NET 2003
+    public:
+#endif
         OptionBase(const std::string & shortOption, const std::string & longOption,
                    const std::string & description, RequiredType required);
         virtual bool SetValue(const char * value) = 0;
