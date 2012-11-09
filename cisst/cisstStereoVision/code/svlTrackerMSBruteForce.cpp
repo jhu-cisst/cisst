@@ -317,6 +317,10 @@ int svlTrackerMSBruteForce::PreProcessImage(svlSampleImage & image, unsigned int
 {
     if (!Initialized) return SVL_FAIL;
 
+    if (Metric == svlFastNCC) {
+        CalculateSumTables(image.GetUCharPointer(videoch));
+    }
+
     // pre-processing image
     if (LowerScale) {
         // shirinking image for the lower scales recursively
@@ -340,6 +344,12 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
     const unsigned int scalem1 = Scale - 1;
     unsigned int templatesize = TemplateRadius * 2 + 1;
     templatesize *= templatesize * 3;
+
+    if (Metric == svlFastNCC) {
+        if (ZeroMeanTemplate[0].size() < templatesize) {
+            ZeroMeanTemplate[0].SetSize(templatesize);
+        }
+    }
 
     int xpre, ypre, x, y;
     svlTarget2D target, *ptgt;
@@ -461,6 +471,14 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
                 MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
                 GetBestMatch(x, y, ptgt->conf, true);
             }
+            else if (Metric == svlFastNCC) {
+                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[0].Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, true);
+            }
+            else if (Metric == svlNotQuiteNCC) {
+                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, true);
+            }
             else return SVL_FAIL;
         }
         else {
@@ -474,6 +492,14 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
             }
             else if (Metric == svlNCC) {
                 MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, true);
+            }
+            else if (Metric == svlFastNCC) {
+                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[0].Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, true);
+            }
+            else if (Metric == svlNotQuiteNCC) {
+                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
                 GetBestMatch(x, y, conf, true);
             }
             else return SVL_FAIL;
@@ -516,6 +542,14 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
 {
     if (!Initialized) return SVL_FAIL;
 
+    if (Metric == svlFastNCC) {
+        if (ZeroMeanTemplate.size() < procInfo->count) {
+            // Too many threads
+            // Increase ZeroMeanTemplate array size
+            return SVL_FAIL;
+        }
+    }
+
     const int leftborder   = ROI.left   + TemplateRadius;
     const int topborder    = ROI.top    + TemplateRadius;
     const int rightborder  = ROI.right  - TemplateRadius;
@@ -526,6 +560,12 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
     const unsigned int scalem1 = Scale - 1;
     unsigned int templatesize = TemplateRadius * 2 + 1;
     templatesize *= templatesize * 3;
+
+    if (Metric == svlFastNCC) {
+        if (ZeroMeanTemplate[procInfo->ID].size() < templatesize) {
+            ZeroMeanTemplate[procInfo->ID].SetSize(templatesize);
+        }
+    }
 
     svlTarget2D target, *ptgt;
     int xpre, ypre, x, y;
@@ -656,6 +696,14 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
                 MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
                 GetBestMatch(x, y, ptgt->conf, true);
             }
+            else if (Metric == svlFastNCC) {
+                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[procInfo->ID].Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, true);
+            }
+            else if (Metric == svlNotQuiteNCC) {
+                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, ptgt->conf, true);
+            }
             else return SVL_FAIL;
         }
         else {
@@ -669,6 +717,14 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
             }
             else if (Metric == svlNCC) {
                 MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, true);
+            }
+            else if (Metric == svlFastNCC) {
+                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[procInfo->ID].Pointer(), xpre, ypre);
+                GetBestMatch(x, y, conf, true);
+            }
+            else if (Metric == svlNotQuiteNCC) {
+                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
                 GetBestMatch(x, y, conf, true);
             }
             else return SVL_FAIL;
@@ -1010,8 +1066,8 @@ void svlTrackerMSBruteForce::MatchTemplateNCC(unsigned char* img, unsigned char*
         if (tmpyfrom <= imgheight_m1) {
             yoffs = 0;
             if (tmpyfrom < 0) {
-                tmpyfrom = 0;
                 yoffs = -tmpyfrom;
+                tmpyfrom = 0;
             }
             tmpyto = l + tmpheight_m1;
             if (tmpyto >= 0) {
@@ -1032,8 +1088,8 @@ void svlTrackerMSBruteForce::MatchTemplateNCC(unsigned char* img, unsigned char*
                 if (tmpxfrom <= imgwidth_m1) {
                     xoffs = 0;
                     if (tmpxfrom < 0) {
-                        tmpxfrom = 0;
                         xoffs = -tmpxfrom;
+                        tmpxfrom = 0;
                     }
                     tmpxto = l + tmpheight_m1;
                     if (tmpxto >= 0) {
@@ -1080,6 +1136,366 @@ void svlTrackerMSBruteForce::MatchTemplateNCC(unsigned char* img, unsigned char*
                             cr2 += di * dt;
                             di = static_cast<int>(*timg) - mi3; di3 += di * di; timg ++;
                             dt = static_cast<int>(*ttmp) - mt3;                 ttmp ++;
+                            cr3 += di * dt;
+                        }
+                        timg += tmpstride;
+                    }
+                    di1 = sqrt_uint32(di1); di2 = sqrt_uint32(di2); di3 = sqrt_uint32(di3);
+
+                    if (di1 != 0) sum  = (cr1 << 8) / (di1 * dt1); else sum  = (cr1 << 8);
+                    if (di2 != 0) sum += (cr2 << 8) / (di2 * dt2); else sum += (cr2 << 8);
+                    if (di3 != 0) sum += (cr3 << 8) / (di3 * dt3); else sum += (cr3 << 8);
+
+                    *map = sum + 1; map ++;
+
+                    #ifdef __DEBUG_TRACKER
+                        int __res = sum / 10 + 128;
+                        if (__res > 255) __res = 255;
+                        img[0] = img[1] = img[2] = __res;
+                    #endif
+                    
+                }
+                else {
+
+                    *map = 0; map ++;
+
+                }
+
+                img += 3;
+            }
+            img += imgwinstride;
+
+        }
+        else {
+
+            memset(map, 0, winsize * sizeof(int)); map += winsize;
+            img += imgstride;
+
+        }
+    }
+}
+
+void svlTrackerMSBruteForce::MatchTemplateFastNCC(unsigned char* img, unsigned char* tmp, int* zero_mean_tmp, int x, int y)
+{
+    const unsigned int imgstride = Width * 3;
+    const unsigned int tmpheight = TemplateRadius * 2 + 1;
+    const unsigned int tmpwidth = tmpheight * 3;
+    const unsigned int winsize = SearchRadius * 2 + 1;
+    const unsigned int imgwinstride = imgstride - winsize * 3;
+    const int imgwidth_m1 = static_cast<int>(Width) - 1;
+    const int imgheight_m1 = static_cast<int>(Height) - 1;
+    const int tmpheight_m1 = tmpheight - 1;
+
+    unsigned int* sum_r = SumTable[0].Pointer();
+    unsigned int* sum_g = SumTable[1].Pointer();
+    unsigned int* sum_b = SumTable[2].Pointer();
+    unsigned int* sq_sum_r = SqSumTable[0].Pointer();
+    unsigned int* sq_sum_g = SqSumTable[1].Pointer();
+    unsigned int* sq_sum_b = SqSumTable[2].Pointer();
+
+    int i, j, k, l, k_m1, l_m1, sum, hfrom, vfrom;
+    int tmpxfrom, tmpxto, tmpyfrom, tmpyto;
+    int tmpstride, tmprowcount, tmpcolcount, tmpcolcount3, tmppixcount;
+    int xoffs, yoffs, ioffs;
+    int mt1, mt2, mt3;
+    int di1, di2, di3, dis1, dis2, dis3, dt1, dt2, dt3;
+    int dt, cr1, cr2, cr3;
+    int *zm_tmp, *map = MatchMap.Pointer();
+    unsigned char *timg, *ttmp;
+    unsigned int v, h, off1, off2, off3, off4;
+
+    hfrom = x - TemplateRadius - SearchRadius;
+    vfrom = y - TemplateRadius - SearchRadius;
+
+    k = vfrom * imgstride + hfrom * 3;
+    if (k > 0) img += k;
+    else img -= -k;
+
+    tmpxfrom = tmpyfrom = 0;
+    tmpxto = tmpyto = tmpheight;
+    tmppixcount = tmpheight * tmpheight;
+
+    // Compute template means 
+    ttmp = tmp; mt1 = mt2 = mt3 = 0;
+    for (j = tmpyfrom; j < tmpyto; j ++) {
+        for (i = tmpxfrom; i < tmpxto; i ++) {
+            mt1 += *ttmp; ttmp ++;
+            mt2 += *ttmp; ttmp ++;
+            mt3 += *ttmp; ttmp ++;
+        }
+    }
+    mt1 = (mt1 + (tmppixcount >> 1)) / tmppixcount;
+    mt2 = (mt2 + (tmppixcount >> 1)) / tmppixcount;
+    mt3 = (mt3 + (tmppixcount >> 1)) / tmppixcount;
+
+    // Compute template standard deviations
+    zm_tmp = zero_mean_tmp;
+    ttmp = tmp; dt1 = dt2 = dt3 = 0;
+    for (j = tmpyfrom; j < tmpyto; j ++) {
+        for (i = tmpxfrom; i < tmpxto; i ++) {
+            dt = static_cast<int>(*ttmp) - mt1;
+            *zm_tmp = dt; zm_tmp ++;
+            dt1 += dt * dt; ttmp ++;
+
+            dt = static_cast<int>(*ttmp) - mt2;
+            *zm_tmp = dt; zm_tmp ++;
+            dt2 += dt * dt; ttmp ++;
+
+            dt = static_cast<int>(*ttmp) - mt3;
+            *zm_tmp = dt; zm_tmp ++;
+            dt3 += dt * dt; ttmp ++;
+        }
+    }
+    dt1 = sqrt_uint32(dt1); dt2 = sqrt_uint32(dt2); dt3 = sqrt_uint32(dt3);
+    if (dt1 == 0) dt1 = 1; if (dt2 == 0) dt2 = 1; if (dt3 == 0) dt3 = 1;
+
+    for (v = 0, l = vfrom, l_m1 = l - 1; v < winsize; v ++, l ++, l_m1 ++) {
+
+        tmprowcount = 0;
+
+        tmpyfrom = l;
+        if (tmpyfrom <= imgheight_m1) {
+            yoffs = 0;
+            if (tmpyfrom < 0) {
+                yoffs = -tmpyfrom;
+                tmpyfrom = 0;
+            }
+            tmpyto = l + tmpheight_m1;
+            if (tmpyto >= 0) {
+                if (tmpyto > imgheight_m1) {
+                    tmpyto = imgheight_m1;
+                }
+                tmprowcount = tmpyto - tmpyfrom + 1;
+            }
+        }
+
+        if (tmprowcount > 0) {
+
+            for (h = 0, k = hfrom, k_m1 = k - 1; h < winsize; h ++, k ++, k_m1 ++) {
+
+                tmpcolcount = 0;
+
+                tmpxfrom = l;
+                if (tmpxfrom <= imgwidth_m1) {
+                    xoffs = 0;
+                    if (tmpxfrom < 0) {
+                        xoffs = -tmpxfrom;
+                        tmpxfrom = 0;
+                    }
+                    tmpxto = l + tmpheight_m1;
+                    if (tmpxto >= 0) {
+                        if (tmpxto > imgwidth_m1) {
+                            tmpxto = imgwidth_m1;
+                        }
+                        tmpcolcount = tmpxto - tmpxfrom + 1;
+                    }
+                }
+
+                if (tmpcolcount > 0) {
+
+                    tmpcolcount3 = tmpcolcount * 3;
+                    tmpstride = imgstride - tmpcolcount3;
+                    tmppixcount = tmprowcount * tmpcolcount;
+
+                    xoffs *= 3;
+                    ioffs = yoffs * imgstride + xoffs;
+
+                    // Compute image standard deviations and correlations
+                    timg = img + ioffs;
+                    zm_tmp = zero_mean_tmp + yoffs * tmpwidth + xoffs;
+                    cr1 = cr2 = cr3 = 0;
+                    for (j = tmpyfrom; j <= tmpyto; j ++) {
+                        for (i = tmpxfrom; i <= tmpxto; i ++) {
+                            cr1 += (int)(*timg) * (int)(*zm_tmp); timg ++; zm_tmp ++;
+                            cr2 += (int)(*timg) * (int)(*zm_tmp); timg ++; zm_tmp ++;
+                            cr3 += (int)(*timg) * (int)(*zm_tmp); timg ++; zm_tmp ++;
+                        }
+                        timg += tmpstride;
+                        zm_tmp += tmpwidth - tmpcolcount3;
+                    }
+
+                    // Compute image normalization denominator
+                    off1 = (l_m1 + tmprowcount) * Width + k_m1 + tmpcolcount;
+                    di1 = sum_r[off1];
+                    di2 = sum_g[off1];
+                    di3 = sum_b[off1];
+                    dis1 = sq_sum_r[off1];
+                    dis2 = sq_sum_g[off1];
+                    dis3 = sq_sum_b[off1];
+                    if (k_m1 >= 0) {
+                        off2 = (l_m1 + tmprowcount) * Width + k_m1;
+                        di1 -= sum_r[off2];
+                        di2 -= sum_g[off2];
+                        di3 -= sum_b[off2];
+                        dis1 -= sq_sum_r[off2];
+                        dis2 -= sq_sum_g[off2];
+                        dis3 -= sq_sum_b[off2];
+                    }
+                    if (l_m1 >= 0) {
+                        off3 = l_m1 * Width + k_m1 + tmpcolcount;
+                        di1 -= sum_r[off3];
+                        di2 -= sum_g[off3];
+                        di3 -= sum_b[off3];
+                        dis1 -= sq_sum_r[off3];
+                        dis2 -= sq_sum_g[off3];
+                        dis3 -= sq_sum_b[off3];
+                        if (k_m1 >= 0) {
+                            off4 = l_m1 * Width + k_m1;
+                            di1 += sum_r[off4];
+                            di2 += sum_g[off4];
+                            di3 += sum_b[off4];
+                            dis1 += sq_sum_r[off4];
+                            dis2 += sq_sum_g[off4];
+                            dis3 += sq_sum_b[off4];
+                        }
+                    }
+                    di1 *= di1; di2 *= di2; di3 *= di3;
+                    di1 /= tmppixcount; di2 /= tmppixcount; di3 /= tmppixcount;
+                    dis1 -= di1; dis2 -= di2; dis3 -= di3;
+                    dis1 = sqrt_uint32(dis1); dis2 = sqrt_uint32(dis2); di3 = sqrt_uint32(dis3);
+
+                    if (dis1 != 0) sum  = (cr1 << 8) / (dis1 * dt1); else sum  = (cr1 << 8);
+                    if (dis2 != 0) sum += (cr2 << 8) / (dis2 * dt2); else sum += (cr2 << 8);
+                    if (dis3 != 0) sum += (cr3 << 8) / (dis3 * dt3); else sum += (cr3 << 8);
+
+                    *map = sum + 1; map ++;
+
+                    #ifdef __DEBUG_TRACKER
+                        int __res = sum / 10 + 128;
+                        if (__res > 255) __res = 255;
+                        img[0] = img[1] = img[2] = __res;
+                    #endif
+                    
+                }
+                else {
+
+                    *map = 0; map ++;
+
+                }
+
+                img += 3;
+            }
+            img += imgwinstride;
+
+        }
+        else {
+
+            memset(map, 0, winsize * sizeof(int)); map += winsize;
+            img += imgstride;
+
+        }
+    }
+}
+
+void svlTrackerMSBruteForce::MatchTemplateNotQuiteNCC(unsigned char* img, unsigned char* tmp, int x, int y)
+{
+    const unsigned int imgstride = Width * 3;
+    const unsigned int tmpheight = TemplateRadius * 2 + 1;
+    const unsigned int tmpwidth = tmpheight * 3;
+    const unsigned int winsize = SearchRadius * 2 + 1;
+    const unsigned int imgwinstride = imgstride - winsize * 3;
+    const int imgwidth_m1 = static_cast<int>(Width) - 1;
+    const int imgheight_m1 = static_cast<int>(Height) - 1;
+    const int tmpheight_m1 = tmpheight - 1;
+
+    int i, j, k, l, sum, hfrom, vfrom;
+    int tmpxfrom, tmpxto, tmpyfrom, tmpyto;
+    int tmpstride, tmprowcount, tmpcolcount, tmppixcount;
+    int xoffs, yoffs, ioffs;
+    int di1, di2, di3, dt1, dt2, dt3;
+    int di, dt, cr1, cr2, cr3;
+    int* map = MatchMap.Pointer();
+    unsigned char *timg, *ttmp;
+    unsigned int v, h;
+
+    hfrom = x - TemplateRadius - SearchRadius;
+    vfrom = y - TemplateRadius - SearchRadius;
+
+    k = vfrom * imgstride + hfrom * 3;
+    if (k > 0) img += k;
+    else img -= -k;
+
+    tmpxfrom = tmpyfrom = 0;
+    tmpxto = tmpyto = tmpheight;
+    tmppixcount = tmpheight * tmpheight;
+
+    // Compute template denominator
+    ttmp = tmp; dt1 = dt2 = dt3 = 0;
+    for (j = tmpyfrom; j < tmpyto; j ++) {
+        for (i = tmpxfrom; i < tmpxto; i ++) {
+            dt = static_cast<int>(*ttmp); dt1 += dt * dt; ttmp ++;
+            dt = static_cast<int>(*ttmp); dt2 += dt * dt; ttmp ++;
+            dt = static_cast<int>(*ttmp); dt3 += dt * dt; ttmp ++;
+        }
+    }
+    dt1 = sqrt_uint32(dt1); dt2 = sqrt_uint32(dt2); dt3 = sqrt_uint32(dt3);
+    if (dt1 == 0) dt1 = 1; if (dt2 == 0) dt2 = 1; if (dt3 == 0) dt3 = 1;
+
+    for (v = 0, l = vfrom; v < winsize; v ++, l ++) {
+
+        tmprowcount = 0;
+
+        tmpyfrom = l;
+        if (tmpyfrom <= imgheight_m1) {
+            yoffs = 0;
+            if (tmpyfrom < 0) {
+                tmpyfrom = 0;
+                yoffs = -tmpyfrom;
+            }
+            tmpyto = l + tmpheight_m1;
+            if (tmpyto >= 0) {
+                if (tmpyto > imgheight_m1) {
+                    tmpyto = imgheight_m1;
+                }
+                tmprowcount = tmpyto - tmpyfrom + 1;
+            }
+        }
+
+        if (tmprowcount > 0) {
+
+            for (h = 0, k = hfrom; h < winsize; h ++, k ++) {
+
+                tmpcolcount = 0;
+
+                tmpxfrom = l;
+                if (tmpxfrom <= imgwidth_m1) {
+                    xoffs = 0;
+                    if (tmpxfrom < 0) {
+                        tmpxfrom = 0;
+                        xoffs = -tmpxfrom;
+                    }
+                    tmpxto = l + tmpheight_m1;
+                    if (tmpxto >= 0) {
+                        if (tmpxto > imgwidth_m1) {
+                            tmpxto = imgwidth_m1;
+                        }
+                        tmpcolcount = tmpxto - tmpxfrom + 1;
+                    }
+                }
+
+                if (tmpcolcount > 0) {
+
+                    tmpstride = imgstride - tmpcolcount * 3;
+                    tmppixcount = tmprowcount * tmpcolcount;
+
+                    xoffs *= 3;
+                    ioffs = yoffs * imgstride + xoffs;
+
+                    // Compute image denominator and numerator
+                    timg = img + ioffs;
+                    ttmp = tmp + yoffs * tmpwidth + xoffs;
+                    cr1 = cr2 = cr3 = 0;
+                    di1 = di2 = di3 = 0;
+                    for (j = tmpyfrom; j <= tmpyto; j ++) {
+                        for (i = tmpxfrom; i <= tmpxto; i ++) {
+                            di = static_cast<int>(*timg); di1 += di * di; timg ++;
+                            dt = static_cast<int>(*ttmp);                 ttmp ++;
+                            cr1 += di * dt;
+                            di = static_cast<int>(*timg); di2 += di * di; timg ++;
+                            dt = static_cast<int>(*ttmp);                 ttmp ++;
+                            cr2 += di * dt;
+                            di = static_cast<int>(*timg); di3 += di * di; timg ++;
+                            dt = static_cast<int>(*ttmp);                 ttmp ++;
                             cr3 += di * dt;
                         }
                         timg += tmpstride;
@@ -1167,6 +1583,8 @@ void svlTrackerMSBruteForce::GetBestMatch(int &x, int &y, unsigned char &conf, b
     if (Metric == svlSAD) avrg <<= 6;
     else if (Metric == svlSSD) best <<= 3;
     else if (Metric == svlNCC) best <<= 6;
+    else if (Metric == svlFastNCC) best <<= 6;
+    else if (Metric == svlNotQuiteNCC) best <<= 6;
 
     if (higherbetter) {
         if (avrg > 0) best = best / avrg;
@@ -1246,6 +1664,120 @@ void svlTrackerMSBruteForce::ShrinkImage(unsigned char* src, unsigned char* dst)
         srcln1 += lgstride2;
         srcln2 += lgstride2;
         dst    += smstride2;
+    }
+}
+
+void svlTrackerMSBruteForce::CalculateSumTables(unsigned char* img)
+{
+    for (unsigned int i = 0; i < 3; i ++) {
+        if (SumTable[i].rows() != Height && SumTable[i].cols() != Width) {
+            SumTable[i].SetSize(Height, Width);
+        }
+        if (SqSumTable[i].rows() != Height && SqSumTable[i].cols() != Width) {
+            SqSumTable[i].SetSize(Height, Width);
+        }
+    }
+
+    unsigned int* sum_r = SumTable[0].Pointer();
+    unsigned int* sum_g = SumTable[1].Pointer();
+    unsigned int* sum_b = SumTable[2].Pointer();
+    unsigned int* sq_sum_r = SqSumTable[0].Pointer();
+    unsigned int* sq_sum_g = SqSumTable[1].Pointer();
+    unsigned int* sq_sum_b = SqSumTable[2].Pointer();
+
+    const int border = TemplateRadius + SearchRadius;
+    int l, r, t, b;
+
+    l = (ROI.left   >= 0) ? ROI.left   : 0;
+    r = (ROI.right  >= 0) ? ROI.right  : Width;
+    t = (ROI.top    >= 0) ? ROI.top    : 0;
+    b = (ROI.bottom >= 0) ? ROI.bottom : Height;
+    l -= border;
+    r += border + 1;
+    t -= border;
+    b += border + 1;
+    if (l < 0) l = 0;
+    if (r > static_cast<int>(Width)) r = Width;
+    if (t < 0) t = 0;
+    if (b > static_cast<int>(Height)) b = Height;
+
+    // Store in const for potentially better optimization
+    const unsigned int left   = l;
+    const unsigned int right  = r;
+    const unsigned int top    = t;
+    const unsigned int bottom = b;
+
+    const int img_width_n = -static_cast<int>(Width);
+    const int img_width_nm1 = img_width_n - 1;
+
+    const unsigned int offset = top * Width + left;
+    const unsigned int stride = Width - (right - left);
+    const unsigned int stride3 = stride * 3;
+    unsigned int s_r, s_g, s_b, ss_r, ss_g, ss_b;
+    unsigned int i, j;
+
+    img += offset * 3;
+    sum_r += offset;
+    sum_g += offset;
+    sum_b += offset;
+    sq_sum_r += offset;
+    sq_sum_g += offset;
+    sq_sum_b += offset;
+
+    for (j = top; j < bottom; j ++) {
+        for (i = left; i < right; i ++) {
+            s_r = *img; img ++;
+            s_g = *img; img ++;
+            s_b = *img; img ++;
+            ss_r = s_r * s_r;
+            ss_g = s_g * s_g;
+            ss_b = s_b * s_b;
+            if (i > left) {
+                s_r += sum_r[-1];
+                s_g += sum_g[-1];
+                s_b += sum_b[-1];
+                ss_r += sq_sum_r[-1];
+                ss_g += sq_sum_g[-1];
+                ss_b += sq_sum_b[-1];
+            }
+            if (j > top) {
+                s_r += sum_r[img_width_n];
+                s_g += sum_g[img_width_n];
+                s_b += sum_b[img_width_n];
+                ss_r += sq_sum_r[img_width_n];
+                ss_g += sq_sum_g[img_width_n];
+                ss_b += sq_sum_b[img_width_n];
+
+                if (i > left) {
+                    s_r -= sum_r[img_width_nm1];
+                    s_g -= sum_g[img_width_nm1];
+                    s_b -= sum_b[img_width_nm1];
+                    ss_r -= sq_sum_r[img_width_nm1];
+                    ss_g -= sq_sum_g[img_width_nm1];
+                    ss_b -= sq_sum_b[img_width_nm1];
+                }
+            }
+            *sum_r = s_r;
+            *sum_g = s_g;
+            *sum_b = s_b;
+            *sq_sum_r = ss_r;
+            *sq_sum_g = ss_g;
+            *sq_sum_b = ss_b;
+
+            sum_r ++;
+            sum_g ++;
+            sum_b ++;
+            sq_sum_r ++;
+            sq_sum_g ++;
+            sq_sum_b ++;
+        }
+        img += stride3;
+        sum_r += stride;
+        sum_g += stride;
+        sum_b += stride;
+        sq_sum_r += stride;
+        sq_sum_g += stride;
+        sq_sum_b += stride;
     }
 }
 
