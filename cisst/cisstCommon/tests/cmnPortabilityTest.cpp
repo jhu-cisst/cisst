@@ -75,7 +75,8 @@ void cmnPortabilityTest::TestWithCMake(void) {
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.2"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.3"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.4"))
-                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.5")));
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.5"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++.exe")));
     } else if (CISST_COMPILER == CISST_CLANG) {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == std::string("c++"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++")));
