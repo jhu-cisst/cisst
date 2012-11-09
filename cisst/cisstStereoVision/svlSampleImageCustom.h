@@ -332,6 +332,21 @@ public:
 #endif // CISST_SVL_HAS_OPENCV
     }
 
+#if CISST_SVL_HAS_OPENCV
+    cv::Mat CvMatRef(const unsigned int videochannel = 0) const
+#else // CISST_SVL_HAS_OPENCV
+    cv::Mat CvMatRef(const unsigned int CMN_UNUSED(videochannel) = 0) const
+#endif // CISST_SVL_HAS_OPENCV
+    {
+#if CISST_SVL_HAS_OPENCV
+        if (videochannel < _VideoChannels) return cv::Mat(OCVImageHeader[videochannel]);
+        else return cv::Mat();
+#else // CISST_SVL_HAS_OPENCV
+        CMN_LOG_CLASS_INIT_ERROR << "Class svlSampleImageCustom: CvMatRef() called while OpenCV is disabled" << std::endl;
+        return 0;
+#endif // CISST_SVL_HAS_OPENCV
+    }
+
     unsigned char* GetUCharPointer(const unsigned int videochannel)
     {
         return reinterpret_cast<unsigned char*>(GetPointer(videochannel));
@@ -387,8 +402,23 @@ public:
 #endif // CISST_SVL_HAS_OPENCV
     {
 #if CISST_SVL_HAS_OPENCV
-        if (ipl_image && videochannel >= _VideoChannels) {
+        if (ipl_image && videochannel < _VideoChannels) {
             SetSize(videochannel, ipl_image->width, ipl_image->height);
+            return SVL_OK;
+        }
+#endif // CISST_SVL_HAS_OPENCV
+        return SVL_FAIL;
+    }
+
+#if CISST_SVL_HAS_OPENCV
+    int SetSize(const cv::Mat& cv_mat, const unsigned int videochannel = 0)
+#else // CISST_SVL_HAS_OPENCV
+    int SetSize(const cv::Mat& CMN_UNUSED(cv_mat), const unsigned int CMN_UNUSED(videochannel) = 0)
+#endif // CISST_SVL_HAS_OPENCV
+    {
+#if CISST_SVL_HAS_OPENCV
+        if (videochannel < _VideoChannels) {
+            SetSize(videochannel, cv_mat.cols, cv_mat.rows);
             return SVL_OK;
         }
 #endif // CISST_SVL_HAS_OPENCV
@@ -405,6 +435,22 @@ public:
         if (GetOCVImagePixelType(ipl_image) == GetPixelType()) {
             if (SetSize(ipl_image, videochannel) != SVL_OK) return SVL_FAIL;
             memcpy(GetUCharPointer(videochannel), ipl_image->imageData, GetDataSize(videochannel));
+            return SVL_OK;
+        }
+#endif // CISST_SVL_HAS_OPENCV
+        return SVL_FAIL;
+    }
+
+#if CISST_SVL_HAS_OPENCV
+    int CopyOf(const cv::Mat& cv_mat, const unsigned int videochannel = 0)
+#else // CISST_SVL_HAS_OPENCV
+    int CopyOf(const cv::Mat& CMN_UNUSED(cv_mat), const unsigned int CMN_UNUSED(videochannel) = 0)
+#endif // CISST_SVL_HAS_OPENCV
+    {
+#if CISST_SVL_HAS_OPENCV
+        if (GetOCVImagePixelType(cv_mat) == GetPixelType()) {
+            if (SetSize(cv_mat, videochannel) != SVL_OK) return SVL_FAIL;
+            memcpy(GetUCharPointer(videochannel), cv_mat.data, GetDataSize(videochannel));
             return SVL_OK;
         }
 #endif // CISST_SVL_HAS_OPENCV
@@ -583,6 +629,26 @@ private:
         }
         else if (ipl_image->depth == IPL_DEPTH_32F) {
             if (ipl_image->nChannels == 1) return svlPixelMonoFloat;
+            if (ipl_image->nChannels == 3) return svlPixel3DFloat;
+        }
+
+        return svlPixelUnknown;
+    }
+
+    svlPixelType GetOCVImagePixelType(const cv::Mat cv_mat)
+    {
+        if (cv_mat.depth() == CV_8U) {
+            if (cv_mat.channels() == 1) return svlPixelMono8;
+            if (cv_mat.channels() == 3) return svlPixelRGB;
+            if (cv_mat.channels() == 4) return svlPixelRGBA;
+        }
+        else if (cv_mat.depth() == CV_16U) {
+            if (cv_mat.channels() == 1) return svlPixelMono16;
+        }
+        // There is no 32 bit unsigned integral type cv::Mat in OpenCV
+        else if (cv_mat.depth() == CV_32F) {
+            if (cv_mat.channels() == 1) return svlPixelMonoFloat;
+            if (cv_mat.channels() == 3) return svlPixel3DFloat;
         }
 
         return svlPixelUnknown;

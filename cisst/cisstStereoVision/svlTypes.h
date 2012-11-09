@@ -78,6 +78,7 @@ http://www.cisst.org/cisst/license.txt.
     #else // CISST_SVL_HAS_OPENCV
         // to compile the same API
         typedef void IplImage;
+        typedef int  cv::Mat;
     #endif // CISST_SVL_HAS_OPENCV
 #endif // CISST_SVL_HAS_OPENCV2
 
