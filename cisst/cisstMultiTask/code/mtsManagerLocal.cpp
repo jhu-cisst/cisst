@@ -1005,7 +1005,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     if (componentName == "") {
         componentName.assign(component->Services()->GetName());
         char buf[20];
-        sprintf(buf, "_%lx", reinterpret_cast<unsigned long>(component));
+        sprintf(buf, "_%p", component);
         componentName.append(buf);
         CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: assigning name \"" << componentName << "\"" << std::endl;
         component->SetName(componentName);
