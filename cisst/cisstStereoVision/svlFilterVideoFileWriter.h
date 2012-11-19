@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Forward declarations
 class osaTimeServer;
+class svlFile;
 
 
 class CISST_EXPORT svlFilterVideoFileWriter : public svlFilterBase
@@ -48,6 +49,7 @@ public:
 
     int SetFilePath(const std::string &filepath, unsigned int videoch = SVL_LEFT);
     int SetFramerate(const double framerate, unsigned int videoch = SVL_LEFT);
+    int SetEnableTimestampsFile(bool enable, unsigned int videoch = SVL_LEFT);
     int SetCodecParams(const svlVideoIO::Compression *compression, unsigned int videoch = SVL_LEFT);
     int ResetCodec(unsigned int videoch = SVL_LEFT);
     int SaveCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT) const;
@@ -55,6 +57,8 @@ public:
 
     std::string GetFilePath(unsigned int videoch = SVL_LEFT) const;
     int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
+    double GetFramerate(unsigned int videoch = SVL_LEFT);
+    bool GetEnableTimestampsFile(unsigned int videoch = SVL_LEFT) const;
     std::string GetCodecName(unsigned int videoch = SVL_LEFT) const;
     int GetCodecName(std::string &name, unsigned int videoch = SVL_LEFT) const;
     svlVideoIO::Compression* GetCodecParams(unsigned int videoch = SVL_LEFT) const;
@@ -98,6 +102,10 @@ private:
     vctDynamicVector<svlVideoIO::Compression*> CodecParam;
     vctDynamicVector<std::string> FilePath;
     vctDynamicVector<double> Framerate;
+    vctDynamicVector<unsigned int> FramesWritten;
+    vctDynamicVector<bool> EnableTimestampsFile;
+    vctDynamicVector<svlFile*> TimestampsFile;
+    vctDynamicVector<double> FirstTimestamp;
 
     void UpdateCodecCount(const unsigned int count);
 };

@@ -50,7 +50,6 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecFFMPEG class ***/
 /*********************************/
 
-//CMN_IMPLEMENT_SERVICES(svlVideoCodecFFMPEG)
 CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecFFMPEG, svlVideoCodecBase)
 
 svlVideoCodecFFMPEG::svlVideoCodecFFMPEG() :
