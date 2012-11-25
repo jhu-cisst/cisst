@@ -228,7 +228,7 @@ http://www.cisst.org/cisst/license.txt.
 // otherwise).
 #  ifndef WIN32
 #    define WIN32 1
-#  elif !WIN32
+#  else
 #    undef WIN32
 #    define WIN32 1
 #  endif

@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 // do it only for windows 32 OSs (95/98/me or NT/2000) and Microsoft compilers.
 // Note: we cannot rely on cmnPortability here because this file is, in fact,
 // included into cmnPortability.
-#if WIN32 && _MSC_VER
+#if defined(WIN32) && defined(_MSC_VER)
 
 #ifdef CISST_THIS_LIBRARY_AS_DLL
 // warning regarding base class not exporting, i.e. all std::
