@@ -472,7 +472,7 @@ int svlFilterVideoFileWriter::GetFilePath(std::string &filepath, unsigned int vi
 double svlFilterVideoFileWriter::GetFramerate(unsigned int videoch)
 {
     if (videoch >= CodecParam.size()) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetCodecName: video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetFramerate: video channel out of range: " << videoch << std::endl;
         return -1.0;
     }
     return Framerate[videoch];
@@ -481,7 +481,7 @@ double svlFilterVideoFileWriter::GetFramerate(unsigned int videoch)
 bool svlFilterVideoFileWriter::GetEnableTimestampsFile(unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetCodecName: video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetEnableTimestampsFile: video channel out of range: " << videoch << std::endl;
         return -1.0;
     }
     return EnableTimestampsFile[videoch];
@@ -495,7 +495,7 @@ std::string svlFilterVideoFileWriter::GetCodecName(unsigned int videoch) const
     }
     if (!CodecParam[videoch] ||
         CodecParam[videoch]->size < sizeof(svlVideoIO::Compression)) {
-        CMN_LOG_CLASS_INIT_ERROR << "SaveCodec: invalid compression structure" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetCodecName: invalid compression structure" << std::endl;
         return "";
     }
 
@@ -512,12 +512,12 @@ int svlFilterVideoFileWriter::GetCodecName(std::string &encoder, unsigned int vi
 svlVideoIO::Compression* svlFilterVideoFileWriter::GetCodecParams(unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetCodec: video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetCodecParams: video channel out of range: " << videoch << std::endl;
         return 0;
     }
     if (!CodecParam[videoch] ||
         CodecParam[videoch]->size < sizeof(svlVideoIO::Compression)) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetCodec: invalid compression structure" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetCodecParams: invalid compression structure" << std::endl;
         return 0;
     }
 
