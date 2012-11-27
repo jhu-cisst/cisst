@@ -37,6 +37,12 @@ http://www.cisst.org/cisst/license.txt.
     #define AVMEDIA_TYPE_VIDEO  CODEC_TYPE_VIDEO
 #endif
 
+#if LIBAVCODEC_VERSION_INT >= ((53 << 16) + (35 << 8))
+    extern "C" {
+        #include <mathematics.h>
+    }
+#endif
+
 #ifndef AVSEEK_FLAG_FRAME
     #define AVSEEK_FLAG_FRAME   8
 #endif
@@ -133,7 +139,7 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
 
         // Find the first video stream
         for (i = 0; i < pFormatCtx->nb_streams; i ++) {
-            if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) {
+            if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
                 VideoStreamID = i;
                 break;
             }
