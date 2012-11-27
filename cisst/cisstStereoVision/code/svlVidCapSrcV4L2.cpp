@@ -72,7 +72,8 @@ svlVidCapSrcV4L2::svlVidCapSrcV4L2() :
 	ColorSpace(0),
 	FrameBufferSize(0),
     FrameBuffer(0),
-    OutputBuffer(0)
+    OutputBuffer(0),
+    Format(0)
 {
 }
 
@@ -107,6 +108,7 @@ int svlVidCapSrcV4L2::SetStreamCount(unsigned int numofstreams)
     FrameBufferSize = new int[NumOfStreams];
     FrameBuffer = new FrameBufferType*[NumOfStreams];
     OutputBuffer = new svlBufferImage*[NumOfStreams];
+    Format = new svlFilterSourceVideoCapture::ImageFormat*[NumOfStreams];
 
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
         CaptureProc[i] = 0;
@@ -122,6 +124,7 @@ int svlVidCapSrcV4L2::SetStreamCount(unsigned int numofstreams)
         FrameBufferSize[i] = 0;
         FrameBuffer[i] = 0;
         OutputBuffer[i] = 0;
+        Format[i] = 0;
     }
 
     return SVL_OK;
@@ -147,10 +150,19 @@ int svlVidCapSrcV4L2::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **de
     //   where * can be an integer from 0 to 255 (minor number).
     //   However, uncompressed video devices are listed only
     //   in the range of 32-47.
+    /// \todo(dmirota1)  Consider replacing with glob call
+    /** glob_t globbuf;
+        glob("/dev/video[0-9]*", NULL, NULL, &globbuf);
+
+        for (i = 0; i < globbuf.gl_pathc; i ++) {
+            memcopy(tempname,globbuf.gl_pathv[i],strlen(globbuf.gl_pathv[i]));
+            ...
+        }
+    **/
     counter = 0;
     for (i = 0; i < 16; i ++) {
     
-        sprintf(tempname, "/dev/video%d", i + 32);
+        sprintf(tempname, "/dev/video%d", i /*+ 32*/);
 #ifdef __verbose__
         cout << "-Opening device: " << tempname << endl;
 #endif
@@ -235,6 +247,7 @@ int svlVidCapSrcV4L2::Open()
     v4l2_capability devprops;
     v4l2_std_id standard;
     v4l2_format format;
+    memset(&format,0,sizeof(v4l2_format));
 //    v4l2_requestbuffers reqbuff;
 //    v4l2_buffer buffer;
     char tempname[64];
@@ -242,7 +255,7 @@ int svlVidCapSrcV4L2::Open()
     for (i = 0; i < NumOfStreams; i ++) {
 
         // Opening device
-        sprintf(tempname, "/dev/video%d", DeviceID[i] + 32);
+        sprintf(tempname, "/dev/video%d", DeviceID[i] /*+ 32*/);
 #ifdef __verbose__
         cout << "Trying: " << tempname << endl;
 #endif
@@ -260,7 +273,8 @@ int svlVidCapSrcV4L2::Open()
             cout << "-Open: QUERYCAP done - Streaming method selected" << endl;
 #endif
         }
-        else {
+        /// Prefer Read method when available
+        if ((devprops.capabilities & V4L2_CAP_READWRITE) != 0){
             CapMethod[i] = MV4LP_METHOD_READ;
 #ifdef __verbose__
             cout << "-Open: QUERYCAP done - Read method selected" << endl;
@@ -276,17 +290,21 @@ int svlVidCapSrcV4L2::Open()
         // Setting standard
         memset(&standard, 0, sizeof(v4l2_std_id));
         standard = V4L2_STD_NTSC_M;
-        if (ioctl(DeviceHandle[i], VIDIOC_S_STD, &standard) != 0) goto labError;
+        if((devprops.capabilities & V4L2_CAP_TUNER) != 0)
+            /// \todo(dmirota1)  PAL and NTSC should be options that exposed
+            if (ioctl(DeviceHandle[i], VIDIOC_S_STD, &standard) != 0) goto labError;
 #ifdef __verbose__
         cout << "-Open: standard set" << endl;
 #endif
 
         // Setting format
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        format.fmt.pix.width  = 720;
-        format.fmt.pix.height = 480;
-        format.fmt.pix.pixelformat = V4L2_PIX_FMT_BGR24;
-        format.fmt.pix.field = V4L2_FIELD_INTERLACED;
+        if (ioctl(DeviceHandle[i], VIDIOC_G_FMT, &format) != 0) goto labError;
+
+        format.fmt.pix.width  = Format[i]->width;
+        format.fmt.pix.height = Format[i]->height;
+        format.fmt.pix.pixelformat = svlPixelType_to_V4L2_color(Format[i]->colorspace);
+        //format.fmt.pix.field = V4L2_FIELD_INTERLACED;
         if (ioctl(DeviceHandle[i], VIDIOC_S_FMT, &format) != 0) goto labError;
 
 #ifdef __verbose__
@@ -334,26 +352,7 @@ int svlVidCapSrcV4L2::Open()
         }
 #endif
 
-        if (format.fmt.pix.pixelformat == V4L2_PIX_FMT_BGR24) {
-            // Using BGR24
-            ColorSpace[i] = MV4LP_CS_BGR24;
-        }
-        else if (format.fmt.pix.pixelformat == V4L2_PIX_FMT_MPEG) {
-            // Using MPEG
-            ColorSpace[i] = MV4LP_CS_MPEG;
-        }
-        else if (format.fmt.pix.pixelformat == V4L2_PIX_FMT_HM12) {
-            // Using HM12
-            ColorSpace[i] = MV4LP_CS_HM12;
-        }
-        else if (format.fmt.pix.pixelformat == V4L2_PIX_FMT_UYVY) {
-            // Using UYVY
-            ColorSpace[i] = MV4LP_CS_UYVY;
-        }
-        else {
-            // Unsupported format
-            ColorSpace[i] = MV4LP_CS_UNKNOWN;
-        }
+        ColorSpace[i] = V4L2_color_to_internal_color(format.fmt.pix.pixelformat);
 
         // Setting resolution
         CapWidth[i] = format.fmt.pix.width;
@@ -398,9 +397,11 @@ int svlVidCapSrcV4L2::Open()
 
         if (CapMethod[i] == MV4LP_METHOD_STREAMING) {
             // Streaming I/O
-            // Not yet supported
-            goto labError;
-/*
+            // Not yet supported, works for Hauppauge cards, but not XtremeRGB cards
+            //goto labError;
+///*
+            struct v4l2_requestbuffers reqbuff;
+
             // Requesting buffer
             memset(&reqbuff, 0, sizeof(v4l2_requestbuffers));
             reqbuff.count = MV4LP_BUFFER_SIZE_TARGET;
@@ -419,6 +420,8 @@ int svlVidCapSrcV4L2::Open()
             memset(FrameBuffer[i], 0, FrameBufferSize[i] * sizeof(FrameBufferType));
 
             for (j = 0; j < FrameBufferSize[i]; j++) {
+                struct v4l2_buffer buffer;
+
                 memset(&buffer, 0, sizeof(v4l2_buffer));
 
                 buffer.index       = j;
@@ -440,7 +443,7 @@ int svlVidCapSrcV4L2::Open()
                 cout << "--Open: buffer " << j << " parameters received" << endl;
 #endif
             }
-*/
+//*/
         }
         else {
             // Read/write I/O
@@ -487,7 +490,13 @@ void svlVidCapSrcV4L2::Close()
         }
 
         if (FrameBuffer[i]) {
-            for (j = 0; j < FrameBufferSize[i]; j++) delete [] reinterpret_cast<unsigned char*>(FrameBuffer[i][j].start);
+			for (j = 0; j < FrameBufferSize[i]; j++) {
+                if (CapMethod[i] == MV4LP_METHOD_STREAMING) {
+                    munmap(FrameBuffer[i][j].start, FrameBuffer[i][j].length);
+                } else {
+					delete [] reinterpret_cast<unsigned char*>(FrameBuffer[i][j].start);
+                }
+			}
             delete [] FrameBuffer[i];
             FrameBuffer[i] = 0;
         }
@@ -579,29 +588,189 @@ int svlVidCapSrcV4L2::GetHeight(unsigned int videoch)
     return CapHeight[videoch];
 }
 
-int svlVidCapSrcV4L2::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlFilterSourceVideoCapture::ImageFormat **formatlist)
+int svlVidCapSrcV4L2::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
 
-    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
-    formatlist[0][0].width = 720;
+    /*formatlist[0][0].width = 720;
     formatlist[0][0].height = 480;
     formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelYUV422;
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = 30.0;
-    formatlist[0][0].custom_mode = -1;
+    formatlist[0][0].custom_mode = -1;*/
 
-    return 1;
+    std::vector<svlFilterSourceVideoCapture::ImageFormat *> formats;
+
+    struct v4l2_input input;
+    //struct v4l2_standard standard;
+    char tempname[64];
+    double framerate = 30.0;
+
+    memset (&input, 0, sizeof (input));
+
+    sprintf(tempname, "/dev/video%d", deviceid);
+    int fd = open(tempname, O_RDWR);
+
+
+    if (-1 == ioctl (fd, VIDIOC_G_INPUT, &input.index)) {
+        perror ("VIDIOC_G_INPUT");
+        exit (EXIT_FAILURE);
+    }
+
+    if (-1 == ioctl (fd, VIDIOC_ENUMINPUT, &input)) {
+        perror ("VIDIOC_ENUM_INPUT");
+        exit (EXIT_FAILURE);
+    }
+
+    //printf ("Current input %s supports:\n", input.name);
+
+    v4l2_std_id std_id = 0;
+    ioctl (fd, VIDIOC_G_STD, &std_id);
+    //memset (&standard, 0, sizeof (standard));
+
+    /*standard.index = 0;
+    while (0 == ioctl (fd, VIDIOC_ENUMSTD, &standard)) {
+        if (standard.id & input.std){
+
+            printf ("%10s %g", standard.name, standard.frameperiod.denominator/(double)standard.frameperiod.numerator);
+            if (standard.id == std_id){
+                framerate = standard.frameperiod.denominator/(double)standard.frameperiod.numerator;
+                printf (" (Current Setting)");
+                //break;
+            }
+
+            printf("\n");
+        }
+        standard.index++;
+    }*/
+
+
+    struct v4l2_format current_format;
+    memset (&current_format, 0, sizeof (current_format));
+    current_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    ioctl (fd, VIDIOC_G_FMT, &current_format);
+    /*fprintf(stdout, "\nCurrent video format:\n");
+    fprintf(stdout, "  h:%d x w:%d\n",current_format.fmt.pix.height ,current_format.fmt.pix.width);
+    fprintf(stdout, "  field %d\n",current_format.fmt.pix.field);
+    fprintf(stdout, "  pixelformat  :%c%c%c%c\n",
+            current_format.fmt.pix.pixelformat & 0xFF, (current_format.fmt.pix.pixelformat >> 8) & 0xFF,
+            (current_format.fmt.pix.pixelformat >> 16) & 0xFF, (current_format.fmt.pix.pixelformat >> 24) & 0xFF);
+    */
+    formats.push_back(new svlFilterSourceVideoCapture::ImageFormat);
+    memset(formats.back(),0,sizeof(svlFilterSourceVideoCapture::ImageFormat));
+    formats.back()->width = current_format.fmt.pix.width;
+    formats.back()->height = current_format.fmt.pix.height;
+    formats.back()->colorspace = V4L2_color_to_svlPixelType(current_format.fmt.pix.pixelformat);
+    formats.back()->rgb_order = true;
+    formats.back()->yuyv_order = false;
+    formats.back()->framerate = framerate;
+    formats.back()->custom_mode = -1;
+
+
+    struct v4l2_fmtdesc format;
+    memset (&format, 0, sizeof (format));
+    format.index = 0;
+
+    //char *buf_types[] = {"VIDEO_CAPTURE","VIDEO_OUTPUT", "VIDEO_OVERLAY"}; /* Conversion between enumerated type & english \*/
+    //char *flags[] = {"uncompressed", "compressed"};
+    //fprintf(stdout, "\nDiscovering supported video formats:\n");
+
+    struct v4l2_frmsizeenum framesize;
+    memset (&framesize, 0, sizeof (framesize));
+    framesize.index = 0;
+
+
+
+    /* For each of the supported v4l2_buf_type buffer types */
+    //for (int i = V4L2_BUF_TYPE_VIDEO_CAPTURE; i < V4L2_BUF_TYPE_VIDEO_OVERLAY; i++)
+    //{
+        format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;//v4l2_buf_type(i);
+        /* Send the VIDIOC_ENUM_FM ioctl and print the results */
+        while( ioctl( fd, VIDIOC_ENUM_FMT, &format ) == 0 )
+        {
+
+            /* We got a video format/codec back */
+            //fprintf(stdout,"VIDIOC_ENUM_FMT(%d, %s)\n", format.index, buf_types[format.type-1]);
+            //fprintf(stdout, "  index        :%d\n", format.index);
+            //fprintf(stdout, "  type         :%s\n", buf_types[format.type-1]);
+            //fprintf(stdout, "  flags        :%s\n", flags[format.flags]);
+            //fprintf(stdout, "  description  :%s\n", format.description);
+
+            /* Convert the pixelformat attributes from FourCC into 'human readable' format */
+            //fprintf(stdout, "  pixelformat  :%c%c%c%c\n",
+            //       format.pixelformat & 0xFF, (format.pixelformat >> 8) & 0xFF,
+            //        (format.pixelformat >> 16) & 0xFF, (format.pixelformat >> 24) & 0xFF);
+
+            /* Increment the index */
+            format.index++;
+
+            if(V4L2_color_to_svlPixelType(format.pixelformat) != svlFilterSourceVideoCapture::PixelUnknown){
+                formats.push_back(new svlFilterSourceVideoCapture::ImageFormat);
+                memset(formats.back(),0,sizeof(svlFilterSourceVideoCapture::ImageFormat));
+                formats.back()->width = current_format.fmt.pix.width;
+                formats.back()->height = current_format.fmt.pix.height;
+                formats.back()->colorspace = V4L2_color_to_svlPixelType(format.pixelformat);
+                formats.back()->rgb_order = true;
+                formats.back()->yuyv_order = false;
+                formats.back()->framerate = framerate;
+                formats.back()->custom_mode = -1;
+            }
+
+            /*framesize.index = 0;
+            framesize.pixel_format = format.pixelformat;
+            fprintf(stdout, "  sizes  :\n");
+            while( ioctl( fd, VIDIOC_ENUM_FRAMESIZES, &framesize ) == 0 )
+            {
+                if (framesize.type == V4L2_FRMSIZE_TYPE_DISCRETE){
+                 fprintf(stdout, "  h:%dxw:%d\n",framesize.discrete.height ,framesize.discrete.width);
+                 framesize.index++;
+                }else if(framesize.type == V4L2_FRMSIZE_TYPE_STEPWISE || framesize.type == V4L2_FRMSIZE_TYPE_CONTINUOUS){
+                    fprintf(stdout, "  max h:%d x max w:%d\n",framesize.stepwise.max_height ,framesize.stepwise.max_width);
+                    break;
+                }else{
+                    break;
+                }
+            }*/
+
+        }
+    //}
+
+    /* EINVAL indicates the end of the enumeration, which cannot be
+       empty unless this device falls under the USB exception. */
+
+    /*if (errno != EINVAL || standard.index == 0) {
+        perror ("VIDIOC_ENUMSTD");
+        exit (EXIT_FAILURE);
+    }*/
+
+    close(fd);
+
+
+    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1+formats.size()];
+
+    memset(&formatlist[0][0],0,sizeof(svlFilterSourceVideoCapture::ImageFormat));
+
+    GetFormat(formatlist[0][0]);
+
+    for(unsigned int i; i < formats.size();i++){
+        memcpy(&formatlist[0][i+1],formats.at(i),sizeof(svlFilterSourceVideoCapture::ImageFormat));
+        delete formats.at(i);
+        formats.at(i) = NULL;
+    }
+
+
+
+    return 1+formats.size();
 }
 
-int svlVidCapSrcV4L2::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
+int svlVidCapSrcV4L2::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int CMN_UNUSED(videoch))
 {
-    if (videoch >= NumOfStreams) return SVL_FAIL;
+    //if (videoch >= NumOfStreams) return SVL_FAIL;
 
     format.width = 720;
     format.height = 480;
-    format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
+    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = 30.0;
@@ -615,7 +784,27 @@ int svlVidCapSrcV4L2::ReadFrame(unsigned int videoch)
     if (Running == false) return SVL_FAIL;
 
     unsigned int imlen;
-    unsigned char *imbuf = OutputBuffer[videoch]->GetPushBuffer(imlen);
+    unsigned char *imbuf = NULL;
+
+    //if(OutputBuffer[videoch]->GetTimestamp() < 0)
+    //   return SVL_FAIL;
+
+    try{
+        imbuf = OutputBuffer[videoch]->GetPushBuffer(imlen);
+    }catch( ... ){
+        try{
+            if (OutputBuffer) delete [] OutputBuffer;
+        }catch( ... ){
+
+        }
+        OutputBuffer = new svlBufferImage*[NumOfStreams];
+        for (unsigned int i = 0; i < NumOfStreams; i ++) {
+            OutputBuffer[i] = new svlBufferImage(CapWidth[i], CapHeight[i]);
+        }
+        imbuf = OutputBuffer[videoch]->GetPushBuffer(imlen);
+    }
+    if (imbuf == NULL) return SVL_FAIL;
+
 
     const int w = CapWidth[videoch];
     const int h = CapHeight[videoch];
@@ -722,6 +911,13 @@ void svlVidCapSrcV4L2::Release()
     if (FrameBuffer) delete [] FrameBuffer;
     if (OutputBuffer) delete [] OutputBuffer;
 
+    if (Format) {
+        for (unsigned int i = 0; i < NumOfStreams; i ++) {
+            if (Format[i]) delete Format[i];
+        }
+        delete [] Format;
+    }
+
     NumOfStreams = 0;
     Initialized = false;
     Running = false;
@@ -745,6 +941,7 @@ int svlVidCapSrcV4L2::GetDeviceInputs(int fd, svlFilterSourceVideoCapture::Devic
     if (fd < 0 || deviceinfo == 0) return SVL_FAIL;
 
     v4l2_input input;
+    memset(&input,0,sizeof(v4l2_input));
     int i;
 
     for (i = 0; i < SVL_VCS_ARRAY_LENGTH; i ++) {
@@ -974,6 +1171,79 @@ void svlVidCapSrcV4L2::YUV420p_to_BGR24(unsigned char* dst, unsigned char* src, 
         dst_line1 += dststride;
         dst_line2 += dststride;
     }
+}
+
+
+int svlVidCapSrcV4L2::SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
+{
+    if (videoch >= NumOfStreams || Initialized) return SVL_FAIL;
+
+    if (Format[videoch] == 0) Format[videoch] = new svlFilterSourceVideoCapture::ImageFormat;
+    memcpy(Format[videoch], &format, sizeof(svlFilterSourceVideoCapture::ImageFormat));
+
+    return SVL_OK;
+}
+
+
+int svlVidCapSrcV4L2::V4L2_color_to_internal_color(int color_in){
+
+    if (color_in == V4L2_PIX_FMT_BGR24) {
+        // Using BGR24
+        return MV4LP_CS_BGR24;
+    }
+    /*else if (color_in == V4L2_PIX_FMT_MPEG) {
+        // Using MPEG
+        return MV4LP_CS_MPEG;
+    }*/
+    else if (color_in == V4L2_PIX_FMT_HM12) {
+        // Using HM12
+        return MV4LP_CS_HM12;
+    }
+    else if (color_in == V4L2_PIX_FMT_UYVY) {
+        // Using UYVY
+        return MV4LP_CS_UYVY;
+    }
+    else {
+        // Unsupported format
+        return MV4LP_CS_UNKNOWN;
+    }
+
+
+}
+
+
+int svlVidCapSrcV4L2::svlPixelType_to_V4L2_color(svlFilterSourceVideoCapture::PixelType color_in){
+
+    if (color_in == svlFilterSourceVideoCapture::PixelRGB8) {
+        // Using BGR24
+        return V4L2_PIX_FMT_BGR24;
+    }
+    else if (color_in == svlFilterSourceVideoCapture::PixelYUV422) {
+        // Using UYVY
+        return V4L2_PIX_FMT_UYVY;
+    }
+    else {
+        // Unsupported format
+        return -1;
+    }
+
+}
+
+svlFilterSourceVideoCapture::PixelType svlVidCapSrcV4L2::V4L2_color_to_svlPixelType(int color_in){
+
+    if (color_in == V4L2_PIX_FMT_BGR24) {
+        // Using BGR24
+        return svlFilterSourceVideoCapture::PixelRGB8;
+    }
+    else if (color_in == V4L2_PIX_FMT_UYVY) {
+        // Using UYVY
+        return svlFilterSourceVideoCapture::PixelYUV422;
+    }
+    else {
+        // Unsupported format
+        return svlFilterSourceVideoCapture::PixelUnknown;
+    }
+
 }
 
 
