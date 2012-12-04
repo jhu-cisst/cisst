@@ -50,6 +50,7 @@ public:
 
     virtual void SetFullScreen(const bool & fullscreen);
     virtual void SetTitle(const std::string & title);
+    virtual void GetIsVisible(bool & show) const {show = IsVisible;}
     virtual void GetFullScreen(bool & fullscreen) const;
     virtual void GetTitle(std::string & title) const;
 
@@ -64,6 +65,7 @@ protected:
 private:
     bool FullScreenFlag;
     bool PositionSetFlag;
+    bool IsVisible;
     int PosX[2], PosY[2];
     std::string Title;
     osaThread* Thread;
