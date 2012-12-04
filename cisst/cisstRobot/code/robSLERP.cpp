@@ -77,7 +77,7 @@ void robSLERP::ComputeParameters( double w ){
     R12 = R1w * vctMatrixRotation3<double>( qw2 );
     
     // compute t2 based on the amount of rotation and the angular velocity
-    vctAxisAngleRotation3<double> r12( R12 );
+    vctAxisAngleRotation3<double> r12( R12, VCT_NORMALIZE );
     StopTime() = StartTime() + r12.Angle() / fabs( w );
     this->w = r12.Axis() * r12.Angle() / Duration();
 

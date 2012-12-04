@@ -35,17 +35,9 @@ if( UNIX )
     endif( "${XENOMAI_DIR}" MATCHES "/usr/include/xenomai")
     
 
-    # find the xenomai pthread library
+    # find the xenomai library
     find_library( XENOMAI_LIBRARY_NATIVE  native  ${XENOMAI_DIR}/lib )
     find_library( XENOMAI_LIBRARY_XENOMAI xenomai ${XENOMAI_DIR}/lib )
-    find_library( XENOMAI_LIBRARY_PTHREAD_RT pthread_rt rtdm ${XENOMAI_DIR}/lib )
-    find_library( XENOMAI_LIBRARY_RTDM    rtdm    ${XENOMAI_DIR}/lib )
-
-    # find the posix wrappers
-    find_file(XENOMAI_POSIX_WRAPPERS lib/posix.wrappers ${XENOMAI_SEARCH_PATH} )
-
-    # set the linker flags
-    #set( XENOMAI_EXE_LINKER_FLAGS "-Wl,@${XENOMAI_POSIX_WRAPPERS}" )
 
     # add compile/preprocess options
     set(XENOMAI_DEFINITIONS "-D_GNU_SOURCE -D_REENTRANT -Wall -pipe -D__XENO__")
