@@ -48,7 +48,7 @@ public:
         bool fullscreen = false;
         bool isVisible = false;
         obj->GetFullScreen(fullscreen);
-        obj->GetIsVisible(isViewable);
+        obj->GetIsVisible(isVisible);
         obj->WindowManager->DoModal(isVisible, fullscreen);
         return this;
     }
