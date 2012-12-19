@@ -607,7 +607,7 @@ labError:
     return ret;
 }
 
-void svlFilterSourceVideoCapture::SetTargetFrequency(double CMN_UNUSED(hertz))
+void svlFilterSourceVideoCapture::SetTargetFrequency(const double & CMN_UNUSED(hertz))
 {
 }
 
@@ -1685,6 +1685,28 @@ labError:
     }
     fclose(fp);
     return SVL_FAIL;
+}
+
+int svlFilterSourceVideoCapture::SetDefaultSettings(unsigned int videoch)
+{
+    if (OutputImage == 0)
+        return SVL_FAIL;
+    if (NumberOfEnumeratedDevices < 1)
+        return SVL_FAIL;
+    if (IsInitialized() == true)
+        return SVL_ALREADY_INITIALIZED;
+    if (videoch >= NumberOfChannels)
+        return SVL_WRONG_CHANNEL;
+
+    // Select first format in list of supported formats
+    SelectFormat(0, videoch);
+
+    if (Format[videoch] != 0)
+        return SVL_FAIL;
+
+    Format[videoch]->defaults = true;
+
+    return SVL_OK;
 }
 
 void svlFilterSourceVideoCapture::CreateInterfaces()
