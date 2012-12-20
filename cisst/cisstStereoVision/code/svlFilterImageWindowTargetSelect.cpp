@@ -35,6 +35,9 @@ svlFilterImageWindowTargetSelect::svlFilterImageWindowTargetSelect() :
     svlWindowEventHandlerBase(),
     svlFilterImageWindow(),
     DisplayImage(0),
+    CrosshairColor(32, 32, 255),
+    CrosshairRadius(12),
+    CrosshairThickness(2),
     SendTargets(false),
     AlwaysSend(false),
     EnableAdd(true),
@@ -68,6 +71,13 @@ void svlFilterImageWindowTargetSelect::SetEnableModify(bool enable)
 void svlFilterImageWindowTargetSelect::SetAlwaysSendTargets(bool enable)
 {
     AlwaysSend = enable;
+}
+
+void svlFilterImageWindowTargetSelect::SetCrosshairStyle(svlRGB color, unsigned int radius, unsigned int thickness)
+{
+    CrosshairColor = color;
+    CrosshairRadius = radius;
+    CrosshairThickness = thickness;
 }
 
 void svlFilterImageWindowTargetSelect::SetTargets(const svlSampleTargets& targets)
@@ -137,14 +147,16 @@ int svlFilterImageWindowTargetSelect::Process(svlProcInfo* procInfo, svlSample* 
                 if (Targets.GetFlag(i) > 0) {
                     if (SelectedTargetWindow != static_cast<int>(idx) ||
                         SelectedTarget != static_cast<int>(i)) {
-                        r = g = b = 255;
+                        r = CrosshairColor.r;
+                        g = CrosshairColor.g;
+                        b = CrosshairColor.b;
                     }
                     else {
                         r = 100; g = 255; b = 100;
                     }
                     svlDraw::Crosshair(dynamic_cast<svlSampleImage*>(DisplayImage), idx,
                                        position.Element(0, i), position.Element(1, i),
-                                       r, g, b, 10);
+                                       r, g, b, CrosshairRadius, CrosshairThickness);
                 }
             }
         }
