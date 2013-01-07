@@ -19,13 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "mtsProxyConfig.h"
+#include <cisstOSAbstraction/osaSleep.h>
+#if IMPROVE_ICE_THREADING
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#endif
+
 #include "mtsComponentProxy.h"
 #include "mtsComponentInterfaceProxyServer.h"
 #include "mtsComponentInterfaceProxyClient.h"
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 std::string mtsComponentInterfaceProxyServer::InterfaceCommunicatorID = "InterfaceCommunicator";
 std::string mtsComponentInterfaceProxyServer::ConnectionIDKey = "InterfaceConnectionID";
@@ -34,13 +37,24 @@ unsigned int mtsComponentInterfaceProxyServer::InstanceCounter = 0;
 mtsComponentInterfaceProxyServer::mtsComponentInterfaceProxyServer(
     const std::string & adapterName, const std::string & communicatorID)
     : BaseServerType("config.server", adapterName, communicatorID)
+#if IMPROVE_ICE_THREADING
+      , IceThreadInitEvent(0)
+#endif
 {
     ProxyName = "ComponentInterfaceProxyClient";
+
+#if IMPROVE_ICE_THREADING
+    IceThreadInitEvent = new osaThreadSignal;
+#endif
 }
 
 mtsComponentInterfaceProxyServer::~mtsComponentInterfaceProxyServer()
 {
     StopProxy();
+
+#if IMPROVE_ICE_THREADING
+    delete IceThreadInitEvent;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -78,6 +92,11 @@ bool mtsComponentInterfaceProxyServer::StartProxy(mtsComponentProxy * proxyOwner
     WorkerThread.Create<ProxyWorker<mtsComponentProxy>, ThreadArguments<mtsComponentProxy>*>(
         &ProxyWorkerInfo, &ProxyWorker<mtsComponentProxy>::Run, &ThreadArgumentsInfo, threadName.c_str());
 
+#if IMPROVE_ICE_THREADING
+    // Wait for Ice thread to start
+    double t = osaGetTime();
+    IceThreadInitEvent->Wait();
+#endif
     return true;
 }
 
@@ -101,6 +120,11 @@ void mtsComponentInterfaceProxyServer::StartServer()
 {
     Sender->Start();
 
+    ChangeProxyState(PROXY_STATE_ACTIVE);
+#if IMPROVE_ICE_THREADING
+    IceThreadInitEvent->Raise();
+#endif
+
     // This is a blocking call that should run in a different thread.
     IceCommunicator->waitForShutdown();
 }
@@ -117,7 +141,6 @@ void mtsComponentInterfaceProxyServer::Runner(ThreadArguments<mtsComponentProxy>
     ProxyServer->GetLogger()->trace("mtsComponentInterfaceProxyServer", "proxy server starts");
 
     try {
-        ProxyServer->ChangeProxyState(PROXY_STATE_ACTIVE);
         ProxyServer->StartServer();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyServer: ");

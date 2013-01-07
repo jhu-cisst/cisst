@@ -22,15 +22,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsProxyBaseCommon_h
 #define _mtsProxyBaseCommon_h
 
-#include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaMutex.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnPath.h>
+#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+
+#include "mtsProxyConfig.h"
 
 #include <cisstMultiTask/mtsExport.h>
 

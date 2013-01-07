@@ -19,13 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "mtsProxyConfig.h"
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
+#if IMPROVE_ICE_THREADING
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#endif
+
 #include "mtsManagerProxyClient.h"
 #include "mtsManagerProxyServer.h"
 #include <cisstMultiTask/mtsFunctionVoid.h>
-
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaCriticalSection.h>
 
 unsigned int mtsManagerProxyClient::InstanceCounter = 0;
 
@@ -45,13 +47,24 @@ void GetConnectionStringSet(mtsManagerProxy::ConnectionStringSet & connectionStr
 
 mtsManagerProxyClient::mtsManagerProxyClient(const std::string & serverEndpointInfo)
     : BaseClientType("config.LCM", serverEndpointInfo), ManagerServerProxy(0)
+#if IMPROVE_ICE_THREADING
+      , IceThreadInitEvent(0)
+#endif
 {
     ProxyName = "ManagerProxyClient";
+
+#if IMPROVE_ICE_THREADING
+    IceThreadInitEvent = new osaThreadSignal;
+#endif
 }
 
 mtsManagerProxyClient::~mtsManagerProxyClient()
 {
     StopProxy();
+
+#if IMPROVE_ICE_THREADING
+    delete IceThreadInitEvent;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -107,6 +120,12 @@ bool mtsManagerProxyClient::StartProxy(mtsManagerLocal * proxyOwner)
     WorkerThread.Create<ProxyWorker<mtsManagerLocal>, ThreadArguments<mtsManagerLocal>*>(
         &ProxyWorkerInfo, &ProxyWorker<mtsManagerLocal>::Run, &ThreadArgumentsInfo, threadName.c_str());
 
+#if IMPROVE_ICE_THREADING
+    // Wait for Ice thread to start
+    double t = osaGetTime();
+    IceThreadInitEvent->Wait();
+#endif
+
     return true;
 }
 
@@ -131,6 +150,11 @@ void mtsManagerProxyClient::StartClient(void)
 {
     Server->Start();
 
+    ChangeProxyState(PROXY_STATE_ACTIVE);
+#if IMPROVE_ICE_THREADING
+    IceThreadInitEvent->Raise();
+#endif
+
     // This is a blocking call that should run in a different thread.
     IceCommunicator->waitForShutdown();
 }
@@ -146,7 +170,6 @@ void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
     ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client starts");
 
     try {
-        ProxyClient->ChangeProxyState(PROXY_STATE_ACTIVE);
         ProxyClient->StartClient();
     } catch (const Ice::Exception& e) {
         std::string error("mtsManagerProxyClient: ");

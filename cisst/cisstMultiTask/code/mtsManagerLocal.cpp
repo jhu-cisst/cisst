@@ -129,7 +129,9 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     }
 
     // Give proxies some time to start up
+#if !IMPROVE_ICE_THREADING
     osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+#endif
 
     SetGCMConnected(true);
 
@@ -190,7 +192,9 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     }
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
+#if !IMPROVE_ICE_THREADING
     osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+#endif
 
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
