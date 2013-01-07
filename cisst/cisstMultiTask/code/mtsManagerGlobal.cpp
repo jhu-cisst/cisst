@@ -1549,17 +1549,18 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     // Increase connection id
     if (ConnectionID + 1 == InvalidConnectionID) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: connection id approached its upper limit: " << InvalidConnectionID << std::endl;
+        ConnectionChange.Unlock();
         return InvalidConnectionID;
     } else {
         ++ConnectionID;
     }
 
+    ConnectionChange.Unlock();
+
     // Send connection event to ManagerComponentServer
     if (ManagerComponentServer) {
         ManagerComponentServer->AddConnectionEvent(description);
     }
-
-    ConnectionChange.Unlock();
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Connect: successfully connected, new connection id [ " << thisConnectionID << " ] "
         << "for \""
