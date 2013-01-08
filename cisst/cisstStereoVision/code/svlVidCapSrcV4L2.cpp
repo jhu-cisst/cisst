@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "svlVidCapSrcV4L2.h"
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstStereoVision/svlBufferImage.h>
+#include <cisstStereoVision/svlConverters.h>
 
 #include <stdlib.h>
 #include <iostream>
@@ -46,6 +47,7 @@ http://www.cisst.org/cisst/license.txt.
 #define MV4LP_CS_BGR24              0
 #define MV4LP_CS_UYVY               1
 #define MV4LP_CS_HM12               2
+#define MV4LP_CS_YUYV               3
 #define MV4LP_CS_MPEG               -10
 
 
@@ -304,6 +306,7 @@ int svlVidCapSrcV4L2::Open()
         format.fmt.pix.width  = Format[i]->width;
         format.fmt.pix.height = Format[i]->height;
         format.fmt.pix.pixelformat = svlPixelType_to_V4L2_color(Format[i]->colorspace);
+        //format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // above not working for YUYV
         //format.fmt.pix.field = V4L2_FIELD_INTERLACED;
         if (ioctl(DeviceHandle[i], VIDIOC_S_FMT, &format) != 0) goto labError;
 
@@ -371,6 +374,10 @@ int svlVidCapSrcV4L2::Open()
 
             case MV4LP_CS_UYVY:
                 cout << " UYVY";
+            break;
+
+            case MV4LP_CS_YUYV:
+                cout << " YUYV";
             break;
 
             case MV4LP_CS_HM12:
@@ -839,6 +846,7 @@ int svlVidCapSrcV4L2::ReadFrame(unsigned int videoch)
 
         int ystride = stride / 3;
         int framesize = ystride * h * 3 / 2;
+        //framesize = stride * h*2; // this works for YUYV
 
         int ret = 0;
         while (ret == 0) {
@@ -867,6 +875,10 @@ int svlVidCapSrcV4L2::ReadFrame(unsigned int videoch)
         if (ColorSpace[videoch] == MV4LP_CS_UYVY) {
             // Convert UYVY to BGR24
             YUV420p_to_BGR24(imbuf, buf1, line, ystride, w, h);
+        }
+        if( ColorSpace[videoch] == MV4LP_CS_YUYV){
+            // Convert YUYV to BGR24
+            svlConverter::YUV422toRGB24( buf1, imbuf, w*h, true, true, true);
         }
         else {
             // Rescramble HM12 to UYVY
@@ -1202,6 +1214,10 @@ int svlVidCapSrcV4L2::V4L2_color_to_internal_color(int color_in){
     else if (color_in == V4L2_PIX_FMT_UYVY) {
         // Using UYVY
         return MV4LP_CS_UYVY;
+    }
+    else if (color_in == V4L2_PIX_FMT_YUYV) {
+        // Using YUYV                                                                                                                                          
+        return MV4LP_CS_YUYV;
     }
     else {
         // Unsupported format
