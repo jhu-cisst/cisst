@@ -141,7 +141,6 @@ bool mtsManagerProxyServer::StartProxy(mtsManagerGlobal * proxyOwner)
 
 #if IMPROVE_ICE_THREADING
     // Wait for Ice thread to start
-    double t = osaGetTime();
     IceThreadInitEvent->Wait();
 #endif
 
