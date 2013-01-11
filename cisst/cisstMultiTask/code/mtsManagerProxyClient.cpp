@@ -971,9 +971,6 @@ mtsManagerProxyClient::ManagerClientI::ManagerClientI(
 mtsManagerProxyClient::ManagerClientI::~ManagerClientI()
 {
     Stop();
-
-    // Sleep for some time enough for Run() loop to terminate
-    osaSleep(1 * cmn_s);
 }
 
 void mtsManagerProxyClient::ManagerClientI::Start()
@@ -999,8 +996,15 @@ void mtsManagerProxyClient::ManagerClientI::Run()
         ManagerProxyClient->SendTestMessageFromClientToServer(ss.str());
     }
 #else
+    double lastTickChecked = 0.0, now;
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
+        now = osaGetTime();
+        if (now < lastTickChecked + mtsProxyConfig::RefreshPeriodForManagers) {
+            osaSleep(10 * cmn_ms);
+            continue;
+        }
+        lastTickChecked = now;
+
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {

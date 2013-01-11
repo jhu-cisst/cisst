@@ -749,9 +749,6 @@ mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ComponentInterfaceS
 mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::~ComponentInterfaceServerI()
 {
     Stop();
-
-    // Sleep for some time enough for Run() loop to terminate
-    osaSleep(1 * cmn_s);
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Start()
@@ -778,8 +775,15 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         ComponentInterfaceProxyServer->SendTestMessageFromServerToClient(ss.str());
     }
 #else
+    double lastTickChecked = 0.0, now;
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
+        now = osaGetTime();
+        if (now < lastTickChecked + mtsProxyConfig::CheckPeriodForInterfaceConnections) {
+            osaSleep(10 * cmn_ms);
+            continue;
+        }
+        lastTickChecked = now;
+
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         try {
             if (ComponentInterfaceProxyServer) {

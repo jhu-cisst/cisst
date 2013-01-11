@@ -1392,9 +1392,6 @@ mtsManagerProxyServer::ManagerServerI::ManagerServerI(
 mtsManagerProxyServer::ManagerServerI::~ManagerServerI()
 {
     Stop();
-
-    // Sleep for some time enough for Run() loop to terminate
-    osaSleep(1 * cmn_s);
 }
 
 void mtsManagerProxyServer::ManagerServerI::Start()
@@ -1420,8 +1417,15 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         ManagerProxyServer->SendTestMessageFromServerToClient(ss.str());
     }
 #else
+    double lastTickChecked = 0.0, now;
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::CheckPeriodForManagerConnections);
+        now = osaGetTime();
+        if (now < lastTickChecked + mtsProxyConfig::CheckPeriodForManagerConnections) {
+            osaSleep(10 * cmn_ms);
+            continue;
+        }
+        lastTickChecked = now;
+
         // If a pending connection fails to be confirmed by LCM, it should be
         // cleaned up
         if (ManagerProxyServer) {
