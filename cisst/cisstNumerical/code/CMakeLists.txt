@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -55,43 +55,31 @@ if (CISST_HAS_CISSTNETLIB)
        nmrRegistrationRigid.cpp
        nmrSVD.cpp
        nmrSVDEconomy.cpp
+       nmrLDPSolver.cpp
+       # deprecated nmrLSISolver.cpp
+       nmrLSqLin.cpp
       )
   set (HEADER_FILES
        ${HEADER_FILES}
        nmrNetlib.h
        nmrInverse.h
        nmrLU.h
-#      nmrLUSolver.h
+       # deprecated: nmrLUSolver.h
        nmrPInverse.h
        nmrPInverseEconomy.h
        nmrRegistrationRigid.h
        nmrSVD.h
        nmrSVDEconomy.h
-#       nmrSVDSolver.h
-       )
-
-if (NOT CMAKE_CL_64)
-  set (SOURCE_FILES
-       ${SOURCE_FILES}
-       nmrLDPSolver.cpp
-#      lsi solver is included in nmrLSqLin
-#      nmrLSISolver.cpp
-       nmrLSqLin.cpp
-      )
-  set (HEADER_FILES
-       ${HEADER_FILES}
+       # deprecated nmrSVDSolver.h
        nmrLDPSolver.h
-#     dgels solver is include in nmrLSqLin
-#      nmrLSSolver.h
-#     lsi solver is include in nmrLSqLin
-#      nmrLSISolver.h
+       nmrLSSolver.h
+       # deprecated nmrLSISolver.h
        nmrLSqLin.h
        nmrHFTISolver.h
        nmrNNLSSolver.h
        nmrCallBack.h
        nmrSVDRSSolver.h
-      )
-endif (NOT CMAKE_CL_64)
+       )
 endif (CISST_HAS_CISSTNETLIB)
 
 # Create the config file

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor
+  Author(s):  Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---

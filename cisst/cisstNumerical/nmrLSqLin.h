@@ -7,7 +7,7 @@
   Author(s): Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -96,7 +96,7 @@ http://www.cisst.org/cisst/license.txt.
      \note The LSqLin functions make use of LAPACK routines.  To activate this
      code, set the CISST_HAS_CNETLIB flag to ON during the configuration
      with CMake.
-     \note The general rule for numerical functions which depend on LAPACK is that 
+     \note The general rule for numerical functions which depend on LAPACK is that
      column-major matrices should be used everywhere, and that all
      matrices should be compact.
      \note For the specific case of LSqLin, a valid result is also obtained if
@@ -137,7 +137,7 @@ protected:
       The input for LSI is similar other than Me == 0.
     */
     vctDynamicMatrix<CISSTNETLIB_DOUBLE> InputMemory;
-    
+
     /*! References to work or return or input types, these point either
       to user allocated memory or our memory chunks if needed
     */
@@ -152,7 +152,7 @@ protected:
     vctDynamicVectorRef<CISSTNETLIB_DOUBLE> RNormE;
     vctDynamicVectorRef<CISSTNETLIB_DOUBLE> Work;
     vctDynamicVectorRef<CISSTNETLIB_INTEGER> IWork;
-    
+
     /* Just store Ma, Me, Mg, N, and which are needed
        to check if A matrix passed to solve method matches
        the allocated size.
@@ -163,7 +163,7 @@ protected:
     CISSTNETLIB_INTEGER m_Me;
     CISSTNETLIB_INTEGER m_Mg;
     CISSTNETLIB_INTEGER m_N;
-    
+
 public:
     /*! Helper methods for user to set min working space required by LAPACK
       LS routine.
@@ -240,7 +240,7 @@ public:
     {
         return nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA.rows(), inE.rows(), inG.rows(), inA.cols());
     }
-    
+
     /*! Helper methods for user to set min working space required by LAPACK
       LS/LSI/LSEI routine.
       \param ma, me, mg, n The size of matrix whose LS/LSI/LSEI needs to be computed
@@ -308,7 +308,7 @@ public:
     {
         inIWork.SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA, inE, inG));
     }
-    
+
     /*! This class is not intended to be a top-level API.
       It has been provided to avoid making the tempalted
       LSqLin function as a friend of this class, which turns
@@ -374,7 +374,7 @@ public:
         }
     };
     friend class Friend;
-    
+
     /*! The default constuctor.
       For dynamic size, there are assigned default values,
       which MUST be changed by calling appropriate methods.
@@ -386,7 +386,7 @@ public:
         m_Me(static_cast<CISSTNETLIB_INTEGER>(0)),
         m_Mg(static_cast<CISSTNETLIB_INTEGER>(0)),
         m_N(static_cast<CISSTNETLIB_INTEGER>(0)) {};
-    
+
     /*! contructor to use with LS */
     nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n)
     {
@@ -402,11 +402,11 @@ public:
     {
         this->Allocate(ma, me, mg, n);
     }
-    
+
     /************************************************************************/
     /* The following are various contructors for LS problem */
     /************************************************************************/
-    
+
     /*! Constructor where user provides the input matrix to specify size,
       Memory allocation is done for output matrices and vectors as well as
       Workspace used by LAPACK. This case covers the scenario when user
@@ -485,11 +485,11 @@ public:
     {
         this->SetRef(inA.rows(), 0, 0, inA.cols(), inX, inWork);
     }
-    
+
     /************************************************************************/
     /* The following are various contructors for LSI problem */
     /************************************************************************/
-    
+
     /*! Constructor where user provides the input matrices to specify size,
       Memory allocation is done for output matrices and vectors as well as
       Workspace used by LAPACK. This case covers the scenario when user
@@ -576,11 +576,11 @@ public:
     {
         this->SetRef(inA.rows(), 0, inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
-    
+
     /************************************************************************/
     /* The following are various contructors for LSEI problem */
     /************************************************************************/
-    
+
     /*! Constructor where user provides the input matrices to specify size,
       Memory allocation is done for output matrices and vectors as well as
       Workspace used by LAPACK. This case covers the scenario when user
@@ -671,11 +671,11 @@ public:
     {
         this->SetRef(inA.rows(), inE.rows(), inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
-    
+
     /************************************************************************/
     /* The following are Allocate methods for LS problem */
     /************************************************************************/
-    
+
     /*! This method allocates memory of output vector
       as well as the workspace.
       This method should be called before the nmrLSqLinSolutionDynamic
@@ -716,11 +716,11 @@ public:
     {
         this->Allocate(A.rows(), 0, 0, A.cols(), inWork);
     }
-    
+
     /************************************************************************/
     /* The following are SetRef methods for LS problem */
     /************************************************************************/
-    
+
     /*! This method must be called before the solution object
       is passed to nmrLSqLin function.
       The user provides the input matrix to specify size,
@@ -759,11 +759,11 @@ public:
     {
         this->SetRef(inA.rows(), 0, 0, inA.cols(), inX, this->WorkspaceMemory);
     }
-    
+
     /************************************************************************/
     /* The following are Allocate methods for LSI problem */
     /************************************************************************/
-    
+
     /*! This method allocates memory of output vector
       as well as the workspace.
       This method should be called before the nmrLSqLinSolutionDynamic
@@ -810,11 +810,11 @@ public:
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols(), inWork, inIWork);
     }
-    
+
     /************************************************************************/
     /* The following are SetRef methods for LSI problem */
     /************************************************************************/
-    
+
     /*! This method must be called before the solution object
       is passed to nmrLSqLin function.
       The user provides the input matrices to specify size,
@@ -858,11 +858,11 @@ public:
     {
         this->SetRef(inA.rows(), 0, inG.rows(), inA.cols(), inX);
     }
-    
+
     /************************************************************************/
     /* The following are Allocate methods for LSEI problem */
     /************************************************************************/
-    
+
     /*! This method allocates memory of output vector
       as well as the workspace.
       This method should be called before the nmrLSqLinSolutionDynamic
@@ -1235,10 +1235,19 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, CISS
     CISSTNETLIB_INTEGER maxmn = (rows > cols)?rows:cols;
     maxmn  = (1>maxmn)?1:maxmn;
     CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(rows, 0, 0, cols);
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgels_(&trans, &rows, &cols, &nrhs,
+                       A.Pointer(), &lda,
+                       b.Pointer(), &maxmn,
+                       solutionFriend.GetWork().Pointer(), &lwork, &ret_value);
+#endif
+#else // no major version
     dgels_(&trans, &rows, &cols, &nrhs,
            A.Pointer(), &lda,
            b.Pointer(), &maxmn,
            solutionFriend.GetWork().Pointer(), &lwork, &ret_value);
+#endif // CISSTNETLIB_VERSION
     solutionFriend.GetX().Assign(b.Pointer());
     return ret_value;
 }
@@ -1302,9 +1311,18 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
     CISSTNETLIB_DOUBLE prgopt = 1.;
     solutionFriend.GetIWork()(0) = -1;
     solutionFriend.GetIWork()(1) = -1;
+
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_lsi_(solutionFriend.GetInput().Pointer(), &mdw, &ma, &mg, &na,
+                     &prgopt, solutionFriend.GetX().Pointer(), solutionFriend.GetRNorm().Pointer(), &mode,
+                     solutionFriend.GetWork().Pointer(), solutionFriend.GetIWork().Pointer());
+#endif
+#else // no major version
     lsi_(solutionFriend.GetInput().Pointer(), &mdw, &ma, &mg, &na,
          &prgopt, solutionFriend.GetX().Pointer(), solutionFriend.GetRNorm().Pointer(), &mode,
          solutionFriend.GetWork().Pointer(), solutionFriend.GetIWork().Pointer());
+#endif // CISSTNETLIB_VERSION
     return mode;
 }
 
@@ -1380,10 +1398,19 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
     CISSTNETLIB_DOUBLE prgopt = 1.;
     solutionFriend.GetIWork()(0) = -1;
     solutionFriend.GetIWork()(1) = -1;
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_lsei_(solutionFriend.GetInput().Pointer(), &mdw, &me, &ma, &mg, &na,
+                      &prgopt, solutionFriend.GetX().Pointer(), solutionFriend.GetRNorm().Pointer(ma),
+                      solutionFriend.GetRNorm().Pointer(), &mode,
+                      solutionFriend.GetWork().Pointer(), solutionFriend.GetIWork().Pointer());
+#endif
+#else // no major version
     lsei_(solutionFriend.GetInput().Pointer(), &mdw, &me, &ma, &mg, &na,
           &prgopt, solutionFriend.GetX().Pointer(), solutionFriend.GetRNorm().Pointer(ma),
           solutionFriend.GetRNorm().Pointer(), &mode,
           solutionFriend.GetWork().Pointer(), solutionFriend.GetIWork().Pointer());
+#endif // CISSTNETLIB_VERSION
     return mode;
 }
 
@@ -1724,10 +1751,20 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
     maxmn  = (1>maxmn)?1:maxmn;
     CISSTNETLIB_INTEGER lwork = static_cast<CISSTNETLIB_INTEGER>(nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK);
     CMN_ASSERT(lwork <= static_cast<CISSTNETLIB_INTEGER>(_work));
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgels_(&trans, &rows, &cols, &nrhs,
+                       A.Pointer(), &lda,
+                       b.Pointer(), &maxmn,
+                       Work.Pointer(), &lwork, &ret_value);
+#endif
+#else // no major version
     dgels_(&trans, &rows, &cols, &nrhs,
            A.Pointer(), &lda,
            b.Pointer(), &maxmn,
            Work.Pointer(), &lwork, &ret_value);
+#endif // CISSTNETLIB_VERSION
+
     x.Assign(b.Pointer());
     return ret_value;
 }
@@ -1782,9 +1819,17 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
     CISSTNETLIB_DOUBLE prgopt = 1.;
     IWork(0) = -1;
     IWork(1) = -1;
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_lsi_(W.Pointer(), &mdw, &ma, &mg, &na,
+                     &prgopt, x.Pointer(), RNorm.Pointer(), &mode,
+                     Work.Pointer(), IWork.Pointer());
+#endif
+#else // no major version
     lsi_(W.Pointer(), &mdw, &ma, &mg, &na,
          &prgopt, x.Pointer(), RNorm.Pointer(), &mode,
          Work.Pointer(), IWork.Pointer());
+#endif // CISSTNETLIB_VERSION
     return mode;
 }
 
@@ -1863,9 +1908,17 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
     CISSTNETLIB_DOUBLE prgopt = 1.;
     IWork(0) = -1;
     IWork(1) = -1;
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_lsei_(W.Pointer(), &mdw, &me, &ma, &mg, &na,
+                      &prgopt, x.Pointer(), RNorm.Pointer(_ma), RNorm.Pointer(), &mode,
+                      Work.Pointer(), IWork.Pointer());
+#endif
+#else // no major version
     lsei_(W.Pointer(), &mdw, &me, &ma, &mg, &na,
           &prgopt, x.Pointer(), RNorm.Pointer(_ma), RNorm.Pointer(), &mode,
           Work.Pointer(), IWork.Pointer());
+#endif // CISSTNETLIB_VERSION
     return mode;
 }
 

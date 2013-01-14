@@ -16,7 +16,7 @@
 project (cisstNumericalLibs)
 
 # Use Fortran NETLIB by default
-option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." ON)
+option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." OFF)
 if (CISST_HAS_CISSTNETLIB)
   find_package (CisstNetlib)
   cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
