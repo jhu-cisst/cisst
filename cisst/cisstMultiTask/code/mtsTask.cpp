@@ -37,6 +37,7 @@
 
 void mtsTask::DoRunInternal(void)
 {
+    RunEventCalled = false;
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
     // Make sure following is called
     if (InterfaceProvidedToManager)
@@ -44,11 +45,12 @@ void mtsTask::DoRunInternal(void)
     this->Run();
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
-    RunEvent();
+    RunEvent();  // only generates event if RunEventCalled is false
 }
 
 void mtsTask::RunEventHandler(void)
 {
+    RunEventCalled = false;
     if (this->State == mtsComponentState::INITIALIZING && !Thread.IsValid()) {
         CMN_LOG_CLASS_RUN_VERBOSE << "RunEventHandler: initializing thread for " << this->GetName() << std::endl;
         // This is only executed once, to produce same behavior as RunInternal
@@ -59,6 +61,14 @@ void mtsTask::RunEventHandler(void)
         DoRunInternal();
     else
         RunEvent();
+}
+
+mtsExecutionResult mtsTask::RunEvent(bool check)
+{
+    if (check && RunEventCalled)
+        return mtsExecutionResult::COMMAND_DISABLED;
+    RunEventCalled = true;
+    return RunEventInternal();
 }
 
 // ChangeStateEventHandler
@@ -119,6 +129,7 @@ void mtsTask::StartupInternal(void) {
             }
         }
     }
+    RunEventCalled = false;
     if (success) {
         // Call user-supplied startup function
         this->Startup();
@@ -254,7 +265,8 @@ mtsTask::mtsTask(const std::string & name,
     StateTable(sizeStateTable, "StateTable"),
     OverranPeriod(false),
     ThreadStartData(0),
-    ReturnValue(0)
+    ReturnValue(0),
+    RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
@@ -271,7 +283,7 @@ mtsTask::mtsTask(const std::string & name,
     ExecOut = this->AddInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceExecOut);
     if (ExecOut) {
         // Can add commands to set period, check if hard real-time, etc.
-        ExecOut->AddEventVoid(RunEvent, "RunEvent");
+        ExecOut->AddEventVoid(RunEventInternal, "RunEvent");
         ExecOut->AddEventWrite(ChangeStateEvent, "ChangeStateEvent", this->State);
     }
     else 
