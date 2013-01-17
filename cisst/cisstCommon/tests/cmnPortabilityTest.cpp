@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-08-09
 
-  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -140,4 +140,42 @@ void cmnPortabilityTest::TestCMN_ISFINITE(void) {
     x = -20.0;
     x /= Zero;
     CPPUNIT_ASSERT(!CMN_ISFINITE(x));
+}
+
+
+void cmnPortabilityTest::TestDataModel(void) {
+#if (CISST_DATA_MODEL == CISST_ILP32)
+    CPPUNIT_ASSERT(4 == sizeof(int));
+    CPPUNIT_ASSERT(4 == sizeof(unsigned int));
+    CPPUNIT_ASSERT(4 == sizeof(long));
+    CPPUNIT_ASSERT(4 == sizeof(unsigned long));
+    CPPUNIT_ASSERT(8 == sizeof(long long));
+    CPPUNIT_ASSERT(8 == sizeof(unsigned long long));
+    CPPUNIT_ASSERT(4 == sizeof(double *));
+    CPPUNIT_ASSERT(4 == sizeof(size_t));
+    CPPUNIT_ASSERT(4 == sizeof(ptrdiff_t));
+#endif
+#if (CISST_DATA_MODEL == CISST_LP64)
+    CPPUNIT_ASSERT(4 == sizeof(int));
+    CPPUNIT_ASSERT(4 == sizeof(unsigned int));
+    CPPUNIT_ASSERT(8 == sizeof(long));
+    CPPUNIT_ASSERT(8 == sizeof(unsigned long));
+    CPPUNIT_ASSERT(8 == sizeof(long long));
+    CPPUNIT_ASSERT(8 == sizeof(unsigned long long));
+    CPPUNIT_ASSERT(8 == sizeof(double *));
+    CPPUNIT_ASSERT(8 == sizeof(size_t));
+    CPPUNIT_ASSERT(8 == sizeof(ptrdiff_t));
+#endif
+#if (CISST_DATA_MODEL == CISST_LLP64)
+    CPPUNIT_ASSERT(4 == sizeof(int));
+    CPPUNIT_ASSERT(4 == sizeof(unsigned int));
+    CPPUNIT_ASSERT(4 == sizeof(long));
+    CPPUNIT_ASSERT(4 == sizeof(unsigned long));
+    CPPUNIT_ASSERT(8 == sizeof(long long));
+    CPPUNIT_ASSERT(8 == sizeof(unsigned long long));
+    CPPUNIT_ASSERT(8 == sizeof(double *));
+    CPPUNIT_ASSERT(8 == sizeof(size_t));
+    CPPUNIT_ASSERT(8 == sizeof(ptrdiff_t));
+#endif
+
 }
