@@ -33,12 +33,12 @@ class cdgBaseClass: public cdgScope
     friend class cdgClass;
 
 public:
-    cdgBaseClass(unsigned int lineNumber);
+    cdgBaseClass(size_t lineNumber);
 
     cdgScope::Type GetScope(void) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
+                  size_t lineNumber);
     void GenerateHeaderInheritance(std::ostream & outputStream) const;
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;

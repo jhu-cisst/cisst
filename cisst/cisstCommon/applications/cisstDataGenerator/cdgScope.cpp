@@ -29,7 +29,7 @@ const std::string cdgScopeNames[] = {"global",
                                      "member",
                                      "code"};
 
-cdgScope::cdgScope(unsigned int lineNumber):
+cdgScope::cdgScope(size_t lineNumber):
     LineNumber(lineNumber)
 {
 }

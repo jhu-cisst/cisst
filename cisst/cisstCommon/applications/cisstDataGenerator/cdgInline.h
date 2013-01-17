@@ -41,12 +41,12 @@ class cdgInline: public cdgScope
 
 public:
     typedef enum {CDG_INLINE_HEADER, CDG_INLINE_CODE} InlineType;
-    cdgInline(unsigned int lineNumber, InlineType type);
+    cdgInline(size_t lineNumber, InlineType type);
 
     cdgScope::Type GetScope(void) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
+                  size_t lineNumber);
 
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;

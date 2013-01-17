@@ -47,7 +47,7 @@ public:
 
     typedef cmnNamedMap<cdgField> FieldsContainer;
 
-    cdgScope(unsigned int lineNumber);
+    cdgScope(size_t lineNumber);
 
     std::string GetDescription(void) const;
 
@@ -65,7 +65,7 @@ public:
 
     virtual bool HasScope(const std::string & fieldName,
                           Stack & scopes,
-                          unsigned int lineNumber) = 0;
+                          size_t lineNumber) = 0;
 
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
@@ -73,7 +73,7 @@ public:
 protected:
     FieldsContainer Fields;
     ScopesContainer Scopes; // list of "scopes" found in this scope
-    unsigned int LineNumber;
+    size_t LineNumber;
     void GenerateLineComment(std::ostream & outputStream) const;
 
 private:

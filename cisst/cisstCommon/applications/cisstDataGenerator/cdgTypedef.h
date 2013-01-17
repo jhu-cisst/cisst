@@ -32,11 +32,11 @@ class cdgTypedef: public cdgScope {
     friend class cdgFile;
 
 public:
-    cdgTypedef(unsigned int lineNumber);
+    cdgTypedef(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
+                  size_t lineNumber);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const {};
 

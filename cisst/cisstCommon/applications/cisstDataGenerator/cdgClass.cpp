@@ -25,7 +25,7 @@
 CMN_IMPLEMENT_SERVICES(cdgClass);
 
 
-cdgClass::cdgClass(unsigned int lineNumber):
+cdgClass::cdgClass(size_t lineNumber):
     cdgScope(lineNumber)
 {
     this->AddField("name", "", true);
@@ -42,7 +42,7 @@ cdgScope::Type cdgClass::GetScope(void) const
 
 bool cdgClass::HasScope(const std::string & keyword,
                         cdgScope::Stack & scopes,
-                        unsigned lineNumber)
+                        size_t lineNumber)
 {
     if (keyword == "typedef") {
         cdgTypedef * newTypedef = new cdgTypedef(lineNumber);
@@ -177,7 +177,7 @@ void cdgClass::GenerateCode(std::ostream & outputStream) const
 
 void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 {
-    unsigned int index;
+    size_t index;
 
     std::stringstream defaultConstructor;
     std::stringstream copyConstructor;

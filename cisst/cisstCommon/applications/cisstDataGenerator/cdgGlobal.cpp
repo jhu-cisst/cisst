@@ -25,7 +25,7 @@
 CMN_IMPLEMENT_SERVICES(cdgGlobal);
 
 
-cdgGlobal::cdgGlobal(unsigned int lineNumber):
+cdgGlobal::cdgGlobal(size_t lineNumber):
     cdgScope(lineNumber)
 {
 }
@@ -39,7 +39,7 @@ cdgScope::Type cdgGlobal::GetScope(void) const
 
 bool cdgGlobal::HasScope(const std::string & keyword,
                          cdgScope::Stack & scopes,
-                         unsigned int lineNumber)
+                         size_t lineNumber)
 {
     if (keyword == "class") {
         cdgClass * newClass = new cdgClass(lineNumber);

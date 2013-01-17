@@ -25,7 +25,7 @@
 CMN_IMPLEMENT_SERVICES(cdgInline);
 
 
-cdgInline::cdgInline(unsigned int lineNumber, InlineType type):
+cdgInline::cdgInline(size_t lineNumber, InlineType type):
     cdgScope(lineNumber),
     Type(type)
 {
@@ -43,7 +43,7 @@ cdgScope::Type cdgInline::GetScope(void) const
 
 bool cdgInline::HasScope(const std::string & CMN_UNUSED(keyword),
                          cdgScope::Stack & CMN_UNUSED(scopes),
-                         unsigned int CMN_UNUSED(lineNumber))
+                         size_t CMN_UNUSED(lineNumber))
 {
     return false;
 }

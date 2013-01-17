@@ -37,12 +37,12 @@ class cdgMember: public cdgScope
     std::string ClassName;
 
 public:
-    cdgMember(unsigned int lineNumber);
+    cdgMember(size_t lineNumber);
 
     cdgScope::Type GetScope(void) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
+                  size_t lineNumber);
 
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;

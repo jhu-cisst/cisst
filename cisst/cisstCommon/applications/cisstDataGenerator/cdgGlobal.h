@@ -46,11 +46,11 @@ class cdgGlobal: public cdgScope
     ClassesType Classes;
 
 public:
-    cdgGlobal(unsigned int lineNumber);
+    cdgGlobal(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
     bool HasScope(const std::string & keyword,
                   cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
+                  size_t lineNumber);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     void GenerateHeader(std::ostream & output) const;

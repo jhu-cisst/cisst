@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdgMember);
 
 
-cdgMember::cdgMember(unsigned int lineNumber):
+cdgMember::cdgMember(size_t lineNumber):
     cdgScope(lineNumber),
     UsesClassTypedef(false)
 {
@@ -75,7 +75,7 @@ cdgScope::Type cdgMember::GetScope(void) const
 
 bool cdgMember::HasScope(const std::string & CMN_UNUSED(keyword),
                          cdgScope::Stack & CMN_UNUSED(scopes),
-                         unsigned int CMN_UNUSED(lineNumber))
+                         size_t CMN_UNUSED(lineNumber))
 {
     return false;
 }
